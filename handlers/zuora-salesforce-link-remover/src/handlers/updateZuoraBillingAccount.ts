@@ -2,11 +2,16 @@ import type { ZuoraSuccessResponse } from '@modules/zuora/zuoraSchemas';
 import type { Handler } from 'aws-lambda';
 import { z } from 'zod';
 import { updateBillingAccountInZuora } from '../zuoraHttp';
-import type { BillingAccountRecord, BillingAccountRecordWithSuccess } from './getBillingAccounts';
+import type {
+	BillingAccountRecord,
+	BillingAccountRecordWithSuccess,
+} from './getBillingAccounts';
 
-export const handler: Handler<BillingAccountRecord, BillingAccountRecordWithSuccess> = async (billingAccount) => {
-
-	try{
+export const handler: Handler<
+	BillingAccountRecord,
+	BillingAccountRecordWithSuccess
+> = async (billingAccount) => {
+	try {
 		const parseResponse = EventSchema.safeParse(billingAccount);
 		if (!parseResponse.success) {
 			throw new Error(
@@ -17,17 +22,21 @@ export const handler: Handler<BillingAccountRecord, BillingAccountRecordWithSucc
 		const billingAccountItem = parseResponse.data.item;
 
 		const zuoraBillingAccountUpdateResponse: ZuoraSuccessResponse =
-			await updateBillingAccountInZuora(billingAccountItem.Zuora__External_Id__c);
+			await updateBillingAccountInZuora(
+				billingAccountItem.Zuora__External_Id__c,
+			);
 
 		return {
 			Id: billingAccountItem.Id,
 			GDPR_Removal_Attempts__c: billingAccountItem.GDPR_Removal_Attempts__c + 1,
 			Zuora__External_Id__c: billingAccountItem.Zuora__External_Id__c,
 			attributes: billingAccountItem.attributes,
-			crmIdRemovedSuccessfully: zuoraBillingAccountUpdateResponse.success
+			crmIdRemovedSuccessfully: zuoraBillingAccountUpdateResponse.success,
 		};
-	}catch(error){
-		throw new Error(`Error updating billing accounts in Zuora: ${JSON.stringify(error)}`);
+	} catch (error) {
+		throw new Error(
+			`Error updating billing accounts in Zuora: ${JSON.stringify(error)}`,
+		);
 	}
 };
 
