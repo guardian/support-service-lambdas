@@ -1,6 +1,7 @@
 import type { Stage } from '@modules/stage';
 import type { Handler, SQSEvent } from 'aws-lambda';
-import { getIdApiSecret, getWebhookValidationSecret } from './getSecrets';
+import { getWebhookValidationSecret } from './getSecrets';
+import { createGuestAccount, fetchUserType } from './idapiService';
 import type { Payload } from './verifySignature';
 import { hasMatchingSignature } from './verifySignature';
 
@@ -14,7 +15,12 @@ export const handler: Handler = async (event: SQSEvent) => {
 		if (matches) {
 			const payload = JSON.parse(record.body) as Payload;
 			const email = payload.payload.buyer_details.email;
-			return callIdapi(email);
+			const userTypeResponse = await fetchUserType(email);
+			if (userTypeResponse.userType === 'new') {
+				return await createGuestAccount(email);
+			} else {
+				return userTypeResponse;
+			}
 		} else {
 			throw new Error(
 				'Signatures do not match - check Ticket Tailor signing secret matches the one stored in AWS.',
@@ -26,58 +32,5 @@ export const handler: Handler = async (event: SQSEvent) => {
 		return res;
 	} else {
 		throw new Error('Unknown Error');
-	}
-};
-
-export type UserTypeResponse = {
-	userType: string;
-};
-
-export const callIdapi = async (email: string) => {
-	const idapiUrl =
-		stage === 'PROD'
-			? 'https://idapi.theguardian.com'
-			: 'https://idapi.code.dev-theguardian.com';
-
-	const idapiToken = await getIdApiSecret(stage);
-
-	const userTypeEndpoint = `/user/type/`;
-	const guestEndpoint = '/guest';
-	const bearerToken = `Bearer ${idapiToken.token}`;
-
-	const userTypeResponse = await fetch(
-		idapiUrl.concat(userTypeEndpoint).concat(email),
-		{
-			method: 'GET',
-			headers: {
-				'Content-Type': 'application/json',
-				'X-GU-ID-Client-Access-Token': bearerToken,
-			},
-		},
-	).then((response) => {
-		if (!response.ok) {
-			throw new Error(response.statusText);
-		}
-		return response.json() as Promise<UserTypeResponse>;
-	});
-
-	if (userTypeResponse.userType === 'new') {
-		return await fetch(idapiUrl.concat(guestEndpoint), {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'X-GU-ID-Client-Access-Token': bearerToken,
-				Origin: 'https://theguardian.com',
-				body: JSON.stringify({ primaryEmailAddress: email }),
-			},
-		}).then((response) => {
-			if (!response.ok) {
-				throw new Error(response.statusText);
-			}
-			console.log(response);
-			return response.json() as Promise<UserTypeResponse>;
-		});
-	} else {
-		return false;
 	}
 };
