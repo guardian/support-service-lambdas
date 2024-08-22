@@ -15,10 +15,11 @@ export type IdApiToken = {
 const client = new SecretsManagerClient(awsConfig);
 
 export const getWebhookValidationSecret = async (
-	stage: Stage,
+	stage: Stage | undefined,
 ): Promise<HmacKey> => {
+	const stageName = stage ?? 'CODE';
 	const command = new GetSecretValueCommand({
-		SecretId: `${stage}/TicketTailor/Webhook-validation`,
+		SecretId: `${stageName}/TicketTailor/Webhook-validation`,
 	});
 
 	const response = await client.send(command);
@@ -30,14 +31,14 @@ export const getWebhookValidationSecret = async (
 		);
 	}
 };
-export const getIdApiSecret = async (stage: Stage): Promise<IdApiToken> => {
+export const getIdApiSecret = async (
+	stage: Stage | undefined,
+): Promise<IdApiToken> => {
 	const client = new SecretsManagerClient(awsConfig);
-	console.log(`Stage is ${stage}`);
 
+	const stageName: string = stage ?? 'CODE';
 	const command = new GetSecretValueCommand({
-		//todo: remove hardcoded STAGE variable
-		//		SecretId: `${stage}/TicketTailor/IdApi-token`,
-		SecretId: `CODE/TicketTailor/IdApi-token`,
+		SecretId: `${stageName}/TicketTailor/IdApi-token`,
 	});
 
 	const response = await client.send(command);
