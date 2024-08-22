@@ -1,4 +1,7 @@
-import type { SfApiUserAuth, SfConnectedAppAuth } from '@modules/salesforce/src/auth';
+import type {
+	SfApiUserAuth,
+	SfConnectedAppAuth,
+} from '@modules/salesforce/src/auth';
 import { doSfAuth } from '@modules/salesforce/src/auth';
 import { executeSalesforceQuery } from '@modules/salesforce/src/query';
 import { RecordSchema } from '@modules/salesforce/src/recordSchema';
@@ -9,8 +12,7 @@ import { getSalesforceSecretNames } from '../secrets';
 import type { ApiUserSecret, ConnectedAppSecret } from '../secrets';
 
 export async function handler() {
-	try{
-
+	try {
 		const secretNames = getSalesforceSecretNames(stageFromEnvironment());
 
 		const { authUrl, clientId, clientSecret } =
@@ -34,19 +36,21 @@ export async function handler() {
 		const sfAuthResponse = await doSfAuth(sfApiUserAuth, sfConnectedAppAuth);
 
 		const limit = 200;
-		const query = `SELECT Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c FROM Zuora__CustomerAccount__c WHERE Zuora__External_Id__c != null AND Zuora__Account__r.GDPR_Billing_Accounts_Ready_for_Removal__c = true AND GDPR_Removal_Attempts__c < 5 ORDER BY Zuora__Account__r.GDPR_Date_Successfully_Removed_Related__c desc LIMIT ${limit}`
+		const query = `SELECT Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c FROM Zuora__CustomerAccount__c WHERE Zuora__External_Id__c != null AND Zuora__Account__r.GDPR_Billing_Accounts_Ready_for_Removal__c = true AND GDPR_Removal_Attempts__c < 5 ORDER BY Zuora__Account__r.GDPR_Date_Successfully_Removed_Related__c desc LIMIT ${limit}`;
 
 		const response = await executeSalesforceQuery(
 			sfAuthResponse,
 			query,
-			BillingAccountRecordSchema
-		  );
+			BillingAccountRecordSchema,
+		);
 
 		return {
 			billingAccountsToProcess: response.records,
 		};
-	}catch(error){
-		throw new Error(`Error fetching billing accounts from Salesforce: ${JSON.stringify(error)}`);
+	} catch (error) {
+		throw new Error(
+			`Error fetching billing accounts from Salesforce: ${JSON.stringify(error)}`,
+		);
 	}
 }
 

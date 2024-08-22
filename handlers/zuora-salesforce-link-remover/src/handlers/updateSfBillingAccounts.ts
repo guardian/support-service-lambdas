@@ -1,7 +1,14 @@
-import type { SfApiUserAuth, SfAuthResponse, SfConnectedAppAuth } from '@modules/salesforce/src/auth';
+import type {
+	SfApiUserAuth,
+	SfAuthResponse,
+	SfConnectedAppAuth,
+} from '@modules/salesforce/src/auth';
 import { doSfAuth } from '@modules/salesforce/src/auth';
 import { sfApiVersion } from '@modules/salesforce/src/config';
-import type { SalesforceUpdateResponse, SalesforceUpdateResponseArray } from '@modules/salesforce/src/updateRecords';
+import type {
+	SalesforceUpdateResponse,
+	SalesforceUpdateResponseArray,
+} from '@modules/salesforce/src/updateRecords';
 import { doCompositeCallout } from '@modules/salesforce/src/updateRecords';
 import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
@@ -12,10 +19,14 @@ import type { ApiUserSecret, ConnectedAppSecret } from '../secrets';
 import type { BillingAccountRecord } from './getBillingAccounts';
 import { BillingAccountRecordSchema } from './getBillingAccounts';
 
-export const handler: Handler<BillingAccountRecord[], SalesforceUpdateResponseArray> = async (billingAccounts) => {
-
-	try{
-		const parseResponse = z.array(BillingAccountRecordSchema).safeParse(billingAccounts);
+export const handler: Handler<
+	BillingAccountRecord[],
+	SalesforceUpdateResponseArray
+> = async (billingAccounts) => {
+	try {
+		const parseResponse = z
+			.array(BillingAccountRecordSchema)
+			.safeParse(billingAccounts);
 
 		if (!parseResponse.success) {
 			throw new Error(
@@ -52,10 +63,12 @@ export const handler: Handler<BillingAccountRecord[], SalesforceUpdateResponseAr
 		);
 
 		return sfUpdateResponse;
-	}catch(error){
-		throw new Error(`Error updating billing account in Salesforce: ${JSON.stringify(error)}`);
+	} catch (error) {
+		throw new Error(
+			`Error updating billing account in Salesforce: ${JSON.stringify(error)}`,
+		);
 	}
-}
+};
 
 export async function updateSfBillingAccounts(
 	sfAuthResponse: SfAuthResponse,
