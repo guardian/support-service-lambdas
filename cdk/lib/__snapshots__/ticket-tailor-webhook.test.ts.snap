@@ -379,6 +379,38 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
                     ],
                   ],
                 },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:CODE/TicketTailor/IdApi-token-JBI5VI",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:PROD/TicketTailor/IdApi-token-eu45YS",
+                    ],
+                  ],
+                },
               ],
             },
           ],
@@ -1155,6 +1187,38 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
                         "Ref": "AWS::AccountId",
                       },
                       ":secret:CODE/TicketTailor/Webhook-validation-eEsTGW",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:CODE/TicketTailor/IdApi-token-JBI5VI",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:PROD/TicketTailor/IdApi-token-eu45YS",
                     ],
                   ],
                 },
