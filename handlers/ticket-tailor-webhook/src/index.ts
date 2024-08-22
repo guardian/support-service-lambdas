@@ -34,7 +34,6 @@ export type UserTypeResponse = {
 };
 
 export const callIdapi = async (email: string) => {
-	const stage = 'CODE';
 	const idapiUrl =
 		stage === 'PROD'
 			? 'https://idapi.theguardian.com'
@@ -44,18 +43,41 @@ export const callIdapi = async (email: string) => {
 
 	const userTypeEndpoint = `/user/type/`;
 	const guestEndpoint = '/guest';
-
 	const bearerToken = `Bearer ${idapiToken.token}`;
 
-	// { status: 'ok', userType: 'new' }
-
-	const res = await fetch(idapiUrl.concat(userTypeEndpoint).concat(email), {
-		method: 'GET',
-		headers: {
-			'Content-Type': 'application/json',
-			'X-GU-ID-Client-Access-Token': bearerToken,
+	const userTypeResponse = await fetch(
+		idapiUrl.concat(userTypeEndpoint).concat(email),
+		{
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-GU-ID-Client-Access-Token': bearerToken,
+			},
 		},
-	}).then((response) => response.json());
+	).then((response) => {
+		if (!response.ok) {
+			throw new Error(response.statusText);
+		}
+		return response.json() as Promise<UserTypeResponse>;
+	});
 
-	console.log(res);
+	if (userTypeResponse.userType === 'new') {
+		return await fetch(idapiUrl.concat(guestEndpoint), {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-GU-ID-Client-Access-Token': bearerToken,
+				Origin: 'https://theguardian.com',
+				body: JSON.stringify({ primaryEmailAddress: email }),
+			},
+		}).then((response) => {
+			if (!response.ok) {
+				throw new Error(response.statusText);
+			}
+			console.log(response);
+			return response.json() as Promise<UserTypeResponse>;
+		});
+	} else {
+		return false;
+	}
 };
