@@ -33,6 +33,7 @@ export const fetchUserType = async (email: string) => {
 		if (!response.ok) {
 			throw new Error(response.statusText);
 		}
+		console.log(`User type response is ${response.type}`);
 		return response.json() as Promise<UserTypeResponse>;
 	});
 
@@ -52,7 +53,7 @@ export const createGuestAccount = async (email: string) => {
 		},
 		body: JSON.stringify({ primaryEmailAddress: email }),
 	}).then((response) => {
-		console.log(`create Guest Account response status: ${response.statusText}`);
+		console.log(`Create Guest Account response status: ${response.statusText}`);
 		if (!response.ok) {
 			throw new Error(response.statusText);
 		}
