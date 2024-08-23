@@ -16,8 +16,8 @@ export const getTimestampAndSignature = (
 	const signatureWithTs =
 		record.messageAttributes['tickettailor-webhook-signature']?.stringValue;
 	if (typeof signatureWithTs === 'string') {
-		const timestamp = signatureWithTs.split(',')[0]?.split('=')[1];
-		const signature = signatureWithTs.split(',')[1]?.split('=')[1];
+		const timestamp = signatureWithTs.split(',')[0]?.split('t=')[1];
+		const signature = signatureWithTs.split(',')[1]?.split('v1=')[1];
 		if (timestamp && signature) {
 			if (!isNaN(Number(timestamp))) {
 				return [timestamp, signature];
