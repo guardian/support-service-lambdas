@@ -98,6 +98,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'zuora-oracle-fusion',
 
 		//data retention
+		'identity-retention',
 		'zuora-retention', //https://github.com/guardian/zuora-retention
 		'zuora-salesforce-link-remover',
 	],
