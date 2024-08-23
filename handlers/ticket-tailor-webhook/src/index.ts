@@ -2,8 +2,8 @@ import type { Stage } from '@modules/stage';
 import type { Handler, SQSEvent } from 'aws-lambda';
 import { getWebhookValidationSecret } from './getSecrets';
 import { createGuestAccount, fetchUserType } from './idapiService';
-import type { Payload } from './verifySignature';
-import { hasMatchingSignature } from './verifySignature';
+import type { Payload } from './validateRequest';
+import { validateRequest } from './validateRequest';
 
 const stage = process.env.STAGE as Stage;
 
@@ -11,8 +11,13 @@ export const handler: Handler = async (event: SQSEvent) => {
 	const res = await event.Records.flatMap(async (record) => {
 		console.log(`Processing TT Webhook. Message id is: ${record.messageId}`);
 		const validationSecret = await getWebhookValidationSecret(stage);
-		const matches = hasMatchingSignature(record, validationSecret);
-		if (matches) {
+		const currentDateTime = new Date();
+		const validRequest = validateRequest(
+			record,
+			validationSecret,
+			currentDateTime,
+		);
+		if (validRequest) {
 			const payload = JSON.parse(record.body) as Payload;
 			const email = payload.payload.buyer_details.email;
 			const userTypeResponse = await fetchUserType(email);
