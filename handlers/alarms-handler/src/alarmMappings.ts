@@ -39,7 +39,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'sf-gocardless-sync',
 		'super-mode-calculator',
 		'support-reminders',
-		'zuora-salesforce-link-remover',
 	],
 	VALUE: [
 		'cancellation-sf-cases-api',
@@ -70,9 +69,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 		// zuora-finance
 		'zuora-creditor',
 
-		// zuora-retention
-		'zuora-retention',
-
 		// support-frontend
 		'frontend',
 		'it-test-runner',
@@ -100,6 +96,10 @@ const teamToAppMappings: Record<Team, string[]> = {
 		// zuora
 		'invoicing-api',
 		'zuora-oracle-fusion',
+
+		//data retention
+		'zuora-retention', //https://github.com/guardian/zuora-retention
+		'zuora-salesforce-link-remover',
 	],
 };
 
