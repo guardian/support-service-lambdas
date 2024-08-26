@@ -7,8 +7,8 @@
     "build": "esbuild --bundle --platform=node --target=node18 --outfile=target/index.js src/index.ts",
     "lint": "eslint src/**/*.ts",
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr discount-api.zip ./*.js",
-    "check-formatting": "prettier --check **/*.ts",
-    "fix-formatting": "prettier --write **/*.ts"
+    "check-formatting": "prettier --check **.ts",
+    "fix-formatting": "prettier --write **.ts"
   },
   "dependencies": {
     "dayjs": "^1.11.12",

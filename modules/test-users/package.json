@@ -8,8 +8,8 @@
     "updateMonthlyContributionAmount": "ts-node ./src/updateMonthlyContributionAmount.ts",
     "cancelSubscription": "ts-node ./src/cancel.ts",
     "deleteAccount": "ts-node ./src/deleteAccount.ts",
-    "check-formatting": "prettier --check **/*.ts",
-    "fix-formatting": "prettier --write **/*.ts"
+    "check-formatting": "prettier --check **.ts",
+    "fix-formatting": "prettier --write **.ts"
   },
   "devDependencies": {
     "dayjs": "^1.11.12",
