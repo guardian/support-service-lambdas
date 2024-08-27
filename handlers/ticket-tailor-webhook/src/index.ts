@@ -2,8 +2,8 @@ import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
 import type { Handler, SQSEvent } from 'aws-lambda';
 import { createGuestAccount, fetchUserType } from './idapiService';
-import type { Payload } from './verifySignature';
-import { hasMatchingSignature } from './verifySignature';
+import type { Payload } from './validateRequest';
+import { validateRequest } from './validateRequest';
 
 const stage = stageFromEnvironment();
 
@@ -17,8 +17,13 @@ export const handler: Handler = async (event: SQSEvent) => {
 		const validationSecret = await getSecretValue<HmacKey>(
 			`${stage}/TicketTailor/Webhook-validation`,
 		);
-		const matches = hasMatchingSignature(record, validationSecret);
-		if (!matches) {
+		const currentDateTime = new Date();
+		const validRequest = validateRequest(
+			record,
+			validationSecret,
+			currentDateTime,
+		);
+		if (!validRequest) {
 			throw new Error(
 				'Signatures do not match - check Ticket Tailor signing secret matches the one stored in AWS.',
 			);
