@@ -1,7 +1,7 @@
 import Dependencies.*
 
 val scala2Settings = Seq(
-  ThisBuild / scalaVersion := "2.13.12",
+  ThisBuild / scalaVersion := "2.13.14",
   version := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
@@ -25,7 +25,7 @@ val scala2Settings = Seq(
 )
 
 val scala3Settings = Seq(
-  scalaVersion := "3.3.1",
+  scalaVersion := "3.3.3",
   version := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
@@ -247,10 +247,10 @@ lazy val `effects-lambda` = library(project in file("lib/effects-lambda"), Seq(t
 
 lazy val `config-core` = library(project in file("lib/config-core"), Seq(), scala3Settings)
 
-lazy val `config-cats` = library(project in file("lib/config-cats"))
+lazy val `config-cats` = library(project in file("lib/config-cats"), Seq(`effects-s3`))
   .settings(
     libraryDependencies ++= Seq(simpleConfig, catsEffect, circe, circeConfig),
-    dependencyOverrides ++= Seq(nettyCodec) ++ jacksonDependencies,
+    dependencyOverrides ++= jacksonDependencies,
   )
 
 val effectsDepIncludingTestFolder: ClasspathDependency = effects % "compile->compile;test->test"
@@ -772,8 +772,6 @@ lazy val `digital-voucher-cancellation-processor` = lambdaProject(
     `imovo-sttp-client`,
     `imovo-sttp-test-stub` % Test,
   ),
-).settings(
-  dependencyOverrides += nettyCodec,
 )
 
 lazy val `digital-voucher-suspension-processor` = lambdaProject(
@@ -790,7 +788,6 @@ lazy val `digital-voucher-suspension-processor` = lambdaProject(
   ),
   Seq(`salesforce-sttp-client`, `imovo-sttp-client`),
 )
-  .settings(dependencyOverrides ++= Seq(nettyCodec))
 
 lazy val `contact-us-api` = lambdaProject(
   "contact-us-api",

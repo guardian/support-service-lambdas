@@ -15,6 +15,7 @@ import cats.Id
 import com.gu.util.config.ConfigLoader
 import com.gu.AppIdentity
 import cats.data.EitherT
+import com.gu.effects.aws
 import com.gu.zuora.Zuora.accessTokenGetResponseV2
 import com.gu.zuora.ZuoraRestOauthConfig
 import com.gu.zuora.Oauth
@@ -25,7 +26,7 @@ import com.gu.zuora.AccessToken
 
 object Lambda extends LazyLogging {
   def handler(event: APIGatewayProxyRequestEvent): APIGatewayProxyResponseEvent = {
-    val identity = AppIdentity.whoAmI(defaultAppName = "payment-intent-issues")
+    val identity = AppIdentity.whoAmI(defaultAppName = "payment-intent-issues", aws.CredentialsProvider).get
 
     val program = loadConfig(identity).subflatMap(config =>
       for {
