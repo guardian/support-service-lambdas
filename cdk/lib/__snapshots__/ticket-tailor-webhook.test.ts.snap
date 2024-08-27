@@ -359,7 +359,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
                       {
                         "Ref": "AWS::AccountId",
                       },
-                      ":secret:PROD/TicketTailor/Webhook-validation-ECS6P8",
+                      ":secret:CODE/TicketTailor/Webhook-validation-*",
                     ],
                   ],
                 },
@@ -375,7 +375,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
                       {
                         "Ref": "AWS::AccountId",
                       },
-                      ":secret:CODE/TicketTailor/Webhook-validation-eEsTGW",
+                      ":secret:CODE/TicketTailor/IdApi-token-*",
                     ],
                   ],
                 },
@@ -1138,7 +1138,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
                       {
                         "Ref": "AWS::AccountId",
                       },
-                      ":secret:PROD/TicketTailor/Webhook-validation-ECS6P8",
+                      ":secret:PROD/TicketTailor/Webhook-validation-*",
                     ],
                   ],
                 },
@@ -1154,7 +1154,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
                       {
                         "Ref": "AWS::AccountId",
                       },
-                      ":secret:CODE/TicketTailor/Webhook-validation-eEsTGW",
+                      ":secret:PROD/TicketTailor/IdApi-token-*",
                     ],
                   ],
                 },

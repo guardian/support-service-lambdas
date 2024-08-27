@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from 'crypto';
 import type { SQSRecord } from 'aws-lambda';
-import type { HmacKey } from './hMacKey';
+import type { HmacKey } from '../src';
 
 export interface Payload {
 	payload: {
