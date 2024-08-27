@@ -1,6 +1,6 @@
-import { SQSRecord } from 'aws-lambda';
+import type { SQSRecord } from 'aws-lambda';
+import type { HmacKey } from '../src';
 import { hasMatchingSignature } from '../src/verifySignature';
-import { HmacKey } from '../src/getSecrets';
 
 /**
  * This is a unit test, it can be run by the `pnpm test` command, and will be run by the CI/CD pipeline

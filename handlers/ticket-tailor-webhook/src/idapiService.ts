@@ -1,12 +1,15 @@
+import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
 import type { Stage } from '@modules/stage';
-import { getIdApiSecret } from './getSecrets';
+
+export type IdApiToken = {
+	token: string;
+};
 
 export type UserTypeResponse = {
 	userType: string;
 };
 
 const stage = process.env.STAGE as Stage;
-
 
 const idapiUrl =
 	stage === 'PROD'
@@ -17,7 +20,9 @@ const userTypeEndpoint = `/user/type/`;
 const guestEndpoint = '/guest?accountVerificationEmail=true';
 
 export const fetchUserType = async (email: string) => {
-	const idapiSecret = await getIdApiSecret(stage);
+	const idapiSecret = await getSecretValue<IdApiToken>(
+		`${stage}/TicketTailor/IdApi-token`,
+	);
 	const bearerToken = `Bearer ${idapiSecret.token}`;
 
 	const userTypeResponse = await fetch(
@@ -41,7 +46,9 @@ export const fetchUserType = async (email: string) => {
 };
 
 export const createGuestAccount = async (email: string) => {
-	const idapiSecret = await getIdApiSecret(stage);
+	const idapiSecret = await getSecretValue<IdApiToken>(
+		`${stage}/TicketTailor/IdApi-token`,
+	);
 	const bearerToken = `Bearer ${idapiSecret.token}`;
 
 	return await fetch(idapiUrl.concat(guestEndpoint), {
