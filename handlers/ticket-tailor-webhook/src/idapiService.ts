@@ -7,7 +7,7 @@ export type UserTypeResponse = {
 
 const stage = process.env.STAGE as Stage;
 
-const idapiToken = getIdApiSecret(stage);
+
 const idapiUrl =
 	stage === 'PROD'
 		? 'https://idapi.theguardian.com'
@@ -17,8 +17,8 @@ const userTypeEndpoint = `/user/type/`;
 const guestEndpoint = '/guest?accountVerificationEmail=true';
 
 export const fetchUserType = async (email: string) => {
-	const token = await idapiToken;
-	const bearerToken = `Bearer ${token.token}`;
+	const idapiSecret = await getIdApiSecret(stage);
+	const bearerToken = `Bearer ${idapiSecret.token}`;
 
 	const userTypeResponse = await fetch(
 		idapiUrl.concat(userTypeEndpoint).concat(email),
@@ -41,8 +41,8 @@ export const fetchUserType = async (email: string) => {
 };
 
 export const createGuestAccount = async (email: string) => {
-	const token = await idapiToken;
-	const bearerToken = `Bearer ${token.token}`;
+	const idapiSecret = await getIdApiSecret(stage);
+	const bearerToken = `Bearer ${idapiSecret.token}`;
 
 	return await fetch(idapiUrl.concat(guestEndpoint), {
 		method: 'POST',
