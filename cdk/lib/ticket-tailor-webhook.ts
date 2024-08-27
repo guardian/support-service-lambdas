@@ -153,8 +153,8 @@ export class TicketTailorWebhook extends GuStack {
 					new PolicyStatement({
 						actions: ['secretsmanager:GetSecretValue'],
 						resources: [
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret::${this.stage}/TicketTailor/Webhook-validation-*`,
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret::${this.stage}/TicketTailor/IdApi-token-*`,
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/TicketTailor/Webhook-validation-*`,
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/TicketTailor/IdApi-token-*`,
 						],
 					}),
 				],
