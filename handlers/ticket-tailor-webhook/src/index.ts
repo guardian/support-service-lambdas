@@ -1,11 +1,11 @@
 import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
-import type { Stage } from '@modules/stage';
+import { stageFromEnvironment } from '@modules/stage';
 import type { Handler, SQSEvent } from 'aws-lambda';
 import { createGuestAccount, fetchUserType } from './idapiService';
 import type { Payload } from './verifySignature';
 import { hasMatchingSignature } from './verifySignature';
 
-const stage = process.env.STAGE as Stage;
+const stage = stageFromEnvironment()
 
 export type HmacKey = {
 	secret: string;

@@ -1,5 +1,5 @@
 import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
-import type { Stage } from '@modules/stage';
+import { stageFromEnvironment } from '@modules/stage';
 
 export type IdApiToken = {
 	token: string;
@@ -9,7 +9,7 @@ export type UserTypeResponse = {
 	userType: string;
 };
 
-const stage = process.env.STAGE as Stage;
+const stage = stageFromEnvironment()
 
 const idapiUrl =
 	stage === 'PROD'
