@@ -5,7 +5,7 @@ import { createGuestAccount, fetchUserType } from './idapiService';
 import type { Payload } from './verifySignature';
 import { hasMatchingSignature } from './verifySignature';
 
-const stage = stageFromEnvironment()
+const stage = stageFromEnvironment();
 
 export type HmacKey = {
 	secret: string;

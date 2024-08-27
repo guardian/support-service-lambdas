@@ -9,7 +9,7 @@ export type UserTypeResponse = {
 	userType: string;
 };
 
-const stage = stageFromEnvironment()
+const stage = stageFromEnvironment();
 
 const idapiUrl =
 	stage === 'PROD'
