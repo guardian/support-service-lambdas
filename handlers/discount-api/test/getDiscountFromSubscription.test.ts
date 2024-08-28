@@ -1,8 +1,7 @@
 import { zuoraSubscriptionSchema } from '@modules/zuora/zuoraSchemas';
 import {
-	catalog,
 	Discount,
-	getDiscountFromSubscription,
+	productToDiscountMapping,
 } from '../src/productToDiscountMapping';
 import json from './fixtures/digital-subscriptions/get-discount-test.json';
 
@@ -16,8 +15,9 @@ test('getDiscountFromSubscription should return an annual discount for an annual
 		sendEmail: false,
 		eligibilityCheckForRatePlan: 'AtCatalogPrice',
 	};
+	const mapping = productToDiscountMapping('PROD');
 	const { discount, discountableProductRatePlanId } =
-		getDiscountFromSubscription('PROD', sub);
+		mapping.getDiscountFromSubscription(sub);
 	expect(discount).toEqual(expected);
-	expect(discountableProductRatePlanId).toEqual(catalog.PROD.digiSub.Annual);
+	expect(discountableProductRatePlanId).toEqual(mapping.catalog.digiSub.Annual);
 });

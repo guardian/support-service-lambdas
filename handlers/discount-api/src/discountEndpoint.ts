@@ -23,7 +23,7 @@ import type { APIGatewayProxyEventHeaders } from 'aws-lambda';
 import dayjs from 'dayjs';
 import { EligibilityChecker } from './eligibilityChecker';
 import { generateCancellationDiscountConfirmationEmail } from './generateCancellationDiscountConfirmationEmail';
-import { getDiscountFromSubscription } from './productToDiscountMapping';
+import { productToDiscountMapping } from './productToDiscountMapping';
 
 export const previewDiscountEndpoint = async (
 	stage: Stage,
@@ -204,7 +204,7 @@ async function getDiscountToApply(
 
 	console.log('Working out the appropriate discount for the subscription');
 	const { discount, discountableProductRatePlanId } =
-		getDiscountFromSubscription(stage, subscription);
+		productToDiscountMapping(stage).getDiscountFromSubscription(subscription);
 
 	console.log('Checking this subscription is eligible for the discount');
 	switch (discount.eligibilityCheckForRatePlan) {
@@ -222,6 +222,8 @@ async function getDiscountToApply(
 				discountableProductRatePlanId,
 				account.metrics.currency,
 			);
+			break;
+		case 'NoCheck':
 			break;
 	}
 
