@@ -11,8 +11,8 @@ export type HmacKey = {
 	secret: string;
 };
 
-export const handler: Handler = async (event: SQSEvent) => {
-	return await event.Records.flatMap(async (record) => {
+export const handler: Handler = (event: SQSEvent) => {
+	  event.Records.flatMap(async (record) => {
 		console.log(`Processing TT Webhook. Message id is: ${record.messageId}`);
 		const validationSecret = await getSecretValue<HmacKey>(
 			`${stage}/TicketTailor/Webhook-validation`,
@@ -32,13 +32,14 @@ export const handler: Handler = async (event: SQSEvent) => {
 			const email = payload.payload.buyer_details.email;
 			const userTypeResponse = await fetchUserType(email);
 			if (userTypeResponse.userType === 'new') {
-				return await createGuestAccount(email);
+				  createGuestAccount(email).catch(() => {throw new Error("Error creating guest account");});
+			
 			} else {
 				console.log(
 					`Skipping guest creation as user of type ${userTypeResponse.userType} exists already`,
 				);
-				return userTypeResponse;
+				 userTypeResponse;
 			}
 		}
-	}).at(0);
+	})
 };

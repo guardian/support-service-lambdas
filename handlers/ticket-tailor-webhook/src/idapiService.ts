@@ -51,7 +51,7 @@ export const createGuestAccount = async (email: string) => {
 	);
 	const bearerToken = `Bearer ${idapiSecret.token}`;
 
-	return await fetch(idapiUrl.concat(guestEndpoint), {
+	 await fetch(idapiUrl.concat(guestEndpoint), {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -65,6 +65,5 @@ export const createGuestAccount = async (email: string) => {
 			throw new Error(response.statusText);
 		}
 		console.log(response);
-		return true;
 	});
 };
