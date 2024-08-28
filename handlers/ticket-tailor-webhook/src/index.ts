@@ -35,9 +35,8 @@ export const handler: Handler = async (event: SQSEvent): Promise<void> => {
 			);
 			if (userTypeResponse.userType === 'new') {
 				console.log(`Creating new guest account for user`);
-				createGuestAccount(email).catch((e: Error) => {
-					throw e;
-				});
+				await createGuestAccount(email);
+				console.log(`Guest account created for ${email}.`);
 			} else {
 				console.log(
 					`Skipping guest creation as account of type ${userTypeResponse.userType} already exists for user.`,

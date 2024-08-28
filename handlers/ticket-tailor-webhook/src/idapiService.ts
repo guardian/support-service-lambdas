@@ -68,8 +68,7 @@ export const createGuestAccount = async (email: string): Promise<void> => {
 	console.log(`Create Guest Account response status: ${response.statusText}`);
 	if (!response.ok) {
 		throw new Error(
-			`Guest account creation for email: ${email} with status ${response.statusText}. Response body is: ${JSON.stringify(response.body)}`,
+			`Guest account creation for email: ${email} failed with status ${response.statusText} }`,
 		);
 	}
-	console.log(`Full response body: ${JSON.stringify(response)}`);
 };
