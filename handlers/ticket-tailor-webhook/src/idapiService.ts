@@ -25,6 +25,8 @@ export const fetchUserType = async (
 	const idapiSecret = await getSecretValue<IdApiToken>(
 		`${stage}/TicketTailor/IdApi-token`,
 	);
+
+	console.log(`Fetching user type for provided email.`);
 	const bearerToken = `Bearer ${idapiSecret.token}`;
 
 	const userTypeResponse = await fetch(
@@ -38,13 +40,17 @@ export const fetchUserType = async (
 		},
 	);
 	if (!userTypeResponse.ok) {
-		throw new Error(userTypeResponse.statusText);
+		throw new Error(
+			`Get userType request for ${email} failed with status: ${userTypeResponse.statusText}. Response body is: ${JSON.stringify(userTypeResponse.body)}`,
+		);
 	}
-	console.log(`User type response is ${userTypeResponse.type}`);
+	console.log(
+		`Request ok. Status is: ${userTypeResponse.statusText}. Response type is ${userTypeResponse.type}.`,
+	);
 	return (await userTypeResponse.json()) as UserTypeResponse;
 };
 
-export const createGuestAccount = async (email: string) => {
+export const createGuestAccount = async (email: string): Promise<void> => {
 	const idapiSecret = await getSecretValue<IdApiToken>(
 		`${stage}/TicketTailor/IdApi-token`,
 	);
@@ -60,7 +66,9 @@ export const createGuestAccount = async (email: string) => {
 	});
 	console.log(`Create Guest Account response status: ${response.statusText}`);
 	if (!response.ok) {
-		throw new Error(response.statusText);
+		throw new Error(
+			`Guest account creation for email: ${email} with status ${response.statusText}. Response body is: ${JSON.stringify(response.body)}`,
+		);
 	}
-	console.log(response);
+	console.log(`Full response body: ${JSON.stringify(response)}`);
 };
