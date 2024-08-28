@@ -676,7 +676,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
               "Arn",
             ],
           },
-          "maxReceiveCount": 1,
+          "maxReceiveCount": 5,
         },
         "Tags": [
           {
@@ -1455,7 +1455,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
               "Arn",
             ],
           },
-          "maxReceiveCount": 1,
+          "maxReceiveCount": 5,
         },
         "Tags": [
           {

@@ -49,7 +49,7 @@ export class TicketTailorWebhook extends GuStack {
 			queueName,
 			deadLetterQueue: {
 				// The number of times a message can be unsuccessfully dequeued before being moved to the dlq
-				maxReceiveCount: 1,
+				maxReceiveCount: 5,
 				queue: deadLetterQueue,
 			},
 			// This must be >= the lambda timeout
