@@ -1,17 +1,16 @@
 import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
-import type { Handler, SQSEvent } from 'aws-lambda';
+import type { SQSEvent } from 'aws-lambda';
 import { createGuestAccount, fetchUserType } from './idapiService';
 import type { Payload } from './validateRequest';
 import { validateRequest } from './validateRequest';
-
-const stage = stageFromEnvironment();
 
 export type HmacKey = {
 	secret: string;
 };
 
-export const handler: Handler = async (event: SQSEvent): Promise<void> => {
+export const handler = async (event: SQSEvent): Promise<void> => {
+	const stage = stageFromEnvironment();
 	const results = event.Records.flatMap(async (record) => {
 		console.log(`Processing TT Webhook. Message id is: ${record.messageId}`);
 		const validationSecret = await getSecretValue<HmacKey>(

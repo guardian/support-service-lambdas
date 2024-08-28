@@ -1,23 +1,22 @@
-import { SQSRecord } from 'aws-lambda';
+import type { SQSRecord } from 'aws-lambda';
+import { type HmacKey } from '../src/index';
 import {
+	getTimestampAndSignature,
 	hasMatchingSignature,
 	isWithinTimeWindow,
-	validateRequest,
 	maxValidTimeWindowSeconds,
-	getTimestampAndSignature,
+	validateRequest,
 } from '../src/validateRequest';
-import type { HmacKey } from '../src/index';
-
-/**
- * This is a unit test, it can be run by the `pnpm test` command, and will be run by the CI/CD pipeline
- * WARNING: Do not alter key or mock records in this file as it will stop the test from working.
- */
 
 const mockKey: HmacKey = {
 	secret: '9dn189d53me1ania7d73a45d5de4674d',
 };
 
-const validSQSRecord: SQSRecord = {
+jest.mock('@modules/secrets-manager/src/getSecret', () => ({
+	getSecretValue: () => mockKey,
+}));
+
+export const validSQSRecord: SQSRecord = {
 	messageId: '48501d06-2c1d-4e06-80b9-7617cd9df313',
 	receiptHandle:
 		'AQEBGUe76PwvIArSCNuXCG04UxR2lalLsc/EqwapLeQdUAz2MsV3D4erYZ7W61kQsx3b1N7wQKVYnWEqa84sZ/JtTNh14oJ98qAoUPNjd4MsQ1FU1LpK2SjliUYT4M8jv3PAVcshzPhN6a7uj1HK54QZZPTmrlu888GpBmdyMYWbJH4oD5xxA8U1CeCMGtLOlhIFdbwxK8sVzQVgfw+ABvMgdnYgl4+M6BTj72EVF7Ce4uUBa6Tg3AiCLYonyeNbut/oSgvT9Gv1gPkGquX/B1ZXmNnP8NZwx9EqMi1i2Mhf+Mr57q4qy3540ZI5+/iRfCt7nKPZrWBbpDBgeOV9cwPlxuTiNdWQSO3gA4Y20OtxXaLJ42H+wpqc75nUTEb63OuBEripC48lJv3lSDiVYqPiFGX44JUClPqh0v7vQoDQXpQ=',
