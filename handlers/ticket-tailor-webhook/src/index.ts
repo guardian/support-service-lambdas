@@ -12,7 +12,7 @@ export type HmacKey = {
 };
 
 export const handler: Handler = (event: SQSEvent) => {
-	  event.Records.flatMap(async (record) => {
+	event.Records.flatMap(async (record) => {
 		console.log(`Processing TT Webhook. Message id is: ${record.messageId}`);
 		const validationSecret = await getSecretValue<HmacKey>(
 			`${stage}/TicketTailor/Webhook-validation`,
@@ -32,14 +32,14 @@ export const handler: Handler = (event: SQSEvent) => {
 			const email = payload.payload.buyer_details.email;
 			const userTypeResponse = await fetchUserType(email);
 			if (userTypeResponse.userType === 'new') {
-				  createGuestAccount(email).catch(() => {throw new Error("Error creating guest account");});
-			
+				createGuestAccount(email).catch(() => {
+					throw new Error('Error creating guest account');
+				});
 			} else {
 				console.log(
 					`Skipping guest creation as user of type ${userTypeResponse.userType} exists already`,
 				);
-				 userTypeResponse;
 			}
 		}
-	})
+	});
 };
