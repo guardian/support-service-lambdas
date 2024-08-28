@@ -28,14 +28,19 @@ export const handler: Handler = async (event: SQSEvent): Promise<void> => {
 		} else {
 			const payload = JSON.parse(record.body) as Payload;
 			const email = payload.payload.buyer_details.email;
+			console.log(`fetching user type for email: ${email}.`);
 			const userTypeResponse = await fetchUserType(email);
+			console.log(
+				`userTypeResponse for email: ${email} is: ${userTypeResponse.userType}`,
+			);
 			if (userTypeResponse.userType === 'new') {
-				createGuestAccount(email).catch(() => {
-					throw new Error('Error creating guest account');
+				console.log(`Creating new guest account for user`);
+				createGuestAccount(email).catch((e: Error) => {
+					throw e;
 				});
 			} else {
 				console.log(
-					`Skipping guest creation as user of type ${userTypeResponse.userType} exists already`,
+					`Skipping guest creation as account of type ${userTypeResponse.userType} already exists for user.`,
 				);
 			}
 		}
