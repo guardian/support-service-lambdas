@@ -71,7 +71,7 @@ object Dependencies {
   val http4sCore = "org.http4s" %% "http4s-core" % http4sVersion
 
   // Guardian
-  val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "1.5.6"
+  val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "2.0.0"
   val supportInternationalisation =
     "com.gu" %% "support-internationalisation" % "0.13"
   val contentAuthCommon = "com.gu" %% "content-authorisation-common" % "0.6"
@@ -92,7 +92,6 @@ object Dependencies {
   val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.17.0" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "5.2.0" % Test
   val mockito = "org.mockito" % "mockito-core" % "5.3.1" % Test
-  val nettyCodec = "io.netty" % "netty-codec" % "4.1.92.Final"
   // play-json still uses an old version of jackson-core which has a vulnerability - https://security.snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-7569538
   val jacksonVersion = "2.17.2"
 
