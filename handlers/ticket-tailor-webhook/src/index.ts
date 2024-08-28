@@ -11,8 +11,8 @@ export type HmacKey = {
 	secret: string;
 };
 
-export const handler: Handler = (event: SQSEvent) => {
-	event.Records.flatMap(async (record) => {
+export const handler: Handler = async (event: SQSEvent): Promise<void> => {
+	const results = event.Records.flatMap(async (record) => {
 		console.log(`Processing TT Webhook. Message id is: ${record.messageId}`);
 		const validationSecret = await getSecretValue<HmacKey>(
 			`${stage}/TicketTailor/Webhook-validation`,
@@ -24,9 +24,7 @@ export const handler: Handler = (event: SQSEvent) => {
 			currentDateTime,
 		);
 		if (!validRequest) {
-			throw new Error(
-				'Signatures do not match - check Ticket Tailor signing secret matches the one stored in AWS.',
-			);
+			console.error('Request failed validation. Processing terminated.');
 		} else {
 			const payload = JSON.parse(record.body) as Payload;
 			const email = payload.payload.buyer_details.email;
@@ -42,4 +40,6 @@ export const handler: Handler = (event: SQSEvent) => {
 			}
 		}
 	});
+
+	await Promise.all<void>(results);
 };

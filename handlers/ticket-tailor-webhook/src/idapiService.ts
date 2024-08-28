@@ -19,7 +19,9 @@ const idapiUrl =
 const userTypeEndpoint = `/user/type/`;
 const guestEndpoint = '/guest?accountVerificationEmail=true';
 
-export const fetchUserType = async (email: string) => {
+export const fetchUserType = async (
+	email: string,
+): Promise<UserTypeResponse> => {
 	const idapiSecret = await getSecretValue<IdApiToken>(
 		`${stage}/TicketTailor/IdApi-token`,
 	);
@@ -34,15 +36,12 @@ export const fetchUserType = async (email: string) => {
 				'X-GU-ID-Client-Access-Token': bearerToken,
 			},
 		},
-	).then((response) => {
-		if (!response.ok) {
-			throw new Error(response.statusText);
-		}
-		console.log(`User type response is ${response.type}`);
-		return response.json() as Promise<UserTypeResponse>;
-	});
-
-	return userTypeResponse;
+	);
+	if (!userTypeResponse.ok) {
+		throw new Error(userTypeResponse.statusText);
+	}
+	console.log(`User type response is ${userTypeResponse.type}`);
+	return (await userTypeResponse.json()) as UserTypeResponse;
 };
 
 export const createGuestAccount = async (email: string) => {
@@ -50,8 +49,7 @@ export const createGuestAccount = async (email: string) => {
 		`${stage}/TicketTailor/IdApi-token`,
 	);
 	const bearerToken = `Bearer ${idapiSecret.token}`;
-
-	await fetch(idapiUrl.concat(guestEndpoint), {
+	const response = await fetch(idapiUrl.concat(guestEndpoint), {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -59,11 +57,10 @@ export const createGuestAccount = async (email: string) => {
 			Origin: 'https://theguardian.com',
 		},
 		body: JSON.stringify({ primaryEmailAddress: email }),
-	}).then((response) => {
-		console.log(`Create Guest Account response status: ${response.statusText}`);
-		if (!response.ok) {
-			throw new Error(response.statusText);
-		}
-		console.log(response);
 	});
+	console.log(`Create Guest Account response status: ${response.statusText}`);
+	if (!response.ok) {
+		throw new Error(response.statusText);
+	}
+	console.log(response);
 };

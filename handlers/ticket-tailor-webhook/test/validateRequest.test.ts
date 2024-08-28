@@ -96,9 +96,12 @@ const invalidSignature =
 	'a3dbd8cfb0f04a0a9b0dd9d2547f1dd1a51e60d528a4edaee3bc02085517bd51';
 
 //Tests for getTimestampAndSignature()
-test('getTimestampAncSignature() called on an SQSRecord returns the correct values', () => {
-	const [timestamp, signature]: [string, string] =
-		getTimestampAndSignature(validSQSRecord);
+test('getTimestampAndSignature() called on an SQSRecord returns the correct values', () => {
+	const timestampAndSignature = getTimestampAndSignature(validSQSRecord);
+	if (!timestampAndSignature) {
+		throw new Error('Test Data missing timestamp and signature');
+	}
+	const [timestamp, signature]: [string, string] = timestampAndSignature;
 	expect(timestamp).toBe('1724160026');
 	expect(signature).toBe(
 		'a3dbd8cfb0f04a0a9b0dd9d2547f1dd1a51e60d528a4edaee3bc02085517bd50',
@@ -117,7 +120,7 @@ test('If the SQS event has a valid signature, hasMatchingSignature() will return
 	expect(signatureCheckResult).toBe(true);
 });
 
-test('If the SQS event has an invalid signature, hasMatchingSignature() will return false', () => {
+test('If the SQS event has an invalid signature, hasMatchingSignature() will log warning and return false', () => {
 	const signatureCheckResult = hasMatchingSignature(
 		validSQSRecordTimestamp,
 		invalidSignature,
@@ -128,7 +131,7 @@ test('If the SQS event has an invalid signature, hasMatchingSignature() will ret
 	expect(signatureCheckResult).toBe(false);
 });
 
-test('If the SQS event has a valid signature but an invalid value for timestamp, hasMatchingSignature() will return false', () => {
+test('If the SQS event has a valid signature but an invalid value for timestamp, hasMatchingSignature() will log warning and return false', () => {
 	const signatureCheckResult = hasMatchingSignature(
 		invalidTimestamp,
 		validSQSRecordSignature,
@@ -158,7 +161,7 @@ test('If a valid SQS event has a timestamp that is just on the allowed time wind
 	expect(withinTimeWindow).toBe(true);
 });
 
-test('If a valid SQS event has a timestamp more than 1 second older than the allowed time window, isWithinTimeWindow() will return false', () => {
+test('If a valid SQS event has a timestamp more than 1 second older than the allowed time window, isWithinTimeWindow() will log warning and return false', () => {
 	const currentTime = new Date();
 	const currentEpochSeconds = Math.ceil(currentTime.valueOf() / 1000);
 	const invalidTimestamp = String(
@@ -174,7 +177,7 @@ test('If a valid SQS event has a timestamp more than 1 second older than the all
 });
 
 // Tests for the validateRequest function
-test('If a request has an invalid signature, validateRequest() will throw an Error', () => {
+test('If a request has an invalid signature, validateRequest() will log warning and return false', () => {
 	const validEpochSeconds =
 		Number(validSQSRecordTimestamp) + maxValidTimeWindowSeconds;
 	//Date works in Epoch milli
@@ -183,10 +186,8 @@ test('If a request has an invalid signature, validateRequest() will throw an Err
 		`validSQSRecordTimestamp: ${validSQSRecordTimestamp}..... validEpochSeconds: ${validEpochSeconds} ...  validDate: ${Math.round(validDate.valueOf() / 1000)}`,
 	);
 
-	expect(function () {
-		validateRequest(invalidSignatureSQSRecord, mockKey, validDate);
-	}).toThrow(
-		'Signatures do not match - check Ticket Tailor signing secret matches the one stored in AWS.',
+	expect(validateRequest(invalidSignatureSQSRecord, mockKey, validDate)).toBe(
+		false,
 	);
 });
 
@@ -202,27 +203,19 @@ test('If a request has a valid signature and timestamp, and the timestamp is wit
 	expect(validateRequest(validSQSRecord, mockKey, validDate)).toBe(true);
 });
 
-test('If a request has a valid signature and timestamp, but the timestamp is more than 1 second outside the allowed time window, validateRequest() will throw an Error', () => {
+test('If a request has a valid signature and timestamp, but the timestamp is more than 1 second outside the allowed time window, validateRequest() will return false', () => {
 	const invalidEpochSeconds =
 		Number(validSQSRecordTimestamp) + maxValidTimeWindowSeconds + 2;
 	//Date works in Epoch milli
 	const invalidDate = new Date(invalidEpochSeconds * 1000);
 
-	expect(function () {
-		validateRequest(validSQSRecord, mockKey, invalidDate);
-	}).toThrow(
-		'Webhook Signature timestamp 1724160026 is older than 300 seconds. Webhook will not be processed.',
-	);
+	expect(validateRequest(validSQSRecord, mockKey, invalidDate)).toBe(false);
 });
 
-test('If a request has a valid signature and timestamp, but the timestamp is later than the current date, validateRequest() will throw an Error', () => {
+test('If a request has a valid signature and timestamp, but the timestamp is later than the current date, validateRequest() will return false', () => {
 	const invalidEpochSeconds = Number(validSQSRecordTimestamp) - 2;
 	//Date works in Epoch milli
 	const invalidDate = new Date(invalidEpochSeconds * 1000);
 
-	expect(function () {
-		validateRequest(validSQSRecord, mockKey, invalidDate);
-	}).toThrow(
-		'Invalid Webhook Signature: timeStamp 1724160026 is later than current time. Check it is not using EpochMillis.',
-	);
+	expect(validateRequest(validSQSRecord, mockKey, invalidDate)).toBe(false);
 });
