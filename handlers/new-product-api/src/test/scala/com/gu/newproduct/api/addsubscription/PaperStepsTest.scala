@@ -3,7 +3,11 @@ package com.gu.newproduct.api.addsubscription
 import com.gu.newproduct.TestData
 import com.gu.newproduct.api.addsubscription.email.{DeliveryAgentDetails, PaperEmailData}
 import com.gu.newproduct.api.addsubscription.validation._
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{
+  SubscriptionName,
+  ZuoraCreateSubRequest,
+  ZuoraCreateSubRequestRatePlan,
+}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.SoldToAddress
 import com.gu.newproduct.api.productcatalog.PlanId.{NationalDeliveryWeekend, VoucherEveryDay}
@@ -81,9 +85,18 @@ class PaperStepsTest extends AnyFlatSpec with Matchers with Inside with DiffShou
       NationalDeliveryWeekend,
       Some(exampleDeliveryAgent),
       { paperEmailData =>
-        val expectedDeliveryAgentDetails = DeliveryAgentDetails("agentName1", "telephone1", "email1", "address11", "address21", "town1", "county1", "postcode1")
+        val expectedDeliveryAgentDetails = DeliveryAgentDetails(
+          "agentName1",
+          "telephone1",
+          "email1",
+          "address11",
+          "address21",
+          "town1",
+          "county1",
+          "postcode1",
+        )
         paperEmailData.deliveryAgentDetails shouldMatchTo Some(expectedDeliveryAgentDetails)
-      }
+      },
     )
 
     val requestInput = AddSubscriptionRequest(
@@ -95,23 +108,22 @@ class PaperStepsTest extends AnyFlatSpec with Matchers with Inside with DiffShou
       amountMinorUnits = None,
       acquisitionCase = CaseId("case"),
       planId = NationalDeliveryWeekend,
-      discountRatePlanId= None,
-      discountMessage= None,
+      discountRatePlanId = None,
+      discountMessage = None,
     )
 
     val futureActual = addVoucherSteps.addProduct(requestInput)
 
     val actual = Await.result(futureActual.underlying, 30 seconds)
-    inside(actual) {
-      case ContinueProcessing(SubscriptionName("well done")) =>
+    inside(actual) { case ContinueProcessing(SubscriptionName("well done")) =>
     }
 
   }
 
   private def buildAddPaperSteps(
-    expectedPlanId: PlanId,
-    expectedDeliveryAgent: Option[DeliveryAgent],
-    checkPaperEmailData: PaperEmailData => Assertion
+      expectedPlanId: PlanId,
+      expectedDeliveryAgent: Option[DeliveryAgent],
+      checkPaperEmailData: PaperEmailData => Assertion,
   ): AddPaperSub = {
 
     val ratePlanId = ProductRatePlanId("ratePlanId")
@@ -134,7 +146,7 @@ class PaperStepsTest extends AnyFlatSpec with Matchers with Inside with DiffShou
     )
 
     def fakeCreate(
-      in: ZuoraCreateSubRequest,
+        in: ZuoraCreateSubRequest,
     ): Types.ClientFailableOp[SubscriptionName] = {
       in shouldMatchTo expectedIn
       ClientSuccess(SubscriptionName("well done"))
@@ -142,41 +154,43 @@ class PaperStepsTest extends AnyFlatSpec with Matchers with Inside with DiffShou
 
     def fakeGetAgents = new GetAgents {
       override def getAgents(): Types.ClientFailableOp[List[GetAgents.DeliveryAgentRecord]] =
-        ClientSuccess(List(
-          DeliveryAgentRecord(
-            DeliveryAgent("differentAgentHere"),
-            "agentName2",
-            "telephone2",
-            "town2",
-            "postcode2",
-            "address22",
-            "email2",
-            "address12",
-            "county2",
+        ClientSuccess(
+          List(
+            DeliveryAgentRecord(
+              DeliveryAgent("differentAgentHere"),
+              "agentName2",
+              "telephone2",
+              "town2",
+              "postcode2",
+              "address22",
+              "email2",
+              "address12",
+              "county2",
+            ),
+            DeliveryAgentRecord(
+              exampleDeliveryAgent,
+              "agentName1",
+              "telephone1",
+              "town1",
+              "postcode1",
+              "address21",
+              "email1",
+              "address11",
+              "county1",
+            ),
+            DeliveryAgentRecord(
+              DeliveryAgent("anotherDifferentAgentHere"),
+              "agentName3",
+              "telephone3",
+              "town3",
+              "postcode3",
+              "address23",
+              "email3",
+              "address13",
+              "county3",
+            ),
           ),
-          DeliveryAgentRecord(
-            exampleDeliveryAgent,
-            "agentName1",
-            "telephone1",
-            "town1",
-            "postcode1",
-            "address21",
-            "email1",
-            "address11",
-            "county1",
-          ),
-          DeliveryAgentRecord(
-            DeliveryAgent("anotherDifferentAgentHere"),
-            "agentName3",
-            "telephone3",
-            "town3",
-            "postcode3",
-            "address23",
-            "email3",
-            "address13",
-            "county3",
-          ),
-        ))
+        )
     }
 
     val fakeGetZuoraId = (planId: PlanId) => {

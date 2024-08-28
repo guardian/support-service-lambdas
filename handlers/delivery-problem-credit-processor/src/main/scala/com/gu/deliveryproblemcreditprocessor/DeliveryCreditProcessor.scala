@@ -12,7 +12,13 @@ import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig}
 import com.gu.util.Logging
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.{ConfigLocation, LoadConfigModule, Stage}
-import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, NewspaperNationalDelivery, TierThree, ZuoraProductType}
+import com.gu.zuora.ZuoraProductTypes.{
+  GuardianWeekly,
+  NewspaperHomeDelivery,
+  NewspaperNationalDelivery,
+  TierThree,
+  ZuoraProductType,
+}
 import com.gu.zuora.subscription._
 import com.gu.zuora.{AccessToken, HolidayStopProcessorZuoraConfig, Zuora}
 import io.circe.generic.auto._

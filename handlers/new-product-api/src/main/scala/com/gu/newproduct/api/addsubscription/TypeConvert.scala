@@ -21,7 +21,8 @@ object TypeConvert {
       case _ => ApiGatewayResponse.internalServerError(s"unknown error during: $action: ${clientFailure.message}")
     }
 
-    def toApiGatewayOp(action: String): ApiGatewayOp[A] = clientOp.toDisjunction.toApiGatewayOp(failureHandler(action, _))
+    def toApiGatewayOp(action: String): ApiGatewayOp[A] =
+      clientOp.toDisjunction.toApiGatewayOp(failureHandler(action, _))
   }
 
   implicit class TypeConvertClientOpAsync[A](clientOp: ClientFailableOp[A]) {

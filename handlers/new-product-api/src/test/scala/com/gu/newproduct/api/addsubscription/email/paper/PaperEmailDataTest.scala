@@ -7,7 +7,14 @@ import com.gu.newproduct.api.addsubscription.DiscountMessage
 import com.gu.newproduct.api.addsubscription.email.{DeliveryAgentDetails, PaperEmailData}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, NonDirectDebitMethod, SortCode}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{
+  BankAccountName,
+  BankAccountNumberMask,
+  DirectDebit,
+  MandateId,
+  NonDirectDebitMethod,
+  SortCode,
+}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.CreditCard
 import com.gu.newproduct.api.productcatalog._
@@ -183,7 +190,6 @@ class PaperEmailDataTest extends AnyFlatSpec with Matchers {
 
     actualJson shouldBe Json.parse(expected)
   }
-
 
   it should "not include direct debit fields if payment method is not direct debit" in {
 

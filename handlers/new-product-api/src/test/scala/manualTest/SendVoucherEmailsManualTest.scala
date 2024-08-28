@@ -6,11 +6,22 @@ import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.api.addsubscription.DiscountMessage
 import com.gu.newproduct.api.addsubscription.email.serialisers.PaperEmailDataSerialiser._
-import com.gu.newproduct.api.addsubscription.email.{DeliveryAgentDetails, EtSqsSend, PaperEmailData, SendConfirmationEmail}
+import com.gu.newproduct.api.addsubscription.email.{
+  DeliveryAgentDetails,
+  EtSqsSend,
+  PaperEmailData,
+  SendConfirmationEmail,
+}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, SortCode}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{
+  BankAccountName,
+  BankAccountNumberMask,
+  DirectDebit,
+  MandateId,
+  SortCode,
+}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.newproduct.api.productcatalog.PlanId.NationalDeliveryWeekend
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
@@ -89,7 +100,7 @@ object SendVoucherEmailsManualTest {
       ),
       currency = GBP,
       Some(deliveryAgentDetails),
-      None
+      None,
     )
   }
 
