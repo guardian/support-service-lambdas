@@ -69,11 +69,12 @@ export const maxValidTimeWindowSeconds = 300;
 
 export const validateRequest = async (
 	record: SQSRecord,
-	currentDateTime: Date,
 ): Promise<boolean> => {
 	const validationSecret = await getSecretValue<HmacKey>(
 	`${stageFromEnvironment()}/TicketTailor/Webhook-validation`,
 	);
+
+	const currentDateTime = new Date();
 	
 	const timestampAndSignature = getTimestampAndSignature(record);
 	if (!timestampAndSignature) {

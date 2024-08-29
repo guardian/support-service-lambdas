@@ -75,7 +75,7 @@ const invalidSignatureSQSRecord = {
 	awsRegion: validSQSRecord.awsRegion,
 };
 
-const invalidTimestampSQSRecord = {
+export const invalidTimestampSQSRecord = {
 	messageId: validSQSRecord.messageId,
 	receiptHandle: validSQSRecord.receiptHandle,
 	body: validSQSRecord.body,
@@ -96,7 +96,7 @@ const invalidTimestampSQSRecord = {
 	awsRegion: validSQSRecord.awsRegion,
 };
 
-const validSQSRecordTimestamp = '1724160026';
+export const validSQSRecordTimestamp = '1724160026';
 const validSQSRecordSignature =
 	'a3dbd8cfb0f04a0a9b0dd9d2547f1dd1a51e60d528a4edaee3bc02085517bd50';
 
@@ -186,45 +186,40 @@ test('If a valid SQS event has a timestamp more than 1 second older than the all
 });
 
 // Tests for the validateRequest function
+const validEpochSeconds =Number(validSQSRecordTimestamp) + maxValidTimeWindowSeconds;
 test('If a request has an invalid signature, validateRequest() will log warning and return false', async () => {
-	const validEpochSeconds =
-		Number(validSQSRecordTimestamp) + maxValidTimeWindowSeconds;
-	//Date works in Epoch milli
-	const validDate = new Date(validEpochSeconds * 1000);
-	console.log(
-		`validSQSRecordTimestamp: ${validSQSRecordTimestamp}..... validEpochSeconds: ${validEpochSeconds} ...  validDate: ${Math.round(validDate.valueOf() / 1000)}`,
-	);
+	jest
+	.useFakeTimers()
+	.setSystemTime(new Date(validEpochSeconds * 1000)); //Date works in Epoch milli
 
-	expect(await validateRequest(invalidSignatureSQSRecord, validDate)).toBe(
+	expect(await validateRequest(invalidSignatureSQSRecord)).toBe(
 		false,
 	);
 });
 
 test('If a request has a valid signature and timestamp, and the timestamp is within the allowed time window, validateRequest() will return true', async () => {
-	const validEpochSeconds =
-		Number(validSQSRecordTimestamp) + maxValidTimeWindowSeconds;
-	//Date works in Epoch milli
-	const validDate = new Date(validEpochSeconds * 1000);
-	console.log(
-		`validSQSRecordTimestamp: ${validSQSRecordTimestamp}..... validEpochSeconds: ${validEpochSeconds} ...  validDate: ${Math.round(validDate.valueOf() / 1000)}`,
-	);
+	jest
+	.useFakeTimers()
+	.setSystemTime(new Date(validEpochSeconds * 1000)); //Date works in Epoch milli
 
-	expect(await validateRequest(validSQSRecord, validDate)).toBe(true);
+	expect(await validateRequest(validSQSRecord)).toBe(true);
 });
 
-test('If a request has a valid signature and timestamp, but the timestamp is more than 1 second outside the allowed time window, validateRequest() will return false', async () => {
-	const invalidEpochSeconds =
+const invalidEpochSeconds =
 		Number(validSQSRecordTimestamp) + maxValidTimeWindowSeconds + 2;
-	//Date works in Epoch milli
-	const invalidDate = new Date(invalidEpochSeconds * 1000);
+test('If a request has a valid signature and timestamp, but the timestamp is more than 1 second outside the allowed time window, validateRequest() will return false', async () => {
+	
+	jest
+	.useFakeTimers()
+	.setSystemTime(new Date(invalidEpochSeconds * 1000)); //Date works in Epoch milli
 
-	expect(await validateRequest(validSQSRecord, invalidDate)).toBe(false);
+	expect(await validateRequest(validSQSRecord)).toBe(false);
 });
 
 test('If a request has a valid signature and timestamp, but the timestamp is later than the current date, validateRequest() will return false', async () => {
-	const invalidEpochSeconds = Number(validSQSRecordTimestamp) - 2;
-	//Date works in Epoch milli
-	const invalidDate = new Date(invalidEpochSeconds * 1000);
+	jest
+	.useFakeTimers()
+	.setSystemTime(new Date(invalidEpochSeconds * 1000)); //Date works in Epoch milli
 
-	expect(await validateRequest(validSQSRecord, invalidDate)).toBe(false);
+	expect(await validateRequest(validSQSRecord)).toBe(false);
 });

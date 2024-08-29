@@ -35,11 +35,9 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			console.log(
 				`Processing TT Webhook. SQS Message id is: ${sqsRecord.messageId}`,
 			);
-	
-			const currentDateTime = new Date();
+		
 			const validRequest = await validateRequest(
 				sqsRecord,
-				currentDateTime,
 			);
 			if (validRequest) {
 				await processValidSqsRecord(sqsRecord);
