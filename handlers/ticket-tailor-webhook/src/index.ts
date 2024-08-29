@@ -1,44 +1,49 @@
-import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
-import { stageFromEnvironment } from '@modules/stage';
-import type { Handler, SQSEvent } from 'aws-lambda';
+import type { SQSEvent, SQSRecord } from 'aws-lambda';
 import { createGuestAccount, fetchUserType } from './idapiService';
-import type { Payload } from './validateRequest';
 import { validateRequest } from './validateRequest';
 
-const stage = stageFromEnvironment();
+/*
+The payload of a webhook request contains an order object:
+https://developers.tickettailor.com/?shell#get-a-single-order
+*/
+export interface TicketTailorRequest {
+	payload: {
+		buyer_details: {
+			email: string;
+		};
+	};
+}
 
-export type HmacKey = {
-	secret: string;
-};
+async function processValidSqsRecord(sqsRecord: SQSRecord) {
+	const ticketTailorRequest = JSON.parse(sqsRecord.body) as TicketTailorRequest;
+	const email = ticketTailorRequest.payload.buyer_details.email;
+	const userTypeResponse = await fetchUserType(email);
 
-export const handler: Handler = async (event: SQSEvent) => {
-	return await event.Records.flatMap(async (record) => {
-		console.log(`Processing TT Webhook. Message id is: ${record.messageId}`);
-		const validationSecret = await getSecretValue<HmacKey>(
-			`${stage}/TicketTailor/Webhook-validation`,
+	if (userTypeResponse.userType === 'new') {
+		await createGuestAccount(email);
+	} else {
+		console.log(
+			`Skipping guest creation as account of type ${userTypeResponse.userType} already exists for user.`,
 		);
-		const currentDateTime = new Date();
-		const validRequest = validateRequest(
-			record,
-			validationSecret,
-			currentDateTime,
-		);
-		if (!validRequest) {
-			throw new Error(
-				'Signatures do not match - check Ticket Tailor signing secret matches the one stored in AWS.',
+	}
+}
+
+export const handler = async (event: SQSEvent): Promise<void> => {
+	const eventualEnsuredIdentityAccount = event.Records.flatMap(
+		async (sqsRecord) => {
+			console.log(
+				`Processing TT Webhook. SQS Message id is: ${sqsRecord.messageId}`,
 			);
-		} else {
-			const payload = JSON.parse(record.body) as Payload;
-			const email = payload.payload.buyer_details.email;
-			const userTypeResponse = await fetchUserType(email);
-			if (userTypeResponse.userType === 'new') {
-				return await createGuestAccount(email);
+
+			const validRequest = await validateRequest(sqsRecord);
+			if (validRequest) {
+				await processValidSqsRecord(sqsRecord);
 			} else {
-				console.log(
-					`Skipping guest creation as user of type ${userTypeResponse.userType} exists already`,
-				);
-				return userTypeResponse;
+				console.error('Request failed validation. Processing terminated.');
+				return;
 			}
-		}
-	}).at(0);
+		},
+	);
+
+	await Promise.all<void>(eventualEnsuredIdentityAccount);
 };

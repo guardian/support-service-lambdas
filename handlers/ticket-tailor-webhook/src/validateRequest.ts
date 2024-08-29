@@ -1,41 +1,36 @@
 import { createHmac, timingSafeEqual } from 'crypto';
+import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
+import { stageFromEnvironment } from '@modules/stage';
 import type { SQSRecord } from 'aws-lambda';
-import type { HmacKey } from './index';
 
-export interface Payload {
-	payload: {
-		buyer_details: {
-			email: string;
-		};
-	};
-}
+export type HmacKey = {
+	secret: string;
+};
 
 export const getTimestampAndSignature = (
 	record: SQSRecord,
-): [string, string] => {
+): [string, string] | undefined => {
 	const signatureWithTs =
 		record.messageAttributes['tickettailor-webhook-signature']?.stringValue;
-	if (typeof signatureWithTs === 'string') {
-		const timestamp = signatureWithTs.split(',')[0]?.split('t=')[1];
-		const signature = signatureWithTs.split(',')[1]?.split('v1=')[1];
-		if (timestamp && signature) {
-			if (!isNaN(Number(timestamp))) {
-				return [timestamp, signature];
-			} else {
-				throw new Error(
-					`Invalid value for MessageAttribute 'tickettailor-webhook-signature' -> timestamp: ${timestamp}. Timestamp should be a numeric string.`,
-				);
-			}
-		} else {
-			throw new Error(
-				`Invalid formatting of MessageAttribute 'tickettailor-webhook-signature': ${signatureWithTs}. Missing timestamp or signature.`,
-			);
-		}
-	} else {
-		throw new Error(
+
+	if (!(typeof signatureWithTs === 'string')) {
+		console.error(
 			'No valid value found for MessgeAttritbute: tickettailor-webhook-signature on incoming request.',
 		);
+		return;
 	}
+
+	const timestamp = signatureWithTs.split(',')[0]?.split('t=')[1];
+	const signature = signatureWithTs.split(',')[1]?.split('v1=')[1];
+
+	if (!(timestamp && signature) || isNaN(Number(timestamp))) {
+		console.error(
+			`Invalid formatting of MessageAttribute 'tickettailor-webhook-signature': ${signatureWithTs}. Missing or incorrectly formatted timestamp or signature.`,
+		);
+		return;
+	}
+
+	return [timestamp, signature];
 };
 
 export const isWithinTimeWindow = (
@@ -48,9 +43,10 @@ export const isWithinTimeWindow = (
 	const currentEpochSeconds = Math.floor(currentDateTime.valueOf() / 1000);
 	const timeDiff = currentEpochSeconds - timestampEpochSeconds;
 	if (timeDiff < 0) {
-		throw new Error(
+		console.error(
 			`Invalid Webhook Signature: timeStamp ${timestamp} is later than current time. Check it is not using EpochMillis.`,
 		);
+		return false;
 	} else {
 		return timeDiff <= allowedTimeWindowInSeconds;
 	}
@@ -70,13 +66,19 @@ export const hasMatchingSignature = (
 
 export const maxValidTimeWindowSeconds = 300;
 
-export const validateRequest = (
-	record: SQSRecord,
-	validationSecret: HmacKey,
-	currentDateTime: Date,
-): boolean => {
-	const [timestamp, signature]: [string, string] =
-		getTimestampAndSignature(record);
+export const validateRequest = async (record: SQSRecord): Promise<boolean> => {
+	const validationSecret = await getSecretValue<HmacKey>(
+		`${stageFromEnvironment()}/TicketTailor/Webhook-validation`,
+	);
+
+	const currentDateTime = new Date();
+
+	const timestampAndSignature = getTimestampAndSignature(record);
+	if (!timestampAndSignature) {
+		return false;
+	}
+
+	const [timestamp, signature]: [string, string] = timestampAndSignature;
 	const withinTimeWindow: boolean = isWithinTimeWindow(
 		maxValidTimeWindowSeconds,
 		timestamp,
@@ -88,15 +90,17 @@ export const validateRequest = (
 		record,
 		validationSecret,
 	);
+
 	if (!signatureMatches) {
-		throw Error(
+		console.warn(
 			'Signatures do not match - check Ticket Tailor signing secret matches the one stored in AWS.',
 		);
-	} else if (!withinTimeWindow) {
-		throw Error(
+	}
+	if (!withinTimeWindow) {
+		console.warn(
 			`Webhook Signature timestamp ${timestamp} is older than ${maxValidTimeWindowSeconds} seconds. Webhook will not be processed.`,
 		);
-	} else {
-		return true;
 	}
+
+	return withinTimeWindow && signatureMatches;
 };
