@@ -40,7 +40,7 @@ class ContributionValidationsTest extends AnyFlatSpec with Matchers {
       testRequest.copy(amountMinorUnits = Some(AmountMinorUnits(99))),
       MonthlyContribution,
       GBP,
-    ) shouldBe Failed("amount must be at least GBP 1")
+    ) shouldBe Failed("amount for MonthlyContribution must be at least GBP 1")
   }
 
   it should "return error if amount is too large" in {
@@ -48,7 +48,7 @@ class ContributionValidationsTest extends AnyFlatSpec with Matchers {
       testRequest.copy(amountMinorUnits = Some(AmountMinorUnits(201))),
       MonthlyContribution,
       GBP,
-    ) shouldBe Failed("amount must not be more than GBP 2")
+    ) shouldBe Failed("amount for MonthlyContribution must not be more than GBP 2")
   }
   it should "return success if amount is within valid range" in {
     wiredValidator(
