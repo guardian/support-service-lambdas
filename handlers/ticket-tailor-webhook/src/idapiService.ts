@@ -45,10 +45,10 @@ export const fetchUserType = async (
 	);
 	if (!userTypeResponse.ok) {
 		console.error(
-			`Get userType request for ${email} failed with status: ${userTypeResponse.statusText}. Response body is: ${JSON.stringify(userTypeResponse.body)}`,
+			`Get userType request failed with status: ${userTypeResponse.statusText}. Response body is: ${JSON.stringify(userTypeResponse.body)}`,
 		);
 		throw new Error(
-			`Get userType request for ${email} failed with status: ${userTypeResponse.statusText}. Response body is: ${JSON.stringify(userTypeResponse.body)}`,
+			`Get userType request failed with status: ${userTypeResponse.statusText}. Response body is: ${JSON.stringify(userTypeResponse.body)}`,
 		);
 	}
 	console.log(
@@ -74,7 +74,7 @@ export const createGuestAccount = async (email: string): Promise<void> => {
 	console.log(`Create Guest Account response status: ${response.statusText}`);
 	if (!response.ok) {
 		throw new Error(
-			`Guest account creation for email: ${email} failed with status ${response.statusText} }`,
+			`Guest account failed with status ${response.statusText} }`,
 		);
 	}
 };

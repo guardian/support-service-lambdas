@@ -23,15 +23,10 @@ export interface TicketTailorRequest {
 async function processValidSqsRecord(sqsRecord: SQSRecord) {
 	const ticketTailorRequest = JSON.parse(sqsRecord.body) as TicketTailorRequest;
 	const email = ticketTailorRequest.payload.buyer_details.email;
-	console.log(`fetching user type for email: ${email}.`);
 	const userTypeResponse = await fetchUserType(email);
-	console.log(
-		`userTypeResponse for email: ${email} is: ${userTypeResponse.userType}`,
-	);
+
 	if (userTypeResponse.userType === 'new') {
-		console.log(`Creating new guest account for user`);
 		await createGuestAccount(email);
-		console.log(`Guest account created for ${email}.`);
 	} else {
 		console.log(
 			`Skipping guest creation as account of type ${userTypeResponse.userType} already exists for user.`,
