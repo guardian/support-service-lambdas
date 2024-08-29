@@ -2,7 +2,6 @@ import { createHmac, timingSafeEqual } from 'crypto';
 import type { SQSRecord } from 'aws-lambda';
 import type { HmacKey } from './index';
 
-
 export const getTimestampAndSignature = (
 	record: SQSRecord,
 ): [string, string] | undefined => {
