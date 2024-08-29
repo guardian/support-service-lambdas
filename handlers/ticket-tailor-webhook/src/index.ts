@@ -2,31 +2,38 @@ import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
 import type { SQSEvent } from 'aws-lambda';
 import { createGuestAccount, fetchUserType } from './idapiService';
-import type { Payload } from './validateRequest';
 import { validateRequest } from './validateRequest';
 
 export type HmacKey = {
 	secret: string;
 };
 
+export interface TicketTailorRequest {
+	payload: {
+		buyer_details: {
+			email: string;
+		};
+	};
+}
+
 export const handler = async (event: SQSEvent): Promise<void> => {
 	const stage = stageFromEnvironment();
-	const results = event.Records.flatMap(async (record) => {
-		console.log(`Processing TT Webhook. Message id is: ${record.messageId}`);
+	const promises = event.Records.flatMap(async (sqsRecord) => {
+		console.log(`Processing TT Webhook. Message id is: ${sqsRecord.messageId}`);
 		const validationSecret = await getSecretValue<HmacKey>(
 			`${stage}/TicketTailor/Webhook-validation`,
 		);
 		const currentDateTime = new Date();
 		const validRequest = validateRequest(
-			record,
+			sqsRecord,
 			validationSecret,
 			currentDateTime,
 		);
 		if (!validRequest) {
 			console.error('Request failed validation. Processing terminated.');
 		} else {
-			const payload = JSON.parse(record.body) as Payload;
-			const email = payload.payload.buyer_details.email;
+			const ticketTailorRequest = JSON.parse(sqsRecord.body) as TicketTailorRequest;
+			const email = ticketTailorRequest.payload.buyer_details.email;
 			console.log(`fetching user type for email: ${email}.`);
 			const userTypeResponse = await fetchUserType(email);
 			console.log(
@@ -44,5 +51,5 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 		}
 	});
 
-	await Promise.all<void>(results);
+	await Promise.all<void>(promises);
 };

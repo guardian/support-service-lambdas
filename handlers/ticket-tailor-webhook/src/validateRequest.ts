@@ -2,13 +2,6 @@ import { createHmac, timingSafeEqual } from 'crypto';
 import type { SQSRecord } from 'aws-lambda';
 import type { HmacKey } from './index';
 
-export interface Payload {
-	payload: {
-		buyer_details: {
-			email: string;
-		};
-	};
-}
 
 export const getTimestampAndSignature = (
 	record: SQSRecord,
