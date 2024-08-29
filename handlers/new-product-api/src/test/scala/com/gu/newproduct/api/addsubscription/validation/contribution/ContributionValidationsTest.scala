@@ -23,7 +23,7 @@ class ContributionValidationsTest extends AnyFlatSpec with Matchers {
   def amountLimitsFor(planId: PlanId, currency: Currency) = {
     planId shouldBe MonthlyContribution
     currency shouldBe GBP
-    AmountLimits.limitsFromMajorToMinorUnits(min = 1, max = 2)
+    AmountLimits.fromMajorUnits(min = 1, max = 2)
   }
 
   def isValidStartDate(d: LocalDate): ValidationResult[Unit] =
