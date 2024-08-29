@@ -51,10 +51,9 @@ export const fetchUserType = async (
 			`Get userType request failed with status: ${userTypeResponse.statusText}. Response body is: ${JSON.stringify(userTypeResponse.body)}`,
 		);
 	}
-	console.log(
-		`Request ok. Status is: ${userTypeResponse.statusText}. Response type is ${userTypeResponse.type}.`,
-	);
-	return (await userTypeResponse.json()) as UserTypeResponse;
+	const parsedResponse = (await userTypeResponse.json()) as UserTypeResponse;
+	console.log(`Request ok. User type is: ${parsedResponse.userType}`);
+	return parsedResponse;
 };
 
 export const createGuestAccount = async (email: string): Promise<void> => {
