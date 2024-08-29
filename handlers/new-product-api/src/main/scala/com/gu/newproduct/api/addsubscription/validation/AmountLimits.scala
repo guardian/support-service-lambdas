@@ -15,33 +15,33 @@ object AmountLimits {
   def fromMinorToMajor(value: Int) = value / 100
 
   val gbp = ContributionLimits(
-    monthly = AmountLimits.limitsFromMajorToMinorUnits(min = 2, max = 166),
-    annual = AmountLimits.limitsFromMajorToMinorUnits(min = 10, max = 2000),
+    monthly = AmountLimits.limitsFromMajorToMinorUnits(min = 4, max = 166),
+    annual = AmountLimits.limitsFromMajorToMinorUnits(min = 50, max = 2000),
   )
 
   val aud = ContributionLimits(
     monthly = AmountLimits.limitsFromMajorToMinorUnits(min = 10, max = 200),
-    annual = AmountLimits.limitsFromMajorToMinorUnits(min = 10, max = 2000),
+    annual = AmountLimits.limitsFromMajorToMinorUnits(min = 80, max = 2000),
   )
 
   val usd = ContributionLimits(
-    monthly = AmountLimits.limitsFromMajorToMinorUnits(min = 2, max = 166),
-    annual = AmountLimits.limitsFromMajorToMinorUnits(min = 10, max = 2000),
+    monthly = AmountLimits.limitsFromMajorToMinorUnits(min = 3, max = 166),
+    annual = AmountLimits.limitsFromMajorToMinorUnits(min = 30, max = 2000),
   )
 
   val nzd = ContributionLimits(
     monthly = AmountLimits.limitsFromMajorToMinorUnits(min = 10, max = 200),
-    annual = AmountLimits.limitsFromMajorToMinorUnits(min = 10, max = 2000),
+    annual = AmountLimits.limitsFromMajorToMinorUnits(min = 80, max = 2000),
   )
 
   val cad = ContributionLimits(
     monthly = AmountLimits.limitsFromMajorToMinorUnits(min = 5, max = 166),
-    annual = AmountLimits.limitsFromMajorToMinorUnits(min = 10, max = 2000),
+    annual = AmountLimits.limitsFromMajorToMinorUnits(min = 60, max = 2000),
   )
 
   val eur = ContributionLimits(
-    monthly = AmountLimits.limitsFromMajorToMinorUnits(min = 2, max = 166),
-    annual = AmountLimits.limitsFromMajorToMinorUnits(min = 10, max = 2000),
+    monthly = AmountLimits.limitsFromMajorToMinorUnits(min = 4, max = 166),
+    annual = AmountLimits.limitsFromMajorToMinorUnits(min = 50, max = 2000),
   )
 
   def limitsFor(planId: PlanId, currency: Currency): AmountLimits = {
