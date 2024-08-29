@@ -1,6 +1,12 @@
 import { createHmac, timingSafeEqual } from 'crypto';
 import type { SQSRecord } from 'aws-lambda';
-import type { HmacKey } from './index';
+import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
+import { stageFromEnvironment } from '@modules/stage';
+
+
+export type HmacKey = {
+	secret: string;
+};
 
 export const getTimestampAndSignature = (
 	record: SQSRecord,
@@ -61,11 +67,14 @@ export const hasMatchingSignature = (
 
 export const maxValidTimeWindowSeconds = 300;
 
-export const validateRequest = (
+export const validateRequest = async (
 	record: SQSRecord,
-	validationSecret: HmacKey,
 	currentDateTime: Date,
-): boolean => {
+): Promise<boolean> => {
+	const validationSecret = await getSecretValue<HmacKey>(
+	`${stageFromEnvironment()}/TicketTailor/Webhook-validation`,
+	);
+	
 	const timestampAndSignature = getTimestampAndSignature(record);
 	if (!timestampAndSignature) {
 		return false;

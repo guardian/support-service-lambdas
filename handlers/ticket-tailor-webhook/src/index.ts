@@ -1,12 +1,7 @@
-import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
-import { stageFromEnvironment } from '@modules/stage';
 import type { SQSEvent, SQSRecord } from 'aws-lambda';
 import { createGuestAccount, fetchUserType } from './idapiService';
 import { validateRequest } from './validateRequest';
 
-export type HmacKey = {
-	secret: string;
-};
 
 /*
 The payload of a webhook request contains an order object:
@@ -35,19 +30,15 @@ async function processValidSqsRecord(sqsRecord: SQSRecord) {
 }
 
 export const handler = async (event: SQSEvent): Promise<void> => {
-	const stage = stageFromEnvironment();
 	const eventualEnsuredIdentityAccount = event.Records.flatMap(
 		async (sqsRecord) => {
 			console.log(
 				`Processing TT Webhook. SQS Message id is: ${sqsRecord.messageId}`,
 			);
-			const validationSecret = await getSecretValue<HmacKey>(
-				`${stage}/TicketTailor/Webhook-validation`,
-			);
+	
 			const currentDateTime = new Date();
-			const validRequest = validateRequest(
+			const validRequest = await validateRequest(
 				sqsRecord,
-				validationSecret,
 				currentDateTime,
 			);
 			if (validRequest) {

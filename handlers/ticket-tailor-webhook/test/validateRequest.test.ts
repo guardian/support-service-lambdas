@@ -1,5 +1,6 @@
 import type { SQSRecord } from 'aws-lambda';
-import { type HmacKey } from '../src/index';
+import type {
+	HmacKey} from '../src/validateRequest';
 import {
 	getTimestampAndSignature,
 	hasMatchingSignature,
@@ -15,6 +16,15 @@ const mockKey: HmacKey = {
 jest.mock('@modules/secrets-manager/src/getSecret', () => ({
 	getSecretValue: () => mockKey,
 }));
+
+beforeEach(() => {
+	process.env.Stage = 'CODE';
+	jest.resetAllMocks;
+	jest.mock('@modules/secrets-manager/src/getSecret', () => ({
+		getSecretValue: () => mockKey,
+	}));
+});
+
 
 export const validSQSRecord: SQSRecord = {
 	messageId: '48501d06-2c1d-4e06-80b9-7617cd9df313',
@@ -176,7 +186,7 @@ test('If a valid SQS event has a timestamp more than 1 second older than the all
 });
 
 // Tests for the validateRequest function
-test('If a request has an invalid signature, validateRequest() will log warning and return false', () => {
+test('If a request has an invalid signature, validateRequest() will log warning and return false', async () => {
 	const validEpochSeconds =
 		Number(validSQSRecordTimestamp) + maxValidTimeWindowSeconds;
 	//Date works in Epoch milli
@@ -185,12 +195,12 @@ test('If a request has an invalid signature, validateRequest() will log warning 
 		`validSQSRecordTimestamp: ${validSQSRecordTimestamp}..... validEpochSeconds: ${validEpochSeconds} ...  validDate: ${Math.round(validDate.valueOf() / 1000)}`,
 	);
 
-	expect(validateRequest(invalidSignatureSQSRecord, mockKey, validDate)).toBe(
+	expect(await validateRequest(invalidSignatureSQSRecord, validDate)).toBe(
 		false,
 	);
 });
 
-test('If a request has a valid signature and timestamp, and the timestamp is within the allowed time window, validateRequest() will return true', () => {
+test('If a request has a valid signature and timestamp, and the timestamp is within the allowed time window, validateRequest() will return true', async () => {
 	const validEpochSeconds =
 		Number(validSQSRecordTimestamp) + maxValidTimeWindowSeconds;
 	//Date works in Epoch milli
@@ -199,22 +209,22 @@ test('If a request has a valid signature and timestamp, and the timestamp is wit
 		`validSQSRecordTimestamp: ${validSQSRecordTimestamp}..... validEpochSeconds: ${validEpochSeconds} ...  validDate: ${Math.round(validDate.valueOf() / 1000)}`,
 	);
 
-	expect(validateRequest(validSQSRecord, mockKey, validDate)).toBe(true);
+	expect(await validateRequest(validSQSRecord, validDate)).toBe(true);
 });
 
-test('If a request has a valid signature and timestamp, but the timestamp is more than 1 second outside the allowed time window, validateRequest() will return false', () => {
+test('If a request has a valid signature and timestamp, but the timestamp is more than 1 second outside the allowed time window, validateRequest() will return false', async () => {
 	const invalidEpochSeconds =
 		Number(validSQSRecordTimestamp) + maxValidTimeWindowSeconds + 2;
 	//Date works in Epoch milli
 	const invalidDate = new Date(invalidEpochSeconds * 1000);
 
-	expect(validateRequest(validSQSRecord, mockKey, invalidDate)).toBe(false);
+	expect(await validateRequest(validSQSRecord, invalidDate)).toBe(false);
 });
 
-test('If a request has a valid signature and timestamp, but the timestamp is later than the current date, validateRequest() will return false', () => {
+test('If a request has a valid signature and timestamp, but the timestamp is later than the current date, validateRequest() will return false', async () => {
 	const invalidEpochSeconds = Number(validSQSRecordTimestamp) - 2;
 	//Date works in Epoch milli
 	const invalidDate = new Date(invalidEpochSeconds * 1000);
 
-	expect(validateRequest(validSQSRecord, mockKey, invalidDate)).toBe(false);
+	expect(await validateRequest(validSQSRecord, invalidDate)).toBe(false);
 });

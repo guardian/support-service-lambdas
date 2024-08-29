@@ -1,7 +1,7 @@
 import type { SQSEvent } from 'aws-lambda';
 import fetchMock from 'fetch-mock';
-import type { HmacKey } from '../src';
 import { handler } from '../src';
+import type { HmacKey } from '../src/validateRequest';
 import { validSQSRecord } from './validateRequest.test';
 
 const sqsEvent: SQSEvent = { Records: [validSQSRecord] };
