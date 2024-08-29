@@ -18,7 +18,7 @@ export interface TicketTailorRequest {
 
 export const handler = async (event: SQSEvent): Promise<void> => {
 	const stage = stageFromEnvironment();
-	const promises = event.Records.flatMap(async (sqsRecord) => {
+	const processedRecords = event.Records.flatMap(async (sqsRecord) => {
 		console.log(`Processing TT Webhook. Message id is: ${sqsRecord.messageId}`);
 		const validationSecret = await getSecretValue<HmacKey>(
 			`${stage}/TicketTailor/Webhook-validation`,
@@ -51,5 +51,5 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 		}
 	});
 
-	await Promise.all<void>(promises);
+	await Promise.all<void>(processedRecords);
 };
