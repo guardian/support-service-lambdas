@@ -8,7 +8,6 @@ export type HmacKey = {
 	secret: string;
 };
 
-
 /*
 The payload of a webhook request contains an order object:
 https://developers.tickettailor.com/?shell#get-a-single-order
@@ -42,26 +41,28 @@ async function processValidSqsRecord(sqsRecord: SQSRecord) {
 
 export const handler = async (event: SQSEvent): Promise<void> => {
 	const stage = stageFromEnvironment();
-	const eventualEnsuredIdentityAccount = event.Records.flatMap(async (sqsRecord) => {
-		console.log(
-			`Processing TT Webhook. SQS Message id is: ${sqsRecord.messageId}`,
-		);
-		const validationSecret = await getSecretValue<HmacKey>(
-			`${stage}/TicketTailor/Webhook-validation`,
-		);
-		const currentDateTime = new Date();
-		const validRequest = validateRequest(
-			sqsRecord,
-			validationSecret,
-			currentDateTime,
-		);
-		if (validRequest) {
-			await processValidSqsRecord(sqsRecord);
-		} else {
-			console.error('Request failed validation. Processing terminated.');
-			return;
-		}
-	});
+	const eventualEnsuredIdentityAccount = event.Records.flatMap(
+		async (sqsRecord) => {
+			console.log(
+				`Processing TT Webhook. SQS Message id is: ${sqsRecord.messageId}`,
+			);
+			const validationSecret = await getSecretValue<HmacKey>(
+				`${stage}/TicketTailor/Webhook-validation`,
+			);
+			const currentDateTime = new Date();
+			const validRequest = validateRequest(
+				sqsRecord,
+				validationSecret,
+				currentDateTime,
+			);
+			if (validRequest) {
+				await processValidSqsRecord(sqsRecord);
+			} else {
+				console.error('Request failed validation. Processing terminated.');
+				return;
+			}
+		},
+	);
 
 	await Promise.all<void>(eventualEnsuredIdentityAccount);
 };
