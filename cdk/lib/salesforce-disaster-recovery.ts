@@ -6,7 +6,6 @@ import {
 } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
 	Choice,
@@ -21,6 +20,7 @@ import {
 	WaitTime,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
+import { nodeVersion } from './node-version';
 
 interface Props extends GuStackProps {
 	salesforceApiDomain: string;
@@ -53,7 +53,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			app,
 			memorySize: 1024,
 			fileName: `${app}.zip`,
-			runtime: Runtime.NODEJS_20_X,
+			runtime: nodeVersion,
 			timeout: Duration.seconds(300),
 			environment: { APP: app, STACK: this.stack, STAGE: this.stage },
 		};

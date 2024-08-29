@@ -1,28 +1,19 @@
-import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
-import { doSfAuth, executeSalesforceQuery } from '../salesforceHttp';
 import type {
-	SalesforceQueryResponse,
 	SfApiUserAuth,
 	SfConnectedAppAuth,
-} from '../salesforceHttp';
+} from '@modules/salesforce/src/auth';
+import { doSfAuth } from '@modules/salesforce/src/auth';
+import { executeSalesforceQuery } from '@modules/salesforce/src/query';
+import { RecordSchema } from '@modules/salesforce/src/recordSchema';
+import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
+import { stageFromEnvironment } from '@modules/stage';
+import { z } from 'zod';
 import { getSalesforceSecretNames } from '../secrets';
 import type { ApiUserSecret, ConnectedAppSecret } from '../secrets';
 
 export async function handler() {
-	try{
-		
-		const stage = process.env.STAGE;
-		const BillingAccountIds = process.env.BillingAccountIds; //should be in format ('abc', 'def')
-
-		if (!stage) {
-			throw Error('Stage not defined');
-		}
-
-		if (!isValidStage(stage)) {
-			throw Error('Invalid Stage value');
-		}
-
-		const secretNames = getSalesforceSecretNames(stage);
+	try {
+		const secretNames = getSalesforceSecretNames(stageFromEnvironment());
 
 		const { authUrl, clientId, clientSecret } =
 			await getSecretValue<ConnectedAppSecret>(
@@ -44,26 +35,35 @@ export async function handler() {
 
 		const sfAuthResponse = await doSfAuth(sfApiUserAuth, sfConnectedAppAuth);
 
-		//todo use test query for now, but update to prod query before release
-		//todo generate test data when we get to dev for updating zuora billing accounts
-		// const limit = 200;
-		// const prodQuery = `SELECT Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c FROM Zuora__CustomerAccount__c WHERE Zuora__External_Id__c != null AND Zuora__Account__r.GDPR_Billing_Accounts_Ready_for_Removal__c = true AND GDPR_Removal_Attempts__c < $maxAttempts ORDER BY Zuora__Account__r.GDPR_Date_Successfully_Removed_Related__c desc LIMIT $limit`
+		const limit = 200;
+		const query = `SELECT Id, Zuora__Account__c, GDPR_Removal_Attempts__c, Zuora__External_Id__c FROM Zuora__CustomerAccount__c WHERE Zuora__External_Id__c != null AND Zuora__Account__r.GDPR_Billing_Accounts_Ready_for_Removal__c = true AND GDPR_Removal_Attempts__c < 5 ORDER BY Zuora__Account__r.GDPR_Date_Successfully_Removed_Related__c desc LIMIT ${limit}`;
 
-		const testQuery =
-			`select Id, GDPR_Removal_Attempts__c, Zuora__External_Id__c from Zuora__CustomerAccount__c where Id in ${BillingAccountIds}`;
-		const response: SalesforceQueryResponse = await executeSalesforceQuery(
+		const response = await executeSalesforceQuery(
 			sfAuthResponse,
-			testQuery,
+			query,
+			BillingAccountRecordSchema,
 		);
 
 		return {
 			billingAccountsToProcess: response.records,
 		};
-	}catch(error){
-		throw new Error(`Error fetching billing accounts from Salesforce: ${JSON.stringify(error)}`);
+	} catch (error) {
+		throw new Error(
+			`Error fetching billing accounts from Salesforce: ${JSON.stringify(error)}`,
+		);
 	}
 }
 
-function isValidStage(value: unknown): value is 'CODE' | 'PROD' {
-	return value === 'CODE' || value === 'PROD';
-}
+export const BillingAccountRecordSchema = RecordSchema.extend({
+	GDPR_Removal_Attempts__c: z.number(),
+	Zuora__External_Id__c: z.string(),
+});
+export type BillingAccountRecord = z.infer<typeof BillingAccountRecordSchema>;
+
+export const BillingAccountRecordWithSuccessSchema =
+	BillingAccountRecordSchema.extend({
+		crmIdRemovedSuccessfully: z.boolean(),
+	});
+export type BillingAccountRecordWithSuccess = z.infer<
+	typeof BillingAccountRecordWithSuccessSchema
+>;

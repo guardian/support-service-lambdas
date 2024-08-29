@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - main
-      
+
 # Ensure we only ever have one build running at a time.
 # If we push twice in quick succession, the first build will be stopped once the second starts.
 # This avoids multiple deploys happening in quick succession causing AWS rate exceeded errors
@@ -37,6 +37,7 @@ jobs:
     strategy:
       matrix:
         subproject:
+          - ticket-tailor-webhook
           - update-supporter-plus-amount
           - product-switch-api
           - generate-product-catalog
@@ -79,4 +80,3 @@ jobs:
               - ./cdk/cdk.out
             ${{ matrix.subproject }}:
               - ./handlers/${{ matrix.subproject }}/target/${{ matrix.subproject }}.zip
-

@@ -246,7 +246,39 @@ export const productCatalogSchema = z.object({
 					.enum(typeObject.SupporterPlus.billingPeriods)
 					.optional(),
 			}),
-			GuardianWeeklyRestOfWorldMonthly: z.object({
+		}),
+	}),
+	TierThree: z.object({
+		ratePlans: z.object({
+			RestOfWorldMonthly: z.object({
+				id: z.string(),
+				pricing: z.object({
+					USD: z.number(),
+					GBP: z.number(),
+				}),
+				charges: z.object({
+					SupporterPlus: z.object({ id: z.string() }),
+					GuardianWeekly: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z
+					.enum(typeObject.SupporterPlus.billingPeriods)
+					.optional(),
+			}),
+			RestOfWorldAnnual: z.object({
+				id: z.string(),
+				pricing: z.object({
+					USD: z.number(),
+					GBP: z.number(),
+				}),
+				charges: z.object({
+					SupporterPlus: z.object({ id: z.string() }),
+					GuardianWeekly: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z
+					.enum(typeObject.SupporterPlus.billingPeriods)
+					.optional(),
+			}),
+			DomesticAnnual: z.object({
 				id: z.string(),
 				pricing: z.object({
 					USD: z.number(),
@@ -264,43 +296,7 @@ export const productCatalogSchema = z.object({
 					.enum(typeObject.SupporterPlus.billingPeriods)
 					.optional(),
 			}),
-			GuardianWeeklyDomesticMonthly: z.object({
-				id: z.string(),
-				pricing: z.object({
-					USD: z.number(),
-					NZD: z.number(),
-					EUR: z.number(),
-					GBP: z.number(),
-					CAD: z.number(),
-					AUD: z.number(),
-				}),
-				charges: z.object({
-					SupporterPlus: z.object({ id: z.string() }),
-					GuardianWeekly: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.SupporterPlus.billingPeriods)
-					.optional(),
-			}),
-			GuardianWeeklyRestOfWorldAnnual: z.object({
-				id: z.string(),
-				pricing: z.object({
-					USD: z.number(),
-					NZD: z.number(),
-					EUR: z.number(),
-					GBP: z.number(),
-					CAD: z.number(),
-					AUD: z.number(),
-				}),
-				charges: z.object({
-					SupporterPlus: z.object({ id: z.string() }),
-					GuardianWeekly: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.SupporterPlus.billingPeriods)
-					.optional(),
-			}),
-			GuardianWeeklyDomesticAnnual: z.object({
+			DomesticMonthly: z.object({
 				id: z.string(),
 				pricing: z.object({
 					USD: z.number(),

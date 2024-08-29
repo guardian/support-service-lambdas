@@ -97,6 +97,11 @@ test('Subscriptions on the new price are eligible', async () => {
 		upToPeriodsType: 'Months',
 		firstDiscountedPaymentDate: zuoraDateFormat(paymentDate),
 		nextNonDiscountedPaymentDate: zuoraDateFormat(paymentDate.add(3, 'months')),
+		nonDiscountedPayments: [
+			{ date: zuoraDateFormat(paymentDate), amount: 14.99 },
+			{ date: zuoraDateFormat(paymentDate.add(1, 'months')), amount: 14.99 },
+			{ date: zuoraDateFormat(paymentDate.add(2, 'months')), amount: 14.99 },
+		],
 	};
 	expect(eligibilityCheckResult).toEqual(expected);
 
@@ -134,6 +139,10 @@ test('Supporter Plus subscriptions are eligible', async () => {
 		upToPeriodsType: 'Months',
 		firstDiscountedPaymentDate: zuoraDateFormat(paymentDate),
 		nextNonDiscountedPaymentDate: zuoraDateFormat(paymentDate.add(2, 'months')),
+		nonDiscountedPayments: [
+			{ date: zuoraDateFormat(paymentDate), amount: 12 },
+			{ date: zuoraDateFormat(paymentDate.add(1, 'months')), amount: 12 },
+		],
 	};
 	expect(eligibilityCheckResult).toEqual(expected);
 

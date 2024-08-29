@@ -1008,7 +1008,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
                 {
                   "Ref": "AWS::AccountId",
                 },
-                ":retention-dev",
+                ":alarms-handler-topic-PROD",
               ],
             ],
           },

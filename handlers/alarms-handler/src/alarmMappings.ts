@@ -1,6 +1,6 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
 
-type Team = 'VALUE' | 'GROWTH' | 'PP' | 'SRE';
+type Team = 'VALUE' | 'GROWTH' | 'PORTFOLIO' | 'PLATFORM' | 'SRE';
 
 const sharedMobilePurchasesApps = [
 	'mobile-purchases-apple-pubsub',
@@ -25,11 +25,11 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'batch-email-sender',
 		'bigquery-acquisitions-publisher',
 		'component-event-stream',
+		'contributions-store-queue',
 		'contributions-ticker-calculator',
 		'digital-voucher-api',
 		'dotcom-components',
 		'fulfilment-date-calculator',
-		'invoicing-api',
 		...sharedMobilePurchasesApps,
 		'new-product-api',
 		'price-migration-engine-state-machine',
@@ -39,7 +39,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'sf-gocardless-sync',
 		'super-mode-calculator',
 		'support-reminders',
-		'zuora-salesforce-link-remover',
 	],
 	VALUE: [
 		'cancellation-sf-cases-api',
@@ -56,30 +55,19 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'payment-failure-comms',
 		'publishing-alarm-stack-cdk',
 		'salesforce-case-raiser',
+		'product-switch-api',
+		'update-supporter-plus-amount',
 	],
 	SRE: ['alarms-handler', 'gchat-test-app'],
-	PP: [
+	PORTFOLIO: [
 		// contributions-platform
 		'fixation',
-
-		// fulfilment-lambdas
-		'fulfilment-lambdas',
 
 		// members-data-api
 		'membership-attribute-service',
 
-		// national-delivery-fulfilment
-		'national-delivery-fulfilment',
-
-		// national-delivery-failed-delivery-processor
-		'failed-national-delivery-processor',
-
 		// zuora-finance
 		'zuora-creditor',
-		'zuora-oracle-fusion',
-
-		// zuora-retention
-		'zuora-retention',
 
 		// support-frontend
 		'frontend',
@@ -90,11 +78,29 @@ const teamToAppMappings: Record<Team, string[]> = {
 
 		// support-service-lambdas
 		'digital-voucher-suspension-processor',
+		'metric-push-api',
 
 		// other
 		'canonical-config',
+	],
+	PLATFORM: [
+		// fulfilment
+		'failed-national-delivery-processor',
+		'fulfilment-lambdas',
+		'national-delivery-fulfilment',
+
+		// salesforce
 		'salesforce-disaster-recovery',
 		'salesforce-disaster-recovery-health-check',
+
+		// zuora
+		'invoicing-api',
+		'zuora-oracle-fusion',
+
+		//data retention
+		'identity-retention',
+		'zuora-retention', //https://github.com/guardian/zuora-retention
+		'zuora-salesforce-link-remover',
 	],
 };
 

@@ -574,12 +574,12 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
         "id": "8a128ed885fc6ded01860228f77e3d5a",
         "pricing": {
-          "AUD": 160,
-          "CAD": 120,
-          "EUR": 95,
-          "GBP": 95,
-          "NZD": 160,
-          "USD": 120,
+          "AUD": 200,
+          "CAD": 150,
+          "EUR": 120,
+          "GBP": 120,
+          "NZD": 200,
+          "USD": 150,
         },
       },
       "GuardianWeeklyDomesticAnnual": {
@@ -674,12 +674,12 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
         "id": "8a128ed885fc6ded018602296ace3eb8",
         "pricing": {
-          "AUD": 17,
-          "CAD": 13,
-          "EUR": 10,
-          "GBP": 10,
-          "NZD": 17,
-          "USD": 13,
+          "AUD": 20,
+          "CAD": 15,
+          "EUR": 12,
+          "GBP": 12,
+          "NZD": 20,
+          "USD": 15,
         },
       },
       "V1DeprecatedAnnual": {
@@ -732,7 +732,12 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
         "id": "8a1288a38ff2af980190025b32591ccc",
         "pricing": {
-          "GBP": 275,
+          "AUD": 680,
+          "CAD": 546,
+          "EUR": 438,
+          "GBP": 300,
+          "NZD": 800,
+          "USD": 510,
         },
       },
       "DomesticMonthly": {
@@ -747,7 +752,12 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
         "id": "8a1299788ff2ec100190025fccc32bb1",
         "pricing": {
-          "GBP": 25,
+          "AUD": 60,
+          "CAD": 48,
+          "EUR": 38.5,
+          "GBP": 27,
+          "NZD": 70,
+          "USD": 45,
         },
       },
       "RestOfWorldAnnual": {
@@ -762,7 +772,8 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
         "id": "8a1299788ff2ec100190024d1e3b1a09",
         "pricing": {
-          "GBP": 392.6,
+          "GBP": 417.6,
+          "USD": 546,
         },
       },
       "RestOfWorldMonthly": {
@@ -777,7 +788,8 @@ exports[`Generated product catalog matches snapshot 1`] = `
         },
         "id": "8a128ab18ff2af9301900255d77979ac",
         "pricing": {
-          "GBP": 34.8,
+          "GBP": 36.8,
+          "USD": 48,
         },
       },
     },
@@ -1055,6 +1067,7 @@ exports[`Generated product catalog types match snapshot 1`] = `
       "Annual",
     ],
     "currencies": [
+      "USD",
       "GBP",
     ],
     "productRatePlans": {

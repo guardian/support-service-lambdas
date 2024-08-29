@@ -43,7 +43,7 @@ describe('getZuoraSecretName', () => {
 
 	test('should get PROD Zuora secret name', () => {
 		const actual = getZuoraSecretName('PROD');
-		const expected = 'PROD/Zuora/SupportServiceLambdas';
+		const expected = 'PROD/Zuora-OAuth/SupportServiceLambdas';
 
 		expect(actual).toEqual(expected);
 	});

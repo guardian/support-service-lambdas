@@ -107,6 +107,10 @@ class CatalogWireTest extends AnyFlatSpec with Matchers with ResourceLoader {
     case NationalDeliveryEveryday => gbpPrice(7100)
     case NationalDeliverySixday => gbpPrice(7101)
     case NationalDeliveryWeekend => gbpPrice(7102)
+    case TierThreeDomesticMonthly => gbpPrice(2700)
+    case TierThreeDomesticAnnual => gbpPrice(30000)
+    case TierThreeROWMonthly => gbpPrice(4800)
+    case TierThreeROWAnnual => gbpPrice(54600)
   }
 
   def stubGetFirstAvailableStartDate(productType: ProductType, daysOfWeek: List[DayOfWeek]) = {

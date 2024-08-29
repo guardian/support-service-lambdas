@@ -1,8 +1,8 @@
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
-import { aws_cloudwatch, Duration } from 'aws-cdk-lib';
 import type { App } from 'aws-cdk-lib';
+import { aws_cloudwatch, Duration } from 'aws-cdk-lib';
 import {
 	Alarm,
 	Metric,
@@ -10,11 +10,22 @@ import {
 	TreatMissingData,
 } from 'aws-cdk-lib/aws-cloudwatch';
 import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
+import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
+import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Architecture } from 'aws-cdk-lib/aws-lambda';
 import { Topic } from 'aws-cdk-lib/aws-sns';
-import { JsonPath, Map, StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
+import {
+	Choice,
+	Condition,
+	DefinitionBody,
+	JsonPath,
+	Map,
+	Pass,
+	StateMachine,
+} from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
+import { nodeVersion } from './node-version';
 
 export class ZuoraSalesforceLinkRemover extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {
@@ -34,10 +45,9 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-get-billing-accounts-${this.stage}`,
-				runtime: Runtime.NODEJS_20_X,
+				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
-					BillingAccountIds: '',
 				},
 				handler: 'getBillingAccounts.handler',
 				fileName: `${appName}.zip`,
@@ -57,13 +67,13 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			},
 		);
 
-		const updateZuoraBillingAccountsLambda = new GuLambdaFunction(
+		const updateZuoraBillingAccountLambda = new GuLambdaFunction(
 			this,
 			'update-zuora-billing-account-lambda',
 			{
 				app: appName,
 				functionName: `${appName}-update-zuora-billing-account-${this.stage}`,
-				runtime: Runtime.NODEJS_20_X,
+				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
 				},
@@ -75,7 +85,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 						actions: ['secretsmanager:GetSecretValue'],
 						resources: [
 							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:CODE/Zuora-OAuth/SupportServiceLambdas-S8QM4l`,
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:PROD/Zuora/SupportServiceLambdas-WeibUa`,
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:PROD/Zuora-OAuth/SupportServiceLambdas-Iu3KIT`,
 						],
 					}),
 					allowPutMetric,
@@ -89,7 +99,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-update-sf-billing-accounts-${this.stage}`,
-				runtime: Runtime.NODEJS_20_X,
+				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
 				},
@@ -120,11 +130,11 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			},
 		);
 
-		const updateZuoraBillingAccountsLambdaTask = new LambdaInvoke(
+		const updateZuoraBillingAccountLambdaTask = new LambdaInvoke(
 			this,
-			'Update Zuora Billing Accounts',
+			'Update Zuora Billing Account',
 			{
-				lambdaFunction: updateZuoraBillingAccountsLambda,
+				lambdaFunction: updateZuoraBillingAccountLambda,
 				outputPath: '$.Payload',
 			},
 		);
@@ -143,7 +153,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			this,
 			'Billing Accounts Processor Map',
 			{
-				maxConcurrency: 1,
+				maxConcurrency: 10,
 				itemsPath: JsonPath.stringAt('$.billingAccountsToProcess'),
 				parameters: {
 					item: JsonPath.stringAt('$$.Map.Item.Value'),
@@ -153,23 +163,46 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 		);
 
 		const billingAccountsProcessingMapDefinition =
-			updateZuoraBillingAccountsLambdaTask;
+			updateZuoraBillingAccountLambdaTask;
 
 		billingAccountsProcessingMap.iterator(
 			billingAccountsProcessingMapDefinition,
 		);
 
-		const definition = getSalesforceBillingAccountsFromLambdaTask
-			.next(billingAccountsProcessingMap)
-			.next(updateSfBillingAccountsLambdaTask);
+		const billingAccountsExistChoice = new Choice(
+			this,
+			'Billing Accounts exist for processing?',
+		)
+			.when(
+				Condition.isPresent('$.billingAccountsToProcess[0]'),
+				billingAccountsProcessingMap.next(updateSfBillingAccountsLambdaTask),
+			)
+			.otherwise(new Pass(this, 'No Billing Accounts to process'));
 
-		new StateMachine(
+		const definitionBody = DefinitionBody.fromChainable(
+			getSalesforceBillingAccountsFromLambdaTask.next(
+				billingAccountsExistChoice,
+			),
+		);
+
+		const stateMachine = new StateMachine(
 			this,
 			`zuora-salesforce-link-remover-state-machine-${this.stage}`,
 			{
-				definition,
+				definitionBody: definitionBody,
 			},
 		);
+
+		const cronEveryHour = { minute: '0', hour: '*' };
+		const cronOncePerYear = { minute: '0', hour: '0', day: '1', month: '1' };
+		const executionFrequency =
+			this.stage === 'PROD' ? cronEveryHour : cronOncePerYear;
+
+		new Rule(this, 'ScheduleStateMachineRule', {
+			schedule: Schedule.cron(executionFrequency),
+			targets: [new SfnStateMachine(stateMachine)],
+			enabled: true,
+		});
 
 		const topic = Topic.fromTopicArn(
 			this,
@@ -179,7 +212,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 
 		const lambdaFunctions = [
 			getSalesforceBillingAccountsLambda,
-			updateZuoraBillingAccountsLambda,
+			updateZuoraBillingAccountLambda,
 			updateSfBillingAccountsLambda,
 		];
 

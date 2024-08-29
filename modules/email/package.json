@@ -4,10 +4,10 @@
   "scripts": {
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
-    "check-formatting": "prettier --check **/*.ts",
-    "fix-formatting": "prettier --write **/*.ts"
+    "check-formatting": "prettier --check **.ts",
+    "fix-formatting": "prettier --write **.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-sqs": "3.606.0"
+    "@aws-sdk/client-sqs": "3.632.0"
   }
 }

@@ -3,7 +3,12 @@ package com.gu.delivery_records_api
 import cats.effect.{ContextShift, IO}
 import com.gu.delivery_records_api.service.createproblem._
 import com.gu.delivery_records_api.service.getrecords.GetDeliveryRecordsServiceImpl.deliveryRecordsQuery
-import com.gu.delivery_records_api.service.getrecords.{DeliveryProblemCase, DeliveryProblemCredit, DeliveryRecord, DeliveryRecordsApiResponse}
+import com.gu.delivery_records_api.service.getrecords.{
+  DeliveryProblemCase,
+  DeliveryProblemCredit,
+  DeliveryRecord,
+  DeliveryRecordsApiResponse,
+}
 import sttp.client3.impl.cats.CatsMonadAsyncError
 import sttp.client3.testing.SttpBackendStub
 import com.gu.salesforce._
@@ -18,6 +23,7 @@ import org.http4s.circe._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{EitherValues, Inside}
+import org.typelevel.ci.CIString
 
 import java.time.LocalDate
 import scala.concurrent._
@@ -208,8 +214,8 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       .run(
         Request(
           method = Method.GET,
-          Uri(path = s"/delivery-records/$subscriptionNumber"),
-          headers = Headers.of(Header("x-identity-id", identityId)),
+          Uri(path = Uri.Path.unsafeFromString(s"/delivery-records/$subscriptionNumber")),
+          headers = Headers(Header.Raw(CIString("x-identity-id"), identityId)),
         ),
       )
       .value
@@ -235,8 +241,8 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       .run(
         Request(
           method = Method.GET,
-          Uri(path = s"/delivery-records/$subscriptionNumber"),
-          headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId)),
+          Uri(path = Uri.Path.unsafeFromString(s"/delivery-records/$subscriptionNumber")),
+          headers = Headers(Header.Raw(CIString("x-salesforce-contact-id"), buyerContactId)),
         ),
       )
       .value
@@ -271,10 +277,10 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
         Request(
           method = Method.GET,
           Uri(
-            path = s"/delivery-records/$subscriptionNumber",
+            path = Uri.Path.unsafeFromString(s"/delivery-records/$subscriptionNumber"),
             query = Query("startDate" -> Some(startDate.toString), "endDate" -> Some(endDate.toString)),
           ),
-          headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId)),
+          headers = Headers(Header.Raw(CIString("x-salesforce-contact-id"), buyerContactId)),
         ),
       )
       .value
@@ -299,8 +305,8 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       .run(
         Request(
           method = Method.GET,
-          Uri(path = s"/delivery-records/$subscriptionNumber"),
-          headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId)),
+          Uri(path = Uri.Path.unsafeFromString(s"/delivery-records/$subscriptionNumber")),
+          headers = Headers(Header.Raw(CIString("x-salesforce-contact-id"), buyerContactId)),
         ),
       )
       .value
@@ -346,8 +352,8 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       .run(
         Request(
           method = Method.POST,
-          Uri(path = s"/delivery-records/$subscriptionNumber"),
-          headers = Headers.of(Header("x-identity-id", identityId)),
+          Uri(path = Uri.Path.unsafeFromString(s"/delivery-records/$subscriptionNumber")),
+          headers = Headers(Header.Raw(CIString("x-identity-id"), identityId)),
         ).withEntity(
           createDeliveryProblemBody,
         ),
@@ -376,8 +382,8 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       .run(
         Request(
           method = Method.GET,
-          Uri(path = s"/delivery-records/$subscriptionNumber"),
-          headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId)),
+          Uri(path = Uri.Path.unsafeFromString(s"/delivery-records/$subscriptionNumber")),
+          headers = Headers(Header.Raw(CIString("x-salesforce-contact-id"), buyerContactId)),
         ).withEntity(
           createDeliveryProblemBody,
         ),
@@ -406,8 +412,8 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       .run(
         Request(
           method = Method.POST,
-          Uri(path = s"/delivery-records/$subscriptionNumber"),
-          headers = Headers.of(Header("x-identity-id", identityId)),
+          Uri(path = Uri.Path.unsafeFromString(s"/delivery-records/$subscriptionNumber")),
+          headers = Headers(Header.Raw(CIString("x-identity-id"), identityId)),
         ).withEntity(
           createDeliveryProblemBody,
         ),
@@ -429,8 +435,8 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       .run(
         Request(
           method = Method.GET,
-          Uri(path = s"/delivery-records/$subscriptionNumber"),
-          headers = Headers.of(Header("x-salesforce-contact-id", buyerContactId)),
+          Uri(path = Uri.Path.unsafeFromString(s"/delivery-records/$subscriptionNumber")),
+          headers = Headers(Header.Raw(CIString("x-salesforce-contact-id"), buyerContactId)),
         ),
       )
       .value
@@ -450,7 +456,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
       .run(
         Request(
           method = Method.GET,
-          Uri(path = s"/delivery-records/$subscriptionNumber"),
+          Uri(path = Uri.Path.unsafeFromString(s"/delivery-records/$subscriptionNumber")),
         ),
       )
       .value
@@ -464,7 +470,9 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
     val salesforceBackendStub =
       SttpBackendStub[IO, Nothing](new CatsMonadAsyncError[IO]).stubFailingAuth
 
-    DeliveryRecordsApiApp.httpRoutesFromConfig(config, salesforceBackendStub).value.unsafeRunSync().isLeft should be(true)
+    DeliveryRecordsApiApp.httpRoutesFromConfig(config, salesforceBackendStub).value.unsafeRunSync().isLeft should be(
+      true,
+    )
   }
 
   private def getBody[A: Decoder](response: Response[IO]) = {
@@ -478,13 +486,14 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
   }
 
   private def createApp(salesforceBackendStub: SttpBackendStub[IO, Nothing]) = {
-    Inside.inside(DeliveryRecordsApiApp.httpRoutesFromConfig(config, salesforceBackendStub).value.unsafeRunSync()) { case Right(value) =>
-      value
+    Inside.inside(DeliveryRecordsApiApp.httpRoutesFromConfig(config, salesforceBackendStub).value.unsafeRunSync()) {
+      case Right(value) =>
+        value
     }
   }
 }
 
 case class SFApiSubscription(
-  Buyer__r: SFApiContactPhoneNumbers,
-  Delivery_Records__r: Option[RecordsWrapperCaseClass[SFApiDeliveryRecord]],
+    Buyer__r: SFApiContactPhoneNumbers,
+    Delivery_Records__r: Option[RecordsWrapperCaseClass[SFApiDeliveryRecord]],
 )

@@ -128,6 +128,27 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
+    "ScheduleStateMachineRule91756851": {
+      "Properties": {
+        "ScheduleExpression": "cron(0 0 1 1 ? *)",
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Ref": "zuorasalesforcelinkremoverstatemachineCODED6EAF6A2",
+            },
+            "Id": "Target0",
+            "RoleArn": {
+              "Fn::GetAtt": [
+                "zuorasalesforcelinkremoverstatemachineCODEEventsRole3E9FD607",
+                "Arn",
+              ],
+            },
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
     "alarm05E1DB6A1": {
       "Properties": {
         "ActionsEnabled": true,
@@ -308,7 +329,6 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "zuora-salesforce-link-remover",
-            "BillingAccountIds": "",
             "STACK": "membership",
             "STAGE": "CODE",
             "Stage": "CODE",
@@ -1013,7 +1033,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
                       {
                         "Ref": "AWS::AccountId",
                       },
-                      ":secret:PROD/Zuora/SupportServiceLambdas-WeibUa",
+                      ":secret:PROD/Zuora-OAuth/SupportServiceLambdas-Iu3KIT",
                     ],
                   ],
                 },
@@ -1131,7 +1151,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
           "Fn::Join": [
             "",
             [
-              "{"StartAt":"Get Salesforce Billing Accounts","States":{"Get Salesforce Billing Accounts":{"Next":"Billing Accounts Processor Map","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "{"StartAt":"Get Salesforce Billing Accounts","States":{"Get Salesforce Billing Accounts":{"Next":"Billing Accounts exist for processing?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1142,7 +1162,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Billing Accounts Processor Map":{"Type":"Map","ResultPath":"$.billingAccountProcessingAttempts","Next":"Update Salesforce Billing Accounts","Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Update Zuora Billing Accounts","States":{"Update Zuora Billing Accounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Billing Accounts exist for processing?":{"Type":"Choice","Choices":[{"Variable":"$.billingAccountsToProcess[0]","IsPresent":true,"Next":"Billing Accounts Processor Map"}],"Default":"No Billing Accounts to process"},"No Billing Accounts to process":{"Type":"Pass","End":true},"Billing Accounts Processor Map":{"Type":"Map","ResultPath":"$.billingAccountProcessingAttempts","Next":"Update Salesforce Billing Accounts","Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Update Zuora Billing Account","States":{"Update Zuora Billing Account":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1153,7 +1173,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.billingAccountsToProcess","MaxConcurrency":1},"Update Salesforce Billing Accounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","InputPath":"$.billingAccountProcessingAttempts","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.billingAccountsToProcess","MaxConcurrency":10},"Update Salesforce Billing Accounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","InputPath":"$.billingAccountProcessingAttempts","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1195,6 +1215,64 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
       },
       "Type": "AWS::StepFunctions::StateMachine",
       "UpdateReplacePolicy": "Delete",
+    },
+    "zuorasalesforcelinkremoverstatemachineCODEEventsRole3E9FD607": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "zuorasalesforcelinkremoverstatemachineCODEEventsRoleDefaultPolicyD7A0B2F9": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "zuorasalesforcelinkremoverstatemachineCODED6EAF6A2",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "zuorasalesforcelinkremoverstatemachineCODEEventsRoleDefaultPolicyD7A0B2F9",
+        "Roles": [
+          {
+            "Ref": "zuorasalesforcelinkremoverstatemachineCODEEventsRole3E9FD607",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "zuorasalesforcelinkremoverstatemachineCODERole2BDCFB38": {
       "Properties": {
@@ -1465,6 +1543,27 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
+    "ScheduleStateMachineRule91756851": {
+      "Properties": {
+        "ScheduleExpression": "cron(0 * * * ? *)",
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Ref": "zuorasalesforcelinkremoverstatemachinePRODCBC395DA",
+            },
+            "Id": "Target0",
+            "RoleArn": {
+              "Fn::GetAtt": [
+                "zuorasalesforcelinkremoverstatemachinePRODEventsRoleC180DD67",
+                "Arn",
+              ],
+            },
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
     "alarm05E1DB6A1": {
       "Properties": {
         "ActionsEnabled": true,
@@ -1645,7 +1744,6 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "zuora-salesforce-link-remover",
-            "BillingAccountIds": "",
             "STACK": "membership",
             "STAGE": "PROD",
             "Stage": "PROD",
@@ -2350,7 +2448,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
                       {
                         "Ref": "AWS::AccountId",
                       },
-                      ":secret:PROD/Zuora/SupportServiceLambdas-WeibUa",
+                      ":secret:PROD/Zuora-OAuth/SupportServiceLambdas-Iu3KIT",
                     ],
                   ],
                 },
@@ -2468,7 +2566,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
           "Fn::Join": [
             "",
             [
-              "{"StartAt":"Get Salesforce Billing Accounts","States":{"Get Salesforce Billing Accounts":{"Next":"Billing Accounts Processor Map","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "{"StartAt":"Get Salesforce Billing Accounts","States":{"Get Salesforce Billing Accounts":{"Next":"Billing Accounts exist for processing?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -2479,7 +2577,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Billing Accounts Processor Map":{"Type":"Map","ResultPath":"$.billingAccountProcessingAttempts","Next":"Update Salesforce Billing Accounts","Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Update Zuora Billing Accounts","States":{"Update Zuora Billing Accounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Billing Accounts exist for processing?":{"Type":"Choice","Choices":[{"Variable":"$.billingAccountsToProcess[0]","IsPresent":true,"Next":"Billing Accounts Processor Map"}],"Default":"No Billing Accounts to process"},"No Billing Accounts to process":{"Type":"Pass","End":true},"Billing Accounts Processor Map":{"Type":"Map","ResultPath":"$.billingAccountProcessingAttempts","Next":"Update Salesforce Billing Accounts","Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Update Zuora Billing Account","States":{"Update Zuora Billing Account":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -2490,7 +2588,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.billingAccountsToProcess","MaxConcurrency":1},"Update Salesforce Billing Accounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","InputPath":"$.billingAccountProcessingAttempts","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.billingAccountsToProcess","MaxConcurrency":10},"Update Salesforce Billing Accounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","InputPath":"$.billingAccountProcessingAttempts","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -2532,6 +2630,64 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
       },
       "Type": "AWS::StepFunctions::StateMachine",
       "UpdateReplacePolicy": "Delete",
+    },
+    "zuorasalesforcelinkremoverstatemachinePRODEventsRoleC180DD67": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "zuorasalesforcelinkremoverstatemachinePRODEventsRoleDefaultPolicy97C93DA8": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "zuorasalesforcelinkremoverstatemachinePRODCBC395DA",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "zuorasalesforcelinkremoverstatemachinePRODEventsRoleDefaultPolicy97C93DA8",
+        "Roles": [
+          {
+            "Ref": "zuorasalesforcelinkremoverstatemachinePRODEventsRoleC180DD67",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "zuorasalesforcelinkremoverstatemachinePRODRole70C6CF2B": {
       "Properties": {
