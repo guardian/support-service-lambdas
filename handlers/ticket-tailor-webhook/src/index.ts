@@ -2,7 +2,6 @@ import type { SQSEvent, SQSRecord } from 'aws-lambda';
 import { createGuestAccount, fetchUserType } from './idapiService';
 import { validateRequest } from './validateRequest';
 
-
 /*
 The payload of a webhook request contains an order object:
 https://developers.tickettailor.com/?shell#get-a-single-order
@@ -35,10 +34,8 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			console.log(
 				`Processing TT Webhook. SQS Message id is: ${sqsRecord.messageId}`,
 			);
-		
-			const validRequest = await validateRequest(
-				sqsRecord,
-			);
+
+			const validRequest = await validateRequest(sqsRecord);
 			if (validRequest) {
 				await processValidSqsRecord(sqsRecord);
 			} else {

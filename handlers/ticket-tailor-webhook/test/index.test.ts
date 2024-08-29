@@ -1,9 +1,12 @@
 import type { SQSEvent } from 'aws-lambda';
 import fetchMock from 'fetch-mock';
 import { handler } from '../src';
-import type { HmacKey} from '../src/validateRequest';
-import { maxValidTimeWindowSeconds  } from '../src/validateRequest';
-import { validSQSRecord, validSQSRecordTimestamp } from './validateRequest.test';
+import type { HmacKey } from '../src/validateRequest';
+import { maxValidTimeWindowSeconds } from '../src/validateRequest';
+import {
+	validSQSRecord,
+	validSQSRecordTimestamp,
+} from './validateRequest.test';
 
 const sqsEvent: SQSEvent = { Records: [validSQSRecord] };
 
@@ -16,7 +19,7 @@ jest.mock('@modules/secrets-manager/src/getSecret', () => ({
 }));
 
 const validEpochSeconds =
-Number(validSQSRecordTimestamp) + maxValidTimeWindowSeconds;
+	Number(validSQSRecordTimestamp) + maxValidTimeWindowSeconds;
 
 beforeEach(() => {
 	process.env.Stage = 'CODE';
@@ -24,15 +27,13 @@ beforeEach(() => {
 });
 
 test('userType 200', async () => {
-    jest
-    .useFakeTimers()
-    .setSystemTime(new Date(validEpochSeconds * 1000)); //Date works in Epoch milli
+	jest.useFakeTimers().setSystemTime(new Date(validEpochSeconds * 1000)); //Date works in Epoch milli
 	fetchMock.mock(
 		'https://idapi.code.dev-theguardian.com/user/type/test111@test111.com',
 		new Response(JSON.stringify({ userType: 'new' })),
 	);
 
-    fetchMock.mock(
+	fetchMock.mock(
 		'https://idapi.code.dev-theguardian.com/guest?accountVerificationEmail=true',
 		200,
 	);

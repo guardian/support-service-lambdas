@@ -3,7 +3,6 @@ import type { SQSRecord } from 'aws-lambda';
 import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
 
-
 export type HmacKey = {
 	secret: string;
 };
@@ -67,15 +66,13 @@ export const hasMatchingSignature = (
 
 export const maxValidTimeWindowSeconds = 300;
 
-export const validateRequest = async (
-	record: SQSRecord,
-): Promise<boolean> => {
+export const validateRequest = async (record: SQSRecord): Promise<boolean> => {
 	const validationSecret = await getSecretValue<HmacKey>(
-	`${stageFromEnvironment()}/TicketTailor/Webhook-validation`,
+		`${stageFromEnvironment()}/TicketTailor/Webhook-validation`,
 	);
 
 	const currentDateTime = new Date();
-	
+
 	const timestampAndSignature = getTimestampAndSignature(record);
 	if (!timestampAndSignature) {
 		return false;
