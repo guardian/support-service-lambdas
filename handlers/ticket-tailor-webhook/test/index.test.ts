@@ -34,27 +34,44 @@ test('calls create guest account for new email addresses', async () => {
 		new Response(JSON.stringify({ userType: 'new' })),
 	);
 
-	fetchMock.post(
-		'https://idapi.code.dev-theguardian.com/guest?accountVerificationEmail=true',
+	fetchMock.mock(
+		{
+			url: 'https://idapi.code.dev-theguardian.com/guest?accountVerificationEmail=true',
+			body: { primaryEmailAddress: emailAddress },
+			method: 'POST',
+		},
 		200,
 	);
-	// expect(fetchMock.calls('https://idapi.code.dev-theguardian.com/guest?accountVerificationEmail=true')).toMatch([])
+
 	await handler(sqsEvent);
+	expect(
+		fetchMock.called(
+			`https://idapi.code.dev-theguardian.com/user/type/${emailAddress}`,
+		),
+	).toBe(true);
+	expect(
+		fetchMock.called(
+			'https://idapi.code.dev-theguardian.com/guest?accountVerificationEmail=true',
+		),
+	).toBe(true);
 });
 
-// test('no call to create guest account for an existing email addresses', async () => {
-// 	jest.useFakeTimers().setSystemTime(new Date(validEpochSeconds * 1000)); //Date works in Epoch milli
-// 	fetchMock.mock(
-// 		`https://idapi.code.dev-theguardian.com/user/type/${emailAddress}`,
-// 		new Response(JSON.stringify({ userType: 'current' })),
-// 	);
+test('no call to create guest account for an existing email addresses', async () => {
+	jest.useFakeTimers().setSystemTime(new Date(validEpochSeconds * 1000)); //Date works in Epoch milli
+	fetchMock.mock(
+		`https://idapi.code.dev-theguardian.com/user/type/${emailAddress}`,
+		new Response(JSON.stringify({ userType: 'current' })),
+	);
 
-// 	fetchMock.post(
-// 		'https://idapi.code.dev-theguardian.com/guest?accountVerificationEmail=true',
-// 		200,
-// 	);
-
-//     fetchMock.done();
-//     expect(fetchMock.calls('https://idapi.code.dev-theguardian.com/guest?accountVerificationEmail=true')).toMatch('[]')
-// 	await handler(sqsEvent);
-// });
+	await handler(sqsEvent);
+	expect(
+		fetchMock.called(
+			`https://idapi.code.dev-theguardian.com/user/type/${emailAddress}`,
+		),
+	).toBe(true);
+	expect(
+		fetchMock.called(
+			'https://idapi.code.dev-theguardian.com/guest?accountVerificationEmail=true',
+		),
+	).toBe(false);
+});
