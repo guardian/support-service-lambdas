@@ -74,7 +74,7 @@ export const createGuestAccount = async (email: string): Promise<void> => {
 	console.log(`Create Guest Account response status: ${response.statusText}`);
 	if (!response.ok) {
 		throw new Error(
-			`Guest account failed with status ${response.statusText} }`,
+			`Guest account failed with status ${JSON.stringify(response)}.`,
 		);
 	}
 };
