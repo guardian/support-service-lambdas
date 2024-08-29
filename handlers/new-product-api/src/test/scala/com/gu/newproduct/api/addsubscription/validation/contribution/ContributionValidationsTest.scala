@@ -23,7 +23,7 @@ class ContributionValidationsTest extends AnyFlatSpec with Matchers {
   def amountLimitsFor(planId: PlanId, currency: Currency) = {
     planId shouldBe MonthlyContribution
     currency shouldBe GBP
-    AmountLimits(min = 100, max = 200)
+    AmountLimits.limitsFromMajorToMinorUnits(min = 1, max = 2)
   }
 
   def isValidStartDate(d: LocalDate): ValidationResult[Unit] =
@@ -40,7 +40,7 @@ class ContributionValidationsTest extends AnyFlatSpec with Matchers {
       testRequest.copy(amountMinorUnits = Some(AmountMinorUnits(99))),
       MonthlyContribution,
       GBP,
-    ) shouldBe Failed("amount must be at least 100")
+    ) shouldBe Failed("amount must be at least GBP 1")
   }
 
   it should "return error if amount is too large" in {
@@ -48,7 +48,7 @@ class ContributionValidationsTest extends AnyFlatSpec with Matchers {
       testRequest.copy(amountMinorUnits = Some(AmountMinorUnits(201))),
       MonthlyContribution,
       GBP,
-    ) shouldBe Failed("amount must not be more than 200")
+    ) shouldBe Failed("amount must not be more than GBP 2")
   }
   it should "return success if amount is within valid range" in {
     wiredValidator(
