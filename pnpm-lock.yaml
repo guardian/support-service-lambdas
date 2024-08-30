@@ -172,6 +172,9 @@ importers:
       '@aws-sdk/client-secrets-manager':
         specifier: ^3.629.0
         version: 3.632.0
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.143
