@@ -1,13 +1,16 @@
 import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
+import { z } from 'zod';
 
 export type IdApiToken = {
 	token: string;
 };
 
-export type UserTypeResponse = {
-	userType: string;
-};
+const UserTypeResponseSchema = z.object({
+	userType: z.string(),
+});
+
+type UserTypeResponse = z.infer<typeof UserTypeResponseSchema>;
 
 const userTypeEndpoint = `/user/type/`;
 const guestEndpoint = '/guest?accountVerificationEmail=true';
@@ -44,16 +47,19 @@ export const fetchUserType = async (
 		},
 	);
 	if (!userTypeResponse.ok) {
-		console.error(
-			`Get userType request failed with status: ${userTypeResponse.statusText}. Response body is: ${JSON.stringify(userTypeResponse.body)}`,
-		);
-		throw new Error(
-			`Get userType request failed with status: ${userTypeResponse.statusText}. Response body is: ${JSON.stringify(userTypeResponse.body)}`,
-		);
+		const errorMessage = `Get userType request failed with status: ${userTypeResponse.statusText}. Response body is: ${JSON.stringify(userTypeResponse.body)}`;
+		console.error(errorMessage);
+		throw new Error(errorMessage);
 	}
-	const parsedResponse = (await userTypeResponse.json()) as UserTypeResponse;
-	console.log(`Request ok. User type is: ${parsedResponse.userType}`);
-	return parsedResponse;
+	const responseJson = await userTypeResponse.json();
+	const validationResult = UserTypeResponseSchema.safeParse(responseJson);
+	if (!validationResult.success) {
+		const errorMessage = `UserType request returned invalid data. Response body is: ${JSON.stringify(userTypeResponse.body)}`;
+		console.error(errorMessage);
+		throw new Error(errorMessage);
+	}
+	console.log(`Request ok. User type is: ${validationResult.data.userType}`);
+	return validationResult.data;
 };
 
 export const createGuestAccount = async (email: string): Promise<void> => {
