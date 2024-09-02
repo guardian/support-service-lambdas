@@ -92,6 +92,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		// salesforce
 		'salesforce-disaster-recovery',
 		'salesforce-disaster-recovery-health-check',
+		'single-contribution-salesforce-writes',
 
 		// zuora
 		'invoicing-api',

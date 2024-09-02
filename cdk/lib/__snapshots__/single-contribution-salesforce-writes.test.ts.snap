@@ -97,13 +97,7 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 1`] =
                 {
                   "Ref": "AWS::AccountId",
                 },
-                ":",
-                {
-                  "Fn::GetAtt": [
-                    "singlecontributionsalesforcewritestopicD1E1FC97",
-                    "TopicName",
-                  ],
-                },
+                ":alarms-handler-topic-CODE",
               ],
             ],
           },
@@ -519,40 +513,6 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 1`] =
       },
       "Type": "AWS::SQS::QueuePolicy",
     },
-    "singlecontributionsalesforcewritestopicD1E1FC97": {
-      "Properties": {
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "TopicName": "single-contribution-salesforce-writes-topic-CODE",
-      },
-      "Type": "AWS::SNS::Topic",
-    },
-    "singlecontributionsalesforcewritestopicsupporterrevenueengineguardiancouk88BB94BA": {
-      "Properties": {
-        "Endpoint": "supporter.revenue.engine@guardian.co.uk",
-        "Protocol": "email",
-        "TopicArn": {
-          "Ref": "singlecontributionsalesforcewritestopicD1E1FC97",
-        },
-      },
-      "Type": "AWS::SNS::Subscription",
-    },
   },
 }
 `;
@@ -654,13 +614,7 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 2`] =
                 {
                   "Ref": "AWS::AccountId",
                 },
-                ":",
-                {
-                  "Fn::GetAtt": [
-                    "singlecontributionsalesforcewritestopicD1E1FC97",
-                    "TopicName",
-                  ],
-                },
+                ":alarms-handler-topic-PROD",
               ],
             ],
           },
@@ -1075,40 +1029,6 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 2`] =
         ],
       },
       "Type": "AWS::SQS::QueuePolicy",
-    },
-    "singlecontributionsalesforcewritestopicD1E1FC97": {
-      "Properties": {
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "TopicName": "single-contribution-salesforce-writes-topic-PROD",
-      },
-      "Type": "AWS::SNS::Topic",
-    },
-    "singlecontributionsalesforcewritestopicsupporterrevenueengineguardiancouk88BB94BA": {
-      "Properties": {
-        "Endpoint": "supporter.revenue.engine@guardian.co.uk",
-        "Protocol": "email",
-        "TopicArn": {
-          "Ref": "singlecontributionsalesforcewritestopicD1E1FC97",
-        },
-      },
-      "Type": "AWS::SNS::Subscription",
     },
   },
 }
