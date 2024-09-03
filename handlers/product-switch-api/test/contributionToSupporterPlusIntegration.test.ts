@@ -43,7 +43,7 @@ describe('product-switching behaviour', () => {
 			identityId,
 		);
 
-		const result = await preview(zuoraClient, switchInformation);
+		const result = await preview(zuoraClient, switchInformation, subscription);
 
 		expect(result.supporterPlusPurchaseAmount).toEqual(20);
 	});
@@ -65,7 +65,7 @@ describe('product-switching behaviour', () => {
 			identityId,
 		);
 
-		const result = await preview(zuoraClient, switchInformation);
+		const result = await preview(zuoraClient, switchInformation, subscription);
 
 		const expectedResult = {
 			supporterPlusPurchaseAmount: 120,

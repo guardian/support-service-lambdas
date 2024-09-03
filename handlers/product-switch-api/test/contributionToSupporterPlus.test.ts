@@ -91,6 +91,8 @@ test('startNewTerm is only true when the termStartDate is before today', () => {
 });
 
 test('preview amounts are correct', () => {
+	const subscription = zuoraSubscriptionSchema.parse(alreadySwitchedJson);
+
 	const apiResponse = {
 		success: true,
 		previewResult: {
@@ -172,19 +174,189 @@ test('preview amounts are correct', () => {
 	};
 
 	expect(
-		previewResponseFromZuoraResponse(apiResponse, {
-			supporterPlus: {
-				price: 95,
-				productRatePlanId: 'not_used',
-				subscriptionChargeId: '8ad08e1a858672180185880566606fad',
-				contributionChargeId: '8ad096ca858682bb0185881568385d73',
+		previewResponseFromZuoraResponse(
+			apiResponse,
+			{
+				supporterPlus: {
+					price: 95,
+					productRatePlanId: 'not_used',
+					subscriptionChargeId: '8ad08e1a858672180185880566606fad',
+					contributionChargeId: '8ad096ca858682bb0185881568385d73',
+				},
+				contribution: {
+					productRatePlanId: 'not_used',
+					chargeId: '2c92c0f85e2d19af015e3896e84d092e',
+				},
 			},
-			contribution: {
-				productRatePlanId: 'not_used',
-				chargeId: '2c92c0f85e2d19af015e3896e84d092e',
-			},
-		}),
+			subscription,
+		),
 	).toStrictEqual(expectedOutput);
+});
+
+/*
+This tests a scenario that occurs when the product switch occurs on the day that the payments would renew.
+ In this scenario there is nothing to refund, so the Invoice Item will not be created.
+ In such a situation, no error should be thrown and the refund amount returned output should be 0.
+ */
+test('Preview that does not contain invoice item for the given charge id, where the day-of-month of the target date equals that of the current date returns an amountWithoutTax value of 0.', () => {
+	const subscription = zuoraSubscriptionSchema.parse(alreadySwitchedJson);
+	jest.useFakeTimers().setSystemTime(new Date(subscription.termStartDate)); //Date works in Epoch milli
+
+	const apiResponse = {
+		success: true,
+		previewResult: {
+			invoices: [
+				{
+					amount: 63.2,
+					amountWithoutTax: 63.2,
+					taxAmount: 0.0,
+					targetDate: '2024-03-21',
+					invoiceItems: [
+						{
+							serviceStartDate: '2024-03-21',
+							serviceEndDate: '2025-03-20',
+							amountWithoutTax: 95.0,
+							taxAmount: 0.0,
+							chargeName: 'Subscription',
+							processingType: 'Charge',
+							productName: 'Supporter Plus',
+							productRatePlanChargeId: '8ad08e1a858672180185880566606fad',
+							unitPrice: 95.0,
+							subscriptionNumber: 'A-S00504165',
+							additionalInfo: {
+								quantity: 1,
+								unitOfMeasure: '',
+								numberOfDeliveries: 0.0,
+							},
+						},
+						{
+							serviceStartDate: '2024-03-21',
+							serviceEndDate: '2025-03-20',
+							amountWithoutTax: 0.0,
+							taxAmount: 0.0,
+							chargeDescription: '',
+							chargeName: 'Contribution',
+							chargeNumber: null,
+							processingType: 'Charge',
+							productName: 'Supporter Plus',
+							productRatePlanChargeId: '8ad096ca858682bb0185881568385d73',
+							unitPrice: 0.0,
+							subscriptionNumber: 'A-S00504165',
+							orderLineItemNumber: null,
+							additionalInfo: {
+								quantity: 1,
+								unitOfMeasure: '',
+								numberOfDeliveries: 0.0,
+							},
+						},
+					],
+				},
+			],
+		},
+	};
+
+	expect(
+		previewResponseFromZuoraResponse(
+			apiResponse,
+			{
+				supporterPlus: {
+					price: 95,
+					productRatePlanId: 'not_used',
+					subscriptionChargeId: '8ad08e1a858672180185880566606fad',
+					contributionChargeId: '8ad096ca858682bb0185881568385d73',
+				},
+				contribution: {
+					productRatePlanId: 'not_used',
+					chargeId: '2c92c0f85e2d19af015e3896e84d092e',
+				},
+			},
+			subscription,
+		).contributionRefundAmount,
+	).toBe(0);
+});
+
+test('Preview that does not contain invoice item for the given charge id, where the date-of-month of the target date does not equal that of the current date throws an error', () => {
+	const subscription = zuoraSubscriptionSchema.parse(alreadySwitchedJson);
+	const millisecondsInADay = 86400000;
+	jest
+		.useFakeTimers()
+		.setSystemTime(
+			new Date(subscription.termStartDate).valueOf() - millisecondsInADay,
+		); //Date works in Epoch milli
+
+	const apiResponse = {
+		success: true,
+		previewResult: {
+			invoices: [
+				{
+					amount: 63.2,
+					amountWithoutTax: 63.2,
+					taxAmount: 0.0,
+					targetDate: '2024-03-21',
+					invoiceItems: [
+						{
+							serviceStartDate: '2024-03-21',
+							serviceEndDate: '2025-03-20',
+							amountWithoutTax: 95.0,
+							taxAmount: 0.0,
+							chargeName: 'Subscription',
+							processingType: 'Charge',
+							productName: 'Supporter Plus',
+							productRatePlanChargeId: '8ad08e1a858672180185880566606fad',
+							unitPrice: 95.0,
+							subscriptionNumber: 'A-S00504165',
+							additionalInfo: {
+								quantity: 1,
+								unitOfMeasure: '',
+								numberOfDeliveries: 0.0,
+							},
+						},
+						{
+							serviceStartDate: '2024-03-21',
+							serviceEndDate: '2025-03-20',
+							amountWithoutTax: 0.0,
+							taxAmount: 0.0,
+							chargeDescription: '',
+							chargeName: 'Contribution',
+							chargeNumber: null,
+							processingType: 'Charge',
+							productName: 'Supporter Plus',
+							productRatePlanChargeId: '8ad096ca858682bb0185881568385d73',
+							unitPrice: 0.0,
+							subscriptionNumber: 'A-S00504165',
+							orderLineItemNumber: null,
+							additionalInfo: {
+								quantity: 1,
+								unitOfMeasure: '',
+								numberOfDeliveries: 0.0,
+							},
+						},
+					],
+				},
+			],
+		},
+	};
+
+	expect(function () {
+		previewResponseFromZuoraResponse(
+			apiResponse,
+			{
+				supporterPlus: {
+					price: 95,
+					productRatePlanId: 'not_used',
+					subscriptionChargeId: '8ad08e1a858672180185880566606fad',
+					contributionChargeId: '8ad096ca858682bb0185881568385d73',
+				},
+				contribution: {
+					productRatePlanId: 'not_used',
+					chargeId: '2c92c0f85e2d19af015e3896e84d092e',
+				},
+			},
+			subscription,
+		).contributionRefundAmount;
+	}).toThrow(
+		Error('No contribution refund amount found in the preview response'),
+	);
 });
 
 test('Email message body is correct', () => {

@@ -7,6 +7,7 @@ import type {
 	PreviewOrderRequest,
 } from '@modules/zuora/orders';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import { removePendingUpdateAmendments } from './amendments';
@@ -55,21 +56,51 @@ export const switchToSupporterPlus = async (
 	};
 };
 
-export const previewResponseFromZuoraResponse = (
+const getContributionRefundAmount = (
 	zuoraResponse: ZuoraPreviewResponse,
 	catalogInformation: CatalogInformation,
-): PreviewResponse => {
+	termStartDate: Date,
+): number => {
+	const termStartDateDayOfMonth = termStartDate.getUTCDate();
+	const dayOfMonthToday = new Date().getUTCDate();
+
 	const invoice = getIfDefined(
 		zuoraResponse.previewResult?.invoices[0],
 		'No invoice found in the preview response',
 	);
-	const contributionRefundAmount = getIfDefined(
-		invoice.invoiceItems.find(
-			(invoiceItem) =>
-				invoiceItem.productRatePlanChargeId ===
-				catalogInformation.contribution.chargeId,
-		)?.amountWithoutTax,
-		'No contribution refund amount found in the preview response',
+
+	const contributionRefundAmount = invoice.invoiceItems.find(
+		(invoiceItem) =>
+			invoiceItem.productRatePlanChargeId ===
+			catalogInformation.contribution.chargeId,
+	)?.amountWithoutTax;
+
+	if (!contributionRefundAmount && termStartDateDayOfMonth != dayOfMonthToday) {
+		throw Error('No contribution refund amount found in the preview response');
+	}
+
+	return contributionRefundAmount ? contributionRefundAmount : 0;
+};
+
+export const previewResponseFromZuoraResponse = (
+	zuoraResponse: ZuoraPreviewResponse,
+	catalogInformation: CatalogInformation,
+	subscription: ZuoraSubscription,
+): PreviewResponse => {
+	const termStartDate = getIfDefined(
+		subscription.termStartDate,
+		'Unable to find termStartDate for subscription',
+	);
+
+	const invoice = getIfDefined(
+		zuoraResponse.previewResult?.invoices[0],
+		'No invoice found in the preview response',
+	);
+
+	const contributionRefundAmount = getContributionRefundAmount(
+		zuoraResponse,
+		catalogInformation,
+		termStartDate,
 	);
 
 	const supporterPlusSubscriptionInvoiceItem = getIfDefined(
@@ -104,6 +135,7 @@ export const previewResponseFromZuoraResponse = (
 export const preview = async (
 	zuoraClient: ZuoraClient,
 	productSwitchInformation: SwitchInformation,
+	subscription: ZuoraSubscription,
 ): Promise<PreviewResponse> => {
 	const requestBody: PreviewOrderRequest = buildPreviewRequestBody(
 		dayjs(),
@@ -118,6 +150,7 @@ export const preview = async (
 		return previewResponseFromZuoraResponse(
 			zuoraResponse,
 			productSwitchInformation.catalog,
+			subscription,
 		);
 	} else {
 		throw new Error(zuoraResponse.reasons?.[0]?.message ?? 'Unknown error');
