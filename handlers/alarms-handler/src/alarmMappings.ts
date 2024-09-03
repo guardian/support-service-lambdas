@@ -79,9 +79,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 		// support-service-lambdas
 		'digital-voucher-suspension-processor',
 		'metric-push-api',
-
-		// other
-		'canonical-config',
 	],
 	PLATFORM: [
 		// fulfilment
@@ -98,10 +95,13 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'invoicing-api',
 		'zuora-oracle-fusion',
 
-		//data retention
+		// data retention
 		'identity-retention',
 		'zuora-retention', //https://github.com/guardian/zuora-retention
 		'zuora-salesforce-link-remover',
+
+		// finance
+		'canonical-config',
 	],
 };
 
