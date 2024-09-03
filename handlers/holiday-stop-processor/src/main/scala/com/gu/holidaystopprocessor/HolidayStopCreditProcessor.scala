@@ -14,6 +14,8 @@ import sttp.client3.{Identity, SttpBackend}
 
 import java.time.LocalDate
 import scala.collection.parallel.CollectionConverters.ImmutableSeqIsParallelizable
+import scala.collection.parallel.ForkJoinTaskSupport
+import scala.collection.parallel.mutable.ParArray
 import scala.util.Try
 
 object HolidayStopCreditProcessor {
@@ -38,7 +40,7 @@ object HolidayStopCreditProcessor {
       fetchFromS3: S3Location => Try[String],
   ): List[ProcessResult[ZuoraHolidayCreditAddResult]] = {
 
-    val allProcessableProductTypes = List(
+    val allProcessableProductTypes = ParArray(
       NewspaperNationalDelivery,
       NewspaperHomeDelivery,
       GuardianWeekly,
@@ -49,10 +51,13 @@ object HolidayStopCreditProcessor {
 
     val productTypesToProcess = productTypeAndStopDateOverride match {
       case Some(ProductTypeAndStopDate(productType, _)) =>
-        List(productType)
+        ParArray(productType)
       case None =>
         allProcessableProductTypes
     }
+
+    val forkJoinPool = new java.util.concurrent.ForkJoinPool(3)
+    productTypesToProcess.tasksupport = new ForkJoinTaskSupport(forkJoinPool)
 
     Zuora.accessTokenGetResponse(config.zuoraConfig, backend) match {
       case Left(err) =>
@@ -61,7 +66,7 @@ object HolidayStopCreditProcessor {
       case Right(zuoraAccessToken) =>
         val stage = Stage()
         val fulfilmentDatesFetcher = FulfilmentDatesFetcher(fetchFromS3, stage)
-        productTypesToProcess.par.map { productType =>
+        productTypesToProcess.map { productType =>
           {
 
             def updateToApply(
