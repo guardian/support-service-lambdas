@@ -56,7 +56,7 @@ object HolidayStopCreditProcessor {
         allProcessableProductTypes
     }
 
-    val forkJoinPool = new java.util.concurrent.ForkJoinPool(allProcessableProductTypes.size)
+    val forkJoinPool = new java.util.concurrent.ForkJoinPool(productTypesToProcess.size)
     productTypesToProcess.tasksupport = new ForkJoinTaskSupport(forkJoinPool)
 
     Zuora.accessTokenGetResponse(config.zuoraConfig, backend) match {
