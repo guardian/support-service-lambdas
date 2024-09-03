@@ -12,9 +12,8 @@ import com.gu.zuora.ZuoraProductTypes._
 import com.gu.zuora.subscription.{OverallFailure, Subscription, SubscriptionUpdate, ZuoraAccount}
 import sttp.client3.{Identity, SttpBackend}
 
-import scala.collection.parallel.CollectionConverters._
 import java.time.LocalDate
-import scala.collection.parallel.ParSeq
+import scala.collection.parallel.CollectionConverters.ImmutableSeqIsParallelizable
 import scala.util.Try
 
 object HolidayStopCreditProcessor {

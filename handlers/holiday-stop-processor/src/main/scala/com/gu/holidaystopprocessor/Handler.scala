@@ -56,7 +56,7 @@ object Handler extends Lambda[Option[ProductTypeAndStopDate], List[ZuoraHolidayC
             GetFromS3.fetchString,
           ),
         )
-        _ <- RIO.foreachPar_(results)(result => RIO.effect(ProcessResult.log(result)))
+        _ <- RIO.foreach_(results)(result => RIO.effect(ProcessResult.log(result)))
         zuoraWriteResults <- results.flatMap(_.overallFailure.toList) match {
           case Nil =>
             val (_, successfulZuoraResponses) = results.flatMap(_.creditResults).separate
