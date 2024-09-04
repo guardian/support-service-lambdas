@@ -2,11 +2,9 @@ import { sendEmail } from '@modules/email/email';
 import { ValidationError } from '@modules/errors';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
-import type {
-	APIGatewayProxyEvent,
-	APIGatewayProxyResult,
-	Handler,
-} from 'aws-lambda';
+import type { FetchInterface } from '@modules/zuora/requestLogger';
+import { RequestLogger } from '@modules/zuora/requestLogger';
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import dayjs from 'dayjs';
 import {
 	applyDiscountEndpoint,
@@ -18,20 +16,28 @@ import type {
 	EligibilityCheckResponseBody,
 } from './responseSchema';
 
-const stage = process.env.STAGE as Stage;
-export const handler: Handler = async (
+const stage = process.env.STAGE as Stage | undefined;
+export const handler: (
+	event: APIGatewayProxyEvent,
+) => Promise<APIGatewayProxyResult> = async (
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
 	console.log(`Input is ${JSON.stringify(event)}`);
-	const response = await routeRequest(event);
+	const requestLogger = new RequestLogger(stage ?? 'DEV');
+	requestLogger.setRequest(JSON.stringify(event));
+	const response = await routeRequest(event, requestLogger);
 	console.log(`Response is ${JSON.stringify(response)}`);
+	await requestLogger.setResponse(response);
 	return response;
 };
 
 // this is a type safe version of stringify
 const stringify = <T>(t: T): string => JSON.stringify(t);
 
-const routeRequest = async (event: APIGatewayProxyEvent) => {
+export const routeRequest = async (
+	event: APIGatewayProxyEvent,
+	fetchInterface: FetchInterface,
+): Promise<APIGatewayProxyResult> => {
 	try {
 		switch (true) {
 			case event.path === '/apply-discount' && event.httpMethod === 'POST': {
@@ -40,13 +46,14 @@ const routeRequest = async (event: APIGatewayProxyEvent) => {
 					JSON.parse(getIfDefined(event.body, 'No body was provided')),
 				).subscriptionNumber;
 				const { response, emailPayload } = await applyDiscountEndpoint(
-					stage,
+					stage ?? 'CODE',
 					event.headers,
 					subscriptionNumber,
 					dayjs(),
+					fetchInterface,
 				);
 				if (emailPayload) {
-					await sendEmail(stage, emailPayload);
+					await sendEmail(stage ?? 'CODE', emailPayload);
 				}
 				return {
 					body: stringify<ApplyDiscountResponseBody>(response),
@@ -59,10 +66,11 @@ const routeRequest = async (event: APIGatewayProxyEvent) => {
 					JSON.parse(getIfDefined(event.body, 'No body was provided')),
 				).subscriptionNumber;
 				const result = await previewDiscountEndpoint(
-					stage,
+					stage ?? 'CODE',
 					event.headers,
 					subscriptionNumber,
 					dayjs(),
+					fetchInterface,
 				);
 				return {
 					body: stringify<EligibilityCheckResponseBody>(result),

@@ -13,6 +13,7 @@ import {
 import { zuoraDateFormat } from '@modules/zuora/common';
 import { getAccount } from '@modules/zuora/getAccount';
 import { getSubscription } from '@modules/zuora/getSubscription';
+import type { FetchInterface } from '@modules/zuora/requestLogger';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type {
 	ZuoraAccount,
@@ -30,8 +31,10 @@ export const previewDiscountEndpoint = async (
 	headers: APIGatewayProxyEventHeaders,
 	subscriptionNumber: string,
 	today: dayjs.Dayjs,
+	fetchInterface: FetchInterface,
 ) => {
-	const zuoraClient = await ZuoraClient.create(stage);
+	console.log('BBBBB');
+	const zuoraClient = await ZuoraClient.create(stage, fetchInterface);
 
 	const { subscription, account } = await getSubscriptionIfBelongsToIdentityId(
 		headers,
@@ -95,8 +98,9 @@ export const applyDiscountEndpoint = async (
 	headers: APIGatewayProxyEventHeaders,
 	subscriptionNumber: string,
 	today: dayjs.Dayjs,
+	fetchInterface: FetchInterface,
 ) => {
-	const zuoraClient = await ZuoraClient.create(stage);
+	const zuoraClient = await ZuoraClient.create(stage, fetchInterface);
 
 	const { subscription, account } = await getSubscriptionIfBelongsToIdentityId(
 		headers,

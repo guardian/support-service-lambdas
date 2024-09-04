@@ -13,6 +13,7 @@ import {
 } from './helpers';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import { validationRequirements } from '../src/eligibilityChecker';
+import { PassThrough } from '@modules/zuora/requestLogger';
 
 const stage: Stage = 'CODE';
 const validIdentityId = '200175946';
@@ -30,6 +31,7 @@ test("Subscriptions which don't belong to the provided identity Id are not eligi
 			{ 'x-identity-id': invalidIdentityId },
 			subscriptionNumber,
 			dayjs(),
+			new PassThrough(),
 		);
 	}).rejects.toThrow('does not belong to identity ID');
 
@@ -54,6 +56,7 @@ test('Subscriptions on the old price are not eligible', async () => {
 			{ 'x-identity-id': validIdentityId },
 			subscriptionNumber,
 			dayjs(),
+			new PassThrough(),
 		);
 	}).rejects.toThrow(validationRequirements.atLeastCatalogPrice);
 
@@ -84,6 +87,7 @@ test('Subscriptions on the new price are eligible', async () => {
 		{ 'x-identity-id': validIdentityId },
 		subscriptionNumber,
 		dayjs(),
+		new PassThrough(),
 	);
 	const eligibilityCheckResult = result as EligibilityCheckResponseBody;
 
@@ -125,6 +129,7 @@ test('Supporter Plus subscriptions are eligible', async () => {
 		{ 'x-identity-id': validIdentityId },
 		subscriptionNumber,
 		today.add(2, 'months').add(1, 'day'),
+		new PassThrough(),
 	);
 	const eligibilityCheckResult = result as EligibilityCheckResponseBody;
 
