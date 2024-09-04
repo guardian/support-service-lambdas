@@ -7,6 +7,12 @@ import {
 } from '@aws-sdk/client-s3';
 import { awsConfig } from '@modules/aws/config';
 import { z } from 'zod';
+import { HttpHandler } from '@smithy/protocol-http';
+import {
+	NodeHttpHandler,
+	NodeHttpHandlerOptions,
+} from '@smithy/node-http-handler';
+import { Provider } from '@smithy/types';
 
 const client = new S3Client(awsConfig);
 
@@ -40,8 +46,36 @@ async function executeUnderlying(input: string, init: RequestData) {
 	return responseJson;
 }
 
+function blockedCreate(
+	instanceOrOptions?:
+		| HttpHandler<any>
+		| NodeHttpHandlerOptions
+		| Provider<NodeHttpHandlerOptions | void>,
+): NodeHttpHandler | HttpHandler<any> {
+	console.log('EEE Recording...');
+	if (typeof (instanceOrOptions as any)?.handle === 'function') {
+		// is already an instance of HttpHandler.
+		return instanceOrOptions as HttpHandler<any>;
+	}
+	// input is ctor options or undefined.
+	return new NodeHttpHandler(instanceOrOptions as NodeHttpHandlerOptions);
+}
+
 export class RequestLogger implements FetchInterface {
-	constructor(private stage: Stage | 'DEV') {}
+	static requestHandler: (
+		instanceOrOptions?:
+			| HttpHandler<any>
+			| NodeHttpHandlerOptions
+			| Provider<NodeHttpHandlerOptions | void>,
+	) => NodeHttpHandler | HttpHandler<any> = ({
+const aaa = NodeHttpHandler.create;
+		// make sure someone doesn't accidentally call AWS
+		NodeHttpHandler.create = blockedCreate;
+		return NodeHttpHandler.create
+	});
+	constructor(private stage: Stage | 'DEV') {
+		console.log('a1:', NodeHttpHandler.create);
+	}
 
 	outgoingFetch: LogRecord[] = [];
 	request?: string;

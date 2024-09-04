@@ -10,6 +10,9 @@
   "dependencies": {
     "@aws-sdk/client-s3": "3.590.0",
     "@aws-sdk/client-secrets-manager": "3.590.0",
+    "@smithy/node-http-handler": "^3.1.4",
+    "@smithy/protocol-http": "^4.1.0",
+    "@smithy/types": "^3.3.0",
     "dayjs": "^1.11.12",
     "zod": "^3.23.8"
   }

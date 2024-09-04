@@ -33,6 +33,7 @@ export const previewDiscountEndpoint = async (
 	today: dayjs.Dayjs,
 	fetchInterface: FetchInterface,
 ) => {
+	console.log('BBBBB');
 	const zuoraClient = await ZuoraClient.create(stage, fetchInterface);
 
 	const { subscription, account } = await getSubscriptionIfBelongsToIdentityId(
