@@ -13,10 +13,8 @@ case class ProcessResult[ResultType <: ZuoraCreditAddResult](
 object ProcessResult extends LazyLogging {
   def log[ResultType <: ZuoraCreditAddResult](processResult: ProcessResult[ResultType]): Unit = {
     import processResult._
-    logger.info(s"${creditsToApply.size} credits to apply:")
-    resultsToExport foreach (_.logDiscrepancies())
     creditsToApply.foreach(request => logger.info(request.toString))
-    creditResults foreach {
+    creditResults.foreach {
       case Left(failure) => logger.error(failure.reason)
       case Right(response) => logger.info(response.toString)
     }

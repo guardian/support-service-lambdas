@@ -1,6 +1,5 @@
 package com.gu.holidaystopprocessor
 
-import java.time.LocalDate
 import cats.syntax.all._
 import com.amazonaws.services.lambda.runtime.{Context, LambdaRuntime}
 import com.gu.creditprocessor.ProcessResult
@@ -8,15 +7,16 @@ import com.gu.effects.GetFromS3
 import com.gu.holiday_stops.{Configuration, ConfigurationLive}
 import com.gu.holidaystopprocessor.HolidayStopCreditProcessor.{ProductTypeAndStopDate, processAllProducts}
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
-import sttp.client3.HttpURLConnectionBackend
 import io.circe.generic.auto._
 import io.github.mkotsur.aws.handler.Lambda
 import io.github.mkotsur.aws.handler.Lambda._
+import sttp.client3.HttpURLConnectionBackend
 import zio._
 import zio.console.Console
 
 import java.io.{IOException, OutputStream, PrintStream}
 import java.lang.{System => JavaSystem}
+import java.time.LocalDate
 
 object Handler extends Lambda[Option[ProductTypeAndStopDate], List[ZuoraHolidayCreditAddResult]] with zio.App {
 
