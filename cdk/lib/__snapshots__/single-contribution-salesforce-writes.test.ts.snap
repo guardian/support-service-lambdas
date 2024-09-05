@@ -164,7 +164,7 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 1`] =
             "Arn",
           ],
         },
-        "Runtime": "java21",
+        "Runtime": "java11",
         "Tags": [
           {
             "Key": "App",
@@ -681,7 +681,7 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 2`] =
             "Arn",
           ],
         },
-        "Runtime": "java21",
+        "Runtime": "java11",
         "Tags": [
           {
             "Key": "App",
