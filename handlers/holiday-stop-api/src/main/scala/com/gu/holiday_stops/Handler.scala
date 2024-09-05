@@ -14,15 +14,16 @@ import com.gu.salesforce.holiday_stops.{SalesforceHolidayStopRequest, Salesforce
 import com.gu.salesforce.{Contact, SalesforceClient, SalesforceHandlerSupport}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
-import com.gu.util.apigateway.ApiGatewayResponse.badRequest
+import com.gu.util.apigateway.ApiGatewayResponse.{badRequest, internalServerError}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config._
+import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker.BodyAsString
-import com.gu.util.resthttp.Types.ClientFailure
+import com.gu.util.resthttp.Types.{ClientFailure, CustomError}
 import com.gu.util.resthttp.{HttpOp, JsonHttp}
 import com.gu.zuora.subscription._
 import com.gu.zuora.{AccessToken, Zuora}
@@ -240,6 +241,19 @@ object Handler extends Logging {
     ApiGatewayResponse.messageResponse("500", error.message)
   }
 
+  implicit class SFToApiGatewayOp[A](theEither: Either[ClientFailure, A]) {
+    def sfTokenHandlingToApiGatewayOp(action: String): ApiGatewayOp[A] =
+      theEither match {
+        case Right(success) => ContinueProcessing(success)
+        case Left(error @ CustomError(message)) if message.startsWith("INVALID_OPERATION_WITH_EXPIRED_PASSWORD") =>
+          logger.error(s"SF token was not valid - returning 400 $action: $error")
+          ReturnWithResponse(badRequest("SF credentials could not be used"))
+        case Left(error) =>
+          logger.error(s"Failed to $action: $error")
+          ReturnWithResponse(internalServerError(s"Failed to execute lambda - unable to $action"))
+      }
+  }
+
   case class PotentialHolidayStopsPathParams(subscriptionName: SubscriptionName)
 
   case class PotentialHolidayStopsQueryParams(
@@ -358,7 +372,7 @@ object Handler extends Logging {
         Some(subName),
         Some(MutableCalendar.today.minusMonths(6)),
       ).toDisjunction
-        .toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
+        .sfTokenHandlingToApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
       accessToken <- getAccessToken()
         .toApiGatewayOp(s"get zuora access token")
       subscription <- getSubscription(accessToken, subName)
@@ -420,9 +434,10 @@ object Handler extends Logging {
     (for {
       requestBody <- requestBodyOp
       contact <- extractContactFromHeaders(req.headers)
-      maybeMatchingSfSub <- verifyContactOwnsSubOp(requestBody.subscriptionName, contact).toDisjunction.toApiGatewayOp(
-        s"fetching subscriptions for contact $contact",
-      )
+      maybeMatchingSfSub <- verifyContactOwnsSubOp(requestBody.subscriptionName, contact).toDisjunction
+        .sfTokenHandlingToApiGatewayOp(
+          s"fetching subscriptions for contact $contact",
+        )
       matchingSfSub <- maybeMatchingSfSub.toApiGatewayOp(
         s"contact $contact does not own ${requestBody.subscriptionName.value}",
       )
@@ -472,7 +487,7 @@ object Handler extends Logging {
         .toApiGatewayOp("effectiveCancellationDate query string parameter is required")
       contact <- extractContactFromHeaders(req.headers)
       holidayStopRequests <- lookupOpHolidayStopsOp(contact, Some(pathParams.subscriptionName), None).toDisjunction
-        .toApiGatewayOp(
+        .sfTokenHandlingToApiGatewayOp(
           s"lookup Holiday Stop Requests for contact $contact and subscription ${pathParams.subscriptionName}",
         )
       holidayStopRequestDetailToUpdate = HolidayStopSubscriptionCancellation(
@@ -508,7 +523,7 @@ object Handler extends Logging {
         .toApiGatewayOp("effectiveCancellationDate query string parameter is required")
       contact <- extractContactFromHeaders(req.headers)
       holidayStopRequests <- lookupOpHolidayStopsOp(contact, Some(pathParams.subscriptionName), None).toDisjunction
-        .toApiGatewayOp(
+        .sfTokenHandlingToApiGatewayOp(
           s"lookup Holiday Stop Requests for contact $contact and subscription ${pathParams.subscriptionName}",
         )
       holidayStopRequestDetailToRefund = HolidayStopSubscriptionCancellation(
@@ -542,7 +557,7 @@ object Handler extends Logging {
       contact <- extractContactFromHeaders(req.headers)
       pathParams <- req.pathParamsAsCaseClass[SpecificHolidayStopRequestPathParams]()
       allExisting <- lookupOp(contact, Some(pathParams.subscriptionName), None).toDisjunction
-        .toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
+        .sfTokenHandlingToApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
       existingPublicationsThatWereToBeStopped <- allExisting
         .find(_.Id == pathParams.holidayStopRequestId)
         .flatMap(_.Holiday_Stop_Request_Detail__r.map(_.records))
@@ -605,7 +620,7 @@ object Handler extends Logging {
     (for {
       contact <- extractContactFromHeaders(req.headers)
       pathParams <- req.pathParamsAsCaseClass[SpecificHolidayStopRequestPathParams]()
-      existingForUser <- lookupOp(contact, None, None).toDisjunction.toApiGatewayOp(
+      existingForUser <- lookupOp(contact, None, None).toDisjunction.sfTokenHandlingToApiGatewayOp(
         s"lookup Holiday Stop Requests for contact $contact",
       )
       hsr <- existingForUser
