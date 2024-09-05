@@ -81,3 +81,10 @@ As soon as we recognise a T3 sub however we then treat the holiday stop as a Gua
 
 We also need to add T3 to the list of all processable product types which the HolidayStopProcessor uses to query
 Salesforce for holiday stop records as this query filters on the name of the Zuora product.
+
+
+## August 2024 Scaling Issues
+
+In August 2024 some issues around scale became apparent (see https://docs.google.com/document/d/1yw21fs1sW41qrtQNdOhlPbclXdsi4zvZV4W8iIl_GIE/edit#heading=h.p2ta3sj6yk1r)
+After some investigation and discussion, the following document was produced with options for improvement:
+https://docs.google.com/document/d/1ac4UF2Pe3Kh9KiOdpvj8-XUlPxgNFEnPqW2UL1-02ns/edit
