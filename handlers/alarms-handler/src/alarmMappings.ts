@@ -29,7 +29,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'contributions-ticker-calculator',
 		'digital-voucher-api',
 		'dotcom-components',
-		'fulfilment-date-calculator',
 		...sharedMobilePurchasesApps,
 		'new-product-api',
 		'price-migration-engine-state-machine',
@@ -85,6 +84,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'failed-national-delivery-processor',
 		'fulfilment-lambdas',
 		'national-delivery-fulfilment',
+		'fulfilment-date-calculator',
 
 		// salesforce
 		'salesforce-disaster-recovery',
