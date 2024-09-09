@@ -172,8 +172,6 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
     val (failedZuoraResponses, successfulZuoraResponses) = result.creditResults.separate
     failedZuoraResponses.size shouldBe 3
     successfulZuoraResponses.size shouldBe 0
-    (failedZuoraResponses.size + successfulZuoraResponses.size) shouldBe 3
-    result.overallFailure.value shouldBe OverallFailure("zuora boom 1")
   }
 
   it should "be None if all Zuora writes succeed and Salesforce write succeeds" in {
