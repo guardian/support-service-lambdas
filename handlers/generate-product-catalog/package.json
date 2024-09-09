@@ -12,6 +12,6 @@
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.142",
-    "@aws-sdk/client-s3": "3.451.0"
+    "@aws-sdk/client-s3": "3.645.0"
   }
 }
