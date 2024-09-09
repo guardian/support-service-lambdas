@@ -2,10 +2,13 @@ import { createHmac, timingSafeEqual } from 'crypto';
 import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
 import type { SQSRecord } from 'aws-lambda';
+import {putMetric} from "./cloudwatch";
 
 export type HmacKey = {
 	secret: string;
 };
+
+const validationFalureMetricName = 'ticket-tailor-webhook-validation-failure'
 
 export const getTimestampAndSignature = (
 	record: SQSRecord,
@@ -14,6 +17,7 @@ export const getTimestampAndSignature = (
 		record.messageAttributes['tickettailor-webhook-signature']?.stringValue;
 
 	if (!(typeof signatureWithTs === 'string')) {
+		await putMetric('ticket-tailor-webhook-validation-failure');
 		console.error(
 			'No valid value found for MessgeAttritbute: tickettailor-webhook-signature on incoming request.',
 		);
@@ -24,6 +28,7 @@ export const getTimestampAndSignature = (
 	const signature = signatureWithTs.split(',')[1]?.split('v1=')[1];
 
 	if (!(timestamp && signature) || isNaN(Number(timestamp))) {
+		await putMetric('ticket-tailor-webhook-validation-failure');
 		console.error(
 			`Invalid formatting of MessageAttribute 'tickettailor-webhook-signature': ${signatureWithTs}. Missing or incorrectly formatted timestamp or signature.`,
 		);
