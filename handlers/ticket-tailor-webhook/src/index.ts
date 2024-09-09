@@ -40,7 +40,6 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			if (validRequest) {
 				await processValidSqsRecord(sqsRecord);
 			} else {
-				await putMetric('ticket-tailor-webhook-validation-failure');
 				console.error('Request failed validation. Processing terminated.');
 				return;
 			}
