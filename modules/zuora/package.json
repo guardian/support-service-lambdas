@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.451.0",
-    "@aws-sdk/client-secrets-manager": "3.451.0",
+    "@aws-sdk/client-secrets-manager": "3.645.0",
     "dayjs": "^1.11.12",
     "zod": "^3.23.8"
   }
