@@ -109,28 +109,35 @@ object Processor {
         val alreadyActionedCredits = creditRequestsFromSalesforce.flatMap(_.chargeCode).distinct
         logger.info(s"Processing ${creditRequests.length} credits in Zuora ...")
 
-        val allZuoraCreditResponses =
+        val bySub =
           creditRequests
             .groupBy(_.subscriptionName)
-            .flatMap { case (_, requests) =>
-              val parReqs = requests.par
-              val forkJoinPool = new java.util.concurrent.ForkJoinPool(4)
-              parReqs.tasksupport = new ForkJoinTaskSupport(forkJoinPool)
-              val processed = parReqs.map(
-                addCreditToSubscription(
-                  creditProduct,
-                  getSubscription,
-                  getAccount,
-                  updateToApply,
-                  updateSubscription,
-                  resultOfZuoraCreditAdd,
-                  getNextInvoiceDate,
-                ),
-              )
-              forkJoinPool.shutdown()
-              processed
-            }
+            .values
             .toList
+            .par
+
+        val requestConcurrency = 10
+        /*https://developer.zuora.com/docs/guides/rate-limits/#concurrent-request-limits
+        Zuora supports up to 40 concurrent requests until migration to orders API which supports 200
+         */
+        val forkJoinPool = new java.util.concurrent.ForkJoinPool(requestConcurrency)
+
+        bySub.tasksupport = new ForkJoinTaskSupport(forkJoinPool)
+        val allZuoraCreditResponses = bySub.flatMap { requests =>
+          requests.map(
+            addCreditToSubscription(
+              creditProduct,
+              getSubscription,
+              getAccount,
+              updateToApply,
+              updateSubscription,
+              resultOfZuoraCreditAdd,
+              getNextInvoiceDate,
+            ),
+          )
+        }.toList
+
+        forkJoinPool.shutdown()
 
         val (failedZuoraResponses, successfulZuoraResponses) = allZuoraCreditResponses.separate
         val notAlreadyActionedCredits =

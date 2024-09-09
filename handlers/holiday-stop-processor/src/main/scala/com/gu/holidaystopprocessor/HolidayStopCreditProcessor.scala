@@ -39,7 +39,7 @@ object HolidayStopCreditProcessor {
       fetchFromS3: S3Location => Try[String],
   ): List[ProcessResult[ZuoraHolidayCreditAddResult]] = {
 
-    val allProcessableProductTypes = ParArray(
+    val allProcessableProductTypes = List(
       NewspaperNationalDelivery,
       NewspaperHomeDelivery,
       GuardianWeekly,
@@ -50,13 +50,10 @@ object HolidayStopCreditProcessor {
 
     val productTypesToProcess = productTypeAndStopDateOverride match {
       case Some(ProductTypeAndStopDate(productType, _)) =>
-        ParArray(productType)
+        List(productType)
       case None =>
         allProcessableProductTypes
     }
-
-    val forkJoinPool = new java.util.concurrent.ForkJoinPool(productTypesToProcess.size)
-    productTypesToProcess.tasksupport = new ForkJoinTaskSupport(forkJoinPool)
 
     Zuora.accessTokenGetResponse(config.zuoraConfig, backend) match {
       case Left(err) =>
@@ -65,7 +62,7 @@ object HolidayStopCreditProcessor {
       case Right(zuoraAccessToken) =>
         val stage = Stage()
         val fulfilmentDatesFetcher = FulfilmentDatesFetcher(fetchFromS3, stage)
-        val res = productTypesToProcess.map { productType =>
+        productTypesToProcess.map { productType =>
           {
             def updateToApply(
                 creditProduct: CreditProductForSubscription,
@@ -97,9 +94,7 @@ object HolidayStopCreditProcessor {
               NextInvoiceDate.getNextInvoiceDate,
             )
           }
-        }.toList
-        forkJoinPool.shutdown()
-        res
+        }
     }
   }
 }

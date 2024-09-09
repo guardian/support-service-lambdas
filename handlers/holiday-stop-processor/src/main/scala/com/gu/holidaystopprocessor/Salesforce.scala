@@ -21,7 +21,7 @@ object Salesforce extends LazyLogging {
    * Beware! This isn't a scalable solution.  If all the products between them
    * have > 5000 credit requests to be processed in a 24 hour window some will be missed.
    */
-  private val batchSize = 100
+  private val batchSize = 500
 
   def holidayStopRequests(sfCredentials: SFAuthConfig)(
       productVariant: ZuoraProductType,
