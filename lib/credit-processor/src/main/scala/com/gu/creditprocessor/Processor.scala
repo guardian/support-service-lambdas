@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory
 import sttp.client3.{Identity, SttpBackend}
 
 import java.time.LocalDate
+import scala.collection.parallel.CollectionConverters.ImmutableSeqIsParallelizable
+import scala.collection.parallel.ForkJoinTaskSupport
 
 object Processor {
 
@@ -106,17 +108,30 @@ object Processor {
         val creditRequests = creditRequestsFromSalesforce.distinct
         val alreadyActionedCredits = creditRequestsFromSalesforce.flatMap(_.chargeCode).distinct
         logger.info(s"Processing ${creditRequests.length} credits in Zuora ...")
-        val allZuoraCreditResponses = creditRequests.map(
-          addCreditToSubscription(
-            creditProduct,
-            getSubscription,
-            getAccount,
-            updateToApply,
-            updateSubscription,
-            resultOfZuoraCreditAdd,
-            getNextInvoiceDate,
-          ),
-        )
+
+        val allZuoraCreditResponses =
+          creditRequests
+            .groupBy(_.subscriptionName)
+            .flatMap { case (_, requests) =>
+              val parReqs = requests.par
+              val forkJoinPool = new java.util.concurrent.ForkJoinPool(4)
+              parReqs.tasksupport = new ForkJoinTaskSupport(forkJoinPool)
+              val processed = parReqs.map(
+                addCreditToSubscription(
+                  creditProduct,
+                  getSubscription,
+                  getAccount,
+                  updateToApply,
+                  updateSubscription,
+                  resultOfZuoraCreditAdd,
+                  getNextInvoiceDate,
+                ),
+              )
+              forkJoinPool.shutdown()
+              processed
+            }
+            .toList
+
         val (failedZuoraResponses, successfulZuoraResponses) = allZuoraCreditResponses.separate
         val notAlreadyActionedCredits =
           successfulZuoraResponses.filterNot(v => alreadyActionedCredits.contains(v.chargeCode))
