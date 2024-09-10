@@ -13,8 +13,6 @@ import com.gu.zuora.subscription.{OverallFailure, Subscription, SubscriptionUpda
 import sttp.client3.{Identity, SttpBackend}
 
 import java.time.LocalDate
-import scala.collection.parallel.ForkJoinTaskSupport
-import scala.collection.parallel.mutable.ParArray
 import scala.util.Try
 
 object HolidayStopCreditProcessor {
@@ -42,9 +40,9 @@ object HolidayStopCreditProcessor {
     val allProcessableProductTypes = List(
       NewspaperNationalDelivery,
       NewspaperHomeDelivery,
+      NewspaperVoucherBook,
       GuardianWeekly,
       TierThree,
-      NewspaperVoucherBook,
       NewspaperDigitalVoucher,
     )
 

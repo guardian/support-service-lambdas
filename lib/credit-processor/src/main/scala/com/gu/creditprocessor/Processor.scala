@@ -116,7 +116,7 @@ object Processor {
             .toList
             .par
 
-        val requestConcurrency = 10
+        val requestConcurrency = 15
         /*https://developer.zuora.com/docs/guides/rate-limits/#concurrent-request-limits
         Zuora supports up to 40 concurrent requests until migration to orders API which supports 200
          */

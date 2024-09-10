@@ -12,7 +12,13 @@ import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig}
 import com.gu.util.Logging
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.{ConfigLocation, LoadConfigModule, Stage}
-import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, NewspaperNationalDelivery, TierThree, ZuoraProductType}
+import com.gu.zuora.ZuoraProductTypes.{
+  GuardianWeekly,
+  NewspaperHomeDelivery,
+  NewspaperNationalDelivery,
+  TierThree,
+  ZuoraProductType,
+}
 import com.gu.zuora.subscription._
 import com.gu.zuora.{AccessToken, HolidayStopProcessorZuoraConfig, Zuora}
 import io.circe.generic.auto._
@@ -217,8 +223,8 @@ object DeliveryCreditProcessor extends Logging {
       .leftMap { e =>
         SalesforceApiFailure(e.message)
       }
-      .flatMap { salesforceClient =>
-        results.map { result =>
+      .map { salesforceClient =>
+        results.parTraverse { result =>
           val actioned = DeliveryCreditActioned(
             Charge_Code__c = result.chargeCode.value,
             Credit_Amount__c = result.amountCredited.value,
@@ -234,7 +240,7 @@ object DeliveryCreditProcessor extends Logging {
             .leftMap { e =>
               SalesforceApiFailure(e.message)
             }
-        }.sequence
+        }
       }
 
     /*
