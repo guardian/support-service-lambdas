@@ -1,7 +1,7 @@
 import type { SQSEvent, SQSRecord } from 'aws-lambda';
+import { putMetric } from './cloudwatch';
 import { createGuestAccount, fetchUserType } from './idapiService';
 import { validateRequest } from './validateRequest';
-import {putMetric} from "./cloudwatch";
 
 /*
 The payload of a webhook request contains an order object:
@@ -41,6 +41,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				await processValidSqsRecord(sqsRecord);
 			} else {
 				console.error('Request failed validation. Processing terminated.');
+				await putMetric('ticket-tailor-webhook-validation-failure');
 				return;
 			}
 		},

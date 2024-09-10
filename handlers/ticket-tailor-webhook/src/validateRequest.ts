@@ -2,13 +2,10 @@ import { createHmac, timingSafeEqual } from 'crypto';
 import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
 import type { SQSRecord } from 'aws-lambda';
-import {putMetric} from "./cloudwatch";
 
 export type HmacKey = {
 	secret: string;
 };
-
-const validationFailureMetricName = 'ticket-tailor-webhook-validation-failure'
 
 export const getTimestampAndSignature = (
 	record: SQSRecord,
@@ -17,7 +14,6 @@ export const getTimestampAndSignature = (
 		record.messageAttributes['tickettailor-webhook-signature']?.stringValue;
 
 	if (!(typeof signatureWithTs === 'string')) {
-		await putMetric(validationFailureMetricName);
 		console.error(
 			'No valid value found for MessgeAttritbute: tickettailor-webhook-signature on incoming request.',
 		);
@@ -28,7 +24,6 @@ export const getTimestampAndSignature = (
 	const signature = signatureWithTs.split(',')[1]?.split('v1=')[1];
 
 	if (!(timestamp && signature) || isNaN(Number(timestamp))) {
-		await putMetric(validationFailureMetricName);
 		console.error(
 			`Invalid formatting of MessageAttribute 'tickettailor-webhook-signature': ${signatureWithTs}. Missing or incorrectly formatted timestamp or signature.`,
 		);
@@ -98,7 +93,7 @@ export const validateRequest = async (record: SQSRecord): Promise<boolean> => {
 
 	if (!signatureMatches) {
 		console.warn(
-			'Signatures do not match - check Ticket Tailor signing secret matches the one stored in AWS.',
+			'Signatures do not match - check Ticket Tailor signing secret matches the one stored in AWS. Webhook will not be processed.',
 		);
 	}
 	if (!withinTimeWindow) {
@@ -106,6 +101,5 @@ export const validateRequest = async (record: SQSRecord): Promise<boolean> => {
 			`Webhook Signature timestamp ${timestamp} is older than ${maxValidTimeWindowSeconds} seconds. Webhook will not be processed.`,
 		);
 	}
-	await putMetric(validationFailureMetricName);
 	return withinTimeWindow && signatureMatches;
 };

@@ -37,8 +37,8 @@ const invalidSignature =
 	'a3dbd8cfb0f04a0a9b0dd9d2547f1dd1a51e60d528a4edaee3bc02085517bd51';
 
 //Tests for getTimestampAndSignature()
-test('getTimestampAndSignature() called on an SQSRecord returns the correct values', () => {
-	const timestampAndSignature = getTimestampAndSignature(validSQSRecord);
+test('getTimestampAndSignature() called on an SQSRecord returns the correct values', async () => {
+	const timestampAndSignature = await getTimestampAndSignature(validSQSRecord);
 	if (!timestampAndSignature) {
 		throw new Error('Test Data missing timestamp and signature');
 	}
