@@ -61,7 +61,21 @@ export const hasMatchingSignature = (
 	const hash = createHmac('sha256', validationSecret.secret)
 		.update(timestamp.concat(record.body))
 		.digest('hex');
-	return timingSafeEqual(Buffer.from(hash), Buffer.from(signature));
+
+	try {
+		console.log('Comparing generated hash and signature from request');
+		return timingSafeEqual(Buffer.from(hash), Buffer.from(signature));
+	} catch (e) {
+		if (e instanceof Error) {
+			console.error(
+				`Hash and signature comparison failed with the following error message: ${e.message}`,
+			);
+		} else {
+			console.error(`Hash and signature comparison failed for Unknown reason.`);
+		}
+
+		return false;
+	}
 };
 
 export const maxValidTimeWindowSeconds = 300;
