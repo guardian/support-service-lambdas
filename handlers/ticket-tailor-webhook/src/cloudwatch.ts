@@ -7,18 +7,19 @@ import {
 	CloudWatchClient,
 	PutMetricDataCommand,
 } from '@aws-sdk/client-cloudwatch';
-import type { Stage } from '@modules/stage';
-import { stageFromEnvironment } from '@modules/stage';
 
 export async function putMetric(metricName: string): Promise<void> {
 	console.log('putting metric... metricName:', metricName);
 
-	const stage: Stage = stageFromEnvironment();
 	const cloudwatch = new CloudWatchClient({
 		region: process.env.AWS_REGION ?? 'eu-west-1',
 	});
 
 	const dimensions: Dimension[] = [
+		{
+			Name: 'App',
+			Value: process.env.App,
+		},
 		{
 			Name: 'Stage',
 			Value: process.env.STAGE,
@@ -26,7 +27,7 @@ export async function putMetric(metricName: string): Promise<void> {
 	];
 
 	const params: PutMetricDataCommandInput = {
-		Namespace: `ticket-tailor-webhook-${stage}`,
+		Namespace: `support-service-lambdas`,
 		MetricData: [
 			{
 				MetricName: metricName,

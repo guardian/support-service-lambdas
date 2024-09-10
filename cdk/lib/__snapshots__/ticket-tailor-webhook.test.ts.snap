@@ -7,6 +7,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
       "GuApiGatewayWithLambdaByPath",
+      "GuPutCloudwatchMetricsPolicy",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -106,6 +107,27 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
         "Roles": [
           {
             "Ref": "ApiGatewayToSqsRole590217A3",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "GuPutCloudwatchMetricsPolicyC5BCE402": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "cloudwatch:PutMetricData",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "GuPutCloudwatchMetricsPolicyC5BCE402",
+        "Roles": [
+          {
+            "Ref": "tickettailorwebhooklambdaServiceRole8D9E481D",
           },
         ],
       },
@@ -713,6 +735,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
       "GuLambdaFunction",
       "GuApiGatewayWithLambdaByPath",
       "GuApiGateway5xxPercentageAlarm",
+      "GuPutCloudwatchMetricsPolicy",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -885,6 +908,27 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
         "Roles": [
           {
             "Ref": "ApiGatewayToSqsRole590217A3",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "GuPutCloudwatchMetricsPolicyC5BCE402": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "cloudwatch:PutMetricData",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "GuPutCloudwatchMetricsPolicyC5BCE402",
+        "Roles": [
+          {
+            "Ref": "tickettailorwebhooklambdaServiceRole8D9E481D",
           },
         ],
       },
