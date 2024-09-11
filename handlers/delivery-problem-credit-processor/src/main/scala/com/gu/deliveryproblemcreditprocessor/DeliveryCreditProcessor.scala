@@ -12,13 +12,7 @@ import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig}
 import com.gu.util.Logging
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.{ConfigLocation, LoadConfigModule, Stage}
-import com.gu.zuora.ZuoraProductTypes.{
-  GuardianWeekly,
-  NewspaperHomeDelivery,
-  NewspaperNationalDelivery,
-  TierThree,
-  ZuoraProductType,
-}
+import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, NewspaperNationalDelivery, TierThree, ZuoraProductType}
 import com.gu.zuora.subscription._
 import com.gu.zuora.{AccessToken, HolidayStopProcessorZuoraConfig, Zuora}
 import io.circe.generic.auto._
@@ -31,6 +25,8 @@ import zio.duration._
 import zio.{RIO, Task, ZIO}
 
 import java.time.{DayOfWeek, LocalDate, LocalDateTime}
+import scala.collection.parallel.CollectionConverters.ImmutableIterableIsParallelizable
+import scala.collection.parallel.ForkJoinTaskSupport
 import scala.concurrent.ExecutionContext
 
 object DeliveryCreditProcessor extends Logging {
@@ -223,8 +219,12 @@ object DeliveryCreditProcessor extends Logging {
       .leftMap { e =>
         SalesforceApiFailure(e.message)
       }
-      .map { salesforceClient =>
-        results.parTraverse { result =>
+      .flatMap { salesforceClient =>
+        val requestConcurrency = 20
+        val forkJoinPool = new java.util.concurrent.ForkJoinPool(requestConcurrency)
+        val parRes = results.par
+        parRes.tasksupport = new ForkJoinTaskSupport(forkJoinPool)
+        val processed = parRes.map { result =>
           val actioned = DeliveryCreditActioned(
             Charge_Code__c = result.chargeCode.value,
             Credit_Amount__c = result.amountCredited.value,
@@ -240,7 +240,9 @@ object DeliveryCreditProcessor extends Logging {
             .leftMap { e =>
               SalesforceApiFailure(e.message)
             }
-        }
+        }.toList.sequence
+        forkJoinPool.shutdown()
+        processed
       }
 
     /*
