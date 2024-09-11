@@ -88,6 +88,10 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
           |    "consented" : true
           |  },
           |  {
+          |    "id" : "guardian_products_services",
+          |    "consented" : true
+          |  },
+          |  {
           |    "id" : "supporter_newsletter",
           |    "consented" : true
           |  }
@@ -163,6 +167,10 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
         """[
           |  {
           |    "id" : "your_support_onboarding",
+          |    "consented" : false
+          |  },
+          |  {
+          |    "id" : "guardian_products_services",
           |    "consented" : false
           |  },
           |  {
@@ -253,6 +261,10 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
         "someIdentityId",
         """[
           |  {
+          |    "id" : "guardian_weekly_newsletter",
+          |    "consented" : true
+          |  },
+          |  {
           |    "id" : "your_support_onboarding",
           |    "consented" : true
           |  },
@@ -261,11 +273,11 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
           |    "consented" : true
           |  },
           |  {
-          |    "id" : "supporter_newsletter",
+          |    "id" : "guardian_products_services",
           |    "consented" : true
           |  },
           |  {
-          |    "id" : "guardian_weekly_newsletter",
+          |    "id" : "supporter_newsletter",
           |    "consented" : true
           |  }
           |]""".stripMargin,

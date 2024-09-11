@@ -131,6 +131,10 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
         |    "consented" : false
         |  },
         |  {
+        |    "id" : "guardian_products_services",
+        |    "consented" : false
+        |  },
+        |  {
         |    "id" : "supporter_newsletter",
         |    "consented" : false
         |  },
@@ -162,23 +166,27 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
       Set("newspaper"),
       calculator,
     ) shouldBe Right("""[
-        |  {
-        |    "id" : "guardian_weekly_newsletter",
-        |    "consented" : false
-        |  },
-        |  {
-        |    "id" : "similar_guardian_products",
-        |    "consented" : true
-        |  },
-        |  {
-        |    "id" : "subscriber_preview",
-        |    "consented" : true
-        |  },
-        |  {
-        |    "id" : "supporter_newsletter",
-        |    "consented" : true
-        |  }
-        |]""".stripMargin)
+                       |  {
+                       |    "id" : "similar_guardian_products",
+                       |    "consented" : true
+                       |  },
+                       |  {
+                       |    "id" : "guardian_products_services",
+                       |    "consented" : true
+                       |  },
+                       |  {
+                       |    "id" : "subscriber_preview",
+                       |    "consented" : true
+                       |  },
+                       |  {
+                       |    "id" : "guardian_weekly_newsletter",
+                       |    "consented" : false
+                       |  },
+                       |  {
+                       |    "id" : "supporter_newsletter",
+                       |    "consented" : true
+                       |  }
+                       |]""".stripMargin.stripLineEnd)
   }
 
   "buildProductSwitchConsents" should "return the correct consents when switching from a Guardian Weekly to a Recurring Contribution whilst also owning a Newspaper subscription" in {
