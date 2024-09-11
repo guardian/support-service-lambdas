@@ -102,7 +102,7 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
     |    "id" : "guardian_weekly_newsletter",
     |    "consented" : true
     |  }
-    |]""".stripMargin)
+    |]""".stripMargin) // be careful this is whitespace sensitive
   }
 
   "buildConsentsBody" should "return a correctly populated JSON array when consents is not empty and state is false" in {
@@ -142,7 +142,7 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
         |    "id" : "guardian_weekly_newsletter",
         |    "consented" : true
         |  }
-        |]""".stripMargin)
+        |]""".stripMargin) // be careful this is whitespace sensitive
   }
 
   "buildProductSwitchConsents" should "return the correct consents when switching from a Recurring Contribution to a Guardian Weekly subscription whilst the user also owns a Newspaper subscription" in {
@@ -156,7 +156,7 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
         |    "id" : "guardian_weekly_newsletter",
         |    "consented" : true
         |  }
-        |]""".stripMargin)
+        |]""".stripMargin) // be careful this is whitespace sensitive
   }
 
   "buildProductSwitchConsents" should "return the correct consents when switching from a Guardian Weekly to a Newspaper subscription" in {
@@ -186,7 +186,7 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
                        |    "id" : "supporter_newsletter",
                        |    "consented" : true
                        |  }
-                       |]""".stripMargin.stripLineEnd)
+                       |]""".stripMargin) // be careful this is whitespace sensitive
   }
 
   "buildProductSwitchConsents" should "return the correct consents when switching from a Guardian Weekly to a Recurring Contribution whilst also owning a Newspaper subscription" in {
@@ -200,7 +200,7 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
         |    "id" : "guardian_weekly_newsletter",
         |    "consented" : false
         |  }
-        |]""".stripMargin)
+        |]""".stripMargin) // be careful this is whitespace sensitive
   }
 
   "buildProductSwitchConsents" should "return the correct consents when switching from a Guardian Weekly to a Newspaper subscription whilst also owning a Recurring Contribution" in {
@@ -218,7 +218,7 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
         |    "id" : "subscriber_preview",
         |    "consented" : true
         |  }
-        |]""".stripMargin)
+        |]""".stripMargin) // be careful this is whitespace sensitive
   }
 
   "buildProductSwitchConsents" should "return the correct consents when switching from a Guardian Weekly to a Newspaper subscription whilst also owning a Mobile Subscription (IAP)" in {
@@ -236,7 +236,7 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
         |    "id" : "subscriber_preview",
         |    "consented" : true
         |  }
-        |]""".stripMargin)
+        |]""".stripMargin) // be careful this is whitespace sensitive
   }
 
   "buildProductSwitchConsents - HandlerIAP" should "return the correct consents when switching from a Guardian Weekly to a Newspaper subscription whilst also owning a Mobile Subscription (IAP)" in {
@@ -254,7 +254,7 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
         |    "id" : "subscriber_preview",
         |    "consented" : true
         |  }
-        |]""".stripMargin)
+        |]""".stripMargin) // be careful this is whitespace sensitive
   }
 
   def removeWhitespace(stringToRemoveWhitespaceFrom: String): String = {

@@ -77,7 +77,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
   test(testName = "processAcquiredSub should handle acquisition event correctly") {
     mockSendConsentsReq
       .expects(
-        "someIdentityId",
+        "someIdentityId", // be careful this is whitespace sensitive
         """[
           |  {
           |    "id" : "your_support_onboarding",
@@ -163,7 +163,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
 
     mockSendConsentsReq
       .expects(
-        "someIdentityId",
+        "someIdentityId", // be careful this is whitespace sensitive
         """[
           |  {
           |    "id" : "your_support_onboarding",
@@ -219,7 +219,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
 
     mockSendConsentsReq
       .expects(
-        "someIdentityId",
+        "someIdentityId", // be careful this is whitespace sensitive
         """[
           |  {
           |    "id" : "supporter_newsletter",
@@ -258,7 +258,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
   test(testName = "processAcquiredSub should handle a Tier Three acquisition event correctly") {
     mockSendConsentsReq
       .expects(
-        "someIdentityId",
+        "someIdentityId", // be careful this is whitespace sensitive
         """[
           |  {
           |    "id" : "guardian_weekly_newsletter",
