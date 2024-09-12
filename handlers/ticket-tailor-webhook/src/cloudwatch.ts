@@ -7,10 +7,9 @@ import {
 	CloudWatchClient,
 	PutMetricDataCommand,
 } from '@aws-sdk/client-cloudwatch';
+import { stageFromEnvironment } from '@modules/stage';
 
 export async function putMetric(metricName: string): Promise<void> {
-	console.log('putting metric... metricName:', metricName);
-
 	const cloudwatch = new CloudWatchClient({
 		region: process.env.AWS_REGION ?? 'eu-west-1',
 	});
@@ -22,7 +21,7 @@ export async function putMetric(metricName: string): Promise<void> {
 		},
 		{
 			Name: 'Stage',
-			Value: process.env.STAGE,
+			Value: stageFromEnvironment(),
 		},
 	];
 
