@@ -1,6 +1,6 @@
 import { zuoraDateFormat } from '@modules/zuora/common';
 import type { Dayjs } from 'dayjs';
-import { productToDiscountMapping } from '../../../src/productToDiscountMapping';
+import { catalog } from '../../../src/productToDiscountMapping';
 
 export const supporterPlusSubscribeBody = (subscriptionDate: Dayjs) => {
 	return {
@@ -42,8 +42,7 @@ export const supporterPlusSubscribeBody = (subscriptionDate: Dayjs) => {
 					RatePlanData: [
 						{
 							RatePlan: {
-								ProductRatePlanId:
-									productToDiscountMapping('CODE').catalog.supporterPlus.Month,
+								ProductRatePlanId: catalog.CODE.supporterPlus.Month,
 							},
 							SubscriptionProductFeatureList: [],
 						},

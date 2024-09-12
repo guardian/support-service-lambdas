@@ -23,7 +23,7 @@ import type { APIGatewayProxyEventHeaders } from 'aws-lambda';
 import dayjs from 'dayjs';
 import { EligibilityChecker } from './eligibilityChecker';
 import { generateCancellationDiscountConfirmationEmail } from './generateCancellationDiscountConfirmationEmail';
-import { productToDiscountMapping } from './productToDiscountMapping';
+import { getDiscountFromSubscription } from './productToDiscountMapping';
 
 export const previewDiscountEndpoint = async (
 	stage: Stage,
@@ -138,14 +138,17 @@ export const applyDiscountEndpoint = async (
 	);
 
 	const emailPayload = discount.sendEmail
-		? generateCancellationDiscountConfirmationEmail({
-				firstDiscountedPaymentDate: dayjs(dateToApply),
-				nextNonDiscountedPaymentDate: dayjs(nextPaymentDate),
-				emailAddress: account.billToContact.workEmail,
-				firstName: account.billToContact.firstName,
-				lastName: account.billToContact.lastName,
-				identityId: account.basicInfo.identityId,
-			})
+		? generateCancellationDiscountConfirmationEmail(
+				{
+					firstDiscountedPaymentDate: dayjs(dateToApply),
+					nextNonDiscountedPaymentDate: dayjs(nextPaymentDate),
+					emailAddress: account.billToContact.workEmail,
+					firstName: account.billToContact.firstName,
+					lastName: account.billToContact.lastName,
+					identityId: account.basicInfo.identityId,
+				},
+				discount.sendEmail,
+			)
 		: undefined;
 
 	return {
@@ -204,7 +207,7 @@ async function getDiscountToApply(
 
 	console.log('Working out the appropriate discount for the subscription');
 	const { discount, discountableProductRatePlanId } =
-		productToDiscountMapping(stage).getDiscountFromSubscription(subscription);
+		getDiscountFromSubscription(stage, subscription);
 
 	console.log('Checking this subscription is eligible for the discount');
 	switch (discount.eligibilityCheckForRatePlan) {

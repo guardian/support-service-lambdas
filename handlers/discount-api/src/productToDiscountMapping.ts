@@ -1,8 +1,38 @@
 import { getSingleOrThrow } from '@modules/arrayFunctions';
+import type { DataExtensionName } from '@modules/email/email';
+import { DataExtensionNames } from '@modules/email/email';
 import { ValidationError } from '@modules/errors';
 import type { Stage } from '@modules/stage';
 import { isNotRemovedOrDiscount } from '@modules/zuora/rateplan';
 import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
+
+function getDiscountableRatePlan(subscription: ZuoraSubscription) {
+	return getSingleOrThrow(
+		subscription.ratePlans.filter(isNotRemovedOrDiscount),
+		(msg) =>
+			new Error(
+				`Subscription ${subscription.subscriptionNumber} has multiple discountable rateplans ${msg}`,
+			),
+	);
+}
+
+export const getDiscountFromSubscription = (
+	stage: Stage,
+	subscription: ZuoraSubscription,
+) => {
+	const discountableProductRatePlanId =
+		getDiscountableRatePlan(subscription).productRatePlanId;
+	const discount =
+		ProductToDiscountMapping(stage)[discountableProductRatePlanId];
+
+	if (discount === undefined) {
+		throw new ValidationError(
+			`Subscription ${subscription.subscriptionNumber} is not eligible for any discount`,
+		);
+	}
+
+	return { discount, discountableProductRatePlanId };
+};
 
 export type EligibilityCheck =
 	| 'EligibleForFreePeriod'
@@ -14,63 +44,45 @@ export type Discount = {
 	name: string;
 	upToPeriods: number;
 	upToPeriodsType: string;
-	sendEmail: boolean;
+	sendEmail?: DataExtensionName;
 	eligibilityCheckForRatePlan?: EligibilityCheck;
 };
 
-export const productToDiscountMapping = (stage: Stage) => {
-	const getDiscountFromSubscription = (subscription: ZuoraSubscription) => {
-		const discountableRatePlan = getSingleOrThrow(
-			subscription.ratePlans.filter(isNotRemovedOrDiscount),
-			(msg) =>
-				new Error(
-					`Subscription ${subscription.subscriptionNumber} has multiple discountable rateplans ${msg}`,
-				),
-		);
-		const discountableProductRatePlanId =
-			discountableRatePlan.productRatePlanId;
-		const discount = ProductToDiscountMapping[discountableProductRatePlanId];
-
-		if (discount === undefined) {
-			throw new ValidationError(
-				`Subscription ${subscription.subscriptionNumber} is not eligible for any discount`,
-			);
-		}
-
-		return { discount, discountableProductRatePlanId };
-	};
-
-	const catalog = {
-		CODE: {
-			digiSub: {
-				Month: '2c92c0f84bbfec8b014bc655f4852d9d',
-				Quarter: '2c92c0f84bbfec58014bc6a2d43a1f5b',
-				Annual: '2c92c0f94bbffaaa014bc6a4212e205b',
-			},
-			supporterPlus: {
-				Month: '8ad08cbd8586721c01858804e3275376',
-			},
-			recurringContribution: {
-				Month: '2c92c0f85a6b134e015a7fcd9f0c7855',
-			},
+export const catalog = {
+	CODE: {
+		digiSub: {
+			Month: '2c92c0f84bbfec8b014bc655f4852d9d',
+			Quarter: '2c92c0f84bbfec58014bc6a2d43a1f5b',
+			Annual: '2c92c0f94bbffaaa014bc6a4212e205b',
 		},
-		PROD: {
-			digiSub: {
-				Month: '2c92a0fb4edd70c8014edeaa4eae220a',
-				Quarter: '2c92a0fb4edd70c8014edeaa4e8521fe',
-				Annual: '2c92a0fb4edd70c8014edeaa4e972204',
-			},
-			supporterPlus: {
-				Month: '8a128ed885fc6ded018602296ace3eb8',
-			},
-			recurringContribution: {
-				Month: '2c92a0fc5aacfadd015ad24db4ff5e97',
-			},
+		supporterPlus: {
+			Month: '8ad08cbd8586721c01858804e3275376',
 		},
-	}[stage];
+		recurringContribution: {
+			Month: '2c92c0f85a6b134e015a7fcd9f0c7855',
+		},
+	},
+	PROD: {
+		digiSub: {
+			Month: '2c92a0fb4edd70c8014edeaa4eae220a',
+			Quarter: '2c92a0fb4edd70c8014edeaa4e8521fe',
+			Annual: '2c92a0fb4edd70c8014edeaa4e972204',
+		},
+		supporterPlus: {
+			Month: '8a128ed885fc6ded018602296ace3eb8',
+		},
+		recurringContribution: {
+			Month: '2c92a0fc5aacfadd015ad24db4ff5e97',
+		},
+	},
+};
 
+const Discounts: (stage: Stage) => { [K in string]: Discount } = (
+	stage: Stage,
+) => {
 	const getCancellationFree2Mo = (
 		eligibilityCheckForRatePlan: EligibilityCheck,
+		dataExtensionName: DataExtensionName,
 	): Discount => {
 		return {
 			productRatePlanId: {
@@ -80,12 +92,12 @@ export const productToDiscountMapping = (stage: Stage) => {
 			name: 'Cancellation Save Discount - Free for 2 months',
 			upToPeriods: 2,
 			upToPeriodsType: 'Months',
-			sendEmail: true,
+			sendEmail: dataExtensionName,
 			eligibilityCheckForRatePlan: eligibilityCheckForRatePlan,
 		};
 	};
 
-	const Discounts: { [K in string]: Discount } = {
+	return {
 		cancellation25pc3mo: {
 			productRatePlanId: {
 				CODE: '2c92c0f962cec7990162d3882afc52dd',
@@ -94,7 +106,7 @@ export const productToDiscountMapping = (stage: Stage) => {
 			name: 'Cancellation Save Discount - 25% off for 3 months',
 			upToPeriods: 3,
 			upToPeriodsType: 'Months',
-			sendEmail: false,
+			sendEmail: undefined,
 			eligibilityCheckForRatePlan: 'AtCatalogPrice',
 		},
 		cancellation25pc12mo: {
@@ -105,20 +117,31 @@ export const productToDiscountMapping = (stage: Stage) => {
 			name: 'Cancellation Save Discount - 25% off for 12 months',
 			upToPeriods: 12,
 			upToPeriodsType: 'Months',
-			sendEmail: false,
+			sendEmail: undefined,
 			eligibilityCheckForRatePlan: 'AtCatalogPrice',
 		},
-		cancellationFree2MoSP: getCancellationFree2Mo('EligibleForFreePeriod'),
-		cancellationFree2MoRC: getCancellationFree2Mo('NoCheck'),
+		cancellationFree2MoSP: getCancellationFree2Mo(
+			'EligibleForFreePeriod',
+			DataExtensionNames.cancellationDiscountConfirmation,
+		),
+		cancellationFree2MoRC: getCancellationFree2Mo(
+			'NoCheck',
+			DataExtensionNames.contributionPauseConfirmationEmail,
+		),
 	};
-
-	const ProductToDiscountMapping = {
-		[catalog.digiSub.Month]: Discounts.cancellation25pc3mo,
-		[catalog.digiSub.Quarter]: Discounts.cancellation25pc3mo,
-		[catalog.digiSub.Annual]: Discounts.cancellation25pc12mo,
-		[catalog.supporterPlus.Month]: Discounts.cancellationFree2MoSP,
-		[catalog.recurringContribution.Month]: Discounts.cancellationFree2MoRC,
-	};
-
-	return { getDiscountFromSubscription, catalog };
 };
+
+function ProductToDiscountMapping(stage: Stage) {
+	const catalogForStage = catalog[stage];
+	const DiscountsForStage = Discounts(stage);
+
+	return {
+		[catalogForStage.digiSub.Month]: DiscountsForStage.cancellation25pc3mo,
+		[catalogForStage.digiSub.Quarter]: DiscountsForStage.cancellation25pc3mo,
+		[catalogForStage.digiSub.Annual]: DiscountsForStage.cancellation25pc12mo,
+		[catalogForStage.supporterPlus.Month]:
+			DiscountsForStage.cancellationFree2MoSP,
+		[catalogForStage.recurringContribution.Month]:
+			DiscountsForStage.cancellationFree2MoRC,
+	};
+}
