@@ -12,7 +12,7 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-      
+
 jobs:
   gu-cdk-build:
     strategy:
@@ -47,12 +47,11 @@ jobs:
       - name: Run tests and build subproject JAR
         run: sbt "project ${{ matrix.subproject }}" test assembly
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 8
+      - run: corepack enable
+        shell: bash
       - uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version-file: '.nvmrc'
           cache: 'pnpm'
       - run: pnpm install
       - run: pnpm --filter cdk package
