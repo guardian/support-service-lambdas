@@ -22,6 +22,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'acquisition-events-api',
 		'admin-console',
 		'apps-metering',
+		'apps-metering-exclusions-lambda',
 		'batch-email-sender',
 		'bigquery-acquisitions-publisher',
 		'component-event-stream',
