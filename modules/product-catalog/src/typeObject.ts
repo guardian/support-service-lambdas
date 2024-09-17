@@ -1,6 +1,6 @@
 export const typeObject = {
 	TierThree: {
-		currencies: ['GBP', 'USD', 'NZD', 'EUR', 'AUD', 'CAD'],
+		currencies: ['USD', 'GBP'],
 		billingPeriods: ['Month', 'Annual'],
 		productRatePlans: {
 			DomesticMonthlyV2: {
