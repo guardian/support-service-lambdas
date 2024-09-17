@@ -1,6 +1,7 @@
 import { GuApiGatewayWithLambdaByPath } from '@guardian/cdk';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
+import { GuPutCloudwatchMetricsPolicy } from '@guardian/cdk/lib/constructs/iam';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda/lambda';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
@@ -161,7 +162,10 @@ export class TicketTailorWebhook extends GuStack {
 			},
 		);
 
+		const cloudwatchPutMetricPolicy = new GuPutCloudwatchMetricsPolicy(this);
+
 		lambda.role?.attachInlinePolicy(s3InlinePolicy);
 		lambda.role?.attachInlinePolicy(secretManagerAccessPolicy);
+		lambda.role?.attachInlinePolicy(cloudwatchPutMetricPolicy);
 	}
 }

@@ -61,7 +61,21 @@ export const hasMatchingSignature = (
 	const hash = createHmac('sha256', validationSecret.secret)
 		.update(timestamp.concat(record.body))
 		.digest('hex');
-	return timingSafeEqual(Buffer.from(hash), Buffer.from(signature));
+
+	try {
+		console.log('Comparing generated hash and signature from request');
+		return timingSafeEqual(Buffer.from(hash), Buffer.from(signature));
+	} catch (e) {
+		if (e instanceof Error) {
+			console.error(
+				`Hash and signature comparison failed with the following error message: ${e.message}`,
+			);
+		} else {
+			console.error(`Hash and signature comparison failed for Unknown reason.`);
+		}
+
+		return false;
+	}
 };
 
 export const maxValidTimeWindowSeconds = 300;
@@ -93,7 +107,7 @@ export const validateRequest = async (record: SQSRecord): Promise<boolean> => {
 
 	if (!signatureMatches) {
 		console.warn(
-			'Signatures do not match - check Ticket Tailor signing secret matches the one stored in AWS.',
+			'Signatures do not match - check Ticket Tailor signing secret matches the one stored in AWS. Webhook will not be processed.',
 		);
 	}
 	if (!withinTimeWindow) {
@@ -101,6 +115,5 @@ export const validateRequest = async (record: SQSRecord): Promise<boolean> => {
 			`Webhook Signature timestamp ${timestamp} is older than ${maxValidTimeWindowSeconds} seconds. Webhook will not be processed.`,
 		);
 	}
-
 	return withinTimeWindow && signatureMatches;
 };
