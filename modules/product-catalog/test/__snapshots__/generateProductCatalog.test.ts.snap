@@ -582,86 +582,6 @@ exports[`Generated product catalog matches snapshot 1`] = `
           "USD": 150,
         },
       },
-      "GuardianWeeklyDomesticAnnual": {
-        "billingPeriod": "Annual",
-        "charges": {
-          "GuardianWeekly": {
-            "id": "8a1282048f518d08018f529eadb53d9b",
-          },
-          "SupporterPlus": {
-            "id": "8a1282048f518d08018f529ead683d93",
-          },
-        },
-        "id": "8a1282048f518d08018f529ead0f3d91",
-        "pricing": {
-          "AUD": 640,
-          "CAD": 516,
-          "EUR": 413,
-          "GBP": 275,
-          "NZD": 760,
-          "USD": 480,
-        },
-      },
-      "GuardianWeeklyDomesticMonthly": {
-        "billingPeriod": "Month",
-        "charges": {
-          "GuardianWeekly": {
-            "id": "8a129a378f51a91a018f529e4a9f6d88",
-          },
-          "SupporterPlus": {
-            "id": "8a1288a38f518d01018f529a04e7317d",
-          },
-        },
-        "id": "8a1288a38f518d01018f529a04443172",
-        "pricing": {
-          "AUD": 57,
-          "CAD": 46,
-          "EUR": 36.5,
-          "GBP": 25,
-          "NZD": 67,
-          "USD": 43,
-        },
-      },
-      "GuardianWeeklyRestOfWorldAnnual": {
-        "billingPeriod": "Annual",
-        "charges": {
-          "GuardianWeekly": {
-            "id": "8a1292628f51a923018f52a325a2571a",
-          },
-          "SupporterPlus": {
-            "id": "8a1292628f51a923018f52a3253e5712",
-          },
-        },
-        "id": "8a1292628f51a923018f52a324e45710",
-        "pricing": {
-          "AUD": 584,
-          "CAD": 465,
-          "EUR": 365,
-          "GBP": 392.6,
-          "NZD": 690,
-          "USD": 516,
-        },
-      },
-      "GuardianWeeklyRestOfWorldMonthly": {
-        "billingPeriod": "Month",
-        "charges": {
-          "GuardianWeekly": {
-            "id": "8a1281f38f518d11018f52a59a246a6f",
-          },
-          "SupporterPlus": {
-            "id": "8a1281f38f518d11018f52a599dd6a67",
-          },
-        },
-        "id": "8a1281f38f518d11018f52a599806a65",
-        "pricing": {
-          "AUD": 123,
-          "CAD": 99.25,
-          "EUR": 77.5,
-          "GBP": 34.8,
-          "NZD": 149.5,
-          "USD": 46,
-        },
-      },
       "Monthly": {
         "billingPeriod": "Month",
         "charges": {
@@ -740,6 +660,29 @@ exports[`Generated product catalog matches snapshot 1`] = `
           "USD": 510,
         },
       },
+      "DomesticAnnualV2": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "GuardianWeekly": {
+            "id": "8a128dfb91f04b9a0191fa30ae951b88",
+          },
+          "NewspaperArchive": {
+            "id": "8a12891291f04b9d0191fa96795b7f22",
+          },
+          "SupporterPlus": {
+            "id": "8a128dfb91f04b9a0191fa30ae611b80",
+          },
+        },
+        "id": "8a128dfb91f04b9a0191fa30ae2e1b7e",
+        "pricing": {
+          "AUD": 682,
+          "CAD": 548,
+          "EUR": 440,
+          "GBP": 302,
+          "NZD": 802,
+          "USD": 512,
+        },
+      },
       "DomesticMonthly": {
         "billingPeriod": "Month",
         "charges": {
@@ -760,6 +703,29 @@ exports[`Generated product catalog matches snapshot 1`] = `
           "USD": 45,
         },
       },
+      "DomesticMonthlyV2": {
+        "billingPeriod": "Month",
+        "charges": {
+          "GuardianWeekly": {
+            "id": "8a128dfb91f04b9a0191fa315d5b1c5b",
+          },
+          "NewspaperArchive": {
+            "id": "8a129c2591f06a5d0191fa945c9177cf",
+          },
+          "SupporterPlus": {
+            "id": "8a128dfb91f04b9a0191fa315d251c53",
+          },
+        },
+        "id": "8a128dfb91f04b9a0191fa315d091c51",
+        "pricing": {
+          "AUD": 62,
+          "CAD": 50,
+          "EUR": 40.5,
+          "GBP": 29,
+          "NZD": 72,
+          "USD": 47,
+        },
+      },
       "RestOfWorldAnnual": {
         "billingPeriod": "Annual",
         "charges": {
@@ -776,6 +742,25 @@ exports[`Generated product catalog matches snapshot 1`] = `
           "USD": 546,
         },
       },
+      "RestOfWorldAnnualV2": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "GuardianWeekly": {
+            "id": "8a129c2591f06a5d0191fa2edbc63030",
+          },
+          "NewspaperArchive": {
+            "id": "8a12831491f04b9f0191fa9a1f084ec0",
+          },
+          "SupporterPlus": {
+            "id": "8a129c2591f06a5d0191fa2edb803028",
+          },
+        },
+        "id": "8a129c2591f06a5d0191fa2edb383026",
+        "pricing": {
+          "GBP": 419.6,
+          "USD": 548,
+        },
+      },
       "RestOfWorldMonthly": {
         "billingPeriod": "Month",
         "charges": {
@@ -790,6 +775,25 @@ exports[`Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 36.8,
           "USD": 48,
+        },
+      },
+      "RestOfWorldMonthlyV2": {
+        "billingPeriod": "Month",
+        "charges": {
+          "GuardianWeekly": {
+            "id": "8a12891291f04b9d0191fa2ffc46097f",
+          },
+          "NewspaperArchive": {
+            "id": "8a129b7891f06a5a0191fa9888db07de",
+          },
+          "SupporterPlus": {
+            "id": "8a12891291f04b9d0191fa2ffc140977",
+          },
+        },
+        "id": "8a12891291f04b9d0191fa2ffbe10975",
+        "pricing": {
+          "GBP": 38.8,
+          "USD": 50,
         },
       },
     },
@@ -1033,22 +1037,6 @@ exports[`Generated product catalog types match snapshot 1`] = `
         "Contribution": {},
         "Subscription": {},
       },
-      "GuardianWeeklyDomesticAnnual": {
-        "GuardianWeekly": {},
-        "SupporterPlus": {},
-      },
-      "GuardianWeeklyDomesticMonthly": {
-        "GuardianWeekly": {},
-        "SupporterPlus": {},
-      },
-      "GuardianWeeklyRestOfWorldAnnual": {
-        "GuardianWeekly": {},
-        "SupporterPlus": {},
-      },
-      "GuardianWeeklyRestOfWorldMonthly": {
-        "GuardianWeekly": {},
-        "SupporterPlus": {},
-      },
       "Monthly": {
         "Contribution": {},
         "Subscription": {},
@@ -1067,24 +1055,48 @@ exports[`Generated product catalog types match snapshot 1`] = `
       "Annual",
     ],
     "currencies": [
-      "USD",
       "GBP",
+      "USD",
+      "NZD",
+      "EUR",
+      "AUD",
+      "CAD",
     ],
     "productRatePlans": {
       "DomesticAnnual": {
         "GuardianWeekly": {},
         "SupporterPlus": {},
       },
+      "DomesticAnnualV2": {
+        "GuardianWeekly": {},
+        "NewspaperArchive": {},
+        "SupporterPlus": {},
+      },
       "DomesticMonthly": {
         "GuardianWeekly": {},
+        "SupporterPlus": {},
+      },
+      "DomesticMonthlyV2": {
+        "GuardianWeekly": {},
+        "NewspaperArchive": {},
         "SupporterPlus": {},
       },
       "RestOfWorldAnnual": {
         "GuardianWeekly": {},
         "SupporterPlus": {},
       },
+      "RestOfWorldAnnualV2": {
+        "GuardianWeekly": {},
+        "NewspaperArchive": {},
+        "SupporterPlus": {},
+      },
       "RestOfWorldMonthly": {
         "GuardianWeekly": {},
+        "SupporterPlus": {},
+      },
+      "RestOfWorldMonthlyV2": {
+        "GuardianWeekly": {},
+        "NewspaperArchive": {},
         "SupporterPlus": {},
       },
     },
