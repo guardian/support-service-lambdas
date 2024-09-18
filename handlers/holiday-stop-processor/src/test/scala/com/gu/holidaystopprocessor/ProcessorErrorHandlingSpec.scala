@@ -172,10 +172,11 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
     val (failedZuoraResponses, successfulZuoraResponses) = result.creditResults.separate
     failedZuoraResponses.size shouldBe 3
     successfulZuoraResponses.size shouldBe 0
-    result.overallFailure shouldBe oneOf(
-      OverallFailure("zuora boom 1"),
-      OverallFailure("zuora boom 2"),
-      OverallFailure("zuora boom 3"),
+
+    List(result.overallFailure) should contain atLeastOneOf (
+      Some(OverallFailure("zuora boom 1")),
+      Some(OverallFailure("zuora boom 2")),
+      Some(OverallFailure("zuora boom 3"))
     )
   }
 
