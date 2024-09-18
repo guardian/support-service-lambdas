@@ -40,9 +40,9 @@ object HolidayStopCreditProcessor {
     val allProcessableProductTypes = List(
       NewspaperNationalDelivery,
       NewspaperHomeDelivery,
-      NewspaperVoucherBook,
       GuardianWeekly,
       TierThree,
+      NewspaperVoucherBook,
       NewspaperDigitalVoucher,
     )
 

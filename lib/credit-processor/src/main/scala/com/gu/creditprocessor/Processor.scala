@@ -109,11 +109,15 @@ object Processor {
         val alreadyActionedCredits = creditRequestsFromSalesforce.flatMap(_.chargeCode).distinct
         logger.info(s"Processing ${creditRequests.length} credits in Zuora ...")
 
-        val bySub =
+        // we group the creditRequests by subscription to make the requests to zuora in parallel
+        // & avoid lock contention on the resource
+
+        val creditRequestBatches =
           creditRequests
             .groupBy(_.subscriptionName)
             .values
             .toList
+            .flatten
             .par
 
         val requestConcurrency = 20
@@ -122,9 +126,9 @@ object Processor {
          */
         val forkJoinPool = new java.util.concurrent.ForkJoinPool(requestConcurrency)
 
-        bySub.tasksupport = new ForkJoinTaskSupport(forkJoinPool)
-        val allZuoraCreditResponses = bySub.flatMap { requests =>
-          requests.map(
+        creditRequestBatches.tasksupport = new ForkJoinTaskSupport(forkJoinPool)
+        val allZuoraCreditResponses = creditRequestBatches
+          .map(creditRequest =>
             addCreditToSubscription(
               creditProduct,
               getSubscription,
@@ -133,9 +137,9 @@ object Processor {
               updateSubscription,
               resultOfZuoraCreditAdd,
               getNextInvoiceDate,
-            ),
+            )(creditRequest),
           )
-        }.toList
+          .toList
 
         forkJoinPool.shutdown()
 
