@@ -42,12 +42,14 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
 
   // getCancellationConsents success cases
   "getCancellationConsents" should "correctly return the mapping when a known product is passed and there are no owned products" in {
-    calculator.getCancellationConsents("Membership", Set()) shouldBe Right(membershipMapping)
+    calculator.getCancellationConsents("Membership", Set()) shouldBe Right(
+      calculator.removeConsentsNotBeingCancelled(membershipMapping),
+    )
   }
 
   "getCancellationConsents" should "correctly return the mapping when a known product is passed and there is an owned product that partially overlaps" in {
     calculator.getCancellationConsents("newspaper", Set("Guardian Weekly")) shouldBe Right(
-      newspaperMapping.diff(guWeeklyMapping),
+      calculator.removeConsentsNotBeingCancelled(newspaperMapping.diff(guWeeklyMapping)),
     )
   }
 
@@ -66,6 +68,12 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
   "getCancellationConsents" should "correctly return the mapping when a known product is passed and there are multiple owned products that completely overlap" in {
     calculator.getCancellationConsents("Guardian Weekly", Set("Membership", "Contributor")) shouldBe Right(
       guWeeklyMapping.diff(membershipMapping ++ contributionMapping),
+    )
+  }
+
+  "getCancellationConsents" should "not cancel guardian_products_services and similar_guardian_products consents" in {
+    calculator.getCancellationConsents("Membership", Set()) shouldBe Right(
+      membershipMapping.removedAll(Set("guardian_products_services", "similar_guardian_products")),
     )
   }
 

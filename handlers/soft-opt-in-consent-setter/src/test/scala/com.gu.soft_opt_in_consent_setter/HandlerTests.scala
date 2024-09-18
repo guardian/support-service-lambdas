@@ -170,10 +170,6 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
           |    "consented" : false
           |  },
           |  {
-          |    "id" : "guardian_products_services",
-          |    "consented" : false
-          |  },
-          |  {
           |    "id" : "supporter_newsletter",
           |    "consented" : false
           |  }
