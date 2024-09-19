@@ -6,13 +6,17 @@ import type { EmailMessageWithUserId } from '@modules/email/email';
 import { ValidationError } from '@modules/errors';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
+import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 import {
 	zuoraAccountSchema,
 	zuoraSubscriptionSchema,
 } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
-import { previewResponseFromZuoraResponse } from '../src/contributionToSupporterPlus';
+import {
+	handleMissingRefundAmount,
+	previewResponseFromZuoraResponse,
+} from '../src/contributionToSupporterPlus';
 import { buildEmailMessage } from '../src/productSwitchEmail';
 import type { ProductSwitchRequestBody } from '../src/schemas';
 import { productSwitchRequestSchema } from '../src/schemas';
@@ -26,6 +30,7 @@ import accountJson from './fixtures/account.json';
 import alreadySwitchedJson from './fixtures/already-switched-subscription.json';
 import jsonWithNoContribution from './fixtures/subscription-with-no-contribution.json';
 import subscriptionJson from './fixtures/subscription.json';
+import zuoraSubscriptionWithMonthlyContribution from './fixtures/zuora-subscription-with-monthly-contribution.json';
 
 export const getProductCatalogFromFixture = (): ProductCatalog =>
 	generateProductCatalog(zuoraCatalogFixture);
@@ -198,164 +203,63 @@ This tests a scenario that occurs when the product switch occurs on the day that
  In this scenario there is nothing to refund, so the Invoice Item will not be created.
  In such a situation, no error should be thrown and the refund amount returned output should be 0.
  */
-test('Preview that does not contain invoice item for the given charge id, where the day-of-month of the target date equals that of the current date returns an amountWithoutTax value of 0.', () => {
-	const subscription = zuoraSubscriptionSchema.parse(alreadySwitchedJson);
-	jest.useFakeTimers().setSystemTime(new Date(subscription.termStartDate)); //Date works in Epoch milli
-
-	const apiResponse = {
-		success: true,
-		previewResult: {
-			invoices: [
-				{
-					amount: 63.2,
-					amountWithoutTax: 63.2,
-					taxAmount: 0.0,
-					targetDate: '2024-03-21',
-					invoiceItems: [
-						{
-							serviceStartDate: '2024-03-21',
-							serviceEndDate: '2025-03-20',
-							amountWithoutTax: 95.0,
-							taxAmount: 0.0,
-							chargeName: 'Subscription',
-							processingType: 'Charge',
-							productName: 'Supporter Plus',
-							productRatePlanChargeId: '8ad08e1a858672180185880566606fad',
-							unitPrice: 95.0,
-							subscriptionNumber: 'A-S00504165',
-							additionalInfo: {
-								quantity: 1,
-								unitOfMeasure: '',
-								numberOfDeliveries: 0.0,
-							},
-						},
-						{
-							serviceStartDate: '2024-03-21',
-							serviceEndDate: '2025-03-20',
-							amountWithoutTax: 0.0,
-							taxAmount: 0.0,
-							chargeDescription: '',
-							chargeName: 'Contribution',
-							chargeNumber: null,
-							processingType: 'Charge',
-							productName: 'Supporter Plus',
-							productRatePlanChargeId: '8ad096ca858682bb0185881568385d73',
-							unitPrice: 0.0,
-							subscriptionNumber: 'A-S00504165',
-							orderLineItemNumber: null,
-							additionalInfo: {
-								quantity: 1,
-								unitOfMeasure: '',
-								numberOfDeliveries: 0.0,
-							},
-						},
-					],
-				},
-			],
+test('handleMissingRefundAmount() called on the charge-through-date for a subscription will return 0', () => {
+	const catalogInformation = {
+		supporterPlus: {
+			price: 95,
+			productRatePlanId: 'not_used',
+			subscriptionChargeId: '8ad08e1a858672180185880566606fad',
+			contributionChargeId: '8ad096ca858682bb0185881568385d73',
+		},
+		contribution: {
+			productRatePlanId: '2c92a0fc5e1dc084015e37f58c200eea',
+			chargeId: '2c92a0fc5e1dc084015e37f58c7b0f35',
 		},
 	};
+	const subscription: ZuoraSubscription = zuoraSubscriptionSchema.parse(
+		zuoraSubscriptionWithMonthlyContribution,
+	);
+
+	const chargeThroughDate =
+		subscription.ratePlans[0]?.ratePlanCharges[0]?.chargedThroughDate;
+	if (!chargeThroughDate) {
+		throw Error(
+			'Problem with test data: zuoraSubscriptionWithMonthlyContribution should contain a charge-through-date',
+		);
+	}
+	const currentDate = new Date(chargeThroughDate);
 
 	expect(
-		previewResponseFromZuoraResponse(
-			apiResponse,
-			{
-				supporterPlus: {
-					price: 95,
-					productRatePlanId: 'not_used',
-					subscriptionChargeId: '8ad08e1a858672180185880566606fad',
-					contributionChargeId: '8ad096ca858682bb0185881568385d73',
-				},
-				contribution: {
-					productRatePlanId: 'not_used',
-					chargeId: '2c92c0f85e2d19af015e3896e84d092e',
-				},
-			},
-			subscription,
-		).contributionRefundAmount,
+		handleMissingRefundAmount(catalogInformation, subscription, currentDate),
 	).toBe(0);
 });
 
-test('Preview that does not contain invoice item for the given charge id, where the date-of-month of the target date does not equal that of the current date throws an error', () => {
-	const subscription = zuoraSubscriptionSchema.parse(alreadySwitchedJson);
-	const millisecondsInADay = 86400000;
-	jest
-		.useFakeTimers()
-		.setSystemTime(
-			new Date(subscription.termStartDate).valueOf() - millisecondsInADay,
-		); //Date works in Epoch milli
-
-	const apiResponse = {
-		success: true,
-		previewResult: {
-			invoices: [
-				{
-					amount: 63.2,
-					amountWithoutTax: 63.2,
-					taxAmount: 0.0,
-					targetDate: '2024-03-21',
-					invoiceItems: [
-						{
-							serviceStartDate: '2024-03-21',
-							serviceEndDate: '2025-03-20',
-							amountWithoutTax: 95.0,
-							taxAmount: 0.0,
-							chargeName: 'Subscription',
-							processingType: 'Charge',
-							productName: 'Supporter Plus',
-							productRatePlanChargeId: '8ad08e1a858672180185880566606fad',
-							unitPrice: 95.0,
-							subscriptionNumber: 'A-S00504165',
-							additionalInfo: {
-								quantity: 1,
-								unitOfMeasure: '',
-								numberOfDeliveries: 0.0,
-							},
-						},
-						{
-							serviceStartDate: '2024-03-21',
-							serviceEndDate: '2025-03-20',
-							amountWithoutTax: 0.0,
-							taxAmount: 0.0,
-							chargeDescription: '',
-							chargeName: 'Contribution',
-							chargeNumber: null,
-							processingType: 'Charge',
-							productName: 'Supporter Plus',
-							productRatePlanChargeId: '8ad096ca858682bb0185881568385d73',
-							unitPrice: 0.0,
-							subscriptionNumber: 'A-S00504165',
-							orderLineItemNumber: null,
-							additionalInfo: {
-								quantity: 1,
-								unitOfMeasure: '',
-								numberOfDeliveries: 0.0,
-							},
-						},
-					],
-				},
-			],
+test('handleMissingRefundAmount() called on a date that is not the charge-through-date for a subscription will throw an error', () => {
+	const catalogInformation = {
+		supporterPlus: {
+			price: 95,
+			productRatePlanId: 'not_used',
+			subscriptionChargeId: '8ad08e1a858672180185880566606fad',
+			contributionChargeId: '8ad096ca858682bb0185881568385d73',
+		},
+		contribution: {
+			productRatePlanId: '2c92a0fc5e1dc084015e37f58c200eea',
+			chargeId: '2c92a0fc5e1dc084015e37f58c7b0f35',
 		},
 	};
+	const subscription = zuoraSubscriptionSchema.parse(
+		zuoraSubscriptionWithMonthlyContribution,
+	);
 
-	expect(function () {
-		previewResponseFromZuoraResponse(
-			apiResponse,
-			{
-				supporterPlus: {
-					price: 95,
-					productRatePlanId: 'not_used',
-					subscriptionChargeId: '8ad08e1a858672180185880566606fad',
-					contributionChargeId: '8ad096ca858682bb0185881568385d73',
-				},
-				contribution: {
-					productRatePlanId: 'not_used',
-					chargeId: '2c92c0f85e2d19af015e3896e84d092e',
-				},
-			},
-			subscription,
-		).contributionRefundAmount;
-	}).toThrow(
-		Error('No contribution refund amount found in the preview response'),
+	//Current value of charge-through-date is '2024-07-01'
+	const currentDate = new Date('2024-07-02');
+
+	expect(() =>
+		handleMissingRefundAmount(catalogInformation, subscription, currentDate),
+	).toThrow(
+		ReferenceError(
+			'No contribution refund amount found in the preview response',
+		),
 	);
 });
 

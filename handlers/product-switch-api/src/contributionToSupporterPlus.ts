@@ -7,7 +7,11 @@ import type {
 	PreviewOrderRequest,
 } from '@modules/zuora/orders';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
+import type {
+	RatePlan,
+	RatePlanCharge,
+	ZuoraSubscription,
+} from '@modules/zuora/zuoraSchemas';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import { removePendingUpdateAmendments } from './amendments';
@@ -15,7 +19,12 @@ import type { CatalogInformation } from './catalogInformation';
 import { takePaymentOrAdjustInvoice } from './payment';
 import { sendThankYouEmail } from './productSwitchEmail';
 import { sendSalesforceTracking } from './salesforceTracking';
-import type { ZuoraPreviewResponse, ZuoraSwitchResponse } from './schemas';
+import type {
+	ZuoraPreviewResponse,
+	ZuoraPreviewResponseInvoice,
+	ZuoraPreviewResponseInvoiceItem,
+	ZuoraSwitchResponse,
+} from './schemas';
 import {
 	zuoraPreviewResponseSchema,
 	zuoraSwitchResponseSchema,
@@ -56,30 +65,51 @@ export const switchToSupporterPlus = async (
 	};
 };
 
-const getContributionRefundAmount = (
-	zuoraResponse: ZuoraPreviewResponse,
+export const handleMissingRefundAmount = (
 	catalogInformation: CatalogInformation,
-	termStartDate: Date,
+	subscription: ZuoraSubscription,
+	currentDate: Date,
 ): number => {
-	const termStartDateDayOfMonth = termStartDate.getUTCDate();
-	const dayOfMonthToday = new Date().getUTCDate();
-
-	const invoice = getIfDefined(
-		zuoraResponse.previewResult?.invoices[0],
-		'No invoice found in the preview response',
+	const ratePlan = getIfDefined(
+		subscription.ratePlans.find(
+			(ratePlan: RatePlan) =>
+				ratePlan.productRatePlanId ===
+				catalogInformation.contribution.productRatePlanId,
+		),
+		'No matching RatePlan found in Subscription,',
 	);
 
-	const contributionRefundAmount = invoice.invoiceItems.find(
-		(invoiceItem) =>
+	const chargedThroughDate: Date = getIfDefined(
+		ratePlan.ratePlanCharges.find(
+			(ratePlanCharge: RatePlanCharge) =>
+				ratePlanCharge.productRatePlanChargeId ===
+				catalogInformation.contribution.chargeId,
+		)?.chargedThroughDate,
+		'No matching chargedThroughDate found in Subscription',
+	);
+
+	if (!(currentDate.toDateString() == chargedThroughDate.toDateString())) {
+		throw Error('No contribution refund amount found in the preview response');
+	}
+
+	return 0;
+};
+
+export const getContributionRefundAmount = (
+	zuoraPreviewInvoice: ZuoraPreviewResponseInvoice,
+	catalogInformation: CatalogInformation,
+	subscription: ZuoraSubscription,
+): number => {
+	const contributionRefundAmount = zuoraPreviewInvoice.invoiceItems.find(
+		(invoiceItem: ZuoraPreviewResponseInvoiceItem) =>
 			invoiceItem.productRatePlanChargeId ===
 			catalogInformation.contribution.chargeId,
 	)?.amountWithoutTax;
 
-	if (!contributionRefundAmount && termStartDateDayOfMonth != dayOfMonthToday) {
-		throw Error('No contribution refund amount found in the preview response');
-	}
-
-	return contributionRefundAmount ? contributionRefundAmount : 0;
+	return (
+		contributionRefundAmount ??
+		handleMissingRefundAmount(catalogInformation, subscription, new Date())
+	);
 };
 
 export const previewResponseFromZuoraResponse = (
@@ -87,25 +117,20 @@ export const previewResponseFromZuoraResponse = (
 	catalogInformation: CatalogInformation,
 	subscription: ZuoraSubscription,
 ): PreviewResponse => {
-	const termStartDate = getIfDefined(
-		subscription.termStartDate,
-		'Unable to find termStartDate for subscription',
-	);
-
-	const invoice = getIfDefined(
+	const invoice: ZuoraPreviewResponseInvoice = getIfDefined(
 		zuoraResponse.previewResult?.invoices[0],
 		'No invoice found in the preview response',
 	);
 
 	const contributionRefundAmount = getContributionRefundAmount(
-		zuoraResponse,
+		invoice,
 		catalogInformation,
-		termStartDate,
+		subscription,
 	);
 
 	const supporterPlusSubscriptionInvoiceItem = getIfDefined(
 		invoice.invoiceItems.find(
-			(invoiceItem) =>
+			(invoiceItem: ZuoraPreviewResponseInvoiceItem) =>
 				invoiceItem.productRatePlanChargeId ===
 				catalogInformation.supporterPlus.subscriptionChargeId,
 		),
@@ -132,6 +157,7 @@ export const previewResponseFromZuoraResponse = (
 		),
 	};
 };
+
 export const preview = async (
 	zuoraClient: ZuoraClient,
 	productSwitchInformation: SwitchInformation,
