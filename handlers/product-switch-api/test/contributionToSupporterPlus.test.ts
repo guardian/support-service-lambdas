@@ -220,11 +220,11 @@ test('handleMissingRefundAmount() called on the charge-through-date for a subscr
 		zuoraSubscriptionWithMonthlyContribution,
 	);
 
-	const chargeThroughDate =
+	const chargedThroughDate =
 		subscription.ratePlans[0]?.ratePlanCharges[0]?.chargedThroughDate;
-	if (!chargeThroughDate) {
+	if (!chargedThroughDate) {
 		throw Error(
-			'Problem with test data: zuoraSubscriptionWithMonthlyContribution should contain a charge-through-date',
+			'Problem with test data: zuoraSubscriptionWithMonthlyContribution should contain a charged-through-date',
 		);
 	}
 	const currentDate = new Date(chargeThroughDate);
