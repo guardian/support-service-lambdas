@@ -13,8 +13,8 @@ import com.typesafe.scalalogging.LazyLogging
 object Salesforce extends LazyLogging {
 
   // TODO: Move the batching into a step function/state machine
-  // For now we seem to handle ~800 per invocation comfortably and keeping the batching ensures some progress is saved
-  private val batchSize = 800
+  // For now we seem to handle ~800 per invocation and keeping the batching a bit lower ensures some progress is saved
+  private val batchSize = 700
 
   def holidayStopRequests(sfCredentials: SFAuthConfig)(
       productVariant: ZuoraProductType,
