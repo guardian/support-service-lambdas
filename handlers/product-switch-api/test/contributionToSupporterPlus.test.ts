@@ -14,7 +14,7 @@ import {
 import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import {
-	handleMissingRefundAmount,
+	refundExpected,
 	previewResponseFromZuoraResponse,
 } from '../src/contributionToSupporterPlus';
 import { buildEmailMessage } from '../src/productSwitchEmail';
@@ -227,11 +227,11 @@ test('handleMissingRefundAmount() called on the charge-through-date for a subscr
 			'Problem with test data: zuoraSubscriptionWithMonthlyContribution should contain a charged-through-date',
 		);
 	}
-	const currentDate = new Date(chargeThroughDate);
+	const currentDate = new Date(chargedThroughDate);
 
-	expect(
-		handleMissingRefundAmount(catalogInformation, subscription, currentDate),
-	).toBe(0);
+	expect(refundExpected(catalogInformation, subscription, currentDate)).toBe(
+		false,
+	);
 });
 
 test('handleMissingRefundAmount() called on a date that is not the charge-through-date for a subscription will throw an error', () => {
@@ -254,12 +254,8 @@ test('handleMissingRefundAmount() called on a date that is not the charge-throug
 	//Current value of charge-through-date is '2024-07-01'
 	const currentDate = new Date('2024-07-02');
 
-	expect(() =>
-		handleMissingRefundAmount(catalogInformation, subscription, currentDate),
-	).toThrow(
-		ReferenceError(
-			'No contribution refund amount found in the preview response',
-		),
+	expect(refundExpected(catalogInformation, subscription, currentDate)).toBe(
+		true,
 	);
 });
 

@@ -65,11 +65,11 @@ export const switchToSupporterPlus = async (
 	};
 };
 
-export const handleMissingRefundAmount = (
+export const refundExpected = (
 	catalogInformation: CatalogInformation,
 	subscription: ZuoraSubscription,
 	currentDate: Date,
-): number => {
+): boolean => {
 	const ratePlan = getIfDefined(
 		subscription.ratePlans.find(
 			(ratePlan: RatePlan) =>
@@ -88,11 +88,7 @@ export const handleMissingRefundAmount = (
 		'No matching chargedThroughDate found in Subscription',
 	);
 
-	if (!(currentDate.toDateString() == chargedThroughDate.toDateString())) {
-		throw Error('No contribution refund amount found in the preview response');
-	}
-
-	return 0;
+	return !(currentDate.toDateString() == chargedThroughDate.toDateString());
 };
 
 export const getContributionRefundAmount = (
@@ -105,11 +101,14 @@ export const getContributionRefundAmount = (
 			invoiceItem.productRatePlanChargeId ===
 			catalogInformation.contribution.chargeId,
 	)?.amountWithoutTax;
+	if (
+		contributionRefundAmount == undefined &&
+		refundExpected(catalogInformation, subscription, new Date())
+	) {
+		throw Error('No contribution refund amount found in the preview response');
+	}
 
-	return (
-		contributionRefundAmount ??
-		handleMissingRefundAmount(catalogInformation, subscription, new Date())
-	);
+	return contributionRefundAmount ?? 0;
 };
 
 export const previewResponseFromZuoraResponse = (
