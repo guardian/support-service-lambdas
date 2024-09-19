@@ -13,7 +13,7 @@ test('getDiscountFromSubscription should return an annual discount for an annual
 		name: 'Cancellation Save Discount - 25% off for 12 months',
 		upToPeriods: 12,
 		upToPeriodsType: 'Months',
-		sendEmail: false,
+		sendEmail: undefined,
 		eligibilityCheckForRatePlan: 'AtCatalogPrice',
 	};
 	const { discount, discountableProductRatePlanId } =

@@ -1,5 +1,7 @@
-import type { EmailMessageWithUserId } from '@modules/email/email';
-import { DataExtensionNames } from '@modules/email/email';
+import type {
+	DataExtensionName,
+	EmailMessageWithUserId,
+} from '@modules/email/email';
 import type dayjs from 'dayjs';
 
 export type EmailFields = {
@@ -11,14 +13,17 @@ export type EmailFields = {
 	identityId: string;
 };
 
-export const generateCancellationDiscountConfirmationEmail = ({
-	firstDiscountedPaymentDate,
-	nextNonDiscountedPaymentDate,
-	emailAddress,
-	firstName,
-	lastName,
-	identityId,
-}: EmailFields): EmailMessageWithUserId => ({
+export const generateCancellationDiscountConfirmationEmail = (
+	{
+		firstDiscountedPaymentDate,
+		nextNonDiscountedPaymentDate,
+		emailAddress,
+		firstName,
+		lastName,
+		identityId,
+	}: EmailFields,
+	dataExtensionName: DataExtensionName,
+): EmailMessageWithUserId => ({
 	To: {
 		Address: emailAddress,
 		ContactAttributes: {
@@ -32,6 +37,6 @@ export const generateCancellationDiscountConfirmationEmail = ({
 			},
 		},
 	},
-	DataExtensionName: DataExtensionNames.cancellationDiscountConfirmation,
+	DataExtensionName: dataExtensionName,
 	IdentityUserId: identityId,
 });
