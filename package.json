@@ -30,5 +30,6 @@
 		"prettier": "^3.3.3",
 		"ts-jest": "^29.2.4",
 		"typescript": "^5.2.2"
-	}
+	},
+	"packageManager": "pnpm@9.1.1"
 }

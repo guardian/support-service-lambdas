@@ -22,6 +22,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'acquisition-events-api',
 		'admin-console',
 		'apps-metering',
+		'apps-metering-exclusions-lambda',
 		'batch-email-sender',
 		'bigquery-acquisitions-publisher',
 		'component-event-stream',
@@ -29,7 +30,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'contributions-ticker-calculator',
 		'digital-voucher-api',
 		'dotcom-components',
-		'fulfilment-date-calculator',
 		...sharedMobilePurchasesApps,
 		'new-product-api',
 		'price-migration-engine-state-machine',
@@ -79,28 +79,30 @@ const teamToAppMappings: Record<Team, string[]> = {
 		// support-service-lambdas
 		'digital-voucher-suspension-processor',
 		'metric-push-api',
-
-		// other
-		'canonical-config',
 	],
 	PLATFORM: [
 		// fulfilment
 		'failed-national-delivery-processor',
 		'fulfilment-lambdas',
 		'national-delivery-fulfilment',
+		'fulfilment-date-calculator',
 
 		// salesforce
 		'salesforce-disaster-recovery',
 		'salesforce-disaster-recovery-health-check',
+		'single-contribution-salesforce-writes',
 
 		// zuora
 		'invoicing-api',
 		'zuora-oracle-fusion',
 
-		//data retention
+		// data retention
 		'identity-retention',
 		'zuora-retention', //https://github.com/guardian/zuora-retention
 		'zuora-salesforce-link-remover',
+
+		// finance
+		'canonical-config',
 	],
 };
 

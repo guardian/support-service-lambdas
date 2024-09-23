@@ -26,7 +26,9 @@ export const contributionToSupporterPlusEndpoint = async (
 	const input = productSwitchRequestSchema.parse(JSON.parse(body));
 	console.log(`Request body is ${prettyPrint(input)}`);
 	console.log('Getting the subscription and account details from Zuora');
+
 	const subscription = await getSubscription(zuoraClient, subscriptionNumber);
+
 	const account = await getAccount(zuoraClient, subscription.accountNumber);
 
 	const switchInformation = getSwitchInformationWithOwnerCheck(
@@ -37,8 +39,9 @@ export const contributionToSupporterPlusEndpoint = async (
 		productCatalog,
 		identityId,
 	);
+
 	const response = input.preview
-		? await preview(zuoraClient, switchInformation)
+		? await preview(zuoraClient, switchInformation, subscription)
 		: await switchToSupporterPlus(zuoraClient, switchInformation);
 
 	return {

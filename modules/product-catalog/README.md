@@ -44,6 +44,7 @@ The mapping between our object model and Zuora's catalog is defined in the files
 
 These files contain functions to generate the product catalog json from the Zuora catalog and also to create a type object which we use to define the types of which the catalog is comprised. This type object is written to `typeObject.ts` and checked into the repo. If it ever needs to be regenerated, it can be done so by running 
 ```shell
+# requires fresh Janus credentials
 pnpm --filter product-catalog generateTypes
 ```
 from the root of the repository.

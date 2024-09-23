@@ -314,6 +314,74 @@ export const productCatalogSchema = z.object({
 					.enum(typeObject.SupporterPlus.billingPeriods)
 					.optional(),
 			}),
+			RestOfWorldMonthlyV2: z.object({
+				id: z.string(),
+				pricing: z.object({
+					USD: z.number(),
+					GBP: z.number(),
+				}),
+				charges: z.object({
+					SupporterPlus: z.object({ id: z.string() }),
+					GuardianWeekly: z.object({ id: z.string() }),
+					NewspaperArchive: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z
+					.enum(typeObject.SupporterPlus.billingPeriods)
+					.optional(),
+			}),
+			RestOfWorldAnnualV2: z.object({
+				id: z.string(),
+				pricing: z.object({
+					USD: z.number(),
+					GBP: z.number(),
+				}),
+				charges: z.object({
+					SupporterPlus: z.object({ id: z.string() }),
+					GuardianWeekly: z.object({ id: z.string() }),
+					NewspaperArchive: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z
+					.enum(typeObject.SupporterPlus.billingPeriods)
+					.optional(),
+			}),
+			DomesticAnnualV2: z.object({
+				id: z.string(),
+				pricing: z.object({
+					USD: z.number(),
+					NZD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					CAD: z.number(),
+					AUD: z.number(),
+				}),
+				charges: z.object({
+					SupporterPlus: z.object({ id: z.string() }),
+					GuardianWeekly: z.object({ id: z.string() }),
+					NewspaperArchive: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z
+					.enum(typeObject.SupporterPlus.billingPeriods)
+					.optional(),
+			}),
+			DomesticMonthlyV2: z.object({
+				id: z.string(),
+				pricing: z.object({
+					USD: z.number(),
+					NZD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					CAD: z.number(),
+					AUD: z.number(),
+				}),
+				charges: z.object({
+					SupporterPlus: z.object({ id: z.string() }),
+					GuardianWeekly: z.object({ id: z.string() }),
+					NewspaperArchive: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z
+					.enum(typeObject.SupporterPlus.billingPeriods)
+					.optional(),
+			}),
 		}),
 	}),
 	GuardianWeeklyRestOfWorld: z.object({

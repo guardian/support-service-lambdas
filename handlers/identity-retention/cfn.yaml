@@ -228,5 +228,5 @@ Resources:
         Namespace: AWS/ApiGateway
         Period: 3600
         Statistic: Sum
-        Threshold: 5
+        Threshold: 10
         TreatMissingData: notBreaching

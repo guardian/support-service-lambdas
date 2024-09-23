@@ -30,19 +30,17 @@ export const sortBy = <T>(array: T[], fn: (item: T) => string): T[] => {
 export const getSingleOrThrow = <T>(
 	array: T[],
 	error: (msg: string) => Error,
-	filter?: (element: T) => boolean,
 ): T => {
-	const matchingElements = filter ? array.filter(filter) : array;
-	if (matchingElements.length > 1) {
+	if (array.length > 1) {
 		throw error('Array had more than one matching element');
 	}
-	if (matchingElements.length < 1) {
+	if (array.length < 1) {
 		throw error('Array had no matching elements');
 	}
-	if (!matchingElements[0]) {
+	if (!array[0]) {
 		throw error('Matching element was null or undefined');
 	}
-	return matchingElements[0];
+	return array[0];
 };
 
 export const findDuplicates = <T>(array: T[]) =>

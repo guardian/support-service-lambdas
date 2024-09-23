@@ -11,32 +11,40 @@ export type ProductSwitchRequestBody = z.infer<
 	typeof productSwitchRequestSchema
 >;
 
+export const zuoraPreviewResponseInvoiceItemSchema = z.object({
+	serviceStartDate: z.string(),
+	serviceEndDate: z.string(),
+	amountWithoutTax: z.number(),
+	taxAmount: z.number(),
+	chargeName: z.string(),
+	processingType: z.string(),
+	productName: z.string(),
+	productRatePlanChargeId: z.string(),
+	unitPrice: z.number(),
+	subscriptionNumber: z.string(),
+});
+
+export type ZuoraPreviewResponseInvoiceItem = z.infer<
+	typeof zuoraPreviewResponseInvoiceItemSchema
+>;
+
+export const zuoraPreviewResponseInvoiceSchema = z.object({
+	amount: z.number(),
+	amountWithoutTax: z.number(),
+	taxAmount: z.number(),
+	targetDate: z.string(),
+	invoiceItems: z.array(zuoraPreviewResponseInvoiceItemSchema),
+});
+
+export type ZuoraPreviewResponseInvoice = z.infer<
+	typeof zuoraPreviewResponseInvoiceSchema
+>;
+
 export const zuoraPreviewResponseSchema = z.object({
 	success: z.boolean(),
 	previewResult: z.optional(
 		z.object({
-			invoices: z.array(
-				z.object({
-					amount: z.number(),
-					amountWithoutTax: z.number(),
-					taxAmount: z.number(),
-					targetDate: z.string(),
-					invoiceItems: z.array(
-						z.object({
-							serviceStartDate: z.string(),
-							serviceEndDate: z.string(),
-							amountWithoutTax: z.number(),
-							taxAmount: z.number(),
-							chargeName: z.string(),
-							processingType: z.string(),
-							productName: z.string(),
-							productRatePlanChargeId: z.string(),
-							unitPrice: z.number(),
-							subscriptionNumber: z.string(),
-						}),
-					),
-				}),
-			),
+			invoices: z.array(zuoraPreviewResponseInvoiceSchema),
 		}),
 	),
 	reasons: z.optional(z.array(z.object({ message: z.string() }))),
