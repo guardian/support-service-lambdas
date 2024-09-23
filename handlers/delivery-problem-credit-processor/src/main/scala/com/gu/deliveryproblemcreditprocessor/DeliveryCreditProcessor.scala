@@ -12,7 +12,13 @@ import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig}
 import com.gu.util.Logging
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.{ConfigLocation, LoadConfigModule, Stage}
-import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, NewspaperNationalDelivery, TierThree, ZuoraProductType}
+import com.gu.zuora.ZuoraProductTypes.{
+  GuardianWeekly,
+  NewspaperHomeDelivery,
+  NewspaperNationalDelivery,
+  TierThree,
+  ZuoraProductType,
+}
 import com.gu.zuora.subscription._
 import com.gu.zuora.{AccessToken, HolidayStopProcessorZuoraConfig, Zuora}
 import io.circe.generic.auto._
@@ -76,14 +82,18 @@ object DeliveryCreditProcessor extends Logging {
     } yield creditResults.flatten
   }
 
-  def gatherCreditResults(processResult: ProcessResult[DeliveryCreditResult]): Task[List[DeliveryCreditResult]] =
+  def gatherCreditResults(processResults: List[ProcessResult[DeliveryCreditResult]]): Task[List[DeliveryCreditResult]] =
     for {
-      _ <- Task.effect(ProcessResult.log(processResult))
-      _ <- Task.effect(processResult.overallFailure).flatMap {
-        case None => Task.succeed(())
-        case Some(e) => Task.fail(new RuntimeException(e.reason))
+      _ <- Task.effect(ProcessResult.log(processResults))
+      _ <- Task.effect(processResults).map { pr =>
+        pr.map {
+          _.overallFailure match {
+            case None => Task.succeed(())
+            case Some(e) => Task.fail(new RuntimeException(e.reason))
+          }
+        }
       }
-      results <- Task.foreach(processResult.creditResults) { result =>
+      results <- Task.foreach(processResults.flatMap(_.creditResults)) { result =>
         ZIO.fromEither(result).mapError(e => new RuntimeException(e.reason))
       }
     } yield results
@@ -92,7 +102,7 @@ object DeliveryCreditProcessor extends Logging {
       sfAuthConfig: SFAuthConfig,
       zuoraConfig: HolidayStopProcessorZuoraConfig,
       zuoraAccessToken: AccessToken,
-  )(productType: ZuoraProductType): Task[ProcessResult[DeliveryCreditResult]] =
+  )(productType: ZuoraProductType): Task[List[ProcessResult[DeliveryCreditResult]]] =
     for {
       processResult <- Task.effect(
         Processor
