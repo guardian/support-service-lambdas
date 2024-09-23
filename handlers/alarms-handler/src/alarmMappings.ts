@@ -45,6 +45,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'contact-us-api',
 		'delivery-records-api',
 		'delivery-problem-credit-processor',
+		'discount-api',
 		'holiday-stop-api',
 		'holiday-stop-processor',
 		'soft-opt-in-consent-setter',
