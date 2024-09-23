@@ -12,8 +12,17 @@ import com.typesafe.scalalogging.LazyLogging
 
 object Salesforce extends LazyLogging {
 
-  // TODO: Move the batching into a step function/state machine
-  // For now we seem to handle ~800 per invocation and keeping the batching a bit lower ensures some progress is saved
+  /** In August 2024 some issues around scale became apparent:
+    * https://docs.google.com/document/d/1yw21fs1sW41qrtQNdOhlPbclXdsi4zvZV4W8iIl_GIE/edit#heading=h.p2ta3sj6yk1r
+    *
+    * After some investigation and discussion, the following document was produced with options for improvement:
+    *
+    * https://docs.google.com/document/d/1ac4UF2Pe3Kh9KiOdpvj8-XUlPxgNFEnPqW2UL1-02ns/edit
+    *
+    * For now we seem to handle ~800 per invocation and keeping the batching a bit lower than threshold assures some
+    * progress is saved and there isn't slow down due to starvation
+    */
+
   private val batchSize = 700
 
   def holidayStopRequests(sfCredentials: SFAuthConfig)(
