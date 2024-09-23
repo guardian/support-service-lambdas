@@ -38,7 +38,7 @@ object Processor {
       writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_],
       getAccount: String => ZuoraApiResponse[ZuoraAccount],
       getNextInvoiceDate: String => ZuoraApiResponse[LocalDate] = null, // FIXME
-  ): ProcessResult[Result] = {
+  ): List[ProcessResult[Result]] = {
 
     def getSubscription(
         subscriptionName: SubscriptionName,
@@ -92,7 +92,7 @@ object Processor {
       resultOfZuoraCreditAdd: (Request, RatePlanCharge) => Result,
       writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_],
       getNextInvoiceDate: String => ZuoraApiResponse[LocalDate] = null, // FIXME,
-  ): ProcessResult[Result] = {
+  ): List[ProcessResult[Result]] = {
     val creditRequestsFromSalesforce = for {
       datesToProcess <- getDatesToProcess(fulfilmentDatesFetcher, productType, processOverrideDate, LocalDate.now())
       _ = logger.info(s"Processing credits for ${productType.name} for issue dates ${datesToProcess.mkString(", ")}")
@@ -102,7 +102,7 @@ object Processor {
 
     creditRequestsFromSalesforce match {
       case Left(sfReadError) =>
-        ProcessResult(Nil, Nil, Nil, Some(OverallFailure(sfReadError.reason)))
+        List(ProcessResult(Nil, Nil, Nil, Some(OverallFailure(sfReadError.reason))))
 
       case Right(creditRequestsFromSalesforce) =>
         val creditRequests = creditRequestsFromSalesforce.distinct
@@ -127,39 +127,55 @@ object Processor {
 
         creditRequestBatches.tasksupport = new ForkJoinTaskSupport(forkJoinPool)
 
-        val allZuoraCreditResponses = (
-          for {
-            batch <- creditRequestBatches
-            request <- batch
-          } yield addCreditToSubscription(
-            creditProduct,
-            getSubscription,
-            getAccount,
-            updateToApply,
-            updateSubscription,
-            resultOfZuoraCreditAdd,
-            getNextInvoiceDate,
-          )(request)
-        ).toList
+        val processResults =
+          creditRequestBatches
+            .map { requests =>
+              val overallResult = requests.map { creditRequest =>
+                val zuoraApiResponse = addCreditToSubscription(
+                  creditProduct,
+                  getSubscription,
+                  getAccount,
+                  updateToApply,
+                  updateSubscription,
+                  resultOfZuoraCreditAdd,
+                  getNextInvoiceDate,
+                )(creditRequest)
 
-        forkJoinPool.shutdown()
+                val sfResult = zuoraApiResponse
+                  .map { creditAddResult =>
+                    val notAlreadyActionedCredits =
+                      List(creditAddResult).filterNot(v => alreadyActionedCredits.contains(v.chargeCode))
+                    val salesForceResponse = writeCreditResultsToSalesforce(
+                      notAlreadyActionedCredits,
+                    )
 
-        val (failedZuoraResponses, successfulZuoraResponses) = allZuoraCreditResponses.separate
-        val notAlreadyActionedCredits =
-          successfulZuoraResponses.filterNot(v => alreadyActionedCredits.contains(v.chargeCode))
-        val salesforceExportResult = writeCreditResultsToSalesforce(notAlreadyActionedCredits)
-        ProcessResult(
-          creditRequests,
-          allZuoraCreditResponses,
-          notAlreadyActionedCredits,
-          OverallFailure(failedZuoraResponses, salesforceExportResult),
-        )
+                    ProcessResult(
+                      creditRequests,
+                      List(zuoraApiResponse),
+                      notAlreadyActionedCredits,
+                      OverallFailure(List.empty, salesForceResponse),
+                    )
+                  }
+                  .leftMap { failure =>
+                    ProcessResult(
+                      creditRequests,
+                      List(zuoraApiResponse),
+                      List.empty,
+                      Some(OverallFailure(failure.reason)),
+                    )
+                  }
+                sfResult
+              }
+              forkJoinPool.shutdown()
+              overallResult
+            }
+        processResults.toList.flatten.map(_.merge)
     }
   }
 
   // FIXME: Temporary test in production to validate migration to https://github.com/guardian/invoicing-api/pull/20
-  import scala.concurrent.{ExecutionContext, Future}
   import java.util.concurrent.Executors
+  import scala.concurrent.{ExecutionContext, Future}
 
   private val ecForTestInProd = ExecutionContext.fromExecutor(Executors.newSingleThreadExecutor)
   private def testInProdNextInvoiceDate(

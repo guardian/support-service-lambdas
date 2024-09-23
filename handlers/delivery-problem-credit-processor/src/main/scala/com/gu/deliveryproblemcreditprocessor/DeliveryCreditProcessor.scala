@@ -219,12 +219,8 @@ object DeliveryCreditProcessor extends Logging {
       .leftMap { e =>
         SalesforceApiFailure(e.message)
       }
-      .flatMap { salesforceClient =>
-        val requestConcurrency = 20
-        val forkJoinPool = new java.util.concurrent.ForkJoinPool(requestConcurrency)
-        val parRes = results.par
-        parRes.tasksupport = new ForkJoinTaskSupport(forkJoinPool)
-        val processed = parRes.map { result =>
+      .map { salesforceClient =>
+        results.parTraverse { result =>
           val actioned = DeliveryCreditActioned(
             Charge_Code__c = result.chargeCode.value,
             Credit_Amount__c = result.amountCredited.value,
@@ -240,9 +236,7 @@ object DeliveryCreditProcessor extends Logging {
             .leftMap { e =>
               SalesforceApiFailure(e.message)
             }
-        }.toList.sequence
-        forkJoinPool.shutdown()
-        processed
+        }
       }
 
     /*

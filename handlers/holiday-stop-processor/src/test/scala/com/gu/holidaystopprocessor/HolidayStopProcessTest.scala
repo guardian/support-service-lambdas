@@ -223,7 +223,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       ZuoraHolidayCreditAddResult.apply,
       exportAmendments(Right(())),
     )
-    responses.creditResults.headOption.value.right.value shouldBe ZuoraHolidayCreditAddResult(
+    responses.head.creditResults.headOption.value.right.value shouldBe ZuoraHolidayCreditAddResult(
       requestId = HolidayStopRequestsDetailId("R1"),
       subscriptionName = SubscriptionName("S1"),
       productName = ProductName("Gu Weekly"),
@@ -232,7 +232,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       actualPrice = Price(-5.81),
       pubDate = AffectedPublicationDate(LocalDate.of(2019, 8, 2)),
     )
-    responses.creditResults.lastOption.value.right.value shouldBe ZuoraHolidayCreditAddResult(
+    responses.last.creditResults.lastOption.value.right.value shouldBe ZuoraHolidayCreditAddResult(
       requestId = HolidayStopRequestsDetailId("R3"),
       subscriptionName = SubscriptionName("S1"),
       productName = ProductName("Gu Weekly"),
@@ -312,7 +312,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       ZuoraHolidayCreditAddResult.apply,
       exportAmendments(Right(())),
     )
-    responses.resultsToExport shouldBe List(
+    responses.flatMap(_.resultsToExport) shouldBe List(
       ZuoraHolidayCreditAddResult(
         HolidayStopRequestsDetailId("R1"),
         subscriptionName = SubscriptionName("S1"),
@@ -331,21 +331,31 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       (_, _) =>
         Right(
           List(
-            Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("r1"), ""),
-            Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("r2"), ""),
-            Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(Fixtures.mkHolidayStopRequest("r3"), ""),
+            Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(
+              Fixtures.mkHolidayStopRequest("R1", LocalDate.of(2019, 8, 2)),
+              "C1",
+            ),
+            Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(
+              Fixtures.mkHolidayStopRequest("R2", LocalDate.of(2019, 9, 1)),
+              "C3",
+            ),
+            Fixtures.mkHolidayStopRequestDetailsFromHolidayStopRequest(
+              Fixtures.mkHolidayStopRequest("R3", LocalDate.of(2019, 8, 9)),
+              "C4",
+            ),
           ),
         ),
       fulfilmentDatesFetcher,
       None,
       ZuoraProductTypes.GuardianWeekly,
-      _ => Right(subscription),
+      _ => Right(Fixtures.mkSubscriptionWithHolidayStops()),
       getAccount(Fixtures.mkAccount().asRight),
       updateToApply,
       updateSubscription(Right(())),
       ZuoraHolidayCreditAddResult.apply,
       exportAmendments(Left(SalesforceApiFailure("Export failed"))),
     )
-    responses.overallFailure.value shouldBe OverallFailure("Export failed")
+
+    responses.map(_.overallFailure) should contain(Some(OverallFailure("Export failed")))
   }
 }
