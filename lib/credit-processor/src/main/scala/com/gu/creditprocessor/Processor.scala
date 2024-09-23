@@ -117,7 +117,6 @@ object Processor {
             .groupBy(_.subscriptionName)
             .values
             .toList
-            .flatten
             .par
 
         val requestConcurrency = 20
@@ -127,19 +126,21 @@ object Processor {
         val forkJoinPool = new java.util.concurrent.ForkJoinPool(requestConcurrency)
 
         creditRequestBatches.tasksupport = new ForkJoinTaskSupport(forkJoinPool)
-        val allZuoraCreditResponses = creditRequestBatches
-          .map(creditRequest =>
-            addCreditToSubscription(
-              creditProduct,
-              getSubscription,
-              getAccount,
-              updateToApply,
-              updateSubscription,
-              resultOfZuoraCreditAdd,
-              getNextInvoiceDate,
-            )(creditRequest),
-          )
-          .toList
+
+        val allZuoraCreditResponses = (
+          for {
+            batch <- creditRequestBatches
+            request <- batch
+          } yield addCreditToSubscription(
+            creditProduct,
+            getSubscription,
+            getAccount,
+            updateToApply,
+            updateSubscription,
+            resultOfZuoraCreditAdd,
+            getNextInvoiceDate,
+          )(request)
+        ).toList
 
         forkJoinPool.shutdown()
 
