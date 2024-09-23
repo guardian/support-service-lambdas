@@ -144,7 +144,7 @@ export class DiscountApi extends GuStack {
 			),
 			evaluationPeriods: 1,
 			threshold: 1,
-			snsTopicName: 'retention-dev',
+			snsTopicName: 'alarms-handler-topic-PROD',
 			actionsEnabled: this.stage === 'PROD',
 			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 			metric: new Metric({
