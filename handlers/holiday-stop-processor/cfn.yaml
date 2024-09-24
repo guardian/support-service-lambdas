@@ -133,7 +133,7 @@ Resources:
     Properties:
       Description: Trigger processing of holiday stops every 20 mins (to ensure successful processing of all batches within 24 hours)
       Name: !FindInMap [StageMap, !Ref Stage, ScheduleName]
-      ScheduleExpression: "cron(0/30 * ? * * *)"
+      ScheduleExpression: "cron(0/20 * ? * * *)"
       State: ENABLED
       Targets:
         - Arn: !GetAtt HolidayStopProcessor.Arn
@@ -153,11 +153,12 @@ Resources:
       - HolidayStopProcessor
       - HolidayStopProcessorScheduleRule
 
+  # As processor runs every 20 mins anyway, there's no need to retry
   HolidayStopProcessorRetryConfig:
     Type: AWS::Lambda::EventInvokeConfig
     Properties:
       FunctionName: !Ref HolidayStopProcessor
-      MaximumRetryAttempts: 1
+      MaximumRetryAttempts: 0
       Qualifier: '$LATEST'
     DependsOn:
       - HolidayStopProcessor
