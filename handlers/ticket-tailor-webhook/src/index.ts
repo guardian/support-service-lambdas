@@ -1,4 +1,5 @@
 import type { SQSEvent, SQSRecord } from 'aws-lambda';
+import { putMetric } from './cloudwatch';
 import { createGuestAccount, fetchUserType } from './idapiService';
 import { validateRequest } from './validateRequest';
 
@@ -40,6 +41,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				await processValidSqsRecord(sqsRecord);
 			} else {
 				console.error('Request failed validation. Processing terminated.');
+				await putMetric('ticket-tailor-webhook-validation-failure');
 				return;
 			}
 		},

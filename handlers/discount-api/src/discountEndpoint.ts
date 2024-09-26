@@ -138,14 +138,17 @@ export const applyDiscountEndpoint = async (
 	);
 
 	const emailPayload = discount.sendEmail
-		? generateCancellationDiscountConfirmationEmail({
-				firstDiscountedPaymentDate: dayjs(dateToApply),
-				nextNonDiscountedPaymentDate: dayjs(nextPaymentDate),
-				emailAddress: account.billToContact.workEmail,
-				firstName: account.billToContact.firstName,
-				lastName: account.billToContact.lastName,
-				identityId: account.basicInfo.identityId,
-			})
+		? generateCancellationDiscountConfirmationEmail(
+				{
+					firstDiscountedPaymentDate: dayjs(dateToApply),
+					nextNonDiscountedPaymentDate: dayjs(nextPaymentDate),
+					emailAddress: account.billToContact.workEmail,
+					firstName: account.billToContact.firstName,
+					lastName: account.billToContact.lastName,
+					identityId: account.basicInfo.identityId,
+				},
+				discount.sendEmail,
+			)
 		: undefined;
 
 	return {
@@ -222,6 +225,8 @@ async function getDiscountToApply(
 				discountableProductRatePlanId,
 				account.metrics.currency,
 			);
+			break;
+		case 'NoCheck':
 			break;
 	}
 

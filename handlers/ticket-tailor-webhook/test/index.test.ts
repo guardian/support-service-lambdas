@@ -23,7 +23,7 @@ const validEpochSeconds =
 	Number(validSQSRecordTimestamp) + maxValidTimeWindowSeconds;
 
 beforeEach(() => {
-	process.env.Stage = 'CODE';
+	process.env.Stage = 'DEV';
 	fetchMock.restore();
 });
 

@@ -33,6 +33,14 @@ const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 	'Supporter Plus & Guardian Weekly Domestic - Monthly': 'DomesticMonthly',
 	'Supporter Plus & Guardian Weekly ROW - Annual': 'RestOfWorldAnnual',
 	'Supporter Plus & Guardian Weekly Domestic - Annual': 'DomesticAnnual',
+	'Supporter Plus, Guardian Weekly ROW & Archive - Monthly':
+		'RestOfWorldMonthlyV2',
+	'Supporter Plus, Guardian Weekly Domestic & Archive - Monthly':
+		'DomesticMonthlyV2',
+	'Supporter Plus, Guardian Weekly ROW & Archive - Annual':
+		'RestOfWorldAnnualV2',
+	'Supporter Plus, Guardian Weekly Domestic & Archive - Annual':
+		'DomesticAnnualV2',
 	'GW Oct 18 - Annual - ROW': 'Annual',
 	'GW Oct 18 - Monthly - ROW': 'Monthly',
 	'GW Oct 18 - Quarterly - ROW': 'Quarterly',
@@ -87,6 +95,7 @@ const zuoraCatalogToProductRatePlanChargeKey: Record<string, string> = {
 	Friday: 'Friday',
 	'Supporter Plus': 'SupporterPlus',
 	'Guardian Weekly': 'GuardianWeekly',
+	'Newspaper Archive': 'NewspaperArchive',
 } as const;
 export const getZuoraProductKey = (product: string): string => {
 	return getIfDefined(

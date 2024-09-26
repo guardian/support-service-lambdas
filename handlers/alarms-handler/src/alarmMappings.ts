@@ -22,6 +22,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'acquisition-events-api',
 		'admin-console',
 		'apps-metering',
+		'apps-metering-exclusions-lambda',
 		'batch-email-sender',
 		'bigquery-acquisitions-publisher',
 		'component-event-stream',
@@ -29,7 +30,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'contributions-ticker-calculator',
 		'digital-voucher-api',
 		'dotcom-components',
-		'fulfilment-date-calculator',
 		...sharedMobilePurchasesApps,
 		'new-product-api',
 		'price-migration-engine-state-machine',
@@ -45,6 +45,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'contact-us-api',
 		'delivery-records-api',
 		'delivery-problem-credit-processor',
+		'discount-api',
 		'holiday-stop-api',
 		'holiday-stop-processor',
 		'soft-opt-in-consent-setter',
@@ -85,6 +86,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'failed-national-delivery-processor',
 		'fulfilment-lambdas',
 		'national-delivery-fulfilment',
+		'fulfilment-date-calculator',
 
 		// salesforce
 		'salesforce-disaster-recovery',

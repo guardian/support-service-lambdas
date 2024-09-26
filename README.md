@@ -12,8 +12,22 @@ Please keep all the various README in this project up to date, and improve them!
 There should be one in each project and anywhere else you think it would help.
 
 ## Getting Started - Typescript
-We use [pnpm](https://pnpm.io/) as a package manager so make sure you have it [installed](https://pnpm.io/installation), 
-`brew install pnpm` is a simple way to do this, then run `pnpm install` from the root of the repo to install all dependencies.
+
+Install [Node.js](https://nodejs.org). The Node version is required is encoded in the `.nvmrc` file at the root of the repo.
+We recommend using a Node version manager such as [fnm](https://github.com/Schniz/fnm).
+
+Once Node is installed and you're using the correct version, install the correct package manager (currently [pnpm](https://pnpm.io/))
+with [corepack](https://github.com/nodejs/corepack) (from the root of the repo):
+
+```
+$ corepack enable
+```
+
+Then install dependencies (again, from the root of the repo):
+
+```
+$ pnpm install
+```
 
 Each lambda is a separate [pnpm workspace](https://pnpm.io/workspaces) which allows us to define common settings and
 dependencies for all projects, add dependencies between projects build all projects at once and generally facilitates 

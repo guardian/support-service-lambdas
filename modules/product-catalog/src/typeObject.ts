@@ -3,6 +3,26 @@ export const typeObject = {
 		currencies: ['USD', 'GBP'],
 		billingPeriods: ['Month', 'Annual'],
 		productRatePlans: {
+			DomesticMonthlyV2: {
+				SupporterPlus: {},
+				GuardianWeekly: {},
+				NewspaperArchive: {},
+			},
+			DomesticAnnualV2: {
+				NewspaperArchive: {},
+				SupporterPlus: {},
+				GuardianWeekly: {},
+			},
+			RestOfWorldMonthlyV2: {
+				SupporterPlus: {},
+				GuardianWeekly: {},
+				NewspaperArchive: {},
+			},
+			RestOfWorldAnnualV2: {
+				NewspaperArchive: {},
+				SupporterPlus: {},
+				GuardianWeekly: {},
+			},
 			RestOfWorldMonthly: {
 				SupporterPlus: {},
 				GuardianWeekly: {},

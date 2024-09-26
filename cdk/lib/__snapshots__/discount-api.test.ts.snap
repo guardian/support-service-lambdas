@@ -62,7 +62,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
                 {
                   "Ref": "AWS::AccountId",
                 },
-                ":retention-dev",
+                ":alarms-handler-topic-PROD",
               ],
             ],
           },
@@ -1030,7 +1030,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
                 {
                   "Ref": "AWS::AccountId",
                 },
-                ":retention-dev",
+                ":alarms-handler-topic-PROD",
               ],
             ],
           },
