@@ -44,7 +44,7 @@ export type Discount = {
 	name: string;
 	upToPeriods: number;
 	upToPeriodsType: string;
-	sendEmail?: DataExtensionName;
+	emailIdentifier?: DataExtensionName;
 	eligibilityCheckForRatePlan?: EligibilityCheck;
 };
 
@@ -92,7 +92,7 @@ const Discounts: (stage: Stage) => { [K in string]: Discount } = (
 			name: 'Cancellation Save Discount - Free for 2 months',
 			upToPeriods: 2,
 			upToPeriodsType: 'Months',
-			sendEmail: dataExtensionName,
+			emailIdentifier: dataExtensionName,
 			eligibilityCheckForRatePlan: eligibilityCheckForRatePlan,
 		};
 	};
@@ -106,7 +106,7 @@ const Discounts: (stage: Stage) => { [K in string]: Discount } = (
 			name: 'Cancellation Save Discount - 25% off for 3 months',
 			upToPeriods: 3,
 			upToPeriodsType: 'Months',
-			sendEmail: undefined,
+			emailIdentifier: undefined,
 			eligibilityCheckForRatePlan: 'AtCatalogPrice',
 		},
 		cancellation25pc12mo: {
@@ -117,7 +117,7 @@ const Discounts: (stage: Stage) => { [K in string]: Discount } = (
 			name: 'Cancellation Save Discount - 25% off for 12 months',
 			upToPeriods: 12,
 			upToPeriodsType: 'Months',
-			sendEmail: undefined,
+			emailIdentifier: undefined,
 			eligibilityCheckForRatePlan: 'AtCatalogPrice',
 		},
 		cancellationFree2MoSP: getCancellationFree2Mo(

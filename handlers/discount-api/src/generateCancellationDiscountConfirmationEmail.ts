@@ -14,29 +14,22 @@ export type EmailFields = {
 };
 
 export const generateCancellationDiscountConfirmationEmail = (
-	{
-		firstDiscountedPaymentDate,
-		nextNonDiscountedPaymentDate,
-		emailAddress,
-		firstName,
-		lastName,
-		identityId,
-	}: EmailFields,
+	emailFields: EmailFields,
 	dataExtensionName: DataExtensionName,
 ): EmailMessageWithUserId => ({
 	To: {
-		Address: emailAddress,
+		Address: emailFields.emailAddress,
 		ContactAttributes: {
 			SubscriberAttributes: {
-				first_name: firstName,
-				last_name: lastName,
+				first_name: emailFields.firstName,
+				last_name: emailFields.lastName,
 				first_discounted_payment_date:
-					firstDiscountedPaymentDate.format('DD MMMM YYYY'),
+					emailFields.firstDiscountedPaymentDate.format('DD MMMM YYYY'),
 				next_non_discounted_payment_date:
-					nextNonDiscountedPaymentDate.format('DD MMMM YYYY'),
+					emailFields.nextNonDiscountedPaymentDate.format('DD MMMM YYYY'),
 			},
 		},
 	},
 	DataExtensionName: dataExtensionName,
-	IdentityUserId: identityId,
+	IdentityUserId: emailFields.identityId,
 });
