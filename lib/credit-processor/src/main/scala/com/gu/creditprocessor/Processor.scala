@@ -141,34 +141,43 @@ object Processor {
                   getNextInvoiceDate,
                 )(creditRequest)
 
-                val sfResult = zuoraApiResponse
-                  .map { creditAddResult =>
-                    val notAlreadyActionedCredits =
-                      List(creditAddResult).filterNot(v => alreadyActionedCredits.contains(v.chargeCode))
-                    val salesForceResponse = writeCreditResultsToSalesforce(
-                      notAlreadyActionedCredits,
+                val sfResult =
+                  zuoraApiResponse
+                    .map(ar => updateSaleforce(creditRequests, zuoraApiResponse, ar))
+                    .leftMap(failure =>
+                      ProcessResult(
+                        creditRequests,
+                        List(zuoraApiResponse),
+                        List.empty,
+                        Some(OverallFailure(failure.reason)),
+                      ),
                     )
 
-                    ProcessResult(
-                      creditRequests,
-                      List(zuoraApiResponse),
-                      notAlreadyActionedCredits,
-                      OverallFailure(List.empty, salesForceResponse),
-                    )
-                  }
-                  .leftMap { failure =>
-                    ProcessResult(
-                      creditRequests,
-                      List(zuoraApiResponse),
-                      List.empty,
-                      Some(OverallFailure(failure.reason)),
-                    )
-                  }
                 sfResult
               }
               forkJoinPool.shutdown()
               overallResult
             }
+
+        def updateSaleforce(
+            creditRequests: List[Request],
+            zuoraApiResponse: ZuoraApiResponse[Result],
+            creditAddResult: Result,
+        ) = {
+          val notAlreadyActionedCredits =
+            List(creditAddResult).filterNot(v => alreadyActionedCredits.contains(v.chargeCode))
+          val salesForceResponse = writeCreditResultsToSalesforce(
+            notAlreadyActionedCredits,
+          )
+
+          ProcessResult(
+            creditRequests,
+            List(zuoraApiResponse),
+            notAlreadyActionedCredits,
+            OverallFailure(List.empty, salesForceResponse),
+          )
+        }
+
         processResults.toList.flatten.map(_.merge)
     }
   }
@@ -255,4 +264,5 @@ object Processor {
           .map(error => ZuoraApiFailure(s"Failed to fetch fulfilment dates: $error")),
       )(processOverRideDate => List(processOverRideDate).asRight)
   }
+
 }
