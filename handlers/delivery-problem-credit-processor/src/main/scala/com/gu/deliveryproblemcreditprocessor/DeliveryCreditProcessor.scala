@@ -229,8 +229,8 @@ object DeliveryCreditProcessor extends Logging {
       .leftMap { e =>
         SalesforceApiFailure(e.message)
       }
-      .map { salesforceClient =>
-        results.parTraverse { result =>
+      .flatMap { salesforceClient =>
+        results.map { result =>
           val actioned = DeliveryCreditActioned(
             Charge_Code__c = result.chargeCode.value,
             Credit_Amount__c = result.amountCredited.value,
@@ -246,7 +246,7 @@ object DeliveryCreditProcessor extends Logging {
             .leftMap { e =>
               SalesforceApiFailure(e.message)
             }
-        }
+        }.sequence
       }
 
     /*
