@@ -5,12 +5,12 @@ import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.ZuoraEnvironment
 import com.gu.effects.S3Location
-import com.gu.util.resthttp.Types.ClientFailableOp
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import play.api.libs.json.{Json, Reads}
 import ZuoraCatalogWireModel._
 import com.gu.i18n.Currency
 
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 case class PlanWithPrice(planId: PlanId, priceMinorUnits: Map[Currency, AmountMinorUnits])
 
@@ -113,8 +113,8 @@ object PricesFromZuoraCatalog {
       zuoraEnvironment: ZuoraEnvironment,
       fetchString: StringFromS3,
       planIdFor: ProductRatePlanId => Option[PlanId],
-  ): ClientFailableOp[Map[PlanId, Map[Currency, AmountMinorUnits]]] = {
-    val tryPrices = for {
+  ): Try[Map[PlanId, Map[Currency, AmountMinorUnits]]] =
+    for {
       catalogString <- fetchString(
         S3Location(
           bucket = "gu-zuora-catalog",
@@ -129,6 +129,4 @@ object PricesFromZuoraCatalog {
       parsed = wireCatalog.toParsedPlans(planIdFor)
     } yield parsed
 
-    tryPrices.toClientFailable(action = "get prices from zuora")
-  }
 }

@@ -38,7 +38,7 @@ object SalesforceSFSubscription extends Logging {
         .map(_.records.headOption)
         .runRequestMultiArg
 
-    def toRequest(subscriptionName: SubscriptionName, contact: Contact) = {
+    private def toRequest(subscriptionName: SubscriptionName, contact: Contact) = {
       val soqlQuery = s"SELECT Id, Name, Product_Name__c " +
         s"FROM $sfSubscriptionsSfObjectRef " +
         s"WHERE Name = '${subscriptionName.value}' " +

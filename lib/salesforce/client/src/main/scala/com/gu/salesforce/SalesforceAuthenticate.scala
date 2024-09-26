@@ -1,13 +1,16 @@
 package com.gu.salesforce
 
+import com.gu.salesforce.SalesforceClient.SalesforceErrorResponseBody
 import com.gu.util.Logging
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker.toClientFailableOp
-import com.gu.util.resthttp.{HttpOp, LazyClientFailableOp}
+import com.gu.util.resthttp.HttpOp
 import okhttp3.{FormBody, Request, Response}
 import play.api.libs.json.Json
 import com.gu.salesforce.SalesforceReads._
+
+import scala.util.{Failure, Success, Try}
 
 object SalesforceAuthenticate extends Logging {
 
@@ -26,7 +29,10 @@ object SalesforceAuthenticate extends Logging {
     builder.post(formBody).build()
   }
 
-  def apply(response: Request => Response): SFAuthConfig => LazyClientFailableOp[SalesforceAuth] =
+  def auth(
+      response: Request => Response,
+      config: SFAuthConfig,
+  ): Either[List[SalesforceErrorResponseBody], SalesforceAuth] =
     HttpOp(response)
       .setupRequest(buildAuthRequest)
       .flatMap(toClientFailableOp)
@@ -35,6 +41,16 @@ object SalesforceAuthenticate extends Logging {
       }
       .parse[SalesforceAuth]
       .map(_.withLogging(s"salesforce auth"))
-      .runRequestLazy
+      .runRequest(config)
+      .toDisjunction
+      .left
+      .map { cf =>
+        Try(Json.parse(cf.body).as[List[SalesforceErrorResponseBody]]) match {
+          case Success(value) => value
+          case Failure(exception) =>
+            logger.warn(s"salesforce auth response $cf not parsable as SalesforceErrorResponseBody" + exception)
+            List()
+        }
+      }
 
 }

@@ -48,7 +48,7 @@ class UpdateSalesforceIdentityIdEffectsTest extends AnyFlatSpec with Matchers {
     val actual = for {
       sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[SFAuthConfig]
       response = RawEffects.response
-      sfClient <- SalesforceClient(response, sfConfig).value.toDisjunction
+      sfClient <- SalesforceClient.auth(response, sfConfig)
       patch = sfClient.wrapWith(JsonHttp.patch)
       updateSalesforceIdentityId = UpdateSalesforceIdentityId(patch)
       sFContactUpdate = SFContactUpdate(

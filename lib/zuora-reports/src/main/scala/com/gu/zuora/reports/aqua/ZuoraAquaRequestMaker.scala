@@ -40,14 +40,14 @@ object ZuoraAquaRequestMaker extends LazyLogging {
         logger.error(s"Zuora Aqua Api rejected our call $bodyAsJson")
         val codePart = errorCode.map(c => s"error code $c:")
         val messagePart = message.getOrElse("No error message")
-        GenericError(s"$codePart $messagePart")
+        GenericError(s"$codePart $messagePart", bodyAsJson.toString)
       }
       case JsSuccess(_: ZuoraAquaResponse, _) => ClientSuccess(())
 
       case error: JsError => {
         val errorMessage = s"Failed to parse Zuora AQuA API response: $error. Response body was: \n $bodyAsJson"
         logger.error(errorMessage)
-        GenericError(errorMessage)
+        GenericError(errorMessage, bodyAsJson.toString)
       }
     }
   }

@@ -30,15 +30,15 @@ object ZuoraRestRequestMaker extends LazyLogging {
       case JsSuccess(ZuoraErrorResponse(reasons), _) => {
         logger.error(s"Zuora rejected our call $bodyAsJson")
         if (reasons.exists(_.code.toString.endsWith("40")))
-          NotFound("Received a 'not found' response from Zuora")
+          NotFound("Received a 'not found' response from Zuora", bodyAsJson.toString)
         else if (reasons.exists(_.code == 53000060))
           PaymentError(s"Received a payment error from Zuora: $reasons")
         else
-          GenericError(s"Received a failure result from Zuora: $reasons")
+          GenericError(s"Received a failure result from Zuora: $reasons", bodyAsJson.toString)
       }
       case error: JsError => {
         logger.error(s"Failed to read common fields from zuora response: $error. Response body was: \n $bodyAsJson")
-        GenericError("Error when reading common fields from zuora")
+        GenericError("Error when reading common fields from zuora", bodyAsJson.toString)
       }
     }
   }

@@ -26,7 +26,8 @@ object Querier {
     zuoraRequester.post[AquaQueryRequest, AquaJobResponse](aquaRequest, "batch-query/") match {
       case ClientSuccess(AquaJobResponse(status, name, _, Some(jobId))) if status.toLowerCase == "submitted" =>
         ClientSuccess(jobId)
-      case ClientSuccess(zuoraResponse) => GenericError(s"unexpected response from zuora: $zuoraResponse")
+      case ClientSuccess(zuoraResponse) =>
+        GenericError(s"unexpected response from zuora: $zuoraResponse", zuoraResponse.toString)
       case error: ClientFailure => error
     }
 

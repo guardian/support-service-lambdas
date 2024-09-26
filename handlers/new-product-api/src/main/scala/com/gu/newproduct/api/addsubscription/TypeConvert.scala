@@ -21,7 +21,8 @@ object TypeConvert {
       case _ => ApiGatewayResponse.internalServerError(s"unknown error during: $action: ${clientFailure.message}")
     }
 
-    def toApiGatewayOp(action: String): ApiGatewayOp[A] = clientOp.toDisjunction.toApiGatewayOp(failureHandler(action, _))
+    def toApiGatewayOp(action: String): ApiGatewayOp[A] =
+      clientOp.toDisjunction.toApiGatewayOp(failureHandler(action, _))
   }
 
   implicit class TypeConvertClientOpAsync[A](clientOp: ClientFailableOp[A]) {
@@ -52,7 +53,7 @@ object TypeConvert {
   implicit class ClientFailableOpToApiResponse[A](clientFailableOp: ClientFailableOp[A]) {
     def toApiResponseCheckingNotFound(action: String, ifNotFoundReturn: String): ApiGatewayOp[A] =
       clientFailableOp match {
-        case NotFound(_) => ReturnWithResponse(ApiValidationErrorResponse(ifNotFoundReturn))
+        case _: NotFound => ReturnWithResponse(ApiValidationErrorResponse(ifNotFoundReturn))
         case anyOtherResponse => anyOtherResponse.toDisjunction.toApiGatewayOp(action)
       }
   }
@@ -60,16 +61,8 @@ object TypeConvert {
   implicit class OptionToClientFailableOp[A](option: Option[A]) {
     def toClientFailable(errorMessage: String, acceptablePaymentMethod: Boolean = true) = option match {
       case None if !acceptablePaymentMethod => PaymentError(errorMessage)
-      case None => GenericError(errorMessage)
+      case None => GenericError(errorMessage, "")
       case Some(value) => ClientSuccess(value)
-    }
-  }
-
-  implicit class TryToClientFailableOp[A](tryValue: Try[A]) extends Logging {
-    def toClientFailable(action: String) = tryValue match {
-      case Success(response) => ClientSuccess(response)
-      case Failure(exception) => GenericError(s"exception thrown while trying to $action : ${exception.toString}")
-
     }
   }
 

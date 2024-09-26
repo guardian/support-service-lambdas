@@ -106,11 +106,11 @@ object AutoCancel extends Logging {
     ): ClientFailableOp[UnbalancedInvoices] =
       for {
         negativeInvoice <- summary.invoices.find(_.id == idOfNegativeInvoice) match {
-          case None => NotFound(s"No negative invoice in account $accountId")
+          case None => NotFound(s"No negative invoice in account $accountId", "")
           case Some(invoice) => ClientSuccess(invoice)
         }
         unpaidInvoices <- summary.invoices.filter(_.balance > 0) match {
-          case Nil => NotFound(s"No unpaid invoices in account $accountId")
+          case Nil => NotFound(s"No unpaid invoices in account $accountId", "")
           case invoices => ClientSuccess(invoices)
         }
       } yield UnbalancedInvoices(negativeInvoice, unpaidInvoices)
