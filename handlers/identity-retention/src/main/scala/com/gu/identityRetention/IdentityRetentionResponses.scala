@@ -19,7 +19,7 @@ object IdentityRetentionResponseModels {
     implicit val successResponseWrites = Json.writes[SuccessResponse]
 
     /** effectiveDeletionDate is 7 years after relationshipEndDate the response is valid until the effectiveDeletionDate
-      * or in three months time, whichever is sooner.
+      * or in about 3 months time, whichever is sooner.
       * @param ongoingRelationship
       * @param relationshipEndDate
       * @return
@@ -34,7 +34,11 @@ object IdentityRetentionResponseModels {
         if (effectiveDeletionDate isBefore today)
           today.plusMonths(3)
         else
-          List(effectiveDeletionDate, today.plusMonths(3)).min
+          val proportionOfMaxLifetimes = today.until(effectiveDeletionDate, ChronoUnit.DAYS) / (365 * 7)
+          List(
+            effectiveDeletionDate, 
+            today.plusDays(60 + (proportionOfMaxLifetimes * 60)) //adds some variation so that the validUntil date is between 60 and 120 days (or longer, if the deletion date is over 7 years in the future)
+          ).min
       SuccessResponse(ongoingRelationship, relationshipEndDate, effectiveDeletionDate, responseValidUntil)
     }
   }
