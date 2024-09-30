@@ -42,7 +42,7 @@ class IdentityRetentionApiResponsesTest extends AnyFlatSpec with Matchers {
 
     "cancelledRelationship" should "calculate the deletion date 7 years after cancellation date and vary the valid until date" in {
     IdentityRetentionApiResponses.lapsedRelationship(
-      latestLapsedDate = LocalDate.of(2024, 1, 1),
+      latestLapsedDate = LocalDate.of(2024, 9, 1),
       today,
     ) shouldEqual ApiResponse(
       "200",
