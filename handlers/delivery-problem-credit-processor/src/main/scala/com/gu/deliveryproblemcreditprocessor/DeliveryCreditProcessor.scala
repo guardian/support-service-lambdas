@@ -85,17 +85,16 @@ object DeliveryCreditProcessor extends Logging {
   def gatherCreditResults(processResults: List[ProcessResult[DeliveryCreditResult]]): Task[List[DeliveryCreditResult]] =
     for {
       _ <- Task.effect(ProcessResult.log(processResults))
-      _ <- Task.effect(processResults).map { pr =>
-        pr.map {
-          _.overallFailure match {
-            case None => Task.succeed(())
-            case Some(e) => Task.fail(new RuntimeException(e.reason))
-          }
-        }
-      }
-      results <- Task.foreach(processResults.flatMap(_.creditResults)) { result =>
-        ZIO.fromEither(result).mapError(e => new RuntimeException(e.reason))
-      }
+      _ <- ZIO.foreach(processResults)(res =>
+        res.overallFailure match {
+          case None => Task.succeed(())
+          case Some(e) => Task.fail(new RuntimeException(e.reason))
+        },
+      )
+      creditResults = processResults.flatMap(_.creditResults)
+      results <- Task.foreach(creditResults)(result =>
+        ZIO.fromEither(result).mapError(e => new RuntimeException(e.reason)),
+      )
     } yield results
 
   def processProduct(

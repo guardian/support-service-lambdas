@@ -173,19 +173,15 @@ object Processor {
         Zuora supports up to 40 concurrent requests until migration to orders API which supports 200
          */
         val forkJoinPool = new java.util.concurrent.ForkJoinPool(requestConcurrency)
-
         creditRequestBatches.tasksupport = new ForkJoinTaskSupport(forkJoinPool)
 
         val processResults =
           creditRequestBatches
-            .map { requests =>
-              val overallResult = updateInZuoraAndSf(requests)
-              forkJoinPool.shutdown()
-              overallResult
-            }
+            .map(requests => updateInZuoraAndSf(requests))
             .toList
             .flatten
 
+        forkJoinPool.shutdown()
         processResults.map(_.merge)
     }
   }
