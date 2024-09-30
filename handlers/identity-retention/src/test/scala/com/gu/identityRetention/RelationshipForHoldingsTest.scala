@@ -44,7 +44,7 @@ class RelationshipForHoldingsTest extends AnyFlatSpec with Matchers {
                |  "ongoingRelationship" : true,
                |  "relationshipEndDate" : "2024-02-01",
                |  "effectiveDeletionDate" : "2031-02-01",
-               |  "responseValidUntil" : "2023-08-31"
+               |  "responseValidUntil" : "2023-10-03"
                |}""".stripMargin,
     )
   }
@@ -68,7 +68,7 @@ class RelationshipForHoldingsTest extends AnyFlatSpec with Matchers {
                |  "ongoingRelationship" : false,
                |  "relationshipEndDate" : "2024-03-01",
                |  "effectiveDeletionDate" : "2031-03-01",
-               |  "responseValidUntil" : "2023-08-31"
+               |  "responseValidUntil" : "2023-10-04"
                |}""".stripMargin,
     )
   }
