@@ -160,7 +160,6 @@ object Processor {
 
         // we group the creditRequests by subscription to make the requests to zuora in parallel
         // & avoid lock contention on the resource
-
         val creditRequestBatches =
           creditRequests
             .groupBy(_.subscriptionName)
@@ -180,9 +179,10 @@ object Processor {
             .map(requests => updateInZuoraAndSf(requests))
             .toList
             .flatten
+            .map(_.merge)
 
         forkJoinPool.shutdown()
-        processResults.map(_.merge)
+        processResults
     }
   }
 
