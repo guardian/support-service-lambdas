@@ -12,7 +12,13 @@ import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig}
 import com.gu.util.Logging
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.{ConfigLocation, LoadConfigModule, Stage}
-import com.gu.zuora.ZuoraProductTypes.{GuardianWeekly, NewspaperHomeDelivery, NewspaperNationalDelivery, TierThree, ZuoraProductType}
+import com.gu.zuora.ZuoraProductTypes.{
+  GuardianWeekly,
+  NewspaperHomeDelivery,
+  NewspaperNationalDelivery,
+  TierThree,
+  ZuoraProductType,
+}
 import com.gu.zuora.subscription._
 import com.gu.zuora.{AccessToken, HolidayStopProcessorZuoraConfig, Zuora}
 import io.circe.generic.auto._
@@ -25,6 +31,8 @@ import zio.duration._
 import zio.{RIO, Task, ZIO}
 
 import java.time.{DayOfWeek, LocalDate, LocalDateTime}
+import scala.collection.parallel.CollectionConverters.ImmutableIterableIsParallelizable
+import scala.collection.parallel.ForkJoinTaskSupport
 import scala.concurrent.ExecutionContext
 
 object DeliveryCreditProcessor extends Logging {
@@ -74,23 +82,26 @@ object DeliveryCreditProcessor extends Logging {
     } yield creditResults.flatten
   }
 
-  def gatherCreditResults(processResult: ProcessResult[DeliveryCreditResult]): Task[List[DeliveryCreditResult]] =
+  def gatherCreditResults(processResults: List[ProcessResult[DeliveryCreditResult]]): Task[List[DeliveryCreditResult]] =
     for {
-      _ <- Task.effect(ProcessResult.log(processResult))
-      _ <- Task.effect(processResult.overallFailure).flatMap {
-        case None => Task.succeed(())
-        case Some(e) => Task.fail(new RuntimeException(e.reason))
-      }
-      results <- Task.foreach(processResult.creditResults) { result =>
-        ZIO.fromEither(result).mapError(e => new RuntimeException(e.reason))
-      }
+      _ <- Task.effect(ProcessResult.log(processResults))
+      _ <- ZIO.foreach(processResults)(res =>
+        res.overallFailure match {
+          case None => Task.succeed(())
+          case Some(e) => Task.fail(new RuntimeException(e.reason))
+        },
+      )
+      creditResults = processResults.flatMap(_.creditResults)
+      results <- Task.foreach(creditResults)(result =>
+        ZIO.fromEither(result).mapError(e => new RuntimeException(e.reason)),
+      )
     } yield results
 
   def processProduct(
       sfAuthConfig: SFAuthConfig,
       zuoraConfig: HolidayStopProcessorZuoraConfig,
       zuoraAccessToken: AccessToken,
-  )(productType: ZuoraProductType): Task[ProcessResult[DeliveryCreditResult]] =
+  )(productType: ZuoraProductType): Task[List[ProcessResult[DeliveryCreditResult]]] =
     for {
       processResult <- Task.effect(
         Processor

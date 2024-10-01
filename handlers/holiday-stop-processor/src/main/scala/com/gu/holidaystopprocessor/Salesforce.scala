@@ -12,17 +12,6 @@ import com.typesafe.scalalogging.LazyLogging
 
 object Salesforce extends LazyLogging {
 
-  /*
-   * Zuora takes 3-4s to add each credit to a sub so this should take ~ 10 mins,
-   * which is within the 15 min max that a lambda can run.
-   * As the lambda runs each hour, all should easily be processed within the
-   * 24 hour window available.
-   *
-   * Beware! This isn't a scalable solution.  If all the products between them
-   * have > 5000 credit requests to be processed in a 24 hour window some will be missed.
-   */
-  private val batchSize = 66
-
   def holidayStopRequests(sfCredentials: SFAuthConfig)(
       productVariant: ZuoraProductType,
       datesToProcess: List[LocalDate],
@@ -36,8 +25,7 @@ object Salesforce extends LazyLogging {
         logger.info(
           s"There are ${details.length} credit requests from Salesforce to process for '${productVariant.name}'",
         )
-        if (details.length > batchSize) logger.warn(s"Only processing $batchSize of ${details.length} requests")
-        Right(details.take(batchSize))
+        Right(details)
     }
   }
 
