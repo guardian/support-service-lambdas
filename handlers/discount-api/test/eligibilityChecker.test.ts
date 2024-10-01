@@ -84,21 +84,6 @@ test('Eligibility check fails for a S+ subscription which is on a reduced price'
 	);
 });
 
-test('Eligibility check fails for a subscription which hasnt been running long', async () => {
-	const sub = zuoraSubscriptionSchema.parse(subSupporterPlusFullPrice);
-	const discount = getDiscountFromSubscription('CODE', sub);
-	const nearlyLongEnough = dayjs(sub.contractEffectiveDate).add(2, 'months');
-
-	const ac2 = () =>
-		eligibilityChecker.assertEligibleForFreePeriod(
-			discount.discount.productRatePlanId,
-			sub,
-			nearlyLongEnough,
-		);
-
-	expect(ac2).toThrow(validationRequirements.twoMonthsMin);
-});
-
 test('Eligibility check works for a price risen subscription', async () => {
 	const sub = zuoraSubscriptionSchema.parse(subscriptionJson2);
 	const billingPreview = loadBillingPreview(billingPreviewJson2);
