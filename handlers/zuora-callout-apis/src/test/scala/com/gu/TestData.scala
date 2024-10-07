@@ -15,9 +15,9 @@ object TestData extends Matchers {
   val today = LocalDate.of(2016, 11, 21)
   val accountId = "accountId"
   val invoiceItemA =
-    InvoiceItem("invitem123", "A-S123", today, today.plusMonths(1), 49.21, "Non founder - annual", "Supporter")
-  val invoiceItemB = InvoiceItem("invitem122", "A-S123", today, today.plusMonths(1), 0, "Friends", "Friend")
-  val invoiceItemC = InvoiceItem("invitem121", "A-S123", today, today.plusMonths(1), -4.90, "Percentage", "Discount")
+    InvoiceItem("invitem123", "A-S123", today, today.plusMonths(1), 49.21, "Non founder - annual", "Supporter", 0)
+  val invoiceItemB = InvoiceItem("invitem122", "A-S123", today, today.plusMonths(1), 0, "Friends", "Friend", 0)
+  val invoiceItemC = InvoiceItem("invitem121", "A-S123", today, today.plusMonths(1), -4.90, "Percentage", "Discount", 0)
 
   def itemisedInvoice(balance: Double, invoiceItems: List[InvoiceItem]) =
     ItemisedInvoice("invoice123", today, 49, balance, "Posted", List(invoiceItemA))

@@ -32,6 +32,7 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
             chargeAmount = 12.34,
             chargeName = "chg",
             productName = "prd",
+            taxAmount = 0,
           ),
         ),
       ),
@@ -50,6 +51,7 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
             chargeAmount = 11.34,
             chargeName = "chg",
             productName = "prd",
+            taxAmount = 0,
           ),
         ),
       ),
@@ -77,6 +79,7 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
             chargeAmount = 6.87,
             chargeName = "chg",
             productName = "prd",
+            taxAmount = 0,
           ),
           InvoiceItem(
             id = "item2",
@@ -86,6 +89,7 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
             chargeAmount = 5.47,
             chargeName = "chg",
             productName = "prd",
+            taxAmount = 0,
           ),
         ),
       ),
@@ -113,6 +117,7 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
             chargeAmount = 6.87,
             chargeName = "chg",
             productName = "prd",
+            taxAmount = 0,
           ),
           InvoiceItem(
             id = "item3",
@@ -122,6 +127,7 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
             chargeAmount = 5.45,
             chargeName = "chg",
             productName = "prd",
+            taxAmount = 0,
           ),
           InvoiceItem(
             id = "item4",
@@ -131,6 +137,7 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
             chargeAmount = -1.23,
             chargeName = "discount",
             productName = "discount",
+            taxAmount = 0,
           ),
           InvoiceItem(
             id = "item2",
@@ -140,6 +147,7 @@ class AutoCancelTest extends AnyFlatSpec with Matchers with MockFactory {
             chargeAmount = 5.47,
             chargeName = "chg",
             productName = "prd",
+            taxAmount = 0,
           ),
         ),
       ),

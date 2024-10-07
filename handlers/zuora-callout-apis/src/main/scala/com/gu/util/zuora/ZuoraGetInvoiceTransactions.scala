@@ -18,6 +18,7 @@ object ZuoraGetInvoiceTransactions extends LazyLogging {
       chargeAmount: Double,
       chargeName: String,
       productName: String,
+      taxAmount: Double,
   )
 
   case class ItemisedInvoice(
@@ -38,7 +39,8 @@ object ZuoraGetInvoiceTransactions extends LazyLogging {
       (JsPath \ "serviceEndDate").read[LocalDate] and
       (JsPath \ "chargeAmount").read[Double] and
       (JsPath \ "chargeName").read[String] and
-      (JsPath \ "productName").read[String]
+      (JsPath \ "productName").read[String] and
+      (JsPath \ "taxAmount").read[Double]
   )(InvoiceItem.apply _)
 
   implicit val itemisedInvoiceReads: Reads[ItemisedInvoice] = (
