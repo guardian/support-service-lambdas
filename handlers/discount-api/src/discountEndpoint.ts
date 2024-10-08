@@ -196,6 +196,11 @@ async function getDiscountToApply(
 		subscription.subscriptionNumber,
 	);
 
+	eligibilityChecker.assertBasicEligibility(
+		subscription,
+		account.metrics.totalInvoiceBalance,
+	);
+
 	console.log('get billing preview for the subscription');
 	const billingPreview = billingPreviewToSimpleInvoiceItems(
 		await getBillingPreview(
@@ -235,10 +240,7 @@ async function getDiscountToApply(
 
 	const orderedInvoiceTotals = getOrderedInvoiceTotals(billingPreview);
 
-	eligibilityChecker.assertGenerallyEligible(
-		subscription,
-		account.metrics.totalInvoiceBalance,
-		nextInvoiceItems,
-	);
+	eligibilityChecker.assertInvoicesEligible(nextInvoiceItems);
+
 	return { discount, dateToApply, orderedInvoiceTotals };
 }

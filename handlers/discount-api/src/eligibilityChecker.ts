@@ -10,10 +10,9 @@ import dayjs from 'dayjs';
 export class EligibilityChecker {
 	constructor(private subscriptionNumber: string) {}
 
-	assertGenerallyEligible = (
+	assertBasicEligibility = (
 		subscription: ZuoraSubscription,
 		accountBalance: number,
-		nextInvoiceItems: SimpleInvoiceItem[],
 	) => {
 		console.log('Checking basic eligibility for the subscription');
 		this.assertValidState(
@@ -28,6 +27,12 @@ export class EligibilityChecker {
 		);
 
 		console.log(
+			'Subscription and account are generally eligible for the discount',
+		);
+	};
+
+	assertInvoicesEligible = (nextInvoiceItems: SimpleInvoiceItem[]) => {
+		console.log(
 			'ensuring there are no refunds/discounts expected on the affected invoices',
 		);
 		this.assertValidState(
@@ -36,7 +41,7 @@ export class EligibilityChecker {
 			JSON.stringify(nextInvoiceItems),
 		);
 
-		console.log('Subscription is generally eligible for the discount');
+		console.log('next invoice is eligible for the discount');
 	};
 
 	assertNextPaymentIsAtCatalogPrice = (

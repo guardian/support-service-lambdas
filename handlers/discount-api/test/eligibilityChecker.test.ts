@@ -40,10 +40,10 @@ test('Eligibility check fails for a Supporter plus which has already had the off
 		.add(2, 'months')
 		.add(1, 'days');
 
+	eligibilityChecker.assertBasicEligibility(sub, 0);
+
 	const actual = () =>
-		eligibilityChecker.assertGenerallyEligible(
-			sub,
-			0,
+		eligibilityChecker.assertInvoicesEligible(
 			getNextInvoiceItems(billingPreview).items,
 		);
 
@@ -67,10 +67,10 @@ test('Eligibility check fails for a S+ subscription which is on a reduced price'
 		.add(2, 'months')
 		.add(1, 'days');
 
+	eligibilityChecker.assertBasicEligibility(sub, 0);
+
 	const actual = () =>
-		eligibilityChecker.assertGenerallyEligible(
-			sub,
-			0,
+		eligibilityChecker.assertInvoicesEligible(
 			getNextInvoiceItems(billingPreview).items,
 		);
 
@@ -104,9 +104,9 @@ test('Eligibility check works for a price risen subscription', async () => {
 	const billingPreview = loadBillingPreview(billingPreviewJson2);
 	const discount = getDiscountFromSubscription('PROD', sub);
 
-	eligibilityChecker.assertGenerallyEligible(
-		sub,
-		0,
+	eligibilityChecker.assertBasicEligibility(sub, 0);
+
+	eligibilityChecker.assertInvoicesEligible(
 		getNextInvoiceItems(billingPreview).items,
 	);
 
@@ -129,9 +129,9 @@ test('Eligibility check works for supporter plus with 2 rate plans', async () =>
 		.add(2, 'months')
 		.add(1, 'days');
 
-	eligibilityChecker.assertGenerallyEligible(
-		sub,
-		0,
+	eligibilityChecker.assertBasicEligibility(sub, 0);
+
+	eligibilityChecker.assertInvoicesEligible(
 		getNextInvoiceItems(billingPreview).items,
 	);
 
