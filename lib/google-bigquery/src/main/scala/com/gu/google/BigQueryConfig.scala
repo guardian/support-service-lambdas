@@ -7,5 +7,5 @@ case class BigQueryConfig(bigQueryCredentials: JsObject)
 
 object BigQueryConfig {
   implicit val bigQueryConfigReads = Json.reads[BigQueryConfig]
-  implicit val location = ConfigLocation[BigQueryConfig](path = "bigQuery", version = 1)
+  implicit val location = ConfigLocation[BigQueryConfig](path = "bigQuery", version = 2)
 }
