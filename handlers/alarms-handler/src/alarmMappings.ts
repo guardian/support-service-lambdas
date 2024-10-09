@@ -1,3 +1,4 @@
+import { groupBy } from '@modules/arrayFunctions';
 import { getIfDefined } from '@modules/nullAndUndefined';
 
 type Team = 'VALUE' | 'GROWTH' | 'PORTFOLIO' | 'PLATFORM' | 'SRE';
@@ -17,7 +18,8 @@ const sharedMobilePurchasesApps = [
 	'mobile-purchases-google-update-subscriptions',
 ];
 
-const teamToAppMappings: Record<Team, string[]> = {
+type AppInfo = string | { app: string; logGroups: string[] };
+export const teamToAppMappings: Record<Team, AppInfo[]> = {
 	GROWTH: [
 		'acquisition-events-api',
 		'admin-console',
@@ -71,11 +73,17 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'zuora-creditor',
 
 		// support-frontend
-		'frontend',
+		{ app: 'frontend', logGroups: ['support-frontend'] },
 		'it-test-runner',
 		'stripe-intent',
-		'workers',
-		'payment-api',
+		{
+			app: 'workers',
+			logGroups: [
+				'/aws/lambda/CreatePaymentMethod',
+				'/aws/lambda/CreateZuoraSubscription', //etc
+			],
+		},
+		{ app: 'payment-api', logGroups: ['support-payment-api'] },
 
 		// support-service-lambdas
 		'digital-voucher-suspension-processor',
@@ -107,33 +115,80 @@ const teamToAppMappings: Record<Team, string[]> = {
 	],
 };
 
-const buildAppToTeamMappings = (): Record<string, Team[]> => {
-	const mappings: Record<string, Team[]> = {};
+export class AlarmMappings {
+	constructor(mappings: Record<string, AppInfo[]> = teamToAppMappings) {
+		this.appToTeamMappings = this.buildAppToTeamMappings(mappings);
+		this.appToLogGroupOverrides = this.buildAppToLogGroupOverrides(mappings);
+	}
 
-	for (const [team, apps] of Object.entries(teamToAppMappings)) {
-		for (const app of apps) {
-			const teams = mappings[app] ?? [];
-			teams.push(team as Team);
+	private buildAppToTeamMappings = (
+		theMappings: Record<Team, AppInfo[]>,
+	): Record<string, Team[]> => {
+		const entries: Array<[Team, AppInfo[]]> = Object.entries(
+			theMappings,
+		) as Array<[Team, AppInfo[]]>; // `as` - hmm?
 
-			mappings[app] = teams;
+		const teamToApp: Array<{ app: string; team: Team }> = entries.flatMap(
+			([team, appInfos]) =>
+				appInfos.map((appInfo) => {
+					const app = typeof appInfo === 'string' ? appInfo : appInfo.app;
+					return { team, app };
+				}),
+		);
+		const groups = groupBy(teamToApp, ({ app }) => app);
+
+		const mappings: Record<string, Team[]> = Object.fromEntries(
+			Object.entries(groups).map(([app, info]) => [
+				app,
+				info.map(({ team }) => team),
+			]),
+		);
+
+		return mappings;
+	};
+
+	private buildAppToLogGroupOverrides = (
+		theMappings: Record<Team, AppInfo[]>,
+	): Record<string, string[]> => {
+		return Object.fromEntries(
+			Object.values(theMappings)
+				.flatMap((appInfos) => appInfos)
+				.flatMap((appInfo) =>
+					typeof appInfo !== 'string' ? [[appInfo.app, appInfo.logGroups]] : [],
+				),
+		);
+	};
+
+	private appToTeamMappings: Record<string, Team[]>;
+	private appToLogGroupOverrides: Record<string, string[]>;
+
+	getTeams = (appName?: string): Team[] => {
+		if (appName && this.appToTeamMappings[appName]) {
+			return this.appToTeamMappings[appName] as Team[];
 		}
-	}
-	return mappings;
-};
 
-const appToTeamMappings: Record<string, Team[]> = buildAppToTeamMappings();
+		return ['SRE'];
+	};
 
-export const getTeams = (appName?: string): Team[] => {
-	if (appName && appToTeamMappings[appName]) {
-		return appToTeamMappings[appName] as Team[];
-	}
+	getTeamWebhookUrl = (team: Team): string => {
+		return getIfDefined<string>(
+			process.env[`${team}_WEBHOOK`],
+			`${team}_WEBHOOK environment variable not set`,
+		);
+	};
 
-	return ['SRE'];
-};
+	getLogGroups = (appName: string, stage: string): string[] => {
+		// currently we assume the log group is /aws/lambda/<app>-<stage>, we can add overrides to the appToTeamMappings later
+		const logGroup = this.appToLogGroupOverrides[appName];
+		if (logGroup === undefined) {
+			// assume it's a lambda
+			console.log('logGroup', logGroup);
+			const lambdaName = appName + '-' + stage;
 
-export const getTeamWebhookUrl = (team: Team): string => {
-	return getIfDefined<string>(
-		process.env[`${team}_WEBHOOK`],
-		`${team}_WEBHOOK environment variable not set`,
-	);
-};
+			const logGroupName = '/aws/lambda/' + lambdaName;
+			return [logGroupName];
+		}
+
+		return logGroup.map((override) => override + '-' + stage);
+	};
+}

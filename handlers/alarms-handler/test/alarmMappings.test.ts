@@ -1,4 +1,6 @@
-import { getTeams } from '../src/alarmMappings';
+import { AlarmMappings } from '../src/alarmMappings';
+
+const { getTeams, getLogGroups } = new AlarmMappings();
 
 describe('getTeam', () => {
 	it('returns the correct team for a given app', () => {
@@ -31,5 +33,26 @@ describe('getTeam', () => {
 		const team = getTeams(app);
 
 		expect(team).toEqual(['GROWTH', 'VALUE']);
+	});
+});
+
+describe('getLogGroups', () => {
+	it('generates a default log group for a lambda', () => {
+		const app = 'discount-api';
+
+		const logGroups = getLogGroups(app, 'CODE');
+
+		expect(logGroups).toEqual(['/aws/lambda/discount-api-CODE']);
+	});
+
+	it('handles multi log groups', () => {
+		const app = 'workers';
+
+		const logGroups = getLogGroups(app, 'CODE');
+
+		expect(logGroups).toEqual([
+			'/aws/lambda/CreatePaymentMethod-CODE',
+			'/aws/lambda/CreateZuoraSubscription-CODE',
+		]);
 	});
 });
