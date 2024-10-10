@@ -53,10 +53,7 @@ describe('Handler', () => {
 	});
 
 	it('should handle CloudWatch alarm message', async () => {
-		(getTags as jest.Mock).mockResolvedValueOnce({
-			App: 'mock-app',
-			Stage: 'CODE',
-		});
+		(getTags as jest.Mock).mockResolvedValueOnce({ App: 'mock-app' });
 
 		jest
 			.spyOn(global, 'fetch')
@@ -71,7 +68,8 @@ describe('Handler', () => {
 	it('should handle captured CloudWatch alarm message', async () => {
 		(getTags as jest.Mock).mockResolvedValueOnce({
 			App: 'mock-app',
-			Stage: 'CODE',
+			DiagnosticUrls:
+				'https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fmock-app-CODE/log-events$3Fstart$3D$startMillis$26filterPattern$3D$26end$3D$endMillis',
 		});
 
 		const result = await getChatMessages(
@@ -92,7 +90,7 @@ describe('Handler', () => {
 		expect(result?.text).toEqual(expectedText);
 	});
 
-	it('should assume PROD if theres no Stage tag', async () => {
+	it('should not insert if the DiagnosticUrls are empty', async () => {
 		(getTags as jest.Mock).mockResolvedValueOnce({ App: 'mock-app' });
 
 		const result = await getChatMessages(
@@ -107,8 +105,35 @@ describe('Handler', () => {
 		const expectedText =
 			'🚨 *ALARM:* DISCOUNT-API-CODE Discount-api 5XX response has triggered!\n\n' +
 			'*Description:* Impact - Discount api returned a 5XX response check the logs for more information: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fdiscount-api-CODE. Follow the process in https://docs.google.com/document/d/sdkjfhskjdfhksjdhf/edit\n\n' +
+			'*Reason:* Threshold Crossed: 1 datapoint [2.0 (09/10/24 07:18:00)] was greater than or equal to the threshold (1.0).';
+		expect(result?.webhookUrls).toEqual([mockEnv.SRE_WEBHOOK]);
+		expect(result?.text).toEqual(expectedText);
+	});
+
+	it('should add multiple urls where specified', async () => {
+		(getTags as jest.Mock).mockResolvedValueOnce({
+			App: 'mock-app',
+			DiagnosticUrls: [
+				'https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fmock-app-CODE/log-events$3Fstart$3D$startMillis$26filterPattern$3D$26end$3D$endMillis',
+				'https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fanother-app-CODE/log-events$3Fstart$3D$startMillis$26filterPattern$3D$26end$3D$endMillis',
+			].join(','),
+		});
+
+		const result = await getChatMessages(
+			fullCloudWatchAlarmEvent,
+			new AlarmMappings({ SRE: ['mock-app'] }),
+		);
+
+		expect(getTags).toHaveBeenCalledWith(
+			'arn:aws:cloudwatch:eu-west-1:1234:alarm:DISCOUNT-API-CODE Discount-api 5XX response',
+			'1234',
+		);
+		const expectedText =
+			'🚨 *ALARM:* DISCOUNT-API-CODE Discount-api 5XX response has triggered!\n\n' +
+			'*Description:* Impact - Discount api returned a 5XX response check the logs for more information: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fdiscount-api-CODE. Follow the process in https://docs.google.com/document/d/sdkjfhskjdfhksjdhf/edit\n\n' +
 			'*Reason:* Threshold Crossed: 1 datapoint [2.0 (09/10/24 07:18:00)] was greater than or equal to the threshold (1.0).\n\n' +
-			'*LogLink*: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fmock-app-PROD/log-events$3Fstart$3D1728458296236$26filterPattern$3D$26end$3D1728458596236';
+			'*LogLink*: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fmock-app-CODE/log-events$3Fstart$3D1728458296236$26filterPattern$3D$26end$3D1728458596236\n\n' +
+			'*LogLink*: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fanother-app-CODE/log-events$3Fstart$3D1728458296236$26filterPattern$3D$26end$3D1728458596236';
 		expect(result?.webhookUrls).toEqual([mockEnv.SRE_WEBHOOK]);
 		expect(result?.text).toEqual(expectedText);
 	});
@@ -136,10 +161,7 @@ describe('Handler', () => {
 	});
 
 	it('calls the webhook with the correct data for an OK action', async () => {
-		(getTags as jest.Mock).mockResolvedValueOnce({
-			App: 'mock-app',
-			Stage: 'CODE',
-		});
+		(getTags as jest.Mock).mockResolvedValueOnce({ App: 'mock-app' });
 		jest
 			.spyOn(global, 'fetch')
 			.mockResolvedValue(Promise.resolve(new Response(JSON.stringify({}))));

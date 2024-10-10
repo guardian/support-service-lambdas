@@ -60,7 +60,7 @@ export async function getChatMessages(
 	console.log('parsedMessage', parsedMessage);
 
 	const message = parsedMessage
-		? await getCloudWatchAlarmMessage(parsedMessage, alarmMappings)
+		? await getCloudWatchAlarmMessage(parsedMessage)
 		: getSnsPublishMessage({
 				message: snsEvent.Message,
 				messageAttributes: snsEvent.MessageAttributes,
@@ -84,27 +84,26 @@ const attemptToParseMessageString = (
 	}
 };
 
-async function getCloudWatchAlarmMessage(
-	{
-		AlarmArn,
-		AlarmName,
-		NewStateReason,
-		NewStateValue,
-		AlarmDescription,
-		AWSAccountId,
-		StateChangeTime,
-		Trigger,
-	}: CloudWatchAlarmMessage,
-	alarmMappings: AlarmMappings,
-) {
+async function getCloudWatchAlarmMessage({
+	AlarmArn,
+	AlarmName,
+	NewStateReason,
+	NewStateValue,
+	AlarmDescription,
+	AWSAccountId,
+	StateChangeTime,
+	Trigger,
+}: CloudWatchAlarmMessage) {
 	const tags = await getTags(AlarmArn, AWSAccountId);
 	console.log('tags', tags);
-	const { App, Stage = 'PROD' } = tags;
+	const { App, DiagnosticUrls } = tags;
 
-	const logGroupNames = App ? alarmMappings.getLogGroups(App, Stage) : [];
+	const diagnosticUrlTemplates = DiagnosticUrls
+		? DiagnosticUrls.split(',')
+		: [];
 
-	const links = logGroupNames.map((logGroupName) =>
-		getCloudwatchLogsLink(logGroupName, Trigger, StateChangeTime),
+	const links = diagnosticUrlTemplates.map((diagnosticUrlTemplate) =>
+		addInsertsToTemplate(diagnosticUrlTemplate, Trigger, StateChangeTime),
 	);
 
 	const text = getText(
@@ -120,8 +119,8 @@ async function getCloudWatchAlarmMessage(
 	return text ? { app: App, text } : undefined;
 }
 
-function getCloudwatchLogsLink(
-	logGroupName: string,
+function addInsertsToTemplate(
+	diagnosticUrlTemplate: string,
 	Trigger:
 		| {
 				Period: number;
@@ -138,17 +137,11 @@ function getCloudwatchLogsLink(
 	const alarmStartTimeMillis =
 		alarmEndTimeMillis - 1000 * alarmCoveredTimeSeconds;
 
-	const cloudwatchLogsBaseUrl =
-		'https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/';
-	const logLink =
-		cloudwatchLogsBaseUrl +
-		logGroupName.replaceAll('/', '$252F') +
-		'/log-events$3Fstart$3D' +
-		alarmStartTimeMillis +
-		'$26filterPattern$3D$26end$3D' +
-		alarmEndTimeMillis;
+	const url = diagnosticUrlTemplate
+		.replaceAll('$startMillis', `${alarmStartTimeMillis}`)
+		.replaceAll('$endMillis', `${alarmEndTimeMillis}`);
 
-	return logLink;
+	return url;
 }
 
 function getText(

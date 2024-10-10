@@ -18,8 +18,7 @@ const sharedMobilePurchasesApps = [
 	'mobile-purchases-google-update-subscriptions',
 ];
 
-type AppInfo = string | { app: string; logGroups: string[] };
-export const teamToAppMappings: Record<Team, AppInfo[]> = {
+const teamToAppMappings: Record<Team, string[]> = {
 	GROWTH: [
 		'acquisition-events-api',
 		'admin-console',
@@ -73,21 +72,11 @@ export const teamToAppMappings: Record<Team, AppInfo[]> = {
 		'zuora-creditor',
 
 		// support-frontend
-		{ app: 'frontend', logGroups: ['support-frontend'] },
+		'frontend',
 		'it-test-runner',
 		'stripe-intent',
-		{
-			app: 'workers',
-			logGroups: [
-				'/aws/lambda/CreatePaymentMethod',
-				'/aws/lambda/CreateSalesforceContact',
-				'/aws/lambda/CreateZuoraSubscription',
-				'/aws/lambda/SendThankYouEmail',
-				'/aws/lambda/UpdateSupporterPlusData',
-				'/aws/lambda/SendAcquisitionEvent',
-			],
-		},
-		{ app: 'payment-api', logGroups: ['support-payment-api'] },
+		'workers',
+		'payment-api',
 
 		// support-service-lambdas
 		'digital-voucher-suspension-processor',
@@ -120,24 +109,19 @@ export const teamToAppMappings: Record<Team, AppInfo[]> = {
 };
 
 export class AlarmMappings {
-	constructor(mappings: Record<string, AppInfo[]> = teamToAppMappings) {
+	constructor(mappings: Record<string, string[]> = teamToAppMappings) {
 		this.appToTeamMappings = this.buildAppToTeamMappings(mappings);
-		this.appToLogGroupOverrides = this.buildAppToLogGroupOverrides(mappings);
 	}
 
 	private buildAppToTeamMappings = (
-		theMappings: Record<Team, AppInfo[]>,
+		theMappings: Record<Team, string[]>,
 	): Record<string, Team[]> => {
-		const entries: Array<[Team, AppInfo[]]> = Object.entries(
+		const entries: Array<[Team, string[]]> = Object.entries(
 			theMappings,
-		) as Array<[Team, AppInfo[]]>; // `as` - hmm?
+		) as Array<[Team, string[]]>; // `as` - hmm?
 
 		const teamToApp: Array<{ app: string; team: Team }> = entries.flatMap(
-			([team, appInfos]) =>
-				appInfos.map((appInfo) => {
-					const app = typeof appInfo === 'string' ? appInfo : appInfo.app;
-					return { team, app };
-				}),
+			([team, apps]) => apps.map((app) => ({ team, app })),
 		);
 		const groups = groupBy(teamToApp, ({ app }) => app);
 
@@ -151,20 +135,7 @@ export class AlarmMappings {
 		return mappings;
 	};
 
-	private buildAppToLogGroupOverrides = (
-		theMappings: Record<Team, AppInfo[]>,
-	): Record<string, string[]> => {
-		return Object.fromEntries(
-			Object.values(theMappings)
-				.flatMap((appInfos) => appInfos)
-				.flatMap((appInfo) =>
-					typeof appInfo !== 'string' ? [[appInfo.app, appInfo.logGroups]] : [],
-				),
-		);
-	};
-
 	private appToTeamMappings: Record<string, Team[]>;
-	private appToLogGroupOverrides: Record<string, string[]>;
 
 	getTeams = (appName?: string): Team[] => {
 		if (appName && this.appToTeamMappings[appName]) {
@@ -179,20 +150,5 @@ export class AlarmMappings {
 			process.env[`${team}_WEBHOOK`],
 			`${team}_WEBHOOK environment variable not set`,
 		);
-	};
-
-	getLogGroups = (appName: string, stage: string): string[] => {
-		// currently we assume the log group is /aws/lambda/<app>-<stage>, we can add overrides to the appToTeamMappings later
-		const logGroup = this.appToLogGroupOverrides[appName];
-		if (logGroup === undefined) {
-			// assume it's a lambda
-			console.log('logGroup', logGroup);
-			const lambdaName = appName + '-' + stage;
-
-			const logGroupName = '/aws/lambda/' + lambdaName;
-			return [logGroupName];
-		}
-
-		return logGroup.map((override) => override + '-' + stage);
 	};
 }
