@@ -58,6 +58,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'salesforce-case-raiser',
 		'product-switch-api',
 		'update-supporter-plus-amount',
+		'product-move-api',
 	],
 	SRE: ['alarms-handler', 'gchat-test-app'],
 	PORTFOLIO: [

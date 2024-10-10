@@ -31,7 +31,7 @@ Resources:
     Condition: IsProd
     Properties:
       AlarmActions:
-        - Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+        - Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-${Stage}
       AlarmName: An error in the Product Move lambda. Please check the logs to diagnose
       ComparisonOperator: GreaterThanOrEqualToThreshold
       Dimensions:
@@ -369,7 +369,7 @@ Resources:
       - ProductMoveApiGateway
     Properties:
       AlarmActions:
-        - Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+        - Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-${Stage}
       AlarmName:
         Fn::Sub: The product-move-api returned a 500 response
       AlarmDescription: Check the logs for details - https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fmove-product-PROD
@@ -393,7 +393,7 @@ Resources:
     Condition: IsProd
     Properties:
       AlarmActions:
-        - Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+        - Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-${Stage}
       AlarmName: New message in the product-switch-refund-dead-letter-PROD dead letter queue.
       AlarmDescription: There is a new message in the product-switch-refund-dead-letter-PROD dead letter queue. This means that a user who has cancelled their supporter plus subscription
         within 14 days has not received the refund that they are due.
