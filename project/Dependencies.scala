@@ -5,7 +5,7 @@ import sbtassembly.AssemblyPlugin.autoImport.{MergeStrategy, assemblyMergeStrate
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsSdkVersion = "2.27.7"
+  val awsSdkVersion = "2.27.24"
   val circeVersion = "0.14.9"
   val sttpVersion = "3.9.7"
   val http4sVersion = "0.22.15" // later versions pull in cats effect 3 which is not compatible
