@@ -18,6 +18,8 @@ class SFErrorExposer[A <: Product](
     inputThatCausedError: Option[A] = None,
 ) extends Logging {
 
+  private val errorCharacterLimit = 500
+
   // if we get a 4xx error back, we can try parsing it to find the error codes
   // we need to pass on the error back to salesforce so it can display to the CSRs
   // https://github.com/guardian/salesforce/blob/356c08e5a28f947eb609cce53046ec459d0a2d3d/force-app/main/default/classes/HolidayStopRequestService.cls#L156
@@ -33,7 +35,7 @@ class SFErrorExposer[A <: Product](
               case sfError :: Nil =>
                 ApiGatewayResponse.messageResponse("500", sfError.toString)
               case sfErrors =>
-                val error = sfErrors.groupBy(_.errorCode).view.mapValues(_.map(_.message)).mkString.take(500)
+                val error = sfErrors.groupBy(_.errorCode).view.mapValues(_.map(_.message)).mkString.take(errorCharacterLimit)
                 ApiGatewayResponse.messageResponse("500", error)
             }
           case Failure(exception) =>
@@ -60,7 +62,7 @@ class SFErrorExposer[A <: Product](
         .flatMap(_.body.map(_.validate[List[SalesforceErrorResponseBody]].asOpt))
         .flatten
         .mkString(", ")
-      val sfErrorText = s"MULTIPLE ERRORS : ${failuresStr.take(500)}${if (failuresStr.length > 500) "..." else ""}"
+      val sfErrorText = s"MULTIPLE ERRORS : ${failuresStr.take(errorCharacterLimit)}${if (failuresStr.length > errorCharacterLimit) "..." else ""}"
       logger.error(s"Failed to $action using input $inputThatCausedError: $sfErrorText")
       ReturnWithResponse(ApiGatewayResponse.messageResponse("500", sfErrorText))
     }

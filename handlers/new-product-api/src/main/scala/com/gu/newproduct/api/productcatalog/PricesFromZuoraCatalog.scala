@@ -1,16 +1,14 @@
 package com.gu.newproduct.api.productcatalog
 
-import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.ZuoraEnvironment
 import com.gu.effects.S3Location
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, GenericError}
 import play.api.libs.json.{Json, Reads}
 import ZuoraCatalogWireModel._
 import com.gu.i18n.Currency
 
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 case class PlanWithPrice(planId: PlanId, priceMinorUnits: Map[Currency, AmountMinorUnits])
 
