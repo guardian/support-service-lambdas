@@ -35,7 +35,9 @@ object GetZuoraContactDetails {
       }
       query <- zoql"SELECT Id, WorkEmail, FirstName, LastName FROM Contact WHERE $or"
       result <- zuoraQuerier[WireContact](query)
-      _ <- if (result.done) ClientSuccess(()) else GenericError("oops, query was too big for one page")
+      _ <-
+        if (result.done) ClientSuccess(())
+        else GenericError("oops, query was too big for one page", result.size.toString)
     } yield result.records.map { contact =>
       (
         ContactId(contact.Id),

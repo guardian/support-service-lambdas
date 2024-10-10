@@ -44,8 +44,9 @@ class EndToEndHandlerEffectsTest extends AnyFlatSpec with Matchers {
 
     // fetch the case to ensure the 'Description' field has been updated
     val caseDescription = for {
-      sfConfig <- LoadConfigModule(RawEffects.stage, GetFromS3.fetchString).load(SFAuthConfig.location, sfAuthConfigReads)
-      sfClient <- SalesforceClient(RawEffects.response, sfConfig).value.toDisjunction
+      sfConfig <- LoadConfigModule(RawEffects.stage, GetFromS3.fetchString)
+        .load(SFAuthConfig.location, sfAuthConfigReads)
+      sfClient <- SalesforceClient.auth(RawEffects.response, sfConfig)
       getCaseOp = SalesforceCase.GetById[JsValue](sfClient.wrapWith(JsonHttp.get))
       caseResponse <- getCaseOp(CaseId(firstRaiseCaseResponse.id.value)).toDisjunction
     } yield (caseResponse \ "Description").as[String]

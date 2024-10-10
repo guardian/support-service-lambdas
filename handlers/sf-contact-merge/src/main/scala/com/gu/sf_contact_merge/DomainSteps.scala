@@ -25,8 +25,9 @@ import com.gu.util.apigateway.{ApiGatewayResponse, ResponseModels}
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types.{ApiGatewayOp, _}
 import com.gu.util.resthttp.Types.ClientFailableOp
-import com.gu.util.resthttp.{HttpOp, LazyClientFailableOp}
+import com.gu.util.resthttp.HttpOp
 import cats.data.NonEmptyList
+import cats.implicits.toTraverseOps
 
 object DomainSteps {
 
@@ -76,10 +77,10 @@ object SFSteps {
 
   def apply(getSfContact: GetSfContact): SFSteps = { dedupedContactIds =>
     val sfContacts =
-      dedupedContactIds.map(id => getSfContact.apply.runRequestLazy(id).map(contact => IdWithContact(id, contact)))
+      dedupedContactIds.map(id => getSfContact.apply.runRequest(id).map(contact => IdWithContact(id, contact)))
     for {
       maybeSFAddressOverride <- GetSfAddressOverride
-        .apply(sfContacts.map(_.value.map(_.contact.SFMaybeAddress)))
+        .apply(sfContacts.map(_.map(_.contact.SFMaybeAddress)))
         .toApiGatewayOp("get salesforce addresses")
       _ <- ValidateNoLosingDigitalVoucher(sfContacts.others.map(_.map(_.contact.isDigitalVoucherUser)))
       contacts <- flattenContactData(sfContacts).toApiGatewayOp("get contacts from SF")
@@ -101,13 +102,13 @@ object SFSteps {
     }
 
   def flattenContactData(
-      sfContacts: SFContactsForMerge[LazyClientFailableOp[IdWithContact]],
+      sfContacts: SFContactsForMerge[ClientFailableOp[IdWithContact]],
   ): ClientFailableOp[List[SFContactIdEmailIdentity]] = {
     val contactsList = NonEmptyList(sfContacts.winner, sfContacts.others)
     val lazyContactsEmailIdentity = contactsList.map(
       _.map(idWithContact => SFContactIdEmailIdentity(idWithContact.id, idWithContact.contact.emailIdentity)),
     )
-    lazyContactsEmailIdentity.traverse(_.value).map(_.toList)
+    lazyContactsEmailIdentity.sequence.map(_.toList)
   }
 
   case class IdWithContact(id: SFContactId, contact: SFContact)

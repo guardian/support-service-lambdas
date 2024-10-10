@@ -98,7 +98,8 @@ object JsonHttp {
   def deserialiseJsonResponse(response: BodyAsString): ClientFailableOp[JsValue] =
     Try(Json.parse(response.value)) match {
       case scala.util.Success(value) => ClientSuccess(value)
-      case scala.util.Failure(exception) => GenericError(s"could not deserialise json $response: $exception")
+      case scala.util.Failure(exception) =>
+        GenericError(s"could not deserialise json $response: $exception", response.value)
     }
 
 }

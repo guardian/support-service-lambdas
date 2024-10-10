@@ -98,7 +98,7 @@ object EmailSendSteps extends EmailSqsSerialisation with LazyLogging {
         ClientSuccess(())
       case Failure(error) =>
         logger.error(s"failed to send $emailRequest to sqs queue: ${error.getMessage}")
-        GenericError(s"failure to send email payload to sqs")
+        GenericError(s"failure to send email payload to sqs", error.toString)
     }
   }
 

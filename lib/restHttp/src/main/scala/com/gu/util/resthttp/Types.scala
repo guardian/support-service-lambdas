@@ -10,15 +10,22 @@ object Types {
     val isFailure = true
 
     def message: String
+
+    def body: String
   }
 
-  case class NotFound(message: String) extends ClientFailure
+  sealed trait Error4xx extends ClientFailure
 
-  case class GenericError(message: String) extends ClientFailure
+  case class NotFound(message: String, body: String) extends Error4xx
+  case class BadRequest(message: String, body: String) extends Error4xx
+  case class Unauthorised(message: String, body: String) extends Error4xx
 
-  case class CustomError(message: String) extends ClientFailure
+  // this case refers to deserialisation errors or issues with headers etc
+  case class GenericError(message: String, body: String = "") extends ClientFailure
 
-  case class PaymentError(message: String) extends ClientFailure
+  case class PaymentError(message: String) extends ClientFailure {
+    def body: String = ""
+  }
 
   case class ClientSuccess[A](value: A) extends ClientFailableOp[A] {
     val isFailure = false

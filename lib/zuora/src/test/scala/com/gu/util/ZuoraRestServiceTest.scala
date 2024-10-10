@@ -62,7 +62,7 @@ class ZuoraRestServiceTest extends AsyncFlatSpec {
 
   it should "return a left[String] if the body of a successful response cannot be de-serialized with a zuora success response" in {
     val either = ZuoraRestRequestMaker.zuoraIsSuccessful(dummyJson)
-    assert(either == GenericError("Error when reading common fields from zuora"))
+    assert(either == GenericError("Error when reading common fields from zuora", dummyJson.toString))
   }
 
   it should "return a left[String] if the body of a successful http response has a zuora failed in it" in {

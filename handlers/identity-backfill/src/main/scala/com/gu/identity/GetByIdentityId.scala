@@ -27,7 +27,7 @@ object GetByIdentityId {
   def userFromResponse(userResponse: UserResponse): ClientFailableOp[User] =
     userResponse match {
       case UserResponse("ok", user) => ClientSuccess(user)
-      case error => GenericError(s"not an OK response from api: $error")
+      case error => GenericError(s"not an OK response from api: $error", userResponse.toString)
     }
 
   def wireToDomainModel(userResponse: UserResponse): ClientFailableOp[IdentityUser] = {

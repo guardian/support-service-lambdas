@@ -29,7 +29,7 @@ object FindExistingIdentityId {
     val result = getByEmail(emailAddress) match {
       case ClientSuccess(IdentityAccount(identityId, true)) => ContinueProcessing(Some(identityId))
       case ClientSuccess(IdentityAccount(identityId, false)) => continueIfNoPassword(identityId)
-      case NotFound(_) => ContinueProcessing(None)
+      case _: NotFound => ContinueProcessing(None)
       case other: ClientFailure => ReturnWithResponse(ApiGatewayResponse.internalServerError(other.toString))
     }
 

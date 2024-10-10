@@ -19,11 +19,10 @@ class GetSFContactSyncCheckFieldsEffectsTest extends AnyFlatSpec with Matchers {
 
     val actual = for {
       sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[SFAuthConfig]
-      sfAuth <- SalesforceClient(RawEffects.response, sfConfig).value.toDisjunction
+      sfAuth <- SalesforceClient.auth(RawEffects.response, sfConfig)
       getOp = sfAuth.wrapWith(JsonHttp.get)
       result <- GetSFContactSyncCheckFields(getOp)
         .apply(SFEffectsData.testAccountHasNamePhoneOtherAddress)
-        .value
         .toDisjunction
     } yield result
 

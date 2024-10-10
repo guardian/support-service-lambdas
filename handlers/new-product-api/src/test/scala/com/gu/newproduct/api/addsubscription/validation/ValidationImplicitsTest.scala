@@ -40,7 +40,7 @@ class ValidationImplicitsTest extends AnyFlatSpec with Matchers {
   }
 
   it should "return 500 error if getter returns not found and no custom not found mesage was specified" in {
-    def getData(id: String): ClientFailableOp[TestData] = NotFound("test data not found")
+    def getData(id: String): ClientFailableOp[TestData] = NotFound("test data not found", "")
 
     def validationFunc(testData: TestData) = Passed(ValidatedTestData("some response"))
 
@@ -52,13 +52,13 @@ class ValidationImplicitsTest extends AnyFlatSpec with Matchers {
   }
 
   it should "return 422 with custom message if getter returns not found and a custom error is specified" in {
-    def getData(id: String): ClientFailableOp[TestData] = NotFound("test data not found")
+    def getData(id: String): ClientFailableOp[TestData] = NotFound("test data not found", "")
 
     def validationFunc(testData: TestData) = Passed(ValidatedTestData("some response"))
 
     def getValidatedData: String => ApiGatewayOp[ValidatedTestData] = getData(_).andValidateWith(
       validate = validationFunc,
-      ifNotFoundReturn = Some("invalid test data Id")
+      ifNotFoundReturn = Some("invalid test data Id"),
     )
 
     getValidatedData("testId") shouldBe ReturnWithResponse(

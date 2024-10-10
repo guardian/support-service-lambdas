@@ -35,7 +35,7 @@ class FormRequestMaker(getResponse: Request => Response, headers: Map[String, St
       case 2 => ClientSuccess(Json.parse(responseBody).as[RESP])
       case _ =>
         logger.warn(s"request failed with status $code: $responseBody")
-        GenericError("failed to successfully call out to API")
+        GenericError("failed to successfully call out to API", responseBody)
     }
   }
 

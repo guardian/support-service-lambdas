@@ -25,7 +25,7 @@ class GetSfAddressEffectsTest extends AnyFlatSpec with Matchers {
     val actual = for {
       sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[SFAuthConfig]
       response = RawEffects.response
-      sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
+      sfAuth <- SalesforceClient.auth(response, sfConfig)
       getSfContact = sfAuth
         .wrapWith(JsonHttp.get)
         .setupRequest(ToSfContactRequest.apply)

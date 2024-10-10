@@ -22,7 +22,7 @@ class PricesFromZuoraCatalogEffectsTest extends AnyFlatSpec with Matchers {
         ZuoraEnvironment("CODE"),
         GetFromS3.fetchString,
         zuoraIds.rateplanIdToApiId.get,
-      ).toDisjunction.left.map(_.toString)
+      ).toEither.left.map(_.toString)
     } yield response
     actual.map(result => result(MonthlySupporterPlus).get(GBP)) shouldBe Right(Some(AmountMinorUnits(1200)))
     // the prices might change but at least we can assert that we got some price for each product

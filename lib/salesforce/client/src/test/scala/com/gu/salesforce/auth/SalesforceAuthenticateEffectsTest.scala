@@ -15,14 +15,12 @@ class SalesforceAuthenticateEffectsTest extends AnyFlatSpec with Matchers {
 
     val actual = for {
       sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[SFAuthConfig]
-      identityId <- SalesforceAuthenticate.apply(RawEffects.response)(sfConfig).value.toDisjunction
-    } yield {
-      identityId
-    }
+      salesforceAuth <- SalesforceAuthenticate.auth(RawEffects.response, sfConfig)
+    } yield salesforceAuth
     withClue(s"wrong result: $actual") {
       actual match {
         case Right(SalesforceAuth(token, instanceUrl)) =>
-          token should not be ("")
+          token should not be ""
           token.length > 20 should be(true)
           instanceUrl should startWith("https://")
         case _ => fail(s"wrong result")

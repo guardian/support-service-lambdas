@@ -45,12 +45,6 @@ class EndToEndHandlerTest extends AnyFlatSpec with Matchers {
         ),
         BasicRequest(
           "POST",
-          "/services/oauth2/token",
-          "client_id=clientsfclient&client_secret=clientsecretsfsecret&username=usernamesf" +
-            "&password=passSFpasswordtokentokenSFtoken&grant_type=password",
-        ),
-        BasicRequest(
-          "POST",
           "/action/query",
           """{"queryString":"SELECT Id FROM Account where IdentityId__c='1234'"}""",
         ),
@@ -65,6 +59,12 @@ class EndToEndHandlerTest extends AnyFlatSpec with Matchers {
           """{"queryString":"SELECT Id FROM Contact where WorkEmail='email@address'"}""",
         ),
         BasicRequest("GET", "/user?emailAddress=email%40address", ""),
+        BasicRequest(
+          "POST",
+          "/services/oauth2/token",
+          "client_id=clientsfclient&client_secret=clientsecretsfsecret&username=usernamesf" +
+            "&password=passSFpasswordtokentokenSFtoken&grant_type=password",
+        ),
       ),
     )
   }
@@ -100,12 +100,6 @@ class EndToEndHandlerTest extends AnyFlatSpec with Matchers {
         ),
         BasicRequest(
           "POST",
-          "/services/oauth2/token",
-          "client_id=clientsfclient&client_secret=clientsecretsfsecret&username=usernamesf" +
-            "&password=passSFpasswordtokentokenSFtoken&grant_type=password",
-        ),
-        BasicRequest(
-          "POST",
           "/action/query",
           """{"queryString":"SELECT Id FROM Account where IdentityId__c='1234'"}""",
         ),
@@ -120,6 +114,12 @@ class EndToEndHandlerTest extends AnyFlatSpec with Matchers {
           """{"queryString":"SELECT Id FROM Contact where WorkEmail='email@address'"}""",
         ),
         BasicRequest("GET", "/user?emailAddress=email%40address", ""),
+        BasicRequest(
+          "POST",
+          "/services/oauth2/token",
+          "client_id=clientsfclient&client_secret=clientsecretsfsecret&username=usernamesf" +
+            "&password=passSFpasswordtokentokenSFtoken&grant_type=password",
+        ),
       ),
     )
   }

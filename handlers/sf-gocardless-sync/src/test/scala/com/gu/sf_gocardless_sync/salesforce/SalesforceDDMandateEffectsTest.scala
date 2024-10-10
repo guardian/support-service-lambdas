@@ -28,7 +28,7 @@ class SalesforceDDMandateEffectsTest extends AnyFlatSpec with Matchers {
     val actual = for {
       sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[SFAuthConfig]
       response = RawEffects.response
-      sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
+      sfAuth <- SalesforceClient.auth(response, sfConfig)
       wiredOp = SalesforceDDMandate.Create(sfAuth.wrapWith(JsonHttp.post))
       result = wiredOp(
         WireNewMandate(
@@ -54,7 +54,7 @@ class SalesforceDDMandateEffectsTest extends AnyFlatSpec with Matchers {
     val actual = for {
       sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[SFAuthConfig]
       response = RawEffects.response
-      sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
+      sfAuth <- SalesforceClient.auth(response, sfConfig)
       wiredOp = SalesforceDDMandate.Update(sfAuth.wrapWith(JsonHttp.patch))(MandateSfId("a2q6E0000007XgS"))
       result = wiredOp(
         WirePatchMandate(
@@ -76,7 +76,7 @@ class SalesforceDDMandateEffectsTest extends AnyFlatSpec with Matchers {
     val actual = for {
       sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[SFAuthConfig]
       response = RawEffects.response
-      sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
+      sfAuth <- SalesforceClient.auth(response, sfConfig)
       wiredOp = SalesforceDDMandate.GetPaymentMethodsEtc(sfAuth.wrapWith(JsonHttp.get))
       shouldBeFound = wiredOp(List(Reference("9RNF2YN")))
       shouldBeNotFound = wiredOp(List(Reference("idontexist")))
@@ -93,7 +93,7 @@ class SalesforceDDMandateEffectsTest extends AnyFlatSpec with Matchers {
     val actual = for {
       sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[SFAuthConfig]
       response = RawEffects.response
-      sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
+      sfAuth <- SalesforceClient.auth(response, sfConfig)
       wiredOp = SalesforceDDMandate.LookupAll(sfAuth.wrapWith(JsonHttp.get))
       shouldBeFound = wiredOp(List(GoCardlessMandateID("MD0004D28YHWH2")))
       shouldBeNotFound = wiredOp(List(GoCardlessMandateID("idontexist")))

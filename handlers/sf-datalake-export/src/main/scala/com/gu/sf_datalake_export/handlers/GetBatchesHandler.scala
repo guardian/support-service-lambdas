@@ -102,7 +102,7 @@ object GetBatchesHandler {
 
     for {
       sfConfig <- loadConfig.load[SFAuthConfig](SFExportAuthConfig.location, sfAuthConfigReads).toTry
-      sfClient <- SalesforceClient(getResponse, sfConfig).value.toTry
+      sfClient <- SalesforceClient.auth(getResponse, sfConfig).left.map(bodies => new Throwable(bodies.toString)).toTry
       getJobBatchesOp = sfClient.wrapWith(GetJobBatches.wrapper)
       batches <- getJobBatchesOp.runRequest(jobId).toTry
       status = getJobStatus(batches)

@@ -48,7 +48,7 @@ class UpdateAccountsTest extends AnyFlatSpec with Matchers {
 
     val response = UpdateAccounts(fakeZuoraUpdate, getRemainingTime _)(testUri, AccountIdIterator(linesIterator, 0).get)
     // this test is a bit specific, no need to check the exact message
-    response shouldBe Failure(LambdaException("error response from lambda GenericError(something failed!)"))
+    response shouldBe Failure(LambdaException("error response from lambda GenericError(something failed!,)"))
 
   }
 }

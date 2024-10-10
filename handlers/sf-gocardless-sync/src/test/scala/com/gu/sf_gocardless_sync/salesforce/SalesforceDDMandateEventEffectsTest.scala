@@ -20,7 +20,7 @@ class SalesforceDDMandateEventEffectsTest extends AnyFlatSpec with Matchers {
     val actual = for {
       sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[SFAuthConfig]
       response = RawEffects.response
-      sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
+      sfAuth <- SalesforceClient.auth(response, sfConfig)
       wiredOp = SalesforceDDMandateEvent.Create(sfAuth.wrapWith(JsonHttp.post))
       result = wiredOp(
         WireNewMandateEvent(
@@ -48,7 +48,7 @@ class SalesforceDDMandateEventEffectsTest extends AnyFlatSpec with Matchers {
     val actual = for {
       sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[SFAuthConfig]
       response = RawEffects.response
-      sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
+      sfAuth <- SalesforceClient.auth(response, sfConfig)
       wiredOp = SalesforceDDMandateEvent.GetGoCardlessIdOfLastProcessed(sfAuth.wrapWith(JsonHttp.get))
       result = wiredOp()
     } yield result

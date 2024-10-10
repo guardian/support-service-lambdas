@@ -1,32 +1,25 @@
 package com.gu.salesforce
 
-import com.gu.salesforce.{SFAuthConfig, SalesforceAuth}
 import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker._
-import com.gu.util.resthttp.Types._
-import com.gu.util.resthttp.{HttpOp, LazyClientFailableOp}
+import com.gu.util.resthttp.HttpOp
 import com.typesafe.scalalogging.LazyLogging
 import okhttp3.{HttpUrl, Request, Response}
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Reads}
 
 object SalesforceClient extends LazyLogging {
 
-  def apply(
+  def auth(
       getResponse: Request => Response,
       config: SFAuthConfig,
-      shouldExposeSalesforceErrorMessageInClientFailure: Boolean = false,
-  ): LazyClientFailableOp[HttpOp[StringHttpRequest, BodyAsString]] =
-    SalesforceAuthenticate(getResponse)(config).map { sfAuth: SalesforceAuth =>
-      HttpOp(getResponse)
-        .flatMap {
-          toClientFailableOp(
-            shouldExposeSalesforceErrorMessageInClientFailure.toOption(parseSalesforceErrorResponseAsCustomError _),
-          )
-        }
-        .setupRequest[StringHttpRequest] {
-          withAuthAndBaseUrl(sfAuth)
-        }
-    }
+  ): Either[List[SalesforceErrorResponseBody], HttpOp[StringHttpRequest, BodyAsString]] =
+    for {
+      sfAuth <- SalesforceAuthenticate.auth(getResponse, config)
+    } yield HttpOp(getResponse)
+      .flatMap(toClientFailableOp)
+      .setupRequest[StringHttpRequest] {
+        withAuthAndBaseUrl(sfAuth)
+      }
 
   private def getAuthHeaders(accessToken: String): List[Header] = List(
     Header(name = "Authorization", value = s"Bearer $accessToken"),
@@ -67,22 +60,7 @@ object SalesforceClient extends LazyLogging {
   case class SalesforceErrorResponseBody(message: String, errorCode: String) {
     override def toString = s"${errorCode} : ${message}"
   }
-  implicit val readsSalesforceErrorResponseBody = Json.reads[SalesforceErrorResponseBody]
+  implicit val readsSalesforceErrorResponseBody: Reads[SalesforceErrorResponseBody] =
+    Json.reads[SalesforceErrorResponseBody]
 
-  def parseSalesforceErrorResponseAsCustomError(errorBody: String): ClientFailure = try {
-    Json.parse(errorBody).as[List[SalesforceErrorResponseBody]] match {
-      case singleSfError :: Nil => CustomError(singleSfError.toString)
-      case multipleSfErrors =>
-        CustomError(
-          multipleSfErrors.groupBy(_.errorCode).view.mapValues(_.map(_.message)).mkString.take(500),
-        )
-      case _ =>
-        logger.warn("Salesforce error response didn't contain any detail")
-        genericError
-    }
-  } catch {
-    case _: Throwable =>
-      logger.warn("Couldn't parse the Salesforce error response body")
-      genericError
-  }
 }

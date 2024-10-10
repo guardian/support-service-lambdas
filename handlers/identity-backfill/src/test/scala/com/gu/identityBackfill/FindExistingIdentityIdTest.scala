@@ -27,7 +27,7 @@ class FindExistingIdentityIdTest extends AnyFlatSpec with Matchers {
 
   "findExistingIdentityId" should "continue processing for not found identity user" in {
     FindExistingIdentityId(
-      _ => NotFound("not found"),
+      _ => NotFound("not found", ""),
       _ => fail("should not be called"),
     )(EmailAddress("email@email.email")) should be(ContinueProcessing(None))
   }

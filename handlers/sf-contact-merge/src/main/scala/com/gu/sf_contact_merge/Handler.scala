@@ -51,7 +51,7 @@ object Handler {
       zuoraQuerier = ZuoraQuery(requests)
 
       sfConfig <- loadConfig.load[SFAuthConfig].toApiGatewayOp("load trusted Api config")
-      sfAuth <- SalesforceClient(getResponse, sfConfig).value.toApiGatewayOp("Failed to authenticate with Salesforce")
+      sfAuth <- SalesforceClient.auth(getResponse, sfConfig).toApiGatewayOp("Failed to authenticate with Salesforce")
 
     } yield Operation.noHealthcheck {
       WireRequestToDomainObject {

@@ -53,7 +53,10 @@ case class ZuoraSarService(zuoraClient: Requests, zuoraDownloadClient: Requests,
      */
     zuoraClient.get[JsValue](s"object/account/$accountId", WithoutCheck).toDisjunction.flatMap { accountObjectRes =>
       Json.fromJson[AccountNumber](accountObjectRes).asEither match {
-        case Left(err) => Left(GenericError(s"Unable to find AccountNumber in account object response: $err"))
+        case Left(err) =>
+          Left(
+            GenericError(s"Unable to find AccountNumber in account object response: $err", accountObjectRes.toString),
+          )
         case Right(_) => Right(accountObjectRes)
       }
     }

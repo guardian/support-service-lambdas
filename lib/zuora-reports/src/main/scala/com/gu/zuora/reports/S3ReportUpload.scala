@@ -25,7 +25,7 @@ object S3ReportUpload extends Logging {
       .left
       .map { exception =>
         logger.error("could not upload report to S3", exception)
-        GenericError(s"could not upload report to S3: ${exception.getMessage}")
+        GenericError(s"could not upload report to S3: ${exception.getMessage}", "")
       }
       .toClientFailableOp
 

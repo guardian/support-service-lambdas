@@ -45,7 +45,7 @@ class SafeQueryBuilderEscapeTest extends AnyFlatSpec with Matchers {
     badChars.foreach { char =>
       val actual = makeSafeStringIntoQueryLiteral(s"hello${char}bye")
       actual.toDisjunction.left.map {
-        case GenericError(mess) => mess.split(':')(0)
+        case GenericError(mess, _) => mess.split(':')(0)
         case a => a
       } should be(Left("control characters can't be inserted into a query"))
     }

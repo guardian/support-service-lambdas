@@ -1,7 +1,6 @@
 package com.gu.identityBackfill
 
 import java.io.{InputStream, OutputStream}
-
 import com.amazonaws.services.lambda.runtime.Context
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.identity._
@@ -29,9 +28,9 @@ import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.JsonHttp.StringHttpRequest
-import com.gu.util.resthttp.RestRequestMaker.{GetRequest, PatchRequest}
+import com.gu.util.resthttp.RestRequestMaker.{BodyAsString, GetRequest, PatchRequest}
 import com.gu.util.resthttp.Types.ClientFailableOp
-import com.gu.util.resthttp.{HttpOp, JsonHttp, LazyClientFailableOp, RestRequestMaker}
+import com.gu.util.resthttp.{HttpOp, JsonHttp}
 import com.gu.util.zuora.ZuoraQuery.ZuoraQuerier
 import com.gu.util.zuora.{ZuoraQuery, ZuoraRestConfig, ZuoraRestRequestMaker}
 import okhttp3.{Request, Response}
@@ -65,7 +64,7 @@ object Handler {
   ): ApiGatewayOp[Operation] = {
     def operation(
         zuoraRestConfig: ZuoraRestConfig,
-        sfConfig: SFAuthConfig,
+        sfAuth: HttpOp[StringHttpRequest, BodyAsString],
         identityConfig: IdentityConfig,
     ) = {
       val zuoraRequests = ZuoraRestRequestMaker(response, zuoraRestConfig)
@@ -80,10 +79,8 @@ object Handler {
       val updateZuoraAccounts =
         IdentityBackfillSteps.updateZuoraBillingAccountsIdentityId(AddIdentityIdToAccount(zuoraRequests))(_, _)
 
-      lazy val sfAuth: LazyClientFailableOp[HttpOp[StringHttpRequest, RestRequestMaker.BodyAsString]] =
-        SalesforceClient(response, sfConfig)
-      lazy val sfPatch = sfAuth.map(_.wrapWith(JsonHttp.patch))
-      lazy val sfGet = sfAuth.map(_.wrapWith(JsonHttp.get))
+      lazy val sfPatch = sfAuth.wrapWith(JsonHttp.patch)
+      lazy val sfGet = sfAuth.wrapWith(JsonHttp.get)
       lazy val checkSfContactsSyncable =
         PreReqCheck.checkSfContactsSyncable(getSFBillingContactIfSyncable(sfGet, stage)) _
       lazy val updateBuyersIdentityId =
@@ -113,7 +110,6 @@ object Handler {
           Healthcheck(
             getByEmail,
             countZuoraAccounts,
-            sfAuth,
           ),
       )
     }
@@ -123,7 +119,8 @@ object Handler {
       zuoraRestConfig <- loadConfig.load[ZuoraRestConfig].toApiGatewayOp("load zuora config")
       sfAuthConfig <- loadConfig.load[SFAuthConfig].toApiGatewayOp("load sfAuth config")
       identityConfig <- loadConfig.load[IdentityConfig].toApiGatewayOp("load identity config")
-      configuredOp = operation(zuoraRestConfig, sfAuthConfig, identityConfig)
+      sfAuth <- SalesforceClient.auth(response, sfAuthConfig).toApiGatewayOp("sf auth")
+      configuredOp = operation(zuoraRestConfig, sfAuth, identityConfig)
 
     } yield configuredOp
     fOperation
@@ -142,30 +139,28 @@ object Handler {
   }
 
   def getSFBillingContactIfSyncable(
-      sfRequests: LazyClientFailableOp[HttpOp[GetRequest, JsValue]],
+      sfRequests: HttpOp[GetRequest, JsValue],
       stage: Stage,
   )(sfAccountId: SFAccountId): ApiGatewayOp[Option[SFContactId]] = {
     val result = for {
-      sfRequests <- sfRequests
       fields <- GetSFContactSyncCheckFields(sfRequests).apply(sfAccountId)
     } yield for {
       standardRecordType <- standardRecordTypeForStage(stage)
       syncable <- GetSFBillingContactIfSyncable(standardRecordType)(fields)
     } yield syncable
 
-    result.value
+    result
       .toApiGatewayOp("load SF contact")
       .flatMap(identity)
   }
 
   def updateSalesforceContactIdentityId(
-      sfRequests: LazyClientFailableOp[HttpOp[PatchRequest, Unit]],
+      sfRequests: HttpOp[PatchRequest, Unit],
   )(
       sFContactId: SFContactId,
       identityId: IdentityId,
   ): ClientFailableOp[Unit] =
     for {
-      sfRequests <- sfRequests.value
       _ <- UpdateSalesforceIdentityId(sfRequests).runRequestMultiArg(sFContactId, identityId)
     } yield ()
 
@@ -175,7 +170,6 @@ object Healthcheck {
   def apply(
       getByEmail: HttpOp[EmailAddress, GetByEmail.IdentityAccount],
       countZuoraAccountsForIdentityId: IdentityId => ClientFailableOp[Int],
-      sfAuth: LazyClientFailableOp[Any],
   ): ApiResponse =
     (for {
       identityAccount <- getByEmail
@@ -186,7 +180,6 @@ object Healthcheck {
       _ <- countZuoraAccountsForIdentityId(identityAccount.identityId).toApiGatewayOp(
         "get zuora accounts for identity id",
       )
-      _ <- sfAuth.value.toApiGatewayOp("Failed to authenticate with Salesforce")
     } yield ApiGatewayResponse.successfulExecution).apiResponse
 
 }

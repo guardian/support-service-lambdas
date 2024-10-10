@@ -165,7 +165,7 @@ case class ZuoraRerService(zuoraClient: Requests, zuoraQuerier: ZuoraQuerier) ex
       case Right(BillingDeletionResult(_, "Pending", _)) | Right(BillingDeletionResult(_, "Processing", _)) | Right(
             BillingDeletionResult(_, "Error", _),
           ) =>
-        Left(GenericError("Billing Deletion processing issue"))
+        Left(GenericError("Billing Deletion processing issue", outcome.toString))
 
       case _ => outcome
     }

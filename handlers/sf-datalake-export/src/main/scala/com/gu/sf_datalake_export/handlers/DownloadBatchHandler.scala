@@ -103,7 +103,7 @@ object DownloadBatchHandler extends LazyLogging {
     val loadConfig = LoadConfigModule(stage, getFromS3)
     for {
       sfConfig <- loadConfig.load[SFAuthConfig](SFExportAuthConfig.location, sfAuthConfigReads).toTry
-      sfClient <- SalesforceClient(getResponse, sfConfig).value.toTry
+      sfClient <- SalesforceClient.auth(getResponse, sfConfig).leftMap(bodies => new Throwable(bodies.toString)).toTry
       wiredGetBatchResultId = sfClient.wrapWith(GetBatchResultId.wrapper).runRequest _
       wiredGetBatchResult = sfClient.wrapWith(GetBatchResult.wrapper).runRequest _
       uploadFile = S3UploadFile(s3Write) _
