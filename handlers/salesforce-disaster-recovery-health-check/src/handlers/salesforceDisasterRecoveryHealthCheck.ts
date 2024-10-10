@@ -66,7 +66,9 @@ export const handler = async (): Promise<
 			if (status !== 'RUNNING') {
 				console.log('Execution result:', describeExecutionResponse);
 
-				if (status === 'SUCCEEDED') return 'HEALTH CHECK PASSED';
+				if (status === 'SUCCEEDED') {
+					return 'HEALTH CHECK PASSED';
+				}
 
 				await publishSnsMessage({
 					topicArn,

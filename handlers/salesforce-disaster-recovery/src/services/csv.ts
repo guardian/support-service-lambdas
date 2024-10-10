@@ -1,5 +1,7 @@
 export const convertArrayToCsv = <T>({ arr }: { arr: T[] }) => {
-	if (!arr[0]) return '';
+	if (!arr[0]) {
+		return '';
+	}
 
 	const headers = Object.keys(arr[0]);
 

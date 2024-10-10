@@ -126,7 +126,7 @@ const appToTeamMappings: Record<string, Team[]> = buildAppToTeamMappings();
 
 export const getTeams = (appName?: string): Team[] => {
 	if (appName && appToTeamMappings[appName]) {
-		return appToTeamMappings[appName] as Team[];
+		return appToTeamMappings[appName];
 	}
 
 	return ['SRE'];

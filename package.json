@@ -15,21 +15,21 @@
 		"check-formatting": "pnpm -r run check-formatting"
 	},
 	"devDependencies": {
-		"@guardian/eslint-config-typescript": "8.0.1",
+		"@guardian/eslint-config-typescript": "12.0.0",
 		"@guardian/prettier": "^8.0.1",
-		"@types/jest": "^29.5.12",
-		"@types/node": "^20.11.27",
-		"esbuild": "^0.23.0",
-		"eslint": "^8.57.0",
-		"eslint-import-resolver-typescript": "^3.6.1",
-		"eslint-plugin-import": "^2.29.1",
-		"husky": "^9.1.4",
+		"@types/jest": "^29.5.13",
+		"@types/node": "^20.16.11",
+		"esbuild": "^0.23.1",
+		"eslint": "^8.57.1",
+		"eslint-import-resolver-typescript": "^3.6.3",
+		"eslint-plugin-import": "^2.31.0",
+		"husky": "^9.1.6",
 		"hygen": "^6.2.11",
 		"jest": "^29.7.0",
 		"jest-runner-groups": "^2.2.0",
 		"prettier": "^3.3.3",
-		"ts-jest": "^29.2.4",
-		"typescript": "^5.2.2"
+		"ts-jest": "^29.2.5",
+		"typescript": "^5.6.3"
 	},
 	"packageManager": "pnpm@9.1.1"
 }

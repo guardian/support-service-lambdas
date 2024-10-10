@@ -50,6 +50,7 @@ const attemptToParseMessageString = ({
 	try {
 		return cloudWatchAlarmMessageSchema.parse(JSON.parse(messageString));
 	} catch (error) {
+		console.error(error);
 		return null;
 	}
 };
@@ -103,7 +104,9 @@ const handleSnsPublishMessage = async ({
 }) => {
 	const stage = messageAttributes.stage?.Value;
 
-	if (stage && stage !== 'PROD') return;
+	if (stage && stage !== 'PROD') {
+		return;
+	}
 
 	const app = messageAttributes.app?.Value;
 	const teams = getTeams(app);

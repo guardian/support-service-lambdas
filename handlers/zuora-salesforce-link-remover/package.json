@@ -12,9 +12,9 @@
 		"fix-formatting": "prettier --write **.ts"
 	},
 	"dependencies": {
-		"@aws-sdk/client-secrets-manager": "^3.556.0",
+		"@aws-sdk/client-secrets-manager": "3.665.0",
 		"aws-lambda": "^1.0.7",
-		"aws-sdk-client-mock": "^3.0.1",
+		"aws-sdk-client-mock": "4.0.2",
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
