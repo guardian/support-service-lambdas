@@ -87,7 +87,7 @@ object AutoCancel extends Logging {
             invoice.invoiceItems.filter(_.subscriptionName == subToCancel.value) match {
               case Nil => GenericError(s"Invoice ${invoice.id} isn't for subscription $subToCancel")
               case items =>
-                val amount = items.map(_.chargeAmount).sum
+                val amount = items.map(item => item.chargeAmount + item.taxAmount).sum
                 applyCreditBalance(invoice.id, amount, comment)
             }
         },
