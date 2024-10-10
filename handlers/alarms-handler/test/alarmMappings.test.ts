@@ -52,7 +52,11 @@ describe('getLogGroups', () => {
 
 		expect(logGroups).toEqual([
 			'/aws/lambda/CreatePaymentMethod-CODE',
+			'/aws/lambda/CreateSalesforceContact-CODE',
 			'/aws/lambda/CreateZuoraSubscription-CODE',
+			'/aws/lambda/SendThankYouEmail-CODE',
+			'/aws/lambda/UpdateSupporterPlusData-CODE',
+			'/aws/lambda/SendAcquisitionEvent-CODE',
 		]);
 	});
 });

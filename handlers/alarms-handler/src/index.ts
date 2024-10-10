@@ -99,10 +99,9 @@ async function getCloudWatchAlarmMessage(
 ) {
 	const tags = await getTags(AlarmArn, AWSAccountId);
 	console.log('tags', tags);
-	const { App, Stage } = tags;
+	const { App, Stage = 'PROD' } = tags;
 
-	const logGroupNames =
-		App && Stage ? alarmMappings.getLogGroups(App, Stage) : [];
+	const logGroupNames = App ? alarmMappings.getLogGroups(App, Stage) : [];
 
 	const links = logGroupNames.map((logGroupName) =>
 		getCloudwatchLogsLink(logGroupName, Trigger, StateChangeTime),

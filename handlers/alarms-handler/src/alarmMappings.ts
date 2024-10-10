@@ -80,7 +80,11 @@ export const teamToAppMappings: Record<Team, AppInfo[]> = {
 			app: 'workers',
 			logGroups: [
 				'/aws/lambda/CreatePaymentMethod',
-				'/aws/lambda/CreateZuoraSubscription', //etc
+				'/aws/lambda/CreateSalesforceContact',
+				'/aws/lambda/CreateZuoraSubscription',
+				'/aws/lambda/SendThankYouEmail',
+				'/aws/lambda/UpdateSupporterPlusData',
+				'/aws/lambda/SendAcquisitionEvent',
 			],
 		},
 		{ app: 'payment-api', logGroups: ['support-payment-api'] },
