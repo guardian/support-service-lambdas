@@ -58,6 +58,6 @@ object TestFixtures {
 
   val t3Subscription = Fixtures.subscriptionFromJson("TierThreeSubscription.json")
   val t3Account = Fixtures.accountFromJson("TierThreeAccount.json")
- 
+
   def asIsoDateString(date: LocalDate) = date.format(DateTimeFormatter.ISO_LOCAL_DATE)
 }

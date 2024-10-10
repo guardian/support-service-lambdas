@@ -60,9 +60,11 @@ object Handler extends Logging {
   ): ApiGatewayOp[Operation] = {
 
     for {
-      sfConfig <- LoadConfigModule(stage, fetchString).load(SFAuthConfig.location, sfAuthConfigReads).toApiGatewayOp(
-        "load SF config",
-      )
+      sfConfig <- LoadConfigModule(stage, fetchString)
+        .load(SFAuthConfig.location, sfAuthConfigReads)
+        .toApiGatewayOp(
+          "load SF config",
+        )
       sfClient <- SalesforceClient(response, sfConfig).value.toApiGatewayOp("Failed to authenticate with Salesforce")
     } yield Operation
       .noHealthcheck( // checking connectivity to SF is sufficient healthcheck so no special steps required

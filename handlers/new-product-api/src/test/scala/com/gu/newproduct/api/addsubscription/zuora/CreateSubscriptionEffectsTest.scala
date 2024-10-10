@@ -60,7 +60,6 @@ class CreateSubscriptionEffectsTest extends AnyFlatSpec with Matchers {
     // ideally should check that it was really created with the right fields
   }
 
-
   it should "create digipack in account with a discount" taggedAs EffectsTest in {
     val validCaseIdToAvoidCausingSFErrors = CaseId("5006E000005b5cf")
     val monthlyTestRatePlanZuoraId = ProductRatePlanId("2c92c0f84bbfec8b014bc655f4852d9d")
