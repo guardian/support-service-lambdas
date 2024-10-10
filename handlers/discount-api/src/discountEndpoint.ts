@@ -23,6 +23,7 @@ import type { APIGatewayProxyEventHeaders } from 'aws-lambda';
 import dayjs from 'dayjs';
 import { EligibilityChecker } from './eligibilityChecker';
 import { generateCancellationDiscountConfirmationEmail } from './generateCancellationDiscountConfirmationEmail';
+import { Lazy } from './lazy';
 import { getDiscountFromSubscription } from './productToDiscountMapping';
 
 export const previewDiscountEndpoint = async (
@@ -196,14 +197,25 @@ async function getDiscountToApply(
 		subscription.subscriptionNumber,
 	);
 
-	console.log('get billing preview for the subscription');
-	const billingPreview = billingPreviewToSimpleInvoiceItems(
-		await getBillingPreview(
-			zuoraClient,
-			today.add(13, 'months'),
-			subscription.accountNumber,
-		),
+	const lazyBillingPreview = new Lazy(
+		() =>
+			getBillingPreview(
+				zuoraClient,
+				today.add(13, 'months'),
+				subscription.accountNumber,
+			),
+		'get billing preview for the subscription',
+	).map(billingPreviewToSimpleInvoiceItems);
+
+	const lazyNextInvoiceItems = lazyBillingPreview.map(getNextInvoiceItems);
+
+	await eligibilityChecker.assertGenerallyEligible(
+		subscription,
+		account.metrics.totalInvoiceBalance,
+		lazyNextInvoiceItems.map(({ items }) => items),
 	);
+
+	const billingPreview = await lazyBillingPreview.get();
 
 	console.log('Working out the appropriate discount for the subscription');
 	const { discount, discountableProductRatePlanId } =
@@ -230,15 +242,9 @@ async function getDiscountToApply(
 			break;
 	}
 
-	const { date: dateToApply, items: nextInvoiceItems } =
-		getNextInvoiceItems(billingPreview);
+	const dateToApply = (await lazyNextInvoiceItems.get()).date;
 
 	const orderedInvoiceTotals = getOrderedInvoiceTotals(billingPreview);
 
-	eligibilityChecker.assertGenerallyEligible(
-		subscription,
-		account.metrics.totalInvoiceBalance,
-		nextInvoiceItems,
-	);
 	return { discount, dateToApply, orderedInvoiceTotals };
 }
