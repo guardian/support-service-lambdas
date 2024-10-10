@@ -27,6 +27,7 @@ object ContributionValidations {
       limits = limitsFor(planId, currency)
       _ <- (amount.value <= limits.max) orFailWith s"amount for $planId must not be more than $currency ${AmountLimits
           .fromMinorToMajor(limits.max)}"
-      _ <- (amount.value >= limits.min) orFailWith s"amount for $planId must be at least $currency ${AmountLimits.fromMinorToMajor(limits.min)}"
+      _ <- (amount.value >= limits.min) orFailWith s"amount for $planId must be at least $currency ${AmountLimits
+          .fromMinorToMajor(limits.min)}"
     } yield (amount)
 }

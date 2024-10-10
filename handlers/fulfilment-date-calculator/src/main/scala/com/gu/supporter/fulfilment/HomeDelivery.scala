@@ -38,7 +38,8 @@ object HomeDeliveryFulfilmentDates {
       today: LocalDate,
       bankHolidays: BankHolidays,
   ): LocalDate = getFulfilmentFileGenerationDateForNextTargetDayOfWeek(
-    today `with` next(targetDayOfWeek), bankHolidays
+    today `with` next(targetDayOfWeek),
+    bankHolidays,
   )
 
   def finalFulfilmentFileGenerationDate(
@@ -74,7 +75,8 @@ object HomeDeliveryFulfilmentDates {
   ): LocalDate = {
     val nextTargetDayOfWeek = today `with` next(targetDayOfWeek)
     val fulfilmentFileGenerationDateForNextTargetDayOfWeek = getFulfilmentFileGenerationDateForNextTargetDayOfWeek(
-      nextTargetDayOfWeek, bankHolidays
+      nextTargetDayOfWeek,
+      bankHolidays,
     )
     val holidayStopProcessingDayForNextTargetDayOfWeek = fulfilmentFileGenerationDateForNextTargetDayOfWeek minusDays 1
     if (holidayStopProcessingDayForNextTargetDayOfWeek isAfter today) {
@@ -103,8 +105,7 @@ object HomeDeliveryFulfilmentDates {
 
   /** This is designed to implement the delay before fulfilment can be started defined by this grid:
     * ----------------------------------------------------------------------------------- \| Pack | Mon | Tue | Wed |
-    * Thu | Fri | Sat | Sun |
-    * -----------------------------------------------------------------------------------
+    * Thu | Fri | Sat | Sun | -----------------------------------------------------------------------------------
     * | Everyday | 3 | 3 | 3 | 6  | 5 | 4 | 3 |
     * |:---------|:-:|:-:|:-:|:--:|:-:|:-:|:-:|
     * | Sixday   | 3 | 3 | 3 | 6  | 5 | 4 | 3 |

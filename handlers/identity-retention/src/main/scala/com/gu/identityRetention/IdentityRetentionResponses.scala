@@ -38,8 +38,10 @@ object IdentityRetentionResponseModels {
           val maxLifeInDays: Double = 365.25 * 7
           val proportionOfMaxLifetimes = today.until(effectiveDeletionDate, ChronoUnit.DAYS).toDouble / maxLifeInDays
           List(
-            effectiveDeletionDate, 
-            today.plusDays(60 + (proportionOfMaxLifetimes * 60).toInt) //adds some variation so that the validUntil date is between 60 and 120 days (or longer, if the deletion date is over 7 years in the future)
+            effectiveDeletionDate,
+            today.plusDays(
+              60 + (proportionOfMaxLifetimes * 60).toInt,
+            ), // adds some variation so that the validUntil date is between 60 and 120 days (or longer, if the deletion date is over 7 years in the future)
           ).min
         }
       SuccessResponse(ongoingRelationship, relationshipEndDate, effectiveDeletionDate, responseValidUntil)

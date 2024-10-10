@@ -9,8 +9,17 @@ import com.gu.newproduct.api.addsubscription.email.{EtSqsSend, SendConfirmationE
 import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.newproduct.api.addsubscription.validation.guardianweekly.GuardianWeeklyAccountValidation
 import com.gu.newproduct.api.addsubscription.validation.tierthree.{GetTierThreeCustomerData, TierThreeCustomerData}
-import com.gu.newproduct.api.addsubscription.validation.{ValidateAccount, ValidatePaymentMethod, ValidatedAccount, ValidationResult}
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
+import com.gu.newproduct.api.addsubscription.validation.{
+  ValidateAccount,
+  ValidatePaymentMethod,
+  ValidatedAccount,
+  ValidationResult,
+}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{
+  SubscriptionName,
+  ZuoraCreateSubRequest,
+  ZuoraCreateSubRequestRatePlan,
+}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.WireModel.GetContactsResponse
