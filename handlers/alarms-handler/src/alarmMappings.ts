@@ -28,7 +28,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'component-event-stream',
 		'contributions-store-queue',
 		'contributions-ticker-calculator',
-		'digital-voucher-api',
 		'dotcom-components',
 		...sharedMobilePurchasesApps,
 		'new-product-api',
@@ -79,7 +78,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'payment-api',
 
 		// support-service-lambdas
-		'digital-voucher-suspension-processor',
 		'metric-push-api',
 	],
 	PLATFORM: [
@@ -88,6 +86,10 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'fulfilment-lambdas',
 		'national-delivery-fulfilment',
 		'fulfilment-date-calculator',
+
+		// digital vouchers (subscription cards)
+		'digital-voucher-api',
+		'digital-voucher-suspension-processor',
 
 		// salesforce
 		'salesforce-disaster-recovery',
