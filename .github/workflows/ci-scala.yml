@@ -44,6 +44,9 @@ jobs:
           java-version: '21'
           cache: 'sbt'
 
+      - name: Setup SBT
+        uses: sbt/setup-sbt@v1
+
       - name: Run tests and build subproject JAR
         run: sbt "project ${{ matrix.subproject }}" test assembly
 
@@ -120,6 +123,9 @@ jobs:
           distribution: 'corretto'
           java-version: '21'
           cache: 'sbt'
+
+      - name: Setup SBT
+        uses: sbt/setup-sbt@v1
 
       - name: Build
         run: |
