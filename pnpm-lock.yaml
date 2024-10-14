@@ -183,8 +183,8 @@ importers:
         specifier: ^8.10.143
         version: 8.10.143
       fetch-mock:
-        specifier: ^11.1.1
-        version: 11.1.1
+        specifier: ^11.1.5
+        version: 11.1.5
 
   handlers/update-supporter-plus-amount:
     dependencies:
@@ -2386,8 +2386,8 @@ packages:
   fb-watchman@2.0.2:
     resolution: {integrity: sha512-p5161BqbuCaSnB8jIbzQHOlpgsPmK5rJVDfDKO91Axs5NC1uu3HRQm6wt9cd9/+GtQQIO53JdGXXoyDpTAsgYA==}
 
-  fetch-mock@11.1.1:
-    resolution: {integrity: sha512-2lZ42bnMar9MBfNR0nza5wM4ZDwLxb+ZbNR4sEvpqOOBzZ+V6cZVVhLBHj8+AAEInF4vp2/tbRM8WlGX5mPhiA==}
+  fetch-mock@11.1.5:
+    resolution: {integrity: sha512-KHmZDnZ1ry0pCTrX4YG5DtThHi0MH+GNI9caESnzX/nMJBrvppUHMvLx47M0WY9oAtKOMiPfZDRpxhlHg89BOA==}
     engines: {node: '>=8.0.0'}
     peerDependencies:
       node-fetch: '*'
@@ -4652,7 +4652,7 @@ snapshots:
       '@aws-crypto/sha256-js': 5.2.0
       '@aws-sdk/client-sts': 3.668.0
       '@aws-sdk/core': 3.667.0
-      '@aws-sdk/credential-provider-node': 3.668.0(@aws-sdk/client-sso-oidc@3.668.0(@aws-sdk/client-sts@3.668.0))(@aws-sdk/client-sts@3.665.0)
+      '@aws-sdk/credential-provider-node': 3.668.0(@aws-sdk/client-sso-oidc@3.668.0(@aws-sdk/client-sts@3.668.0))(@aws-sdk/client-sts@3.668.0)
       '@aws-sdk/middleware-host-header': 3.667.0
       '@aws-sdk/middleware-logger': 3.667.0
       '@aws-sdk/middleware-recursion-detection': 3.667.0
@@ -7996,7 +7996,7 @@ snapshots:
     dependencies:
       bser: 2.1.1
 
-  fetch-mock@11.1.1:
+  fetch-mock@11.1.5:
     dependencies:
       '@types/glob-to-regexp': 0.4.4
       dequal: 2.0.3
