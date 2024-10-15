@@ -202,7 +202,7 @@ class HandlerTest extends AnyFlatSpec with Matchers {
         response.statusCode should equal("400")
         response.body should equal(
           """{
-          |  "message" : "Bad request: salesforce returned INVALID_OPERATION_WITH_EXPIRED_PASSWORD"
+          |  "message" : "Bad request: salesforce returned auth error"
           |}""".stripMargin,
         )
       }
