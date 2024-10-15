@@ -6,7 +6,6 @@ import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 import type { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import type { Lazy } from './lazy';
 
 export class EligibilityChecker {
 	constructor(private subscriptionNumber: string) {}
@@ -14,7 +13,7 @@ export class EligibilityChecker {
 	assertGenerallyEligible = async (
 		subscription: ZuoraSubscription,
 		accountBalance: number,
-		lazyNextInvoiceItems: Lazy<SimpleInvoiceItem[]>,
+		lazyNextInvoiceItems: () => Promise<SimpleInvoiceItem[]>,
 	) => {
 		console.log('Checking basic eligibility for the subscription');
 		this.assertValidState(
@@ -31,7 +30,7 @@ export class EligibilityChecker {
 		console.log(
 			'ensuring there are no refunds/discounts expected on the affected invoices',
 		);
-		const nextInvoiceItems = await lazyNextInvoiceItems.get();
+		const nextInvoiceItems = await lazyNextInvoiceItems();
 		this.assertValidState(
 			nextInvoiceItems.every((item) => item.amount >= 0),
 			validationRequirements.noNegativePreviewItems,

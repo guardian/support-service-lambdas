@@ -18,12 +18,10 @@ import subscriptionJson1 from './fixtures/supporter-plus/free-2-months.json';
 import {
 	billingPreviewToSimpleInvoiceItems,
 	getNextInvoiceItems,
-	SimpleInvoiceItem,
 } from '@modules/zuora/billingPreview';
 import { getDiscountFromSubscription } from '../src/productToDiscountMapping';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
-import { Lazy } from '../src/lazy';
 
 const eligibilityChecker = new EligibilityChecker('A-S001');
 const catalogProd = new ZuoraCatalogHelper(
@@ -34,8 +32,8 @@ function loadBillingPreview(data: any) {
 	return billingPreviewToSimpleInvoiceItems(billingPreviewSchema.parse(data));
 }
 
-function pure<T>(value: T): Lazy<T> {
-	return new Lazy<T>(() => Promise.resolve(value), 'test lazy');
+function asLazy<T>(value: T): () => Promise<T> {
+	return () => Promise.resolve(value);
 }
 
 test('Eligibility check fails for a Supporter plus which has already had the offer', async () => {
@@ -50,7 +48,7 @@ test('Eligibility check fails for a Supporter plus which has already had the off
 		eligibilityChecker.assertGenerallyEligible(
 			sub,
 			0,
-			pure(getNextInvoiceItems(billingPreview).items),
+			asLazy(getNextInvoiceItems(billingPreview)),
 		);
 
 	expect(actual).rejects.toThrow(validationRequirements.noNegativePreviewItems);
@@ -77,7 +75,7 @@ test('Eligibility check fails for a S+ subscription which is on a reduced price'
 		eligibilityChecker.assertGenerallyEligible(
 			sub,
 			0,
-			pure(getNextInvoiceItems(billingPreview).items),
+			asLazy(getNextInvoiceItems(billingPreview)),
 		);
 
 	expect(actual).rejects.toThrow(validationRequirements.noNegativePreviewItems);
@@ -113,7 +111,7 @@ test('Eligibility check works for a price risen subscription', async () => {
 	await eligibilityChecker.assertGenerallyEligible(
 		sub,
 		0,
-		pure(getNextInvoiceItems(billingPreview).items),
+		asLazy(getNextInvoiceItems(billingPreview)),
 	);
 
 	// shouldn't throw
@@ -138,7 +136,7 @@ test('Eligibility check works for supporter plus with 2 rate plans', async () =>
 	await eligibilityChecker.assertGenerallyEligible(
 		sub,
 		0,
-		pure(getNextInvoiceItems(billingPreview).items),
+		asLazy(getNextInvoiceItems(billingPreview)),
 	);
 
 	//shouldn't throw
@@ -155,13 +153,8 @@ test('Eligibility check fails for a subscription which is cancelled', async () =
 	expect(subSupporterPlusFullPrice.status).toEqual('Active');
 
 	const ac2 = () =>
-		eligibilityChecker.assertGenerallyEligible(
-			sub,
-			0,
-			new Lazy<SimpleInvoiceItem[]>(
-				() => Promise.reject('should not attempt a BP if its cancelled'),
-				'fail promise',
-			),
+		eligibilityChecker.assertGenerallyEligible(sub, 0, () =>
+			Promise.reject('should not attempt a BP if its cancelled'),
 		);
 
 	expect(ac2).rejects.toThrow(validationRequirements.isActive);

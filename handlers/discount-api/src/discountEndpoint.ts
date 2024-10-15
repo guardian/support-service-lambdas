@@ -6,6 +6,7 @@ import { addDiscount, previewDiscount } from '@modules/zuora/addDiscount';
 import {
 	billingPreviewToSimpleInvoiceItems,
 	getBillingPreview,
+	getNextInvoice,
 	getNextInvoiceItems,
 	getNextNonFreePaymentDate,
 	getOrderedInvoiceTotals,
@@ -197,6 +198,7 @@ async function getDiscountToApply(
 		subscription.subscriptionNumber,
 	);
 
+	// don't get the billing preview until we know the subscription is not cancelled
 	const lazyBillingPreview = new Lazy(
 		() =>
 			getBillingPreview(
@@ -207,14 +209,13 @@ async function getDiscountToApply(
 		'get billing preview for the subscription',
 	).then(billingPreviewToSimpleInvoiceItems);
 
-	const lazyNextInvoiceItems = lazyBillingPreview.then(getNextInvoiceItems);
-
 	await eligibilityChecker.assertGenerallyEligible(
 		subscription,
 		account.metrics.totalInvoiceBalance,
-		lazyNextInvoiceItems.then(({ items }) => items),
+		() => lazyBillingPreview.then(getNextInvoiceItems).get(),
 	);
 
+	// now we know the subscription is not cancelled we can force the billing preview
 	const billingPreview = await lazyBillingPreview.get();
 
 	console.log('Working out the appropriate discount for the subscription');
@@ -242,7 +243,7 @@ async function getDiscountToApply(
 			break;
 	}
 
-	const dateToApply = (await lazyNextInvoiceItems.get()).date;
+	const dateToApply = getNextInvoice(billingPreview).date;
 
 	const orderedInvoiceTotals = getOrderedInvoiceTotals(billingPreview);
 
