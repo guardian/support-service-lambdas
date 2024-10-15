@@ -22,7 +22,10 @@ object SendConfirmationEmail extends Logging {
     sendMessageResult <- etSqsSend(etPayload).toAsyncApiGatewayOp("sending email sqs message")
   } yield sendMessageResult
 
-  private def toPayload[DATA <: EmailData](sfContactId: Option[SfContactId], emailData: DATA): ApiGatewayOp[ETPayload[DATA]] =
+  private def toPayload[DATA <: EmailData](
+      sfContactId: Option[SfContactId],
+      emailData: DATA,
+  ): ApiGatewayOp[ETPayload[DATA]] =
     emailData.contacts.billTo.email match {
       case Some(email) =>
         val payload = ETPayload(

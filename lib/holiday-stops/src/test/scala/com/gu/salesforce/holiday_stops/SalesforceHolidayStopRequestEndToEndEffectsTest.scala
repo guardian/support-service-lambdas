@@ -51,15 +51,17 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends AnyFlatSpec with M
         .get
 
       createOp = new SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail(sfAuth.wrapWith(JsonHttp.post))
-      createResult <- createOp.run(
-        CreateHolidayStopRequestWithDetail.buildBody(
-          startDate,
-          endDate,
-          publicationDatesToBeStopped,
-          maybeMatchingSubscription.get,
-          None,
-        ),
-      ).toDisjunction
+      createResult <- createOp
+        .run(
+          CreateHolidayStopRequestWithDetail.buildBody(
+            startDate,
+            endDate,
+            publicationDatesToBeStopped,
+            maybeMatchingSubscription.get,
+            None,
+          ),
+        )
+        .toDisjunction
 
       fetchOp = new SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(
         sfAuth.wrapWith(JsonHttp.getWithParams),

@@ -13,19 +13,22 @@ import java.time.{DayOfWeek, LocalDate}
 import scala.util.{Failure, Try}
 
 class StartDateFromFulfilmentFilesTest extends AnyFlatSpec with Matchers with ResourceLoader {
-  
+
   def stubFetchString(s3Location: S3Location): Try[String] = {
     if (s3Location.bucket == "fulfilment-date-calculator-code") {
       val resourceName = s3Location.key match {
         case "Guardian Weekly/2020-04-27_Guardian Weekly.json" => "2023-09-14_Guardian Weekly.json"
-        case "Newspaper - Home Delivery/2020-04-27_Newspaper - Home Delivery.json" => "2023-09-14_Newspaper - Home Delivery.json"
-        case "Newspaper - Voucher Book/2020-04-27_Newspaper - Voucher Book.json" => "2023-09-14_Newspaper - Voucher Book.json"
-        case "Newspaper - Digital Voucher/2020-04-27_Newspaper - Digital Voucher.json" => "2023-09-14_Newspaper - Digital Voucher.json"
-        case "Newspaper - National Delivery/2020-04-27_Newspaper - National Delivery.json" => "2023-09-14_Newspaper - National Delivery.json"
+        case "Newspaper - Home Delivery/2020-04-27_Newspaper - Home Delivery.json" =>
+          "2023-09-14_Newspaper - Home Delivery.json"
+        case "Newspaper - Voucher Book/2020-04-27_Newspaper - Voucher Book.json" =>
+          "2023-09-14_Newspaper - Voucher Book.json"
+        case "Newspaper - Digital Voucher/2020-04-27_Newspaper - Digital Voucher.json" =>
+          "2023-09-14_Newspaper - Digital Voucher.json"
+        case "Newspaper - National Delivery/2020-04-27_Newspaper - National Delivery.json" =>
+          "2023-09-14_Newspaper - National Delivery.json"
       }
       getResource(resourceName)
-    }
-    else Failure(new Throwable("not found"))
+    } else Failure(new Throwable("not found"))
   }
 
   "StartDateFromFulfilmentFiles" should "get start dates for guardian weekly" in {
@@ -36,7 +39,7 @@ class StartDateFromFulfilmentFilesTest extends AnyFlatSpec with Matchers with Re
     testStartDate(
       ProductType.NewspaperHomeDelivery,
       List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY),
-      LocalDate.of(2023, 9, 20),//next wed (gen fri, need Fri+Mon+Tue to get the papers ready)
+      LocalDate.of(2023, 9, 20), // next wed (gen fri, need Fri+Mon+Tue to get the papers ready)
     )
     testStartDate(
       ProductType.NewspaperHomeDelivery,
@@ -104,7 +107,7 @@ class StartDateFromFulfilmentFilesTest extends AnyFlatSpec with Matchers with Re
     testStartDate(
       ProductType.NewspaperNationalDelivery,
       List(MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY),
-      LocalDate.of(2023, 9, 19), //next tue (gen fri, need Fri+Mon to get the papers ready)
+      LocalDate.of(2023, 9, 19), // next tue (gen fri, need Fri+Mon to get the papers ready)
     )
     testStartDate(
       ProductType.NewspaperNationalDelivery,

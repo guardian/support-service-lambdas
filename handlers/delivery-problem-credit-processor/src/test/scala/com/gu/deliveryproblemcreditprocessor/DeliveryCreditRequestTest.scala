@@ -16,7 +16,7 @@ class DeliveryCreditRequestTest extends AnyFlatSpec with Matchers with DiffShoul
 
   "Json decode" should "decode SF response correctly" in {
     val json = Source.fromResource("sf-credit-request.json").mkString
-    decode[RecordsWrapperCaseClass[DeliveryCreditRequest]](json).value shouldMatchTo(
+    decode[RecordsWrapperCaseClass[DeliveryCreditRequest]](json).value shouldMatchTo (
       RecordsWrapperCaseClass(
         List(
           DeliveryCreditRequest(
@@ -34,7 +34,7 @@ class DeliveryCreditRequestTest extends AnyFlatSpec with Matchers with DiffShoul
             Invoice_Date__c = Some(LocalDate.of(2020, 3, 1)),
           ),
         ),
-      ),
+      )
     )
   }
 }
