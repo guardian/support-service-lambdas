@@ -12,7 +12,7 @@ export class Lazy<T> {
 		return this.val ?? (this.val = this.getValue());
 	}
 
-	public map<B>(f: (t: T) => B): Lazy<B> {
+	public then<B>(f: (t: T) => B): Lazy<B> {
 		return new Lazy(() => this.getValue().then(f), this.message);
 	}
 }

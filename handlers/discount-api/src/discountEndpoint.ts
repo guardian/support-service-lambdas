@@ -205,14 +205,14 @@ async function getDiscountToApply(
 				subscription.accountNumber,
 			),
 		'get billing preview for the subscription',
-	).map(billingPreviewToSimpleInvoiceItems);
+	).then(billingPreviewToSimpleInvoiceItems);
 
-	const lazyNextInvoiceItems = lazyBillingPreview.map(getNextInvoiceItems);
+	const lazyNextInvoiceItems = lazyBillingPreview.then(getNextInvoiceItems);
 
 	await eligibilityChecker.assertGenerallyEligible(
 		subscription,
 		account.metrics.totalInvoiceBalance,
-		lazyNextInvoiceItems.map(({ items }) => items),
+		lazyNextInvoiceItems.then(({ items }) => items),
 	);
 
 	const billingPreview = await lazyBillingPreview.get();
