@@ -6,11 +6,7 @@ import {
 } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
-import { Topic } from 'aws-cdk-lib/aws-sns';
-import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
-import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import {
 	Choice,
 	Condition,
@@ -24,6 +20,7 @@ import {
 	WaitTime,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
+import { nodeVersion } from './node-version';
 
 interface Props extends GuStackProps {
 	salesforceApiDomain: string;
@@ -47,16 +44,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 		const queryResultFileName = 'query-result.csv';
 		const failedRowsFileName = 'failed-rows.csv';
 
-		const snsTopic = new Topic(this, 'SnsTopic', {
-			topicName: `${app}-${this.stage}`,
-		});
-
-		const snsTopicSubscriptionEmail = StringParameter.valueForStringParameter(
-			this,
-			`/${this.stage}/membership/salesforce-disaster-recovery/sns-topic-subscription-email`,
-		);
-
-		snsTopic.addSubscription(new EmailSubscription(snsTopicSubscriptionEmail));
+		const snsTopicArn = `arn:aws:sns:${this.region}:${this.account}:alarms-handler-topic-${this.stage}`;
 
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
@@ -65,7 +53,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			app,
 			memorySize: 1024,
 			fileName: `${app}.zip`,
-			runtime: Runtime.NODEJS_20_X,
+			runtime: nodeVersion,
 			timeout: Duration.seconds(300),
 			environment: { APP: app, STACK: this.stack, STAGE: this.stage },
 		};
@@ -356,10 +344,9 @@ export class SalesforceDisasterRecovery extends GuStack {
 					Type: 'Task',
 					Resource: 'arn:aws:states:::sns:publish',
 					Parameters: {
-						TopicArn: snsTopic.topicArn,
-						Subject: `Salesforce Disaster Recovery Re-syncing Procedure Completed For ${this.stage}`,
+						TopicArn: snsTopicArn,
 						'Message.$': JsonPath.format(
-							`This notification is part of the Salesforce Disaster Recovery procedure explained in the runbook below:\n{}\n\nState machine execution details:\n{}\n\nAccounts to sync:\n{}\n\nAccounts that failed to update ({}):\n{}
+							`Salesforce Disaster Recovery Re-syncing Procedure Completed For ${this.stage}\n\nThis notification is part of the Salesforce Disaster Recovery procedure explained in the runbook below:\n{}\n\nState machine execution details:\n{}\n\nAccounts to sync:\n{}\n\nAccounts that failed to update ({}):\n{}
 						`,
 							'https://docs.google.com/document/d/1_KxFtfKU3-3-PSzaAYG90uONa05AVgoBmyBDyu5SC5c/edit#heading=h.2r6eh2y6rjut',
 							JsonPath.stringAt('$.stateMachineExecutionDetailsUrl'),
@@ -367,6 +354,16 @@ export class SalesforceDisasterRecovery extends GuStack {
 							JsonPath.stringAt('$.failedRowsCount'),
 							JsonPath.stringAt('$.failedRowsFileUrl'),
 						),
+						MessageAttributes: {
+							app: {
+								DataType: 'String',
+								StringValue: app,
+							},
+							stage: {
+								DataType: 'String',
+								StringValue: this.stage,
+							},
+						},
 					},
 					ResultPath: JsonPath.stringAt('$.TaskResult'),
 				},
@@ -513,7 +510,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 						}),
 						new PolicyStatement({
 							actions: ['sns:Publish'],
-							resources: [snsTopic.topicArn],
+							resources: [snsTopicArn],
 						}),
 					],
 				},

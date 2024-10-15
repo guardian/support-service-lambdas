@@ -10,6 +10,7 @@ jest.mock('../../src/services/step-functions');
 
 describe('Handler', () => {
 	const mockEnv = {
+		APP: 'test-app',
 		STAGE: 'CODE',
 		REGION: 'eu-west-1',
 		SNS_TOPIC_ARN: 'test-topic-arn',

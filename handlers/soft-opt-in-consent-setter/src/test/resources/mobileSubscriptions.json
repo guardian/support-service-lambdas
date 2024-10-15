@@ -7,7 +7,8 @@
       "valid": false,
       "gracePeriod": false,
       "autoRenewing": false,
-      "productId": "uk.co.guardian.gla.1month.2018May.withFreeTrial"
+      "productId": "uk.co.guardian.gla.1month.2018May.withFreeTrial",
+      "softOptInProductName": "InAppPurchase"
     }
   ]
 }

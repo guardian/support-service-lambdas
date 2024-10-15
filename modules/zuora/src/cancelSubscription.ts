@@ -18,5 +18,7 @@ export const cancelSubscription = async (
 		runBilling,
 		collect,
 	});
-	return zuoraClient.put(path, body, zuoraSuccessResponseSchema);
+	return zuoraClient.put(path, body, zuoraSuccessResponseSchema, {
+		'zuora-version': '211.0',
+	});
 };

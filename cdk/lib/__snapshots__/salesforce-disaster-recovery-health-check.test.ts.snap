@@ -47,7 +47,7 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
                   {
                     "Ref": "AWS::AccountId",
                   },
-                  ":salesforce-disaster-recovery-CODE",
+                  ":alarms-handler-topic-CODE",
                 ],
               ],
             },
@@ -223,7 +223,7 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":salesforce-disaster-recovery-CODE",
+                    ":alarms-handler-topic-CODE",
                   ],
                 ],
               },
@@ -412,7 +412,7 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
                   {
                     "Ref": "AWS::AccountId",
                   },
-                  ":salesforce-disaster-recovery-PROD",
+                  ":alarms-handler-topic-PROD",
                 ],
               ],
             },
@@ -588,7 +588,7 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":salesforce-disaster-recovery-PROD",
+                    ":alarms-handler-topic-PROD",
                   ],
                 ],
               },

@@ -11,34 +11,37 @@ case class AmountLimits(min: Int, max: Int)
 
 object AmountLimits {
 
+  def fromMajorUnits(min: Int, max: Int) = AmountLimits(min * 100, max * 100)
+  def fromMinorToMajor(value: Int) = value / 100
+
   val gbp = ContributionLimits(
-    monthly = AmountLimits(min = 200, max = 16600),
-    annual = AmountLimits(min = 1000, max = 200000),
+    monthly = AmountLimits.fromMajorUnits(min = 2, max = 166),
+    annual = AmountLimits.fromMajorUnits(min = 25, max = 2000),
   )
 
   val aud = ContributionLimits(
-    monthly = AmountLimits(min = 1000, max = 20000),
-    annual = AmountLimits(min = 1000, max = 200000),
+    monthly = AmountLimits.fromMajorUnits(min = 5, max = 200),
+    annual = AmountLimits.fromMajorUnits(min = 40, max = 2000),
   )
 
   val usd = ContributionLimits(
-    monthly = AmountLimits(min = 200, max = 16600),
-    annual = AmountLimits(min = 1000, max = 200000),
+    monthly = AmountLimits.fromMajorUnits(min = 2, max = 166),
+    annual = AmountLimits.fromMajorUnits(min = 15, max = 2000),
   )
 
   val nzd = ContributionLimits(
-    monthly = AmountLimits(min = 1000, max = 20000),
-    annual = AmountLimits(min = 1000, max = 200000),
+    monthly = AmountLimits.fromMajorUnits(min = 5, max = 200),
+    annual = AmountLimits.fromMajorUnits(min = 40, max = 2000),
   )
 
   val cad = ContributionLimits(
-    monthly = AmountLimits(min = 500, max = 16600),
-    annual = AmountLimits(min = 1000, max = 200000),
+    monthly = AmountLimits.fromMajorUnits(min = 2, max = 166),
+    annual = AmountLimits.fromMajorUnits(min = 30, max = 2000),
   )
 
   val eur = ContributionLimits(
-    monthly = AmountLimits(min = 200, max = 16600),
-    annual = AmountLimits(min = 1000, max = 200000),
+    monthly = AmountLimits.fromMajorUnits(min = 2, max = 166),
+    annual = AmountLimits.fromMajorUnits(min = 25, max = 2000),
   )
 
   def limitsFor(planId: PlanId, currency: Currency): AmountLimits = {

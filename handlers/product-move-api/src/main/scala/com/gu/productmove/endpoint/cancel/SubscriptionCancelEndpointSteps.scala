@@ -46,7 +46,7 @@ class SubscriptionCancelEndpointSteps(
         subscriptionName,
         Some(identityId),
       )
-      _ <- ZIO.log(s"PostData: $postData")
+      _ <- ZIO.log(s"Cancel Supporter Plus - PostData: $postData")
       subscription <- getSubscriptionToCancel.get(subscriptionName)
       _ <- ZIO.log(s"Subscription is $subscription")
 
@@ -62,7 +62,12 @@ class SubscriptionCancelEndpointSteps(
       // https://developer.zuora.com/api-references/api/operation/GET_SubscriptionsByKey/#!in=query&path=charge-detail&t=request
       // this means that only the currently active rate plan will contain charge information (even if it has a
       // lastChangeType of 'Remove')
-      ratePlan <- asSingle(subscription.ratePlans.filter(_.ratePlanCharges.nonEmpty), "ratePlan")
+      ratePlan <- asSingle(
+        subscription.ratePlans.filter(ratePlan =>
+          ratePlan.productName != "Discounts" && ratePlan.ratePlanCharges.nonEmpty,
+        ),
+        "ratePlan",
+      )
       charges <- asNonEmptyList(
         ratePlan.ratePlanCharges,
         s"Subscription can't be cancelled as the charge list is empty",

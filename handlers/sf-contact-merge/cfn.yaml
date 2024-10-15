@@ -208,7 +208,7 @@ Resources:
       Condition: CreateProdMonitoring
       Properties:
         AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-PROD
         AlarmName:
           !Sub
             - 5XX rate from ${ApiName}

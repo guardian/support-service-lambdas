@@ -18,7 +18,9 @@ class ZuoraGetLive(zuoraClient: ZuoraClient) extends ZuoraGet {
       zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
   ): Task[Response] =
     for {
+      _ <- ZIO.log(s"Sending GET to $relativeUrl")
       response <- zuoraClient.send(basicRequest.get(relativeUrl))
+      _ <- ZIO.log(s"Response is $response")
       parsedBody <- ZIO.fromEither(ZuoraRestBody.parseIfSuccessful[Response](response, zuoraSuccessCheck))
     } yield parsedBody
 
@@ -40,7 +42,9 @@ class ZuoraGetLive(zuoraClient: ZuoraClient) extends ZuoraGet {
       zuoraSuccessCheck: ZuoraSuccessCheck = ZuoraSuccessCheck.SuccessCheckLowercase,
   ): Task[Response] =
     for {
+      _ <- ZIO.log(s"Sending PUT to $relativeUrl with body ${input.toJson}")
       response <- zuoraClient.send(basicRequest.contentType("application/json").body(input.toJson).put(relativeUrl))
+      _ <- ZIO.log(s"Response is $response")
       parsedBody <- ZIO.fromEither(
         ZuoraRestBody.parseIfSuccessful[Response](response, zuoraSuccessCheck),
       )

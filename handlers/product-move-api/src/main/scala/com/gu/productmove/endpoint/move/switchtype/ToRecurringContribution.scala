@@ -67,7 +67,9 @@ class ToRecurringContributionImpl(
 
       price = postData.price
       previousAmount = activeRatePlanCharge.price.get
-      billingPeriod = activeRatePlanCharge.billingPeriod
+      billingPeriod <- ZIO
+        .fromOption(activeRatePlanCharge.billingPeriod)
+        .orElseFail(new Throwable(s"billingPeriod is null for rate plan charge $activeRatePlanCharge"))
 
       updateRequestBody <- getRatePlans(
         billingPeriod,

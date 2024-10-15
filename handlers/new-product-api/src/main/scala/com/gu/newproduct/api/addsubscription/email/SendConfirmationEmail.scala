@@ -50,6 +50,7 @@ object SendConfirmationEmail extends Logging {
       case _: GuardianWeeklyDomestic => "guardian-weekly"
       case _: GuardianWeeklyRow => "guardian-weekly"
       case _: NationalDeliveryPlanId => "paper-national-delivery"
+      case _: TierThreePlanId => "tier-three"
     },
   )
 }

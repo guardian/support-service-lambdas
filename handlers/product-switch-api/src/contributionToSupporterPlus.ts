@@ -1,6 +1,17 @@
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import { zuoraDateFormat } from '@modules/zuora/common';
+import type {
+	ChangePlanOrderAction,
+	CreateOrderRequest,
+	OrderAction,
+	PreviewOrderRequest,
+} from '@modules/zuora/orders';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type {
+	RatePlan,
+	RatePlanCharge,
+	ZuoraSubscription,
+} from '@modules/zuora/zuoraSchemas';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import { removePendingUpdateAmendments } from './amendments';
@@ -9,11 +20,9 @@ import { takePaymentOrAdjustInvoice } from './payment';
 import { sendThankYouEmail } from './productSwitchEmail';
 import { sendSalesforceTracking } from './salesforceTracking';
 import type {
-	ChangePlanOrderAction,
-	CreateOrderRequest,
-	OrderAction,
-	PreviewOrderRequest,
 	ZuoraPreviewResponse,
+	ZuoraPreviewResponseInvoice,
+	ZuoraPreviewResponseInvoiceItem,
 	ZuoraSwitchResponse,
 } from './schemas';
 import {
@@ -56,33 +65,78 @@ export const switchToSupporterPlus = async (
 	};
 };
 
+export const refundExpected = (
+	catalogInformation: CatalogInformation,
+	subscription: ZuoraSubscription,
+	currentDate: Date,
+): boolean => {
+	const ratePlan = getIfDefined(
+		subscription.ratePlans.find(
+			(ratePlan: RatePlan) =>
+				ratePlan.productRatePlanId ===
+				catalogInformation.contribution.productRatePlanId,
+		),
+		'No matching RatePlan found in Subscription,',
+	);
+
+	const chargedThroughDate: Date = getIfDefined(
+		ratePlan.ratePlanCharges.find(
+			(ratePlanCharge: RatePlanCharge) =>
+				ratePlanCharge.productRatePlanChargeId ===
+				catalogInformation.contribution.chargeId,
+		)?.chargedThroughDate,
+		'No matching chargedThroughDate found in Subscription',
+	);
+
+	return !(currentDate.toDateString() == chargedThroughDate.toDateString());
+};
+
+export const getContributionRefundAmount = (
+	zuoraPreviewInvoice: ZuoraPreviewResponseInvoice,
+	catalogInformation: CatalogInformation,
+	subscription: ZuoraSubscription,
+): number => {
+	const contributionRefundAmount = zuoraPreviewInvoice.invoiceItems.find(
+		(invoiceItem: ZuoraPreviewResponseInvoiceItem) =>
+			invoiceItem.productRatePlanChargeId ===
+			catalogInformation.contribution.chargeId,
+	)?.amountWithoutTax;
+	if (
+		contributionRefundAmount == undefined &&
+		refundExpected(catalogInformation, subscription, new Date())
+	) {
+		throw Error('No contribution refund amount found in the preview response');
+	}
+
+	return contributionRefundAmount ?? 0;
+};
+
 export const previewResponseFromZuoraResponse = (
 	zuoraResponse: ZuoraPreviewResponse,
 	catalogInformation: CatalogInformation,
+	subscription: ZuoraSubscription,
 ): PreviewResponse => {
-	const invoice = checkDefined(
+	const invoice: ZuoraPreviewResponseInvoice = getIfDefined(
 		zuoraResponse.previewResult?.invoices[0],
 		'No invoice found in the preview response',
 	);
-	const contributionRefundAmount = checkDefined(
-		invoice.invoiceItems.find(
-			(invoiceItem) =>
-				invoiceItem.productRatePlanChargeId ===
-				catalogInformation.contribution.chargeId,
-		)?.amountWithoutTax,
-		'No contribution refund amount found in the preview response',
+
+	const contributionRefundAmount = getContributionRefundAmount(
+		invoice,
+		catalogInformation,
+		subscription,
 	);
 
-	const supporterPlusSubscriptionInvoiceItem = checkDefined(
+	const supporterPlusSubscriptionInvoiceItem = getIfDefined(
 		invoice.invoiceItems.find(
-			(invoiceItem) =>
+			(invoiceItem: ZuoraPreviewResponseInvoiceItem) =>
 				invoiceItem.productRatePlanChargeId ===
 				catalogInformation.supporterPlus.subscriptionChargeId,
 		),
 		'No supporter plus invoice item found in the preview response',
 	);
 
-	const supporterPlusContributionItem = checkDefined(
+	const supporterPlusContributionItem = getIfDefined(
 		invoice.invoiceItems.find(
 			(invoiceItem) =>
 				invoiceItem.productRatePlanChargeId ===
@@ -102,9 +156,11 @@ export const previewResponseFromZuoraResponse = (
 		),
 	};
 };
+
 export const preview = async (
 	zuoraClient: ZuoraClient,
 	productSwitchInformation: SwitchInformation,
+	subscription: ZuoraSubscription,
 ): Promise<PreviewResponse> => {
 	const requestBody: PreviewOrderRequest = buildPreviewRequestBody(
 		dayjs(),
@@ -119,6 +175,7 @@ export const preview = async (
 		return previewResponseFromZuoraResponse(
 			zuoraResponse,
 			productSwitchInformation.catalog,
+			subscription,
 		);
 	} else {
 		throw new Error(zuoraResponse.reasons?.[0]?.message ?? 'Unknown error');
@@ -269,7 +326,7 @@ export const buildSwitchRequestBody = (
 					],
 					renewSubscription: {},
 				},
-		  ]
+			]
 		: [];
 
 	return {

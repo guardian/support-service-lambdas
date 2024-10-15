@@ -1,0 +1,45 @@
+{
+  "success": true,
+  "id": "8a1295998f51a921018f5be20c7b2975",
+  "accountNumber": "A02071906",
+  "subscriptionNumber": "A-S02138089",
+  "status": "Active",
+  "contractEffectiveDate": "2024-05-31",
+  "serviceActivationDate": "2024-05-31",
+  "customerAcceptanceDate": "2024-05-31",
+  "subscriptionStartDate": "2024-07-01",
+  "subscriptionEndDate": "2025-07-01",
+  "lastBookingDate": "2024-06-11",
+  "termStartDate": "2024-05-31",
+  "termEndDate": "2025-05-31",
+  "ratePlans": [
+    {
+      "id": "8a1295998f51a921018f5be20c922977",
+      "lastChangeType": "Foo",
+      "productId": "2c92a0fe5aacfabe015ad24bf6e15ff6",
+      "productName": "Contributor",
+      "productRatePlanId": "2c92a0fc5e1dc084015e37f58c200eea",
+      "ratePlanName": "Annual Contribution",
+      "ratePlanCharges": [
+        {
+          "id": "8a1295998f51a921018f5be20cab297c",
+          "productRatePlanChargeId": "2c92a0fc5e1dc084015e37f58c7b0f35",
+          "number": "C-05575926",
+          "name": "Monthly Contribution",
+          "type": "Recurring",
+          "model": "FlatFee",
+          "currency": "EUR",
+          "effectiveStartDate": "2024-05-31",
+          "effectiveEndDate": "2025-05-31",
+          "billingPeriod": "Month",
+          "processedThroughDate": "2024-07-01",
+          "chargedThroughDate": "2024-07-01",
+          "upToPeriodsType": null,
+          "upToPeriods": null,
+          "price": 50,
+          "discountPercentage": null
+        }
+      ]
+    }
+  ]
+}

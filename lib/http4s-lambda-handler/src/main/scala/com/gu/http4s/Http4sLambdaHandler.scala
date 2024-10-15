@@ -1,7 +1,6 @@
 package com.gu.http4s
 
 import java.io.{InputStream, OutputStream}
-
 import cats.data.EitherT
 import cats.effect.IO
 import org.http4s.{EmptyBody, Header, Headers, HttpRoutes, Method, Query, Request, Response, Uri}
@@ -83,7 +82,7 @@ class Http4sLambdaHandler(service: HttpRoutes[IO]) {
       responseBody <- http4sResponse
         .attemptAs[String]
         .leftMap(decodingFailure => s"Failed to convert response body to string: ${decodingFailure}")
-      headers = http4sResponse.headers.iterator.map { header => (header.name.toString(), header.value) }.toMap
+      headers = http4sResponse.headers.headers.map { header => (header.name.toString, header.value) }.toMap
     } yield LambdaResponse(http4sResponse.status.code, responseBody, headers)
   }
 
@@ -110,14 +109,14 @@ class Http4sLambdaHandler(service: HttpRoutes[IO]) {
         }
         .toList
 
-    Uri(path = apiGateWayRequest.path, query = Query(queryStringValues: _*))
+    Uri(path = Uri.Path.unsafeFromString(apiGateWayRequest.path), query = Query(queryStringValues: _*))
   }
 
   private def extractHeaders(apiGateWayRequest: LambdaRequest): Headers = {
-    Headers.of(
+    Headers(
       apiGateWayRequest.multiValueHeaders
         .getOrElse(Nil)
-        .flatMap { case (key, multiValue) => multiValue.map(value => Header(key, value)) }
+        .flatMap { case (key, multiValue) => multiValue.map[Header.ToRaw](value => (key, value)) } // implicit conversion from pair to "ToRaw"
         .toList: _*,
     )
   }

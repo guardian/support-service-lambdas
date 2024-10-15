@@ -13,5 +13,6 @@ object ProductType {
   val DigitalPack = ProductType("Digital Pack")
   val Contribution = ProductType("Contribution")
   val SupporterPlus = ProductType("Supporter Plus")
+  val tierThreePlanId = ProductType("Tier Three")
   val Membership = ProductType("Membership")
 }

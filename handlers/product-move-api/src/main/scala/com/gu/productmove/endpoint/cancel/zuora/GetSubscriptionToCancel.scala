@@ -55,7 +55,7 @@ object GetSubscriptionToCancel {
   case class RatePlanCharge(
       name: String,
       number: String,
-      price: BigDecimal,
+      price: Option[BigDecimal],
       billingPeriod: Option[String],
       effectiveStartDate: LocalDate,
       chargedThroughDate: Option[LocalDate],

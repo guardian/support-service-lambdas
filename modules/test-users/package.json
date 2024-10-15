@@ -7,10 +7,12 @@
     "createMonthlyContribution": "ts-node ./src/createMonthlyContribution.ts",
     "updateMonthlyContributionAmount": "ts-node ./src/updateMonthlyContributionAmount.ts",
     "cancelSubscription": "ts-node ./src/cancel.ts",
-    "deleteAccount": "ts-node ./src/deleteAccount.ts"
+    "deleteAccount": "ts-node ./src/deleteAccount.ts",
+    "check-formatting": "prettier --check **.ts",
+    "fix-formatting": "prettier --write **.ts"
   },
   "devDependencies": {
-    "dayjs": "^1.11.10",
+    "dayjs": "^1.11.12",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0"
   }

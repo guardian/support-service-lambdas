@@ -1,5 +1,6 @@
 import { zuoraDateFormat } from '@modules/zuora/common';
 import type { Dayjs } from 'dayjs';
+import { catalog } from '../../../src/productToDiscountMapping';
 
 export const digiSubSubscribeBody = (
 	subscriptionDate: Dayjs,
@@ -16,7 +17,7 @@ export const digiSubSubscribeBody = (
 						},
 					},
 				],
-		  }
+			}
 		: {};
 	return {
 		subscribes: [
@@ -57,7 +58,7 @@ export const digiSubSubscribeBody = (
 					RatePlanData: [
 						{
 							RatePlan: {
-								ProductRatePlanId: '2c92c0f84bbfec8b014bc655f4852d9d',
+								ProductRatePlanId: catalog.CODE.digiSub.Month,
 							},
 							...chargeOverride,
 							SubscriptionProductFeatureList: [],

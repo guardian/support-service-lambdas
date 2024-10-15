@@ -1,4 +1,4 @@
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 
 const zuoraCatalogToProductKey: Record<string, string> = {
 	'Digital Pack': 'DigitalSubscription',
@@ -9,6 +9,7 @@ const zuoraCatalogToProductKey: Record<string, string> = {
 	'Newspaper Digital Voucher': 'SubscriptionCard',
 	Contributor: 'Contribution',
 	'Newspaper Delivery': 'HomeDelivery',
+	'Tier Three': 'TierThree',
 } as const;
 
 const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
@@ -16,6 +17,8 @@ const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 	'Digital Pack Annual': 'Annual',
 	'Digital Subscription One Year Fixed - One Time Charge': 'OneYearGift',
 	'Digital Subscription Three Month Fixed - One Time Charge': 'ThreeMonthGift',
+	'Supporter Plus Monthly': 'V1DeprecatedMonthly',
+	'Supporter Plus Annual': 'V1DeprecatedAnnual',
 	'Supporter Plus V2 - Monthly': 'Monthly',
 	'Supporter Plus V2 - Annual': 'Annual',
 	'Supporter Plus V2 & Guardian Weekly ROW - Monthly':
@@ -26,6 +29,18 @@ const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 		'GuardianWeeklyRestOfWorldAnnual',
 	'Supporter Plus V2 & Guardian Weekly Domestic - Annual':
 		'GuardianWeeklyDomesticAnnual',
+	'Supporter Plus & Guardian Weekly ROW - Monthly': 'RestOfWorldMonthly',
+	'Supporter Plus & Guardian Weekly Domestic - Monthly': 'DomesticMonthly',
+	'Supporter Plus & Guardian Weekly ROW - Annual': 'RestOfWorldAnnual',
+	'Supporter Plus & Guardian Weekly Domestic - Annual': 'DomesticAnnual',
+	'Supporter Plus, Guardian Weekly ROW & Archive - Monthly':
+		'RestOfWorldMonthlyV2',
+	'Supporter Plus, Guardian Weekly Domestic & Archive - Monthly':
+		'DomesticMonthlyV2',
+	'Supporter Plus, Guardian Weekly ROW & Archive - Annual':
+		'RestOfWorldAnnualV2',
+	'Supporter Plus, Guardian Weekly Domestic & Archive - Annual':
+		'DomesticAnnualV2',
 	'GW Oct 18 - Annual - ROW': 'Annual',
 	'GW Oct 18 - Monthly - ROW': 'Monthly',
 	'GW Oct 18 - Quarterly - ROW': 'Quarterly',
@@ -51,6 +66,8 @@ const zuoraCatalogToProductRatePlanChargeKey: Record<string, string> = {
 	'Digital Subscription One Year Fixed - One Time Charge': 'Subscription',
 	'Digital Subscription Three Month Fixed - One Time Charge': 'Subscription',
 	'Digital Subscription Three Month Fixed - One Time': 'Subscription',
+	'Supporter Plus Monthly': 'Subscription',
+	'Supporter Plus Annual': 'Subscription',
 	'Supporter Plus Monthly Charge': 'Subscription',
 	'Supporter Plus Annual Charge': 'Subscription',
 	'Annual Contribution': 'Contribution',
@@ -78,15 +95,16 @@ const zuoraCatalogToProductRatePlanChargeKey: Record<string, string> = {
 	Friday: 'Friday',
 	'Supporter Plus': 'SupporterPlus',
 	'Guardian Weekly': 'GuardianWeekly',
+	'Newspaper Archive': 'NewspaperArchive',
 } as const;
 export const getZuoraProductKey = (product: string): string => {
-	return checkDefined(
+	return getIfDefined(
 		zuoraCatalogToProductKey[product],
 		`Unexpected product type ${product}`,
 	);
 };
 export const getProductRatePlanKey = (productRatePlan: string): string => {
-	return checkDefined(
+	return getIfDefined(
 		zuoraCatalogToProductRatePlanKey[productRatePlan],
 		`Unexpected product rate plan type ${productRatePlan}`,
 	);
@@ -94,7 +112,7 @@ export const getProductRatePlanKey = (productRatePlan: string): string => {
 export const getProductRatePlanChargeKey = (
 	productRatePlanCharge: string,
 ): string => {
-	return checkDefined(
+	return getIfDefined(
 		zuoraCatalogToProductRatePlanChargeKey[productRatePlanCharge],
 		`Unexpected product rate plan charge type ${productRatePlanCharge}`,
 	);

@@ -1,6 +1,7 @@
 package com.gu.soft_opt_in_consent_setter
 
 import com.gu.soft_opt_in_consent_setter.models.{
+  ConsentsMapping,
   EnhancedSub,
   SFAssociatedSubResponse,
   SFSubRecord,
@@ -36,7 +37,7 @@ object Handler extends LazyLogging {
       )
 
       identityConnector = new IdentityConnector(config.identityConfig)
-      consentsCalculator = new ConsentsCalculator(config.consentsMapping)
+      consentsCalculator = new ConsentsCalculator(ConsentsMapping.consentsMapping)
 
       acqSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessAcquisitionStatus))
       _ <- processAcquiredSubs(acqSubs, identityConnector.sendConsentsReq, sfConnector.updateSubs, consentsCalculator)
@@ -89,6 +90,9 @@ object Handler extends LazyLogging {
           for {
             consents <- consentsCalculator.getSoftOptInsByProduct(sub.Product__c)
             consentsBody = consentsCalculator.buildConsentsBody(consents, state = true)
+            _ = logger.info(
+              s"Sending consents request - sub ${sub.Name}, Identity id ${sub.Buyer__r.IdentityID__c}, product ${sub.Product__c} with body $consentsBody",
+            )
             _ <- sendConsentsReq(sub.Buyer__r.IdentityID__c, consentsBody)
           } yield ()
 

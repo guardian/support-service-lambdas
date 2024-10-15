@@ -20,7 +20,7 @@ class IdentityRetentionApiResponsesTest extends AnyFlatSpec with Matchers {
          |  "ongoingRelationship" : true,
          |  "relationshipEndDate" : "2024-01-01",
          |  "effectiveDeletionDate" : "2031-01-01",
-         |  "responseValidUntil" : "2023-08-31"
+         |  "responseValidUntil" : "2023-10-03"
          |}""".stripMargin,
     )
   }
@@ -35,7 +35,22 @@ class IdentityRetentionApiResponsesTest extends AnyFlatSpec with Matchers {
         |  "ongoingRelationship" : false,
         |  "relationshipEndDate" : "2024-01-01",
         |  "effectiveDeletionDate" : "2031-01-01",
-        |  "responseValidUntil" : "2023-08-31"
+        |  "responseValidUntil" : "2023-10-03"
+        |}""".stripMargin,
+    )
+  }
+
+    "cancelledRelationship" should "calculate the deletion date 7 years after cancellation date and vary the valid until date" in {
+    IdentityRetentionApiResponses.lapsedRelationship(
+      latestLapsedDate = LocalDate.of(2024, 9, 1),
+      today,
+    ) shouldEqual ApiResponse(
+      "200",
+      """{
+        |  "ongoingRelationship" : false,
+        |  "relationshipEndDate" : "2024-09-01",
+        |  "effectiveDeletionDate" : "2031-09-01",
+        |  "responseValidUntil" : "2023-10-08"
         |}""".stripMargin,
     )
   }

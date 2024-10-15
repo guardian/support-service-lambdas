@@ -5,32 +5,61 @@ on:
   push:
     branches:
       - main
+
+# Ensure we only ever have one build running at a time.
+# If we push twice in quick succession, the first build will be stopped once the second starts.
+# This avoids multiple deploys happening in quick succession causing AWS rate exceeded errors
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  gu-cdk-build:
-    strategy:
-      matrix:
-        subproject:
-          - product-switch-api
-          - generate-product-catalog
-          - alarms-handler
-          - discount-api
-          - salesforce-disaster-recovery
-          - salesforce-disaster-recovery-health-check
+  common:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 8
+      - run: corepack enable
+        shell: bash
       - uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - run: pnpm install
-      - run: pnpm package
+      - run: pnpm --filter "./modules/**" check-formatting
+      - run: pnpm --filter "./modules/**" test
+
+  gu-cdk-build:
+    needs: common
+    strategy:
+      matrix:
+        subproject:
+          - ticket-tailor-webhook
+          - update-supporter-plus-amount
+          - product-switch-api
+          - generate-product-catalog
+          - alarms-handler
+          - discount-api
+          - salesforce-disaster-recovery
+          - salesforce-disaster-recovery-health-check
+          - zuora-salesforce-link-remover
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - run: corepack enable
+        shell: bash
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - run: pnpm install
+      - run: pnpm --filter cdk package
+      - run: pnpm --filter ${{ matrix.subproject }} package
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -49,4 +78,3 @@ jobs:
               - ./cdk/cdk.out
             ${{ matrix.subproject }}:
               - ./handlers/${{ matrix.subproject }}/target/${{ matrix.subproject }}.zip
-

@@ -11,11 +11,8 @@ import scala.util.{Failure, Success, Try}
 
 object RestRequestMaker extends LazyLogging {
 
-  val genericError = GenericError("HTTP request was unsuccessful")
-
   def httpIsSuccessful(
       response: Response,
-      maybeErrorBodyParser: Option[String => ClientFailure] = None,
   ): ClientFailableOp[Unit] = {
     if (response.isSuccessful) {
       ClientSuccess(())
@@ -26,10 +23,11 @@ object RestRequestMaker extends LazyLogging {
       logger.error(
         s"HTTP request was unsuccessful, response status was ${response.code}, response body: \n $response\n$truncated",
       )
-      maybeErrorBodyParser match {
-        case Some(errorBodyParser) => errorBodyParser(body)
-        case _ if (response.code == 404) => NotFound(response.message)
-        case _ => genericError
+      response.code match {
+        case 400 => BadRequest(response.message, body)
+        case 401 => Unauthorised(response.message, body)
+        case 404 => NotFound(response.message, body)
+        case _ => GenericError("HTTP request was unsuccessful", body)
       }
     }
   }
@@ -40,7 +38,7 @@ object RestRequestMaker extends LazyLogging {
         ClientSuccess(success.get)
       case error: JsError => {
         logger.error(s"Failed to convert JSON response to case class $error. Response body was: \n $bodyAsJson")
-        GenericError(s"Error when converting JSON response to case class: $error")
+        GenericError(s"Error when converting JSON response to case class: $error", bodyAsJson.toString())
       }
     }
   }
@@ -160,7 +158,8 @@ object RestRequestMaker extends LazyLogging {
       val body = createBody[REQ](req)
       val headersWithContentType = headers + ("Content-Type" -> "application/json") + ("accept" -> "application/json")
       for {
-        bodyAsJson <- sendRequest(buildRequest(headersWithContentType, baseUrl + path, _.post(body)), getResponse).map(Json.parse)
+        bodyAsJson <- sendRequest(buildRequest(headersWithContentType, baseUrl + path, _.post(body)), getResponse)
+          .map(Json.parse)
         _ <- if (skipCheck == WithoutCheck) ClientSuccess(()) else jsonIsSuccessful(bodyAsJson)
         respModel <- toResult[RESP](bodyAsJson)
       } yield respModel
@@ -190,7 +189,7 @@ object RestRequestMaker extends LazyLogging {
     private def extractContentLength(response: Response) = {
       Try(response.header("content-length").toLong) match {
         case Success(contentlength) => ClientSuccess(contentlength)
-        case Failure(error) => GenericError(s"could not extract content length from response ${error.getMessage}")
+        case Failure(error) => GenericError(s"could not extract content length from response ${error.getMessage}", "")
       }
     }
 
@@ -211,12 +210,7 @@ object RestRequestMaker extends LazyLogging {
   }
 
   def toClientFailableOp(response: Response): ClientFailableOp[BodyAsString] =
-    toClientFailableOp(maybeErrorBodyParser = None)(response)
-
-  def toClientFailableOp(maybeErrorBodyParser: Option[String => ClientFailure])(
-      response: Response,
-  ): ClientFailableOp[BodyAsString] =
-    httpIsSuccessful(response, maybeErrorBodyParser).map(_ => response).map(_.body.string).map(BodyAsString.apply)
+    httpIsSuccessful(response).map(_ => BodyAsString(response.body.string))
 
   def buildRequest(
       headers: Map[String, String],

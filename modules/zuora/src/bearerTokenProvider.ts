@@ -48,7 +48,6 @@ export class BearerTokenProvider {
 		});
 
 		const json = await response.json();
-		console.log('Response from Zuora was: ', json);
 
 		return zuoraBearerTokenSchema.parse(json);
 	};

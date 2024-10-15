@@ -1,6 +1,6 @@
 package com.gu.digital_voucher_api
 
-import cats.effect.IO
+import cats.effect.{ContextShift, IO}
 import com.gu.DevIdentity
 import com.gu.imovo.ImovoStub._
 import com.gu.imovo._
@@ -23,7 +23,7 @@ import scala.concurrent.ExecutionContext
 
 class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffShouldMatcher with EitherValues {
 
-  private implicit val contextShift = IO.contextShift(ExecutionContext.global)
+  private implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
   private val imovoConfig = ImovoConfig("https://imovo.test.com", "imovo-test-api-key")
   private val subscriptionId = SfSubscriptionId("123456")
@@ -53,15 +53,15 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffSh
       .run(
         Request[IO](
           method = Method.PUT,
-          uri = Uri(path = s"/digital-voucher/${subscriptionId.value}"),
+          uri = Uri(path = Uri.Path.unsafeFromString(s"/digital-voucher/${subscriptionId.value}")),
         ).withEntity[String](CreateVoucherRequestBody("Everyday").asJson.spaces2),
       )
       .value
       .unsafeRunSync()
       .get
 
-    response.status.code shouldMatchTo(201)
-    getBody[SubscriptionVouchers](response) shouldMatchTo(SubscriptionVouchers("new-card-code", "new-letter-code"))
+    response.status.code shouldMatchTo (201)
+    getBody[SubscriptionVouchers](response) shouldMatchTo (SubscriptionVouchers("new-card-code", "new-letter-code"))
   }
 
   it should "get existing voucher details from imovo if create fails because the vouchers already exist" in {
@@ -98,16 +98,16 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffSh
       .run(
         Request[IO](
           method = Method.PUT,
-          uri = Uri(path = s"/digital-voucher/${subscriptionId.value}"),
+          uri = Uri(path = Uri.Path.unsafeFromString(s"/digital-voucher/${subscriptionId.value}")),
         ).withEntity[String](CreateVoucherRequestBody("Everyday").asJson.spaces2),
       )
       .value
       .unsafeRunSync()
       .get
 
-    response.status.code shouldMatchTo(201)
-    getBody[SubscriptionVouchers](response) shouldMatchTo(
-      SubscriptionVouchers("existing-card-code", "existing-letter-code"),
+    response.status.code shouldMatchTo (201)
+    getBody[SubscriptionVouchers](response) shouldMatchTo (
+      SubscriptionVouchers("existing-card-code", "existing-letter-code")
     )
   }
 
@@ -131,15 +131,15 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffSh
       .run(
         Request[IO](
           method = Method.PUT,
-          uri = Uri(path = s"/digital-voucher/${subscriptionId.value}"),
+          uri = Uri(path = Uri.Path.unsafeFromString(s"/digital-voucher/${subscriptionId.value}")),
         ).withEntity[String](CreateVoucherRequestBody("Everyday").asJson.spaces2),
       )
       .value
       .unsafeRunSync()
       .get
 
-    response.status.code shouldMatchTo(502)
-    getBody[DigitalVoucherApiRoutesError](response) shouldMatchTo(
+    response.status.code shouldMatchTo (502)
+    getBody[DigitalVoucherApiRoutesError](response) shouldMatchTo (
       DigitalVoucherApiRoutesError(
         s"""Imovo failure to create voucher: Imovo create request failed:Request GET ${imovoConfig.imovoBaseUrl}/Subscription/RequestSubscriptionVouchers?SubscriptionId=123456&SchemeName=Guardian7Day&StartDate=$tomorrow failed with response ({
          |  "errorMessages" : [
@@ -152,7 +152,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffSh
          |  ],
          |  "successfulRequest" : false
          |})""".stripMargin,
-      ),
+      )
     )
   }
 
@@ -165,18 +165,18 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffSh
       .run(
         Request[IO](
           method = Method.PUT,
-          uri = Uri(path = s"/digital-voucher/${subscriptionId.value}"),
+          uri = Uri(path = Uri.Path.unsafeFromString(s"/digital-voucher/${subscriptionId.value}")),
         ).withEntity[String](CreateVoucherRequestBody("HomeDelivery").asJson.spaces2),
       )
       .value
       .unsafeRunSync()
       .get
 
-    response.status.code shouldMatchTo(422)
-    getBody[DigitalVoucherApiRoutesError](response) shouldMatchTo(
+    response.status.code shouldMatchTo (422)
+    getBody[DigitalVoucherApiRoutesError](response) shouldMatchTo (
       DigitalVoucherApiRoutesError(
         "Bad request argument: Rate plan name has no matching scheme name: RatePlanName(HomeDelivery)",
-      ),
+      )
     )
   }
 
@@ -203,7 +203,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffSh
       .run(
         Request[IO](
           method = Method.POST,
-          Uri(path = "/digital-voucher/replace"),
+          Uri(path = Uri.Path.unsafeFromString("/digital-voucher/replace")),
         ).withEntity[String](
           SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some(true), Some(true)).asJson.spaces2,
         ),
@@ -212,13 +212,13 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffSh
       .unsafeRunSync()
       .get
 
-    getBody[ReplacementSubscriptionVouchers](response) shouldMatchTo(
+    getBody[ReplacementSubscriptionVouchers](response) shouldMatchTo (
       ReplacementSubscriptionVouchers(
         Some("replaced-card-test-voucher-code"),
         Some("replaced-letter-test-voucher-code"),
-      ),
+      )
     )
-    response.status.code shouldMatchTo(200)
+    response.status.code shouldMatchTo (200)
   }
 
   it should "return replaced letter details for replace only letter request with subscriptionId" in {
@@ -243,7 +243,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffSh
       .run(
         Request[IO](
           method = Method.POST,
-          Uri(path = "/digital-voucher/replace"),
+          Uri(path = Uri.Path.unsafeFromString("/digital-voucher/replace")),
         ).withEntity[String](
           SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some(false), Some(true)).asJson.spaces2,
         ),
@@ -252,10 +252,10 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffSh
       .unsafeRunSync()
       .get
 
-    getBody[ReplacementSubscriptionVouchers](response) shouldMatchTo(
-      ReplacementSubscriptionVouchers(None, Some("replaced-letter-test-voucher-code")),
+    getBody[ReplacementSubscriptionVouchers](response) shouldMatchTo (
+      ReplacementSubscriptionVouchers(None, Some("replaced-letter-test-voucher-code"))
     )
-    response.status.code shouldMatchTo(200)
+    response.status.code shouldMatchTo (200)
   }
 
   it should "return replaced card details for replace only card request with subscriptionId" in {
@@ -280,7 +280,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffSh
       .run(
         Request[IO](
           method = Method.POST,
-          Uri(path = "/digital-voucher/replace"),
+          Uri(path = Uri.Path.unsafeFromString("/digital-voucher/replace")),
         ).withEntity[String](
           SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some(true), Some(false)).asJson.spaces2,
         ),
@@ -289,10 +289,10 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffSh
       .unsafeRunSync()
       .get
 
-    getBody[ReplacementSubscriptionVouchers](response) shouldMatchTo(
-      ReplacementSubscriptionVouchers(Some("replaced-card-test-voucher-code"), None),
+    getBody[ReplacementSubscriptionVouchers](response) shouldMatchTo (
+      ReplacementSubscriptionVouchers(Some("replaced-card-test-voucher-code"), None)
     )
-    response.status.code shouldMatchTo(200)
+    response.status.code shouldMatchTo (200)
   }
 
   it should "return error response when one imovo replace request fails" in {
@@ -310,7 +310,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffSh
       .run(
         Request[IO](
           method = Method.POST,
-          Uri(path = "/digital-voucher/replace"),
+          Uri(path = Uri.Path.unsafeFromString("/digital-voucher/replace")),
         ).withEntity[String](
           SubscriptionActionRequestBody(Some(subscriptionId.value), None, None, Some(true), Some(true)).asJson.spaces2,
         ),
@@ -319,7 +319,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffSh
       .unsafeRunSync()
       .get
 
-    response.status.code shouldMatchTo(500)
+    response.status.code shouldMatchTo (500)
   }
 
   it should "return voucher details for get subscription request" in {
@@ -344,15 +344,15 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffSh
       .run(
         Request(
           method = Method.GET,
-          Uri(path = s"/digital-voucher/${subscriptionId.value}"),
+          Uri(path = Uri.Path.unsafeFromString(s"/digital-voucher/${subscriptionId.value}")),
         ),
       )
       .value
       .unsafeRunSync()
       .get
 
-    getBody[SubscriptionVouchers](response) shouldMatchTo(SubscriptionVouchers("card-code", "letter-code"))
-    response.status.code shouldMatchTo(200)
+    getBody[SubscriptionVouchers](response) shouldMatchTo (SubscriptionVouchers("card-code", "letter-code"))
+    response.status.code shouldMatchTo (200)
   }
 
   it should "return 200 response for cancel request" in {
@@ -372,7 +372,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffSh
       .run(
         Request[IO](
           method = Method.POST,
-          Uri(path = "/digital-voucher/cancel"),
+          Uri(path = Uri.Path.unsafeFromString("/digital-voucher/cancel")),
         ).withEntity[String](
           CancelSubscriptionVoucherRequestBody(subscriptionId.value, cancellationDate).asJson.spaces2,
         ),
@@ -406,7 +406,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffSh
       .run(
         Request(
           method = Method.GET,
-          Uri(path = s"/digital-voucher/redemption-history/${subscriptionId.value}"),
+          Uri(path = Uri.Path.unsafeFromString(s"/digital-voucher/redemption-history/${subscriptionId.value}")),
         ),
       )
       .value
@@ -486,7 +486,7 @@ class DigitalVoucherApiTest extends AnyFlatSpec with should.Matchers with DiffSh
       .run(
         Request(
           method = Method.GET,
-          Uri(path = s"/digital-voucher/redemption-history/${subscriptionId.value}"),
+          Uri(path = Uri.Path.unsafeFromString(s"/digital-voucher/redemption-history/${subscriptionId.value}")),
         ),
       )
       .value

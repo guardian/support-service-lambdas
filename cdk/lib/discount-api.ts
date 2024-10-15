@@ -11,8 +11,8 @@ import {
 } from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
+import { nodeVersion } from './node-version';
 
 export interface DiscountApiProps extends GuStackProps {
 	stack: string;
@@ -42,14 +42,12 @@ export class DiscountApi extends GuStack {
 			functionName: nameWithStage,
 			fileName: `${app}.zip`,
 			handler: 'index.handler',
-			runtime: Runtime.NODEJS_18_X,
+			runtime: nodeVersion,
 			memorySize: 1024,
 			timeout: Duration.seconds(300),
 			environment: commonEnvironmentVariables,
-			// Create an alarm
 			monitoringConfiguration: {
-				http5xxAlarm: { tolerated5xxPercentage: 5 },
-				snsTopicName: 'retention-dev',
+				noMonitoring: true, // There is a threshold alarm defined below
 			},
 			app: app,
 			api: {
@@ -115,8 +113,21 @@ export class DiscountApi extends GuStack {
 			},
 		);
 
+		const sqsEmailPolicy: Policy = new Policy(this, 'SQS email policy', {
+			statements: [
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: ['sqs:sendmessage'],
+					resources: [
+						`arn:aws:sqs:${this.region}:${this.account}:braze-emails-${this.stage}`,
+					],
+				}),
+			],
+		});
+
 		lambda.role?.attachInlinePolicy(s3InlinePolicy);
 		lambda.role?.attachInlinePolicy(secretsManagerPolicy);
+		lambda.role?.attachInlinePolicy(sqsEmailPolicy);
 
 		// ---- Alarms ---- //
 		const alarmName = (shortDescription: string) =>
@@ -133,7 +144,7 @@ export class DiscountApi extends GuStack {
 			),
 			evaluationPeriods: 1,
 			threshold: 1,
-			snsTopicName: 'retention-dev',
+			snsTopicName: 'alarms-handler-topic-PROD',
 			actionsEnabled: this.stage === 'PROD',
 			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 			metric: new Metric({

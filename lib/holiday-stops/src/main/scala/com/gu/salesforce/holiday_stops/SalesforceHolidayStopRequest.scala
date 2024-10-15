@@ -1,17 +1,17 @@
 package com.gu.salesforce.holiday_stops
 
 import cats.implicits._
-import com.gu.salesforce.SalesforceClient.SalesforceErrorResponseBody
 import com.gu.salesforce.SalesforceConstants._
 import com.gu.salesforce.SalesforceQueryConstants.contactToWhereClausePart
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail.{CreateHolidayStopRequestResult, format}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.WithdrawHolidayStopRequest.WithdrawnTimePatch
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
 import com.gu.salesforce.{Contact, RecordsWrapperCaseClass}
 import com.gu.util.Logging
-import com.gu.util.resthttp.HttpOp.HttpOpWrapper
 import com.gu.util.resthttp.RestOp._
 import com.gu.util.resthttp.RestRequestMaker._
-import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess, CustomError}
+import com.gu.util.resthttp.Types.{ClientFailableOp, ClientSuccess}
 import com.gu.util.resthttp.{HttpOp, RestRequestMaker}
 import com.gu.zuora.subscription._
 import play.api.libs.json._
@@ -91,16 +91,23 @@ object SalesforceHolidayStopRequest extends Logging {
 
   implicit val formatIds = Json.format[RecordsWrapperCaseClass[HolidayStopRequest]]
 
-  object LookupByContactAndOptionalSubscriptionName {
+  class LookupByContactAndOptionalSubscriptionName(sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue]) {
 
-    def apply(
-        sfGet: HttpOp[RestRequestMaker.GetRequestWithParams, JsValue],
-    ): (Contact, Option[SubscriptionName], Option[LocalDate]) => ClientFailableOp[List[HolidayStopRequest]] =
+    import LookupByContactAndOptionalSubscriptionName._
+
+    def run(
+      contact: Contact,
+      optionalSubscriptionName: Option[SubscriptionName],
+      optionalHistoricalCutOff: Option[LocalDate],
+    ): ClientFailableOp[List[HolidayStopRequest]] =
       sfGet
-        .setupRequestMultiArg(toRequest _)
         .parse[RecordsWrapperCaseClass[HolidayStopRequest]]
         .map(_.records)
-        .runRequestMultiArg
+        .runRequest(toRequest(contact, optionalSubscriptionName, optionalHistoricalCutOff))
+
+  }
+
+  object LookupByContactAndOptionalSubscriptionName {
 
     def getSOQL(
         contact: Contact,
@@ -164,19 +171,9 @@ object SalesforceHolidayStopRequest extends Logging {
   implicit val formatCompositeTreeHolidayStopRequest = Json.format[CompositeTreeHolidayStopRequest]
   implicit val formatNewHolidayStopRequest = Json.format[RecordsWrapperCaseClass[CompositeTreeHolidayStopRequest]]
 
-  object CreateHolidayStopRequestWithDetail {
+  class CreateHolidayStopRequestWithDetail(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]) {
 
-    case class CreateHolidayStopRequestResultIdWrapper(
-        id: HolidayStopRequestId,
-        referenceId: String,
-    )
-    implicit val formatCreateHolidayStopRequestResultIdWrapper = Json.format[CreateHolidayStopRequestResultIdWrapper]
-    case class CreateHolidayStopRequestResult(results: List[CreateHolidayStopRequestResultIdWrapper])
-    implicit val format = Json.format[CreateHolidayStopRequestResult]
-
-    def apply(
-        sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue],
-    ): RecordsWrapperCaseClass[CompositeTreeHolidayStopRequest] => ClientFailableOp[HolidayStopRequestId] =
+    def run(request: RecordsWrapperCaseClass[CompositeTreeHolidayStopRequest]): ClientFailableOp[HolidayStopRequestId] =
       sfPost
         .setupRequest[RecordsWrapperCaseClass[CompositeTreeHolidayStopRequest]] { createHolidayStopRequestWithDetail =>
           PostRequest(createHolidayStopRequestWithDetail, RelativePath(holidayStopRequestCompositeTreeBaseUrl))
@@ -185,7 +182,19 @@ object SalesforceHolidayStopRequest extends Logging {
         .map(
           _.results.find(_.referenceId == holidayStopRequestSfObjectRef).map(_.id).get,
         ) // FIXME refactor this to map None to ClientFailure rather than nasty .get
-        .runRequest
+        .runRequest(request)
+
+  }
+
+  object CreateHolidayStopRequestWithDetail {
+
+    case class CreateHolidayStopRequestResultIdWrapper(
+        id: HolidayStopRequestId,
+        referenceId: String,
+    )
+    implicit val formatCreateHolidayStopRequestResultIdWrapper = Json.format[CreateHolidayStopRequestResultIdWrapper]
+    case class CreateHolidayStopRequestResult(results: List[CreateHolidayStopRequestResultIdWrapper])
+    implicit val format: OFormat[CreateHolidayStopRequestResult] = Json.format[CreateHolidayStopRequestResult]
 
     def buildBody(
         startDate: LocalDate,
@@ -243,34 +252,20 @@ object SalesforceHolidayStopRequest extends Logging {
 
   lazy val successStatusCodes = 200 to 299
 
-  val safeSalesforceCompositeRequest =
-    HttpOpWrapper[CompositeRequest, PostRequest, CompositeResponse, CompositeResponse](
-      (requestBody: CompositeRequest) => PostRequest(requestBody, RelativePath(compositeBaseUrl)),
-      (response: CompositeResponse) => {
-        val failures = response.compositeResponse
-          .filter(resp => !successStatusCodes.contains(resp.httpStatusCode))
-        if (failures.isEmpty) {
-          ClientSuccess(response)
-        } else {
-          logger.error(response.toString)
-          val failuresStr: String = failures
-            .flatMap(_.body.map(_.validate[List[SalesforceErrorResponseBody]].asOpt))
-            .flatten
-            .mkString(", ")
-          CustomError(s"MULTIPLE ERRORS : ${failuresStr.take(500)}${if (failuresStr.length > 500) "..." else ""}")
-        }
-      },
-    )
+  private def safeSalesforceCompositeRequestSetupRequest(requestBody: CompositeRequest): PostRequest =
+    PostRequest(requestBody, RelativePath(compositeBaseUrl))
 
-  object AmendHolidayStopRequest {
+  class AmendHolidayStopRequest(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]) {
 
-    def apply(
-        sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue],
-    ): CompositeRequest => ClientFailableOp[CompositeResponse] =
+    def doRequest(req: CompositeRequest): ClientFailableOp[CompositeResponse] =
       sfPost
         .parse[CompositeResponse]
-        .wrapWith(safeSalesforceCompositeRequest)
-        .runRequest
+        .setupRequest(safeSalesforceCompositeRequestSetupRequest)
+        .runRequest(req)
+
+  }
+
+  object AmendHolidayStopRequest {
 
     case class AmendHolidayStopRequestItselfBody(
         Start_Date__c: HolidayStopRequestStartDate,
@@ -351,20 +346,21 @@ object SalesforceHolidayStopRequest extends Logging {
 
   }
 
+  class CancelHolidayStopRequestDetail(sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue]) {
+
+    def doRequest(req: CompositeRequest): ClientFailableOp[CompositeResponse] =
+      sfPost
+        .parse[CompositeResponse]
+        .setupRequest(safeSalesforceCompositeRequestSetupRequest)
+        .runRequest(req)
+
+  }
   object CancelHolidayStopRequestDetail {
     implicit val cancelHolidayStopRequestDetailBodyReads = Json.writes[CancelHolidayStopRequestDetailBody]
     final case class CancelHolidayStopRequestDetailBody(
         Actual_Price__c: Option[Price],
         Charge_Code__c: Option[RatePlanChargeCode],
     )
-
-    def apply(
-        sfPost: HttpOp[RestRequestMaker.PostRequest, JsValue],
-    ): CompositeRequest => ClientFailableOp[CompositeResponse] =
-      sfPost
-        .parse[CompositeResponse]
-        .wrapWith(safeSalesforceCompositeRequest)
-        .runRequest
 
     def buildBody(
         holidayStopRequestsDetails: List[HolidayStopRequestsDetail],
@@ -389,18 +385,19 @@ object SalesforceHolidayStopRequest extends Logging {
   }
 
   object WithdrawHolidayStopRequest {
-    case class WithdrawnTimePatch(Withdrawn_Time__c: ZonedDateTime = ZonedDateTime.now())
-    implicit val writes = Json.writes[WithdrawnTimePatch]
+    case class WithdrawnTimePatch(Withdrawn_Time__c: ZonedDateTime)
 
-    def apply(sfPatch: HttpOp[RestRequestMaker.PatchRequest, Unit]): HolidayStopRequestId => ClientFailableOp[Unit] =
-      sfPatch
-        .setupRequest[HolidayStopRequestId] { holidayStopRequestId =>
-          PatchRequest(
-            WithdrawnTimePatch(),
-            RelativePath(s"$holidayStopRequestSfObjectsBaseUrl/${holidayStopRequestId.value}"),
-          )
-        }
-        .runRequest
+    implicit val writes = Json.writes[WithdrawnTimePatch]
+  }
+
+  class WithdrawHolidayStopRequest(sfPatch: HttpOp[RestRequestMaker.PatchRequest, Unit]) {
+    def run(withdrawlTime: ZonedDateTime, holidayStopRequestId: HolidayStopRequestId): ClientFailableOp[Unit] =
+      sfPatch.runRequest(
+        PatchRequest(
+          WithdrawnTimePatch(withdrawlTime),
+          RelativePath(s"$holidayStopRequestSfObjectsBaseUrl/${holidayStopRequestId.value}"),
+        )
+      )
   }
 
   private def generateId() = UUID.randomUUID().toString.replace("-", "")

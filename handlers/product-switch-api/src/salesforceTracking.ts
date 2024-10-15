@@ -44,7 +44,7 @@ export const sendSalesforceTracking = async (
 		caseId: caseId,
 	};
 	console.log(
-		`Sending email message ${prettyPrint(
+		`Sending Salesforce tracking message ${prettyPrint(
 			salesforceTrackingInput,
 		)} to queue ${queueName}`,
 	);

@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory
 import sttp.client3.{Identity, SttpBackend}
 
 import java.time.LocalDate
+import scala.collection.parallel.CollectionConverters.ImmutableSeqIsParallelizable
+import scala.collection.parallel.ForkJoinTaskSupport
 
 object Processor {
 
@@ -36,7 +38,7 @@ object Processor {
       writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_],
       getAccount: String => ZuoraApiResponse[ZuoraAccount],
       getNextInvoiceDate: String => ZuoraApiResponse[LocalDate] = null, // FIXME
-  ): ProcessResult[Result] = {
+  ): List[ProcessResult[Result]] = {
 
     def getSubscription(
         subscriptionName: SubscriptionName,
@@ -90,7 +92,8 @@ object Processor {
       resultOfZuoraCreditAdd: (Request, RatePlanCharge) => Result,
       writeCreditResultsToSalesforce: List[Result] => SalesforceApiResponse[_],
       getNextInvoiceDate: String => ZuoraApiResponse[LocalDate] = null, // FIXME,
-  ): ProcessResult[Result] = {
+  ): List[ProcessResult[Result]] = {
+
     val creditRequestsFromSalesforce = for {
       datesToProcess <- getDatesToProcess(fulfilmentDatesFetcher, productType, processOverrideDate, LocalDate.now())
       _ = logger.info(s"Processing credits for ${productType.name} for issue dates ${datesToProcess.mkString(", ")}")
@@ -100,39 +103,92 @@ object Processor {
 
     creditRequestsFromSalesforce match {
       case Left(sfReadError) =>
-        ProcessResult(Nil, Nil, Nil, Some(OverallFailure(sfReadError.reason)))
+        List(ProcessResult(Nil, Nil, Nil, Some(OverallFailure(sfReadError.reason))))
 
       case Right(creditRequestsFromSalesforce) =>
         val creditRequests = creditRequestsFromSalesforce.distinct
         val alreadyActionedCredits = creditRequestsFromSalesforce.flatMap(_.chargeCode).distinct
+
+        def updateSaleforce(
+            creditRequests: List[Request],
+            zuoraApiResponse: ZuoraApiResponse[Result],
+            creditAddResult: Result,
+        ) = {
+          val notAlreadyActionedCredits =
+            List(creditAddResult).filterNot(v => alreadyActionedCredits.contains(v.chargeCode))
+          val salesForceResponse = writeCreditResultsToSalesforce(
+            notAlreadyActionedCredits,
+          )
+
+          ProcessResult(
+            creditRequests,
+            List(zuoraApiResponse),
+            notAlreadyActionedCredits,
+            OverallFailure(List.empty, salesForceResponse),
+          )
+        }
+
+        def updateInZuoraAndSf(creditRequests: List[Request]) = {
+          creditRequests.map { creditRequest =>
+            val zuoraApiResponse = addCreditToSubscription(
+              creditProduct,
+              getSubscription,
+              getAccount,
+              updateToApply,
+              updateSubscription,
+              resultOfZuoraCreditAdd,
+              getNextInvoiceDate,
+            )(creditRequest)
+
+            val sfResult =
+              zuoraApiResponse
+                .map(ar => updateSaleforce(creditRequests, zuoraApiResponse, ar))
+                .leftMap(failure =>
+                  ProcessResult(
+                    creditRequests,
+                    List(zuoraApiResponse),
+                    List.empty,
+                    Some(OverallFailure(failure.reason)),
+                  ),
+                )
+
+            sfResult
+          }
+        }
+
         logger.info(s"Processing ${creditRequests.length} credits in Zuora ...")
-        val allZuoraCreditResponses = creditRequests.map(
-          addCreditToSubscription(
-            creditProduct,
-            getSubscription,
-            getAccount,
-            updateToApply,
-            updateSubscription,
-            resultOfZuoraCreditAdd,
-            getNextInvoiceDate,
-          ),
-        )
-        val (failedZuoraResponses, successfulZuoraResponses) = allZuoraCreditResponses.separate
-        val notAlreadyActionedCredits =
-          successfulZuoraResponses.filterNot(v => alreadyActionedCredits.contains(v.chargeCode))
-        val salesforceExportResult = writeCreditResultsToSalesforce(notAlreadyActionedCredits)
-        ProcessResult(
-          creditRequests,
-          allZuoraCreditResponses,
-          notAlreadyActionedCredits,
-          OverallFailure(failedZuoraResponses, salesforceExportResult),
-        )
+
+        // we group the creditRequests by subscription to make the requests to zuora in parallel
+        // & avoid lock contention on the resource
+        val creditRequestBatches =
+          creditRequests
+            .groupBy(_.subscriptionName)
+            .values
+            .toList
+            .par
+
+        val requestConcurrency = 20
+        /*https://developer.zuora.com/docs/guides/rate-limits/#concurrent-request-limits
+        Zuora supports up to 40 concurrent requests until migration to orders API which supports 200
+         */
+        val forkJoinPool = new java.util.concurrent.ForkJoinPool(requestConcurrency)
+        creditRequestBatches.tasksupport = new ForkJoinTaskSupport(forkJoinPool)
+
+        val processResults =
+          creditRequestBatches
+            .map(requests => updateInZuoraAndSf(requests))
+            .toList
+            .flatten
+            .map(_.merge)
+
+        forkJoinPool.shutdown()
+        processResults
     }
   }
 
   // FIXME: Temporary test in production to validate migration to https://github.com/guardian/invoicing-api/pull/20
-  import scala.concurrent.{ExecutionContext, Future}
   import java.util.concurrent.Executors
+  import scala.concurrent.{ExecutionContext, Future}
 
   private val ecForTestInProd = ExecutionContext.fromExecutor(Executors.newSingleThreadExecutor)
   private def testInProdNextInvoiceDate(
@@ -212,4 +268,5 @@ object Processor {
           .map(error => ZuoraApiFailure(s"Failed to fetch fulfilment dates: $error")),
       )(processOverRideDate => List(processOverRideDate).asRight)
   }
+
 }

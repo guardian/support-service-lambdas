@@ -127,7 +127,7 @@ object ZuoraRestBody {
       case ZuoraSuccessCheck.None => Right(())
     }
 
-    isSuccessful.flatMap(_ => body.fromJson[A].left.map(errorMessage => new Throwable("json parse" + errorMessage)))
+    isSuccessful.flatMap(_ => body.fromJson[A].left.map(errorMessage => new Throwable(s"json parsing error $errorMessage with body $body")))
   }
 
 }

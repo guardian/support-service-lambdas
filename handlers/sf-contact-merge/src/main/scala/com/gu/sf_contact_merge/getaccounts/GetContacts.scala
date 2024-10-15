@@ -29,7 +29,9 @@ object GetContacts {
       }
       query <- zoql"SELECT BillToId, IdentityId__c, sfContactId__c FROM Account WHERE $or"
       result <- zuoraQuerier[WireAccount](query)
-      _ <- if (result.done) ClientSuccess(()) else GenericError("oops, query was too big for one page")
+      _ <-
+        if (result.done) ClientSuccess(())
+        else GenericError("oops, query was too big for one page", result.size.toString)
     } yield result.records.map { acc =>
       (
         ContactId(acc.BillToId),

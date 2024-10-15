@@ -1,23 +1,35 @@
 package com.gu.holidaystopprocessor
 
-import java.time.LocalDate
 import cats.syntax.all._
-import com.amazonaws.services.lambda.runtime.Context
+import com.amazonaws.services.lambda.runtime.{Context, LambdaRuntime}
 import com.gu.creditprocessor.ProcessResult
 import com.gu.effects.GetFromS3
 import com.gu.holiday_stops.{Configuration, ConfigurationLive}
 import com.gu.holidaystopprocessor.HolidayStopCreditProcessor.{ProductTypeAndStopDate, processAllProducts}
 import com.gu.zuora.ZuoraProductTypes.ZuoraProductType
-import sttp.client3.HttpURLConnectionBackend
 import io.circe.generic.auto._
 import io.github.mkotsur.aws.handler.Lambda
 import io.github.mkotsur.aws.handler.Lambda._
+import sttp.client3.HttpURLConnectionBackend
 import zio._
 import zio.console.Console
 
-import java.io.IOException
+import java.io.{IOException, OutputStream, PrintStream}
+import java.lang.{System => JavaSystem}
+import java.time.LocalDate
 
 object Handler extends Lambda[Option[ProductTypeAndStopDate], List[ZuoraHolidayCreditAddResult]] with zio.App {
+
+  val printStream = new PrintStream(new OutputStream() {
+    override def write(b: Int): Unit =
+      LambdaRuntime.getLogger.log(Array(b.toByte))
+
+    override def write(b: Array[Byte]): Unit =
+      LambdaRuntime.getLogger.log(b)
+
+    override def write(b: Array[Byte], off: Int, len: Int): Unit =
+      LambdaRuntime.getLogger.log(b.slice(off, off + len))
+  })
 
   /** @param productTypeAndStopDateOverride
     *   Optionally, the handler will take a product type and stopped publication date of holiday-stop requests to
@@ -28,6 +40,8 @@ object Handler extends Lambda[Option[ProductTypeAndStopDate], List[ZuoraHolidayC
       productTypeAndStopDateOverride: Option[ProductTypeAndStopDate],
       context: Context,
   ): Either[Throwable, List[ZuoraHolidayCreditAddResult]] = {
+    JavaSystem.setOut(printStream)
+    JavaSystem.setErr(printStream)
 
     val runtime = zio.Runtime.default
 
@@ -42,7 +56,7 @@ object Handler extends Lambda[Option[ProductTypeAndStopDate], List[ZuoraHolidayC
             GetFromS3.fetchString,
           ),
         )
-        _ <- RIO.foreach_(results)(result => RIO.effect(ProcessResult.log(result)))
+        _ <- RIO.effect(ProcessResult.log(results))
         zuoraWriteResults <- results.flatMap(_.overallFailure.toList) match {
           case Nil =>
             val (_, successfulZuoraResponses) = results.flatMap(_.creditResults).separate

@@ -1,6 +1,6 @@
 import type { BillingPeriod } from '@modules/billingPeriod';
 import { ValidationError } from '@modules/errors';
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
 import type {
 	ProductCatalog,
@@ -59,7 +59,7 @@ const getAccountInformation = (account: ZuoraAccount): AccountInformation => {
 	};
 };
 
-const getFirstContributionRatePlan = (
+export const getFirstContributionRatePlan = (
 	productCatalog: ProductCatalog,
 	subscription: ZuoraSubscription,
 ) => {
@@ -67,22 +67,56 @@ const getFirstContributionRatePlan = (
 		productCatalog.Contribution.ratePlans.Annual.id,
 		productCatalog.Contribution.ratePlans.Monthly.id,
 	];
-	return checkDefined(
+	const contributionRatePlan = subscription.ratePlans.find(
+		(ratePlan) =>
+			ratePlan.lastChangeType !== 'Remove' &&
+			contributionProductRatePlanIds.includes(ratePlan.productRatePlanId),
+	);
+	if (contributionRatePlan !== undefined) {
+		return contributionRatePlan;
+	}
+	if (
+		subscriptionHasAlreadySwitchedToSupporterPlus(productCatalog, subscription)
+	) {
+		throw new ValidationError(
+			`The subscription ${subscription.subscriptionNumber} has already been switched to supporter plus: ${prettyPrint(subscription)}`,
+		);
+	}
+	throw new ReferenceError(
+		`Subscription ${subscription.subscriptionNumber} does not contain an active contribution rate plan: ${prettyPrint(subscription)}`,
+	);
+};
+
+export const subscriptionHasAlreadySwitchedToSupporterPlus = (
+	productCatalog: ProductCatalog,
+	subscription: ZuoraSubscription,
+) => {
+	const contributionProductRatePlanIds = [
+		productCatalog.Contribution.ratePlans.Annual.id,
+		productCatalog.Contribution.ratePlans.Monthly.id,
+	];
+	const supporterPlusProductRatePlanIds = [
+		productCatalog.SupporterPlus.ratePlans.Monthly.id,
+		productCatalog.SupporterPlus.ratePlans.Annual.id,
+	];
+	return (
+		subscription.ratePlans.find(
+			(ratePlan) =>
+				ratePlan.lastChangeType === 'Remove' &&
+				contributionProductRatePlanIds.includes(ratePlan.productRatePlanId),
+		) !== undefined &&
 		subscription.ratePlans.find(
 			(ratePlan) =>
 				ratePlan.lastChangeType !== 'Remove' &&
-				contributionProductRatePlanIds.includes(ratePlan.productRatePlanId),
-		),
-		`No contribution rate plan found in the subscription ${prettyPrint(
-			subscription,
-		)}`,
+				supporterPlusProductRatePlanIds.includes(ratePlan.productRatePlanId),
+		) !== undefined
 	);
 };
 
 const getCurrency = (
 	contributionRatePlan: RatePlan,
 ): ProductCurrency<'SupporterPlus'> => {
-	const currency = checkDefined(
+	const currency = getIfDefined(
 		contributionRatePlan.ratePlanCharges[0]?.currency,
 		'No currency found on the rate plan charge',
 	);
@@ -120,11 +154,11 @@ export const getSwitchInformationWithOwnerCheck = (
 		productCatalog,
 		subscription,
 	);
-	const previousAmount = checkDefined(
+	const previousAmount = getIfDefined(
 		contributionRatePlan.ratePlanCharges[0]?.price,
 		'No price found on the contribution rate plan charge',
 	);
-	const billingPeriod = checkDefined(
+	const billingPeriod = getIfDefined(
 		contributionRatePlan.ratePlanCharges[0]?.billingPeriod,
 		`No rate plan charge found on the rate plan ${prettyPrint(
 			contributionRatePlan,
@@ -151,7 +185,9 @@ export const getSwitchInformationWithOwnerCheck = (
 		billingPeriod,
 	};
 
-	const startNewTerm = dayjs(subscription.termStartDate).isBefore(today);
+	const termStartDate = dayjs(subscription.termStartDate).startOf('day');
+	const startOfToday = today.startOf('day');
+	const startNewTerm = termStartDate.isBefore(startOfToday);
 
 	return {
 		stage,
