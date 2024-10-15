@@ -145,8 +145,8 @@ Resources:
     Type: AWS::Events::Rule
     DependsOn: SuspensionLambda
     Properties:
-      Description: Triggers hourly processing of digital voucher suspensions.
-      ScheduleExpression: "rate(1 hour)"
+      Description: Triggers hourly processing of digital voucher suspensions starting from 2am UTC
+      ScheduleExpression: "cron(20 2-23 * * ? *)"
       State: ENABLED
       Targets:
         - Arn: !GetAtt SuspensionLambda.Arn
