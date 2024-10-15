@@ -52,7 +52,7 @@ object Handler extends Logging {
 
   def prepareSfClient = for {
     sfConfig <- LoadConfigModule(RawEffects.stage, GetFromS3.fetchString).load[SFAuthConfig]
-    sfClient <- SalesforceClient(RawEffects.response, sfConfig).value.toDisjunction
+    sfClient <- SalesforceClient.auth(RawEffects.response, sfConfig)
   } yield sfClient
 
   def toSfMandateEvent(gcMandateEvent: GoCardlessMandateEvent, mandateSfId: MandateSfId) = WireNewMandateEvent(
@@ -179,7 +179,11 @@ object Handler extends Logging {
       case MandateWithSfId(_) =>
         patchMandateOp
       case other =>
-        () => GenericError(s"\n\njust created an out of order event \n\t${gcMandateEventDetail.event}\n\t$other\n\n")
+        () =>
+          GenericError(
+            s"\n\njust created an out of order event \n\t${gcMandateEventDetail.event}\n\t$other\n\n",
+            other.toString,
+          )
     }
   }
 

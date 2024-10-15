@@ -1,8 +1,5 @@
 package com.gu.holiday_stops
 
-import java.io.{InputStream, OutputStream, PrintStream, Serializable}
-import java.time.LocalDate
-import java.util.UUID
 import com.amazonaws.services.lambda.runtime.{Context, LambdaRuntime}
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.fulfilmentdates.FulfilmentDatesFetcher
@@ -14,26 +11,28 @@ import com.gu.salesforce.holiday_stops.{SalesforceHolidayStopRequest, Salesforce
 import com.gu.salesforce.{Contact, SalesforceClient, SalesforceHandlerSupport}
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayHandler.{LambdaIO, Operation}
-import com.gu.util.apigateway.ApiGatewayResponse.badRequest
+import com.gu.util.apigateway.ApiGatewayResponse.{badRequest, internalServerError}
 import com.gu.util.apigateway.ResponseModels.ApiResponse
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest, ApiGatewayResponse}
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config._
+import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
 import com.gu.util.reader.Types._
 import com.gu.util.resthttp.JsonHttp.StringHttpRequest
 import com.gu.util.resthttp.RestRequestMaker.BodyAsString
-import com.gu.util.resthttp.Types.ClientFailure
 import com.gu.util.resthttp.{HttpOp, JsonHttp}
 import com.gu.zuora.subscription._
 import com.gu.zuora.{AccessToken, Zuora}
-import sttp.client3.{HttpURLConnectionBackend, Identity, SttpBackend}
 import okhttp3.{Request, Response}
 import play.api.libs.json.{Json, Reads, Writes}
-import zio.console.Console
+import sttp.client3.{HttpURLConnectionBackend, Identity, SttpBackend}
 import zio.ZIO
-import zio.ZIO.debug
+import zio.console.Console
 
+import java.io.{InputStream, OutputStream, PrintStream, Serializable}
 import java.lang.{System => JavaSystem}
+import java.time.{LocalDate, ZonedDateTime}
+import java.util.UUID
 import scala.util.Try
 
 object Handler extends Logging {
@@ -60,7 +59,6 @@ object Handler extends Logging {
       JavaSystem.setErr(printStream)
       operationForEffects(
         RawEffects.response,
-        RawEffects.stage,
         GetFromS3.fetchString,
         HttpURLConnectionBackend(),
         UUID.randomUUID().toString,
@@ -78,36 +76,40 @@ object Handler extends Logging {
 
   def operationForEffects(
       response: Request => Response,
-      stage: Stage,
       fetchString: StringFromS3,
       backend: SttpBackend[Identity, Any],
       idGenerator: => String,
+      now: () => ZonedDateTime = () => ZonedDateTime.now(),
   ): ZIO[Console with Configuration, Serializable, ApiGatewayOp[Operation]] =
     Configuration.config.map(config =>
       operationForEffectsInternal(
         response,
-        stage,
         fetchString,
         backend,
         idGenerator,
         config,
+        now,
       ),
     )
 
   private def operationForEffectsInternal(
       response: Request => Response,
-      stage: Stage,
       fetchString: StringFromS3,
       backend: SttpBackend[Identity, Any],
       idGenerator: => String,
       config: Config,
-  ): ApiGatewayOp[Operation] = {
+      now: () => ZonedDateTime,
+  ): ApiGatewayOp[Operation] =
     for {
-      sfClient <- SalesforceClient(
-        response,
-        config.sfConfig,
-        shouldExposeSalesforceErrorMessageInClientFailure = true,
-      ).value.toDisjunction.toApiGatewayOp("authenticate with SalesForce")
+      sfClient <- SalesforceClient.auth(response, config.sfConfig) match {
+        case Right(success) => ContinueProcessing(success)
+        case Left(errors) if errors.exists(_.errorCode == "INVALID_OPERATION_WITH_EXPIRED_PASSWORD") =>
+          logger.error(s"SF token was not valid - returning 400 authenticate with SalesForce: $errors")
+          ReturnWithResponse(badRequest("salesforce returned INVALID_OPERATION_WITH_EXPIRED_PASSWORD"))
+        case Left(error) =>
+          logger.error(s"Failed to authenticate with SalesForce: $error")
+          ReturnWithResponse(internalServerError("Failed to execute lambda - unable to authenticate with SalesForce"))
+      }
     } yield Operation.noHealthcheck(
       request => // checking connectivity to SF is sufficient healthcheck so no special steps required
         validateRequestAndCreateSteps(
@@ -118,12 +120,12 @@ object Handler extends Logging {
           idGenerator,
           FulfilmentDatesFetcher(fetchString, Stage()),
           PreviewPublications.preview,
+          now,
         )(
           request,
           sfClient.setupRequest(withAlternateAccessTokenIfPresentInHeaderList(request.headers)),
         ),
     )
-  }
 
   private def validateRequestAndCreateSteps(
       request: ApiGatewayRequest,
@@ -133,7 +135,8 @@ object Handler extends Logging {
       idGenerator: => String,
       fulfilmentDatesFetcher: FulfilmentDatesFetcher,
       previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse] = null, // FIXME
-  ) = {
+      now: () => ZonedDateTime,
+  ): (ApiGatewayRequest, HttpOp[StringHttpRequest, BodyAsString]) => ApiResponse = {
     (for {
       httpMethod <- validateMethod(request.httpMethod)
       path <- validatePath(request.path)
@@ -146,6 +149,7 @@ object Handler extends Logging {
       idGenerator,
       fulfilmentDatesFetcher,
       previewPublications,
+      now,
     )).fold(
       { errorMessage: String =>
         badrequest(errorMessage) _
@@ -177,6 +181,7 @@ object Handler extends Logging {
       idGenerator: => String,
       fulfilmentDatesFetcher: FulfilmentDatesFetcher,
       previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse] = null, // FIXME
+      now: () => ZonedDateTime,
   ) = {
     path match {
       case "potential" :: _ :: Nil =>
@@ -208,7 +213,7 @@ object Handler extends Logging {
       case "hsr" :: _ :: _ :: Nil =>
         httpMethod match {
           case "PATCH" => stepsToAmend(getAccessToken, getSubscription, getAccount) _
-          case "DELETE" => stepsToWithdraw _
+          case "DELETE" => stepsToWithdraw(now) _
           case _ => unsupported _
         }
       case _ =>
@@ -231,14 +236,6 @@ object Handler extends Logging {
           error.message,
         ),
       )
-
-  private def exposeSfErrorMessageIn500ApiResponse[A <: Product](
-      action: String,
-      inputThatCausedError: Option[A] = None,
-  ): ClientFailure => ApiResponse = (error: ClientFailure) => {
-    logger.error(s"Failed to $action using input $inputThatCausedError: $error")
-    ApiGatewayResponse.messageResponse("500", error.message)
-  }
 
   case class PotentialHolidayStopsPathParams(subscriptionName: SubscriptionName)
 
@@ -345,7 +342,9 @@ object Handler extends Logging {
   )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
     val lookupOp =
-      SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(sfClient.wrapWith(JsonHttp.getWithParams))
+      new SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(
+        sfClient.wrapWith(JsonHttp.getWithParams),
+      )
 
     val extractSubNameOp: ApiGatewayOp[SubscriptionName] =
       req.pathParamsAsCaseClass[ListExistingPathParams]()(Json.reads[ListExistingPathParams]).map(_.subscriptionName)
@@ -353,11 +352,13 @@ object Handler extends Logging {
     (for {
       contact <- extractContactFromHeaders(req.headers)
       subName <- extractSubNameOp
-      usersHolidayStopRequests <- lookupOp(
-        contact,
-        Some(subName),
-        Some(MutableCalendar.today.minusMonths(6)),
-      ).toDisjunction
+      usersHolidayStopRequests <- lookupOp
+        .run(
+          contact,
+          Some(subName),
+          Some(MutableCalendar.today.minusMonths(6)),
+        )
+        .toDisjunction
         .toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
       accessToken <- getAccessToken()
         .toApiGatewayOp(s"get zuora access token")
@@ -415,14 +416,15 @@ object Handler extends Logging {
 
     val verifyContactOwnsSubOp =
       SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact(sfClient.wrapWith(JsonHttp.getWithParams))
-    val createOp = SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail(sfClient.wrapWith(JsonHttp.post))
+    val createOp = new SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail(sfClient.wrapWith(JsonHttp.post))
 
     (for {
       requestBody <- requestBodyOp
       contact <- extractContactFromHeaders(req.headers)
-      maybeMatchingSfSub <- verifyContactOwnsSubOp(requestBody.subscriptionName, contact).toDisjunction.toApiGatewayOp(
-        s"fetching subscriptions for contact $contact",
-      )
+      maybeMatchingSfSub <- verifyContactOwnsSubOp(requestBody.subscriptionName, contact).toDisjunction
+        .toApiGatewayOp(
+          s"fetching subscriptions for contact $contact",
+        )
       matchingSfSub <- maybeMatchingSfSub.toApiGatewayOp(
         s"contact $contact does not own ${requestBody.subscriptionName.value}",
       )
@@ -441,12 +443,11 @@ object Handler extends Logging {
         matchingSfSub,
         requestBody.bulkSuspensionReason,
       )
-      _ <- createOp(createBody).toDisjunction.toApiGatewayOp(
-        exposeSfErrorMessageIn500ApiResponse(
-          s"create new Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)",
-          Some(createBody),
-        ),
+      sfErrorExposer = new SFErrorExposer(
+        s"create new Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)",
+        Some(createBody),
       )
+      _ <- createOp.run(createBody).toDisjunction.toApiGatewayOp(sfErrorExposer.parseFailureTo500ApiResponse _)
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   }
 
@@ -460,8 +461,8 @@ object Handler extends Logging {
       idGenerator: => String,
   )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
     val sfClientGetWithParams = sfClient.wrapWith(JsonHttp.getWithParams)
-    val lookupOpHolidayStopsOp = LookupByContactAndOptionalSubscriptionName(sfClientGetWithParams)
-    val updateRequestDetailOp = CancelHolidayStopRequestDetail(sfClient.wrapWith(JsonHttp.post))
+    val lookupOpHolidayStopsOp = new LookupByContactAndOptionalSubscriptionName(sfClientGetWithParams)
+    val updateRequestDetailOp = new CancelHolidayStopRequestDetail(sfClient.wrapWith(JsonHttp.post))
 
     (for {
       pathParams <- req.pathParamsAsCaseClass[CancelHolidayStopsPathParams]()(Json.reads[CancelHolidayStopsPathParams])
@@ -471,7 +472,9 @@ object Handler extends Logging {
       effectiveCancellationDate <- queryParams.effectiveCancellationDate
         .toApiGatewayOp("effectiveCancellationDate query string parameter is required")
       contact <- extractContactFromHeaders(req.headers)
-      holidayStopRequests <- lookupOpHolidayStopsOp(contact, Some(pathParams.subscriptionName), None).toDisjunction
+      holidayStopRequests <- lookupOpHolidayStopsOp
+        .run(contact, Some(pathParams.subscriptionName), None)
+        .toDisjunction
         .toApiGatewayOp(
           s"lookup Holiday Stop Requests for contact $contact and subscription ${pathParams.subscriptionName}",
         )
@@ -481,14 +484,16 @@ object Handler extends Logging {
         queryParams.autoRefundGuid,
       )
       cancelBody = CancelHolidayStopRequestDetail.buildBody(holidayStopRequestDetailToUpdate, idGenerator)
-      _ <- updateRequestDetailOp(cancelBody).toDisjunction
-        .toApiGatewayOp(
-          exposeSfErrorMessageIn500ApiResponse(
-            s"cancel holiday stop request details: ${holidayStopRequestDetailToUpdate.map(_.Id.value).mkString(",")} " +
-              s"(contact $contact)",
-            Some(cancelBody),
-          ),
-        )
+      sfErrorExposer = new SFErrorExposer(
+        s"cancel holiday stop request details: ${holidayStopRequestDetailToUpdate.map(_.Id.value).mkString(",")} " +
+          s"(contact $contact)",
+        Some(cancelBody),
+      )
+      updateResult <- updateRequestDetailOp
+        .doRequest(cancelBody)
+        .toDisjunction
+        .toApiGatewayOp(sfErrorExposer.parseFailureTo500ApiResponse _)
+      _ <- sfErrorExposer.compositeResponseErrorto500ApiResponse(updateResult)
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   }
 
@@ -497,7 +502,7 @@ object Handler extends Logging {
 
   def stepsToGetCancellationDetails(idGenerator: => String)(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
     val sfClientGetWithParams = sfClient.wrapWith(JsonHttp.getWithParams)
-    val lookupOpHolidayStopsOp = LookupByContactAndOptionalSubscriptionName(sfClientGetWithParams)
+    val lookupOpHolidayStopsOp = new LookupByContactAndOptionalSubscriptionName(sfClientGetWithParams)
 
     (for {
       pathParams <- req.pathParamsAsCaseClass[CancelHolidayStopsPathParams]()(Json.reads[CancelHolidayStopsPathParams])
@@ -507,7 +512,9 @@ object Handler extends Logging {
       effectiveCancellationDate <- queryParams.effectiveCancellationDate
         .toApiGatewayOp("effectiveCancellationDate query string parameter is required")
       contact <- extractContactFromHeaders(req.headers)
-      holidayStopRequests <- lookupOpHolidayStopsOp(contact, Some(pathParams.subscriptionName), None).toDisjunction
+      holidayStopRequests <- lookupOpHolidayStopsOp
+        .run(contact, Some(pathParams.subscriptionName), None)
+        .toDisjunction
         .toApiGatewayOp(
           s"lookup Holiday Stop Requests for contact $contact and subscription ${pathParams.subscriptionName}",
         )
@@ -534,14 +541,18 @@ object Handler extends Logging {
   )(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
     val lookupOp =
-      SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(sfClient.wrapWith(JsonHttp.getWithParams))
-    val amendOp = SalesforceHolidayStopRequest.AmendHolidayStopRequest(sfClient.wrapWith(JsonHttp.post))
+      new SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(
+        sfClient.wrapWith(JsonHttp.getWithParams),
+      )
+    val amendOp = new SalesforceHolidayStopRequest.AmendHolidayStopRequest(sfClient.wrapWith(JsonHttp.post))
 
     (for {
       requestBody <- req.bodyAsCaseClass[HolidayStopRequestPartial]()
       contact <- extractContactFromHeaders(req.headers)
       pathParams <- req.pathParamsAsCaseClass[SpecificHolidayStopRequestPathParams]()
-      allExisting <- lookupOp(contact, Some(pathParams.subscriptionName), None).toDisjunction
+      allExisting <- lookupOp
+        .run(contact, Some(pathParams.subscriptionName), None)
+        .toDisjunction
         .toApiGatewayOp(s"lookup Holiday Stop Requests for contact $contact")
       existingPublicationsThatWereToBeStopped <- allExisting
         .find(_.Id == pathParams.holidayStopRequestId)
@@ -564,12 +575,15 @@ object Handler extends Logging {
           existingPublicationsThatWereToBeStopped,
         )
         .toApiGatewayOp(message => badRequest(s"build body for holiday stop request: $message"))
-      _ <- amendOp(amendBody).toDisjunction.toApiGatewayOp(
-        exposeSfErrorMessageIn500ApiResponse(
-          s"amend Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)",
-          Some(amendBody),
-        ),
+      sfErrorExposer = new SFErrorExposer(
+        s"amend Holiday Stop Request for subscription ${requestBody.subscriptionName} (contact $contact)",
+        Some(amendBody),
       )
+      amendResult <- amendOp
+        .doRequest(amendBody)
+        .toDisjunction
+        .toApiGatewayOp(sfErrorExposer.parseFailureTo500ApiResponse _)
+      _ <- sfErrorExposer.compositeResponseErrorto500ApiResponse(amendResult)
     } yield ApiGatewayResponse.successfulExecution).apiResponse
 
   }
@@ -596,31 +610,34 @@ object Handler extends Logging {
       backend: SttpBackend[Identity, Any],
   )(): Either[ApiFailure, AccessToken] = Zuora.accessTokenGetResponse(config.zuoraConfig, backend)
 
-  def stepsToWithdraw(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
+  def stepsToWithdraw(now: () => ZonedDateTime)(req: ApiGatewayRequest, sfClient: SfClient): ApiResponse = {
 
     val lookupOp =
-      SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(sfClient.wrapWith(JsonHttp.getWithParams))
-    val withdrawOp = SalesforceHolidayStopRequest.WithdrawHolidayStopRequest(sfClient.wrapWith(JsonHttp.patch))
+      new SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(
+        sfClient.wrapWith(JsonHttp.getWithParams),
+      )
+    val withdrawOp = new SalesforceHolidayStopRequest.WithdrawHolidayStopRequest(sfClient.wrapWith(JsonHttp.patch))
 
     (for {
       contact <- extractContactFromHeaders(req.headers)
       pathParams <- req.pathParamsAsCaseClass[SpecificHolidayStopRequestPathParams]()
-      existingForUser <- lookupOp(contact, None, None).toDisjunction.toApiGatewayOp(
-        s"lookup Holiday Stop Requests for contact $contact",
-      )
-      hsr <- existingForUser
+      existingForUser <- lookupOp
+        .run(contact, None, None)
+        .toDisjunction
+        .toApiGatewayOp(
+          s"lookup Holiday Stop Requests for contact $contact",
+        )
+      _ <- existingForUser
         .find(_.Id == pathParams.holidayStopRequestId)
         .toApiGatewayContinueProcessing(ApiGatewayResponse.forbidden("not your holiday stop"))
-      _ = hsr.Holiday_Stop_Request_Detail__r
-        .exists(_.records.exists(_.Is_Actioned__c))
-        .toApiGatewayContinueProcessing(
-          ApiGatewayResponse.forbidden("can't withdraw holiday stop with any actioned items"),
-        ) // FIXME: Does this do anyting?
-      _ <- withdrawOp(pathParams.holidayStopRequestId).toDisjunction.toApiGatewayOp(
-        exposeSfErrorMessageIn500ApiResponse(
-          s"withdraw Holiday Stop Request for subscription ${pathParams.subscriptionName.value} of contact $contact",
-        ),
+      sfErrorExposer = new SFErrorExposer(
+        s"withdraw Holiday Stop Request for subscription ${pathParams.subscriptionName.value} of contact $contact",
+        None,
       )
+      _ <- withdrawOp
+        .run(now(), pathParams.holidayStopRequestId)
+        .toDisjunction
+        .toApiGatewayOp(sfErrorExposer.parseFailureTo500ApiResponse _)
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   }
 

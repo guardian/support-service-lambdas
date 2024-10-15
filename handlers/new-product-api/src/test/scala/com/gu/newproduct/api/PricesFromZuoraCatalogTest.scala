@@ -8,9 +8,8 @@ import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 import com.gu.newproduct.api.productcatalog.{AmountMinorUnits, PricesFromZuoraCatalog, ZuoraCatalogWireModel}
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.ZuoraEnvironment
-import com.gu.util.resthttp.Types.ClientSuccess
 
-import scala.util.Try
+import scala.util.{Success, Try}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
@@ -72,7 +71,7 @@ class PricesFromZuoraCatalogTest extends AnyFlatSpec with Matchers {
       fakeGetStringFromS3,
       rateplanToPlanId.get,
     )
-    actual shouldBe ClientSuccess(
+    actual shouldBe Success(
       Map(
         VoucherSaturdayPlus -> Map(
           GBP -> AmountMinorUnits(2162),
@@ -94,7 +93,6 @@ class PricesFromZuoraCatalogTest extends AnyFlatSpec with Matchers {
       Price(Some(9.79), "GBP"),
       Price(Some(9.79), "GBP"),
       Price(Some(13.05), "GBP"),
-
     )
     ZuoraCatalogWireModel.sumPrices(prices) shouldBe Some(AmountMinorUnits(6199))
   }

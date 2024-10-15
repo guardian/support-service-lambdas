@@ -10,7 +10,8 @@ import com.gu.util.reader.Types
 import com.gu.util.reader.Types.ApiGatewayOp._
 import com.gu.util.resthttp.RestOp.HttpOpParseOp
 import com.gu.util.resthttp.RestRequestMaker.{GetRequest, RelativePath}
-import com.gu.util.resthttp.{HttpOp, LazyClientFailableOp}
+import com.gu.util.resthttp.Types.ClientFailableOp
+import com.gu.util.resthttp.HttpOp
 import play.api.libs.json.{JsValue, Json}
 
 object GetSFContactSyncCheckFields {
@@ -35,7 +36,7 @@ object GetSFContactSyncCheckFields {
 
   def apply(getOp: HttpOp[GetRequest, JsValue]): GetSFContactSyncCheckFields = {
     new GetSFContactSyncCheckFields(
-      getOp.setupRequest(toRequest).parse[ContactsByAccountIdQueryResponse].map(_.records).runRequestLazy,
+      getOp.setupRequest(toRequest).parse[ContactsByAccountIdQueryResponse].map(_.records).runRequest,
     )
   }
 
@@ -49,7 +50,7 @@ object GetSFContactSyncCheckFields {
 
 }
 
-case class GetSFContactSyncCheckFields(apply: SFAccountId => LazyClientFailableOp[List[ContactSyncCheckFields]])
+case class GetSFContactSyncCheckFields(apply: SFAccountId => ClientFailableOp[List[ContactSyncCheckFields]])
 
 object ContactSyncCheck {
 

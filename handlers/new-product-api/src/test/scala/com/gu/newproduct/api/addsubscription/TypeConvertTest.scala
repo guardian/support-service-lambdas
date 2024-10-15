@@ -23,7 +23,7 @@ class TypeConvertTest extends AnyFlatSpec with Matchers {
   }
 
   "toApiResponseCheckingNotFound" should "convert not found client error to status 422 api response" in {
-    val notFound = NotFound("server specific error")
+    val notFound = NotFound("server specific error", "")
 
     val actual = ClientFailableOpToApiResponse(notFound).toApiResponseCheckingNotFound(
       action = "some action",
