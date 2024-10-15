@@ -4,6 +4,7 @@ export const sum = <T>(array: T[], fn: (item: T) => number): number => {
 export const sumNumbers = (array: number[]): number => {
 	return sum(array, (item) => item);
 };
+
 export const groupBy = <T>(
 	array: T[],
 	fn: (item: T) => string,
@@ -15,6 +16,26 @@ export const groupBy = <T>(
 		acc[key] = group;
 		return acc;
 	}, {});
+};
+
+// TODO add tests
+export const mapValues = <K extends keyof any, V, N>(
+	records: Record<K, V>,
+	fn: (item: V) => N,
+): Record<K, N> => {
+	return Object.fromEntries(
+		Object.entries(records).map(([key, value]) => [key, fn(value as V)]),
+	) as Record<K, N>;
+};
+
+export const groupMap = <T, N>(
+	array: T[],
+	groupFn: (item: T) => string,
+	mapFn: (item: T) => N,
+): Record<string, N[]> => {
+	return mapValues(groupBy(array, groupFn), (groupedItems) =>
+		groupedItems.map(mapFn),
+	);
 };
 
 export const sortBy = <T>(array: T[], fn: (item: T) => string): T[] => {

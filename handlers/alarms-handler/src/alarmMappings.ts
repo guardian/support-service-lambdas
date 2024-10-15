@@ -1,4 +1,4 @@
-import { groupBy } from '@modules/arrayFunctions';
+import { groupMap } from '@modules/arrayFunctions';
 import { getIfDefined } from '@modules/nullAndUndefined';
 
 type Team = 'VALUE' | 'GROWTH' | 'PORTFOLIO' | 'PLATFORM' | 'SRE';
@@ -116,20 +116,18 @@ export class AlarmMappings {
 	private buildAppToTeamMappings = (
 		theMappings: Record<Team, string[]>,
 	): Record<string, Team[]> => {
-		const entries: Array<[Team, string[]]> = Object.entries(
-			theMappings,
-		) as Array<[Team, string[]]>; // `as` - hmm?
+		const entries: Array<[Team, string[]]> = Object.entries(theMappings).map(
+			([team, apps]) => [team as Team, apps],
+		);
 
 		const teamToApp: Array<{ app: string; team: Team }> = entries.flatMap(
 			([team, apps]) => apps.map((app) => ({ team, app })),
 		);
-		const groups = groupBy(teamToApp, ({ app }) => app);
 
-		const mappings: Record<string, Team[]> = Object.fromEntries(
-			Object.entries(groups).map(([app, info]) => [
-				app,
-				info.map(({ team }) => team),
-			]),
+		const mappings: Record<string, Team[]> = groupMap(
+			teamToApp,
+			({ app }) => app,
+			({ team }) => team,
 		);
 
 		return mappings;
