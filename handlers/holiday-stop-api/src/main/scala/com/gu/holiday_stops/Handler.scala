@@ -105,7 +105,7 @@ object Handler extends Logging {
     for {
       sfClient <- SalesforceClient.auth(response, config.sfConfig) match {
         case Right(success) => ContinueProcessing(success)
-        case Left(errors) if errors.exists(errors => csrAuthErrors.contains(errors.errorCode)) =>
+        case Left(errors) if errors.exists(error => csrAuthErrors.contains(error.errorCode)) =>
           logger.error(s"SF token was not valid - returning 400 authenticate with SalesForce: $errors")
           ReturnWithResponse(badRequest("salesforce returned auth error"))
         case Left(error) =>
