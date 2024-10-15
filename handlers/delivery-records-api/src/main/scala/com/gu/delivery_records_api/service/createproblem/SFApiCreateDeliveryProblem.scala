@@ -12,10 +12,10 @@ import java.time.{LocalDate, LocalDateTime}
 object SFApiCreateDeliveryProblem {
 
   def create(
-    subscriptionNumber: String,
-    contact: Contact,
-    detail: CreateDeliveryProblem,
-    now: LocalDateTime = LocalDateTime.now(),
+      subscriptionNumber: String,
+      contact: Contact,
+      detail: CreateDeliveryProblem,
+      now: LocalDateTime = LocalDateTime.now(),
   ): SFApiCompositeRequest[SFApiCompositePartBody] = SFApiCompositeRequest[SFApiCompositePartBody](
     allOrNone = true,
     // this is needed so ID of case creation can be injected into the parts that link delivery records

@@ -1,7 +1,13 @@
 package com.gu.holiday_stops
 
 import com.gu.effects.{FakeFetchString, SFTestEffects, TestingRawEffects}
-import com.gu.holiday_stops.TestFixtures.{asIsoDateString, gwDomesticAccount, gwDomesticSubscription, t3Account, t3Subscription}
+import com.gu.holiday_stops.TestFixtures.{
+  asIsoDateString,
+  gwDomesticAccount,
+  gwDomesticSubscription,
+  t3Account,
+  t3Subscription,
+}
 import com.gu.holiday_stops.ZuoraSttpEffects.ZuoraSttpEffectsOps
 import com.gu.salesforce.SalesforceHandlerSupport.{HEADER_IDENTITY_ID, HEADER_SALESFORCE_CONTACT_ID}
 import com.gu.salesforce.holiday_stops.{SalesForceHolidayStopsEffects, SalesforceHolidayStopRequestsDetail}
@@ -345,7 +351,11 @@ class HandlerTest extends AnyFlatSpec with Matchers {
           Handler.operationForEffects(
             new TestingRawEffects(
               responses = Map(
-                SalesForceHolidayStopsEffects.listHolidayStops(contactId, Some(SubscriptionName(subscriptionName)), List(holidayStopRequest)),
+                SalesForceHolidayStopsEffects.listHolidayStops(
+                  contactId,
+                  Some(SubscriptionName(subscriptionName)),
+                  List(holidayStopRequest),
+                ),
               ),
               postResponses = Map(
                 SFTestEffects.authSuccess,
@@ -375,67 +385,67 @@ class HandlerTest extends AnyFlatSpec with Matchers {
   "DELETE /hsr/<<sub name>>/<<holidayStopRequestId>> endpoint" should
     "not let you withdraw when it's been actioned" in {
 
-    val ref = "a2kUD0000005HrRYAU"
-    val subscriptionName = "A-S00925850"
-    val identityId = "200275381"
-    val withdrawTime = ZonedDateTime.now()
+      val ref = "a2kUD0000005HrRYAU"
+      val subscriptionName = "A-S00925850"
+      val identityId = "200275381"
+      val withdrawTime = ZonedDateTime.now()
 
-    val stopDate = LocalDate.of(2024, 10, 4)
-    val contactId = "Contact1234"
-    val price = 1.23
-    val holidayStopRequestsDetail = Fixtures.mkHolidayStopRequestDetails(
-      chargeCode = Some("actioned code"),
-      stopDate = stopDate.minusDays(1),
-      estimatedPrice = Some(price),
-    )
+      val stopDate = LocalDate.of(2024, 10, 4)
+      val contactId = "Contact1234"
+      val price = 1.23
+      val holidayStopRequestsDetail = Fixtures.mkHolidayStopRequestDetails(
+        chargeCode = Some("actioned code"),
+        stopDate = stopDate.minusDays(1),
+        estimatedPrice = Some(price),
+      )
 
-    val testBackend = SttpBackendStub.synchronous
+      val testBackend = SttpBackendStub.synchronous
 
-    val holidayStopRequest = Fixtures.mkHolidayStopRequest(
-      id = ref,
-      subscriptionName = SubscriptionName(subscriptionName),
-      requestDetail = List(holidayStopRequestsDetail),
-    )
+      val holidayStopRequest = Fixtures.mkHolidayStopRequest(
+        id = ref,
+        subscriptionName = SubscriptionName(subscriptionName),
+        requestDetail = List(holidayStopRequestsDetail),
+      )
 
-    val request = ApiGatewayRequest(
-      httpMethod = Some("DELETE"),
-      queryStringParameters = None,
-      body = None,
-      headers = Some(Map("x-salesforce-contact-id" -> contactId)),
-      pathParameters = Some(Json.parse(
-        s"""{
+      val request = ApiGatewayRequest(
+        httpMethod = Some("DELETE"),
+        queryStringParameters = None,
+        body = None,
+        headers = Some(Map("x-salesforce-contact-id" -> contactId)),
+        pathParameters = Some(Json.parse(s"""{
            |    "holidayStopRequestId": "$ref",
            |    "subscriptionName": "$subscriptionName"
-           |}""".stripMargin)
-      ),
-      path = Some(s"/hsr/$subscriptionName/$ref")
-    )
+           |}""".stripMargin)),
+        path = Some(s"/hsr/$subscriptionName/$ref"),
+      )
 
-    inside(
-      unwrappedOp(
-        Handler.operationForEffects(
-          new TestingRawEffects(
-            responses = Map(
-              SalesForceHolidayStopsEffects.listHolidayStops(contactId, None, List(holidayStopRequest)),
-            ),
-            postResponses = Map(
-              SFTestEffects.authSuccess,
-              SFTestEffects.withdrawAlreadyCredited(ref, withdrawTime),
-            ),
-          ).response,
-          FakeFetchString.fetchString,
-          testBackend,
-          testId,
-          () => withdrawTime,
-        ),
-      ).map(_.steps(request))
-    ) { case ContinueProcessing(response) =>
-      response.statusCode should equal("500")
-      inside ((Json.parse(response.body) \ "message").get) {
-        case JsString(message) => message should be("FIELD_CUSTOM_VALIDATION_EXCEPTION : Holiday Stop Request cannot be withdrawn because some publications have been actioned (credited to customer)")
+      inside(
+        unwrappedOp(
+          Handler.operationForEffects(
+            new TestingRawEffects(
+              responses = Map(
+                SalesForceHolidayStopsEffects.listHolidayStops(contactId, None, List(holidayStopRequest)),
+              ),
+              postResponses = Map(
+                SFTestEffects.authSuccess,
+                SFTestEffects.withdrawAlreadyCredited(ref, withdrawTime),
+              ),
+            ).response,
+            FakeFetchString.fetchString,
+            testBackend,
+            testId,
+            () => withdrawTime,
+          ),
+        ).map(_.steps(request)),
+      ) { case ContinueProcessing(response) =>
+        response.statusCode should equal("500")
+        inside((Json.parse(response.body) \ "message").get) { case JsString(message) =>
+          message should be(
+            "FIELD_CUSTOM_VALIDATION_EXCEPTION : Holiday Stop Request cannot be withdrawn because some publications have been actioned (credited to customer)",
+          )
+        }
       }
     }
-  }
 
   "GET /hsr/<<sub name>>/cancel?effectiveCancelationDate=yy-MM-dd endpoint" should
     "get holiday stop details that should be refunded if the subscription is canceled" in {
@@ -466,7 +476,11 @@ class HandlerTest extends AnyFlatSpec with Matchers {
           Handler.operationForEffects(
             new TestingRawEffects(
               responses = Map(
-                SalesForceHolidayStopsEffects.listHolidayStops(contactId, Some(SubscriptionName(subscriptionName)), List(holidayStopRequest)),
+                SalesForceHolidayStopsEffects.listHolidayStops(
+                  contactId,
+                  Some(SubscriptionName(subscriptionName)),
+                  List(holidayStopRequest),
+                ),
               ),
               postResponses = Map(
                 SFTestEffects.authSuccess,

@@ -38,7 +38,9 @@ object GuardianWeeklyFields {
     "subscriber_id" -> data.subscriptionName.value,
     "date_of_first_paper" -> data.firstPaymentDate.format(firstPaymentDateFormat),
     "date_of_first_payment" -> data.firstPaymentDate.format(firstPaymentDateFormat),
-    "subscription_rate" -> data.discountMessage.map(_.value).getOrElse(data.plan.paymentPlans.get(data.currency).map(_.description).getOrElse("")),
+    "subscription_rate" -> data.discountMessage
+      .map(_.value)
+      .getOrElse(data.plan.paymentPlans.get(data.currency).map(_.description).getOrElse("")),
   ) ++ paymentMethodFields(data.paymentMethod)
 
 }
