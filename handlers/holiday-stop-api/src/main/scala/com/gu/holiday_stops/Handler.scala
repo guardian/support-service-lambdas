@@ -92,6 +92,8 @@ object Handler extends Logging {
       ),
     )
 
+  val csrAuthErrors = List("INVALID_SESSION_ID", "INVALID_OPERATION_WITH_EXPIRED_PASSWORD")
+
   private def operationForEffectsInternal(
       response: Request => Response,
       fetchString: StringFromS3,
@@ -103,9 +105,9 @@ object Handler extends Logging {
     for {
       sfClient <- SalesforceClient.auth(response, config.sfConfig) match {
         case Right(success) => ContinueProcessing(success)
-        case Left(errors) if errors.exists(_.errorCode == "INVALID_OPERATION_WITH_EXPIRED_PASSWORD") =>
+        case Left(errors) if errors.exists(errors => csrAuthErrors.contains(errors.errorCode)) =>
           logger.error(s"SF token was not valid - returning 400 authenticate with SalesForce: $errors")
-          ReturnWithResponse(badRequest("salesforce returned INVALID_OPERATION_WITH_EXPIRED_PASSWORD"))
+          ReturnWithResponse(badRequest("salesforce returned auth error"))
         case Left(error) =>
           logger.error(s"Failed to authenticate with SalesForce: $error")
           ReturnWithResponse(internalServerError("Failed to execute lambda - unable to authenticate with SalesForce"))
