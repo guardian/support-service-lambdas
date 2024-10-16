@@ -13,6 +13,7 @@ import {
 } from './helpers';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import { EmailMessageWithUserId } from '@modules/email/email';
+import { Logger } from '../src/logger';
 
 const stage: Stage = 'CODE';
 const validIdentityId = '200175946';
@@ -27,6 +28,7 @@ test('Supporter Plus subscriptions can have a discount and get an email', async 
 	const subscriptionNumber = await createSupporterPlusSubscription(zuoraClient);
 
 	const { response, emailPayload } = await applyDiscountEndpoint(
+		new Logger(),
 		stage,
 		{ 'x-identity-id': validIdentityId },
 		subscriptionNumber,
@@ -78,6 +80,7 @@ test('digi subs can have a discount but dont get an email', async () => {
 	);
 
 	const { response, emailPayload } = await applyDiscountEndpoint(
+		new Logger(),
 		stage,
 		{ 'x-identity-id': validIdentityId },
 		subscriptionNumber,

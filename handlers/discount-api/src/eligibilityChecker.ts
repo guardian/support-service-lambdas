@@ -6,16 +6,17 @@ import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 import type { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
+import type { Logger } from './logger';
 
 export class EligibilityChecker {
-	constructor(private subscriptionNumber: string) {}
+	constructor(private logger: Logger) {}
 
 	assertGenerallyEligible = async (
 		subscription: ZuoraSubscription,
 		accountBalance: number,
 		getNextInvoiceItems: () => Promise<SimpleInvoiceItem[]>,
 	) => {
-		console.log('Checking basic eligibility for the subscription');
+		this.logger.log('Checking basic eligibility for the subscription');
 		this.assertValidState(
 			subscription.status === 'Active',
 			validationRequirements.isActive,
@@ -27,7 +28,7 @@ export class EligibilityChecker {
 			`${accountBalance}`,
 		);
 
-		console.log(
+		this.logger.log(
 			'ensuring there are no refunds/discounts expected on the affected invoices',
 		);
 		const nextInvoiceItems = await getNextInvoiceItems();
@@ -37,7 +38,7 @@ export class EligibilityChecker {
 			JSON.stringify(nextInvoiceItems),
 		);
 
-		console.log('Subscription is generally eligible for the discount');
+		this.logger.log('Subscription is generally eligible for the discount');
 	};
 
 	assertNextPaymentIsAtCatalogPrice = (
@@ -54,7 +55,9 @@ export class EligibilityChecker {
 		// Work out how much the cost of the next invoice will be
 		const nextInvoiceTotal = getIfDefined(
 			getNextInvoiceTotal(invoiceItems),
-			`No next invoice found for account containing ${this.subscriptionNumber}`,
+			this.logger.getMessage(
+				`No next invoice found for account containing this subscription`,
+			),
 		);
 
 		this.assertValidState(
@@ -69,15 +72,12 @@ export class EligibilityChecker {
 		subscription: ZuoraSubscription,
 		now: Dayjs,
 	) => {
-		const eligibilityChecker = new EligibilityChecker(
-			subscription.subscriptionNumber,
-		);
-		eligibilityChecker.assertValidState(
+		this.assertValidState(
 			dayjs(subscription.contractEffectiveDate).add(2, 'months').isBefore(now),
 			validationRequirements.twoMonthsMin,
 			subscription.contractEffectiveDate.toDateString(),
 		);
-		eligibilityChecker.assertValidState(
+		this.assertValidState(
 			subscription.ratePlans.every(
 				(rp) => rp.productRatePlanId !== discountProductRatePlanId,
 			),
@@ -87,15 +87,12 @@ export class EligibilityChecker {
 	};
 
 	assertValidState = (isValid: boolean, message: string, actual: string) => {
-		console.log(
-			`Asserting that ${this.subscriptionNumber} - <` + message + '>',
-		);
+		this.logger.log(`Asserting <${message}>`);
 		if (!isValid) {
 			throw new ValidationError(
-				`Subscription ${this.subscriptionNumber} did not meet precondition <` +
-					message +
-					'>' +
-					` (was ${actual})`,
+				this.logger.getMessage(
+					`subscription did not meet precondition <${message}> (was ${actual})`,
+				),
 			);
 		}
 	};
