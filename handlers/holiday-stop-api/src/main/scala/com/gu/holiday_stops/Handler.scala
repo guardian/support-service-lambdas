@@ -265,14 +265,14 @@ object Handler extends Logging {
         .toApiGatewayOp(s"get account ${subscription.accountNumber}")
       subscriptionData <- SubscriptionData(subscription, account)
         .toApiGatewayOp(s"building SubscriptionData")
-      issuesData = subscriptionData.issueDataForPeriod(queryParams.startDate, queryParams.endDate)
+      issuesData = subscriptionData.subscriptionIssueData.issueDataForPeriod(queryParams.startDate, queryParams.endDate)
       potentialHolidayStops = issuesData.map { issueData =>
         PotentialHolidayStop(
           issueData.issueDate,
           Credit(issueData.credit, issueData.nextBillingPeriodStartDate),
         )
       }
-      nextInvoiceDateAfterToday = subscriptionData
+      nextInvoiceDateAfterToday = subscriptionData.subscriptionIssueData
         .issueDataForPeriod(MutableCalendar.today.minusDays(7), MutableCalendar.today.plusMonths(2))
         .filter(_.nextBillingPeriodStartDate.isAfter(MutableCalendar.today))
         .minBy(_.nextBillingPeriodStartDate)(Ordering.by(_.toEpochDay))
@@ -399,7 +399,7 @@ object Handler extends Logging {
         .toApiGatewayOp(s"get billing preview for account ${subscription.accountNumber}")
       _ = logger.info("billingPreview: " + billingPreview)
       issuesData <- SubscriptionData(subscription, account)
-        .map(_.issueDataForPeriod(requestBody.startDate, requestBody.endDate))
+        .map(_.subscriptionIssueData.issueDataForPeriod(requestBody.startDate, requestBody.endDate))
         .toApiGatewayOp(s"calculating publication dates")
       createBody = CreateHolidayStopRequestWithDetail.buildBody(
         requestBody.startDate,
@@ -529,7 +529,7 @@ object Handler extends Logging {
       account <- getAccount(accessToken, subscription.accountNumber)
         .toApiGatewayOp(s"get account ${subscription.accountNumber}")
       issuesData <- SubscriptionData(subscription, account)
-        .map(_.issueDataForPeriod(requestBody.startDate, requestBody.endDate))
+        .map(_.subscriptionIssueData.issueDataForPeriod(requestBody.startDate, requestBody.endDate))
         .toApiGatewayOp(s"calculating publication dates")
       amendBody <- AmendHolidayStopRequest
         .buildBody(

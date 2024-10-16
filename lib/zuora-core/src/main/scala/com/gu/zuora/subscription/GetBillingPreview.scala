@@ -11,14 +11,16 @@ import java.time.LocalDate
 object GetBillingPreview {
 
   case class InvoiceItem(
-      chargeDate: LocalDate,
+      serviceStartDate: LocalDate,
+      serviceEndDate: LocalDate,
       chargeId: String,
   )
-  implicit val decode: Decoder[InvoiceItem] = (c: HCursor) =>
-    for {
-      chargeDate <- c.downField("chargeDate").as[String].map(_.takeWhile(_ != ' ')).map(LocalDate.parse)
-      chargeId <- c.downField("chargeId").as[String]
-    } yield InvoiceItem(chargeDate, chargeId)
+  implicit val decode: Decoder[InvoiceItem] = deriveDecoder
+//  implicit val decode: Decoder[InvoiceItem] = (c: HCursor) =>
+//    for {
+//      chargeDate <- c.downField("chargeDate").as[String].map(_.takeWhile(_ != ' ')).map(LocalDate.parse)
+//      chargeId <- c.downField("chargeId").as[String]
+//    } yield InvoiceItem(chargeDate, chargeId)
 
   case class BillingPreview(
       invoiceItems: List[InvoiceItem],
@@ -31,15 +33,17 @@ object GetBillingPreview {
       assumeRenewal: String = "Autorenew",
   )
 }
+
 trait GetBillingPreview {
   import GetBillingPreview._
   def getBillingPreview(
       accessToken: AccessToken,
       accountNumber: String,
-      targetDate: LocalDate,
+      targetDate: LocalDate, // target date is how far in the future to go to
   ): Either[ApiFailure, List[InvoiceItem]]
 }
 
+// https://developer.zuora.com/v1-api-reference/api/operation/POST_BillingPreview/
 object GetBillingPreviewLive {
 
   def billingPreviewGetResponse(
