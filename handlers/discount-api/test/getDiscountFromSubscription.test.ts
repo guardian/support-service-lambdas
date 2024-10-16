@@ -5,6 +5,7 @@ import {
 	getDiscountFromSubscription,
 } from '../src/productToDiscountMapping';
 import json from './fixtures/digital-subscriptions/get-discount-test.json';
+import { DataExtensionNames } from '@modules/email/email';
 
 test('getDiscountFromSubscription should return an annual discount for an annual sub', () => {
 	const sub = zuoraSubscriptionSchema.parse(json);
@@ -13,7 +14,7 @@ test('getDiscountFromSubscription should return an annual discount for an annual
 		name: 'Cancellation Save Discount - 25% off for 12 months',
 		upToPeriods: 12,
 		upToPeriodsType: 'Months',
-		emailIdentifier: undefined,
+		emailIdentifier: DataExtensionNames.digipackAnnualDiscountConfirmationEmail,
 		eligibilityCheckForRatePlan: 'AtCatalogPrice',
 	};
 	const { discount, discountableProductRatePlanId } =

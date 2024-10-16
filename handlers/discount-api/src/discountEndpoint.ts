@@ -139,19 +139,17 @@ export const applyDiscountEndpoint = async (
 		billingPreviewToSimpleInvoiceItems(billingPreviewAfter),
 	);
 
-	const emailPayload = discount.emailIdentifier
-		? generateCancellationDiscountConfirmationEmail(
-				{
-					firstDiscountedPaymentDate: dayjs(dateToApply),
-					nextNonDiscountedPaymentDate: dayjs(nextPaymentDate),
-					emailAddress: account.billToContact.workEmail,
-					firstName: account.billToContact.firstName,
-					lastName: account.billToContact.lastName,
-					identityId: account.basicInfo.identityId,
-				},
-				discount.emailIdentifier,
-			)
-		: undefined;
+	const emailPayload = generateCancellationDiscountConfirmationEmail(
+		{
+			firstDiscountedPaymentDate: dayjs(dateToApply),
+			nextNonDiscountedPaymentDate: dayjs(nextPaymentDate),
+			emailAddress: account.billToContact.workEmail,
+			firstName: account.billToContact.firstName,
+			lastName: account.billToContact.lastName,
+			identityId: account.basicInfo.identityId,
+		},
+		discount.emailIdentifier,
+	);
 
 	return {
 		emailPayload,
