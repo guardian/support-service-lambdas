@@ -13,7 +13,7 @@ export class EligibilityChecker {
 	assertGenerallyEligible = async (
 		subscription: ZuoraSubscription,
 		accountBalance: number,
-		lazyNextInvoiceItems: () => Promise<SimpleInvoiceItem[]>,
+		getNextInvoiceItems: () => Promise<SimpleInvoiceItem[]>,
 	) => {
 		console.log('Checking basic eligibility for the subscription');
 		this.assertValidState(
@@ -30,7 +30,7 @@ export class EligibilityChecker {
 		console.log(
 			'ensuring there are no refunds/discounts expected on the affected invoices',
 		);
-		const nextInvoiceItems = await lazyNextInvoiceItems();
+		const nextInvoiceItems = await getNextInvoiceItems();
 		this.assertValidState(
 			nextInvoiceItems.every((item) => item.amount >= 0),
 			validationRequirements.noNegativePreviewItems,
