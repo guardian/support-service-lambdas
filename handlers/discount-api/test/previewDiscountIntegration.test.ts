@@ -90,7 +90,8 @@ test('Subscriptions on the new price are eligible', async () => {
 	const expected: EligibilityCheckResponseBody = {
 		discountedPrice: 11.24,
 		upToPeriods: 3,
-		upToPeriodsType: 'Months',
+		upToPeriodsType: 'month',
+		discountPercentage: 25,
 		firstDiscountedPaymentDate: zuoraDateFormat(paymentDate),
 		nextNonDiscountedPaymentDate: zuoraDateFormat(paymentDate.add(3, 'months')),
 		nonDiscountedPayments: [
@@ -131,7 +132,8 @@ test('Supporter Plus subscriptions are eligible', async () => {
 	const expected: EligibilityCheckResponseBody = {
 		discountedPrice: 0,
 		upToPeriods: 2,
-		upToPeriodsType: 'Months',
+		upToPeriodsType: 'month',
+		discountPercentage: 100,
 		firstDiscountedPaymentDate: zuoraDateFormat(paymentDate),
 		nextNonDiscountedPaymentDate: zuoraDateFormat(paymentDate.add(2, 'months')),
 		nonDiscountedPayments: [

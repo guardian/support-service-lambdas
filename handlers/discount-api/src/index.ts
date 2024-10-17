@@ -8,6 +8,7 @@ import type {
 	Handler,
 } from 'aws-lambda';
 import dayjs from 'dayjs';
+import type { ZodType } from 'zod';
 import {
 	applyDiscountEndpoint,
 	previewDiscountEndpoint,
@@ -16,6 +17,10 @@ import { applyDiscountSchema } from './requestSchema';
 import type {
 	ApplyDiscountResponseBody,
 	EligibilityCheckResponseBody,
+} from './responseSchema';
+import {
+	applyDiscountResponseSchema,
+	previewDiscountResponseSchema,
 } from './responseSchema';
 
 const stage = process.env.STAGE as Stage;
@@ -29,7 +34,8 @@ export const handler: Handler = async (
 };
 
 // this is a type safe version of stringify
-const stringify = <T>(t: T): string => JSON.stringify(t);
+export const stringify = <T>(t: T, type: ZodType<T>): string =>
+	JSON.stringify(type.parse(t));
 
 const routeRequest = async (event: APIGatewayProxyEvent) => {
 	try {
@@ -47,7 +53,10 @@ const routeRequest = async (event: APIGatewayProxyEvent) => {
 				);
 				await sendEmail(stage, emailPayload);
 				return {
-					body: stringify<ApplyDiscountResponseBody>(response),
+					body: stringify<ApplyDiscountResponseBody>(
+						response,
+						applyDiscountResponseSchema,
+					),
 					statusCode: 200,
 				};
 			}
@@ -63,7 +72,10 @@ const routeRequest = async (event: APIGatewayProxyEvent) => {
 					dayjs(),
 				);
 				return {
-					body: stringify<EligibilityCheckResponseBody>(result),
+					body: stringify<EligibilityCheckResponseBody>(
+						result,
+						previewDiscountResponseSchema,
+					),
 					statusCode: 200,
 				};
 			}
