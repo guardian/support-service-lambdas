@@ -32,16 +32,15 @@ object Handler extends LazyLogging {
         .leftMap(e => DigitalVoucherSuspendFailure(s"Failed to create Imovo client: $e"))
       suspensions <- fetchSuspensionsToBeProcessed(salesforce).leftWiden[Failure]
       suspensionResults <- EitherT.right[Failure].apply(
-        suspensions
-          .map(sendSuspensionToDigitalVoucherApi(salesforce, imovo, LocalDateTime.now))
-          .toList
-          .traverse(_.value),
+        suspensions.traverse(suspension =>
+          sendSuspensionToDigitalVoucherApi(salesforce, imovo, LocalDateTime.now)(suspension).value
+        )
       )
-      failures = suspensionResults.collect { case Left(failure) => failure }
-      _ <- failures match {
-        case Nil => EitherT.rightT[IO, Failure].apply(())
-        case failures => EitherT.leftT[IO, Unit].apply(CompositeFailure(failures)).leftWiden[Failure]
+      maybeFailures = suspensionResults.collect { case Left(failure) => failure } match {
+        case Nil => None
+        case failures => Some[Failure](CompositeFailure(failures))
       }
+      _ <- EitherT.fromEither[IO].apply(maybeFailures.toLeft(()))
     } yield ()
 
     AsyncHttpClientCatsBackend[IO]()
@@ -57,7 +56,7 @@ object Handler extends LazyLogging {
 
   def fetchSuspensionsToBeProcessed[F[_]: Sync](
       salesforce: SalesforceClient[F],
-  ): EitherT[F, SalesforceFetchFailure, Seq[Suspension]] =
+  ): EitherT[F, SalesforceFetchFailure, List[Suspension]] =
     Salesforce.fetchSuspensions(salesforce).map(_.records).map { suspensions =>
       logger.info(s"${suspensions.length} suspensions to be processed")
       suspensions.foreach(suspension => logger.info(s"To be processed: $suspension"))
