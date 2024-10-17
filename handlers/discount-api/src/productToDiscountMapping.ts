@@ -37,6 +37,7 @@ export const getDiscountFromSubscription = (
 export type EligibilityCheck =
 	| 'EligibleForFreePeriod'
 	| 'AtCatalogPrice'
+	| 'NoRepeats'
 	| 'NoCheck';
 
 export type Discount = {
@@ -136,7 +137,7 @@ const Discounts = (stage: Stage) => {
 			DataExtensionNames.contributionPauseConfirmationEmail,
 		),
 		cancellation25pc12moSP: getCancellation25pc12mo(
-			'AtCatalogPrice',
+			'NoRepeats',
 			DataExtensionNames.supporterPlusAnnualDiscountConfirmationEmail,
 		),
 	} as const satisfies { [K in string]: Discount };
