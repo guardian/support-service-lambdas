@@ -12,7 +12,6 @@ import sttp.client3.asynchttpclient.cats.AsyncHttpClientCatsBackend
 
 import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext
-import scala.collection.immutable
 
 object Handler extends LazyLogging {
 
@@ -26,27 +25,24 @@ object Handler extends LazyLogging {
   def processSuspensions(): Unit = {
 
     def processed(sttpBackend: SttpBackend[IO, Any]) = for {
-      config <- EitherT.fromEither[IO](Config.get()).leftWiden[Failure]
+      config <- EitherT.fromEither[IO].apply(Config.get()).leftWiden[Failure]
       salesforce <- SalesforceClient(sttpBackend, config.salesforce)
         .leftMap(e => SalesforceFetchFailure(s"Failed to create Salesforce client: $e"))
-        .leftWiden[Failure]
       imovo <- ImovoClient(sttpBackend, config.imovo)
         .leftMap(e => DigitalVoucherSuspendFailure(s"Failed to create Imovo client: $e"))
-        .leftWiden[Failure]
-      suspensions <- fetchSuspensionsToBeProcessed(salesforce)
-        .leftWiden[Failure]
-      suspensionResults <- EitherT.rightT[IO, Failure](
+      suspensions <- fetchSuspensionsToBeProcessed(salesforce).leftWiden[Failure]
+      suspensionResults <- EitherT.right[Failure].apply(
         suspensions
           .map(sendSuspensionToDigitalVoucherApi(salesforce, imovo, LocalDateTime.now))
           .toList
           .traverse(_.value),
-      ): EitherT[IO, Failure, List[Either[Failure, Unit]]]
+      )
       failures = suspensionResults.collect { case Left(failure) => failure }
-      aaa = EitherT.rightT[IO, Failure](())
-    } yield () /*failures match {
-      case Nil => aaa
-      case failures => EitherT.leftT[IO, Unit](CompositeFailure(failures))
-    }*/
+      _ <- failures match {
+        case Nil => EitherT.rightT[IO, Failure].apply(())
+        case failures => EitherT.leftT[IO, Unit].apply(CompositeFailure(failures)).leftWiden[Failure]
+      }
+    } yield ()
 
     AsyncHttpClientCatsBackend[IO]()
       .flatMap { sttpBackend =>
@@ -56,12 +52,7 @@ object Handler extends LazyLogging {
       .valueOr { e =>
         logger.error(s"Processing failed: $e")
         throw new RuntimeException(e.toString)
-      } match {
-      case Nil => () // all the suspensions worked
-      case failures =>
-        logger.error(s"Processing failed: $e")
-        throw new RuntimeException(failures.toString)
-    }
+      }
   }
 
   def fetchSuspensionsToBeProcessed[F[_]: Sync](
