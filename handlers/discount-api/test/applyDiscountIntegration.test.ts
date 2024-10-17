@@ -97,7 +97,9 @@ test('digi subs can have a discount but dont get an email', async () => {
 					first_name: 'Test',
 					last_name: 'User',
 					first_discounted_payment_date: paymentDate.format('DD MMMM YYYY'),
-					next_non_discounted_payment_date: paymentDate.format('DD MMMM YYYY'),
+					next_non_discounted_payment_date: paymentDate
+						.add(3, 'month')
+						.format('DD MMMM YYYY'),
 				},
 			},
 		},

@@ -142,7 +142,9 @@ export const applyDiscountEndpoint = async (
 	const emailPayload = generateCancellationDiscountConfirmationEmail(
 		{
 			firstDiscountedPaymentDate: dayjs(dateToApply),
-			nextNonDiscountedPaymentDate: dayjs(nextPaymentDate),
+			nextNonDiscountedPaymentDate: discount.name.includes('Free')
+				? dayjs(nextPaymentDate)
+				: dayjs(dateToApply).add(discount.upToPeriods, 'month'),
 			emailAddress: account.billToContact.workEmail,
 			firstName: account.billToContact.firstName,
 			lastName: account.billToContact.lastName,
