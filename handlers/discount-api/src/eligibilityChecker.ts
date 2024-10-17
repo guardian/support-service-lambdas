@@ -69,15 +69,19 @@ export class EligibilityChecker {
 		subscription: ZuoraSubscription,
 		now: Dayjs,
 	) => {
-		const eligibilityChecker = new EligibilityChecker(
-			subscription.subscriptionNumber,
-		);
-		eligibilityChecker.assertValidState(
+		this.assertValidState(
 			dayjs(subscription.contractEffectiveDate).add(2, 'months').isBefore(now),
 			validationRequirements.twoMonthsMin,
 			subscription.contractEffectiveDate.toDateString(),
 		);
-		eligibilityChecker.assertValidState(
+		this.assertNoRepeats(discountProductRatePlanId, subscription);
+	};
+
+	assertNoRepeats = (
+		discountProductRatePlanId: string,
+		subscription: ZuoraSubscription,
+	) => {
+		this.assertValidState(
 			subscription.ratePlans.every(
 				(rp) => rp.productRatePlanId !== discountProductRatePlanId,
 			),

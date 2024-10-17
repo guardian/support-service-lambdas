@@ -239,6 +239,12 @@ async function getDiscountToApply(
 				account.metrics.currency,
 			);
 			break;
+		case 'NoRepeats':
+			eligibilityChecker.assertNoRepeats(
+				discount.productRatePlanId,
+				subscription,
+			);
+			break;
 		case 'NoCheck':
 			break;
 	}
