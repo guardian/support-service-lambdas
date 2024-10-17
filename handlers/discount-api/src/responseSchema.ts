@@ -3,7 +3,11 @@ import { z } from 'zod';
 export const previewDiscountResponseSchema = z.object({
 	discountedPrice: z.number(),
 	upToPeriods: z.number(),
-	upToPeriodsType: z.string(),
+	upToPeriodsType: z
+		.literal('month')
+		.or(z.literal('year'))
+		.or(z.literal('week'))
+		.or(z.literal('day')),
 	discountPercentage: z.number(),
 	firstDiscountedPaymentDate: z.string(),
 	nextNonDiscountedPaymentDate: z.string(),
