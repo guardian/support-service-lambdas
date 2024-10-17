@@ -44,7 +44,7 @@ export type Discount = {
 	name: string;
 	upToPeriods: number;
 	upToPeriodsType: string;
-	emailIdentifier?: DataExtensionName;
+	emailIdentifier: DataExtensionName;
 	eligibilityCheckForRatePlan?: EligibilityCheck;
 };
 
@@ -106,7 +106,8 @@ const Discounts: (stage: Stage) => { [K in string]: Discount } = (
 			name: 'Cancellation Save Discount - 25% off for 3 months',
 			upToPeriods: 3,
 			upToPeriodsType: 'Months',
-			emailIdentifier: undefined,
+			emailIdentifier:
+				DataExtensionNames.digipackMonthlyDiscountConfirmationEmail,
 			eligibilityCheckForRatePlan: 'AtCatalogPrice',
 		},
 		cancellation25pc12mo: {
@@ -117,7 +118,8 @@ const Discounts: (stage: Stage) => { [K in string]: Discount } = (
 			name: 'Cancellation Save Discount - 25% off for 12 months',
 			upToPeriods: 12,
 			upToPeriodsType: 'Months',
-			emailIdentifier: undefined,
+			emailIdentifier:
+				DataExtensionNames.digipackAnnualDiscountConfirmationEmail,
 			eligibilityCheckForRatePlan: 'AtCatalogPrice',
 		},
 		cancellationFree2MoSP: getCancellationFree2Mo(
