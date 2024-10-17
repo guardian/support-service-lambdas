@@ -14,6 +14,7 @@ import {
 import { zuoraDateFormat } from '@modules/zuora/common';
 import { getAccount } from '@modules/zuora/getAccount';
 import { getSubscription } from '@modules/zuora/getSubscription';
+import type { Logger } from '@modules/zuora/logger';
 import { isNotRemovedOrDiscount } from '@modules/zuora/rateplan';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type {
@@ -26,7 +27,6 @@ import dayjs from 'dayjs';
 import { EligibilityChecker } from './eligibilityChecker';
 import { generateCancellationDiscountConfirmationEmail } from './generateCancellationDiscountConfirmationEmail';
 import { Lazy } from './lazy';
-import type { Logger } from './logger';
 import { getDiscountFromSubscription } from './productToDiscountMapping';
 
 export const previewDiscountEndpoint = async (
@@ -36,7 +36,7 @@ export const previewDiscountEndpoint = async (
 	subscriptionNumber: string,
 	today: dayjs.Dayjs,
 ) => {
-	const zuoraClient = await ZuoraClient.create(stage);
+	const zuoraClient = await ZuoraClient.create(stage, logger);
 
 	const { subscription, account } = await getSubscriptionIfBelongsToIdentityId(
 		logger.log.bind(logger),
@@ -110,7 +110,7 @@ export const applyDiscountEndpoint = async (
 	subscriptionNumber: string,
 	today: dayjs.Dayjs,
 ) => {
-	const zuoraClient = await ZuoraClient.create(stage);
+	const zuoraClient = await ZuoraClient.create(stage, logger);
 
 	const { subscription, account } = await getSubscriptionIfBelongsToIdentityId(
 		logger.log.bind(logger),
@@ -120,7 +120,6 @@ export const applyDiscountEndpoint = async (
 	);
 
 	logger.mutableAddContext(
-		'productRatePlan',
 		subscription.ratePlans
 			.filter(isNotRemovedOrDiscount)
 			.map((p) => p.ratePlanName)

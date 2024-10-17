@@ -2,11 +2,11 @@ import { ValidationError } from '@modules/errors';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { SimpleInvoiceItem } from '@modules/zuora/billingPreview';
 import { getNextInvoiceTotal } from '@modules/zuora/billingPreview';
+import type { Logger } from '@modules/zuora/logger';
 import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 import type { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import type { Logger } from './logger';
 
 export class EligibilityChecker {
 	constructor(private logger: Logger) {}
@@ -55,9 +55,7 @@ export class EligibilityChecker {
 		// Work out how much the cost of the next invoice will be
 		const nextInvoiceTotal = getIfDefined(
 			getNextInvoiceTotal(invoiceItems),
-			this.logger.getMessage(
-				`No next invoice found for account containing this subscription`,
-			),
+			`No next invoice found for account containing this subscription`,
 		);
 
 		this.assertValidState(
@@ -90,9 +88,7 @@ export class EligibilityChecker {
 		this.logger.log(`Asserting <${message}>`);
 		if (!isValid) {
 			throw new ValidationError(
-				this.logger.getMessage(
-					`subscription did not meet precondition <${message}> (was ${actual})`,
-				),
+				`subscription did not meet precondition <${message}> (was ${actual})`,
 			);
 		}
 	};

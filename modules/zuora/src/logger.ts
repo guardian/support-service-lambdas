@@ -1,8 +1,8 @@
 export class Logger {
 	constructor(private prefix: string[] = []) {}
 
-	public mutableAddContext(key: string, value: string): void {
-		this.prefix.push(key + ': ' + value);
+	public mutableAddContext(value: string): void {
+		this.prefix.push(value);
 	}
 
 	/* eslint-disable @typescript-eslint/no-explicit-any -- this has to match console.log */
@@ -16,8 +16,8 @@ export class Logger {
 	}
 	/* eslint-enable @typescript-eslint/no-unsafe-argument */
 
-	public getMessage(message: any): string {
-		return [...this.prefix.map((k) => `(${k})`), message].join(' ');
+	getMessage(message: any): string {
+		return [...this.prefix, message].join(' ');
 	}
 	/* eslint-enable @typescript-eslint/no-explicit-any */
 }

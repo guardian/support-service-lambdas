@@ -1,4 +1,4 @@
-import { Logger } from '../src/logger';
+import { Logger } from '@modules/zuora/logger';
 
 test('it should be a no-op if theres no context', () => {
 	const logger = new Logger();
@@ -7,15 +7,13 @@ test('it should be a no-op if theres no context', () => {
 
 test('it should add space separated context when you add a single item', () => {
 	const logger = new Logger();
-	logger.mutableAddContext('sub', 'A-S123');
-	expect(logger.getMessage('msg')).toEqual('(sub: A-S123) msg');
+	logger.mutableAddContext('A-S123');
+	expect(logger.getMessage('msg')).toEqual('A-S123 msg');
 });
 
 test('it should add space separated context when you add multiple items', () => {
 	const logger = new Logger();
-	logger.mutableAddContext('sub', 'A-S123');
-	logger.mutableAddContext('product', 'Contribution');
-	expect(logger.getMessage('msg')).toEqual(
-		'(sub: A-S123) (product: Contribution) msg',
-	);
+	logger.mutableAddContext('A-S123');
+	logger.mutableAddContext('Contribution');
+	expect(logger.getMessage('msg')).toEqual('A-S123 Contribution msg');
 });

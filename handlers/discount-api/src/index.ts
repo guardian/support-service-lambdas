@@ -2,6 +2,7 @@ import { sendEmail } from '@modules/email/email';
 import { ValidationError } from '@modules/errors';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
+import { Logger } from '@modules/zuora/logger';
 import type {
 	APIGatewayProxyEvent,
 	APIGatewayProxyResult,
@@ -12,7 +13,6 @@ import {
 	applyDiscountEndpoint,
 	previewDiscountEndpoint,
 } from './discountEndpoint';
-import { Logger } from './logger';
 import { applyDiscountSchema } from './requestSchema';
 import type {
 	ApplyDiscountResponseBody,
@@ -41,7 +41,7 @@ const routeRequest = async (logger: Logger, event: APIGatewayProxyEvent) => {
 				const subscriptionNumber = applyDiscountSchema.parse(
 					JSON.parse(getIfDefined(event.body, 'No body was provided')),
 				).subscriptionNumber;
-				logger.mutableAddContext('sub', subscriptionNumber);
+				logger.mutableAddContext(subscriptionNumber);
 				const { response, emailPayload } = await applyDiscountEndpoint(
 					logger,
 					stage,
@@ -62,7 +62,7 @@ const routeRequest = async (logger: Logger, event: APIGatewayProxyEvent) => {
 				const subscriptionNumber = applyDiscountSchema.parse(
 					JSON.parse(getIfDefined(event.body, 'No body was provided')),
 				).subscriptionNumber;
-				logger.mutableAddContext('sub', subscriptionNumber);
+				logger.mutableAddContext(subscriptionNumber);
 				const result = await previewDiscountEndpoint(
 					logger,
 					stage,

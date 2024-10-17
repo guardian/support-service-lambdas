@@ -13,7 +13,7 @@ import {
 } from './helpers';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import { validationRequirements } from '../src/eligibilityChecker';
-import { Logger } from '../src/logger';
+import { Logger } from '@modules/zuora/logger';
 
 const stage: Stage = 'CODE';
 const validIdentityId = '200175946';
