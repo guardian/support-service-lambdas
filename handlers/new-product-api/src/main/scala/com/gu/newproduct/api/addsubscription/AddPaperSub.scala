@@ -4,11 +4,24 @@ import com.gu.effects.sqs.AwsSQSSend
 import com.gu.effects.sqs.AwsSQSSend.QueueName
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.email.serialisers.PaperEmailDataSerialiser._
-import com.gu.newproduct.api.addsubscription.email.{DeliveryAgentDetails, EtSqsSend, PaperEmailData, SendConfirmationEmail}
+import com.gu.newproduct.api.addsubscription.email.{
+  DeliveryAgentDetails,
+  EtSqsSend,
+  PaperEmailData,
+  SendConfirmationEmail,
+}
 import com.gu.newproduct.api.addsubscription.validation.Validation._
 import com.gu.newproduct.api.addsubscription.validation._
-import com.gu.newproduct.api.addsubscription.validation.paper.{GetPaperCustomerData, PaperAccountValidation, PaperCustomerData}
-import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{SubscriptionName, ZuoraCreateSubRequest, ZuoraCreateSubRequestRatePlan}
+import com.gu.newproduct.api.addsubscription.validation.paper.{
+  GetPaperCustomerData,
+  PaperAccountValidation,
+  PaperCustomerData,
+}
+import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.{
+  SubscriptionName,
+  ZuoraCreateSubRequest,
+  ZuoraCreateSubRequestRatePlan,
+}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts.SoldToAddress
@@ -30,15 +43,16 @@ import java.time.LocalDate
 import scala.concurrent.Future
 
 class AddPaperSub(
-  getPlan: PlanId => Plan,
-  getZuoraRateplanId: PlanId => Option[ProductRatePlanId],
-  getCustomerData: ZuoraAccountId => ApiGatewayOp[PaperCustomerData],
-  validateStartDate: (PlanId, LocalDate) => ValidationResult[Unit],
-  validateAddress: (PlanId, SoldToAddress) => ValidationResult[Unit],
-  createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
-  sendConfirmationEmail: (Option[SfContactId], PaperEmailData) => AsyncApiGatewayOp[Unit],
-  getAgents: GetAgents,
-) extends AddSpecificProduct with LazyLogging {
+    getPlan: PlanId => Plan,
+    getZuoraRateplanId: PlanId => Option[ProductRatePlanId],
+    getCustomerData: ZuoraAccountId => ApiGatewayOp[PaperCustomerData],
+    validateStartDate: (PlanId, LocalDate) => ValidationResult[Unit],
+    validateAddress: (PlanId, SoldToAddress) => ValidationResult[Unit],
+    createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
+    sendConfirmationEmail: (Option[SfContactId], PaperEmailData) => AsyncApiGatewayOp[Unit],
+    getAgents: GetAgents,
+) extends AddSpecificProduct
+    with LazyLogging {
   override def addProduct(request: AddSubscriptionRequest): AsyncApiGatewayOp[SubscriptionName] = for {
     _ <- validateStartDate(request.planId, request.startDate).toApiGatewayOp.toAsync
     _ <- validateDeliveryAgent(request.planId, request.deliveryAgent).toApiGatewayOp.toAsync
@@ -93,7 +107,7 @@ class AddPaperSub(
       deliveryAgentDetails = deliveryAgentRecord.map { record =>
         import record._
         DeliveryAgentDetails(agentName, telephone, email, address1, address2, town, county, postcode)
-      } ,
+      },
       discountMessage = request.discountMessage,
     )
     _ <- sendConfirmationEmail(customerData.account.sfContactId, paperEmailData)
@@ -102,9 +116,12 @@ class AddPaperSub(
 
   private def lookupDeliveryAgent(deliveryAgent: DeliveryAgent) = {
     for {
-      matchingAgents <- getAgents.getAgents().map {
-        _.filter(cur => cur.deliveryAgent == deliveryAgent)
-      }.toApiGatewayOp("get delivery details")
+      matchingAgents <- getAgents
+        .getAgents()
+        .map {
+          _.filter(cur => cur.deliveryAgent == deliveryAgent)
+        }
+        .toApiGatewayOp("get delivery details")
       singleMatchingAgent <- matchingAgents match {
         case value :: Nil => ContinueProcessing(value)
         case _ =>
@@ -127,15 +144,15 @@ class AddPaperSub(
 object AddPaperSub {
 
   def wireSteps(
-    catalog: Map[PlanId, Plan],
-    zuoraIds: ZuoraIds,
-    zuoraClient: Requests,
-    isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
-    isValidAddressForPlan: (PlanId, SoldToAddress) => ValidationResult[Unit],
-    createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
-    awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
-    emailQueueName: QueueName,
-    getAgents: GetAgents,
+      catalog: Map[PlanId, Plan],
+      zuoraIds: ZuoraIds,
+      zuoraClient: Requests,
+      isValidStartDateForPlan: (PlanId, LocalDate) => ValidationResult[Unit],
+      isValidAddressForPlan: (PlanId, SoldToAddress) => ValidationResult[Unit],
+      createSubscription: ZuoraCreateSubRequest => ClientFailableOp[SubscriptionName],
+      awsSQSSend: QueueName => AwsSQSSend.Payload => Future[Unit],
+      emailQueueName: QueueName,
+      getAgents: GetAgents,
   ): AddSpecificProduct = {
     val paperSqsQueueSend = awsSQSSend(emailQueueName)
     val paperBrazeConfirmationSqsSend = EtSqsSend[PaperEmailData](paperSqsQueueSend) _
@@ -156,10 +173,11 @@ object AddPaperSub {
   def getValidatedCustomerData(zuoraClient: Requests): ZuoraAccountId => ApiGatewayOp[PaperCustomerData] = {
 
     val validateAccount = ValidateAccount.apply _ thenValidate PaperAccountValidation.apply _
-    val getValidatedAccount: ZuoraAccountId => ApiGatewayOp[ValidatedAccount] = GetAccount(zuoraClient.get[ZuoraAccount])(_).andValidateWith(
-      validate = validateAccount,
-      ifNotFoundReturn = Some("Zuora account id is not valid")
-    )
+    val getValidatedAccount: ZuoraAccountId => ApiGatewayOp[ValidatedAccount] =
+      GetAccount(zuoraClient.get[ZuoraAccount])(_).andValidateWith(
+        validate = validateAccount,
+        ifNotFoundReturn = Some("Zuora account id is not valid"),
+      )
     val getValidatedPaymentMethod: GetAccount.PaymentMethodId => ApiGatewayOp[GetPaymentMethod.PaymentMethod] =
       GetPaymentMethod(zuoraClient.get[PaymentMethodWire])(_).andValidateWith(ValidatePaymentMethod.apply _)
     val getContacts: ZuoraAccountId => ClientFailableOp[GetContacts.Contacts] = GetContacts(
