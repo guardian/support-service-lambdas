@@ -7,6 +7,7 @@ import { DiscountApi } from '../lib/discount-api';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
+import { PressReaderEntitlements } from '../lib/press-reader-entitlements';
 import { ProductSwitchApi } from '../lib/product-switch-api';
 import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery';
 import { SalesforceDisasterRecoveryHealthCheck } from '../lib/salesforce-disaster-recovery-health-check';
@@ -244,4 +245,14 @@ new TicketTailorWebhook(app, 'ticket-tailor-webhook-CODE', {
 new TicketTailorWebhook(app, 'ticket-tailor-webhook-PROD', {
 	stack: 'support',
 	stage: 'PROD',
+});
+new PressReaderEntitlements(app, 'press-reader-entitlements-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+	domainName: `press-reader-entitlements-code.dev-guardianapis.com`,
+});
+new PressReaderEntitlements(app, 'press-reader-entitlements-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+	domainName: `press-reader-entitlements.guardianapis.com`,
 });
