@@ -121,7 +121,6 @@ object Handler extends Logging {
           getAccountFromZuora(config, backend),
           idGenerator,
           FulfilmentDatesFetcher(fetchString, Stage()),
-          PreviewPublications.preview,
           now,
         )(
           request,
@@ -136,7 +135,6 @@ object Handler extends Logging {
       getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
       idGenerator: => String,
       fulfilmentDatesFetcher: FulfilmentDatesFetcher,
-      previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse] = null, // FIXME
       now: () => ZonedDateTime,
   ): (ApiGatewayRequest, HttpOp[StringHttpRequest, BodyAsString]) => ApiResponse = {
     (for {
@@ -150,7 +148,6 @@ object Handler extends Logging {
       getAccount,
       idGenerator,
       fulfilmentDatesFetcher,
-      previewPublications,
       now,
     )).fold(
       { errorMessage: String =>
@@ -182,13 +179,12 @@ object Handler extends Logging {
       getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
       idGenerator: => String,
       fulfilmentDatesFetcher: FulfilmentDatesFetcher,
-      previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse] = null, // FIXME
       now: () => ZonedDateTime,
   ) = {
     path match {
       case "potential" :: _ :: Nil =>
         httpMethod match {
-          case "GET" => stepsForPotentialHolidayStop(getAccessToken, getSubscription, getAccount, previewPublications) _
+          case "GET" => stepsForPotentialHolidayStop(getAccessToken, getSubscription, getAccount) _
           case _ => unsupported _
         }
       case "hsr" :: Nil =>
@@ -246,54 +242,10 @@ object Handler extends Logging {
       endDate: LocalDate,
   )
 
-  // FIXME: Temporary test in production to validate migration to https://github.com/guardian/invoicing-api/pull/23
-  // FIXME: Make sure to add .filter(_.price > 0.0) if it ever replaces old potential endpoint
-  import scala.concurrent.{ExecutionContext, Future}
-  import java.util.concurrent.Executors
-  private val ecForTestInProd = ExecutionContext.fromExecutor(Executors.newSingleThreadExecutor)
-  private def testInProdPreviewPublications(
-      previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse],
-      subscription: Subscription,
-      queryParams: PotentialHolidayStopsQueryParams,
-      potentialHolidayStops: List[PotentialHolidayStop],
-      nextInvoiceDateAfterToday: LocalDate,
-  ): Future[_] = Future {
-    lazy val testCase =
-      s"${subscription.subscriptionNumber}?startDate=${queryParams.startDate}&endDate=${queryParams.endDate}"
-
-    (previewPublications(subscription.subscriptionNumber, queryParams.startDate.toString, queryParams.endDate.toString)
-      .map { actual =>
-        val actualPotentialHolidayStops =
-          actual.publicationsWithinRange
-            .filter(
-              _.price > 0.0,
-            ) // invoicing-api/preview endpoint is general and calculates the price of each publication (even if it is 0)
-            .map(pub => PotentialHolidayStop(pub.publicationDate, Credit(-pub.price, pub.nextInvoiceDate)))
-            .sortBy(_.publicationDate)
-
-        val actualNextInvoiceDateAfterToday = actual.nextInvoiceDateAfterToday
-
-        if (
-          (potentialHolidayStops == actualPotentialHolidayStops) && (nextInvoiceDateAfterToday == actualNextInvoiceDateAfterToday)
-        ) {
-          // 1logger.info("testInProdPreviewPublications OK")
-        } else {
-          logger.error(
-            s"testInProdPreviewPublications failed $testCase because $potentialHolidayStops =/= $actualPotentialHolidayStops or $nextInvoiceDateAfterToday =/= $actualNextInvoiceDateAfterToday",
-          )
-        }
-      })
-      .left
-      .map { e =>
-        logger.error(s"testInProdPreviewPublications failed $testCase because invoicing-api error: $e")
-      }
-  }(ecForTestInProd)
-
   def stepsForPotentialHolidayStop(
       getAccessToken: () => Either[ApiFailure, AccessToken],
       getSubscription: (AccessToken, SubscriptionName) => Either[ApiFailure, Subscription],
       getAccount: (AccessToken, String) => Either[ApiFailure, ZuoraAccount],
-      previewPublications: (String, String, String) => Either[ApiFailure, PreviewPublicationsResponse] = null, // FIXME
   )(req: ApiGatewayRequest, unused: SfClient): ApiResponse = {
     implicit val reads: Reads[PotentialHolidayStopsQueryParams] = Json.reads[PotentialHolidayStopsQueryParams]
     (for {
@@ -321,13 +273,6 @@ object Handler extends Logging {
         .filter(_.nextBillingPeriodStartDate.isAfter(MutableCalendar.today))
         .minBy(_.nextBillingPeriodStartDate)(Ordering.by(_.toEpochDay))
         .nextBillingPeriodStartDate
-      _ = testInProdPreviewPublications(
-        previewPublications,
-        subscription,
-        queryParams,
-        potentialHolidayStops,
-        nextInvoiceDateAfterToday,
-      ) // FIXME
     } yield ApiGatewayResponse(
       "200",
       PotentialHolidayStopsResponse(nextInvoiceDateAfterToday, potentialHolidayStops),

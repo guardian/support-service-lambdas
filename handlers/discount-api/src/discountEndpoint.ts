@@ -6,6 +6,7 @@ import { addDiscount, previewDiscount } from '@modules/zuora/addDiscount';
 import {
 	billingPreviewToSimpleInvoiceItems,
 	getBillingPreview,
+	getNextInvoice,
 	getNextInvoiceItems,
 	getNextNonFreePaymentDate,
 	getOrderedInvoiceTotals,
@@ -23,6 +24,7 @@ import type { APIGatewayProxyEventHeaders } from 'aws-lambda';
 import dayjs from 'dayjs';
 import { EligibilityChecker } from './eligibilityChecker';
 import { generateCancellationDiscountConfirmationEmail } from './generateCancellationDiscountConfirmationEmail';
+import { Lazy } from './lazy';
 import { getDiscountFromSubscription } from './productToDiscountMapping';
 
 export const previewDiscountEndpoint = async (
@@ -196,14 +198,25 @@ async function getDiscountToApply(
 		subscription.subscriptionNumber,
 	);
 
-	console.log('get billing preview for the subscription');
-	const billingPreview = billingPreviewToSimpleInvoiceItems(
-		await getBillingPreview(
-			zuoraClient,
-			today.add(13, 'months'),
-			subscription.accountNumber,
-		),
+	// don't get the billing preview until we know the subscription is not cancelled
+	const lazyBillingPreview = new Lazy(
+		() =>
+			getBillingPreview(
+				zuoraClient,
+				today.add(13, 'months'),
+				subscription.accountNumber,
+			),
+		'get billing preview for the subscription',
+	).then(billingPreviewToSimpleInvoiceItems);
+
+	await eligibilityChecker.assertGenerallyEligible(
+		subscription,
+		account.metrics.totalInvoiceBalance,
+		() => lazyBillingPreview.then(getNextInvoiceItems).get(),
 	);
+
+	// now we know the subscription is not cancelled we can force the billing preview
+	const billingPreview = await lazyBillingPreview.get();
 
 	console.log('Working out the appropriate discount for the subscription');
 	const { discount, discountableProductRatePlanId } =
@@ -230,15 +243,9 @@ async function getDiscountToApply(
 			break;
 	}
 
-	const { date: dateToApply, items: nextInvoiceItems } =
-		getNextInvoiceItems(billingPreview);
+	const dateToApply = getNextInvoice(billingPreview).date;
 
 	const orderedInvoiceTotals = getOrderedInvoiceTotals(billingPreview);
 
-	eligibilityChecker.assertGenerallyEligible(
-		subscription,
-		account.metrics.totalInvoiceBalance,
-		nextInvoiceItems,
-	);
 	return { discount, dateToApply, orderedInvoiceTotals };
 }

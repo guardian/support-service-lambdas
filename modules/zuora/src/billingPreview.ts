@@ -24,10 +24,14 @@ export const getBillingPreview = async (
 export type SimpleInvoiceItem = { date: Date; amount: number };
 
 export function getNextInvoiceTotal(invoiceItems: Array<SimpleInvoiceItem>) {
-	return convertItemsToTotal(getNextInvoiceItems(invoiceItems)).total;
+	return convertItemsToTotal(getNextInvoice(invoiceItems)).total;
 }
 
 export function getNextInvoiceItems(invoiceItems: Array<SimpleInvoiceItem>) {
+	return getNextInvoice(invoiceItems).items;
+}
+
+export function getNextInvoice(invoiceItems: Array<SimpleInvoiceItem>) {
 	const ordered = getOrderedInvoiceItemGroups(invoiceItems);
 
 	return getIfDefined(
