@@ -5,7 +5,7 @@ import sbtassembly.AssemblyPlugin.autoImport.{MergeStrategy, assemblyMergeStrate
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsSdkVersion = "2.27.7"
+  val awsSdkVersion = "2.27.24"
   val circeVersion = "0.14.9"
   val sttpVersion = "3.9.7"
   val http4sVersion = "0.22.15" // later versions pull in cats effect 3 which is not compatible
@@ -25,8 +25,8 @@ object Dependencies {
   val awsS3 = "software.amazon.awssdk" % "s3" % awsSdkVersion
   val awsDynamo = "software.amazon.awssdk" % "dynamodb" % awsSdkVersion
 
-  val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.2"
-  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.11.2"
+  val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.3"
+  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.11.6"
 
   // scalaLambda depends on the old version of circe, until this PR is merged
   // https://github.com/mkotsur/aws-lambda-scala/pull/30
