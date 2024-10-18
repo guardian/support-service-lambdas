@@ -42,12 +42,14 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
 
   // getCancellationConsents success cases
   "getCancellationConsents" should "correctly return the mapping when a known product is passed and there are no owned products" in {
-    calculator.getCancellationConsents("Membership", Set()) shouldBe Right(membershipMapping)
+    calculator.getCancellationConsents("Membership", Set()) shouldBe Right(
+      calculator.removeConsentsNotBeingCancelled(membershipMapping),
+    )
   }
 
   "getCancellationConsents" should "correctly return the mapping when a known product is passed and there is an owned product that partially overlaps" in {
     calculator.getCancellationConsents("newspaper", Set("Guardian Weekly")) shouldBe Right(
-      newspaperMapping.diff(guWeeklyMapping),
+      calculator.removeConsentsNotBeingCancelled(newspaperMapping.diff(guWeeklyMapping)),
     )
   }
 
@@ -66,6 +68,12 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
   "getCancellationConsents" should "correctly return the mapping when a known product is passed and there are multiple owned products that completely overlap" in {
     calculator.getCancellationConsents("Guardian Weekly", Set("Membership", "Contributor")) shouldBe Right(
       guWeeklyMapping.diff(membershipMapping ++ contributionMapping),
+    )
+  }
+
+  "getCancellationConsents" should "not cancel guardian_products_services and similar_guardian_products consents" in {
+    calculator.getCancellationConsents("Membership", Set()) shouldBe Right(
+      membershipMapping.removedAll(Set("guardian_products_services", "similar_guardian_products")),
     )
   }
 
@@ -120,14 +128,20 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
   }
 
   "buildProductSwitchConsents" should "return the correct consents when switching from a Recurring Contribution to Guardian Weekly subscription" in {
-    Handler.buildProductSwitchConsents(
-      "Contributor",
-      "Guardian Weekly",
-      Set("Guardian Weekly"),
-      calculator,
-    ) shouldBe Right("""[
+    Handler
+      .buildProductSwitchConsents(
+        "Contributor",
+        "Guardian Weekly",
+        Set("Guardian Weekly"),
+        calculator,
+      )
+      .map(removeWhitespace) shouldBe Right(removeWhitespace("""[
         |  {
         |    "id" : "similar_guardian_products",
+        |    "consented" : false
+        |  },
+        |  {
+        |    "id" : "guardian_products_services",
         |    "consented" : false
         |  },
         |  {
@@ -138,70 +152,82 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
         |    "id" : "guardian_weekly_newsletter",
         |    "consented" : true
         |  }
-        |]""".stripMargin)
+        |]""".stripMargin))
   }
 
   "buildProductSwitchConsents" should "return the correct consents when switching from a Recurring Contribution to a Guardian Weekly subscription whilst the user also owns a Newspaper subscription" in {
-    Handler.buildProductSwitchConsents(
-      "Contributor",
-      "Guardian Weekly",
-      Set("Guardian Weekly", "newspaper"),
-      calculator,
-    ) shouldBe Right("""[
+    Handler
+      .buildProductSwitchConsents(
+        "Contributor",
+        "Guardian Weekly",
+        Set("Guardian Weekly", "newspaper"),
+        calculator,
+      )
+      .map(removeWhitespace) shouldBe Right(removeWhitespace("""[
         |  {
         |    "id" : "guardian_weekly_newsletter",
         |    "consented" : true
         |  }
-        |]""".stripMargin)
+        |]""".stripMargin)) // be careful this is whitespace sensitive
   }
 
   "buildProductSwitchConsents" should "return the correct consents when switching from a Guardian Weekly to a Newspaper subscription" in {
-    Handler.buildProductSwitchConsents(
-      "Guardian Weekly",
-      "newspaper",
-      Set("newspaper"),
-      calculator,
-    ) shouldBe Right("""[
-        |  {
-        |    "id" : "guardian_weekly_newsletter",
-        |    "consented" : false
-        |  },
-        |  {
-        |    "id" : "similar_guardian_products",
-        |    "consented" : true
-        |  },
-        |  {
-        |    "id" : "subscriber_preview",
-        |    "consented" : true
-        |  },
-        |  {
-        |    "id" : "supporter_newsletter",
-        |    "consented" : true
-        |  }
-        |]""".stripMargin)
+    Handler
+      .buildProductSwitchConsents(
+        "Guardian Weekly",
+        "newspaper",
+        Set("newspaper"),
+        calculator,
+      )
+      .map(removeWhitespace) shouldBe Right(removeWhitespace("""[
+                       |  {
+                       |    "id" : "similar_guardian_products",
+                       |    "consented" : true
+                       |  },
+                       |  {
+                       |    "id" : "guardian_products_services",
+                       |    "consented" : true
+                       |  },
+                       |  {
+                       |    "id" : "subscriber_preview",
+                       |    "consented" : true
+                       |  },
+                       |  {
+                       |    "id" : "guardian_weekly_newsletter",
+                       |    "consented" : false
+                       |  },
+                       |  {
+                       |    "id" : "supporter_newsletter",
+                       |    "consented" : true
+                       |  }
+                       |]""".stripMargin))
   }
 
   "buildProductSwitchConsents" should "return the correct consents when switching from a Guardian Weekly to a Recurring Contribution whilst also owning a Newspaper subscription" in {
-    Handler.buildProductSwitchConsents(
-      "Guardian Weekly",
-      "Contributor",
-      Set("newspaper", "Contributor"),
-      calculator,
-    ) shouldBe Right("""[
+    Handler
+      .buildProductSwitchConsents(
+        "Guardian Weekly",
+        "Contributor",
+        Set("newspaper", "Contributor"),
+        calculator,
+      )
+      .map(removeWhitespace) shouldBe Right(removeWhitespace("""[
         |  {
         |    "id" : "guardian_weekly_newsletter",
         |    "consented" : false
         |  }
-        |]""".stripMargin)
+        |]""".stripMargin))
   }
 
   "buildProductSwitchConsents" should "return the correct consents when switching from a Guardian Weekly to a Newspaper subscription whilst also owning a Recurring Contribution" in {
-    Handler.buildProductSwitchConsents(
-      "Guardian Weekly",
-      "newspaper",
-      Set("newspaper", "Contributor"),
-      calculator,
-    ) shouldBe Right("""[
+    Handler
+      .buildProductSwitchConsents(
+        "Guardian Weekly",
+        "newspaper",
+        Set("newspaper", "Contributor"),
+        calculator,
+      )
+      .map(removeWhitespace) shouldBe Right(removeWhitespace("""[
         |  {
         |    "id" : "guardian_weekly_newsletter",
         |    "consented" : false
@@ -210,16 +236,18 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
         |    "id" : "subscriber_preview",
         |    "consented" : true
         |  }
-        |]""".stripMargin)
+        |]""".stripMargin)) // be careful this is whitespace sensitive
   }
 
   "buildProductSwitchConsents" should "return the correct consents when switching from a Guardian Weekly to a Newspaper subscription whilst also owning a Mobile Subscription (IAP)" in {
-    Handler.buildProductSwitchConsents(
-      "Guardian Weekly",
-      "newspaper",
-      Set("newspaper", "InAppPurchase"),
-      calculator,
-    ) shouldBe Right("""[
+    Handler
+      .buildProductSwitchConsents(
+        "Guardian Weekly",
+        "newspaper",
+        Set("newspaper", "InAppPurchase"),
+        calculator,
+      )
+      .map(removeWhitespace) shouldBe Right(removeWhitespace("""[
         |  {
         |    "id" : "guardian_weekly_newsletter",
         |    "consented" : false
@@ -228,16 +256,18 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
         |    "id" : "subscriber_preview",
         |    "consented" : true
         |  }
-        |]""".stripMargin)
+        |]""".stripMargin))
   }
 
   "buildProductSwitchConsents - HandlerIAP" should "return the correct consents when switching from a Guardian Weekly to a Newspaper subscription whilst also owning a Mobile Subscription (IAP)" in {
-    HandlerIAP.buildProductSwitchConsents(
-      "Guardian Weekly",
-      "newspaper",
-      Set("newspaper", "InAppPurchase"),
-      calculator,
-    ) shouldBe Right("""[
+    HandlerIAP
+      .buildProductSwitchConsents(
+        "Guardian Weekly",
+        "newspaper",
+        Set("newspaper", "InAppPurchase"),
+        calculator,
+      )
+      .map(removeWhitespace) shouldBe Right(removeWhitespace("""[
         |  {
         |    "id" : "guardian_weekly_newsletter",
         |    "consented" : false
@@ -246,7 +276,7 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
         |    "id" : "subscriber_preview",
         |    "consented" : true
         |  }
-        |]""".stripMargin)
+        |]""".stripMargin))
   }
 
   def removeWhitespace(stringToRemoveWhitespaceFrom: String): String = {

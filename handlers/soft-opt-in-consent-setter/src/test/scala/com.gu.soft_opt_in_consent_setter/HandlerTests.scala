@@ -77,7 +77,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
   test(testName = "processAcquiredSub should handle acquisition event correctly") {
     mockSendConsentsReq
       .expects(
-        "someIdentityId",
+        "someIdentityId", // be careful this is whitespace sensitive
         """[
           |  {
           |    "id" : "your_support_onboarding",
@@ -85,6 +85,10 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
           |  },
           |  {
           |    "id" : "similar_guardian_products",
+          |    "consented" : true
+          |  },
+          |  {
+          |    "id" : "guardian_products_services",
           |    "consented" : true
           |  },
           |  {
@@ -159,7 +163,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
 
     mockSendConsentsReq
       .expects(
-        "someIdentityId",
+        "someIdentityId", // be careful this is whitespace sensitive
         """[
           |  {
           |    "id" : "your_support_onboarding",
@@ -211,7 +215,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
 
     mockSendConsentsReq
       .expects(
-        "someIdentityId",
+        "someIdentityId", // be careful this is whitespace sensitive
         """[
           |  {
           |    "id" : "supporter_newsletter",
@@ -250,8 +254,12 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
   test(testName = "processAcquiredSub should handle a Tier Three acquisition event correctly") {
     mockSendConsentsReq
       .expects(
-        "someIdentityId",
+        "someIdentityId", // be careful this is whitespace sensitive
         """[
+          |  {
+          |    "id" : "guardian_weekly_newsletter",
+          |    "consented" : true
+          |  },
           |  {
           |    "id" : "your_support_onboarding",
           |    "consented" : true
@@ -261,11 +269,11 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
           |    "consented" : true
           |  },
           |  {
-          |    "id" : "supporter_newsletter",
+          |    "id" : "guardian_products_services",
           |    "consented" : true
           |  },
           |  {
-          |    "id" : "guardian_weekly_newsletter",
+          |    "id" : "supporter_newsletter",
           |    "consented" : true
           |  }
           |]""".stripMargin,
