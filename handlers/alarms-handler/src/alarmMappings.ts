@@ -40,6 +40,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'support-reminders',
 	],
 	VALUE: [
+		'apps-metering-events',
 		'cancellation-sf-cases-api',
 		'contact-us-api',
 		'delivery-records-api',
