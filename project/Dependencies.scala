@@ -7,7 +7,7 @@ import sbtassembly.PathList
 object Dependencies {
   val awsSdkVersion = "2.27.24"
   val circeVersion = "0.14.9"
-  val sttpVersion = "3.9.7"
+  val sttpVersion = "3.9.8"
   val http4sVersion = "0.22.15" // later versions pull in cats effect 3 which is not compatible
   val catsVersion = "2.9.0"
   val catsEffectVersion = "2.5.5"
@@ -39,7 +39,7 @@ object Dependencies {
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
   // GCP
-  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.34.0"
+  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.34.2"
 
   // Cats
   val catsCore = "org.typelevel" %% "cats-core" % catsVersion
@@ -80,7 +80,7 @@ object Dependencies {
   val zio = "dev.zio" %% "zio" % "1.0.17"
   val zio2Version = "2.0.13"
   val zio2 = "dev.zio" %% "zio" % zio2Version
-  val tapirVersion = "1.9.2"
+  val tapirVersion = "1.9.11"
   val enumeratum = "com.beachape" %% "enumeratum" % "1.7.2"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.1.0"
   val stripe = "com.stripe" % "stripe-java" % "22.20.0"
@@ -89,7 +89,7 @@ object Dependencies {
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest-should" % "0.9.0" % Test
   val scalatest = "org.scalatest" %% "scalatest" % "3.2.16" % Test
-  val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.17.0" % Test
+  val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.17.1" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "5.2.0" % Test
   val mockito = "org.mockito" % "mockito-core" % "5.3.1" % Test
   // play-json still uses an old version of jackson-core which has a vulnerability - https://security.snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-7569538
