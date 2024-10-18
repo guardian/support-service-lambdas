@@ -36,6 +36,7 @@ jobs:
     strategy:
       matrix:
         subproject:
+          - press-reader-entitlements
           - ticket-tailor-webhook
           - update-supporter-plus-amount
           - product-switch-api
