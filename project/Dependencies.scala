@@ -26,7 +26,7 @@ object Dependencies {
   val awsDynamo = "software.amazon.awssdk" % "dynamodb" % awsSdkVersion
 
   val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.3"
-  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.11.6"
+  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.14.0"
 
   // scalaLambda depends on the old version of circe, until this PR is merged
   // https://github.com/mkotsur/aws-lambda-scala/pull/30
