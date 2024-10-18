@@ -15,7 +15,7 @@ export type Member = {
 
 export function buildXml(member: Member){	
 	const builder = new XMLBuilder({format: true});
-	const xmlContent = builder.build(member);
+	const xmlContent: string = builder.build(member);
 
 	return `<?xml version="1.0" encoding="utf-8"?>\n${xmlContent}`;
 }
