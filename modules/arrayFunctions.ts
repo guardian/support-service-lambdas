@@ -17,21 +17,30 @@ export const groupBy = <T>(
 	}, {});
 };
 
+export const sortBy = <T>(array: T[], fn: (item: T) => string): T[] => {
+	return array.sort((posGT, negGT) => {
+		const posGTKey = fn(posGT);
+		const negGTKey = fn(negGT);
+		if (posGTKey > negGTKey) return 1;
+		else if (posGTKey < negGTKey) return -1;
+		else return 0;
+	});
+};
+
 export const getSingleOrThrow = <T>(
 	array: T[],
-	filter: (element: T) => boolean,
+	error: (msg: string) => Error,
 ): T => {
-	const matchingElements = array.filter(filter);
-	if (matchingElements.length > 1) {
-		throw new Error('Array had more than one matching element');
+	if (array.length > 1) {
+		throw error('Array had more than one matching element');
 	}
-	if (matchingElements.length < 1) {
-		throw new Error('Array had no matching elements');
+	if (array.length < 1) {
+		throw error('Array had no matching elements');
 	}
-	if (!matchingElements[0]) {
-		throw new ReferenceError('Matching element was null or undefined :-s');
+	if (!array[0]) {
+		throw error('Matching element was null or undefined');
 	}
-	return matchingElements[0];
+	return array[0];
 };
 
 export const findDuplicates = <T>(array: T[]) =>

@@ -1,11 +1,22 @@
+import { sendEmail } from '@modules/email/email';
+import { ValidationError } from '@modules/errors';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import type {
 	APIGatewayProxyEvent,
 	APIGatewayProxyResult,
 	Handler,
 } from 'aws-lambda';
-import { discountEndpoint } from './discountEndpoint';
-import { ValidationError } from './errors';
+import dayjs from 'dayjs';
+import {
+	applyDiscountEndpoint,
+	previewDiscountEndpoint,
+} from './discountEndpoint';
+import { applyDiscountSchema } from './requestSchema';
+import type {
+	ApplyDiscountResponseBody,
+	EligibilityCheckResponseBody,
+} from './responseSchema';
 
 const stage = process.env.STAGE as Stage;
 export const handler: Handler = async (
@@ -17,16 +28,46 @@ export const handler: Handler = async (
 	return response;
 };
 
+// this is a type safe version of stringify
+const stringify = <T>(t: T): string => JSON.stringify(t);
+
 const routeRequest = async (event: APIGatewayProxyEvent) => {
 	try {
 		switch (true) {
 			case event.path === '/apply-discount' && event.httpMethod === 'POST': {
 				console.log('Applying a discount');
-				return await discountEndpoint(stage, false, event.headers, event.body);
+				const subscriptionNumber = applyDiscountSchema.parse(
+					JSON.parse(getIfDefined(event.body, 'No body was provided')),
+				).subscriptionNumber;
+				const { response, emailPayload } = await applyDiscountEndpoint(
+					stage,
+					event.headers,
+					subscriptionNumber,
+					dayjs(),
+				);
+				if (emailPayload) {
+					await sendEmail(stage, emailPayload);
+				}
+				return {
+					body: stringify<ApplyDiscountResponseBody>(response),
+					statusCode: 200,
+				};
 			}
 			case event.path === '/preview-discount' && event.httpMethod === 'POST': {
 				console.log('Previewing discount');
-				return await discountEndpoint(stage, true, event.headers, event.body);
+				const subscriptionNumber = applyDiscountSchema.parse(
+					JSON.parse(getIfDefined(event.body, 'No body was provided')),
+				).subscriptionNumber;
+				const result = await previewDiscountEndpoint(
+					stage,
+					event.headers,
+					subscriptionNumber,
+					dayjs(),
+				);
+				return {
+					body: stringify<EligibilityCheckResponseBody>(result),
+					statusCode: 200,
+				};
 			}
 			default:
 				return {
@@ -44,7 +85,7 @@ const routeRequest = async (event: APIGatewayProxyEvent) => {
 			};
 		} else {
 			return {
-				body: JSON.stringify(error),
+				body: 'Internal server error, check the logs for more information',
 				statusCode: 500,
 			};
 		}

@@ -7,9 +7,9 @@ import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { Bucket, EventType } from 'aws-cdk-lib/aws-s3';
 import { LambdaDestination } from 'aws-cdk-lib/aws-s3-notifications';
+import { nodeVersion } from './node-version';
 
 export interface GenerateProductCatalogProps extends GuStackProps {
 	stack: string;
@@ -36,7 +36,7 @@ export class GenerateProductCatalog extends GuStack {
 			functionName: nameWithStage,
 			fileName: `${app}.zip`,
 			handler: 'index.handler',
-			runtime: Runtime.NODEJS_18_X,
+			runtime: nodeVersion,
 			memorySize: 1024,
 			timeout: Duration.seconds(300),
 			environment: commonEnvironmentVariables,
@@ -93,25 +93,27 @@ export class GenerateProductCatalog extends GuStack {
 			resourceRecord: 'guardian.map.fastly.net',
 		});
 
-		new GuAlarm(this, 'FailedProductCatalogLambdaAlarm', {
-			app,
-			alarmName: `The ${app} Lambda has failed`,
-			alarmDescription:
-				'This means the product catalog may not be up to date in S3. This lambda runs on a regular schedule so action will only be necessary if the alarm is triggered continuously',
-			evaluationPeriods: 1,
-			threshold: 1,
-			actionsEnabled: this.stage === 'PROD',
-			snsTopicName: 'retention-dev',
-			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-			metric: new Metric({
-				metricName: 'Errors',
-				namespace: 'AWS/Lambda',
-				statistic: 'Sum',
-				period: Duration.seconds(300),
-				dimensionsMap: {
-					FunctionName: lambda.functionName,
-				},
-			}),
-		});
+		if (this.stage === 'PROD') {
+			new GuAlarm(this, `FailedProductCatalogLambdaAlarm`, {
+				app,
+				alarmName: `The ${app} Lambda has failed`,
+				alarmDescription:
+					'This means the product catalog may not be up to date in S3. This lambda runs on a regular schedule so action will only be necessary if the alarm is triggered continuously',
+				evaluationPeriods: 1,
+				threshold: 1,
+				snsTopicName: 'retention-dev',
+				comparisonOperator:
+					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+				metric: new Metric({
+					metricName: 'Errors',
+					namespace: 'AWS/Lambda',
+					statistic: 'Sum',
+					period: Duration.seconds(300),
+					dimensionsMap: {
+						FunctionName: lambda.functionName,
+					},
+				}),
+			});
+		}
 	}
 }

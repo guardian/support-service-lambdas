@@ -9,8 +9,6 @@ import { SqsQueue } from 'aws-cdk-lib/aws-events-targets';
 import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
-import { Topic } from 'aws-cdk-lib/aws-sns';
-import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 
 export const APP_NAME = 'single-contribution-salesforce-writes';
@@ -73,7 +71,7 @@ export class SingleContributionSalesforceWrites extends GuStack {
 
 		const lambda = new GuLambdaFunction(this, `${APP_NAME}-lambda`, {
 			app: APP_NAME,
-			runtime: Runtime.JAVA_21,
+			runtime: Runtime.JAVA_11,
 			fileName: `${APP_NAME}.jar`,
 			functionName: `${APP_NAME}-${props.stage}`,
 			handler:
@@ -92,17 +90,9 @@ export class SingleContributionSalesforceWrites extends GuStack {
 
 		lambda.addToRolePolicy(getSecretValuePolicyStatement);
 
-		const snsTopic = new Topic(this, `${APP_NAME}-topic`, {
-			topicName: `${APP_NAME}-topic-${props.stage}`,
-		});
-
-		snsTopic.addSubscription(
-			new EmailSubscription('supporter.revenue.engine@guardian.co.uk'),
-		);
-
 		new GuAlarm(this, `${APP_NAME}-alarm`, {
 			app: APP_NAME,
-			snsTopicName: snsTopic.topicName,
+			snsTopicName: `alarms-handler-topic-${this.stage}`,
 			alarmName: `${this.stage}: Failed to sync single contribution to Salesforce`,
 			alarmDescription: `Impact: A Single Contribution record has not been added to Salesforce. Fix: check logs for lambda ${lambda.functionName} and redrive from dead letter queue or, if Salesforce is preventing record creation due to a data quality issue, fix and add record manually to Salesforce`,
 			metric: deadLetterQueue

@@ -20,16 +20,17 @@ import java.time.{LocalDate, LocalDateTime}
 import scala.collection.immutable.ListMap
 import math.Ordered.orderingToOrdered
 
-object GetRefundInvoiceDetailsLive:
+object GetRefundInvoiceDetailsLive {
   val layer: URLayer[ZuoraGet, GetRefundInvoiceDetails] =
     ZLayer.fromFunction(GetRefundInvoiceDetailsLive(_))
+}
 
 private class GetRefundInvoiceDetailsLive(zuoraGet: ZuoraGet) extends GetRefundInvoiceDetails {
   private def getInvoiceItemsQuery(subscriptionName: SubscriptionName) =
-    s"select Id, ChargeAmount, TaxAmount, ChargeDate, InvoiceId FROM InvoiceItem where SubscriptionNumber = '${subscriptionName.value}'"
+    s"select Id, AppliedToInvoiceItemId, ChargeAmount, TaxAmount, ChargeDate, InvoiceId FROM InvoiceItem where SubscriptionNumber = '${subscriptionName.value}'"
   private def getTaxationItemsQuery(invoiceId: String) =
     s"select Id, InvoiceItemId, InvoiceId from TaxationItem where InvoiceId = '$invoiceId'"
-  override def get(subscriptionName: SubscriptionName): IO[ErrorResponse, RefundInvoiceDetails] = {
+  override def get(subscriptionName: SubscriptionName): Task[RefundInvoiceDetails] = {
     for {
       invoiceItems <- zuoraGet
         .post[PostBody, InvoiceItemsResponse](
@@ -60,10 +61,11 @@ private class GetRefundInvoiceDetailsLive(zuoraGet: ZuoraGet) extends GetRefundI
       negativeInvoiceId,
       negativeInvoiceItems.map(i =>
         InvoiceItemWithTaxDetails(
-          i.Id,
-          i.ChargeDate,
-          i.ChargeAmount,
-          if (i.TaxAmount != 0) {
+          Id = i.Id,
+          AppliedToInvoiceItemId = i.AppliedToInvoiceItemId,
+          ChargeDate = i.ChargeDate,
+          ChargeAmount = i.ChargeAmount,
+          TaxDetails = if (i.TaxAmount != 0) {
             println(s"Tax amount for invoice item $i is ${i.TaxAmount} searching for matching taxation item")
             val item = taxationItems.find(_.InvoiceItemId == i.Id)
             if (item.isDefined)
@@ -74,19 +76,19 @@ private class GetRefundInvoiceDetailsLive(zuoraGet: ZuoraGet) extends GetRefundI
           } else {
             None
           },
-          i.InvoiceId,
+          InvoiceId = i.InvoiceId,
         ),
       ),
     )
   }
   private def invoiceIncludesTax(invoiceItems: List[InvoiceItem]) =
     invoiceItems.exists(_.TaxAmount > 0)
-  private def getNegativeInvoice(items: List[InvoiceItem]): ZIO[Any, ErrorResponse, (String, List[InvoiceItem])] =
+  private def getNegativeInvoice(items: List[InvoiceItem]): Task[(String, List[InvoiceItem])] =
     getInvoicesSortedByDate(items).headOption
       .map(ZIO.succeed(_))
       .getOrElse(
         ZIO.fail(
-          InternalServerError(
+          new Throwable(
             s"Empty list of invoice items in response $items this is an error " +
               s"as we need the cancellation invoice items to carry out a refund",
           ),
@@ -102,13 +104,13 @@ private class GetRefundInvoiceDetailsLive(zuoraGet: ZuoraGet) extends GetRefundI
   }
   private def getLastPaidInvoice(
       items: List[InvoiceItem],
-  ): ZIO[Any, InternalServerError, (String, List[InvoiceItem])] = {
+  ): Task[(String, List[InvoiceItem])] = {
     val sorted = getInvoicesSortedByDate(items)
     sorted.tail.headOption
       .map(ZIO.succeed(_))
       .getOrElse(
         ZIO.fail(
-          InternalServerError(
+          new Throwable(
             s"There was only one invoice item in response $items this is an error " +
               s"as we need the cancellation invoice items to carry out a refund",
           ),
@@ -131,6 +133,7 @@ private class GetRefundInvoiceDetailsLive(zuoraGet: ZuoraGet) extends GetRefundI
   case class TaxationItems(records: List[TaxationItem])
   case class InvoiceItem(
       Id: String,
+      AppliedToInvoiceItemId: Option[String] = None,
       ChargeDate: String,
       ChargeAmount: BigDecimal,
       TaxAmount: BigDecimal,
@@ -147,7 +150,7 @@ private class GetRefundInvoiceDetailsLive(zuoraGet: ZuoraGet) extends GetRefundI
 }
 
 trait GetRefundInvoiceDetails {
-  def get(subscriptionName: SubscriptionName): IO[ErrorResponse, RefundInvoiceDetails]
+  def get(subscriptionName: SubscriptionName): Task[RefundInvoiceDetails]
 }
 case class RefundInvoiceDetails(
     refundAmount: BigDecimal,
@@ -157,18 +160,20 @@ case class RefundInvoiceDetails(
 case class TaxDetails(amount: BigDecimal, taxationId: String)
 case class InvoiceItemWithTaxDetails(
     Id: String,
+    AppliedToInvoiceItemId: Option[String] = None,
     ChargeDate: String,
     ChargeAmount: BigDecimal,
     TaxDetails: Option[TaxDetails],
     InvoiceId: String,
 ) {
-  def amountWithTax = ChargeAmount + TaxDetails.map(_.amount).getOrElse(0)
+  def taxAmount = TaxDetails.map(_.amount).getOrElse(BigDecimal(0))
+  def amountWithTax = ChargeAmount + taxAmount
   def chargeDateAsDate = LocalDate.parse(ChargeDate, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
 }
 
 object GetRefundInvoiceDetails {
   def get(
       subscriptionName: SubscriptionName,
-  ): ZIO[GetRefundInvoiceDetails, ErrorResponse, RefundInvoiceDetails] =
+  ): RIO[GetRefundInvoiceDetails, RefundInvoiceDetails] =
     ZIO.serviceWithZIO[GetRefundInvoiceDetails](_.get(subscriptionName))
 }

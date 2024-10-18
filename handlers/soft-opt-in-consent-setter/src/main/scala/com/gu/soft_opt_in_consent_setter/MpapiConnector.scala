@@ -9,7 +9,7 @@ import scalaj.http.{Http, HttpResponse}
 import scala.util.Try
 
 case class MobileSubscriptions(subscriptions: List[MobileSubscription])
-case class MobileSubscription(valid: Boolean)
+case class MobileSubscription(valid: Boolean, softOptInProductName: String)
 
 class MpapiConnector(config: MpapiConfig) {
 

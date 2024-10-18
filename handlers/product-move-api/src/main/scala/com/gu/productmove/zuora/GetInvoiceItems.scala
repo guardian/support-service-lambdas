@@ -21,18 +21,21 @@ import java.time.{LocalDate, LocalDateTime}
 import scala.collection.immutable.ListMap
 import scala.math.Ordered.orderingToOrdered
 
-object GetInvoiceItemsLive:
+object GetInvoiceItemsLive {
   val layer: URLayer[ZuoraGet, GetInvoiceItems] = ZLayer.fromFunction(GetInvoiceItemsLive(_))
+}
 
-private class GetInvoiceItemsLive(zuoraGet: ZuoraGet) extends GetInvoiceItems:
-  override def get(invoiceId: String): IO[ErrorResponse, GetInvoiceItemsResponse] =
+private class GetInvoiceItemsLive(zuoraGet: ZuoraGet) extends GetInvoiceItems {
+  override def get(invoiceId: String): Task[GetInvoiceItemsResponse] =
     zuoraGet.get[GetInvoiceItemsResponse](
       uri"invoices/$invoiceId/items",
       ZuoraRestBody.ZuoraSuccessCheck.None,
     )
+}
 
-trait GetInvoiceItems:
-  def get(invoiceId: String): IO[ErrorResponse, GetInvoiceItemsResponse]
+trait GetInvoiceItems {
+  def get(invoiceId: String): Task[GetInvoiceItemsResponse]
+}
 
 object GetInvoiceItems {
 
@@ -42,6 +45,6 @@ object GetInvoiceItems {
   given JsonDecoder[InvoiceItem] = DeriveJsonDecoder.gen[InvoiceItem]
   given JsonDecoder[GetInvoiceItemsResponse] = DeriveJsonDecoder.gen[GetInvoiceItemsResponse]
 
-  def get(invoiceId: String): ZIO[GetInvoiceItems, ErrorResponse, GetInvoiceItemsResponse] =
+  def get(invoiceId: String): RIO[GetInvoiceItems, GetInvoiceItemsResponse] =
     ZIO.serviceWithZIO[GetInvoiceItems](_.get(invoiceId))
 }

@@ -25,11 +25,11 @@ class UpdateSalesforceIdentityIdEffectsTest extends AnyFlatSpec with Matchers {
     val actual = for {
       sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[SFAuthConfig]
       response = RawEffects.response
-      auth <- SalesforceClient(response, sfConfig).value.toDisjunction
+      auth <- SalesforceClient.auth(response, sfConfig)
       updateSalesforceIdentityId = UpdateSalesforceIdentityId(auth.wrapWith(JsonHttp.patch))
       _ <- updateSalesforceIdentityId.runRequestMultiArg(testContact, IdentityId(unique)).toDisjunction
       getSalesforceIdentityId = GetSalesforceIdentityId(auth.wrapWith(JsonHttp.get))
-      identityId <- getSalesforceIdentityId(testContact).value.toDisjunction
+      identityId <- getSalesforceIdentityId(testContact).toDisjunction
     } yield identityId
 
     actual should be(Right(IdentityId(unique)))

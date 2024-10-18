@@ -7,6 +7,7 @@ import sttp.client3._
 import sttp.client3.circe._
 
 import scala.annotation.tailrec
+import scala.concurrent.duration.DurationInt
 
 case class ZuoraAccountMoveSubscriptionCommand(
     crmId: String,
@@ -68,6 +69,7 @@ object Zuora {
     val errMsg = (reason: String) =>
       s"Failed to update subscription '${subscription.subscriptionNumber}' with $update. Reason: $reason"
     basicRequest
+      .readTimeout(2.minutes)
       .put(uri"${config.baseUrl}/subscriptions/${subscription.subscriptionNumber}")
       .header("Authorization", s"Bearer ${accessToken.access_token}")
       .body(update)
@@ -114,6 +116,7 @@ object Zuora {
       s"Failed to update subscription '${subscription.subscriptionNumber}' " +
         s"with $updateCommandData. Reason: $reason"
     basicRequest
+      .readTimeout(2.minutes)
       .put(uri"${config.baseUrl}/accounts/${subscription.accountNumber}")
       .header("Authorization", s"Bearer ${accessToken.access_token}")
       .body(updateCommandData)

@@ -35,17 +35,8 @@ case class SalesforceAuthDetails(access_token: String, instance_url: String)
 given JsonDecoder[SalesforceAuthDetails] = DeriveJsonDecoder.gen[SalesforceAuthDetails]
 
 trait SalesforceClient {
-  def get[Response: JsonDecoder](relativeUrl: Uri): IO[ErrorResponse, Response]
-  def post[Request: JsonEncoder, Response: JsonDecoder](input: Request, relativeUrl: Uri): IO[ErrorResponse, Response]
-}
-
-object SalesforceClient {
-  def get[Response: JsonDecoder](relativeUrl: Uri): ZIO[SalesforceClient, ErrorResponse, Response] =
-    ZIO.environmentWithZIO(_.get.get(relativeUrl))
-  def post[Request: JsonEncoder, Response: JsonDecoder](
-      input: Request,
-      relativeUrl: Uri,
-  ): ZIO[SalesforceClient, ErrorResponse, Response] = ZIO.environmentWithZIO(_.get.post(input, relativeUrl))
+  def get[Response: JsonDecoder](relativeUrl: Uri): Task[Response]
+  def post[Request: JsonEncoder, Response: JsonDecoder](input: Request, relativeUrl: Uri): Task[Response]
 }
 
 object SalesforceClientLive {
@@ -92,7 +83,7 @@ object SalesforceClientLive {
 
       } yield new SalesforceClient {
 
-        override def get[Response: JsonDecoder](relativeUrl: Uri): IO[ErrorResponse, Response] = {
+        override def get[Response: JsonDecoder](relativeUrl: Uri): Task[Response] = {
           val absoluteUri = base_uri.resolve(relativeUrl)
 
           basicRequest
@@ -112,13 +103,12 @@ object SalesforceClientLive {
               response.body
             }
             .absolve
-            .mapError(e => InternalServerError(e.toString))
         }
 
         override def post[Request: JsonEncoder, Response: JsonDecoder](
             input: Request,
             relativeUrl: Uri,
-        ): ZIO[Any, ErrorResponse, Response] = {
+        ): Task[Response] = {
           val absoluteUri = base_uri.resolve(relativeUrl)
 
           basicRequest
@@ -140,7 +130,6 @@ object SalesforceClientLive {
               response.body
             }
             .absolve
-            .mapError(e => InternalServerError(e.toString))
         }
       },
     )

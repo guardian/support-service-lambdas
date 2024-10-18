@@ -16,7 +16,7 @@ object AwsCredentialsLive {
   val layer: Layer[Throwable, AwsCredentialsProvider] =
     ZLayer.scoped(ZIO.fromAutoCloseable(ZIO.attempt(impl)))
 
-  private def impl: AwsCredentialsProviderChain =
+  def impl: AwsCredentialsProviderChain =
     AwsCredentialsProviderChain
       .builder()
       .credentialsProviders(

@@ -63,4 +63,14 @@ class ConsentsCalculator(consentsMappings: Map[String, Set[String]]) {
     consents.map(ConsentsObject(_, state)).asJson.toString()
   }
 
+  def removeSimilarGuardianProductFromSet(consents: Set[String]): Set[String] = {
+    // This method was added during https://github.com/guardian/support-service-lambdas/pull/2130
+    // for the sole purpose of removing similar_guardian_products to the set of consents that are
+    // passed sendCancellationConsents. If one day more than one consent needs to be excluded from
+    // being turned off, then the author of the change can adopt the same method, but should
+    // probably rename this function
+
+    consents - "similar_guardian_products"
+  }
+
 }

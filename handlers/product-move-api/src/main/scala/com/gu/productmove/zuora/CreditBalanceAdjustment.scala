@@ -13,16 +13,17 @@ given JsonEncoder[RequestBody] = DeriveJsonEncoder.gen[RequestBody]
 case class Res(Id: String)
 given JsonDecoder[Res] = DeriveJsonDecoder.gen[Res]
 
-object CreditBalanceAdjustmentLive:
+object CreditBalanceAdjustmentLive {
   val layer: URLayer[ZuoraGet, CreditBalanceAdjustment] = ZLayer.fromFunction(CreditBalanceAdjustmentLive(_))
+}
 
-private class CreditBalanceAdjustmentLive(zuoraGet: ZuoraGet) extends CreditBalanceAdjustment:
+private class CreditBalanceAdjustmentLive(zuoraGet: ZuoraGet) extends CreditBalanceAdjustment {
   override def adjust(
       amount: BigDecimal,
       comment: String,
       invoiceId: String,
       `type`: String,
-  ): IO[ErrorResponse, Res] = {
+  ): Task[Res] = {
     val body = RequestBody(amount, comment, invoiceId, `type`)
 
     zuoraGet.post[RequestBody, Res](
@@ -31,14 +32,16 @@ private class CreditBalanceAdjustmentLive(zuoraGet: ZuoraGet) extends CreditBala
       ZuoraSuccessCheck.SuccessCheckCapitalised,
     )
   }
+}
 
-trait CreditBalanceAdjustment:
+trait CreditBalanceAdjustment {
   def adjust(
       amount: BigDecimal,
       comment: String,
       invoiceId: String,
       `type`: String,
-  ): ZIO[CreditBalanceAdjustment, ErrorResponse, Res]
+  ): RIO[CreditBalanceAdjustment, Res]
+}
 
 object CreditBalanceAdjustment {
   def adjust(
@@ -46,6 +49,6 @@ object CreditBalanceAdjustment {
       comment: String,
       invoiceId: String,
       `type`: String,
-  ): ZIO[CreditBalanceAdjustment, ErrorResponse, Res] =
+  ): RIO[CreditBalanceAdjustment, Res] =
     ZIO.serviceWithZIO[CreditBalanceAdjustment](_.adjust(amount, comment, invoiceId, `type`))
 }

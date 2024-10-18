@@ -2,17 +2,13 @@
 
 This is a lambda that alters a user's Soft Opt-In setting based on the subscriptions they acquire and cancel.
 
-The lambda will fetch 200 subscriptions at a time from Salesforce, process them, set the consents in IDAPI, and update
-their records in Salesforce with the outcome. It will first process acquisitions and then process cancellations.
+The lambda will fetch 200 subscriptions at a time from Salesforce, process them, set the consents in IDAPI, and update their records in Salesforce with the outcome. It will first process acquisitions and then process cancellations.
 
-For an acquisition, it will enable the Soft Opt-In consents associated with that subscription according to the consents
-mapping.
+For an acquisition, it will enable the Soft Opt-In consents associated with that subscription according to the consents mapping.
 
-For a cancellation, it will disable the Soft Opt-In consents that are associated only with the subscription being
-cancelled, out of all the products the user has active.
+For a cancellation, it will disable the Soft Opt-In consents that are associated only with the subscription being cancelled, except similar_guardian_products
 
-If it is unable to update a record, it will increment the number of retries and try again later in a subsequent run. It
-will only attempt to update records 5 times.
+If it is unable to update a record, it will increment the number of retries and try again later in a subsequent run. It will only attempt to update records 5 times.
 
 ## Metrics
 

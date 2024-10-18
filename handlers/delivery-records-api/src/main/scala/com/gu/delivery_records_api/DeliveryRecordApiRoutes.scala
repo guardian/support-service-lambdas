@@ -5,7 +5,10 @@ import cats.effect.Effect
 import cats.syntax.all._
 import com.gu.delivery_records_api.service.createproblem.{CreateDeliveryProblem, CreateDeliveryProblemService}
 import com.gu.delivery_records_api.service.getrecords.{DeliveryRecordsApiResponse, GetDeliveryRecordsService}
-import com.gu.delivery_records_api.service.{DeliveryRecordServiceGenericError, DeliveryRecordServiceSubscriptionNotFound}
+import com.gu.delivery_records_api.service.{
+  DeliveryRecordServiceGenericError,
+  DeliveryRecordServiceSubscriptionNotFound,
+}
 import com.gu.salesforce.{Contact, SalesforceHandlerSupport}
 import io.circe.generic.auto._
 import org.http4s.circe.CirceEntityDecoder._
@@ -17,15 +20,18 @@ import java.time.LocalDate
 
 case class DeliveryRecordApiRoutesError(message: String)
 
-class DeliveryRecordApiRoutes[F[_]: Effect](createDeliveryProblemService: CreateDeliveryProblemService[F], getDeliveryRecordsService: GetDeliveryRecordsService[F]) {
+class DeliveryRecordApiRoutes[F[_]: Effect](
+    createDeliveryProblemService: CreateDeliveryProblemService[F],
+    getDeliveryRecordsService: GetDeliveryRecordsService[F],
+) {
 
   private object http4sDsl extends Http4sDsl[F]
   import http4sDsl._
 
   val routes: HttpRoutes[F] = HttpRoutes.of[F] {
 
-    case request @ GET -> Root / "delivery-records" / subscriptionNumber => (
-      for {
+    case request @ GET -> Root / "delivery-records" / subscriptionNumber =>
+      (for {
         contact <- getContactFromHeaders(request)
         startDate <- parseDateFromQueryString(request, "startDate")
         endDate <- parseDateFromQueryString(request, "endDate")
@@ -38,8 +44,8 @@ class DeliveryRecordApiRoutes[F[_]: Effect](createDeliveryProblemService: Create
         )
       } yield Ok(records)).merge.flatten
 
-    case request @ GET -> Root / "delivery-records" / subscriptionNumber / "cancel" => (
-      for {
+    case request @ GET -> Root / "delivery-records" / subscriptionNumber / "cancel" =>
+      (for {
         contact <- getContactFromHeaders(request)
         cancellationEffectiveDate <- parseDateFromQueryString(request, "effectiveCancellationDate")
         records <- getDeliveryRecords(
@@ -51,8 +57,8 @@ class DeliveryRecordApiRoutes[F[_]: Effect](createDeliveryProblemService: Create
         )
       } yield Ok(records)).merge.flatten
 
-    case request @ POST -> Root / "delivery-records" / subscriptionNumber => (
-      for {
+    case request @ POST -> Root / "delivery-records" / subscriptionNumber =>
+      (for {
         contact <- getContactFromHeaders(request)
         body <- request
           .attemptAs[CreateDeliveryProblem]
@@ -76,18 +82,18 @@ class DeliveryRecordApiRoutes[F[_]: Effect](createDeliveryProblemService: Create
   private def getContactFromHeaders(request: Request[F]): EitherT[F, F[Response[F]], Contact] = {
     SalesforceHandlerSupport
       .extractContactFromHeaders(
-        request.headers.toList.map(header => header.name.value -> header.value),
+        request.headers.headers.map(header => header.name.toString -> header.value),
       )
       .toEitherT[F]
       .leftMap(error => BadRequest(error))
   }
 
   private def getDeliveryRecords(
-    subscriptionNumber: String,
-    contact: Contact,
-    optionalStartDate: Option[LocalDate],
-    optionalEndDate: Option[LocalDate],
-    optionalCancellationEffectiveDate: Option[LocalDate],
+      subscriptionNumber: String,
+      contact: Contact,
+      optionalStartDate: Option[LocalDate],
+      optionalEndDate: Option[LocalDate],
+      optionalCancellationEffectiveDate: Option[LocalDate],
   ): EitherT[F, F[Response[F]], DeliveryRecordsApiResponse] =
     getDeliveryRecordsService
       .getDeliveryRecordsForSubscription(
@@ -105,15 +111,15 @@ class DeliveryRecordApiRoutes[F[_]: Effect](createDeliveryProblemService: Create
       }
 
   private def parseDateFromQueryString(
-    request: Request[F],
-    queryParameterKey: String,
+      request: Request[F],
+      queryParameterKey: String,
   ): EitherT[F, F[Response[F]], Option[LocalDate]] =
     request.params
       .get(queryParameterKey)
       .traverse[RouteResult, LocalDate] { queryStringValue =>
         Either
           .catchNonFatal(LocalDate.parse(queryStringValue))
-          .leftMap(ex =>
+          .leftMap(_ =>
             BadRequest(
               DeliveryRecordApiRoutesError(
                 s"$queryParameterKey should be formatted yyyy-MM-dd",

@@ -22,11 +22,13 @@ import com.gu.productmove.zuora.Fixtures.{
 }
 import com.gu.productmove.zuora.GetInvoice.GetInvoiceResponse
 import com.gu.productmove.zuora.GetInvoiceItems.{GetInvoiceItemsResponse, InvoiceItem}
-import com.gu.productmove.{EmailMessage, EmailPayload, RCtoSPEmailPayloadProductSwitchAttributes}
+import com.gu.productmove.{EmailMessage, EmailPayload, IdentityId, RCtoSPEmailPayloadProductSwitchAttributes}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.util.config.Stage
 
 import java.time.LocalDate
+
+val someIdentityId: Some[IdentityId] = Some(IdentityId("12345"))
 
 //======================================================================
 // Stubs/test data/Mock Data
@@ -45,7 +47,7 @@ val ratePlanCharge1 = RatePlanCharge(
   effectiveStartDate = LocalDate.of(2017, 12, 15),
   effectiveEndDate = LocalDate.of(2020, 11, 29),
   chargedThroughDate = Some(LocalDate.of(2022, 9, 29)),
-  billingPeriod = Monthly,
+  billingPeriod = Some(Monthly),
 )
 
 val ratePlanCharge2 = RatePlanCharge(
@@ -58,7 +60,7 @@ val ratePlanCharge2 = RatePlanCharge(
   effectiveStartDate = LocalDate.of(2021, 1, 15),
   effectiveEndDate = LocalDate.of(2022, 1, 15),
   chargedThroughDate = Some(LocalDate.of(2021, 2, 15)),
-  billingPeriod = Monthly,
+  billingPeriod = Some(Monthly),
 )
 
 val getSubscriptionResponse = GetSubscriptionResponse(
@@ -103,7 +105,26 @@ val getSubscriptionForCancelResponse = GetSubscriptionToCancelResponse(
             .productRatePlanChargeId
             .value,
           name = "Contribution",
-          price = 5.000000000,
+          price = Some(5.000000000),
+          number = "number",
+          effectiveStartDate = LocalDate.of(2017, 12, 15),
+          effectiveEndDate = LocalDate.of(2020, 11, 29),
+          chargedThroughDate = Some(LocalDate.of(2022, 9, 29)),
+          billingPeriod = Some("Monthly"),
+        ),
+      ),
+    ),
+    GetSubscriptionToCancel.RatePlan(
+      id = "89ad8casd9c0asdcaj89sdc98as",
+      productName = "Discounts",
+      productRatePlanId = "a_discount_rate_plan_id",
+      ratePlanName = "RP2",
+      lastChangeType = None,
+      ratePlanCharges = List(
+        GetSubscriptionToCancel.RatePlanCharge(
+          productRatePlanChargeId = "a_discount_rate_plan_charge_id",
+          name = "Contribution",
+          price = None,
           number = "number",
           effectiveStartDate = LocalDate.of(2017, 12, 15),
           effectiveEndDate = LocalDate.of(2020, 11, 29),
@@ -132,7 +153,7 @@ val getSubscriptionResponse2 = GetSubscriptionResponse(
           number = "C-00732721",
           price = Some(5.000000000),
           currency = "GBP",
-          billingPeriod = Monthly,
+          billingPeriod = Some(Monthly),
           effectiveStartDate = LocalDate.of(2022, 10, 28),
           effectiveEndDate = LocalDate.of(2022, 10, 28),
           chargedThroughDate = Some(LocalDate.of(2022, 10, 28)),
@@ -153,7 +174,7 @@ val getSubscriptionResponse2 = GetSubscriptionResponse(
           number = "C-00732747",
           price = Some(30.000000000),
           currency = "GBP",
-          billingPeriod = Monthly,
+          billingPeriod = Some(Monthly),
           chargedThroughDate = Some(LocalDate.of(2022, 11, 28)),
           effectiveStartDate = LocalDate.of(2022, 10, 28),
           effectiveEndDate = LocalDate.of(2023, 10, 28),
@@ -206,7 +227,7 @@ val getSubscriptionResponseNoChargedThroughDate = GetSubscriptionResponse(
           effectiveStartDate = LocalDate.of(2017, 12, 15),
           effectiveEndDate = LocalDate.of(2020, 11, 29),
           chargedThroughDate = None,
-          billingPeriod = Monthly,
+          billingPeriod = Some(Monthly),
         ),
       ),
     ),
@@ -220,7 +241,7 @@ val getAccountResponse = GetAccountResponse(
   BasicInfo(
     "id",
     DefaultPaymentMethod("paymentMethodId", Some(LocalDate.of(2030, 12, 1))),
-    Some("12345"),
+    someIdentityId,
     "sfContactId",
     balance = 0,
     currency = Currency.GBP,
@@ -318,7 +339,7 @@ val emailMessageBody = EmailMessage(
   ),
   "SV_RCtoSP_Switch",
   "sfContactId",
-  Some("12345"),
+  someIdentityId,
 )
 
 val emailMessageBodyRefund = EmailMessage(
@@ -339,7 +360,7 @@ val emailMessageBodyRefund = EmailMessage(
   ),
   "SV_RCtoSP_Switch",
   "sfContactId",
-  Some("12345"),
+  someIdentityId,
 )
 
 val emailMessageBodyNoPaymentOrRefund = EmailMessage(
@@ -360,7 +381,7 @@ val emailMessageBodyNoPaymentOrRefund = EmailMessage(
   ),
   "SV_RCtoSP_Switch",
   "sfContactId",
-  Some("12345"),
+  someIdentityId,
 )
 
 val emailMessageLowCharge = EmailMessage(
@@ -381,7 +402,7 @@ val emailMessageLowCharge = EmailMessage(
   ),
   "SV_RCtoSP_Switch",
   "sfContactId",
-  Some("12345"),
+  someIdentityId,
 )
 
 // MembershipToRecurringContribution
@@ -402,7 +423,7 @@ val emailMessageBody2 = EmailMessage(
   ),
   "SV_MBtoRC_Switch",
   "sfContactId",
-  Some("12345"),
+  someIdentityId,
 )
 
 val refundInput1 = RefundInput(

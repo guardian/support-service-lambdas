@@ -11,6 +11,7 @@ sealed trait HomeDeliveryPlanId
 sealed trait DigipackPlanId
 sealed trait GuardianWeeklyDomestic
 sealed trait GuardianWeeklyRow
+sealed trait TierThreePlanId
 sealed trait DigitalVoucherPlanId
 sealed trait NationalDeliveryPlanId
 
@@ -69,7 +70,9 @@ object PlanId {
 
   case object DigipackAnnual extends PlanId("digipack_annual") with DigipackPlanId
 
-  case object GuardianWeeklyDomestic6for6 extends PlanId("guardian_weekly_domestic_6for6") with GuardianWeeklyDomestic
+  case object GuardianWeeklyDomesticMonthly
+      extends PlanId("guardian_weekly_domestic_monthly")
+      with GuardianWeeklyDomestic
 
   case object GuardianWeeklyDomesticQuarterly
       extends PlanId("guardian_weekly_domestic_quarterly")
@@ -77,11 +80,19 @@ object PlanId {
 
   case object GuardianWeeklyDomesticAnnual extends PlanId("guardian_weekly_domestic_annual") with GuardianWeeklyDomestic
 
-  case object GuardianWeeklyROW6for6 extends PlanId("guardian_weekly_row_6for6") with GuardianWeeklyRow
+  case object GuardianWeeklyROWMonthly extends PlanId("guardian_weekly_row_monthly") with GuardianWeeklyRow
 
   case object GuardianWeeklyROWQuarterly extends PlanId("guardian_weekly_row_quarterly") with GuardianWeeklyRow
 
   case object GuardianWeeklyROWAnnual extends PlanId("guardian_weekly_row_annual") with GuardianWeeklyRow
+
+  case object TierThreeDomesticMonthly extends PlanId("tier_three_domestic_monthly") with TierThreePlanId
+
+  case object TierThreeDomesticAnnual extends PlanId("tier_three_domestic_annual") with TierThreePlanId
+
+  case object TierThreeROWMonthly extends PlanId("tier_three_row_monthly") with TierThreePlanId
+
+  case object TierThreeROWAnnual extends PlanId("tier_three_row_annual") with TierThreePlanId
 
   case object DigitalVoucherWeekend extends PlanId("digital_voucher_weekend") with DigitalVoucherPlanId
 
@@ -102,7 +113,6 @@ object PlanId {
   case object DigitalVoucherSixday extends PlanId("digital_voucher_sixday") with DigitalVoucherPlanId
 
   case object DigitalVoucherSixdayPlus extends PlanId("digital_voucher_sixday_plus") with DigitalVoucherPlanId
-
 
   case object NationalDeliveryWeekend extends PlanId("national_delivery_weekend") with NationalDeliveryPlanId
 
@@ -152,13 +162,13 @@ object PlanId {
   )
 
   val enabledGuardianWeeklyDomesticPlans = List(
-    GuardianWeeklyDomestic6for6,
+    GuardianWeeklyDomesticMonthly,
     GuardianWeeklyDomesticQuarterly,
     GuardianWeeklyDomesticAnnual,
   )
 
   val enabledGuardianWeeklyROWPlans = List(
-    GuardianWeeklyROW6for6,
+    GuardianWeeklyROWMonthly,
     GuardianWeeklyROWQuarterly,
     GuardianWeeklyROWAnnual,
   )
@@ -182,12 +192,17 @@ object PlanId {
     NationalDeliveryWeekend,
   )
 
+  val enabledTierThreePlans = List(
+    TierThreeDomesticMonthly,
+    TierThreeDomesticAnnual,
+    TierThreeROWMonthly,
+    TierThreeROWAnnual,
+  )
+
   val supportedPlans: List[PlanId] =
-    enabledVoucherPlans ++ enabledSupporterPlusPlans ++ enabledContributionPlans ++ enabledHomeDeliveryPlans ++ enabledDigipackPlans ++
-      enabledGuardianWeeklyDomesticPlans ++ enabledGuardianWeeklyROWPlans ++ enabledDigitalVoucherPlans ++ enabledNationalDeliveryPlans
+    enabledVoucherPlans ++ enabledSupporterPlusPlans ++ enabledContributionPlans ++ enabledHomeDeliveryPlans ++
+      enabledDigipackPlans ++ enabledGuardianWeeklyDomesticPlans ++ enabledGuardianWeeklyROWPlans ++
+      enabledDigitalVoucherPlans ++ enabledNationalDeliveryPlans ++ enabledTierThreePlans
 
   def fromName(name: String): Option[PlanId] = supportedPlans.find(_.name == name)
 }
-
-
-

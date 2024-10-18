@@ -386,11 +386,12 @@ Resources:
       Condition: CreateProdMonitoring
       Properties:
         AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:retention-dev
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-PROD
         AlarmName:
           !Sub
             - 5XX rate from ${ApiName}
             - { ApiName: !FindInMap [StageMap, !Ref Stage, ApiName] }
+        AlarmDescription: Holiday stop API exceeded the allowed 5XX error rate
         ComparisonOperator: GreaterThanThreshold
         Dimensions:
           - Name: ApiName

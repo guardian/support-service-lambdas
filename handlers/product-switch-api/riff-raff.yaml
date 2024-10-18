@@ -1,0 +1,25 @@
+stacks:
+- support
+regions:
+- eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  product-switch-api-cloudformation:
+    type: cloud-formation
+    app: product-switch-api
+    parameters:
+      templateStagePaths:
+        CODE: product-switch-api-CODE.template.json
+        PROD: product-switch-api-PROD.template.json
+
+  product-switch-api:
+    type: aws-lambda
+    parameters:
+      fileName: product-switch-api.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+      - product-switch-api-
+    dependencies: [product-switch-api-cloudformation]

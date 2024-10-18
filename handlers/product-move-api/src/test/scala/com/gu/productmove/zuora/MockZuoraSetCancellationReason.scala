@@ -2,7 +2,7 @@ package com.gu.productmove.zuora
 
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
 import com.gu.productmove.zuora.model.SubscriptionName
-import zio.ZIO
+import zio.*
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -15,13 +15,13 @@ class MockZuoraSetCancellationReason(stubs: Map[(SubscriptionName, Int, String),
       subscriptionName: SubscriptionName,
       subscriptionVersion: Int,
       userCancellationReason: String,
-  ): ZIO[Any, ErrorResponse, UpdateResponse] = {
+  ): Task[UpdateResponse] = {
     requests += ((subscriptionName, subscriptionVersion, userCancellationReason))
     stubs.get(subscriptionName, subscriptionVersion, userCancellationReason) match {
       case Some(response) => ZIO.succeed(response)
       case None =>
         ZIO.fail(
-          InternalServerError(
+          new Throwable(
             s"MockZuoraSetCancellationReason: No response stubbed for input: (${subscriptionName.value}, $subscriptionVersion, $userCancellationReason)",
           ),
         )

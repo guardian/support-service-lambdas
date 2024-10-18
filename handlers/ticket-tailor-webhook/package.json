@@ -1,0 +1,22 @@
+{
+  "name": "ticket-tailor-webhook",
+  "scripts": {
+    "test": "jest --group=-integration",
+    "it-test": "jest --group=integration",
+    "type-check": "tsc --noEmit",
+    "build": "esbuild --bundle --platform=node --target=node18 --outfile=target/index.js src/index.ts",
+    "lint": "eslint src/**/*.ts",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr ticket-tailor-webhook.zip ./*.js",
+    "check-formatting": "prettier --check **.ts",
+    "fix-formatting": "prettier --write **.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cloudwatch": "3.670.0",
+    "@aws-sdk/client-secrets-manager": "3.665.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.143",
+    "fetch-mock": "^11.1.1"
+  }
+}

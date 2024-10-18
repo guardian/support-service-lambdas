@@ -1,14 +1,18 @@
 /**
  * @group integration
  */
-import { checkDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import { cancelSubscription } from '@modules/zuora/cancelSubscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import { discountEndpoint } from '../src/discountEndpoint';
-import { previewDiscountSchema } from '../src/responseSchema';
-import { createDigitalSubscription } from './helpers';
+import { previewDiscountEndpoint } from '../src/discountEndpoint';
+import { EligibilityCheckResponseBody } from '../src/responseSchema';
+import {
+	createDigitalSubscription,
+	createSupporterPlusSubscription,
+} from './helpers';
+import { zuoraDateFormat } from '@modules/zuora/common';
+import { validationRequirements } from '../src/eligibilityChecker';
 
 const stage: Stage = 'CODE';
 const validIdentityId = '200175946';
@@ -18,24 +22,14 @@ test("Subscriptions which don't belong to the provided identity Id are not eligi
 	const zuoraClient = await ZuoraClient.create(stage);
 
 	console.log('Creating a new digital subscription');
-	const subscribeResponse = await createDigitalSubscription(zuoraClient, true);
-
-	const subscriptionNumber = checkDefined(
-		subscribeResponse[0]?.SubscriptionNumber,
-		'SubscriptionNumber was undefined in response from Zuora',
-	);
-
-	const requestBody = {
-		subscriptionNumber: subscriptionNumber,
-		preview: true,
-	};
+	const subscriptionNumber = await createDigitalSubscription(zuoraClient, true);
 
 	await expect(async () => {
-		await discountEndpoint(
+		await previewDiscountEndpoint(
 			stage,
-			true,
 			{ 'x-identity-id': invalidIdentityId },
-			JSON.stringify(requestBody),
+			subscriptionNumber,
+			dayjs(),
 		);
 	}).rejects.toThrow('does not belong to identity ID');
 
@@ -44,6 +38,7 @@ test("Subscriptions which don't belong to the provided identity Id are not eligi
 		zuoraClient,
 		subscriptionNumber,
 		dayjs().add(1, 'month'),
+		true,
 	);
 	expect(cancellationResult.success).toEqual(true);
 }, 30000);
@@ -51,32 +46,23 @@ test('Subscriptions on the old price are not eligible', async () => {
 	const zuoraClient = await ZuoraClient.create(stage);
 
 	console.log('Creating a new digital subscription');
-	const subscribeResponse = await createDigitalSubscription(zuoraClient, true);
-
-	const subscriptionNumber = checkDefined(
-		subscribeResponse[0]?.SubscriptionNumber,
-		'SubscriptionNumber was undefined in response from Zuora',
-	);
-
-	const requestBody = {
-		subscriptionNumber: subscriptionNumber,
-		preview: true,
-	};
+	const subscriptionNumber = await createDigitalSubscription(zuoraClient, true);
 
 	await expect(async () => {
-		await discountEndpoint(
+		await previewDiscountEndpoint(
 			stage,
-			true,
 			{ 'x-identity-id': validIdentityId },
-			JSON.stringify(requestBody),
+			subscriptionNumber,
+			dayjs(),
 		);
-	}).rejects.toThrow('it is not eligible for a discount');
+	}).rejects.toThrow(validationRequirements.atLeastCatalogPrice);
 
 	console.log('Cancelling the subscription');
 	const cancellationResult = await cancelSubscription(
 		zuoraClient,
 		subscriptionNumber,
 		dayjs().add(1, 'month'),
+		true,
 	);
 	expect(cancellationResult.success).toEqual(true);
 }, 30000);
@@ -84,36 +70,83 @@ test('Subscriptions on the old price are not eligible', async () => {
 test('Subscriptions on the new price are eligible', async () => {
 	const zuoraClient = await ZuoraClient.create(stage);
 
+	const today = dayjs();
+	const paymentDate = today.add(16, 'day');
+
 	console.log('Creating a new digital subscription');
-	const subscribeResponse = await createDigitalSubscription(zuoraClient, false);
-
-	const subscriptionNumber = checkDefined(
-		subscribeResponse[0]?.SubscriptionNumber,
-		'SubscriptionNumber was undefined in response from Zuora',
+	const subscriptionNumber = await createDigitalSubscription(
+		zuoraClient,
+		false,
 	);
 
-	const requestBody = {
-		subscriptionNumber: subscriptionNumber,
-		preview: true,
-	};
-
-	const result = await discountEndpoint(
+	const result = await previewDiscountEndpoint(
 		stage,
-		true,
 		{ 'x-identity-id': validIdentityId },
-		JSON.stringify(requestBody),
+		subscriptionNumber,
+		dayjs(),
 	);
-	const eligibilityCheckResult = previewDiscountSchema.parse(
-		JSON.parse(result.body),
-	);
-	expect(eligibilityCheckResult.discountedPrice).toEqual(11.24);
-	expect(eligibilityCheckResult.upToPeriodsType).toEqual('Months');
+	const eligibilityCheckResult = result as EligibilityCheckResponseBody;
+
+	const expected: EligibilityCheckResponseBody = {
+		discountedPrice: 11.24,
+		upToPeriods: 3,
+		upToPeriodsType: 'Months',
+		firstDiscountedPaymentDate: zuoraDateFormat(paymentDate),
+		nextNonDiscountedPaymentDate: zuoraDateFormat(paymentDate.add(3, 'months')),
+		nonDiscountedPayments: [
+			{ date: zuoraDateFormat(paymentDate), amount: 14.99 },
+			{ date: zuoraDateFormat(paymentDate.add(1, 'months')), amount: 14.99 },
+			{ date: zuoraDateFormat(paymentDate.add(2, 'months')), amount: 14.99 },
+		],
+	};
+	expect(eligibilityCheckResult).toEqual(expected);
 
 	console.log('Cancelling the subscription');
 	const cancellationResult = await cancelSubscription(
 		zuoraClient,
 		subscriptionNumber,
 		dayjs().add(1, 'month'),
+		true,
+	);
+	expect(cancellationResult.success).toEqual(true);
+}, 30000);
+
+test('Supporter Plus subscriptions are eligible', async () => {
+	const zuoraClient = await ZuoraClient.create(stage);
+
+	const today = dayjs();
+	const paymentDate = today.add(16, 'day');
+
+	console.log('Creating a new S+ subscription');
+	const subscriptionNumber = await createSupporterPlusSubscription(zuoraClient);
+
+	const result = await previewDiscountEndpoint(
+		stage,
+		{ 'x-identity-id': validIdentityId },
+		subscriptionNumber,
+		today.add(2, 'months').add(1, 'day'),
+	);
+	const eligibilityCheckResult = result as EligibilityCheckResponseBody;
+
+	const expected: EligibilityCheckResponseBody = {
+		discountedPrice: 0,
+		upToPeriods: 2,
+		upToPeriodsType: 'Months',
+		firstDiscountedPaymentDate: zuoraDateFormat(paymentDate),
+		nextNonDiscountedPaymentDate: zuoraDateFormat(paymentDate.add(2, 'months')),
+		nonDiscountedPayments: [
+			{ date: zuoraDateFormat(paymentDate), amount: 12 },
+			{ date: zuoraDateFormat(paymentDate.add(1, 'months')), amount: 12 },
+		],
+	};
+	expect(eligibilityCheckResult).toEqual(expected);
+
+	console.log('Cancelling the subscription');
+	const cancellationResult = await cancelSubscription(
+		zuoraClient,
+		subscriptionNumber,
+		dayjs().add(1, 'month'),
+		true,
 	);
 	expect(cancellationResult.success).toEqual(true);
 }, 30000);

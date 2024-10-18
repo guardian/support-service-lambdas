@@ -19,10 +19,10 @@ class GuardianWeeklyPlans(getStartDateFromFulfilmentFiles: (ProductType, List[Da
 
   val planInfo: List[(PlanId, PlanDescription, StartDateRules, BillingPeriod)] = List(
     (
-      GuardianWeeklyDomestic6for6,
-      PlanDescription("GW Oct 18 - Six for Six - Domestic"),
+      GuardianWeeklyDomesticMonthly,
+      PlanDescription("GW Oct 18 - Monthly - Domestic"),
       startDateRules,
-      SixWeeks,
+      Monthly,
     ),
     (
       GuardianWeeklyDomesticQuarterly,
@@ -37,10 +37,10 @@ class GuardianWeeklyPlans(getStartDateFromFulfilmentFiles: (ProductType, List[Da
       Annual,
     ),
     (
-      GuardianWeeklyROW6for6,
-      PlanDescription("GW Oct 18 - Six for Six - ROW"),
+      GuardianWeeklyROWMonthly,
+      PlanDescription("GW Oct 18 - Monthly - ROW"),
       startDateRules,
-      SixWeeks,
+      Monthly,
     ),
     (
       GuardianWeeklyROWQuarterly,

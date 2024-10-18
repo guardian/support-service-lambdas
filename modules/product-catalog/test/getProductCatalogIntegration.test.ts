@@ -12,3 +12,10 @@ test('getCatalogFromApi', async () => {
 		14.99,
 	);
 });
+
+test('getCatalogFromApi', async () => {
+	const catalog = await getProductCatalogFromApi('PROD');
+	expect(catalog.DigitalSubscription.ratePlans.Monthly.pricing.GBP).toEqual(
+		14.99,
+	);
+});

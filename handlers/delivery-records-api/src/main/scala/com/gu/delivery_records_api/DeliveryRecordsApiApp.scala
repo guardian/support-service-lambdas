@@ -11,7 +11,7 @@ import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import org.http4s.HttpRoutes
 import org.http4s.server.middleware.Logger
-import org.http4s.util.CaseInsensitiveString
+import org.typelevel.ci.CIString
 import sttp.client3.SttpBackend
 
 import scala.concurrent.ExecutionContext
@@ -46,7 +46,7 @@ object DeliveryRecordsApiApp extends LazyLogging {
     Logger.httpRoutes(
       logHeaders = true,
       logBody = true,
-      redactHeadersWhen = { headerKey: CaseInsensitiveString => headerKey.value == "x-api-key" },
+      redactHeadersWhen = { headerKey: CIString => headerKey.toString == "x-api-key" },
       logAction = Some({ message: String => IO.delay(logger.info(message)) }),
     )(routes)
 

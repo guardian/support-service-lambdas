@@ -34,7 +34,7 @@ object GetJobBatches {
       .map {
         ClientSuccess(_)
       }
-      .getOrElse(GenericError(s"unknown batch state: $state"))
+      .getOrElse(GenericError(s"unknown batch state: $state", state))
   }
 
   object Queued extends BatchState {
@@ -76,7 +76,7 @@ object GetJobBatches {
     }
     val failures = failableBatchInfos.collect { case error: ClientFailure => error }
     if (failures.nonEmpty) {
-      GenericError("errors returned : " + failures.mkString(";"))
+      GenericError("errors returned : " + failures.mkString(";"), xml.toString)
     } else {
       val successes = failableBatchInfos.collect { case ClientSuccess(batchInfo) => batchInfo }
       ClientSuccess(successes)

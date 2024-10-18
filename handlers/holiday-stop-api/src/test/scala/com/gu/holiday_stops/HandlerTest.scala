@@ -1,23 +1,15 @@
 package com.gu.holiday_stops
 
 import com.gu.effects.{FakeFetchString, SFTestEffects, TestingRawEffects}
+import com.gu.holiday_stops.TestFixtures.{asIsoDateString, gwDomesticAccount, gwDomesticSubscription, t3Account, t3Subscription}
 import com.gu.holiday_stops.ZuoraSttpEffects.ZuoraSttpEffectsOps
 import com.gu.salesforce.SalesforceHandlerSupport.{HEADER_IDENTITY_ID, HEADER_SALESFORCE_CONTACT_ID}
 import com.gu.salesforce.holiday_stops.{SalesForceHolidayStopsEffects, SalesforceHolidayStopRequestsDetail}
 import com.gu.salesforce.{IdentityId, SalesforceContactId}
 import com.gu.util.apigateway.{ApiGatewayHandler, ApiGatewayRequest}
-import com.gu.util.config.Stage
 import com.gu.util.reader.Types.ApiGatewayOp
 import com.gu.util.reader.Types.ApiGatewayOp.{ContinueProcessing, ReturnWithResponse}
-import com.gu.zuora.subscription.{
-  Credit,
-  MutableCalendar,
-  RatePlan,
-  RatePlanCharge,
-  Subscription,
-  SubscriptionName,
-  Fixtures => SubscriptionFixtures,
-}
+import com.gu.zuora.subscription.{Credit, MutableCalendar, SubscriptionName, Fixtures => SubscriptionFixtures}
 import org.scalatest.Inside.inside
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -26,10 +18,9 @@ import sttp.client3.testing.SttpBackendStub
 import zio.ZIO
 import zio.console.Console
 
-import java.io.Serializable
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters.next
-import java.time.{DayOfWeek, LocalDate}
+import java.time.{DayOfWeek, LocalDate, ZonedDateTime}
 
 class HandlerTest extends AnyFlatSpec with Matchers {
   val testId = "testGeneratedId"
@@ -69,70 +60,18 @@ class HandlerTest extends AnyFlatSpec with Matchers {
   }
   "GET /potential/<<sub name>>?startDate=...&endDate=... endpoint" should
     "calculate potential holiday stop dates and estimated credit" in {
-      MutableCalendar.setFakeToday(Some(LocalDate.parse("2019-02-01")))
-      val subscriptionName = "Sub12344"
-
-      val startDate = LocalDate.of(2019, 1, 1)
-      val endDate = startDate.plusMonths(3)
-      val customerAcceptanceDate = startDate.plusMonths(1)
-
-      val accountNumber = "123456"
-      val account = Fixtures.mkAccount()
-      val subscription = Subscription(
-        subscriptionNumber = subscriptionName,
-        termStartDate = startDate,
-        termEndDate = endDate,
-        customerAcceptanceDate = customerAcceptanceDate,
-        contractEffectiveDate = customerAcceptanceDate,
-        currentTerm = 12,
-        currentTermPeriodType = "Month",
-        autoRenew = true,
-        ratePlans = List(
-          RatePlan(
-            productName = "Guardian Weekly - Domestic",
-            ratePlanName = "GW Oct 18 - Quarterly - Domestic",
-            ratePlanCharges = List(
-              RatePlanCharge(
-                name = "GW Oct 18 - Quarterly - Domestic",
-                number = "C1",
-                37.50,
-                Some("Quarter"),
-                effectiveStartDate = startDate,
-                chargedThroughDate = Some(endDate),
-                HolidayStart__c = None,
-                HolidayEnd__c = None,
-                processedThroughDate = Some(endDate.minusMonths(3)),
-                "",
-                specificBillingPeriod = None,
-                endDateCondition = Some("Subscription_End"),
-                upToPeriodsType = None,
-                upToPeriods = None,
-                billingDay = None,
-                triggerEvent = Some("SpecificDate"),
-                triggerDate = Some(startDate),
-                discountPercentage = None,
-                effectiveEndDate = LocalDate.now,
-              ),
-            ),
-            productRatePlanId = "",
-            id = "",
-            lastChangeType = None,
-          ),
-        ),
-        "Active",
-        accountNumber = accountNumber,
-      )
+      val fakeToday = LocalDate.parse("2019-02-01")
+      MutableCalendar.setFakeToday(Some(fakeToday))
 
       val testBackend = SttpBackendStub.synchronous
         .stubZuoraAuthCall()
-        .stubZuoraAccount(accountNumber, account)
-        .stubZuoraSubscription(subscriptionName, subscription)
+        .stubZuoraAccount(gwDomesticSubscription.accountNumber, gwDomesticAccount)
+        .stubZuoraSubscription(gwDomesticSubscription.subscriptionNumber, gwDomesticSubscription)
 
       inside(
         unwrappedOp(
           Handler.operationForEffects(
             defaultTestEffects.response,
-            Stage("CODE"),
             FakeFetchString.fetchString,
             testBackend,
             "test-generated-id",
@@ -142,9 +81,9 @@ class HandlerTest extends AnyFlatSpec with Matchers {
             .steps(
               legacyPotentialIssueDateRequest(
                 productPrefix = "Guardian Weekly xxx",
-                startDate = "2019-01-01",
+                startDate = asIsoDateString(fakeToday.minusMonths(1)),
                 endDate = "2019-01-15",
-                subscriptionName = subscriptionName,
+                subscriptionName = gwDomesticSubscription.subscriptionNumber,
               ),
             )
         },
@@ -156,8 +95,59 @@ class HandlerTest extends AnyFlatSpec with Matchers {
             PotentialHolidayStopsResponse(
               nextInvoiceDateAfterToday = LocalDate.parse("2019-04-01"),
               potentials = List(
-                PotentialHolidayStop(LocalDate.of(2019, 1, 4), Credit(-2.89, LocalDate.parse("2019-04-01"))),
-                PotentialHolidayStop(LocalDate.of(2019, 1, 11), Credit(-2.89, LocalDate.parse("2019-04-01"))),
+                PotentialHolidayStop(LocalDate.parse("2019-01-04"), Credit(-2.89, LocalDate.parse("2019-04-01"))),
+                PotentialHolidayStop(LocalDate.parse("2019-01-11"), Credit(-2.89, LocalDate.parse("2019-04-01"))),
+              ),
+            ),
+          )
+        }
+      }
+    }
+  "GET /potential/<<sub name>>?startDate=...&endDate=... endpoint" should
+    "calculate the correct amount for T3 subscriptions" in {
+      val fakeToday = LocalDate.parse("2024-06-20")
+      MutableCalendar.setFakeToday(Some(fakeToday))
+
+      val testBackend = SttpBackendStub.synchronous
+        .stubZuoraAuthCall()
+        .stubZuoraAccount(t3Subscription.accountNumber, t3Account)
+        .stubZuoraSubscription(t3Subscription.subscriptionNumber, t3Subscription)
+
+      inside(
+        unwrappedOp(
+          Handler.operationForEffects(
+            defaultTestEffects.response,
+            FakeFetchString.fetchString,
+            testBackend,
+            "test-generated-id",
+          ),
+        ).map { operation =>
+          operation
+            .steps(
+              legacyPotentialIssueDateRequest(
+                productPrefix = "Tier Three",
+                startDate = asIsoDateString(fakeToday.minusMonths(1)),
+                endDate = asIsoDateString(fakeToday.plusWeeks(2)),
+                subscriptionName = t3Subscription.subscriptionNumber,
+              ),
+            )
+        },
+      ) { case ContinueProcessing(response) =>
+        response.statusCode should equal("200")
+        val parsedResponseBody = Json.fromJson[PotentialHolidayStopsResponse](Json.parse(response.body))
+        inside(parsedResponseBody) { case JsSuccess(response, _) =>
+          val expectedCreditAmount = -3.75 // worked out by RatePlanChargeData.calculateIssueCreditAmount method
+          val expectedNextIssueDate = LocalDate.parse("2024-06-28")
+          val expectedInvoiceDate = LocalDate.parse("2024-07-28")
+
+          response should equal(
+            PotentialHolidayStopsResponse(
+              nextInvoiceDateAfterToday = expectedInvoiceDate,
+              potentials = List(
+                PotentialHolidayStop(
+                  publicationDate = expectedNextIssueDate,
+                  expectedCredit = Credit(amount = expectedCreditAmount, invoiceDate = expectedInvoiceDate),
+                ),
               ),
             ),
           )
@@ -170,7 +160,6 @@ class HandlerTest extends AnyFlatSpec with Matchers {
         Handler
           .operationForEffects(
             defaultTestEffects.response,
-            Stage("CODE"),
             FakeFetchString.fetchString,
             SttpBackendStub.synchronous,
             testId,
@@ -186,13 +175,45 @@ class HandlerTest extends AnyFlatSpec with Matchers {
       )
     }
   }
+
+  "get" should
+    "fail correctly if CSR password is expired" in {
+      val fakeToday = LocalDate.parse("2019-02-01")
+      MutableCalendar.setFakeToday(Some(fakeToday))
+
+      val testBackend = SttpBackendStub.synchronous
+        .stubZuoraAuthCall()
+
+      inside(
+        unwrappedOp(
+          Handler.operationForEffects(
+            new TestingRawEffects(
+              postResponses = Map(
+                SFTestEffects.authFailure,
+              ),
+            ).response,
+            FakeFetchString.fetchString,
+            testBackend,
+            "test-generated-id",
+          ),
+        )
+          .map(_.steps(ApiGatewayRequest(None, None, None, None, None, None))),
+      ) { case ReturnWithResponse(response) =>
+        response.statusCode should equal("400")
+        response.body should equal(
+          """{
+          |  "message" : "Bad request: salesforce returned auth error"
+          |}""".stripMargin,
+        )
+      }
+    }
+
   it should "return bad request if path is missing" in {
     inside(
       unwrappedOp(
         Handler
           .operationForEffects(
             defaultTestEffects.response,
-            Stage("CODE"),
             FakeFetchString.fetchString,
             SttpBackendStub.synchronous,
             testId,
@@ -242,7 +263,7 @@ class HandlerTest extends AnyFlatSpec with Matchers {
               responses = Map(
                 SalesForceHolidayStopsEffects.listHolidayStops(
                   contactId,
-                  subscriptionName,
+                  Some(SubscriptionName(subscriptionName)),
                   List(holidayStopRequest),
                   Some(MutableCalendar.today.minusMonths(6)),
                 ),
@@ -251,7 +272,6 @@ class HandlerTest extends AnyFlatSpec with Matchers {
                 SFTestEffects.authSuccess,
               ),
             ).response,
-            Stage("CODE"),
             FakeFetchString.fetchString,
             testBackend,
             testId,
@@ -325,14 +345,13 @@ class HandlerTest extends AnyFlatSpec with Matchers {
           Handler.operationForEffects(
             new TestingRawEffects(
               responses = Map(
-                SalesForceHolidayStopsEffects.listHolidayStops(contactId, subscriptionName, List(holidayStopRequest)),
+                SalesForceHolidayStopsEffects.listHolidayStops(contactId, Some(SubscriptionName(subscriptionName)), List(holidayStopRequest)),
               ),
               postResponses = Map(
                 SFTestEffects.authSuccess,
                 SFTestEffects.cancelSuccess(testId, price),
               ),
             ).response,
-            Stage("CODE"),
             FakeFetchString.fetchString,
             testBackend,
             testId,
@@ -352,6 +371,71 @@ class HandlerTest extends AnyFlatSpec with Matchers {
         response.statusCode should equal("200")
       }
     }
+
+  "DELETE /hsr/<<sub name>>/<<holidayStopRequestId>> endpoint" should
+    "not let you withdraw when it's been actioned" in {
+
+    val ref = "a2kUD0000005HrRYAU"
+    val subscriptionName = "A-S00925850"
+    val identityId = "200275381"
+    val withdrawTime = ZonedDateTime.now()
+
+    val stopDate = LocalDate.of(2024, 10, 4)
+    val contactId = "Contact1234"
+    val price = 1.23
+    val holidayStopRequestsDetail = Fixtures.mkHolidayStopRequestDetails(
+      chargeCode = Some("actioned code"),
+      stopDate = stopDate.minusDays(1),
+      estimatedPrice = Some(price),
+    )
+
+    val testBackend = SttpBackendStub.synchronous
+
+    val holidayStopRequest = Fixtures.mkHolidayStopRequest(
+      id = ref,
+      subscriptionName = SubscriptionName(subscriptionName),
+      requestDetail = List(holidayStopRequestsDetail),
+    )
+
+    val request = ApiGatewayRequest(
+      httpMethod = Some("DELETE"),
+      queryStringParameters = None,
+      body = None,
+      headers = Some(Map("x-salesforce-contact-id" -> contactId)),
+      pathParameters = Some(Json.parse(
+        s"""{
+           |    "holidayStopRequestId": "$ref",
+           |    "subscriptionName": "$subscriptionName"
+           |}""".stripMargin)
+      ),
+      path = Some(s"/hsr/$subscriptionName/$ref")
+    )
+
+    inside(
+      unwrappedOp(
+        Handler.operationForEffects(
+          new TestingRawEffects(
+            responses = Map(
+              SalesForceHolidayStopsEffects.listHolidayStops(contactId, None, List(holidayStopRequest)),
+            ),
+            postResponses = Map(
+              SFTestEffects.authSuccess,
+              SFTestEffects.withdrawAlreadyCredited(ref, withdrawTime),
+            ),
+          ).response,
+          FakeFetchString.fetchString,
+          testBackend,
+          testId,
+          () => withdrawTime,
+        ),
+      ).map(_.steps(request))
+    ) { case ContinueProcessing(response) =>
+      response.statusCode should equal("500")
+      inside ((Json.parse(response.body) \ "message").get) {
+        case JsString(message) => message should be("FIELD_CUSTOM_VALIDATION_EXCEPTION : Holiday Stop Request cannot be withdrawn because some publications have been actioned (credited to customer)")
+      }
+    }
+  }
 
   "GET /hsr/<<sub name>>/cancel?effectiveCancelationDate=yy-MM-dd endpoint" should
     "get holiday stop details that should be refunded if the subscription is canceled" in {
@@ -382,13 +466,12 @@ class HandlerTest extends AnyFlatSpec with Matchers {
           Handler.operationForEffects(
             new TestingRawEffects(
               responses = Map(
-                SalesForceHolidayStopsEffects.listHolidayStops(contactId, subscriptionName, List(holidayStopRequest)),
+                SalesForceHolidayStopsEffects.listHolidayStops(contactId, Some(SubscriptionName(subscriptionName)), List(holidayStopRequest)),
               ),
               postResponses = Map(
                 SFTestEffects.authSuccess,
               ),
             ).response,
-            Stage("CODE"),
             FakeFetchString.fetchString,
             testBackend,
             testId,

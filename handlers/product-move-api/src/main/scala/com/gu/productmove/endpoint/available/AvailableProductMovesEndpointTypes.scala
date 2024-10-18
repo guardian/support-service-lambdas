@@ -1,5 +1,6 @@
 package com.gu.productmove.endpoint.available
 
+import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpoint.localDateToString
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes.{AvailableMoves, OutputBody}
 import com.gu.productmove.endpoint.available.Currency.GBP
@@ -45,19 +46,18 @@ given JsonCodec[Option[String]] = JsonCodec.string.transform(
 )
 
 object MoveToProduct {
-  given JsonCodec[MoveToProduct] = DeriveJsonCodec.gen[MoveToProduct]
+
+  given JsonCodec[ProductRatePlanId] = JsonCodec.string.transform(ProductRatePlanId.apply, _.value)
+  given Schema[ProductRatePlanId] = Schema(SchemaType.SString())
+
   given Schema[MoveToProduct] = Schema.derived
 
-  given JsonCodec[Billing] = DeriveJsonCodec.gen[Billing]
   given Schema[Billing] = Schema.derived
 
-  given JsonCodec[Trial] = DeriveJsonCodec.gen[Trial]
   given Schema[Trial] = Schema.derived
 
-  given JsonCodec[Offer] = DeriveJsonCodec.gen[Offer]
   given Schema[Offer] = Schema.derived
 
-  given JsonCodec[TimePeriod] = DeriveJsonCodec.gen[TimePeriod]
   given Schema[TimePeriod] = Schema.derived
 
   def buildResponseFromRatePlan(
@@ -108,14 +108,14 @@ object MoveToProduct {
 @description("A product that's available for subscription.")
 case class MoveToProduct(
     @description("ID of product in Zuora product catalogue.")
-    id: String,
+    id: ProductRatePlanId,
     @description("Name of product in Zuora product catalogue.")
     @encodedExample("Digital Pack")
     name: String,
     billing: Billing,
     trial: Option[Trial],
     introOffer: Option[Offer],
-)
+) derives JsonCodec
 
 @encodedName("billing")
 @description("Amount and frequency of billing.")
@@ -138,13 +138,13 @@ case class Billing(
     )
     @encodedExample("2022-06-21")
     startDate: Option[String], // LocalDate?
-)
+) derives JsonCodec
 
 // tapir doesn't support scala 3 enums (yet), hence the need for custom codec https://github.com/softwaremill/tapir/pull/1824#discussion_r913111720
 enum Currency(
     val code: String,
     val symbol: String,
-):
+) {
   // The MVP only accepts GBP
   case GBP extends Currency("GBP", "£")
   case USD extends Currency("USD", "$")
@@ -153,6 +153,7 @@ enum Currency(
   case CAD extends Currency("CAD", "$")
   case EUR extends Currency("EUR", "€")
   case UnrecognizedCurrency extends Currency("", "")
+}
 
 object Currency {
   val websiteSupportedCurrencies = List(
@@ -196,10 +197,11 @@ object Currency {
 }
 
 // tapir doesn't support scala 3 enums (yet), hence the need for custom codec https://github.com/softwaremill/tapir/pull/1824#discussion_r913111720
-enum TimeUnit:
+enum TimeUnit {
   case month, year
+}
 
-object TimeUnit:
+object TimeUnit {
   given JsonCodec[TimeUnit] = DeriveJsonCodec.gen[TimeUnit]
 
   given Schema[TimeUnit] =
@@ -211,6 +213,7 @@ object TimeUnit:
       case "Annual" => TimeUnit.year
     }
   }
+}
 
 @encodedName("trial")
 @description("An optional free trial that begins when a subscription begins\nand lasts for a given number of days.")
@@ -218,7 +221,7 @@ case class Trial(
     @description("Number of days that free trial lasts.")
     @encodedExample(14)
     dayCount: Int,
-)
+) derives JsonCodec
 
 @encodedName("offer")
 @description(
@@ -227,7 +230,7 @@ case class Trial(
 case class Offer(
     billing: Billing,
     duration: TimePeriod,
-)
+) derives JsonCodec
 
 @encodedName("timePeriod")
 case class TimePeriod(
@@ -242,4 +245,4 @@ case class TimePeriod(
     name: TimeUnit,
     @description("Number of time units in this time period.")
     count: Int,
-)
+) derives JsonCodec

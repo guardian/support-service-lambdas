@@ -1,216 +1,229 @@
 export const typeObject = {
-  "DigitalSubscription": {
-    "currencies": [
-      "USD",
-      "NZD",
-      "EUR",
-      "GBP",
-      "CAD",
-      "AUD"
-    ],
-    "productRatePlans": {
-      "Monthly": {
-        "Subscription": {}
-      },
-      "Annual": {
-        "Subscription": {}
-      },
-      "ThreeMonthGift": {
-        "Subscription": {}
-      },
-      "OneYearGift": {
-        "Subscription": {}
-      }
-    }
-  },
-  "NationalDelivery": {
-    "currencies": [
-      "GBP"
-    ],
-    "productRatePlans": {
-      "Sixday": {
-        "Saturday": {},
-        "Friday": {},
-        "Thursday": {},
-        "Wednesday": {},
-        "Tuesday": {},
-        "Monday": {}
-      },
-      "Weekend": {
-        "Sunday": {},
-        "Saturday": {}
-      },
-      "Everyday": {
-        "Sunday": {},
-        "Saturday": {},
-        "Friday": {},
-        "Thursday": {},
-        "Wednesday": {},
-        "Tuesday": {},
-        "Monday": {}
-      }
-    }
-  },
-  "SupporterPlus": {
-    "currencies": [
-      "USD",
-      "NZD",
-      "EUR",
-      "GBP",
-      "CAD",
-      "AUD"
-    ],
-    "productRatePlans": {
-      "Monthly": {
-        "Contribution": {},
-        "Subscription": {}
-      },
-      "Annual": {
-        "Subscription": {},
-        "Contribution": {}
-      }
-    }
-  },
-  "GuardianWeeklyRestOfWorld": {
-    "currencies": [
-      "USD",
-      "GBP"
-    ],
-    "productRatePlans": {
-      "Monthly": {
-        "Monthly": {}
-      },
-      "OneYearGift": {
-        "Subscription": {}
-      },
-      "Annual": {
-        "Subscription": {}
-      },
-      "SixWeekly": {
-        "Subscription": {}
-      },
-      "Quarterly": {
-        "Subscription": {}
-      },
-      "ThreeMonthGift": {
-        "Subscription": {}
-      }
-    }
-  },
-  "GuardianWeeklyDomestic": {
-    "currencies": [
-      "USD",
-      "NZD",
-      "EUR",
-      "GBP",
-      "CAD",
-      "AUD"
-    ],
-    "productRatePlans": {
-      "OneYearGift": {
-        "Subscription": {}
-      },
-      "Annual": {
-        "Subscription": {}
-      },
-      "Quarterly": {
-        "Subscription": {}
-      },
-      "Monthly": {
-        "Subscription": {}
-      },
-      "ThreeMonthGift": {
-        "Subscription": {}
-      },
-      "SixWeekly": {
-        "Subscription": {}
-      }
-    }
-  },
-  "SubscriptionCard": {
-    "currencies": [
-      "GBP"
-    ],
-    "productRatePlans": {
-      "Everyday": {
-        "Monday": {},
-        "Tuesday": {},
-        "Saturday": {},
-        "Thursday": {},
-        "Friday": {},
-        "Wednesday": {},
-        "Sunday": {}
-      },
-      "Weekend": {
-        "Saturday": {},
-        "Sunday": {}
-      },
-      "Sixday": {
-        "Saturday": {},
-        "Friday": {},
-        "Monday": {},
-        "Tuesday": {},
-        "Thursday": {},
-        "Wednesday": {}
-      },
-      "Sunday": {
-        "Sunday": {}
-      },
-      "Saturday": {
-        "Saturday": {}
-      }
-    }
-  },
-  "Contribution": {
-    "currencies": [
-      "USD",
-      "NZD",
-      "EUR",
-      "GBP",
-      "CAD",
-      "AUD"
-    ],
-    "productRatePlans": {
-      "Annual": {
-        "Contribution": {}
-      },
-      "Monthly": {
-        "Contribution": {}
-      }
-    }
-  },
-  "HomeDelivery": {
-    "currencies": [
-      "GBP"
-    ],
-    "productRatePlans": {
-      "Sixday": {
-        "Wednesday": {},
-        "Friday": {},
-        "Thursday": {},
-        "Monday": {},
-        "Tuesday": {},
-        "Saturday": {}
-      },
-      "Everyday": {
-        "Tuesday": {},
-        "Saturday": {},
-        "Sunday": {},
-        "Wednesday": {},
-        "Friday": {},
-        "Thursday": {},
-        "Monday": {}
-      },
-      "Weekend": {
-        "Sunday": {},
-        "Saturday": {}
-      },
-      "Sunday": {
-        "Sunday": {}
-      },
-      "Saturday": {
-        "Saturday": {}
-      }
-    }
-  }
+	TierThree: {
+		currencies: ['USD', 'GBP'],
+		billingPeriods: ['Month', 'Annual'],
+		productRatePlans: {
+			DomesticMonthlyV2: {
+				SupporterPlus: {},
+				GuardianWeekly: {},
+				NewspaperArchive: {},
+			},
+			DomesticAnnualV2: {
+				NewspaperArchive: {},
+				SupporterPlus: {},
+				GuardianWeekly: {},
+			},
+			RestOfWorldMonthlyV2: {
+				SupporterPlus: {},
+				GuardianWeekly: {},
+				NewspaperArchive: {},
+			},
+			RestOfWorldAnnualV2: {
+				NewspaperArchive: {},
+				SupporterPlus: {},
+				GuardianWeekly: {},
+			},
+			RestOfWorldMonthly: {
+				SupporterPlus: {},
+				GuardianWeekly: {},
+			},
+			RestOfWorldAnnual: {
+				SupporterPlus: {},
+				GuardianWeekly: {},
+			},
+			DomesticAnnual: {
+				SupporterPlus: {},
+				GuardianWeekly: {},
+			},
+			DomesticMonthly: {
+				SupporterPlus: {},
+				GuardianWeekly: {},
+			},
+		},
+	},
+	DigitalSubscription: {
+		currencies: ['NZD', 'CAD', 'AUD', 'USD', 'GBP', 'EUR'],
+		billingPeriods: ['Quarter', 'Month', 'Annual'],
+		productRatePlans: {
+			Monthly: {
+				Subscription: {},
+			},
+			Annual: {
+				Subscription: {},
+			},
+			ThreeMonthGift: {
+				Subscription: {},
+			},
+			OneYearGift: {
+				Subscription: {},
+			},
+		},
+	},
+	NationalDelivery: {
+		currencies: ['GBP'],
+		billingPeriods: ['Month'],
+		productRatePlans: {
+			Sixday: {
+				Monday: {},
+				Tuesday: {},
+				Wednesday: {},
+				Thursday: {},
+				Friday: {},
+				Saturday: {},
+			},
+			Weekend: {
+				Saturday: {},
+				Sunday: {},
+			},
+			Everyday: {
+				Monday: {},
+				Tuesday: {},
+				Wednesday: {},
+				Thursday: {},
+				Friday: {},
+				Saturday: {},
+				Sunday: {},
+			},
+		},
+	},
+	SupporterPlus: {
+		currencies: ['GBP', 'USD', 'AUD', 'EUR', 'NZD', 'CAD'],
+		billingPeriods: ['Month', 'Annual'],
+		productRatePlans: {
+			V1DeprecatedMonthly: {
+				Subscription: {},
+			},
+			V1DeprecatedAnnual: {
+				Subscription: {},
+			},
+			Monthly: {
+				Subscription: {},
+				Contribution: {},
+			},
+			Annual: {
+				Contribution: {},
+				Subscription: {},
+			},
+		},
+	},
+	GuardianWeeklyRestOfWorld: {
+		currencies: ['GBP', 'USD'],
+		billingPeriods: ['Month', 'Annual', 'Quarter'],
+		productRatePlans: {
+			Monthly: {
+				Monthly: {},
+			},
+			OneYearGift: {
+				Subscription: {},
+			},
+			Annual: {
+				Subscription: {},
+			},
+			Quarterly: {
+				Subscription: {},
+			},
+			ThreeMonthGift: {
+				Subscription: {},
+			},
+		},
+	},
+	GuardianWeeklyDomestic: {
+		currencies: ['GBP', 'USD', 'NZD', 'EUR', 'CAD', 'AUD'],
+		billingPeriods: ['Annual', 'Quarter', 'Month'],
+		productRatePlans: {
+			OneYearGift: {
+				Subscription: {},
+			},
+			Annual: {
+				Subscription: {},
+			},
+			Quarterly: {
+				Subscription: {},
+			},
+			Monthly: {
+				Subscription: {},
+			},
+			ThreeMonthGift: {
+				Subscription: {},
+			},
+		},
+	},
+	SubscriptionCard: {
+		currencies: ['GBP'],
+		billingPeriods: ['Month'],
+		productRatePlans: {
+			Sixday: {
+				Friday: {},
+				Monday: {},
+				Tuesday: {},
+				Thursday: {},
+				Wednesday: {},
+				Saturday: {},
+			},
+			Everyday: {
+				Monday: {},
+				Tuesday: {},
+				Saturday: {},
+				Thursday: {},
+				Friday: {},
+				Wednesday: {},
+				Sunday: {},
+			},
+			Weekend: {
+				Saturday: {},
+				Sunday: {},
+			},
+			Sunday: {
+				Sunday: {},
+			},
+			Saturday: {
+				Saturday: {},
+			},
+		},
+	},
+	Contribution: {
+		currencies: ['GBP', 'USD', 'NZD', 'EUR', 'CAD', 'AUD'],
+		billingPeriods: ['Annual', 'Month'],
+		productRatePlans: {
+			Annual: {
+				Contribution: {},
+			},
+			Monthly: {
+				Contribution: {},
+			},
+		},
+	},
+	HomeDelivery: {
+		currencies: ['GBP'],
+		billingPeriods: ['Month'],
+		productRatePlans: {
+			Everyday: {
+				Sunday: {},
+				Wednesday: {},
+				Friday: {},
+				Thursday: {},
+				Monday: {},
+				Tuesday: {},
+				Saturday: {},
+			},
+			Sunday: {
+				Sunday: {},
+			},
+			Sixday: {
+				Wednesday: {},
+				Friday: {},
+				Thursday: {},
+				Monday: {},
+				Tuesday: {},
+				Saturday: {},
+			},
+			Weekend: {
+				Sunday: {},
+				Saturday: {},
+			},
+			Saturday: {
+				Saturday: {},
+			},
+		},
+	},
 } as const;

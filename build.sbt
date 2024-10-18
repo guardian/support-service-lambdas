@@ -1,7 +1,7 @@
 import Dependencies.*
 
 val scala2Settings = Seq(
-  ThisBuild / scalaVersion := "2.13.12",
+  ThisBuild / scalaVersion := "2.13.14",
   version := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
@@ -25,7 +25,7 @@ val scala2Settings = Seq(
 )
 
 val scala3Settings = Seq(
-  scalaVersion := "3.3.1",
+  scalaVersion := "3.3.3",
   version := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
@@ -37,6 +37,7 @@ val scala3Settings = Seq(
     "-Xmax-inlines",
     "256",
     "-Yretain-trees",
+    "-no-indent",
   ),
   Test / fork := true,
   autoCompilerPlugins := true,
@@ -246,10 +247,10 @@ lazy val `effects-lambda` = library(project in file("lib/effects-lambda"), Seq(t
 
 lazy val `config-core` = library(project in file("lib/config-core"), Seq(), scala3Settings)
 
-lazy val `config-cats` = library(project in file("lib/config-cats"))
+lazy val `config-cats` = library(project in file("lib/config-cats"), Seq(`effects-s3`))
   .settings(
     libraryDependencies ++= Seq(simpleConfig, catsEffect, circe, circeConfig),
-    dependencyOverrides ++= Seq(nettyCodec) ++ jacksonDependencies,
+    dependencyOverrides ++= jacksonDependencies,
   )
 
 val effectsDepIncludingTestFolder: ClasspathDependency = effects % "compile->compile;test->test"
@@ -319,7 +320,7 @@ lazy val `credit-processor` = library(
   ),
 )
   .settings(
-    libraryDependencies ++= logging,
+    libraryDependencies ++= Seq(parallelCollections) ++ logging,
     dependencyOverrides ++= jacksonDependencies,
   )
 
@@ -588,6 +589,8 @@ lazy val `zuora-datalake-export` = lambdaProject(
   "zuora-datalake-export",
   "Zuora to Datalake export using Stateful AQuA API which exports incremental changes",
   Seq(scalaLambda, scalajHttp, awsS3, enumeratum),
+).settings(
+  scalaLambdaCirceOverride
 )
 
 lazy val `batch-email-sender` = lambdaProject(
@@ -606,6 +609,8 @@ lazy val `holiday-stop-processor` = lambdaProject(
     `holiday-stops` % "compile->compile;test->test",
     effects,
   ),
+).settings(
+  scalaLambdaCirceOverride
 )
 
 lazy val `delivery-problem-credit-processor` = lambdaProject(
@@ -620,6 +625,8 @@ lazy val `delivery-problem-credit-processor` = lambdaProject(
     diffx,
   ),
   Seq(`credit-processor`, `salesforce-sttp-client`, effects),
+).settings(
+  scalaLambdaCirceOverride
 )
 
 lazy val `product-move-api` = lambdaProject(
@@ -648,7 +655,7 @@ lazy val `product-move-api` = lambdaProject(
     awsSecretsManager,
     upickle,
   ),
-  Seq(`zuora-models`, `effects-sqs`, `new-product-api`),
+  Seq(`zuora-models`, `effects-sqs`),
   scala3Settings ++ Seq(
     excludeDependencies ++= Seq(
       ExclusionRule("org.typelevel", "cats-kernel_2.13"),
@@ -709,6 +716,8 @@ lazy val `fulfilment-date-calculator` = lambdaProject(
   "Generate files in S3 bucket containing relevant fulfilment-related dates, for example, acquisitionsStartDate, holidayStopFirstAvailableDate, etc.",
   Seq(scalaLambda, scalajHttp, enumeratum),
   Seq(testDep, `fulfilment-dates`),
+).settings(
+  scalaLambdaCirceOverride
 )
 
 lazy val `delivery-records-api` = lambdaProject(
@@ -763,8 +772,6 @@ lazy val `digital-voucher-cancellation-processor` = lambdaProject(
     `imovo-sttp-client`,
     `imovo-sttp-test-stub` % Test,
   ),
-).settings(
-  dependencyOverrides += nettyCodec,
 )
 
 lazy val `digital-voucher-suspension-processor` = lambdaProject(
@@ -781,7 +788,6 @@ lazy val `digital-voucher-suspension-processor` = lambdaProject(
   ),
   Seq(`salesforce-sttp-client`, `imovo-sttp-client`),
 )
-  .settings(dependencyOverrides ++= Seq(nettyCodec))
 
 lazy val `contact-us-api` = lambdaProject(
   "contact-us-api",

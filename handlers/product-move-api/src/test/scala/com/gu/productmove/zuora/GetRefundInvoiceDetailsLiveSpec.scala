@@ -5,10 +5,9 @@ import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpoint
 import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes.ExpectedInput
 import com.gu.productmove.refund.RefundSupporterPlus
 import com.gu.productmove.zuora.TaxDetails
-import com.gu.productmove.zuora.SubscriptionCancelSpec.{suite, test}
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
-import zio.{Scope, ZLayer}
+import zio.*
 import zio.test.Assertion.{equalTo, isSome}
 import zio.test.{Spec, TestAspect, TestEnvironment, ZIOSpecDefault, assertTrue, assert}
 
@@ -22,7 +21,6 @@ object GetRefundInvoiceDetailsLiveSpec extends ZIOSpecDefault {
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("GetInvoiceItemsForSubscriptionLive")(
       test("finds taxation details for a subscription") {
-
         for {
           result <- GetRefundInvoiceDetails
             .get(SubscriptionName("A-S00631534"))
@@ -44,6 +42,28 @@ object GetRefundInvoiceDetailsLiveSpec extends ZIOSpecDefault {
               .find(_.TaxDetails.isDefined)
               .flatMap(_.TaxDetails)
               .contains(TaxDetails(-0.91, "8ad08dc989e27bbe0189e40e60f80ab8")),
+          )
+        }
+      },
+      test("finds discount details for a subscription") {
+        for {
+          result <- GetRefundInvoiceDetails
+            .get(SubscriptionName("A-S00631534"))
+            .provide(
+              GetRefundInvoiceDetailsLive.layer,
+              ZLayer.succeed(
+                new MockStackedGetInvoicesZuoraClient(
+                  mutable.Stack(
+                    MockGetInvoicesZuoraClient.responseWithDiscount,
+                    MockGetInvoicesZuoraClient.taxationItemsForDiscount,
+                  ),
+                ),
+              ),
+              ZuoraGetLive.layer,
+            )
+        } yield {
+          assertTrue(
+            result.negativeInvoiceItems.size == 3
           )
         }
       },

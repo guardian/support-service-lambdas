@@ -3,11 +3,12 @@ package com.gu.productmove.endpoint.move
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes.OutputBody
 import com.gu.productmove.framework.InlineSchema.inlineSchema
 import com.gu.productmove.endpoint.available.{Currency, MoveToProduct}
+
 import java.time.LocalDate
 import sttp.tapir.Schema
 import sttp.tapir.Schema.annotations.{description, encodedName}
 import sttp.tapir.generic.{Configuration, Derived}
-import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonDecoder, JsonEncoder}
+import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder, JsonCodec, JsonDecoder, JsonEncoder}
 import sttp.tapir.Schema
 
 import scala.deriving.Mirror
@@ -37,6 +38,7 @@ object ProductMoveEndpointTypes {
   case class Success(
       @description("Success message.") message: String,
   ) extends OutputBody
+      derives JsonCodec
   case class PreviewResult(
       @description("The amount payable by the customer today") amountPayableToday: BigDecimal,
       @description(
@@ -48,14 +50,15 @@ object ProductMoveEndpointTypes {
         "The next payment date of the new supporter plus subscription, i.e.: the second payment date",
       ) nextPaymentDate: LocalDate,
   ) extends OutputBody
+      derives JsonCodec
 
-  case class BadRequest(@description("Error message.") message: String) extends ErrorResponse
+  case class BadRequest(@description("Error message.") message: String) extends ErrorResponse derives JsonCodec
 
-  case class InternalServerError(@description("Error message.") message: String) extends ErrorResponse
+  case class InternalServerError(@description("Error message.") message: String) extends ErrorResponse derives JsonCodec
 
   sealed trait ErrorResponse extends OutputBody
-  case class TransactionError(@description("Error message.") message: String) extends ErrorResponse
-  case class SecretsError(@description("Error message.") message: String) extends ErrorResponse
+  case class TransactionError(@description("Error message.") message: String) extends ErrorResponse derives JsonCodec
+  case class SecretsError(@description("Error message.") message: String) extends ErrorResponse derives JsonCodec
 
   given Schema[Success] = inlineSchema(Schema.derived)
   given Schema[PreviewResult] = inlineSchema(Schema.derived)
@@ -64,19 +67,4 @@ object ProductMoveEndpointTypes {
   given Schema[TransactionError] = inlineSchema(Schema.derived)
   given Schema[SecretsError] = inlineSchema(Schema.derived)
 
-  given JsonEncoder[Success] = DeriveJsonEncoder.gen[Success]
-  given JsonDecoder[Success] = DeriveJsonDecoder.gen[Success] // needed to keep tapir happy
-  given JsonEncoder[PreviewResult] = DeriveJsonEncoder.gen[PreviewResult]
-  given JsonDecoder[PreviewResult] = DeriveJsonDecoder.gen // needed to keep tapir happy
-  given JsonEncoder[OutputBody] = DeriveJsonEncoder.gen[OutputBody]
-  given JsonDecoder[OutputBody] = DeriveJsonDecoder.gen[OutputBody] // needed to keep tapir happy
-  given JsonEncoder[InternalServerError] = DeriveJsonEncoder.gen[InternalServerError]
-  given JsonDecoder[InternalServerError] = DeriveJsonDecoder.gen[InternalServerError] // needed to keep tapir happy
-  given JsonEncoder[BadRequest] = DeriveJsonEncoder.gen[BadRequest]
-
-  given JsonDecoder[BadRequest] = DeriveJsonDecoder.gen[BadRequest] // needed to keep tapir happy
-  given JsonEncoder[TransactionError] = DeriveJsonEncoder.gen[TransactionError]
-  given JsonDecoder[TransactionError] = DeriveJsonDecoder.gen[TransactionError] // needed to keep tapir happy
-  given JsonEncoder[SecretsError] = DeriveJsonEncoder.gen[SecretsError]
-  given JsonDecoder[SecretsError] = DeriveJsonDecoder.gen[SecretsError] // needed to keep tapir happy
 }

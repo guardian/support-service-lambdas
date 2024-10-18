@@ -1,6 +1,10 @@
 import com.gu.soft_opt_in_consent_setter.HandlerIAP._
-import com.gu.soft_opt_in_consent_setter.models.{SFAssociatedSubRecord, SFAssociatedSubResponse, SoftOptInError}
-import com.gu.soft_opt_in_consent_setter.testData.ConsentsCalculatorTestData.testConsentMappings
+import com.gu.soft_opt_in_consent_setter.models.{
+  ConsentsMapping,
+  SFAssociatedSubRecord,
+  SFAssociatedSubResponse,
+  SoftOptInError,
+}
 import com.gu.soft_opt_in_consent_setter.{
   ConsentsCalculator,
   MobileSubscription,
@@ -15,7 +19,7 @@ import org.scalatest.matchers.should.Matchers
 
 class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
 
-  val calculator = new ConsentsCalculator(testConsentMappings)
+  val calculator = new ConsentsCalculator(ConsentsMapping.consentsMapping)
   val mockSendConsentsReq = mockFunction[String, String, Either[SoftOptInError, Unit]]
   val mockGetMobileSubscriptions = mockFunction[String, Either[SoftOptInError, MobileSubscriptions]]
   val mockSfConnector = mock[SalesforceConnector]
@@ -26,14 +30,15 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
   test(testName = "processProductSwitchSub should handle product switch event correctly") {
     val mobileSubscriptions = MobileSubscriptions(
       List(
-        MobileSubscription(true),
+        MobileSubscription(true, "InAppPurchase"),
       ),
     )
 
     mockSendConsentsReq
       .expects(
         identityId,
-        "[\n  {\n    \"id\" : \"digital_subscriber_preview\",\n    \"consented\" : true\n  }\n]",
+        """[
+          |]""".stripMargin,
       )
       .returning(Right(()))
     mockGetMobileSubscriptions.expects("someIdentityId").returning(Right(mobileSubscriptions))
@@ -43,7 +48,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
         true,
         records = Seq(
           SFAssociatedSubRecord(
-            "contributions",
+            "Contributor",
             identityId,
           ),
         ),
@@ -52,8 +57,8 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
 
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
-      productName = "supporterPlus",
-      previousProductName = Some("contributions"),
+      productName = "Supporter Plus",
+      previousProductName = Some("Contributor"),
       eventType = Switch,
       subscriptionId = "A-S12345678",
     )
@@ -70,22 +75,29 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
   }
 
   test(testName = "processAcquiredSub should handle acquisition event correctly") {
-    val mobileSubscriptions = MobileSubscriptions(
-      List(
-        MobileSubscription(true),
-      ),
-    )
-
     mockSendConsentsReq
       .expects(
         "someIdentityId",
-        "[\n  {\n    \"id\" : \"your_support_onboarding\",\n    \"consented\" : true\n  },\n  {\n    \"id\" : \"similar_guardian_products\",\n    \"consented\" : true\n  },\n  {\n    \"id\" : \"supporter_newsletter\",\n    \"consented\" : true\n  },\n  {\n    \"id\" : \"digital_subscriber_preview\",\n    \"consented\" : true\n  }\n]",
+        """[
+          |  {
+          |    "id" : "your_support_onboarding",
+          |    "consented" : true
+          |  },
+          |  {
+          |    "id" : "similar_guardian_products",
+          |    "consented" : true
+          |  },
+          |  {
+          |    "id" : "supporter_newsletter",
+          |    "consented" : true
+          |  }
+          |]""".stripMargin,
       )
       .returning(Right(()))
 
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
-      productName = "supporterPlus",
+      productName = "Supporter Plus",
       previousProductName = None,
       eventType = Acquisition,
       subscriptionId = "A-S12345678",
@@ -103,16 +115,17 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
   test(testName = "processCancellation should handle supporter plus cancellation while owning an IAP") {
     val mobileSubscriptions = MobileSubscriptions(
       List(
-        MobileSubscription(true),
+        MobileSubscription(true, "InAppPurchase"),
       ),
     )
 
     mockSendConsentsReq
       .expects(
         "someIdentityId",
-        "[\n  {\n    \"id\" : \"digital_subscriber_preview\",\n    \"consented\" : false\n  }\n]",
+        """[
+          |]""".stripMargin,
       )
-      .returning(Right(()))
+      .never
     mockGetMobileSubscriptions.expects("someIdentityId").returning(Right(mobileSubscriptions))
     mockSfConnector.getActiveSubs _ expects Seq("someIdentityId") returning Right(
       SFAssociatedSubResponse(
@@ -124,7 +137,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
 
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
-      productName = "supporterPlus",
+      productName = "Supporter Plus",
       previousProductName = None,
       eventType = Cancellation,
       subscriptionId = "A-S12345678",
@@ -147,7 +160,16 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     mockSendConsentsReq
       .expects(
         "someIdentityId",
-        "[\n  {\n    \"id\" : \"your_support_onboarding\",\n    \"consented\" : false\n  },\n  {\n    \"id\" : \"similar_guardian_products\",\n    \"consented\" : false\n  },\n  {\n    \"id\" : \"supporter_newsletter\",\n    \"consented\" : false\n  },\n  {\n    \"id\" : \"digital_subscriber_preview\",\n    \"consented\" : false\n  }\n]",
+        """[
+          |  {
+          |    "id" : "your_support_onboarding",
+          |    "consented" : false
+          |  },
+          |  {
+          |    "id" : "supporter_newsletter",
+          |    "consented" : false
+          |  }
+          |]""".stripMargin,
       )
       .returning(Right(()))
     mockGetMobileSubscriptions.expects("someIdentityId").returning(Right(mobileSubscriptions))
@@ -161,7 +183,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
 
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
-      productName = "supporterPlus",
+      productName = "Supporter Plus",
       previousProductName = None,
       eventType = Cancellation,
       subscriptionId = "A-S12345678",
@@ -173,6 +195,95 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       mockGetMobileSubscriptions,
       calculator,
       mockSfConnector,
+    )
+
+    result shouldBe Right(())
+  }
+
+  test(testName =
+    "when cancelling Supporter Plus, while also holding a Feast IAP, processCancellation should unset the Supporter Plus consents which are not shared with the Feast IAP",
+  ) {
+    val mobileSubscriptionsIncludingFeast = MobileSubscriptions(
+      List(
+        MobileSubscription(true, "FeastInAppPurchase"),
+      ),
+    )
+
+    mockSendConsentsReq
+      .expects(
+        "someIdentityId",
+        """[
+          |  {
+          |    "id" : "supporter_newsletter",
+          |    "consented" : false
+          |  }
+          |]""".stripMargin,
+      )
+      .returning(Right(()))
+    mockGetMobileSubscriptions.expects("someIdentityId").returning(Right(mobileSubscriptionsIncludingFeast))
+    mockSfConnector.getActiveSubs _ expects Seq("someIdentityId") returning Right(
+      SFAssociatedSubResponse(
+        0,
+        true,
+        records = Seq(),
+      ),
+    )
+
+    val testMessageBody = MessageBody(
+      identityId = "someIdentityId",
+      productName = "Supporter Plus",
+      previousProductName = None,
+      eventType = Cancellation,
+      subscriptionId = "A-S12345678",
+    )
+
+    val result = processCancelledSub(
+      testMessageBody,
+      mockSendConsentsReq,
+      mockGetMobileSubscriptions,
+      calculator,
+      mockSfConnector,
+    )
+
+    result shouldBe Right(())
+  }
+  test(testName = "processAcquiredSub should handle a Tier Three acquisition event correctly") {
+    mockSendConsentsReq
+      .expects(
+        "someIdentityId",
+        """[
+          |  {
+          |    "id" : "your_support_onboarding",
+          |    "consented" : true
+          |  },
+          |  {
+          |    "id" : "similar_guardian_products",
+          |    "consented" : true
+          |  },
+          |  {
+          |    "id" : "supporter_newsletter",
+          |    "consented" : true
+          |  },
+          |  {
+          |    "id" : "guardian_weekly_newsletter",
+          |    "consented" : true
+          |  }
+          |]""".stripMargin,
+      )
+      .returning(Right(()))
+
+    val testMessageBody = MessageBody(
+      identityId = "someIdentityId",
+      productName = "Tier Three",
+      previousProductName = None,
+      eventType = Acquisition,
+      subscriptionId = "A-S12345678",
+    )
+
+    val result = processAcquiredSub(
+      testMessageBody,
+      mockSendConsentsReq,
+      calculator,
     )
 
     result shouldBe Right(())

@@ -13,7 +13,7 @@ import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.Subscripti
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{WireCreateRequest, WireSubscription}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora._
-import com.gu.newproduct.api.productcatalog.PlanId.{GuardianWeeklyDomestic6for6, GuardianWeeklyDomesticQuarterly, GuardianWeeklyROW6for6, GuardianWeeklyROWQuarterly}
+import com.gu.newproduct.api.productcatalog.PlanId.{GuardianWeeklyDomesticMonthly, GuardianWeeklyDomesticQuarterly, GuardianWeeklyROWMonthly, GuardianWeeklyROWQuarterly}
 import com.gu.newproduct.api.productcatalog._
 import com.gu.paperround.client.{GetAgents, PaperRoundConfig, PaperRoundRestRequestMaker}
 import com.gu.util.Logging
@@ -56,6 +56,7 @@ class handleRequest(
   addDigipackSub: AddSpecificProduct,
   addGuardianWeeklyDomesticSub: AddSpecificProduct,
   addGuardianWeeklyROWSub: AddSpecificProduct,
+  addTierThree: AddSpecificProduct,
 ) {
   def apply(apiGatewayRequest: ApiGatewayRequest): Future[ApiResponse]
   = (for {
@@ -70,6 +71,7 @@ class handleRequest(
       case _: GuardianWeeklyRow => addGuardianWeeklyROWSub
       case _: DigitalVoucherPlanId => addPaperSub
       case _: NationalDeliveryPlanId => addPaperSub
+      case _: TierThreePlanId => addTierThree
     }
     subscriptionName <- addSpecificProduct.addProduct(request)
   } yield ApiGatewayResponse(body = AddedSubscription(subscriptionName.value), statusCode = "200")).apiResponse
@@ -166,8 +168,6 @@ object Steps {
         createSubscription,
         awsSQSSend,
         EmailQueueName,
-        GuardianWeeklyDomestic6for6,
-        GuardianWeeklyDomesticQuarterly,
       )
 
       guardianWeeklyROWStep = AddGuardianWeeklySub.wireSteps(
@@ -179,8 +179,17 @@ object Steps {
         createSubscription,
         awsSQSSend,
         EmailQueueName,
-        GuardianWeeklyROW6for6,
-        GuardianWeeklyROWQuarterly,
+      )
+      
+      tierThreeStep = AddTierThree.wireSteps(
+        catalog,
+        zuoraIds,
+        zuoraClient,
+        isValidStartDateForPlan,
+        GuardianWeeklyDomesticAddressValidator.apply,
+        createSubscription,
+        awsSQSSend,
+        EmailQueueName,
       )
 
       addSubSteps = new handleRequest(
@@ -190,6 +199,7 @@ object Steps {
         addDigipackSub = digipackSteps,
         addGuardianWeeklyDomesticSub = guardianWeeklyDomesticStep,
         addGuardianWeeklyROWSub = guardianWeeklyROWStep,
+        addTierThree = tierThreeStep,
       )
 
       configuredOp = Operation.async(

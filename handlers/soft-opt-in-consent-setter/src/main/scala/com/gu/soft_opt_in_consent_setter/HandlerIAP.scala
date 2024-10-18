@@ -73,7 +73,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       dynamoConnector <- DynamoConnector()
 
       identityConnector = new IdentityConnector(config.identityConfig)
-      consentsCalculator = new ConsentsCalculator(config.consentsMapping)
+      consentsCalculator = new ConsentsCalculator(ConsentsMapping.consentsMapping)
       mpapiConnector = new MpapiConnector(config.mpapiConfig)
     } yield (sfConnector, identityConnector, consentsCalculator, mpapiConnector, dynamoConnector)
 
@@ -191,11 +191,12 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       mobileSubscriptionsResponse <- getMobileSubscriptions(messageBody.identityId)
       activeSubs <- sfConnector.getActiveSubs(Seq(messageBody.identityId))
 
-      hasMobileSub = mobileSubscriptionsResponse.subscriptions
+      iapSOIs = mobileSubscriptionsResponse.subscriptions
         .filter(_.valid)
-        .headOption
-        .map(_ => "InAppPurchase")
-      productNames = activeSubs.records.map(_.Product__c) ++ hasMobileSub
+        .map(_.softOptInProductName)
+        .distinct
+
+      productNames = activeSubs.records.map(_.Product__c) ++ iapSOIs
 
       consentsBody <- buildProductSwitchConsents(
         previousProductName,
@@ -220,7 +221,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       sfConnector: SalesforceConnector,
   ): Either[SoftOptInError, Unit] = {
     def sendCancellationConsents(identityId: String, consents: Set[String]): Either[SoftOptInError, Unit] = {
-      if (consents.nonEmpty)
+      if (consents.nonEmpty) {
         for {
           _ <- {
             val consentsBody = consentsCalculator.buildConsentsBody(consents, state = false)
@@ -230,25 +231,27 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
             sendConsentsReq(identityId, consentsBody)
           }
         } yield ()
-      else
+      } else {
         Right(())
+      }
     }
 
     for {
       mobileSubscriptionsResponse <- getMobileSubscriptions(messageBody.identityId)
       activeSubs <- sfConnector.getActiveSubs(Seq(messageBody.identityId))
 
-      hasMobileSub = mobileSubscriptionsResponse.subscriptions
+      iapSOIs = mobileSubscriptionsResponse.subscriptions
         .filter(_.valid)
-        .headOption
-        .map(_ => "InAppPurchase")
-      productNames = activeSubs.records.map(_.Product__c) ++ hasMobileSub
+        .map(_.softOptInProductName)
+        .distinct
+      productNames = activeSubs.records.map(_.Product__c) ++ iapSOIs
 
       consents <- consentsCalculator.getCancellationConsents(
         messageBody.productName,
         productNames.toSet,
       )
-      _ <- sendCancellationConsents(messageBody.identityId, consents)
+      consentWithoutSimilarProducts = consentsCalculator.removeSimilarGuardianProductFromSet(consents)
+      _ <- sendCancellationConsents(messageBody.identityId, consentWithoutSimilarProducts)
     } yield ()
   }
 

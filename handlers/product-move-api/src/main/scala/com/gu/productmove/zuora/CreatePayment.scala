@@ -1,14 +1,6 @@
 package com.gu.productmove.zuora
 
 import com.gu.i18n.Currency
-import com.gu.newproduct.api.productcatalog.PlanId.{AnnualSupporterPlus, MonthlySupporterPlus}
-import com.gu.newproduct.api.productcatalog.ZuoraIds.{
-  ProductRatePlanId,
-  SupporterPlusZuoraIds,
-  ZuoraIds,
-  zuoraIdsForStage,
-}
-import com.gu.newproduct.api.productcatalog.*
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError, PreviewResult}
@@ -30,26 +22,28 @@ import zio.{Clock, IO, RIO, Task, UIO, URLayer, ZIO, ZLayer}
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
-trait CreatePayment:
+trait CreatePayment {
   def create(
       accountId: String,
       invoiceId: String,
       paymentMethodId: String,
       amount: BigDecimal,
       today: LocalDate,
-  ): IO[ErrorResponse, CreatePaymentResponse]
+  ): Task[CreatePaymentResponse]
+}
 
-object CreatePaymentLive:
+object CreatePaymentLive {
   val layer: URLayer[ZuoraGet, CreatePayment] = ZLayer.fromFunction(CreatePaymentLive(_))
+}
 
-private class CreatePaymentLive(zuoraGet: ZuoraGet) extends CreatePayment:
+private class CreatePaymentLive(zuoraGet: ZuoraGet) extends CreatePayment {
   override def create(
       accountId: String,
       invoiceId: String,
       paymentMethodId: String,
       amount: BigDecimal,
       today: LocalDate,
-  ): IO[ErrorResponse, CreatePaymentResponse] = for {
+  ): Task[CreatePaymentResponse] = for {
     _ <- ZIO.log(
       s"Attempting to create payment on account $accountId, invoice $invoiceId, paymentMethodId $paymentMethodId for amount $amount",
     )
@@ -70,6 +64,7 @@ private class CreatePaymentLive(zuoraGet: ZuoraGet) extends CreatePayment:
       )
     _ <- ZIO.log(s"Successfully created payment")
   } yield response
+}
 
 object CreatePayment {
   def create(
@@ -78,7 +73,7 @@ object CreatePayment {
       paymentMethodId: String,
       amount: BigDecimal,
       today: LocalDate,
-  ): ZIO[CreatePayment, ErrorResponse, CreatePaymentResponse] =
+  ): RIO[CreatePayment, CreatePaymentResponse] =
     ZIO.serviceWithZIO[CreatePayment](_.create(accountId, invoiceId, paymentMethodId, amount, today))
 }
 case class CreatePaymentRequest(

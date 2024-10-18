@@ -12,6 +12,8 @@ import com.gu.zuora.subscription._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
+import java.time.ZonedDateTime
+
 class SalesforceHolidayStopRequestEndToEndEffectsTest extends AnyFlatSpec with Matchers {
 
   case class EndToEndResults(
@@ -26,11 +28,12 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends AnyFlatSpec with M
     val endDate = MutableCalendar.today.plusDays(15)
     val subscriptionName = SubscriptionName("A-S00050817") // must exist in CODE SalesForce
     val contact = IdentityId("100004814") // must exist in CODE SalesForce
+    val withdrawTime = ZonedDateTime.now()
 
     val actual = for {
       sfConfig <- LoadConfigModule(Stage("CODE"), GetFromS3.fetchString).load[SFAuthConfig]
       response = RawEffects.response
-      sfAuth <- SalesforceClient(response, sfConfig).value.toDisjunction
+      sfAuth <- SalesforceClient.auth(response, sfConfig)
 
       verifySubOwnerOp = SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact(
         sfAuth.wrapWith(JsonHttp.getWithParams),
@@ -47,8 +50,8 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends AnyFlatSpec with M
         .toOption
         .get
 
-      createOp = SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail(sfAuth.wrapWith(JsonHttp.post))
-      createResult <- createOp(
+      createOp = new SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail(sfAuth.wrapWith(JsonHttp.post))
+      createResult <- createOp.run(
         CreateHolidayStopRequestWithDetail.buildBody(
           startDate,
           endDate,
@@ -58,10 +61,10 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends AnyFlatSpec with M
         ),
       ).toDisjunction
 
-      fetchOp = SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(
+      fetchOp = new SalesforceHolidayStopRequest.LookupByContactAndOptionalSubscriptionName(
         sfAuth.wrapWith(JsonHttp.getWithParams),
       )
-      preProcessingFetchResult <- fetchOp(contact, Some(subscriptionName), None).toDisjunction
+      preProcessingFetchResult <- fetchOp.run(contact, Some(subscriptionName), None).toDisjunction
 
       id: HolidayStopRequestsDetailId = preProcessingFetchResult
         .find(_.Id == createResult)
@@ -81,7 +84,7 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends AnyFlatSpec with M
         ),
       ).toDisjunction
 
-      postProcessingFetchResult <- fetchOp(contact, Some(subscriptionName), None).toDisjunction
+      postProcessingFetchResult <- fetchOp.run(contact, Some(subscriptionName), None).toDisjunction
 
       // UN-ACTION in order to delete the parent
       _ <- processOp(
@@ -91,8 +94,8 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends AnyFlatSpec with M
         ),
       ).toDisjunction
 
-      deleteOp = SalesforceHolidayStopRequest.WithdrawHolidayStopRequest(sfAuth.wrapWith(JsonHttp.patch))
-      _ <- deleteOp(createResult).toDisjunction
+      deleteOp = new SalesforceHolidayStopRequest.WithdrawHolidayStopRequest(sfAuth.wrapWith(JsonHttp.patch))
+      _ <- deleteOp.run(withdrawTime, createResult).toDisjunction
 
     } yield EndToEndResults(createResult, preProcessingFetchResult, postProcessingFetchResult)
 

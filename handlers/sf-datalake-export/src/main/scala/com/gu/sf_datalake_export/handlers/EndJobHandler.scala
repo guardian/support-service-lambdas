@@ -85,7 +85,7 @@ object EndJobHandler {
     for {
       _ <- uploadDummySuccessFileToTriggerOphanJob(request)
       sfConfig <- loadConfig.load[SFAuthConfig](SFExportAuthConfig.location, sfAuthConfigReads).toTry
-      sfClient <- SalesforceClient(getResponse, sfConfig).value.toTry
+      sfClient <- SalesforceClient.auth(getResponse, sfConfig).left.map(bodies => new Throwable(bodies.toString)).toTry
       wiredCloseJob = sfClient.wrapWith(JsonHttp.post).wrapWith(CloseJob.wrapper)
       _ <- wiredCloseJob.runRequest(jobId).toTry
     } yield WireResponse(

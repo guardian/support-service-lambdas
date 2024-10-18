@@ -1,14 +1,14 @@
 package com.gu.productmove.zuora
 
-import com.gu.newproduct.api.productcatalog.BillingPeriod
 import com.gu.productmove.GuStageLive
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError, PreviewResult}
 import com.gu.productmove.zuora.GetSubscription
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.SubscriptionUpdatePreviewResponse
 import com.gu.productmove.zuora.model.SubscriptionName
-import zio.{IO, ZIO}
+import zio.*
 import com.gu.i18n.Currency
+import com.gu.newproduct.api.productcatalog.BillingPeriod
 import zio.json.JsonDecoder
 
 class MockSubscriptionUpdate(
@@ -24,15 +24,16 @@ class MockSubscriptionUpdate(
   override def update[R: JsonDecoder](
       subscriptionName: SubscriptionName,
       requestBody: SubscriptionUpdateRequest,
-  ): ZIO[Any, ErrorResponse, R] = {
-    mutableStore = (subscriptionName, requestBody) :: mutableStore
+  ): Task[R] = {
+    val params = (subscriptionName, requestBody)
+    mutableStore = params :: mutableStore
 
     preview.get(subscriptionName, requestBody) match {
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse.asInstanceOf[R])
       case None =>
         update.get(subscriptionName, requestBody) match {
           case Some(stubbedResponse) => ZIO.succeed(stubbedResponse.asInstanceOf[R])
-          case None => ZIO.fail(InternalServerError(s"success = false"))
+          case None => ZIO.fail(new Throwable(s"mock: success = false subscriptionUpdate: " + params))
         }
     }
   }

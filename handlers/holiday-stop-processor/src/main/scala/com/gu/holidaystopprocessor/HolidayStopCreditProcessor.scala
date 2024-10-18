@@ -37,19 +37,20 @@ object HolidayStopCreditProcessor {
       fetchFromS3: S3Location => Try[String],
   ): List[ProcessResult[ZuoraHolidayCreditAddResult]] = {
 
-    val productTypesToProcess = productTypeAndStopDateOverride match {
+    val allProcessableProductTypes = List(
+      NewspaperNationalDelivery,
+      NewspaperHomeDelivery,
+      GuardianWeekly,
+      TierThree,
+      NewspaperVoucherBook,
+      NewspaperDigitalVoucher,
+    )
 
+    val productTypesToProcess = productTypeAndStopDateOverride match {
       case Some(ProductTypeAndStopDate(productType, _)) =>
         List(productType)
-
       case None =>
-        List(
-          NewspaperHomeDelivery,
-          NewspaperVoucherBook,
-          NewspaperDigitalVoucher,
-          GuardianWeekly,
-          NewspaperNationalDelivery,
-        )
+        allProcessableProductTypes
     }
 
     Zuora.accessTokenGetResponse(config.zuoraConfig, backend) match {
@@ -59,41 +60,37 @@ object HolidayStopCreditProcessor {
       case Right(zuoraAccessToken) =>
         val stage = Stage()
         val fulfilmentDatesFetcher = FulfilmentDatesFetcher(fetchFromS3, stage)
-        productTypesToProcess
-          .map { productType =>
-            {
-
-              def updateToApply(
-                  creditProduct: CreditProductForSubscription,
-                  subscription: Subscription,
-                  account: ZuoraAccount,
-                  request: HolidayStopRequestsDetail,
-              ) =
-                SubscriptionUpdate(
-                  creditProduct(subscription),
-                  subscription,
-                  account,
-                  request.Stopped_Publication_Date__c,
-                  None,
-                )
-
-              Processor.processLiveProduct(
-                config.zuoraConfig,
-                zuoraAccessToken,
-                backend,
-                HolidayCreditProduct.forStage(stage),
-                Salesforce.holidayStopRequests(config.sfConfig),
-                fulfilmentDatesFetcher,
-                productTypeAndStopDateOverride.map(_.stopDate),
-                productType,
-                updateToApply,
-                ZuoraHolidayCreditAddResult.apply,
-                Salesforce.holidayStopUpdateResponse(config.sfConfig),
-                Zuora.accountGetResponse(config.zuoraConfig, zuoraAccessToken, backend),
-                NextInvoiceDate.getNextInvoiceDate,
-              )
-            }
-          }
+        productTypesToProcess.flatMap(productType =>
+          Processor.processLiveProduct(
+            config.zuoraConfig,
+            zuoraAccessToken,
+            backend,
+            HolidayCreditProduct.forStage(stage),
+            Salesforce.holidayStopRequests(config.sfConfig),
+            fulfilmentDatesFetcher,
+            productTypeAndStopDateOverride.map(_.stopDate),
+            productType,
+            updateToApply,
+            ZuoraHolidayCreditAddResult.apply,
+            Salesforce.holidayStopUpdateResponse(config.sfConfig),
+            Zuora.accountGetResponse(config.zuoraConfig, zuoraAccessToken, backend),
+            NextInvoiceDate.getNextInvoiceDate,
+          ),
+        )
     }
   }
+
+  def updateToApply(
+      creditProduct: CreditProductForSubscription,
+      subscription: Subscription,
+      account: ZuoraAccount,
+      request: HolidayStopRequestsDetail,
+  ) =
+    SubscriptionUpdate(
+      creditProduct(subscription),
+      subscription,
+      account,
+      request.Stopped_Publication_Date__c,
+      None,
+    )
 }

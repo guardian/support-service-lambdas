@@ -30,14 +30,14 @@ case class PaperEmailData(
 ) extends EmailData
 
 case class DeliveryAgentDetails(
-  agentName: String,
-  telephone: String,
-  email: String,
-  address1: String,
-  address2: String,
-  town: String,
-  county: String,
-  postcode: String,
+    agentName: String,
+    telephone: String,
+    email: String,
+    address1: String,
+    address2: String,
+    town: String,
+    county: String,
+    postcode: String,
 )
 
 case class TrialPeriod(days: Int)
@@ -84,7 +84,17 @@ case class GuardianWeeklyEmailData(
     plan: Plan,
     contacts: Contacts,
     subscriptionName: SubscriptionName,
-    discountMessage: Option[DiscountMessage] ,
+    discountMessage: Option[DiscountMessage],
+) extends EmailData
+
+case class TierThreeEmailData(
+    currency: Currency,
+    paymentMethod: PaymentMethod,
+    firstPaymentDate: LocalDate,
+    plan: Plan,
+    contacts: Contacts,
+    subscriptionName: SubscriptionName,
+    discountMessage: Option[DiscountMessage],
 ) extends EmailData
 
 object EmailData {

@@ -23,6 +23,6 @@ class JsonCodecSpec extends AnyFlatSpec with should.Matchers {
 
     val record = decode[MobileSubscriptions](json)
 
-    record shouldBe Right(MobileSubscriptions(List(MobileSubscription(false))))
+    record shouldBe Right(MobileSubscriptions(List(MobileSubscription(false, "InAppPurchase"))))
   }
 }

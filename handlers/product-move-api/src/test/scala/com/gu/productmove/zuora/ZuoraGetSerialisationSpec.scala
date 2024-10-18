@@ -3,8 +3,8 @@ package com.gu.productmove.zuora
 import com.gu.productmove.{SecretsLive, SttpClientLive}
 import com.gu.productmove.zuora.InvoiceItemAdjustment.{InvoiceItemAdjustmentResult, InvoiceItemAdjustmentsWriteRequest}
 import com.gu.productmove.zuora.model.SubscriptionName
-import zio.Scope
-import zio.{IO, ZIO}
+import zio.*
+import zio.*
 import zio.*
 import zio.test.Assertion.*
 import zio.test.*
@@ -19,11 +19,13 @@ object ZuoraGetSerialisationSpec extends ZIOSpecDefault {
     suite("ZuoraGetSerialisation")(
       test("can deserialise a list") {
         for {
-          result <- ZuoraGet
-            .post[InvoiceItemAdjustmentsWriteRequest, List[InvoiceItemAdjustmentResult]](
-              uri"action/create",
-              InvoiceItemAdjustmentsWriteRequest(objects = Nil),
-              ZuoraRestBody.ZuoraSuccessCheck.None,
+          result <- ZIO
+            .serviceWith[ZuoraGet](
+              _.post[InvoiceItemAdjustmentsWriteRequest, List[InvoiceItemAdjustmentResult]](
+                uri"action/create",
+                InvoiceItemAdjustmentsWriteRequest(objects = Nil),
+                ZuoraRestBody.ZuoraSuccessCheck.None,
+              ),
             )
             .provide(
               ZuoraGetLive.layer,

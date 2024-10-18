@@ -7,7 +7,7 @@ import com.gu.productmove.zuora.GetSubscription
 import com.gu.productmove.zuora.Subscribe.*
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
-import zio.{IO, ZIO}
+import zio.*
 import zio.*
 import zio.test.Assertion.*
 import zio.test.*

@@ -1,7 +1,5 @@
-import fs from 'fs';
 import { arrayToObject, distinct } from '@modules/arrayFunctions';
-import { checkDefined } from '@modules/nullAndUndefined';
-import { getZuoraCatalogFromS3 } from '@modules/zuora-catalog/S3';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import type {
 	ZuoraCatalog,
 	ZuoraProductRatePlan,
@@ -35,16 +33,32 @@ const getCurrenciesForProduct = (productRatePlan: ZuoraProductRatePlan) =>
 			charge.pricing.map((price) => price.currency),
 		),
 	);
-
+const getBillingPeriodsForProduct = (
+	productRatePlans: ZuoraProductRatePlan[],
+) =>
+	distinct(
+		productRatePlans
+			.flatMap((productRatePlan) =>
+				productRatePlan.productRatePlanCharges.flatMap(
+					(charge) => charge.billingPeriod,
+				),
+			)
+			.filter(
+				(billingPeriod) =>
+					billingPeriod !== null && billingPeriod != 'Specific_Weeks',
+			) as string[],
+	);
 const getZuoraProduct = (productRatePlans: ZuoraProductRatePlan[]) => {
 	const currencies = getCurrenciesForProduct(
-		checkDefined(
+		getIfDefined(
 			productRatePlans[0],
 			'Undefined productRatePlan in getZuoraProductObjects',
 		),
 	);
+	const billingPeriods = getBillingPeriodsForProduct(productRatePlans);
 	return {
 		currencies,
+		billingPeriods,
 		productRatePlans: arrayToObject(
 			productRatePlans
 				.filter((productRatePlan) =>
@@ -77,18 +91,3 @@ export const generateTypeObject = (catalog: ZuoraCatalog) => {
 
 	return arrayToObject(arrayVersion);
 };
-
-const writeTypesToFile = async () => {
-	const prodCatalog = await getZuoraCatalogFromS3('PROD');
-	const types = generateTypeObject(prodCatalog);
-	const typesString = JSON.stringify(types, null, 2);
-
-	fs.writeFileSync(
-		'./src/typeObject.ts',
-		`export const typeObject = ${typesString} as const;`,
-	);
-};
-
-void (async function () {
-	await writeTypesToFile();
-})();

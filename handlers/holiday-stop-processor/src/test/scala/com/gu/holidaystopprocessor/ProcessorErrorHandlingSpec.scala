@@ -92,25 +92,29 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
     val writeHolidayStopsToSalesforce: List[ZuoraHolidayCreditAddResult] => Either[SalesforceApiFailure, Unit] =
       _ => Right(())
 
-    val result = Processor.processProduct(
-      creditProduct,
-      holidayStopRequestsFromSalesforce,
-      fulfilmentDatesFetcher,
-      None,
-      ZuoraProductTypes.GuardianWeekly,
-      getSubscription,
-      getAccount(Fixtures.mkAccount().asRight),
-      updateToApply,
-      updateSubscription,
-      ZuoraHolidayCreditAddResult.apply,
-      writeHolidayStopsToSalesforce,
-    )
+    val result = Processor
+      .processProduct(
+        creditProduct,
+        holidayStopRequestsFromSalesforce,
+        fulfilmentDatesFetcher,
+        None,
+        ZuoraProductTypes.GuardianWeekly,
+        getSubscription,
+        getAccount(Fixtures.mkAccount().asRight),
+        updateToApply,
+        updateSubscription,
+        ZuoraHolidayCreditAddResult.apply,
+        writeHolidayStopsToSalesforce,
+      )
 
-    val (failedZuoraResponses, successfulZuoraResponses) = result.creditResults.separate
+    val failedZuoraResponses = result.flatMap(_.creditResults.separate._1)
+    val successfulZuoraResponses = result.flatMap(_.creditResults.separate._2)
+
     failedZuoraResponses.size shouldBe 1
     successfulZuoraResponses.size shouldBe 2
     (failedZuoraResponses.size + successfulZuoraResponses.size) shouldBe 3
-    result.overallFailure.value shouldBe OverallFailure("zuora boom")
+    result.map(_.overallFailure) should contain(Some(OverallFailure("zuora boom")))
+
   }
 
   it should "not short-circuit if all Zuora writes succeed, and Salesforce write fails" in {
@@ -123,25 +127,28 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
     val writeHolidayStopsToSalesforce: List[ZuoraHolidayCreditAddResult] => Either[SalesforceApiFailure, Unit] =
       _ => Left(SalesforceApiFailure("salesforce boom"))
 
-    val result = Processor.processProduct(
-      creditProduct,
-      holidayStopRequestsFromSalesforce,
-      fulfilmentDatesFetcher,
-      None,
-      ZuoraProductTypes.GuardianWeekly,
-      getSubscription,
-      getAccount(Fixtures.mkAccount().asRight),
-      updateToApply,
-      updateSubscription,
-      ZuoraHolidayCreditAddResult.apply,
-      writeHolidayStopsToSalesforce,
-    )
+    val result = Processor
+      .processProduct(
+        creditProduct,
+        holidayStopRequestsFromSalesforce,
+        fulfilmentDatesFetcher,
+        None,
+        ZuoraProductTypes.GuardianWeekly,
+        getSubscription,
+        getAccount(Fixtures.mkAccount().asRight),
+        updateToApply,
+        updateSubscription,
+        ZuoraHolidayCreditAddResult.apply,
+        writeHolidayStopsToSalesforce,
+      )
 
-    val (failedZuoraResponses, successfulZuoraResponses) = result.creditResults.separate
+    val failedZuoraResponses = result.flatMap(_.creditResults.separate._1)
+    val successfulZuoraResponses = result.flatMap(_.creditResults.separate._2)
+
     failedZuoraResponses.size shouldBe 0
     successfulZuoraResponses.size shouldBe 3
     (failedZuoraResponses.size + successfulZuoraResponses.size) shouldBe 3
-    result.overallFailure.value shouldBe OverallFailure("salesforce boom")
+    result.head.overallFailure.value shouldBe OverallFailure("salesforce boom")
 
   }
 
@@ -155,25 +162,32 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
     val writeHolidayStopsToSalesforce: List[ZuoraHolidayCreditAddResult] => Either[SalesforceApiFailure, Unit] =
       _ => Right(())
 
-    val result = Processor.processProduct(
-      creditProduct,
-      holidayStopRequestsFromSalesforce,
-      fulfilmentDatesFetcher,
-      None,
-      ZuoraProductTypes.GuardianWeekly,
-      getSubscription,
-      getAccount(Fixtures.mkAccount().asRight),
-      updateToApply,
-      updateSubscription,
-      ZuoraHolidayCreditAddResult.apply,
-      writeHolidayStopsToSalesforce,
-    )
+    val result = Processor
+      .processProduct(
+        creditProduct,
+        holidayStopRequestsFromSalesforce,
+        fulfilmentDatesFetcher,
+        None,
+        ZuoraProductTypes.GuardianWeekly,
+        getSubscription,
+        getAccount(Fixtures.mkAccount().asRight),
+        updateToApply,
+        updateSubscription,
+        ZuoraHolidayCreditAddResult.apply,
+        writeHolidayStopsToSalesforce,
+      )
 
-    val (failedZuoraResponses, successfulZuoraResponses) = result.creditResults.separate
+    val failedZuoraResponses = result.flatMap(_.creditResults.separate._1)
+    val successfulZuoraResponses = result.flatMap(_.creditResults.separate._2)
+
     failedZuoraResponses.size shouldBe 3
     successfulZuoraResponses.size shouldBe 0
-    (failedZuoraResponses.size + successfulZuoraResponses.size) shouldBe 3
-    result.overallFailure.value shouldBe OverallFailure("zuora boom 1")
+
+    result.flatMap(_.overallFailure) should contain atLeastOneOf (
+      OverallFailure("zuora boom 1"),
+      OverallFailure("zuora boom 2"),
+      OverallFailure("zuora boom 3")
+    )
   }
 
   it should "be None if all Zuora writes succeed and Salesforce write succeeds" in {
@@ -186,24 +200,26 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
     val writeHolidayStopsToSalesforce: List[ZuoraHolidayCreditAddResult] => Either[SalesforceApiFailure, Unit] =
       _ => Right(())
 
-    val result = Processor.processProduct(
-      creditProduct,
-      holidayStopRequestsFromSalesforce,
-      fulfilmentDatesFetcher,
-      None,
-      ZuoraProductTypes.GuardianWeekly,
-      getSubscription,
-      getAccount(Fixtures.mkAccount().asRight),
-      updateToApply,
-      updateSubscription,
-      ZuoraHolidayCreditAddResult.apply,
-      writeHolidayStopsToSalesforce,
-    )
+    val result = Processor
+      .processProduct(
+        creditProduct,
+        holidayStopRequestsFromSalesforce,
+        fulfilmentDatesFetcher,
+        None,
+        ZuoraProductTypes.GuardianWeekly,
+        getSubscription,
+        getAccount(Fixtures.mkAccount().asRight),
+        updateToApply,
+        updateSubscription,
+        ZuoraHolidayCreditAddResult.apply,
+        writeHolidayStopsToSalesforce,
+      )
 
-    val (failedZuoraResponses, successfulZuoraResponses) = result.creditResults.separate
+    val failedZuoraResponses = result.flatMap(_.creditResults.separate._1)
+    val successfulZuoraResponses = result.flatMap(_.creditResults.separate._2)
     failedZuoraResponses.size shouldBe 0
     successfulZuoraResponses.size shouldBe 3
     (failedZuoraResponses.size + successfulZuoraResponses.size) shouldBe 3
-    result.overallFailure should be(None)
+    result.head.overallFailure should be(None)
   }
 }

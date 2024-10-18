@@ -108,35 +108,29 @@ object ZuoraIds {
   }
 
   case class GuardianWeeklyDomesticIds(
-      sixForSix: PlanAndCharge,
+      monthly: ProductRatePlanId,
       quarterly: ProductRatePlanId,
       annual: ProductRatePlanId,
   ) {
     val zuoraRatePlanIdByApiPlanId = Map(
-      GuardianWeeklyDomestic6for6 -> sixForSix.productRatePlanId,
+      GuardianWeeklyDomesticMonthly -> monthly,
       GuardianWeeklyDomesticQuarterly -> quarterly,
       GuardianWeeklyDomesticAnnual -> annual,
     )
     val zuoraRatePlanIdToApiPlanId = zuoraRatePlanIdByApiPlanId.map(_.swap)
-    val planAndChargeByApiPlanId = Map(
-      GuardianWeeklyDomestic6for6 -> sixForSix,
-    )
   }
 
   case class GuardianWeeklyROWIds(
-      sixForSix: PlanAndCharge,
+      monthly: ProductRatePlanId,
       quarterly: ProductRatePlanId,
       annual: ProductRatePlanId,
   ) {
     val zuoraRatePlanIdByApiPlanId = Map(
-      GuardianWeeklyROW6for6 -> sixForSix.productRatePlanId,
+      GuardianWeeklyROWMonthly -> monthly,
       GuardianWeeklyROWQuarterly -> quarterly,
       GuardianWeeklyROWAnnual -> annual,
     )
     val apiPlanIdZuoraRatePlanIdBy = zuoraRatePlanIdByApiPlanId.map(_.swap)
-    val planAndChargeByApiPlanId = Map(
-      GuardianWeeklyROW6for6 -> sixForSix,
-    )
   }
 
   case class DigitalVoucherZuoraIds(
@@ -167,9 +161,9 @@ object ZuoraIds {
   }
 
   case class NationalDeliveryZuoraIds(
-    everyday: ProductRatePlanId,
-    weekend: ProductRatePlanId,
-    sixDay: ProductRatePlanId,
+      everyday: ProductRatePlanId,
+      weekend: ProductRatePlanId,
+      sixDay: ProductRatePlanId,
   ) {
     val byApiPlanId: Map[PlanId, ProductRatePlanId] = Map(
       NationalDeliveryEveryday -> everyday,
@@ -178,16 +172,31 @@ object ZuoraIds {
     )
   }
 
+  case class TierThreeZuoraIds(
+      monthlyDomestic: ProductRatePlanId,
+      annualDomestic: ProductRatePlanId,
+      monthlyRestOfWorld: ProductRatePlanId,
+      annualRestOfWorld: ProductRatePlanId,
+  ) {
+    val byApiPlanId: Map[PlanId, ProductRatePlanId] = Map(
+      TierThreeDomesticMonthly -> monthlyDomestic,
+      TierThreeDomesticAnnual -> annualDomestic,
+      TierThreeROWMonthly -> monthlyRestOfWorld,
+      TierThreeROWAnnual -> annualRestOfWorld,
+    )
+  }
+
   case class ZuoraIds(
-    supporterPlusZuoraIds: SupporterPlusZuoraIds,
-    contributionsZuoraIds: ContributionsZuoraIds,
-    voucherZuoraIds: VoucherZuoraIds,
-    homeDeliveryZuoraIds: HomeDeliveryZuoraIds,
-    digitalPackIds: DigipackZuoraIds,
-    guardianWeeklyDomestic: GuardianWeeklyDomesticIds,
-    guardianWeeklyROW: GuardianWeeklyROWIds,
-    digitalVoucher: DigitalVoucherZuoraIds,
-    nationalDeliveryZuoraIds: NationalDeliveryZuoraIds,
+      supporterPlusZuoraIds: SupporterPlusZuoraIds,
+      contributionsZuoraIds: ContributionsZuoraIds,
+      voucherZuoraIds: VoucherZuoraIds,
+      homeDeliveryZuoraIds: HomeDeliveryZuoraIds,
+      digitalPackIds: DigipackZuoraIds,
+      guardianWeeklyDomestic: GuardianWeeklyDomesticIds,
+      guardianWeeklyROW: GuardianWeeklyROWIds,
+      digitalVoucher: DigitalVoucherZuoraIds,
+      nationalDeliveryZuoraIds: NationalDeliveryZuoraIds,
+      tierThreeZuoraIds: TierThreeZuoraIds,
   ) {
     def apiIdToRateplanId: Map[PlanId, ProductRatePlanId] =
       (supporterPlusZuoraIds.planAndChargeByApiPlanId.view.mapValues(_.productRatePlanId) ++
@@ -197,17 +206,15 @@ object ZuoraIds {
         digitalPackIds.byApiPlanId ++
         guardianWeeklyDomestic.zuoraRatePlanIdByApiPlanId ++
         guardianWeeklyROW.zuoraRatePlanIdByApiPlanId ++
-        digitalVoucher.byApiPlanId ++ 
-        nationalDeliveryZuoraIds.byApiPlanId
-      ).toMap
+        digitalVoucher.byApiPlanId ++
+        nationalDeliveryZuoraIds.byApiPlanId ++
+        tierThreeZuoraIds.byApiPlanId).toMap
 
     val rateplanIdToApiId: Map[ProductRatePlanId, PlanId] = apiIdToRateplanId.map(_.swap)
 
     def apiIdToPlanAndCharge: Map[PlanId, HasPlanAndChargeIds] =
       supporterPlusZuoraIds.planAndChargeByApiPlanId ++
-        contributionsZuoraIds.planAndChargeByApiPlanId ++
-        guardianWeeklyDomestic.planAndChargeByApiPlanId ++
-        guardianWeeklyROW.planAndChargeByApiPlanId
+        contributionsZuoraIds.planAndChargeByApiPlanId
 
   }
 
@@ -276,18 +283,12 @@ object ZuoraIds {
           annual = ProductRatePlanId("2c92a0fb4edd70c8014edeaa4e972204"),
         ),
         GuardianWeeklyDomesticIds(
-          sixForSix = PlanAndCharge(
-            ProductRatePlanId("2c92a0086619bf8901661aaac94257fe"),
-            ProductRatePlanChargeId("2c92a0086619bf8901661aaac95d5800"),
-          ),
+          monthly = ProductRatePlanId("2c92a0fd79ac64b00179ae3f9d474960"),
           quarterly = ProductRatePlanId("2c92a0fe6619b4b301661aa494392ee2"),
           annual = ProductRatePlanId("2c92a0fe6619b4b901661aa8e66c1692"),
         ),
         GuardianWeeklyROWIds(
-          sixForSix = PlanAndCharge(
-            ProductRatePlanId("2c92a0086619bf8901661ab545f51b21"),
-            ProductRatePlanChargeId("2c92a0086619bf8901661ab546091b23"),
-          ),
+          monthly = ProductRatePlanId("2c92a0ff79ac64e30179ae45669b3a83"),
           quarterly = ProductRatePlanId("2c92a0086619bf8901661ab02752722f"),
           annual = ProductRatePlanId("2c92a0fe6619b4b601661ab300222651"),
         ),
@@ -307,6 +308,12 @@ object ZuoraIds {
           everyday = ProductRatePlanId("8a12999f8a268c57018a27ebe31414a4"),
           weekend = ProductRatePlanId("8a12999f8a268c57018a27ebe868150c"),
           sixDay = ProductRatePlanId("8a12999f8a268c57018a27ebfd721883"),
+        ),
+        TierThreeZuoraIds(
+          monthlyDomestic = ProductRatePlanId("8a1299788ff2ec100190025fccc32bb1"),
+          annualDomestic = ProductRatePlanId("8a1288a38ff2af980190025b32591ccc"),
+          monthlyRestOfWorld = ProductRatePlanId("8a128ab18ff2af9301900255d77979ac"),
+          annualRestOfWorld = ProductRatePlanId("8a1299788ff2ec100190024d1e3b1a09"),
         ),
       ),
       Stage("CODE") -> ZuoraIds(
@@ -369,18 +376,12 @@ object ZuoraIds {
           annual = ProductRatePlanId("2c92c0f94bbffaaa014bc6a4212e205b"),
         ),
         GuardianWeeklyDomesticIds(
-          sixForSix = PlanAndCharge(
-            ProductRatePlanId("2c92c0f965f212210165f69b94c92d66"),
-            ProductRatePlanChargeId("2c92c0f865f204440165f69f407d66f1"),
-          ),
+          monthly = ProductRatePlanId("2c92c0f878ac40300178acaa04bb401d"),
           quarterly = ProductRatePlanId("2c92c0f965dc30640165f150c0956859"),
           annual = ProductRatePlanId("2c92c0f965d280590165f16b1b9946c2"),
         ),
         GuardianWeeklyROWIds(
-          sixForSix = PlanAndCharge(
-            ProductRatePlanId("2c92c0f965f2122101660fbc75a16c38"),
-            ProductRatePlanChargeId("2c92c0f965f2122101660fbc75ba6c3c"),
-          ),
+          monthly = ProductRatePlanId("2c92c0f878ac402c0178acb3a90a3620"),
           quarterly = ProductRatePlanId("2c92c0f965f2122101660fb81b745a06"),
           annual = ProductRatePlanId("2c92c0f965f2122101660fb33ed24a45"),
         ),
@@ -398,8 +399,14 @@ object ZuoraIds {
         ),
         NationalDeliveryZuoraIds(
           everyday = ProductRatePlanId("8ad096ca8992481d018992a363bd17ad"),
-          weekend = ProductRatePlanId("8ad096ca8992481d018992a36256175e"), 
+          weekend = ProductRatePlanId("8ad096ca8992481d018992a36256175e"),
           sixDay = ProductRatePlanId("8ad096ca8992481d018992a35f60171b"),
+        ),
+        TierThreeZuoraIds(
+          monthlyDomestic = ProductRatePlanId("8ad097b48ff26452019001cebac92376"),
+          annualDomestic = ProductRatePlanId("8ad081dd8ff24a9a019001d95e4e3574"),
+          monthlyRestOfWorld = ProductRatePlanId("8ad081dd8ff24a9a019001df2ce83657"),
+          annualRestOfWorld = ProductRatePlanId("8ad097b48ff26452019001e65bbf2ca8"),
         ),
       ),
     )

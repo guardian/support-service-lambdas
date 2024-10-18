@@ -1,4 +1,4 @@
-import { checkDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import {
 	type AccountRowWithResult,
 	convertArrayToCsv,
@@ -12,7 +12,7 @@ export const handler = async (event: {
 }) => {
 	const { resultFiles, filePath } = event;
 
-	const bucketName = checkDefined<string>(
+	const bucketName = getIfDefined<string>(
 		process.env.S3_BUCKET,
 		'S3_BUCKET environment variable not set',
 	);

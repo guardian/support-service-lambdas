@@ -8,8 +8,9 @@ import zio.json.*
 //has to be a separate file due to https://github.com/lampepfl/dotty/issues/12498#issuecomment-973991160
 object SubscriptionCancelEndpointTypes {
 
-  enum RefundType:
+  enum RefundType {
     case Asynchronous, Synchronous, NoRefund
+  }
 
   case class ExpectedInput(
       @description("User cancellation reason - from a picklist.")
@@ -17,10 +18,7 @@ object SubscriptionCancelEndpointTypes {
         "mma_other",
       ) // also "mma_value_for_money" , "mma_support_another_way" , "mma_financial_circumstances", etc
       reason: String,
-  )
-
-  given JsonDecoder[ExpectedInput] = DeriveJsonDecoder.gen[ExpectedInput]
-  given JsonEncoder[ExpectedInput] = DeriveJsonEncoder.gen[ExpectedInput] // needed to keep tapir happy
+  ) derives JsonCodec
 
   given Schema[ExpectedInput] = inlineSchema(Schema.derived)
 

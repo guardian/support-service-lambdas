@@ -25,7 +25,7 @@ object GetBatchResultId {
   def toResponse(response: BodyAsString): ClientFailableOp[BatchResultId] = {
     val xml: Elem = scala.xml.XML.loadString(response.value)
     (xml \ "result").text match {
-      case "" => GenericError("no result id found in response")
+      case "" => GenericError("no result id found in response", response.value)
       case resultId => ClientSuccess(BatchResultId(resultId))
     }
   }

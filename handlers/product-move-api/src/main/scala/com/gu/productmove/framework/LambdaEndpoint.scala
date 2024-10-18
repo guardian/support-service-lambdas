@@ -8,7 +8,7 @@ object LambdaEndpoint {
   private val includeInterruptedCause: Boolean = false
 
   // for testing
-  def runTest[OUT](response: IO[Any, OUT]): Unit = {
+  def runTest[OUT](response: Task[OUT]): Unit = {
     val result = Unsafe.unsafe { implicit u =>
       Runtime.default.unsafe.run(
         response
@@ -38,7 +38,7 @@ object LambdaEndpoint {
       )
 
     }
-    result match
+    result match {
       case Exit.Success(value) =>
         println(s"program succeeded with: $value")
       case Exit.Failure(cause) =>
@@ -49,6 +49,7 @@ object LambdaEndpoint {
         }
         println(shortcause.prettyPrint)
         println("(Cause filtered for clarity)")
+    }
 
     println("for more verbose logging change constants in LambdaEndpoint.scala")
   }

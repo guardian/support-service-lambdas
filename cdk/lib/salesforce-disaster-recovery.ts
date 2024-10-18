@@ -6,22 +6,21 @@ import {
 } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
 	Choice,
 	Condition,
 	CustomState,
 	DefinitionBody,
-	Fail,
 	JsonPath,
+	Pass,
 	StateMachine,
-	Succeed,
 	TaskInput,
 	Wait,
 	WaitTime,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
+import { nodeVersion } from './node-version';
 
 interface Props extends GuStackProps {
 	salesforceApiDomain: string;
@@ -45,6 +44,8 @@ export class SalesforceDisasterRecovery extends GuStack {
 		const queryResultFileName = 'query-result.csv';
 		const failedRowsFileName = 'failed-rows.csv';
 
+		const snsTopicArn = `arn:aws:sns:${this.region}:${this.account}:alarms-handler-topic-${this.stage}`;
+
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
 			'app' | 'memorySize' | 'fileName' | 'runtime' | 'timeout' | 'environment'
@@ -52,7 +53,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			app,
 			memorySize: 1024,
 			fileName: `${app}.zip`,
-			runtime: Runtime.NODEJS_20_X,
+			runtime: nodeVersion,
 			timeout: Duration.seconds(300),
 			environment: { APP: app, STACK: this.stack, STAGE: this.stage },
 		};
@@ -192,7 +193,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 			{
 				stateJson: {
 					Type: 'Map',
-					MaxConcurrency: 10,
+					MaxConcurrency: 20,
 					ToleratedFailurePercentage: 100,
 					Comment: `ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches`,
 					ItemReader: {
@@ -302,15 +303,72 @@ export class SalesforceDisasterRecovery extends GuStack {
 			}),
 			resultSelector: {
 				failedRowsCount: JsonPath.numberAt('$.Payload.failedRowsCount'),
-				failedRowsFilePath: JsonPath.stringAt('$.Payload.failedRowsFilePath'),
-				failedRowsFileConsoleUrl: JsonPath.format(
-					`https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}`,
-					bucket.bucketName,
-					this.region,
-					JsonPath.stringAt('$.Payload.failedRowsFilePath'),
-				),
 			},
 		});
+
+		const constructNotificationData = new Pass(
+			this,
+			'ConstructNotificationData',
+			{
+				parameters: {
+					stateMachineExecutionDetailsUrl: JsonPath.format(
+						`https://{}.console.aws.amazon.com/states/home?region={}#/executions/details/{}`,
+						this.region,
+						this.region,
+						JsonPath.stringAt('$$.Execution.Id'),
+					),
+					queryResultFileUrl: JsonPath.format(
+						`https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}`,
+						bucket.bucketName,
+						this.region,
+						JsonPath.stringAt('$$.Execution.StartTime'),
+						queryResultFileName,
+					),
+					failedRowsCount: JsonPath.numberAt('$.failedRowsCount'),
+					failedRowsFileUrl: JsonPath.format(
+						`https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}/{}`,
+						bucket.bucketName,
+						this.region,
+						JsonPath.stringAt('$$.Execution.StartTime'),
+						failedRowsFileName,
+					),
+				},
+			},
+		);
+
+		const sendCompletionNotification = new CustomState(
+			this,
+			'SendCompletionNotification',
+			{
+				stateJson: {
+					Type: 'Task',
+					Resource: 'arn:aws:states:::sns:publish',
+					Parameters: {
+						TopicArn: snsTopicArn,
+						'Message.$': JsonPath.format(
+							`Salesforce Disaster Recovery Re-syncing Procedure Completed For ${this.stage}\n\nThis notification is part of the Salesforce Disaster Recovery procedure explained in the runbook below:\n{}\n\nState machine execution details:\n{}\n\nAccounts to sync:\n{}\n\nAccounts that failed to update ({}):\n{}
+						`,
+							'https://docs.google.com/document/d/1_KxFtfKU3-3-PSzaAYG90uONa05AVgoBmyBDyu5SC5c/edit#heading=h.2r6eh2y6rjut',
+							JsonPath.stringAt('$.stateMachineExecutionDetailsUrl'),
+							JsonPath.stringAt('$.queryResultFileUrl'),
+							JsonPath.stringAt('$.failedRowsCount'),
+							JsonPath.stringAt('$.failedRowsFileUrl'),
+						),
+						MessageAttributes: {
+							app: {
+								DataType: 'String',
+								StringValue: app,
+							},
+							stage: {
+								DataType: 'String',
+								StringValue: this.stage,
+							},
+						},
+					},
+					ResultPath: JsonPath.stringAt('$.TaskResult'),
+				},
+			},
+		);
 
 		const stateMachine = new StateMachine(
 			this,
@@ -325,19 +383,61 @@ export class SalesforceDisasterRecovery extends GuStack {
 							new Choice(this, 'IsSalesforceQueryJobCompleted')
 								.when(
 									Condition.stringEquals('$.ResponseBody.state', 'JobComplete'),
-									saveSalesforceQueryResultToS3.next(
-										processCsvInDistributedMap
-											.next(getMapResult)
-											.next(saveFailedRowsToS3)
-											.next(
-												new Choice(this, 'HaveAllRowsSuccedeed')
-													.when(
-														Condition.numberEquals('$.failedRowsCount', 0),
-														new Succeed(this, 'AllRowsHaveSuccedeed'),
-													)
-													.otherwise(new Fail(this, 'SomeRowsHaveFailed')),
+									new Choice(this, 'AreThereAccountsToResync')
+										.when(
+											Condition.numberEquals(
+												'$.ResponseBody.numberRecordsProcessed',
+												0,
 											),
-									),
+											new Pass(this, 'NoAccountsToResync'),
+										)
+										.otherwise(
+											saveSalesforceQueryResultToS3.next(
+												processCsvInDistributedMap
+													.next(getMapResult)
+													.next(saveFailedRowsToS3)
+													.next(
+														new Choice(this, 'IsHealthCheck')
+															.when(
+																Condition.stringMatches(
+																	'$$.Execution.Name',
+																	'health-check-*',
+																),
+																new Pass(this, 'HealthCheckSuccessful'),
+															)
+															.otherwise(
+																constructNotificationData
+																	.next(sendCompletionNotification)
+																	.next(
+																		new Choice(
+																			this,
+																			'HaveAllAccountsBeenResynced',
+																		)
+																			.when(
+																				Condition.numberEquals(
+																					'$.failedRowsCount',
+																					0,
+																				),
+																				new Pass(
+																					this,
+																					'AllAccountsHaveBeenResynced',
+																				),
+																			)
+																			.otherwise(
+																				new Pass(
+																					this,
+																					'SomeAccountsHaveFailedToUpdate',
+																					{
+																						stateName:
+																							"SomeAccountsHaveFailedToUpdate - Open state input 'failedRowsFileUrl' to debug",
+																					},
+																				),
+																			),
+																	),
+															),
+													),
+											),
+										),
 								)
 								.otherwise(waitForSalesforceQueryJobToComplete),
 						),
@@ -346,67 +446,75 @@ export class SalesforceDisasterRecovery extends GuStack {
 		);
 
 		stateMachine.role.attachInlinePolicy(
-			new Policy(this, 'SalesforceApiHttpInvoke', {
-				statements: [
-					new PolicyStatement({
-						actions: ['states:InvokeHTTPEndpoint'],
-						resources: [stateMachine.stateMachineArn],
-						conditions: {
-							StringEquals: {
-								'states:HTTPMethod': 'POST',
-								'states:HTTPEndpoint': `${props.salesforceApiDomain}/services/data/v59.0/jobs/query`,
+			new Policy(
+				this,
+				'SalesforceDisasterRecoveryStateMachineRoleAdditionalPolicy',
+				{
+					statements: [
+						new PolicyStatement({
+							actions: ['states:InvokeHTTPEndpoint'],
+							resources: [stateMachine.stateMachineArn],
+							conditions: {
+								StringEquals: {
+									'states:HTTPMethod': 'POST',
+									'states:HTTPEndpoint': `${props.salesforceApiDomain}/services/data/v59.0/jobs/query`,
+								},
 							},
-						},
-					}),
-					new PolicyStatement({
-						actions: ['states:InvokeHTTPEndpoint'],
-						resources: [stateMachine.stateMachineArn],
-						conditions: {
-							StringEquals: {
-								'states:HTTPMethod': 'GET',
+						}),
+						new PolicyStatement({
+							actions: ['states:InvokeHTTPEndpoint'],
+							resources: [stateMachine.stateMachineArn],
+							conditions: {
+								StringEquals: {
+									'states:HTTPMethod': 'GET',
+								},
+								StringLike: {
+									'states:HTTPEndpoint': `${props.salesforceApiDomain}/services/data/v59.0/jobs/query/*`,
+								},
 							},
-							StringLike: {
-								'states:HTTPEndpoint': `${props.salesforceApiDomain}/services/data/v59.0/jobs/query/*`,
-							},
-						},
-					}),
-					new PolicyStatement({
-						actions: ['events:RetrieveConnectionCredentials'],
-						resources: [salesforceApiConnectionArn],
-					}),
-					new PolicyStatement({
-						actions: [
-							'secretsmanager:GetSecretValue',
-							'secretsmanager:DescribeSecret',
-						],
-						resources: [
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:events!connection/${app}-${this.stage}-salesforce-api/*`,
-						],
-					}),
-					new PolicyStatement({
-						actions: ['s3:GetObject', 's3:PutObject'],
-						resources: [bucket.arnForObjects('*')],
-					}),
-					new PolicyStatement({
-						actions: ['states:StartExecution'],
-						resources: [stateMachine.stateMachineArn],
-					}),
-					new PolicyStatement({
-						actions: [
-							'states:RedriveExecution',
-							'states:DescribeExecution',
-							'states:StopExecution',
-						],
-						resources: [
-							`arn:aws:states:${this.region}:${this.account}:execution:${stateMachine.stateMachineName}/*`,
-						],
-					}),
-					new PolicyStatement({
-						actions: ['lambda:InvokeFunction'],
-						resources: [updateZuoraAccountsLambda.functionArn],
-					}),
-				],
-			}),
+						}),
+						new PolicyStatement({
+							actions: ['events:RetrieveConnectionCredentials'],
+							resources: [salesforceApiConnectionArn],
+						}),
+						new PolicyStatement({
+							actions: [
+								'secretsmanager:GetSecretValue',
+								'secretsmanager:DescribeSecret',
+							],
+							resources: [
+								`arn:aws:secretsmanager:${this.region}:${this.account}:secret:events!connection/${app}-${this.stage}-salesforce-api/*`,
+							],
+						}),
+						new PolicyStatement({
+							actions: ['s3:GetObject', 's3:PutObject'],
+							resources: [bucket.arnForObjects('*')],
+						}),
+						new PolicyStatement({
+							actions: ['states:StartExecution'],
+							resources: [stateMachine.stateMachineArn],
+						}),
+						new PolicyStatement({
+							actions: [
+								'states:RedriveExecution',
+								'states:DescribeExecution',
+								'states:StopExecution',
+							],
+							resources: [
+								`arn:aws:states:${this.region}:${this.account}:execution:${stateMachine.stateMachineName}/*`,
+							],
+						}),
+						new PolicyStatement({
+							actions: ['lambda:InvokeFunction'],
+							resources: [updateZuoraAccountsLambda.functionArn],
+						}),
+						new PolicyStatement({
+							actions: ['sns:Publish'],
+							resources: [snsTopicArn],
+						}),
+					],
+				},
+			),
 		);
 	}
 }

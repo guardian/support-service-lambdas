@@ -74,6 +74,7 @@ class EmailSendStepsTest extends AnyFlatSpec with Matchers {
 
     EmailSendSteps(sqsSend)(makeMessage("james@jameson.com")) shouldBe GenericError(
       "failure to send email payload to sqs",
+      "java.lang.RuntimeException: foo",
     )
   }
 

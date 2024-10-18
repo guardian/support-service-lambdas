@@ -1,70 +1,102 @@
 /**
- * Creates test subscriptions in various state to test the price rise logic
- *
  * @group integration
  */
-
-import { checkDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
-import { addDiscount } from '@modules/zuora/addDiscount';
-import { getSubscription } from '@modules/zuora/getSubscription';
+import { cancelSubscription } from '@modules/zuora/cancelSubscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import { createDigitalSubscription, doPriceRise } from './helpers';
+import { applyDiscountEndpoint } from '../src/discountEndpoint';
+import { ApplyDiscountResponseBody } from '../src/responseSchema';
+import {
+	createDigitalSubscription,
+	createSupporterPlusSubscription,
+} from './helpers';
+import { zuoraDateFormat } from '@modules/zuora/common';
+import { EmailMessageWithUserId } from '@modules/email/email';
 
 const stage: Stage = 'CODE';
-const subscribeDate = dayjs();
-const nextBillingDate = subscribeDate.add(1, 'month');
+const validIdentityId = '200175946';
 
-test('createDigitalSubscription', async () => {
+test('Supporter Plus subscriptions can have a discount and get an email', async () => {
 	const zuoraClient = await ZuoraClient.create(stage);
+	const today = dayjs();
 
-	console.log('Creating a new digital subscription');
-	const subscribeResponse = await createDigitalSubscription(zuoraClient, false);
+	const paymentDate = today.add(16, 'day');
 
-	const subscriptionNumber = checkDefined(
-		subscribeResponse[0]?.SubscriptionNumber,
-		'SubscriptionNumber was undefined in response from Zuora',
+	console.log('Creating a new S+ subscription');
+	const subscriptionNumber = await createSupporterPlusSubscription(zuoraClient);
+
+	const { response, emailPayload } = await applyDiscountEndpoint(
+		stage,
+		{ 'x-identity-id': validIdentityId },
+		subscriptionNumber,
+		paymentDate.add(2, 'months').add(1, 'day'),
 	);
 
-	console.log('Getting the subscription details from Zuora');
-	const subscription = await getSubscription(zuoraClient, subscriptionNumber);
+	const expected: ApplyDiscountResponseBody = {
+		nextNonDiscountedPaymentDate: zuoraDateFormat(paymentDate.add(2, 'months')),
+	};
+	const expectedEmail: EmailMessageWithUserId = {
+		To: {
+			Address: 'test.user@thegulocal.com',
+			ContactAttributes: {
+				SubscriberAttributes: {
+					first_name: 'Test',
+					last_name: 'User',
+					first_discounted_payment_date: paymentDate.format('DD MMMM YYYY'),
+					next_non_discounted_payment_date: paymentDate
+						.add(2, 'months')
+						.format('DD MMMM YYYY'),
+				},
+			},
+		},
+		DataExtensionName: 'cancellation-discount-confirmation-email',
+		IdentityUserId: '200175946',
+	};
 
-	expect(subscription.subscriptionNumber).toEqual(subscriptionNumber);
-}, 30000);
+	expect(response as ApplyDiscountResponseBody).toEqual(expected);
+	expect(emailPayload).toEqual(expectedEmail);
 
-test('createPriceRiseSubscription', async () => {
-	const zuoraClient = await ZuoraClient.create(stage);
-
-	console.log('Creating a new digital subscription');
-	const subscribeResponse = await createDigitalSubscription(zuoraClient, true);
-
-	const subscriptionNumber = checkDefined(
-		subscribeResponse[0]?.SubscriptionNumber,
-		'SubscriptionNumber was undefined in response from Zuora',
-	);
-
-	console.log('Getting the subscription details from Zuora');
-	const subscription = await getSubscription(zuoraClient, subscriptionNumber);
-
-	console.log('Updating the subscription to trigger a price rise');
-	const priceRisen = await doPriceRise(
-		zuoraClient,
-		subscription,
-		nextBillingDate,
-	);
-
-	expect(priceRisen.success).toEqual(true);
-
-	console.log('Apply a discount to the subscription');
-	const discounted = await addDiscount(
+	console.log('Cancelling the subscription');
+	const cancellationResult = await cancelSubscription(
 		zuoraClient,
 		subscriptionNumber,
-		dayjs(subscription.termStartDate),
-		dayjs(subscription.termEndDate),
-		nextBillingDate,
-		'8ad09be48b23d33f018b23e53afd522d',
+		dayjs().add(1, 'month'),
+		true,
+	);
+	expect(cancellationResult.success).toEqual(true);
+}, 30000);
+
+test('digi subs can have a discount but dont get an email', async () => {
+	const zuoraClient = await ZuoraClient.create(stage);
+	const today = dayjs();
+
+	console.log('Creating a new digital subscription');
+	const subscriptionNumber = await createDigitalSubscription(
+		zuoraClient,
+		false,
 	);
 
-	expect(discounted.success).toEqual(true);
+	const { response, emailPayload } = await applyDiscountEndpoint(
+		stage,
+		{ 'x-identity-id': validIdentityId },
+		subscriptionNumber,
+		today,
+	);
+
+	const expected: ApplyDiscountResponseBody = {
+		nextNonDiscountedPaymentDate: zuoraDateFormat(today.add(16, 'day')),
+	};
+
+	expect(response as ApplyDiscountResponseBody).toEqual(expected);
+	expect(emailPayload).toEqual(undefined);
+
+	console.log('Cancelling the subscription');
+	const cancellationResult = await cancelSubscription(
+		zuoraClient,
+		subscriptionNumber,
+		dayjs().add(1, 'month'),
+		true,
+	);
+	expect(cancellationResult.success).toEqual(true);
 }, 30000);

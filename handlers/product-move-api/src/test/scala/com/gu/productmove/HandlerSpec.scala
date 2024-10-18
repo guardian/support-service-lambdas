@@ -1,8 +1,8 @@
 package com.gu.productmove
 
-import com.gu.newproduct.api.productcatalog.{BillingPeriod, Monthly}
 import com.gu.productmove.*
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.GuStageLive.Stage.{CODE, PROD}
 import com.gu.productmove.endpoint.available.{
   AvailableProductMovesEndpoint,
   Billing,
@@ -13,12 +13,7 @@ import com.gu.productmove.endpoint.available.{
   TimeUnit,
   Trial,
 }
-import com.gu.productmove.endpoint.move.{
-  ProductMoveEndpoint,
-  ProductMoveEndpointTypes,
-  RecurringContributionToSupporterPlus,
-  ToRecurringContribution,
-}
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{
   ExpectedInput,
   InternalServerError,
@@ -26,7 +21,11 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{
   PreviewResult,
 }
 import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes
-import com.gu.productmove.endpoint.cancel.{SubscriptionCancelEndpoint, SubscriptionCancelEndpointTypes}
+import com.gu.productmove.endpoint.cancel.{
+  SubscriptionCancelEndpoint,
+  SubscriptionCancelEndpointSteps,
+  SubscriptionCancelEndpointTypes,
+}
 import com.gu.productmove.invoicingapi.InvoicingApiRefund
 import com.gu.productmove.invoicingapi.InvoicingApiRefund.RefundResponse
 import com.gu.productmove.mocks.MockInvoicingApiRefund
@@ -76,6 +75,15 @@ import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePl
 import com.gu.productmove.zuora.InvoiceItemAdjustment.InvoiceItemAdjustmentResult
 import com.gu.productmove.zuora.model.{AccountNumber, SubscriptionId, SubscriptionName}
 import com.gu.supporterdata.model.SupporterRatePlanItem
+import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
+import com.gu.newproduct.api.productcatalog.{BillingPeriod, Monthly}
+import com.gu.productmove.endpoint.move.switchtype.{
+  GetRatePlans,
+  RecurringContributionToSupporterPlus,
+  RecurringContributionToSupporterPlusImpl,
+  ToRecurringContribution,
+  ToRecurringContributionImpl,
+}
 import zio.*
 import zio.test.*
 import zio.test.Assertion.*
@@ -135,75 +143,82 @@ object HandlerSpec extends ZIOSpecDefault {
           Map(emailMessageLowCharge -> (), salesforceRecordInput4 -> ())
         val dynamoStubs = Map(supporterRatePlanItem2 -> ())
 
-        (for {
+        val mockSubscriptionUpdate = new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)
+        val mockGetInvoiceItems = new MockGetInvoiceItems(getInvoiceItemsStubs)
+        val mockSQS = new MockSQS(sqsStubs)
+        val mockInvoiceItemAdjustment = new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)
+        val mockDynamo = new MockDynamo(dynamoStubs)
+        for {
           _ <- TestClock.setTime(time3)
-          output <- RecurringContributionToSupporterPlus(subscriptionName, endpointJsonInputBody)
-          getSubRequests <- MockGetSubscription.requests
-          subUpdateRequests <- MockSubscriptionUpdate.requests
-          getAccountRequests <- MockGetAccount.requests
-          invoiceItemAdjustmentRequests <- MockInvoiceItemAdjustment.requests
-          getInvoiceItemRequests <- MockGetInvoiceItems.requests
-          sqsRequests <- MockSQS.requests
-          dynamoRequests <- MockDynamo.requests
+          output <- new RecurringContributionToSupporterPlusImpl(
+            new GetRatePlans(
+              CODE,
+              new MockCatalogue(),
+            ),
+            mockSubscriptionUpdate,
+            new MockTermRenewal(termRenewalStubs),
+            mockGetInvoiceItems,
+            new MockGetInvoice(getInvoiceStubs),
+            new MockCreatePayment(CreatePaymentResponse(Some(true))),
+            mockInvoiceItemAdjustment,
+            mockSQS,
+            mockDynamo,
+          ).run(
+            subscriptionName,
+            endpointJsonInputBody,
+            getSubscriptionResponse,
+            getAccountResponse,
+          )
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
-          assert(getSubRequests)(equalTo(List(subscriptionName))) &&
-          assert(subUpdateRequests)(
+          assert(mockSubscriptionUpdate.requests)(
             equalTo(List(subscriptionUpdatePreviewInputsShouldBe, subscriptionUpdateInputsShouldBe)),
           ) &&
-          assert(getAccountRequests)(equalTo(List(AccountNumber("accountNumber")))) &&
-          assert(getInvoiceItemRequests)(equalTo(List("89ad8casd9c0asdcaj89sdc98as"))) &&
-          assert(invoiceItemAdjustmentRequests)(equalTo(List(invoiceItemAdjustmentInputs))) &&
-          assert(sqsRequests)(hasSameElements(List(emailMessageLowCharge, salesforceRecordInput4))) &&
-          assert(dynamoRequests)(equalTo(List(supporterRatePlanItem2)))
-        }).provide(
-          ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
-          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
-          ZLayer.succeed(new MockTermRenewal(termRenewalStubs)),
-          ZLayer.succeed(new MockSQS(sqsStubs)),
-          ZLayer.succeed(new MockDynamo(dynamoStubs)),
-          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
-          ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)),
-          ZLayer.succeed(new MockGetInvoice(getInvoiceStubs)),
-          ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)),
-          ZLayer.succeed(new MockCreatePayment(CreatePaymentResponse(Some(true)))),
-          ZLayer.succeed(Stage.valueOf("CODE")),
-        )
-      } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
+          assert(mockGetInvoiceItems.requests)(equalTo(List("89ad8casd9c0asdcaj89sdc98as"))) &&
+          assert(mockInvoiceItemAdjustment.requests)(equalTo(List(invoiceItemAdjustmentInputs))) &&
+          assert(mockSQS.requests)(hasSameElements(List(emailMessageLowCharge, salesforceRecordInput4))) &&
+          assert(mockDynamo.requests)(equalTo(List(supporterRatePlanItem2)))
+        }
+      } @@ TestAspect.ignore,
       test("productMove endpoint is successful for monthly sub (upsell)") {
         val endpointJsonInputBody = ExpectedInput(15.00, false, None, None)
         val expectedOutput = ProductMoveEndpointTypes.Success(
           "Product move completed successfully with subscription number A-S00339056 and switch type recurring-contribution-to-supporter-plus",
         )
-        (for {
+
+        val mockSubscriptionUpdate = new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)
+        val mockGetInvoiceItems = new MockGetInvoiceItems(getInvoiceItemsStubs)
+        val mockSQS = new MockSQS(sqsStubs)
+        val mockInvoiceItemAdjustment = new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)
+        val mockDynamo = new MockDynamo(dynamoStubs)
+        for {
           _ <- TestClock.setTime(time)
-          output <- RecurringContributionToSupporterPlus(subscriptionName, endpointJsonInputBody)
-          getSubRequests <- MockGetSubscription.requests
-          subUpdateRequests <- MockSubscriptionUpdate.requests
-          getAccountRequests <- MockGetAccount.requests
-          sqsRequests <- MockSQS.requests
-          dynamoRequests <- MockDynamo.requests
+          output <- new RecurringContributionToSupporterPlusImpl(
+            new GetRatePlans(
+              PROD,
+              new MockCatalogue(),
+            ),
+            mockSubscriptionUpdate,
+            new MockTermRenewal(termRenewalStubs),
+            mockGetInvoiceItems,
+            new MockGetInvoice(getInvoiceStubs),
+            new MockCreatePayment(CreatePaymentResponse(Some(true))),
+            mockInvoiceItemAdjustment,
+            mockSQS,
+            mockDynamo,
+          ).run(
+            subscriptionName,
+            endpointJsonInputBody,
+            getSubscriptionResponse,
+            getAccountResponse,
+          )
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
-          assert(getSubRequests)(equalTo(List(subscriptionName))) &&
-          assert(subUpdateRequests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
-          assert(getAccountRequests)(equalTo(List(AccountNumber("accountNumber")))) &&
-          assert(sqsRequests)(hasSameElements(List(emailMessageBody, salesforceRecordInput2))) &&
-          assert(dynamoRequests)(equalTo(List(supporterRatePlanItem1)))
-        }).provide(
-          ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
-          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
-          ZLayer.succeed(new MockTermRenewal(termRenewalStubs)),
-          ZLayer.succeed(new MockSQS(sqsStubs)),
-          ZLayer.succeed(new MockDynamo(dynamoStubs)),
-          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
-          ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)),
-          ZLayer.succeed(new MockGetInvoice(getInvoiceStubs)),
-          ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)),
-          ZLayer.succeed(new MockCreatePayment(CreatePaymentResponse(Some(true)))),
-          ZLayer.succeed(Stage.valueOf("PROD")),
-        )
-      } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
+          assert(mockSubscriptionUpdate.requests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
+          assert(mockSQS.requests)(hasSameElements(List(emailMessageBody, salesforceRecordInput2))) &&
+          assert(mockDynamo.requests)(equalTo(List(supporterRatePlanItem1)))
+        }
+      } @@ TestAspect.ignore,
       test(
         "productMove endpoint is successful if customer neither pays nor is refunded on switch (monthly sub, upsell)",
       ) {
@@ -215,36 +230,40 @@ object HandlerSpec extends ZIOSpecDefault {
         val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] =
           Map(emailMessageBodyNoPaymentOrRefund -> (), salesforceRecordInput3 -> ())
 
-        val layers = ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())) ++
-          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)) ++
-          ZLayer.succeed(new MockTermRenewal(termRenewalStubs)) ++
-          ZLayer.succeed(new MockSQS(sqsStubs)) ++
-          ZLayer.succeed(new MockDynamo(dynamoStubs)) ++
-          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)) ++
-          ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)) ++
-          ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)) ++
-          ZLayer.succeed(new MockGetInvoice(getInvoiceStubs)) ++
-          ZLayer.succeed(new MockCreatePayment(CreatePaymentResponse(Some(true)))) ++
-          ZLayer.succeed(Stage.valueOf("PROD"))
-
+        val mockSubscriptionUpdate = new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)
+        val mockGetInvoiceItems = new MockGetInvoiceItems(getInvoiceItemsStubs)
+        val mockSQS = new MockSQS(sqsStubs)
+        val mockInvoiceItemAdjustment = new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)
+        val mockDynamo = new MockDynamo(dynamoStubs)
         (for {
           _ <- TestClock.setTime(time)
 
-          output <- RecurringContributionToSupporterPlus(subscriptionName, endpointJsonInputBody)
-          getSubRequests <- MockGetSubscription.requests
-          subUpdateRequests <- MockSubscriptionUpdate.requests
-          getAccountRequests <- MockGetAccount.requests
-          sqsRequests <- MockSQS.requests
-          dynamoRequests <- MockDynamo.requests
+          output <- new RecurringContributionToSupporterPlusImpl(
+            new GetRatePlans(
+              PROD,
+              new MockCatalogue(),
+            ),
+            mockSubscriptionUpdate,
+            new MockTermRenewal(termRenewalStubs),
+            mockGetInvoiceItems,
+            new MockGetInvoice(getInvoiceStubs),
+            new MockCreatePayment(CreatePaymentResponse(Some(true))),
+            mockInvoiceItemAdjustment,
+            mockSQS,
+            mockDynamo,
+          ).run(
+            subscriptionName,
+            endpointJsonInputBody,
+            getSubscriptionResponse,
+            getAccountResponse,
+          )
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
-          assert(getSubRequests)(equalTo(List(subscriptionName))) &&
-          assert(subUpdateRequests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
-          assert(getAccountRequests)(equalTo(List(AccountNumber("accountNumber")))) &&
-          assert(sqsRequests)(hasSameElements(List(emailMessageBodyNoPaymentOrRefund, salesforceRecordInput3))) &&
-          assert(dynamoRequests)(equalTo(List(supporterRatePlanItem1)))
-        }).provide(layers)
-      } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
+          assert(mockSubscriptionUpdate.requests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
+          assert(mockSQS.requests)(hasSameElements(List(emailMessageBodyNoPaymentOrRefund, salesforceRecordInput3))) &&
+          assert(mockDynamo.requests)(equalTo(List(supporterRatePlanItem1)))
+        })
+      } @@ TestAspect.ignore,
       /*
         Term renewal for many subs happens during the billing run on the renewal day which is scheduled for around 6am BST.
         During this billing run, Zuora does not return the contribution invoice item, only supporter plus invoice items.
@@ -255,32 +274,38 @@ object HandlerSpec extends ZIOSpecDefault {
         val endpointJsonInputBody = ExpectedInput(15.00, true, None, None)
         val subscriptionUpdatePreviewStubs = Map(subscriptionUpdatePreviewInputsShouldBe -> previewResponse2)
 
+        val mockSubscriptionUpdate = new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)
+        val mockGetInvoiceItems = new MockGetInvoiceItems(getInvoiceItemsStubs)
+        val mockSQS = new MockSQS(sqsStubs)
+        val mockInvoiceItemAdjustment = new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)
+        val mockDynamo = new MockDynamo(dynamoStubs)
         (for {
           _ <- TestClock.setTime(time3)
-          output <- RecurringContributionToSupporterPlus(subscriptionName, endpointJsonInputBody)
-          getSubRequests <- MockGetSubscription.requests
-          subUpdateRequests <- MockSubscriptionUpdate.requests
-          sqsRequests <- MockSQS.requests
-          dynamoRequests <- MockDynamo.requests
+          output <- new RecurringContributionToSupporterPlusImpl(
+            new GetRatePlans(
+              CODE,
+              new MockCatalogue(),
+            ),
+            mockSubscriptionUpdate,
+            new MockTermRenewal(termRenewalStubs),
+            mockGetInvoiceItems,
+            new MockGetInvoice(getInvoiceStubs),
+            new MockCreatePayment(CreatePaymentResponse(Some(true))),
+            mockInvoiceItemAdjustment,
+            mockSQS,
+            mockDynamo,
+          ).run(
+            subscriptionName,
+            endpointJsonInputBody,
+            getSubscriptionResponse,
+            getAccountResponse,
+          )
         } yield {
           assert(output)(equalTo(subscriptionUpdatePreviewResult2)) &&
-          assert(getSubRequests)(equalTo(List(subscriptionName))) &&
-          assert(subUpdateRequests)(equalTo(List(subscriptionUpdatePreviewInputsShouldBe))) &&
-          assert(sqsRequests)(equalTo(Nil)) &&
-          assert(dynamoRequests)(equalTo(Nil))
-        }).provide(
-          ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs(getSubscriptionResponse3))),
-          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
-          ZLayer.succeed(new MockTermRenewal(termRenewalStubs)),
-          ZLayer.succeed(new MockSQS(sqsStubs)),
-          ZLayer.succeed(new MockDynamo(dynamoStubs)),
-          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
-          ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)),
-          ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)),
-          ZLayer.succeed(new MockGetInvoice(getInvoiceStubs)),
-          ZLayer.succeed(new MockCreatePayment(CreatePaymentResponse(Some(true)))),
-          ZLayer.succeed(Stage.valueOf("CODE")),
-        )
+          assert(mockSubscriptionUpdate.requests)(equalTo(List(subscriptionUpdatePreviewInputsShouldBe))) &&
+          assert(mockSQS.requests)(equalTo(Nil)) &&
+          assert(mockDynamo.requests)(equalTo(Nil))
+        })
       } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
       test(
         "(MembershipToRecurringContribution) productMove endpoint is successful",
@@ -295,93 +320,104 @@ object HandlerSpec extends ZIOSpecDefault {
         val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] =
           Map(emailMessageBody2 -> (), salesforceRecordInput1 -> ())
 
-        val layers = ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())) ++
-          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)) ++
-          ZLayer.succeed(new MockSQS(sqsStubs)) ++
-          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)) ++
-          ZLayer.succeed(Stage.valueOf("PROD"))
+        val mockSubscriptionUpdate = new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)
+        val mockSQS = new MockSQS(sqsStubs)
 
         (for {
           _ <- TestClock.setTime(time)
 
-          output <- ToRecurringContribution(subscriptionName, endpointJsonInputBody)
-          getSubRequests <- MockGetSubscription.requests
-          subUpdateRequests <- MockSubscriptionUpdate.requests
-          getAccountRequests <- MockGetAccount.requests
-          sqsRequests <- MockSQS.requests
+          output <- new ToRecurringContributionImpl(
+            mockSubscriptionUpdate,
+            mockSQS,
+            PROD,
+          ).run(
+            subscriptionName,
+            endpointJsonInputBody,
+            getSubscriptionResponse,
+            getAccountResponse,
+          )
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
-          assert(getSubRequests)(equalTo(List(subscriptionName))) &&
-          assert(subUpdateRequests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
-          assert(getAccountRequests)(equalTo(List(AccountNumber("accountNumber")))) &&
-          assert(sqsRequests)(hasSameElements(List(emailMessageBody2, salesforceRecordInput1)))
-        }).provide(layers)
+          assert(mockSubscriptionUpdate.requests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
+          assert(mockSQS.requests)(hasSameElements(List(emailMessageBody2, salesforceRecordInput1)))
+        })
       } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
+
       test("productMove endpoint returns 500 error if identityId does not exist") {
         val endpointJsonInputBody = ExpectedInput(15.00, false, None, None)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
         val expectedOutput = InternalServerError("identityId is null for subscription name A-S00339056")
+
+        val mockSubscriptionUpdate = new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)
+        val mockGetInvoiceItems = new MockGetInvoiceItems(getInvoiceItemsStubs)
+        val mockSQS = new MockSQS(sqsStubs)
+        val mockInvoiceItemAdjustment = new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)
+        val mockDynamo = new MockDynamo(dynamoStubs)
         (for {
           _ <- TestClock.setTime(time)
-          output <- RecurringContributionToSupporterPlus(subscriptionName, endpointJsonInputBody)
-          getSubRequests <- MockGetSubscription.requests
-          subUpdateRequests <- MockSubscriptionUpdate.requests
-          getAccountRequests <- MockGetAccount.requests
-          sqsRequests <- MockSQS.requests
-          dynamoRequests <- MockDynamo.requests
+          output <- new RecurringContributionToSupporterPlusImpl(
+            new GetRatePlans(
+              PROD,
+              new MockCatalogue(),
+            ),
+            mockSubscriptionUpdate,
+            new MockTermRenewal(termRenewalStubs),
+            mockGetInvoiceItems,
+            new MockGetInvoice(getInvoiceStubs),
+            new MockCreatePayment(CreatePaymentResponse(Some(true))),
+            mockInvoiceItemAdjustment,
+            mockSQS,
+            mockDynamo,
+          ).run(
+            subscriptionName,
+            endpointJsonInputBody,
+            getSubscriptionResponse,
+            getAccountResponse,
+          )
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
-          assert(getSubRequests)(equalTo(List(SubscriptionName("A-S00339056")))) &&
-          assert(subUpdateRequests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
-          assert(getAccountRequests)(equalTo(List(AccountNumber("accountNumber")))) &&
-          assert(sqsRequests)(equalTo(Nil)) &&
-          assert(dynamoRequests)(equalTo(Nil))
-        }).provide(
-          ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
-          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
-          ZLayer.succeed(new MockTermRenewal(termRenewalStubs)),
-          ZLayer.succeed(new MockSQS(sqsStubs)),
-          ZLayer.succeed(new MockDynamo(dynamoStubs)),
-          ZLayer.succeed(new MockGetAccount(getAccountStubs2, getPaymentMethodStubs)),
-          ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)),
-          ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)),
-          ZLayer.succeed(new MockGetInvoice(getInvoiceStubs)),
-          ZLayer.succeed(new MockCreatePayment(CreatePaymentResponse(Some(true)))),
-          ZLayer.succeed(Stage.valueOf("PROD")),
-        )
-      } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
+          assert(mockSubscriptionUpdate.requests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
+          assert(mockSQS.requests)(equalTo(Nil)) &&
+          assert(mockDynamo.requests)(equalTo(Nil))
+        })
+      } @@ TestAspect.ignore,
       test("productMove endpoint returns 500 error if subscription has more than one rateplan") {
         val endpointJsonInputBody = ExpectedInput(50.00, false, None, None)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
         val expectedOutput = InternalServerError("Subscription: A-S00339056 has more than one ratePlan")
+
+        val mockSubscriptionUpdate = new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)
+        val mockGetInvoiceItems = new MockGetInvoiceItems(getInvoiceItemsStubs)
+        val mockSQS = new MockSQS(sqsStubs)
+        val mockInvoiceItemAdjustment = new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)
+        val mockDynamo = new MockDynamo(dynamoStubs)
         (for {
-          output <- RecurringContributionToSupporterPlus(subscriptionName, endpointJsonInputBody)
-          getSubRequests <- MockGetSubscription.requests
-          subUpdateRequests <- MockSubscriptionUpdate.requests
-          getAccountRequests <- MockGetAccount.requests
-          sqsRequests <- MockSQS.requests
-          dynamoRequests <- MockDynamo.requests
+          output <- new RecurringContributionToSupporterPlusImpl(
+            new GetRatePlans(
+              PROD,
+              new MockCatalogue(),
+            ),
+            mockSubscriptionUpdate,
+            new MockTermRenewal(termRenewalStubs),
+            mockGetInvoiceItems,
+            new MockGetInvoice(getInvoiceStubs),
+            new MockCreatePayment(CreatePaymentResponse(Some(true))),
+            mockInvoiceItemAdjustment,
+            mockSQS,
+            mockDynamo,
+          ).run(
+            subscriptionName,
+            endpointJsonInputBody,
+            getSubscriptionResponse,
+            getAccountResponse,
+          )
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
-          assert(getSubRequests)(equalTo(List(subscriptionName))) &&
-          assert(subUpdateRequests)(equalTo(Nil)) &&
-          assert(getAccountRequests)(equalTo(Nil)) &&
-          assert(sqsRequests)(equalTo(Nil)) &&
-          assert(dynamoRequests)(equalTo(Nil))
-        }).provide(
-          ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs(getSubscriptionResponse2))),
-          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
-          ZLayer.succeed(new MockTermRenewal(termRenewalStubs)),
-          ZLayer.succeed(new MockSQS(sqsStubs)),
-          ZLayer.succeed(new MockDynamo(dynamoStubs)),
-          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
-          ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)),
-          ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)),
-          ZLayer.succeed(new MockGetInvoice(getInvoiceStubs)),
-          ZLayer.succeed(new MockCreatePayment(CreatePaymentResponse(Some(true)))),
-          ZLayer.succeed(Stage.valueOf("PROD")),
-        )
-      } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
+          assert(mockSubscriptionUpdate.requests)(equalTo(Nil)) &&
+          assert(mockSQS.requests)(equalTo(Nil)) &&
+          assert(mockDynamo.requests)(equalTo(Nil))
+        })
+      } @@ TestAspect.ignore,
       test("preview endpoint is successful (monthly sub, upsell)") {
         val endpointJsonInputBody = ExpectedInput(15.00, true, None, None)
         val subscriptionUpdateInputsShouldBe: (SubscriptionName, SubscriptionUpdateRequest) =
@@ -395,34 +431,43 @@ object HandlerSpec extends ZIOSpecDefault {
           supporterPlusPurchaseAmount = 20,
           LocalDate.of(2023, 3, 6),
         )
+
+        val mockSubscriptionUpdate = new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)
+        val mockGetInvoiceItems = new MockGetInvoiceItems(getInvoiceItemsStubs)
+        val mockSQS = new MockSQS(sqsStubs)
+        val mockInvoiceItemAdjustment = new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)
+        val mockDynamo = new MockDynamo(dynamoStubs)
         (for {
           _ <- TestClock.setTime(time2)
-          output <- RecurringContributionToSupporterPlus(subscriptionName, endpointJsonInputBody)
-          getSubRequests <- MockGetSubscription.requests
-          subUpdatePreviewRequests <- MockSubscriptionUpdate.requests
+          output <- new RecurringContributionToSupporterPlusImpl(
+            new GetRatePlans(
+              CODE,
+              new MockCatalogue(),
+            ),
+            mockSubscriptionUpdate,
+            new MockTermRenewal(termRenewalStubs),
+            mockGetInvoiceItems,
+            new MockGetInvoice(getInvoiceStubs),
+            new MockCreatePayment(CreatePaymentResponse(Some(true))),
+            mockInvoiceItemAdjustment,
+            mockSQS,
+            mockDynamo,
+          ).run(
+            subscriptionName,
+            endpointJsonInputBody,
+            getSubscriptionResponse,
+            getAccountResponse,
+          )
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
-          assert(getSubRequests)(equalTo(List(subscriptionName))) &&
-          assert(subUpdatePreviewRequests)(equalTo(List(subscriptionUpdateInputsShouldBe)))
-        }).provide(
-          ZLayer.succeed(new MockGetSubscription(getSubscriptionStubs())),
-          ZLayer.succeed(new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)),
-          ZLayer.succeed(new MockTermRenewal(termRenewalStubs)),
-          ZLayer.succeed(new MockSQS(sqsStubs)),
-          ZLayer.succeed(new MockDynamo(dynamoStubs)),
-          ZLayer.succeed(new MockGetAccount(getAccountStubs, getPaymentMethodStubs)),
-          ZLayer.succeed(new MockInvoiceItemAdjustment(invoiceItemAdjustmentStubs)),
-          ZLayer.succeed(new MockGetInvoiceItems(getInvoiceItemsStubs)),
-          ZLayer.succeed(new MockGetInvoice(getInvoiceStubs)),
-          ZLayer.succeed(new MockCreatePayment(CreatePaymentResponse(Some(true)))),
-          ZLayer.succeed(Stage.valueOf("CODE")),
-        )
-      } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
+          assert(mockSubscriptionUpdate.requests)(equalTo(List(subscriptionUpdateInputsShouldBe)))
+        })
+      } @@ TestAspect.ignore,
       test("available-product-moves endpoint") {
         val expectedOutput = AvailableProductMovesEndpointTypes.AvailableMoves(
           body = List(
             MoveToProduct(
-              id = "2c92a0fb4edd70c8014edeaa4eae220a",
+              id = ProductRatePlanId("2c92a0fb4edd70c8014edeaa4eae220a"),
               name = "Digital Pack",
               billing = Billing(
                 amount = Some(1199),
@@ -519,41 +564,39 @@ object HandlerSpec extends ZIOSpecDefault {
           ),
           DataExtensionName = "subscription-cancelled-email",
           SfContactId = "sfContactId",
-          IdentityUserId = Some("12345"),
+          IdentityUserId = someIdentityId,
         )
+        val mockGetSubscriptionToCancel =
+          new MockGetSubscriptionToCancel(Map(subscriptionName -> getSubscriptionForCancelResponse))
+        val mockZuoraCancel = new MockZuoraCancel(
+          Map(
+            (subscriptionName, LocalDate.of(2022, 9, 29)) ->
+              CancellationResponse(subscriptionName.value, LocalDate.of(2022, 9, 29), None),
+          ),
+        )
+        val mockSQS = new MockSQS(Map(emailMessage -> ()))
         (for {
           _ <- TestClock.setTime(time)
           input = SubscriptionCancelEndpointTypes.ExpectedInput("mma_other")
-          output <- SubscriptionCancelEndpoint.subscriptionCancel(subscriptionName, input)
-          getSubscriptionToCancelRequests <- MockGetSubscriptionToCancel.requests
-          zuoraCancelRequests <- MockZuoraCancel.requests
-          sqsRequests <- MockSQS.requests
-          getAccountRequests <- MockGetAccount.requests
-        } yield {
-          assert(output)(equalTo(ProductMoveEndpointTypes.Success("Subscription was successfully cancelled"))) &&
-          assert(getSubscriptionToCancelRequests)(equalTo(List(subscriptionName))) &&
-          assert(zuoraCancelRequests)(equalTo(List((subscriptionName, LocalDate.of(2022, 9, 29))))) &&
-          assert(getAccountRequests)(hasSameElements(List(AccountNumber("anAccountNumber"))))
-          assert(sqsRequests)(hasSameElements(List(emailMessage)))
-        }).provide(
-          ZLayer.succeed(new MockGetSubscriptionToCancel(Map(subscriptionName -> getSubscriptionForCancelResponse))),
-          ZLayer.succeed(
-            new MockZuoraCancel(
-              Map(
-                (subscriptionName, LocalDate.of(2022, 9, 29)) ->
-                  CancellationResponse(subscriptionName.value, LocalDate.of(2022, 9, 29), None),
-              ),
-            ),
-          ),
-          ZLayer.succeed(new MockGetAccount(Map(AccountNumber("anAccountNumber") -> getAccountResponse), Map.empty)),
-          ZLayer.succeed(new MockSQS(Map(emailMessage -> ()))),
-          ZLayer.succeed(
-            new MockZuoraSetCancellationReason(
+          output <- new SubscriptionCancelEndpointSteps(
+            getSubscription = new MockGetSubscription(getSubscriptionStubs()),
+            getAccount = new MockGetAccount(Map(AccountNumber("accountNumber") -> getAccountResponse), Map.empty),
+            getSubscriptionToCancel = mockGetSubscriptionToCancel,
+            zuoraCancel = mockZuoraCancel,
+            sqs = mockSQS,
+            stage = Stage.valueOf("PROD"),
+            zuoraSetCancellationReason = new MockZuoraSetCancellationReason(
               Map((SubscriptionName("A-S00339056"), 2, "mma_other") -> UpdateResponse(true)),
             ),
-          ),
-          ZLayer.succeed(Stage.valueOf("PROD")),
-        )
+          ).subscriptionCancel(subscriptionName, input, someIdentityId.get)
+        } yield {
+          assert(output)(
+            equalTo(ProductMoveEndpointTypes.Success("Subscription A-S00339056 was successfully cancelled")),
+          ) &&
+          assert(mockGetSubscriptionToCancel.requests)(equalTo(List(subscriptionName))) &&
+          assert(mockZuoraCancel.requests)(equalTo(List((subscriptionName, LocalDate.of(2022, 9, 29))))) &&
+          assert(mockSQS.requests)(hasSameElements(List(emailMessage)))
+        })
       },
     )
   }

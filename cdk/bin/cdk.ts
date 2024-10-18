@@ -1,17 +1,24 @@
 import 'source-map-support/register';
 import { App } from 'aws-cdk-lib';
+import { AlarmsHandler } from '../lib/alarms-handler';
 import { BatchEmailSender } from '../lib/batch-email-sender';
 import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
 import { DiscountApi } from '../lib/discount-api';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
+import { ProductSwitchApi } from '../lib/product-switch-api';
 import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery';
+import { SalesforceDisasterRecoveryHealthCheck } from '../lib/salesforce-disaster-recovery-health-check';
 import {
 	APP_NAME as SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME,
 	SingleContributionSalesforceWrites,
 } from '../lib/single-contribution-salesforce-writes';
+import type { StripeWebhookEndpointsProps } from '../lib/stripe-webhook-endpoints';
 import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
+import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
+import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
+import { ZuoraSalesforceLinkRemover } from '../lib/zuora-salesforce-link-remover';
 
 const app = new App();
 const membershipHostedZoneId = 'Z1E4V12LQGXFEC';
@@ -114,7 +121,8 @@ new SalesforceDisasterRecovery(app, 'salesforce-disaster-recovery-CODE', {
 new SalesforceDisasterRecovery(app, 'salesforce-disaster-recovery-CSBX', {
 	stack: 'membership',
 	stage: 'CSBX',
-	salesforceApiDomain: 'https://gnmtouchpoint--dev1.sandbox.my.salesforce.com',
+	salesforceApiDomain:
+		'https://gnmtouchpoint--partial24.sandbox.my.salesforce.com',
 	salesforceApiConnectionResourceId:
 		'salesforce-disaster-recovery-CSBX-salesforce-api/c8d71d2e-9101-439d-a3e2-d8fa7e6b155f',
 	salesforceOauthSecretName:
@@ -142,11 +150,98 @@ new GenerateProductCatalog(app, 'generate-product-catalog-PROD', {
 	domainName: 'product-catalog.guardianapis.com',
 });
 
-new StripeWebhookEndpoints(app, 'stripe-webhook-endpoints-CODE', {
+export const stripeWebhookEndpointsCodeProps: StripeWebhookEndpointsProps = {
+	stack: 'membership',
+	stage: 'CODE',
+	certificateId: membershipCertificateId,
+	domainName: `stripe-webhook-endpoints-code.${membershipApisDomain}`,
+	hostedZoneId: membershipHostedZoneId,
+};
+export const stripeWebhookEndpointsProdProps: StripeWebhookEndpointsProps = {
+	stack: 'membership',
+	stage: 'PROD',
+	certificateId: membershipCertificateId,
+	domainName: `stripe-webhook-endpoints-prod.${membershipApisDomain}`,
+	hostedZoneId: membershipHostedZoneId,
+};
+
+new StripeWebhookEndpoints(
+	app,
+	'stripe-webhook-endpoints-CODE',
+	stripeWebhookEndpointsCodeProps,
+);
+new StripeWebhookEndpoints(
+	app,
+	'stripe-webhook-endpoints-PROD',
+	stripeWebhookEndpointsProdProps,
+);
+
+new ProductSwitchApi(app, 'product-switch-api-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+	domainName: `product-switch-api-code.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
+});
+new ProductSwitchApi(app, 'product-switch-api-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+	domainName: `product-switch-api.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
+});
+
+new AlarmsHandler(app, 'alarms-handler-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+});
+new AlarmsHandler(app, 'alarms-handler-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+});
+new SalesforceDisasterRecoveryHealthCheck(
+	app,
+	'salesforce-disaster-recovery-health-check-CODE',
+	{
+		stack: 'membership',
+		stage: 'CODE',
+	},
+);
+new SalesforceDisasterRecoveryHealthCheck(
+	app,
+	'salesforce-disaster-recovery-health-check-PROD',
+	{
+		stack: 'membership',
+		stage: 'PROD',
+	},
+);
+new UpdateSupporterPlusAmount(app, 'update-supporter-plus-amount-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+	domainName: `update-supporter-plus-amount-code.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
+});
+new UpdateSupporterPlusAmount(app, 'update-supporter-plus-amount-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+	domainName: `update-supporter-plus-amount.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
+});
+new ZuoraSalesforceLinkRemover(app, 'zuora-salesforce-link-remover-CODE', {
 	stack: 'membership',
 	stage: 'CODE',
 });
-new StripeWebhookEndpoints(app, 'stripe-webhook-endpoints-PROD', {
+new ZuoraSalesforceLinkRemover(app, 'zuora-salesforce-link-remover-PROD', {
 	stack: 'membership',
+	stage: 'PROD',
+});
+new TicketTailorWebhook(app, 'ticket-tailor-webhook-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+});
+new TicketTailorWebhook(app, 'ticket-tailor-webhook-PROD', {
+	stack: 'support',
 	stage: 'PROD',
 });

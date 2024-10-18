@@ -2,7 +2,6 @@ package com.gu.productmove.endpoint.zuora
 
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ErrorResponse
 import com.gu.productmove.endpoint.zuora.GetSubscriptionToCancel.GetSubscriptionToCancelResponse
 import com.gu.productmove.zuora.model.{AccountNumber, SubscriptionName}
 import com.gu.productmove.zuora.rest.ZuoraGet
@@ -17,17 +16,20 @@ import zio.{IO, RIO, Task, URLayer, ZIO, ZLayer}
 
 import java.time.LocalDate
 
-object GetSubscriptionToCancelLive:
+object GetSubscriptionToCancelLive {
   val layer: URLayer[ZuoraGet, GetSubscriptionToCancel] = ZLayer.fromFunction(GetSubscriptionToCancelLive(_))
+}
 
-private class GetSubscriptionToCancelLive(zuoraGet: ZuoraGet) extends GetSubscriptionToCancel:
-  override def get(subscriptionName: SubscriptionName): IO[ErrorResponse, GetSubscriptionToCancelResponse] =
+private class GetSubscriptionToCancelLive(zuoraGet: ZuoraGet) extends GetSubscriptionToCancel {
+  override def get(subscriptionName: SubscriptionName): Task[GetSubscriptionToCancelResponse] =
     zuoraGet.get[GetSubscriptionToCancelResponse](
       uri"subscriptions/${subscriptionName.value}?charge-detail=current-segment",
     )
+}
 
-trait GetSubscriptionToCancel:
-  def get(subscriptionName: SubscriptionName): IO[ErrorResponse, GetSubscriptionToCancelResponse]
+trait GetSubscriptionToCancel {
+  def get(subscriptionName: SubscriptionName): Task[GetSubscriptionToCancelResponse]
+}
 
 object GetSubscriptionToCancel {
 
@@ -53,7 +55,7 @@ object GetSubscriptionToCancel {
   case class RatePlanCharge(
       name: String,
       number: String,
-      price: BigDecimal,
+      price: Option[BigDecimal],
       billingPeriod: Option[String],
       effectiveStartDate: LocalDate,
       chargedThroughDate: Option[LocalDate],
@@ -67,7 +69,7 @@ object GetSubscriptionToCancel {
 
   def get(
       subscriptionName: SubscriptionName,
-  ): ZIO[GetSubscriptionToCancel, ErrorResponse, GetSubscriptionToCancelResponse] =
+  ): RIO[GetSubscriptionToCancel, GetSubscriptionToCancelResponse] =
     ZIO.serviceWithZIO[GetSubscriptionToCancel](_.get(subscriptionName))
 
 }
