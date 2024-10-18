@@ -89,7 +89,7 @@ object Dependencies {
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest-should" % "0.9.0" % Test
   val scalatest = "org.scalatest" %% "scalatest" % "3.2.19" % Test
   val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.17.1" % Test
-  val scalaMock = "org.scalamock" %% "scalamock" % "6.0.0" % Test
+  val scalaMock = "org.scalamock" %% "scalamock" % "5.2.0" % Test
   val mockito = "org.mockito" % "mockito-core" % "5.14.1" % Test
   // play-json still uses an old version of jackson-core which has a vulnerability - https://security.snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-7569538
   val jacksonVersion = "2.17.2"
