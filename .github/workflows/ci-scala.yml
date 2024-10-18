@@ -62,6 +62,7 @@ jobs:
       - name: Upload to Riff-Raff
         uses: guardian/actions-riff-raff@v4
         with:
+          roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
           projectName: support-service-lambdas::${{ matrix.subproject }}
           buildNumberOffset: 7000
           configPath: ./handlers/${{ matrix.subproject }}/riff-raff.yaml
