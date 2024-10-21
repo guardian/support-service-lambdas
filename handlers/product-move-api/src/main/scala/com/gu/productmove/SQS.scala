@@ -201,8 +201,7 @@ case class toRCEmailPayloadProductSwitchAttributes(
     payment_frequency: String,
     currency: String,
     subscription_id: String,
-) extends EmailPayloadAttributes
-    derives JsonEncoder
+) extends EmailPayloadAttributes derives JsonEncoder
 
 case class RCtoSPEmailPayloadProductSwitchAttributes(
     first_name: String,
@@ -213,16 +212,14 @@ case class RCtoSPEmailPayloadProductSwitchAttributes(
     payment_frequency: String,
     currency: String,
     subscription_id: String,
-) extends EmailPayloadAttributes
-    derives JsonEncoder
+) extends EmailPayloadAttributes derives JsonEncoder
 
 case class EmailPayloadCancellationAttributes(
     first_name: String,
     last_name: String,
     product_type: String,
     cancellation_effective_date: Option[String],
-) extends EmailPayloadAttributes
-    derives JsonEncoder
+) extends EmailPayloadAttributes derives JsonEncoder
 
 case class EmailPayloadUpdateAmountAttributes(
     first_name: String,
@@ -231,8 +228,7 @@ case class EmailPayloadUpdateAmountAttributes(
     currency: String,
     frequency: String,
     next_payment_date: String,
-) extends EmailPayloadAttributes
-    derives JsonEncoder
+) extends EmailPayloadAttributes derives JsonEncoder
 
 case class EmailPayloadContactAttributes(SubscriberAttributes: EmailPayloadAttributes) derives JsonEncoder
 
