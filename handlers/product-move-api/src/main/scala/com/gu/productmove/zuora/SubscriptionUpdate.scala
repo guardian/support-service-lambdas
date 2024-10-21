@@ -50,13 +50,11 @@ case class SwitchProductUpdateRequest(
     targetDate: Option[LocalDate] = None,
     currentTerm: Option[String] = None,
     currentTermPeriodType: Option[String] = None,
-) extends SubscriptionUpdateRequest
-    derives JsonEncoder
+) extends SubscriptionUpdateRequest derives JsonEncoder
 
 case class UpdateSubscriptionAmount(
     update: List[UpdateSubscriptionAmountItem],
-) extends SubscriptionUpdateRequest
-    derives JsonEncoder
+) extends SubscriptionUpdateRequest derives JsonEncoder
 
 case class UpdateSubscriptionAmountItem(
     contractEffectiveDate: LocalDate,
