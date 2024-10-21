@@ -249,7 +249,7 @@ new TicketTailorWebhook(app, 'ticket-tailor-webhook-PROD', {
 new PressReaderEntitlements(app, 'press-reader-entitlements-CODE', {
 	stack: 'support',
 	stage: 'CODE',
-	domainName: `press-reader-entitlements-code.dev-guardianapis.com`,
+	domainName: `press-reader-entitlements.code.dev-guardianapis.com`,
 });
 new PressReaderEntitlements(app, 'press-reader-entitlements-PROD', {
 	stack: 'support',
