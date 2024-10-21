@@ -7,13 +7,21 @@ import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.newproduct.api.addsubscription.TypeConvert._
 import com.gu.newproduct.api.addsubscription.email.digipack.DigipackAddressValidator
 import com.gu.newproduct.api.addsubscription.validation._
-import com.gu.newproduct.api.addsubscription.validation.guardianweekly.{GuardianWeeklyDomesticAddressValidator, GuardianWeeklyROWAddressValidator}
+import com.gu.newproduct.api.addsubscription.validation.guardianweekly.{
+  GuardianWeeklyDomesticAddressValidator,
+  GuardianWeeklyROWAddressValidator,
+}
 import com.gu.newproduct.api.addsubscription.validation.paper.PaperAddressValidator
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.WireModel.{WireCreateRequest, WireSubscription}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.WireModel.ZuoraAccount
 import com.gu.newproduct.api.addsubscription.zuora._
-import com.gu.newproduct.api.productcatalog.PlanId.{GuardianWeeklyDomesticMonthly, GuardianWeeklyDomesticQuarterly, GuardianWeeklyROWMonthly, GuardianWeeklyROWQuarterly}
+import com.gu.newproduct.api.productcatalog.PlanId.{
+  GuardianWeeklyDomesticMonthly,
+  GuardianWeeklyDomesticQuarterly,
+  GuardianWeeklyROWMonthly,
+  GuardianWeeklyROWQuarterly,
+}
 import com.gu.newproduct.api.productcatalog._
 import com.gu.paperround.client.{GetAgents, PaperRoundConfig, PaperRoundRestRequestMaker}
 import com.gu.util.Logging
@@ -50,16 +58,15 @@ trait AddSpecificProduct {
 }
 
 class handleRequest(
-  addSupporterPlus: AddSpecificProduct,
-  addContribution: AddSpecificProduct,
-  addPaperSub: AddSpecificProduct,
-  addDigipackSub: AddSpecificProduct,
-  addGuardianWeeklyDomesticSub: AddSpecificProduct,
-  addGuardianWeeklyROWSub: AddSpecificProduct,
-  addTierThree: AddSpecificProduct,
+    addSupporterPlus: AddSpecificProduct,
+    addContribution: AddSpecificProduct,
+    addPaperSub: AddSpecificProduct,
+    addDigipackSub: AddSpecificProduct,
+    addGuardianWeeklyDomesticSub: AddSpecificProduct,
+    addGuardianWeeklyROWSub: AddSpecificProduct,
+    addTierThree: AddSpecificProduct,
 ) {
-  def apply(apiGatewayRequest: ApiGatewayRequest): Future[ApiResponse]
-  = (for {
+  def apply(apiGatewayRequest: ApiGatewayRequest): Future[ApiResponse] = (for {
     request <- apiGatewayRequest.bodyAsCaseClass[AddSubscriptionRequest]().withLogging("parsed request").toAsync
     addSpecificProduct = request.planId match {
       case _: SupporterPlusPlanId => addSupporterPlus
@@ -180,7 +187,7 @@ object Steps {
         awsSQSSend,
         EmailQueueName,
       )
-      
+
       tierThreeStep = AddTierThree.wireSteps(
         catalog,
         zuoraIds,

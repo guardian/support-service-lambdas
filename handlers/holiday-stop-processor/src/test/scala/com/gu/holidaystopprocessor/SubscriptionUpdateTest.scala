@@ -164,7 +164,7 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffShouldMa
       stoppedPublicationDate,
       Some(givenInvoiceDate),
     )
-    update.value shouldMatchTo(
+    update.value shouldMatchTo (
       SubscriptionUpdate(
         currentTerm = Some(536),
         currentTermPeriodType = Some("Day"),
@@ -184,7 +184,7 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffShouldMa
             ),
           ),
         ),
-      ),
+      )
     )
   }
 }

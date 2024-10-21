@@ -1,6 +1,11 @@
 package com.gu.newproduct.api.productcatalog.plans
 
-import com.gu.newproduct.api.productcatalog.PlanId.{TierThreeDomesticAnnual, TierThreeDomesticMonthly, TierThreeROWAnnual, TierThreeROWMonthly}
+import com.gu.newproduct.api.productcatalog.PlanId.{
+  TierThreeDomesticAnnual,
+  TierThreeDomesticMonthly,
+  TierThreeROWAnnual,
+  TierThreeROWMonthly,
+}
 import com.gu.newproduct.api.productcatalog._
 
 import java.time.{DayOfWeek, LocalDate}
