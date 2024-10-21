@@ -18,10 +18,10 @@ object Annual extends BillingPeriod
 object SixWeeks extends BillingPeriod
 
 case class PaymentPlan(
-  currency: Currency,
-  amountMinorUnits: AmountMinorUnits,
-  billingPeriod: BillingPeriod,
-  description: String,
+    currency: Currency,
+    amountMinorUnits: AmountMinorUnits,
+    billingPeriod: BillingPeriod,
+    description: String,
 )
 
 case class PlanDescription(value: String) extends AnyVal

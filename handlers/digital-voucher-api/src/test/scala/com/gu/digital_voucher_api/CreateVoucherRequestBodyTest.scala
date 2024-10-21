@@ -12,8 +12,8 @@ class CreateVoucherRequestBodyTest extends AnyFlatSpec with should.Matchers with
 
   "Json decode" should "decode expected Json object successfully" in {
     val json = """{"ratePlanName": "Weekend"}"""
-    decode[CreateVoucherRequestBody](json).value shouldMatchTo(
-      CreateVoucherRequestBody("Weekend"),
+    decode[CreateVoucherRequestBody](json).value shouldMatchTo (
+      CreateVoucherRequestBody("Weekend")
     )
   }
 }

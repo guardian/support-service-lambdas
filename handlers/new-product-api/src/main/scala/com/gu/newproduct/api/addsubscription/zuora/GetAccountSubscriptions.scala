@@ -27,7 +27,8 @@ object GetAccountSubscriptions {
 
     implicit val zuoraRateplanReads: Reads[ZuoraRatePlan] = Json.reads[ZuoraRatePlan]
     implicit val zuoraSubscriptionReads: Reads[ZuoraSubscription] = Json.reads[ZuoraSubscription]
-    implicit val zuoraSubscriptionsResponseReads: Reads[ZuoraSubscriptionsResponse] = Json.reads[ZuoraSubscriptionsResponse]
+    implicit val zuoraSubscriptionsResponseReads: Reads[ZuoraSubscriptionsResponse] =
+      Json.reads[ZuoraSubscriptionsResponse]
   }
 
   import WireModel._
