@@ -23,13 +23,13 @@ object Validation {
         validate: DATA => ValidationResult[VALIDATED],
         ifNotFoundReturn: Option[String] = None,
     ): ApiGatewayOp[VALIDATED] =
-        for {
-          data <- ifNotFoundReturn match {
-            case Some(notFoundError) => result.toApiResponseCheckingNotFound("getting data", notFoundError)
-            case None => result.toApiGatewayOp("getting data")
-          }
-          validatedData <- validate(data).toApiGatewayOp
-        } yield validatedData
+      for {
+        data <- ifNotFoundReturn match {
+          case Some(notFoundError) => result.toApiResponseCheckingNotFound("getting data", notFoundError)
+          case None => result.toApiGatewayOp("getting data")
+        }
+        validatedData <- validate(data).toApiGatewayOp
+      } yield validatedData
   }
 
   implicit class ComposeValidation[UNVALIDATED, VALIDATED](

@@ -35,7 +35,8 @@ class SFErrorExposer[A <: Product](
               case sfError :: Nil =>
                 ApiGatewayResponse.messageResponse("500", sfError.toString)
               case sfErrors =>
-                val error = sfErrors.groupBy(_.errorCode).view.mapValues(_.map(_.message)).mkString.take(errorCharacterLimit)
+                val error =
+                  sfErrors.groupBy(_.errorCode).view.mapValues(_.map(_.message)).mkString.take(errorCharacterLimit)
                 ApiGatewayResponse.messageResponse("500", error)
             }
           case Failure(exception) =>
@@ -62,7 +63,8 @@ class SFErrorExposer[A <: Product](
         .flatMap(_.body.map(_.validate[List[SalesforceErrorResponseBody]].asOpt))
         .flatten
         .mkString(", ")
-      val sfErrorText = s"MULTIPLE ERRORS : ${failuresStr.take(errorCharacterLimit)}${if (failuresStr.length > errorCharacterLimit) "..." else ""}"
+      val sfErrorText = s"MULTIPLE ERRORS : ${failuresStr
+          .take(errorCharacterLimit)}${if (failuresStr.length > errorCharacterLimit) "..." else ""}"
       logger.error(s"Failed to $action using input $inputThatCausedError: $sfErrorText")
       ReturnWithResponse(ApiGatewayResponse.messageResponse("500", sfErrorText))
     }

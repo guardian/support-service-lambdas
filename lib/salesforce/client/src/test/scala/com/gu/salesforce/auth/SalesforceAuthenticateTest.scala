@@ -42,7 +42,14 @@ class SalesforceAuthenticateTest extends AnyFlatSpec with Matchers {
           "tokentokenSFtoken",
         ),
       )
-    val expected = Left(List(SalesforceErrorResponseBody("The users password has expired, you must call SetPassword before attempting any other API operations", "INVALID_OPERATION_WITH_EXPIRED_PASSWORD")))
+    val expected = Left(
+      List(
+        SalesforceErrorResponseBody(
+          "The users password has expired, you must call SetPassword before attempting any other API operations",
+          "INVALID_OPERATION_WITH_EXPIRED_PASSWORD",
+        ),
+      ),
+    )
     auth should be(expected)
   }
 

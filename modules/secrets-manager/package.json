@@ -6,7 +6,7 @@
     "test": "jest --group=-integration"
   },
   "dependencies": {
-    "@aws-sdk/client-secrets-manager": "3.665.0",
-    "aws-sdk-client-mock": "4.0.2"
+    "@aws-sdk/client-secrets-manager": "3.675.0",
+    "aws-sdk-client-mock": "4.1.0"
   }
 }
