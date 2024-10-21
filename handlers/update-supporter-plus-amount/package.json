@@ -16,6 +16,6 @@
     "@aws-sdk/client-sqs": "3.675.0"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.142"
+    "@types/aws-lambda": "^8.10.145"
   }
 }
