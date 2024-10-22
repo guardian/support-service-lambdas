@@ -101,6 +101,9 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'invoicing-api',
 		'zuora-oracle-fusion',
 
+		// stripe
+		'stripe-patrons-data',
+
 		// data retention
 		'identity-retention',
 		'zuora-retention', //https://github.com/guardian/zuora-retention
