@@ -14,5 +14,5 @@ test('We can get a product rate plan from a subscription', () => {
 		productCatalog,
 		subscription.ratePlans,
 	);
-	expect(supporterPlusPlans.productRatePlan.pricing.GBP).toEqual(95);
+	expect(supporterPlusPlans.productRatePlan.pricing.GBP).toEqual(120);
 });

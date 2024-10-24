@@ -10,6 +10,7 @@ const zuoraCatalogToProductKey: Record<string, string> = {
 	Contributor: 'Contribution',
 	'Newspaper Delivery': 'HomeDelivery',
 	'Tier Three': 'TierThree',
+	'Guardian Light': 'GuardianLight',
 } as const;
 
 const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
@@ -58,6 +59,7 @@ const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 	Sunday: 'Sunday',
 	Weekend: 'Weekend',
 	Sixday: 'Sixday',
+	'Guardian Light Monthly': 'Monthly',
 } as const;
 
 const zuoraCatalogToProductRatePlanChargeKey: Record<string, string> = {
@@ -96,6 +98,7 @@ const zuoraCatalogToProductRatePlanChargeKey: Record<string, string> = {
 	'Supporter Plus': 'SupporterPlus',
 	'Guardian Weekly': 'GuardianWeekly',
 	'Newspaper Archive': 'NewspaperArchive',
+	'Guardian Light': 'GuardianLight',
 } as const;
 export const getZuoraProductKey = (product: string): string => {
 	return getIfDefined(
