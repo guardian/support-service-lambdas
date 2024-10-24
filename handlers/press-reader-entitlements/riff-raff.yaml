@@ -1,0 +1,25 @@
+stacks:
+- support
+regions:
+- eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  press-reader-entitlements-cloudformation:
+    type: cloud-formation
+    app: press-reader-entitlements
+    parameters:
+      templateStagePaths:
+        CODE: press-reader-entitlements-CODE.template.json
+        PROD: press-reader-entitlements-PROD.template.json
+
+  press-reader-entitlements:
+    type: aws-lambda
+    parameters:
+      fileName: press-reader-entitlements.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+      - press-reader-entitlements-
+    dependencies: [press-reader-entitlements-cloudformation]

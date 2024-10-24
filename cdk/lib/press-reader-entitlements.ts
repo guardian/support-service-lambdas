@@ -1,35 +1,26 @@
----
-# This template creates a CDK definition for the new lambda
-
-to: cdk/lib/<%=lambdaName%>.ts
-sh: git add cdk/lib/<%=lambdaName%>.ts
----
-<% PascalCase = h.changeCase.pascal(lambdaName) %>
 import { GuApiLambda } from '@guardian/cdk';
 import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
-import { GuCname } from '@guardian/cdk/lib/constructs/dns';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
+import { GuCname } from '@guardian/cdk/lib/constructs/dns';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
-<% if (includeApiKey === 'Y'){ %>
 import { ApiKeySourceType } from 'aws-cdk-lib/aws-apigateway';
-<% } %>
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { nodeVersion } from './node-version';
 
-export interface <%= PascalCase %>Props extends GuStackProps {
+export interface PressReaderEntitlementsProps extends GuStackProps {
 	stack: string;
 	stage: string;
 	domainName: string;
 }
 
-export class <%= PascalCase %> extends GuStack {
-	constructor(scope: App, id: string, props: <%= PascalCase %>Props) {
+export class PressReaderEntitlements extends GuStack {
+	constructor(scope: App, id: string, props: PressReaderEntitlementsProps) {
 		super(scope, id, props);
 
-		const app = '<%= lambdaName %>';
+		const app = 'press-reader-entitlements';
 		const nameWithStage = `${app}-${this.stage}`;
 
 		const commonEnvironmentVariables = {
@@ -63,18 +54,17 @@ export class <%= PascalCase %> extends GuStack {
 				deployOptions: {
 					stageName: this.stage,
 				},
-			<% if (includeApiKey === 'Y'){ %>
+
 				apiKeySourceType: ApiKeySourceType.HEADER,
 				defaultMethodOptions: {
 					apiKeyRequired: true,
 				},
-			<% } %>
 			},
 		});
-	<% if (includeApiKey === 'Y'){ %>
+
 		const usagePlan = lambda.api.addUsagePlan('UsagePlan', {
 			name: nameWithStage,
-			description: 'REST endpoints for <%= lambdaName %>>',
+			description: 'REST endpoints for press-reader-entitlements>',
 			apiStages: [
 				{
 					stage: lambda.api.deploymentStage,
@@ -85,16 +75,15 @@ export class <%= PascalCase %> extends GuStack {
 
 		// create api key
 		const apiKey = lambda.api.addApiKey(`${app}-key-${this.stage}`, {
-		apiKeyName: `${app}-key-${this.stage}`,
+			apiKeyName: `${app}-key-${this.stage}`,
 		});
 
 		// associate api key to plan
 		usagePlan.addApiKey(apiKey);
-	<% } %>
 
 		// ---- Alarms ---- //
 		const alarmName = (shortDescription: string) =>
-			`<%= h.changeCase.kebabCase(lambdaName).toUpperCase() %>-${this.stage} ${shortDescription}`;
+			`PRESS-READER-ENTITLEMENTS-${this.stage} ${shortDescription}`;
 
 		const alarmDescription = (description: string) =>
 			`Impact - ${description}. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit`;
@@ -103,7 +92,7 @@ export class <%= PascalCase %> extends GuStack {
 			app,
 			alarmName: alarmName('API gateway 4XX response'),
 			alarmDescription: alarmDescription(
-				'<%= h.changeCase.sentenceCase(lambdaName) %> received an invalid request',
+				'Press reader entitlements received an invalid request',
 			),
 			evaluationPeriods: 1,
 			threshold: 1,
@@ -133,7 +122,9 @@ export class <%= PascalCase %> extends GuStack {
 				new PolicyStatement({
 					effect: Effect.ALLOW,
 					actions: ['s3:GetObject'],
-					resources: [`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`],
+					resources: [
+						`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`,
+					],
 				}),
 			],
 		});
