@@ -1,15 +1,17 @@
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
-import {
+import type {
 	ProductCatalog,
-	ProductCatalogHelper,
+	ProductKey,
 } from '@modules/product-catalog/productCatalog';
+import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import type {
 	APIGatewayProxyEvent,
 	APIGatewayProxyResult,
 	Handler,
 } from 'aws-lambda';
-import { getSupporterProductData, SupporterRatePlanItem } from './dynamo';
+import type { SupporterRatePlanItem } from './dynamo';
+import { getSupporterProductData } from './dynamo';
 
 export const handler: Handler = async (
 	event: APIGatewayProxyEvent,
@@ -21,7 +23,7 @@ export const handler: Handler = async (
 	});
 };
 
-async function checkEntitlements(
+export async function checkEntitlements(
 	identityId: string,
 	stage: Stage,
 ): Promise<boolean> {
@@ -36,18 +38,22 @@ async function checkEntitlements(
 	return false;
 }
 
-function checkForValidEntitlements(
+export function checkForValidEntitlements(
 	productCatalog: ProductCatalog,
 	supporterProductData: SupporterRatePlanItem[],
 ) {
-	const validProducts = ['DigitalSubscription', 'TierThree', 'GuardianWeekly'];
+	const validProducts: Array<ProductKey | undefined> = [
+		'DigitalSubscription',
+		'TierThree',
+		'GuardianWeeklyDomestic',
+	];
 
 	const productCatalogHelper = new ProductCatalogHelper(productCatalog);
 
 	const hasValidSubscription = !!supporterProductData.find((item) =>
 		validProducts.includes(
 			productCatalogHelper.findProductDetails(item.productRatePlanId)
-				?.zuoraProduct ?? '',
+				?.zuoraProduct,
 		),
 	);
 
