@@ -66,14 +66,18 @@ function createMember(
 		products: latestSubscription
 			? [
 					{
-						productID: 'the-guardian',
-						enddate: latestSubscription.termEndDate,
-						startdate: latestSubscription.contractEffectiveDate,
+						product: {
+							productID: 'the-guardian',
+							enddate: latestSubscription.termEndDate,
+							startdate: latestSubscription.contractEffectiveDate,
+						},
 					},
 					{
-						productID: 'the-observer',
-						enddate: latestSubscription.termEndDate,
-						startdate: latestSubscription.contractEffectiveDate,
+						product: {
+							productID: 'the-observer',
+							enddate: latestSubscription.termEndDate,
+							startdate: latestSubscription.contractEffectiveDate,
+						},
 					},
 				]
 			: [],

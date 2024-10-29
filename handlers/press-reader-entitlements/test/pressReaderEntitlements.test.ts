@@ -12,14 +12,16 @@ describe('xmlBuilder', () => {
 <firstname>John</firstname>
 <lastname>Doe</lastname>
 <products>
-  <productID>123</productID>
-  <startdate>2022-01-01</startdate>
-  <enddate>2022-12-31</enddate>
-</products>
-<products>
-  <productID>456</productID>
-  <startdate>2022-01-01</startdate>
-  <enddate>2022-12-31</enddate>
+  <product>
+    <productID>123</productID>
+    <startdate>2022-01-01</startdate>
+    <enddate>2022-12-31</enddate>
+  </product>
+  <product>
+    <productID>456</productID>
+    <startdate>2022-01-01</startdate>
+    <enddate>2022-12-31</enddate>
+  </product>
 </products>
 `;
 
@@ -29,14 +31,18 @@ describe('xmlBuilder', () => {
 			lastname: 'Doe',
 			products: [
 				{
-					productID: '123',
-					startdate: '2022-01-01',
-					enddate: '2022-12-31',
+					product: {
+						productID: '123',
+						startdate: '2022-01-01',
+						enddate: '2022-12-31',
+					},
 				},
 				{
-					productID: '456',
-					startdate: '2022-01-01',
-					enddate: '2022-12-31',
+					product: {
+						productID: '456',
+						startdate: '2022-01-01',
+						enddate: '2022-12-31',
+					},
 				},
 			],
 		};
