@@ -4,7 +4,7 @@ import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuCname } from '@guardian/cdk/lib/constructs/dns';
 import type { App } from 'aws-cdk-lib';
-import { Duration } from 'aws-cdk-lib';
+import { Duration, Fn } from 'aws-cdk-lib';
 import { ApiKeySourceType } from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
@@ -14,6 +14,7 @@ export interface PressReaderEntitlementsProps extends GuStackProps {
 	stack: string;
 	stage: string;
 	domainName: string;
+	supporterProductDataTable: string;
 }
 
 export class PressReaderEntitlements extends GuStack {
@@ -29,6 +30,11 @@ export class PressReaderEntitlements extends GuStack {
 			Stage: this.stage,
 		};
 
+		const supporterProductDataTablePolicy = new PolicyStatement({
+			actions: ['dynamodb:Query'],
+			resources: [Fn.importValue(props.supporterProductDataTable)],
+		});
+
 		// ---- API-triggered lambda functions ---- //
 		const lambda = new GuApiLambda(this, `${app}-lambda`, {
 			description:
@@ -36,6 +42,7 @@ export class PressReaderEntitlements extends GuStack {
 			functionName: nameWithStage,
 			fileName: `${app}.zip`,
 			handler: 'index.handler',
+			initialPolicy: [supporterProductDataTablePolicy],
 			runtime: nodeVersion,
 			memorySize: 1024,
 			timeout: Duration.seconds(300),

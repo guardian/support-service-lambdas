@@ -42,7 +42,8 @@ export const handler: Handler = async (
 			body: 'Not found',
 			statusCode: 404,
 		});
-	} catch {
+	} catch (e) {
+		console.log('Caught exception with message: ', e);
 		return await Promise.resolve({
 			body: 'Goodbye World!',
 			statusCode: 500,

@@ -250,9 +250,13 @@ new PressReaderEntitlements(app, 'press-reader-entitlements-CODE', {
 	stack: 'support',
 	stage: 'CODE',
 	domainName: `press-reader-entitlements.code.dev-guardianapis.com`,
+	supporterProductDataTable:
+		'supporter-product-data-tables-CODE-SupporterProductDataTable',
 });
 new PressReaderEntitlements(app, 'press-reader-entitlements-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 	domainName: `press-reader-entitlements.guardianapis.com`,
+	supporterProductDataTable:
+		'supporter-product-data-tables-PROD-SupporterProductDataTable',
 });
