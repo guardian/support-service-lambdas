@@ -42,6 +42,7 @@ export function checkForValidEntitlements(
 	productCatalog: ProductCatalog,
 	supporterProductData: SupporterRatePlanItem[],
 ) {
+	// ToDo: complete list of valid products
 	const validProducts: Array<ProductKey | undefined> = [
 		'DigitalSubscription',
 		'TierThree',
