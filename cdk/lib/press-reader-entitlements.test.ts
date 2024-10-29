@@ -12,6 +12,8 @@ describe('The Press reader entitlements stack', () => {
 				stack: 'membership',
 				stage: 'CODE',
 				domainName: `press-reader-entitlements.code.dev-guardianapis.com`,
+				supporterProductDataTable:
+					'supporter-product-data-tables-CODE-SupporterProductDataTable',
 			},
 		);
 		const prodStack = new PressReaderEntitlements(
@@ -21,6 +23,8 @@ describe('The Press reader entitlements stack', () => {
 				stack: 'membership',
 				stage: 'PROD',
 				domainName: `press-reader-entitlements.guardianapis.com`,
+				supporterProductDataTable:
+					'supporter-product-data-tables-PROD-SupporterProductDataTable',
 			},
 		);
 
