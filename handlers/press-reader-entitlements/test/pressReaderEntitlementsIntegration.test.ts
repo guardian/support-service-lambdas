@@ -2,7 +2,7 @@
  * @group integration
  */
 
-import { checkEntitlements } from '../src';
+import { getMemberDetails } from '../src';
 import { getSupporterProductData } from '../src/dynamo';
 
 test('Dynamo Integration', async () => {
@@ -12,7 +12,7 @@ test('Dynamo Integration', async () => {
 
 describe('Product Catalog integration', () => {
 	test('Entitlements check', async () => {
-		const entitled = await checkEntitlements('110001137', 'CODE');
-		expect(entitled).toBe(true);
+		const memberDetails = await getMemberDetails('110001137', 'CODE');
+		expect(memberDetails.products.length).toEqual(2);
 	});
 });

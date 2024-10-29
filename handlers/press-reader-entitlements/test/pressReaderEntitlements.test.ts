@@ -1,6 +1,6 @@
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import codeZuoraCatalog from '../../../modules/zuora-catalog/test/fixtures/catalog-code.json';
-import { checkForValidEntitlements } from '../src';
+import { getLatestValidSubscription } from '../src';
 import type { SupporterRatePlanItem } from '../src/dynamo';
 import type { Member } from '../src/xmlBuilder';
 import { buildXml } from '../src/xmlBuilder';
@@ -53,8 +53,8 @@ test('checkForValidEntitlements', () => {
 	const supporterData: SupporterRatePlanItem[] = [
 		{
 			subscriptionName: 'A-S00123456',
-			contractEffectiveDate: '2024-02-01',
-			termEndDate: '2025-02-01',
+			contractEffectiveDate: '2024-01-01',
+			termEndDate: '2024-01-31',
 			identityId: '110001234',
 			productRatePlanId: 'Invalid Product Rate Plan ID',
 			productRatePlanName: 'Fake Product',
@@ -62,17 +62,27 @@ test('checkForValidEntitlements', () => {
 		{
 			subscriptionName: 'A-S00123456',
 			contractEffectiveDate: '2024-02-01',
+			termEndDate: '2025-01-01',
+			identityId: '110001234',
+			productRatePlanId: '8ad096ca8992481d018992a363bd17ad',
+			productRatePlanName: 'NationalDelivery',
+		},
+		{
+			subscriptionName: 'A-S00123456',
+			contractEffectiveDate: '2024-02-01',
 			termEndDate: '2025-02-01',
 			identityId: '110001234',
-			productRatePlanId: '2c92c0f878ac40300178acaa04bb401d',
-			productRatePlanName: 'GW Oct 18 - Monthly - Domestic',
+			productRatePlanId: '8ad08cbd8586721c01858804e3275376',
+			productRatePlanName: 'SupporterPlus',
 		},
 	];
 
-	const isEntitled = checkForValidEntitlements(
+	const subscription = getLatestValidSubscription(
 		codeProductCatalog,
 		supporterData,
 	);
 
-	expect(isEntitled).toEqual(true);
+	expect(subscription).toBeDefined();
+	expect(subscription?.termEndDate).toBe('2025-02-01');
+	expect(subscription?.productRatePlanName).toBe('SupporterPlus');
 });

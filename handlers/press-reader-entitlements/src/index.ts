@@ -1,3 +1,5 @@
+import { sortBy } from '@modules/arrayFunctions';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type {
 	ProductCatalog,
@@ -12,51 +14,128 @@ import type {
 } from 'aws-lambda';
 import type { SupporterRatePlanItem } from './dynamo';
 import { getSupporterProductData } from './dynamo';
+import type { Member } from './xmlBuilder';
+import { buildXml } from './xmlBuilder';
+
+const stage = process.env.STAGE as Stage;
 
 export const handler: Handler = async (
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
 	console.log(`Input is ${JSON.stringify(event)}`);
-	return await Promise.resolve({
-		body: 'Hello World!',
-		statusCode: 200,
-	});
+
+	try {
+		if (event.path === '/user-entitlements' && event.httpMethod === 'GET') {
+			const userId = getIfDefined(
+				event.queryStringParameters?.['userId'],
+				'userId does not exist',
+			);
+
+			const memberDetails = await getMemberDetails(userId, stage);
+			return await Promise.resolve({
+				body: buildXml(memberDetails),
+				statusCode: 200,
+			});
+		}
+
+		return await Promise.resolve({
+			body: 'Not found',
+			statusCode: 404,
+		});
+	} catch {
+		return await Promise.resolve({
+			body: 'Goodbye World!',
+			statusCode: 500,
+		});
+	}
 };
 
-export async function checkEntitlements(
-	identityId: string,
-	stage: Stage,
-): Promise<boolean> {
-	const supporterProductData = await getSupporterProductData(identityId, stage);
+type UserDetails = {
+	userID: string;
+	firstname: string;
+	lastname: string;
+};
 
-	if (supporterProductData) {
-		const productCatalog = await getProductCatalogFromApi(stage);
-
-		return checkForValidEntitlements(productCatalog, supporterProductData);
-	}
-
-	return false;
+function createMember(
+	userDetails: UserDetails,
+	latestSubscription: SupporterRatePlanItem | undefined,
+): Member {
+	return {
+		...userDetails,
+		products: latestSubscription
+			? [
+					{
+						productID: 'the-guardian',
+						enddate: latestSubscription.termEndDate,
+						startdate: latestSubscription.contractEffectiveDate,
+					},
+					{
+						productID: 'the-observer',
+						enddate: latestSubscription.termEndDate,
+						startdate: latestSubscription.contractEffectiveDate,
+					},
+				]
+			: [],
+	};
 }
 
-export function checkForValidEntitlements(
+export async function getMemberDetails(
+	identityId: string,
+	stage: Stage,
+): Promise<Member> {
+	const supporterProductDataItems = await getSupporterProductData(
+		identityId,
+		stage,
+	);
+
+	// ToDo: get this from Identity, if we can't - return a 404?
+	const user: UserDetails = {
+		userID: identityId,
+		firstname: 'Joe',
+		lastname: 'Bloggs',
+	};
+
+	if (supporterProductDataItems) {
+		const productCatalog = await getProductCatalogFromApi(stage);
+
+		const latestSubscription = getLatestValidSubscription(
+			productCatalog,
+			supporterProductDataItems,
+		);
+
+		return createMember(user, latestSubscription);
+	}
+
+	return createMember(user, undefined);
+}
+
+export function getLatestValidSubscription(
 	productCatalog: ProductCatalog,
 	supporterProductData: SupporterRatePlanItem[],
-) {
-	// ToDo: complete list of valid products
+): SupporterRatePlanItem | undefined {
 	const validProducts: Array<ProductKey | undefined> = [
 		'DigitalSubscription',
+		'HomeDelivery',
+		'NationalDelivery',
+		'SubscriptionCard',
+		'SupporterPlus',
 		'TierThree',
-		'GuardianWeeklyDomestic',
-	];
+		// ToDo: add Patron, currently not in product catalog
+	] as const;
 
 	const productCatalogHelper = new ProductCatalogHelper(productCatalog);
 
-	const hasValidSubscription = !!supporterProductData.find((item) =>
+	const validSubscriptions = supporterProductData.filter((item) =>
 		validProducts.includes(
 			productCatalogHelper.findProductDetails(item.productRatePlanId)
 				?.zuoraProduct,
 		),
 	);
 
-	return hasValidSubscription;
+	const latestSubscription = sortBy(
+		validSubscriptions,
+		(item) => item.termEndDate,
+	).pop();
+
+	return latestSubscription;
 }
