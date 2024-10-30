@@ -9,7 +9,7 @@ test('catalogSchema', () => {
 	expect(codeCatalog.products.length).toEqual(40);
 
 	const prodCatalog: ZuoraCatalog = zuoraCatalogSchema.parse(prod);
-	expect(prodCatalog.products.length).toEqual(20);
+	expect(prodCatalog.products.length).toEqual(21);
 });
 
 test('getCatalogPriceForCurrency', () => {
