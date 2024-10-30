@@ -42,10 +42,17 @@ export const handler: Handler = async (
 			body: 'Not found',
 			statusCode: 404,
 		});
-	} catch (e) {
-		console.log('Caught exception with message: ', e);
+	} catch (error) {
+		console.log('Caught exception with message: ', error);
+		if (error instanceof IdentityError) {
+			return await Promise.resolve({
+				body: 'User not found',
+				statusCode: 404,
+			});
+		}
+
 		return await Promise.resolve({
-			body: 'Goodbye World!',
+			body: 'Internal server error',
 			statusCode: 500,
 		});
 	}
@@ -56,6 +63,26 @@ type UserDetails = {
 	firstname: string;
 	lastname: string;
 };
+
+class IdentityError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = 'IdentityError';
+	}
+}
+
+async function getUserDetails(identityId: string): Promise<UserDetails> {
+	// ToDo: get this from Identity, if we can't - return a 404
+	try {
+		return Promise.resolve({
+			userID: identityId,
+			firstname: 'Joe',
+			lastname: 'Bloggs',
+		});
+	} catch (error) {
+		throw new IdentityError(JSON.stringify(error));
+	}
+}
 
 function createMember(
 	userDetails: UserDetails,
@@ -93,12 +120,7 @@ export async function getMemberDetails(
 		stage,
 	);
 
-	// ToDo: get this from Identity, if we can't - return a 404?
-	const user: UserDetails = {
-		userID: identityId,
-		firstname: 'Joe',
-		lastname: 'Bloggs',
-	};
+	const user = await getUserDetails(identityId);
 
 	if (supporterProductDataItems) {
 		const productCatalog = await getProductCatalogFromApi(stage);
