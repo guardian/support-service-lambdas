@@ -2,6 +2,20 @@ import { z } from 'zod';
 import { typeObject } from '@modules/product-catalog/typeObject';
 
 export const productCatalogSchema = z.object({
+	GuardianLight: z.object({
+		ratePlans: z.object({
+			Monthly: z.object({
+				id: z.string(),
+				pricing: z.object({
+					GBP: z.number(),
+				}),
+				charges: z.object({ GuardianLight: z.object({ id: z.string() }) }),
+				billingPeriod: z
+					.enum(typeObject.GuardianLight.billingPeriods)
+					.optional(),
+			}),
+		}),
+	}),
 	DigitalSubscription: z.object({
 		ratePlans: z.object({
 			Annual: z.object({
