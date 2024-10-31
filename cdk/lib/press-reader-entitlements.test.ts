@@ -1,5 +1,10 @@
 import { App } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
+import {
+	supportApisDomain,
+	supportCertificateId,
+	supportHostedZoneId,
+} from '../bin/cdk';
 import { PressReaderEntitlements } from './press-reader-entitlements';
 
 describe('The Press reader entitlements stack', () => {
@@ -11,7 +16,10 @@ describe('The Press reader entitlements stack', () => {
 			{
 				stack: 'membership',
 				stage: 'CODE',
-				domainName: `press-reader-entitlements.code.dev-guardianapis.com`,
+				internalDomainName: `product-switch-api.code.${supportApisDomain}`,
+				publicDomainName: 'press-reader-entitlements.code.dev-guardianapis.com',
+				certificateId: supportCertificateId,
+				hostedZoneId: supportHostedZoneId,
 				supporterProductDataTable:
 					'supporter-product-data-tables-CODE-SupporterProductDataTable',
 			},
@@ -22,7 +30,10 @@ describe('The Press reader entitlements stack', () => {
 			{
 				stack: 'membership',
 				stage: 'PROD',
-				domainName: `press-reader-entitlements.guardianapis.com`,
+				internalDomainName: `product-switch-api.${supportApisDomain}`,
+				publicDomainName: `press-reader-entitlements.guardianapis.com`,
+				certificateId: supportCertificateId,
+				hostedZoneId: supportHostedZoneId,
 				supporterProductDataTable:
 					'supporter-product-data-tables-PROD-SupporterProductDataTable',
 			},

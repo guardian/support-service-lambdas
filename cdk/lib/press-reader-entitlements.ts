@@ -5,15 +5,23 @@ import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuCname } from '@guardian/cdk/lib/constructs/dns';
 import type { App } from 'aws-cdk-lib';
 import { Duration, Fn } from 'aws-cdk-lib';
-import { ApiKeySourceType } from 'aws-cdk-lib/aws-apigateway';
+import {
+	ApiKeySourceType,
+	CfnBasePathMapping,
+	CfnDomainName,
+} from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { nodeVersion } from './node-version';
 
 export interface PressReaderEntitlementsProps extends GuStackProps {
 	stack: string;
 	stage: string;
-	domainName: string;
+	internalDomainName: string;
+	publicDomainName: string;
+	hostedZoneId: string;
+	certificateId: string;
 	supporterProductDataTable: string;
 }
 
@@ -117,11 +125,35 @@ export class PressReaderEntitlements extends GuStack {
 			}),
 		});
 
-		new GuCname(this, `NS1 DNS entry for ${props.domainName}`, {
+		// ---- DNS ---- //
+		const certificateArn = `arn:aws:acm:eu-west-1:${this.account}:certificate/${props.certificateId}`;
+		const cfnDomainName = new CfnDomainName(this, 'DomainName', {
+			domainName: props.internalDomainName,
+			regionalCertificateArn: certificateArn,
+			endpointConfiguration: {
+				types: ['REGIONAL'],
+			},
+		});
+
+		new CfnBasePathMapping(this, 'BasePathMapping', {
+			domainName: cfnDomainName.ref,
+			restApiId: lambda.api.restApiId,
+			stage: lambda.api.deploymentStage.stageName,
+		});
+
+		new CfnRecordSet(this, 'DNSRecord', {
+			name: props.internalDomainName,
+			type: 'CNAME',
+			hostedZoneId: props.hostedZoneId,
+			ttl: '120',
+			resourceRecords: [cfnDomainName.attrRegionalDomainName],
+		});
+
+		new GuCname(this, `NS1 DNS entry for ${props.publicDomainName}`, {
 			app: app,
-			domainName: props.domainName,
+			domainName: props.publicDomainName,
 			ttl: Duration.hours(1),
-			resourceRecord: 'guardian.map.fastly.net',
+			resourceRecord: 'dualstack.guardian.map.fastly.net',
 		});
 
 		const s3InlinePolicy: Policy = new Policy(this, 'S3 inline policy', {
