@@ -171,13 +171,16 @@ class Steps(log: String => Unit) {
         .map { case id :: termEndDate :: Nil => cancelSub.run(id, dateToCancel(LocalDate.parse(termEndDate), today())) }
         .toList
         .sequence
-      _ <- queryResults(accounts_to_cancel).map { 
-        case id :: creditBalance :: Nil => 
-        creditBalance.toDouble match {
-          case 0 => cancelAccount.run(id)
-          case _ => removeAccountCrm.run(id) //can't cancel an account with a credit balance, so just remove the CRMId
-        } 
-      }.toList.sequence
+      _ <- queryResults(accounts_to_cancel)
+        .map { case id :: creditBalance :: Nil =>
+          creditBalance.toDouble match {
+            case 0 => cancelAccount.run(id)
+            case _ =>
+              removeAccountCrm.run(id) // can't cancel an account with a credit balance, so just remove the CRMId
+          }
+        }
+        .toList
+        .sequence
     } yield ()
     zRes.toDisjunction.leftMap(failure =>
       new RuntimeException(s"one of the preceding requests has failed: ${failure.toString}"),

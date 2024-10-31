@@ -820,7 +820,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
                 {
                   "Ref": "AWS::AccountId",
                 },
-                ":retention-dev",
+                ":alarms-handler-topic-PROD",
               ],
             ],
           },

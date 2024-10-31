@@ -97,7 +97,7 @@ object HolidayCreditProduct {
 
     def creditProduct(stage: Stage)(plan: RatePlan): Option[CreditProduct] = (stage, plan.productName) match {
       case (Stage.Prod, s"Guardian Weekly$_") => Some(HolidayCreditProduct.Prod.GuardianWeekly)
-      // We need to match 'Tier Three' here because that is what the product is called in Zuora, 
+      // We need to match 'Tier Three' here because that is what the product is called in Zuora,
       // however the delivery product we are doing a credit for is Guardian Weekly
       case (Stage.Prod, "Tier Three") => Some(HolidayCreditProduct.Prod.GuardianWeekly)
       case (Stage.Prod, "Newspaper Delivery") => Some(HolidayCreditProduct.Prod.HomeDelivery)

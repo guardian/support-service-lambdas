@@ -40,6 +40,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'support-reminders',
 	],
 	VALUE: [
+		'apps-metering-events',
 		'cancellation-sf-cases-api',
 		'contact-us-api',
 		'delivery-records-api',
@@ -58,6 +59,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'product-switch-api',
 		'update-supporter-plus-amount',
 		'product-move-api',
+		'workflow',
 	],
 	SRE: ['alarms-handler', 'gchat-test-app'],
 	PORTFOLIO: [
@@ -78,6 +80,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'payment-api',
 
 		// support-service-lambdas
+		'generate-product-catalog',
 		'metric-push-api',
 	],
 	PLATFORM: [
@@ -95,12 +98,18 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'salesforce-disaster-recovery',
 		'salesforce-disaster-recovery-health-check',
 		'single-contribution-salesforce-writes',
+		'sf-datalake-export',
 
 		// zuora
 		'invoicing-api',
+		'zuora-callout-apis',
 		'zuora-oracle-fusion',
 
+		// stripe
+		'stripe-patrons-data',
+
 		// data retention
+		'identity-backfill',
 		'identity-retention',
 		'zuora-retention', //https://github.com/guardian/zuora-retention
 		'zuora-salesforce-link-remover',

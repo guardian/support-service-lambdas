@@ -49,9 +49,7 @@ const routeRequest = async (logger: Logger, event: APIGatewayProxyEvent) => {
 					subscriptionNumber,
 					dayjs(),
 				);
-				if (emailPayload) {
-					await sendEmail(stage, emailPayload, logger.log.bind(logger));
-				}
+				await sendEmail(stage, emailPayload, logger.log.bind(logger));
 				return {
 					body: stringify<ApplyDiscountResponseBody>(response),
 					statusCode: 200,
