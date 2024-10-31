@@ -2,6 +2,7 @@ import { sendEmail } from '@modules/email/email';
 import { ValidationError } from '@modules/errors';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
+import { Logger } from '@modules/zuora/logger';
 import type {
 	APIGatewayProxyEvent,
 	APIGatewayProxyResult,
@@ -22,41 +23,46 @@ const stage = process.env.STAGE as Stage;
 export const handler: Handler = async (
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
-	console.log(`Input is ${JSON.stringify(event)}`);
-	const response = await routeRequest(event);
-	console.log(`Response is ${JSON.stringify(response)}`);
+	const logger = new Logger();
+	logger.log(`Input is ${JSON.stringify(event)}`);
+	const response = await routeRequest(logger, event);
+	logger.log(`Response is ${JSON.stringify(response)}`);
 	return response;
 };
 
 // this is a type safe version of stringify
 const stringify = <T>(t: T): string => JSON.stringify(t);
 
-const routeRequest = async (event: APIGatewayProxyEvent) => {
+const routeRequest = async (logger: Logger, event: APIGatewayProxyEvent) => {
 	try {
 		switch (true) {
 			case event.path === '/apply-discount' && event.httpMethod === 'POST': {
-				console.log('Applying a discount');
+				logger.log('Applying a discount');
 				const subscriptionNumber = applyDiscountSchema.parse(
 					JSON.parse(getIfDefined(event.body, 'No body was provided')),
 				).subscriptionNumber;
+				logger.mutableAddContext(subscriptionNumber);
 				const { response, emailPayload } = await applyDiscountEndpoint(
+					logger,
 					stage,
 					event.headers,
 					subscriptionNumber,
 					dayjs(),
 				);
-				await sendEmail(stage, emailPayload);
+				await sendEmail(stage, emailPayload, logger.log.bind(logger));
 				return {
 					body: stringify<ApplyDiscountResponseBody>(response),
 					statusCode: 200,
 				};
 			}
 			case event.path === '/preview-discount' && event.httpMethod === 'POST': {
-				console.log('Previewing discount');
+				logger.log('Previewing discount');
 				const subscriptionNumber = applyDiscountSchema.parse(
 					JSON.parse(getIfDefined(event.body, 'No body was provided')),
 				).subscriptionNumber;
+				logger.mutableAddContext(subscriptionNumber);
 				const result = await previewDiscountEndpoint(
+					logger,
 					stage,
 					event.headers,
 					subscriptionNumber,
@@ -74,9 +80,9 @@ const routeRequest = async (event: APIGatewayProxyEvent) => {
 				};
 		}
 	} catch (error) {
-		console.log('Caught error in index.ts ', error);
+		logger.error('Caught error in index.ts ', error);
 		if (error instanceof ValidationError) {
-			console.log(`Validation failure: ${error.message}`);
+			logger.error(`Validation failure: ${error.message}`);
 			return {
 				body: error.message,
 				statusCode: 400,

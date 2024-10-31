@@ -3,6 +3,7 @@ import type { z } from 'zod';
 import { BearerTokenProvider } from './bearerTokenProvider';
 import { zuoraServerUrl } from './common';
 import { getOAuthClientCredentials } from './oAuthCredentials';
+import { Logger } from '@modules/zuora/logger';
 
 export class ZuoraError extends Error {
 	constructor(
@@ -14,15 +15,16 @@ export class ZuoraError extends Error {
 }
 
 export class ZuoraClient {
-	static async create(stage: Stage) {
+	static async create(stage: Stage, logger: Logger = new Logger()) {
 		const credentials = await getOAuthClientCredentials(stage);
 		const bearerTokenProvider = new BearerTokenProvider(stage, credentials);
-		return new ZuoraClient(stage, bearerTokenProvider);
+		return new ZuoraClient(stage, bearerTokenProvider, logger);
 	}
 	private zuoraServerUrl: string;
 	constructor(
 		stage: Stage,
 		private tokenProvider: BearerTokenProvider,
+		private logger: Logger,
 	) {
 		this.zuoraServerUrl = zuoraServerUrl(stage).replace(/\/$/, ''); // remove trailing slash
 	}
@@ -68,7 +70,7 @@ export class ZuoraClient {
 	): Promise<O> {
 		const bearerToken = await this.tokenProvider.getBearerToken();
 		const url = `${this.zuoraServerUrl}/${path.replace(/^\//, '')}`;
-		console.log(`${method} ${url} ${body ? `with body ${body}` : ''}`);
+		this.logger.log(`${method} ${url} ${body ? `with body ${body}` : ''}`);
 		const response = await fetch(url, {
 			method,
 			headers: {
@@ -79,15 +81,15 @@ export class ZuoraClient {
 			body,
 		});
 		const json = await response.json();
-		console.log('Response from Zuora was: ', JSON.stringify(json, null, 2));
+		this.logger.log('Response from Zuora was: ', JSON.stringify(json, null, 2));
 
 		if (response.ok) {
 			return schema.parse(json);
 		} else {
-			console.error(response.text);
+			this.logger.error(response.text);
 
 			if (response.status === 429) {
-				console.log(response.headers);
+				this.logger.log(response.headers);
 			}
 
 			throw new ZuoraError(response.statusText, response.status);
