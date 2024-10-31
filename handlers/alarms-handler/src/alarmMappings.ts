@@ -27,7 +27,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'bigquery-acquisitions-publisher',
 		'component-event-stream',
 		'contributions-store-queue',
-		'contributions-ticker-calculator',
 		'dotcom-components',
 		...sharedMobilePurchasesApps,
 		'new-product-api',
@@ -38,6 +37,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'sf-gocardless-sync',
 		'super-mode-calculator',
 		'support-reminders',
+		'ticker-calculator',
 	],
 	VALUE: [
 		'cancellation-sf-cases-api',
