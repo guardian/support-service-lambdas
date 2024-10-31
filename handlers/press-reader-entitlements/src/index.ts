@@ -71,13 +71,18 @@ class IdentityError extends Error {
 	}
 }
 
-async function getUserDetails(identityId: string): Promise<UserDetails> {
-	// ToDo: get this from Identity, if we can't - return a 404
+async function getUserDetails(
+	userId: string,
+): Promise<{ identityId: string; user: UserDetails }> {
+	// ToDo: get Identity ID from Identity, using a Braze UUID as userId, if we can't - return a 404
 	try {
 		return Promise.resolve({
-			userID: identityId,
-			firstname: 'Joe',
-			lastname: 'Bloggs',
+			identityId: '123',
+			user: {
+				userID: userId,
+				firstname: 'Joe',
+				lastname: 'Bloggs',
+			},
 		});
 	} catch (error) {
 		throw new IdentityError(JSON.stringify(error));
@@ -112,15 +117,15 @@ function createMember(
 }
 
 export async function getMemberDetails(
-	identityId: string,
+	userId: string,
 	stage: Stage,
 ): Promise<Member> {
+	const { identityId, user } = await getUserDetails(userId);
+
 	const supporterProductDataItems = await getSupporterProductData(
 		identityId,
 		stage,
 	);
-
-	const user = await getUserDetails(identityId);
 
 	if (supporterProductDataItems) {
 		const productCatalog = await getProductCatalogFromApi(stage);
