@@ -72,6 +72,9 @@ const teamToAppMappings: Record<Team, string[]> = {
 		// zuora-finance
 		'zuora-creditor',
 
+		// zuora-config
+		'canonical-config',
+
 		// support-frontend
 		'frontend',
 		'it-test-runner',
@@ -113,9 +116,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'identity-retention',
 		'zuora-retention', //https://github.com/guardian/zuora-retention
 		'zuora-salesforce-link-remover',
-
-		// finance
-		'canonical-config',
 	],
 };
 
