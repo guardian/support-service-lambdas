@@ -8,6 +8,6 @@
     "fix-formatting": "prettier --write **.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-sqs": "3.675.0"
+    "@aws-sdk/client-sqs": "3.682.0"
   }
 }
