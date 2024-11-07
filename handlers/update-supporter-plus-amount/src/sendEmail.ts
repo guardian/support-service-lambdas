@@ -1,10 +1,9 @@
 import type { EmailMessageWithUserId } from '@modules/email/email';
-import { DataExtensionNames, sendEmail } from '@modules/email/email';
+import { DataExtensionNames } from '@modules/email/email';
 import type {
 	ProductBillingPeriod,
 	ProductCurrency,
 } from '@modules/product-catalog/productCatalog';
-import type { Stage } from '@modules/stage';
 import type dayjs from 'dayjs';
 
 export type EmailFields = {
@@ -18,8 +17,7 @@ export type EmailFields = {
 	identityId: string;
 };
 
-export const sendThankYouEmail = async ({
-	stage,
+export const createThankYouEmail = ({
 	nextPaymentDate,
 	emailAddress,
 	firstName,
@@ -28,7 +26,7 @@ export const sendThankYouEmail = async ({
 	newAmount,
 	billingPeriod,
 	identityId,
-}: { stage: Stage } & EmailFields) => {
+}: EmailFields) => {
 	const emailMessage: EmailMessageWithUserId = {
 		To: {
 			Address: emailAddress,
@@ -47,5 +45,5 @@ export const sendThankYouEmail = async ({
 		IdentityUserId: identityId,
 	};
 
-	return await sendEmail(stage, emailMessage);
+	return emailMessage;
 };

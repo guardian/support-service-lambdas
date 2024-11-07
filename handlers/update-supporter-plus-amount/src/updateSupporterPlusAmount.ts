@@ -1,3 +1,4 @@
+import { getSingleOrThrow } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
@@ -8,8 +9,10 @@ import type {
 	ProductRatePlan,
 } from '@modules/product-catalog/productCatalog';
 import { isProductCurrency } from '@modules/product-catalog/productCatalog';
+import { zuoraDateFormat } from '@modules/zuora/common';
 import { getAccount } from '@modules/zuora/getAccount';
 import { getSubscription } from '@modules/zuora/getSubscription';
+import type { Logger } from '@modules/zuora/logger';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type {
 	RatePlan,
@@ -42,6 +45,7 @@ type ProductData = {
 };
 
 export const getSupporterPlusData = (
+	logger: Logger,
 	productCatalog: ProductCatalog,
 	ratePlans: RatePlan[],
 ): SupporterPlusData => {
@@ -71,44 +75,50 @@ export const getSupporterPlusData = (
 		},
 	};
 
-	const updatableChargeData = ratePlans
-		.map((ratePlan) => ({
-			ratePlan,
-			productData: supporterPlusProductData[ratePlan.productRatePlanId],
-		}))
-		.filter(
-			(item): item is { ratePlan: RatePlan; productData: ProductData } =>
-				item.ratePlan.lastChangeType !== 'Remove' &&
-				item.productData !== undefined,
-		)
-		.map((item) => {
-			const { ratePlan, productData } = item;
-			const { productRatePlan, planHasSeparateContributionCharge } =
-				productData;
-			const chargeToUpdate = getIfDefined(
-				ratePlan.ratePlanCharges.find(
-					(charge) =>
-						charge.productRatePlanChargeId === productData.chargeToUpdateId,
-				),
-				`Couldn\t find a charge with the id ${productData.chargeToUpdateId} in this rate plan`,
-			);
-			return {
-				ratePlan,
-				productRatePlan,
-				chargeToUpdate,
-				planHasSeparateContributionCharge,
-			};
-		});
+	const activeRatePlans = ratePlans.filter(
+		(ratePlan) => ratePlan.lastChangeType !== 'Remove',
+	);
+	logger.log(
+		'active rate plans',
+		activeRatePlans.map((rp) => rp.id),
+	);
+	const relevantRatePlans = activeRatePlans.flatMap((ratePlan) => {
+		const productData = supporterPlusProductData[ratePlan.productRatePlanId];
+		if (productData !== undefined) {
+			return [{ ratePlan, productData }];
+		} else {
+			return [];
+		}
+	});
+	logger.log(
+		'relevant rate plans',
+		relevantRatePlans.map((rp) => rp.ratePlan.id),
+	);
 
-	if (
-		updatableChargeData.length !== 1 ||
-		updatableChargeData[0] === undefined
-	) {
-		throw new Error(
-			`Expected 1 rate plan for Supporter Plus, got ${ratePlans.length}`,
-		);
-	}
-	return updatableChargeData[0];
+	const relevantRatePlan = getSingleOrThrow(
+		relevantRatePlans,
+		(msg) => new Error(`wrong number of supporter plus rate plans: ${msg}`),
+	);
+
+	const { ratePlan, productData } = relevantRatePlan;
+	const { productRatePlan, planHasSeparateContributionCharge } = productData;
+
+	const chargeToUpdate = getIfDefined(
+		ratePlan.ratePlanCharges.find(
+			(charge) =>
+				charge.productRatePlanChargeId === productData.chargeToUpdateId,
+		),
+		`Could not find a charge with the id ${productData.chargeToUpdateId} in this rate plan`,
+	);
+
+	logger.log('updatable charge', chargeToUpdate.id);
+
+	return {
+		ratePlan,
+		productRatePlan,
+		chargeToUpdate,
+		planHasSeparateContributionCharge,
+	};
 };
 
 const validateNewAmount = (
@@ -155,6 +165,7 @@ const getNewTermStartDate = (
 };
 
 export const updateSupporterPlusAmount = async (
+	logger: Logger,
 	zuoraClient: ZuoraClient,
 	productCatalog: ProductCatalog,
 	identityIdFromRequest: string,
@@ -174,6 +185,7 @@ export const updateSupporterPlusAmount = async (
 	}
 
 	const supporterPlusData = getSupporterPlusData(
+		logger,
 		productCatalog,
 		subscription.ratePlans,
 	);
@@ -190,15 +202,21 @@ export const updateSupporterPlusAmount = async (
 			? newPaymentAmount - supporterPlusData.productRatePlan.pricing[currency]
 			: newPaymentAmount;
 
+	const { chargeToUpdate } = supporterPlusData;
+
 	const applyFromDate = dayjs(
-		supporterPlusData.chargeToUpdate.chargedThroughDate ?? // If the currently active charge is the one that was invoiced last
-			supporterPlusData.chargeToUpdate.effectiveStartDate, // If there is a pending amendment
+		chargeToUpdate.chargedThroughDate ?? // If the currently active charge is the one that was invoiced last
+			chargeToUpdate.effectiveStartDate, // If there is a pending amendment
 	);
 
 	const newTermStartDate = getNewTermStartDate(
 		subscription,
-		supporterPlusData.chargeToUpdate,
+		chargeToUpdate,
 		applyFromDate,
+	);
+
+	logger.log(
+		`new term date: ${newTermStartDate ? zuoraDateFormat(newTermStartDate) : undefined} and apply from: ${zuoraDateFormat(applyFromDate)}`,
 	);
 
 	await doUpdate({
@@ -208,7 +226,7 @@ export const updateSupporterPlusAmount = async (
 		subscriptionNumber,
 		accountNumber: subscription.accountNumber,
 		ratePlanId: supporterPlusData.ratePlan.id,
-		chargeNumber: supporterPlusData.chargeToUpdate.number,
+		chargeNumber: chargeToUpdate.number,
 		contributionAmount: newContributionAmount,
 	});
 

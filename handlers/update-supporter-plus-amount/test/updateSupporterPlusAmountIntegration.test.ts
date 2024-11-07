@@ -2,8 +2,10 @@ import console from 'console';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import { sendThankYouEmail } from '../src/sendEmail';
+import { createThankYouEmail } from '../src/sendEmail';
 import { updateSupporterPlusAmount } from '../src/updateSupporterPlusAmount';
+import { Logger } from '@modules/zuora/logger';
+import { sendEmail } from '@modules/email/email';
 
 /**
  * This is an integration test, the `@group integration` tag ensures that it will only be run by the `pnpm it-test`
@@ -30,6 +32,7 @@ test('We can carry out an amount change', async () => {
 	const productCatalog = await getProductCatalogFromApi(stage);
 
 	const result = await updateSupporterPlusAmount(
+		new Logger(),
 		zuoraClient,
 		productCatalog,
 		identityId,
@@ -51,17 +54,19 @@ test('We can send a thank you email', async () => {
 	const currency = 'GBP';
 	const billingPeriod = 'Month';
 
-	const result = await sendThankYouEmail({
+	const result = await sendEmail(
 		stage,
-		nextPaymentDate,
-		emailAddress,
-		firstName,
-		lastName,
-		currency,
-		newAmount,
-		billingPeriod,
-		identityId,
-	});
+		createThankYouEmail({
+			nextPaymentDate,
+			emailAddress,
+			firstName,
+			lastName,
+			currency,
+			newAmount,
+			billingPeriod,
+			identityId,
+		}),
+	);
 
 	expect(result.$metadata.httpStatusCode).toEqual(200);
 });
