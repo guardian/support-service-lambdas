@@ -26,6 +26,11 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !FindInMap [StageMap, !Ref Stage, bucketName]
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
