@@ -11,12 +11,12 @@
     "fix-formatting": "prettier --write **.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-cloudwatch": "3.670.0",
-    "@aws-sdk/client-secrets-manager": "3.665.0",
+    "@aws-sdk/client-cloudwatch": "3.682.0",
+    "@aws-sdk/client-secrets-manager": "3.682.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.143",
+    "@types/aws-lambda": "^8.10.145",
     "fetch-mock": "^11.1.1"
   }
 }

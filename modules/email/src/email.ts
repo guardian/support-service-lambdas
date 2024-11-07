@@ -47,10 +47,11 @@ export type DataExtensionName =
 export const sendEmail = async (
 	stage: Stage,
 	emailMessage: EmailMessageWithUserId,
+	log: (messsage: string) => void = console.log,
 ): Promise<SendMessageCommandOutput> => {
 	const queueName = `braze-emails-${stage}`;
 	const client = new SQSClient(awsConfig);
-	console.log(
+	log(
 		`Sending email message ${prettyPrint(emailMessage)} to queue ${queueName}`,
 	);
 	const command = new SendMessageCommand({
@@ -59,6 +60,6 @@ export const sendEmail = async (
 	});
 
 	const response = await client.send(command);
-	console.log(`Response from email send was ${prettyPrint(response)}`);
+	log(`Response from email send was ${prettyPrint(response)}`);
 	return response;
 };

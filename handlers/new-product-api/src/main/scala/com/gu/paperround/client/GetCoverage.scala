@@ -11,11 +11,11 @@ class GetCoverage(formRequestMaker: FormRequestMaker) {
   def getCoverage(postcode: String): ClientFailableOp[List[DeliveryAgent]] =
     for {
       wireResponse <- formRequestMaker.post[WireResponse](Map("postcode" -> postcode), "/coverage")
-      _ <- if (List("CO", "NC").contains(wireResponse.data.status)) ClientSuccess(()) else GenericError("invalid status")
-    } yield
-      wireResponse.data.agents.map { agent =>
-        DeliveryAgent(agent.agentid.toString)
-      }
+      _ <-
+        if (List("CO", "NC").contains(wireResponse.data.status)) ClientSuccess(()) else GenericError("invalid status")
+    } yield wireResponse.data.agents.map { agent =>
+      DeliveryAgent(agent.agentid.toString)
+    }
 
 }
 

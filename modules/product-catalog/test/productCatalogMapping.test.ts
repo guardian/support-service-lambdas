@@ -24,7 +24,7 @@ test('We can find a product rate plan charge from product details', () => {
 
 test('We can find the price of a product from product details', () => {
 	expect(codeProductCatalog.HomeDelivery.ratePlans.Sixday.pricing.GBP).toBe(
-		68.99,
+		73.99,
 	);
 });
 

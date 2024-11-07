@@ -3,8 +3,9 @@ import { productCatalogSchema } from '@modules/product-catalog/productCatalogSch
 
 export const getProductCatalogFromApi = async (
 	stage: string,
+	log: (messsage: string) => void = console.log,
 ): Promise<ProductCatalog> => {
-	console.log('getProductCatalogFromApi');
+	log('getProductCatalogFromApi');
 	const url =
 		stage === 'PROD'
 			? 'https://product-catalog.guardianapis.com/product-catalog.json'
@@ -15,7 +16,7 @@ export const getProductCatalogFromApi = async (
 
 	const json = await response.json();
 	if (response.ok) {
-		console.log(`Response from catalog api was: ${JSON.stringify(json)}`);
+		log(`Response from catalog api was: ${JSON.stringify(json)}`);
 		return productCatalogSchema.parse(json);
 	} else {
 		throw new Error(

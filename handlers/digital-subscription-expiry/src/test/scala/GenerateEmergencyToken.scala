@@ -18,9 +18,13 @@ object GenerateEmergencyToken extends App {
   val weeksToGive = (52 * monthsToGive) / 12
 
   val loadConfig = LoadConfigModule(Stage.Prod, GetFromS3.fetchString)
-  val emergencyTokensConfig = loadConfig.load[EmergencyTokensConfig].getOrElse(throw new RuntimeException("failed to load config"))
+  val emergencyTokensConfig =
+    loadConfig.load[EmergencyTokensConfig].getOrElse(throw new RuntimeException("failed to load config"))
   // replace "secret" with the prod secret to get a code that'll work with https://content-auth.guardian.co.uk/subs
-  val codec = PrefixedTokens(secretKey = emergencyTokensConfig.secret, emergencySubscriberAuthPrefix = emergencyTokensConfig.prefix)
+  val codec = PrefixedTokens(
+    secretKey = emergencyTokensConfig.secret,
+    emergencySubscriberAuthPrefix = emergencyTokensConfig.prefix,
+  )
   val tokenPayload = TokenPayload.apply(org.joda.time.LocalDate.now())(Weeks.weeks(weeksToGive), SevenDay)
   val encoded = codec.encode(tokenPayload)
   val expectedResponse = expectedExpiryForDate(LocalDate.now().plusWeeks(weeksToGive).plusDays(1))

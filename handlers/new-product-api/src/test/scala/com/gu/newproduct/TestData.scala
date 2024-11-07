@@ -8,10 +8,22 @@ import com.gu.newproduct.api.addsubscription.validation.guardianweekly.GuardianW
 import com.gu.newproduct.api.addsubscription.validation.paper.PaperCustomerData
 import com.gu.newproduct.api.addsubscription.validation.supporterplus.SupporterPlusCustomerData
 import com.gu.newproduct.api.addsubscription.validation.tierthree.TierThreeCustomerData
-import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{AccountBalanceMinorUnits, AutoPay, IdentityId, PaymentMethodId, SfContactId}
+import com.gu.newproduct.api.addsubscription.zuora.GetAccount.{
+  AccountBalanceMinorUnits,
+  AutoPay,
+  IdentityId,
+  PaymentMethodId,
+  SfContactId,
+}
 import com.gu.newproduct.api.addsubscription.zuora.GetAccountSubscriptions.{Active, Subscription}
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, SortCode}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{
+  BankAccountName,
+  BankAccountNumberMask,
+  DirectDebit,
+  MandateId,
+  SortCode,
+}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
 
