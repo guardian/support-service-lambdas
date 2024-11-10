@@ -7,10 +7,10 @@ import sbtassembly.PathList
 object Dependencies {
   val awsSdkVersion = "2.27.24"
   val circeVersion = "0.14.10"
-  val sttpVersion = "3.9.8"
-  val http4sVersion = "0.22.15" // keep version 0.22.15, later versions pull in cats effect 3 which is not compatible
+  val sttpVersion = "3.10.1"
+  val http4sVersion = "0.23.28" // keep version 0.23.28, later versions pull in cats effect 3 which is not compatible
   val catsVersion = "2.12.0"
-  val catsEffectVersion = "2.5.5"
+  val catsEffectVersion = "3.5.4"
   val logging: Seq[ModuleID] = Seq(
     "ch.qos.logback" % "logback-classic" % "1.5.11",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
@@ -77,20 +77,20 @@ object Dependencies {
 
   // Other
   val zio = "dev.zio" %% "zio" % "1.0.17"
-  val zio2Version = "2.0.22"
+  val zio2Version = "2.1.11"
   val zio2 = "dev.zio" %% "zio" % zio2Version
-  val tapirVersion = "1.9.11"
+  val tapirVersion = "1.11.7"
   val enumeratum = "com.beachape" %% "enumeratum" % "1.7.5"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.3.0"
-  val stripe = "com.stripe" % "stripe-java" % "22.31.0"
+  val stripe = "com.stripe" % "stripe-java" % "27.1.1"
   val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest-should" % "0.9.0" % Test
   val scalatest = "org.scalatest" %% "scalatest" % "3.2.19" % Test
-  val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.17.1" % Test
-  val scalaMock = "org.scalamock" %% "scalamock" % "5.2.0" % Test
-  val mockito = "org.mockito" % "mockito-core" % "5.14.1" % Test
+  val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.18.1" % Test
+  val scalaMock = "org.scalamock" %% "scalamock" % "6.0.0" % Test
+  val mockito = "org.mockito" % "mockito-core" % "5.14.2" % Test
   // play-json still uses an old version of jackson-core which has a vulnerability - https://security.snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-7569538
   val jacksonVersion = "2.17.2"
 
