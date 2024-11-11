@@ -1,7 +1,7 @@
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import codeZuoraCatalog from '../../../modules/zuora-catalog/test/fixtures/catalog-code.json';
-import { getLatestValidSubscription } from '../src';
-import type { SupporterRatePlanItem } from '../src/dynamo';
+import type { SupporterRatePlanItem } from '../src/supporterProductData';
+import { getLatestValidSubscription } from '../src/supporterProductData';
 import type { Member } from '../src/xmlBuilder';
 import { buildXml } from '../src/xmlBuilder';
 

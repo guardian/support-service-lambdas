@@ -2,9 +2,12 @@
  * @group integration
  */
 
-import { getLatestSubscription, getMemberDetails } from '../src';
-import { getSupporterProductData } from '../src/dynamo';
+import { getMemberDetails } from '../src';
 import { getIdentityClientAccessToken, getIdentityId } from '../src/identity';
+import {
+	getLatestSubscription,
+	getSupporterProductData,
+} from '../src/supporterProductData';
 
 test('Dynamo Integration', async () => {
 	const supporterData = await getSupporterProductData('CODE', '110001137');

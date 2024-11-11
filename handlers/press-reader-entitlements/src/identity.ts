@@ -31,18 +31,23 @@ export async function getIdentityId(stage: Stage, userId: string) {
 			'X-GU-ID-Client-Access-Token': `Bearer ${clientAccessToken}`,
 		},
 		method: 'GET',
-	})
-		.then(async (res) => {
-			const json = await res.json();
-			console.log(`Identity returned ${JSON.stringify(json)}`);
-			return json;
-		})
-		.then((json) => getIdentityIdSchema.parse(json));
+	});
+	const json = await response.json();
+	console.log(`Identity returned ${JSON.stringify(json)}`);
 
-	if (response.status === 'ok') {
-		return response.id;
+	const identityResponse = getIdentityIdSchema.parse(json);
+	console.log('Successfully parsed identity response');
+
+	if (identityResponse.status === 'ok') {
+		console.log(
+			`Retrieved identity id ${identityResponse.id} from userId ${userId}`,
+		);
+		return identityResponse.id;
 	}
+	const errorsList = identityResponse.errors.reduce((acc, error) => {
+		return acc + error.message + ', ';
+	}, 'Errors: ');
 	throw new Error(
-		`Failed to get identity id because of ${JSON.stringify(response)}`,
+		`Failed to get identity id because of ${errorsList}, for user ${userId}`,
 	);
 }
