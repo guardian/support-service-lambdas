@@ -1,14 +1,18 @@
 export const typeObject = {
-	TierThree: {
-		currencies: ['USD', 'GBP'],
-		billingPeriods: ['Month', 'Annual'],
+	GuardianLight: {
+		currencies: ['GBP'],
+		billingPeriods: ['Month'],
 		productRatePlans: {
-			DomesticMonthlyV2: {
-				SupporterPlus: {},
-				GuardianWeekly: {},
-				NewspaperArchive: {},
+			Monthly: {
+				GuardianLight: {},
 			},
-			DomesticAnnualV2: {
+		},
+	},
+	TierThree: {
+		currencies: ['GBP', 'USD'],
+		billingPeriods: ['Annual', 'Month'],
+		productRatePlans: {
+			RestOfWorldAnnualV2: {
 				NewspaperArchive: {},
 				SupporterPlus: {},
 				GuardianWeekly: {},
@@ -18,10 +22,15 @@ export const typeObject = {
 				GuardianWeekly: {},
 				NewspaperArchive: {},
 			},
-			RestOfWorldAnnualV2: {
+			DomesticAnnualV2: {
 				NewspaperArchive: {},
 				SupporterPlus: {},
 				GuardianWeekly: {},
+			},
+			DomesticMonthlyV2: {
+				SupporterPlus: {},
+				GuardianWeekly: {},
+				NewspaperArchive: {},
 			},
 			RestOfWorldMonthly: {
 				SupporterPlus: {},

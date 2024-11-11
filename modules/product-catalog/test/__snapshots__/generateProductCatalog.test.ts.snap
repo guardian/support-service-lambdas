@@ -110,6 +110,22 @@ exports[`Generated product catalog matches snapshot 1`] = `
       },
     },
   },
+  "GuardianLight": {
+    "ratePlans": {
+      "Monthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "GuardianLight": {
+            "id": "8a129b7892c35f170192dd3225572b97",
+          },
+        },
+        "id": "8a12831492c341730192dd1c39207038",
+        "pricing": {
+          "GBP": 2,
+        },
+      },
+    },
+  },
   "GuardianWeeklyDomestic": {
     "ratePlans": {
       "Annual": {
@@ -854,6 +870,19 @@ exports[`Generated product catalog types match snapshot 1`] = `
       },
     },
   },
+  "GuardianLight": {
+    "billingPeriods": [
+      "Month",
+    ],
+    "currencies": [
+      "GBP",
+    ],
+    "productRatePlans": {
+      "Monthly": {
+        "GuardianLight": {},
+      },
+    },
+  },
   "GuardianWeeklyDomestic": {
     "billingPeriods": [
       "Annual",
@@ -1051,16 +1080,12 @@ exports[`Generated product catalog types match snapshot 1`] = `
   },
   "TierThree": {
     "billingPeriods": [
-      "Month",
       "Annual",
+      "Month",
     ],
     "currencies": [
       "GBP",
       "USD",
-      "NZD",
-      "EUR",
-      "AUD",
-      "CAD",
     ],
     "productRatePlans": {
       "DomesticAnnual": {
