@@ -9,8 +9,6 @@ describe('xmlBuilder', () => {
 	it('creates Member schema xml with products', () => {
 		const expectedXml = `<?xml version="1.0" encoding="utf-8"?>
 <userID>123456</userID>
-<firstname>John</firstname>
-<lastname>Doe</lastname>
 <products>
   <product>
     <productID>123</productID>
@@ -53,8 +51,6 @@ describe('xmlBuilder', () => {
 	it('creates creates Member schema xml with no products', () => {
 		const expectedXml = `<?xml version="1.0" encoding="utf-8"?>
 <userID>123456</userID>
-<firstname>John</firstname>
-<lastname>Doe</lastname>
 <products></products>
 `;
 
