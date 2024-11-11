@@ -2,21 +2,19 @@
  * @group integration
  */
 
-import { describe } from 'node:test';
 import { getLatestSubscription, getMemberDetails } from '../src';
 import { getSupporterProductData } from '../src/dynamo';
 import { getIdentityClientAccessToken, getIdentityId } from '../src/identity';
+import { buildXml } from '../src/xmlBuilder';
 
 test('Dynamo Integration', async () => {
 	const supporterData = await getSupporterProductData('CODE', '110001137');
 	expect(supporterData?.length).toEqual(4);
 });
 
-describe('Product Catalog integration', () => {
-	test('Entitlements check', async () => {
-		const memberDetails = await getLatestSubscription('CODE', '110001137');
-		expect(memberDetails).toBeDefined();
-	});
+test('Entitlements check', async () => {
+	const memberDetails = await getLatestSubscription('CODE', '110001137');
+	expect(memberDetails).toBeDefined();
 });
 
 test('getIdentityClientAccessToken', async () => {
@@ -57,4 +55,5 @@ test('getMemberDetails', async () => {
 		'c20da7c7-4f72-44fb-b719-78879bfab70d',
 	);
 	expect(memberDetails).toStrictEqual(expected);
+	console.log(buildXml(memberDetails));
 });
