@@ -10,8 +10,6 @@ type Product = {
 
 export type Member = {
 	userID: string;
-	firstname: string;
-	lastname: string;
 	products: Product[];
 };
 

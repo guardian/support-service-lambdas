@@ -27,8 +27,6 @@ describe('xmlBuilder', () => {
 
 		const member: Member = {
 			userID: '123456',
-			firstname: 'John',
-			lastname: 'Doe',
 			products: [
 				{
 					product: {
@@ -62,8 +60,6 @@ describe('xmlBuilder', () => {
 
 		const member: Member = {
 			userID: '123456',
-			firstname: 'John',
-			lastname: 'Doe',
 			products: [],
 		};
 

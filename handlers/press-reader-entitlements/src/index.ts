@@ -14,6 +14,7 @@ import type {
 } from 'aws-lambda';
 import type { SupporterRatePlanItem } from './dynamo';
 import { getSupporterProductData } from './dynamo';
+import { getIdentityId } from './identity';
 import type { Member } from './xmlBuilder';
 import { buildXml } from './xmlBuilder';
 
@@ -31,37 +32,31 @@ export const handler: Handler = async (
 				'userId does not exist',
 			);
 
-			const memberDetails = await getMemberDetails(userId, stage);
-			return await Promise.resolve({
+			const memberDetails = await getMemberDetails(stage, userId);
+			return {
 				body: buildXml(memberDetails),
 				statusCode: 200,
-			});
+			};
 		}
 
-		return await Promise.resolve({
+		return {
 			body: 'Not found',
 			statusCode: 404,
-		});
+		};
 	} catch (error) {
 		console.log('Caught exception with message: ', error);
 		if (error instanceof IdentityError) {
-			return await Promise.resolve({
+			return {
 				body: 'User not found',
 				statusCode: 404,
-			});
+			};
 		}
 
-		return await Promise.resolve({
+		return {
 			body: 'Internal server error',
 			statusCode: 500,
-		});
+		};
 	}
-};
-
-type UserDetails = {
-	userID: string;
-	firstname: string;
-	lastname: string;
 };
 
 class IdentityError extends Error {
@@ -71,30 +66,21 @@ class IdentityError extends Error {
 	}
 }
 
-async function getUserDetails(
+export async function getMemberDetails(
+	stage: Stage,
 	userId: string,
-): Promise<{ identityId: string; user: UserDetails }> {
-	// ToDo: get Identity ID from Identity, using a Braze UUID as userId, if we can't - return a 404
-	try {
-		return Promise.resolve({
-			identityId: '123',
-			user: {
-				userID: userId,
-				firstname: 'Joe',
-				lastname: 'Bloggs',
-			},
-		});
-	} catch (error) {
-		throw new IdentityError(JSON.stringify(error));
-	}
+): Promise<Member> {
+	const identityId = await getIdentityId(stage, userId);
+	const latestSubscription = await getLatestSubscription(stage, identityId);
+	return createMember(userId, latestSubscription);
 }
 
 function createMember(
-	userDetails: UserDetails,
+	userId: string,
 	latestSubscription: SupporterRatePlanItem | undefined,
 ): Member {
 	return {
-		...userDetails,
+		userID: userId,
 		products: latestSubscription
 			? [
 					{
@@ -116,29 +102,25 @@ function createMember(
 	};
 }
 
-export async function getMemberDetails(
-	userId: string,
+export async function getLatestSubscription(
 	stage: Stage,
-): Promise<Member> {
-	const { identityId, user } = await getUserDetails(userId);
-
+	identityId: string,
+): Promise<SupporterRatePlanItem | undefined> {
 	const supporterProductDataItems = await getSupporterProductData(
-		identityId,
 		stage,
+		identityId,
 	);
 
 	if (supporterProductDataItems) {
 		const productCatalog = await getProductCatalogFromApi(stage);
 
-		const latestSubscription = getLatestValidSubscription(
+		return getLatestValidSubscription(
 			productCatalog,
 			supporterProductDataItems,
 		);
-
-		return createMember(user, latestSubscription);
 	}
 
-	return createMember(user, undefined);
+	return undefined;
 }
 
 export function getLatestValidSubscription(

@@ -15,8 +15,8 @@ export type SupporterRatePlanItem = {
 };
 
 export const getSupporterProductData = async (
-	identityId: string,
 	stage: Stage,
+	identityId: string,
 ): Promise<SupporterRatePlanItem[] | undefined> => {
 	const input = {
 		ExpressionAttributeValues: {
