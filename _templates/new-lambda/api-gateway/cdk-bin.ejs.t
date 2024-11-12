@@ -11,10 +11,14 @@ import { <%= PascalCase %> } from '../lib/<%= lambdaName %>';
 new <%= PascalCase %>(app, '<%= lambdaName %>-CODE', {
     stack: 'support',
     stage: 'CODE',
-    domainName: `<%= lambdaName %>.code.dev-guardianapis.com`,
+    domainName: `<%= lambdaName %>-code.${supportApisDomain}`,
+    hostedZoneId: supportHostedZoneId,
+    certificateId: supportCertificateId,
 });
 new <%= PascalCase %>(app, '<%= lambdaName %>-PROD', {
     stack: 'support',
     stage: 'PROD',
-    domainName: `<%= lambdaName %>.guardianapis.com`,
+    domainName: `<%= lambdaName %>.${supportApisDomain}`,
+    hostedZoneId: supportHostedZoneId,
+    certificateId: supportCertificateId,
 });

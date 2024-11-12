@@ -7,7 +7,6 @@ sh: git add cdk/lib/<%=lambdaName%>.ts
 <% PascalCase = h.changeCase.pascal(lambdaName) %>
 import { GuApiLambda } from '@guardian/cdk';
 import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
-import { GuCname } from '@guardian/cdk/lib/constructs/dns';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import type { App } from 'aws-cdk-lib';
@@ -15,14 +14,18 @@ import { Duration } from 'aws-cdk-lib';
 <% if (includeApiKey === 'Y'){ %>
 import { ApiKeySourceType } from 'aws-cdk-lib/aws-apigateway';
 <% } %>
+import { CfnBasePathMapping, CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { nodeVersion } from './node-version';
 
 export interface <%= PascalCase %>Props extends GuStackProps {
 	stack: string;
 	stage: string;
+	certificateId: string;
 	domainName: string;
+	hostedZoneId: string;
 }
 
 export class <%= PascalCase %> extends GuStack {
@@ -121,11 +124,28 @@ export class <%= PascalCase %> extends GuStack {
 			}),
 		});
 
-		new GuCname(this, `NS1 DNS entry for ${props.domainName}`, {
-			app: app,
+		// ---- DNS ---- //
+		const certificateArn = `arn:aws:acm:eu-west-1:${this.account}:certificate/${props.certificateId}`;
+		const cfnDomainName = new CfnDomainName(this, 'DomainName', {
 			domainName: props.domainName,
-			ttl: Duration.hours(1),
-			resourceRecord: 'guardian.map.fastly.net',
+			regionalCertificateArn: certificateArn,
+			endpointConfiguration: {
+				types: ['REGIONAL'],
+			},
+		});
+
+		new CfnBasePathMapping(this, 'BasePathMapping', {
+			domainName: cfnDomainName.ref,
+			restApiId: lambda.api.restApiId,
+			stage: lambda.api.deploymentStage.stageName,
+		});
+
+		new CfnRecordSet(this, 'DNSRecord', {
+			name: props.domainName,
+			type: 'CNAME',
+			hostedZoneId: props.hostedZoneId,
+			ttl: '120',
+			resourceRecords: [cfnDomainName.attrRegionalDomainName],
 		});
 
 		const s3InlinePolicy: Policy = new Policy(this, 'S3 inline policy', {
