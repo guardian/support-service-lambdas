@@ -1,4 +1,6 @@
+import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
+import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { Stage } from '@modules/stage';
 import type {
 	APIGatewayProxyEvent,
@@ -12,6 +14,9 @@ import type { Member } from './xmlBuilder';
 import { buildXml } from './xmlBuilder';
 
 const stage = process.env.STAGE as Stage;
+const lazyProductCatalog = new Lazy(async () => {
+	return await getProductCatalogFromApi(stage);
+}, 'productCatalog');
 
 export const handler: Handler = async (
 	event: APIGatewayProxyEvent,
@@ -49,7 +54,12 @@ export async function getMemberDetails(
 	userId: string,
 ): Promise<Member> {
 	const identityId = await getIdentityId(stage, userId);
-	const latestSubscription = await getLatestSubscription(stage, identityId);
+	const productCatalog = await lazyProductCatalog.get();
+	const latestSubscription = await getLatestSubscription(
+		stage,
+		identityId,
+		productCatalog,
+	);
 	return createMember(userId, latestSubscription);
 }
 

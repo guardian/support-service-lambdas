@@ -2,7 +2,6 @@ import { DynamoDBClient, QueryCommand } from '@aws-sdk/client-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { sortBy } from '@modules/arrayFunctions';
 import { awsConfig } from '@modules/aws/config';
-import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type {
 	ProductCatalog,
 	ProductKey,
@@ -44,6 +43,7 @@ export const getSupporterProductData = async (
 export async function getLatestSubscription(
 	stage: Stage,
 	identityId: string,
+	productCatalog: ProductCatalog,
 ): Promise<SupporterRatePlanItem | undefined> {
 	const supporterProductDataItems = await getSupporterProductData(
 		stage,
@@ -51,8 +51,6 @@ export async function getLatestSubscription(
 	);
 
 	if (supporterProductDataItems) {
-		const productCatalog = await getProductCatalogFromApi(stage);
-
 		return getLatestValidSubscription(
 			productCatalog,
 			supporterProductDataItems,
