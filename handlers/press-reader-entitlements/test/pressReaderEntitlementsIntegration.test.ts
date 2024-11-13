@@ -2,8 +2,10 @@
  * @group integration
  */
 
+import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
+import zuoraCatalogFixture from '../../../modules/zuora-catalog/test/fixtures/catalog-code.json';
 import { getMemberDetails } from '../src';
-import { getIdentityClientAccessToken, getIdentityId } from '../src/identity';
+import { getIdentityId, lazyClientAccessToken } from '../src/identity';
 import {
 	getLatestSubscription,
 	getSupporterProductData,
@@ -15,12 +17,17 @@ test('Dynamo Integration', async () => {
 });
 
 test('Entitlements check', async () => {
-	const memberDetails = await getLatestSubscription('CODE', '110001137');
+	const productCatalog = generateProductCatalog(zuoraCatalogFixture);
+	const memberDetails = await getLatestSubscription(
+		'CODE',
+		'110001137',
+		productCatalog,
+	);
 	expect(memberDetails).toBeDefined();
 });
 
 test('getIdentityClientAccessToken', async () => {
-	const accessToken = await getIdentityClientAccessToken();
+	const accessToken = await lazyClientAccessToken.get();
 	expect(accessToken).toBeDefined();
 });
 

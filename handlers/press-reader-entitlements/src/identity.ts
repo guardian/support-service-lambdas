@@ -6,7 +6,7 @@ import type { Stage } from '@modules/stage';
 import { getIdentityIdSchema } from './schemas';
 
 const ssmClient = new SSMClient(awsConfig);
-const lazyClientAccessToken = new Lazy(async () => {
+export const lazyClientAccessToken = new Lazy(async () => {
 	const params = {
 		Name: '/CODE/support/press-reader-entitlements/identity-client-access-token',
 		WithDecryption: true,
