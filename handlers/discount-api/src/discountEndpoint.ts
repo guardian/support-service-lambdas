@@ -28,7 +28,6 @@ import { EligibilityChecker } from './eligibilityChecker';
 import { generateCancellationDiscountConfirmationEmail } from './generateCancellationDiscountConfirmationEmail';
 import { Lazy } from './lazy';
 import { getDiscountFromSubscription } from './productToDiscountMapping';
-import type { EligibilityCheckResponseBody } from './responseSchema';
 
 export const previewDiscountEndpoint = async (
 	logger: Logger,
@@ -97,9 +96,7 @@ export const previewDiscountEndpoint = async (
 	return {
 		discountedPrice,
 		upToPeriods: discount.upToPeriods,
-		upToPeriodsType: discount.upToPeriodsType
-			.toLowerCase()
-			.replace(/s$/, '') as EligibilityCheckResponseBody['upToPeriodsType'],
+		upToPeriodsType: discount.upToPeriodsType,
 		discountPercentage: discount.discountPercentage,
 		firstDiscountedPaymentDate,
 		nextNonDiscountedPaymentDate,

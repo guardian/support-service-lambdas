@@ -4,10 +4,10 @@ export const previewDiscountResponseSchema = z.object({
 	discountedPrice: z.number(),
 	upToPeriods: z.number(),
 	upToPeriodsType: z
-		.literal('month')
-		.or(z.literal('year'))
-		.or(z.literal('week'))
-		.or(z.literal('day')),
+		.literal('Months')
+		.or(z.literal('Years'))
+		.or(z.literal('Weeks'))
+		.or(z.literal('Days')),
 	discountPercentage: z.number(),
 	firstDiscountedPaymentDate: z.string(),
 	nextNonDiscountedPaymentDate: z.string(),
