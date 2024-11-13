@@ -41,10 +41,14 @@ export type EligibilityCheck =
 	| 'NoCheck';
 
 export type Discount = {
+	// the following fields match the charge in the zuora catalog
+	// https://knowledgecenter.zuora.com/Zuora_Platform/API/G_SOAP_API/E1_SOAP_API_Object_Reference/ProductRatePlanCharge
 	productRatePlanId: string;
 	name: string;
 	upToPeriods: number;
-	upToPeriodsType: string;
+	upToPeriodsType: 'Days' | 'Weeks' | 'Months' | 'Years';
+	discountPercentage: number;
+	// end fields that match the zuora catalog
 	emailIdentifier: DataExtensionName;
 	eligibilityCheckForRatePlan?: EligibilityCheck;
 };
@@ -92,6 +96,7 @@ const Discounts = (stage: Stage) => {
 		name: 'Cancellation Save Discount - Free for 2 months',
 		upToPeriods: 2,
 		upToPeriodsType: 'Months',
+		discountPercentage: 100,
 		emailIdentifier: dataExtensionName,
 		eligibilityCheckForRatePlan: eligibilityCheckForRatePlan,
 	});
@@ -107,6 +112,7 @@ const Discounts = (stage: Stage) => {
 		name: 'Cancellation Save Discount - 25% off for 12 months',
 		upToPeriods: 12,
 		upToPeriodsType: 'Months',
+		discountPercentage: 25,
 		emailIdentifier: dataExtensionName,
 		eligibilityCheckForRatePlan: eligibilityCheckForRatePlan,
 	});
@@ -120,6 +126,7 @@ const Discounts = (stage: Stage) => {
 			name: 'Cancellation Save Discount - 25% off for 3 months',
 			upToPeriods: 3,
 			upToPeriodsType: 'Months',
+			discountPercentage: 25,
 			emailIdentifier:
 				DataExtensionNames.digipackMonthlyDiscountConfirmationEmail,
 			eligibilityCheckForRatePlan: 'AtCatalogPrice',

@@ -97,6 +97,7 @@ export const previewDiscountEndpoint = async (
 		discountedPrice,
 		upToPeriods: discount.upToPeriods,
 		upToPeriodsType: discount.upToPeriodsType,
+		discountPercentage: discount.discountPercentage,
 		firstDiscountedPaymentDate,
 		nextNonDiscountedPaymentDate,
 		nonDiscountedPayments,
