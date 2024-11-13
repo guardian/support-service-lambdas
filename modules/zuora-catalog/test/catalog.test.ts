@@ -6,7 +6,7 @@ import prod from './fixtures/catalog-prod.json';
 
 test('catalogSchema', () => {
 	const codeCatalog: ZuoraCatalog = zuoraCatalogSchema.parse(code);
-	expect(codeCatalog.products.length).toEqual(39);
+	expect(codeCatalog.products.length).toEqual(40);
 
 	const prodCatalog: ZuoraCatalog = zuoraCatalogSchema.parse(prod);
 	expect(prodCatalog.products.length).toEqual(20);

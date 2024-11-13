@@ -22,8 +22,9 @@ import {
 import { getDiscountFromSubscription } from '../src/productToDiscountMapping';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
+import { Logger } from '@modules/zuora/logger';
 
-const eligibilityChecker = new EligibilityChecker('A-S001');
+const eligibilityChecker = new EligibilityChecker(new Logger());
 const catalogProd = new ZuoraCatalogHelper(
 	zuoraCatalogSchema.parse(catalogJsonProd),
 );

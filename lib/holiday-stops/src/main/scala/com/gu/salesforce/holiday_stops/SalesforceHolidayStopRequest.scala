@@ -3,7 +3,10 @@ package com.gu.salesforce.holiday_stops
 import cats.implicits._
 import com.gu.salesforce.SalesforceConstants._
 import com.gu.salesforce.SalesforceQueryConstants.contactToWhereClausePart
-import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail.{CreateHolidayStopRequestResult, format}
+import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.CreateHolidayStopRequestWithDetail.{
+  CreateHolidayStopRequestResult,
+  format,
+}
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequest.WithdrawHolidayStopRequest.WithdrawnTimePatch
 import com.gu.salesforce.holiday_stops.SalesforceHolidayStopRequestsDetail._
 import com.gu.salesforce.holiday_stops.SalesforceSFSubscription.SubscriptionForSubscriptionNameAndContact._
@@ -96,9 +99,9 @@ object SalesforceHolidayStopRequest extends Logging {
     import LookupByContactAndOptionalSubscriptionName._
 
     def run(
-      contact: Contact,
-      optionalSubscriptionName: Option[SubscriptionName],
-      optionalHistoricalCutOff: Option[LocalDate],
+        contact: Contact,
+        optionalSubscriptionName: Option[SubscriptionName],
+        optionalHistoricalCutOff: Option[LocalDate],
     ): ClientFailableOp[List[HolidayStopRequest]] =
       sfGet
         .parse[RecordsWrapperCaseClass[HolidayStopRequest]]
@@ -396,7 +399,7 @@ object SalesforceHolidayStopRequest extends Logging {
         PatchRequest(
           WithdrawnTimePatch(withdrawlTime),
           RelativePath(s"$holidayStopRequestSfObjectsBaseUrl/${holidayStopRequestId.value}"),
-        )
+        ),
       )
   }
 

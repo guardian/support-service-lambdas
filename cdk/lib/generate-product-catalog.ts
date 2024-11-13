@@ -101,7 +101,7 @@ export class GenerateProductCatalog extends GuStack {
 					'This means the product catalog may not be up to date in S3. This lambda runs on a regular schedule so action will only be necessary if the alarm is triggered continuously',
 				evaluationPeriods: 1,
 				threshold: 1,
-				snsTopicName: 'retention-dev',
+				snsTopicName: `alarms-handler-topic-${this.stage}`,
 				comparisonOperator:
 					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 				metric: new Metric({

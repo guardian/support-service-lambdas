@@ -1,6 +1,11 @@
 package com.gu.delivery_records_api
 
-import com.gu.delivery_records_api.service.createproblem.{CreateDeliveryProblem, DeliveryRecordToLink, SFApiCreateDeliveryProblem, SFApiContactPhoneNumbers}
+import com.gu.delivery_records_api.service.createproblem.{
+  CreateDeliveryProblem,
+  DeliveryRecordToLink,
+  SFApiCreateDeliveryProblem,
+  SFApiContactPhoneNumbers,
+}
 
 import java.time.{LocalDate, LocalDateTime}
 import com.gu.salesforce.IdentityId
@@ -17,35 +22,38 @@ class SFApiCreateDeliveryProblemTest extends AnyFlatSpec with Matchers {
 
     val now = LocalDateTime.now()
 
-    SFApiCreateDeliveryProblem.create(
-      subscriptionNumber = "A-S123456",
-      contact = IdentityId("123456789"),
-      detail = CreateDeliveryProblem(
-        productName = "Guardian Weekly",
-        description = Some("description"),
-        problemType = "No delivery",
-        deliveryRecords = List(
-          DeliveryRecordToLink(
-            id = "deliveryRecordIdA",
-            creditAmount = Some(1.23),
-            invoiceDate = Some(LocalDate.of(2019, 12, 10)),
+    SFApiCreateDeliveryProblem
+      .create(
+        subscriptionNumber = "A-S123456",
+        contact = IdentityId("123456789"),
+        detail = CreateDeliveryProblem(
+          productName = "Guardian Weekly",
+          description = Some("description"),
+          problemType = "No delivery",
+          deliveryRecords = List(
+            DeliveryRecordToLink(
+              id = "deliveryRecordIdA",
+              creditAmount = Some(1.23),
+              invoiceDate = Some(LocalDate.of(2019, 12, 10)),
+            ),
+            DeliveryRecordToLink(
+              id = "deliveryRecordIdB",
+              creditAmount = Some(3.21),
+              invoiceDate = Some(LocalDate.of(2020, 1, 10)),
+            ),
           ),
-          DeliveryRecordToLink(
-            id = "deliveryRecordIdB",
-            creditAmount = Some(3.21),
-            invoiceDate = Some(LocalDate.of(2020, 1, 10)),
+          newContactPhoneNumbers = Some(
+            SFApiContactPhoneNumbers(
+              Id = Some("id"),
+              Phone = Some("1234567890"),
+            ),
           ),
+          repeatDeliveryProblem = Some(true),
         ),
-        newContactPhoneNumbers = Some(
-          SFApiContactPhoneNumbers(
-            Id = Some("id"),
-            Phone = Some("1234567890"),
-          ),
-        ),
-        repeatDeliveryProblem = Some(true),
-      ),
-      now,
-    ).asJson.spaces2 should equal(
+        now,
+      )
+      .asJson
+      .spaces2 should equal(
       s"""{
          |  "allOrNone" : true,
          |  "collateSubrequests" : false,

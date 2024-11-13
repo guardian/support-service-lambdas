@@ -7,7 +7,14 @@ import com.gu.newproduct.api.addsubscription.DiscountMessage
 import com.gu.newproduct.api.addsubscription.email.{DigipackEmailData, TrialPeriod}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, NonDirectDebitMethod, SortCode}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{
+  BankAccountName,
+  BankAccountNumberMask,
+  DirectDebit,
+  MandateId,
+  NonDirectDebitMethod,
+  SortCode,
+}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodType.CreditCard
 import com.gu.newproduct.api.productcatalog.PlanId._
@@ -171,7 +178,6 @@ class DigipackEmailDataTest extends AnyFlatSpec with Matchers {
 
     actualJson shouldBe Json.parse(expected)
   }
-
 
   def fieldsForPlanIds(ids: List[PlanId]): List[Map[String, String]] = {
     val allPlansVoucherData =
