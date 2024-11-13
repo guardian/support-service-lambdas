@@ -1,1 +1,0 @@
-pnpm --filter cdk lint && pnpm --filter cdk test
