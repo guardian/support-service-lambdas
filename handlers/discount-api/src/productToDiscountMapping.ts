@@ -37,6 +37,7 @@ export const getDiscountFromSubscription = (
 export type EligibilityCheck =
 	| 'EligibleForFreePeriod'
 	| 'AtCatalogPrice'
+	| 'NoRepeats'
 	| 'NoCheck';
 
 export type Discount = {
@@ -57,6 +58,7 @@ export const catalog = {
 		},
 		supporterPlus: {
 			Month: '8ad08cbd8586721c01858804e3275376',
+			Annual: '8ad08e1a8586721801858805663f6fab',
 		},
 		recurringContribution: {
 			Month: '2c92c0f85a6b134e015a7fcd9f0c7855',
@@ -70,6 +72,7 @@ export const catalog = {
 		},
 		supporterPlus: {
 			Month: '8a128ed885fc6ded018602296ace3eb8',
+			Annual: '8a128ed885fc6ded01860228f77e3d5a',
 		},
 		recurringContribution: {
 			Month: '2c92a0fc5aacfadd015ad24db4ff5e97',
@@ -77,25 +80,36 @@ export const catalog = {
 	},
 };
 
-const Discounts: (stage: Stage) => { [K in string]: Discount } = (
-	stage: Stage,
-) => {
+const Discounts = (stage: Stage) => {
 	const getCancellationFree2Mo = (
 		eligibilityCheckForRatePlan: EligibilityCheck,
 		dataExtensionName: DataExtensionName,
-	): Discount => {
-		return {
-			productRatePlanId: {
-				CODE: '8ad081dd8fd3d9df018fe2b6a7bc379d',
-				PROD: '8a1299c28fb956e8018fe2c0e12c3ae4',
-			}[stage],
-			name: 'Cancellation Save Discount - Free for 2 months',
-			upToPeriods: 2,
-			upToPeriodsType: 'Months',
-			emailIdentifier: dataExtensionName,
-			eligibilityCheckForRatePlan: eligibilityCheckForRatePlan,
-		};
-	};
+	): Discount => ({
+		productRatePlanId: {
+			CODE: '8ad081dd8fd3d9df018fe2b6a7bc379d',
+			PROD: '8a1299c28fb956e8018fe2c0e12c3ae4',
+		}[stage],
+		name: 'Cancellation Save Discount - Free for 2 months',
+		upToPeriods: 2,
+		upToPeriodsType: 'Months',
+		emailIdentifier: dataExtensionName,
+		eligibilityCheckForRatePlan: eligibilityCheckForRatePlan,
+	});
+
+	const getCancellation25pc12mo = (
+		eligibilityCheckForRatePlan: EligibilityCheck,
+		dataExtensionName: DataExtensionName,
+	): Discount => ({
+		productRatePlanId: {
+			CODE: '8ad08f068b5b9ca2018b5cadf0897ed3',
+			PROD: '8a128adf8b64bcfd018b6b6fdc7674f5',
+		}[stage],
+		name: 'Cancellation Save Discount - 25% off for 12 months',
+		upToPeriods: 12,
+		upToPeriodsType: 'Months',
+		emailIdentifier: dataExtensionName,
+		eligibilityCheckForRatePlan: eligibilityCheckForRatePlan,
+	});
 
 	return {
 		cancellation25pc3mo: {
@@ -110,18 +124,10 @@ const Discounts: (stage: Stage) => { [K in string]: Discount } = (
 				DataExtensionNames.digipackMonthlyDiscountConfirmationEmail,
 			eligibilityCheckForRatePlan: 'AtCatalogPrice',
 		},
-		cancellation25pc12mo: {
-			productRatePlanId: {
-				CODE: '8ad08f068b5b9ca2018b5cadf0897ed3',
-				PROD: '8a128adf8b64bcfd018b6b6fdc7674f5',
-			}[stage],
-			name: 'Cancellation Save Discount - 25% off for 12 months',
-			upToPeriods: 12,
-			upToPeriodsType: 'Months',
-			emailIdentifier:
-				DataExtensionNames.digipackAnnualDiscountConfirmationEmail,
-			eligibilityCheckForRatePlan: 'AtCatalogPrice',
-		},
+		cancellation25pc12mo: getCancellation25pc12mo(
+			'AtCatalogPrice',
+			DataExtensionNames.digipackAnnualDiscountConfirmationEmail,
+		),
 		cancellationFree2MoSP: getCancellationFree2Mo(
 			'EligibleForFreePeriod',
 			DataExtensionNames.cancellationDiscountConfirmation,
@@ -130,7 +136,11 @@ const Discounts: (stage: Stage) => { [K in string]: Discount } = (
 			'NoCheck',
 			DataExtensionNames.contributionPauseConfirmationEmail,
 		),
-	};
+		cancellation25pc12moSP: getCancellation25pc12mo(
+			'NoRepeats',
+			DataExtensionNames.supporterPlusAnnualDiscountConfirmationEmail,
+		),
+	} as const satisfies { [K in string]: Discount };
 };
 
 function ProductToDiscountMapping(stage: Stage) {
@@ -145,5 +155,7 @@ function ProductToDiscountMapping(stage: Stage) {
 			DiscountsForStage.cancellationFree2MoSP,
 		[catalogForStage.recurringContribution.Month]:
 			DiscountsForStage.cancellationFree2MoRC,
+		[catalogForStage.supporterPlus.Annual]:
+			DiscountsForStage.cancellation25pc12moSP,
 	};
 }

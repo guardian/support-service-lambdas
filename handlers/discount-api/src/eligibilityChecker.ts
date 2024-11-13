@@ -75,6 +75,13 @@ export class EligibilityChecker {
 			validationRequirements.twoMonthsMin,
 			subscription.contractEffectiveDate.toDateString(),
 		);
+		this.assertNoRepeats(discountProductRatePlanId, subscription);
+	};
+
+	assertNoRepeats = (
+		discountProductRatePlanId: string,
+		subscription: ZuoraSubscription,
+	) => {
 		this.assertValidState(
 			subscription.ratePlans.every(
 				(rp) => rp.productRatePlanId !== discountProductRatePlanId,
