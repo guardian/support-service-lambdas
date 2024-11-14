@@ -1,5 +1,11 @@
-# Check if there are changes in the 'cdk' folder
-if git diff --quiet HEAD -- cdk/; then
+# Fetch the latest changes from the remote without merging
+git fetch origin
+
+# Get the name of the current branch
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+# Check if there are changes in the 'cdk' folder between the local branch and its remote
+if git diff --exit-code --quiet origin/$CURRENT_BRANCH -- cdk/; then
   echo "No changes detected in the 'cdk' folder. Skipping lint and test."
 else
   echo "Changes detected in the 'cdk' folder. Running lint and test..."
