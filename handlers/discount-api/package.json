@@ -11,7 +11,7 @@
     "fix-formatting": "prettier --write **.ts"
   },
   "dependencies": {
-    "dayjs": "^1.11.12",
+    "dayjs": "^1.11.13",
     "zod": "^3.23.8"
   },
   "devDependencies": {
