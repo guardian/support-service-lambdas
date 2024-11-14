@@ -43,7 +43,10 @@ export type ProductRatePlan<
 	billingPeriod?: ProductBillingPeriod<P>;
 };
 
+type ProductBillingSystem = 'stripe' | 'zuora';
+
 type Product<P extends ProductKey> = {
+	billingSystem: ProductBillingSystem;
 	ratePlans: {
 		[PRP in ProductRatePlanKey<P>]: ProductRatePlan<P, PRP>;
 	};
@@ -65,12 +68,20 @@ export class ProductCatalogHelper {
 	) => {
 		return this.catalogData[zuoraProduct].ratePlans[productRatePlan];
 	};
+	getAllProductDetailsForBillingSystem = (
+		billingSystem: ProductBillingSystem,
+	) =>
+		this.getAllProductDetails().filter(
+			(productDetail) => productDetail.billingSystem === billingSystem,
+		);
+
 	getAllProductDetails = () => {
 		const stageMapping = this.catalogData;
 		const zuoraProductKeys = Object.keys(stageMapping) as Array<
 			keyof typeof stageMapping
 		>;
 		return zuoraProductKeys.flatMap((zuoraProduct) => {
+			const billingSystem = stageMapping[zuoraProduct].billingSystem;
 			const productRatePlans = stageMapping[zuoraProduct].ratePlans;
 			const productRatePlanKeys = Object.keys(productRatePlans) as Array<
 				keyof typeof productRatePlans
@@ -79,6 +90,7 @@ export class ProductCatalogHelper {
 				const { id } = this.getProductRatePlan(zuoraProduct, productRatePlan);
 				return {
 					zuoraProduct,
+					billingSystem,
 					productRatePlan,
 					id,
 				};

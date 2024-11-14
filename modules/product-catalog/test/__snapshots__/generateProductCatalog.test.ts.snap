@@ -3,6 +3,7 @@
 exports[`Generated product catalog matches snapshot 1`] = `
 {
   "Contribution": {
+    "billingSystem": "zuora",
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -41,6 +42,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
     },
   },
   "DigitalSubscription": {
+    "billingSystem": "zuora",
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -111,6 +113,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
     },
   },
   "GuardianLight": {
+    "billingSystem": "zuora",
     "ratePlans": {
       "Monthly": {
         "billingPeriod": "Month",
@@ -126,7 +129,30 @@ exports[`Generated product catalog matches snapshot 1`] = `
       },
     },
   },
+  "GuardianPatron": {
+    "billingSystem": "stripe",
+    "ratePlans": {
+      "GuardianPatron": {
+        "billingPeriod": "Month",
+        "charges": {
+          "GuardianPatron": {
+            "id": "guardian_patron",
+          },
+        },
+        "id": "guardian_patron",
+        "pricing": {
+          "AUD": 0,
+          "CAD": 0,
+          "EUR": 0,
+          "GBP": 0,
+          "NZD": 0,
+          "USD": 0,
+        },
+      },
+    },
+  },
   "GuardianWeeklyDomestic": {
+    "billingSystem": "zuora",
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -216,6 +242,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
     },
   },
   "GuardianWeeklyRestOfWorld": {
+    "billingSystem": "zuora",
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -301,6 +328,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
     },
   },
   "HomeDelivery": {
+    "billingSystem": "zuora",
     "ratePlans": {
       "Everyday": {
         "billingPeriod": "Month",
@@ -401,6 +429,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
     },
   },
   "NationalDelivery": {
+    "billingSystem": "zuora",
     "ratePlans": {
       "Everyday": {
         "billingPeriod": "Month",
@@ -477,6 +506,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
     },
   },
   "SubscriptionCard": {
+    "billingSystem": "zuora",
     "ratePlans": {
       "Everyday": {
         "billingPeriod": "Month",
@@ -577,6 +607,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
     },
   },
   "SupporterPlus": {
+    "billingSystem": "zuora",
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -655,6 +686,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
     },
   },
   "TierThree": {
+    "billingSystem": "zuora",
     "ratePlans": {
       "DomesticAnnual": {
         "billingPeriod": "Annual",
@@ -861,6 +893,24 @@ exports[`Generated product catalog types match snapshot 1`] = `
     "productRatePlans": {
       "Monthly": {
         "GuardianLight": {},
+      },
+    },
+  },
+  "GuardianPatron": {
+    "billingPeriods": [
+      "Month",
+    ],
+    "currencies": [
+      "NZD",
+      "CAD",
+      "AUD",
+      "USD",
+      "GBP",
+      "EUR",
+    ],
+    "productRatePlans": {
+      "GuardianPatron": {
+        "GuardianPatron": {},
       },
     },
   },

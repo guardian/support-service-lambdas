@@ -6,6 +6,7 @@ import type {
 	ZuoraProductRatePlanCharge,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
+import { stripeProducts } from '@modules/product-catalog/stripeProducts';
 import {
 	getProductRatePlanChargeKey,
 	getProductRatePlanKey,
@@ -84,6 +85,7 @@ const getBillingPeriod = (productRatePlan: ZuoraProductRatePlan) => {
 
 const getZuoraProduct = (productRatePlans: ZuoraProductRatePlan[]) => {
 	return {
+		billingSystem: 'zuora',
 		ratePlans: arrayToObject(
 			productRatePlans
 				.filter((productRatePlan) =>
@@ -123,5 +125,6 @@ export const generateProductCatalog = (
 			};
 		}),
 	);
-	return result as ProductCatalog;
+	const productCatalog = { ...stripeProducts, ...result };
+	return productCatalog as ProductCatalog;
 };
