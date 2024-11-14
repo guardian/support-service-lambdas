@@ -7,6 +7,7 @@ import { DiscountApi } from '../lib/discount-api';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
+import { PressReaderEntitlements } from '../lib/press-reader-entitlements';
 import { ProductSwitchApi } from '../lib/product-switch-api';
 import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery';
 import { SalesforceDisasterRecoveryHealthCheck } from '../lib/salesforce-disaster-recovery-health-check';
@@ -244,4 +245,24 @@ new TicketTailorWebhook(app, 'ticket-tailor-webhook-CODE', {
 new TicketTailorWebhook(app, 'ticket-tailor-webhook-PROD', {
 	stack: 'support',
 	stage: 'PROD',
+});
+new PressReaderEntitlements(app, 'press-reader-entitlements-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+	internalDomainName: `press-reader-entitlements-code.${supportApisDomain}`,
+	publicDomainName: 'press-reader-entitlements.code.dev-guardianapis.com',
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
+	supporterProductDataTable:
+		'supporter-product-data-tables-CODE-SupporterProductDataTable',
+});
+new PressReaderEntitlements(app, 'press-reader-entitlements-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+	internalDomainName: `press-reader-entitlements.${supportApisDomain}`,
+	publicDomainName: 'press-reader-entitlements.guardianapis.com',
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
+	supporterProductDataTable:
+		'supporter-product-data-tables-PROD-SupporterProductDataTable',
 });
