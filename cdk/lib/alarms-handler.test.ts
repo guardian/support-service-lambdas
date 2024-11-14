@@ -2,6 +2,7 @@ import { App } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
 import { AlarmsHandler } from './alarms-handler';
 
+// comment
 describe('The alarms-handler stack', () => {
 	it('matches the snapshot', () => {
 		const app = new App();
