@@ -1,3 +1,5 @@
+import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
+import { awsConfig } from '@modules/aws/config';
 import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
@@ -17,6 +19,20 @@ const stage = process.env.STAGE as Stage;
 const lazyProductCatalog = new Lazy(async () => {
 	return await getProductCatalogFromApi(stage);
 }, 'productCatalog');
+
+export const lazyClientAccessToken = new Lazy(async () => {
+	const ssmClient = new SSMClient(awsConfig);
+	const params = {
+		Name: `/${stage}/support/press-reader-entitlements/identity-client-access-token`,
+		WithDecryption: true,
+	};
+	const command = new GetParameterCommand(params);
+	const response = await ssmClient.send(command);
+	return getIfDefined(
+		response.Parameter?.Value,
+		"Couldn't retrieve identity client access token from parameter store",
+	);
+}, 'clientAccessToken');
 
 export const handler: Handler = async (
 	event: APIGatewayProxyEvent,
@@ -53,7 +69,8 @@ export async function getMemberDetails(
 	stage: Stage,
 	userId: string,
 ): Promise<Member> {
-	const identityId = await getIdentityId(stage, userId);
+	const clientAccessToken = await lazyClientAccessToken.get();
+	const identityId = await getIdentityId(clientAccessToken, stage, userId);
 	const productCatalog = await lazyProductCatalog.get();
 	const latestSubscription = await getLatestSubscription(
 		stage,

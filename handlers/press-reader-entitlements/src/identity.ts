@@ -1,30 +1,15 @@
-import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
-import { awsConfig } from '@modules/aws/config';
-import { Lazy } from '@modules/lazy';
-import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import { getIdentityIdSchema } from './schemas';
 
-const ssmClient = new SSMClient(awsConfig);
-export const lazyClientAccessToken = new Lazy(async () => {
-	const params = {
-		Name: '/CODE/support/press-reader-entitlements/identity-client-access-token',
-		WithDecryption: true,
-	};
-	const command = new GetParameterCommand(params);
-	const response = await ssmClient.send(command);
-	return getIfDefined(
-		response.Parameter?.Value,
-		"Couldn't retrieve identity client access token from parameter store",
-	);
-}, 'clientAccessToken');
-
-export async function getIdentityId(stage: Stage, userId: string) {
+export async function getIdentityId(
+	clientAccessToken: string,
+	stage: Stage,
+	userId: string,
+) {
 	const identityHost =
 		stage === 'CODE'
 			? 'https://idapi.code.dev-theguardian.com'
 			: 'https://idapi.theguardian.com';
-	const clientAccessToken = await lazyClientAccessToken.get();
 
 	const response = await fetch(`${identityHost}/user/braze-uuid/${userId}`, {
 		headers: {
