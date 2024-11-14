@@ -1,2 +1,7 @@
-pnpm --filter cdk lint && pnpm --filter cdk test
-echo 'test'
+# Check if there are changes in the 'cdk' folder
+if git diff --quiet HEAD -- cdk/; then
+  echo "No changes detected in the 'cdk' folder. Skipping lint and test."
+else
+  echo "Changes detected in the 'cdk' folder. Running lint and test..."
+  pnpm --filter cdk lint && pnpm --filter cdk test
+fi
