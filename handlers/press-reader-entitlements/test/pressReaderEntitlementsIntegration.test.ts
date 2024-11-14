@@ -5,7 +5,7 @@
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import zuoraCatalogFixture from '../../../modules/zuora-catalog/test/fixtures/catalog-code.json';
 import { getMemberDetails } from '../src';
-import { getIdentityId, lazyClientAccessToken } from '../src/identity';
+import { getClientAccessToken, getIdentityId } from '../src/identity';
 import {
 	getLatestSubscription,
 	getSupporterProductData,
@@ -26,13 +26,11 @@ test('Entitlements check', async () => {
 	expect(memberDetails).toBeDefined();
 });
 
-test('getIdentityClientAccessToken', async () => {
-	const accessToken = await lazyClientAccessToken.get();
-	expect(accessToken).toBeDefined();
-});
-
 test('getIdentityId', async () => {
+	const accessToken = await getClientAccessToken('CODE');
+	expect(accessToken).toBeDefined();
 	const identityId = await getIdentityId(
+		accessToken,
 		'CODE',
 		'c20da7c7-4f72-44fb-b719-78879bfab70d',
 	);

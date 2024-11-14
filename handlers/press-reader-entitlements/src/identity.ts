@@ -1,5 +1,22 @@
+import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
+import { awsConfig } from '@modules/aws/config';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import { getIdentityIdSchema } from './schemas';
+
+export const getClientAccessToken = async (stage: Stage) => {
+	const ssmClient = new SSMClient(awsConfig);
+	const params = {
+		Name: `/${stage}/support/press-reader-entitlements/identity-client-access-token`,
+		WithDecryption: true,
+	};
+	const command = new GetParameterCommand(params);
+	const response = await ssmClient.send(command);
+	return getIfDefined(
+		response.Parameter?.Value,
+		"Couldn't retrieve identity client access token from parameter store",
+	);
+};
 
 export async function getIdentityId(
 	clientAccessToken: string,

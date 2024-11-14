@@ -1,38 +1,21 @@
-import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
-import { awsConfig } from '@modules/aws/config';
-import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
+import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import type {
 	APIGatewayProxyEvent,
 	APIGatewayProxyResult,
 	Handler,
 } from 'aws-lambda';
-import { getIdentityId } from './identity';
+import { getClientAccessToken, getIdentityId } from './identity';
 import type { SupporterRatePlanItem } from './supporterProductData';
 import { getLatestSubscription } from './supporterProductData';
 import type { Member } from './xmlBuilder';
 import { buildXml } from './xmlBuilder';
 
 const stage = process.env.STAGE as Stage;
-const lazyProductCatalog = new Lazy(async () => {
-	return await getProductCatalogFromApi(stage);
-}, 'productCatalog');
-
-export const lazyClientAccessToken = new Lazy(async () => {
-	const ssmClient = new SSMClient(awsConfig);
-	const params = {
-		Name: `/${stage}/support/press-reader-entitlements/identity-client-access-token`,
-		WithDecryption: true,
-	};
-	const command = new GetParameterCommand(params);
-	const response = await ssmClient.send(command);
-	return getIfDefined(
-		response.Parameter?.Value,
-		"Couldn't retrieve identity client access token from parameter store",
-	);
-}, 'clientAccessToken');
+let productCatalog: ProductCatalog | undefined = undefined;
+let identityClientAccessToken: string | undefined = undefined;
 
 export const handler: Handler = async (
 	event: APIGatewayProxyEvent,
@@ -69,9 +52,17 @@ export async function getMemberDetails(
 	stage: Stage,
 	userId: string,
 ): Promise<Member> {
-	const clientAccessToken = await lazyClientAccessToken.get();
-	const identityId = await getIdentityId(clientAccessToken, stage, userId);
-	const productCatalog = await lazyProductCatalog.get();
+	if (identityClientAccessToken === undefined) {
+		identityClientAccessToken = await getClientAccessToken(stage);
+	}
+	const identityId = await getIdentityId(
+		identityClientAccessToken,
+		stage,
+		userId,
+	);
+	if (productCatalog === undefined) {
+		productCatalog = await getProductCatalogFromApi(stage);
+	}
 	const latestSubscription = await getLatestSubscription(
 		stage,
 		identityId,
