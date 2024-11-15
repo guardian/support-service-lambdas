@@ -129,7 +129,7 @@ const zuoraCatalogToProductRatePlanChargeKey: Record<string, string> = {
 	'Supporter Plus': 'SupporterPlus',
 	'Guardian Weekly': 'GuardianWeekly',
 	'Newspaper Archive': 'NewspaperArchive',
-	'Guardian Light': 'GuardianLight',
+	'Guardian Light': 'Subscription',
 	'Supporter Membership - Annual': 'Subscription',
 	'Supporter Membership - Monthly': 'Subscription',
 	'Partner Membership - Monthly': 'Subscription',

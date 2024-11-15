@@ -45,8 +45,9 @@ export type ProductRatePlan<
 
 type ProductBillingSystem = 'stripe' | 'zuora';
 
-type Product<P extends ProductKey> = {
+export type Product<P extends ProductKey> = {
 	billingSystem: ProductBillingSystem;
+	active: boolean;
 	ratePlans: {
 		[PRP in ProductRatePlanKey<P>]: ProductRatePlan<P, PRP>;
 	};

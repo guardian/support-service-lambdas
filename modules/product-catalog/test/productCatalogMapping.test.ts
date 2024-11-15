@@ -70,7 +70,7 @@ test('All zuora products exist in the zuora catalog', () => {
 	zuoraProductExistsInCatalog('PROD');
 });
 
-test('All product rate plan ids are unique', () => {
+test('All Zuora product rate plan ids are unique', () => {
 	const allProducts = codeCatalogHelper
 		.getAllProductDetailsForBillingSystem('zuora')
 		.concat(prodCatalogHelper.getAllProductDetailsForBillingSystem('zuora'));
