@@ -121,7 +121,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
       "Monthly": {
         "billingPeriod": "Month",
         "charges": {
-          "GuardianLight": {
+          "Subscription": {
             "id": "8a129b7892c35f170192dd3225572b97",
           },
         },
@@ -133,12 +133,13 @@ exports[`Generated product catalog matches snapshot 1`] = `
     },
   },
   "GuardianPatron": {
+    "active": true,
     "billingSystem": "stripe",
     "ratePlans": {
       "GuardianPatron": {
         "billingPeriod": "Month",
         "charges": {
-          "GuardianPatron": {
+          "Subscription": {
             "id": "guardian_patron",
           },
         },
@@ -1104,7 +1105,7 @@ exports[`Generated product catalog types match snapshot 1`] = `
     ],
     "productRatePlans": {
       "Monthly": {
-        "GuardianLight": {},
+        "Subscription": {},
       },
     },
   },
@@ -1122,7 +1123,7 @@ exports[`Generated product catalog types match snapshot 1`] = `
     ],
     "productRatePlans": {
       "GuardianPatron": {
-        "GuardianPatron": {},
+        "Subscription": {},
       },
     },
   },

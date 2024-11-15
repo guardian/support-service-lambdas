@@ -9,7 +9,7 @@ export const productCatalogSchema = z.object({
 				pricing: z.object({
 					GBP: z.number(),
 				}),
-				charges: z.object({ GuardianLight: z.object({ id: z.string() }) }),
+				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
 				billingPeriod: z
 					.enum(typeObject.GuardianLight.billingPeriods)
 					.optional(),
