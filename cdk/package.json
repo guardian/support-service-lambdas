@@ -14,7 +14,7 @@
     "fix-formatting": "prettier --write **.ts"
   },
   "devDependencies": {
-    "@guardian/cdk": "52.3.0",
+    "@guardian/cdk": "60.1.1",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.11.27",
     "aws-cdk": "2.109.0",
