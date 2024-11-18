@@ -6,7 +6,7 @@ import type {
 	ProductCatalog,
 	ProductCurrency,
 } from '@modules/product-catalog/productCatalog';
-import { isValidProductCurrency } from '@modules/product-catalog/productCatalog';
+import { isProductCurrency } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import type {
 	RatePlan,
@@ -121,7 +121,7 @@ const getCurrency = (
 		'No currency found on the rate plan charge',
 	);
 
-	if (isValidProductCurrency('SupporterPlus', currency)) {
+	if (isProductCurrency('SupporterPlus', currency)) {
 		return currency;
 	}
 	throw new Error(`Unsupported currency ${currency}`);

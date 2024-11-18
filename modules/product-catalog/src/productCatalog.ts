@@ -66,13 +66,6 @@ export type ProductCatalog = {
 	[P in ProductKey]: Product<P>;
 };
 
-export const isValidProductCurrency = <P extends ProductKey>(
-	product: P,
-	maybeCurrency: string,
-): maybeCurrency is ProductCurrency<P> => {
-	return !!typeObject[product].currencies.find((c) => c === maybeCurrency);
-};
-
 export const getCurrencyGlyph = (currency: string) => {
 	switch (currency) {
 		case 'GBP':
