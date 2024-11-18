@@ -924,6 +924,10 @@ exports[`Generated product catalog types match snapshot 1`] = `
     "currencies": [
       "GBP",
       "USD",
+      "NZD",
+      "EUR",
+      "CAD",
+      "AUD",
     ],
     "productRatePlans": {
       "Annual": {
@@ -1086,6 +1090,10 @@ exports[`Generated product catalog types match snapshot 1`] = `
     "currencies": [
       "GBP",
       "USD",
+      "CAD",
+      "NZD",
+      "EUR",
+      "AUD",
     ],
     "productRatePlans": {
       "DomesticAnnual": {
