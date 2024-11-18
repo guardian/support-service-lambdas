@@ -3,11 +3,12 @@ import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuCname } from '@guardian/cdk/lib/constructs/dns';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda/lambda';
+import { GuS3Bucket } from '@guardian/cdk/lib/constructs/s3';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Bucket, EventType } from 'aws-cdk-lib/aws-s3';
+import { BlockPublicAccess, Bucket, EventType } from 'aws-cdk-lib/aws-s3';
 import { LambdaDestination } from 'aws-cdk-lib/aws-s3-notifications';
 import { nodeVersion } from './node-version';
 
@@ -44,7 +45,6 @@ export class GenerateProductCatalog extends GuStack {
 		});
 
 		const zuoraCatalogBucketName = 'gu-zuora-catalog';
-		const productCatalogBucketName = 'gu-product-catalog';
 		const zuoraCatalogFolder = `PROD/Zuora-${this.stage}`;
 		const zuoraCatalogBucket = Bucket.fromBucketName(
 			this,
@@ -60,10 +60,14 @@ export class GenerateProductCatalog extends GuStack {
 			},
 		);
 
-		const productCatalogBucket = Bucket.fromBucketName(
+		const productCatalogBucket = new GuS3Bucket(
 			this,
-			productCatalogBucketName,
-			productCatalogBucketName,
+			`ProductCatalogBucket-${this.stage}`,
+			{
+				app,
+				bucketName: `gu-product-catalog-${this.stage.toLowerCase()}`,
+				blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+			},
 		);
 
 		const s3InlinePolicy: Policy = new Policy(this, 'S3 inline policy', {
@@ -79,7 +83,7 @@ export class GenerateProductCatalog extends GuStack {
 				new PolicyStatement({
 					effect: Effect.ALLOW,
 					actions: ['s3:PutObject'],
-					resources: [`${productCatalogBucket.bucketArn}/${this.stage}/*`],
+					resources: [`${productCatalogBucket.bucketArn}/*`],
 				}),
 			],
 		});

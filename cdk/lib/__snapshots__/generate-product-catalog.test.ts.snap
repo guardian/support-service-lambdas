@@ -6,6 +6,7 @@ exports[`The generate product catalog stack matches the snapshot 1`] = `
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
+      "GuS3Bucket",
       "GuCname",
     ],
     "gu:cdk:version": "TEST",
@@ -245,6 +246,42 @@ def submit_response(event: dict, context, response_status: str, error_message: s
       },
       "Type": "Guardian::DNS::RecordSet",
     },
+    "ProductCatalogBucketCODEGenerateproductcatalog89614A54": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "BucketName": "gu-product-catalog-code",
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true,
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "generate-product-catalog",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+    },
     "S3inlinepolicy3B07399A": {
       "Properties": {
         "PolicyDocument": {
@@ -264,11 +301,13 @@ def submit_response(event: dict, context, response_status: str, error_message: s
                 "Fn::Join": [
                   "",
                   [
-                    "arn:",
                     {
-                      "Ref": "AWS::Partition",
+                      "Fn::GetAtt": [
+                        "ProductCatalogBucketCODEGenerateproductcatalog89614A54",
+                        "Arn",
+                      ],
                     },
-                    ":s3:::gu-product-catalog/CODE/*",
+                    "/*",
                   ],
                 ],
               },
@@ -576,6 +615,7 @@ exports[`The generate product catalog stack matches the snapshot 2`] = `
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
+      "GuS3Bucket",
       "GuCname",
       "GuAlarm",
     ],
@@ -857,6 +897,42 @@ def submit_response(event: dict, context, response_status: str, error_message: s
       },
       "Type": "Guardian::DNS::RecordSet",
     },
+    "ProductCatalogBucketPRODGenerateproductcatalogA3BD7F0D": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "BucketName": "gu-product-catalog-prod",
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true,
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "generate-product-catalog",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+    },
     "S3inlinepolicy3B07399A": {
       "Properties": {
         "PolicyDocument": {
@@ -876,11 +952,13 @@ def submit_response(event: dict, context, response_status: str, error_message: s
                 "Fn::Join": [
                   "",
                   [
-                    "arn:",
                     {
-                      "Ref": "AWS::Partition",
+                      "Fn::GetAtt": [
+                        "ProductCatalogBucketPRODGenerateproductcatalogA3BD7F0D",
+                        "Arn",
+                      ],
                     },
-                    ":s3:::gu-product-catalog/PROD/*",
+                    "/*",
                   ],
                 ],
               },
