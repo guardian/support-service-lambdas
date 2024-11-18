@@ -79,7 +79,7 @@ export class PressReaderEntitlements extends GuStack {
 
 		const usagePlan = lambda.api.addUsagePlan('UsagePlan', {
 			name: nameWithStage,
-			description: 'REST endpoints for press-reader-entitlements>',
+			description: 'REST endpoints for press-reader-entitlements',
 			apiStages: [
 				{
 					stage: lambda.api.deploymentStage,
@@ -98,7 +98,7 @@ export class PressReaderEntitlements extends GuStack {
 
 		// ---- Alarms ---- //
 		const alarmName = (shortDescription: string) =>
-			`PRESS-READER-ENTITLEMENTS-${this.stage} ${shortDescription}`;
+			`press-reader-entitlements-${this.stage} ${shortDescription}`;
 
 		const alarmDescription = (description: string) =>
 			`Impact - ${description}. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit`;
@@ -110,7 +110,7 @@ export class PressReaderEntitlements extends GuStack {
 				'Press reader entitlements received an invalid request',
 			),
 			evaluationPeriods: 1,
-			threshold: 1,
+			threshold: 10,
 			snsTopicName: `alarms-handler-topic-${this.stage}`,
 			actionsEnabled: this.stage === 'PROD',
 			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,

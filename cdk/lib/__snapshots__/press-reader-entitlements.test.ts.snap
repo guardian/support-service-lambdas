@@ -70,7 +70,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
           },
         ],
         "AlarmDescription": "Impact - Press reader entitlements received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
-        "AlarmName": "PRESS-READER-ENTITLEMENTS-CODE API gateway 4XX response",
+        "AlarmName": "press-reader-entitlements-CODE API gateway 4XX response",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
@@ -83,7 +83,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
         "Namespace": "AWS/ApiGateway",
         "Period": 300,
         "Statistic": "Sum",
-        "Threshold": 1,
+        "Threshold": 10,
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
@@ -771,7 +771,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
             "Throttle": {},
           },
         ],
-        "Description": "REST endpoints for press-reader-entitlements>",
+        "Description": "REST endpoints for press-reader-entitlements",
         "Tags": [
           {
             "Key": "App",
@@ -1057,7 +1057,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
           },
         ],
         "AlarmDescription": "Impact - Press reader entitlements received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
-        "AlarmName": "PRESS-READER-ENTITLEMENTS-PROD API gateway 4XX response",
+        "AlarmName": "press-reader-entitlements-PROD API gateway 4XX response",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
@@ -1070,7 +1070,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
         "Namespace": "AWS/ApiGateway",
         "Period": 300,
         "Statistic": "Sum",
-        "Threshold": 1,
+        "Threshold": 10,
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
@@ -1758,7 +1758,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
             "Throttle": {},
           },
         ],
-        "Description": "REST endpoints for press-reader-entitlements>",
+        "Description": "REST endpoints for press-reader-entitlements",
         "Tags": [
           {
             "Key": "App",

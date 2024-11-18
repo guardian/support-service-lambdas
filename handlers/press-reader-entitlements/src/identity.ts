@@ -1,5 +1,6 @@
 import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
 import { awsConfig } from '@modules/aws/config';
+import { ValidationError } from '@modules/errors';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import { getIdentityIdSchema } from './schemas';
@@ -34,6 +35,11 @@ export async function getIdentityId(
 		},
 		method: 'GET',
 	});
+
+	if (response.status == 404) {
+		throw new ValidationError(`UserId ${userId} does not exist`);
+	}
+
 	const json = await response.json();
 	console.log(`Identity returned ${JSON.stringify(json)}`);
 

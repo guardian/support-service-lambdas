@@ -77,7 +77,7 @@ export class <%= PascalCase %> extends GuStack {
 	<% if (includeApiKey === 'Y'){ %>
 		const usagePlan = lambda.api.addUsagePlan('UsagePlan', {
 			name: nameWithStage,
-			description: 'REST endpoints for <%= lambdaName %>>',
+			description: 'REST endpoints for <%= lambdaName %>',
 			apiStages: [
 				{
 					stage: lambda.api.deploymentStage,
@@ -97,7 +97,7 @@ export class <%= PascalCase %> extends GuStack {
 
 		// ---- Alarms ---- //
 		const alarmName = (shortDescription: string) =>
-			`<%= h.changeCase.kebabCase(lambdaName).toUpperCase() %>-${this.stage} ${shortDescription}`;
+			`<%= lambdaName %>-${this.stage} ${shortDescription}`;
 
 		const alarmDescription = (description: string) =>
 			`Impact - ${description}. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit`;
