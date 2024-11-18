@@ -9,7 +9,7 @@ export const typeObject = {
 		},
 	},
 	TierThree: {
-		currencies: ['GBP', 'USD'],
+		currencies: ['GBP', 'USD', 'CAD', 'NZD', 'EUR', 'AUD'],
 		billingPeriods: ['Annual', 'Month'],
 		productRatePlans: {
 			RestOfWorldAnnualV2: {
@@ -116,7 +116,7 @@ export const typeObject = {
 		},
 	},
 	GuardianWeeklyRestOfWorld: {
-		currencies: ['GBP', 'USD'],
+		currencies: ['GBP', 'USD', 'NZD', 'EUR', 'CAD', 'AUD'],
 		billingPeriods: ['Month', 'Annual', 'Quarter'],
 		productRatePlans: {
 			Monthly: {
