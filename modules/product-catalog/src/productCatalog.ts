@@ -1,3 +1,4 @@
+import type { Currency } from '@modules/internationalisation/currency';
 import { typeObject } from '@modules/product-catalog/typeObject';
 
 type TypeObject = typeof typeObject;
@@ -12,18 +13,6 @@ type ProductRatePlanChargeKey<
 	PRP extends ProductRatePlanKey<P>,
 > = keyof TypeObject[P]['productRatePlans'][PRP];
 
-export type ProductCurrency<P extends ProductKey> =
-	TypeObject[P]['currencies'][number];
-
-export const isProductCurrency = <P extends ProductKey>(
-	product: P,
-	currency: unknown,
-): currency is ProductCurrency<P> => {
-	return (typeObject[product].currencies as readonly unknown[]).includes(
-		currency,
-	);
-};
-
 export type ProductBillingPeriod<P extends ProductKey> =
 	TypeObject[P]['billingPeriods'][number];
 
@@ -36,9 +25,7 @@ export const isProductBillingPeriod = <P extends ProductKey>(
 	);
 };
 
-type ProductPrice<P extends ProductKey> = {
-	[PC in ProductCurrency<P>]: number;
-};
+type ProductPrice = { GBP: number } & Partial<Record<Currency, number>>;
 
 export type ProductRatePlanCharge = {
 	id: string;
@@ -49,7 +36,7 @@ export type ProductRatePlan<
 	PRP extends ProductRatePlanKey<P>,
 > = {
 	id: string;
-	pricing: ProductPrice<P>;
+	pricing: ProductPrice;
 	charges: {
 		[PRPC in ProductRatePlanChargeKey<P, PRP>]: ProductRatePlanCharge;
 	};
@@ -64,28 +51,6 @@ type Product<P extends ProductKey> = {
 
 export type ProductCatalog = {
 	[P in ProductKey]: Product<P>;
-};
-
-export const isValidProductCurrency = <P extends ProductKey>(
-	product: P,
-	maybeCurrency: string,
-): maybeCurrency is ProductCurrency<P> => {
-	return !!typeObject[product].currencies.find((c) => c === maybeCurrency);
-};
-
-export const getCurrencyGlyph = (currency: string) => {
-	switch (currency) {
-		case 'GBP':
-			return '£';
-		case 'EUR':
-			return '€';
-		case 'AUD':
-		case 'CAD':
-		case 'NZD':
-		case 'USD':
-			return '$';
-	}
-	throw new Error(`Unsupported currency ${currency}`);
 };
 
 export class ProductCatalogHelper {

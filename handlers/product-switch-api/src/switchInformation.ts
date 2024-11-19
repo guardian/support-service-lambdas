@@ -1,12 +1,10 @@
 import type { BillingPeriod } from '@modules/billingPeriod';
 import { ValidationError } from '@modules/errors';
+import type { Currency } from '@modules/internationalisation/currency';
+import { isSupportedCurrency } from '@modules/internationalisation/currency';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
-import type {
-	ProductCatalog,
-	ProductCurrency,
-} from '@modules/product-catalog/productCatalog';
-import { isValidProductCurrency } from '@modules/product-catalog/productCatalog';
+import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import type {
 	RatePlan,
@@ -34,7 +32,7 @@ export type SubscriptionInformation = {
 	previousProductName: string;
 	previousRatePlanName: string;
 	previousAmount: number;
-	currency: ProductCurrency<'SupporterPlus'>;
+	currency: Currency;
 	billingPeriod: BillingPeriod;
 };
 
@@ -113,15 +111,13 @@ export const subscriptionHasAlreadySwitchedToSupporterPlus = (
 	);
 };
 
-const getCurrency = (
-	contributionRatePlan: RatePlan,
-): ProductCurrency<'SupporterPlus'> => {
+const getCurrency = (contributionRatePlan: RatePlan): Currency => {
 	const currency = getIfDefined(
 		contributionRatePlan.ratePlanCharges[0]?.currency,
 		'No currency found on the rate plan charge',
 	);
 
-	if (isValidProductCurrency('SupporterPlus', currency)) {
+	if (isSupportedCurrency(currency)) {
 		return currency;
 	}
 	throw new Error(`Unsupported currency ${currency}`);

@@ -1,9 +1,7 @@
 import type { EmailMessageWithUserId } from '@modules/email/email';
 import { DataExtensionNames } from '@modules/email/email';
-import type {
-	ProductBillingPeriod,
-	ProductCurrency,
-} from '@modules/product-catalog/productCatalog';
+import type { Currency } from '@modules/internationalisation/currency';
+import type { ProductBillingPeriod } from '@modules/product-catalog/productCatalog';
 import type dayjs from 'dayjs';
 
 export type EmailFields = {
@@ -11,7 +9,7 @@ export type EmailFields = {
 	emailAddress: string;
 	firstName: string;
 	lastName: string;
-	currency: ProductCurrency<'SupporterPlus'>;
+	currency: Currency;
 	newAmount: number;
 	billingPeriod: ProductBillingPeriod<'SupporterPlus'>;
 	identityId: string;

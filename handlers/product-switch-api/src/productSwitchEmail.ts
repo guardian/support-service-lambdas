@@ -1,8 +1,8 @@
 import type { BillingPeriod } from '@modules/billingPeriod';
 import type { EmailMessageWithUserId } from '@modules/email/email';
 import { DataExtensionNames, sendEmail } from '@modules/email/email';
-import type { ProductCurrency } from '@modules/product-catalog/productCatalog';
-import { getCurrencyGlyph } from '@modules/product-catalog/productCatalog';
+import type { Currency } from '@modules/internationalisation/currency';
+import { getCurrencyGlyph } from '@modules/internationalisation/currency';
 import dayjs from 'dayjs';
 import type { SwitchInformation } from './switchInformation';
 
@@ -22,7 +22,7 @@ export const buildEmailMessage = ({
 	emailAddress: string;
 	firstName: string;
 	lastName: string;
-	currency: ProductCurrency<'SupporterPlus'>;
+	currency: Currency;
 	productPrice: number;
 	firstPaymentAmount: number;
 	billingPeriod: BillingPeriod;
