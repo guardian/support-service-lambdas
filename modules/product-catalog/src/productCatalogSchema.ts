@@ -1,14 +1,24 @@
 import { z } from 'zod';
 import { typeObject } from '@modules/product-catalog/typeObject';
 
+const pricingGBPOnly = z.object({
+	GBP: z.number(),
+});
+const pricingAllCurrencies = z.object({
+	GBP: z.number(),
+	USD: z.number().optional(),
+	NZD: z.number().optional(),
+	EUR: z.number().optional(),
+	CAD: z.number().optional(),
+	AUD: z.number().optional(),
+});
+
 export const productCatalogSchema = z.object({
 	GuardianLight: z.object({
 		ratePlans: z.object({
 			Monthly: z.object({
 				id: z.string(),
-				pricing: z.object({
-					GBP: z.number(),
-				}),
+				pricing: pricingGBPOnly,
 				charges: z.object({ GuardianLight: z.object({ id: z.string() }) }),
 				billingPeriod: z
 					.enum(typeObject.GuardianLight.billingPeriods)
@@ -20,14 +30,7 @@ export const productCatalogSchema = z.object({
 		ratePlans: z.object({
 			Annual: z.object({
 				id: z.string(),
-				pricing: z.object({
-					USD: z.number(),
-					NZD: z.number(),
-					EUR: z.number(),
-					GBP: z.number(),
-					CAD: z.number(),
-					AUD: z.number(),
-				}),
+				pricing: pricingAllCurrencies,
 				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
 				billingPeriod: z
 					.enum(typeObject.DigitalSubscription.billingPeriods)
@@ -35,14 +38,7 @@ export const productCatalogSchema = z.object({
 			}),
 			ThreeMonthGift: z.object({
 				id: z.string(),
-				pricing: z.object({
-					USD: z.number(),
-					NZD: z.number(),
-					EUR: z.number(),
-					GBP: z.number(),
-					CAD: z.number(),
-					AUD: z.number(),
-				}),
+				pricing: pricingAllCurrencies,
 				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
 				billingPeriod: z
 					.enum(typeObject.DigitalSubscription.billingPeriods)
@@ -50,14 +46,7 @@ export const productCatalogSchema = z.object({
 			}),
 			OneYearGift: z.object({
 				id: z.string(),
-				pricing: z.object({
-					USD: z.number(),
-					NZD: z.number(),
-					EUR: z.number(),
-					GBP: z.number(),
-					CAD: z.number(),
-					AUD: z.number(),
-				}),
+				pricing: pricingAllCurrencies,
 				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
 				billingPeriod: z
 					.enum(typeObject.DigitalSubscription.billingPeriods)
@@ -65,14 +54,7 @@ export const productCatalogSchema = z.object({
 			}),
 			Monthly: z.object({
 				id: z.string(),
-				pricing: z.object({
-					USD: z.number(),
-					NZD: z.number(),
-					EUR: z.number(),
-					GBP: z.number(),
-					CAD: z.number(),
-					AUD: z.number(),
-				}),
+				pricing: pricingAllCurrencies,
 				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
 				billingPeriod: z
 					.enum(typeObject.DigitalSubscription.billingPeriods)
@@ -84,7 +66,7 @@ export const productCatalogSchema = z.object({
 		ratePlans: z.object({
 			Everyday: z.object({
 				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
+				pricing: pricingGBPOnly,
 				charges: z.object({
 					Saturday: z.object({ id: z.string() }),
 					Monday: z.object({ id: z.string() }),
@@ -100,7 +82,7 @@ export const productCatalogSchema = z.object({
 			}),
 			Sixday: z.object({
 				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
+				pricing: pricingGBPOnly,
 				charges: z.object({
 					Friday: z.object({ id: z.string() }),
 					Thursday: z.object({ id: z.string() }),
@@ -115,7 +97,7 @@ export const productCatalogSchema = z.object({
 			}),
 			Weekend: z.object({
 				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
+				pricing: pricingGBPOnly,
 				charges: z.object({
 					Saturday: z.object({ id: z.string() }),
 					Sunday: z.object({ id: z.string() }),
@@ -126,7 +108,7 @@ export const productCatalogSchema = z.object({
 			}),
 			Saturday: z.object({
 				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
+				pricing: pricingGBPOnly,
 				charges: z.object({ Saturday: z.object({ id: z.string() }) }),
 				billingPeriod: z
 					.enum(typeObject.HomeDelivery.billingPeriods)
@@ -134,7 +116,7 @@ export const productCatalogSchema = z.object({
 			}),
 			Sunday: z.object({
 				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
+				pricing: pricingGBPOnly,
 				charges: z.object({ Sunday: z.object({ id: z.string() }) }),
 				billingPeriod: z
 					.enum(typeObject.HomeDelivery.billingPeriods)
@@ -146,7 +128,7 @@ export const productCatalogSchema = z.object({
 		ratePlans: z.object({
 			Everyday: z.object({
 				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
+				pricing: pricingGBPOnly,
 				charges: z.object({
 					Monday: z.object({ id: z.string() }),
 					Tuesday: z.object({ id: z.string() }),
@@ -162,7 +144,7 @@ export const productCatalogSchema = z.object({
 			}),
 			Weekend: z.object({
 				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
+				pricing: pricingGBPOnly,
 				charges: z.object({
 					Saturday: z.object({ id: z.string() }),
 					Sunday: z.object({ id: z.string() }),
@@ -173,7 +155,7 @@ export const productCatalogSchema = z.object({
 			}),
 			Sixday: z.object({
 				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
+				pricing: pricingGBPOnly,
 				charges: z.object({
 					Thursday: z.object({ id: z.string() }),
 					Monday: z.object({ id: z.string() }),
@@ -446,14 +428,7 @@ export const productCatalogSchema = z.object({
 		ratePlans: z.object({
 			ThreeMonthGift: z.object({
 				id: z.string(),
-				pricing: z.object({
-					USD: z.number(),
-					NZD: z.number(),
-					EUR: z.number(),
-					GBP: z.number(),
-					CAD: z.number(),
-					AUD: z.number(),
-				}),
+				pricing: pricingAllCurrencies,
 				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
 				billingPeriod: z
 					.enum(typeObject.GuardianWeeklyDomestic.billingPeriods)
@@ -461,14 +436,7 @@ export const productCatalogSchema = z.object({
 			}),
 			Quarterly: z.object({
 				id: z.string(),
-				pricing: z.object({
-					USD: z.number(),
-					NZD: z.number(),
-					EUR: z.number(),
-					GBP: z.number(),
-					CAD: z.number(),
-					AUD: z.number(),
-				}),
+				pricing: pricingAllCurrencies,
 				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
 				billingPeriod: z
 					.enum(typeObject.GuardianWeeklyDomestic.billingPeriods)
@@ -476,14 +444,7 @@ export const productCatalogSchema = z.object({
 			}),
 			Annual: z.object({
 				id: z.string(),
-				pricing: z.object({
-					USD: z.number(),
-					NZD: z.number(),
-					EUR: z.number(),
-					GBP: z.number(),
-					CAD: z.number(),
-					AUD: z.number(),
-				}),
+				pricing: pricingAllCurrencies,
 				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
 				billingPeriod: z
 					.enum(typeObject.GuardianWeeklyDomestic.billingPeriods)
@@ -491,14 +452,7 @@ export const productCatalogSchema = z.object({
 			}),
 			Monthly: z.object({
 				id: z.string(),
-				pricing: z.object({
-					USD: z.number(),
-					NZD: z.number(),
-					EUR: z.number(),
-					GBP: z.number(),
-					CAD: z.number(),
-					AUD: z.number(),
-				}),
+				pricing: pricingAllCurrencies,
 				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
 				billingPeriod: z
 					.enum(typeObject.GuardianWeeklyDomestic.billingPeriods)
@@ -525,7 +479,7 @@ export const productCatalogSchema = z.object({
 		ratePlans: z.object({
 			Everyday: z.object({
 				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
+				pricing: pricingGBPOnly,
 				charges: z.object({
 					Monday: z.object({ id: z.string() }),
 					Friday: z.object({ id: z.string() }),
@@ -541,7 +495,7 @@ export const productCatalogSchema = z.object({
 			}),
 			Weekend: z.object({
 				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
+				pricing: pricingGBPOnly,
 				charges: z.object({
 					Saturday: z.object({ id: z.string() }),
 					Sunday: z.object({ id: z.string() }),
@@ -552,7 +506,7 @@ export const productCatalogSchema = z.object({
 			}),
 			Sixday: z.object({
 				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
+				pricing: pricingGBPOnly,
 				charges: z.object({
 					Thursday: z.object({ id: z.string() }),
 					Friday: z.object({ id: z.string() }),
@@ -567,7 +521,7 @@ export const productCatalogSchema = z.object({
 			}),
 			Sunday: z.object({
 				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
+				pricing: pricingGBPOnly,
 				charges: z.object({ Sunday: z.object({ id: z.string() }) }),
 				billingPeriod: z
 					.enum(typeObject.SubscriptionCard.billingPeriods)
@@ -575,7 +529,7 @@ export const productCatalogSchema = z.object({
 			}),
 			Saturday: z.object({
 				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
+				pricing: pricingGBPOnly,
 				charges: z.object({ Saturday: z.object({ id: z.string() }) }),
 				billingPeriod: z
 					.enum(typeObject.SubscriptionCard.billingPeriods)
@@ -587,14 +541,7 @@ export const productCatalogSchema = z.object({
 		ratePlans: z.object({
 			Annual: z.object({
 				id: z.string(),
-				pricing: z.object({
-					USD: z.number(),
-					NZD: z.number(),
-					EUR: z.number(),
-					GBP: z.number(),
-					CAD: z.number(),
-					AUD: z.number(),
-				}),
+				pricing: pricingAllCurrencies,
 				charges: z.object({ Contribution: z.object({ id: z.string() }) }),
 				billingPeriod: z
 					.enum(typeObject.Contribution.billingPeriods)
@@ -602,14 +549,7 @@ export const productCatalogSchema = z.object({
 			}),
 			Monthly: z.object({
 				id: z.string(),
-				pricing: z.object({
-					USD: z.number(),
-					NZD: z.number(),
-					EUR: z.number(),
-					GBP: z.number(),
-					CAD: z.number(),
-					AUD: z.number(),
-				}),
+				pricing: pricingAllCurrencies,
 				charges: z.object({ Contribution: z.object({ id: z.string() }) }),
 				billingPeriod: z
 					.enum(typeObject.Contribution.billingPeriods)
