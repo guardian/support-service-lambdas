@@ -2,7 +2,7 @@ import { getIfDefined } from '@modules/nullAndUndefined';
 
 type Team = 'VALUE' | 'GROWTH' | 'PORTFOLIO' | 'PLATFORM' | 'SRE';
 
-const sharedMobilePurchasesApps = [
+const mobilePurchasesApps = [
 	'mobile-purchases-apple-pubsub',
 	'mobile-purchases-apple-subscription-status',
 	'mobile-purchases-apple-update-subscriptions',
@@ -28,7 +28,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'component-event-stream',
 		'contributions-store-queue',
 		'dotcom-components',
-		...sharedMobilePurchasesApps,
+		...mobilePurchasesApps,
 		'new-product-api',
 		'price-migration-engine-state-machine',
 		'promotions-tool',
@@ -49,7 +49,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'holiday-stop-api',
 		'holiday-stop-processor',
 		'soft-opt-in-consent-setter',
-		...sharedMobilePurchasesApps,
 		'manage-help-content-publisher',
 		'mobile-purchases-soft-opt-in-acquisitions',
 		'mobile-purchases-soft-opt-in-acquisitions-dlq-processor',

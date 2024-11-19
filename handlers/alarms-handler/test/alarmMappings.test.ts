@@ -24,12 +24,4 @@ describe('getTeam', () => {
 
 		expect(team).toEqual(['SRE']);
 	});
-
-	it('returns both teams for a shared app', () => {
-		const app = 'mobile-purchases-google-oauth';
-
-		const team = getTeams(app);
-
-		expect(team).toEqual(['GROWTH', 'VALUE']);
-	});
 });
