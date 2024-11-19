@@ -3,10 +3,7 @@ export const typeObject = {
 		billingPeriods: ['Month'],
 		productRatePlans: {
 			Monthly: {
-				currencies: { GBP: {} },
-				charges: {
-					GuardianLight: {},
-				},
+				currencies: { GBP: {}, USD: {} },
 			},
 		},
 	},
@@ -19,18 +16,12 @@ export type ProductKey = keyof TypeObject;
 export type ProductRatePlanKey<P extends ProductKey> =
 	keyof TypeObject[P]['productRatePlans'];
 
-export type ProductRatePlanChargeKey<
+export type ProductRatePlanCurrency<
 	P extends ProductKey,
 	PRP extends ProductRatePlanKey<P>,
-> = keyof TypeObject[P]['productRatePlans'][PRP]['charges'];
+> = keyof (TypeObject[P]['productRatePlans'][PRP] & {
+	currencies: Record<string, unknown>;
+})['currencies'];
 
-export type ProductCurrency<
-	P extends ProductKey,
-	PRP extends ProductRatePlanKey<P>,
-> = keyof TypeObject[P]['productRatePlans'][PRP]['currencies'];
-
-const blah: ProductRatePlanChargeKey<'GuardianLight', 'Monthly'> = 'currencies';
-// export type ProductCurrency<
-// 	P extends ProductKey,
-// 	PRP extends ProductRatePlanKey<P>,
-// > = keyof NonNullable<TypeObject[P]['productRatePlans'][PRP]['currencies']>;
+export const currency: ProductRatePlanCurrency<'GuardianLight', 'Monthly'> =
+	'USD';

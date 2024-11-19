@@ -12,8 +12,10 @@ type ProductRatePlanChargeKey<
 	PRP extends ProductRatePlanKey<P>,
 > = keyof TypeObject[P]['productRatePlans'][PRP];
 
-export type ProductCurrency<P extends ProductKey> =
-	TypeObject[P]['currencies'][number];
+export type ProductCurrency<
+	P extends ProductKey,
+	PRP extends ProductRatePlanKey<P>,
+> = TypeObject[P]['currencies'][number];
 
 export const isProductCurrency = <P extends ProductKey>(
 	product: P,
