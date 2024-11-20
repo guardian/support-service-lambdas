@@ -163,13 +163,7 @@ Resources:
       ComparisonOperator: GreaterThanOrEqualToThreshold
       EvaluationPeriods: 1
       AlarmActions:
-        - Fn::Join:
-            - ""
-            - - "arn:aws:sns:"
-              - Ref: AWS::Region
-              - ":"
-              - Ref: AWS::AccountId
-              - :fulfilment-dev
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-PROD
       AlarmDescription: "IMPACT: If this goes unaddressed at least one subscription that was supposed to be cancelled will be available for fulfilment. For troubleshooting, see https://github.com/guardian/support-service-lambdas/blob/main/handlers/digital-voucher-cancellation-processor/README.md."
       AlarmName: "URGENT 9-5 - PROD: Failed to cancel digital voucher subscriptions"
       Dimensions:
@@ -186,4 +180,3 @@ Resources:
       - DigitalVoucherCancellationProcessorLambdaAllowEventRuledigitalvouchercancellationprocessorDigitalVoucherCancellationProcessorSchedule4B74A65D3684A4A6
       - DigitalVoucherCancellationProcessorLambdaCA1ECC62
     Condition: IsProd
-
