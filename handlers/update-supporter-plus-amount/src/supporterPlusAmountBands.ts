@@ -1,10 +1,8 @@
-import type {
-	ProductBillingPeriod,
-	ProductCurrency,
-} from '@modules/product-catalog/productCatalog';
+import type { Currency } from '@modules/internationalisation/currency';
+import type { ProductBillingPeriod } from '@modules/product-catalog/productCatalog';
 
 export const supporterPlusAmountBands: {
-	[K in ProductCurrency<'SupporterPlus'>]: {
+	[C in Currency]: {
 		[K in ProductBillingPeriod<'SupporterPlus'>]: { min: number; max: number };
 	};
 } = {

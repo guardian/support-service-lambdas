@@ -1,14 +1,14 @@
 import { getSingleOrThrow } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
+import type { Currency } from '@modules/internationalisation/currency';
+import { isSupportedCurrency } from '@modules/internationalisation/currency';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
 import type {
 	ProductBillingPeriod,
 	ProductCatalog,
-	ProductCurrency,
 	ProductRatePlan,
 } from '@modules/product-catalog/productCatalog';
-import { isProductCurrency } from '@modules/product-catalog/productCatalog';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import { getAccount } from '@modules/zuora/getAccount';
 import { getSubscription } from '@modules/zuora/getSubscription';
@@ -123,7 +123,7 @@ export const getSupporterPlusData = (
 
 const validateNewAmount = (
 	newAmount: number,
-	currency: ProductCurrency<'SupporterPlus'>,
+	currency: Currency,
 	billingPeriod: ProductBillingPeriod<'SupporterPlus'>,
 ): void => {
 	const amountBand = supporterPlusAmountBands[currency][billingPeriod];
@@ -180,7 +180,7 @@ export const updateSupporterPlusAmount = async (
 		);
 	}
 	const currency = account.billingAndPayment.currency;
-	if (!isProductCurrency('SupporterPlus', currency)) {
+	if (!isSupportedCurrency(currency)) {
 		throw new Error(`Unsupported currency ${currency}`);
 	}
 
@@ -197,9 +197,13 @@ export const updateSupporterPlusAmount = async (
 
 	validateNewAmount(newPaymentAmount, currency, billingPeriod);
 
+	const productPrice = getIfDefined(
+		supporterPlusData.productRatePlan.pricing[currency],
+		`SupporterPlus pricing was undefined for currency ${currency}`,
+	);
 	const newContributionAmount =
 		supporterPlusData.planHasSeparateContributionCharge
-			? newPaymentAmount - supporterPlusData.productRatePlan.pricing[currency]
+			? newPaymentAmount - productPrice
 			: newPaymentAmount;
 
 	const { chargeToUpdate } = supporterPlusData;

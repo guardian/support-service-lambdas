@@ -1,8 +1,7 @@
 import type { BillingPeriod } from '@modules/billingPeriod';
-import type {
-	ProductCatalog,
-	ProductCurrency,
-} from '@modules/product-catalog/productCatalog';
+import type { Currency } from '@modules/internationalisation/currency';
+import { getIfDefined } from '@modules/nullAndUndefined';
+import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 
 export type CatalogInformation = {
 	supporterPlus: {
@@ -29,15 +28,18 @@ const getCatalogBillingPeriod = (billingPeriod: BillingPeriod) => {
 export const getCatalogInformation = (
 	productCatalog: ProductCatalog,
 	billingPeriod: BillingPeriod,
-	currency: ProductCurrency<'SupporterPlus'>,
+	currency: Currency,
 ): CatalogInformation => {
 	const catalogBillingPeriod = getCatalogBillingPeriod(billingPeriod);
+	const price = getIfDefined(
+		productCatalog.SupporterPlus.ratePlans[catalogBillingPeriod].pricing[
+			currency
+		],
+		'No Supporter Plus price defined for currency',
+	);
 	return {
 		supporterPlus: {
-			price:
-				productCatalog.SupporterPlus.ratePlans[catalogBillingPeriod].pricing[
-					currency
-				],
+			price,
 			productRatePlanId:
 				productCatalog.SupporterPlus.ratePlans[catalogBillingPeriod].id,
 			subscriptionChargeId:
