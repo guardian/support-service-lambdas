@@ -36,7 +36,6 @@ export const stripeProducts: Partial<Record<ProductKey, Product<ProductKey>>> =
 
 export const stripeTypeObject = {
 	GuardianPatron: {
-		currencies: ['NZD', 'CAD', 'AUD', 'USD', 'GBP', 'EUR'],
 		billingPeriods: ['Month'],
 		productRatePlans: {
 			GuardianPatron: {
