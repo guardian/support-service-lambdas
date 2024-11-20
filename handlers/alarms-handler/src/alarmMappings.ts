@@ -95,6 +95,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 
 		// digital vouchers (subscription cards)
 		'digital-voucher-api',
+		'digital-voucher-cancellation-processor',
 		'digital-voucher-suspension-processor',
 
 		// salesforce
