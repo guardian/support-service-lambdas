@@ -14,17 +14,14 @@ export const isSupportedCurrency = (
 	return (CurrencyValues as readonly string[]).includes(maybeCurrency);
 };
 
-export const getCurrencyGlyph = (currency: Currency) => {
-	switch (currency) {
-		case 'GBP':
-			return '£';
-		case 'EUR':
-			return '€';
-		case 'AUD':
-		case 'CAD':
-		case 'NZD':
-		case 'USD':
-			return '$';
-	}
-	throw new Error(`Unsupported currency ${currency}`);
+const currencyToGlyphMapping: { [C in Currency]: string } = {
+	GBP: '£',
+	EUR: '€',
+	AUD: '$',
+	USD: '$',
+	CAD: '$',
+	NZD: '$',
 };
+
+export const getCurrencyGlyph = (currency: Currency) =>
+	currencyToGlyphMapping[currency];
