@@ -1,5 +1,4 @@
 import { arrayToObject, distinct } from '@modules/arrayFunctions';
-import { getIfDefined } from '@modules/nullAndUndefined';
 import type {
 	ZuoraCatalog,
 	ZuoraProductRatePlan,
@@ -49,17 +48,10 @@ const getBillingPeriodsForProduct = (
 			) as string[],
 	);
 const getZuoraProduct = (productRatePlans: ZuoraProductRatePlan[]) => {
-	const currencies = getCurrenciesForProduct(
-		getIfDefined(
-			productRatePlans[0],
-			'Undefined productRatePlan in getZuoraProductObjects',
-		),
-	);
 	const billingPeriods = getBillingPeriodsForProduct(productRatePlans);
 	return {
-		currencies,
 		billingPeriods,
-		productRatePlans: arrayToObject(
+		ratePlans: arrayToObject(
 			productRatePlans
 				.filter((productRatePlan) =>
 					isSupportedProductRatePlan(productRatePlan.name),
@@ -69,9 +61,12 @@ const getZuoraProduct = (productRatePlans: ZuoraProductRatePlan[]) => {
 						productRatePlan.name,
 					);
 					return {
-						[productRatePlanKey]: getProductRatePlanCharges(
-							productRatePlan.productRatePlanCharges,
-						),
+						[productRatePlanKey]: {
+							charges: getProductRatePlanCharges(
+								productRatePlan.productRatePlanCharges,
+							),
+							currencies: getCurrenciesForProduct(productRatePlan),
+						},
 					};
 				}),
 		),

@@ -18,7 +18,7 @@ test('We can find a product rate plan from product details', () => {
 
 test('We can find a product rate plan charge from product details', () => {
 	expect(
-		codeProductCatalog.NationalDelivery.ratePlans.Everyday.charges.Monday.id,
+		codeProductCatalog.NationalDelivery.ratePlans.Sixday.charges.Monday.id,
 	).toBe('8ad096ca8992481d018992a3674c18da');
 });
 

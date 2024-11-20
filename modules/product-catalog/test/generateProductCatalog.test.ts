@@ -6,6 +6,7 @@ import prod from '../../zuora-catalog/test/fixtures/catalog-prod.json';
 test('Generated product catalog matches snapshot', () => {
 	const prodZuoraCatalog = zuoraCatalogSchema.parse(prod);
 	const prodProductCatalog = generateProductCatalog(prodZuoraCatalog);
+	console.log(JSON.stringify(prodProductCatalog));
 	expect(prodProductCatalog).toMatchSnapshot();
 });
 

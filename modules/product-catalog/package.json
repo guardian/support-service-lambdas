@@ -4,6 +4,7 @@
   "scripts": {
     "generateTypes": "ts-node src/generateTypeObjectCommand.ts",
     "updateSnapshots": "jest -u --group=-integration",
+    "type-check": "tsc --noEmit",
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
     "check-formatting": "prettier --check **.ts",

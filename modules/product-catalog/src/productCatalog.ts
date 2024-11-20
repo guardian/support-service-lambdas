@@ -5,23 +5,33 @@ type TypeObject = typeof typeObject;
 export type ProductKey = keyof TypeObject;
 
 export type ProductRatePlanKey<P extends ProductKey> =
-	keyof TypeObject[P]['productRatePlans'];
+	keyof TypeObject[P]['ratePlans'];
 
 type ProductRatePlanChargeKey<
 	P extends ProductKey,
 	PRP extends ProductRatePlanKey<P>,
-> = keyof TypeObject[P]['productRatePlans'][PRP];
+> = keyof TypeObject[P]['ratePlans'][PRP] &
+	{ charges: Record<string, unknown> }['charges'];
 
-export type ProductCurrency<P extends ProductKey> =
-	TypeObject[P]['currencies'][number];
+export type ProductRatePlanCurrency<
+	P extends ProductKey,
+	PRP extends ProductRatePlanKey<P>,
+> = keyof (TypeObject[P]['ratePlans'][PRP] & {
+	currencies: Record<string, unknown>;
+})['currencies'];
 
-export const isProductCurrency = <P extends ProductKey>(
+export const isProductCurrency = <
+	P extends ProductKey,
+	PRP extends ProductRatePlanKey<P>,
+>(
 	product: P,
+	productRatePlan: ProductRatePlanKey<P>,
 	currency: unknown,
-): currency is ProductCurrency<P> => {
-	return (typeObject[product].currencies as readonly unknown[]).includes(
-		currency,
-	);
+): currency is ProductRatePlanCurrency<P, PRP> => {
+	return (
+		(typeObject[product].ratePlans[productRatePlan] as { currencies: string[] })
+			.currencies as readonly unknown[]
+	).includes(currency);
 };
 
 export type ProductBillingPeriod<P extends ProductKey> =
@@ -36,8 +46,8 @@ export const isProductBillingPeriod = <P extends ProductKey>(
 	);
 };
 
-type ProductPrice<P extends ProductKey> = {
-	[PC in ProductCurrency<P>]: number;
+type ProductPrice<P extends ProductKey, PRP extends ProductRatePlanKey<P>> = {
+	[PC in ProductRatePlanCurrency<P, PRP>]: number;
 };
 
 export type ProductRatePlanCharge = {
@@ -49,7 +59,7 @@ export type ProductRatePlan<
 	PRP extends ProductRatePlanKey<P>,
 > = {
 	id: string;
-	pricing: ProductPrice<P>;
+	pricing: ProductPrice<P, PRP>;
 	charges: {
 		[PRPC in ProductRatePlanChargeKey<P, PRP>]: ProductRatePlanCharge;
 	};
@@ -64,13 +74,6 @@ type Product<P extends ProductKey> = {
 
 export type ProductCatalog = {
 	[P in ProductKey]: Product<P>;
-};
-
-export const isValidProductCurrency = <P extends ProductKey>(
-	product: P,
-	maybeCurrency: string,
-): maybeCurrency is ProductCurrency<P> => {
-	return !!typeObject[product].currencies.find((c) => c === maybeCurrency);
 };
 
 export const getCurrencyGlyph = (currency: string) => {
