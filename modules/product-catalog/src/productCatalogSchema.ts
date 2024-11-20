@@ -2,7 +2,34 @@ import { z } from 'zod';
 import { typeObject } from '@modules/product-catalog/typeObject';
 
 export const productCatalogSchema = z.object({
+	GuardianPatron: z.object({
+		billingSystem: z.literal('stripe'),
+		active: z.boolean(),
+		ratePlans: z.object({
+			GuardianPatron: z.object({
+				id: z.string(),
+				pricing: z.object({
+					GBP: z.number(),
+					USD: z.number(),
+					NZD: z.number(),
+					EUR: z.number(),
+					AUD: z.number(),
+					CAD: z.number(),
+				}),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z
+					.enum(typeObject.GuardianPatron.billingPeriods)
+					.optional(),
+			}),
+		}),
+	}),
 	GuardianLight: z.object({
+		billingSystem: z.literal('zuora'),
+		active: z.boolean(),
 		ratePlans: z.object({
 			Monthly: z.object({
 				id: z.string(),
@@ -16,7 +43,179 @@ export const productCatalogSchema = z.object({
 			}),
 		}),
 	}),
+	SupporterMembership: z.object({
+		billingSystem: z.literal('zuora'),
+		active: z.boolean(),
+		ratePlans: z.object({
+			Annual: z.object({
+				id: z.string(),
+				pricing: z.object({
+					CAD: z.number(),
+					AUD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					USD: z.number(),
+				}),
+				charges: z.object({
+					Subscription: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z
+					.enum(typeObject.SupporterMembership.billingPeriods)
+					.optional(),
+			}),
+			Monthly: z.object({
+				id: z.string(),
+				pricing: z.object({
+					GBP: z.number(),
+					CAD: z.number(),
+					AUD: z.number(),
+					EUR: z.number(),
+					USD: z.number(),
+				}),
+				charges: z.object({
+					Subscription: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z
+					.enum(typeObject.SupporterMembership.billingPeriods)
+					.optional(),
+			}),
+			V2DeprecatedAnnual: z.object({
+				id: z.string(),
+				pricing: z.object({
+					USD: z.number(),
+					GBP: z.number(),
+					CAD: z.number(),
+					EUR: z.number(),
+					AUD: z.number(),
+				}),
+				charges: z.object({
+					Subscription: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z
+					.enum(typeObject.SupporterMembership.billingPeriods)
+					.optional(),
+			}),
+			V1DeprecatedAnnual: z.object({
+				id: z.string(),
+				pricing: z.object({
+					GBP: z.number(),
+				}),
+				charges: z.object({
+					Subscription: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z
+					.enum(typeObject.SupporterMembership.billingPeriods)
+					.optional(),
+			}),
+			V1DeprecatedMonthly: z.object({
+				id: z.string(),
+				pricing: z.object({
+					GBP: z.number(),
+				}),
+				charges: z.object({
+					Subscription: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z
+					.enum(typeObject.SupporterMembership.billingPeriods)
+					.optional(),
+			}),
+			V2DeprecatedMonthly: z.object({
+				id: z.string(),
+				pricing: z.object({
+					GBP: z.number(),
+					USD: z.number(),
+					AUD: z.number(),
+					EUR: z.number(),
+					CAD: z.number(),
+				}),
+				charges: z.object({
+					Subscription: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z
+					.enum(typeObject.SupporterMembership.billingPeriods)
+					.optional(),
+			}),
+		}),
+	}),
+	PatronMembership: z.object({
+		billingSystem: z.literal('zuora'),
+		active: z.boolean(),
+		ratePlans: z.object({
+			Monthly: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Subscription: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z.enum(typeObject.PatronMembership.billingPeriods),
+			}),
+			Annual: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Subscription: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z.enum(typeObject.PatronMembership.billingPeriods),
+			}),
+			V1DeprecatedAnnual: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Subscription: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z.enum(typeObject.PatronMembership.billingPeriods),
+			}),
+			V1DeprecatedMonthly: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Subscription: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z.enum(typeObject.PatronMembership.billingPeriods),
+			}),
+		}),
+	}),
+	PartnerMembership: z.object({
+		billingSystem: z.literal('zuora'),
+		active: z.boolean(),
+		ratePlans: z.object({
+			V1DeprecatedAnnual: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Subscription: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z.enum(typeObject.PartnerMembership.billingPeriods),
+			}),
+			Monthly: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Subscription: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z.enum(typeObject.PartnerMembership.billingPeriods),
+			}),
+			Annual: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Subscription: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z.enum(typeObject.PartnerMembership.billingPeriods),
+			}),
+			V1DeprecatedMonthly: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Subscription: z.object({ id: z.string() }),
+				}),
+				billingPeriod: z.enum(typeObject.PartnerMembership.billingPeriods),
+			}),
+		}),
+	}),
 	DigitalSubscription: z.object({
+		billingSystem: z.literal('zuora'),
+		active: z.boolean(),
 		ratePlans: z.object({
 			Annual: z.object({
 				id: z.string(),
@@ -81,6 +280,8 @@ export const productCatalogSchema = z.object({
 		}),
 	}),
 	HomeDelivery: z.object({
+		billingSystem: z.literal('zuora'),
+		active: z.boolean(),
 		ratePlans: z.object({
 			Everyday: z.object({
 				id: z.string(),
@@ -143,6 +344,8 @@ export const productCatalogSchema = z.object({
 		}),
 	}),
 	NationalDelivery: z.object({
+		billingSystem: z.literal('zuora'),
+		active: z.boolean(),
 		ratePlans: z.object({
 			Everyday: z.object({
 				id: z.string(),
@@ -189,6 +392,8 @@ export const productCatalogSchema = z.object({
 		}),
 	}),
 	SupporterPlus: z.object({
+		billingSystem: z.literal('zuora'),
+		active: z.boolean(),
 		ratePlans: z.object({
 			V1DeprecatedMonthly: z.object({
 				id: z.string(),
@@ -263,6 +468,8 @@ export const productCatalogSchema = z.object({
 		}),
 	}),
 	TierThree: z.object({
+		billingSystem: z.literal('zuora'),
+		active: z.boolean(),
 		ratePlans: z.object({
 			RestOfWorldMonthly: z.object({
 				id: z.string(),
@@ -399,6 +606,8 @@ export const productCatalogSchema = z.object({
 		}),
 	}),
 	GuardianWeeklyRestOfWorld: z.object({
+		billingSystem: z.literal('zuora'),
+		active: z.boolean(),
 		ratePlans: z.object({
 			ThreeMonthGift: z.object({
 				id: z.string(),
@@ -443,6 +652,8 @@ export const productCatalogSchema = z.object({
 		}),
 	}),
 	GuardianWeeklyDomestic: z.object({
+		billingSystem: z.literal('zuora'),
+		active: z.boolean(),
 		ratePlans: z.object({
 			ThreeMonthGift: z.object({
 				id: z.string(),
@@ -522,6 +733,8 @@ export const productCatalogSchema = z.object({
 		}),
 	}),
 	SubscriptionCard: z.object({
+		billingSystem: z.literal('zuora'),
+		active: z.boolean(),
 		ratePlans: z.object({
 			Everyday: z.object({
 				id: z.string(),
@@ -584,6 +797,8 @@ export const productCatalogSchema = z.object({
 		}),
 	}),
 	Contribution: z.object({
+		billingSystem: z.literal('zuora'),
+		active: z.boolean(),
 		ratePlans: z.object({
 			Annual: z.object({
 				id: z.string(),

@@ -1113,14 +1113,6 @@ exports[`Generated product catalog types match snapshot 1`] = `
     "billingPeriods": [
       "Month",
     ],
-    "currencies": [
-      "NZD",
-      "CAD",
-      "AUD",
-      "USD",
-      "GBP",
-      "EUR",
-    ],
     "productRatePlans": {
       "GuardianPatron": {
         "Subscription": {},
@@ -1242,9 +1234,6 @@ exports[`Generated product catalog types match snapshot 1`] = `
       "Annual",
       "Month",
     ],
-    "currencies": [
-      "GBP",
-    ],
     "productRatePlans": {
       "Annual": {
         "Subscription": {},
@@ -1264,9 +1253,6 @@ exports[`Generated product catalog types match snapshot 1`] = `
     "billingPeriods": [
       "Month",
       "Annual",
-    ],
-    "currencies": [
-      "GBP",
     ],
     "productRatePlans": {
       "Annual": {
@@ -1321,13 +1307,6 @@ exports[`Generated product catalog types match snapshot 1`] = `
     "billingPeriods": [
       "Annual",
       "Month",
-    ],
-    "currencies": [
-      "CAD",
-      "AUD",
-      "EUR",
-      "GBP",
-      "USD",
     ],
     "productRatePlans": {
       "Annual": {
