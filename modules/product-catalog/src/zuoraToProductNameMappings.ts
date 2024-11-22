@@ -86,6 +86,7 @@ const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 	'Non Founder Partner - annual': 'Annual',
 	'Partner - annual': 'V1DeprecatedAnnual',
 	'Partner - monthly': 'V1DeprecatedMonthly',
+	'Partner - monthly (Events)': 'V1DeprecatedMonthly',
 	'Non Founder Patron - monthly': 'Monthly',
 	'Non Founder Patron - annual': 'Annual',
 	'Non Founder Patron Membership - Annual': 'Annual',
