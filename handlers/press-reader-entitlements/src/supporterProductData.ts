@@ -71,7 +71,8 @@ export function getLatestValidSubscription(
 		'SubscriptionCard',
 		'SupporterPlus',
 		'TierThree',
-		// ToDo: add Patron, currently not in product catalog
+		'GuardianPatron',
+		'PatronMembership',
 	] as const;
 
 	const productCatalogHelper = new ProductCatalogHelper(productCatalog);
