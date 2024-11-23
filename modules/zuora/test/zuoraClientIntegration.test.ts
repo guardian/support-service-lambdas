@@ -8,7 +8,7 @@ import { BearerTokenProvider } from '../src/bearerTokenProvider';
 import { getOAuthClientCredentials } from '../src/oAuthCredentials';
 import { ZuoraClient } from '../src/zuoraClient';
 import type { ZuoraSubscription } from '../src/zuoraSchemas';
-import { zuoraSubscriptionSchema } from '../src/zuoraSchemas';
+import { zuoraSubscriptionResponseSchema } from '../src/zuoraSchemas';
 
 test('ZuoraClient', async () => {
 	const stage = 'CODE';
@@ -19,7 +19,7 @@ test('ZuoraClient', async () => {
 	const path = `v1/subscriptions/${subscriptionNumber}`;
 	const subscription: ZuoraSubscription = await zuoraClient.get(
 		path,
-		zuoraSubscriptionSchema,
+		zuoraSubscriptionResponseSchema,
 	);
 	expect(subscription.subscriptionNumber).toBe(subscriptionNumber);
 });

@@ -1,14 +1,14 @@
-import { zuoraSubscriptionSchema } from '@modules/zuora/zuoraSchemas';
+import { DataExtensionNames } from '@modules/email/email';
+import { zuoraSubscriptionResponseSchema } from '@modules/zuora/zuoraSchemas';
+import type { Discount } from '../src/productToDiscountMapping';
 import {
 	catalog,
-	Discount,
 	getDiscountFromSubscription,
 } from '../src/productToDiscountMapping';
 import json from './fixtures/digital-subscriptions/get-discount-test.json';
-import { DataExtensionNames } from '@modules/email/email';
 
 test('getDiscountFromSubscription should return an annual discount for an annual sub', () => {
-	const sub = zuoraSubscriptionSchema.parse(json);
+	const sub = zuoraSubscriptionResponseSchema.parse(json);
 	const expected: Discount = {
 		productRatePlanId: '8a128adf8b64bcfd018b6b6fdc7674f5',
 		name: 'Cancellation Save Discount - 25% off for 12 months',

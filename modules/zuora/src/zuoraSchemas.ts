@@ -19,7 +19,6 @@ export const zuoraBearerTokenSchema = z.object({
 
 // --------------- Subscription ---------------
 export const zuoraSubscriptionSchema = z.object({
-	success: z.boolean(),
 	id: z.string(),
 	accountNumber: z.string(),
 	subscriptionNumber: z.string(),
@@ -63,6 +62,11 @@ export const zuoraSubscriptionSchema = z.object({
 		}),
 	),
 });
+export const zuoraSubscriptionResponseSchema = z
+	.object({
+		success: z.boolean(),
+	})
+	.merge(zuoraSubscriptionSchema);
 
 export type ZuoraSubscription = z.infer<typeof zuoraSubscriptionSchema>;
 
@@ -103,7 +107,17 @@ export const zuoraAccountSchema = z.object({
 	billToContact: billToContactSchema,
 	metrics: metricsSchema,
 });
+
 export type ZuoraAccount = z.infer<typeof zuoraAccountSchema>;
+
+export const zuoraSubscriptionsFromAccountSchema = z.object({
+	success: z.boolean(),
+	subscriptions: z.array(zuoraSubscriptionSchema),
+});
+
+export type ZuoraSubscriptionsFromAccountResponse = z.infer<
+	typeof zuoraSubscriptionsFromAccountSchema
+>;
 
 // --------------- Subscribe ---------------
 export const zuoraSubscribeResponseSchema = z.array(
