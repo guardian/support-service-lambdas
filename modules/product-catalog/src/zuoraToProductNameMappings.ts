@@ -1,16 +1,23 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
 
 const zuoraCatalogToProductKey: Record<string, string> = {
-	'Digital Pack': 'DigitalSubscription',
-	'Newspaper - National Delivery': 'NationalDelivery',
+	'Guardian Light': 'GuardianLight',
+	Contributor: 'Contribution',
 	'Supporter Plus': 'SupporterPlus',
+	'Digital Pack': 'DigitalSubscription',
+	'Tier Three': 'TierThree',
+	// Newspaper products
+	'Newspaper Delivery': 'HomeDelivery',
+	'Newspaper - National Delivery': 'NationalDelivery',
+	'Newspaper Digital Voucher': 'SubscriptionCard',
+	'Newspaper Voucher': 'NewspaperVoucher',
+	// Guardian Weekly products
 	'Guardian Weekly - ROW': 'GuardianWeeklyRestOfWorld',
 	'Guardian Weekly - Domestic': 'GuardianWeeklyDomestic',
-	'Newspaper Digital Voucher': 'SubscriptionCard',
-	Contributor: 'Contribution',
-	'Newspaper Delivery': 'HomeDelivery',
-	'Tier Three': 'TierThree',
-	'Guardian Light': 'GuardianLight',
+	'Guardian Weekly Zone A': 'GuardianWeeklyZoneA',
+	'Guardian Weekly Zone B': 'GuardianWeeklyZoneB',
+	'Guardian Weekly Zone C': 'GuardianWeeklyZoneC',
+	// Membership products
 	Supporter: 'SupporterMembership',
 	Partner: 'PartnerMembership',
 	Patron: 'PatronMembership',
@@ -30,14 +37,19 @@ export const activeProducts = [
 ];
 
 const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
+	'Annual Contribution': 'Annual',
+	'Monthly Contribution': 'Monthly',
+	// Digital Pack rate plans
 	'Digital Pack Monthly': 'Monthly',
 	'Digital Pack Annual': 'Annual',
 	'Digital Subscription One Year Fixed - One Time Charge': 'OneYearGift',
 	'Digital Subscription Three Month Fixed - One Time Charge': 'ThreeMonthGift',
+	// Supporter Plus rate plans
 	'Supporter Plus Monthly': 'V1DeprecatedMonthly',
 	'Supporter Plus Annual': 'V1DeprecatedAnnual',
 	'Supporter Plus V2 - Monthly': 'Monthly',
 	'Supporter Plus V2 - Annual': 'Annual',
+	// Tier Three rate plans
 	'Supporter Plus V2 & Guardian Weekly ROW - Monthly':
 		'GuardianWeeklyRestOfWorldMonthly',
 	'Supporter Plus V2 & Guardian Weekly Domestic - Monthly':
@@ -50,6 +62,7 @@ const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 	'Supporter Plus & Guardian Weekly Domestic - Monthly': 'DomesticMonthly',
 	'Supporter Plus & Guardian Weekly ROW - Annual': 'RestOfWorldAnnual',
 	'Supporter Plus & Guardian Weekly Domestic - Annual': 'DomesticAnnual',
+	// Remove these we are not creating a new rate plan for archive benefits now
 	'Supporter Plus, Guardian Weekly ROW & Archive - Monthly':
 		'RestOfWorldMonthlyV2',
 	'Supporter Plus, Guardian Weekly Domestic & Archive - Monthly':
@@ -58,6 +71,7 @@ const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 		'RestOfWorldAnnualV2',
 	'Supporter Plus, Guardian Weekly Domestic & Archive - Annual':
 		'DomesticAnnualV2',
+	// Current GW rate plans
 	'GW Oct 18 - Annual - ROW': 'Annual',
 	'GW Oct 18 - Monthly - ROW': 'Monthly',
 	'GW Oct 18 - Quarterly - ROW': 'Quarterly',
@@ -68,14 +82,23 @@ const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 	'GW Oct 18 - Quarterly - Domestic': 'Quarterly',
 	'GW GIFT Oct 18 - 1 Year - Domestic': 'OneYearGift',
 	'GW GIFT Oct 18 - 3 Month - Domestic': 'ThreeMonthGift',
-	'Annual Contribution': 'Annual',
-	'Monthly Contribution': 'Monthly',
+	// Old GW rate plans
+	'Guardian Weekly Annual': 'Annual',
+	'Guardian Weekly Quarterly': 'Quarterly',
+	// Paper rate plans
 	Everyday: 'Everyday',
 	Saturday: 'Saturday',
 	Sunday: 'Sunday',
 	Weekend: 'Weekend',
 	Sixday: 'Sixday',
+	// Paper+ rate plans
+	'Everyday+': 'Everyday+',
+	'Saturday+': 'Saturday+',
+	'Sunday+': 'Sunday+',
+	'Weekend+': 'Weekend+',
+	'Sixday+': 'Sixday+',
 	'Guardian Light Monthly': 'Monthly',
+	// Membership rate plans
 	'Supporter - monthly': 'V1DeprecatedMonthly',
 	'Supporter - annual': 'V1DeprecatedAnnual',
 	'Non Founder Supporter - monthly': 'V2DeprecatedMonthly',
@@ -118,6 +141,13 @@ const zuoraCatalogToProductRatePlanChargeKey: Record<string, string> = {
 	'GW Oct 18 - First 6 issues - Domestic': 'Subscription',
 	'GW GIFT Oct 18 - 1 Year - Domestic': 'Subscription',
 	'GW GIFT Oct 18 - 3 Month - Domestic': 'Subscription',
+	// Old GW rate plan charges
+	'Zone A Annual': 'Subscription',
+	'Zone A Quarterly': 'Subscription',
+	'Zone B Annual': 'Subscription',
+	'Zone B Quarterly': 'Subscription',
+	'Zone C Annual': 'Subscription',
+	'Zone C Quarterly': 'Subscription',
 	Contribution: 'Contribution',
 	Subscription: 'Subscription',
 	Saturday: 'Saturday',
@@ -127,6 +157,9 @@ const zuoraCatalogToProductRatePlanChargeKey: Record<string, string> = {
 	Wednesday: 'Wednesday',
 	Thursday: 'Thursday',
 	Friday: 'Friday',
+	Digipack: 'DigitalPack',
+	'Digital Pack': 'DigitalPack',
+	'Digital Pack bolt-on': 'DigitalPack',
 	'Supporter Plus': 'SupporterPlus',
 	'Guardian Weekly': 'GuardianWeekly',
 	'Newspaper Archive': 'NewspaperArchive',
