@@ -42,13 +42,16 @@ void (async () => {
 		client,
 		identityId,
 	);
-	const subscriptions = await Promise.all(
-		accountNumbers.map((accountNumber) =>
-			getSubscriptionsByAccountNumber(client, accountNumber),
-		),
-	);
-	const messageBodies = subscriptions
+	const subscriptions = (
+		await Promise.all(
+			accountNumbers.map((accountNumber) =>
+				getSubscriptionsByAccountNumber(client, accountNumber),
+			),
+		)
+	)
 		.flat()
+		.filter((subscription) => subscription.status === 'Active');
+	const messageBodies = subscriptions
 		.map((subscription) =>
 			getValidRatePlansFromSubscription(productCatalogHelper, subscription).map(
 				(ratePlan) => createMessageBody(identityId, subscription, ratePlan),
@@ -67,8 +70,9 @@ const getValidRatePlansFromSubscription = (
 ): RatePlan[] =>
 	subscription.ratePlans.filter(
 		(ratePlan) =>
+			ratePlan.lastChangeType !== 'RemoveProduct' &&
 			productCatalogHelper.findProductDetails(ratePlan.productRatePlanId) !==
-			undefined,
+				undefined,
 	);
 
 const createMessageBody = (

@@ -1,4 +1,5 @@
-A script to sync the supporter product data Dynamo table with product data held by Zuora for a given identity id
+A script to sync the supporter product data Dynamo table with product data held by Zuora for a given identity id.
+The script is idempotent, so can be run multiple times without causing any issues even if the data is already in sync.
 
 ## Usage
 
