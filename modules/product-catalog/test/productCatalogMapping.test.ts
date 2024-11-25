@@ -32,6 +32,7 @@ test('We can find product details from a productRatePlanId', () => {
 	const productRatePlanId = '2c92c0f84bbfec8b014bc655f4852d9d';
 	expect(codeCatalogHelper.findProductDetails(productRatePlanId)).toStrictEqual(
 		{
+			billingSystem: 'zuora',
 			zuoraProduct: 'DigitalSubscription',
 			productRatePlan: 'Monthly',
 			id: productRatePlanId,
@@ -39,26 +40,40 @@ test('We can find product details from a productRatePlanId', () => {
 	);
 });
 
-const productExistsInCatalog = (stage: Stage) => {
+test('We can find product details for a Guardian Patron', () => {
+	const productRatePlanId = 'guardian_patron';
+	expect(codeCatalogHelper.findProductDetails(productRatePlanId)).toStrictEqual(
+		{
+			billingSystem: 'stripe',
+			zuoraProduct: 'GuardianPatron',
+			productRatePlan: 'GuardianPatron',
+			id: productRatePlanId,
+		},
+	);
+});
+
+const zuoraProductExistsInCatalog = (stage: Stage) => {
 	const [zuoraCatalog, productCatalog] =
 		stage === 'CODE'
 			? [new ZuoraCatalogHelper(codeZuoraCatalog), codeCatalogHelper]
 			: [new ZuoraCatalogHelper(prodZuoraCatalog), prodCatalogHelper];
-	const allProductDetails = productCatalog.getAllProductDetails();
+	const allProductDetails =
+		productCatalog.getAllProductDetailsForBillingSystem('zuora');
+
 	allProductDetails.forEach((productDetails) => {
 		expect(zuoraCatalog.getCatalogPlan(productDetails.id)).toBeDefined();
 	});
 };
 
-test('All valid products exist in the catalog', () => {
-	productExistsInCatalog('CODE');
-	productExistsInCatalog('PROD');
+test('All zuora products exist in the zuora catalog', () => {
+	zuoraProductExistsInCatalog('CODE');
+	zuoraProductExistsInCatalog('PROD');
 });
 
-test('All product rate plan ids are unique', () => {
+test('All Zuora product rate plan ids are unique', () => {
 	const allProducts = codeCatalogHelper
-		.getAllProductDetails()
-		.concat(prodCatalogHelper.getAllProductDetails());
+		.getAllProductDetailsForBillingSystem('zuora')
+		.concat(prodCatalogHelper.getAllProductDetailsForBillingSystem('zuora'));
 	const productRatePlanIds = allProducts
 		.map((product) => {
 			return product.id;

@@ -3,7 +3,7 @@ export const typeObject = {
 		billingPeriods: ['Month'],
 		productRatePlans: {
 			Monthly: {
-				GuardianLight: {},
+				Subscription: {},
 			},
 		},
 	},
@@ -88,6 +88,29 @@ export const typeObject = {
 				Friday: {},
 				Saturday: {},
 				Sunday: {},
+			},
+		},
+	},
+	SupporterMembership: {
+		billingPeriods: ['Annual', 'Month'],
+		productRatePlans: {
+			Annual: {
+				Subscription: {},
+			},
+			Monthly: {
+				Subscription: {},
+			},
+			V2DeprecatedAnnual: {
+				Subscription: {},
+			},
+			V1DeprecatedAnnual: {
+				Subscription: {},
+			},
+			V1DeprecatedMonthly: {
+				Subscription: {},
+			},
+			V2DeprecatedMonthly: {
+				Subscription: {},
 			},
 		},
 	},
@@ -222,6 +245,49 @@ export const typeObject = {
 			},
 			Saturday: {
 				Saturday: {},
+			},
+		},
+	},
+	PatronMembership: {
+		billingPeriods: ['Month', 'Annual'],
+		productRatePlans: {
+			Monthly: {
+				Subscription: {},
+			},
+			Annual: {
+				Subscription: {},
+			},
+			V1DeprecatedAnnual: {
+				Subscription: {},
+			},
+			V1DeprecatedMonthly: {
+				Subscription: {},
+			},
+		},
+	},
+	PartnerMembership: {
+		billingPeriods: ['Annual', 'Month'],
+		productRatePlans: {
+			V1DeprecatedAnnual: {
+				Subscription: {},
+			},
+			Monthly: {
+				Subscription: {},
+			},
+			Annual: {
+				Subscription: {},
+			},
+			V1DeprecatedMonthly: {
+				Subscription: {},
+			},
+		},
+	},
+	GuardianPatron: {
+		currencies: ['NZD', 'CAD', 'AUD', 'USD', 'GBP', 'EUR'],
+		billingPeriods: ['Month'],
+		productRatePlans: {
+			GuardianPatron: {
+				Subscription: {},
 			},
 		},
 	},

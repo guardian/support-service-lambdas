@@ -3,6 +3,8 @@
 exports[`Generated product catalog matches snapshot 1`] = `
 {
   "Contribution": {
+    "active": true,
+    "billingSystem": "zuora",
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -41,6 +43,8 @@ exports[`Generated product catalog matches snapshot 1`] = `
     },
   },
   "DigitalSubscription": {
+    "active": true,
+    "billingSystem": "zuora",
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -111,11 +115,13 @@ exports[`Generated product catalog matches snapshot 1`] = `
     },
   },
   "GuardianLight": {
+    "active": true,
+    "billingSystem": "zuora",
     "ratePlans": {
       "Monthly": {
         "billingPeriod": "Month",
         "charges": {
-          "GuardianLight": {
+          "Subscription": {
             "id": "8a129b7892c35f170192dd3225572b97",
           },
         },
@@ -126,7 +132,32 @@ exports[`Generated product catalog matches snapshot 1`] = `
       },
     },
   },
+  "GuardianPatron": {
+    "active": true,
+    "billingSystem": "stripe",
+    "ratePlans": {
+      "GuardianPatron": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Subscription": {
+            "id": "guardian_patron",
+          },
+        },
+        "id": "guardian_patron",
+        "pricing": {
+          "AUD": 0,
+          "CAD": 0,
+          "EUR": 0,
+          "GBP": 0,
+          "NZD": 0,
+          "USD": 0,
+        },
+      },
+    },
+  },
   "GuardianWeeklyDomestic": {
+    "active": true,
+    "billingSystem": "zuora",
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -216,6 +247,8 @@ exports[`Generated product catalog matches snapshot 1`] = `
     },
   },
   "GuardianWeeklyRestOfWorld": {
+    "active": true,
+    "billingSystem": "zuora",
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -301,6 +334,8 @@ exports[`Generated product catalog matches snapshot 1`] = `
     },
   },
   "HomeDelivery": {
+    "active": true,
+    "billingSystem": "zuora",
     "ratePlans": {
       "Everyday": {
         "billingPeriod": "Month",
@@ -401,6 +436,8 @@ exports[`Generated product catalog matches snapshot 1`] = `
     },
   },
   "NationalDelivery": {
+    "active": true,
+    "billingSystem": "zuora",
     "ratePlans": {
       "Everyday": {
         "billingPeriod": "Month",
@@ -476,7 +513,117 @@ exports[`Generated product catalog matches snapshot 1`] = `
       },
     },
   },
+  "PartnerMembership": {
+    "active": false,
+    "billingSystem": "zuora",
+    "ratePlans": {
+      "Annual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Subscription": {
+            "id": "2c92a0f94c54758b014c69f813d939ee",
+          },
+        },
+        "id": "2c92a0f94c54758b014c69f813bd39ec",
+        "pricing": {
+          "GBP": 149,
+        },
+      },
+      "Monthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Subscription": {
+            "id": "2c92a0fb4c5481dc014c69f95ff07243",
+          },
+        },
+        "id": "2c92a0fb4c5481dc014c69f95fce7240",
+        "pricing": {
+          "GBP": 15,
+        },
+      },
+      "V1DeprecatedAnnual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Subscription": {
+            "id": "2c92a0fb479fbd5d0147d01563184625",
+          },
+        },
+        "id": "2c92a0f9479fb46d0147d0155cb15596",
+        "pricing": {
+          "GBP": 135,
+        },
+      },
+      "V1DeprecatedMonthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Subscription": {
+            "id": "2c92a0fb479fbd5d0147d01562c9461a",
+          },
+        },
+        "id": "2c92a0f9479fb46d0147d0155ca15595",
+        "pricing": {
+          "GBP": 15,
+        },
+      },
+    },
+  },
+  "PatronMembership": {
+    "active": false,
+    "billingSystem": "zuora",
+    "ratePlans": {
+      "Annual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Subscription": {
+            "id": "2c92a0f94c547592014c69fb0e70757a",
+          },
+        },
+        "id": "2c92a0f94c547592014c69fb0c4274fc",
+        "pricing": {
+          "GBP": 599,
+        },
+      },
+      "Monthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Subscription": {
+            "id": "2c92a0fb4c5481db014c69fb92b47065",
+          },
+        },
+        "id": "2c92a0fb4c5481db014c69fb9118704b",
+        "pricing": {
+          "GBP": 60,
+        },
+      },
+      "V1DeprecatedAnnual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Subscription": {
+            "id": "2c92a0fb479fbd5d0147d015609245da",
+          },
+        },
+        "id": "2c92a0f9479fb46d0147d0155c245581",
+        "pricing": {
+          "GBP": 540,
+        },
+      },
+      "V1DeprecatedMonthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Subscription": {
+            "id": "2c92a0fb479fbd5d0147d015602b45d3",
+          },
+        },
+        "id": "2c92a0f9479fb46d0147d0155bf9557a",
+        "pricing": {
+          "GBP": 60,
+        },
+      },
+    },
+  },
   "SubscriptionCard": {
+    "active": true,
+    "billingSystem": "zuora",
     "ratePlans": {
       "Everyday": {
         "billingPeriod": "Month",
@@ -576,7 +723,103 @@ exports[`Generated product catalog matches snapshot 1`] = `
       },
     },
   },
+  "SupporterMembership": {
+    "active": false,
+    "billingSystem": "zuora",
+    "ratePlans": {
+      "Annual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Subscription": {
+            "id": "8a129ce886834fa90186a20c3f4f0b6c",
+          },
+        },
+        "id": "8a129ce886834fa90186a20c3ee70b6a",
+        "pricing": {
+          "AUD": 160,
+          "CAD": 120,
+          "EUR": 95,
+          "GBP": 75,
+          "USD": 120,
+        },
+      },
+      "Monthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Subscription": {
+            "id": "8a12800986832d1d0186a20bf5136471",
+          },
+        },
+        "id": "8a1287c586832d250186a2040b1548fe",
+        "pricing": {
+          "AUD": 14.99,
+          "CAD": 12.99,
+          "EUR": 9.99,
+          "GBP": 7,
+          "USD": 9.99,
+        },
+      },
+      "V1DeprecatedAnnual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Subscription": {
+            "id": "2c92a0fb4bb97034014bbbc5626f4ff9",
+          },
+        },
+        "id": "2c92a0fb4bb97034014bbbc562604ff7",
+        "pricing": {
+          "GBP": 50,
+        },
+      },
+      "V1DeprecatedMonthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Subscription": {
+            "id": "2c92a0fb4bb97034014bbbc562274ff1",
+          },
+        },
+        "id": "2c92a0fb4bb97034014bbbc562114fef",
+        "pricing": {
+          "GBP": 5,
+        },
+      },
+      "V2DeprecatedAnnual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Subscription": {
+            "id": "2c92a0fb4c5481db014c69f4a2013bbf",
+          },
+        },
+        "id": "2c92a0fb4c5481db014c69f4a1e03bbd",
+        "pricing": {
+          "AUD": 100,
+          "CAD": 69,
+          "EUR": 49,
+          "GBP": 49,
+          "USD": 69,
+        },
+      },
+      "V2DeprecatedMonthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Subscription": {
+            "id": "2c92a0f94c547592014c69f5b1204f80",
+          },
+        },
+        "id": "2c92a0f94c547592014c69f5b0ff4f7e",
+        "pricing": {
+          "AUD": 10,
+          "CAD": 6.99,
+          "EUR": 4.99,
+          "GBP": 5,
+          "USD": 6.99,
+        },
+      },
+    },
+  },
   "SupporterPlus": {
+    "active": true,
+    "billingSystem": "zuora",
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -655,6 +898,8 @@ exports[`Generated product catalog matches snapshot 1`] = `
     },
   },
   "TierThree": {
+    "active": true,
+    "billingSystem": "zuora",
     "ratePlans": {
       "DomesticAnnual": {
         "billingPeriod": "Annual",
@@ -860,7 +1105,17 @@ exports[`Generated product catalog types match snapshot 1`] = `
     ],
     "productRatePlans": {
       "Monthly": {
-        "GuardianLight": {},
+        "Subscription": {},
+      },
+    },
+  },
+  "GuardianPatron": {
+    "billingPeriods": [
+      "Month",
+    ],
+    "productRatePlans": {
+      "GuardianPatron": {
+        "Subscription": {},
       },
     },
   },
@@ -974,6 +1229,46 @@ exports[`Generated product catalog types match snapshot 1`] = `
       },
     },
   },
+  "PartnerMembership": {
+    "billingPeriods": [
+      "Annual",
+      "Month",
+    ],
+    "productRatePlans": {
+      "Annual": {
+        "Subscription": {},
+      },
+      "Monthly": {
+        "Subscription": {},
+      },
+      "V1DeprecatedAnnual": {
+        "Subscription": {},
+      },
+      "V1DeprecatedMonthly": {
+        "Subscription": {},
+      },
+    },
+  },
+  "PatronMembership": {
+    "billingPeriods": [
+      "Month",
+      "Annual",
+    ],
+    "productRatePlans": {
+      "Annual": {
+        "Subscription": {},
+      },
+      "Monthly": {
+        "Subscription": {},
+      },
+      "V1DeprecatedAnnual": {
+        "Subscription": {},
+      },
+      "V1DeprecatedMonthly": {
+        "Subscription": {},
+      },
+    },
+  },
   "SubscriptionCard": {
     "billingPeriods": [
       "Month",
@@ -1005,6 +1300,32 @@ exports[`Generated product catalog types match snapshot 1`] = `
       "Weekend": {
         "Saturday": {},
         "Sunday": {},
+      },
+    },
+  },
+  "SupporterMembership": {
+    "billingPeriods": [
+      "Annual",
+      "Month",
+    ],
+    "productRatePlans": {
+      "Annual": {
+        "Subscription": {},
+      },
+      "Monthly": {
+        "Subscription": {},
+      },
+      "V1DeprecatedAnnual": {
+        "Subscription": {},
+      },
+      "V1DeprecatedMonthly": {
+        "Subscription": {},
+      },
+      "V2DeprecatedAnnual": {
+        "Subscription": {},
+      },
+      "V2DeprecatedMonthly": {
+        "Subscription": {},
       },
     },
   },

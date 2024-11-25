@@ -11,7 +11,23 @@ const zuoraCatalogToProductKey: Record<string, string> = {
 	'Newspaper Delivery': 'HomeDelivery',
 	'Tier Three': 'TierThree',
 	'Guardian Light': 'GuardianLight',
+	Supporter: 'SupporterMembership',
+	Partner: 'PartnerMembership',
+	Patron: 'PatronMembership',
 } as const;
+
+export const activeProducts = [
+	'SupporterPlus',
+	'DigitalSubscription',
+	'TierThree',
+	'GuardianLight',
+	'GuardianWeeklyRestOfWorld',
+	'GuardianWeeklyDomestic',
+	'HomeDelivery',
+	'NationalDelivery',
+	'SubscriptionCard',
+	'Contribution',
+];
 
 const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 	'Digital Pack Monthly': 'Monthly',
@@ -60,6 +76,22 @@ const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 	Weekend: 'Weekend',
 	Sixday: 'Sixday',
 	'Guardian Light Monthly': 'Monthly',
+	'Supporter - monthly': 'V1DeprecatedMonthly',
+	'Supporter - annual': 'V1DeprecatedAnnual',
+	'Non Founder Supporter - monthly': 'V2DeprecatedMonthly',
+	'Non Founder Supporter - annual': 'V2DeprecatedAnnual',
+	'Supporter - annual (2023 Price)': 'Annual',
+	'Supporter - monthly (2023 Price)': 'Monthly',
+	'Non Founder Partner - monthly': 'Monthly',
+	'Non Founder Partner - annual': 'Annual',
+	'Partner - annual': 'V1DeprecatedAnnual',
+	'Partner - monthly': 'V1DeprecatedMonthly',
+	'Partner - monthly (Events)': 'V1DeprecatedMonthly',
+	'Non Founder Patron - monthly': 'Monthly',
+	'Non Founder Patron - annual': 'Annual',
+	'Non Founder Patron Membership - Annual': 'Annual',
+	'Patron - annual': 'V1DeprecatedAnnual',
+	'Patron - monthly': 'V1DeprecatedMonthly',
 } as const;
 
 const zuoraCatalogToProductRatePlanChargeKey: Record<string, string> = {
@@ -98,7 +130,15 @@ const zuoraCatalogToProductRatePlanChargeKey: Record<string, string> = {
 	'Supporter Plus': 'SupporterPlus',
 	'Guardian Weekly': 'GuardianWeekly',
 	'Newspaper Archive': 'NewspaperArchive',
-	'Guardian Light': 'GuardianLight',
+	'Guardian Light': 'Subscription',
+	'Supporter Membership - Annual': 'Subscription',
+	'Supporter Membership - Monthly': 'Subscription',
+	'Partner Membership - Monthly': 'Subscription',
+	'Partner Membership - Annual': 'Subscription',
+	'Patron Membership - Monthly': 'Subscription',
+	'Patron Membership - Annual': 'Subscription',
+	'Non Founder Patron Membership - Annual': 'Subscription',
+	'Non Founder Patron Membership - Monthly': 'Subscription',
 } as const;
 export const getZuoraProductKey = (product: string): string => {
 	return getIfDefined(
