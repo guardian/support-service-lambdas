@@ -9,13 +9,13 @@ import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 import {
 	zuoraAccountSchema,
-	zuoraSubscriptionSchema,
+	zuoraSubscriptionResponseSchema,
 } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import {
-	refundExpected,
 	previewResponseFromZuoraResponse,
+	refundExpected,
 } from '../src/contributionToSupporterPlus';
 import { buildEmailMessage } from '../src/productSwitchEmail';
 import type { ProductSwitchRequestBody } from '../src/schemas';
@@ -79,7 +79,7 @@ test('url parsing', () => {
 
 test('startNewTerm is only true when the termStartDate is before today', () => {
 	const today = dayjs('2024-05-09T23:10:10.663+01:00');
-	const subscription = zuoraSubscriptionSchema.parse(subscriptionJson);
+	const subscription = zuoraSubscriptionResponseSchema.parse(subscriptionJson);
 	const account = zuoraAccountSchema.parse(accountJson);
 	const productCatalog = getProductCatalogFromFixture();
 
@@ -96,7 +96,8 @@ test('startNewTerm is only true when the termStartDate is before today', () => {
 });
 
 test('preview amounts are correct', () => {
-	const subscription = zuoraSubscriptionSchema.parse(alreadySwitchedJson);
+	const subscription =
+		zuoraSubscriptionResponseSchema.parse(alreadySwitchedJson);
 
 	const apiResponse = {
 		success: true,
@@ -216,7 +217,7 @@ test('handleMissingRefundAmount() called on the charge-through-date for a subscr
 			chargeId: '2c92a0fc5e1dc084015e37f58c7b0f35',
 		},
 	};
-	const subscription: ZuoraSubscription = zuoraSubscriptionSchema.parse(
+	const subscription: ZuoraSubscription = zuoraSubscriptionResponseSchema.parse(
 		zuoraSubscriptionWithMonthlyContribution,
 	);
 
@@ -247,7 +248,7 @@ test('handleMissingRefundAmount() called on a date that is not the charge-throug
 			chargeId: '2c92a0fc5e1dc084015e37f58c7b0f35',
 		},
 	};
-	const subscription = zuoraSubscriptionSchema.parse(
+	const subscription = zuoraSubscriptionResponseSchema.parse(
 		zuoraSubscriptionWithMonthlyContribution,
 	);
 
@@ -299,7 +300,8 @@ test('Email message body is correct', () => {
 
 test('We can tell when a subscription has already been switched to Supporter Plus', () => {
 	const productCatalog = getProductCatalogFromFixture();
-	const subscription = zuoraSubscriptionSchema.parse(alreadySwitchedJson);
+	const subscription =
+		zuoraSubscriptionResponseSchema.parse(alreadySwitchedJson);
 	expect(
 		subscriptionHasAlreadySwitchedToSupporterPlus(productCatalog, subscription),
 	).toEqual(true);
@@ -307,7 +309,8 @@ test('We can tell when a subscription has already been switched to Supporter Plu
 
 test('We throw a validation error (converts to 400) when trying to switch an already switched subscription', () => {
 	const productCatalog = getProductCatalogFromFixture();
-	const subscription = zuoraSubscriptionSchema.parse(alreadySwitchedJson);
+	const subscription =
+		zuoraSubscriptionResponseSchema.parse(alreadySwitchedJson);
 	expect(() =>
 		getFirstContributionRatePlan(productCatalog, subscription),
 	).toThrow(ValidationError);
@@ -315,7 +318,9 @@ test('We throw a validation error (converts to 400) when trying to switch an alr
 
 test('We throw a reference error (converts to 500) if a subscription has no contribution charge', () => {
 	const productCatalog = getProductCatalogFromFixture();
-	const subscription = zuoraSubscriptionSchema.parse(jsonWithNoContribution);
+	const subscription = zuoraSubscriptionResponseSchema.parse(
+		jsonWithNoContribution,
+	);
 	expect(() =>
 		getFirstContributionRatePlan(productCatalog, subscription),
 	).toThrow(ReferenceError);
@@ -323,7 +328,7 @@ test('We throw a reference error (converts to 500) if a subscription has no cont
 
 test('We can successfully find the contribution charge on a valid subscription', () => {
 	const productCatalog = getProductCatalogFromFixture();
-	const subscription = zuoraSubscriptionSchema.parse(subscriptionJson);
+	const subscription = zuoraSubscriptionResponseSchema.parse(subscriptionJson);
 	expect(() =>
 		getFirstContributionRatePlan(productCatalog, subscription),
 	).toBeDefined();
