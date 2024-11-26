@@ -456,73 +456,6 @@ export const productCatalogSchema = z.object({
 					.enum(typeObject.NationalDelivery.billingPeriods)
 					.optional(),
 			}),
-			'Everyday+': z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Saturday: z.object({ id: z.string() }),
-					Monday: z.object({ id: z.string() }),
-					Sunday: z.object({ id: z.string() }),
-					Friday: z.object({ id: z.string() }),
-					Wednesday: z.object({ id: z.string() }),
-					Tuesday: z.object({ id: z.string() }),
-					Thursday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.NationalDelivery.billingPeriods)
-					.optional(),
-			}),
-			'Sixday+': z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Friday: z.object({ id: z.string() }),
-					Thursday: z.object({ id: z.string() }),
-					Wednesday: z.object({ id: z.string() }),
-					Tuesday: z.object({ id: z.string() }),
-					Monday: z.object({ id: z.string() }),
-					Saturday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.NationalDelivery.billingPeriods)
-					.optional(),
-			}),
-			'Weekend+': z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Saturday: z.object({ id: z.string() }),
-					Sunday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.NationalDelivery.billingPeriods)
-					.optional(),
-			}),
-			'Saturday+': z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Saturday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.NationalDelivery.billingPeriods)
-					.optional(),
-			}),
-			'Sunday+': z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Sunday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.NationalDelivery.billingPeriods)
-					.optional(),
-			}),
 		}),
 	}),
 	SubscriptionCard: z.object({
@@ -1136,11 +1069,7 @@ export const productCatalogSchema = z.object({
 				id: z.string(),
 				pricing: z.object({
 					USD: z.number(),
-					NZD: z.number(),
-					EUR: z.number(),
 					GBP: z.number(),
-					CAD: z.number(),
-					AUD: z.number(),
 				}),
 				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
 				billingPeriod: z
@@ -1151,11 +1080,7 @@ export const productCatalogSchema = z.object({
 				id: z.string(),
 				pricing: z.object({
 					USD: z.number(),
-					NZD: z.number(),
-					EUR: z.number(),
 					GBP: z.number(),
-					CAD: z.number(),
-					AUD: z.number(),
 				}),
 				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
 				billingPeriod: z
