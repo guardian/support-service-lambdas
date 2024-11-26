@@ -159,7 +159,7 @@ Resources:
             - 'client-side fatal errors are being reported to sentry for support-frontend'
         AlarmDescription: !Join
           - ' '
-          - - 'Impact - some or all browsers are failing to render support client side pages. Log in to Sentry.io to investigate.'
+          - - 'Impact - some or all browsers are failing to render support client side pages. Log in to Sentry to see these errors: https://the-guardian.sentry.io/discover/results/?project=1213654&query=%22Fatal%20error%20rendering%20page%22&queryDataset=error-events&sort=-count&statsPeriod=24h'
             - !FindInMap [ Constants, Alarm, Process ]
             - !FindInMap [StageMap, !Ref Stage, ApiName]
         MetricName: Count
