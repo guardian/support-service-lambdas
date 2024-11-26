@@ -69,6 +69,7 @@ export function getLatestValidSubscription(
 		'HomeDelivery',
 		'NationalDelivery',
 		'SubscriptionCard',
+		'NewspaperVoucher',
 		'SupporterPlus',
 		'TierThree',
 		'GuardianPatron',
