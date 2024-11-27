@@ -1,6 +1,6 @@
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
+import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import codeZuoraCatalog from '../../../modules/zuora-catalog/test/fixtures/catalog-code.json';
-import type { SupporterRatePlanItem } from '../src/supporterProductData';
 import { getLatestValidSubscription } from '../src/supporterProductData';
 import type { Member } from '../src/xmlBuilder';
 import { buildXml } from '../src/xmlBuilder';

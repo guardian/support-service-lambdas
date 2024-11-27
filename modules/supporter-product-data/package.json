@@ -1,0 +1,11 @@
+{
+  "name": "supporter-product-data",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-dynamodb": "^3.679.0",
+    "@aws-sdk/util-dynamodb": "^3.679.0"
+  }
+}
