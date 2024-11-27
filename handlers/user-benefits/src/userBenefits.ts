@@ -29,7 +29,7 @@ export const getUserBenefits = async (
 	});
 };
 
-const getBenefits = (
+export const getBenefits = (
 	productCatalogHelper: ProductCatalogHelper,
 	supporterProductDataItems: SupporterRatePlanItem[] | undefined,
 ): ProductBenefit[] => {

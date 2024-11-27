@@ -11,17 +11,17 @@ export type ProductBenefit =
 	| 'rejectTracking'
 	| 'liveEvents'; // Do we need this?
 
-const supporterPlusBenefits: ProductBenefit[] = [
+export const supporterPlusBenefits: ProductBenefit[] = [
 	'adFree',
 	'liveApp',
 	'feastApp',
 	'fewerSupportAsks',
 	'rejectTracking',
 ];
-const digitalSubscriptionBenefits = supporterPlusBenefits.concat([
+export const digitalSubscriptionBenefits = supporterPlusBenefits.concat([
 	'newspaperEdition',
 ]);
-const tierThreeBenefits = digitalSubscriptionBenefits.concat([
+export const tierThreeBenefits = digitalSubscriptionBenefits.concat([
 	'guardianWeeklyEdition',
 ]);
 
