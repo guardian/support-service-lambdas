@@ -19,6 +19,7 @@ import type { StripeWebhookEndpointsProps } from '../lib/stripe-webhook-endpoint
 import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
 import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
 import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
+import { UserBenefits } from '../lib/user-benefits';
 import { ZuoraSalesforceLinkRemover } from '../lib/zuora-salesforce-link-remover';
 
 const app = new App();
@@ -265,4 +266,18 @@ new PressReaderEntitlements(app, 'press-reader-entitlements-PROD', {
 	certificateId: supportCertificateId,
 	supporterProductDataTable:
 		'supporter-product-data-tables-PROD-SupporterProductDataTable',
+});
+new UserBenefits(app, 'user-benefits-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+	domainName: `user-benefits-code.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
+});
+new UserBenefits(app, 'user-benefits-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+	domainName: `user-benefits.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
 });
