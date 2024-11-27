@@ -3,13 +3,13 @@ import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
+import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import type {
 	APIGatewayProxyEvent,
 	APIGatewayProxyResult,
 	Handler,
 } from 'aws-lambda';
 import { getClientAccessToken, getIdentityId } from './identity';
-import type { SupporterRatePlanItem } from './supporterProductData';
 import { getLatestSubscription } from './supporterProductData';
 import type { Member } from './xmlBuilder';
 import { buildXml } from './xmlBuilder';

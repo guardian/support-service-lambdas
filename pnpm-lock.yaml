@@ -292,6 +292,15 @@ importers:
         specifier: 4.1.0
         version: 4.1.0
 
+  modules/supporter-product-data:
+    devDependencies:
+      '@aws-sdk/client-dynamodb':
+        specifier: ^3.679.0
+        version: 3.687.0
+      '@aws-sdk/util-dynamodb':
+        specifier: ^3.679.0
+        version: 3.687.0(@aws-sdk/client-dynamodb@3.687.0)
+
   modules/sync-supporter-product-data:
     devDependencies:
       '@aws-sdk/client-sqs':
@@ -5942,9 +5951,9 @@ snapshots:
       '@aws-sdk/types': 3.686.0
       '@smithy/core': 2.5.4
       '@smithy/node-config-provider': 3.1.11
-      '@smithy/property-provider': 3.1.7
+      '@smithy/property-provider': 3.1.10
       '@smithy/protocol-http': 4.1.7
-      '@smithy/signature-v4': 4.2.0
+      '@smithy/signature-v4': 4.2.3
       '@smithy/smithy-client': 3.4.4
       '@smithy/types': 3.7.1
       '@smithy/util-middleware': 3.0.10
@@ -6326,9 +6335,9 @@ snapshots:
       '@aws-sdk/credential-provider-sso': 3.687.0(@aws-sdk/client-sso-oidc@3.687.0(@aws-sdk/client-sts@3.687.0))
       '@aws-sdk/credential-provider-web-identity': 3.686.0(@aws-sdk/client-sts@3.687.0)
       '@aws-sdk/types': 3.686.0
-      '@smithy/credential-provider-imds': 3.2.4
-      '@smithy/property-provider': 3.1.7
-      '@smithy/shared-ini-file-loader': 3.1.8
+      '@smithy/credential-provider-imds': 3.2.7
+      '@smithy/property-provider': 3.1.10
+      '@smithy/shared-ini-file-loader': 3.1.11
       '@smithy/types': 3.7.1
       tslib: 2.6.2
     transitivePeerDependencies:

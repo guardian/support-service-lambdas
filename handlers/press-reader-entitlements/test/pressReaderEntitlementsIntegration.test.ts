@@ -6,15 +6,7 @@ import { generateProductCatalog } from '@modules/product-catalog/generateProduct
 import zuoraCatalogFixture from '../../../modules/zuora-catalog/test/fixtures/catalog-code.json';
 import { getMemberDetails } from '../src';
 import { getClientAccessToken, getIdentityId } from '../src/identity';
-import {
-	getLatestSubscription,
-	getSupporterProductData,
-} from '../src/supporterProductData';
-
-test('Dynamo Integration', async () => {
-	const supporterData = await getSupporterProductData('CODE', '110001137');
-	expect(supporterData?.length).toEqual(4);
-});
+import { getLatestSubscription } from '../src/supporterProductData';
 
 test('Entitlements check', async () => {
 	const productCatalog = generateProductCatalog(zuoraCatalogFixture);
