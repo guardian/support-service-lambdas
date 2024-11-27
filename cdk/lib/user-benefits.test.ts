@@ -16,6 +16,8 @@ describe('The User benefits stack', () => {
 			domainName: `user-benefits.code.${supportApisDomain}`,
 			hostedZoneId: supportHostedZoneId,
 			certificateId: supportCertificateId,
+			supporterProductDataTable:
+				'supporter-product-data-tables-CODE-SupporterProductDataTable',
 		});
 		const prodStack = new UserBenefits(app, 'user-benefits-PROD', {
 			stack: 'membership',
@@ -23,6 +25,8 @@ describe('The User benefits stack', () => {
 			domainName: `user-benefits.${supportApisDomain}`,
 			hostedZoneId: supportHostedZoneId,
 			certificateId: supportCertificateId,
+			supporterProductDataTable:
+				'supporter-product-data-tables-PROD-SupporterProductDataTable',
 		});
 
 		expect(Template.fromStack(codeStack).toJSON()).toMatchSnapshot();

@@ -3,7 +3,7 @@ import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import type { App } from 'aws-cdk-lib';
-import { Duration } from 'aws-cdk-lib';
+import { Duration, Fn } from 'aws-cdk-lib';
 import {
 	ApiKeySourceType,
 	CfnBasePathMapping,
@@ -20,6 +20,7 @@ export interface UserBenefitsProps extends GuStackProps {
 	certificateId: string;
 	domainName: string;
 	hostedZoneId: string;
+	supporterProductDataTable: string;
 }
 
 export class UserBenefits extends GuStack {
@@ -35,6 +36,11 @@ export class UserBenefits extends GuStack {
 			Stage: this.stage,
 		};
 
+		const supporterProductDataTablePolicy = new PolicyStatement({
+			actions: ['dynamodb:Query'],
+			resources: [Fn.importValue(props.supporterProductDataTable)],
+		});
+
 		// ---- API-triggered lambda functions ---- //
 		const lambda = new GuApiLambda(this, `${app}-lambda`, {
 			description:
@@ -42,6 +48,7 @@ export class UserBenefits extends GuStack {
 			functionName: nameWithStage,
 			fileName: `${app}.zip`,
 			handler: 'index.handler',
+			initialPolicy: [supporterProductDataTablePolicy],
 			runtime: nodeVersion,
 			memorySize: 1024,
 			timeout: Duration.seconds(300),

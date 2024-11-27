@@ -273,6 +273,8 @@ new UserBenefits(app, 'user-benefits-CODE', {
 	domainName: `user-benefits-code.${supportApisDomain}`,
 	hostedZoneId: supportHostedZoneId,
 	certificateId: supportCertificateId,
+	supporterProductDataTable:
+		'supporter-product-data-tables-CODE-SupporterProductDataTable',
 });
 new UserBenefits(app, 'user-benefits-PROD', {
 	stack: 'support',
@@ -280,4 +282,6 @@ new UserBenefits(app, 'user-benefits-PROD', {
 	domainName: `user-benefits.${supportApisDomain}`,
 	hostedZoneId: supportHostedZoneId,
 	certificateId: supportCertificateId,
+	supporterProductDataTable:
+		'supporter-product-data-tables-PROD-SupporterProductDataTable',
 });
