@@ -1,4 +1,5 @@
 import { ValidationError } from '@modules/errors';
+import { IdentityAuthorisationHelper } from '@modules/identity/identity';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
@@ -10,17 +11,16 @@ import type {
 import { getUserBenefits } from './userBenefits';
 
 const stage = process.env.STAGE as Stage;
+const identityAuthorisationHelper = new IdentityAuthorisationHelper(stage);
 
 export const handler: Handler = async (
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
 	console.log(`Input is ${JSON.stringify(event)}`);
 	try {
+		const identityId =
+			await identityAuthorisationHelper.identityIdFromRequest(event);
 		const productCatalog = await getProductCatalogFromApi(stage);
-		const identityId = event.queryStringParameters?.identityId;
-		if (identityId === undefined) {
-			throw new ValidationError('IdentityId is required');
-		}
 
 		const userBenefitsResponse = await getUserBenefits(
 			stage,
