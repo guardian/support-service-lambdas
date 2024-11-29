@@ -31,14 +31,16 @@ const loadOktaConfig = (stage: Stage): OktaConfig => {
 export class IdentityAuthorisationHelper {
 	config;
 	oktaJwtVerifier;
-	constructor(stage: Stage) {
+	constructor(stage: Stage, requiredScopes: string[] = []) {
 		this.config = loadOktaConfig(stage);
 		this.oktaJwtVerifier = new OktaJwtVerifier({
 			issuer: this.config.issuer,
+			assertClaims: {
+				'scp.includes': requiredScopes,
+			},
 			cacheMaxAge: 24 * 60 * 60 * 1000, // 24 hours
 		} as OktaJwtVerifier.VerifierOptions);
 	}
-
 	verifyAccessToken = (authHeader: string): Promise<OktaJwtVerifier.Jwt> => {
 		const accessToken = authHeader.match(/Bearer (.+)/)?.[1];
 		if (accessToken) {
@@ -50,31 +52,9 @@ export class IdentityAuthorisationHelper {
 			throw new Error('Invalid Authorization header');
 		}
 	};
-
-	checkTokenScopes = (
-		requiredScopes: string[],
-		scopesFromToken: string[],
-	): boolean => {
-		return (
-			requiredScopes.length == 0 ||
-			scopesFromToken.some((scope) => requiredScopes.includes(scope))
-		);
-	};
-
-	checkIdentityToken = async (
-		authHeader: string,
-		requiredScopes: string[] = [],
-	): Promise<string> => {
+	checkIdentityToken = async (authHeader: string): Promise<string> => {
 		return this.verifyAccessToken(authHeader)
 			.then((jwt) => {
-				const tokenScopesAreValid = this.checkTokenScopes(
-					requiredScopes,
-					jwt.claims.scp ?? [],
-				);
-				if (!tokenScopesAreValid) {
-					console.log('access-token-invalid-scopes');
-					throw new Error('access-token-invalid-scopes');
-				}
 				const claims = jwt.claims as JwtClaimsWithUserID;
 				if (!claims.legacy_identity_id) {
 					throw new Error('No legacy_identity_id in claims');
@@ -86,8 +66,7 @@ export class IdentityAuthorisationHelper {
 				throw err;
 			});
 	};
-
-	identityIdFromRequest = (
+	public identityIdFromRequest = (
 		apiGatewayEvent: APIGatewayProxyEvent,
 	): Promise<string> => {
 		if (apiGatewayEvent.headers.Authorization === undefined) {
