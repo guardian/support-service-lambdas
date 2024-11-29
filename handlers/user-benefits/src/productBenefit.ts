@@ -23,6 +23,7 @@ export const digitalSubscriptionBenefits = supporterPlusBenefits.concat([
 ]);
 export const tierThreeBenefits = digitalSubscriptionBenefits.concat([
 	'guardianWeeklyEdition',
+	'newspaperArchive',
 ]);
 
 export const productBenefitMapping: Record<ProductKey, ProductBenefit[]> = {
