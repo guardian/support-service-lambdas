@@ -15,3 +15,9 @@ test('getUserBenefits', () => {
 	expect(getBenefits(['GuardianWeeklyDomestic'])).toEqual(['fewerSupportAsks']);
 	expect(getBenefits([])).toEqual([]);
 });
+
+test('getUserBenefits returns distinct benefits', () => {
+	expect(getBenefits(['TierThree', 'DigitalSubscription'])).toEqual(
+		tierThreeBenefits,
+	);
+});

@@ -1,3 +1,4 @@
+import { distinct } from '@modules/arrayFunctions';
 import type {
 	ProductCatalogHelper,
 	ProductKey,
@@ -58,7 +59,7 @@ const getUserProducts = async (
 };
 
 export const getBenefits = (userProducts: ProductKey[]): ProductBenefit[] =>
-	userProducts.flatMap((product) => productBenefitMapping[product]);
+	distinct(userProducts.flatMap((product) => productBenefitMapping[product]));
 
 export const getTrialInformation = (
 	productBenefits: ProductBenefit[],
