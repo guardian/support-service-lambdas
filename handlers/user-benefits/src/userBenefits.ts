@@ -28,8 +28,11 @@ export const getUserBenefits = async (
 		productCatalogHelper,
 		identityId,
 	);
+	console.log(`User products for user ${identityId} are: `, userProducts);
 	const benefits = getBenefits(userProducts);
+	console.log(`Benefits for user ${identityId} are: `, benefits);
 	const trials = getTrialInformation(benefits, userProducts);
+	console.log(`Trials for user ${identityId} are: `, trials);
 	return {
 		benefits,
 		trials,
@@ -68,6 +71,7 @@ export const getTrialInformation = (
 	if (productBenefits.includes('feastApp')) {
 		return {};
 	}
+	// TODO: this is all changing shortly
 	if (userProducts.find((product) => product === 'GuardianWeeklyDomestic')) {
 		return { feastApp: feastExtendedTrial };
 	}

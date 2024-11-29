@@ -20,6 +20,7 @@ export const handler: Handler = async (
 	try {
 		const identityId =
 			await identityAuthorisationHelper.identityIdFromRequest(event);
+		console.log(`Identity ID is ${identityId}`);
 		const productCatalog = await getProductCatalogFromApi(stage);
 
 		const userBenefitsResponse = await getUserBenefits(
