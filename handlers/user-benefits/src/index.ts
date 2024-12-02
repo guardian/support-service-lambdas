@@ -11,7 +11,7 @@ import type {
 import { getUserBenefits } from './userBenefits';
 
 const stage = process.env.STAGE as Stage;
-const identityAuthorisationHelper = new IdentityAuthorisationHelper(stage);
+const identityAuthorisationHelper = new IdentityAuthorisationHelper(stage, []); //TODO: Do we have any required scopes?
 
 export const handler: Handler = async (
 	event: APIGatewayProxyEvent,
