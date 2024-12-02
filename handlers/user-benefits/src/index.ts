@@ -51,10 +51,9 @@ export const handler: Handler = async (
 			};
 		}
 		if (error instanceof ValidationError) {
-			console.log(`Validation failure: ${error.message}`);
 			return {
 				body: error.message,
-				statusCode: 400,
+				statusCode: 403,
 			};
 		}
 		return {
