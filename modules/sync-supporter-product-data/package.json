@@ -7,6 +7,6 @@
   "devDependencies": {
     "dayjs": "^1.11.13",
     "ts-node": "10.9.2",
-    "@aws-sdk/client-sqs": "3.682.0"
+    "@aws-sdk/client-sqs": "3.699.0"
   }
 }
