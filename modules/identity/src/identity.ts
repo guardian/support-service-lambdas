@@ -4,8 +4,8 @@ import type { JwtClaims } from '@okta/jwt-verifier';
 import OktaJwtVerifier from '@okta/jwt-verifier';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 
-// The claims object returned by Okta should include the identity_id
-interface JwtClaimsWithUserID extends JwtClaims {
+// The claims object returned by Okta. It should include the identity_id
+interface JwtClaimsWithIdentityID extends JwtClaims {
 	legacy_identity_id?: string;
 	braze_uuid?: string;
 }
@@ -13,6 +13,20 @@ type OktaConfig = {
 	issuer: string;
 	audience: string;
 };
+
+export class InvalidScopesError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = 'InvalidScopesError';
+	}
+}
+
+export class ExpiredTokenError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = 'ExpiredTokenError';
+	}
+}
 
 const loadOktaConfig = (stage: Stage): OktaConfig => {
 	if (stage === 'PROD') {
@@ -31,7 +45,7 @@ const loadOktaConfig = (stage: Stage): OktaConfig => {
 export class IdentityAuthorisationHelper {
 	config;
 	oktaJwtVerifier;
-	constructor(stage: Stage, requiredScopes: string[] = []) {
+	constructor(stage: Stage, requiredScopes: string[]) {
 		this.config = loadOktaConfig(stage);
 		this.oktaJwtVerifier = new OktaJwtVerifier({
 			issuer: this.config.issuer,
@@ -53,18 +67,32 @@ export class IdentityAuthorisationHelper {
 		}
 	};
 	checkIdentityToken = async (authHeader: string): Promise<string> => {
-		return this.verifyAccessToken(authHeader)
-			.then((jwt) => {
-				const claims = jwt.claims as JwtClaimsWithUserID;
-				if (!claims.legacy_identity_id) {
-					throw new Error('No legacy_identity_id in claims');
+		try {
+			const jwt = await this.verifyAccessToken(authHeader);
+			console.log(`Verified access token: ${JSON.stringify(jwt)}`);
+			const claims = jwt.claims as JwtClaimsWithIdentityID;
+			if (!claims.legacy_identity_id) {
+				throw new ValidationError('No legacy_identity_id in claims');
+			}
+			return claims.legacy_identity_id;
+		} catch (err) {
+			if (err instanceof Error) {
+				if (err.name === 'JwtParseError' && err.message === 'Jwt is expired') {
+					throw new ExpiredTokenError('Jwt is expired');
 				}
-				return claims.legacy_identity_id;
-			})
-			.catch((err) => {
-				console.log(`Failed to verify access token: ${String(err)}`);
-				throw err;
-			});
+				if (
+					/claim 'scp' value.*does not include expected value .*/.test(
+						err.message,
+					)
+				) {
+					throw new InvalidScopesError(
+						'Token does not have the required scopes',
+					);
+				}
+			}
+			console.log(`Failed to verify access token: ${String(err)}`);
+			throw err;
+		}
 	};
 	public identityIdFromRequest = (
 		apiGatewayEvent: APIGatewayProxyEvent,
