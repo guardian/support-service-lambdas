@@ -1,4 +1,8 @@
-import { sendEmail } from '@modules/email/email';
+import {
+	DataExtensionNames,
+	type EmailMessageWithIdentityUserId,
+	sendEmail,
+} from '@modules/email/email';
 import { ValidationError } from '@modules/errors';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
@@ -14,7 +18,7 @@ import {
 	applyDiscountEndpoint,
 	previewDiscountEndpoint,
 } from './discountEndpoint';
-import { applyDiscountSchema } from './requestSchema';
+import { applyDiscountSchema, sendEmailSchema } from './requestSchema';
 import type {
 	ApplyDiscountResponseBody,
 	EligibilityCheckResponseBody,
@@ -82,6 +86,30 @@ const routeRequest = async (logger: Logger, event: APIGatewayProxyEvent) => {
 						result,
 						previewDiscountResponseSchema,
 					),
+					statusCode: 200,
+				};
+			}
+			case event.path === '/send-email' && event.httpMethod === 'POST': {
+				logger.log('sending email');
+				const request = sendEmailSchema.parse(
+					JSON.parse(getIfDefined(event.body, 'No body was provided')),
+				);
+				logger.mutableAddContext(request.identityId);
+				logger.mutableAddContext(request.emailAddress);
+				logger.log('strikeDiscount - user has requested a strike discount');
+				const emailPayload: EmailMessageWithIdentityUserId = {
+					To: {
+						Address: request.emailAddress,
+						ContactAttributes: {
+							SubscriberAttributes: {},
+						},
+					},
+					DataExtensionName: DataExtensionNames.strikeSuspensionEmail,
+					IdentityUserId: request.identityId,
+				};
+				await sendEmail(stage, emailPayload, logger.log.bind(logger));
+				return {
+					body: 'Email has been sent to ' + request.emailAddress,
 					statusCode: 200,
 				};
 			}

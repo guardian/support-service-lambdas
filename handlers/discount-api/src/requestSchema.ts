@@ -5,3 +5,10 @@ export const applyDiscountSchema = z.object({
 });
 
 export type ApplyDiscountRequestBody = z.infer<typeof applyDiscountSchema>;
+
+export const sendEmailSchema = z.object({
+	identityId: z.string(),
+	emailAddress: z.string(),
+});
+
+export type SendEmailRequestBody = z.infer<typeof sendEmailSchema>;
