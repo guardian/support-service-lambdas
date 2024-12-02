@@ -91,25 +91,30 @@ const routeRequest = async (logger: Logger, event: APIGatewayProxyEvent) => {
 			}
 			case event.path === '/send-email' && event.httpMethod === 'POST': {
 				logger.log('sending email');
-				const request = sendEmailSchema.parse(
+				const emailAddress = sendEmailSchema.parse(
 					JSON.parse(getIfDefined(event.body, 'No body was provided')),
+				).emailAddress;
+				const identityId = getIfDefined(
+					event.headers['x-identity-id'],
+					'Identity ID not found in request',
 				);
-				logger.mutableAddContext(request.identityId);
-				logger.mutableAddContext(request.emailAddress);
+
+				logger.mutableAddContext(identityId);
+				logger.mutableAddContext(emailAddress);
 				logger.log('strikeDiscount - user has requested a strike discount');
 				const emailPayload: EmailMessageWithIdentityUserId = {
 					To: {
-						Address: request.emailAddress,
+						Address: emailAddress,
 						ContactAttributes: {
 							SubscriberAttributes: {},
 						},
 					},
 					DataExtensionName: DataExtensionNames.strikeSuspensionEmail,
-					IdentityUserId: request.identityId,
+					IdentityUserId: identityId,
 				};
 				await sendEmail(stage, emailPayload, logger.log.bind(logger));
 				return {
-					body: 'Email has been sent to ' + request.emailAddress,
+					body: 'Email has been sent to ' + emailAddress,
 					statusCode: 200,
 				};
 			}
