@@ -1,5 +1,9 @@
 import { ValidationError } from '@modules/errors';
-import { IdentityAuthorisationHelper } from '@modules/identity/identity';
+import {
+	ExpiredTokenError,
+	IdentityAuthorisationHelper,
+	InvalidScopesError,
+} from '@modules/identity/identity';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
@@ -34,6 +38,18 @@ export const handler: Handler = async (
 		};
 	} catch (error) {
 		console.log('Caught exception with message: ', error);
+		if (error instanceof ExpiredTokenError) {
+			return {
+				body: 'Token has expired',
+				statusCode: 401,
+			};
+		}
+		if (error instanceof InvalidScopesError) {
+			return {
+				body: 'Token does not have the required scopes',
+				statusCode: 403,
+			};
+		}
 		if (error instanceof ValidationError) {
 			console.log(`Validation failure: ${error.message}`);
 			return {
