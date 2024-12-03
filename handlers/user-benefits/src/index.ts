@@ -17,6 +17,12 @@ export const handler: Handler = async (
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
 	console.log(`Input is ${JSON.stringify(event)}`);
+	if (!(event.path === '/benefits/me' && event.httpMethod === 'GET')) {
+		return {
+			body: 'Not Found',
+			statusCode: 404,
+		};
+	}
 	try {
 		const authenticatedEvent = await identityAuthenticator.authenticate(event);
 		if (authenticatedEvent.type === 'FailedAuthenticationResponse') {
