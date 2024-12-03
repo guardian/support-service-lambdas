@@ -2,13 +2,10 @@ import { GuApiLambda } from '@guardian/cdk';
 import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
+import { GuCname } from '@guardian/cdk/lib/constructs/dns';
 import type { App } from 'aws-cdk-lib';
 import { Duration, Fn } from 'aws-cdk-lib';
-import {
-	ApiKeySourceType,
-	CfnBasePathMapping,
-	CfnDomainName,
-} from 'aws-cdk-lib/aws-apigateway';
+import { CfnBasePathMapping, CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
@@ -18,7 +15,8 @@ export interface UserBenefitsProps extends GuStackProps {
 	stack: string;
 	stage: string;
 	certificateId: string;
-	domainName: string;
+	internalDomainName: string;
+	publicDomainName: string;
 	hostedZoneId: string;
 	supporterProductDataTable: string;
 }
@@ -68,31 +66,11 @@ export class UserBenefits extends GuStack {
 					stageName: this.stage,
 				},
 
-				apiKeySourceType: ApiKeySourceType.HEADER,
 				defaultMethodOptions: {
-					apiKeyRequired: true,
+					apiKeyRequired: false,
 				},
 			},
 		});
-
-		const usagePlan = lambda.api.addUsagePlan('UsagePlan', {
-			name: nameWithStage,
-			description: 'REST endpoints for user-benefits',
-			apiStages: [
-				{
-					stage: lambda.api.deploymentStage,
-					api: lambda.api,
-				},
-			],
-		});
-
-		// create api key
-		const apiKey = lambda.api.addApiKey(`${app}-key-${this.stage}`, {
-			apiKeyName: `${app}-key-${this.stage}`,
-		});
-
-		// associate api key to plan
-		usagePlan.addApiKey(apiKey);
 
 		// ---- Alarms ---- //
 		const alarmName = (shortDescription: string) =>
@@ -126,7 +104,7 @@ export class UserBenefits extends GuStack {
 		// ---- DNS ---- //
 		const certificateArn = `arn:aws:acm:eu-west-1:${this.account}:certificate/${props.certificateId}`;
 		const cfnDomainName = new CfnDomainName(this, 'DomainName', {
-			domainName: props.domainName,
+			domainName: props.internalDomainName,
 			regionalCertificateArn: certificateArn,
 			endpointConfiguration: {
 				types: ['REGIONAL'],
@@ -140,11 +118,18 @@ export class UserBenefits extends GuStack {
 		});
 
 		new CfnRecordSet(this, 'DNSRecord', {
-			name: props.domainName,
+			name: props.internalDomainName,
 			type: 'CNAME',
 			hostedZoneId: props.hostedZoneId,
 			ttl: '120',
 			resourceRecords: [cfnDomainName.attrRegionalDomainName],
+		});
+
+		new GuCname(this, 'NS1 DNS entry', {
+			app: app,
+			domainName: props.publicDomainName,
+			ttl: Duration.hours(1),
+			resourceRecord: 'guardian.map.fastly.net',
 		});
 
 		const s3InlinePolicy: Policy = new Policy(this, 'S3 inline policy', {

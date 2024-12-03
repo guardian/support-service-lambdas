@@ -270,7 +270,8 @@ new PressReaderEntitlements(app, 'press-reader-entitlements-PROD', {
 new UserBenefits(app, 'user-benefits-CODE', {
 	stack: 'support',
 	stage: 'CODE',
-	domainName: `user-benefits-code.${supportApisDomain}`,
+	internalDomainName: `user-benefits-code.${supportApisDomain}`,
+	publicDomainName: 'user-benefits.code.dev-guardianapis.com',
 	hostedZoneId: supportHostedZoneId,
 	certificateId: supportCertificateId,
 	supporterProductDataTable:
@@ -279,7 +280,8 @@ new UserBenefits(app, 'user-benefits-CODE', {
 new UserBenefits(app, 'user-benefits-PROD', {
 	stack: 'support',
 	stage: 'PROD',
-	domainName: `user-benefits.${supportApisDomain}`,
+	internalDomainName: `user-benefits.${supportApisDomain}`,
+	publicDomainName: 'user-benefits.guardianapis.com',
 	hostedZoneId: supportHostedZoneId,
 	certificateId: supportCertificateId,
 	supporterProductDataTable:

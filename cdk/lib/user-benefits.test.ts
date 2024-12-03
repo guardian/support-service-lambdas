@@ -13,7 +13,8 @@ describe('The User benefits stack', () => {
 		const codeStack = new UserBenefits(app, 'user-benefits-CODE', {
 			stack: 'membership',
 			stage: 'CODE',
-			domainName: `user-benefits.code.${supportApisDomain}`,
+			internalDomainName: `user-benefits.code.${supportApisDomain}`,
+			publicDomainName: 'user-benefits.code.dev-guardianapis.com',
 			hostedZoneId: supportHostedZoneId,
 			certificateId: supportCertificateId,
 			supporterProductDataTable:
@@ -22,7 +23,8 @@ describe('The User benefits stack', () => {
 		const prodStack = new UserBenefits(app, 'user-benefits-PROD', {
 			stack: 'membership',
 			stage: 'PROD',
-			domainName: `user-benefits.${supportApisDomain}`,
+			internalDomainName: `user-benefits.${supportApisDomain}`,
+			publicDomainName: 'user-benefits.guardianapis.com',
 			hostedZoneId: supportHostedZoneId,
 			certificateId: supportCertificateId,
 			supporterProductDataTable:

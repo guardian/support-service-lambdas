@@ -8,6 +8,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
       "GuApiLambda",
       "GuApiGateway5xxPercentageAlarm",
       "GuAlarm",
+      "GuCname",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -230,6 +231,18 @@ exports[`The User benefits stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::ApiGateway::DomainName",
+    },
+    "NS1DNSentry": {
+      "Properties": {
+        "Name": "user-benefits.code.dev-guardianapis.com",
+        "RecordType": "CNAME",
+        "ResourceRecords": [
+          "guardian.map.fastly.net",
+        ],
+        "Stage": "CODE",
+        "TTL": 3600,
+      },
+      "Type": "Guardian::DNS::RecordSet",
     },
     "S3inlinepolicy3B07399A": {
       "Properties": {
@@ -473,7 +486,6 @@ exports[`The User benefits stack matches the snapshot 1`] = `
     },
     "userbenefitslambdauserbenefitsCODE14241B5B": {
       "Properties": {
-        "ApiKeySourceType": "HEADER",
         "Description": "API Gateway created by CDK",
         "Name": "user-benefits-CODE",
         "Tags": [
@@ -581,7 +593,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
     },
     "userbenefitslambdauserbenefitsCODEANYB79394BE": {
       "Properties": {
-        "ApiKeyRequired": true,
+        "ApiKeyRequired": false,
         "AuthorizationType": "NONE",
         "HttpMethod": "ANY",
         "Integration": {
@@ -694,7 +706,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "userbenefitslambdauserbenefitsCODEDeployment236838197538cf027bef77b851e3854400bf32af": {
+    "userbenefitslambdauserbenefitsCODEDeployment23683819163118741c02f815f88a90c3534056f8": {
       "DependsOn": [
         "userbenefitslambdauserbenefitsCODEproxyANY433A9AFE",
         "userbenefitslambdauserbenefitsCODEproxy0CF74ECD",
@@ -714,7 +726,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "userbenefitslambdauserbenefitsCODEDeployment236838197538cf027bef77b851e3854400bf32af",
+          "Ref": "userbenefitslambdauserbenefitsCODEDeployment23683819163118741c02f815f88a90c3534056f8",
         },
         "RestApiId": {
           "Ref": "userbenefitslambdauserbenefitsCODE14241B5B",
@@ -745,58 +757,6 @@ exports[`The User benefits stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::Stage",
     },
-    "userbenefitslambdauserbenefitsCODEUsagePlan13296C30": {
-      "Properties": {
-        "ApiStages": [
-          {
-            "ApiId": {
-              "Ref": "userbenefitslambdauserbenefitsCODE14241B5B",
-            },
-            "Stage": {
-              "Ref": "userbenefitslambdauserbenefitsCODEDeploymentStageCODEE2C1EB57",
-            },
-            "Throttle": {},
-          },
-        ],
-        "Description": "REST endpoints for user-benefits",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "user-benefits",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "UsagePlanName": "user-benefits-CODE",
-      },
-      "Type": "AWS::ApiGateway::UsagePlan",
-    },
-    "userbenefitslambdauserbenefitsCODEUsagePlanUsagePlanKeyResourceuserbenefitsCODEuserbenefitslambdauserbenefitsCODEuserbenefitskeyCODECF9C3728FBAE29D7": {
-      "Properties": {
-        "KeyId": {
-          "Ref": "userbenefitslambdauserbenefitsCODEuserbenefitskeyCODE59AE19DB",
-        },
-        "KeyType": "API_KEY",
-        "UsagePlanId": {
-          "Ref": "userbenefitslambdauserbenefitsCODEUsagePlan13296C30",
-        },
-      },
-      "Type": "AWS::ApiGateway::UsagePlanKey",
-    },
     "userbenefitslambdauserbenefitsCODEproxy0CF74ECD": {
       "Properties": {
         "ParentId": {
@@ -814,7 +774,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
     },
     "userbenefitslambdauserbenefitsCODEproxyANY433A9AFE": {
       "Properties": {
-        "ApiKeyRequired": true,
+        "ApiKeyRequired": false,
         "AuthorizationType": "NONE",
         "HttpMethod": "ANY",
         "Integration": {
@@ -931,45 +891,6 @@ exports[`The User benefits stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "userbenefitslambdauserbenefitsCODEuserbenefitskeyCODE59AE19DB": {
-      "Properties": {
-        "Enabled": true,
-        "Name": "user-benefits-key-CODE",
-        "StageKeys": [
-          {
-            "RestApiId": {
-              "Ref": "userbenefitslambdauserbenefitsCODE14241B5B",
-            },
-            "StageName": {
-              "Ref": "userbenefitslambdauserbenefitsCODEDeploymentStageCODEE2C1EB57",
-            },
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "user-benefits",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::ApiKey",
-    },
   },
 }
 `;
@@ -982,6 +903,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
       "GuApiLambda",
       "GuApiGateway5xxPercentageAlarm",
       "GuAlarm",
+      "GuCname",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -1204,6 +1126,18 @@ exports[`The User benefits stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::ApiGateway::DomainName",
+    },
+    "NS1DNSentry": {
+      "Properties": {
+        "Name": "user-benefits.guardianapis.com",
+        "RecordType": "CNAME",
+        "ResourceRecords": [
+          "guardian.map.fastly.net",
+        ],
+        "Stage": "PROD",
+        "TTL": 3600,
+      },
+      "Type": "Guardian::DNS::RecordSet",
     },
     "S3inlinepolicy3B07399A": {
       "Properties": {
@@ -1447,7 +1381,6 @@ exports[`The User benefits stack matches the snapshot 2`] = `
     },
     "userbenefitslambdauserbenefitsPROD46740E25": {
       "Properties": {
-        "ApiKeySourceType": "HEADER",
         "Description": "API Gateway created by CDK",
         "Name": "user-benefits-PROD",
         "Tags": [
@@ -1555,7 +1488,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
     },
     "userbenefitslambdauserbenefitsPRODANYEAF8DF58": {
       "Properties": {
-        "ApiKeyRequired": true,
+        "ApiKeyRequired": false,
         "AuthorizationType": "NONE",
         "HttpMethod": "ANY",
         "Integration": {
@@ -1668,7 +1601,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "userbenefitslambdauserbenefitsPRODDeploymentDD11CFA18ea73d36d2812ee1d278b44a67d96b70": {
+    "userbenefitslambdauserbenefitsPRODDeploymentDD11CFA1e5fd0ba57b7247c0a8cf63920c782b08": {
       "DependsOn": [
         "userbenefitslambdauserbenefitsPRODproxyANY38F6879D",
         "userbenefitslambdauserbenefitsPRODproxy8D0A546A",
@@ -1688,7 +1621,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "userbenefitslambdauserbenefitsPRODDeploymentDD11CFA18ea73d36d2812ee1d278b44a67d96b70",
+          "Ref": "userbenefitslambdauserbenefitsPRODDeploymentDD11CFA1e5fd0ba57b7247c0a8cf63920c782b08",
         },
         "RestApiId": {
           "Ref": "userbenefitslambdauserbenefitsPROD46740E25",
@@ -1719,58 +1652,6 @@ exports[`The User benefits stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::Stage",
     },
-    "userbenefitslambdauserbenefitsPRODUsagePlanD32EE983": {
-      "Properties": {
-        "ApiStages": [
-          {
-            "ApiId": {
-              "Ref": "userbenefitslambdauserbenefitsPROD46740E25",
-            },
-            "Stage": {
-              "Ref": "userbenefitslambdauserbenefitsPRODDeploymentStagePROD1EA2411B",
-            },
-            "Throttle": {},
-          },
-        ],
-        "Description": "REST endpoints for user-benefits",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "user-benefits",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "UsagePlanName": "user-benefits-PROD",
-      },
-      "Type": "AWS::ApiGateway::UsagePlan",
-    },
-    "userbenefitslambdauserbenefitsPRODUsagePlanUsagePlanKeyResourceuserbenefitsPRODuserbenefitslambdauserbenefitsPRODuserbenefitskeyPROD5A91DFA3F85EF91B": {
-      "Properties": {
-        "KeyId": {
-          "Ref": "userbenefitslambdauserbenefitsPRODuserbenefitskeyPROD35180CEA",
-        },
-        "KeyType": "API_KEY",
-        "UsagePlanId": {
-          "Ref": "userbenefitslambdauserbenefitsPRODUsagePlanD32EE983",
-        },
-      },
-      "Type": "AWS::ApiGateway::UsagePlanKey",
-    },
     "userbenefitslambdauserbenefitsPRODproxy8D0A546A": {
       "Properties": {
         "ParentId": {
@@ -1788,7 +1669,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
     },
     "userbenefitslambdauserbenefitsPRODproxyANY38F6879D": {
       "Properties": {
-        "ApiKeyRequired": true,
+        "ApiKeyRequired": false,
         "AuthorizationType": "NONE",
         "HttpMethod": "ANY",
         "Integration": {
@@ -1904,45 +1785,6 @@ exports[`The User benefits stack matches the snapshot 2`] = `
         },
       },
       "Type": "AWS::Lambda::Permission",
-    },
-    "userbenefitslambdauserbenefitsPRODuserbenefitskeyPROD35180CEA": {
-      "Properties": {
-        "Enabled": true,
-        "Name": "user-benefits-key-PROD",
-        "StageKeys": [
-          {
-            "RestApiId": {
-              "Ref": "userbenefitslambdauserbenefitsPROD46740E25",
-            },
-            "StageName": {
-              "Ref": "userbenefitslambdauserbenefitsPRODDeploymentStagePROD1EA2411B",
-            },
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "user-benefits",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::ApiKey",
     },
   },
 }
