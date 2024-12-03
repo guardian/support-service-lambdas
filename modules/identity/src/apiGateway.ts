@@ -17,7 +17,7 @@ export type FailedAuthenticationResponse = APIGatewayProxyResult & {
 	type: 'FailedAuthenticationResponse';
 };
 
-export class ApiGatewayIdentityAuthenticator {
+export class IdentityApiGatewayAuthenticator {
 	tokenHelper: OktaTokenHelper;
 	constructor(stage: Stage, requiredScopes: string[]) {
 		this.tokenHelper = new OktaTokenHelper(stage, requiredScopes);

@@ -10,7 +10,7 @@
  * @group integration
  */
 
-import { ApiGatewayIdentityAuthenticator } from '@modules/identity/apiGateway';
+import { IdentityApiGatewayAuthenticator } from '@modules/identity/apiGateway';
 import {
 	ExpiredTokenError,
 	InvalidScopesError,
@@ -68,7 +68,7 @@ test('we throw an error if the token is expired', async () => {
 	).rejects.toThrow(ExpiredTokenError);
 });
 
-const authenticator = new ApiGatewayIdentityAuthenticator('CODE', []);
+const authenticator = new IdentityApiGatewayAuthenticator('CODE', []);
 
 test('ApiGateway event with a valid token returns an authenticated result', async () => {
 	const response = await authenticator.authenticate(
@@ -105,7 +105,7 @@ test('ApiGateway event with an invalid token returns a 401 response', async () =
 });
 
 test('ApiGateway event with a valid token with incorrect scopes returns a 403 response', async () => {
-	const authenticatorWithNonExistantScope = new ApiGatewayIdentityAuthenticator(
+	const authenticatorWithNonExistantScope = new IdentityApiGatewayAuthenticator(
 		'CODE',
 		['non-existent.scope'],
 	);
