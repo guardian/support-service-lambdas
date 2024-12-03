@@ -69,7 +69,7 @@ export class OktaTokenHelper {
 				this.config.audience,
 			);
 		} else {
-			throw new Error('Invalid Authorization header');
+			throw new InvalidTokenError('Invalid Authorization header');
 		}
 	};
 	getIdentityId = async (authHeader: string): Promise<string> => {
