@@ -2,7 +2,6 @@ import { ValidationError } from '@modules/errors';
 import type { Stage } from '@modules/stage';
 import type { JwtClaims } from '@okta/jwt-verifier';
 import OktaJwtVerifier from '@okta/jwt-verifier';
-import type { APIGatewayProxyEvent } from 'aws-lambda';
 
 // The claims object returned by Okta. It should include the identity_id
 interface JwtClaimsWithIdentityID extends JwtClaims {
@@ -28,6 +27,13 @@ export class ExpiredTokenError extends Error {
 	}
 }
 
+export class InvalidTokenError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = 'InvalidTokenError';
+	}
+}
+
 const loadOktaConfig = (stage: Stage): OktaConfig => {
 	if (stage === 'PROD') {
 		return {
@@ -42,7 +48,7 @@ const loadOktaConfig = (stage: Stage): OktaConfig => {
 	};
 };
 
-export class IdentityAuthorisationHelper {
+export class OktaTokenHelper {
 	config;
 	oktaJwtVerifier;
 	constructor(stage: Stage, requiredScopes: string[]) {
@@ -56,7 +62,7 @@ export class IdentityAuthorisationHelper {
 		} as OktaJwtVerifier.VerifierOptions);
 	}
 	verifyAccessToken = (authHeader: string): Promise<OktaJwtVerifier.Jwt> => {
-		const accessToken = authHeader.match(/Bearer (.+)/)?.[1];
+		const accessToken = authHeader.replace('Bearer ', '');
 		if (accessToken) {
 			return this.oktaJwtVerifier.verifyAccessToken(
 				accessToken,
@@ -66,7 +72,7 @@ export class IdentityAuthorisationHelper {
 			throw new Error('Invalid Authorization header');
 		}
 	};
-	checkIdentityToken = async (authHeader: string): Promise<string> => {
+	getIdentityId = async (authHeader: string): Promise<string> => {
 		try {
 			const jwt = await this.verifyAccessToken(authHeader);
 			console.log(`Verified access token: ${JSON.stringify(jwt)}`);
@@ -76,9 +82,16 @@ export class IdentityAuthorisationHelper {
 			}
 			return claims.legacy_identity_id;
 		} catch (err) {
+			console.log(`Failed to verify access token: ${String(err)}`);
 			if (err instanceof Error) {
 				if (err.name === 'JwtParseError' && err.message === 'Jwt is expired') {
 					throw new ExpiredTokenError('Jwt is expired');
+				}
+				if (
+					err.name === 'JwtParseError' &&
+					err.message === 'Jwt cannot be parsed'
+				) {
+					throw new InvalidTokenError('Jwt cannot be parsed');
 				}
 				if (
 					/claim 'scp' value.*does not include expected value .*/.test(
@@ -90,16 +103,7 @@ export class IdentityAuthorisationHelper {
 					);
 				}
 			}
-			console.log(`Failed to verify access token: ${String(err)}`);
 			throw err;
 		}
-	};
-	public identityIdFromRequest = (
-		apiGatewayEvent: APIGatewayProxyEvent,
-	): Promise<string> => {
-		if (apiGatewayEvent.headers.Authorization === undefined) {
-			throw new ValidationError('No Authorization header found in the request');
-		}
-		return this.checkIdentityToken(apiGatewayEvent.headers.Authorization);
 	};
 }
