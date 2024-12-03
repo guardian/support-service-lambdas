@@ -74,7 +74,7 @@ export class OktaTokenHelper {
 	getIdentityId = async (authHeader: string): Promise<string> => {
 		try {
 			const jwt = await this.verifyAccessToken(authHeader);
-			console.log(`Verified access token: ${JSON.stringify(jwt)}`);
+			console.log('Successfully verified access token');
 			const claims = jwt.claims as JwtClaimsWithIdentityID;
 			if (!claims.legacy_identity_id) {
 				throw new ValidationError('No legacy_identity_id in claims');
