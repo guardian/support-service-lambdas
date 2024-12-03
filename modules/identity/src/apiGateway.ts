@@ -31,7 +31,7 @@ export class IdentityApiGatewayAuthenticator {
 			console.log('No Authorization header provided in request', event);
 			return {
 				type: 'FailedAuthenticationResponse',
-				statusCode: 403,
+				statusCode: 401,
 				body: JSON.stringify({ message: 'No Authorization header provided' }),
 			};
 		}

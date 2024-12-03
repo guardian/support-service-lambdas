@@ -1,6 +1,11 @@
-export const buildProxyEvent = (authHeader: string) => {
+import type { APIGatewayProxyEvent } from 'aws-lambda';
+
+export const buildProxyEvent = (
+	authHeader: string | undefined,
+): APIGatewayProxyEvent => {
+	const headers = authHeader !== undefined ? { Authorization: authHeader } : {};
 	return {
-		headers: { Authorization: authHeader },
+		headers,
 		body: '',
 		httpMethod: 'GET',
 		path: '/test',

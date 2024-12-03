@@ -104,6 +104,15 @@ test('ApiGateway event with an invalid token returns a 401 response', async () =
 	expect(response.statusCode).toBe(401);
 });
 
+test('ApiGateway event with an missing token returns a 401 response', async () => {
+	const response = await authenticator.authenticate(buildProxyEvent(undefined));
+	expect(response.type).toBe('FailedAuthenticationResponse');
+	if (response.type !== 'FailedAuthenticationResponse') {
+		throw new Error('Expected response to be a FailedAuthenticationResponse');
+	}
+	expect(response.statusCode).toBe(401);
+});
+
 test('ApiGateway event with a valid token with incorrect scopes returns a 403 response', async () => {
 	const authenticatorWithNonExistantScope = new IdentityApiGatewayAuthenticator(
 		'CODE',
