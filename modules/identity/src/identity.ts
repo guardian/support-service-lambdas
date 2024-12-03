@@ -6,7 +6,6 @@ import OktaJwtVerifier from '@okta/jwt-verifier';
 // The claims object returned by Okta. It should include the identity_id
 interface JwtClaimsWithIdentityID extends JwtClaims {
 	legacy_identity_id?: string;
-	braze_uuid?: string;
 }
 type OktaConfig = {
 	issuer: string;
