@@ -1,9 +1,5 @@
 import { ValidationError } from '@modules/errors';
-import {
-	ExpiredTokenError,
-	IdentityAuthorisationHelper,
-	InvalidScopesError,
-} from '@modules/identity/identity';
+import { IdentityApiGatewayAuthenticator } from '@modules/identity/apiGateway';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
@@ -15,22 +11,24 @@ import type {
 import { getUserBenefits } from './userBenefits';
 
 const stage = process.env.STAGE as Stage;
-const identityAuthorisationHelper = new IdentityAuthorisationHelper(stage, []); //TODO: Do we have any required scopes?
+const identityAuthenticator = new IdentityApiGatewayAuthenticator(stage, []); //TODO: Do we have any required scopes?
 
 export const handler: Handler = async (
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
 	console.log(`Input is ${JSON.stringify(event)}`);
 	try {
-		const identityId =
-			await identityAuthorisationHelper.identityIdFromRequest(event);
-		console.log(`Identity ID is ${identityId}`);
+		const authenticatedEvent = await identityAuthenticator.authenticate(event);
+		if (authenticatedEvent.type === 'FailedAuthenticationResponse') {
+			return authenticatedEvent;
+		}
+		console.log(`Identity ID is ${authenticatedEvent.identityId}`);
 		const productCatalog = await getProductCatalogFromApi(stage);
 
 		const userBenefitsResponse = await getUserBenefits(
 			stage,
 			new ProductCatalogHelper(productCatalog),
-			identityId,
+			authenticatedEvent.identityId,
 		);
 		return {
 			body: JSON.stringify(userBenefitsResponse),
@@ -38,22 +36,10 @@ export const handler: Handler = async (
 		};
 	} catch (error) {
 		console.log('Caught exception with message: ', error);
-		if (error instanceof ExpiredTokenError) {
-			return {
-				body: 'Token has expired',
-				statusCode: 401,
-			};
-		}
-		if (error instanceof InvalidScopesError) {
-			return {
-				body: 'Token does not have the required scopes',
-				statusCode: 403,
-			};
-		}
 		if (error instanceof ValidationError) {
 			return {
 				body: error.message,
-				statusCode: 403,
+				statusCode: 400,
 			};
 		}
 		return {
