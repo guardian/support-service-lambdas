@@ -5,18 +5,16 @@ import type {
 } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import { getSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
-import type { ProductBenefit } from './productBenefit';
 import { productBenefitMapping } from './productBenefit';
-import type { TrialInformation } from './trialInformation';
+import type {
+	ProductBenefit,
+	TrialInformation,
+	UserBenefitsResponse,
+} from './schemas';
 import {
 	feastExtendedTrial,
 	feastRegularSubscription,
 } from './trialInformation';
-
-export type UserBenefitsResponse = {
-	benefits: ProductBenefit[];
-	trials: TrialInformation;
-};
 
 export const getUserBenefits = async (
 	stage: Stage,

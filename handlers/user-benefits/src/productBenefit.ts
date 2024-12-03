@@ -1,15 +1,5 @@
 import type { ProductKey } from '@modules/product-catalog/productCatalog';
-
-export type ProductBenefit =
-	| 'feastApp'
-	| 'adFree'
-	| 'newspaperArchive'
-	| 'newspaperEdition'
-	| 'guardianWeeklyEdition'
-	| 'liveApp'
-	| 'fewerSupportAsks'
-	| 'rejectTracking'
-	| 'liveEvents'; // Do we need this?
+import type { ProductBenefit } from './schemas';
 
 export const supporterPlusBenefits: ProductBenefit[] = [
 	'adFree',
