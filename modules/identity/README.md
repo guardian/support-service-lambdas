@@ -21,6 +21,6 @@ export const handler: Handler = async (
 ```
 
 ## Tests
-See the identity.test.ts file for examples of how to use the module and the [tests readme file](./test/README.md) for how to acquire a valid access token.
+See the identity.test.ts file for more examples of how to use the module and the [tests readme file](./test/README.md) for how to acquire a valid access token.
 
 Documentation for the Okta library used [is here](https://github.com/okta/okta-jwt-verifier-js)
