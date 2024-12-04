@@ -55,7 +55,7 @@ export function getLatestValidSubscription(
 	const latestSubscription = sortBy(
 		validSubscriptions,
 		(item) => item.termEndDate,
-	)[0];
+	).reverse()[0];
 	console.log(
 		`User has ${validSubscriptions.length} valid subscriptions, returning latest: ${JSON.stringify(latestSubscription)}`,
 	);
