@@ -30,6 +30,8 @@ export const handler: Handler = async (
 			);
 
 			const memberDetails = await getMemberDetails(stage, userId);
+			const xmlBody = buildXml(memberDetails);
+			console.log(`Successful response body is ${xmlBody}`);
 			return {
 				body: buildXml(memberDetails),
 				statusCode: 200,
