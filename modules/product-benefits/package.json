@@ -1,0 +1,12 @@
+{
+  "name": "product-benefits",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "check-formatting": "prettier --check **.ts",
+    "fix-formatting": "prettier --write **.ts"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  }
+}

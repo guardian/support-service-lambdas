@@ -1,20 +1,20 @@
 import { distinct } from '@modules/arrayFunctions';
+import { productBenefitMapping } from '@modules/product-benefits/src/productBenefit';
+import type {
+	ProductBenefit,
+	TrialInformation,
+	UserBenefitsResponse,
+} from '@modules/product-benefits/src/schemas';
+import {
+	feastExtendedTrial,
+	feastRegularSubscription,
+} from '@modules/product-benefits/src/trialInformation';
 import type {
 	ProductCatalogHelper,
 	ProductKey,
 } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import { getSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
-import { productBenefitMapping } from './productBenefit';
-import type {
-	ProductBenefit,
-	TrialInformation,
-	UserBenefitsResponse,
-} from './schemas';
-import {
-	feastExtendedTrial,
-	feastRegularSubscription,
-} from './trialInformation';
 
 export const getUserBenefits = async (
 	stage: Stage,

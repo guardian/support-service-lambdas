@@ -2,7 +2,7 @@ import {
 	digitalSubscriptionBenefits,
 	supporterPlusBenefits,
 	tierThreeBenefits,
-} from '../src/productBenefit';
+} from '@modules/product-benefits/src/productBenefit';
 import { getBenefits } from '../src/userBenefits';
 
 test('getUserBenefits', () => {
