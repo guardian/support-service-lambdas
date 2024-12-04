@@ -13,4 +13,4 @@ Or alternatively:
 - ensure you are logged in to a guardian account via profile.code.dev-theguardian.com
 - open the network tab in your browser's developer tools
 - go to support.code.dev-theguardian.com and look for a request to the members-data-api /user/me endpoint
-- copy the Authorization header from that request and paste it below
+- copy the Authorization header from that request and paste it into the `validAuthHeader` field in /etc/gu/support-service-lambdas-auth-token-test.json
