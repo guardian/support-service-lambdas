@@ -1,14 +1,14 @@
 import { distinct } from '@modules/arrayFunctions';
-import { productBenefitMapping } from '@modules/product-benefits/src/productBenefit';
+import { productBenefitMapping } from '@modules/product-benefits/productBenefit';
 import type {
 	ProductBenefit,
 	TrialInformation,
 	UserBenefitsResponse,
-} from '@modules/product-benefits/src/schemas';
+} from '@modules/product-benefits/schemas';
 import {
 	feastExtendedTrial,
 	feastRegularSubscription,
-} from '@modules/product-benefits/src/trialInformation';
+} from '@modules/product-benefits/trialInformation';
 import type {
 	ProductCatalogHelper,
 	ProductKey,
