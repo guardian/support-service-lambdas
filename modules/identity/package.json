@@ -1,0 +1,14 @@
+{
+  "name": "identity",
+  "version": "1.0.0",
+  "scripts": {
+    "it-test": "jest --group=integration",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@okta/jwt-verifier": "^4.0.1"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.145"
+  }
+}
