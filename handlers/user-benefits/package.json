@@ -1,18 +1,14 @@
 {
   "name": "user-benefits",
   "scripts": {
-    "test": "jest --group=-integration",
-    "it-test": "jest --group=integration",
     "type-check": "tsc --noEmit",
     "build": "esbuild --bundle --platform=node --target=node18 --outfile=target/index.js src/index.ts",
     "lint": "eslint src/**/*.ts",
-    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr user-benefits.zip ./*.js",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm ../../modules/product-benefits/test && pnpm build && cd target && zip -qr user-benefits.zip ./*.js",
     "check-formatting": "prettier --check **.ts",
     "fix-formatting": "prettier --write **.ts"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.129",
-    "dayjs": "^1.11.13",
-    "zod": "^3.23.8"
+    "@types/aws-lambda": "^8.10.129"
   }
 }

@@ -3,7 +3,7 @@ import {
 	supporterPlusBenefits,
 	tierThreeBenefits,
 } from '@modules/product-benefits/productBenefit';
-import { getBenefits } from '../src/userBenefits';
+import { getBenefits } from '@modules/product-benefits/userBenefits';
 
 test('getUserBenefits', () => {
 	expect(getBenefits(['DigitalSubscription'])).toEqual(
