@@ -30,5 +30,20 @@ export const getUserProducts = async (
 		.filter((product) => product !== undefined);
 };
 
-export const getBenefits = (userProducts: ProductKey[]): ProductBenefit[] =>
-	distinct(userProducts.flatMap((product) => productBenefitMapping[product]));
+export const getUserBenefits = async (
+	stage: Stage,
+	productCatalogHelper: ProductCatalogHelper,
+	identityId: string,
+): Promise<ProductBenefit[]> => {
+	const userProducts = await getUserProducts(
+		stage,
+		productCatalogHelper,
+		identityId,
+	);
+	return getUserBenefitsFromUserProducts(userProducts);
+};
+
+export const getUserBenefitsFromUserProducts = (
+	userProducts: ProductKey[],
+): ProductBenefit[] =>
+	distinct(userProducts).flatMap((product) => productBenefitMapping[product]);

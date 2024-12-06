@@ -1,10 +1,11 @@
 import { ValidationError } from '@modules/errors';
+import type {
+	AuthenticatedApiGatewayEvent,
+	FailedAuthenticationResponse,
+} from '@modules/identity/apiGateway';
 import { IdentityApiGatewayAuthenticator } from '@modules/identity/apiGateway';
 import type { UserBenefitsResponse } from '@modules/product-benefits/schemas';
-import {
-	getBenefits,
-	getUserProducts,
-} from '@modules/product-benefits/userBenefits';
+import { getUserBenefits } from '@modules/product-benefits/userBenefits';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
@@ -23,13 +24,11 @@ const getUserBenefitsResponse = async (
 	productCatalogHelper: ProductCatalogHelper,
 	identityId: string,
 ): Promise<UserBenefitsResponse> => {
-	const userProducts = await getUserProducts(
+	const benefits = await getUserBenefits(
 		stage,
 		productCatalogHelper,
 		identityId,
 	);
-	console.log(`User products for user ${identityId} are: `, userProducts);
-	const benefits = getBenefits(userProducts);
 	console.log(`Benefits for user ${identityId} are: `, benefits);
 	const trials = getTrialInformation(benefits);
 	console.log(`Trials for user ${identityId} are: `, trials);
@@ -50,17 +49,21 @@ export const handler: Handler = async (
 		};
 	}
 	try {
-		const authenticatedEvent = await identityAuthenticator.authenticate(event);
-		if (authenticatedEvent.type === 'FailedAuthenticationResponse') {
-			return authenticatedEvent;
+		const maybeAuthenticatedEvent:
+			| AuthenticatedApiGatewayEvent
+			| FailedAuthenticationResponse =
+			await identityAuthenticator.authenticate(event);
+
+		if (maybeAuthenticatedEvent.type === 'FailedAuthenticationResponse') {
+			return maybeAuthenticatedEvent;
 		}
-		console.log(`Identity ID is ${authenticatedEvent.identityId}`);
+		console.log(`Identity ID is ${maybeAuthenticatedEvent.identityId}`);
 		const productCatalog = await getProductCatalogFromApi(stage);
 
 		const userBenefitsResponse = await getUserBenefitsResponse(
 			stage,
 			new ProductCatalogHelper(productCatalog),
-			authenticatedEvent.identityId,
+			maybeAuthenticatedEvent.identityId,
 		);
 		return {
 			body: JSON.stringify(userBenefitsResponse),
