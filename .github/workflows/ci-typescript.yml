@@ -37,6 +37,7 @@ jobs:
     strategy:
       matrix:
         subproject:
+          - user-benefits
           - press-reader-entitlements
           - ticket-tailor-webhook
           - update-supporter-plus-amount

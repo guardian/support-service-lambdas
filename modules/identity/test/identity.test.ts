@@ -25,11 +25,9 @@ let expiredAuthHeader: string;
 
 beforeAll(() => {
 	const data = fs.readFileSync(
-		'//etc/gu/support-service-lambdas-auth-token-test.json',
+		'/etc/gu/support-service-lambdas-auth-token-test.json',
 		'utf8',
 	);
-
-	console.log(data);
 	const config: Config = JSON.parse(data) as Config;
 	validAuthHeader = config.validAuthHeader;
 	authHeaderWithoutBearerPrefix = validAuthHeader.replace('Bearer ', '');

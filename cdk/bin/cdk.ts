@@ -19,6 +19,7 @@ import type { StripeWebhookEndpointsProps } from '../lib/stripe-webhook-endpoint
 import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
 import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
 import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
+import { UserBenefits } from '../lib/user-benefits';
 import { ZuoraSalesforceLinkRemover } from '../lib/zuora-salesforce-link-remover';
 
 const app = new App();
@@ -261,6 +262,26 @@ new PressReaderEntitlements(app, 'press-reader-entitlements-PROD', {
 	stage: 'PROD',
 	internalDomainName: `press-reader-entitlements.${supportApisDomain}`,
 	publicDomainName: 'press-reader-entitlements.guardianapis.com',
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
+	supporterProductDataTable:
+		'supporter-product-data-tables-PROD-SupporterProductDataTable',
+});
+new UserBenefits(app, 'user-benefits-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+	internalDomainName: `user-benefits-code.${supportApisDomain}`,
+	publicDomainName: 'user-benefits.code.dev-guardianapis.com',
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
+	supporterProductDataTable:
+		'supporter-product-data-tables-CODE-SupporterProductDataTable',
+});
+new UserBenefits(app, 'user-benefits-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+	internalDomainName: `user-benefits.${supportApisDomain}`,
+	publicDomainName: 'user-benefits.guardianapis.com',
 	hostedZoneId: supportHostedZoneId,
 	certificateId: supportCertificateId,
 	supporterProductDataTable:
