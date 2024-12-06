@@ -46,4 +46,4 @@ export const getUserBenefits = async (
 export const getUserBenefitsFromUserProducts = (
 	userProducts: ProductKey[],
 ): ProductBenefit[] =>
-	distinct(userProducts).flatMap((product) => productBenefitMapping[product]);
+	distinct(userProducts.flatMap((product) => productBenefitMapping[product]));
