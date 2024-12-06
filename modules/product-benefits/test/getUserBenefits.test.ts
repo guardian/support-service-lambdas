@@ -29,3 +29,12 @@ test('getUserBenefitsFromUserProducts returns distinct benefits', () => {
 		getUserBenefitsFromUserProducts(['TierThree', 'DigitalSubscription']),
 	).toEqual(tierThreeBenefits);
 });
+
+test('getUserBenefitsFromUserProducts returns the union of two benefit sets', () => {
+	expect(
+		getUserBenefitsFromUserProducts([
+			'GuardianLight',
+			'GuardianWeeklyDomestic',
+		]),
+	).toEqual(['rejectTracking', 'fewerSupportAsks']);
+});
