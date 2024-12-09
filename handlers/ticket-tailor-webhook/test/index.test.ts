@@ -29,18 +29,18 @@ beforeEach(() => {
 
 test('calls create guest account for new email addresses', async () => {
 	jest.useFakeTimers().setSystemTime(new Date(validEpochSeconds * 1000)); //Date works in Epoch milli
-	fetchMock.mock(
+	fetchMock.route(
 		`https://idapi.code.dev-theguardian.com/user/type/${emailAddress}`,
 		new Response(JSON.stringify({ userType: 'new' })),
 	);
 
-	fetchMock.mock(
+	fetchMock.route(
+		'https://idapi.code.dev-theguardian.com/guest?accountVerificationEmail=true',
 		{
-			url: 'https://idapi.code.dev-theguardian.com/guest?accountVerificationEmail=true',
 			body: { primaryEmailAddress: emailAddress },
 			method: 'POST',
+			status: 200
 		},
-		200,
 	);
 
 	await handler(sqsEvent);
