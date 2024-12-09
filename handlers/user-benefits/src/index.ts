@@ -62,7 +62,6 @@ export const handler: Handler = async (
 		if (maybeAuthenticatedEvent.type === 'FailedAuthenticationResponse') {
 			return maybeAuthenticatedEvent;
 		}
-		console.log(`Identity ID is ${maybeAuthenticatedEvent.identityId}`);
 
 		const userBenefitsResponse = await getUserBenefitsResponse(
 			stage,
