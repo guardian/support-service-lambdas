@@ -128,8 +128,8 @@ importers:
         specifier: ^3.679.0
         version: 3.687.0
       '@aws-sdk/util-dynamodb':
-        specifier: ^3.679.0
-        version: 3.687.0(@aws-sdk/client-dynamodb@3.699.0)
+        specifier: ^3.705.0
+        version: 3.705.0(@aws-sdk/client-dynamodb@3.699.0)
       fast-xml-parser:
         specifier: ^4.5.0
         version: 4.5.0
@@ -308,8 +308,8 @@ importers:
         specifier: ^3.699.0
         version: 3.699.0
       '@aws-sdk/util-dynamodb':
-        specifier: ^3.679.0
-        version: 3.687.0(@aws-sdk/client-dynamodb@3.699.0)
+        specifier: ^3.705.0
+        version: 3.705.0(@aws-sdk/client-dynamodb@3.699.0)
 
   modules/sync-supporter-product-data:
     devDependencies:
@@ -885,11 +885,11 @@ packages:
     resolution: {integrity: sha512-XUKJWWo+KOB7fbnPP0+g/o5Ulku/X53t7i/h+sPHr5xxYTJJ9CYnbToo95mzxe7xWvkLrsNtJ8L+MnNn9INs2w==}
     engines: {node: '>=16.0.0'}
 
-  '@aws-sdk/util-dynamodb@3.687.0':
-    resolution: {integrity: sha512-0Xg/34GgRcmD7PxHD5LPpxd+h8qpdM6A9iPpz4UIokkQo3Baa+BrBBa6h7tgQwrvfWm0oX63Pa5U3ZKY1yHxQw==}
+  '@aws-sdk/util-dynamodb@3.705.0':
+    resolution: {integrity: sha512-cETrLaH8HGnHy2ohse02OR1/ux6IeT9dA1kngfYZyv0RhC1nt0fm6xJCTt8KPucPTTgXgGWzLaCB/AYu9uxH7A==}
     engines: {node: '>=16.0.0'}
     peerDependencies:
-      '@aws-sdk/client-dynamodb': ^3.687.0
+      '@aws-sdk/client-dynamodb': ^3.705.0
 
   '@aws-sdk/util-endpoints@3.664.0':
     resolution: {integrity: sha512-KrXoHz6zmAahVHkyWMRT+P6xJaxItgmklxEDrT+npsUB4d5C/lhw16Crcp9TDi828fiZK3GYKRAmmNhvmzvBNg==}
@@ -6993,7 +6993,7 @@ snapshots:
     dependencies:
       tslib: 2.6.2
 
-  '@aws-sdk/util-dynamodb@3.687.0(@aws-sdk/client-dynamodb@3.699.0)':
+  '@aws-sdk/util-dynamodb@3.705.0(@aws-sdk/client-dynamodb@3.699.0)':
     dependencies:
       '@aws-sdk/client-dynamodb': 3.699.0
       tslib: 2.6.2
