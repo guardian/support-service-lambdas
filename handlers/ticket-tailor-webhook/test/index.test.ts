@@ -28,17 +28,16 @@ beforeEach(() => {
 });
 
 test('calls create guest account for new email addresses', async () => {
-	jest.useFakeTimers().setSystemTime(new Date(validEpochSeconds * 1000)); //Date works in Epoch milli
-	fetchMock.route(
+	jest.useFakeTimers().setSystemTime(new Date(validEpochSeconds * 1000)); // Date works in Epoch milli
+	fetchMock.get(
 		`https://idapi.code.dev-theguardian.com/user/type/${emailAddress}`,
 		new Response(JSON.stringify({ userType: 'new' })),
 	);
 
-	fetchMock.route(
+	fetchMock.post(
 		'https://idapi.code.dev-theguardian.com/guest?accountVerificationEmail=true',
 		{
 			body: { primaryEmailAddress: emailAddress },
-			method: 'POST',
 			status: 200
 		},
 	);
@@ -57,8 +56,8 @@ test('calls create guest account for new email addresses', async () => {
 });
 
 test('no call to create guest account for an existing email addresses', async () => {
-	jest.useFakeTimers().setSystemTime(new Date(validEpochSeconds * 1000)); //Date works in Epoch milli
-	fetchMock.route(
+	jest.useFakeTimers().setSystemTime(new Date(validEpochSeconds * 1000)); // Date works in Epoch milli
+	fetchMock.get(
 		`https://idapi.code.dev-theguardian.com/user/type/${emailAddress}`,
 		new Response(JSON.stringify({ userType: 'current' })),
 	);
