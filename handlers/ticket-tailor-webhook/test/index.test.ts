@@ -58,7 +58,7 @@ test('calls create guest account for new email addresses', async () => {
 
 test('no call to create guest account for an existing email addresses', async () => {
 	jest.useFakeTimers().setSystemTime(new Date(validEpochSeconds * 1000)); //Date works in Epoch milli
-	fetchMock.mock(
+	fetchMock.route(
 		`https://idapi.code.dev-theguardian.com/user/type/${emailAddress}`,
 		new Response(JSON.stringify({ userType: 'current' })),
 	);
