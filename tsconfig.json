@@ -33,6 +33,7 @@
       "@modules/aws/*": ["./modules/aws/src/*"],
       "@modules/zuora/*": ["./modules/zuora/src/*"],
       "@modules/zuora-catalog/*": ["./modules/zuora-catalog/src/*"],
+      "@modules/product-benefits/*": ["./modules/product-benefits/src/*"],
       "@modules/product-catalog/*": ["./modules/product-catalog/src/*"],
       "@modules/email/*": ["./modules/email/src/*"],
       "@modules/internationalisation/*": ["./modules/internationalisation/src/*"],

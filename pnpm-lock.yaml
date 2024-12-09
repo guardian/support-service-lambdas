@@ -224,6 +224,12 @@ importers:
         specifier: ^8.10.145
         version: 8.10.145
 
+  handlers/user-benefits:
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.129
+        version: 8.10.145
+
   handlers/zuora-salesforce-link-remover:
     dependencies:
       '@aws-sdk/client-secrets-manager':
@@ -264,6 +270,12 @@ importers:
       '@types/aws-lambda':
         specifier: ^8.10.145
         version: 8.10.145
+
+  modules/product-benefits:
+    dependencies:
+      zod:
+        specifier: ^3.23.8
+        version: 3.23.8
 
   modules/product-catalog:
     devDependencies:

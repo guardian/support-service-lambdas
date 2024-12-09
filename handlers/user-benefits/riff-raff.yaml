@@ -1,0 +1,25 @@
+stacks:
+- support
+regions:
+- eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  user-benefits-cloudformation:
+    type: cloud-formation
+    app: user-benefits
+    parameters:
+      templateStagePaths:
+        CODE: user-benefits-CODE.template.json
+        PROD: user-benefits-PROD.template.json
+
+  user-benefits:
+    type: aws-lambda
+    parameters:
+      fileName: user-benefits.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+      - user-benefits-
+    dependencies: [user-benefits-cloudformation]
