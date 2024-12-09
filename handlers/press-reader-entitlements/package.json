@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.699.0",
-    "@aws-sdk/util-dynamodb": "^3.679.0",
+    "@aws-sdk/util-dynamodb": "^3.705.0",
     "@aws-sdk/client-ssm": "^3.679.0",
     "fast-xml-parser": "^4.5.0",
     "zod": "^3.23.8"
