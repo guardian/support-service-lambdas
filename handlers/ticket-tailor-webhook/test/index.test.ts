@@ -24,7 +24,7 @@ const validEpochSeconds =
 
 beforeEach(() => {
 	process.env.Stage = 'DEV';
-	fetchMock.restore();
+	fetchMock.hardReset();
 });
 
 test('calls create guest account for new email addresses', async () => {
