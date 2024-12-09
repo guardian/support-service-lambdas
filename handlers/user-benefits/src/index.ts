@@ -4,6 +4,7 @@ import type {
 	FailedAuthenticationResponse,
 } from '@modules/identity/apiGateway';
 import { IdentityApiGatewayAuthenticator } from '@modules/identity/apiGateway';
+import { Lazy } from '@modules/lazy';
 import type { UserBenefitsResponse } from '@modules/product-benefits/schemas';
 import { getUserBenefits } from '@modules/product-benefits/userBenefits';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
@@ -18,6 +19,10 @@ import { getTrialInformation } from './trials';
 
 const stage = process.env.STAGE as Stage;
 const identityAuthenticator = new IdentityApiGatewayAuthenticator(stage, []); //TODO: Do we have any required scopes?
+const productCatalog = new Lazy(
+	async () => await getProductCatalogFromApi(stage),
+	'Get product catalog',
+);
 
 const getUserBenefitsResponse = async (
 	stage: Stage,
@@ -58,11 +63,10 @@ export const handler: Handler = async (
 			return maybeAuthenticatedEvent;
 		}
 		console.log(`Identity ID is ${maybeAuthenticatedEvent.identityId}`);
-		const productCatalog = await getProductCatalogFromApi(stage);
 
 		const userBenefitsResponse = await getUserBenefitsResponse(
 			stage,
-			new ProductCatalogHelper(productCatalog),
+			new ProductCatalogHelper(await productCatalog.get()),
 			maybeAuthenticatedEvent.identityId,
 		);
 		return {
