@@ -6,11 +6,9 @@ import type {
 } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import { getSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
-import {
-	productBenefitMapping,
-	tierThreeBenefits,
-} from '@modules/product-benefits/productBenefit';
+import { productBenefitMapping } from '@modules/product-benefits/productBenefit';
 import type { ProductBenefit } from '@modules/product-benefits/schemas';
+import { allProductBenefits } from '@modules/product-benefits/schemas';
 
 export const getUserProducts = async (
 	stage: Stage,
@@ -34,7 +32,7 @@ export const getUserProducts = async (
 		.filter((product) => product !== undefined);
 };
 
-const userWorksForTheGuardian = (email: string): boolean =>
+const userHasGuardianEmail = (email: string): boolean =>
 	email.endsWith('@theguardian.com') || email.endsWith('@guardian.co.uk');
 
 export const getUserBenefits = async (
@@ -42,8 +40,8 @@ export const getUserBenefits = async (
 	productCatalogHelper: ProductCatalogHelper,
 	userDetails: IdentityUserDetails,
 ): Promise<ProductBenefit[]> => {
-	if (userWorksForTheGuardian(userDetails.email)) {
-		return tierThreeBenefits;
+	if (userHasGuardianEmail(userDetails.email)) {
+		return allProductBenefits;
 	}
 	const userProducts = await getUserProducts(
 		stage,

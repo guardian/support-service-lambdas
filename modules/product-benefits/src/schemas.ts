@@ -1,18 +1,21 @@
 import { z } from 'zod';
 
-const productBenefitSchema = z.union([
-	z.literal('feastApp'),
-	z.literal('adFree'),
-	z.literal('newspaperArchive'),
-	z.literal('newspaperEdition'),
-	z.literal('guardianWeeklyEdition'),
-	z.literal('liveApp'),
-	z.literal('fewerSupportAsks'),
-	z.literal('rejectTracking'),
-	z.literal('liveEvents'), // Do we need this?
+const productBenefitSchema = z.enum([
+	'feastApp',
+	'adFree',
+	'newspaperArchive',
+	'newspaperEdition',
+	'guardianWeeklyEdition',
+	'liveApp',
+	'fewerSupportAsks',
+	'rejectTracking',
+	'liveEvents',
 ]);
 
 export type ProductBenefit = z.infer<typeof productBenefitSchema>;
+
+export const allProductBenefits: ProductBenefit[] =
+	productBenefitSchema.options;
 
 const trialSchema = z.object({
 	iosSubscriptionGroup: z.string(),
