@@ -1,6 +1,7 @@
 import { ValidationError } from '@modules/errors';
 import type { Stage } from '@modules/stage';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import type { IdentityUserDetails } from '@modules/identity/identity';
 import {
 	ExpiredTokenError,
 	InvalidScopesError,
@@ -10,7 +11,7 @@ import {
 
 export type AuthenticatedApiGatewayEvent = APIGatewayProxyEvent & {
 	type: 'AuthenticatedApiGatewayEvent';
-	identityId: string;
+	userDetails: IdentityUserDetails;
 };
 
 export type FailedAuthenticationResponse = APIGatewayProxyResult & {
@@ -36,14 +37,14 @@ export class IdentityApiGatewayAuthenticator {
 			};
 		}
 		try {
-			const identityId = await this.tokenHelper.getIdentityId(authHeader);
+			const userDetails = await this.tokenHelper.getIdentityId(authHeader);
 			console.log(
-				`Successfully authenticated user with identityId: ${identityId}`,
+				`Successfully authenticated user with identityId: ${userDetails.identityId}`,
 			);
 			return {
 				type: 'AuthenticatedApiGatewayEvent',
 				...event,
-				identityId,
+				userDetails,
 			};
 		} catch (error) {
 			console.log('Caught exception with message: ', error);

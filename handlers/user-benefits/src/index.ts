@@ -4,6 +4,7 @@ import type {
 	FailedAuthenticationResponse,
 } from '@modules/identity/apiGateway';
 import { IdentityApiGatewayAuthenticator } from '@modules/identity/apiGateway';
+import type { IdentityUserDetails } from '@modules/identity/identity';
 import { Lazy } from '@modules/lazy';
 import type { UserBenefitsResponse } from '@modules/product-benefits/schemas';
 import { getUserBenefits } from '@modules/product-benefits/userBenefits';
@@ -27,16 +28,16 @@ const productCatalog = new Lazy(
 const getUserBenefitsResponse = async (
 	stage: Stage,
 	productCatalogHelper: ProductCatalogHelper,
-	identityId: string,
+	userDetails: IdentityUserDetails,
 ): Promise<UserBenefitsResponse> => {
 	const benefits = await getUserBenefits(
 		stage,
 		productCatalogHelper,
-		identityId,
+		userDetails,
 	);
-	console.log(`Benefits for user ${identityId} are: `, benefits);
+	console.log(`Benefits for user ${userDetails.identityId} are: `, benefits);
 	const trials = getTrialInformation(benefits);
-	console.log(`Trials for user ${identityId} are: `, trials);
+	console.log(`Trials for user ${userDetails.identityId} are: `, trials);
 	return {
 		benefits,
 		trials,
@@ -66,7 +67,7 @@ export const handler: Handler = async (
 		const userBenefitsResponse = await getUserBenefitsResponse(
 			stage,
 			new ProductCatalogHelper(await productCatalog.get()),
-			maybeAuthenticatedEvent.identityId,
+			maybeAuthenticatedEvent.userDetails,
 		);
 		return {
 			body: JSON.stringify(userBenefitsResponse),

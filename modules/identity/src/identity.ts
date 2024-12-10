@@ -1,12 +1,17 @@
-import { ValidationError } from '@modules/errors';
 import type { Stage } from '@modules/stage';
-import type { JwtClaims } from '@okta/jwt-verifier';
 import OktaJwtVerifier from '@okta/jwt-verifier';
+import { z } from 'zod';
 
-// The claims object returned by Okta. It should include the identity_id
-interface JwtClaimsWithIdentityID extends JwtClaims {
-	legacy_identity_id?: string;
-}
+// The claims object returned by Okta. It should include the identity ID and email
+const jwtClaimsSchema = z.object({
+	legacy_identity_id: z.string(),
+	sub: z.string(),
+});
+
+export type IdentityUserDetails = {
+	identityId: string;
+	email: string;
+};
 type OktaConfig = {
 	issuer: string;
 	audience: string;
@@ -71,15 +76,15 @@ export class OktaTokenHelper {
 			throw new InvalidTokenError('Invalid Authorization header');
 		}
 	};
-	getIdentityId = async (authHeader: string): Promise<string> => {
+	getIdentityId = async (authHeader: string): Promise<IdentityUserDetails> => {
 		try {
 			const jwt = await this.verifyAccessToken(authHeader);
 			console.log('Successfully verified access token');
-			const claims = jwt.claims as JwtClaimsWithIdentityID;
-			if (!claims.legacy_identity_id) {
-				throw new ValidationError('No legacy_identity_id in claims');
-			}
-			return claims.legacy_identity_id;
+			const claims = jwtClaimsSchema.parse(jwt.claims);
+			return {
+				identityId: claims.legacy_identity_id,
+				email: claims.sub,
+			};
 		} catch (err) {
 			console.log(`Failed to verify access token: ${String(err)}`);
 			if (err instanceof Error) {

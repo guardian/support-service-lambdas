@@ -6,7 +6,8 @@
     "build": "tsc --noEmit"
   },
   "dependencies": {
-    "@okta/jwt-verifier": "^4.0.1"
+    "@okta/jwt-verifier": "^4.0.1",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.145"

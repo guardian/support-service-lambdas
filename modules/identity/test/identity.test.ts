@@ -52,15 +52,17 @@ test('we can decode an access token without the Bearer prefix', async () => {
 });
 
 test('we can return an identity id', async () => {
-	const identityId =
+	const userDetails =
 		await identityHelperWithNoRequiredScopes.getIdentityId(validAuthHeader);
-	expect(identityId.length).toBeGreaterThan(0);
+	expect(userDetails.identityId.length).toBeGreaterThan(0);
+	expect(userDetails.email.length).toBeGreaterThan(0);
 });
 
 test('we can return an identity id with required scopes', async () => {
 	const identityHelper = new OktaTokenHelper('CODE', ['profile']);
-	const identityId = await identityHelper.getIdentityId(validAuthHeader);
-	expect(identityId.length).toBeGreaterThan(0);
+	const userDetails = await identityHelper.getIdentityId(validAuthHeader);
+	expect(userDetails.identityId.length).toBeGreaterThan(0);
+	expect(userDetails.email.length).toBeGreaterThan(0);
 });
 
 test('we throw an error if the token does not have the required scopes', async () => {
@@ -87,7 +89,7 @@ test('ApiGateway event with a valid token returns an authenticated result', asyn
 	if (response.type !== 'AuthenticatedApiGatewayEvent') {
 		throw new Error('Expected response to be an AuthenticatedApiGatewayEvent');
 	}
-	expect(response.identityId.length).toBeGreaterThan(0);
+	expect(response.userDetails.identityId.length).toBeGreaterThan(0);
 });
 
 test('ApiGateway event with expired token returns a 401 response', async () => {

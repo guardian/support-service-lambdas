@@ -1,11 +1,15 @@
 import { distinct } from '@modules/arrayFunctions';
+import type { IdentityUserDetails } from '@modules/identity/identity';
 import type {
 	ProductCatalogHelper,
 	ProductKey,
 } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import { getSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
-import { productBenefitMapping } from '@modules/product-benefits/productBenefit';
+import {
+	productBenefitMapping,
+	tierThreeBenefits,
+} from '@modules/product-benefits/productBenefit';
 import type { ProductBenefit } from '@modules/product-benefits/schemas';
 
 export const getUserProducts = async (
@@ -30,15 +34,21 @@ export const getUserProducts = async (
 		.filter((product) => product !== undefined);
 };
 
+const userWorksForTheGuardian = (email: string): boolean =>
+	email.endsWith('@theguardian.com') || email.endsWith('@guardian.co.uk');
+
 export const getUserBenefits = async (
 	stage: Stage,
 	productCatalogHelper: ProductCatalogHelper,
-	identityId: string,
+	userDetails: IdentityUserDetails,
 ): Promise<ProductBenefit[]> => {
+	if (userWorksForTheGuardian(userDetails.email)) {
+		return tierThreeBenefits;
+	}
 	const userProducts = await getUserProducts(
 		stage,
 		productCatalogHelper,
-		identityId,
+		userDetails.identityId,
 	);
 	return getUserBenefitsFromUserProducts(userProducts);
 };
