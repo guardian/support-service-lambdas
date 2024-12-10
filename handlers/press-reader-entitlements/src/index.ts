@@ -1,5 +1,6 @@
 import { ValidationError } from '@modules/errors';
 import { getIfDefined } from '@modules/nullAndUndefined';
+import { userHasGuardianEmail } from '@modules/product-benefits/userBenefits';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
@@ -9,7 +10,7 @@ import type {
 	APIGatewayProxyResult,
 	Handler,
 } from 'aws-lambda';
-import { getClientAccessToken, getIdentityId } from './identity';
+import { getClientAccessToken, getUserDetails } from './identity';
 import { getLatestSubscription } from './supporterProductData';
 import type { Member } from './xmlBuilder';
 import { buildXml } from './xmlBuilder';
@@ -64,17 +65,23 @@ export async function getMemberDetails(
 	if (identityClientAccessToken === undefined) {
 		identityClientAccessToken = await getClientAccessToken(stage);
 	}
-	const identityId = await getIdentityId(
+	const userDetails = await getUserDetails(
 		identityClientAccessToken,
 		stage,
 		userId,
 	);
+	if (userHasGuardianEmail(userDetails.email)) {
+		return createMember(userId, {
+			contractEffectiveDate: '1821-05-05',
+			termEndDate: '2099-01-01',
+		});
+	}
 	if (productCatalog === undefined) {
 		productCatalog = await getProductCatalogFromApi(stage);
 	}
 	const latestSubscription = await getLatestSubscription(
 		stage,
-		identityId,
+		userDetails.identityId,
 		productCatalog,
 	);
 	return createMember(userId, latestSubscription);
@@ -82,7 +89,9 @@ export async function getMemberDetails(
 
 function createMember(
 	userId: string,
-	latestSubscription: SupporterRatePlanItem | undefined,
+	latestSubscription:
+		| Pick<SupporterRatePlanItem, 'termEndDate' | 'contractEffectiveDate'>
+		| undefined,
 ): Member {
 	return {
 		userID: userId,

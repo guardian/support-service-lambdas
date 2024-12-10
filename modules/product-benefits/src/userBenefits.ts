@@ -34,7 +34,7 @@ export const getUserProducts = async (
 		.filter((product) => product !== undefined);
 };
 
-const userHasGuardianEmail = (email: string): boolean =>
+export const userHasGuardianEmail = (email: string): boolean =>
 	email.endsWith('@theguardian.com') || email.endsWith('@guardian.co.uk');
 
 export const getUserBenefits = async (
