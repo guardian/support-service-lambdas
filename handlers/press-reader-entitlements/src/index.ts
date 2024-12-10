@@ -1,8 +1,8 @@
 import { ValidationError } from '@modules/errors';
+import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { userHasGuardianEmail } from '@modules/product-benefits/userBenefits';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
-import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import type {
@@ -16,8 +16,14 @@ import type { Member } from './xmlBuilder';
 import { buildXml } from './xmlBuilder';
 
 const stage = process.env.STAGE as Stage;
-let productCatalog: ProductCatalog | undefined = undefined;
-let identityClientAccessToken: string | undefined = undefined;
+const lazyProductCatalog = new Lazy(
+	async () => await getProductCatalogFromApi(stage),
+	'Get product catalog',
+);
+const lazyIdentityClientAccessToken = new Lazy(
+	async () => await getClientAccessToken(stage),
+	'Get identity client access token',
+);
 
 export const handler: Handler = async (
 	event: APIGatewayProxyEvent,
@@ -62,11 +68,8 @@ export async function getMemberDetails(
 	stage: Stage,
 	userId: string,
 ): Promise<Member> {
-	if (identityClientAccessToken === undefined) {
-		identityClientAccessToken = await getClientAccessToken(stage);
-	}
 	const userDetails = await getUserDetails(
-		identityClientAccessToken,
+		await lazyIdentityClientAccessToken.get(),
 		stage,
 		userId,
 	);
@@ -76,13 +79,10 @@ export async function getMemberDetails(
 			termEndDate: '2099-01-01',
 		});
 	}
-	if (productCatalog === undefined) {
-		productCatalog = await getProductCatalogFromApi(stage);
-	}
 	const latestSubscription = await getLatestSubscription(
 		stage,
 		userDetails.identityId,
-		productCatalog,
+		await lazyProductCatalog.get(),
 	);
 	return createMember(userId, latestSubscription);
 }
