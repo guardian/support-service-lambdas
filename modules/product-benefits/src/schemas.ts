@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const productBenefitSchema = z.enum([
+export const productBenefitListSchema = z.enum([
 	'feastApp',
 	'adFree',
 	'newspaperArchive',
@@ -12,21 +12,18 @@ const productBenefitSchema = z.enum([
 	'liveEvents',
 ]);
 
-export type ProductBenefit = z.infer<typeof productBenefitSchema>;
-
-export const allProductBenefits: ProductBenefit[] =
-	productBenefitSchema.options;
+export type ProductBenefit = z.infer<typeof productBenefitListSchema>;
 
 const trialSchema = z.object({
 	iosSubscriptionGroup: z.string(),
 	androidOfferTag: z.string(),
 });
 export type Trial = z.infer<typeof trialSchema>;
-const trialInformationSchema = z.record(productBenefitSchema, trialSchema);
+const trialInformationSchema = z.record(productBenefitListSchema, trialSchema);
 export type TrialInformation = z.infer<typeof trialInformationSchema>;
 
 export const userBenefitsSchema = z.object({
-	benefits: z.array(productBenefitSchema),
+	benefits: z.array(productBenefitListSchema),
 	trials: trialInformationSchema,
 });
 

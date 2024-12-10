@@ -1,5 +1,9 @@
 import type { ProductKey } from '@modules/product-catalog/productCatalog';
 import type { ProductBenefit } from './schemas';
+import { productBenefitListSchema } from './schemas';
+
+export const allProductBenefits: ProductBenefit[] =
+	productBenefitListSchema.options;
 
 export const supporterPlusBenefits: ProductBenefit[] = [
 	'adFree',

@@ -6,9 +6,11 @@ import type {
 } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import { getSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
-import { productBenefitMapping } from '@modules/product-benefits/productBenefit';
+import {
+	allProductBenefits,
+	productBenefitMapping,
+} from '@modules/product-benefits/productBenefit';
 import type { ProductBenefit } from '@modules/product-benefits/schemas';
-import { allProductBenefits } from '@modules/product-benefits/schemas';
 
 export const getUserProducts = async (
 	stage: Stage,
