@@ -75,9 +75,8 @@ object S3Helper extends S3Service with LazyLogging {
   ): Either[S3Error, S3WriteSuccess] = {
     val completedPath = s"${config.resultsPath}/$initiationReference/completed/$keySuffix"
     UploadToS3
-      .putStringWithAcl(
+      .putString(
         S3Location(config.resultsBucket, completedPath),
-        ObjectCannedACL.BUCKET_OWNER_READ,
         "",
       ) match {
       case Failure(err) => Left(S3Error(err.getMessage))
@@ -108,9 +107,8 @@ object S3Helper extends S3Service with LazyLogging {
     val resultsPath = s"${config.resultsPath}/$initiationId/failed/$randomUUID"
     logger.info("Uploading file to failed path in S3.")
     UploadToS3
-      .putStringWithAcl(
+      .putString(
         S3Location(config.resultsBucket, resultsPath),
-        ObjectCannedACL.BUCKET_OWNER_READ,
         zuoraError.toString,
       )
       .toEither
