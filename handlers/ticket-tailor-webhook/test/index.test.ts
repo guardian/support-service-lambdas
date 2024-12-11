@@ -24,23 +24,22 @@ const validEpochSeconds =
 
 beforeEach(() => {
 	process.env.Stage = 'DEV';
-	fetchMock.restore();
+	fetchMock.hardReset();
 });
 
 test('calls create guest account for new email addresses', async () => {
-	jest.useFakeTimers().setSystemTime(new Date(validEpochSeconds * 1000)); //Date works in Epoch milli
-	fetchMock.mock(
+	jest.useFakeTimers().setSystemTime(new Date(validEpochSeconds * 1000)); // Date works in Epoch milli
+	fetchMock.get(
 		`https://idapi.code.dev-theguardian.com/user/type/${emailAddress}`,
 		new Response(JSON.stringify({ userType: 'new' })),
 	);
 
-	fetchMock.mock(
+	fetchMock.post(
+		'https://idapi.code.dev-theguardian.com/guest?accountVerificationEmail=true',
 		{
-			url: 'https://idapi.code.dev-theguardian.com/guest?accountVerificationEmail=true',
 			body: { primaryEmailAddress: emailAddress },
-			method: 'POST',
+			status: 200
 		},
-		200,
 	);
 
 	await handler(sqsEvent);
@@ -57,8 +56,8 @@ test('calls create guest account for new email addresses', async () => {
 });
 
 test('no call to create guest account for an existing email addresses', async () => {
-	jest.useFakeTimers().setSystemTime(new Date(validEpochSeconds * 1000)); //Date works in Epoch milli
-	fetchMock.mock(
+	jest.useFakeTimers().setSystemTime(new Date(validEpochSeconds * 1000)); // Date works in Epoch milli
+	fetchMock.get(
 		`https://idapi.code.dev-theguardian.com/user/type/${emailAddress}`,
 		new Response(JSON.stringify({ userType: 'current' })),
 	);
