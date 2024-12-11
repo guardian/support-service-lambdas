@@ -1,9 +1,10 @@
 import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
 import { awsConfig } from '@modules/aws/config';
 import { ValidationError } from '@modules/errors';
+import type { IdentityUserDetails } from '@modules/identity/identity';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
-import { getIdentityIdSchema } from './schemas';
+import { getUserDetailsSchema } from './schemas';
 
 export const getClientAccessToken = async (stage: Stage) => {
 	const ssmClient = new SSMClient(awsConfig);
@@ -19,11 +20,11 @@ export const getClientAccessToken = async (stage: Stage) => {
 	);
 };
 
-export async function getIdentityId(
+export async function getUserDetails(
 	clientAccessToken: string,
 	stage: Stage,
 	userId: string,
-) {
+): Promise<IdentityUserDetails> {
 	const identityHost =
 		stage === 'CODE'
 			? 'https://idapi.code.dev-theguardian.com'
@@ -43,14 +44,17 @@ export async function getIdentityId(
 	const json = await response.json();
 	console.log(`Identity returned ${JSON.stringify(json)}`);
 
-	const identityResponse = getIdentityIdSchema.parse(json);
+	const identityResponse = getUserDetailsSchema.parse(json);
 	console.log('Successfully parsed identity response');
 
 	if (identityResponse.status === 'ok') {
 		console.log(
 			`Retrieved identity id ${identityResponse.id} from userId ${userId}`,
 		);
-		return identityResponse.id;
+		return {
+			identityId: identityResponse.id,
+			email: identityResponse.primaryEmailAddress,
+		};
 	}
 	const errorsList = identityResponse.errors.reduce((acc, error) => {
 		return acc + error.message + ', ';

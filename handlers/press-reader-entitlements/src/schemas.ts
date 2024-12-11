@@ -3,19 +3,20 @@ import { z } from 'zod';
 const ok = z.literal('ok');
 const error = z.literal('error');
 
-const successfulGetIdentityIdResponse = z.object({
+const successfulGetUserDetailsResponse = z.object({
 	status: ok,
 	id: z.string(),
+	primaryEmailAddress: z.string(),
 });
 
-const failedGetIdentityIdResponse = z.object({
+const failedGetUserDetailsResponse = z.object({
 	status: error,
 	errors: z.array(z.object({ message: z.string(), description: z.string() })),
 });
 
-export const getIdentityIdSchema = z.discriminatedUnion('status', [
-	successfulGetIdentityIdResponse,
-	failedGetIdentityIdResponse,
+export const getUserDetailsSchema = z.discriminatedUnion('status', [
+	successfulGetUserDetailsResponse,
+	failedGetUserDetailsResponse,
 ]);
 
-export type GetIdentityIdResponse = z.infer<typeof getIdentityIdSchema>;
+export type GetUserDetailsResponse = z.infer<typeof getUserDetailsSchema>;

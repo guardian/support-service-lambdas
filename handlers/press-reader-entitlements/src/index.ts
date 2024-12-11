@@ -1,22 +1,30 @@
 import { ValidationError } from '@modules/errors';
+import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
+import { userHasGuardianEmail } from '@modules/product-benefits/userBenefits';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
-import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
+import { stageFromEnvironment } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import type {
 	APIGatewayProxyEvent,
 	APIGatewayProxyResult,
 	Handler,
 } from 'aws-lambda';
-import { getClientAccessToken, getIdentityId } from './identity';
+import { getClientAccessToken, getUserDetails } from './identity';
 import { getLatestSubscription } from './supporterProductData';
 import type { Member } from './xmlBuilder';
 import { buildXml } from './xmlBuilder';
 
-const stage = process.env.STAGE as Stage;
-let productCatalog: ProductCatalog | undefined = undefined;
-let identityClientAccessToken: string | undefined = undefined;
+const stage = stageFromEnvironment();
+const lazyProductCatalog = new Lazy(
+	async () => await getProductCatalogFromApi(stage),
+	'Get product catalog',
+);
+const lazyIdentityClientAccessToken = new Lazy(
+	async () => await getClientAccessToken(stage),
+	'Get identity client access token',
+);
 
 export const handler: Handler = async (
 	event: APIGatewayProxyEvent,
@@ -61,28 +69,30 @@ export async function getMemberDetails(
 	stage: Stage,
 	userId: string,
 ): Promise<Member> {
-	if (identityClientAccessToken === undefined) {
-		identityClientAccessToken = await getClientAccessToken(stage);
-	}
-	const identityId = await getIdentityId(
-		identityClientAccessToken,
+	const userDetails = await getUserDetails(
+		await lazyIdentityClientAccessToken.get(),
 		stage,
 		userId,
 	);
-	if (productCatalog === undefined) {
-		productCatalog = await getProductCatalogFromApi(stage);
+	if (userHasGuardianEmail(userDetails.email)) {
+		return createMember(userId, {
+			contractEffectiveDate: '1821-05-05',
+			termEndDate: '2099-01-01',
+		});
 	}
 	const latestSubscription = await getLatestSubscription(
 		stage,
-		identityId,
-		productCatalog,
+		userDetails.identityId,
+		await lazyProductCatalog.get(),
 	);
 	return createMember(userId, latestSubscription);
 }
 
 function createMember(
 	userId: string,
-	latestSubscription: SupporterRatePlanItem | undefined,
+	latestSubscription:
+		| Pick<SupporterRatePlanItem, 'termEndDate' | 'contractEffectiveDate'>
+		| undefined,
 ): Member {
 	return {
 		userID: userId,

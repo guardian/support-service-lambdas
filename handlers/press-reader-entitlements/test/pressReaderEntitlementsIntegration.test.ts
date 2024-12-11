@@ -5,7 +5,7 @@
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import zuoraCatalogFixture from '../../../modules/zuora-catalog/test/fixtures/catalog-code.json';
 import { getMemberDetails } from '../src';
-import { getClientAccessToken, getIdentityId } from '../src/identity';
+import { getClientAccessToken, getUserDetails } from '../src/identity';
 import { getLatestSubscription } from '../src/supporterProductData';
 
 test('Entitlements check', async () => {
@@ -21,12 +21,12 @@ test('Entitlements check', async () => {
 test('getIdentityId', async () => {
 	const accessToken = await getClientAccessToken('CODE');
 	expect(accessToken).toBeDefined();
-	const identityId = await getIdentityId(
+	const userDetails = await getUserDetails(
 		accessToken,
 		'CODE',
 		'c20da7c7-4f72-44fb-b719-78879bfab70d',
 	);
-	expect(identityId).toBe('200149752');
+	expect(userDetails.identityId).toBe('200149752');
 });
 
 test('getMemberDetails', async () => {
@@ -36,15 +36,15 @@ test('getMemberDetails', async () => {
 			{
 				product: {
 					productID: 'the-guardian',
-					enddate: '2025-09-08',
-					startdate: '2023-09-08',
+					enddate: '2099-01-01',
+					startdate: '1821-05-05',
 				},
 			},
 			{
 				product: {
 					productID: 'the-observer',
-					enddate: '2025-09-08',
-					startdate: '2023-09-08',
+					enddate: '2099-01-01',
+					startdate: '1821-05-05',
 				},
 			},
 		],
