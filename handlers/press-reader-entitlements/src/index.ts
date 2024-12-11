@@ -4,6 +4,7 @@ import { getIfDefined } from '@modules/nullAndUndefined';
 import { userHasGuardianEmail } from '@modules/product-benefits/userBenefits';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { Stage } from '@modules/stage';
+import { stageFromEnvironment } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import type {
 	APIGatewayProxyEvent,
@@ -15,7 +16,7 @@ import { getLatestSubscription } from './supporterProductData';
 import type { Member } from './xmlBuilder';
 import { buildXml } from './xmlBuilder';
 
-const stage = process.env.STAGE as Stage;
+const stage = stageFromEnvironment();
 const lazyProductCatalog = new Lazy(
 	async () => await getProductCatalogFromApi(stage),
 	'Get product catalog',

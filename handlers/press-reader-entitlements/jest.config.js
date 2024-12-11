@@ -8,3 +8,6 @@ module.exports = {
 		'@modules/(.*)$': '<rootDir>/../../modules/$1',
 	},
 };
+process.env = Object.assign(process.env, {
+	Stage: 'CODE',
+});
