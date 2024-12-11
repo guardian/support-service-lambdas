@@ -1,0 +1,51 @@
+{
+  "accountId": "accIdidId123",
+  "invoiceItems": [
+    {
+      "id": "id12345",
+      "subscriptionName": "A-S12313444",
+      "subscriptionId": "subidID1432",
+      "subscriptionNumber": "A-S12313444",
+      "serviceStartDate": "2025-01-01",
+      "serviceEndDate": "2025-01-31",
+      "chargeAmount": 0,
+      "chargeDescription": "",
+      "chargeName": "Monthly Contribution",
+      "chargeNumber": "C-01234344",
+      "chargeId": "chargeididcharID",
+      "productName": "Contributor",
+      "quantity": 1,
+      "taxAmount": 0,
+      "unitOfMeasure": "",
+      "chargeDate": "2024-12-11 10:15:31",
+      "chargeType": "Recurring",
+      "processingType": "Charge",
+      "appliedToItemId": null,
+      "numberOfDeliveries": 0
+    },
+    {
+      "id": "id12345",
+      "subscriptionName": "A-S12313444",
+      "subscriptionId": "subidID1432",
+      "subscriptionNumber": "A-S12313444",
+      "serviceStartDate": "2025-02-01",
+      "serviceEndDate": "2025-02-28",
+      "chargeAmount": 0,
+      "chargeDescription": "",
+      "chargeName": "Monthly Contribution",
+      "chargeNumber": "C-01234344",
+      "chargeId": "chargeididcharID",
+      "productName": "Contributor",
+      "quantity": 1,
+      "taxAmount": 0,
+      "unitOfMeasure": "",
+      "chargeDate": "2024-12-11 10:15:31",
+      "chargeType": "Recurring",
+      "processingType": "Charge",
+      "appliedToItemId": null,
+      "numberOfDeliveries": 0
+    }
+  ],
+  "creditMemoItems": [],
+  "success": true
+}
