@@ -53,7 +53,9 @@ test('Eligibility check fails for a Supporter plus which has already had the off
 			asLazy(getNextInvoiceItems(billingPreview)),
 		);
 
-	expect(actual).rejects.toThrow(validationRequirements.noNegativePreviewItems);
+	await expect(actual).rejects.toThrow(
+		validationRequirements.noNegativePreviewItems,
+	);
 
 	const ac2 = () =>
 		eligibilityChecker.assertEligibleForFreePeriod(
@@ -76,8 +78,8 @@ test('Eligibility check fails where the next payment is zero (i.e. a contributio
 			asLazy(getNextInvoiceItems(billingPreview)),
 		);
 
-	expect(actual).rejects.toThrow(
-		validationRequirements.notAlreadyUsed, //TODO expect fail - change this to nextInvoiceGreaterThanZero,
+	await expect(actual).rejects.toThrow(
+		validationRequirements.nextInvoiceGreaterThanZero,
 	);
 });
 
@@ -96,7 +98,9 @@ test('Eligibility check fails for a S+ subscription which is on a reduced price'
 			asLazy(getNextInvoiceItems(billingPreview)),
 		);
 
-	expect(actual).rejects.toThrow(validationRequirements.noNegativePreviewItems);
+	await expect(actual).rejects.toThrow(
+		validationRequirements.noNegativePreviewItems,
+	);
 
 	//expect to not throw
 	eligibilityChecker.assertEligibleForFreePeriod(
@@ -175,5 +179,5 @@ test('Eligibility check fails for a subscription which is cancelled', async () =
 			Promise.reject('should not attempt a BP if its cancelled'),
 		);
 
-	expect(ac2).rejects.toThrow(validationRequirements.isActive);
+	await expect(ac2).rejects.toThrow(validationRequirements.isActive);
 });
