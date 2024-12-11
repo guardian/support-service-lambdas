@@ -22,6 +22,7 @@ import billingPreviewSupporterPlusFullPrice from './fixtures/billing-previews/su
 import subscriptionJson2 from './fixtures/digital-subscriptions/eligibility-checker-test2.json';
 import subscriptionJson3 from './fixtures/digital-subscriptions/eligibility-checker-test3.json';
 import subscriptionJson1 from './fixtures/supporter-plus/free-2-months.json';
+import zeroContributionPreview from './fixtures/billing-previews/zero-contribution.json';
 import subSupporterPlusFullPrice from './fixtures/supporter-plus/full-price.json';
 
 const eligibilityChecker = new EligibilityChecker(new Logger());
@@ -62,6 +63,22 @@ test('Eligibility check fails for a Supporter plus which has already had the off
 		);
 
 	expect(ac2).toThrow(validationRequirements.notAlreadyUsed);
+});
+
+test('Eligibility check fails where the next payment is zero (i.e. a contribution set to 0 amount)', async () => {
+	const sub = zuoraSubscriptionResponseSchema.parse(subscriptionJson1);
+	const billingPreview = loadBillingPreview(zeroContributionPreview);
+
+	const actual = () =>
+		eligibilityChecker.assertGenerallyEligible(
+			sub,
+			0,
+			asLazy(getNextInvoiceItems(billingPreview)),
+		);
+
+	expect(actual).rejects.toThrow(
+		validationRequirements.notAlreadyUsed, //TODO expect fail - change this to nextInvoiceGreaterThanZero,
+	);
 });
 
 test('Eligibility check fails for a S+ subscription which is on a reduced price', async () => {

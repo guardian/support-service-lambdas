@@ -38,6 +38,18 @@ export class EligibilityChecker {
 			JSON.stringify(nextInvoiceItems),
 		);
 
+		this.logger.log(
+			"making sure there's a payment due - avoid zero contribution amounts",
+		);
+		const nextInvoiceTotal = nextInvoiceItems
+			.map((item) => item.amount)
+			.reduce((a, b) => a + b);
+		this.assertValidState(
+			nextInvoiceTotal > 0,
+			validationRequirements.nextInvoiceGreaterThanZero,
+			JSON.stringify(nextInvoiceItems),
+		);
+
 		this.logger.log('Subscription is generally eligible for the discount');
 	};
 
@@ -108,4 +120,5 @@ export const validationRequirements = {
 	isActive: 'subscription status is active',
 	zeroAccountBalance: 'account balance is zero',
 	atLeastCatalogPrice: 'next invoice must be at least the catalog price',
+	nextInvoiceGreaterThanZero: 'next invoice total must be greater than zero',
 };
