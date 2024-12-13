@@ -98,3 +98,15 @@ export class IdentityApiGatewayAuthenticator {
 		}
 	}
 }
+
+export const buildAuthenticate = (
+	stage: Stage,
+	requiredScopes: string[],
+): ((event: APIGatewayProxyEvent) => Promise<AuthenticationResult>) => {
+	const authenticator = new IdentityApiGatewayAuthenticator(
+		stage,
+		requiredScopes,
+	);
+
+	return (event: APIGatewayProxyEvent) => authenticator.authenticate(event);
+};
