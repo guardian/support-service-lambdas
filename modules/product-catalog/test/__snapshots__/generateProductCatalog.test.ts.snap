@@ -949,6 +949,29 @@ exports[`Generated product catalog matches snapshot 1`] = `
       },
     },
   },
+  "OneTimeContribution": {
+    "active": true,
+    "billingSystem": "stripe",
+    "ratePlans": {
+      "OneTime": {
+        "billingPeriod": "OneTime",
+        "charges": {
+          "Contribution": {
+            "id": "single_contribution",
+          },
+        },
+        "id": "single_contribution",
+        "pricing": {
+          "AUD": 0,
+          "CAD": 0,
+          "EUR": 0,
+          "GBP": 0,
+          "NZD": 0,
+          "USD": 0,
+        },
+      },
+    },
+  },
   "PartnerMembership": {
     "active": false,
     "billingSystem": "zuora",
@@ -1920,6 +1943,16 @@ exports[`Generated product catalog types match snapshot 1`] = `
         "DigitalPack": {},
         "Saturday": {},
         "Sunday": {},
+      },
+    },
+  },
+  "OneTimeContribution": {
+    "billingPeriods": [
+      "OneTime",
+    ],
+    "productRatePlans": {
+      "OneTime": {
+        "Contribution": {},
       },
     },
   },

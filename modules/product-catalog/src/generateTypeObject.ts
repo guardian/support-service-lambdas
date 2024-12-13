@@ -4,6 +4,7 @@ import type {
 	ZuoraProductRatePlan,
 	ZuoraProductRatePlanCharge,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
+import { oneTimeContributionTypeObject } from '@modules/product-catalog/oneTimeContributionProduct';
 import { stripeTypeObject } from '@modules/product-catalog/stripeProducts';
 import {
 	getProductRatePlanChargeKey,
@@ -78,5 +79,9 @@ export const generateTypeObject = (catalog: ZuoraCatalog) => {
 
 	const zuoraTypeObject = arrayToObject(arrayVersion);
 
-	return { ...zuoraTypeObject, ...stripeTypeObject };
+	return {
+		...oneTimeContributionTypeObject,
+		...zuoraTypeObject,
+		...stripeTypeObject,
+	};
 };

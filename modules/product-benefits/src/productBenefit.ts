@@ -39,4 +39,5 @@ export const productBenefitMapping: Record<ProductKey, ProductBenefit[]> = {
 	GuardianWeeklyZoneB: ['fewerSupportAsks'],
 	GuardianWeeklyZoneC: ['fewerSupportAsks'],
 	Contribution: ['fewerSupportAsks'],
+	OneTimeContribution: ['fewerSupportAsks'],
 };
