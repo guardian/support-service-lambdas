@@ -1,9 +1,56 @@
+import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
+import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
+import { zuoraDateFormat } from '@modules/zuora/common';
+import dayjs from 'dayjs';
 import {
 	digitalSubscriptionBenefits,
 	supporterPlusBenefits,
 	tierThreeBenefits,
 } from '@modules/product-benefits/productBenefit';
-import { getUserBenefitsFromUserProducts } from '@modules/product-benefits/userBenefits';
+import {
+	getUserBenefitsFromUserProducts,
+	getValidUserProducts,
+} from '@modules/product-benefits/userBenefits';
+import codeZuoraCatalog from '../../zuora-catalog/test/fixtures/catalog-code.json';
+
+const codeProductCatalog = generateProductCatalog(codeZuoraCatalog);
+const codeCatalogHelper = new ProductCatalogHelper(codeProductCatalog);
+
+describe('getUserProductsFromSupporterProductDataItems', () => {
+	test('returns no products when there are no supporter product data items', () => {
+		expect(getValidUserProducts(codeCatalogHelper, [])).toEqual([]);
+	});
+
+	test('returns single contribution when there is a single contribution less than 3 months old', () => {
+		expect(
+			getValidUserProducts(codeCatalogHelper, [
+				{
+					subscriptionName: '123',
+					productRatePlanId: 'single_contribution',
+					productRatePlanName: 'Single Contribution',
+					contractEffectiveDate: zuoraDateFormat(dayjs().subtract(2, 'months')),
+					termEndDate: '2099-04-01',
+					identityId: '123',
+				},
+			]),
+		).toEqual(['OneTimeContribution']);
+	});
+
+	test('returns no products when there are single contributions older than 3 months', () => {
+		expect(
+			getValidUserProducts(codeCatalogHelper, [
+				{
+					subscriptionName: '123',
+					productRatePlanId: 'single_contribution',
+					productRatePlanName: 'Single Contribution',
+					contractEffectiveDate: '2021-01-01',
+					termEndDate: '2099-04-01',
+					identityId: '123',
+				},
+			]),
+		).toEqual([]);
+	});
+});
 
 test('getUserBenefitsFromUserProducts', () => {
 	expect(getUserBenefitsFromUserProducts(['DigitalSubscription'])).toEqual(

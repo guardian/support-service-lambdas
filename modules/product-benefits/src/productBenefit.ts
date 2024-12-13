@@ -1,4 +1,6 @@
 import type { ProductKey } from '@modules/product-catalog/productCatalog';
+import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
+import dayjs from 'dayjs';
 import type { ProductBenefit } from './schemas';
 import { productBenefitListSchema } from './schemas';
 
@@ -40,4 +42,17 @@ export const productBenefitMapping: Record<ProductKey, ProductBenefit[]> = {
 	GuardianWeeklyZoneC: ['fewerSupportAsks'],
 	Contribution: ['fewerSupportAsks'],
 	OneTimeContribution: ['fewerSupportAsks'],
+};
+
+const itemIsNewerThanThreeMonths = (item: SupporterRatePlanItem) =>
+	dayjs(item.contractEffectiveDate).add(3, 'month').isAfter(dayjs());
+
+const noSpecialValidation = () => true;
+
+export const validationFunctionForProduct = (product: ProductKey) => {
+	if (product === 'OneTimeContribution') {
+		return itemIsNewerThanThreeMonths;
+	} else {
+		return noSpecialValidation;
+	}
 };
