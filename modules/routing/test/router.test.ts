@@ -1,15 +1,12 @@
-import type { HttpMethod } from '@modules/routing/router';
-import { Router } from '@modules/routing/router';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
+import type { HttpMethod } from '@modules/routing/router';
+import { NotFoundResponse, Router } from '@modules/routing/router';
 
 const successResponse = {
 	body: 'Success',
 	statusCode: 200,
 };
-const notFoundResponse = {
-	body: 'Not Found',
-	statusCode: 404,
-};
+
 const router = new Router([
 	{
 		httpMethod: 'GET',
@@ -29,7 +26,7 @@ describe('Router', () => {
 	test('it should return a 404 if no route is found', async () => {
 		expect(
 			await router.routeRequest(buildApiGatewayEvent('/not-found', 'GET')),
-		).toEqual(notFoundResponse);
+		).toEqual(NotFoundResponse);
 	});
 });
 

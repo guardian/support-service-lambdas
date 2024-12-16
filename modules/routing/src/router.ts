@@ -1,20 +1,23 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-export const HttpMethods = [
-	'GET',
-	'POST',
-	'PUT',
-	'DELETE',
-	'PATCH',
-	'OPTIONS',
-	'HEAD',
-];
-export type HttpMethod = (typeof HttpMethods)[number];
+export type HttpMethod =
+	| 'GET'
+	| 'POST'
+	| 'PUT'
+	| 'DELETE'
+	| 'PATCH'
+	| 'OPTIONS'
+	| 'HEAD';
 
 type Route = {
 	httpMethod: HttpMethod;
 	path: string;
 	handler: (event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult>;
+};
+
+export const NotFoundResponse = {
+	body: 'Not Found',
+	statusCode: 404,
 };
 
 export class Router {
@@ -30,9 +33,6 @@ export class Router {
 		if (route) {
 			return await route.handler(event);
 		}
-		return {
-			body: 'Not Found',
-			statusCode: 404,
-		};
+		return NotFoundResponse;
 	}
 }
