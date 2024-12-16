@@ -61,7 +61,10 @@ export const handler: Handler = async (
 			await identityAuthenticator.authenticate(event);
 
 		if (maybeAuthenticatedEvent.type === 'FailedAuthenticationResponse') {
-			return maybeAuthenticatedEvent;
+			return {
+				statusCode: 401,
+				body: JSON.stringify({ message: 'Unauthorized' }),
+			};
 		}
 
 		const userBenefitsResponse = await getUserBenefitsResponse(
