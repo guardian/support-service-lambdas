@@ -71,6 +71,9 @@ export const handler: Handler = async (
 		);
 		return {
 			body: JSON.stringify(userBenefitsResponse),
+			headers: {
+				'Cache-Control': 'no-cache, no-store',
+			},
 			statusCode: 200,
 		};
 	} catch (error) {
