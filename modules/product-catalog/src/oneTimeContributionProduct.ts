@@ -12,15 +12,7 @@ export const oneTimeContribution: {
 			OneTime: {
 				id: 'single_contribution',
 				// Contribution amounts are variable and not tied to the product catalog
-				// so leave this as 0 for now
-				pricing: {
-					GBP: 0,
-					USD: 0,
-					NZD: 0,
-					EUR: 0,
-					AUD: 0,
-					CAD: 0,
-				},
+				pricing: {},
 				// One time contributions don't have charges in the same way as Zuora
 				charges: {
 					Contribution: { id: 'single_contribution' },

@@ -1197,4 +1197,15 @@ export const productCatalogSchema = z.object({
 			}),
 		}),
 	}),
+	OneTimeContribution: z.object({
+		billingSystem: z.literal('stripe'),
+		active: z.boolean(),
+		ratePlans: z.object({
+			OneTime: z.object({
+				id: z.string(),
+				pricing: z.object({}),
+				charges: z.object({ Contribution: z.object({ id: z.string() }) }),
+			}),
+		}),
+	}),
 });

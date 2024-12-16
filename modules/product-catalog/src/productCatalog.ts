@@ -25,7 +25,7 @@ export const isProductBillingPeriod = <P extends ProductKey>(
 	);
 };
 
-type ProductPrice = { GBP: number } & Partial<Record<Currency, number>>;
+type ProductPrice = Partial<Record<Currency, number>>;
 
 export type ProductRatePlanCharge = {
 	id: string;

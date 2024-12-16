@@ -14,16 +14,8 @@ export const stripeProducts: Partial<Record<ProductKey, Product<ProductKey>>> =
 			ratePlans: {
 				GuardianPatron: {
 					id: 'guardian_patron',
-					// Pricing on Patrons is complicated and we don't use the product catalog
-					// to manage it so leave this as 0 for now
-					pricing: {
-						GBP: 0,
-						USD: 0,
-						NZD: 0,
-						EUR: 0,
-						AUD: 0,
-						CAD: 0,
-					},
+					// Pricing on Patrons is complicated and we don't use the product catalog to manage it
+					pricing: {},
 					// Stripe doesn't have charges in the same way as Zuora
 					charges: {
 						Subscription: { id: 'guardian_patron' },
