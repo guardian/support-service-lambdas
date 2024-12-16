@@ -68,6 +68,7 @@ jobs:
           projectName: support-service-lambdas::${{ matrix.subproject }}
           buildNumberOffset: 7000
           configPath: ./handlers/${{ matrix.subproject }}/riff-raff.yaml
+          commentingEnabled: 'false'
           contentDirectories: |
             ${{ matrix.subproject }}-cloudformation:
               - ./cdk/cdk.out/${{ matrix.subproject }}-CODE.template.json
