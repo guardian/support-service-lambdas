@@ -71,8 +71,9 @@ export const handler: Handler = async (
 		);
 		return {
 			body: JSON.stringify(userBenefitsResponse),
+			// https://www.fastly.com/documentation/guides/concepts/edge-state/cache/cache-freshness/#preventing-content-from-being-cached
 			headers: {
-				'Cache-Control': 'no-cache, no-store',
+				'Cache-Control': 'private, no-store',
 			},
 			statusCode: 200,
 		};
