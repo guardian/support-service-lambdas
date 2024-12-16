@@ -61,13 +61,14 @@ jobs:
       - run: pnpm --filter cdk package
 
       - name: Upload to Riff-Raff
-        uses: guardian/actions-riff-raff@v4
+        uses: guardian/actions-riff-raff@1275686863875d7b86e0f38e6362644048679500
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
           projectName: support-service-lambdas::${{ matrix.subproject }}
           buildNumberOffset: 7000
           configPath: ./handlers/${{ matrix.subproject }}/riff-raff.yaml
+          commentingEnabled: 'false'
           contentDirectories: |
             ${{ matrix.subproject }}-cloudformation:
               - ./cdk/cdk.out/${{ matrix.subproject }}-CODE.template.json
