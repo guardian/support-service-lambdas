@@ -1,0 +1,11 @@
+{
+  "name": "routing",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "jest --group=-integration"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.129"
+  }
+}
