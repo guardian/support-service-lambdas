@@ -72,7 +72,7 @@ jobs:
           aws-region: eu-west-1
 
       - name: Upload to Riff-Raff
-        uses: guardian/actions-riff-raff@1275686863875d7b86e0f38e6362644048679500
+        uses: guardian/actions-riff-raff@v4
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           roleArn: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
