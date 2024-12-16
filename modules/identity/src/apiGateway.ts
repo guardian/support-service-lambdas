@@ -9,14 +9,17 @@ import {
 	OktaTokenHelper,
 } from '@modules/identity/identity';
 
-export type AuthenticatedApiGatewayEvent = APIGatewayProxyEvent & {
-	type: 'AuthenticatedApiGatewayEvent';
+type SuccessfulAuthentication = {
+	type: 'success';
 	userDetails: IdentityUserDetails;
 };
 
-export type FailedAuthenticationResponse = APIGatewayProxyResult & {
-	type: 'FailedAuthenticationResponse';
+type FailedAuthentication = {
+	type: 'failure';
+	response: APIGatewayProxyResult;
 };
+
+type AuthenticationResult = SuccessfulAuthentication | FailedAuthentication;
 
 export class IdentityApiGatewayAuthenticator {
 	tokenHelper: OktaTokenHelper;
@@ -26,14 +29,16 @@ export class IdentityApiGatewayAuthenticator {
 
 	async authenticate(
 		event: APIGatewayProxyEvent,
-	): Promise<AuthenticatedApiGatewayEvent | FailedAuthenticationResponse> {
+	): Promise<AuthenticationResult> {
 		const authHeader = event.headers.Authorization;
 		if (!authHeader) {
 			console.log('No Authorization header provided in request', event);
 			return {
-				type: 'FailedAuthenticationResponse',
-				statusCode: 401,
-				body: JSON.stringify({ message: 'No Authorization header provided' }),
+				type: 'failure',
+				response: {
+					statusCode: 401,
+					body: JSON.stringify({ message: 'No Authorization header provided' }),
+				},
 			};
 		}
 		try {
@@ -42,44 +47,53 @@ export class IdentityApiGatewayAuthenticator {
 				`Successfully authenticated user with identityId: ${userDetails.identityId}`,
 			);
 			return {
-				type: 'AuthenticatedApiGatewayEvent',
-				...event,
+				type: 'success',
 				userDetails,
 			};
 		} catch (error) {
 			console.log('Caught exception with message: ', error);
 			if (error instanceof ExpiredTokenError) {
 				return {
-					type: 'FailedAuthenticationResponse',
-					body: 'Token has expired',
-					statusCode: 401,
+					type: 'failure',
+					response: {
+						body: 'Token has expired',
+						statusCode: 401,
+					},
 				};
 			}
 			if (error instanceof InvalidTokenError) {
 				return {
-					type: 'FailedAuthenticationResponse',
-					body: 'Token is invalid',
-					statusCode: 401,
+					type: 'failure',
+					response: {
+						body: 'Token is invalid',
+						statusCode: 401,
+					},
 				};
 			}
 			if (error instanceof InvalidScopesError) {
 				return {
-					type: 'FailedAuthenticationResponse',
-					body: 'Token does not have the required scopes',
-					statusCode: 403,
+					type: 'failure',
+					response: {
+						body: 'Token does not have the required scopes',
+						statusCode: 403,
+					},
 				};
 			}
 			if (error instanceof ValidationError) {
 				return {
-					type: 'FailedAuthenticationResponse',
-					body: error.message,
-					statusCode: 403,
+					type: 'failure',
+					response: {
+						body: error.message,
+						statusCode: 403,
+					},
 				};
 			}
 			return {
-				type: 'FailedAuthenticationResponse',
-				body: 'Internal server error',
-				statusCode: 500,
+				type: 'failure',
+				response: {
+					body: 'Internal server error',
+					statusCode: 500,
+				},
 			};
 		}
 	}
