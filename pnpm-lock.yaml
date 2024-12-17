@@ -292,6 +292,12 @@ importers:
         specifier: ^3.23.8
         version: 3.23.8
 
+  modules/routing:
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.129
+        version: 8.10.145
+
   modules/salesforce:
     dependencies:
       zod:
