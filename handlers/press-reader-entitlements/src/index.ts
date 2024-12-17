@@ -1,4 +1,3 @@
-import { ValidationError } from '@modules/errors';
 import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { userHasGuardianEmail } from '@modules/product-benefits/userBenefits';
@@ -44,33 +43,18 @@ export const handler: Handler = async (
 async function userEntitlementsHandler(
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> {
-	try {
-		const userId = getIfDefined(
-			event.queryStringParameters?.['userId'],
-			'userId does not exist',
-		);
+	const userId = getIfDefined(
+		event.queryStringParameters?.['userId'],
+		'userId does not exist',
+	);
 
-		const memberDetails = await getMemberDetails(stage, userId);
-		const xmlBody = buildXml(memberDetails);
-		console.log(`Successful response body is ${xmlBody}`);
-		return {
-			body: buildXml(memberDetails),
-			statusCode: 200,
-		};
-	} catch (error) {
-		console.log('Caught exception with message: ', error);
-		if (error instanceof ValidationError) {
-			console.log(`Validation failure: ${error.message}`);
-			return {
-				body: error.message,
-				statusCode: 400,
-			};
-		}
-		return {
-			body: 'Internal server error',
-			statusCode: 500,
-		};
-	}
+	const memberDetails = await getMemberDetails(stage, userId);
+	const xmlBody = buildXml(memberDetails);
+	console.log(`Successful response body is ${xmlBody}`);
+	return {
+		body: buildXml(memberDetails),
+		statusCode: 200,
+	};
 }
 
 export async function getMemberDetails(
