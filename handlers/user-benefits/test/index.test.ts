@@ -1,6 +1,6 @@
 import type { UserBenefitsResponse } from '@modules/product-benefits/schemas';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
-import { handler } from '../src/index';
+import { userBenefitsHandler } from '../src/index';
 
 jest.mock('@modules/identity/apiGateway', () => ({
 	buildAuthenticate: () => (event: APIGatewayProxyEvent) => {
@@ -27,34 +27,20 @@ jest.mock('@modules/product-benefits/userBenefits', () => ({
 	getUserBenefits: () => ['adFree'],
 }));
 
-describe('handler', () => {
-	it('returns a 404 for an unrecognized path or HTTP method', async () => {
+describe('userBenefitsHandler', () => {
+	it('returns a 200 with user benefits', async () => {
 		const requestEvent = {
-			path: '/bad/path',
+			path: '/benefits/me',
 			httpMethod: 'GET',
-			headers: {},
+			headers: {
+				Authorization: 'Bearer good-token',
+			},
 		} as unknown as APIGatewayProxyEvent;
 
-		const response = await handler(requestEvent);
+		const response = await userBenefitsHandler(requestEvent);
 
-		expect(response.statusCode).toEqual(404);
-	});
-
-	describe('/benefits/me', () => {
-		it('returns a 200 with user benefits', async () => {
-			const requestEvent = {
-				path: '/benefits/me',
-				httpMethod: 'GET',
-				headers: {
-					Authorization: 'Bearer good-token',
-				},
-			} as unknown as APIGatewayProxyEvent;
-
-			const response = await handler(requestEvent);
-
-			expect(response.statusCode).toEqual(200);
-			const parsedBody = JSON.parse(response.body) as UserBenefitsResponse;
-			expect(parsedBody.benefits).toEqual(['adFree']);
-		});
+		expect(response.statusCode).toEqual(200);
+		const parsedBody = JSON.parse(response.body) as UserBenefitsResponse;
+		expect(parsedBody.benefits).toEqual(['adFree']);
 	});
 });
