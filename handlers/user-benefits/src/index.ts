@@ -1,5 +1,5 @@
 import { ValidationError } from '@modules/errors';
-import { IdentityApiGatewayAuthenticator } from '@modules/identity/apiGateway';
+import { buildAuthenticate } from '@modules/identity/apiGateway';
 import type { IdentityUserDetails } from '@modules/identity/identity';
 import { Lazy } from '@modules/lazy';
 import type { UserBenefitsResponse } from '@modules/product-benefits/schemas';
@@ -7,15 +7,11 @@ import { getUserBenefits } from '@modules/product-benefits/userBenefits';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
-import type {
-	APIGatewayProxyEvent,
-	APIGatewayProxyResult,
-	Handler,
-} from 'aws-lambda';
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { getTrialInformation } from './trials';
 
 const stage = process.env.STAGE as Stage;
-const identityAuthenticator = new IdentityApiGatewayAuthenticator(stage, []); //TODO: Do we have any required scopes?
+const authenticate = buildAuthenticate(stage, []); //TODO: Do we have any required scopes?
 const productCatalog = new Lazy(
 	async () => await getProductCatalogFromApi(stage),
 	'Get product catalog',
@@ -40,7 +36,7 @@ const getUserBenefitsResponse = async (
 	};
 };
 
-export const handler: Handler = async (
+export const handler = async (
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
 	console.log(`Input is ${JSON.stringify(event)}`);
@@ -51,8 +47,7 @@ export const handler: Handler = async (
 		};
 	}
 	try {
-		const maybeAuthenticatedEvent =
-			await identityAuthenticator.authenticate(event);
+		const maybeAuthenticatedEvent = await authenticate(event);
 
 		if (maybeAuthenticatedEvent.type === 'failure') {
 			return maybeAuthenticatedEvent.response;

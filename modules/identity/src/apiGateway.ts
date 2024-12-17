@@ -98,3 +98,23 @@ export class IdentityApiGatewayAuthenticator {
 		}
 	}
 }
+
+export const buildAuthenticate = (
+	stage: Stage,
+	requiredScopes: string[],
+): ((event: APIGatewayProxyEvent) => Promise<AuthenticationResult>) => {
+	// We only build one of these instances, the function returned below closes
+	// over the instance and uses it each time it is invoked.
+	const authenticator = new IdentityApiGatewayAuthenticator(
+		stage,
+		requiredScopes,
+	);
+	console.log(
+		`Created an IdentityApiGatewayAuthenticator instance. Stage: ${stage}. Scopes: ${requiredScopes.join(', ')}.`,
+	);
+
+	const authenticate = (event: APIGatewayProxyEvent) =>
+		authenticator.authenticate(event);
+
+	return authenticate;
+};
