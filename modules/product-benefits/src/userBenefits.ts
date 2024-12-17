@@ -5,9 +5,11 @@ import type {
 	ProductKey,
 } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
+import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import { getSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
 import {
 	allProductBenefits,
+	itemIsValidForProduct,
 	productBenefitMapping,
 } from '@modules/product-benefits/productBenefit';
 import type { ProductBenefit } from '@modules/product-benefits/schemas';
@@ -25,14 +27,25 @@ export const getUserProducts = async (
 		console.log('No supporter product data found');
 		return [];
 	}
-	return supporterProductDataItems
-		.flatMap(
-			(item) =>
-				productCatalogHelper.findProductDetails(item.productRatePlanId)
-					?.zuoraProduct,
-		)
-		.filter((product) => product !== undefined);
+	return getValidUserProducts(productCatalogHelper, supporterProductDataItems);
 };
+
+export const getValidUserProducts = (
+	productCatalogHelper: ProductCatalogHelper,
+	supporterProductDataItems: SupporterRatePlanItem[],
+): ProductKey[] =>
+	supporterProductDataItems
+		.flatMap((item) => {
+			const product = productCatalogHelper.findProductDetails(
+				item.productRatePlanId,
+			)?.zuoraProduct;
+
+			if (product !== undefined && itemIsValidForProduct(item, product)) {
+				return product;
+			}
+			return undefined;
+		})
+		.filter((product) => product !== undefined);
 
 export const userHasGuardianEmail = (email: string): boolean =>
 	email.endsWith('@theguardian.com') || email.endsWith('@guardian.co.uk');

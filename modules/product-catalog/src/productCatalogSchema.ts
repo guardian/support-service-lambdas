@@ -8,14 +8,7 @@ export const productCatalogSchema = z.object({
 		ratePlans: z.object({
 			GuardianPatron: z.object({
 				id: z.string(),
-				pricing: z.object({
-					GBP: z.number(),
-					USD: z.number(),
-					NZD: z.number(),
-					EUR: z.number(),
-					AUD: z.number(),
-					CAD: z.number(),
-				}),
+				pricing: z.object({}),
 				charges: z.object({
 					Subscription: z.object({
 						id: z.string(),
@@ -1167,14 +1160,7 @@ export const productCatalogSchema = z.object({
 		ratePlans: z.object({
 			Annual: z.object({
 				id: z.string(),
-				pricing: z.object({
-					USD: z.number(),
-					NZD: z.number(),
-					EUR: z.number(),
-					GBP: z.number(),
-					CAD: z.number(),
-					AUD: z.number(),
-				}),
+				pricing: z.object({}),
 				charges: z.object({ Contribution: z.object({ id: z.string() }) }),
 				billingPeriod: z
 					.enum(typeObject.Contribution.billingPeriods)
@@ -1182,18 +1168,22 @@ export const productCatalogSchema = z.object({
 			}),
 			Monthly: z.object({
 				id: z.string(),
-				pricing: z.object({
-					USD: z.number(),
-					NZD: z.number(),
-					EUR: z.number(),
-					GBP: z.number(),
-					CAD: z.number(),
-					AUD: z.number(),
-				}),
+				pricing: z.object({}),
 				charges: z.object({ Contribution: z.object({ id: z.string() }) }),
 				billingPeriod: z
 					.enum(typeObject.Contribution.billingPeriods)
 					.optional(),
+			}),
+		}),
+	}),
+	OneTimeContribution: z.object({
+		billingSystem: z.literal('stripe'),
+		active: z.boolean(),
+		ratePlans: z.object({
+			OneTime: z.object({
+				id: z.string(),
+				pricing: z.object({}),
+				charges: z.object({ Contribution: z.object({ id: z.string() }) }),
 			}),
 		}),
 	}),

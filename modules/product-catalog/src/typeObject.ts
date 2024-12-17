@@ -1,4 +1,12 @@
 export const typeObject = {
+	OneTimeContribution: {
+		billingPeriods: ['OneTime'],
+		productRatePlans: {
+			OneTime: {
+				Contribution: {},
+			},
+		},
+	},
 	GuardianLight: {
 		billingPeriods: ['Month'],
 		productRatePlans: {
