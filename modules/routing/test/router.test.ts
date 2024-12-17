@@ -28,6 +28,11 @@ describe('Router', () => {
 			await router.routeRequest(buildApiGatewayEvent('/not-found', 'GET')),
 		).toEqual(NotFoundResponse);
 	});
+	test('it should check the http method as well as the path', async () => {
+		expect(
+			await router.routeRequest(buildApiGatewayEvent('/benefits/me', 'POST')),
+		).toEqual(NotFoundResponse);
+	});
 });
 
 const buildApiGatewayEvent = (
