@@ -81,46 +81,45 @@ test('we throw an error if the token is expired', async () => {
 const authenticator = new IdentityApiGatewayAuthenticator('CODE', []);
 
 test('ApiGateway event with a valid token returns an authenticated result', async () => {
-	const response = await authenticator.authenticate(
+	const result = await authenticator.authenticate(
 		buildProxyEvent(validAuthHeader),
 	);
-	console.log(response);
-	expect(response.type).toBe('AuthenticatedApiGatewayEvent');
-	if (response.type !== 'AuthenticatedApiGatewayEvent') {
+	expect(result.type).toBe('success');
+	if (result.type !== 'success') {
 		throw new Error('Expected response to be an AuthenticatedApiGatewayEvent');
 	}
-	expect(response.userDetails.identityId.length).toBeGreaterThan(0);
+	expect(result.userDetails.identityId.length).toBeGreaterThan(0);
 });
 
 test('ApiGateway event with expired token returns a 401 response', async () => {
-	const response = await authenticator.authenticate(
+	const result = await authenticator.authenticate(
 		buildProxyEvent(expiredAuthHeader),
 	);
-	expect(response.type).toBe('FailedAuthenticationResponse');
-	if (response.type !== 'FailedAuthenticationResponse') {
-		throw new Error('Expected response to be a FailedAuthenticationResponse');
+	expect(result.type).toBe('failure');
+	if (result.type !== 'failure') {
+		throw new Error('Expected response to be a failure');
 	}
-	expect(response.statusCode).toBe(401);
+	expect(result.response.statusCode).toBe(401);
 });
 
 test('ApiGateway event with an invalid token returns a 401 response', async () => {
-	const response = await authenticator.authenticate(
+	const result = await authenticator.authenticate(
 		buildProxyEvent('Bearer invalid-token'),
 	);
-	expect(response.type).toBe('FailedAuthenticationResponse');
-	if (response.type !== 'FailedAuthenticationResponse') {
-		throw new Error('Expected response to be a FailedAuthenticationResponse');
+	expect(result.type).toBe('failure');
+	if (result.type !== 'failure') {
+		throw new Error('Expected response to be a failure');
 	}
-	expect(response.statusCode).toBe(401);
+	expect(result.response.statusCode).toBe(401);
 });
 
 test('ApiGateway event with an missing token returns a 401 response', async () => {
-	const response = await authenticator.authenticate(buildProxyEvent(undefined));
-	expect(response.type).toBe('FailedAuthenticationResponse');
-	if (response.type !== 'FailedAuthenticationResponse') {
-		throw new Error('Expected response to be a FailedAuthenticationResponse');
+	const result = await authenticator.authenticate(buildProxyEvent(undefined));
+	expect(result.type).toBe('failure');
+	if (result.type !== 'failure') {
+		throw new Error('Expected response to be a failure');
 	}
-	expect(response.statusCode).toBe(401);
+	expect(result.response.statusCode).toBe(401);
 });
 
 test('ApiGateway event with a valid token with incorrect scopes returns a 403 response', async () => {
@@ -128,12 +127,12 @@ test('ApiGateway event with a valid token with incorrect scopes returns a 403 re
 		'CODE',
 		['non-existent.scope'],
 	);
-	const response = await authenticatorWithNonExistantScope.authenticate(
+	const result = await authenticatorWithNonExistantScope.authenticate(
 		buildProxyEvent(validAuthHeader),
 	);
-	expect(response.type).toBe('FailedAuthenticationResponse');
-	if (response.type !== 'FailedAuthenticationResponse') {
-		throw new Error('Expected response to be a FailedAuthenticationResponse');
+	expect(result.type).toBe('failure');
+	if (result.type !== 'failure') {
+		throw new Error('Expected response to be a failure');
 	}
-	expect(response.statusCode).toBe(403);
+	expect(result.response.statusCode).toBe(403);
 });

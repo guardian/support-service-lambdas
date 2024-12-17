@@ -1,8 +1,4 @@
 import { ValidationError } from '@modules/errors';
-import type {
-	AuthenticatedApiGatewayEvent,
-	FailedAuthenticationResponse,
-} from '@modules/identity/apiGateway';
 import { IdentityApiGatewayAuthenticator } from '@modules/identity/apiGateway';
 import type { IdentityUserDetails } from '@modules/identity/identity';
 import { Lazy } from '@modules/lazy';
@@ -55,13 +51,11 @@ export const handler: Handler = async (
 		};
 	}
 	try {
-		const maybeAuthenticatedEvent:
-			| AuthenticatedApiGatewayEvent
-			| FailedAuthenticationResponse =
+		const maybeAuthenticatedEvent =
 			await identityAuthenticator.authenticate(event);
 
-		if (maybeAuthenticatedEvent.type === 'FailedAuthenticationResponse') {
-			return maybeAuthenticatedEvent;
+		if (maybeAuthenticatedEvent.type === 'failure') {
+			return maybeAuthenticatedEvent.response;
 		}
 
 		const userBenefitsResponse = await getUserBenefitsResponse(
