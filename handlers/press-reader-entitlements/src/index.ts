@@ -3,6 +3,7 @@ import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { userHasGuardianEmail } from '@modules/product-benefits/userBenefits';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
+import { Router } from '@modules/routing/router';
 import type { Stage } from '@modules/stage';
 import { stageFromEnvironment } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
@@ -25,29 +26,36 @@ const lazyIdentityClientAccessToken = new Lazy(
 	async () => await getClientAccessToken(stage),
 	'Get identity client access token',
 );
+const router = new Router([
+	{
+		httpMethod: 'GET',
+		path: '/user-entitlements',
+		handler: userEntitlementsHandler,
+	},
+]);
 
 export const handler: Handler = async (
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
 	console.log(`Input is ${JSON.stringify(event)}`);
-	try {
-		if (event.path === '/user-entitlements' && event.httpMethod === 'GET') {
-			const userId = getIfDefined(
-				event.queryStringParameters?.['userId'],
-				'userId does not exist',
-			);
+	return router.routeRequest(event);
+};
 
-			const memberDetails = await getMemberDetails(stage, userId);
-			const xmlBody = buildXml(memberDetails);
-			console.log(`Successful response body is ${xmlBody}`);
-			return {
-				body: buildXml(memberDetails),
-				statusCode: 200,
-			};
-		}
+async function userEntitlementsHandler(
+	event: APIGatewayProxyEvent,
+): Promise<APIGatewayProxyResult> {
+	try {
+		const userId = getIfDefined(
+			event.queryStringParameters?.['userId'],
+			'userId does not exist',
+		);
+
+		const memberDetails = await getMemberDetails(stage, userId);
+		const xmlBody = buildXml(memberDetails);
+		console.log(`Successful response body is ${xmlBody}`);
 		return {
-			body: 'Not found',
-			statusCode: 404,
+			body: buildXml(memberDetails),
+			statusCode: 200,
 		};
 	} catch (error) {
 		console.log('Caught exception with message: ', error);
@@ -63,7 +71,7 @@ export const handler: Handler = async (
 			statusCode: 500,
 		};
 	}
-};
+}
 
 export async function getMemberDetails(
 	stage: Stage,
