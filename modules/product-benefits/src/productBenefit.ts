@@ -44,15 +44,16 @@ export const productBenefitMapping: Record<ProductKey, ProductBenefit[]> = {
 	OneTimeContribution: ['fewerSupportAsks'],
 };
 
-const itemIsNewerThanThreeMonths = (item: SupporterRatePlanItem) =>
+const itemIsLessThanThreeMonthsOld = (item: SupporterRatePlanItem) =>
 	dayjs(item.contractEffectiveDate).add(3, 'month').isAfter(dayjs());
 
-const noSpecialValidation = () => true;
-
-export const validationFunctionForProduct = (product: ProductKey) => {
+export const itemIsValidForProduct = (
+	item: SupporterRatePlanItem,
+	product: ProductKey,
+) => {
 	if (product === 'OneTimeContribution') {
-		return itemIsNewerThanThreeMonths;
+		return itemIsLessThanThreeMonthsOld(item);
 	} else {
-		return noSpecialValidation;
+		return true;
 	}
 };

@@ -9,8 +9,8 @@ import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supp
 import { getSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
 import {
 	allProductBenefits,
+	itemIsValidForProduct,
 	productBenefitMapping,
-	validationFunctionForProduct,
 } from '@modules/product-benefits/productBenefit';
 import type { ProductBenefit } from '@modules/product-benefits/schemas';
 
@@ -40,10 +40,7 @@ export const getValidUserProducts = (
 				item.productRatePlanId,
 			)?.zuoraProduct;
 
-			if (
-				product !== undefined &&
-				validationFunctionForProduct(product)(item)
-			) {
+			if (product !== undefined && itemIsValidForProduct(item, product)) {
 				return product;
 			}
 			return undefined;
