@@ -3,7 +3,7 @@ import {
 	SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager';
 import { awsConfig } from '@modules/aws/config';
-import type { Stage } from '@modules/stage';
+import type { Stage } from '@modules/utils/stage';
 import type { OAuthClientCredentials } from './zuoraSchemas';
 import { oAuthClientCredentialsSchema } from './zuoraSchemas';
 

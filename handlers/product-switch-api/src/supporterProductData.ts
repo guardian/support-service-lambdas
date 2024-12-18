@@ -1,6 +1,6 @@
 import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 import { awsConfig } from '@modules/aws/config';
-import { prettyPrint } from '@modules/prettyPrint';
+import { prettyPrint } from '@modules/utils/prettyPrint';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import dayjs from 'dayjs';
 import type { SwitchInformation } from './switchInformation';

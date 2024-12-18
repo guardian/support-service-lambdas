@@ -1,4 +1,4 @@
-import { getIfDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/utils/nullAndUndefined';
 
 const regex = /\/update-supporter-plus-amount\/(A-S\d+)/;
 export const getSubscriptionNumberFromUrl = (urlPath: string) => {

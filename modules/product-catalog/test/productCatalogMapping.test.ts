@@ -1,5 +1,5 @@
-import { findDuplicates } from '@modules/arrayFunctions';
-import type { Stage } from '@modules/stage';
+import { findDuplicates } from '@modules/utils/arrayFunctions';
+import type { Stage } from '@modules/utils/stage';
 import { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';

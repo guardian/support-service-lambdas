@@ -1,4 +1,4 @@
-import { groupBy, sortBy } from './arrayFunctions';
+import { groupBy, sortBy } from '../src/arrayFunctions';
 
 test('sortBy should sort by the relevant field', () => {
 	const data = [

@@ -3,7 +3,7 @@
  *
  */
 import type { EmailMessageWithUserId } from '@modules/email/email';
-import { ValidationError } from '@modules/errors';
+import { ValidationError } from '@modules/utils/errors';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';

@@ -4,7 +4,7 @@ import {
 } from '@aws-sdk/client-cloudwatch';
 import type { Tag } from '@aws-sdk/client-cloudwatch';
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
-import { getIfDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/utils/nullAndUndefined';
 
 const buildCrossAccountCloudwatchClient = (roleArn: string) => {
 	const credentials = fromTemporaryCredentials({

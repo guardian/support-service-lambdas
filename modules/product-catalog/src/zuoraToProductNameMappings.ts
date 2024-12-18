@@ -1,4 +1,4 @@
-import { getIfDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/utils/nullAndUndefined';
 
 const zuoraCatalogToProductKey: Record<string, string> = {
 	'Guardian Light': 'GuardianLight',

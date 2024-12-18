@@ -1,8 +1,8 @@
-import { sum } from '@modules/arrayFunctions';
-import { ValidationError } from '@modules/errors';
-import { Lazy } from '@modules/lazy';
-import { getIfDefined } from '@modules/nullAndUndefined';
-import type { Stage } from '@modules/stage';
+import { sum } from '@modules/utils/arrayFunctions';
+import { ValidationError } from '@modules/utils/errors';
+import { Lazy } from '@modules/utils/lazy';
+import { getIfDefined } from '@modules/utils/nullAndUndefined';
+import type { Stage } from '@modules/utils/stage';
 import { addDiscount, previewDiscount } from '@modules/zuora/addDiscount';
 import {
 	billingPreviewToSimpleInvoiceItems,

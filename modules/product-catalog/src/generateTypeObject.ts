@@ -1,4 +1,4 @@
-import { arrayToObject, distinct } from '@modules/arrayFunctions';
+import { arrayToObject, distinct } from '@modules/utils/arrayFunctions';
 import type {
 	ZuoraCatalog,
 	ZuoraProductRatePlan,

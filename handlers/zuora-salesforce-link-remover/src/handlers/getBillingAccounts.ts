@@ -6,7 +6,7 @@ import { doSfAuth } from '@modules/salesforce/src/auth';
 import { executeSalesforceQuery } from '@modules/salesforce/src/query';
 import { RecordSchema } from '@modules/salesforce/src/recordSchema';
 import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
-import { stageFromEnvironment } from '@modules/stage';
+import { stageFromEnvironment } from '@modules/utils/stage';
 import { z } from 'zod';
 import { getSalesforceSecretNames } from '../secrets';
 import type { ApiUserSecret, ConnectedAppSecret } from '../secrets';

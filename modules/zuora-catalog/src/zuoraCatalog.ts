@@ -1,5 +1,5 @@
-import { sumNumbers } from '@modules/arrayFunctions';
-import { getIfDefined, isNotNull } from '@modules/nullAndUndefined';
+import { sumNumbers } from '@modules/utils/arrayFunctions';
+import { getIfDefined, isNotNull } from '@modules/utils/nullAndUndefined';
 import type {
 	Pricing,
 	ZuoraCatalog,

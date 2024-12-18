@@ -4,7 +4,7 @@
  * @group integration
  */
 
-import type { Stage } from '@modules/stage';
+import type { Stage } from '@modules/utils/stage';
 import { addDiscount } from '@modules/zuora/addDiscount';
 import { getSubscription } from '@modules/zuora/getSubscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';

@@ -1,6 +1,6 @@
-import { ValidationError } from '@modules/errors';
-import { getIfDefined } from '@modules/nullAndUndefined';
-import type { Stage } from '@modules/stage';
+import { ValidationError } from '@modules/utils/errors';
+import { getIfDefined } from '@modules/utils/nullAndUndefined';
+import type { Stage } from '@modules/utils/stage';
 import type {
 	APIGatewayProxyEvent,
 	APIGatewayProxyResult,

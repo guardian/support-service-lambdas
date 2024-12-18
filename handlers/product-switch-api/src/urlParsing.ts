@@ -1,4 +1,4 @@
-import { getIfDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/utils/nullAndUndefined';
 
 const regex =
 	/\/product-move\/(recurring-contribution-to-supporter-plus)\/(A-S\d+)/;

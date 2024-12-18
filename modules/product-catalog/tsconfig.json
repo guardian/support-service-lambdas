@@ -12,7 +12,7 @@
       "@modules/zuora-catalog/*": ["../zuora-catalog/src/*"],
       "@modules/product-catalog/*": ["../product-catalog/src/*"],
       "@modules/internationalisation/*": ["../internationalisation/src/*"],
-      "@modules/*": ["../*"]
+      "@modules/utils/*": ["../utils/src/*"]
     }
-  },
+  }
 }

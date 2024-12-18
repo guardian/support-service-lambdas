@@ -1,4 +1,4 @@
-import { getIfDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/utils/nullAndUndefined';
 import { publishSnsMessage } from '../services/sns';
 import { describeExecution, startExecution } from '../services/step-functions';
 

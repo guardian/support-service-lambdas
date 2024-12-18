@@ -1,4 +1,4 @@
-import type { BillingPeriod } from '@modules/billingPeriod';
+import type { BillingPeriod } from '@modules/utils/billingPeriod';
 import type { EmailMessageWithUserId } from '@modules/email/email';
 import { DataExtensionNames, sendEmail } from '@modules/email/email';
 import type { Currency } from '@modules/internationalisation/currency';

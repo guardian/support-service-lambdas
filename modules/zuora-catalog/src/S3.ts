@@ -1,6 +1,6 @@
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { awsConfig } from '@modules/aws/config';
-import type { Stage } from '@modules/stage';
+import type { Stage } from '@modules/utils/stage';
 import { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
 import {
 	type ZuoraCatalog,

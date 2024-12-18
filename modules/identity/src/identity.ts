@@ -1,4 +1,4 @@
-import type { Stage } from '@modules/stage';
+import type { Stage } from '@modules/utils/stage';
 import OktaJwtVerifier from '@okta/jwt-verifier';
 import { z } from 'zod';
 

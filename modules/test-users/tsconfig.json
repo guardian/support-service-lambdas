@@ -11,7 +11,8 @@
       "@modules/zuora/*": ["../zuora/src/*"],
       "@modules/zuora-catalog/*": ["../zuora-catalog/src/*"],
       "@modules/product-catalog/*": ["../product-catalog/src/*"],
-      "@modules/*": ["../*"]
+      "@modules/test-users/*": ["../test-users/src/*"],
+      "@modules/utils/*": ["../utils/src/*"]
     }
   },
 }

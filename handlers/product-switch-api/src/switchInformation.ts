@@ -1,11 +1,11 @@
-import type { BillingPeriod } from '@modules/billingPeriod';
-import { ValidationError } from '@modules/errors';
+import type { BillingPeriod } from '@modules/utils/billingPeriod';
+import { ValidationError } from '@modules/utils/errors';
 import type { Currency } from '@modules/internationalisation/currency';
 import { isSupportedCurrency } from '@modules/internationalisation/currency';
-import { getIfDefined } from '@modules/nullAndUndefined';
-import { prettyPrint } from '@modules/prettyPrint';
+import { getIfDefined } from '@modules/utils/nullAndUndefined';
+import { prettyPrint } from '@modules/utils/prettyPrint';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
-import type { Stage } from '@modules/stage';
+import type { Stage } from '@modules/utils/stage';
 import type {
 	RatePlan,
 	ZuoraAccount,

@@ -1,5 +1,5 @@
-import { getIfDefined } from '@modules/nullAndUndefined';
-import { type Stage } from '@modules/stage';
+import { getIfDefined } from '@modules/utils/nullAndUndefined';
+import { type Stage } from '@modules/utils/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import {
 	type AccountRow,

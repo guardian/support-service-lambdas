@@ -1,9 +1,9 @@
 import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
 import { awsConfig } from '@modules/aws/config';
-import { ValidationError } from '@modules/errors';
+import { ValidationError } from '@modules/utils/errors';
 import type { IdentityUserDetails } from '@modules/identity/identity';
-import { getIfDefined } from '@modules/nullAndUndefined';
-import type { Stage } from '@modules/stage';
+import { getIfDefined } from '@modules/utils/nullAndUndefined';
+import type { Stage } from '@modules/utils/stage';
 import { getUserDetailsSchema } from './schemas';
 
 export const getClientAccessToken = async (stage: Stage) => {

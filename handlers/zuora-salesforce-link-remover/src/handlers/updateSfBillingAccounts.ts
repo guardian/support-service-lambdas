@@ -11,7 +11,7 @@ import type {
 } from '@modules/salesforce/src/updateRecords';
 import { doCompositeCallout } from '@modules/salesforce/src/updateRecords';
 import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
-import { stageFromEnvironment } from '@modules/stage';
+import { stageFromEnvironment } from '@modules/utils/stage';
 import type { Handler } from 'aws-lambda';
 import { z } from 'zod';
 import { getSalesforceSecretNames } from '../secrets';

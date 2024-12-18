@@ -1,8 +1,8 @@
 import { sendEmail } from '@modules/email/email';
-import { ValidationError } from '@modules/errors';
-import { getIfDefined } from '@modules/nullAndUndefined';
+import { ValidationError } from '@modules/utils/errors';
+import { getIfDefined } from '@modules/utils/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
-import type { Stage } from '@modules/stage';
+import type { Stage } from '@modules/utils/stage';
 import { Logger } from '@modules/zuora/logger';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type {

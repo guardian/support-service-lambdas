@@ -1,5 +1,5 @@
-import { ValidationError } from '@modules/errors';
-import type { Stage } from '@modules/stage';
+import { ValidationError } from '@modules/utils/errors';
+import type { Stage } from '@modules/utils/stage';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import type { IdentityUserDetails } from '@modules/identity/identity';
 import {

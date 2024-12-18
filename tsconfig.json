@@ -40,7 +40,8 @@
       "@modules/supporter-product-data/*": ["./modules/supporter-product-data/src/*"],
       "@modules/identity/*": ["./modules/identity/src/*"],
       "@modules/routing/*": ["./modules/routing/src/*"],
-      "@modules/*": ["./modules/*"]
+      "@modules/secrets-manager/*": ["./modules/secrets-manager/src/*"],
+      "@modules/utils/*": ["./modules/utils/src/*"]
     },
     // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
     // "typeRoots": [],                                  /* Specify multiple folders that act like './node_modules/@types'. */
