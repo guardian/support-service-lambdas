@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "check-formatting": "prettier --check **.ts",
-    "fix-formatting": "prettier --write **.ts",
-    "lint": "eslint src/**/*.ts test/**/*.ts"
+    "fix-formatting": "prettier --write **.ts"
   },
   "dependencies": {
     "@aws-sdk/credential-provider-node": "3.699.0"

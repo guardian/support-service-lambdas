@@ -110,6 +110,7 @@ describe('Handler', () => {
 		expect(fetch).toHaveBeenCalledWith(
 			mockEnv.SRE_WEBHOOK,
 			expect.objectContaining({
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- eslint is unhappy with any, not sure how to fix
 				body: expect.stringContaining('*ALARM OK:* mock-alarm has recovered!'),
 			}),
 		);

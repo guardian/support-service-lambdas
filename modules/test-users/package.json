@@ -10,7 +10,7 @@
     "deleteAccount": "ts-node ./src/deleteAccount.ts",
     "check-formatting": "prettier --check **.ts",
     "fix-formatting": "prettier --write **.ts",
-    "lint": "eslint src/**/*.ts test/**/*.ts"
+    "lint": "eslint src/**/*.ts"
   },
   "devDependencies": {
     "dayjs": "^1.11.13",

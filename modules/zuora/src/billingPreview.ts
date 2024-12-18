@@ -1,6 +1,7 @@
 import { groupBy, sortBy, sumNumbers } from '@modules/arrayFunctions';
 import { getIfDefined } from '@modules/nullAndUndefined';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
+import type { Dayjs } from 'dayjs';
 import { zuoraDateFormat } from './common';
 import type { ZuoraClient } from './zuoraClient';
 import type { BillingPreview } from './zuoraSchemas';
@@ -23,15 +24,15 @@ export const getBillingPreview = async (
 
 export type SimpleInvoiceItem = { date: Date; amount: number };
 
-export function getNextInvoiceTotal(invoiceItems: Array<SimpleInvoiceItem>) {
+export function getNextInvoiceTotal(invoiceItems: SimpleInvoiceItem[]) {
 	return convertItemsToTotal(getNextInvoice(invoiceItems)).total;
 }
 
-export function getNextInvoiceItems(invoiceItems: Array<SimpleInvoiceItem>) {
+export function getNextInvoiceItems(invoiceItems: SimpleInvoiceItem[]) {
 	return getNextInvoice(invoiceItems).items;
 }
 
-export function getNextInvoice(invoiceItems: Array<SimpleInvoiceItem>) {
+export function getNextInvoice(invoiceItems: SimpleInvoiceItem[]) {
 	const ordered = getOrderedInvoiceItemGroups(invoiceItems);
 
 	return getIfDefined(
@@ -40,9 +41,7 @@ export function getNextInvoice(invoiceItems: Array<SimpleInvoiceItem>) {
 	);
 }
 
-export function getNextNonFreePaymentDate(
-	invoiceItems: Array<SimpleInvoiceItem>,
-) {
+export function getNextNonFreePaymentDate(invoiceItems: SimpleInvoiceItem[]) {
 	const ordered = getOrderedInvoiceItemGroups(invoiceItems);
 
 	const firstNonFree = getIfDefined(
@@ -53,15 +52,13 @@ export function getNextNonFreePaymentDate(
 	return firstNonFree.date;
 }
 
-export function getOrderedInvoiceTotals(
-	invoiceItems: Array<SimpleInvoiceItem>,
-) {
+export function getOrderedInvoiceTotals(invoiceItems: SimpleInvoiceItem[]) {
 	return getOrderedInvoiceItemGroups(invoiceItems).map((invoiceGroup) =>
 		convertItemsToTotal(invoiceGroup),
 	);
 }
 
-function getOrderedInvoiceItemGroups(invoiceItems: Array<SimpleInvoiceItem>) {
+function getOrderedInvoiceItemGroups(invoiceItems: SimpleInvoiceItem[]) {
 	if (invoiceItems[0] === undefined) {
 		throw new Error('no invoice items in preview');
 	}
@@ -69,7 +66,7 @@ function getOrderedInvoiceItemGroups(invoiceItems: Array<SimpleInvoiceItem>) {
 		zuoraDateFormat(dayjs(invoiceItem.date)),
 	);
 
-	const sortedItemGroups: [string, SimpleInvoiceItem[]][] = sortBy(
+	const sortedItemGroups: Array<[string, SimpleInvoiceItem[]]> = sortBy(
 		Object.entries(grouped),
 		([date]) => date,
 	);

@@ -1,11 +1,11 @@
 import console from 'console';
+import { sendEmail } from '@modules/email/email';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
+import { Logger } from '@modules/zuora/logger';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { createThankYouEmail } from '../src/sendEmail';
 import { updateSupporterPlusAmount } from '../src/updateSupporterPlusAmount';
-import { Logger } from '@modules/zuora/logger';
-import { sendEmail } from '@modules/email/email';
 
 /**
  * This is an integration test, the `@group integration` tag ensures that it will only be run by the `pnpm it-test`
