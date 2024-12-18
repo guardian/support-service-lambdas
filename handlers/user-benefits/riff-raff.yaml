@@ -17,7 +17,7 @@ deployments:
   user-benefits-me:
     type: aws-lambda
     parameters:
-      fileName: user-benefits-me.zip
+      fileName: user-benefits.zip
       bucketSsmLookup: true
       prefixStack: false
       functionNames:
