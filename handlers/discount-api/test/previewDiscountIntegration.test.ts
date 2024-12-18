@@ -3,22 +3,22 @@
  */
 import type { Stage } from '@modules/stage';
 import { cancelSubscription } from '@modules/zuora/cancelSubscription';
+import { zuoraDateFormat } from '@modules/zuora/common';
+import { Logger } from '@modules/zuora/logger';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { previewDiscountEndpoint } from '../src/discountEndpoint';
-import { EligibilityCheckResponseBody } from '../src/responseSchema';
+import { validationRequirements } from '../src/eligibilityChecker';
+import type { EligibilityCheckResponseBody } from '../src/responseSchema';
 import {
 	createDigitalSubscription,
 	createSupporterPlusSubscription,
 } from './helpers';
-import { zuoraDateFormat } from '@modules/zuora/common';
-import { validationRequirements } from '../src/eligibilityChecker';
-import { Logger } from '@modules/zuora/logger';
 
 const stage: Stage = 'CODE';
 const validIdentityId = '200175946';
 const invalidIdentityId = 'qwertyuiop';
-``;
+
 test("Subscriptions which don't belong to the provided identity Id are not eligible", async () => {
 	const zuoraClient = await ZuoraClient.create(stage);
 

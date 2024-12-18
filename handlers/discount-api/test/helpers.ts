@@ -1,3 +1,4 @@
+import { getIfDefined } from '@modules/nullAndUndefined';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type {
 	ZuoraSubscribeResponse,
@@ -11,9 +12,8 @@ import {
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import { digiSubSubscribeBody } from './fixtures/request-bodies/digitalSub-subscribe-body-old-price';
-import { updateSubscriptionBody } from './fixtures/request-bodies/update-subscription-body';
 import { supporterPlusSubscribeBody } from './fixtures/request-bodies/supporterplus-subscribe-body-tier2';
-import { getIfDefined } from '@modules/nullAndUndefined';
+import { updateSubscriptionBody } from './fixtures/request-bodies/update-subscription-body';
 
 export const createDigitalSubscription = async (
 	zuoraClient: ZuoraClient,
@@ -46,7 +46,7 @@ export const createSupporterPlusSubscription = async (
 async function subscribe(
 	zuoraClient: ZuoraClient,
 	subscribeBody: {
-		subscribes: {
+		subscribes: Array<{
 			Account: {
 				IdentityId__c: string;
 				InvoiceTemplateId: string;
@@ -64,10 +64,10 @@ async function subscribe(
 			};
 			SubscribeOptions: { GenerateInvoice: boolean; ProcessPayments: boolean };
 			SubscriptionData: {
-				RatePlanData: {
+				RatePlanData: Array<{
 					RatePlan: { ProductRatePlanId: string };
-					SubscriptionProductFeatureList: any[];
-				}[];
+					SubscriptionProductFeatureList: unknown[];
+				}>;
 				Subscription: {
 					ContractEffectiveDate: string;
 					ContractAcceptanceDate: string; // actually CustomerAcceptanceDate but zuora API has a typo
@@ -98,7 +98,7 @@ async function subscribe(
 				LastName: string;
 				WorkEmail: string;
 			};
-		}[];
+		}>;
 	},
 ) {
 	const path = `/v1/action/subscribe`;

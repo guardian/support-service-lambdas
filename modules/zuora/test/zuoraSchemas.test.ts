@@ -5,14 +5,14 @@ import {
 import subscriptionJson from './fixtures/subscription.json';
 import subscriptionsFromAccountJson from './fixtures/subscriptions-from-account-number-response.json';
 
-test('ChargedThroughDate is null in the model when it is null in Zuora', async () => {
+test('ChargedThroughDate is null in the model when it is null in Zuora', () => {
 	const result = zuoraSubscriptionResponseSchema.parse(subscriptionJson);
 	expect(result.ratePlans[0]?.ratePlanCharges[0]?.chargedThroughDate).toBe(
 		null,
 	);
 });
 
-test('ZuoraSubscriptionsFromAccountResponse schema is correct', async () => {
+test('ZuoraSubscriptionsFromAccountResponse schema is correct', () => {
 	const result = zuoraSubscriptionsFromAccountSchema.parse(
 		subscriptionsFromAccountJson,
 	);

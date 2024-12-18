@@ -19,10 +19,10 @@ import { getDiscountFromSubscription } from '../src/productToDiscountMapping';
 import billingPreviewJson1 from './fixtures/billing-previews/eligibility-checker-test.json';
 import billingPreviewJson2 from './fixtures/billing-previews/eligibility-checker-test2.json';
 import billingPreviewSupporterPlusFullPrice from './fixtures/billing-previews/supporter-plus-fullprice.json';
+import zeroContributionPreview from './fixtures/billing-previews/zero-contribution.json';
 import subscriptionJson2 from './fixtures/digital-subscriptions/eligibility-checker-test2.json';
 import subscriptionJson3 from './fixtures/digital-subscriptions/eligibility-checker-test3.json';
 import subscriptionJson1 from './fixtures/supporter-plus/free-2-months.json';
-import zeroContributionPreview from './fixtures/billing-previews/zero-contribution.json';
 import subSupporterPlusFullPrice from './fixtures/supporter-plus/full-price.json';
 
 const eligibilityChecker = new EligibilityChecker(new Logger());
@@ -30,7 +30,7 @@ const catalogProd = new ZuoraCatalogHelper(
 	zuoraCatalogSchema.parse(catalogJsonProd),
 );
 
-function loadBillingPreview(data: any) {
+function loadBillingPreview(data: unknown) {
 	return billingPreviewToSimpleInvoiceItems(billingPreviewSchema.parse(data));
 }
 
@@ -110,7 +110,7 @@ test('Eligibility check fails for a S+ subscription which is on a reduced price'
 	);
 });
 
-test('Eligibility check fails for a subscription which hasnt been running long', async () => {
+test('Eligibility check fails for a subscription which hasnt been running long', () => {
 	const sub = zuoraSubscriptionResponseSchema.parse(subSupporterPlusFullPrice);
 	const discount = getDiscountFromSubscription('CODE', sub);
 	const nearlyLongEnough = dayjs(sub.contractEffectiveDate).add(2, 'months');
@@ -176,7 +176,7 @@ test('Eligibility check fails for a subscription which is cancelled', async () =
 
 	const ac2 = () =>
 		eligibilityChecker.assertGenerallyEligible(sub, 0, () =>
-			Promise.reject('should not attempt a BP if its cancelled'),
+			Promise.reject(new Error('should not attempt a BP if its cancelled')),
 		);
 
 	await expect(ac2).rejects.toThrow(validationRequirements.isActive);

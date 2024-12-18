@@ -23,7 +23,7 @@ jest.mock('@modules/secrets-manager/src/getSecret', () => ({
 
 beforeEach(() => {
 	process.env.Stage = 'CODE';
-	jest.resetAllMocks;
+	jest.resetAllMocks();
 	jest.mock('@modules/secrets-manager/src/getSecret', () => ({
 		getSecretValue: () => mockKey,
 	}));
