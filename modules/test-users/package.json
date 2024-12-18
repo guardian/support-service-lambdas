@@ -9,7 +9,8 @@
     "cancelSubscription": "ts-node ./src/cancel.ts",
     "deleteAccount": "ts-node ./src/deleteAccount.ts",
     "check-formatting": "prettier --check **.ts",
-    "fix-formatting": "prettier --write **.ts"
+    "fix-formatting": "prettier --write **.ts",
+    "lint": "eslint src/**/*.ts test/**/*.ts"
   },
   "devDependencies": {
     "dayjs": "^1.11.13",

@@ -2,7 +2,8 @@
   "name": "supporter-product-data",
   "version": "1.0.0",
   "scripts": {
-    "build": "tsc --noEmit"
+    "build": "tsc --noEmit",
+    "lint": "eslint src/**/*.ts test/**/*.ts"
   },
   "devDependencies": {
     "@aws-sdk/client-dynamodb": "^3.699.0",

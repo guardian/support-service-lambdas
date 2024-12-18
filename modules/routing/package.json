@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "build": "tsc --noEmit",
-    "test": "jest --group=-integration"
+    "test": "jest --group=-integration",
+    "lint": "eslint src/**/*.ts test/**/*.ts"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.129"
