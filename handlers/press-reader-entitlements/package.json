@@ -11,7 +11,7 @@
     "fix-formatting": "prettier --write **.ts"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.129"
+    "@types/aws-lambda": "^8.10.146"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.699.0",
