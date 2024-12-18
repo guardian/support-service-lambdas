@@ -14,12 +14,12 @@ deployments:
         CODE: user-benefits-CODE.template.json
         PROD: user-benefits-PROD.template.json
 
-  user-benefits:
+  user-benefits-me:
     type: aws-lambda
     parameters:
       fileName: user-benefits.zip
       bucketSsmLookup: true
       prefixStack: false
       functionNames:
-      - user-benefits-
+      - user-benefits-me-
     dependencies: [user-benefits-cloudformation]
