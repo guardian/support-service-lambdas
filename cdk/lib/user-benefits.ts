@@ -1,4 +1,4 @@
-import { GuApiGatewayWithLambdaByPath, GuApiLambda } from '@guardian/cdk';
+import { GuApiGatewayWithLambdaByPath } from '@guardian/cdk';
 import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
