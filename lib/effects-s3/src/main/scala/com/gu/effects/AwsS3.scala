@@ -55,6 +55,13 @@ object UploadToS3 extends LazyLogging {
     uploadRequest
   }
 
+  def putString(s3Location: S3Location, content: String) = {
+    putObject(
+      PutObjectRequest.builder.bucket(s3Location.bucket).key(s3Location.key).build(),
+      RequestBody.fromString(content, StandardCharsets.UTF_8),
+    )
+  }
+
   def putStringWithAcl(s3Location: S3Location, cannedAcl: ObjectCannedACL, content: String): Try[PutObjectResponse] = {
     putObject(
       PutObjectRequest.builder.bucket(s3Location.bucket).key(s3Location.key).acl(cannedAcl).build(),
