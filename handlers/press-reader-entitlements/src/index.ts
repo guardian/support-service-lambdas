@@ -1,10 +1,10 @@
-import { Lazy } from '@modules/lazy';
-import { getIfDefined } from '@modules/nullAndUndefined';
+import { Lazy } from '@modules/utils/lazy';
+import { getIfDefined } from '@modules/utils/nullAndUndefined';
 import { userHasGuardianEmail } from '@modules/product-benefits/userBenefits';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { Router } from '@modules/routing/router';
-import type { Stage } from '@modules/stage';
-import { stageFromEnvironment } from '@modules/stage';
+import type { Stage } from '@modules/utils/stage';
+import { stageFromEnvironment } from '@modules/utils/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import type {
 	APIGatewayProxyEvent,

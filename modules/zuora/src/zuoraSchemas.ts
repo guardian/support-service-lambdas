@@ -1,4 +1,4 @@
-import { BillingPeriodValues } from '@modules/billingPeriod';
+import { BillingPeriodValues } from '@modules/utils/billingPeriod';
 import { z } from 'zod';
 
 // --------------- Auth ---------------

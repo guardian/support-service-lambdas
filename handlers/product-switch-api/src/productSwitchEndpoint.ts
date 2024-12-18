@@ -1,7 +1,7 @@
-import { getIfDefined } from '@modules/nullAndUndefined';
-import { prettyPrint } from '@modules/prettyPrint';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
-import type { Stage } from '@modules/stage';
+import { getIfDefined } from '@modules/utils/nullAndUndefined';
+import { prettyPrint } from '@modules/utils/prettyPrint';
+import type { Stage } from '@modules/utils/stage';
 import { getAccount } from '@modules/zuora/getAccount';
 import { getSubscription } from '@modules/zuora/getSubscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';

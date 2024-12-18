@@ -1,5 +1,5 @@
-import { groupBy, sortBy, sumNumbers } from '@modules/arrayFunctions';
-import { getIfDefined } from '@modules/nullAndUndefined';
+import { groupBy, sortBy, sumNumbers } from '@modules/utils/arrayFunctions';
+import { getIfDefined } from '@modules/utils/nullAndUndefined';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import { zuoraDateFormat } from './common';

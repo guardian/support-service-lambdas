@@ -1,5 +1,5 @@
-import { arrayToObject } from '@modules/arrayFunctions';
-import { isBillingPeriod } from '@modules/billingPeriod';
+import { arrayToObject } from '@modules/utils/arrayFunctions';
+import { isBillingPeriod } from '@modules/utils/billingPeriod';
 import type {
 	ZuoraCatalog,
 	ZuoraProductRatePlan,

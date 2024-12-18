@@ -1,4 +1,4 @@
-import { getIfDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/utils/nullAndUndefined';
 
 type Team = 'VALUE' | 'GROWTH' | 'PORTFOLIO' | 'PLATFORM' | 'SRE';
 

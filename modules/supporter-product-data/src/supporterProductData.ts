@@ -1,7 +1,7 @@
 import { DynamoDBClient, QueryCommand } from '@aws-sdk/client-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { awsConfig } from '@modules/aws/config';
-import type { Stage } from '@modules/stage';
+import type { Stage } from '@modules/utils/stage';
 
 const dynamoClient = new DynamoDBClient(awsConfig);
 

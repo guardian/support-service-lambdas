@@ -1,4 +1,4 @@
-import type { Stage } from '@modules/stage';
+import type { Stage } from '@modules/utils/stage';
 
 export function getSalesforceSecretNames(stage: Stage): SecretNames {
 	switch (stage) {

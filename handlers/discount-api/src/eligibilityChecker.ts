@@ -1,5 +1,5 @@
-import { ValidationError } from '@modules/errors';
-import { getIfDefined } from '@modules/nullAndUndefined';
+import { ValidationError } from '@modules/utils/errors';
+import { getIfDefined } from '@modules/utils/nullAndUndefined';
 import type { SimpleInvoiceItem } from '@modules/zuora/billingPreview';
 import { getNextInvoiceTotal } from '@modules/zuora/billingPreview';
 import type { Logger } from '@modules/zuora/logger';

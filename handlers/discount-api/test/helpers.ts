@@ -1,4 +1,4 @@
-import { getIfDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/utils/nullAndUndefined';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type {
 	ZuoraSubscribeResponse,

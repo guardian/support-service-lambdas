@@ -1,7 +1,7 @@
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
+import { createAccountAndSubscription } from '@modules/test-users/create';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import { createAccountAndSubscription } from '@modules/test-users/src/create';
 
 void (async () => {
 	const stage = 'CODE';

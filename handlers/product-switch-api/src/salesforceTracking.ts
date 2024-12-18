@@ -1,6 +1,6 @@
 import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 import { awsConfig } from '@modules/aws/config';
-import { prettyPrint } from '@modules/prettyPrint';
+import { prettyPrint } from '@modules/utils/prettyPrint';
 import type { SwitchInformation } from './switchInformation';
 
 export type SalesforceTrackingInput = {

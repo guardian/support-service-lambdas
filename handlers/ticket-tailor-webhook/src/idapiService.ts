@@ -1,5 +1,5 @@
-import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
-import { stageFromEnvironment } from '@modules/stage';
+import { getSecretValue } from '@modules/secrets-manager/getSecret';
+import { stageFromEnvironment } from '@modules/utils/stage';
 import { z } from 'zod';
 
 export type IdApiToken = {

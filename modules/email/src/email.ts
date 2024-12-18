@@ -1,8 +1,8 @@
 import type { SendMessageCommandOutput } from '@aws-sdk/client-sqs';
 import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 import { awsConfig } from '@modules/aws/config';
-import { prettyPrint } from '@modules/prettyPrint';
-import type { Stage } from '@modules/stage';
+import { prettyPrint } from '@modules/utils/prettyPrint';
+import type { Stage } from '@modules/utils/stage';
 
 type EmailMessage = {
 	To: EmailPayload;

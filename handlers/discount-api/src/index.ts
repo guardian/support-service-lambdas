@@ -1,7 +1,7 @@
 import { sendEmail } from '@modules/email/email';
-import { ValidationError } from '@modules/errors';
-import { getIfDefined } from '@modules/nullAndUndefined';
-import type { Stage } from '@modules/stage';
+import { ValidationError } from '@modules/utils/errors';
+import { getIfDefined } from '@modules/utils/nullAndUndefined';
+import type { Stage } from '@modules/utils/stage';
 import { Logger } from '@modules/zuora/logger';
 import type {
 	APIGatewayProxyEvent,

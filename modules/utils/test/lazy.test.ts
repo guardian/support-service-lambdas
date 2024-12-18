@@ -1,4 +1,4 @@
-import { Lazy } from '@modules/lazy';
+import { Lazy } from '@modules/utils/lazy';
 
 test('it should only call the function when its used', async () => {
 	let log = 0;

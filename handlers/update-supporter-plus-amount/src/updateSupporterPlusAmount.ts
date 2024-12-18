@@ -1,9 +1,9 @@
-import { getSingleOrThrow } from '@modules/arrayFunctions';
-import { ValidationError } from '@modules/errors';
+import { getSingleOrThrow } from '@modules/utils/arrayFunctions';
+import { ValidationError } from '@modules/utils/errors';
 import type { Currency } from '@modules/internationalisation/currency';
 import { isSupportedCurrency } from '@modules/internationalisation/currency';
-import { getIfDefined } from '@modules/nullAndUndefined';
-import { prettyPrint } from '@modules/prettyPrint';
+import { getIfDefined } from '@modules/utils/nullAndUndefined';
+import { prettyPrint } from '@modules/utils/prettyPrint';
 import type {
 	ProductBillingPeriod,
 	ProductCatalog,

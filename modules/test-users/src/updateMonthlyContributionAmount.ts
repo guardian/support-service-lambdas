@@ -1,5 +1,5 @@
-import { getIfDefined } from '@modules/nullAndUndefined';
-import { prettyPrint } from '@modules/prettyPrint';
+import { getIfDefined } from '@modules/utils/nullAndUndefined';
+import { prettyPrint } from '@modules/utils/prettyPrint';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { zuoraDateFormat } from '@modules/zuora/common';

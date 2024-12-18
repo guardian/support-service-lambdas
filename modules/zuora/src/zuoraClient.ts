@@ -1,4 +1,4 @@
-import type { Stage } from '@modules/stage';
+import type { Stage } from '@modules/utils/stage';
 import type { z } from 'zod';
 import { Logger } from '@modules/zuora/logger';
 import { BearerTokenProvider } from './bearerTokenProvider';

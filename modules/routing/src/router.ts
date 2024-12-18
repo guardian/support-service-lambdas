@@ -1,4 +1,4 @@
-import { ValidationError } from '@modules/errors';
+import { ValidationError } from '@modules/utils/errors';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 export type HttpMethod =

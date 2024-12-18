@@ -1,6 +1,6 @@
-import type { BillingPeriod } from '@modules/billingPeriod';
+import type { BillingPeriod } from '@modules/utils/billingPeriod';
 import type { Currency } from '@modules/internationalisation/currency';
-import { getIfDefined } from '@modules/nullAndUndefined';
+import { getIfDefined } from '@modules/utils/nullAndUndefined';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 
 export type CatalogInformation = {

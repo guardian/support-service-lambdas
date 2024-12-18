@@ -1,8 +1,8 @@
-import { getSingleOrThrow } from '@modules/arrayFunctions';
+import { getSingleOrThrow } from '@modules/utils/arrayFunctions';
 import type { DataExtensionName } from '@modules/email/email';
 import { DataExtensionNames } from '@modules/email/email';
-import { ValidationError } from '@modules/errors';
-import type { Stage } from '@modules/stage';
+import { ValidationError } from '@modules/utils/errors';
+import type { Stage } from '@modules/utils/stage';
 import { isNotRemovedOrDiscount } from '@modules/zuora/rateplan';
 import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 

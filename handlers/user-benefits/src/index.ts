@@ -1,12 +1,12 @@
-import { ValidationError } from '@modules/errors';
+import { ValidationError } from '@modules/utils/errors';
 import { buildAuthenticate } from '@modules/identity/apiGateway';
 import type { IdentityUserDetails } from '@modules/identity/identity';
-import { Lazy } from '@modules/lazy';
+import { Lazy } from '@modules/utils/lazy';
 import type { UserBenefitsResponse } from '@modules/product-benefits/schemas';
 import { getUserBenefits } from '@modules/product-benefits/userBenefits';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
-import type { Stage } from '@modules/stage';
+import type { Stage } from '@modules/utils/stage';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { getTrialInformation } from './trials';
 
