@@ -1,8 +1,9 @@
-import { GuApiLambda } from '@guardian/cdk';
+import { GuApiGatewayWithLambdaByPath, GuApiLambda } from '@guardian/cdk';
 import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuCname } from '@guardian/cdk/lib/constructs/dns';
+import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
 import { Duration, Fn } from 'aws-cdk-lib';
 import { CfnBasePathMapping, CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
@@ -26,7 +27,6 @@ export class UserBenefits extends GuStack {
 		super(scope, id, props);
 
 		const app = 'user-benefits';
-		const nameWithStage = `${app}-${this.stage}`;
 
 		const commonEnvironmentVariables = {
 			App: app,
@@ -39,36 +39,35 @@ export class UserBenefits extends GuStack {
 			resources: [Fn.importValue(props.supporterProductDataTable)],
 		});
 
-		// ---- API-triggered lambda functions ---- //
-		const lambda = new GuApiLambda(this, `${app}-lambda`, {
-			description:
-				'An API Gateway triggered lambda generated in the support-service-lambdas repo',
-			functionName: nameWithStage,
-			fileName: `${app}.zip`,
-			handler: 'index.handler',
-			initialPolicy: [supporterProductDataTablePolicy],
-			runtime: nodeVersion,
-			memorySize: 1024,
-			timeout: Duration.seconds(300),
-			environment: commonEnvironmentVariables,
-			// Create an alarm
+		const userBenefitsMeLambda = new GuLambdaFunction(
+			this,
+			`user-benefits-me-lambda`,
+			{
+				app,
+				description:
+					'An API Gateway triggered lambda generated in the support-service-lambdas repo',
+				functionName: `user-benefits-me-${this.stage}`,
+				fileName: `${app}.zip`,
+				handler: 'index.handler',
+				initialPolicy: [supporterProductDataTablePolicy],
+				runtime: nodeVersion,
+				memorySize: 1024,
+				timeout: Duration.seconds(300),
+				environment: commonEnvironmentVariables,
+			},
+		);
+		const lambdaByPath = new GuApiGatewayWithLambdaByPath(this, {
+			app,
+			targets: [
+				{
+					path: '/user-benefits/me',
+					httpMethod: 'GET',
+					lambda: userBenefitsMeLambda,
+				},
+			],
 			monitoringConfiguration: {
 				http5xxAlarm: { tolerated5xxPercentage: 5 },
 				snsTopicName: `alarms-handler-topic-${this.stage}`,
-			},
-			app: app,
-			api: {
-				id: nameWithStage,
-				restApiName: nameWithStage,
-				description: 'API Gateway created by CDK',
-				proxy: true,
-				deployOptions: {
-					stageName: this.stage,
-				},
-
-				defaultMethodOptions: {
-					apiKeyRequired: false,
-				},
 			},
 		});
 
@@ -96,7 +95,7 @@ export class UserBenefits extends GuStack {
 				statistic: 'Sum',
 				period: Duration.seconds(300),
 				dimensionsMap: {
-					ApiName: nameWithStage,
+					ApiName: lambdaByPath.api.restApiName,
 				},
 			}),
 		});
@@ -113,8 +112,8 @@ export class UserBenefits extends GuStack {
 
 		new CfnBasePathMapping(this, 'BasePathMapping', {
 			domainName: cfnDomainName.ref,
-			restApiId: lambda.api.restApiId,
-			stage: lambda.api.deploymentStage.stageName,
+			restApiId: lambdaByPath.api.restApiId,
+			stage: lambdaByPath.api.deploymentStage.stageName,
 		});
 
 		new CfnRecordSet(this, 'DNSRecord', {
@@ -144,6 +143,6 @@ export class UserBenefits extends GuStack {
 			],
 		});
 
-		lambda.role?.attachInlinePolicy(s3InlinePolicy);
+		userBenefitsMeLambda.role?.attachInlinePolicy(s3InlinePolicy);
 	}
 }

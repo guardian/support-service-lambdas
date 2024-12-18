@@ -5,7 +5,8 @@ exports[`The User benefits stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuApiLambda",
+      "GuLambdaFunction",
+      "GuApiGatewayWithLambdaByPath",
       "GuApiGateway5xxPercentageAlarm",
       "GuAlarm",
       "GuCname",
@@ -13,14 +14,14 @@ exports[`The User benefits stack matches the snapshot 1`] = `
     "gu:cdk:version": "TEST",
   },
   "Outputs": {
-    "userbenefitslambdauserbenefitsCODEEndpoint4F1CA138": {
+    "RestApiEndpoint0551178A": {
       "Value": {
         "Fn::Join": [
           "",
           [
             "https://",
             {
-              "Ref": "userbenefitslambdauserbenefitsCODE14241B5B",
+              "Ref": "RestApi0C43BF4B",
             },
             ".execute-api.",
             {
@@ -32,7 +33,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
             },
             "/",
             {
-              "Ref": "userbenefitslambdauserbenefitsCODEDeploymentStageCODEE2C1EB57",
+              "Ref": "RestApiDeploymentStageprod3855DE66",
             },
             "/",
           ],
@@ -75,7 +76,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
         "Dimensions": [
           {
             "Name": "ApiName",
-            "Value": "user-benefits-CODE",
+            "Value": "membership-CODE-user-benefits",
           },
         ],
         "EvaluationPeriods": 1,
@@ -125,7 +126,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": "user-benefits-CODE",
+                    "Value": "membership-CODE-user-benefits",
                   },
                 ],
                 "MetricName": "5XXError",
@@ -143,7 +144,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": "user-benefits-CODE",
+                    "Value": "membership-CODE-user-benefits",
                   },
                 ],
                 "MetricName": "Count",
@@ -166,10 +167,10 @@ exports[`The User benefits stack matches the snapshot 1`] = `
           "Ref": "DomainName",
         },
         "RestApiId": {
-          "Ref": "userbenefitslambdauserbenefitsCODE14241B5B",
+          "Ref": "RestApi0C43BF4B",
         },
         "Stage": {
-          "Ref": "userbenefitslambdauserbenefitsCODEDeploymentStageCODEE2C1EB57",
+          "Ref": "RestApiDeploymentStageprod3855DE66",
         },
       },
       "Type": "AWS::ApiGateway::BasePathMapping",
@@ -244,6 +245,289 @@ exports[`The User benefits stack matches the snapshot 1`] = `
       },
       "Type": "Guardian::DNS::RecordSet",
     },
+    "RestApi0C43BF4B": {
+      "Properties": {
+        "Name": "membership-CODE-user-benefits",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "RestApiAccount7C83CF5A": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "RestApi0C43BF4B",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "RestApiCloudWatchRoleE3ED6605",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "RestApiCloudWatchRoleE3ED6605": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "RestApiDeployment180EC503d9233985bae6103861251c7cfeb9450c": {
+      "DependsOn": [
+        "RestApiuserbenefitsmeGET7BE98224",
+        "RestApiuserbenefitsme7C168E4C",
+        "RestApiuserbenefitsE453BB4D",
+      ],
+      "Properties": {
+        "Description": "Automatically created by the RestApi construct",
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "RestApiDeploymentStageprod3855DE66": {
+      "DependsOn": [
+        "RestApiAccount7C83CF5A",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "RestApiDeployment180EC503d9233985bae6103861251c7cfeb9450c",
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+        "StageName": "prod",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "RestApiuserbenefitsE453BB4D": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "RestApi0C43BF4B",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "user-benefits",
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "RestApiuserbenefitsme7C168E4C": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "RestApiuserbenefitsE453BB4D",
+        },
+        "PathPart": "me",
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "RestApiuserbenefitsmeGET7BE98224": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "userbenefitsmelambdaC38B824F",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "RestApiuserbenefitsme7C168E4C",
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "RestApiuserbenefitsmeGETApiPermissionTestuserbenefitsCODERestApi6C1D688CGETuserbenefitsme91078079": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "userbenefitsmelambdaC38B824F",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "RestApi0C43BF4B",
+              },
+              "/test-invoke-stage/GET/user-benefits/me",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "RestApiuserbenefitsmeGETApiPermissionuserbenefitsCODERestApi6C1D688CGETuserbenefitsme96BE54BA": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "userbenefitsmelambdaC38B824F",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "RestApi0C43BF4B",
+              },
+              "/",
+              {
+                "Ref": "RestApiDeploymentStageprod3855DE66",
+              },
+              "/GET/user-benefits/me",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
     "S3inlinepolicy3B07399A": {
       "Properties": {
         "PolicyDocument": {
@@ -259,16 +543,16 @@ exports[`The User benefits stack matches the snapshot 1`] = `
         "PolicyName": "S3inlinepolicy3B07399A",
         "Roles": [
           {
-            "Ref": "userbenefitslambdaServiceRoleD30C43BC",
+            "Ref": "userbenefitsmelambdaServiceRole989330C7",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "userbenefitslambdaD2A6379F": {
+    "userbenefitsmelambdaC38B824F": {
       "DependsOn": [
-        "userbenefitslambdaServiceRoleDefaultPolicy08D83DDF",
-        "userbenefitslambdaServiceRoleD30C43BC",
+        "userbenefitsmelambdaServiceRoleDefaultPolicy0A47ED04",
+        "userbenefitsmelambdaServiceRole989330C7",
       ],
       "Properties": {
         "Code": {
@@ -288,12 +572,12 @@ exports[`The User benefits stack matches the snapshot 1`] = `
             "Stage": "CODE",
           },
         },
-        "FunctionName": "user-benefits-CODE",
+        "FunctionName": "user-benefits-me-CODE",
         "Handler": "index.handler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "userbenefitslambdaServiceRoleD30C43BC",
+            "userbenefitsmelambdaServiceRole989330C7",
             "Arn",
           ],
         },
@@ -324,7 +608,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "userbenefitslambdaServiceRoleD30C43BC": {
+    "userbenefitsmelambdaServiceRole989330C7": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -377,7 +661,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "userbenefitslambdaServiceRoleDefaultPolicy08D83DDF": {
+    "userbenefitsmelambdaServiceRoleDefaultPolicy0A47ED04": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -475,421 +759,14 @@ exports[`The User benefits stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "userbenefitslambdaServiceRoleDefaultPolicy08D83DDF",
+        "PolicyName": "userbenefitsmelambdaServiceRoleDefaultPolicy0A47ED04",
         "Roles": [
           {
-            "Ref": "userbenefitslambdaServiceRoleD30C43BC",
+            "Ref": "userbenefitsmelambdaServiceRole989330C7",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
-    },
-    "userbenefitslambdauserbenefitsCODE14241B5B": {
-      "Properties": {
-        "Description": "API Gateway created by CDK",
-        "Name": "user-benefits-CODE",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "user-benefits",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::RestApi",
-    },
-    "userbenefitslambdauserbenefitsCODEANYApiPermissionTestuserbenefitsCODEuserbenefitslambdauserbenefitsCODEE492CB09ANYBC63C954": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "userbenefitslambdaD2A6379F",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "userbenefitslambdauserbenefitsCODE14241B5B",
-              },
-              "/test-invoke-stage/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "userbenefitslambdauserbenefitsCODEANYApiPermissionuserbenefitsCODEuserbenefitslambdauserbenefitsCODEE492CB09ANYCCE5B60A": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "userbenefitslambdaD2A6379F",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "userbenefitslambdauserbenefitsCODE14241B5B",
-              },
-              "/",
-              {
-                "Ref": "userbenefitslambdauserbenefitsCODEDeploymentStageCODEE2C1EB57",
-              },
-              "/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "userbenefitslambdauserbenefitsCODEANYB79394BE": {
-      "Properties": {
-        "ApiKeyRequired": false,
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "userbenefitslambdaD2A6379F",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Fn::GetAtt": [
-            "userbenefitslambdauserbenefitsCODE14241B5B",
-            "RootResourceId",
-          ],
-        },
-        "RestApiId": {
-          "Ref": "userbenefitslambdauserbenefitsCODE14241B5B",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "userbenefitslambdauserbenefitsCODEAccountF3DF647C": {
-      "DeletionPolicy": "Retain",
-      "DependsOn": [
-        "userbenefitslambdauserbenefitsCODE14241B5B",
-      ],
-      "Properties": {
-        "CloudWatchRoleArn": {
-          "Fn::GetAtt": [
-            "userbenefitslambdauserbenefitsCODECloudWatchRole264FB427",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::ApiGateway::Account",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "userbenefitslambdauserbenefitsCODECloudWatchRole264FB427": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "apigateway.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "user-benefits",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "userbenefitslambdauserbenefitsCODEDeployment23683819163118741c02f815f88a90c3534056f8": {
-      "DependsOn": [
-        "userbenefitslambdauserbenefitsCODEproxyANY433A9AFE",
-        "userbenefitslambdauserbenefitsCODEproxy0CF74ECD",
-        "userbenefitslambdauserbenefitsCODEANYB79394BE",
-      ],
-      "Properties": {
-        "Description": "API Gateway created by CDK",
-        "RestApiId": {
-          "Ref": "userbenefitslambdauserbenefitsCODE14241B5B",
-        },
-      },
-      "Type": "AWS::ApiGateway::Deployment",
-    },
-    "userbenefitslambdauserbenefitsCODEDeploymentStageCODEE2C1EB57": {
-      "DependsOn": [
-        "userbenefitslambdauserbenefitsCODEAccountF3DF647C",
-      ],
-      "Properties": {
-        "DeploymentId": {
-          "Ref": "userbenefitslambdauserbenefitsCODEDeployment23683819163118741c02f815f88a90c3534056f8",
-        },
-        "RestApiId": {
-          "Ref": "userbenefitslambdauserbenefitsCODE14241B5B",
-        },
-        "StageName": "CODE",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "user-benefits",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::Stage",
-    },
-    "userbenefitslambdauserbenefitsCODEproxy0CF74ECD": {
-      "Properties": {
-        "ParentId": {
-          "Fn::GetAtt": [
-            "userbenefitslambdauserbenefitsCODE14241B5B",
-            "RootResourceId",
-          ],
-        },
-        "PathPart": "{proxy+}",
-        "RestApiId": {
-          "Ref": "userbenefitslambdauserbenefitsCODE14241B5B",
-        },
-      },
-      "Type": "AWS::ApiGateway::Resource",
-    },
-    "userbenefitslambdauserbenefitsCODEproxyANY433A9AFE": {
-      "Properties": {
-        "ApiKeyRequired": false,
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "userbenefitslambdaD2A6379F",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Ref": "userbenefitslambdauserbenefitsCODEproxy0CF74ECD",
-        },
-        "RestApiId": {
-          "Ref": "userbenefitslambdauserbenefitsCODE14241B5B",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "userbenefitslambdauserbenefitsCODEproxyANYApiPermissionTestuserbenefitsCODEuserbenefitslambdauserbenefitsCODEE492CB09ANYproxy1B5A3709": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "userbenefitslambdaD2A6379F",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "userbenefitslambdauserbenefitsCODE14241B5B",
-              },
-              "/test-invoke-stage/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "userbenefitslambdauserbenefitsCODEproxyANYApiPermissionuserbenefitsCODEuserbenefitslambdauserbenefitsCODEE492CB09ANYproxy90704E13": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "userbenefitslambdaD2A6379F",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "userbenefitslambdauserbenefitsCODE14241B5B",
-              },
-              "/",
-              {
-                "Ref": "userbenefitslambdauserbenefitsCODEDeploymentStageCODEE2C1EB57",
-              },
-              "/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
     },
   },
 }
@@ -900,7 +777,8 @@ exports[`The User benefits stack matches the snapshot 2`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuApiLambda",
+      "GuLambdaFunction",
+      "GuApiGatewayWithLambdaByPath",
       "GuApiGateway5xxPercentageAlarm",
       "GuAlarm",
       "GuCname",
@@ -908,14 +786,14 @@ exports[`The User benefits stack matches the snapshot 2`] = `
     "gu:cdk:version": "TEST",
   },
   "Outputs": {
-    "userbenefitslambdauserbenefitsPRODEndpoint3573AD65": {
+    "RestApiEndpoint0551178A": {
       "Value": {
         "Fn::Join": [
           "",
           [
             "https://",
             {
-              "Ref": "userbenefitslambdauserbenefitsPROD46740E25",
+              "Ref": "RestApi0C43BF4B",
             },
             ".execute-api.",
             {
@@ -927,7 +805,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
             },
             "/",
             {
-              "Ref": "userbenefitslambdauserbenefitsPRODDeploymentStagePROD1EA2411B",
+              "Ref": "RestApiDeploymentStageprod3855DE66",
             },
             "/",
           ],
@@ -970,7 +848,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
         "Dimensions": [
           {
             "Name": "ApiName",
-            "Value": "user-benefits-PROD",
+            "Value": "membership-PROD-user-benefits",
           },
         ],
         "EvaluationPeriods": 1,
@@ -1020,7 +898,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": "user-benefits-PROD",
+                    "Value": "membership-PROD-user-benefits",
                   },
                 ],
                 "MetricName": "5XXError",
@@ -1038,7 +916,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": "user-benefits-PROD",
+                    "Value": "membership-PROD-user-benefits",
                   },
                 ],
                 "MetricName": "Count",
@@ -1061,10 +939,10 @@ exports[`The User benefits stack matches the snapshot 2`] = `
           "Ref": "DomainName",
         },
         "RestApiId": {
-          "Ref": "userbenefitslambdauserbenefitsPROD46740E25",
+          "Ref": "RestApi0C43BF4B",
         },
         "Stage": {
-          "Ref": "userbenefitslambdauserbenefitsPRODDeploymentStagePROD1EA2411B",
+          "Ref": "RestApiDeploymentStageprod3855DE66",
         },
       },
       "Type": "AWS::ApiGateway::BasePathMapping",
@@ -1139,6 +1017,289 @@ exports[`The User benefits stack matches the snapshot 2`] = `
       },
       "Type": "Guardian::DNS::RecordSet",
     },
+    "RestApi0C43BF4B": {
+      "Properties": {
+        "Name": "membership-PROD-user-benefits",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "RestApiAccount7C83CF5A": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "RestApi0C43BF4B",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "RestApiCloudWatchRoleE3ED6605",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "RestApiCloudWatchRoleE3ED6605": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "RestApiDeployment180EC50362a3cb910ff90d075d47e6d58bbf7ef0": {
+      "DependsOn": [
+        "RestApiuserbenefitsmeGET7BE98224",
+        "RestApiuserbenefitsme7C168E4C",
+        "RestApiuserbenefitsE453BB4D",
+      ],
+      "Properties": {
+        "Description": "Automatically created by the RestApi construct",
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "RestApiDeploymentStageprod3855DE66": {
+      "DependsOn": [
+        "RestApiAccount7C83CF5A",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "RestApiDeployment180EC50362a3cb910ff90d075d47e6d58bbf7ef0",
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+        "StageName": "prod",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "RestApiuserbenefitsE453BB4D": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "RestApi0C43BF4B",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "user-benefits",
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "RestApiuserbenefitsme7C168E4C": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "RestApiuserbenefitsE453BB4D",
+        },
+        "PathPart": "me",
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "RestApiuserbenefitsmeGET7BE98224": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "userbenefitsmelambdaC38B824F",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "RestApiuserbenefitsme7C168E4C",
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "RestApiuserbenefitsmeGETApiPermissionTestuserbenefitsPRODRestApi85285150GETuserbenefitsme7C1BA965": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "userbenefitsmelambdaC38B824F",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "RestApi0C43BF4B",
+              },
+              "/test-invoke-stage/GET/user-benefits/me",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "RestApiuserbenefitsmeGETApiPermissionuserbenefitsPRODRestApi85285150GETuserbenefitsme407B6475": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "userbenefitsmelambdaC38B824F",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "RestApi0C43BF4B",
+              },
+              "/",
+              {
+                "Ref": "RestApiDeploymentStageprod3855DE66",
+              },
+              "/GET/user-benefits/me",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
     "S3inlinepolicy3B07399A": {
       "Properties": {
         "PolicyDocument": {
@@ -1154,16 +1315,16 @@ exports[`The User benefits stack matches the snapshot 2`] = `
         "PolicyName": "S3inlinepolicy3B07399A",
         "Roles": [
           {
-            "Ref": "userbenefitslambdaServiceRoleD30C43BC",
+            "Ref": "userbenefitsmelambdaServiceRole989330C7",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "userbenefitslambdaD2A6379F": {
+    "userbenefitsmelambdaC38B824F": {
       "DependsOn": [
-        "userbenefitslambdaServiceRoleDefaultPolicy08D83DDF",
-        "userbenefitslambdaServiceRoleD30C43BC",
+        "userbenefitsmelambdaServiceRoleDefaultPolicy0A47ED04",
+        "userbenefitsmelambdaServiceRole989330C7",
       ],
       "Properties": {
         "Code": {
@@ -1183,12 +1344,12 @@ exports[`The User benefits stack matches the snapshot 2`] = `
             "Stage": "PROD",
           },
         },
-        "FunctionName": "user-benefits-PROD",
+        "FunctionName": "user-benefits-me-PROD",
         "Handler": "index.handler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "userbenefitslambdaServiceRoleD30C43BC",
+            "userbenefitsmelambdaServiceRole989330C7",
             "Arn",
           ],
         },
@@ -1219,7 +1380,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "userbenefitslambdaServiceRoleD30C43BC": {
+    "userbenefitsmelambdaServiceRole989330C7": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -1272,7 +1433,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "userbenefitslambdaServiceRoleDefaultPolicy08D83DDF": {
+    "userbenefitsmelambdaServiceRoleDefaultPolicy0A47ED04": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -1370,421 +1531,14 @@ exports[`The User benefits stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "userbenefitslambdaServiceRoleDefaultPolicy08D83DDF",
+        "PolicyName": "userbenefitsmelambdaServiceRoleDefaultPolicy0A47ED04",
         "Roles": [
           {
-            "Ref": "userbenefitslambdaServiceRoleD30C43BC",
+            "Ref": "userbenefitsmelambdaServiceRole989330C7",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
-    },
-    "userbenefitslambdauserbenefitsPROD46740E25": {
-      "Properties": {
-        "Description": "API Gateway created by CDK",
-        "Name": "user-benefits-PROD",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "user-benefits",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::RestApi",
-    },
-    "userbenefitslambdauserbenefitsPRODANYApiPermissionTestuserbenefitsPRODuserbenefitslambdauserbenefitsPROD033FBE01ANY0CD327F0": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "userbenefitslambdaD2A6379F",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "userbenefitslambdauserbenefitsPROD46740E25",
-              },
-              "/test-invoke-stage/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "userbenefitslambdauserbenefitsPRODANYApiPermissionuserbenefitsPRODuserbenefitslambdauserbenefitsPROD033FBE01ANYAD452002": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "userbenefitslambdaD2A6379F",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "userbenefitslambdauserbenefitsPROD46740E25",
-              },
-              "/",
-              {
-                "Ref": "userbenefitslambdauserbenefitsPRODDeploymentStagePROD1EA2411B",
-              },
-              "/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "userbenefitslambdauserbenefitsPRODANYEAF8DF58": {
-      "Properties": {
-        "ApiKeyRequired": false,
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "userbenefitslambdaD2A6379F",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Fn::GetAtt": [
-            "userbenefitslambdauserbenefitsPROD46740E25",
-            "RootResourceId",
-          ],
-        },
-        "RestApiId": {
-          "Ref": "userbenefitslambdauserbenefitsPROD46740E25",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "userbenefitslambdauserbenefitsPRODAccount7774F186": {
-      "DeletionPolicy": "Retain",
-      "DependsOn": [
-        "userbenefitslambdauserbenefitsPROD46740E25",
-      ],
-      "Properties": {
-        "CloudWatchRoleArn": {
-          "Fn::GetAtt": [
-            "userbenefitslambdauserbenefitsPRODCloudWatchRole2EFDF87B",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::ApiGateway::Account",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "userbenefitslambdauserbenefitsPRODCloudWatchRole2EFDF87B": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "apigateway.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "user-benefits",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "userbenefitslambdauserbenefitsPRODDeploymentDD11CFA1e5fd0ba57b7247c0a8cf63920c782b08": {
-      "DependsOn": [
-        "userbenefitslambdauserbenefitsPRODproxyANY38F6879D",
-        "userbenefitslambdauserbenefitsPRODproxy8D0A546A",
-        "userbenefitslambdauserbenefitsPRODANYEAF8DF58",
-      ],
-      "Properties": {
-        "Description": "API Gateway created by CDK",
-        "RestApiId": {
-          "Ref": "userbenefitslambdauserbenefitsPROD46740E25",
-        },
-      },
-      "Type": "AWS::ApiGateway::Deployment",
-    },
-    "userbenefitslambdauserbenefitsPRODDeploymentStagePROD1EA2411B": {
-      "DependsOn": [
-        "userbenefitslambdauserbenefitsPRODAccount7774F186",
-      ],
-      "Properties": {
-        "DeploymentId": {
-          "Ref": "userbenefitslambdauserbenefitsPRODDeploymentDD11CFA1e5fd0ba57b7247c0a8cf63920c782b08",
-        },
-        "RestApiId": {
-          "Ref": "userbenefitslambdauserbenefitsPROD46740E25",
-        },
-        "StageName": "PROD",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "user-benefits",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::Stage",
-    },
-    "userbenefitslambdauserbenefitsPRODproxy8D0A546A": {
-      "Properties": {
-        "ParentId": {
-          "Fn::GetAtt": [
-            "userbenefitslambdauserbenefitsPROD46740E25",
-            "RootResourceId",
-          ],
-        },
-        "PathPart": "{proxy+}",
-        "RestApiId": {
-          "Ref": "userbenefitslambdauserbenefitsPROD46740E25",
-        },
-      },
-      "Type": "AWS::ApiGateway::Resource",
-    },
-    "userbenefitslambdauserbenefitsPRODproxyANY38F6879D": {
-      "Properties": {
-        "ApiKeyRequired": false,
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "userbenefitslambdaD2A6379F",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Ref": "userbenefitslambdauserbenefitsPRODproxy8D0A546A",
-        },
-        "RestApiId": {
-          "Ref": "userbenefitslambdauserbenefitsPROD46740E25",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "userbenefitslambdauserbenefitsPRODproxyANYApiPermissionTestuserbenefitsPRODuserbenefitslambdauserbenefitsPROD033FBE01ANYproxyF7592444": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "userbenefitslambdaD2A6379F",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "userbenefitslambdauserbenefitsPROD46740E25",
-              },
-              "/test-invoke-stage/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "userbenefitslambdauserbenefitsPRODproxyANYApiPermissionuserbenefitsPRODuserbenefitslambdauserbenefitsPROD033FBE01ANYproxy9335DA4D": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "userbenefitslambdaD2A6379F",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "userbenefitslambdauserbenefitsPROD46740E25",
-              },
-              "/",
-              {
-                "Ref": "userbenefitslambdauserbenefitsPRODDeploymentStagePROD1EA2411B",
-              },
-              "/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
     },
   },
 }
