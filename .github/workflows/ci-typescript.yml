@@ -30,6 +30,7 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install
       - run: pnpm --filter "./modules/**" check-formatting
+      - run: pnpm --filter "./modules/**" lint
       - run: pnpm --filter "./modules/**" test
 
   gu-cdk-build:
