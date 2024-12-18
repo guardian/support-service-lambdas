@@ -1,12 +1,12 @@
-import { distinct } from '@modules/utils/arrayFunctions';
 import type { IdentityUserDetails } from '@modules/identity/identity';
 import type {
 	ProductCatalogHelper,
 	ProductKey,
 } from '@modules/product-catalog/productCatalog';
-import type { Stage } from '@modules/utils/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import { getSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
+import { distinct } from '@modules/utils/arrayFunctions';
+import type { Stage } from '@modules/utils/stage';
 import {
 	allProductBenefits,
 	itemIsValidForProduct,
