@@ -146,6 +146,7 @@ export class ProductSwitchApi extends GuStack {
 					resources: [
 						`arn:aws:sqs:${this.region}:${this.account}:braze-emails-${this.stage}`,
 						`arn:aws:sqs:${this.region}:${this.account}:supporter-product-data-${this.stage}`,
+						`arn:aws:sqs:${this.region}:${this.account}:product-switch-salesforce-tracking-${this.stage}`,
 					],
 				}),
 			],
