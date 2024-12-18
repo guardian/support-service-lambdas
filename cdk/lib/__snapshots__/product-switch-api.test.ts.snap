@@ -181,6 +181,22 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
                     ],
                   ],
                 },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:sqs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":product-switch-salesforce-tracking-CODE",
+                    ],
+                  ],
+                },
               ],
             },
           ],
@@ -1206,6 +1222,22 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
                         "Ref": "AWS::AccountId",
                       },
                       ":supporter-product-data-PROD",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:sqs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":product-switch-salesforce-tracking-PROD",
                     ],
                   ],
                 },
