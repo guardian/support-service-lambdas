@@ -67,6 +67,25 @@ Filtering can also be used to run builds or any other command on a particular su
 ```shell
 pnpm --filter discount-api package
 ```
+
+Linting can be run for all workspaces:
+
+```shell
+pnpm lint
+```
+
+or a specific workspace:
+
+```shell
+pnpm --filter alarms-handler lint
+```
+
+Auto-fixing linting errors only works when a workspace is specified:
+
+```shell
+pnpm --filter alarms-handler lint --fix
+```
+
 ## Getting Started - Scala
 
 1. Open the project in Intellij with Scala plugin installed
