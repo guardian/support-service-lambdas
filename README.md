@@ -89,7 +89,7 @@ pnpm --filter alarms-handler lint --fix
 ## Getting Started - Scala
 
 1. Open the project in Intellij with Scala plugin installed
-1. Open Intellij->Settings->sbt (search for it)
+1. Open Intellij / Settings / Build, Execution, Deployment / Build Tools / sbt
 1. Turn on sbt shell for project loading and compilation.
 1. (optional for better scala 3 support) switch the scala plugin to "nightly" or "early access" rather than Release
 1. Go into "handlers" and find the relevant lambda(s), and check (or add) their Getting Started section
@@ -107,12 +107,9 @@ This is also means you can run them with the IntelliJ debugger :)
 ### Testing post deployment to CODE/PROD
 The PROD health checks are [called by blazemeter](https://www.runscope.com/radar/wrb0ytfjy4a4) every 5 minutes.
 
----
-
 ## Generating CloudFormation templates:
 
 See the [docs](./cdk/README.md) for setup and running guides.
-
 
 ## Adding a new lambda:
 See [this doc](./handlers/HOWTO-create-lambda.md)
