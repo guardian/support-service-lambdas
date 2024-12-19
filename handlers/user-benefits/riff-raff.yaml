@@ -22,4 +22,5 @@ deployments:
       prefixStack: false
       functionNames:
       - user-benefits-me-
+      - user-benefits-identity-id-
     dependencies: [user-benefits-cloudformation]

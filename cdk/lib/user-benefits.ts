@@ -56,6 +56,23 @@ export class UserBenefits extends GuStack {
 				environment: commonEnvironmentVariables,
 			},
 		);
+		const userBenefitsIdentityIdLambda = new GuLambdaFunction(
+			this,
+			`user-benefits-identity-id-lambda`,
+			{
+				app,
+				description:
+					'An API Gateway triggered lambda generated in the support-service-lambdas repo',
+				functionName: `user-benefits-identity-id-${this.stage}`,
+				fileName: `${app}.zip`,
+				handler: 'index.benefitsIdentityIdHandler',
+				initialPolicy: [supporterProductDataTablePolicy],
+				runtime: nodeVersion,
+				memorySize: 1024,
+				timeout: Duration.seconds(300),
+				environment: commonEnvironmentVariables,
+			},
+		);
 		const lambdaByPath = new GuApiGatewayWithLambdaByPath(this, {
 			app,
 			targets: [
@@ -63,6 +80,11 @@ export class UserBenefits extends GuStack {
 					path: '/benefits/me',
 					httpMethod: 'GET',
 					lambda: userBenefitsMeLambda,
+				},
+				{
+					path: '/benefits/{proxy+}',
+					httpMethod: 'GET',
+					lambda: userBenefitsIdentityIdLambda,
 				},
 			],
 			monitoringConfiguration: {
