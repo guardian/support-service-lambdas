@@ -6,7 +6,11 @@ import { GuCname } from '@guardian/cdk/lib/constructs/dns';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
 import { Duration, Fn } from 'aws-cdk-lib';
-import { CfnBasePathMapping, CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
+import {
+	CfnBasePathMapping,
+	CfnDomainName,
+	UsagePlan,
+} from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
@@ -91,6 +95,21 @@ export class UserBenefits extends GuStack {
 				snsTopicName: `alarms-handler-topic-${this.stage}`,
 			},
 		});
+
+		// ---- API Key ---- //
+		const usagePlan = new UsagePlan(this, 'UserBenefitsUsagePlan', {
+			name: `user-benefits-api-usage-plan-${this.stage}`,
+			apiStages: [
+				{
+					api: apiGateway.api,
+					stage: apiGateway.api.deploymentStage,
+				},
+			],
+		});
+		const apiKey = apiGateway.api.addApiKey(`${app}-api-key-${this.stage}`, {
+			apiKeyName: `${app}-api-key-${this.stage}`,
+		});
+		usagePlan.addApiKey(apiKey);
 
 		// ---- Alarms ---- //
 		const alarmName = (shortDescription: string) =>

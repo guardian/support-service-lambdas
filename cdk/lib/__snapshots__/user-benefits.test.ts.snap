@@ -662,6 +662,41 @@ exports[`The User benefits stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
+    "RestApiuserbenefitsapikeyCODEB166238B": {
+      "Properties": {
+        "Enabled": true,
+        "Name": "user-benefits-api-key-CODE",
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "RestApi0C43BF4B",
+            },
+            "StageName": {
+              "Ref": "RestApiDeploymentStageprod3855DE66",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
     "S3inlinepolicy3B07399A": {
       "Properties": {
         "PolicyDocument": {
@@ -682,6 +717,53 @@ exports[`The User benefits stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "UserBenefitsUsagePlanB21D0332": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "RestApi0C43BF4B",
+            },
+            "Stage": {
+              "Ref": "RestApiDeploymentStageprod3855DE66",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "UsagePlanName": "user-benefits-api-usage-plan-CODE",
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "UserBenefitsUsagePlanUsagePlanKeyResourceuserbenefitsCODERestApiuserbenefitsapikeyCODEC5358F0C159EC6E3": {
+      "Properties": {
+        "KeyId": {
+          "Ref": "RestApiuserbenefitsapikeyCODEB166238B",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "UserBenefitsUsagePlanB21D0332",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
     },
     "userbenefitsidentityidlambda0927FAA2": {
       "DependsOn": [
@@ -1787,6 +1869,41 @@ exports[`The User benefits stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
+    "RestApiuserbenefitsapikeyPRODD0B975B9": {
+      "Properties": {
+        "Enabled": true,
+        "Name": "user-benefits-api-key-PROD",
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "RestApi0C43BF4B",
+            },
+            "StageName": {
+              "Ref": "RestApiDeploymentStageprod3855DE66",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
     "S3inlinepolicy3B07399A": {
       "Properties": {
         "PolicyDocument": {
@@ -1807,6 +1924,53 @@ exports[`The User benefits stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "UserBenefitsUsagePlanB21D0332": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "RestApi0C43BF4B",
+            },
+            "Stage": {
+              "Ref": "RestApiDeploymentStageprod3855DE66",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "UsagePlanName": "user-benefits-api-usage-plan-PROD",
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "UserBenefitsUsagePlanUsagePlanKeyResourceuserbenefitsPRODRestApiuserbenefitsapikeyPROD095D3C67E0E07727": {
+      "Properties": {
+        "KeyId": {
+          "Ref": "RestApiuserbenefitsapikeyPRODD0B975B9",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "UserBenefitsUsagePlanB21D0332",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
     },
     "userbenefitsidentityidlambda0927FAA2": {
       "DependsOn": [
