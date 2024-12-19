@@ -39,38 +39,35 @@ export class UserBenefits extends GuStack {
 			resources: [Fn.importValue(props.supporterProductDataTable)],
 		});
 
+		const commonLambdaProps = {
+			app,
+			fileName: `${app}.zip`,
+			initialPolicy: [supporterProductDataTablePolicy],
+			runtime: nodeVersion,
+			memorySize: 1024,
+			timeout: Duration.seconds(300),
+			environment: commonEnvironmentVariables,
+		};
 		const userBenefitsMeLambda = new GuLambdaFunction(
 			this,
 			`user-benefits-me-lambda`,
 			{
-				app,
 				description:
 					'An API Gateway triggered lambda generated in the support-service-lambdas repo',
 				functionName: `user-benefits-me-${this.stage}`,
-				fileName: `${app}.zip`,
 				handler: 'index.benefitsMeHandler',
-				initialPolicy: [supporterProductDataTablePolicy],
-				runtime: nodeVersion,
-				memorySize: 1024,
-				timeout: Duration.seconds(300),
-				environment: commonEnvironmentVariables,
+				...commonLambdaProps,
 			},
 		);
 		const userBenefitsIdentityIdLambda = new GuLambdaFunction(
 			this,
 			`user-benefits-identity-id-lambda`,
 			{
-				app,
 				description:
 					'An API Gateway triggered lambda generated in the support-service-lambdas repo',
 				functionName: `user-benefits-identity-id-${this.stage}`,
-				fileName: `${app}.zip`,
 				handler: 'index.benefitsIdentityIdHandler',
-				initialPolicy: [supporterProductDataTablePolicy],
-				runtime: nodeVersion,
-				memorySize: 1024,
-				timeout: Duration.seconds(300),
-				environment: commonEnvironmentVariables,
+				...commonLambdaProps,
 			},
 		);
 		const lambdaByPath = new GuApiGatewayWithLambdaByPath(this, {
