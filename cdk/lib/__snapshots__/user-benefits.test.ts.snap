@@ -336,11 +336,11 @@ exports[`The User benefits stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC503d9233985bae6103861251c7cfeb9450c": {
+    "RestApiDeployment180EC503a4447b8deeeadb24e0b8730afb160de5": {
       "DependsOn": [
-        "RestApiuserbenefitsmeGET7BE98224",
-        "RestApiuserbenefitsme7C168E4C",
-        "RestApiuserbenefitsE453BB4D",
+        "RestApibenefitsmeGETE1668978",
+        "RestApibenefitsmeD17C4853",
+        "RestApibenefits030C9A78",
       ],
       "Properties": {
         "Description": "Automatically created by the RestApi construct",
@@ -356,7 +356,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC503d9233985bae6103861251c7cfeb9450c",
+          "Ref": "RestApiDeployment180EC503a4447b8deeeadb24e0b8730afb160de5",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -383,7 +383,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::Stage",
     },
-    "RestApiuserbenefitsE453BB4D": {
+    "RestApibenefits030C9A78": {
       "Properties": {
         "ParentId": {
           "Fn::GetAtt": [
@@ -391,17 +391,17 @@ exports[`The User benefits stack matches the snapshot 1`] = `
             "RootResourceId",
           ],
         },
-        "PathPart": "user-benefits",
+        "PathPart": "benefits",
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
         },
       },
       "Type": "AWS::ApiGateway::Resource",
     },
-    "RestApiuserbenefitsme7C168E4C": {
+    "RestApibenefitsmeD17C4853": {
       "Properties": {
         "ParentId": {
-          "Ref": "RestApiuserbenefitsE453BB4D",
+          "Ref": "RestApibenefits030C9A78",
         },
         "PathPart": "me",
         "RestApiId": {
@@ -410,47 +410,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::Resource",
     },
-    "RestApiuserbenefitsmeGET7BE98224": {
-      "Properties": {
-        "AuthorizationType": "NONE",
-        "HttpMethod": "GET",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "userbenefitsmelambdaC38B824F",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Ref": "RestApiuserbenefitsme7C168E4C",
-        },
-        "RestApiId": {
-          "Ref": "RestApi0C43BF4B",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "RestApiuserbenefitsmeGETApiPermissionTestuserbenefitsCODERestApi6C1D688CGETuserbenefitsme91078079": {
+    "RestApibenefitsmeGETApiPermissionTestuserbenefitsCODERestApi6C1D688CGETbenefitsmeC1D3617B": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -480,14 +440,14 @@ exports[`The User benefits stack matches the snapshot 1`] = `
               {
                 "Ref": "RestApi0C43BF4B",
               },
-              "/test-invoke-stage/GET/user-benefits/me",
+              "/test-invoke-stage/GET/benefits/me",
             ],
           ],
         },
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "RestApiuserbenefitsmeGETApiPermissionuserbenefitsCODERestApi6C1D688CGETuserbenefitsme96BE54BA": {
+    "RestApibenefitsmeGETApiPermissionuserbenefitsCODERestApi6C1D688CGETbenefitsmeEAD82119": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -521,12 +481,52 @@ exports[`The User benefits stack matches the snapshot 1`] = `
               {
                 "Ref": "RestApiDeploymentStageprod3855DE66",
               },
-              "/GET/user-benefits/me",
+              "/GET/benefits/me",
             ],
           ],
         },
       },
       "Type": "AWS::Lambda::Permission",
+    },
+    "RestApibenefitsmeGETE1668978": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "userbenefitsmelambdaC38B824F",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "RestApibenefitsmeD17C4853",
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
     },
     "S3inlinepolicy3B07399A": {
       "Properties": {
@@ -573,7 +573,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
           },
         },
         "FunctionName": "user-benefits-me-CODE",
-        "Handler": "index.handler",
+        "Handler": "index.benefitsMeHandler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -1108,11 +1108,11 @@ exports[`The User benefits stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC50362a3cb910ff90d075d47e6d58bbf7ef0": {
+    "RestApiDeployment180EC50340d27b287ee9fb7bbdd14fc40fb85654": {
       "DependsOn": [
-        "RestApiuserbenefitsmeGET7BE98224",
-        "RestApiuserbenefitsme7C168E4C",
-        "RestApiuserbenefitsE453BB4D",
+        "RestApibenefitsmeGETE1668978",
+        "RestApibenefitsmeD17C4853",
+        "RestApibenefits030C9A78",
       ],
       "Properties": {
         "Description": "Automatically created by the RestApi construct",
@@ -1128,7 +1128,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC50362a3cb910ff90d075d47e6d58bbf7ef0",
+          "Ref": "RestApiDeployment180EC50340d27b287ee9fb7bbdd14fc40fb85654",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -1155,7 +1155,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::Stage",
     },
-    "RestApiuserbenefitsE453BB4D": {
+    "RestApibenefits030C9A78": {
       "Properties": {
         "ParentId": {
           "Fn::GetAtt": [
@@ -1163,17 +1163,17 @@ exports[`The User benefits stack matches the snapshot 2`] = `
             "RootResourceId",
           ],
         },
-        "PathPart": "user-benefits",
+        "PathPart": "benefits",
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
         },
       },
       "Type": "AWS::ApiGateway::Resource",
     },
-    "RestApiuserbenefitsme7C168E4C": {
+    "RestApibenefitsmeD17C4853": {
       "Properties": {
         "ParentId": {
-          "Ref": "RestApiuserbenefitsE453BB4D",
+          "Ref": "RestApibenefits030C9A78",
         },
         "PathPart": "me",
         "RestApiId": {
@@ -1182,47 +1182,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::Resource",
     },
-    "RestApiuserbenefitsmeGET7BE98224": {
-      "Properties": {
-        "AuthorizationType": "NONE",
-        "HttpMethod": "GET",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "userbenefitsmelambdaC38B824F",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Ref": "RestApiuserbenefitsme7C168E4C",
-        },
-        "RestApiId": {
-          "Ref": "RestApi0C43BF4B",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "RestApiuserbenefitsmeGETApiPermissionTestuserbenefitsPRODRestApi85285150GETuserbenefitsme7C1BA965": {
+    "RestApibenefitsmeGETApiPermissionTestuserbenefitsPRODRestApi85285150GETbenefitsme9AE93355": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -1252,14 +1212,14 @@ exports[`The User benefits stack matches the snapshot 2`] = `
               {
                 "Ref": "RestApi0C43BF4B",
               },
-              "/test-invoke-stage/GET/user-benefits/me",
+              "/test-invoke-stage/GET/benefits/me",
             ],
           ],
         },
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "RestApiuserbenefitsmeGETApiPermissionuserbenefitsPRODRestApi85285150GETuserbenefitsme407B6475": {
+    "RestApibenefitsmeGETApiPermissionuserbenefitsPRODRestApi85285150GETbenefitsme1C2643BF": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -1293,12 +1253,52 @@ exports[`The User benefits stack matches the snapshot 2`] = `
               {
                 "Ref": "RestApiDeploymentStageprod3855DE66",
               },
-              "/GET/user-benefits/me",
+              "/GET/benefits/me",
             ],
           ],
         },
       },
       "Type": "AWS::Lambda::Permission",
+    },
+    "RestApibenefitsmeGETE1668978": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "userbenefitsmelambdaC38B824F",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "RestApibenefitsmeD17C4853",
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
     },
     "S3inlinepolicy3B07399A": {
       "Properties": {
@@ -1345,7 +1345,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
           },
         },
         "FunctionName": "user-benefits-me-PROD",
-        "Handler": "index.handler",
+        "Handler": "index.benefitsMeHandler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [

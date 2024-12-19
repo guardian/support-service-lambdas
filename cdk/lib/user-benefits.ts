@@ -48,7 +48,7 @@ export class UserBenefits extends GuStack {
 					'An API Gateway triggered lambda generated in the support-service-lambdas repo',
 				functionName: `user-benefits-me-${this.stage}`,
 				fileName: `${app}.zip`,
-				handler: 'index.handler',
+				handler: 'index.benefitsMeHandler',
 				initialPolicy: [supporterProductDataTablePolicy],
 				runtime: nodeVersion,
 				memorySize: 1024,
@@ -60,7 +60,7 @@ export class UserBenefits extends GuStack {
 			app,
 			targets: [
 				{
-					path: '/user-benefits/me',
+					path: '/benefits/me',
 					httpMethod: 'GET',
 					lambda: userBenefitsMeLambda,
 				},
