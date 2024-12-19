@@ -14,7 +14,7 @@ deployments:
         CODE: user-benefits-CODE.template.json
         PROD: user-benefits-PROD.template.json
 
-  user-benefits-me:
+  user-benefits:
     type: aws-lambda
     parameters:
       fileName: user-benefits.zip
