@@ -10,7 +10,7 @@ object Dependencies {
   val sttpVersion = "3.10.1"
   val http4sVersion = "0.23.30" // keep version 0.23.30, later versions pull in cats effect 3 which is not compatible
   val catsVersion = "2.12.0"
-  val catsEffectVersion = "2.5.5"
+  val catsEffectVersion = "3.5.7"
   val logging: Seq[ModuleID] = Seq(
     "ch.qos.logback" % "logback-classic" % "1.5.14",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
