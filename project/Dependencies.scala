@@ -83,7 +83,7 @@ object Dependencies {
   val enumeratum = "com.beachape" %% "enumeratum" % "1.7.5"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.3.0"
   val stripe = "com.stripe" % "stripe-java" % "28.2.0"
-  val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4"
+  val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.1.0"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest-should" % "0.9.0" % Test
