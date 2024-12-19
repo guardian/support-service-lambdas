@@ -105,10 +105,7 @@ object Dependencies {
     "com.fasterxml.jackson.module" %% "jackson-module-scala" % jacksonVersion,
   )
 
-  /*
-   * End of vulnerability fixes
-   * ===============================================================================================
-   */
+  val sbtDependencyGraph = "net.virtual-void" % "sbt-dependency-graph" % "0.9.2"
 
   // to resolve merge clash of 'module-info.class'
   // see https://stackoverflow.com/questions/54834125/sbt-assembly-deduplicate-module-info-class
