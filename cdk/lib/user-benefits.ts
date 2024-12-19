@@ -77,6 +77,7 @@ export class UserBenefits extends GuStack {
 			app,
 			targets: [
 				{
+					// Auth is handled by the lambda which validates a JWT
 					path: '/benefits/me',
 					httpMethod: 'GET',
 					lambda: userBenefitsMeLambda,
@@ -85,6 +86,7 @@ export class UserBenefits extends GuStack {
 					path: '/benefits/{proxy+}',
 					httpMethod: 'GET',
 					lambda: userBenefitsIdentityIdLambda,
+					apiKeyRequired: true,
 				},
 			],
 			monitoringConfiguration: {

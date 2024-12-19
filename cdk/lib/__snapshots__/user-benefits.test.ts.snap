@@ -337,7 +337,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC5039623c9c2dc4d0ec9963c002b9508fd71": {
+    "RestApiDeployment180EC5039b588e40daca3eee8484174088530c04": {
       "DependsOn": [
         "RestApibenefitsproxyGET31A530B9",
         "RestApibenefitsproxy6F20D4DE",
@@ -359,7 +359,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC5039623c9c2dc4d0ec9963c002b9508fd71",
+          "Ref": "RestApiDeployment180EC5039b588e40daca3eee8484174088530c04",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -545,6 +545,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
     },
     "RestApibenefitsproxyGET31A530B9": {
       "Properties": {
+        "ApiKeyRequired": true,
         "AuthorizationType": "NONE",
         "HttpMethod": "GET",
         "Integration": {
@@ -1461,7 +1462,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC50378983a9cab8f20137029bc5b9a212957": {
+    "RestApiDeployment180EC50356d1853ea4c414245715751483f02391": {
       "DependsOn": [
         "RestApibenefitsproxyGET31A530B9",
         "RestApibenefitsproxy6F20D4DE",
@@ -1483,7 +1484,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC50378983a9cab8f20137029bc5b9a212957",
+          "Ref": "RestApiDeployment180EC50356d1853ea4c414245715751483f02391",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -1669,6 +1670,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
     },
     "RestApibenefitsproxyGET31A530B9": {
       "Properties": {
+        "ApiKeyRequired": true,
         "AuthorizationType": "NONE",
         "HttpMethod": "GET",
         "Integration": {
