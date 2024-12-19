@@ -1,6 +1,6 @@
 import { sendEmail } from '@modules/email/email';
-import { ValidationError } from '@modules/errors';
 import { getIfDefined } from '@modules/nullAndUndefined';
+import { Router } from '@modules/routing/router';
 import type { Stage } from '@modules/stage';
 import { Logger } from '@modules/zuora/logger';
 import type {
@@ -25,85 +25,80 @@ import {
 } from './responseSchema';
 
 const stage = process.env.STAGE as Stage;
+const logger = new Logger();
+const router = new Router([
+	{
+		httpMethod: 'POST',
+		path: '/apply-discount',
+		handler: applyDiscountHandler(logger),
+	},
+	{
+		httpMethod: 'POST',
+		path: '/preview-discount',
+		handler: previewDiscountHandler(logger),
+	},
+]);
 export const handler: Handler = async (
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
-	const logger = new Logger();
 	logger.log(`Input is ${JSON.stringify(event)}`);
-	const response = await routeRequest(logger, event);
+	const response = await router.routeRequest(event);
 	logger.log(`Response is ${JSON.stringify(response)}`);
 	return response;
 };
 
+function applyDiscountHandler(logger: Logger) {
+	return async (
+		event: APIGatewayProxyEvent,
+	): Promise<APIGatewayProxyResult> => {
+		const subscriptionNumber = applyDiscountSchema.parse(
+			JSON.parse(getIfDefined(event.body, 'No body was provided')),
+		).subscriptionNumber;
+		logger.mutableAddContext(subscriptionNumber);
+		const { response, emailPayload } = await applyDiscountEndpoint(
+			logger,
+			stage,
+			event.headers,
+			subscriptionNumber,
+			dayjs(),
+		);
+		await sendEmail(stage, emailPayload, logger.log.bind(logger));
+		return {
+			body: stringify<ApplyDiscountResponseBody>(
+				response,
+				applyDiscountResponseSchema,
+			),
+			statusCode: 200,
+		};
+	};
+}
+
+function previewDiscountHandler(logger: Logger) {
+	return async (
+		event: APIGatewayProxyEvent,
+	): Promise<APIGatewayProxyResult> => {
+		logger.log('Previewing discount');
+		const subscriptionNumber = applyDiscountSchema.parse(
+			JSON.parse(getIfDefined(event.body, 'No body was provided')),
+		).subscriptionNumber;
+		logger.mutableAddContext(subscriptionNumber);
+		const result = await previewDiscountEndpoint(
+			logger,
+			stage,
+			event.headers,
+			subscriptionNumber,
+			dayjs(),
+		);
+		return {
+			body: stringify<EligibilityCheckResponseBody>(
+				result,
+				previewDiscountResponseSchema,
+			),
+			statusCode: 200,
+		};
+	};
+}
+
 // this is a type safe version of stringify
 export const stringify = <T>(t: T, type: ZodType<T>): string =>
 	JSON.stringify(type.parse(t));
-
-const routeRequest = async (logger: Logger, event: APIGatewayProxyEvent) => {
-	try {
-		switch (true) {
-			case event.path === '/apply-discount' && event.httpMethod === 'POST': {
-				logger.log('Applying a discount');
-				const subscriptionNumber = applyDiscountSchema.parse(
-					JSON.parse(getIfDefined(event.body, 'No body was provided')),
-				).subscriptionNumber;
-				logger.mutableAddContext(subscriptionNumber);
-				const { response, emailPayload } = await applyDiscountEndpoint(
-					logger,
-					stage,
-					event.headers,
-					subscriptionNumber,
-					dayjs(),
-				);
-				await sendEmail(stage, emailPayload, logger.log.bind(logger));
-				return {
-					body: stringify<ApplyDiscountResponseBody>(
-						response,
-						applyDiscountResponseSchema,
-					),
-					statusCode: 200,
-				};
-			}
-			case event.path === '/preview-discount' && event.httpMethod === 'POST': {
-				logger.log('Previewing discount');
-				const subscriptionNumber = applyDiscountSchema.parse(
-					JSON.parse(getIfDefined(event.body, 'No body was provided')),
-				).subscriptionNumber;
-				logger.mutableAddContext(subscriptionNumber);
-				const result = await previewDiscountEndpoint(
-					logger,
-					stage,
-					event.headers,
-					subscriptionNumber,
-					dayjs(),
-				);
-				return {
-					body: stringify<EligibilityCheckResponseBody>(
-						result,
-						previewDiscountResponseSchema,
-					),
-					statusCode: 200,
-				};
-			}
-			default:
-				return {
-					body: 'Not found',
-					statusCode: 404,
-				};
-		}
-	} catch (error) {
-		logger.error('Caught error in index.ts ', error);
-		if (error instanceof ValidationError) {
-			logger.error(`Validation failure: ${error.message}`);
-			return {
-				body: error.message,
-				statusCode: 400,
-			};
-		} else {
-			return {
-				body: 'Internal server error, check the logs for more information',
-				statusCode: 500,
-			};
-		}
-	}
-};
