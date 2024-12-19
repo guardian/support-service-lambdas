@@ -107,9 +107,15 @@ This is also means you can run them with the IntelliJ debugger :)
 ### Testing post deployment to CODE/PROD
 The PROD health checks are [called by blazemeter](https://www.runscope.com/radar/wrb0ytfjy4a4) every 5 minutes.
 
-## Generating CloudFormation templates:
+## Misc
+
+### Generating CloudFormation templates:
 
 See the [docs](./cdk/README.md) for setup and running guides.
 
-## Adding a new lambda:
+### Adding a new lambda:
 See [this doc](./handlers/HOWTO-create-lambda.md)
+
+### Scala dependency tree
+
+run `sbt dependencyTree`
