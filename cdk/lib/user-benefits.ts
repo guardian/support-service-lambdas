@@ -70,7 +70,7 @@ export class UserBenefits extends GuStack {
 				...commonLambdaProps,
 			},
 		);
-		const lambdaByPath = new GuApiGatewayWithLambdaByPath(this, {
+		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {
 			app,
 			targets: [
 				{
@@ -116,7 +116,7 @@ export class UserBenefits extends GuStack {
 				statistic: 'Sum',
 				period: Duration.seconds(300),
 				dimensionsMap: {
-					ApiName: lambdaByPath.api.restApiName,
+					ApiName: apiGateway.api.restApiName,
 				},
 			}),
 		});
@@ -133,8 +133,8 @@ export class UserBenefits extends GuStack {
 
 		new CfnBasePathMapping(this, 'BasePathMapping', {
 			domainName: cfnDomainName.ref,
-			restApiId: lambdaByPath.api.restApiId,
-			stage: lambdaByPath.api.deploymentStage.stageName,
+			restApiId: apiGateway.api.restApiId,
+			stage: apiGateway.api.deploymentStage.stageName,
 		});
 
 		new CfnRecordSet(this, 'DNSRecord', {
