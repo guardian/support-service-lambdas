@@ -140,7 +140,7 @@ lazy val `salesforce-sttp-client` = library(
   .settings(
     libraryDependencies ++=
       Seq(sttp, sttpCirce, sttpAsyncHttpClientBackendCats % Test, scalatest, catsCore, catsEffect, circe) ++ logging,
-    dependencyOverrides ++= jacksonDependencies,
+    dependencyOverrides ++= jacksonDependencies :+ asyncHttpClientOverride,
   )
 
 lazy val `salesforce-sttp-test-stub` = library(
@@ -328,6 +328,7 @@ lazy val `imovo-sttp-client` = library(project in file("lib/imovo/imovo-sttp-cli
   .settings(
     libraryDependencies ++=
       Seq(sttp, sttpCirce, sttpAsyncHttpClientBackendCats % Test, scalatest, catsCore, catsEffect, circe) ++ logging,
+    dependencyOverrides ++= Seq(asyncHttpClientOverride),
   )
 
 lazy val `imovo-sttp-test-stub` = library(
