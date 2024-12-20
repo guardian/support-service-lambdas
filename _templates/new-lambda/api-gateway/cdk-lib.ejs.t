@@ -147,17 +147,5 @@ export class <%= PascalCase %> extends GuStack {
 			ttl: '120',
 			resourceRecords: [cfnDomainName.attrRegionalDomainName],
 		});
-
-		const s3InlinePolicy: Policy = new Policy(this, 'S3 inline policy', {
-			statements: [
-				new PolicyStatement({
-					effect: Effect.ALLOW,
-					actions: ['s3:GetObject'],
-					resources: [`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`],
-				}),
-			],
-		});
-
-		lambda.role?.attachInlinePolicy(s3InlinePolicy);
 	}
 }
