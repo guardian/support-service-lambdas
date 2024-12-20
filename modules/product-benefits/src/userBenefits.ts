@@ -50,20 +50,33 @@ export const getValidUserProducts = (
 export const userHasGuardianEmail = (email: string): boolean =>
 	email.endsWith('@theguardian.com') || email.endsWith('@guardian.co.uk');
 
-export const getUserBenefits = async (
+export const getUserBenefitsExcludingStaff = async (
+	stage: Stage,
+	productCatalogHelper: ProductCatalogHelper,
+	identityId: string,
+): Promise<ProductBenefit[]> => {
+	const userProducts = await getUserProducts(
+		stage,
+		productCatalogHelper,
+		identityId,
+	);
+
+	return getUserBenefitsFromUserProducts(userProducts);
+};
+
+export const getUserBenefits = (
 	stage: Stage,
 	productCatalogHelper: ProductCatalogHelper,
 	userDetails: IdentityUserDetails,
 ): Promise<ProductBenefit[]> => {
 	if (userHasGuardianEmail(userDetails.email)) {
-		return allProductBenefits;
+		return Promise.resolve(allProductBenefits);
 	}
-	const userProducts = await getUserProducts(
+	return getUserBenefitsExcludingStaff(
 		stage,
 		productCatalogHelper,
 		userDetails.identityId,
 	);
-	return getUserBenefitsFromUserProducts(userProducts);
 };
 
 export const getUserBenefitsFromUserProducts = (
