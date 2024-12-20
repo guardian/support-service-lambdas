@@ -9,9 +9,9 @@ import { buildNonCachedHttpResponse } from './response';
 import { getTrialInformation } from './trials';
 
 const stage = process.env.STAGE as Stage;
-const productCatalog = new Lazy(
-	async () => await getProductCatalogFromApi(stage),
-	'Get product catalog',
+const productCatalogHelper = new Lazy(
+	async () => new ProductCatalogHelper(await getProductCatalogFromApi(stage)),
+	'Get product catalog helper',
 );
 
 const getUserBenefitsResponse = async (
@@ -50,7 +50,7 @@ export const benefitsIdentityIdHandler = async (
 
 	const userBenefitsResponse = await getUserBenefitsResponse(
 		stage,
-		new ProductCatalogHelper(await productCatalog.get()),
+		await productCatalogHelper.get(),
 		identityId,
 	);
 

@@ -13,9 +13,9 @@ import { getTrialInformation } from './trials';
 
 const stage = process.env.STAGE as Stage;
 const authenticate = buildAuthenticate(stage, []); //TODO: Do we have any required scopes?
-const productCatalog = new Lazy(
-	async () => await getProductCatalogFromApi(stage),
-	'Get product catalog',
+const productCatalogHelper = new Lazy(
+	async () => new ProductCatalogHelper(await getProductCatalogFromApi(stage)),
+	'Get product catalog helper',
 );
 
 const getUserBenefitsResponse = async (
@@ -51,7 +51,7 @@ export const benefitsMeHandler = async (
 
 		const userBenefitsResponse = await getUserBenefitsResponse(
 			stage,
-			new ProductCatalogHelper(await productCatalog.get()),
+			await productCatalogHelper.get(),
 			maybeAuthenticatedEvent.userDetails,
 		);
 		return buildNonCachedHttpResponse(userBenefitsResponse);
