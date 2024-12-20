@@ -56,8 +56,13 @@ object Dependencies {
   // HTTP clients
   val sttp = "com.softwaremill.sttp.client3" %% "core" % sttpVersion
   val sttpCirce = "com.softwaremill.sttp.client3" %% "circe" % sttpVersion
+
+  // Override to fix this vulnerability https://github.com/guardian/support-service-lambdas/security/dependabot/24
+  // This is a transitive dependency of async-http-client-backend-cats-ce2 so when we upgrade that we can remove this
+  val asyncHttpClientOverride = "org.asynchttpclient" % "async-http-client" % "2.12.4"
   val sttpAsyncHttpClientBackendCats =
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats-ce2" % sttpVersion
+
   val sttpOkhttpBackend =
     "com.softwaremill.sttp.client3" %% "okhttp-backend" % sttpVersion
   val okhttp3 = "com.squareup.okhttp3" % "okhttp" % "4.12.0"
