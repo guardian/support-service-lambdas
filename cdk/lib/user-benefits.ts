@@ -84,7 +84,7 @@ export class UserBenefits extends GuStack {
 					lambda: userBenefitsMeLambda,
 				},
 				{
-					path: '/benefits/{proxy+}',
+					path: '/benefits/{identityId+}',
 					httpMethod: 'GET',
 					lambda: userBenefitsIdentityIdLambda,
 					apiKeyRequired: true,
