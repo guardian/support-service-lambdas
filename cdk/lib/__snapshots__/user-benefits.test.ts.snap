@@ -756,7 +756,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
           },
           "S3Key": "membership/CODE/user-benefits/user-benefits.zip",
         },
-        "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
+        "Description": "An API Gateway triggered lambda to get the benefits of the user identified in the request path",
         "Environment": {
           "Variables": {
             "APP": "user-benefits",
@@ -975,7 +975,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
           },
           "S3Key": "membership/CODE/user-benefits/user-benefits.zip",
         },
-        "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
+        "Description": "An API Gateway triggered lambda to get the benefits of a user identified by a JWT",
         "Environment": {
           "Variables": {
             "APP": "user-benefits",
@@ -1942,7 +1942,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
           },
           "S3Key": "membership/PROD/user-benefits/user-benefits.zip",
         },
-        "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
+        "Description": "An API Gateway triggered lambda to get the benefits of the user identified in the request path",
         "Environment": {
           "Variables": {
             "APP": "user-benefits",
@@ -2161,7 +2161,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
           },
           "S3Key": "membership/PROD/user-benefits/user-benefits.zip",
         },
-        "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
+        "Description": "An API Gateway triggered lambda to get the benefits of a user identified by a JWT",
         "Environment": {
           "Variables": {
             "APP": "user-benefits",

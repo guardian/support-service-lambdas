@@ -12,7 +12,7 @@ import {
 	UsagePlan,
 } from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
-import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { nodeVersion } from './node-version';
 
@@ -57,7 +57,7 @@ export class UserBenefits extends GuStack {
 			`user-benefits-me-lambda`,
 			{
 				description:
-					'An API Gateway triggered lambda generated in the support-service-lambdas repo',
+					'An API Gateway triggered lambda to get the benefits of a user identified by a JWT',
 				functionName: `user-benefits-me-${this.stage}`,
 				handler: 'index.benefitsMeHandler',
 				...commonLambdaProps,
@@ -68,7 +68,7 @@ export class UserBenefits extends GuStack {
 			`user-benefits-identity-id-lambda`,
 			{
 				description:
-					'An API Gateway triggered lambda generated in the support-service-lambdas repo',
+					'An API Gateway triggered lambda to get the benefits of the user identified in the request path',
 				functionName: `user-benefits-identity-id-${this.stage}`,
 				handler: 'index.benefitsIdentityIdHandler',
 				...commonLambdaProps,
