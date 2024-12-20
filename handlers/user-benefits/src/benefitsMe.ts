@@ -8,7 +8,7 @@ import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { buildHttpResponse } from './response';
+import { buildNonCachedHttpResponse } from './response';
 import { getTrialInformation } from './trials';
 
 const stage = process.env.STAGE as Stage;
@@ -54,7 +54,7 @@ export const benefitsMeHandler = async (
 			new ProductCatalogHelper(await productCatalog.get()),
 			maybeAuthenticatedEvent.userDetails,
 		);
-		return buildHttpResponse(userBenefitsResponse);
+		return buildNonCachedHttpResponse(userBenefitsResponse);
 	} catch (error) {
 		console.log('Caught exception with message: ', error);
 		if (error instanceof ValidationError) {

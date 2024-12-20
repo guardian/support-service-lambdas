@@ -1,7 +1,7 @@
 import type { UserBenefitsResponse } from '@modules/product-benefits/schemas';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 
-export const buildHttpResponse = (
+export const buildNonCachedHttpResponse = (
 	benefits: UserBenefitsResponse,
 ): APIGatewayProxyResult => ({
 	body: JSON.stringify(benefits),

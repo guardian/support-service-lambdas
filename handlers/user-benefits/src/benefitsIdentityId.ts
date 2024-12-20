@@ -5,7 +5,7 @@ import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { buildHttpResponse } from './response';
+import { buildNonCachedHttpResponse } from './response';
 import { getTrialInformation } from './trials';
 
 const stage = process.env.STAGE as Stage;
@@ -54,5 +54,5 @@ export const benefitsIdentityIdHandler = async (
 		identityId,
 	);
 
-	return buildHttpResponse(userBenefitsResponse);
+	return buildNonCachedHttpResponse(userBenefitsResponse);
 };
