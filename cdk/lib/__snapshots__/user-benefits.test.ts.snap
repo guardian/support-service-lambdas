@@ -697,27 +697,6 @@ exports[`The User benefits stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::ApiKey",
     },
-    "S3inlinepolicy3B07399A": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/membership/CODE/user-benefits/",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "S3inlinepolicy3B07399A",
-        "Roles": [
-          {
-            "Ref": "userbenefitsmelambdaServiceRole989330C7",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
     "UserBenefitsUsagePlanB21D0332": {
       "Properties": {
         "ApiStages": [
@@ -1903,27 +1882,6 @@ exports[`The User benefits stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::ApiGateway::ApiKey",
-    },
-    "S3inlinepolicy3B07399A": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/membership/PROD/user-benefits/",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "S3inlinepolicy3B07399A",
-        "Roles": [
-          {
-            "Ref": "userbenefitsmelambdaServiceRole989330C7",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
     },
     "UserBenefitsUsagePlanB21D0332": {
       "Properties": {
