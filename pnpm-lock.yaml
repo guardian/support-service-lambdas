@@ -94,8 +94,8 @@ importers:
         version: 3.23.8
     devDependencies:
       '@types/aws-lambda':
-        specifier: ^8.10.145
-        version: 8.10.145
+        specifier: ^8.10.147
+        version: 8.10.147
 
   handlers/discount-api:
     dependencies:
@@ -107,8 +107,8 @@ importers:
         version: 3.23.8
     devDependencies:
       '@types/aws-lambda':
-        specifier: ^8.10.145
-        version: 8.10.145
+        specifier: ^8.10.147
+        version: 8.10.147
 
   handlers/generate-product-catalog:
     devDependencies:
@@ -116,8 +116,8 @@ importers:
         specifier: 3.665.0
         version: 3.665.0
       '@types/aws-lambda':
-        specifier: ^8.10.145
-        version: 8.10.145
+        specifier: ^8.10.147
+        version: 8.10.147
 
   handlers/press-reader-entitlements:
     dependencies:
@@ -138,8 +138,8 @@ importers:
         version: 3.23.8
     devDependencies:
       '@types/aws-lambda':
-        specifier: ^8.10.129
-        version: 8.10.145
+        specifier: ^8.10.147
+        version: 8.10.147
 
   handlers/product-switch-api:
     dependencies:
@@ -154,8 +154,8 @@ importers:
         version: 3.23.8
     devDependencies:
       '@types/aws-lambda':
-        specifier: ^8.10.145
-        version: 8.10.145
+        specifier: ^8.10.147
+        version: 8.10.147
 
   handlers/salesforce-disaster-recovery:
     dependencies:
@@ -170,8 +170,8 @@ importers:
         version: 5.6.0
     devDependencies:
       '@types/aws-lambda':
-        specifier: ^8.10.145
-        version: 8.10.145
+        specifier: ^8.10.147
+        version: 8.10.147
       aws-sdk-client-mock:
         specifier: 4.1.0
         version: 4.1.0
@@ -186,8 +186,8 @@ importers:
         version: 3.693.0
     devDependencies:
       '@types/aws-lambda':
-        specifier: ^8.10.145
-        version: 8.10.145
+        specifier: ^8.10.147
+        version: 8.10.147
 
   handlers/ticket-tailor-webhook:
     dependencies:
@@ -202,8 +202,8 @@ importers:
         version: 3.23.8
     devDependencies:
       '@types/aws-lambda':
-        specifier: ^8.10.145
-        version: 8.10.145
+        specifier: ^8.10.147
+        version: 8.10.147
       fetch-mock:
         specifier: ^11.1.1
         version: 11.1.1
@@ -221,14 +221,14 @@ importers:
         version: 3.23.8
     devDependencies:
       '@types/aws-lambda':
-        specifier: ^8.10.145
-        version: 8.10.145
+        specifier: ^8.10.147
+        version: 8.10.147
 
   handlers/user-benefits:
     devDependencies:
       '@types/aws-lambda':
-        specifier: ^8.10.129
-        version: 8.10.145
+        specifier: ^8.10.147
+        version: 8.10.147
 
   handlers/zuora-salesforce-link-remover:
     dependencies:
@@ -246,8 +246,8 @@ importers:
         version: 3.23.8
     devDependencies:
       '@types/aws-lambda':
-        specifier: ^8.10.145
-        version: 8.10.145
+        specifier: ^8.10.147
+        version: 8.10.147
 
   modules/aws:
     dependencies:
@@ -271,8 +271,8 @@ importers:
         version: 3.23.8
     devDependencies:
       '@types/aws-lambda':
-        specifier: ^8.10.145
-        version: 8.10.145
+        specifier: ^8.10.147
+        version: 8.10.147
 
   modules/product-benefits:
     dependencies:
@@ -298,8 +298,8 @@ importers:
   modules/routing:
     devDependencies:
       '@types/aws-lambda':
-        specifier: ^8.10.129
-        version: 8.10.145
+        specifier: ^8.10.147
+        version: 8.10.147
 
   modules/salesforce:
     dependencies:
@@ -2065,8 +2065,8 @@ packages:
   '@tsconfig/node16@1.0.4':
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
 
-  '@types/aws-lambda@8.10.145':
-    resolution: {integrity: sha512-dtByW6WiFk5W5Jfgz1VM+YPA21xMXTuSFoLYIDY0L44jDLLflVPtZkYuu3/YxpGcvjzKFBZLU+GyKjR0HOYtyw==}
+  '@types/aws-lambda@8.10.147':
+    resolution: {integrity: sha512-nD0Z9fNIZcxYX5Mai2CTmFD7wX7UldCkW2ezCF8D1T5hdiLsnTWDGRpfRYntU6VjTdLQjOvyszru7I1c1oCQew==}
 
   '@types/babel__core@7.20.5':
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
@@ -8784,7 +8784,7 @@ snapshots:
 
   '@tsconfig/node16@1.0.4': {}
 
-  '@types/aws-lambda@8.10.145': {}
+  '@types/aws-lambda@8.10.147': {}
 
   '@types/babel__core@7.20.5':
     dependencies:
