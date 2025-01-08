@@ -21,5 +21,6 @@ deployments:
       bucketSsmLookup: true
       prefixStack: false
       functionNames:
-      - user-benefits-
+      - user-benefits-me-
+      - user-benefits-identity-id-
     dependencies: [user-benefits-cloudformation]
