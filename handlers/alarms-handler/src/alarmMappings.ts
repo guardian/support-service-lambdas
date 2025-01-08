@@ -82,6 +82,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'payment-api',
 
 		// support-service-lambdas
+		'catalog-service',
 		'generate-product-catalog',
 		'metric-push-api',
 		'press-reader-entitlements',
@@ -108,7 +109,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'invoicing-api',
 		'zuora-callout-apis',
 		'zuora-oracle-fusion',
-		'catalog-service',
 
 		// stripe
 		'stripe-patrons-data',
