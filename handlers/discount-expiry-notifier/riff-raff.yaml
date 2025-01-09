@@ -1,0 +1,15 @@
+stacks:
+  - membership
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  discount-expiry-notifier-cloudformation:
+    type: cloud-formation
+    app: discount-expiry-notifier
+    parameters:
+      templateStagePaths:
+        CODE: discount-expiry-notifier-CODE.template.json
+        PROD: discount-expiry-notifier-PROD.template.json
