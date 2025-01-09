@@ -200,7 +200,7 @@ Resources:
         Dimensions:
           - Name: FunctionName
             Value: !Ref CODECatalogServiceLambda
-        EvaluationPeriods: 36
+        EvaluationPeriods: 18
         MetricName: Errors
         Namespace: AWS/Lambda
         Period: 300
