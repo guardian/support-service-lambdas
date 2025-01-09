@@ -2,7 +2,7 @@ import { App } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
 import { DiscountExpiryNotifier } from './discount-expiry-notifier';
 
-describe('The zuora-salesforce-link-remover stack', () => {
+describe('The discount-expiry-notifier stack', () => {
 	it('matches the snapshot', () => {
 		const app = new App();
 		const codeStack = new DiscountExpiryNotifier(
