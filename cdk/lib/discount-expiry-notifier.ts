@@ -16,7 +16,7 @@ export class DiscountExpiryNotifier extends GuStack {
 		const passState = new Pass(this, 'generic pass state');
 		const definitionBody = DefinitionBody.fromChainable(passState);
 
-		new StateMachine(this, `${appName}-state-machine-${this.stage}`, {
+		new StateMachine(this, `${appName}-state-machine-${this.stage}`,{
 			definitionBody: definitionBody,
 		});
 	}
