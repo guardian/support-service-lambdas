@@ -175,7 +175,7 @@ Resources:
       Condition: CreateProdOnlyResources
       Properties:
         AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:reader-revenue-dev
+          - Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-PROD
         AlarmName: High error rate when fetching PROD Zuora Catalog
         ComparisonOperator: GreaterThanOrEqualToThreshold
         Dimensions:
@@ -194,7 +194,7 @@ Resources:
       Condition: CreateProdOnlyResources
       Properties:
         AlarmActions:
-        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:reader-revenue-dev
+          - Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-PROD
         AlarmName: High error rate when fetching CODE Zuora Catalog
         ComparisonOperator: GreaterThanOrEqualToThreshold
         Dimensions:

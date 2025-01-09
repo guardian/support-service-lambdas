@@ -82,6 +82,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'payment-api',
 
 		// support-service-lambdas
+		'catalog-service',
 		'generate-product-catalog',
 		'metric-push-api',
 		'press-reader-entitlements',
