@@ -10,20 +10,14 @@ import {
 export class DiscountExpiryNotifier extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {
 		super(scope, id, props);
-		
+
 		const appName = 'discount-expiry-notifier';
 
-		const passState = new Pass(this, 'generic pass state')
-		const definitionBody = DefinitionBody.fromChainable(
-			passState
-		);
+		const passState = new Pass(this, 'generic pass state');
+		const definitionBody = DefinitionBody.fromChainable(passState);
 
-		new StateMachine(
-			this,
-			`${appName}-state-machine-${this.stage}`,
-			{
-				definitionBody: definitionBody,
-			},
-		);
+		new StateMachine(this, `${appName}-state-machine-${this.stage}`, {
+			definitionBody: definitionBody,
+		});
 	}
 }
