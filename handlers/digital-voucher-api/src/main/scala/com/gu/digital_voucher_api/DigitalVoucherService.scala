@@ -121,10 +121,7 @@ object DigitalVoucherService {
         case _ => {
           Left(
             DigitalVoucherServiceFailure(
-              List(
-                "Imovo response did not contain an subscription voucher where subscriptionType==\"ActiveLetter\" ",
-                "Imovo response did not contain an subscription voucher where subscriptionType==\"ActiveCard\" ",
-              ).mkString(","),
+              s"Imovo response did not contain a subscription voucher where subscriptionType==\"ActiveLetter\" or subscriptionType==\"ActiveCard\" : ${voucherResponse}"
             ),
           )
         }
