@@ -15,6 +15,14 @@ export const typeObject = {
 			},
 		},
 	},
+	GuardianAdLite: {
+		billingPeriods: ['Month'],
+		productRatePlans: {
+			Monthly: {
+				Subscription: {},
+			},
+		},
+	},
 	TierThree: {
 		billingPeriods: ['Annual', 'Month'],
 		productRatePlans: {
