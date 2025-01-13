@@ -1,6 +1,6 @@
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
-import { generateTypeObject } from '@modules/product-catalog/generateTypeObject';
+import { generateTypeObjects } from '@modules/product-catalog/generateTypeObject';
 import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
 import prod from '../../zuora-catalog/test/fixtures/catalog-prod.json';
 
@@ -14,7 +14,7 @@ describe('prod', () => {
 
 	test('Generated product catalog types match snapshot', () => {
 		const prodZuoraCatalog = zuoraCatalogSchema.parse(prod);
-		const prodTypeObject = generateTypeObject(prodZuoraCatalog);
+		const prodTypeObject = generateTypeObjects(prodZuoraCatalog);
 		expect(prodTypeObject).toMatchSnapshot();
 	});
 });
@@ -29,7 +29,7 @@ describe('code', () => {
 
 	test('Generated product catalog types match snapshot', () => {
 		const codeZuoraCatalog = zuoraCatalogSchema.parse(code);
-		const codeTypeObject = generateTypeObject(codeZuoraCatalog);
+		const codeTypeObject = generateTypeObjects(codeZuoraCatalog);
 		expect(codeTypeObject).toMatchSnapshot();
 	});
 });
