@@ -49,6 +49,7 @@ jobs:
           - salesforce-disaster-recovery
           - salesforce-disaster-recovery-health-check
           - zuora-salesforce-link-remover
+          - stripe-checkout-spike
     runs-on: ubuntu-latest
     permissions:
       id-token: write
