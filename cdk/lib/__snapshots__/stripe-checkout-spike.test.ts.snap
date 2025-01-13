@@ -17,10 +17,41 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
-    "CheckoutSessionCompletedHandler775FD5F0": {
+    "StripeBusToQueueRule315DB460": {
+      "Properties": {
+        "Description": "Send stripe events to queue",
+        "EventBusName": "aws.partner/stripe.com/ed_test_61RqARF6hmlRU6YCC16Rq9XTM0E9VxCGACIr7p1tg5ZY",
+        "EventPattern": {
+          "account": [
+            {
+              "Ref": "AWS::AccountId",
+            },
+          ],
+          "region": [
+            {
+              "Ref": "AWS::Region",
+            },
+          ],
+        },
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "stripecheckoutspikequeue88DF5386",
+                "Arn",
+              ],
+            },
+            "Id": "Target0",
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "checkoutSessionCompletedEventHandlerF07DFDDB": {
       "DependsOn": [
-        "CheckoutSessionCompletedHandlerServiceRoleDefaultPolicy288D60AA",
-        "CheckoutSessionCompletedHandlerServiceRoleE508FC37",
+        "checkoutSessionCompletedEventHandlerServiceRoleDefaultPolicy249BD397",
+        "checkoutSessionCompletedEventHandlerServiceRoleC9F47EDB",
       ],
       "Properties": {
         "Code": {
@@ -36,12 +67,12 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 1`] = `
             "STAGE": "CODE",
           },
         },
-        "FunctionName": "checkout-session-completed-handler-CODE",
-        "Handler": "checkoutSessionCompletedHandler.handler",
+        "FunctionName": "checkout-session-completed-event-handler-CODE",
+        "Handler": "checkoutSessionCompletedEventHandler.handler",
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
-            "CheckoutSessionCompletedHandlerServiceRoleE508FC37",
+            "checkoutSessionCompletedEventHandlerServiceRoleC9F47EDB",
             "Arn",
           ],
         },
@@ -72,7 +103,60 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "CheckoutSessionCompletedHandlerServiceRoleDefaultPolicy288D60AA": {
+    "checkoutSessionCompletedEventHandlerServiceRoleC9F47EDB": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-checkout-spike",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "checkoutSessionCompletedEventHandlerServiceRoleDefaultPolicy249BD397": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -179,69 +263,16 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "CheckoutSessionCompletedHandlerServiceRoleDefaultPolicy288D60AA",
+        "PolicyName": "checkoutSessionCompletedEventHandlerServiceRoleDefaultPolicy249BD397",
         "Roles": [
           {
-            "Ref": "CheckoutSessionCompletedHandlerServiceRoleE508FC37",
+            "Ref": "checkoutSessionCompletedEventHandlerServiceRoleC9F47EDB",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "CheckoutSessionCompletedHandlerServiceRoleE508FC37": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "stripe-checkout-spike",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "CheckoutSessionCompletedHandlerSqsEventSourcestripecheckoutspikeCODEstripecheckoutspikequeue7C9AD88CAB83DC09": {
+    "checkoutSessionCompletedEventHandlerSqsEventSourcestripecheckoutspikeCODEstripecheckoutspikequeue7C9AD88C34BEC033": {
       "Properties": {
         "EventSourceArn": {
           "Fn::GetAtt": [
@@ -250,41 +281,10 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 1`] = `
           ],
         },
         "FunctionName": {
-          "Ref": "CheckoutSessionCompletedHandler775FD5F0",
+          "Ref": "checkoutSessionCompletedEventHandlerF07DFDDB",
         },
       },
       "Type": "AWS::Lambda::EventSourceMapping",
-    },
-    "StripeBusToQueueRule315DB460": {
-      "Properties": {
-        "Description": "Send stripe events to queue",
-        "EventBusName": "aws.partner/stripe.com/ed_test_61RqARF6hmlRU6YCC16Rq9XTM0E9VxCGACIr7p1tg5ZY",
-        "EventPattern": {
-          "account": [
-            {
-              "Ref": "AWS::AccountId",
-            },
-          ],
-          "region": [
-            {
-              "Ref": "AWS::Region",
-            },
-          ],
-        },
-        "State": "ENABLED",
-        "Targets": [
-          {
-            "Arn": {
-              "Fn::GetAtt": [
-                "stripecheckoutspikequeue88DF5386",
-                "Arn",
-              ],
-            },
-            "Id": "Target0",
-          },
-        ],
-      },
-      "Type": "AWS::Events::Rule",
     },
     "deadlettersstripecheckoutspikequeue18B0557F": {
       "DeletionPolicy": "Delete",
@@ -435,10 +435,41 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
-    "CheckoutSessionCompletedHandler775FD5F0": {
+    "StripeBusToQueueRule315DB460": {
+      "Properties": {
+        "Description": "Send stripe events to queue",
+        "EventBusName": "aws.partner/stripe.com/ed_test_61RqARF6hmlRU6YCC16Rq9XTM0E9VxCGACIr7p1tg5ZY",
+        "EventPattern": {
+          "account": [
+            {
+              "Ref": "AWS::AccountId",
+            },
+          ],
+          "region": [
+            {
+              "Ref": "AWS::Region",
+            },
+          ],
+        },
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "stripecheckoutspikequeue88DF5386",
+                "Arn",
+              ],
+            },
+            "Id": "Target0",
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "checkoutSessionCompletedEventHandlerF07DFDDB": {
       "DependsOn": [
-        "CheckoutSessionCompletedHandlerServiceRoleDefaultPolicy288D60AA",
-        "CheckoutSessionCompletedHandlerServiceRoleE508FC37",
+        "checkoutSessionCompletedEventHandlerServiceRoleDefaultPolicy249BD397",
+        "checkoutSessionCompletedEventHandlerServiceRoleC9F47EDB",
       ],
       "Properties": {
         "Code": {
@@ -454,12 +485,12 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 2`] = `
             "STAGE": "PROD",
           },
         },
-        "FunctionName": "checkout-session-completed-handler-PROD",
-        "Handler": "checkoutSessionCompletedHandler.handler",
+        "FunctionName": "checkout-session-completed-event-handler-PROD",
+        "Handler": "checkoutSessionCompletedEventHandler.handler",
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
-            "CheckoutSessionCompletedHandlerServiceRoleE508FC37",
+            "checkoutSessionCompletedEventHandlerServiceRoleC9F47EDB",
             "Arn",
           ],
         },
@@ -490,7 +521,60 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "CheckoutSessionCompletedHandlerServiceRoleDefaultPolicy288D60AA": {
+    "checkoutSessionCompletedEventHandlerServiceRoleC9F47EDB": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-checkout-spike",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "checkoutSessionCompletedEventHandlerServiceRoleDefaultPolicy249BD397": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -597,69 +681,16 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "CheckoutSessionCompletedHandlerServiceRoleDefaultPolicy288D60AA",
+        "PolicyName": "checkoutSessionCompletedEventHandlerServiceRoleDefaultPolicy249BD397",
         "Roles": [
           {
-            "Ref": "CheckoutSessionCompletedHandlerServiceRoleE508FC37",
+            "Ref": "checkoutSessionCompletedEventHandlerServiceRoleC9F47EDB",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "CheckoutSessionCompletedHandlerServiceRoleE508FC37": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "stripe-checkout-spike",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "CheckoutSessionCompletedHandlerSqsEventSourcestripecheckoutspikePRODstripecheckoutspikequeueC1B16F666B3B81B4": {
+    "checkoutSessionCompletedEventHandlerSqsEventSourcestripecheckoutspikePRODstripecheckoutspikequeueC1B16F66366C2BB9": {
       "Properties": {
         "EventSourceArn": {
           "Fn::GetAtt": [
@@ -668,41 +699,10 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 2`] = `
           ],
         },
         "FunctionName": {
-          "Ref": "CheckoutSessionCompletedHandler775FD5F0",
+          "Ref": "checkoutSessionCompletedEventHandlerF07DFDDB",
         },
       },
       "Type": "AWS::Lambda::EventSourceMapping",
-    },
-    "StripeBusToQueueRule315DB460": {
-      "Properties": {
-        "Description": "Send stripe events to queue",
-        "EventBusName": "aws.partner/stripe.com/ed_test_61RqARF6hmlRU6YCC16Rq9XTM0E9VxCGACIr7p1tg5ZY",
-        "EventPattern": {
-          "account": [
-            {
-              "Ref": "AWS::AccountId",
-            },
-          ],
-          "region": [
-            {
-              "Ref": "AWS::Region",
-            },
-          ],
-        },
-        "State": "ENABLED",
-        "Targets": [
-          {
-            "Arn": {
-              "Fn::GetAtt": [
-                "stripecheckoutspikequeue88DF5386",
-                "Arn",
-              ],
-            },
-            "Id": "Target0",
-          },
-        ],
-      },
-      "Type": "AWS::Events::Rule",
     },
     "deadlettersstripecheckoutspikequeue18B0557F": {
       "DeletionPolicy": "Delete",

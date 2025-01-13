@@ -72,10 +72,10 @@ export class StripeCheckoutSpike extends GuStack {
 			environment: { APP: app, STACK: this.stack, STAGE: this.stage },
 		};
 
-		new GuLambdaFunction(this, 'CheckoutSessionCompletedHandler', {
+		new GuLambdaFunction(this, 'checkoutSessionCompletedEventHandler', {
 			...lambdaDefaultConfig,
-			handler: 'checkoutSessionCompletedHandler.handler',
-			functionName: `checkout-session-completed-handler-${this.stage}`,
+			handler: 'checkoutSessionCompletedEventHandler.handler',
+			functionName: `checkout-session-completed-event-handler-${this.stage}`,
 			environment: { ...lambdaDefaultConfig.environment },
 			events: [new SqsEventSource(queue)],
 		});
