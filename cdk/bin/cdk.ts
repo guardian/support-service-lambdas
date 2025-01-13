@@ -289,10 +289,10 @@ new UserBenefits(app, 'user-benefits-PROD', {
 		'supporter-product-data-tables-PROD-SupporterProductDataTable',
 });
 new DiscountExpiryNotifier(app, 'discount-expiry-notifier-CODE', {
-	stack: 'membership',
+	stack: 'support',
 	stage: 'CODE',
 });
 new DiscountExpiryNotifier(app, 'discount-expiry-notifier-PROD', {
-	stack: 'membership',
+	stack: 'support',
 	stage: 'PROD',
 });
