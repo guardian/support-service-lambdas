@@ -158,6 +158,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
             "Arn",
           ],
         },
+        "StateMachineName": "discount-expiry-notifier-CODE",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -639,6 +640,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
             "Arn",
           ],
         },
+        "StateMachineName": "discount-expiry-notifier-PROD",
         "Tags": [
           {
             "Key": "gu:cdk:version",
