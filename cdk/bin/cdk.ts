@@ -4,6 +4,7 @@ import { AlarmsHandler } from '../lib/alarms-handler';
 import { BatchEmailSender } from '../lib/batch-email-sender';
 import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
 import { DiscountApi } from '../lib/discount-api';
+import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
@@ -21,7 +22,6 @@ import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
 import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
 import { UserBenefits } from '../lib/user-benefits';
 import { ZuoraSalesforceLinkRemover } from '../lib/zuora-salesforce-link-remover';
-import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 
 const app = new App();
 const membershipHostedZoneId = 'Z1E4V12LQGXFEC';
