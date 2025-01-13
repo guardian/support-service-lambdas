@@ -18,7 +18,7 @@ export class DiscountExpiryNotifier extends GuStack {
 			'get-subs-with-expiring-discounts-lambda',
 			{
 				app: appName,
-				functionName: `get-subs-with-expiring-discounts-${this.stage}`,
+				functionName: `${appName}-get-subs-with-expiring-discounts-${this.stage}`,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
@@ -31,7 +31,7 @@ export class DiscountExpiryNotifier extends GuStack {
 
 		const getSubsWithExpiringDiscountsLambdaTask = new LambdaInvoke(
 			this,
-			'Get Salesforce Billing Accounts',
+			'Get Subs With Expiring Discounts',
 			{
 				lambdaFunction: getSubsWithExpiringDiscountsLambda,
 				outputPath: '$.Payload',
