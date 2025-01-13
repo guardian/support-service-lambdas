@@ -35,7 +35,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'sf-contact-merge',
 		'sf-emails-to-s3-exporter',
 		'sf-gocardless-sync',
-		'super-mode-calculator',
+		'super-mode',
 		'support-reminders',
 		'ticker-calculator',
 	],
