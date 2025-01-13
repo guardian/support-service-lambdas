@@ -9,7 +9,7 @@ describe('The StripeCheckoutSpike stack', () => {
 			app,
 			`stripe-checkout-spike-CODE`,
 			{
-				stack: 'membership',
+				stack: 'support',
 				stage: 'CODE',
 			},
 		);
@@ -17,7 +17,7 @@ describe('The StripeCheckoutSpike stack', () => {
 			app,
 			`stripe-checkout-spike-PROD`,
 			{
-				stack: 'membership',
+				stack: 'support',
 				stage: 'PROD',
 			},
 		);

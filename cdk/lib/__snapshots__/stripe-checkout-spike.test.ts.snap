@@ -27,12 +27,12 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/CODE/stripe-checkout-spike/stripe-checkout-spike.zip",
+          "S3Key": "support/CODE/stripe-checkout-spike/stripe-checkout-spike.zip",
         },
         "Environment": {
           "Variables": {
             "APP": "stripe-checkout-spike",
-            "STACK": "membership",
+            "STACK": "support",
             "STAGE": "CODE",
           },
         },
@@ -61,7 +61,7 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -127,7 +127,7 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/CODE/stripe-checkout-spike/stripe-checkout-spike.zip",
+                      "/support/CODE/stripe-checkout-spike/stripe-checkout-spike.zip",
                     ],
                   ],
                 },
@@ -148,7 +148,7 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/stripe-checkout-spike",
+                    ":parameter/CODE/support/stripe-checkout-spike",
                   ],
                 ],
               },
@@ -171,7 +171,7 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/stripe-checkout-spike/*",
+                    ":parameter/CODE/support/stripe-checkout-spike/*",
                   ],
                 ],
               },
@@ -231,7 +231,7 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -302,7 +302,7 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -337,7 +337,7 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -445,12 +445,12 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 2`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/PROD/stripe-checkout-spike/stripe-checkout-spike.zip",
+          "S3Key": "support/PROD/stripe-checkout-spike/stripe-checkout-spike.zip",
         },
         "Environment": {
           "Variables": {
             "APP": "stripe-checkout-spike",
-            "STACK": "membership",
+            "STACK": "support",
             "STAGE": "PROD",
           },
         },
@@ -479,7 +479,7 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -545,7 +545,7 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 2`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/PROD/stripe-checkout-spike/stripe-checkout-spike.zip",
+                      "/support/PROD/stripe-checkout-spike/stripe-checkout-spike.zip",
                     ],
                   ],
                 },
@@ -566,7 +566,7 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/stripe-checkout-spike",
+                    ":parameter/PROD/support/stripe-checkout-spike",
                   ],
                 ],
               },
@@ -589,7 +589,7 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/stripe-checkout-spike/*",
+                    ":parameter/PROD/support/stripe-checkout-spike/*",
                   ],
                 ],
               },
@@ -649,7 +649,7 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -720,7 +720,7 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -755,7 +755,7 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",

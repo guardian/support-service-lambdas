@@ -289,10 +289,10 @@ new UserBenefits(app, 'user-benefits-PROD', {
 		'supporter-product-data-tables-PROD-SupporterProductDataTable',
 });
 new StripeCheckoutSpike(app, 'stripe-checkout-spike-CODE', {
-	stack: 'membership',
+	stack: 'support',
 	stage: 'CODE',
 });
 new StripeCheckoutSpike(app, 'stripe-checkout-spike-PROD', {
-	stack: 'membership',
+	stack: 'support',
 	stage: 'PROD',
 });
