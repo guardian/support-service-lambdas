@@ -18,7 +18,7 @@ export class DiscountExpiryNotifier extends GuStack {
 			'get-subs-with-expiring-discounts-lambda',
 			{
 				app: appName,
-				functionName: `${appName}-get-subs-with-expiring-discounts-${this.stage}`,
+				functionName: `get-subs-with-expiring-discounts-${this.stage}`,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
