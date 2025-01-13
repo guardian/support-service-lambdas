@@ -1,0 +1,24 @@
+stacks:
+  - membership
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  stripe-checkout-spike-cloudformation:
+    type: cloud-formation
+    app: stripe-checkout-spike
+    parameters:
+      templateStagePaths:
+        CODE: stripe-checkout-spike-CODE.template.json
+        PROD: stripe-checkout-spike-PROD.template.json
+  stripe-checkout-spike:
+    type: aws-lambda
+    parameters:
+      fileName: stripe-checkout-spike.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - checkout-session-completed-handler-
+    dependencies: [stripe-checkout-spike-cloudformation]
