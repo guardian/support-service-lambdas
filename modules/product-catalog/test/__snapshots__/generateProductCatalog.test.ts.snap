@@ -1,6 +1,2266 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Generated product catalog matches snapshot 1`] = `
+exports[`code Generated product catalog matches snapshot 1`] = `
+{
+  "Contribution": {
+    "active": true,
+    "billingSystem": "zuora",
+    "ratePlans": {
+      "Annual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Contribution": {
+            "id": "2c92c0f85e2d19af015e3896e84d092e",
+          },
+        },
+        "id": "2c92c0f85e2d19af015e3896e824092c",
+        "pricing": {
+          "AUD": 100,
+          "CAD": 5,
+          "EUR": 60,
+          "GBP": 60,
+          "NZD": 60,
+          "USD": 60,
+        },
+      },
+      "Monthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Contribution": {
+            "id": "2c92c0f85a6b1352015a7fcf35ab397c",
+          },
+        },
+        "id": "2c92c0f85a6b134e015a7fcd9f0c7855",
+        "pricing": {
+          "AUD": 10,
+          "CAD": 5,
+          "EUR": 5,
+          "GBP": 5,
+          "NZD": 5,
+          "USD": 5,
+        },
+      },
+    },
+  },
+  "DigitalSubscription": {
+    "active": true,
+    "billingSystem": "zuora",
+    "ratePlans": {
+      "Annual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f94bbffaaa014bc6a4213e205d",
+          },
+        },
+        "id": "2c92c0f94bbffaaa014bc6a4212e205b",
+        "pricing": {
+          "AUD": 269,
+          "CAD": 274,
+          "EUR": 187,
+          "GBP": 149,
+          "NZD": 269.99,
+          "USD": 249,
+        },
+      },
+      "Monthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f84bbfec58014bc6a2c37e1f15",
+          },
+        },
+        "id": "2c92c0f84bbfec8b014bc655f4852d9d",
+        "pricing": {
+          "AUD": 26.99,
+          "CAD": 27.44,
+          "EUR": 18.99,
+          "GBP": 14.99,
+          "NZD": 26.99,
+          "USD": 24.99,
+        },
+      },
+      "OneYearGift": {
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f9778c090d0177a613d98c177e",
+          },
+        },
+        "id": "2c92c0f8778bf8cd0177a610cdf230ae",
+        "pricing": {
+          "AUD": 99,
+          "CAD": 99,
+          "EUR": 99,
+          "GBP": 99,
+          "NZD": 99,
+          "USD": 99,
+        },
+      },
+      "ThreeMonthGift": {
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f9778c090d0177916fd95b47a2",
+          },
+        },
+        "id": "2c92c0f8778bf8f60177915b477714aa",
+        "pricing": {
+          "AUD": 36,
+          "CAD": 36,
+          "EUR": 36,
+          "GBP": 36,
+          "NZD": 36,
+          "USD": 36,
+        },
+      },
+    },
+  },
+  "GuardianAdLite": {
+    "active": true,
+    "billingSystem": "zuora",
+    "ratePlans": {
+      "Monthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Subscription": {
+            "id": "71a1bebf6be9444afad446c5ec26001a",
+          },
+        },
+        "id": "71a1bebf6be9444afad446c5ebaf0019",
+        "pricing": {
+          "GBP": 5,
+        },
+      },
+    },
+  },
+  "GuardianLight": {
+    "active": true,
+    "billingSystem": "zuora",
+    "ratePlans": {
+      "Monthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Subscription": {
+            "id": "71a1c43a10792b28f702b3bf5d380037",
+          },
+        },
+        "id": "71a1c43a1e192b28f702b3b47113000a",
+        "pricing": {
+          "GBP": 2,
+        },
+      },
+    },
+  },
+  "GuardianPatron": {
+    "active": true,
+    "billingSystem": "stripe",
+    "ratePlans": {
+      "GuardianPatron": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Subscription": {
+            "id": "guardian_patron",
+          },
+        },
+        "id": "guardian_patron",
+        "pricing": {},
+      },
+    },
+  },
+  "GuardianWeeklyDomestic": {
+    "active": true,
+    "billingSystem": "zuora",
+    "ratePlans": {
+      "Annual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f965d280590165f16b1ba946c4",
+          },
+        },
+        "id": "2c92c0f965d280590165f16b1b9946c2",
+        "pricing": {
+          "AUD": 480,
+          "CAD": 396,
+          "EUR": 318,
+          "GBP": 180,
+          "NZD": 600,
+          "USD": 360,
+        },
+      },
+      "Monthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f878ac40300178acae0612681b",
+          },
+        },
+        "id": "2c92c0f878ac40300178acaa04bb401d",
+        "pricing": {
+          "AUD": 40,
+          "CAD": 33,
+          "EUR": 26.5,
+          "GBP": 15,
+          "NZD": 50,
+          "USD": 30,
+        },
+      },
+      "OneYearGift": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f867cae0700167eff921884f7d",
+          },
+        },
+        "id": "2c92c0f867cae0700167eff921734f7b",
+        "pricing": {
+          "AUD": 480,
+          "CAD": 396,
+          "EUR": 318,
+          "GBP": 180,
+          "NZD": 600,
+          "USD": 360,
+        },
+      },
+      "Quarterly": {
+        "billingPeriod": "Quarter",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f865d273010165f16ada0a4346",
+          },
+        },
+        "id": "2c92c0f965dc30640165f150c0956859",
+        "pricing": {
+          "AUD": 120,
+          "CAD": 99,
+          "EUR": 79.5,
+          "GBP": 45,
+          "NZD": 150,
+          "USD": 90,
+        },
+      },
+      "ThreeMonthGift": {
+        "billingPeriod": "Quarter",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f96ded216a016df49113814093",
+          },
+        },
+        "id": "2c92c0f96ded216a016df491134d4091",
+        "pricing": {
+          "AUD": 120,
+          "CAD": 99,
+          "EUR": 79.5,
+          "GBP": 45,
+          "NZD": 150,
+          "USD": 90,
+        },
+      },
+    },
+  },
+  "GuardianWeeklyRestOfWorld": {
+    "active": true,
+    "billingSystem": "zuora",
+    "ratePlans": {
+      "Annual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f965f2122101660fb6ac46550e",
+          },
+        },
+        "id": "2c92c0f965f2122101660fb33ed24a45",
+        "pricing": {
+          "GBP": 297.6,
+          "USD": 396,
+        },
+      },
+      "Monthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Monthly": {
+            "id": "2c92c0f878ac402c0178acf675822d88",
+          },
+        },
+        "id": "2c92c0f878ac402c0178acb3a90a3620",
+        "pricing": {
+          "GBP": 24.8,
+          "USD": 33,
+        },
+      },
+      "OneYearGift": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f967caee410167eff78e975246",
+          },
+        },
+        "id": "2c92c0f967caee410167eff78e7b5244",
+        "pricing": {
+          "GBP": 297.6,
+          "USD": 396,
+        },
+      },
+      "Quarterly": {
+        "billingPeriod": "Quarter",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f965f2122101660fb81b875a0b",
+          },
+        },
+        "id": "2c92c0f965f2122101660fb81b745a06",
+        "pricing": {
+          "GBP": 74.4,
+          "USD": 99,
+        },
+      },
+      "ThreeMonthGift": {
+        "billingPeriod": "Quarter",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f96df75b5a016df81ba1e9260b",
+          },
+        },
+        "id": "2c92c0f96df75b5a016df81ba1c62609",
+        "pricing": {
+          "GBP": 74.4,
+          "USD": 99,
+        },
+      },
+    },
+  },
+  "GuardianWeeklyZoneA": {
+    "active": false,
+    "billingSystem": "zuora",
+    "ratePlans": {
+      "Annual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f8574b2b8101574c4a9494068f",
+          },
+        },
+        "id": "2c92c0f8574b2b8101574c4a9480068d",
+        "pricing": {
+          "CAD": 240,
+          "GBP": 120,
+          "USD": 240,
+        },
+      },
+      "Quarterly": {
+        "billingPeriod": "Quarter",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f8574b2b8101574c4a958d06c0",
+          },
+        },
+        "id": "2c92c0f8574b2b8101574c4a957706be",
+        "pricing": {
+          "CAD": 60,
+          "GBP": 30,
+          "USD": 60,
+        },
+      },
+    },
+  },
+  "GuardianWeeklyZoneB": {
+    "active": false,
+    "billingSystem": "zuora",
+    "ratePlans": {
+      "Annual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f8574b2be601574c39889c6852",
+          },
+        },
+        "id": "2c92c0f8574b2be601574c39888d6850",
+        "pricing": {
+          "AUD": 312,
+          "CAD": 240,
+          "EUR": 196,
+          "GBP": 152,
+          "NZD": 392,
+          "USD": 240,
+        },
+      },
+      "Quarterly": {
+        "billingPeriod": "Quarter",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f8574b2be601574c323cb35c80",
+          },
+        },
+        "id": "2c92c0f8574b2be601574c323ca15c7e",
+        "pricing": {
+          "AUD": 78,
+          "CAD": 60,
+          "EUR": 49,
+          "GBP": 38,
+          "NZD": 98,
+          "USD": 60,
+        },
+      },
+    },
+  },
+  "GuardianWeeklyZoneC": {
+    "active": false,
+    "billingSystem": "zuora",
+    "ratePlans": {
+      "Annual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f858aa38af0158da325d450b3f",
+          },
+        },
+        "id": "2c92c0f858aa38af0158da325d2f0b3d",
+        "pricing": {
+          "AUD": 312,
+          "CAD": 999,
+          "EUR": 196,
+          "GBP": 192,
+          "NZD": 392,
+          "USD": 260,
+        },
+      },
+      "Quarterly": {
+        "billingPeriod": "Quarter",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f858aa38af0158da325d010b30",
+          },
+        },
+        "id": "2c92c0f858aa38af0158da325cec0b2e",
+        "pricing": {
+          "AUD": 78,
+          "CAD": 999,
+          "EUR": 49,
+          "GBP": 48,
+          "NZD": 98,
+          "USD": 65,
+        },
+      },
+    },
+  },
+  "HomeDelivery": {
+    "active": true,
+    "billingSystem": "zuora",
+    "ratePlans": {
+      "Everyday": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Friday": {
+            "id": "2c92c0f955c3cf0f0155c5d9e2713c45",
+          },
+          "Monday": {
+            "id": "2c92c0f955c3cf0f0155c5d9e43a3c6d",
+          },
+          "Saturday": {
+            "id": "2c92c0f955c3cf0f0155c5d9e2c83c4d",
+          },
+          "Sunday": {
+            "id": "2c92c0f955c3cf0f0155c5d9e4993c75",
+          },
+          "Thursday": {
+            "id": "2c92c0f955c3cf0f0155c5d9e3233c55",
+          },
+          "Tuesday": {
+            "id": "2c92c0f955c3cf0f0155c5d9e3da3c65",
+          },
+          "Wednesday": {
+            "id": "2c92c0f955c3cf0f0155c5d9e37f3c5d",
+          },
+        },
+        "id": "2c92c0f955c3cf0f0155c5d9e2493c43",
+        "pricing": {
+          "GBP": 83.99,
+        },
+      },
+      "Everyday+": {
+        "billingPeriod": "Month",
+        "charges": {
+          "DigitalPack": {
+            "id": "2c92c0f85aff3453015b104a62cd3ff4",
+          },
+          "Friday": {
+            "id": "2c92c0f85aff3453015b10496b713d19",
+          },
+          "Monday": {
+            "id": "2c92c0f85aff3453015b10496c2f3d41",
+          },
+          "Saturday": {
+            "id": "2c92c0f85aff3453015b10496b983d21",
+          },
+          "Sunday": {
+            "id": "2c92c0f85aff3453015b10496c583d49",
+          },
+          "Thursday": {
+            "id": "2c92c0f85aff3453015b10496bbb3d29",
+          },
+          "Tuesday": {
+            "id": "2c92c0f85aff3453015b10496c083d39",
+          },
+          "Wednesday": {
+            "id": "2c92c0f85aff3453015b10496be13d31",
+          },
+        },
+        "id": "2c92c0f85aff3453015b10496b5e3d17",
+        "pricing": {
+          "GBP": 80.99,
+        },
+      },
+      "Saturday": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Saturday": {
+            "id": "2c92c0f961f9cf300161fc4d2e773666",
+          },
+        },
+        "id": "2c92c0f961f9cf300161fc4d2e3e3664",
+        "pricing": {
+          "GBP": 20.99,
+        },
+      },
+      "Saturday+": {
+        "billingPeriod": "Month",
+        "charges": {
+          "DigitalPack": {
+            "id": "2c92c0f961f9cf300161fc4f716e3a3e",
+          },
+          "Saturday": {
+            "id": "2c92c0f961f9cf300161fc4f71553a36",
+          },
+        },
+        "id": "2c92c0f961f9cf300161fc4f71473a34",
+        "pricing": {
+          "GBP": 30.99,
+        },
+      },
+      "Sixday": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Friday": {
+            "id": "2c92c0f955c3cf0f0155c5d9de103bc7",
+          },
+          "Monday": {
+            "id": "2c92c0f955c3cf0f0155c5d9df0a3bef",
+          },
+          "Saturday": {
+            "id": "2c92c0f955c3cf0f0155c5d9de463bcf",
+          },
+          "Thursday": {
+            "id": "2c92c0f955c3cf0f0155c5d9de783bd7",
+          },
+          "Tuesday": {
+            "id": "2c92c0f955c3cf0f0155c5d9ded23be7",
+          },
+          "Wednesday": {
+            "id": "2c92c0f955c3cf0f0155c5d9dea63bdf",
+          },
+        },
+        "id": "2c92c0f955c3cf0f0155c5d9ddf13bc5",
+        "pricing": {
+          "GBP": 73.99,
+        },
+      },
+      "Sixday+": {
+        "billingPeriod": "Month",
+        "charges": {
+          "DigitalPack": {
+            "id": "2c92c0f95aff3b54015b1043d1222634",
+          },
+          "Friday": {
+            "id": "2c92c0f85aff33ff015b1042d4cf0a08",
+          },
+          "Monday": {
+            "id": "2c92c0f85aff33ff015b1042d5a90a30",
+          },
+          "Saturday": {
+            "id": "2c92c0f85aff33ff015b1042d4f90a10",
+          },
+          "Thursday": {
+            "id": "2c92c0f85aff33ff015b1042d5220a18",
+          },
+          "Tuesday": {
+            "id": "2c92c0f85aff33ff015b1042d5790a28",
+          },
+          "Wednesday": {
+            "id": "2c92c0f85aff33ff015b1042d54d0a20",
+          },
+        },
+        "id": "2c92c0f85aff33ff015b1042d4ba0a05",
+        "pricing": {
+          "GBP": 70.99,
+        },
+      },
+      "Sunday": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Sunday": {
+            "id": "2c92c0f85aff3453015b1041dfea3181",
+          },
+        },
+        "id": "2c92c0f85aff3453015b1041dfd2317f",
+        "pricing": {
+          "GBP": 20.99,
+        },
+      },
+      "Sunday+": {
+        "billingPeriod": "Month",
+        "charges": {
+          "DigitalPack": {
+            "id": "2c92c0f955c3cf0f0155c5d9e8f83cc1",
+          },
+          "Sunday": {
+            "id": "2c92c0f955c3cf0f0155c5d9e87e3cb9",
+          },
+        },
+        "id": "2c92c0f955c3cf0f0155c5d9e83a3cb7",
+        "pricing": {
+          "GBP": 30.99,
+        },
+      },
+      "Weekend": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Saturday": {
+            "id": "2c92c0f955c3cf0f0155c5d9df5c3bf9",
+          },
+          "Sunday": {
+            "id": "2c92c0f955c3cf0f0155c5d9df963c01",
+          },
+        },
+        "id": "2c92c0f955c3cf0f0155c5d9df433bf7",
+        "pricing": {
+          "GBP": 33.99,
+        },
+      },
+      "Weekend+": {
+        "billingPeriod": "Month",
+        "charges": {
+          "DigitalPack": {
+            "id": "2c92c0f95aff3b54015b104bc6d5334d",
+          },
+          "Saturday": {
+            "id": "2c92c0f95aff3b56015b104aa9b73ea7",
+          },
+          "Sunday": {
+            "id": "2c92c0f95aff3b56015b104aa9de3eaf",
+          },
+        },
+        "id": "2c92c0f95aff3b56015b104aa9a13ea5",
+        "pricing": {
+          "GBP": 40.99,
+        },
+      },
+    },
+  },
+  "NationalDelivery": {
+    "active": true,
+    "billingSystem": "zuora",
+    "ratePlans": {
+      "Everyday": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Friday": {
+            "id": "8ad096ca8992481d018992a3640b17c4",
+          },
+          "Monday": {
+            "id": "8ad096ca8992481d018992a3674c18da",
+          },
+          "Saturday": {
+            "id": "8ad096ca8992481d018992a364a517f7",
+          },
+          "Sunday": {
+            "id": "8ad096ca8992481d018992a367c518e3",
+          },
+          "Thursday": {
+            "id": "8ad096ca8992481d018992a365741862",
+          },
+          "Tuesday": {
+            "id": "8ad096ca8992481d018992a366c018bb",
+          },
+          "Wednesday": {
+            "id": "8ad096ca8992481d018992a366281896",
+          },
+        },
+        "id": "8ad096ca8992481d018992a363bd17ad",
+        "pricing": {
+          "GBP": 83.99,
+        },
+      },
+      "Sixday": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Friday": {
+            "id": "8ad096ca8992481d018992a35fa9171e",
+          },
+          "Monday": {
+            "id": "8ad096ca8992481d018992a361da1756",
+          },
+          "Saturday": {
+            "id": "8ad096ca8992481d018992a3601a1729",
+          },
+          "Thursday": {
+            "id": "8ad096ca8992481d018992a360911731",
+          },
+          "Tuesday": {
+            "id": "8ad096ca8992481d018992a3616a174a",
+          },
+          "Wednesday": {
+            "id": "8ad096ca8992481d018992a360ff1739",
+          },
+        },
+        "id": "8ad096ca8992481d018992a35f60171b",
+        "pricing": {
+          "GBP": 73.99,
+        },
+      },
+      "Weekend": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Saturday": {
+            "id": "8ad096ca8992481d018992a362931760",
+          },
+          "Sunday": {
+            "id": "8ad096ca8992481d018992a36308176c",
+          },
+        },
+        "id": "8ad096ca8992481d018992a36256175e",
+        "pricing": {
+          "GBP": 33.99,
+        },
+      },
+    },
+  },
+  "NewspaperVoucher": {
+    "active": false,
+    "billingSystem": "zuora",
+    "ratePlans": {
+      "Everyday": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Friday": {
+            "id": "2c92c0f9555cf10501556e84a71b40e4",
+          },
+          "Monday": {
+            "id": "2c92c0f9555cf10501556e84a7eb410c",
+          },
+          "Saturday": {
+            "id": "2c92c0f9555cf10501556e84a74440ec",
+          },
+          "Sunday": {
+            "id": "2c92c0f9555cf11d01556e851a1c0cb0",
+          },
+          "Thursday": {
+            "id": "2c92c0f9555cf10501556e84a76e40f4",
+          },
+          "Tuesday": {
+            "id": "2c92c0f9555cf10501556e84a7c44104",
+          },
+          "Wednesday": {
+            "id": "2c92c0f9555cf10501556e84a79e40fc",
+          },
+        },
+        "id": "2c92c0f9555cf10501556e84a70440e2",
+        "pricing": {
+          "GBP": 69.99,
+        },
+      },
+      "Everyday+": {
+        "billingPeriod": "Month",
+        "charges": {
+          "DigitalPack": {
+            "id": "2c92c0f85aff33ff015b10477d36137b",
+          },
+          "Friday": {
+            "id": "2c92c0f95aff3b53015b10469bd45f61",
+          },
+          "Monday": {
+            "id": "2c92c0f95aff3b53015b10469ca15f89",
+          },
+          "Saturday": {
+            "id": "2c92c0f95aff3b53015b10469bfa5f69",
+          },
+          "Sunday": {
+            "id": "2c92c0f95aff3b53015b10469cd15f91",
+          },
+          "Thursday": {
+            "id": "2c92c0f95aff3b53015b10469c1f5f71",
+          },
+          "Tuesday": {
+            "id": "2c92c0f95aff3b53015b10469c735f81",
+          },
+          "Wednesday": {
+            "id": "2c92c0f95aff3b53015b10469c455f79",
+          },
+        },
+        "id": "2c92c0f95aff3b53015b10469bbf5f5f",
+        "pricing": {
+          "GBP": 66.99,
+        },
+      },
+      "Saturday": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Saturday": {
+            "id": "2c92c0f861f9c26d0161fc434c1d0051",
+          },
+        },
+        "id": "2c92c0f861f9c26d0161fc434bfe004c",
+        "pricing": {
+          "GBP": 15.99,
+        },
+      },
+      "Saturday+": {
+        "billingPeriod": "Month",
+        "charges": {
+          "DigitalPack": {
+            "id": "2c92c0f961f9cf300161fc44f2901262",
+          },
+          "Saturday": {
+            "id": "2c92c0f961f9cf300161fc44f274125a",
+          },
+        },
+        "id": "2c92c0f961f9cf300161fc44f2661258",
+        "pricing": {
+          "GBP": 25.99,
+        },
+      },
+      "Sixday": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Friday": {
+            "id": "2c92c0f8555ce5cc01556e827ac323d8",
+          },
+          "Monday": {
+            "id": "2c92c0f8555ce63a01556e8479096440",
+          },
+          "Saturday": {
+            "id": "2c92c0f8555ce5cf01556e7f018c1b8c",
+          },
+          "Thursday": {
+            "id": "2c92c0f8555ce5cf01556e82d0b6217b",
+          },
+          "Tuesday": {
+            "id": "2c92c0f8555ce63a01556e842d7a63e8",
+          },
+          "Wednesday": {
+            "id": "2c92c0f8555ce63a01556e83ecd863c0",
+          },
+        },
+        "id": "2c92c0f8555ce5cf01556e7f01771b8a",
+        "pricing": {
+          "GBP": 61.99,
+        },
+      },
+      "Sixday+": {
+        "billingPeriod": "Month",
+        "charges": {
+          "DigitalPack": {
+            "id": "2c92c0f85721ffeb01572d7d63400fd2",
+          },
+          "Friday": {
+            "id": "2c92c0f855c3b8190155c585a97f6f5d",
+          },
+          "Monday": {
+            "id": "2c92c0f855c3b8190155c585aa936f9e",
+          },
+          "Saturday": {
+            "id": "2c92c0f855c3b8190155c585a9bf6f6e",
+          },
+          "Sunday": {
+            "id": "2c92c0f855c3b8190155c585aad46fab",
+          },
+          "Thursday": {
+            "id": "2c92c0f855c3b8190155c585a9f06f7c",
+          },
+          "Tuesday": {
+            "id": "2c92c0f855c3b8190155c585aa586f91",
+          },
+          "Wednesday": {
+            "id": "2c92c0f855c3b8190155c585aa226f85",
+          },
+        },
+        "id": "2c92c0f855c3b8190155c585a95e6f5a",
+        "pricing": {
+          "GBP": 58.99,
+        },
+      },
+      "Sunday": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Sunday": {
+            "id": "2c92c0f95aff3b56015b1045fba832d4",
+          },
+        },
+        "id": "2c92c0f95aff3b56015b1045fb9332d2",
+        "pricing": {
+          "GBP": 15.99,
+        },
+      },
+      "Sunday+": {
+        "billingPeriod": "Month",
+        "charges": {
+          "DigitalPack": {
+            "id": "2c92c0f955a0b5bf0155b62623c66fd2",
+          },
+          "Sunday": {
+            "id": "2c92c0f955a0b5bf0155b626239c6fca",
+          },
+        },
+        "id": "2c92c0f955a0b5bf0155b62623846fc8",
+        "pricing": {
+          "GBP": 25.99,
+        },
+      },
+      "Weekend": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Saturday": {
+            "id": "2c92c0f8555ce5cf01556e7f01cb1b96",
+          },
+          "Sunday": {
+            "id": "2c92c0f8555ce63a01556e81e4a86077",
+          },
+        },
+        "id": "2c92c0f8555ce5cf01556e7f01b81b94",
+        "pricing": {
+          "GBP": 26.99,
+        },
+      },
+      "Weekend+": {
+        "billingPeriod": "Month",
+        "charges": {
+          "DigitalPack": {
+            "id": "2c92c0f95aff3b56015b1048e4d53b66",
+          },
+          "Saturday": {
+            "id": "2c92c0f95aff3b54015b1047efbb2ac5",
+          },
+          "Sunday": {
+            "id": "2c92c0f95aff3b54015b1047efe02acd",
+          },
+        },
+        "id": "2c92c0f95aff3b54015b1047efaa2ac3",
+        "pricing": {
+          "GBP": 34.99,
+        },
+      },
+    },
+  },
+  "OneTimeContribution": {
+    "active": true,
+    "billingSystem": "stripe",
+    "ratePlans": {
+      "OneTime": {
+        "billingPeriod": "OneTime",
+        "charges": {
+          "Contribution": {
+            "id": "single_contribution",
+          },
+        },
+        "id": "single_contribution",
+        "pricing": {},
+      },
+    },
+  },
+  "PartnerMembership": {
+    "active": false,
+    "billingSystem": "zuora",
+    "ratePlans": {
+      "Annual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f84c510081014c569a18c44e86",
+          },
+        },
+        "id": "2c92c0f84c510081014c569a18b04e84",
+        "pricing": {
+          "GBP": 149,
+        },
+      },
+      "Monthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f94c510a0d014c569a93344577",
+          },
+        },
+        "id": "2c92c0f94c510a0d014c569a93194575",
+        "pricing": {
+          "GBP": 15,
+        },
+      },
+      "V1DeprecatedAnnual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f8471e22bb01471ffe9643366e",
+          },
+        },
+        "id": "2c92c0f8471e22bb01471ffe9596366c",
+        "pricing": {
+          "GBP": 135,
+        },
+      },
+      "V1DeprecatedMonthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f945fee1c9014605749e55096b",
+          },
+        },
+        "id": "2c92c0f945fee1c9014605749e450969",
+        "pricing": {
+          "GBP": 15,
+        },
+      },
+    },
+  },
+  "PatronMembership": {
+    "active": false,
+    "billingSystem": "zuora",
+    "ratePlans": {
+      "Annual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f94c510a04014c568d64a5097f",
+          },
+        },
+        "id": "2c92c0f94c510a04014c568d648d097d",
+        "pricing": {
+          "GBP": 599,
+        },
+      },
+      "Monthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f84c5100b6014c56908a79216f",
+          },
+        },
+        "id": "2c92c0f84c5100b6014c56908a63216d",
+        "pricing": {
+          "GBP": 60,
+        },
+      },
+      "V1DeprecatedAnnual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f9471e145d01471ffd7c3d4dfb",
+          },
+        },
+        "id": "2c92c0f9471e145d01471ffd7c304df9",
+        "pricing": {
+          "GBP": 540,
+        },
+      },
+      "V1DeprecatedMonthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f845fed48301460578277c67c5",
+          },
+        },
+        "id": "2c92c0f845fed48301460578277167c3",
+        "pricing": {
+          "GBP": 60,
+        },
+      },
+    },
+  },
+  "SubscriptionCard": {
+    "active": true,
+    "billingSystem": "zuora",
+    "ratePlans": {
+      "Everyday": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Friday": {
+            "id": "2c92c0f86fa49142016fa49ea599293a",
+          },
+          "Monday": {
+            "id": "2c92c0f86fa49142016fa49ea84e2965",
+          },
+          "Saturday": {
+            "id": "2c92c0f86fa49142016fa49ea5f12942",
+          },
+          "Sunday": {
+            "id": "2c92c0f86fa49142016fa49ea8a8296e",
+          },
+          "Thursday": {
+            "id": "2c92c0f86fa49142016fa49ea644294a",
+          },
+          "Tuesday": {
+            "id": "2c92c0f86fa49142016fa49ea7f2295d",
+          },
+          "Wednesday": {
+            "id": "2c92c0f86fa49142016fa49ea7782955",
+          },
+        },
+        "id": "2c92c0f86fa49142016fa49ea56a2938",
+        "pricing": {
+          "GBP": 69.99,
+        },
+      },
+      "Everyday+": {
+        "billingPeriod": "Month",
+        "charges": {
+          "DigitalPack": {
+            "id": "2c92c0f86fa49142016fa49eaa84298a",
+          },
+          "Friday": {
+            "id": "2c92c0f86fa49142016fa49eaaf12995",
+          },
+          "Monday": {
+            "id": "2c92c0f86fa49142016fa49ead1429c0",
+          },
+          "Saturday": {
+            "id": "2c92c0f86fa49142016fa49eab5c29a0",
+          },
+          "Sunday": {
+            "id": "2c92c0f86fa49142016fa49ead7f29c8",
+          },
+          "Thursday": {
+            "id": "2c92c0f86fa49142016fa49eabcf29a8",
+          },
+          "Tuesday": {
+            "id": "2c92c0f86fa49142016fa49eaca929b8",
+          },
+          "Wednesday": {
+            "id": "2c92c0f86fa49142016fa49eac3529b0",
+          },
+        },
+        "id": "2c92c0f86fa49142016fa49eaa492988",
+        "pricing": {
+          "GBP": 66.99,
+        },
+      },
+      "Saturday": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Saturday": {
+            "id": "2c92c0f86fa49142016fa49ea4da2921",
+          },
+        },
+        "id": "2c92c0f86fa49142016fa49ea442291b",
+        "pricing": {
+          "GBP": 15.99,
+        },
+      },
+      "Saturday+": {
+        "billingPeriod": "Month",
+        "charges": {
+          "DigitalPack": {
+            "id": "2c92c0f86fa49142016fa49eb23d2a5c",
+          },
+          "Saturday": {
+            "id": "2c92c0f86fa49142016fa49eb1b32a47",
+          },
+        },
+        "id": "2c92c0f86fa49142016fa49eb1732a39",
+        "pricing": {
+          "GBP": 25.99,
+        },
+      },
+      "Sixday": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Friday": {
+            "id": "2c92c0f86fa49142016fa49e9e472877",
+          },
+          "Monday": {
+            "id": "2c92c0f86fa49142016fa49ea07828ae",
+          },
+          "Saturday": {
+            "id": "2c92c0f86fa49142016fa49e9eaf287f",
+          },
+          "Thursday": {
+            "id": "2c92c0f86fa49142016fa49e9ee72887",
+          },
+          "Tuesday": {
+            "id": "2c92c0f86fa49142016fa49ea03d28a4",
+          },
+          "Wednesday": {
+            "id": "2c92c0f86fa49142016fa49ea0072896",
+          },
+        },
+        "id": "2c92c0f86fa49142016fa49e9b9a286f",
+        "pricing": {
+          "GBP": 61.99,
+        },
+      },
+      "Sixday+": {
+        "billingPeriod": "Month",
+        "charges": {
+          "DigitalPack": {
+            "id": "2c92c0f86fa49142016fa49ea3ee290b",
+          },
+          "Friday": {
+            "id": "2c92c0f86fa49142016fa49ea1ce28ca",
+          },
+          "Monday": {
+            "id": "2c92c0f86fa49142016fa49ea34528f2",
+          },
+          "Saturday": {
+            "id": "2c92c0f86fa49142016fa49ea21028d2",
+          },
+          "Sunday": {
+            "id": "2c92c0f86fa49142016fa49ea39a28fc",
+          },
+          "Thursday": {
+            "id": "2c92c0f86fa49142016fa49ea25928da",
+          },
+          "Tuesday": {
+            "id": "2c92c0f86fa49142016fa49ea2f528ea",
+          },
+          "Wednesday": {
+            "id": "2c92c0f86fa49142016fa49ea2a528e2",
+          },
+        },
+        "id": "2c92c0f86fa49142016fa49ea1af28c8",
+        "pricing": {
+          "GBP": 58.99,
+        },
+      },
+      "Sunday": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Sunday": {
+            "id": "2c92c0f86fa49142016fa49eb0f42a15",
+          },
+        },
+        "id": "2c92c0f86fa49142016fa49eb0a42a01",
+        "pricing": {
+          "GBP": 15.99,
+        },
+      },
+      "Sunday+": {
+        "billingPeriod": "Month",
+        "charges": {
+          "DigitalPack": {
+            "id": "2c92c0f86fa49142016fa49ea9a62980",
+          },
+          "Sunday": {
+            "id": "2c92c0f86fa49142016fa49ea93b2978",
+          },
+        },
+        "id": "2c92c0f86fa49142016fa49ea90e2976",
+        "pricing": {
+          "GBP": 25.99,
+        },
+      },
+      "Weekend": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Saturday": {
+            "id": "2c92c0f86fa49142016fa49ea0ec28b8",
+          },
+          "Sunday": {
+            "id": "2c92c0f86fa49142016fa49ea12a28c0",
+          },
+        },
+        "id": "2c92c0f86fa49142016fa49ea0d028b6",
+        "pricing": {
+          "GBP": 26.99,
+        },
+      },
+      "Weekend+": {
+        "billingPeriod": "Month",
+        "charges": {
+          "DigitalPack": {
+            "id": "2c92c0f86fa49142016fa49eb01829f1",
+          },
+          "Saturday": {
+            "id": "2c92c0f86fa49142016fa49eaf0b29e1",
+          },
+          "Sunday": {
+            "id": "2c92c0f86fa49142016fa49eaf8e29e9",
+          },
+        },
+        "id": "2c92c0f86fa49142016fa49eaecb29dd",
+        "pricing": {
+          "GBP": 34.99,
+        },
+      },
+    },
+  },
+  "SupporterMembership": {
+    "active": false,
+    "billingSystem": "zuora",
+    "ratePlans": {
+      "Annual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Subscription": {
+            "id": "8ad08c8487755a49018779f99a4b0277",
+          },
+        },
+        "id": "8ad08c8487755a49018779f999f00270",
+        "pricing": {
+          "AUD": 160,
+          "CAD": 120,
+          "EUR": 95,
+          "GBP": 75,
+          "USD": 120,
+        },
+      },
+      "Monthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Subscription": {
+            "id": "8ad09ea087756cc4018779f9a7ca6c6e",
+          },
+        },
+        "id": "8ad09ea087756cc4018779f9a76f6c65",
+        "pricing": {
+          "AUD": 14.99,
+          "CAD": 12.99,
+          "EUR": 9.99,
+          "GBP": 7,
+          "USD": 9.99,
+        },
+      },
+      "V1DeprecatedAnnual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f84b079582014b2754bfe50f6f",
+          },
+        },
+        "id": "2c92c0f84b079582014b2754bfd70f6d",
+        "pricing": {
+          "GBP": 60,
+        },
+      },
+      "V1DeprecatedMonthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f84b079582014b2754c0900f7f",
+          },
+        },
+        "id": "2c92c0f84b079582014b2754c07c0f7d",
+        "pricing": {
+          "GBP": 5,
+        },
+      },
+      "V2DeprecatedAnnual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f94c510a01014c569e2de37cff",
+          },
+        },
+        "id": "2c92c0f94c510a01014c569e2d857cfd",
+        "pricing": {
+          "AUD": 100,
+          "CAD": 69,
+          "EUR": 99.99,
+          "GBP": 51,
+          "USD": 89.99,
+        },
+      },
+      "V2DeprecatedMonthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f94c510a0d014c569baa654600",
+          },
+        },
+        "id": "2c92c0f94c510a0d014c569ba8eb45f7",
+        "pricing": {
+          "AUD": 10,
+          "CAD": 6.99,
+          "EUR": 10,
+          "GBP": 9,
+          "USD": 7.99,
+        },
+      },
+    },
+  },
+  "SupporterPlus": {
+    "active": true,
+    "billingSystem": "zuora",
+    "ratePlans": {
+      "Annual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Contribution": {
+            "id": "8ad096ca858682bb0185881568385d73",
+          },
+          "Subscription": {
+            "id": "8ad08e1a858672180185880566606fad",
+          },
+        },
+        "id": "8ad08e1a8586721801858805663f6fab",
+        "pricing": {
+          "AUD": 200,
+          "CAD": 150,
+          "EUR": 120,
+          "GBP": 120,
+          "NZD": 200,
+          "USD": 150,
+        },
+      },
+      "GuardianWeeklyDomesticAnnual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "GuardianWeekly": {
+            "id": "8ad097b48f006681018f059b7613014a",
+          },
+          "SupporterPlus": {
+            "id": "8ad097b48f006681018f059b75b90142",
+          },
+        },
+        "id": "8ad097b48f006681018f059b755e0140",
+        "pricing": {
+          "AUD": 640,
+          "CAD": 516,
+          "EUR": 413,
+          "GBP": 275,
+          "NZD": 760,
+          "USD": 480,
+        },
+      },
+      "GuardianWeeklyDomesticMonthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "GuardianWeekly": {
+            "id": "8ad097b48f006681018f0598097f0059",
+          },
+          "SupporterPlus": {
+            "id": "8ad081dd8ef57784018ef6e159894bfc",
+          },
+        },
+        "id": "8ad081dd8ef57784018ef6e159224bfa",
+        "pricing": {
+          "AUD": 50,
+          "CAD": 39.5,
+          "EUR": 60,
+          "GBP": 25,
+          "NZD": 57,
+          "USD": 43,
+        },
+      },
+      "GuardianWeeklyRestOfWorldAnnual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "GuardianWeekly": {
+            "id": "8ad097b48f006681018f05a049f301fe",
+          },
+          "SupporterPlus": {
+            "id": "8ad097b48f006681018f05a049a101f6",
+          },
+        },
+        "id": "8ad097b48f006681018f05a0496e01f4",
+        "pricing": {
+          "AUD": 584,
+          "CAD": 465,
+          "EUR": 365,
+          "GBP": 392.6,
+          "NZD": 690,
+          "USD": 516,
+        },
+      },
+      "GuardianWeeklyRestOfWorldMonthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "GuardianWeekly": {
+            "id": "8ad097b48f006681018f05a2c17e0231",
+          },
+          "SupporterPlus": {
+            "id": "8ad097b48f006681018f05a2c12f0229",
+          },
+        },
+        "id": "8ad097b48f006681018f05a2c0fb0227",
+        "pricing": {
+          "AUD": 17,
+          "CAD": 13,
+          "EUR": 10,
+          "GBP": 34.8,
+          "NZD": 17,
+          "USD": 46,
+        },
+      },
+      "Monthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Contribution": {
+            "id": "8ad09ea0858682bb0185880ac57f4c4c",
+          },
+          "Subscription": {
+            "id": "8ad08cbd8586721c01858804e3715378",
+          },
+        },
+        "id": "8ad08cbd8586721c01858804e3275376",
+        "pricing": {
+          "AUD": 20,
+          "CAD": 15,
+          "EUR": 12,
+          "GBP": 12,
+          "NZD": 20,
+          "USD": 15,
+        },
+      },
+      "V1DeprecatedAnnual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Subscription": {
+            "id": "8ad09fc281de1ce70181de3b29223787",
+          },
+        },
+        "id": "8ad09fc281de1ce70181de3b28ee3783",
+        "pricing": {
+          "AUD": 160,
+          "CAD": 120,
+          "EUR": 95,
+          "GBP": 95,
+          "NZD": 160,
+          "USD": 120,
+        },
+      },
+      "V1DeprecatedMonthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Subscription": {
+            "id": "8ad09fc281de1ce70181de3b253e36a6",
+          },
+        },
+        "id": "8ad09fc281de1ce70181de3b251736a4",
+        "pricing": {
+          "AUD": 17,
+          "CAD": 13,
+          "EUR": 10,
+          "GBP": 10,
+          "NZD": 17,
+          "USD": 13,
+        },
+      },
+    },
+  },
+  "TierThree": {
+    "active": true,
+    "billingSystem": "zuora",
+    "ratePlans": {
+      "DomesticAnnual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "GuardianWeekly": {
+            "id": "8ad081dd8ff24a9a019001dbc55635e8",
+          },
+          "SupporterPlus": {
+            "id": "8ad097b48ff26452019001ddd8a226ed",
+          },
+        },
+        "id": "8ad081dd8ff24a9a019001d95e4e3574",
+        "pricing": {
+          "AUD": 680,
+          "CAD": 546,
+          "EUR": 438,
+          "GBP": 300,
+          "NZD": 800,
+          "USD": 510,
+        },
+      },
+      "DomesticAnnualV2": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "GuardianWeekly": {
+            "id": "8ad097b491daf9180191e0cd5953180d",
+          },
+          "NewspaperArchive": {
+            "id": "8ad081dd91e5368e0191eb3af3e200aa",
+          },
+          "SupporterPlus": {
+            "id": "8ad097b491daf9180191e0cd59a11815",
+          },
+        },
+        "id": "8ad097b491daf9180191e0cd58e5180b",
+        "pricing": {
+          "AUD": 704,
+          "CAD": 570,
+          "EUR": 462,
+          "GBP": 324,
+          "NZD": 824,
+          "USD": 534,
+        },
+      },
+      "DomesticMonthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "GuardianWeekly": {
+            "id": "8ad097b48ff26452019001d46f8824e2",
+          },
+          "SupporterPlus": {
+            "id": "8ad097b48ff26452019001d78ee325d1",
+          },
+        },
+        "id": "8ad097b48ff26452019001cebac92376",
+        "pricing": {
+          "AUD": 60,
+          "CAD": 48,
+          "EUR": 38.5,
+          "GBP": 27,
+          "NZD": 70,
+          "USD": 45,
+        },
+      },
+      "DomesticMonthlyV2": {
+        "billingPeriod": "Month",
+        "charges": {
+          "GuardianWeekly": {
+            "id": "8ad081dd91dae1d30191e0ce086718d5",
+          },
+          "NewspaperArchive": {
+            "id": "8ad097b491e54f780191eb3c36606552",
+          },
+          "SupporterPlus": {
+            "id": "8ad081dd91dae1d30191e0ce089818dd",
+          },
+        },
+        "id": "8ad081dd91dae1d30191e0ce082d18d3",
+        "pricing": {
+          "AUD": 62,
+          "CAD": 50,
+          "EUR": 40.5,
+          "GBP": 29,
+          "NZD": 72,
+          "USD": 47,
+        },
+      },
+      "RestOfWorldAnnual": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "GuardianWeekly": {
+            "id": "8ad097b48ff26452019001e65be32caa",
+          },
+          "SupporterPlus": {
+            "id": "8ad097b48ff26452019001e65c262cb2",
+          },
+        },
+        "id": "8ad097b48ff26452019001e65bbf2ca8",
+        "pricing": {
+          "GBP": 417.6,
+          "USD": 546,
+        },
+      },
+      "RestOfWorldAnnualV2": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "GuardianWeekly": {
+            "id": "8ad097b491daf9180191e0cdf3791860",
+          },
+          "NewspaperArchive": {
+            "id": "8ad081dd91e5368e0191eb34500c7e6a",
+          },
+          "SupporterPlus": {
+            "id": "8ad097b491daf9180191e0cdf3c71868",
+          },
+        },
+        "id": "8ad097b491daf9180191e0cdf34e185e",
+        "pricing": {
+          "GBP": 441.6,
+          "USD": 570,
+        },
+      },
+      "RestOfWorldMonthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "GuardianWeekly": {
+            "id": "8ad097b48ff26452019001e2cedb27b9",
+          },
+          "SupporterPlus": {
+            "id": "8ad097b48ff26452019001e632f82c99",
+          },
+        },
+        "id": "8ad081dd8ff24a9a019001df2ce83657",
+        "pricing": {
+          "GBP": 36.8,
+          "USD": 48,
+        },
+      },
+      "RestOfWorldMonthlyV2": {
+        "billingPeriod": "Month",
+        "charges": {
+          "GuardianWeekly": {
+            "id": "8ad097b491daf9180191e0cdba95183e",
+          },
+          "NewspaperArchive": {
+            "id": "8ad097b491e54f780191eb37685b63c9",
+          },
+          "SupporterPlus": {
+            "id": "8ad097b491daf9180191e0cdbae31846",
+          },
+        },
+        "id": "8ad097b491daf9180191e0cdba5f183c",
+        "pricing": {
+          "GBP": 38.8,
+          "USD": 50,
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`code Generated product catalog types match snapshot 1`] = `
+{
+  "Contribution": {
+    "billingPeriods": [
+      "Annual",
+      "Month",
+    ],
+    "productRatePlans": {
+      "Annual": {
+        "Contribution": {},
+      },
+      "Monthly": {
+        "Contribution": {},
+      },
+    },
+  },
+  "DigitalSubscription": {
+    "billingPeriods": [
+      "Month",
+      "Annual",
+      "Quarter",
+    ],
+    "productRatePlans": {
+      "Annual": {
+        "Subscription": {},
+      },
+      "Monthly": {
+        "Subscription": {},
+      },
+      "OneYearGift": {
+        "Subscription": {},
+      },
+      "ThreeMonthGift": {
+        "Subscription": {},
+      },
+    },
+  },
+  "GuardianAdLite": {
+    "billingPeriods": [
+      "Month",
+    ],
+    "productRatePlans": {
+      "Monthly": {
+        "Subscription": {},
+      },
+    },
+  },
+  "GuardianLight": {
+    "billingPeriods": [
+      "Month",
+    ],
+    "productRatePlans": {
+      "Monthly": {
+        "Subscription": {},
+      },
+    },
+  },
+  "GuardianPatron": {
+    "billingPeriods": [
+      "Month",
+    ],
+    "productRatePlans": {
+      "GuardianPatron": {
+        "Subscription": {},
+      },
+    },
+  },
+  "GuardianWeeklyDomestic": {
+    "billingPeriods": [
+      "Quarter",
+      "Annual",
+      "Month",
+    ],
+    "productRatePlans": {
+      "Annual": {
+        "Subscription": {},
+      },
+      "Monthly": {
+        "Subscription": {},
+      },
+      "OneYearGift": {
+        "Subscription": {},
+      },
+      "Quarterly": {
+        "Subscription": {},
+      },
+      "ThreeMonthGift": {
+        "Subscription": {},
+      },
+    },
+  },
+  "GuardianWeeklyRestOfWorld": {
+    "billingPeriods": [
+      "Quarter",
+      "Annual",
+      "Month",
+    ],
+    "productRatePlans": {
+      "Annual": {
+        "Subscription": {},
+      },
+      "Monthly": {
+        "Monthly": {},
+      },
+      "OneYearGift": {
+        "Subscription": {},
+      },
+      "Quarterly": {
+        "Subscription": {},
+      },
+      "ThreeMonthGift": {
+        "Subscription": {},
+      },
+    },
+  },
+  "GuardianWeeklyZoneA": {
+    "billingPeriods": [
+      "Semi_Annual",
+      "Two_Years",
+      "Annual",
+      "Three_Years",
+      "Quarter",
+    ],
+    "productRatePlans": {
+      "Annual": {
+        "Subscription": {},
+      },
+      "Quarterly": {
+        "Subscription": {},
+      },
+    },
+  },
+  "GuardianWeeklyZoneB": {
+    "billingPeriods": [
+      "Semi_Annual",
+      "Three_Years",
+      "Two_Years",
+      "Annual",
+      "Quarter",
+    ],
+    "productRatePlans": {
+      "Annual": {
+        "Subscription": {},
+      },
+      "Quarterly": {
+        "Subscription": {},
+      },
+    },
+  },
+  "GuardianWeeklyZoneC": {
+    "billingPeriods": [
+      "Annual",
+      "Quarter",
+    ],
+    "productRatePlans": {
+      "Annual": {
+        "Subscription": {},
+      },
+      "Quarterly": {
+        "Subscription": {},
+      },
+    },
+  },
+  "HomeDelivery": {
+    "billingPeriods": [
+      "Month",
+    ],
+    "productRatePlans": {
+      "Everyday": {
+        "Friday": {},
+        "Monday": {},
+        "Saturday": {},
+        "Sunday": {},
+        "Thursday": {},
+        "Tuesday": {},
+        "Wednesday": {},
+      },
+      "Everyday+": {
+        "DigitalPack": {},
+        "Friday": {},
+        "Monday": {},
+        "Saturday": {},
+        "Sunday": {},
+        "Thursday": {},
+        "Tuesday": {},
+        "Wednesday": {},
+      },
+      "Saturday": {
+        "Saturday": {},
+      },
+      "Saturday+": {
+        "DigitalPack": {},
+        "Saturday": {},
+      },
+      "Sixday": {
+        "Friday": {},
+        "Monday": {},
+        "Saturday": {},
+        "Thursday": {},
+        "Tuesday": {},
+        "Wednesday": {},
+      },
+      "Sixday+": {
+        "DigitalPack": {},
+        "Friday": {},
+        "Monday": {},
+        "Saturday": {},
+        "Thursday": {},
+        "Tuesday": {},
+        "Wednesday": {},
+      },
+      "Sunday": {
+        "Sunday": {},
+      },
+      "Sunday+": {
+        "DigitalPack": {},
+        "Sunday": {},
+      },
+      "Weekend": {
+        "Saturday": {},
+        "Sunday": {},
+      },
+      "Weekend+": {
+        "DigitalPack": {},
+        "Saturday": {},
+        "Sunday": {},
+      },
+    },
+  },
+  "NationalDelivery": {
+    "billingPeriods": [
+      "Month",
+    ],
+    "productRatePlans": {
+      "Everyday": {
+        "Friday": {},
+        "Monday": {},
+        "Saturday": {},
+        "Sunday": {},
+        "Thursday": {},
+        "Tuesday": {},
+        "Wednesday": {},
+      },
+      "Sixday": {
+        "Friday": {},
+        "Monday": {},
+        "Saturday": {},
+        "Thursday": {},
+        "Tuesday": {},
+        "Wednesday": {},
+      },
+      "Weekend": {
+        "Saturday": {},
+        "Sunday": {},
+      },
+    },
+  },
+  "NewspaperVoucher": {
+    "billingPeriods": [
+      "Month",
+    ],
+    "productRatePlans": {
+      "Everyday": {
+        "Friday": {},
+        "Monday": {},
+        "Saturday": {},
+        "Sunday": {},
+        "Thursday": {},
+        "Tuesday": {},
+        "Wednesday": {},
+      },
+      "Everyday+": {
+        "DigitalPack": {},
+        "Friday": {},
+        "Monday": {},
+        "Saturday": {},
+        "Sunday": {},
+        "Thursday": {},
+        "Tuesday": {},
+        "Wednesday": {},
+      },
+      "Saturday": {
+        "Saturday": {},
+      },
+      "Saturday+": {
+        "DigitalPack": {},
+        "Saturday": {},
+      },
+      "Sixday": {
+        "Friday": {},
+        "Monday": {},
+        "Saturday": {},
+        "Thursday": {},
+        "Tuesday": {},
+        "Wednesday": {},
+      },
+      "Sixday+": {
+        "DigitalPack": {},
+        "Friday": {},
+        "Monday": {},
+        "Saturday": {},
+        "Sunday": {},
+        "Thursday": {},
+        "Tuesday": {},
+        "Wednesday": {},
+      },
+      "Sunday": {
+        "Sunday": {},
+      },
+      "Sunday+": {
+        "DigitalPack": {},
+        "Sunday": {},
+      },
+      "Weekend": {
+        "Saturday": {},
+        "Sunday": {},
+      },
+      "Weekend+": {
+        "DigitalPack": {},
+        "Saturday": {},
+        "Sunday": {},
+      },
+    },
+  },
+  "OneTimeContribution": {
+    "billingPeriods": [
+      "OneTime",
+    ],
+    "productRatePlans": {
+      "OneTime": {
+        "Contribution": {},
+      },
+    },
+  },
+  "PartnerMembership": {
+    "billingPeriods": [
+      "Annual",
+      "Month",
+    ],
+    "productRatePlans": {
+      "Annual": {
+        "Subscription": {},
+      },
+      "Monthly": {
+        "Subscription": {},
+      },
+      "V1DeprecatedAnnual": {
+        "Subscription": {},
+      },
+      "V1DeprecatedMonthly": {
+        "Subscription": {},
+      },
+    },
+  },
+  "PatronMembership": {
+    "billingPeriods": [
+      "Annual",
+      "Month",
+    ],
+    "productRatePlans": {
+      "Annual": {
+        "Subscription": {},
+      },
+      "Monthly": {
+        "Subscription": {},
+      },
+      "V1DeprecatedAnnual": {
+        "Subscription": {},
+      },
+      "V1DeprecatedMonthly": {
+        "Subscription": {},
+      },
+    },
+  },
+  "SubscriptionCard": {
+    "billingPeriods": [
+      "Month",
+    ],
+    "productRatePlans": {
+      "Everyday": {
+        "Friday": {},
+        "Monday": {},
+        "Saturday": {},
+        "Sunday": {},
+        "Thursday": {},
+        "Tuesday": {},
+        "Wednesday": {},
+      },
+      "Everyday+": {
+        "DigitalPack": {},
+        "Friday": {},
+        "Monday": {},
+        "Saturday": {},
+        "Sunday": {},
+        "Thursday": {},
+        "Tuesday": {},
+        "Wednesday": {},
+      },
+      "Saturday": {
+        "Saturday": {},
+      },
+      "Saturday+": {
+        "DigitalPack": {},
+        "Saturday": {},
+      },
+      "Sixday": {
+        "Friday": {},
+        "Monday": {},
+        "Saturday": {},
+        "Thursday": {},
+        "Tuesday": {},
+        "Wednesday": {},
+      },
+      "Sixday+": {
+        "DigitalPack": {},
+        "Friday": {},
+        "Monday": {},
+        "Saturday": {},
+        "Sunday": {},
+        "Thursday": {},
+        "Tuesday": {},
+        "Wednesday": {},
+      },
+      "Sunday": {
+        "Sunday": {},
+      },
+      "Sunday+": {
+        "DigitalPack": {},
+        "Sunday": {},
+      },
+      "Weekend": {
+        "Saturday": {},
+        "Sunday": {},
+      },
+      "Weekend+": {
+        "DigitalPack": {},
+        "Saturday": {},
+        "Sunday": {},
+      },
+    },
+  },
+  "SupporterMembership": {
+    "billingPeriods": [
+      "Month",
+      "Annual",
+    ],
+    "productRatePlans": {
+      "Annual": {
+        "Subscription": {},
+      },
+      "Monthly": {
+        "Subscription": {},
+      },
+      "V1DeprecatedAnnual": {
+        "Subscription": {},
+      },
+      "V1DeprecatedMonthly": {
+        "Subscription": {},
+      },
+      "V2DeprecatedAnnual": {
+        "Subscription": {},
+      },
+      "V2DeprecatedMonthly": {
+        "Subscription": {},
+      },
+    },
+  },
+  "SupporterPlus": {
+    "billingPeriods": [
+      "Annual",
+      "Month",
+    ],
+    "productRatePlans": {
+      "Annual": {
+        "Contribution": {},
+        "Subscription": {},
+      },
+      "GuardianWeeklyDomesticAnnual": {
+        "GuardianWeekly": {},
+        "SupporterPlus": {},
+      },
+      "GuardianWeeklyDomesticMonthly": {
+        "GuardianWeekly": {},
+        "SupporterPlus": {},
+      },
+      "GuardianWeeklyRestOfWorldAnnual": {
+        "GuardianWeekly": {},
+        "SupporterPlus": {},
+      },
+      "GuardianWeeklyRestOfWorldMonthly": {
+        "GuardianWeekly": {},
+        "SupporterPlus": {},
+      },
+      "Monthly": {
+        "Contribution": {},
+        "Subscription": {},
+      },
+      "V1DeprecatedAnnual": {
+        "Subscription": {},
+      },
+      "V1DeprecatedMonthly": {
+        "Subscription": {},
+      },
+    },
+  },
+  "TierThree": {
+    "billingPeriods": [
+      "Annual",
+      "Month",
+    ],
+    "productRatePlans": {
+      "DomesticAnnual": {
+        "GuardianWeekly": {},
+        "SupporterPlus": {},
+      },
+      "DomesticAnnualV2": {
+        "GuardianWeekly": {},
+        "NewspaperArchive": {},
+        "SupporterPlus": {},
+      },
+      "DomesticMonthly": {
+        "GuardianWeekly": {},
+        "SupporterPlus": {},
+      },
+      "DomesticMonthlyV2": {
+        "GuardianWeekly": {},
+        "NewspaperArchive": {},
+        "SupporterPlus": {},
+      },
+      "RestOfWorldAnnual": {
+        "GuardianWeekly": {},
+        "SupporterPlus": {},
+      },
+      "RestOfWorldAnnualV2": {
+        "GuardianWeekly": {},
+        "NewspaperArchive": {},
+        "SupporterPlus": {},
+      },
+      "RestOfWorldMonthly": {
+        "GuardianWeekly": {},
+        "SupporterPlus": {},
+      },
+      "RestOfWorldMonthlyV2": {
+        "GuardianWeekly": {},
+        "NewspaperArchive": {},
+        "SupporterPlus": {},
+      },
+    },
+  },
+}
+`;
+
+exports[`prod Generated product catalog matches snapshot 1`] = `
 {
   "Contribution": {
     "active": true,
@@ -110,6 +2370,24 @@ exports[`Generated product catalog matches snapshot 1`] = `
           "GBP": 36,
           "NZD": 63,
           "USD": 60,
+        },
+      },
+    },
+  },
+  "GuardianAdLite": {
+    "active": true,
+    "billingSystem": "zuora",
+    "ratePlans": {
+      "Monthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Subscription": {
+            "id": "8a1285e294443da501944b04cb9d2ca0",
+          },
+        },
+        "id": "8a1285e294443da501944b04cb692c9e",
+        "pricing": {
+          "GBP": 5,
         },
       },
     },
@@ -1618,7 +3896,7 @@ exports[`Generated product catalog matches snapshot 1`] = `
 }
 `;
 
-exports[`Generated product catalog types match snapshot 1`] = `
+exports[`prod Generated product catalog types match snapshot 1`] = `
 {
   "Contribution": {
     "billingPeriods": [
@@ -1651,6 +3929,16 @@ exports[`Generated product catalog types match snapshot 1`] = `
         "Subscription": {},
       },
       "ThreeMonthGift": {
+        "Subscription": {},
+      },
+    },
+  },
+  "GuardianAdLite": {
+    "billingPeriods": [
+      "Month",
+    ],
+    "productRatePlans": {
+      "Monthly": {
         "Subscription": {},
       },
     },
