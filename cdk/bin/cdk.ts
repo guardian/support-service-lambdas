@@ -21,6 +21,7 @@ import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
 import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
 import { UserBenefits } from '../lib/user-benefits';
 import { ZuoraSalesforceLinkRemover } from '../lib/zuora-salesforce-link-remover';
+import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 
 const app = new App();
 const membershipHostedZoneId = 'Z1E4V12LQGXFEC';
@@ -286,4 +287,12 @@ new UserBenefits(app, 'user-benefits-PROD', {
 	certificateId: supportCertificateId,
 	supporterProductDataTable:
 		'supporter-product-data-tables-PROD-SupporterProductDataTable',
+});
+new DiscountExpiryNotifier(app, 'discount-expiry-notifier-CODE', {
+	stack: 'membership',
+	stage: 'CODE',
+});
+new DiscountExpiryNotifier(app, 'discount-expiry-notifier-PROD', {
+	stack: 'membership',
+	stage: 'PROD',
 });
