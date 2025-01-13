@@ -43,6 +43,7 @@ export class DiscountExpiryNotifier extends GuStack {
 		);
 
 		new StateMachine(this, `${appName}-state-machine-${this.stage}`, {
+			stateMachineName: `${appName}-${this.stage}`,
 			definitionBody: definitionBody,
 		});
 	}
