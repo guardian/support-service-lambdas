@@ -288,7 +288,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
             "Stage": "CODE",
           },
         },
-        "FunctionName": "discount-expiry-notifier-get-subs-with-expiring-discounts-CODE",
+        "FunctionName": "get-subs-with-expiring-discounts-CODE",
         "Handler": "getSubsWithExpiringDiscounts.handler",
         "MemorySize": 512,
         "Role": {
@@ -769,7 +769,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
             "Stage": "PROD",
           },
         },
-        "FunctionName": "discount-expiry-notifier-get-subs-with-expiring-discounts-PROD",
+        "FunctionName": "get-subs-with-expiring-discounts-PROD",
         "Handler": "getSubsWithExpiringDiscounts.handler",
         "MemorySize": 512,
         "Role": {
