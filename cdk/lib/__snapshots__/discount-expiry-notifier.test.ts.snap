@@ -137,7 +137,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
           "Fn::Join": [
             "",
             [
-              "{"StartAt":"Get Salesforce Billing Accounts","States":{"Get Salesforce Billing Accounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "{"StartAt":"Get Subs With Expiring Discounts","States":{"Get Subs With Expiring Discounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -288,7 +288,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
             "Stage": "CODE",
           },
         },
-        "FunctionName": "get-subs-with-expiring-discounts-CODE",
+        "FunctionName": "discount-expiry-notifier-get-subs-with-expiring-discounts-CODE",
         "Handler": "getSubsWithExpiringDiscounts.handler",
         "MemorySize": 512,
         "Role": {
@@ -618,7 +618,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
           "Fn::Join": [
             "",
             [
-              "{"StartAt":"Get Salesforce Billing Accounts","States":{"Get Salesforce Billing Accounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "{"StartAt":"Get Subs With Expiring Discounts","States":{"Get Subs With Expiring Discounts":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -769,7 +769,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
             "Stage": "PROD",
           },
         },
-        "FunctionName": "get-subs-with-expiring-discounts-PROD",
+        "FunctionName": "discount-expiry-notifier-get-subs-with-expiring-discounts-PROD",
         "Handler": "getSubsWithExpiringDiscounts.handler",
         "MemorySize": 512,
         "Role": {
