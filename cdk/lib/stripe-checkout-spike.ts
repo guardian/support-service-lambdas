@@ -67,10 +67,8 @@ export class StripeCheckoutSpike extends GuStack {
 			'app' | 'memorySize' | 'fileName' | 'runtime' | 'timeout' | 'environment'
 		> = {
 			app,
-			memorySize: 1024,
 			runtime: nodeVersion,
 			fileName: `${app}.zip`,
-			timeout: Duration.seconds(300),
 			environment: { APP: app, STACK: this.stack, STAGE: this.stage },
 		};
 

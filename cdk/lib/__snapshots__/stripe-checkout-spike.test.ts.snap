@@ -38,7 +38,7 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 1`] = `
         },
         "FunctionName": "checkout-session-completed-handler-CODE",
         "Handler": "checkoutSessionCompletedHandler.handler",
-        "MemorySize": 1024,
+        "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
             "CheckoutSessionCompletedHandlerServiceRoleE508FC37",
@@ -68,7 +68,7 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 1`] = `
             "Value": "CODE",
           },
         ],
-        "Timeout": 300,
+        "Timeout": 30,
       },
       "Type": "AWS::Lambda::Function",
     },
@@ -456,7 +456,7 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 2`] = `
         },
         "FunctionName": "checkout-session-completed-handler-PROD",
         "Handler": "checkoutSessionCompletedHandler.handler",
-        "MemorySize": 1024,
+        "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
             "CheckoutSessionCompletedHandlerServiceRoleE508FC37",
@@ -486,7 +486,7 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 2`] = `
             "Value": "PROD",
           },
         ],
-        "Timeout": 300,
+        "Timeout": 30,
       },
       "Type": "AWS::Lambda::Function",
     },
