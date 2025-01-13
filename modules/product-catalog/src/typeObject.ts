@@ -349,7 +349,7 @@ export const activeTypeObject = {
     }
   }
 } as const;
-export const inactiveTypesObject = {
+export const inactiveTypeObject = {
   "SupporterMembership": {
     "billingPeriods": [
       "Annual",

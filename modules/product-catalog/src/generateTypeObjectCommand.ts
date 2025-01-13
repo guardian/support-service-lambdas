@@ -10,7 +10,7 @@ const writeTypesToFile = async () => {
 
 	fs.writeFileSync(
 		'./src/typeObject.ts',
-		`export const activeTypeObject = ${activeTypesString} as const;\nexport const inactiveTypesObject = ${inactiveTypesString} as const;`,
+		`export const activeTypeObject = ${activeTypesString} as const;\nexport const inactiveTypeObject = ${inactiveTypesString} as const;`,
 	);
 };
 
