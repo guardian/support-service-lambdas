@@ -48,7 +48,7 @@ export class StripeCheckoutSpike extends GuStack {
 		});
 
 		const sendMessagePolicyStatement = new PolicyStatement({
-			sid: 'Allow Stripe bus to send messages to the stripe-checkout-spike-queue',
+			sid: `Allow stripe bus to send messages to the ${app}-queue`,
 			principals: [new ServicePrincipal('events.amazonaws.com')],
 			effect: Effect.ALLOW,
 			resources: [queue.queueArn],
