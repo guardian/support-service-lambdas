@@ -95,6 +95,43 @@ test('startNewTerm is only true when the termStartDate is before today', () => {
 	expect(switchInformation.startNewTerm).toEqual(false);
 });
 
+test('owner check is bypassed for salesforce calls', () => {
+	const today = dayjs('2024-05-09T23:10:10.663+01:00');
+	const subscription = zuoraSubscriptionResponseSchema.parse(subscriptionJson);
+	const account = zuoraAccountSchema.parse(accountJson);
+	const productCatalog = getProductCatalogFromFixture();
+
+	const switchInformation = getSwitchInformationWithOwnerCheck(
+		'CODE',
+		{ price: 95, preview: false },
+		subscription,
+		account,
+		productCatalog,
+		undefined, // salesforce doesn't send the header
+		today,
+	);
+	expect(switchInformation.startNewTerm).toEqual(false);
+});
+
+test("owner check doesn't allow incorrect owner", () => {
+	const today = dayjs('2024-05-09T23:10:10.663+01:00');
+	const subscription = zuoraSubscriptionResponseSchema.parse(subscriptionJson);
+	const account = zuoraAccountSchema.parse(accountJson);
+	const productCatalog = getProductCatalogFromFixture();
+
+	const switchInformation = () =>
+		getSwitchInformationWithOwnerCheck(
+			'CODE',
+			{ price: 95, preview: false },
+			subscription,
+			account,
+			productCatalog,
+			'12345', // incorrect identity id
+			today,
+		);
+	expect(switchInformation).toThrow(ValidationError);
+});
+
 test('preview amounts are correct', () => {
 	const subscription =
 		zuoraSubscriptionResponseSchema.parse(alreadySwitchedJson);
