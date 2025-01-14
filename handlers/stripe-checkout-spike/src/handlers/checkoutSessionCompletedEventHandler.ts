@@ -11,7 +11,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 
 			console.log(JSON.stringify(body));
 
-			const accessToken = await getSecretValue({ secretName: '' });
+			const accessToken = await getSecretValue<string>({ secretName: '' });
 
 			const response = await fetch(
 				`$https://idapi.theguardian.com/user?emailAddress=${body.detail.data.object.customer_details?.email}`,
