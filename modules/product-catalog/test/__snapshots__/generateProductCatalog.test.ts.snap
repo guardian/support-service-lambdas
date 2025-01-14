@@ -1710,550 +1710,554 @@ exports[`code Generated product catalog matches snapshot 1`] = `
 
 exports[`code Generated product catalog types match snapshot 1`] = `
 {
-  "Contribution": {
-    "billingPeriods": [
-      "Annual",
-      "Month",
-    ],
-    "productRatePlans": {
-      "Annual": {
-        "Contribution": {},
+  "active": {
+    "Contribution": {
+      "billingPeriods": [
+        "Annual",
+        "Month",
+      ],
+      "productRatePlans": {
+        "Annual": {
+          "Contribution": {},
+        },
+        "Monthly": {
+          "Contribution": {},
+        },
       },
-      "Monthly": {
-        "Contribution": {},
+    },
+    "DigitalSubscription": {
+      "billingPeriods": [
+        "Month",
+        "Annual",
+        "Quarter",
+      ],
+      "productRatePlans": {
+        "Annual": {
+          "Subscription": {},
+        },
+        "Monthly": {
+          "Subscription": {},
+        },
+        "OneYearGift": {
+          "Subscription": {},
+        },
+        "ThreeMonthGift": {
+          "Subscription": {},
+        },
+      },
+    },
+    "GuardianAdLite": {
+      "billingPeriods": [
+        "Month",
+      ],
+      "productRatePlans": {
+        "Monthly": {
+          "Subscription": {},
+        },
+      },
+    },
+    "GuardianLight": {
+      "billingPeriods": [
+        "Month",
+      ],
+      "productRatePlans": {
+        "Monthly": {
+          "Subscription": {},
+        },
+      },
+    },
+    "GuardianPatron": {
+      "billingPeriods": [
+        "Month",
+      ],
+      "productRatePlans": {
+        "GuardianPatron": {
+          "Subscription": {},
+        },
+      },
+    },
+    "GuardianWeeklyDomestic": {
+      "billingPeriods": [
+        "Quarter",
+        "Annual",
+        "Month",
+      ],
+      "productRatePlans": {
+        "Annual": {
+          "Subscription": {},
+        },
+        "Monthly": {
+          "Subscription": {},
+        },
+        "OneYearGift": {
+          "Subscription": {},
+        },
+        "Quarterly": {
+          "Subscription": {},
+        },
+        "ThreeMonthGift": {
+          "Subscription": {},
+        },
+      },
+    },
+    "GuardianWeeklyRestOfWorld": {
+      "billingPeriods": [
+        "Quarter",
+        "Annual",
+        "Month",
+      ],
+      "productRatePlans": {
+        "Annual": {
+          "Subscription": {},
+        },
+        "Monthly": {
+          "Monthly": {},
+        },
+        "OneYearGift": {
+          "Subscription": {},
+        },
+        "Quarterly": {
+          "Subscription": {},
+        },
+        "ThreeMonthGift": {
+          "Subscription": {},
+        },
+      },
+    },
+    "HomeDelivery": {
+      "billingPeriods": [
+        "Month",
+      ],
+      "productRatePlans": {
+        "Everyday": {
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Sunday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Everyday+": {
+          "DigitalPack": {},
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Sunday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Saturday": {
+          "Saturday": {},
+        },
+        "Saturday+": {
+          "DigitalPack": {},
+          "Saturday": {},
+        },
+        "Sixday": {
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Sixday+": {
+          "DigitalPack": {},
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Sunday": {
+          "Sunday": {},
+        },
+        "Sunday+": {
+          "DigitalPack": {},
+          "Sunday": {},
+        },
+        "Weekend": {
+          "Saturday": {},
+          "Sunday": {},
+        },
+        "Weekend+": {
+          "DigitalPack": {},
+          "Saturday": {},
+          "Sunday": {},
+        },
+      },
+    },
+    "NationalDelivery": {
+      "billingPeriods": [
+        "Month",
+      ],
+      "productRatePlans": {
+        "Everyday": {
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Sunday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Sixday": {
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Weekend": {
+          "Saturday": {},
+          "Sunday": {},
+        },
+      },
+    },
+    "OneTimeContribution": {
+      "billingPeriods": [
+        "OneTime",
+      ],
+      "productRatePlans": {
+        "OneTime": {
+          "Contribution": {},
+        },
+      },
+    },
+    "SubscriptionCard": {
+      "billingPeriods": [
+        "Month",
+      ],
+      "productRatePlans": {
+        "Everyday": {
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Sunday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Everyday+": {
+          "DigitalPack": {},
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Sunday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Saturday": {
+          "Saturday": {},
+        },
+        "Saturday+": {
+          "DigitalPack": {},
+          "Saturday": {},
+        },
+        "Sixday": {
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Sixday+": {
+          "DigitalPack": {},
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Sunday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Sunday": {
+          "Sunday": {},
+        },
+        "Sunday+": {
+          "DigitalPack": {},
+          "Sunday": {},
+        },
+        "Weekend": {
+          "Saturday": {},
+          "Sunday": {},
+        },
+        "Weekend+": {
+          "DigitalPack": {},
+          "Saturday": {},
+          "Sunday": {},
+        },
+      },
+    },
+    "SupporterPlus": {
+      "billingPeriods": [
+        "Annual",
+        "Month",
+      ],
+      "productRatePlans": {
+        "Annual": {
+          "Contribution": {},
+          "Subscription": {},
+        },
+        "GuardianWeeklyDomesticAnnual": {
+          "GuardianWeekly": {},
+          "SupporterPlus": {},
+        },
+        "GuardianWeeklyDomesticMonthly": {
+          "GuardianWeekly": {},
+          "SupporterPlus": {},
+        },
+        "GuardianWeeklyRestOfWorldAnnual": {
+          "GuardianWeekly": {},
+          "SupporterPlus": {},
+        },
+        "GuardianWeeklyRestOfWorldMonthly": {
+          "GuardianWeekly": {},
+          "SupporterPlus": {},
+        },
+        "Monthly": {
+          "Contribution": {},
+          "Subscription": {},
+        },
+        "V1DeprecatedAnnual": {
+          "Subscription": {},
+        },
+        "V1DeprecatedMonthly": {
+          "Subscription": {},
+        },
+      },
+    },
+    "TierThree": {
+      "billingPeriods": [
+        "Annual",
+        "Month",
+      ],
+      "productRatePlans": {
+        "DomesticAnnual": {
+          "GuardianWeekly": {},
+          "SupporterPlus": {},
+        },
+        "DomesticAnnualV2": {
+          "GuardianWeekly": {},
+          "NewspaperArchive": {},
+          "SupporterPlus": {},
+        },
+        "DomesticMonthly": {
+          "GuardianWeekly": {},
+          "SupporterPlus": {},
+        },
+        "DomesticMonthlyV2": {
+          "GuardianWeekly": {},
+          "NewspaperArchive": {},
+          "SupporterPlus": {},
+        },
+        "RestOfWorldAnnual": {
+          "GuardianWeekly": {},
+          "SupporterPlus": {},
+        },
+        "RestOfWorldAnnualV2": {
+          "GuardianWeekly": {},
+          "NewspaperArchive": {},
+          "SupporterPlus": {},
+        },
+        "RestOfWorldMonthly": {
+          "GuardianWeekly": {},
+          "SupporterPlus": {},
+        },
+        "RestOfWorldMonthlyV2": {
+          "GuardianWeekly": {},
+          "NewspaperArchive": {},
+          "SupporterPlus": {},
+        },
       },
     },
   },
-  "DigitalSubscription": {
-    "billingPeriods": [
-      "Month",
-      "Annual",
-      "Quarter",
-    ],
-    "productRatePlans": {
-      "Annual": {
-        "Subscription": {},
-      },
-      "Monthly": {
-        "Subscription": {},
-      },
-      "OneYearGift": {
-        "Subscription": {},
-      },
-      "ThreeMonthGift": {
-        "Subscription": {},
+  "inactive": {
+    "GuardianWeeklyZoneA": {
+      "billingPeriods": [
+        "Semi_Annual",
+        "Two_Years",
+        "Annual",
+        "Three_Years",
+        "Quarter",
+      ],
+      "productRatePlans": {
+        "Annual": {
+          "Subscription": {},
+        },
+        "Quarterly": {
+          "Subscription": {},
+        },
       },
     },
-  },
-  "GuardianAdLite": {
-    "billingPeriods": [
-      "Month",
-    ],
-    "productRatePlans": {
-      "Monthly": {
-        "Subscription": {},
+    "GuardianWeeklyZoneB": {
+      "billingPeriods": [
+        "Semi_Annual",
+        "Three_Years",
+        "Two_Years",
+        "Annual",
+        "Quarter",
+      ],
+      "productRatePlans": {
+        "Annual": {
+          "Subscription": {},
+        },
+        "Quarterly": {
+          "Subscription": {},
+        },
       },
     },
-  },
-  "GuardianLight": {
-    "billingPeriods": [
-      "Month",
-    ],
-    "productRatePlans": {
-      "Monthly": {
-        "Subscription": {},
+    "GuardianWeeklyZoneC": {
+      "billingPeriods": [
+        "Annual",
+        "Quarter",
+      ],
+      "productRatePlans": {
+        "Annual": {
+          "Subscription": {},
+        },
+        "Quarterly": {
+          "Subscription": {},
+        },
       },
     },
-  },
-  "GuardianPatron": {
-    "billingPeriods": [
-      "Month",
-    ],
-    "productRatePlans": {
-      "GuardianPatron": {
-        "Subscription": {},
+    "NewspaperVoucher": {
+      "billingPeriods": [
+        "Month",
+      ],
+      "productRatePlans": {
+        "Everyday": {
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Sunday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Everyday+": {
+          "DigitalPack": {},
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Sunday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Saturday": {
+          "Saturday": {},
+        },
+        "Saturday+": {
+          "DigitalPack": {},
+          "Saturday": {},
+        },
+        "Sixday": {
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Sixday+": {
+          "DigitalPack": {},
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Sunday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Sunday": {
+          "Sunday": {},
+        },
+        "Sunday+": {
+          "DigitalPack": {},
+          "Sunday": {},
+        },
+        "Weekend": {
+          "Saturday": {},
+          "Sunday": {},
+        },
+        "Weekend+": {
+          "DigitalPack": {},
+          "Saturday": {},
+          "Sunday": {},
+        },
       },
     },
-  },
-  "GuardianWeeklyDomestic": {
-    "billingPeriods": [
-      "Quarter",
-      "Annual",
-      "Month",
-    ],
-    "productRatePlans": {
-      "Annual": {
-        "Subscription": {},
-      },
-      "Monthly": {
-        "Subscription": {},
-      },
-      "OneYearGift": {
-        "Subscription": {},
-      },
-      "Quarterly": {
-        "Subscription": {},
-      },
-      "ThreeMonthGift": {
-        "Subscription": {},
+    "PartnerMembership": {
+      "billingPeriods": [
+        "Annual",
+        "Month",
+      ],
+      "productRatePlans": {
+        "Annual": {
+          "Subscription": {},
+        },
+        "Monthly": {
+          "Subscription": {},
+        },
+        "V1DeprecatedAnnual": {
+          "Subscription": {},
+        },
+        "V1DeprecatedMonthly": {
+          "Subscription": {},
+        },
       },
     },
-  },
-  "GuardianWeeklyRestOfWorld": {
-    "billingPeriods": [
-      "Quarter",
-      "Annual",
-      "Month",
-    ],
-    "productRatePlans": {
-      "Annual": {
-        "Subscription": {},
-      },
-      "Monthly": {
-        "Monthly": {},
-      },
-      "OneYearGift": {
-        "Subscription": {},
-      },
-      "Quarterly": {
-        "Subscription": {},
-      },
-      "ThreeMonthGift": {
-        "Subscription": {},
+    "PatronMembership": {
+      "billingPeriods": [
+        "Annual",
+        "Month",
+      ],
+      "productRatePlans": {
+        "Annual": {
+          "Subscription": {},
+        },
+        "Monthly": {
+          "Subscription": {},
+        },
+        "V1DeprecatedAnnual": {
+          "Subscription": {},
+        },
+        "V1DeprecatedMonthly": {
+          "Subscription": {},
+        },
       },
     },
-  },
-  "GuardianWeeklyZoneA": {
-    "billingPeriods": [
-      "Semi_Annual",
-      "Two_Years",
-      "Annual",
-      "Three_Years",
-      "Quarter",
-    ],
-    "productRatePlans": {
-      "Annual": {
-        "Subscription": {},
-      },
-      "Quarterly": {
-        "Subscription": {},
-      },
-    },
-  },
-  "GuardianWeeklyZoneB": {
-    "billingPeriods": [
-      "Semi_Annual",
-      "Three_Years",
-      "Two_Years",
-      "Annual",
-      "Quarter",
-    ],
-    "productRatePlans": {
-      "Annual": {
-        "Subscription": {},
-      },
-      "Quarterly": {
-        "Subscription": {},
-      },
-    },
-  },
-  "GuardianWeeklyZoneC": {
-    "billingPeriods": [
-      "Annual",
-      "Quarter",
-    ],
-    "productRatePlans": {
-      "Annual": {
-        "Subscription": {},
-      },
-      "Quarterly": {
-        "Subscription": {},
-      },
-    },
-  },
-  "HomeDelivery": {
-    "billingPeriods": [
-      "Month",
-    ],
-    "productRatePlans": {
-      "Everyday": {
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Sunday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Everyday+": {
-        "DigitalPack": {},
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Sunday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Saturday": {
-        "Saturday": {},
-      },
-      "Saturday+": {
-        "DigitalPack": {},
-        "Saturday": {},
-      },
-      "Sixday": {
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Sixday+": {
-        "DigitalPack": {},
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Sunday": {
-        "Sunday": {},
-      },
-      "Sunday+": {
-        "DigitalPack": {},
-        "Sunday": {},
-      },
-      "Weekend": {
-        "Saturday": {},
-        "Sunday": {},
-      },
-      "Weekend+": {
-        "DigitalPack": {},
-        "Saturday": {},
-        "Sunday": {},
-      },
-    },
-  },
-  "NationalDelivery": {
-    "billingPeriods": [
-      "Month",
-    ],
-    "productRatePlans": {
-      "Everyday": {
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Sunday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Sixday": {
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Weekend": {
-        "Saturday": {},
-        "Sunday": {},
-      },
-    },
-  },
-  "NewspaperVoucher": {
-    "billingPeriods": [
-      "Month",
-    ],
-    "productRatePlans": {
-      "Everyday": {
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Sunday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Everyday+": {
-        "DigitalPack": {},
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Sunday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Saturday": {
-        "Saturday": {},
-      },
-      "Saturday+": {
-        "DigitalPack": {},
-        "Saturday": {},
-      },
-      "Sixday": {
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Sixday+": {
-        "DigitalPack": {},
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Sunday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Sunday": {
-        "Sunday": {},
-      },
-      "Sunday+": {
-        "DigitalPack": {},
-        "Sunday": {},
-      },
-      "Weekend": {
-        "Saturday": {},
-        "Sunday": {},
-      },
-      "Weekend+": {
-        "DigitalPack": {},
-        "Saturday": {},
-        "Sunday": {},
-      },
-    },
-  },
-  "OneTimeContribution": {
-    "billingPeriods": [
-      "OneTime",
-    ],
-    "productRatePlans": {
-      "OneTime": {
-        "Contribution": {},
-      },
-    },
-  },
-  "PartnerMembership": {
-    "billingPeriods": [
-      "Annual",
-      "Month",
-    ],
-    "productRatePlans": {
-      "Annual": {
-        "Subscription": {},
-      },
-      "Monthly": {
-        "Subscription": {},
-      },
-      "V1DeprecatedAnnual": {
-        "Subscription": {},
-      },
-      "V1DeprecatedMonthly": {
-        "Subscription": {},
-      },
-    },
-  },
-  "PatronMembership": {
-    "billingPeriods": [
-      "Annual",
-      "Month",
-    ],
-    "productRatePlans": {
-      "Annual": {
-        "Subscription": {},
-      },
-      "Monthly": {
-        "Subscription": {},
-      },
-      "V1DeprecatedAnnual": {
-        "Subscription": {},
-      },
-      "V1DeprecatedMonthly": {
-        "Subscription": {},
-      },
-    },
-  },
-  "SubscriptionCard": {
-    "billingPeriods": [
-      "Month",
-    ],
-    "productRatePlans": {
-      "Everyday": {
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Sunday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Everyday+": {
-        "DigitalPack": {},
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Sunday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Saturday": {
-        "Saturday": {},
-      },
-      "Saturday+": {
-        "DigitalPack": {},
-        "Saturday": {},
-      },
-      "Sixday": {
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Sixday+": {
-        "DigitalPack": {},
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Sunday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Sunday": {
-        "Sunday": {},
-      },
-      "Sunday+": {
-        "DigitalPack": {},
-        "Sunday": {},
-      },
-      "Weekend": {
-        "Saturday": {},
-        "Sunday": {},
-      },
-      "Weekend+": {
-        "DigitalPack": {},
-        "Saturday": {},
-        "Sunday": {},
-      },
-    },
-  },
-  "SupporterMembership": {
-    "billingPeriods": [
-      "Month",
-      "Annual",
-    ],
-    "productRatePlans": {
-      "Annual": {
-        "Subscription": {},
-      },
-      "Monthly": {
-        "Subscription": {},
-      },
-      "V1DeprecatedAnnual": {
-        "Subscription": {},
-      },
-      "V1DeprecatedMonthly": {
-        "Subscription": {},
-      },
-      "V2DeprecatedAnnual": {
-        "Subscription": {},
-      },
-      "V2DeprecatedMonthly": {
-        "Subscription": {},
-      },
-    },
-  },
-  "SupporterPlus": {
-    "billingPeriods": [
-      "Annual",
-      "Month",
-    ],
-    "productRatePlans": {
-      "Annual": {
-        "Contribution": {},
-        "Subscription": {},
-      },
-      "GuardianWeeklyDomesticAnnual": {
-        "GuardianWeekly": {},
-        "SupporterPlus": {},
-      },
-      "GuardianWeeklyDomesticMonthly": {
-        "GuardianWeekly": {},
-        "SupporterPlus": {},
-      },
-      "GuardianWeeklyRestOfWorldAnnual": {
-        "GuardianWeekly": {},
-        "SupporterPlus": {},
-      },
-      "GuardianWeeklyRestOfWorldMonthly": {
-        "GuardianWeekly": {},
-        "SupporterPlus": {},
-      },
-      "Monthly": {
-        "Contribution": {},
-        "Subscription": {},
-      },
-      "V1DeprecatedAnnual": {
-        "Subscription": {},
-      },
-      "V1DeprecatedMonthly": {
-        "Subscription": {},
-      },
-    },
-  },
-  "TierThree": {
-    "billingPeriods": [
-      "Annual",
-      "Month",
-    ],
-    "productRatePlans": {
-      "DomesticAnnual": {
-        "GuardianWeekly": {},
-        "SupporterPlus": {},
-      },
-      "DomesticAnnualV2": {
-        "GuardianWeekly": {},
-        "NewspaperArchive": {},
-        "SupporterPlus": {},
-      },
-      "DomesticMonthly": {
-        "GuardianWeekly": {},
-        "SupporterPlus": {},
-      },
-      "DomesticMonthlyV2": {
-        "GuardianWeekly": {},
-        "NewspaperArchive": {},
-        "SupporterPlus": {},
-      },
-      "RestOfWorldAnnual": {
-        "GuardianWeekly": {},
-        "SupporterPlus": {},
-      },
-      "RestOfWorldAnnualV2": {
-        "GuardianWeekly": {},
-        "NewspaperArchive": {},
-        "SupporterPlus": {},
-      },
-      "RestOfWorldMonthly": {
-        "GuardianWeekly": {},
-        "SupporterPlus": {},
-      },
-      "RestOfWorldMonthlyV2": {
-        "GuardianWeekly": {},
-        "NewspaperArchive": {},
-        "SupporterPlus": {},
+    "SupporterMembership": {
+      "billingPeriods": [
+        "Month",
+        "Annual",
+      ],
+      "productRatePlans": {
+        "Annual": {
+          "Subscription": {},
+        },
+        "Monthly": {
+          "Subscription": {},
+        },
+        "V1DeprecatedAnnual": {
+          "Subscription": {},
+        },
+        "V1DeprecatedMonthly": {
+          "Subscription": {},
+        },
+        "V2DeprecatedAnnual": {
+          "Subscription": {},
+        },
+        "V2DeprecatedMonthly": {
+          "Subscription": {},
+        },
       },
     },
   },
@@ -3898,533 +3902,537 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
 
 exports[`prod Generated product catalog types match snapshot 1`] = `
 {
-  "Contribution": {
-    "billingPeriods": [
-      "Annual",
-      "Month",
-    ],
-    "productRatePlans": {
-      "Annual": {
-        "Contribution": {},
+  "active": {
+    "Contribution": {
+      "billingPeriods": [
+        "Annual",
+        "Month",
+      ],
+      "productRatePlans": {
+        "Annual": {
+          "Contribution": {},
+        },
+        "Monthly": {
+          "Contribution": {},
+        },
       },
-      "Monthly": {
-        "Contribution": {},
+    },
+    "DigitalSubscription": {
+      "billingPeriods": [
+        "Quarter",
+        "Month",
+        "Annual",
+      ],
+      "productRatePlans": {
+        "Annual": {
+          "Subscription": {},
+        },
+        "Monthly": {
+          "Subscription": {},
+        },
+        "OneYearGift": {
+          "Subscription": {},
+        },
+        "ThreeMonthGift": {
+          "Subscription": {},
+        },
+      },
+    },
+    "GuardianAdLite": {
+      "billingPeriods": [
+        "Month",
+      ],
+      "productRatePlans": {
+        "Monthly": {
+          "Subscription": {},
+        },
+      },
+    },
+    "GuardianLight": {
+      "billingPeriods": [
+        "Month",
+      ],
+      "productRatePlans": {
+        "Monthly": {
+          "Subscription": {},
+        },
+      },
+    },
+    "GuardianPatron": {
+      "billingPeriods": [
+        "Month",
+      ],
+      "productRatePlans": {
+        "GuardianPatron": {
+          "Subscription": {},
+        },
+      },
+    },
+    "GuardianWeeklyDomestic": {
+      "billingPeriods": [
+        "Annual",
+        "Quarter",
+        "Month",
+      ],
+      "productRatePlans": {
+        "Annual": {
+          "Subscription": {},
+        },
+        "Monthly": {
+          "Subscription": {},
+        },
+        "OneYearGift": {
+          "Subscription": {},
+        },
+        "Quarterly": {
+          "Subscription": {},
+        },
+        "ThreeMonthGift": {
+          "Subscription": {},
+        },
+      },
+    },
+    "GuardianWeeklyRestOfWorld": {
+      "billingPeriods": [
+        "Month",
+        "Annual",
+        "Quarter",
+      ],
+      "productRatePlans": {
+        "Annual": {
+          "Subscription": {},
+        },
+        "Monthly": {
+          "Monthly": {},
+        },
+        "OneYearGift": {
+          "Subscription": {},
+        },
+        "Quarterly": {
+          "Subscription": {},
+        },
+        "ThreeMonthGift": {
+          "Subscription": {},
+        },
+      },
+    },
+    "HomeDelivery": {
+      "billingPeriods": [
+        "Month",
+      ],
+      "productRatePlans": {
+        "Everyday": {
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Sunday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Everyday+": {
+          "DigitalPack": {},
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Sunday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Saturday": {
+          "Saturday": {},
+        },
+        "Saturday+": {
+          "DigitalPack": {},
+          "Saturday": {},
+        },
+        "Sixday": {
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Sixday+": {
+          "DigitalPack": {},
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Sunday": {
+          "Sunday": {},
+        },
+        "Sunday+": {
+          "DigitalPack": {},
+          "Sunday": {},
+        },
+        "Weekend": {
+          "Saturday": {},
+          "Sunday": {},
+        },
+        "Weekend+": {
+          "DigitalPack": {},
+          "Saturday": {},
+          "Sunday": {},
+        },
+      },
+    },
+    "NationalDelivery": {
+      "billingPeriods": [
+        "Month",
+      ],
+      "productRatePlans": {
+        "Everyday": {
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Sunday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Sixday": {
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Weekend": {
+          "Saturday": {},
+          "Sunday": {},
+        },
+      },
+    },
+    "OneTimeContribution": {
+      "billingPeriods": [
+        "OneTime",
+      ],
+      "productRatePlans": {
+        "OneTime": {
+          "Contribution": {},
+        },
+      },
+    },
+    "SubscriptionCard": {
+      "billingPeriods": [
+        "Month",
+      ],
+      "productRatePlans": {
+        "Everyday": {
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Sunday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Everyday+": {
+          "DigitalPack": {},
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Sunday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Saturday": {
+          "Saturday": {},
+        },
+        "Saturday+": {
+          "DigitalPack": {},
+          "Saturday": {},
+        },
+        "Sixday": {
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Sixday+": {
+          "DigitalPack": {},
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Sunday": {
+          "Sunday": {},
+        },
+        "Sunday+": {
+          "DigitalPack": {},
+          "Sunday": {},
+        },
+        "Weekend": {
+          "Saturday": {},
+          "Sunday": {},
+        },
+        "Weekend+": {
+          "DigitalPack": {},
+          "Saturday": {},
+          "Sunday": {},
+        },
+      },
+    },
+    "SupporterPlus": {
+      "billingPeriods": [
+        "Month",
+        "Annual",
+      ],
+      "productRatePlans": {
+        "Annual": {
+          "Contribution": {},
+          "Subscription": {},
+        },
+        "Monthly": {
+          "Contribution": {},
+          "Subscription": {},
+        },
+        "V1DeprecatedAnnual": {
+          "Subscription": {},
+        },
+        "V1DeprecatedMonthly": {
+          "Subscription": {},
+        },
+      },
+    },
+    "TierThree": {
+      "billingPeriods": [
+        "Annual",
+        "Month",
+      ],
+      "productRatePlans": {
+        "DomesticAnnual": {
+          "GuardianWeekly": {},
+          "SupporterPlus": {},
+        },
+        "DomesticAnnualV2": {
+          "GuardianWeekly": {},
+          "NewspaperArchive": {},
+          "SupporterPlus": {},
+        },
+        "DomesticMonthly": {
+          "GuardianWeekly": {},
+          "SupporterPlus": {},
+        },
+        "DomesticMonthlyV2": {
+          "GuardianWeekly": {},
+          "NewspaperArchive": {},
+          "SupporterPlus": {},
+        },
+        "RestOfWorldAnnual": {
+          "GuardianWeekly": {},
+          "SupporterPlus": {},
+        },
+        "RestOfWorldAnnualV2": {
+          "GuardianWeekly": {},
+          "NewspaperArchive": {},
+          "SupporterPlus": {},
+        },
+        "RestOfWorldMonthly": {
+          "GuardianWeekly": {},
+          "SupporterPlus": {},
+        },
+        "RestOfWorldMonthlyV2": {
+          "GuardianWeekly": {},
+          "NewspaperArchive": {},
+          "SupporterPlus": {},
+        },
       },
     },
   },
-  "DigitalSubscription": {
-    "billingPeriods": [
-      "Quarter",
-      "Month",
-      "Annual",
-    ],
-    "productRatePlans": {
-      "Annual": {
-        "Subscription": {},
-      },
-      "Monthly": {
-        "Subscription": {},
-      },
-      "OneYearGift": {
-        "Subscription": {},
-      },
-      "ThreeMonthGift": {
-        "Subscription": {},
+  "inactive": {
+    "GuardianWeeklyZoneA": {
+      "billingPeriods": [
+        "Annual",
+        "Three_Years",
+        "Semi_Annual",
+        "Two_Years",
+        "Quarter",
+      ],
+      "productRatePlans": {
+        "Annual": {
+          "Subscription": {},
+        },
+        "Quarterly": {
+          "Subscription": {},
+        },
       },
     },
-  },
-  "GuardianAdLite": {
-    "billingPeriods": [
-      "Month",
-    ],
-    "productRatePlans": {
-      "Monthly": {
-        "Subscription": {},
+    "GuardianWeeklyZoneB": {
+      "billingPeriods": [
+        "Annual",
+        "Three_Years",
+        "Two_Years",
+        "Semi_Annual",
+        "Quarter",
+      ],
+      "productRatePlans": {
+        "Annual": {
+          "Subscription": {},
+        },
+        "Quarterly": {
+          "Subscription": {},
+        },
       },
     },
-  },
-  "GuardianLight": {
-    "billingPeriods": [
-      "Month",
-    ],
-    "productRatePlans": {
-      "Monthly": {
-        "Subscription": {},
+    "GuardianWeeklyZoneC": {
+      "billingPeriods": [
+        "Semi_Annual",
+        "Annual",
+        "Quarter",
+      ],
+      "productRatePlans": {
+        "Annual": {
+          "Subscription": {},
+        },
+        "Quarterly": {
+          "Subscription": {},
+        },
       },
     },
-  },
-  "GuardianPatron": {
-    "billingPeriods": [
-      "Month",
-    ],
-    "productRatePlans": {
-      "GuardianPatron": {
-        "Subscription": {},
+    "NewspaperVoucher": {
+      "billingPeriods": [
+        "Month",
+      ],
+      "productRatePlans": {
+        "Everyday": {
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Sunday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Everyday+": {
+          "DigitalPack": {},
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Sunday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Saturday": {
+          "Saturday": {},
+        },
+        "Saturday+": {
+          "DigitalPack": {},
+          "Saturday": {},
+        },
+        "Sixday": {
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Sixday+": {
+          "DigitalPack": {},
+          "Friday": {},
+          "Monday": {},
+          "Saturday": {},
+          "Thursday": {},
+          "Tuesday": {},
+          "Wednesday": {},
+        },
+        "Sunday": {
+          "Sunday": {},
+        },
+        "Sunday+": {
+          "DigitalPack": {},
+          "Sunday": {},
+        },
+        "Weekend": {
+          "Saturday": {},
+          "Sunday": {},
+        },
+        "Weekend+": {
+          "DigitalPack": {},
+          "Saturday": {},
+          "Sunday": {},
+        },
       },
     },
-  },
-  "GuardianWeeklyDomestic": {
-    "billingPeriods": [
-      "Annual",
-      "Quarter",
-      "Month",
-    ],
-    "productRatePlans": {
-      "Annual": {
-        "Subscription": {},
-      },
-      "Monthly": {
-        "Subscription": {},
-      },
-      "OneYearGift": {
-        "Subscription": {},
-      },
-      "Quarterly": {
-        "Subscription": {},
-      },
-      "ThreeMonthGift": {
-        "Subscription": {},
+    "PartnerMembership": {
+      "billingPeriods": [
+        "Annual",
+        "Month",
+      ],
+      "productRatePlans": {
+        "Annual": {
+          "Subscription": {},
+        },
+        "Monthly": {
+          "Subscription": {},
+        },
+        "V1DeprecatedAnnual": {
+          "Subscription": {},
+        },
+        "V1DeprecatedMonthly": {
+          "Subscription": {},
+        },
       },
     },
-  },
-  "GuardianWeeklyRestOfWorld": {
-    "billingPeriods": [
-      "Month",
-      "Annual",
-      "Quarter",
-    ],
-    "productRatePlans": {
-      "Annual": {
-        "Subscription": {},
-      },
-      "Monthly": {
-        "Monthly": {},
-      },
-      "OneYearGift": {
-        "Subscription": {},
-      },
-      "Quarterly": {
-        "Subscription": {},
-      },
-      "ThreeMonthGift": {
-        "Subscription": {},
+    "PatronMembership": {
+      "billingPeriods": [
+        "Month",
+        "Annual",
+      ],
+      "productRatePlans": {
+        "Annual": {
+          "Subscription": {},
+        },
+        "Monthly": {
+          "Subscription": {},
+        },
+        "V1DeprecatedAnnual": {
+          "Subscription": {},
+        },
+        "V1DeprecatedMonthly": {
+          "Subscription": {},
+        },
       },
     },
-  },
-  "GuardianWeeklyZoneA": {
-    "billingPeriods": [
-      "Annual",
-      "Three_Years",
-      "Semi_Annual",
-      "Two_Years",
-      "Quarter",
-    ],
-    "productRatePlans": {
-      "Annual": {
-        "Subscription": {},
-      },
-      "Quarterly": {
-        "Subscription": {},
-      },
-    },
-  },
-  "GuardianWeeklyZoneB": {
-    "billingPeriods": [
-      "Annual",
-      "Three_Years",
-      "Two_Years",
-      "Semi_Annual",
-      "Quarter",
-    ],
-    "productRatePlans": {
-      "Annual": {
-        "Subscription": {},
-      },
-      "Quarterly": {
-        "Subscription": {},
-      },
-    },
-  },
-  "GuardianWeeklyZoneC": {
-    "billingPeriods": [
-      "Semi_Annual",
-      "Annual",
-      "Quarter",
-    ],
-    "productRatePlans": {
-      "Annual": {
-        "Subscription": {},
-      },
-      "Quarterly": {
-        "Subscription": {},
-      },
-    },
-  },
-  "HomeDelivery": {
-    "billingPeriods": [
-      "Month",
-    ],
-    "productRatePlans": {
-      "Everyday": {
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Sunday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Everyday+": {
-        "DigitalPack": {},
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Sunday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Saturday": {
-        "Saturday": {},
-      },
-      "Saturday+": {
-        "DigitalPack": {},
-        "Saturday": {},
-      },
-      "Sixday": {
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Sixday+": {
-        "DigitalPack": {},
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Sunday": {
-        "Sunday": {},
-      },
-      "Sunday+": {
-        "DigitalPack": {},
-        "Sunday": {},
-      },
-      "Weekend": {
-        "Saturday": {},
-        "Sunday": {},
-      },
-      "Weekend+": {
-        "DigitalPack": {},
-        "Saturday": {},
-        "Sunday": {},
-      },
-    },
-  },
-  "NationalDelivery": {
-    "billingPeriods": [
-      "Month",
-    ],
-    "productRatePlans": {
-      "Everyday": {
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Sunday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Sixday": {
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Weekend": {
-        "Saturday": {},
-        "Sunday": {},
-      },
-    },
-  },
-  "NewspaperVoucher": {
-    "billingPeriods": [
-      "Month",
-    ],
-    "productRatePlans": {
-      "Everyday": {
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Sunday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Everyday+": {
-        "DigitalPack": {},
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Sunday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Saturday": {
-        "Saturday": {},
-      },
-      "Saturday+": {
-        "DigitalPack": {},
-        "Saturday": {},
-      },
-      "Sixday": {
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Sixday+": {
-        "DigitalPack": {},
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Sunday": {
-        "Sunday": {},
-      },
-      "Sunday+": {
-        "DigitalPack": {},
-        "Sunday": {},
-      },
-      "Weekend": {
-        "Saturday": {},
-        "Sunday": {},
-      },
-      "Weekend+": {
-        "DigitalPack": {},
-        "Saturday": {},
-        "Sunday": {},
-      },
-    },
-  },
-  "OneTimeContribution": {
-    "billingPeriods": [
-      "OneTime",
-    ],
-    "productRatePlans": {
-      "OneTime": {
-        "Contribution": {},
-      },
-    },
-  },
-  "PartnerMembership": {
-    "billingPeriods": [
-      "Annual",
-      "Month",
-    ],
-    "productRatePlans": {
-      "Annual": {
-        "Subscription": {},
-      },
-      "Monthly": {
-        "Subscription": {},
-      },
-      "V1DeprecatedAnnual": {
-        "Subscription": {},
-      },
-      "V1DeprecatedMonthly": {
-        "Subscription": {},
-      },
-    },
-  },
-  "PatronMembership": {
-    "billingPeriods": [
-      "Month",
-      "Annual",
-    ],
-    "productRatePlans": {
-      "Annual": {
-        "Subscription": {},
-      },
-      "Monthly": {
-        "Subscription": {},
-      },
-      "V1DeprecatedAnnual": {
-        "Subscription": {},
-      },
-      "V1DeprecatedMonthly": {
-        "Subscription": {},
-      },
-    },
-  },
-  "SubscriptionCard": {
-    "billingPeriods": [
-      "Month",
-    ],
-    "productRatePlans": {
-      "Everyday": {
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Sunday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Everyday+": {
-        "DigitalPack": {},
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Sunday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Saturday": {
-        "Saturday": {},
-      },
-      "Saturday+": {
-        "DigitalPack": {},
-        "Saturday": {},
-      },
-      "Sixday": {
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Sixday+": {
-        "DigitalPack": {},
-        "Friday": {},
-        "Monday": {},
-        "Saturday": {},
-        "Thursday": {},
-        "Tuesday": {},
-        "Wednesday": {},
-      },
-      "Sunday": {
-        "Sunday": {},
-      },
-      "Sunday+": {
-        "DigitalPack": {},
-        "Sunday": {},
-      },
-      "Weekend": {
-        "Saturday": {},
-        "Sunday": {},
-      },
-      "Weekend+": {
-        "DigitalPack": {},
-        "Saturday": {},
-        "Sunday": {},
-      },
-    },
-  },
-  "SupporterMembership": {
-    "billingPeriods": [
-      "Annual",
-      "Month",
-    ],
-    "productRatePlans": {
-      "Annual": {
-        "Subscription": {},
-      },
-      "Monthly": {
-        "Subscription": {},
-      },
-      "V1DeprecatedAnnual": {
-        "Subscription": {},
-      },
-      "V1DeprecatedMonthly": {
-        "Subscription": {},
-      },
-      "V2DeprecatedAnnual": {
-        "Subscription": {},
-      },
-      "V2DeprecatedMonthly": {
-        "Subscription": {},
-      },
-    },
-  },
-  "SupporterPlus": {
-    "billingPeriods": [
-      "Month",
-      "Annual",
-    ],
-    "productRatePlans": {
-      "Annual": {
-        "Contribution": {},
-        "Subscription": {},
-      },
-      "Monthly": {
-        "Contribution": {},
-        "Subscription": {},
-      },
-      "V1DeprecatedAnnual": {
-        "Subscription": {},
-      },
-      "V1DeprecatedMonthly": {
-        "Subscription": {},
-      },
-    },
-  },
-  "TierThree": {
-    "billingPeriods": [
-      "Annual",
-      "Month",
-    ],
-    "productRatePlans": {
-      "DomesticAnnual": {
-        "GuardianWeekly": {},
-        "SupporterPlus": {},
-      },
-      "DomesticAnnualV2": {
-        "GuardianWeekly": {},
-        "NewspaperArchive": {},
-        "SupporterPlus": {},
-      },
-      "DomesticMonthly": {
-        "GuardianWeekly": {},
-        "SupporterPlus": {},
-      },
-      "DomesticMonthlyV2": {
-        "GuardianWeekly": {},
-        "NewspaperArchive": {},
-        "SupporterPlus": {},
-      },
-      "RestOfWorldAnnual": {
-        "GuardianWeekly": {},
-        "SupporterPlus": {},
-      },
-      "RestOfWorldAnnualV2": {
-        "GuardianWeekly": {},
-        "NewspaperArchive": {},
-        "SupporterPlus": {},
-      },
-      "RestOfWorldMonthly": {
-        "GuardianWeekly": {},
-        "SupporterPlus": {},
-      },
-      "RestOfWorldMonthlyV2": {
-        "GuardianWeekly": {},
-        "NewspaperArchive": {},
-        "SupporterPlus": {},
+    "SupporterMembership": {
+      "billingPeriods": [
+        "Annual",
+        "Month",
+      ],
+      "productRatePlans": {
+        "Annual": {
+          "Subscription": {},
+        },
+        "Monthly": {
+          "Subscription": {},
+        },
+        "V1DeprecatedAnnual": {
+          "Subscription": {},
+        },
+        "V1DeprecatedMonthly": {
+          "Subscription": {},
+        },
+        "V2DeprecatedAnnual": {
+          "Subscription": {},
+        },
+        "V2DeprecatedMonthly": {
+          "Subscription": {},
+        },
       },
     },
   },
