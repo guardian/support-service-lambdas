@@ -11,10 +11,18 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 
 			console.log(JSON.stringify(body));
 
-			const accessToken = await getSecretValue<string>({ secretName: '' });
+			const accessToken = await getSecretValue<string>({
+				secretName: `${process.env.STAGE}/Identity/${process.env.APP}`,
+			});
+
+			const email = body.detail.data.object.customer_details?.email;
+
+			if (!accessToken || !email) {
+				throw new Error('Error');
+			}
 
 			const response = await fetch(
-				`$https://idapi.theguardian.com/user?emailAddress=${body.detail.data.object.customer_details?.email}`,
+				`$https://idapi.theguardian.com/user?emailAddress=${email}`,
 				{
 					method: 'GET',
 					headers: {

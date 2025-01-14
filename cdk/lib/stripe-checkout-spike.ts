@@ -78,6 +78,17 @@ export class StripeCheckoutSpike extends GuStack {
 			functionName: `checkout-session-completed-event-handler-${this.stage}`,
 			environment: { ...lambdaDefaultConfig.environment },
 			events: [new SqsEventSource(queue)],
+			initialPolicy: [
+				new PolicyStatement({
+					actions: [
+						'secretsmanager:GetSecretValue',
+						'secretsmanager:DescribeSecret',
+					],
+					resources: [
+						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Identity/stripe-checkout-spike-*`,
+					],
+				}),
+			],
 		});
 	}
 }
