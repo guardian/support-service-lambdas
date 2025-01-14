@@ -7,7 +7,7 @@ export const productBenefitListSchema = z.enum([
 	'newspaperEdition',
 	'guardianWeeklyEdition',
 	'liveApp',
-	'fewerSupportAsks',
+	'hideSupportMessaging',
 	'rejectTracking',
 	'liveEvents',
 ]);
