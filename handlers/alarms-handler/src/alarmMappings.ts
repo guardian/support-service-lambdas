@@ -38,6 +38,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'super-mode',
 		'support-reminders',
 		'ticker-calculator',
+		'bandit',
 	],
 	VALUE: [
 		'apps-metering-events',
