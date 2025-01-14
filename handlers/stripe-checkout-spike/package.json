@@ -15,5 +15,8 @@
 		"@types/aws-lambda": "^8.10.147",
 		"aws-sdk-client-mock": "4.1.0"
 	},
-	"dependencies": {}
+	"dependencies": {
+		"@aws-sdk/client-secrets-manager": "3.682.0",
+		"stripe": "^17.5.0"
+	}
 }
