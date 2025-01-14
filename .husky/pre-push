@@ -1,13 +1,29 @@
-# Fetch the latest changes from the remote without merging
+#!/bin/sh +e
+
 git fetch origin
 
-# Get the name of the current branch
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
-# Check if there are changes in the 'cdk' folder between the local branch and its remote
-if git diff --exit-code --quiet origin/$CURRENT_BRANCH -- cdk/; then
+git diff --exit-code --quiet origin/$CURRENT_BRANCH -- cdk/
+RC=$?
+if [ $RC -eq 0 ]; then
+  # no changes
   echo "No changes detected in the 'cdk' folder. Skipping lint and test."
-else
+elif [ $RC -eq 1 ]; then
   echo "Changes detected in the 'cdk' folder. Running lint and test..."
   pnpm --filter cdk lint && pnpm --filter cdk test
+else
+  # something went wrong, maybe we haven't pushed our branch and are branching off main
+  # use main not origin/main as we don't care if others changed cdk dir
+  git diff --exit-code --quiet main -- cdk/
+  RC=$?
+    if [ $RC -eq 0 ]; then
+      # no changes
+      echo "(main) No changes detected in the 'cdk' folder. Skipping lint and test."
+    elif [ $RC -eq 1 ]; then
+      echo "(main) Changes detected in the 'cdk' folder. Running lint and test..."
+      pnpm --filter cdk lint && pnpm --filter cdk test
+    else
+      echo "Error: could not compare with upstream"
+    fi
 fi
