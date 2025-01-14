@@ -24,6 +24,7 @@ export const tierThreeBenefits = digitalSubscriptionBenefits.concat([
 
 export const productBenefitMapping: Record<ProductKey, ProductBenefit[]> = {
 	GuardianLight: ['rejectTracking'],
+	GuardianAdLite: ['rejectTracking'],
 	SupporterPlus: supporterPlusBenefits,
 	DigitalSubscription: digitalSubscriptionBenefits,
 	TierThree: tierThreeBenefits,
