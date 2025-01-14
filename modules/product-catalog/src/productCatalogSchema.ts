@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { typeObject } from '@modules/product-catalog/typeObject';
+import { typeObject } from '@modules/product-catalog/productCatalog';
 
 export const productCatalogSchema = z.object({
 	GuardianPatron: z.object({

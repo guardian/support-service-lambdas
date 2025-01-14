@@ -7,7 +7,7 @@ import {
 type ActiveTypeObject = typeof activeTypeObject;
 type InactiveTypeObject = typeof inactiveTypeObject;
 
-const typeObject = {
+export const typeObject = {
 	...activeTypeObject,
 	...inactiveTypeObject,
 };
