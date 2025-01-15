@@ -1,9 +1,21 @@
 import type { Currency } from '@modules/internationalisation/currency';
-import { typeObject } from '@modules/product-catalog/typeObject';
+import {
+	activeTypeObject,
+	inactiveTypeObject,
+} from '@modules/product-catalog/typeObject';
 
+type ActiveTypeObject = typeof activeTypeObject;
+type InactiveTypeObject = typeof inactiveTypeObject;
+
+export const typeObject = {
+	...activeTypeObject,
+	...inactiveTypeObject,
+};
 type TypeObject = typeof typeObject;
 
 export type ProductKey = keyof TypeObject;
+export type ActiveProductKey = keyof ActiveTypeObject;
+export type InactiveProductKey = keyof InactiveTypeObject;
 
 export type ProductRatePlanKey<P extends ProductKey> =
 	keyof TypeObject[P]['productRatePlans'];
