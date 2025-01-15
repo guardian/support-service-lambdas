@@ -51,6 +51,7 @@ const buildCloudwatchClient = (awsAccountId: string): CloudWatchClient => {
 
 export type Tags = {
 	App?: string;
+	DiagnosticUrls?: string;
 };
 
 export const getTags = async (

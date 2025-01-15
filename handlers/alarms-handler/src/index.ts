@@ -11,6 +11,13 @@ const cloudWatchAlarmMessageSchema = z.object({
 	NewStateReason: z.string(),
 	NewStateValue: z.string(),
 	AWSAccountId: z.string(),
+	StateChangeTime: z.coerce.date(),
+	Trigger: z
+		.object({
+			Period: z.number(),
+			EvaluationPeriods: z.number(),
+		})
+		.optional(),
 });
 
 type CloudWatchAlarmMessage = z.infer<typeof cloudWatchAlarmMessageSchema>;
@@ -61,7 +68,7 @@ export async function getChatMessages(
 
 	let message;
 	if (parsedMessage) {
-		message = await handleCloudWatchAlarmMessage({ message: parsedMessage });
+		message = await handleCloudWatchAlarmMessage(parsedMessage);
 	} else {
 		message = handleSnsPublishMessage({
 			message: Message,
@@ -93,33 +100,66 @@ const attemptToParseMessageString = ({
 };
 
 const handleCloudWatchAlarmMessage = async ({
-	message,
-}: {
-	message: CloudWatchAlarmMessage;
-}) => {
-	const {
-		AlarmArn,
-		AlarmName,
-		NewStateReason,
-		NewStateValue,
-		AlarmDescription,
-		AWSAccountId,
-	} = message;
+	AlarmArn,
+	AlarmName,
+	NewStateReason,
+	NewStateValue,
+	AlarmDescription,
+	AWSAccountId,
+	StateChangeTime,
+	Trigger,
+}: CloudWatchAlarmMessage) => {
+	const { App, DiagnosticUrls } = await getTags(AlarmArn, AWSAccountId);
 
-	const { App } = await getTags(AlarmArn, AWSAccountId);
+	const diagnosticUrlTemplates = DiagnosticUrls
+		? DiagnosticUrls.split(',')
+		: [];
+
+	const links = diagnosticUrlTemplates.map((diagnosticUrlTemplate) =>
+		addInsertsToTemplate(diagnosticUrlTemplate, Trigger, StateChangeTime),
+	);
 
 	const title =
 		NewStateValue === 'OK'
 			? `✅ *ALARM OK:* ${AlarmName} has recovered!`
 			: `🚨 *ALARM:* ${AlarmName} has triggered!`;
-	const text = `${title}\n\n*Description:* ${
-		AlarmDescription ?? ''
-	}\n\n*Reason:* ${NewStateReason}`;
+	const text = [
+		title,
+		`*Description:* ${AlarmDescription ?? ''}`,
+		`*Reason:* ${NewStateReason}`,
+	]
+		.concat(links.map((link) => `*LogLink*: ${link}`))
+		.join('\n\n');
 
-	console.log(`CloudWatch alarm from ${App}`);
+	console.log(`CloudWatch alarm from ${App}`, text);
 
 	return { app: App, text };
 };
+
+function addInsertsToTemplate(
+	diagnosticUrlTemplate: string,
+	Trigger:
+		| {
+				Period: number;
+				EvaluationPeriods: number;
+		  }
+		| undefined,
+	StateChangeTime: Date,
+) {
+	const assumedTimeForCompositeAlarms = 300;
+	const alarmCoveredTimeSeconds = Trigger
+		? Trigger.EvaluationPeriods * Trigger.Period
+		: assumedTimeForCompositeAlarms;
+	const alarmEndTimeMillis = StateChangeTime.getTime();
+	const alarmStartTimeMillis =
+		alarmEndTimeMillis - 1000 * alarmCoveredTimeSeconds;
+
+	const url = diagnosticUrlTemplate
+		.replaceAll('$startMillis', `${alarmStartTimeMillis}`)
+		.replaceAll('$endMillis', `${alarmEndTimeMillis}`);
+
+	return url;
+}
 
 const handleSnsPublishMessage = ({
 	message,
