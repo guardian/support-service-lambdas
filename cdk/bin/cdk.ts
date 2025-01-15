@@ -277,6 +277,14 @@ new UserBenefits(app, 'user-benefits-CODE', {
 	certificateId: supportCertificateId,
 	supporterProductDataTable:
 		'supporter-product-data-tables-CODE-SupporterProductDataTable',
+	corsAllowOrigins: [
+		'https://m.code.dev-theguardian.com',
+		'https://profile.code.dev-theguardian.com',
+		'https://profile.thegulocal.com',
+		'https://m.thegulocal.com',
+		'https://support.code.dev-theguardian.com',
+		'https://support.thegulocal.com',
+	],
 });
 new UserBenefits(app, 'user-benefits-PROD', {
 	stack: 'support',
@@ -287,6 +295,13 @@ new UserBenefits(app, 'user-benefits-PROD', {
 	certificateId: supportCertificateId,
 	supporterProductDataTable:
 		'supporter-product-data-tables-PROD-SupporterProductDataTable',
+	corsAllowOrigins: [
+		'https://www.theguardian.com',
+		'https://interactive.guim.co.uk',
+		'https://membership.theguardian.com',
+		'https://profile.theguardian.com',
+		'https://support.theguardian.com',
+	],
 });
 new DiscountExpiryNotifier(app, 'discount-expiry-notifier-CODE', {
 	stack: 'support',

@@ -24,6 +24,7 @@ export interface UserBenefitsProps extends GuStackProps {
 	publicDomainName: string;
 	hostedZoneId: string;
 	supporterProductDataTable: string;
+	corsAllowOrigins: string[];
 }
 
 export class UserBenefits extends GuStack {
@@ -90,6 +91,10 @@ export class UserBenefits extends GuStack {
 					apiKeyRequired: true,
 				},
 			],
+			defaultCorsPreflightOptions: {
+				allowOrigins: props.corsAllowOrigins,
+				allowMethods: ['GET'],
+			},
 			monitoringConfiguration: {
 				http5xxAlarm: { tolerated5xxPercentage: 5 },
 				snsTopicName: `alarms-handler-topic-${this.stage}`,
