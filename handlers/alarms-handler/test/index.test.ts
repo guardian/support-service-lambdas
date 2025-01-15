@@ -1,7 +1,7 @@
 import type { SQSEvent, SQSRecord } from 'aws-lambda';
 import { getChatMessages, handler } from '../src';
 import { AlarmMappings } from '../src/alarmMappings';
-import { getAppNameTag } from '../src/cloudwatch';
+import { getTags } from '../src/cloudwatch';
 
 jest.mock('../src/cloudwatch');
 
@@ -52,7 +52,7 @@ describe('Handler', () => {
 	});
 
 	it('should handle CloudWatch alarm message', async () => {
-		(getAppNameTag as jest.Mock).mockResolvedValueOnce('mock-app');
+		(getTags as jest.Mock).mockResolvedValueOnce({ App: 'mock-app' });
 
 		jest
 			.spyOn(global, 'fetch')
@@ -60,18 +60,19 @@ describe('Handler', () => {
 
 		await handler(mockCloudWatchAlarmEvent);
 
-		expect(getAppNameTag).toHaveBeenCalledWith('mock-arn', '111111');
+		expect(getTags).toHaveBeenCalledWith('mock-arn', '111111');
 		expect(fetch).toHaveBeenCalledWith(mockEnv.SRE_WEBHOOK, expect.any(Object));
 	});
+
 	it('should handle captured CloudWatch alarm message', async () => {
-		(getAppNameTag as jest.Mock).mockResolvedValueOnce('mock-app');
+		(getTags as jest.Mock).mockResolvedValueOnce({ App: 'mock-app' });
 
 		const result = await getChatMessages(
 			fullCloudWatchAlarmEvent,
 			AlarmMappings({ SRE: ['mock-app'] }),
 		);
 
-		expect(getAppNameTag).toHaveBeenCalledWith(
+		expect(getTags).toHaveBeenCalledWith(
 			'arn:aws:cloudwatch:eu-west-1:1234:alarm:DISCOUNT-API-CODE Discount-api 5XX response',
 			'1234',
 		);
@@ -104,7 +105,7 @@ describe('Handler', () => {
 	});
 
 	it('calls the webhook with the correct data for an OK action', async () => {
-		(getAppNameTag as jest.Mock).mockResolvedValueOnce('mock-app');
+		(getTags as jest.Mock).mockResolvedValueOnce({ App: 'mock-app' });
 		jest
 			.spyOn(global, 'fetch')
 			.mockResolvedValue(Promise.resolve(new Response(JSON.stringify({}))));

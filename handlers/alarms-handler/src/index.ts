@@ -2,7 +2,7 @@ import type { SNSEventRecord, SQSEvent, SQSRecord } from 'aws-lambda';
 import { z } from 'zod';
 import type { AlarmMappings } from './alarmMappings';
 import { ProdAlarmMappings } from './alarmMappings';
-import { getAppNameTag } from './cloudwatch';
+import { getTags } from './cloudwatch';
 
 const cloudWatchAlarmMessageSchema = z.object({
 	AlarmArn: z.string(),
@@ -106,7 +106,7 @@ const handleCloudWatchAlarmMessage = async ({
 		AWSAccountId,
 	} = message;
 
-	const app = await getAppNameTag(AlarmArn, AWSAccountId);
+	const { App } = await getTags(AlarmArn, AWSAccountId);
 
 	const title =
 		NewStateValue === 'OK'
@@ -116,9 +116,9 @@ const handleCloudWatchAlarmMessage = async ({
 		AlarmDescription ?? ''
 	}\n\n*Reason:* ${NewStateReason}`;
 
-	console.log(`CloudWatch alarm from ${app}`);
+	console.log(`CloudWatch alarm from ${App}`);
 
-	return { app, text };
+	return { app: App, text };
 };
 
 const handleSnsPublishMessage = ({
