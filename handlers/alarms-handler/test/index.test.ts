@@ -95,6 +95,7 @@ describe('Handler', () => {
 	});
 
 	it('should throw error if the fetch HTTP call fails', async () => {
+		(getTags as jest.Mock).mockResolvedValueOnce({ App: 'mock-app' });
 		jest
 			.spyOn(global, 'fetch')
 			.mockResolvedValue(Promise.reject(new Error('Fetch error')));
