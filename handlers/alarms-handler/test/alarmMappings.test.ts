@@ -1,10 +1,10 @@
-import { getTeams } from '../src/alarmMappings';
+import { ProdAlarmMappings } from '../src/alarmMappings';
 
 describe('getTeam', () => {
 	it('returns the correct team for a given app', () => {
 		const app = 'apps-metering';
 
-		const team = getTeams(app);
+		const team = ProdAlarmMappings.getTeams(app);
 
 		expect(team).toEqual(['GROWTH']);
 	});
@@ -12,7 +12,7 @@ describe('getTeam', () => {
 	it('returns SRE if the app does not have a team owner', () => {
 		const app = 'foo';
 
-		const team = getTeams(app);
+		const team = ProdAlarmMappings.getTeams(app);
 
 		expect(team).toEqual(['SRE']);
 	});
@@ -20,7 +20,7 @@ describe('getTeam', () => {
 	it('returns SRE if there is no app tag', () => {
 		const app = undefined;
 
-		const team = getTeams(app);
+		const team = ProdAlarmMappings.getTeams(app);
 
 		expect(team).toEqual(['SRE']);
 	});

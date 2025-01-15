@@ -1,5 +1,6 @@
-import { type SQSEvent } from 'aws-lambda';
-import { handler } from '../src';
+import type { SQSEvent, SQSRecord } from 'aws-lambda';
+import { getChatMessages, handler } from '../src';
+import { AlarmMappings } from '../src/alarmMappings';
 import { getAppNameTag } from '../src/cloudwatch';
 
 jest.mock('../src/cloudwatch');
@@ -62,6 +63,25 @@ describe('Handler', () => {
 		expect(getAppNameTag).toHaveBeenCalledWith('mock-arn', '111111');
 		expect(fetch).toHaveBeenCalledWith(mockEnv.SRE_WEBHOOK, expect.any(Object));
 	});
+	it('should handle captured CloudWatch alarm message', async () => {
+		(getAppNameTag as jest.Mock).mockResolvedValueOnce('mock-app');
+
+		const result = await getChatMessages(
+			fullCloudWatchAlarmEvent,
+			AlarmMappings({ SRE: ['mock-app'] }),
+		);
+
+		expect(getAppNameTag).toHaveBeenCalledWith(
+			'arn:aws:cloudwatch:eu-west-1:1234:alarm:DISCOUNT-API-CODE Discount-api 5XX response',
+			'1234',
+		);
+		const expectedText =
+			'🚨 *ALARM:* DISCOUNT-API-CODE Discount-api 5XX response has triggered!\n\n' +
+			'*Description:* Impact - Discount api returned a 5XX response check the logs for more information: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fdiscount-api-CODE. Follow the process in https://docs.google.com/document/d/sdkjfhskjdfhksjdhf/edit\n\n' +
+			'*Reason:* Threshold Crossed: 1 datapoint [2.0 (09/10/24 07:18:00)] was greater than or equal to the threshold (1.0).';
+		expect(result?.webhookUrls).toEqual([mockEnv.SRE_WEBHOOK]);
+		expect(result?.text).toEqual(expectedText);
+	});
 
 	it('should handle SNS publish message', async () => {
 		jest
@@ -116,3 +136,64 @@ describe('Handler', () => {
 		);
 	});
 });
+
+const fullCloudWatchAlarmEvent = {
+	messageId: 'askjdhaskjhdjkashdakjsdjkashd',
+	receiptHandle: 'skdfhksjdfhksjdhfkjsdhfjkhsdfksd==',
+	body: JSON.stringify({
+		Type: 'Notification',
+		MessageId: 'sdkfjhslkdfhjksjdhfkjsdhf',
+		TopicArn: 'arn:aws:sns:eu-west-1:123456:alarms-handler-topic-CODE',
+		Subject:
+			'ALARM: "DISCOUNT-API-CODE Discount-api 5XX response" in EU (Ireland)',
+		Message: JSON.stringify({
+			AlarmName: 'DISCOUNT-API-CODE Discount-api 5XX response',
+			AlarmDescription:
+				'Impact - Discount api returned a 5XX response check the logs for more information: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fdiscount-api-CODE. Follow the process in https://docs.google.com/document/d/sdkjfhskjdfhksjdhf/edit',
+			AWSAccountId: '1234',
+			AlarmConfigurationUpdatedTimestamp: '2024-09-23T09:21:15.363+0000',
+			NewStateValue: 'ALARM',
+			NewStateReason:
+				'Threshold Crossed: 1 datapoint [2.0 (09/10/24 07:18:00)] was greater than or equal to the threshold (1.0).',
+			StateChangeTime: '2024-10-09T07:23:16.236+0000',
+			Region: 'EU (Ireland)',
+			AlarmArn:
+				'arn:aws:cloudwatch:eu-west-1:1234:alarm:DISCOUNT-API-CODE Discount-api 5XX response',
+			OldStateValue: 'OK',
+			OKActions: [],
+			AlarmActions: ['arn:aws:sns:eu-west-1:1234:alarms-handler-topic-CODE'],
+			InsufficientDataActions: [],
+			Trigger: {
+				MetricName: '5XXError',
+				Namespace: 'AWS/ApiGateway',
+				StatisticType: 'Statistic',
+				Statistic: 'SUM',
+				Unit: null,
+				Dimensions: [[Object]],
+				Period: 300,
+				EvaluationPeriods: 1,
+				ComparisonOperator: 'GreaterThanOrEqualToThreshold',
+				Threshold: 1,
+				TreatMissingData: '',
+				EvaluateLowSampleCountPercentile: '',
+			},
+		}),
+		Timestamp: '2024-10-09T07:23:16.318Z',
+		SignatureVersion: '1',
+		Signature: 'skjefhksjdhfkjsdhfkjsdhfkjsdf==',
+		SigningCertURL: 'https://sns.eu-west-1.amazonaws.com/smhdfsmdfhgsdjf.pem',
+		UnsubscribeURL:
+			'https://sns.eu-west-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:eu-west-1:1234:alarms-handler-topic-CODE:sdkjfhsdkjfhskdjf',
+	}),
+	attributes: {
+		ApproximateReceiveCount: '1',
+		SentTimestamp: '1728458596353',
+		SenderId: 'askjdhaskjdhaksdj',
+		ApproximateFirstReceiveTimestamp: '1728458596364',
+	},
+	messageAttributes: {},
+	md5OfBody: 'askdjalksdjlasdjlaksjd',
+	eventSource: 'aws:sqs',
+	eventSourceARN: 'arn:aws:sqs:eu-west-1:1234:alarms-handler-queue-CODE',
+	awsRegion: 'eu-west-1',
+} as SQSRecord;
