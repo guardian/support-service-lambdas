@@ -15,5 +15,6 @@
 		"@types/aws-lambda": "^8.10.147"
 	},
 	"dependencies": {
+		"@google-cloud/bigquery": "^7.9.1"
 	}
 }
