@@ -66,6 +66,22 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
+		const saveResultsLambda = new GuLambdaFunction(
+			this,
+			'save-results-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-save-results-send-${this.stage}`,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+				},
+				handler: 'saveResults.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+			},
+		);
+
 		const getSubsWithExpiringDiscountsLambdaTask = new LambdaInvoke(
 			this,
 			'Get Subs With Expiring Discounts',
@@ -84,6 +100,11 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
+		const saveResultsLambdaTask = new LambdaInvoke(this, 'Save Results', {
+			lambdaFunction: saveResultsLambda,
+			outputPath: '$.Payload',
+		});
+
 		const initiateEmailSendLambdaTask = new LambdaInvoke(
 			this,
 			'Initiate Email Send',
@@ -94,9 +115,10 @@ export class DiscountExpiryNotifier extends GuStack {
 		);
 
 		const definitionBody = DefinitionBody.fromChainable(
-			getSubsWithExpiringDiscountsLambdaTask.next(
-				buildEmailPayloadLambdaTask.next(initiateEmailSendLambdaTask),
-			),
+			getSubsWithExpiringDiscountsLambdaTask
+				.next(buildEmailPayloadLambdaTask)
+				.next(initiateEmailSendLambdaTask)
+				.next(saveResultsLambdaTask),
 		);
 
 		new StateMachine(this, `${appName}-state-machine-${this.stage}`, {
