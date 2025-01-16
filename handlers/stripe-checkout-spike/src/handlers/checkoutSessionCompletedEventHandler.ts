@@ -3,6 +3,30 @@ import type Stripe from 'stripe';
 import { getSecretValue } from '../services';
 import { sendMessageToSqsQueue } from '../services/sqs';
 
+type GuestRegistrationRequest = {
+	token: string;
+	userId: string;
+	timeIssued: string; // ISO 8601 string
+};
+
+type SuccessResponse = {
+	status: 'ok';
+	guestRegistrationRequest: GuestRegistrationRequest;
+};
+
+type ErrorDetail = {
+	message: string;
+	description: string;
+	context: string;
+};
+
+type ErrorResponse = {
+	status: 'error';
+	errors: ErrorDetail[];
+};
+
+type FetchResponse = SuccessResponse | ErrorResponse;
+
 export const handler = async (event: SQSEvent): Promise<void> => {
 	try {
 		for (const record of event.Records) {
@@ -10,6 +34,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				detail: Stripe.CheckoutSessionCompletedEvent;
 			};
 
+			console.log('Logging Stripe event...');
 			console.log(JSON.stringify(body));
 
 			const session = body.detail.data.object;
@@ -18,13 +43,14 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				secretName: `${process.env.STAGE}/Identity/${process.env.APP}`,
 			});
 
-			console.log(bearerToken);
-
 			const email = session.customer_details?.email;
 			const firstName = session.customer_details?.name;
 
-			if (!bearerToken || !email) {
-				throw new Error('Access token or email not found');
+			if (!bearerToken) {
+				throw new Error('Bearer token not found');
+			}
+			if (!email) {
+				throw new Error('Custuomer email not found');
 			}
 
 			console.log('Fetching use from Identity API...');
@@ -41,9 +67,27 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				},
 			);
 			console.log(response);
+			const data = (await response.json()) as FetchResponse;
+
+			let identityUserId;
+
+			if (data.status == 'ok') {
+				identityUserId = data.guestRegistrationRequest.userId;
+			} else {
+				identityUserId = '';
+			}
+
+			if (!process.env.BRAZE_EMAILS_QUEUE_URL) {
+				throw new Error('Braze queue URL not found');
+			}
+
+			if (!identityUserId) {
+				throw new Error('User identity id not found');
+			}
 
 			const response2 = await sendMessageToSqsQueue({
-				body: JSON.stringify({
+				queueUrl: process.env.BRAZE_EMAILS_QUEUE_URL,
+				messageBody: JSON.stringify({
 					To: {
 						Address: email,
 						SubscriberKey: email,
@@ -60,7 +104,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 						},
 					},
 					DataExtensionName: 'contribution-thank-you',
-					IdentityUserId: 'xxx',
+					IdentityUserId: identityUserId,
 				}),
 			});
 			console.log(response2);

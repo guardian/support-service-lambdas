@@ -69,7 +69,12 @@ export class StripeCheckoutSpike extends GuStack {
 			app,
 			runtime: nodeVersion,
 			fileName: `${app}.zip`,
-			environment: { APP: app, STACK: this.stack, STAGE: this.stage },
+			environment: {
+				APP: app,
+				STACK: this.stack,
+				STAGE: this.stage,
+				BRAZE_EMAILS_QUEUE_URL: `https://sqs.${this.region}.amazonaws.com/${this.account}/braze-emails-${this.stage}`,
+			},
 		};
 
 		new GuLambdaFunction(this, 'checkoutSessionCompletedEventHandler', {

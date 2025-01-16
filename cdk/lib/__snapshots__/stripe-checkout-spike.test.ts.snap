@@ -63,6 +63,22 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "stripe-checkout-spike",
+            "BRAZE_EMAILS_QUEUE_URL": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://sqs.",
+                  {
+                    "Ref": "AWS::Region",
+                  },
+                  ".amazonaws.com/",
+                  {
+                    "Ref": "AWS::AccountId",
+                  },
+                  "/braze-emails-CODE",
+                ],
+              ],
+            },
             "STACK": "support",
             "STAGE": "CODE",
           },
@@ -527,6 +543,22 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "stripe-checkout-spike",
+            "BRAZE_EMAILS_QUEUE_URL": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://sqs.",
+                  {
+                    "Ref": "AWS::Region",
+                  },
+                  ".amazonaws.com/",
+                  {
+                    "Ref": "AWS::AccountId",
+                  },
+                  "/braze-emails-PROD",
+                ],
+              ],
+            },
             "STACK": "support",
             "STAGE": "PROD",
           },
