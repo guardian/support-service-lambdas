@@ -2,7 +2,7 @@
   "name": "product-catalog",
   "version": "1.0.0",
   "scripts": {
-    "generateTypes": "ts-node src/generateTypeObjectCommand.ts",
+    "generateTypes": "ts-node src/generateTypeObjectCommand.ts && prettier --write src/typeObject.ts",
     "updateSnapshots": "jest -u --group=-integration",
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",

@@ -38,6 +38,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'super-mode',
 		'support-reminders',
 		'ticker-calculator',
+		'bandit',
 	],
 	VALUE: [
 		'apps-metering-events',
@@ -86,6 +87,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'generate-product-catalog',
 		'metric-push-api',
 		'press-reader-entitlements',
+		'user-benefits',
 	],
 	PLATFORM: [
 		// fulfilment

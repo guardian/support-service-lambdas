@@ -46,6 +46,7 @@ jobs:
           - generate-product-catalog
           - alarms-handler
           - discount-api
+          - discount-expiry-notifier
           - salesforce-disaster-recovery
           - salesforce-disaster-recovery-health-check
           - zuora-salesforce-link-remover

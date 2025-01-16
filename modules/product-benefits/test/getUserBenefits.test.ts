@@ -66,7 +66,7 @@ test('getUserBenefitsFromUserProducts', () => {
 		tierThreeBenefits,
 	);
 	expect(getUserBenefitsFromUserProducts(['GuardianWeeklyDomestic'])).toEqual([
-		'fewerSupportAsks',
+		'hideSupportMessaging',
 	]);
 	expect(getUserBenefitsFromUserProducts([])).toEqual([]);
 });
@@ -83,5 +83,5 @@ test('getUserBenefitsFromUserProducts returns the union of two benefit sets', ()
 			'GuardianLight',
 			'GuardianWeeklyDomestic',
 		]),
-	).toEqual(['rejectTracking', 'fewerSupportAsks']);
+	).toEqual(['rejectTracking', 'hideSupportMessaging']);
 });
