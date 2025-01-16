@@ -8,6 +8,9 @@ export const buildNonCachedHttpResponse = (
 	// https://www.fastly.com/documentation/guides/concepts/edge-state/cache/cache-freshness/#preventing-content-from-being-cached
 	headers: {
 		'Cache-Control': 'private, no-store',
+		'access-control-allow-headers': '*',
+		'access-control-allow-methods': '*',
+		'access-control-allow-origin': '*',
 	},
 	statusCode: 200,
 });
