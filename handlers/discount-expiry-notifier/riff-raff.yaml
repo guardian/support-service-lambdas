@@ -21,4 +21,5 @@ deployments:
       prefixStack: false
       functionNames:
         - discount-expiry-notifier-get-subs-with-expiring-discounts-
+        - discount-expiry-notifier-build-email-payload-
     dependencies: [discount-expiry-notifier-cloudformation]
