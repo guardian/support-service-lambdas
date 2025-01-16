@@ -1,6 +1,6 @@
 import type { SQSEvent, SQSRecord } from 'aws-lambda';
 import { getChatMessages, handler } from '../src';
-import { AlarmMappings } from '../src/alarmMappings';
+import { buildAlarmMappings } from '../src/alarmMappings';
 import { getAppNameTag } from '../src/cloudwatch';
 
 jest.mock('../src/cloudwatch');
@@ -68,7 +68,7 @@ describe('Handler', () => {
 
 		const result = await getChatMessages(
 			fullCloudWatchAlarmEvent,
-			AlarmMappings({ SRE: ['mock-app'] }),
+			buildAlarmMappings({ SRE: ['mock-app'] }),
 		);
 
 		expect(getAppNameTag).toHaveBeenCalledWith(
