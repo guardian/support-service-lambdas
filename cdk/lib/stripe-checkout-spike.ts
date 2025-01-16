@@ -91,7 +91,7 @@ export class StripeCheckoutSpike extends GuStack {
 				new PolicyStatement({
 					actions: ['sqs:GetQueueUrl', 'sqs:SendMessage'],
 					resources: [
-						`https://sqs.${this.region}.amazonaws.com/${this.account}/braze-emails-${this.stage}`,
+						`arn:aws:sqs:${this.region}:${this.account}:braze-emails-${this.stage}`,
 					],
 				}),
 			],

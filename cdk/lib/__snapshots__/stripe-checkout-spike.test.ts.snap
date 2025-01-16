@@ -193,15 +193,15 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 1`] = `
                 "Fn::Join": [
                   "",
                   [
-                    "https://sqs.",
+                    "arn:aws:sqs:",
                     {
                       "Ref": "AWS::Region",
                     },
-                    ".amazonaws.com/",
+                    ":",
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    "/braze-emails-CODE",
+                    ":braze-emails-CODE",
                   ],
                 ],
               },
@@ -657,15 +657,15 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 2`] = `
                 "Fn::Join": [
                   "",
                   [
-                    "https://sqs.",
+                    "arn:aws:sqs:",
                     {
                       "Ref": "AWS::Region",
                     },
-                    ".amazonaws.com/",
+                    ":",
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    "/braze-emails-PROD",
+                    ":braze-emails-PROD",
                   ],
                 ],
               },
