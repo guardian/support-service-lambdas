@@ -27,6 +27,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				throw new Error('Access token or email not found');
 			}
 
+			console.log('Fetching use from Identity API...');
 			const response = await fetch(
 				'https://idapi.code.dev-theguardian.com//user?' +
 					new URLSearchParams({
