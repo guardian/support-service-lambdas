@@ -77,7 +77,33 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			if (data.status == 'ok') {
 				identityUserId = data.guestRegistrationRequest.userId;
 			} else {
-				identityUserId = '';
+				console.log('Creating new guest user...');
+				const response2 = await fetch(
+					`${process.env.IDENTITY_API_URL}/guest` +
+						new URLSearchParams({
+							accountVerificationEmail: 'true',
+						}).toString(),
+					{
+						method: 'POST',
+						headers: {
+							'x-gu-id-client-access-token': `Bearer ${bearerToken}`,
+						},
+						body: JSON.stringify({
+							primaryEmailAddress: email,
+							// privateFields: {
+							// 	firstName,
+							// },
+							publicFields: {
+								displayName: firstName,
+							},
+						}),
+					},
+				);
+				console.log(response2);
+				const data = (await response.json()) as FetchResponse;
+				if (data.status == 'ok') {
+					identityUserId = data.guestRegistrationRequest.userId;
+				}
 			}
 
 			if (!process.env.BRAZE_EMAILS_QUEUE_URL) {
@@ -88,7 +114,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				throw new Error('User identity id not found');
 			}
 
-			const response2 = await sendMessageToSqsQueue({
+			const response3 = await sendMessageToSqsQueue({
 				queueUrl: process.env.BRAZE_EMAILS_QUEUE_URL,
 				messageBody: JSON.stringify({
 					To: {
@@ -110,7 +136,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 					IdentityUserId: identityUserId,
 				}),
 			});
-			console.log(response2);
+			console.log(response3);
 		}
 	} catch (error) {
 		console.error(error);
