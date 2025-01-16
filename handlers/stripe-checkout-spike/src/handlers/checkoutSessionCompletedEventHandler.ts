@@ -49,7 +49,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 						ContactAttributes: {
 							SubscriberAttributes: {
 								EmailAddress: email,
-								edition: getEdition({ currency: session.currency! }),
+								edition: getEdition(session.currency!),
 								'payment method': 'credit / debit card',
 								currency: session.currency!,
 								amount: session.amount_total!.toFixed(2),
@@ -70,7 +70,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 	}
 };
 
-const getEdition = ({ currency }: { currency: string }) => {
+const getEdition = (currency: string) => {
 	const editionsMapping: Record<string, string> = {
 		GBP: 'uk',
 		USD: 'us',
@@ -81,7 +81,7 @@ const getEdition = ({ currency }: { currency: string }) => {
 };
 
 const formatToCustomDate = (instant: number): string => {
-	return new Intl.DateTimeFormat('en-US', {
+	return new Intl.DateTimeFormat('en-GB', {
 		day: 'numeric',
 		month: 'long',
 		year: 'numeric',
