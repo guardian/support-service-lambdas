@@ -22,4 +22,5 @@ deployments:
       functionNames:
         - discount-expiry-notifier-get-subs-with-expiring-discounts-
         - discount-expiry-notifier-build-email-payload-
+        - discount-expiry-initiate-email-send-
     dependencies: [discount-expiry-notifier-cloudformation]
