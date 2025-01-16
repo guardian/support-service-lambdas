@@ -56,7 +56,7 @@ export const benefitsMeHandler = async (
 		);
 		return buildHttpResponse(
 			stage,
-			event.headers['Origin'],
+			event.headers['origin'],
 			userBenefitsResponse,
 		);
 	} catch (error) {

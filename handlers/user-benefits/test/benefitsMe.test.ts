@@ -52,7 +52,7 @@ describe('benefitsMeHandler', () => {
 			httpMethod: 'GET',
 			headers: {
 				Authorization: 'Bearer good-token',
-				Origin: 'https://m.code.dev-theguardian.com',
+				origin: 'https://m.code.dev-theguardian.com',
 			},
 		} as unknown as APIGatewayProxyEvent;
 		const response = await benefitsMeHandler(corsEvent);
@@ -80,7 +80,7 @@ describe('benefitsMeHandler', () => {
 			httpMethod: 'GET',
 			headers: {
 				Authorization: 'Bearer good-token',
-				Origin: 'https://not-allowed.com',
+				origin: 'https://not-allowed.com',
 			},
 		} as unknown as APIGatewayProxyEvent;
 		const response = await benefitsMeHandler(corsEvent);

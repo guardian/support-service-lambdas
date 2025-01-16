@@ -57,7 +57,7 @@ export const benefitsIdentityIdHandler = async (
 
 	return buildHttpResponse(
 		stage,
-		event.headers['Origin'],
+		event.headers['origin'],
 		userBenefitsResponse,
 	);
 };
