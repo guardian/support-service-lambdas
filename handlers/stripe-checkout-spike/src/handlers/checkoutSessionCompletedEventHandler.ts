@@ -6,7 +6,7 @@ import { sendMessageToSqsQueue } from '../services/sqs';
 type GuestRegistrationRequest = {
 	token: string;
 	userId: string;
-	timeIssued: string; // ISO 8601 string
+	timeIssued: string;
 };
 
 type SuccessResponse = {
@@ -50,7 +50,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				throw new Error('Bearer token not found');
 			}
 			if (!email) {
-				throw new Error('Custuomer email not found');
+				throw new Error('Customer email not found');
 			}
 			if (!process.env.IDENTITY_API_URL) {
 				throw new Error('Identity API URL not found');
@@ -90,9 +90,6 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 						},
 						body: JSON.stringify({
 							primaryEmailAddress: email,
-							// privateFields: {
-							// 	firstName,
-							// },
 							publicFields: {
 								displayName: firstName,
 							},
@@ -100,7 +97,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 					},
 				);
 				console.log(response2);
-				const data = (await response.json()) as FetchResponse;
+				const data = (await response2.json()) as FetchResponse;
 				if (data.status == 'ok') {
 					identityUserId = data.guestRegistrationRequest.userId;
 				}
