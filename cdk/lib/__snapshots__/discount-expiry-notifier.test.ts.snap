@@ -1065,7 +1065,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
             "Stage": "CODE",
           },
         },
-        "FunctionName": "discount-expiry-notifier-save-results-send-CODE",
+        "FunctionName": "discount-expiry-notifier-save-results-CODE",
         "Handler": "saveResults.handler",
         "MemorySize": 512,
         "Role": {
@@ -2323,7 +2323,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
             "Stage": "PROD",
           },
         },
-        "FunctionName": "discount-expiry-notifier-save-results-send-PROD",
+        "FunctionName": "discount-expiry-notifier-save-results-PROD",
         "Handler": "saveResults.handler",
         "MemorySize": 512,
         "Role": {

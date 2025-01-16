@@ -71,7 +71,7 @@ export class DiscountExpiryNotifier extends GuStack {
 			'save-results-lambda',
 			{
 				app: appName,
-				functionName: `${appName}-save-results-send-${this.stage}`,
+				functionName: `${appName}-save-results-${this.stage}`,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
