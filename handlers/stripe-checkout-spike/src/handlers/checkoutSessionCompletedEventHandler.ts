@@ -63,7 +63,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 								edition: getEdition(currency),
 								'payment method': 'credit / debit card',
 								currency,
-								amount: session.amount_total!.toFixed(2),
+								amount: (session.amount_total! / 100).toFixed(2),
 								first_name: firstName,
 								date_of_payment: formatToCustomDate(Date.now()),
 							},
