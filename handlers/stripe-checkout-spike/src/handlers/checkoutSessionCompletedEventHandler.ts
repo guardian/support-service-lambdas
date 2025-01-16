@@ -16,6 +16,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			const session = body.detail.data.object;
 			const email = session.customer_details?.email;
 			const firstName = session.customer_details?.name;
+			const currency = session.currency?.toUpperCase();
 			let identityUserId;
 
 			if (!email) {
@@ -23,6 +24,9 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			}
 			if (!firstName) {
 				throw new Error('Firstname not present in event');
+			}
+			if (!currency) {
+				throw new Error('Currency not present in event');
 			}
 			if (!process.env.IDENTITY_API_URL) {
 				throw new Error('Identity API URL not found in environment variables');
@@ -56,9 +60,9 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 						ContactAttributes: {
 							SubscriberAttributes: {
 								EmailAddress: email,
-								edition: getEdition(session.currency!),
+								edition: getEdition(currency),
 								'payment method': 'credit / debit card',
-								currency: session.currency!,
+								currency,
 								amount: session.amount_total!.toFixed(2),
 								first_name: firstName,
 								date_of_payment: formatToCustomDate(Date.now()),
@@ -77,6 +81,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 };
 
 const getEdition = (currency: string) => {
+	console.log('Logging currency: ' + currency);
 	const editionsMapping: Record<string, string> = {
 		GBP: 'uk',
 		USD: 'us',
