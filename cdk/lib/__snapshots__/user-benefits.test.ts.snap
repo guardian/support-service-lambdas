@@ -337,7 +337,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC503946cef9219580c03c635b0510d18a14b": {
+    "RestApiDeployment180EC5037f50432d604b867b75ccb57bc046264c": {
       "DependsOn": [
         "RestApibenefitsidentityIdGET09FA095A",
         "RestApibenefitsidentityIdOPTIONSE3678C12",
@@ -363,7 +363,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC503946cef9219580c03c635b0510d18a14b",
+          "Ref": "RestApiDeployment180EC5037f50432d604b867b75ccb57bc046264c",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -399,7 +399,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
           "IntegrationResponses": [
             {
               "ResponseParameters": {
-                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                "method.response.header.Access-Control-Allow-Headers": "'*'",
                 "method.response.header.Access-Control-Allow-Methods": "'GET'",
                 "method.response.header.Access-Control-Allow-Origin": "'https://m.code.dev-theguardian.com'",
                 "method.response.header.Vary": "'Origin'",
@@ -468,7 +468,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
           "IntegrationResponses": [
             {
               "ResponseParameters": {
-                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                "method.response.header.Access-Control-Allow-Headers": "'*'",
                 "method.response.header.Access-Control-Allow-Methods": "'GET'",
                 "method.response.header.Access-Control-Allow-Origin": "'https://m.code.dev-theguardian.com'",
                 "method.response.header.Vary": "'Origin'",
@@ -650,7 +650,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
           "IntegrationResponses": [
             {
               "ResponseParameters": {
-                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                "method.response.header.Access-Control-Allow-Headers": "'*'",
                 "method.response.header.Access-Control-Allow-Methods": "'GET'",
                 "method.response.header.Access-Control-Allow-Origin": "'https://m.code.dev-theguardian.com'",
                 "method.response.header.Vary": "'Origin'",
@@ -831,7 +831,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
           "IntegrationResponses": [
             {
               "ResponseParameters": {
-                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                "method.response.header.Access-Control-Allow-Headers": "'*'",
                 "method.response.header.Access-Control-Allow-Methods": "'GET'",
                 "method.response.header.Access-Control-Allow-Origin": "'https://m.code.dev-theguardian.com'",
                 "method.response.header.Vary": "'Origin'",
@@ -1734,7 +1734,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC503b580d9e99be0c905a346d9eeeeb5ecf9": {
+    "RestApiDeployment180EC503a00db2781bb1d706b9ffe1462524a0b0": {
       "DependsOn": [
         "RestApibenefitsidentityIdGET09FA095A",
         "RestApibenefitsidentityIdOPTIONSE3678C12",
@@ -1760,7 +1760,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC503b580d9e99be0c905a346d9eeeeb5ecf9",
+          "Ref": "RestApiDeployment180EC503a00db2781bb1d706b9ffe1462524a0b0",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -1796,7 +1796,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
           "IntegrationResponses": [
             {
               "ResponseParameters": {
-                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                "method.response.header.Access-Control-Allow-Headers": "'*'",
                 "method.response.header.Access-Control-Allow-Methods": "'GET'",
                 "method.response.header.Access-Control-Allow-Origin": "'https://www.theguardian.com'",
                 "method.response.header.Vary": "'Origin'",
@@ -1865,7 +1865,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
           "IntegrationResponses": [
             {
               "ResponseParameters": {
-                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                "method.response.header.Access-Control-Allow-Headers": "'*'",
                 "method.response.header.Access-Control-Allow-Methods": "'GET'",
                 "method.response.header.Access-Control-Allow-Origin": "'https://www.theguardian.com'",
                 "method.response.header.Vary": "'Origin'",
@@ -2047,7 +2047,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
           "IntegrationResponses": [
             {
               "ResponseParameters": {
-                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                "method.response.header.Access-Control-Allow-Headers": "'*'",
                 "method.response.header.Access-Control-Allow-Methods": "'GET'",
                 "method.response.header.Access-Control-Allow-Origin": "'https://www.theguardian.com'",
                 "method.response.header.Vary": "'Origin'",
@@ -2228,7 +2228,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
           "IntegrationResponses": [
             {
               "ResponseParameters": {
-                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                "method.response.header.Access-Control-Allow-Headers": "'*'",
                 "method.response.header.Access-Control-Allow-Methods": "'GET'",
                 "method.response.header.Access-Control-Allow-Origin": "'https://www.theguardian.com'",
                 "method.response.header.Vary": "'Origin'",

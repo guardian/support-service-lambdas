@@ -14,6 +14,7 @@ import {
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
+import { allowedOriginsForStage } from '../../handlers/user-benefits/src/cors';
 import { nodeVersion } from './node-version';
 
 export interface UserBenefitsProps extends GuStackProps {
@@ -24,7 +25,6 @@ export interface UserBenefitsProps extends GuStackProps {
 	publicDomainName: string;
 	hostedZoneId: string;
 	supporterProductDataTable: string;
-	corsAllowOrigins: string[];
 }
 
 export class UserBenefits extends GuStack {
@@ -92,8 +92,9 @@ export class UserBenefits extends GuStack {
 				},
 			],
 			defaultCorsPreflightOptions: {
-				allowOrigins: props.corsAllowOrigins,
+				allowHeaders: ['*'],
 				allowMethods: ['GET'],
+				allowOrigins: allowedOriginsForStage(this.stage),
 			},
 			monitoringConfiguration: {
 				http5xxAlarm: { tolerated5xxPercentage: 5 },

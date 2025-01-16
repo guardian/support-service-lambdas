@@ -19,14 +19,6 @@ describe('The User benefits stack', () => {
 			certificateId: supportCertificateId,
 			supporterProductDataTable:
 				'supporter-product-data-tables-CODE-SupporterProductDataTable',
-			corsAllowOrigins: [
-				'https://m.code.dev-theguardian.com',
-				'https://profile.code.dev-theguardian.com',
-				'https://profile.thegulocal.com',
-				'https://m.thegulocal.com',
-				'https://support.code.dev-theguardian.com',
-				'https://support.thegulocal.com',
-			],
 		});
 		const prodStack = new UserBenefits(app, 'user-benefits-PROD', {
 			stack: 'membership',
@@ -37,13 +29,6 @@ describe('The User benefits stack', () => {
 			certificateId: supportCertificateId,
 			supporterProductDataTable:
 				'supporter-product-data-tables-PROD-SupporterProductDataTable',
-			corsAllowOrigins: [
-				'https://www.theguardian.com',
-				'https://interactive.guim.co.uk',
-				'https://membership.theguardian.com',
-				'https://profile.theguardian.com',
-				'https://support.theguardian.com',
-			],
 		});
 
 		expect(Template.fromStack(codeStack).toJSON()).toMatchSnapshot();

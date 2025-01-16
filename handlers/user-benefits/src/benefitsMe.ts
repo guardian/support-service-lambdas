@@ -54,7 +54,7 @@ export const benefitsMeHandler = async (
 			await productCatalogHelper.get(),
 			maybeAuthenticatedEvent.userDetails,
 		);
-		return buildNonCachedHttpResponse(userBenefitsResponse);
+		return buildNonCachedHttpResponse(stage, userBenefitsResponse);
 	} catch (error) {
 		console.log('Caught exception with message: ', error);
 		if (error instanceof ValidationError) {

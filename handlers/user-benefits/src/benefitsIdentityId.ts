@@ -54,5 +54,5 @@ export const benefitsIdentityIdHandler = async (
 		identityId,
 	);
 
-	return buildNonCachedHttpResponse(userBenefitsResponse);
+	return buildNonCachedHttpResponse(stage, userBenefitsResponse);
 };
