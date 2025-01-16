@@ -16,6 +16,8 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			});
 
 			const email = body.detail.data.object.customer_details?.email;
+			console.log(email);
+			console.log(accessToken);
 
 			if (!accessToken || !email) {
 				throw new Error('Error');
