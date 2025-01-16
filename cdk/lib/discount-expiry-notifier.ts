@@ -89,7 +89,7 @@ export class DiscountExpiryNotifier extends GuStack {
 
 		const getSubsWithExpiringDiscountsLambdaTask = new LambdaInvoke(
 			this,
-			'Get Subs With Expiring Discounts',
+			'Get subs with expiring discounts',
 			{
 				lambdaFunction: getSubsWithExpiringDiscountsLambda,
 				outputPath: '$.Payload',
@@ -98,28 +98,28 @@ export class DiscountExpiryNotifier extends GuStack {
 
 		const buildEmailPayloadLambdaTask = new LambdaInvoke(
 			this,
-			'Build Email Payload',
+			'Build email payload',
 			{
 				lambdaFunction: buildEmailPayloadLambda,
 				outputPath: '$.Payload',
 			},
 		);
 
-		const saveResultsLambdaTask = new LambdaInvoke(this, 'Save Results', {
+		const saveResultsLambdaTask = new LambdaInvoke(this, 'Save results', {
 			lambdaFunction: saveResultsLambda,
 			outputPath: '$.Payload',
 		});
 
 		const initiateEmailSendLambdaTask = new LambdaInvoke(
 			this,
-			'Initiate Email Send',
+			'Initiate email send',
 			{
 				lambdaFunction: initiateEmailSendLambda,
 				outputPath: '$.Payload',
 			},
 		);
 
-		const emailSendsProcessingMap = new Map(this, 'Email Sends Processor Map', {
+		const emailSendsProcessingMap = new Map(this, 'Email sends processor map', {
 			maxConcurrency: 10,
 			itemsPath: JsonPath.stringAt('$.discountsToProcess'),
 			parameters: {
