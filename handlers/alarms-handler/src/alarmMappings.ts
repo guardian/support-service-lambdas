@@ -143,9 +143,9 @@ export type AlarmMappings = {
 	getTeamWebhookUrl: (team: Team) => string;
 };
 
-export const AlarmMappings: (
+export const buildAlarmMappings = (
 	mappings: Record<string, string[]>,
-) => AlarmMappings = (mappings: Record<string, string[]>) => {
+): AlarmMappings => {
 	const appToTeamMappings: Record<string, Team[]> =
 		buildAppToTeamMappings(mappings);
 
@@ -167,4 +167,4 @@ export const AlarmMappings: (
 	return { getTeams, getTeamWebhookUrl };
 };
 
-export const ProdAlarmMappings = AlarmMappings(teamToAppMappings);
+export const ProdAlarmMappings = buildAlarmMappings(teamToAppMappings);
