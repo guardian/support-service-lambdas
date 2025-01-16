@@ -85,7 +85,7 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 1`] = `
         },
         "FunctionName": "checkout-session-completed-event-handler-CODE",
         "Handler": "checkoutSessionCompletedEventHandler.handler",
-        "MemorySize": 512,
+        "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
             "checkoutSessionCompletedEventHandlerServiceRoleC9F47EDB",
@@ -565,7 +565,7 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 2`] = `
         },
         "FunctionName": "checkout-session-completed-event-handler-PROD",
         "Handler": "checkoutSessionCompletedEventHandler.handler",
-        "MemorySize": 512,
+        "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
             "checkoutSessionCompletedEventHandlerServiceRoleC9F47EDB",
