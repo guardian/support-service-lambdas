@@ -6,15 +6,25 @@ import { allowedOriginsForStage } from './cors';
 const buildCorsHeaders = (
 	origin: string | undefined,
 	stage: Stage,
-): Record<string, string | number | boolean> =>
-	origin && allowedOriginsForStage(stage).includes(origin)
-		? {
-				'access-control-allow-origin': origin,
-				vary: 'Origin',
-				'access-control-allow-headers': '*',
-				'access-control-allow-methods': 'GET',
-			}
-		: {};
+): Record<string, string | number | boolean> => {
+	if (origin) {
+		console.log(`Origin header is ${origin}`);
+		const allowedOrigins = allowedOriginsForStage(stage);
+		console.log(
+			`Allowed origins for stage ${stage}: ${allowedOrigins.join(', ')}`,
+		);
+		return allowedOrigins.includes(origin)
+			? {
+					'access-control-allow-origin': origin,
+					vary: 'Origin',
+					'access-control-allow-headers': '*',
+					'access-control-allow-methods': 'GET',
+				}
+			: {};
+	}
+	console.log('Origin header missing from request');
+	return {};
+};
 
 export const buildHttpResponse = (
 	stage: Stage,
