@@ -4,11 +4,12 @@ import { getUserBenefitsExcludingStaff } from '@modules/product-benefits/userBen
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
+import { stageFromEnvironment } from '@modules/stage';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { buildNonCachedHttpResponse } from './response';
+import { buildHttpResponse } from './response';
 import { getTrialInformation } from './trials';
 
-const stage = process.env.STAGE as Stage;
+const stage = stageFromEnvironment();
 const productCatalogHelper = new Lazy(
 	async () => new ProductCatalogHelper(await getProductCatalogFromApi(stage)),
 	'Get product catalog helper',
@@ -54,5 +55,9 @@ export const benefitsIdentityIdHandler = async (
 		identityId,
 	);
 
-	return buildNonCachedHttpResponse(stage, userBenefitsResponse);
+	return buildHttpResponse(
+		stage,
+		event.headers['Origin'],
+		userBenefitsResponse,
+	);
 };
