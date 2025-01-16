@@ -9,75 +9,72 @@ import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { nodeVersion } from './node-version';
 
 export class DiscountExpiryNotifier extends GuStack {
-    constructor(scope: App, id: string, props: GuStackProps) {
-        super(scope, id, props);
+	constructor(scope: App, id: string, props: GuStackProps) {
+		super(scope, id, props);
 
-        const appName = 'discount-expiry-notifier';
+		const appName = 'discount-expiry-notifier';
 
-        new Bucket(this, 'Bucket', {
-            bucketName: `${appName}-${this.stage.toLowerCase()}`,
-        });
+		new Bucket(this, 'Bucket', {
+			bucketName: `${appName}-${this.stage.toLowerCase()}`,
+		});
 
-        const getSubsWithExpiringDiscountsLambda = new GuLambdaFunction(
-            this,
-            'get-subs-with-expiring-discounts-lambda',
-            {
-                app: appName,
-                functionName: `${appName}-get-subs-with-expiring-discounts-${this.stage}`,
-                runtime: nodeVersion,
-                environment: {
-                    Stage: this.stage,
-                },
-                handler: 'getSubsWithExpiringDiscounts.handler',
-                fileName: `${appName}.zip`,
-                architecture: Architecture.ARM_64,
-            },
-        );
+		const getSubsWithExpiringDiscountsLambda = new GuLambdaFunction(
+			this,
+			'get-subs-with-expiring-discounts-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-get-subs-with-expiring-discounts-${this.stage}`,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+				},
+				handler: 'getSubsWithExpiringDiscounts.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+			},
+		);
 
-        const buildEmailPayloadLambda = new GuLambdaFunction(
-            this,
-            'build-email-payload-lambda',
-            {
-                app: appName,
-                functionName: `${appName}-build-email-payload-${this.stage}`,
-                runtime: nodeVersion,
-                environment: {
-                    Stage: this.stage,
-                },
-                handler: 'buildEmailPayload.handler',
-                fileName: `${appName}.zip`,
-                architecture: Architecture.ARM_64,
-            },
-        );
+		const buildEmailPayloadLambda = new GuLambdaFunction(
+			this,
+			'build-email-payload-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-build-email-payload-${this.stage}`,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+				},
+				handler: 'buildEmailPayload.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+			},
+		);
 
-        const getSubsWithExpiringDiscountsLambdaTask = new LambdaInvoke(
-            this,
-            'Get Subs With Expiring Discounts',
-            {
-                lambdaFunction: getSubsWithExpiringDiscountsLambda,
-                outputPath: '$.Payload',
-            },
-        );
+		const getSubsWithExpiringDiscountsLambdaTask = new LambdaInvoke(
+			this,
+			'Get Subs With Expiring Discounts',
+			{
+				lambdaFunction: getSubsWithExpiringDiscountsLambda,
+				outputPath: '$.Payload',
+			},
+		);
 
-        const buildEmailPayloadLambdaTask = new LambdaInvoke(
-            this,
-            'Build Email Payload',
-            {
-                lambdaFunction: buildEmailPayloadLambda,
-                outputPath: '$.Payload',
-            },
-        );
+		const buildEmailPayloadLambdaTask = new LambdaInvoke(
+			this,
+			'Build Email Payload',
+			{
+				lambdaFunction: buildEmailPayloadLambda,
+				outputPath: '$.Payload',
+			},
+		);
 
-        const definitionBody = DefinitionBody.fromChainable(
-            getSubsWithExpiringDiscountsLambdaTask.next(
-                buildEmailPayloadLambdaTask,
-            ),
-        );
+		const definitionBody = DefinitionBody.fromChainable(
+			getSubsWithExpiringDiscountsLambdaTask.next(buildEmailPayloadLambdaTask),
+		);
 
-        new StateMachine(this, `${appName}-state-machine-${this.stage}`, {
-            stateMachineName: `${appName}-${this.stage}`,
-            definitionBody: definitionBody,
-        });
-    }
+		new StateMachine(this, `${appName}-state-machine-${this.stage}`, {
+			stateMachineName: `${appName}-${this.stage}`,
+			definitionBody: definitionBody,
+		});
+	}
 }
-
