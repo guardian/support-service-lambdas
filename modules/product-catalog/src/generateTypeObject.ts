@@ -7,6 +7,7 @@ import type {
 import { oneTimeContributionTypeObject } from '@modules/product-catalog/oneTimeContributionProduct';
 import { stripeTypeObject } from '@modules/product-catalog/stripeProducts';
 import {
+	activeProducts,
 	getProductRatePlanChargeKey,
 	getProductRatePlanKey,
 	getZuoraProductKey,
@@ -65,7 +66,7 @@ const getZuoraProduct = (productRatePlans: ZuoraProductRatePlan[]) => {
 		),
 	};
 };
-export const generateTypeObject = (catalog: ZuoraCatalog) => {
+export const generateTypeObjects = (catalog: ZuoraCatalog) => {
 	const supportedProducts = catalog.products.filter((product) =>
 		isSupportedProduct(product.name),
 	);
@@ -79,9 +80,30 @@ export const generateTypeObject = (catalog: ZuoraCatalog) => {
 
 	const zuoraTypeObject = arrayToObject(arrayVersion);
 
+	const activeProductKeys = Object.keys(zuoraTypeObject).filter((k) =>
+		activeProducts.includes(k),
+	);
+	const inactiveProductsKeys = Object.keys(zuoraTypeObject).filter(
+		(k) => !activeProducts.includes(k),
+	);
+
+	const reducer = (acc: typeof zuoraTypeObject, key: string) => {
+		if (zuoraTypeObject[key]) {
+			acc[key] = zuoraTypeObject[key];
+		}
+		return acc;
+	};
+	const activeZuoraTypeObject = activeProductKeys.reduce(reducer, {});
+	const inactiveZuoraTypeObject = inactiveProductsKeys.reduce(reducer, {});
+
 	return {
-		...oneTimeContributionTypeObject,
-		...zuoraTypeObject,
-		...stripeTypeObject,
+		active: {
+			...oneTimeContributionTypeObject,
+			...activeZuoraTypeObject,
+			...stripeTypeObject,
+		},
+		inactive: {
+			...inactiveZuoraTypeObject,
+		},
 	};
 };

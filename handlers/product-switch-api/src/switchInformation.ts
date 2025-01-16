@@ -130,14 +130,17 @@ export const getSwitchInformationWithOwnerCheck = (
 	subscription: ZuoraSubscription,
 	account: ZuoraAccount,
 	productCatalog: ProductCatalog,
-	identityIdFromRequest: string,
+	identityIdFromRequest: string | undefined,
 	today: Dayjs = dayjs(),
 ): SwitchInformation => {
 	console.log(
 		`Checking subscription ${subscription.subscriptionNumber} is owned by the currently logged in user`,
 	);
 	const userInformation = getAccountInformation(account);
-	if (userInformation.identityId !== identityIdFromRequest) {
+	if (
+		identityIdFromRequest &&
+		userInformation.identityId !== identityIdFromRequest
+	) {
 		throw new ValidationError(
 			`Subscription ${subscription.subscriptionNumber} does not belong to identity ID ${identityIdFromRequest}`,
 		);

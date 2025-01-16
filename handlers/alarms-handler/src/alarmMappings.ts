@@ -35,9 +35,10 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'sf-contact-merge',
 		'sf-emails-to-s3-exporter',
 		'sf-gocardless-sync',
-		'super-mode-calculator',
+		'super-mode',
 		'support-reminders',
 		'ticker-calculator',
+		'bandit',
 	],
 	VALUE: [
 		'apps-metering-events',
@@ -86,6 +87,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'generate-product-catalog',
 		'metric-push-api',
 		'press-reader-entitlements',
+		'user-benefits',
 	],
 	PLATFORM: [
 		// fulfilment

@@ -11,7 +11,7 @@ export const supporterPlusBenefits: ProductBenefit[] = [
 	'adFree',
 	'liveApp',
 	'feastApp',
-	'fewerSupportAsks',
+	'hideSupportMessaging',
 	'rejectTracking',
 ];
 export const digitalSubscriptionBenefits = supporterPlusBenefits.concat([
@@ -24,6 +24,7 @@ export const tierThreeBenefits = digitalSubscriptionBenefits.concat([
 
 export const productBenefitMapping: Record<ProductKey, ProductBenefit[]> = {
 	GuardianLight: ['rejectTracking'],
+	GuardianAdLite: ['rejectTracking'],
 	SupporterPlus: supporterPlusBenefits,
 	DigitalSubscription: digitalSubscriptionBenefits,
 	TierThree: tierThreeBenefits,
@@ -31,17 +32,17 @@ export const productBenefitMapping: Record<ProductKey, ProductBenefit[]> = {
 	NationalDelivery: digitalSubscriptionBenefits,
 	NewspaperVoucher: digitalSubscriptionBenefits,
 	SubscriptionCard: digitalSubscriptionBenefits,
-	SupporterMembership: ['liveApp', 'fewerSupportAsks'],
-	PartnerMembership: ['liveApp', 'feastApp', 'fewerSupportAsks'],
+	SupporterMembership: ['liveApp', 'hideSupportMessaging'],
+	PartnerMembership: ['liveApp', 'feastApp', 'hideSupportMessaging'],
 	PatronMembership: digitalSubscriptionBenefits,
 	GuardianPatron: digitalSubscriptionBenefits,
-	GuardianWeeklyDomestic: ['fewerSupportAsks'],
-	GuardianWeeklyRestOfWorld: ['fewerSupportAsks'],
-	GuardianWeeklyZoneA: ['fewerSupportAsks'],
-	GuardianWeeklyZoneB: ['fewerSupportAsks'],
-	GuardianWeeklyZoneC: ['fewerSupportAsks'],
-	Contribution: ['fewerSupportAsks'],
-	OneTimeContribution: ['fewerSupportAsks'],
+	GuardianWeeklyDomestic: ['hideSupportMessaging'],
+	GuardianWeeklyRestOfWorld: ['hideSupportMessaging'],
+	GuardianWeeklyZoneA: ['hideSupportMessaging'],
+	GuardianWeeklyZoneB: ['hideSupportMessaging'],
+	GuardianWeeklyZoneC: ['hideSupportMessaging'],
+	Contribution: ['hideSupportMessaging'],
+	OneTimeContribution: ['hideSupportMessaging'],
 };
 
 const itemIsLessThanThreeMonthsOld = (item: SupporterRatePlanItem) =>
