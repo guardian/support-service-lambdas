@@ -74,7 +74,7 @@ export const createGuestUser = async ({
 	try {
 		console.log('Creating new guest user...');
 		const response = await fetch(
-			`${process.env.IDENTITY_API_URL}/guest` +
+			`${process.env.IDENTITY_API_URL}/guest?` +
 				new URLSearchParams({
 					accountVerificationEmail: 'true',
 				}).toString(),
