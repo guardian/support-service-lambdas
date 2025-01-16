@@ -29,20 +29,11 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				{
 					method: 'GET',
 					headers: {
-						Authorization: `Bearer ${accessToken}`,
+						'x-gu-id-client-access-token': `Bearer ${accessToken}`,
 					},
 				},
 			);
 
-			// const response = await fetch(
-			// 	`$https://idapi.theguardian.com/user?emailAddress=${email}`,
-			// 	{
-			// 		method: 'GET',
-			// 		headers: {
-			// 			Authorization: `Bearer ${accessToken}`,
-			// 		},
-			// 	},
-			// );
 			console.log(response);
 		}
 	} catch (error) {
