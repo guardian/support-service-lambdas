@@ -14,7 +14,7 @@ export class DiscountExpiryNotifier extends GuStack {
 
 		const appName = 'discount-expiry-notifier';
 
-		const bucket = new Bucket(this, 'Bucket', {
+		new Bucket(this, 'Bucket', {
 			bucketName: `${appName}-${this.stage.toLowerCase()}`,
 		});
 
