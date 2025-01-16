@@ -206,22 +206,56 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 1`] = `
                 "sqs:SendMessage",
               ],
               "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:sqs:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":braze-emails-CODE",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:sqs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":braze-emails-CODE",
+                    ],
                   ],
-                ],
-              },
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:sqs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":contributions-store-queue-CODE",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:sqs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":soft-opt-in-consent-setter-queue-CODE",
+                    ],
+                  ],
+                },
+              ],
             },
             {
               "Action": [
@@ -687,22 +721,56 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 2`] = `
                 "sqs:SendMessage",
               ],
               "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:sqs:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":braze-emails-PROD",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:sqs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":braze-emails-PROD",
+                    ],
                   ],
-                ],
-              },
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:sqs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":contributions-store-queue-PROD",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:sqs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":soft-opt-in-consent-setter-queue-PROD",
+                    ],
+                  ],
+                },
+              ],
             },
             {
               "Action": [

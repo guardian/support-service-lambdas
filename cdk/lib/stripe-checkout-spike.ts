@@ -102,6 +102,8 @@ export class StripeCheckoutSpike extends GuStack {
 					actions: ['sqs:GetQueueUrl', 'sqs:SendMessage'],
 					resources: [
 						`arn:aws:sqs:${this.region}:${this.account}:braze-emails-${this.stage}`,
+						`arn:aws:sqs:${this.region}:${this.account}:contributions-store-queue-${this.stage}`,
+						`arn:aws:sqs:${this.region}:${this.account}:soft-opt-in-consent-setter-queue-${this.stage}`,
 					],
 				}),
 			],
