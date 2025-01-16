@@ -14,7 +14,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 
 			const session = body.detail.data.object;
 
-			const bearerToken = await getSecretValue<string>({
+			const { bearerToken } = await getSecretValue<{ bearerToken: string }>({
 				secretName: `${process.env.STAGE}/Identity/${process.env.APP}`,
 			});
 
