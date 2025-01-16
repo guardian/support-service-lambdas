@@ -52,10 +52,13 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			if (!email) {
 				throw new Error('Custuomer email not found');
 			}
+			if (!process.env.IDENTITY_API_URL) {
+				throw new Error('Identity API URL not found');
+			}
 
 			console.log('Fetching use from Identity API...');
 			const response = await fetch(
-				'https://idapi.code.dev-theguardian.com//user?' +
+				`${process.env.IDENTITY_API_URL}/user?` +
 					new URLSearchParams({
 						emailAddress: email,
 					}).toString(),
