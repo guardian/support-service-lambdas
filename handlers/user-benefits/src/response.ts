@@ -1,7 +1,6 @@
 import type { UserBenefitsResponse } from '@modules/product-benefits/schemas';
 import type { Stage } from '@modules/stage';
 import type { APIGatewayProxyResult } from 'aws-lambda';
-import { allowedOriginsForStage } from './cors';
 
 export const buildNonCachedHttpResponse = (
 	stage: Stage,
@@ -14,7 +13,7 @@ export const buildNonCachedHttpResponse = (
 		// CORS headers
 		'access-control-allow-headers': '*',
 		'access-control-allow-methods': 'GET',
-		'access-control-allow-origin': allowedOriginsForStage(stage).join(','),
+		'access-control-allow-origin': '*',
 	},
 	statusCode: 200,
 });
