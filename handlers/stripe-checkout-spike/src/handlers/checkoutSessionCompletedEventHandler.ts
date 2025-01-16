@@ -16,22 +16,22 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			});
 
 			const email = body.detail.data.object.customer_details?.email;
-			console.log(email);
-			console.log(accessToken);
+			// console.log(email);
+			// console.log(accessToken);
 
 			if (!accessToken || !email) {
 				throw new Error('Error');
 			}
 
 			const response = await fetch(
-				'https://idapi.theguardian.com/user?' +
+				'https://idapi.code.dev-theguardian.com//user?' +
 					new URLSearchParams({
 						emailAddress: email,
 					}).toString(),
 				{
 					method: 'GET',
 					headers: {
-						'Content-Type': 'application/json',
+						// 'Content-Type': 'application/json',
 						'x-gu-id-client-access-token': `Bearer ${accessToken}`,
 					},
 				},
