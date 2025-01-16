@@ -4,7 +4,12 @@ import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
 import { Architecture } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
-import { DefinitionBody, StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
+import {
+	DefinitionBody,
+	JsonPath,
+	Map,
+	StateMachine,
+} from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { nodeVersion } from './node-version';
 
@@ -114,10 +119,22 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
+		const emailSendsProcessingMap = new Map(this, 'Email Sends Processor Map', {
+			maxConcurrency: 10,
+			itemsPath: JsonPath.stringAt('$.discountsToProcess'),
+			parameters: {
+				item: JsonPath.stringAt('$$.Map.Item.Value'),
+			},
+			resultPath: '$.discountProcessingAttempts',
+		});
+
+		emailSendsProcessingMap.iterator(
+			buildEmailPayloadLambdaTask.next(initiateEmailSendLambdaTask),
+		);
+
 		const definitionBody = DefinitionBody.fromChainable(
 			getSubsWithExpiringDiscountsLambdaTask
-				.next(buildEmailPayloadLambdaTask)
-				.next(initiateEmailSendLambdaTask)
+				.next(emailSendsProcessingMap)
 				.next(saveResultsLambdaTask),
 		);
 
