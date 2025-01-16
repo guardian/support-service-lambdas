@@ -22,7 +22,10 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			}
 
 			const response = await fetch(
-				`$https://idapi.theguardian.com/user?emailAddress=${email}`,
+				'https://idapi.theguardian.com/user?' +
+					new URLSearchParams({
+						emailAddress: email,
+					}).toString(),
 				{
 					method: 'GET',
 					headers: {
@@ -30,6 +33,16 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 					},
 				},
 			);
+
+			// const response = await fetch(
+			// 	`$https://idapi.theguardian.com/user?emailAddress=${email}`,
+			// 	{
+			// 		method: 'GET',
+			// 		headers: {
+			// 			Authorization: `Bearer ${accessToken}`,
+			// 		},
+			// 	},
+			// );
 			console.log(response);
 		}
 	} catch (error) {
