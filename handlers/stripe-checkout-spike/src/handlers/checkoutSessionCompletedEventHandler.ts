@@ -1,6 +1,7 @@
 import { type SQSEvent } from 'aws-lambda';
 import type Stripe from 'stripe';
 import { getSecretValue } from '../services';
+import { sendMessageToSqsQueue } from '../services/sqs';
 
 export const handler = async (event: SQSEvent): Promise<void> => {
 	try {
@@ -11,16 +12,19 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 
 			console.log(JSON.stringify(body));
 
-			const accessToken = await getSecretValue<string>({
+			const session = body.detail.data.object;
+
+			const bearerToken = await getSecretValue<string>({
 				secretName: `${process.env.STAGE}/Identity/${process.env.APP}`,
 			});
 
-			const email = body.detail.data.object.customer_details?.email;
-			// console.log(email);
-			// console.log(accessToken);
+			console.log(bearerToken);
 
-			if (!accessToken || !email) {
-				throw new Error('Error');
+			const email = session.customer_details?.email;
+			const firstName = session.customer_details?.name;
+
+			if (!bearerToken || !email) {
+				throw new Error('Access token or email not found');
 			}
 
 			const response = await fetch(
@@ -31,16 +35,55 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				{
 					method: 'GET',
 					headers: {
-						// 'Content-Type': 'application/json',
-						'x-gu-id-client-access-token': `Bearer ${accessToken}`,
+						'x-gu-id-client-access-token': `Bearer ${bearerToken}`,
 					},
 				},
 			);
-
 			console.log(response);
+
+			const response2 = await sendMessageToSqsQueue({
+				body: JSON.stringify({
+					To: {
+						Address: email,
+						SubscriberKey: email,
+						ContactAttributes: {
+							SubscriberAttributes: {
+								EmailAddress: email,
+								edition: getEdition({ currency: session.currency! }),
+								'payment method': 'credit / debit card',
+								currency: session.currency!,
+								amount: session.amount_total!.toFixed(2),
+								first_name: firstName,
+								date_of_payment: formatToCustomDate(Date.now()),
+							},
+						},
+					},
+					DataExtensionName: 'contribution-thank-you',
+					IdentityUserId: 'xxx',
+				}),
+			});
+			console.log(response2);
 		}
 	} catch (error) {
 		console.error(error);
 		throw error;
 	}
+};
+
+const getEdition = ({ currency }: { currency: string }) => {
+	const editionsMapping: Record<string, string> = {
+		GBP: 'uk',
+		USD: 'us',
+		AUD: 'au',
+	};
+
+	return editionsMapping[currency] ?? 'international';
+};
+
+const formatToCustomDate = (instant: number): string => {
+	return new Intl.DateTimeFormat('en-US', {
+		day: 'numeric',
+		month: 'long',
+		year: 'numeric',
+	}).format(new Date(instant));
 };
