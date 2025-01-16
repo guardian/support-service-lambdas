@@ -31,6 +31,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				{
 					method: 'GET',
 					headers: {
+						'Content-Type': 'application/json',
 						'x-gu-id-client-access-token': `Bearer ${accessToken}`,
 					},
 				},
