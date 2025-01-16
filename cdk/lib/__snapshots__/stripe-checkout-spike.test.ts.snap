@@ -185,6 +185,29 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 1`] = `
             },
             {
               "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:SendMessage",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "https://sqs.",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ".amazonaws.com/",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    "/braze-emails-CODE",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
                 "sqs:ReceiveMessage",
                 "sqs:ChangeMessageVisibility",
                 "sqs:GetQueueUrl",
@@ -620,6 +643,29 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 2`] = `
                       "Ref": "AWS::AccountId",
                     },
                     ":secret:PROD/Identity/stripe-checkout-spike-*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:SendMessage",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "https://sqs.",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ".amazonaws.com/",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    "/braze-emails-PROD",
                   ],
                 ],
               },

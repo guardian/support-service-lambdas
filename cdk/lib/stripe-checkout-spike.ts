@@ -88,6 +88,12 @@ export class StripeCheckoutSpike extends GuStack {
 						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Identity/stripe-checkout-spike-*`,
 					],
 				}),
+				new PolicyStatement({
+					actions: ['sqs:GetQueueUrl', 'sqs:SendMessage'],
+					resources: [
+						`https://sqs.${this.region}.amazonaws.com/${this.account}/braze-emails-${this.stage}`,
+					],
+				}),
 			],
 		});
 	}
