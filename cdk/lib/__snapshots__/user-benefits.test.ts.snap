@@ -337,7 +337,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC5037f50432d604b867b75ccb57bc046264c": {
+    "RestApiDeployment180EC5031b9cf7f6c14f2d0d67b7159f1361a7d5": {
       "DependsOn": [
         "RestApibenefitsidentityIdGET09FA095A",
         "RestApibenefitsidentityIdOPTIONSE3678C12",
@@ -363,7 +363,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC5037f50432d604b867b75ccb57bc046264c",
+          "Ref": "RestApiDeployment180EC5031b9cf7f6c14f2d0d67b7159f1361a7d5",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -409,7 +409,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
 #if($origin == "")
   #set($origin = $input.params().header.get("origin"))
 #end
-#if($origin == "https://profile.code.dev-theguardian.com" || $origin == "https://profile.thegulocal.com" || $origin == "https://m.thegulocal.com" || $origin == "https://support.code.dev-theguardian.com" || $origin == "https://support.thegulocal.com")
+#if($origin == "https://m.thegulocal.com" || $origin == "https://profile.code.dev-theguardian.com" || $origin == "https://profile.thegulocal.com" || $origin == "https://support.code.dev-theguardian.com" || $origin == "https://support.thegulocal.com")
   #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)
 #end",
               },
@@ -478,7 +478,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
 #if($origin == "")
   #set($origin = $input.params().header.get("origin"))
 #end
-#if($origin == "https://profile.code.dev-theguardian.com" || $origin == "https://profile.thegulocal.com" || $origin == "https://m.thegulocal.com" || $origin == "https://support.code.dev-theguardian.com" || $origin == "https://support.thegulocal.com")
+#if($origin == "https://m.thegulocal.com" || $origin == "https://profile.code.dev-theguardian.com" || $origin == "https://profile.thegulocal.com" || $origin == "https://support.code.dev-theguardian.com" || $origin == "https://support.thegulocal.com")
   #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)
 #end",
               },
@@ -660,7 +660,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
 #if($origin == "")
   #set($origin = $input.params().header.get("origin"))
 #end
-#if($origin == "https://profile.code.dev-theguardian.com" || $origin == "https://profile.thegulocal.com" || $origin == "https://m.thegulocal.com" || $origin == "https://support.code.dev-theguardian.com" || $origin == "https://support.thegulocal.com")
+#if($origin == "https://m.thegulocal.com" || $origin == "https://profile.code.dev-theguardian.com" || $origin == "https://profile.thegulocal.com" || $origin == "https://support.code.dev-theguardian.com" || $origin == "https://support.thegulocal.com")
   #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)
 #end",
               },
@@ -841,7 +841,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
 #if($origin == "")
   #set($origin = $input.params().header.get("origin"))
 #end
-#if($origin == "https://profile.code.dev-theguardian.com" || $origin == "https://profile.thegulocal.com" || $origin == "https://m.thegulocal.com" || $origin == "https://support.code.dev-theguardian.com" || $origin == "https://support.thegulocal.com")
+#if($origin == "https://m.thegulocal.com" || $origin == "https://profile.code.dev-theguardian.com" || $origin == "https://profile.thegulocal.com" || $origin == "https://support.code.dev-theguardian.com" || $origin == "https://support.thegulocal.com")
   #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)
 #end",
               },
@@ -1734,7 +1734,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC503a00db2781bb1d706b9ffe1462524a0b0": {
+    "RestApiDeployment180EC5032d4d5ec416a5fa8ac8a06493468f87fc": {
       "DependsOn": [
         "RestApibenefitsidentityIdGET09FA095A",
         "RestApibenefitsidentityIdOPTIONSE3678C12",
@@ -1760,7 +1760,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC503a00db2781bb1d706b9ffe1462524a0b0",
+          "Ref": "RestApiDeployment180EC5032d4d5ec416a5fa8ac8a06493468f87fc",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -1806,7 +1806,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
 #if($origin == "")
   #set($origin = $input.params().header.get("origin"))
 #end
-#if($origin == "https://interactive.guim.co.uk" || $origin == "https://membership.theguardian.com" || $origin == "https://profile.theguardian.com" || $origin == "https://support.theguardian.com")
+#if($origin == "https://interactive.guim.co.uk" || $origin == "https://profile.theguardian.com" || $origin == "https://support.theguardian.com")
   #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)
 #end",
               },
@@ -1875,7 +1875,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
 #if($origin == "")
   #set($origin = $input.params().header.get("origin"))
 #end
-#if($origin == "https://interactive.guim.co.uk" || $origin == "https://membership.theguardian.com" || $origin == "https://profile.theguardian.com" || $origin == "https://support.theguardian.com")
+#if($origin == "https://interactive.guim.co.uk" || $origin == "https://profile.theguardian.com" || $origin == "https://support.theguardian.com")
   #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)
 #end",
               },
@@ -2057,7 +2057,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
 #if($origin == "")
   #set($origin = $input.params().header.get("origin"))
 #end
-#if($origin == "https://interactive.guim.co.uk" || $origin == "https://membership.theguardian.com" || $origin == "https://profile.theguardian.com" || $origin == "https://support.theguardian.com")
+#if($origin == "https://interactive.guim.co.uk" || $origin == "https://profile.theguardian.com" || $origin == "https://support.theguardian.com")
   #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)
 #end",
               },
@@ -2238,7 +2238,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
 #if($origin == "")
   #set($origin = $input.params().header.get("origin"))
 #end
-#if($origin == "https://interactive.guim.co.uk" || $origin == "https://membership.theguardian.com" || $origin == "https://profile.theguardian.com" || $origin == "https://support.theguardian.com")
+#if($origin == "https://interactive.guim.co.uk" || $origin == "https://profile.theguardian.com" || $origin == "https://support.theguardian.com")
   #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)
 #end",
               },
