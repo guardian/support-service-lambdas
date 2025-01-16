@@ -2,6 +2,7 @@ import { getIfDefined } from '@modules/nullAndUndefined';
 
 const zuoraCatalogToProductKey: Record<string, string> = {
 	'Guardian Light': 'GuardianLight',
+	'Guardian Ad-Lite': 'GuardianAdLite',
 	Contributor: 'Contribution',
 	'Supporter Plus': 'SupporterPlus',
 	'Digital Pack': 'DigitalSubscription',
@@ -28,6 +29,7 @@ export const activeProducts = [
 	'DigitalSubscription',
 	'TierThree',
 	'GuardianLight',
+	'GuardianAdLite',
 	'GuardianWeeklyRestOfWorld',
 	'GuardianWeeklyDomestic',
 	'HomeDelivery',
@@ -98,6 +100,7 @@ const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 	'Weekend+': 'Weekend+',
 	'Sixday+': 'Sixday+',
 	'Guardian Light Monthly': 'Monthly',
+	'Guardian Ad-Lite Monthly': 'Monthly',
 	// Membership rate plans
 	'Supporter - monthly': 'V1DeprecatedMonthly',
 	'Supporter - annual': 'V1DeprecatedAnnual',
@@ -164,6 +167,7 @@ const zuoraCatalogToProductRatePlanChargeKey: Record<string, string> = {
 	'Guardian Weekly': 'GuardianWeekly',
 	'Newspaper Archive': 'NewspaperArchive',
 	'Guardian Light': 'Subscription',
+	'Guardian Ad-Lite': 'Subscription',
 	'Supporter Membership - Annual': 'Subscription',
 	'Supporter Membership - Monthly': 'Subscription',
 	'Partner Membership - Monthly': 'Subscription',

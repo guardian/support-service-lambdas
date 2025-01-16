@@ -1,4 +1,3 @@
-import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { Stage } from '@modules/stage';
@@ -16,10 +15,7 @@ export const contributionToSupporterPlusEndpoint = async (
 	body: string,
 	subscriptionNumber: string,
 ) => {
-	const identityId = getIfDefined(
-		headers['x-identity-id'],
-		'Identity ID not found in request',
-	);
+	const identityId = headers['x-identity-id'];
 	const zuoraClient = await ZuoraClient.create(stage);
 	console.log('Loading the product catalog');
 	const productCatalog = await getProductCatalogFromApi(stage);
