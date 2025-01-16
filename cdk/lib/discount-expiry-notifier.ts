@@ -2,6 +2,7 @@ import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
+import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Architecture } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
@@ -19,7 +20,7 @@ export class DiscountExpiryNotifier extends GuStack {
 
 		const appName = 'discount-expiry-notifier';
 
-		new Bucket(this, 'Bucket', {
+		const bucket = new Bucket(this, 'Bucket', {
 			bucketName: `${appName}-${this.stage.toLowerCase()}`,
 		});
 
@@ -84,6 +85,12 @@ export class DiscountExpiryNotifier extends GuStack {
 				handler: 'saveResults.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['s3:PutObject'],
+						resources: [bucket.arnForObjects('*')],
+					}),
+				],
 			},
 		);
 
