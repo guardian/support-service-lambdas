@@ -132,24 +132,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
       },
     },
   },
-  "GuardianLight": {
-    "active": true,
-    "billingSystem": "zuora",
-    "ratePlans": {
-      "Monthly": {
-        "billingPeriod": "Month",
-        "charges": {
-          "Subscription": {
-            "id": "71a1c43a10792b28f702b3bf5d380037",
-          },
-        },
-        "id": "71a1c43a1e192b28f702b3b47113000a",
-        "pricing": {
-          "GBP": 2,
-        },
-      },
-    },
-  },
   "GuardianPatron": {
     "active": true,
     "billingSystem": "stripe",
@@ -1756,16 +1738,6 @@ exports[`code Generated product catalog types match snapshot 1`] = `
         },
       },
     },
-    "GuardianLight": {
-      "billingPeriods": [
-        "Month",
-      ],
-      "productRatePlans": {
-        "Monthly": {
-          "Subscription": {},
-        },
-      },
-    },
     "GuardianPatron": {
       "billingPeriods": [
         "Month",
@@ -2392,24 +2364,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "id": "8a1285e294443da501944b04cb692c9e",
         "pricing": {
           "GBP": 5,
-        },
-      },
-    },
-  },
-  "GuardianLight": {
-    "active": true,
-    "billingSystem": "zuora",
-    "ratePlans": {
-      "Monthly": {
-        "billingPeriod": "Month",
-        "charges": {
-          "Subscription": {
-            "id": "8a129b7892c35f170192dd3225572b97",
-          },
-        },
-        "id": "8a12831492c341730192dd1c39207038",
-        "pricing": {
-          "GBP": 2,
         },
       },
     },
@@ -3939,16 +3893,6 @@ exports[`prod Generated product catalog types match snapshot 1`] = `
       },
     },
     "GuardianAdLite": {
-      "billingPeriods": [
-        "Month",
-      ],
-      "productRatePlans": {
-        "Monthly": {
-          "Subscription": {},
-        },
-      },
-    },
-    "GuardianLight": {
       "billingPeriods": [
         "Month",
       ],
