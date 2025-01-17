@@ -106,6 +106,12 @@ export class StripeCheckoutSpike extends GuStack {
 						`arn:aws:sqs:${this.region}:${this.account}:soft-opt-in-consent-setter-queue-${this.stage}`,
 					],
 				}),
+				new PolicyStatement({
+					actions: ['events:PutEvents'],
+					resources: [
+						`arn:aws:events:${this.region}:${this.account}:event-bus/acquisitions-bus-${this.stage}`,
+					],
+				}),
 			],
 		});
 	}
