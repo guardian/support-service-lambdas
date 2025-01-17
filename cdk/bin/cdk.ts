@@ -16,6 +16,7 @@ import {
 	APP_NAME as SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME,
 	SingleContributionSalesforceWrites,
 } from '../lib/single-contribution-salesforce-writes';
+import { StripeCheckoutSpike } from '../lib/stripe-checkout-spike';
 import type { StripeWebhookEndpointsProps } from '../lib/stripe-webhook-endpoints';
 import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
 import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
@@ -287,6 +288,14 @@ new UserBenefits(app, 'user-benefits-PROD', {
 	certificateId: supportCertificateId,
 	supporterProductDataTable:
 		'supporter-product-data-tables-PROD-SupporterProductDataTable',
+});
+new StripeCheckoutSpike(app, 'stripe-checkout-spike-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+});
+new StripeCheckoutSpike(app, 'stripe-checkout-spike-PROD', {
+	stack: 'support',
+	stage: 'PROD',
 });
 new DiscountExpiryNotifier(app, 'discount-expiry-notifier-CODE', {
 	stack: 'support',

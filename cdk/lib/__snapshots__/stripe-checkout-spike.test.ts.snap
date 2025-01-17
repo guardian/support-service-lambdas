@@ -1,0 +1,1071 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`The StripeCheckoutSpike stack matches the snapshot 1`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [
+      "GuDistributionBucketParameter",
+      "GuLambdaFunction",
+    ],
+    "gu:cdk:version": "TEST",
+  },
+  "Parameters": {
+    "DistributionBucketName": {
+      "Default": "/account/services/artifact.bucket",
+      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "StripeBusToQueueRule315DB460": {
+      "Properties": {
+        "Description": "Send stripe events to queue",
+        "EventBusName": "aws.partner/stripe.com/ed_test_61RqARF6hmlRU6YCC16Rq9XTM0E9VxCGACIr7p1tg5ZY",
+        "EventPattern": {
+          "account": [
+            {
+              "Ref": "AWS::AccountId",
+            },
+          ],
+          "region": [
+            {
+              "Ref": "AWS::Region",
+            },
+          ],
+        },
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "stripecheckoutspikequeue88DF5386",
+                "Arn",
+              ],
+            },
+            "Id": "Target0",
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "checkoutSessionCompletedEventHandlerF07DFDDB": {
+      "DependsOn": [
+        "checkoutSessionCompletedEventHandlerServiceRoleDefaultPolicy249BD397",
+        "checkoutSessionCompletedEventHandlerServiceRoleC9F47EDB",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/CODE/stripe-checkout-spike/stripe-checkout-spike.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "APP": "stripe-checkout-spike",
+            "BRAZE_EMAILS_QUEUE_URL": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://sqs.",
+                  {
+                    "Ref": "AWS::Region",
+                  },
+                  ".amazonaws.com/",
+                  {
+                    "Ref": "AWS::AccountId",
+                  },
+                  "/braze-emails-CODE",
+                ],
+              ],
+            },
+            "IDENTITY_API_URL": "https://idapi.code.dev-theguardian.com",
+            "STACK": "support",
+            "STAGE": "CODE",
+          },
+        },
+        "FunctionName": "checkout-session-completed-event-handler-CODE",
+        "Handler": "checkoutSessionCompletedEventHandler.handler",
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "checkoutSessionCompletedEventHandlerServiceRoleC9F47EDB",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-checkout-spike",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 30,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "checkoutSessionCompletedEventHandlerServiceRoleC9F47EDB": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-checkout-spike",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "checkoutSessionCompletedEventHandlerServiceRoleDefaultPolicy249BD397": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:CODE/Identity/stripe-checkout-spike-*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:SendMessage",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:sqs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":braze-emails-CODE",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:sqs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":contributions-store-queue-CODE",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:sqs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":soft-opt-in-consent-setter-queue-CODE",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "events:PutEvents",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:events:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":event-bus/acquisitions-bus-CODE",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "stripecheckoutspikequeue88DF5386",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/CODE/stripe-checkout-spike/stripe-checkout-spike.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/stripe-checkout-spike",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/stripe-checkout-spike/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "checkoutSessionCompletedEventHandlerServiceRoleDefaultPolicy249BD397",
+        "Roles": [
+          {
+            "Ref": "checkoutSessionCompletedEventHandlerServiceRoleC9F47EDB",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "checkoutSessionCompletedEventHandlerSqsEventSourcestripecheckoutspikeCODEstripecheckoutspikequeue7C9AD88C34BEC033": {
+      "Properties": {
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "stripecheckoutspikequeue88DF5386",
+            "Arn",
+          ],
+        },
+        "FunctionName": {
+          "Ref": "checkoutSessionCompletedEventHandlerF07DFDDB",
+        },
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "deadlettersstripecheckoutspikequeue18B0557F": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "dead-letters-stripe-checkout-spike-queue-CODE",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "stripecheckoutspikequeue88DF5386": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "QueueName": "stripe-checkout-spike-queue-CODE",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "deadlettersstripecheckoutspikequeue18B0557F",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 1,
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "stripecheckoutspikequeuePolicy24824C45": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "StripeBusToQueueRule315DB460",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "stripecheckoutspikequeue88DF5386",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "StripeBusToQueueRule315DB460",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "stripecheckoutspikequeue88DF5386",
+                  "Arn",
+                ],
+              },
+              "Sid": "Allow stripe bus to send messages to the stripe-checkout-spike-queue",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "stripecheckoutspikequeue88DF5386",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
+  },
+}
+`;
+
+exports[`The StripeCheckoutSpike stack matches the snapshot 2`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [
+      "GuDistributionBucketParameter",
+      "GuLambdaFunction",
+    ],
+    "gu:cdk:version": "TEST",
+  },
+  "Parameters": {
+    "DistributionBucketName": {
+      "Default": "/account/services/artifact.bucket",
+      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "StripeBusToQueueRule315DB460": {
+      "Properties": {
+        "Description": "Send stripe events to queue",
+        "EventBusName": "aws.partner/stripe.com/ed_test_61RqARF6hmlRU6YCC16Rq9XTM0E9VxCGACIr7p1tg5ZY",
+        "EventPattern": {
+          "account": [
+            {
+              "Ref": "AWS::AccountId",
+            },
+          ],
+          "region": [
+            {
+              "Ref": "AWS::Region",
+            },
+          ],
+        },
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "stripecheckoutspikequeue88DF5386",
+                "Arn",
+              ],
+            },
+            "Id": "Target0",
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "checkoutSessionCompletedEventHandlerF07DFDDB": {
+      "DependsOn": [
+        "checkoutSessionCompletedEventHandlerServiceRoleDefaultPolicy249BD397",
+        "checkoutSessionCompletedEventHandlerServiceRoleC9F47EDB",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/PROD/stripe-checkout-spike/stripe-checkout-spike.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "APP": "stripe-checkout-spike",
+            "BRAZE_EMAILS_QUEUE_URL": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://sqs.",
+                  {
+                    "Ref": "AWS::Region",
+                  },
+                  ".amazonaws.com/",
+                  {
+                    "Ref": "AWS::AccountId",
+                  },
+                  "/braze-emails-PROD",
+                ],
+              ],
+            },
+            "IDENTITY_API_URL": "https://idapi.theguardian.com",
+            "STACK": "support",
+            "STAGE": "PROD",
+          },
+        },
+        "FunctionName": "checkout-session-completed-event-handler-PROD",
+        "Handler": "checkoutSessionCompletedEventHandler.handler",
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "checkoutSessionCompletedEventHandlerServiceRoleC9F47EDB",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-checkout-spike",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 30,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "checkoutSessionCompletedEventHandlerServiceRoleC9F47EDB": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-checkout-spike",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "checkoutSessionCompletedEventHandlerServiceRoleDefaultPolicy249BD397": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:PROD/Identity/stripe-checkout-spike-*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:SendMessage",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:sqs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":braze-emails-PROD",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:sqs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":contributions-store-queue-PROD",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:sqs:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":soft-opt-in-consent-setter-queue-PROD",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "events:PutEvents",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:events:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":event-bus/acquisitions-bus-PROD",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "stripecheckoutspikequeue88DF5386",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/PROD/stripe-checkout-spike/stripe-checkout-spike.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/stripe-checkout-spike",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/stripe-checkout-spike/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "checkoutSessionCompletedEventHandlerServiceRoleDefaultPolicy249BD397",
+        "Roles": [
+          {
+            "Ref": "checkoutSessionCompletedEventHandlerServiceRoleC9F47EDB",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "checkoutSessionCompletedEventHandlerSqsEventSourcestripecheckoutspikePRODstripecheckoutspikequeueC1B16F66366C2BB9": {
+      "Properties": {
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "stripecheckoutspikequeue88DF5386",
+            "Arn",
+          ],
+        },
+        "FunctionName": {
+          "Ref": "checkoutSessionCompletedEventHandlerF07DFDDB",
+        },
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "deadlettersstripecheckoutspikequeue18B0557F": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "dead-letters-stripe-checkout-spike-queue-PROD",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "stripecheckoutspikequeue88DF5386": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "QueueName": "stripe-checkout-spike-queue-PROD",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "deadlettersstripecheckoutspikequeue18B0557F",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 1,
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "stripecheckoutspikequeuePolicy24824C45": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "StripeBusToQueueRule315DB460",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "stripecheckoutspikequeue88DF5386",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "StripeBusToQueueRule315DB460",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "stripecheckoutspikequeue88DF5386",
+                  "Arn",
+                ],
+              },
+              "Sid": "Allow stripe bus to send messages to the stripe-checkout-spike-queue",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "stripecheckoutspikequeue88DF5386",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
+  },
+}
+`;
