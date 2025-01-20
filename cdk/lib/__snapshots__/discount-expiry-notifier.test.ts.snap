@@ -126,6 +126,32 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
+    "Bucket83908E77": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "BucketName": "discount-expiry-notifier-code",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+    },
     "discountexpirynotifierstatemachineCODE793C8056": {
       "DeletionPolicy": "Delete",
       "DependsOn": [
@@ -608,6 +634,32 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
+    "Bucket83908E77": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "BucketName": "discount-expiry-notifier-prod",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+    },
     "discountexpirynotifierstatemachinePROD71101E82": {
       "DeletionPolicy": "Delete",
       "DependsOn": [

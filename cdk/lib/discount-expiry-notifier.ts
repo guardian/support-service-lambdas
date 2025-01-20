@@ -3,6 +3,7 @@ import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
 import { Architecture } from 'aws-cdk-lib/aws-lambda';
+import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { DefinitionBody, StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { nodeVersion } from './node-version';
@@ -12,6 +13,10 @@ export class DiscountExpiryNotifier extends GuStack {
 		super(scope, id, props);
 
 		const appName = 'discount-expiry-notifier';
+
+		new Bucket(this, 'Bucket', {
+			bucketName: `${appName}-${this.stage.toLowerCase()}`,
+		});
 
 		const getSubsWithExpiringDiscountsLambda = new GuLambdaFunction(
 			this,
