@@ -6,9 +6,12 @@ import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Architecture } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
+	Choice,
+	Condition,
 	DefinitionBody,
 	JsonPath,
 	Map,
+	Pass,
 	StateMachine,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
@@ -35,6 +38,22 @@ export class DiscountExpiryNotifier extends GuStack {
 					Stage: this.stage,
 				},
 				handler: 'getSubsWithExpiringDiscounts.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+			},
+		);
+
+		const subIsActiveLambda = new GuLambdaFunction(
+			this,
+			'sub-is-active-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-sub-is-active-${this.stage}`,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+				},
+				handler: 'subIsActive.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
 			},
@@ -103,6 +122,15 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
+		const subIsActiveLambdaTask = new LambdaInvoke(
+			this,
+			'Check sub is active',
+			{
+				lambdaFunction: subIsActiveLambda,
+				outputPath: '$.Payload',
+			},
+		);
+
 		const buildEmailPayloadLambdaTask = new LambdaInvoke(
 			this,
 			'Build email payload',
@@ -135,8 +163,19 @@ export class DiscountExpiryNotifier extends GuStack {
 			resultPath: '$.discountProcessingAttempts',
 		});
 
+		const isSubActiveChoice = new Choice(this, 'Is Subscription Active?');
+
 		emailSendsProcessingMap.iterator(
-			buildEmailPayloadLambdaTask.next(initiateEmailSendLambdaTask),
+			subIsActiveLambdaTask.next(
+				isSubActiveChoice
+					.when(
+						Condition.booleanEquals('$.isActive', true),
+						buildEmailPayloadLambdaTask.next(initiateEmailSendLambdaTask),
+					)
+					.otherwise(
+						new Pass(this, 'Skip Processing', { resultPath: JsonPath.DISCARD }),
+					),
+			),
 		);
 
 		const definitionBody = DefinitionBody.fromChainable(
