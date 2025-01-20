@@ -44,7 +44,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 export async function getChatMessages(
 	record: SQSRecord,
 	alarmMappings: AlarmMappings,
-) {
+): Promise<{ webhookUrls: string[]; text: string } | undefined> {
 	console.log('sqsRecord', record);
 
 	const { Message, MessageAttributes } = JSON.parse(
