@@ -17,7 +17,6 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			const email = session.customer_details?.email;
 			const firstName = session.customer_details?.name;
 			const currency = session.currency?.toUpperCase();
-			let identityUserId;
 
 			if (!email) {
 				throw new Error('Customer email not present in event');
@@ -37,15 +36,17 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 
 			const { user: existingUser } = await getUser({ email });
 
+			let identityId;
+
 			if (existingUser) {
-				identityUserId = existingUser.userId;
+				identityId = existingUser.userId;
 			} else {
 				const { user: guestUser, errors } = await createGuestUser({
 					email,
 					firstName,
 				});
 				if (guestUser) {
-					identityUserId = guestUser.userId;
+					identityId = guestUser.userId;
 				} else {
 					throw new Error(JSON.stringify(errors));
 				}
@@ -70,9 +71,50 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 						},
 					},
 					DataExtensionName: 'contribution-thank-you',
-					IdentityUserId: identityUserId,
+					IdentityUserId: identityId,
 				}),
 			});
+
+			const eventPayload = {
+				// eventTimeStamp: DateTime,
+				// product: AcquisitionProduct,
+				// amount: Option[BigDecimal],
+				// country: Country,
+				currency,
+				// source: Option[String],
+				// referrerUrl: Option[String],
+				// abTests: List[AbTest],
+				// paymentFrequency: PaymentFrequency,
+				// paymentProvider: Option[PaymentProvider],
+				identityId,
+				// labels: List[String],
+				// promoCode: Option[String],
+				// reusedExistingPaymentMethod: Boolean,
+				// readerType: ReaderType,
+				// acquisitionType: AcquisitionType,
+				// contributionId: Option[String],
+				// paymentId: Option[String],
+				// queryParameters: List[QueryParameter],
+				// platform: Option[String],
+				email,
+			};
+			console.log(eventPayload);
+
+			const supporterProductDataPayload = {
+				identityId,
+				subscriptionName: `Stripe - ${typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent?.id}`,
+				productRatePlanId: 'single_contribution',
+				productRatePlanName: 'Single Contribution',
+			};
+			console.log(supporterProductDataPayload);
+
+			// Supporter data
+			// case class SupporterRatePlanItem(
+			// 	gifteeIdentityId: Option[String], // Unique identifier for user if this is a DS gift subscription
+			// 	termEndDate: LocalDate, // Date that this subscription term ends
+			// 	contractEffectiveDate: LocalDate, // Date that this subscription started
+			// 	contributionAmount: Option[ContributionAmount],
+			// )
 		}
 	} catch (error) {
 		console.error(error);
@@ -81,7 +123,6 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 };
 
 const getEdition = (currency: string) => {
-	console.log('Logging currency: ' + currency);
 	const editionsMapping: Record<string, string> = {
 		GBP: 'uk',
 		USD: 'us',
