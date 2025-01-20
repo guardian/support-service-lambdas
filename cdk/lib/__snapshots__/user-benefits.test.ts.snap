@@ -337,13 +337,17 @@ exports[`The User benefits stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC50317193408b169c5bb564915defe08adff": {
+    "RestApiDeployment180EC5031b9cf7f6c14f2d0d67b7159f1361a7d5": {
       "DependsOn": [
         "RestApibenefitsidentityIdGET09FA095A",
+        "RestApibenefitsidentityIdOPTIONSE3678C12",
         "RestApibenefitsidentityIdAB0AD6FB",
         "RestApibenefitsmeGETE1668978",
+        "RestApibenefitsmeOPTIONSB9A61D09",
         "RestApibenefitsmeD17C4853",
+        "RestApibenefitsOPTIONS469AA380",
         "RestApibenefits030C9A78",
+        "RestApiOPTIONS6AA64D2D",
       ],
       "Properties": {
         "Description": "Automatically created by the RestApi construct",
@@ -359,7 +363,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC50317193408b169c5bb564915defe08adff",
+          "Ref": "RestApiDeployment180EC5031b9cf7f6c14f2d0d67b7159f1361a7d5",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -386,6 +390,60 @@ exports[`The User benefits stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::Stage",
     },
+    "RestApiOPTIONS6AA64D2D": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "OPTIONS",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'*'",
+                "method.response.header.Access-Control-Allow-Methods": "'GET'",
+                "method.response.header.Access-Control-Allow-Origin": "'https://m.code.dev-theguardian.com'",
+                "method.response.header.Vary": "'Origin'",
+              },
+              "ResponseTemplates": {
+                "application/json": "#set($origin = $input.params().header.get("Origin"))
+#if($origin == "")
+  #set($origin = $input.params().header.get("origin"))
+#end
+#if($origin == "https://m.thegulocal.com" || $origin == "https://profile.code.dev-theguardian.com" || $origin == "https://profile.thegulocal.com" || $origin == "https://support.code.dev-theguardian.com" || $origin == "https://support.thegulocal.com")
+  #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)
+#end",
+              },
+              "StatusCode": "204",
+            },
+          ],
+          "RequestTemplates": {
+            "application/json": "{ statusCode: 200 }",
+          },
+          "Type": "MOCK",
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Methods": true,
+              "method.response.header.Access-Control-Allow-Origin": true,
+              "method.response.header.Vary": true,
+            },
+            "StatusCode": "204",
+          },
+        ],
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "RestApi0C43BF4B",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
     "RestApibenefits030C9A78": {
       "Properties": {
         "ParentId": {
@@ -400,6 +458,57 @@ exports[`The User benefits stack matches the snapshot 1`] = `
         },
       },
       "Type": "AWS::ApiGateway::Resource",
+    },
+    "RestApibenefitsOPTIONS469AA380": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "OPTIONS",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'*'",
+                "method.response.header.Access-Control-Allow-Methods": "'GET'",
+                "method.response.header.Access-Control-Allow-Origin": "'https://m.code.dev-theguardian.com'",
+                "method.response.header.Vary": "'Origin'",
+              },
+              "ResponseTemplates": {
+                "application/json": "#set($origin = $input.params().header.get("Origin"))
+#if($origin == "")
+  #set($origin = $input.params().header.get("origin"))
+#end
+#if($origin == "https://m.thegulocal.com" || $origin == "https://profile.code.dev-theguardian.com" || $origin == "https://profile.thegulocal.com" || $origin == "https://support.code.dev-theguardian.com" || $origin == "https://support.thegulocal.com")
+  #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)
+#end",
+              },
+              "StatusCode": "204",
+            },
+          ],
+          "RequestTemplates": {
+            "application/json": "{ statusCode: 200 }",
+          },
+          "Type": "MOCK",
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Methods": true,
+              "method.response.header.Access-Control-Allow-Origin": true,
+              "method.response.header.Vary": true,
+            },
+            "StatusCode": "204",
+          },
+        ],
+        "ResourceId": {
+          "Ref": "RestApibenefits030C9A78",
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
     },
     "RestApibenefitsidentityIdAB0AD6FB": {
       "Properties": {
@@ -532,6 +641,57 @@ exports[`The User benefits stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
+    "RestApibenefitsidentityIdOPTIONSE3678C12": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "OPTIONS",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'*'",
+                "method.response.header.Access-Control-Allow-Methods": "'GET'",
+                "method.response.header.Access-Control-Allow-Origin": "'https://m.code.dev-theguardian.com'",
+                "method.response.header.Vary": "'Origin'",
+              },
+              "ResponseTemplates": {
+                "application/json": "#set($origin = $input.params().header.get("Origin"))
+#if($origin == "")
+  #set($origin = $input.params().header.get("origin"))
+#end
+#if($origin == "https://m.thegulocal.com" || $origin == "https://profile.code.dev-theguardian.com" || $origin == "https://profile.thegulocal.com" || $origin == "https://support.code.dev-theguardian.com" || $origin == "https://support.thegulocal.com")
+  #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)
+#end",
+              },
+              "StatusCode": "204",
+            },
+          ],
+          "RequestTemplates": {
+            "application/json": "{ statusCode: 200 }",
+          },
+          "Type": "MOCK",
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Methods": true,
+              "method.response.header.Access-Control-Allow-Origin": true,
+              "method.response.header.Vary": true,
+            },
+            "StatusCode": "204",
+          },
+        ],
+        "ResourceId": {
+          "Ref": "RestApibenefitsidentityIdAB0AD6FB",
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
     "RestApibenefitsmeD17C4853": {
       "Properties": {
         "ParentId": {
@@ -653,6 +813,57 @@ exports[`The User benefits stack matches the snapshot 1`] = `
             ],
           },
         },
+        "ResourceId": {
+          "Ref": "RestApibenefitsmeD17C4853",
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "RestApibenefitsmeOPTIONSB9A61D09": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "OPTIONS",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'*'",
+                "method.response.header.Access-Control-Allow-Methods": "'GET'",
+                "method.response.header.Access-Control-Allow-Origin": "'https://m.code.dev-theguardian.com'",
+                "method.response.header.Vary": "'Origin'",
+              },
+              "ResponseTemplates": {
+                "application/json": "#set($origin = $input.params().header.get("Origin"))
+#if($origin == "")
+  #set($origin = $input.params().header.get("origin"))
+#end
+#if($origin == "https://m.thegulocal.com" || $origin == "https://profile.code.dev-theguardian.com" || $origin == "https://profile.thegulocal.com" || $origin == "https://support.code.dev-theguardian.com" || $origin == "https://support.thegulocal.com")
+  #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)
+#end",
+              },
+              "StatusCode": "204",
+            },
+          ],
+          "RequestTemplates": {
+            "application/json": "{ statusCode: 200 }",
+          },
+          "Type": "MOCK",
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Methods": true,
+              "method.response.header.Access-Control-Allow-Origin": true,
+              "method.response.header.Vary": true,
+            },
+            "StatusCode": "204",
+          },
+        ],
         "ResourceId": {
           "Ref": "RestApibenefitsmeD17C4853",
         },
@@ -1523,13 +1734,17 @@ exports[`The User benefits stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC503b2938a813f2678b1e535ffceb083fc7e": {
+    "RestApiDeployment180EC5032d4d5ec416a5fa8ac8a06493468f87fc": {
       "DependsOn": [
         "RestApibenefitsidentityIdGET09FA095A",
+        "RestApibenefitsidentityIdOPTIONSE3678C12",
         "RestApibenefitsidentityIdAB0AD6FB",
         "RestApibenefitsmeGETE1668978",
+        "RestApibenefitsmeOPTIONSB9A61D09",
         "RestApibenefitsmeD17C4853",
+        "RestApibenefitsOPTIONS469AA380",
         "RestApibenefits030C9A78",
+        "RestApiOPTIONS6AA64D2D",
       ],
       "Properties": {
         "Description": "Automatically created by the RestApi construct",
@@ -1545,7 +1760,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC503b2938a813f2678b1e535ffceb083fc7e",
+          "Ref": "RestApiDeployment180EC5032d4d5ec416a5fa8ac8a06493468f87fc",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -1572,6 +1787,60 @@ exports[`The User benefits stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::Stage",
     },
+    "RestApiOPTIONS6AA64D2D": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "OPTIONS",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'*'",
+                "method.response.header.Access-Control-Allow-Methods": "'GET'",
+                "method.response.header.Access-Control-Allow-Origin": "'https://www.theguardian.com'",
+                "method.response.header.Vary": "'Origin'",
+              },
+              "ResponseTemplates": {
+                "application/json": "#set($origin = $input.params().header.get("Origin"))
+#if($origin == "")
+  #set($origin = $input.params().header.get("origin"))
+#end
+#if($origin == "https://interactive.guim.co.uk" || $origin == "https://profile.theguardian.com" || $origin == "https://support.theguardian.com")
+  #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)
+#end",
+              },
+              "StatusCode": "204",
+            },
+          ],
+          "RequestTemplates": {
+            "application/json": "{ statusCode: 200 }",
+          },
+          "Type": "MOCK",
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Methods": true,
+              "method.response.header.Access-Control-Allow-Origin": true,
+              "method.response.header.Vary": true,
+            },
+            "StatusCode": "204",
+          },
+        ],
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "RestApi0C43BF4B",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
     "RestApibenefits030C9A78": {
       "Properties": {
         "ParentId": {
@@ -1586,6 +1855,57 @@ exports[`The User benefits stack matches the snapshot 2`] = `
         },
       },
       "Type": "AWS::ApiGateway::Resource",
+    },
+    "RestApibenefitsOPTIONS469AA380": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "OPTIONS",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'*'",
+                "method.response.header.Access-Control-Allow-Methods": "'GET'",
+                "method.response.header.Access-Control-Allow-Origin": "'https://www.theguardian.com'",
+                "method.response.header.Vary": "'Origin'",
+              },
+              "ResponseTemplates": {
+                "application/json": "#set($origin = $input.params().header.get("Origin"))
+#if($origin == "")
+  #set($origin = $input.params().header.get("origin"))
+#end
+#if($origin == "https://interactive.guim.co.uk" || $origin == "https://profile.theguardian.com" || $origin == "https://support.theguardian.com")
+  #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)
+#end",
+              },
+              "StatusCode": "204",
+            },
+          ],
+          "RequestTemplates": {
+            "application/json": "{ statusCode: 200 }",
+          },
+          "Type": "MOCK",
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Methods": true,
+              "method.response.header.Access-Control-Allow-Origin": true,
+              "method.response.header.Vary": true,
+            },
+            "StatusCode": "204",
+          },
+        ],
+        "ResourceId": {
+          "Ref": "RestApibenefits030C9A78",
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
     },
     "RestApibenefitsidentityIdAB0AD6FB": {
       "Properties": {
@@ -1718,6 +2038,57 @@ exports[`The User benefits stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
+    "RestApibenefitsidentityIdOPTIONSE3678C12": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "OPTIONS",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'*'",
+                "method.response.header.Access-Control-Allow-Methods": "'GET'",
+                "method.response.header.Access-Control-Allow-Origin": "'https://www.theguardian.com'",
+                "method.response.header.Vary": "'Origin'",
+              },
+              "ResponseTemplates": {
+                "application/json": "#set($origin = $input.params().header.get("Origin"))
+#if($origin == "")
+  #set($origin = $input.params().header.get("origin"))
+#end
+#if($origin == "https://interactive.guim.co.uk" || $origin == "https://profile.theguardian.com" || $origin == "https://support.theguardian.com")
+  #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)
+#end",
+              },
+              "StatusCode": "204",
+            },
+          ],
+          "RequestTemplates": {
+            "application/json": "{ statusCode: 200 }",
+          },
+          "Type": "MOCK",
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Methods": true,
+              "method.response.header.Access-Control-Allow-Origin": true,
+              "method.response.header.Vary": true,
+            },
+            "StatusCode": "204",
+          },
+        ],
+        "ResourceId": {
+          "Ref": "RestApibenefitsidentityIdAB0AD6FB",
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
     "RestApibenefitsmeD17C4853": {
       "Properties": {
         "ParentId": {
@@ -1839,6 +2210,57 @@ exports[`The User benefits stack matches the snapshot 2`] = `
             ],
           },
         },
+        "ResourceId": {
+          "Ref": "RestApibenefitsmeD17C4853",
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "RestApibenefitsmeOPTIONSB9A61D09": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "OPTIONS",
+        "Integration": {
+          "IntegrationResponses": [
+            {
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Headers": "'*'",
+                "method.response.header.Access-Control-Allow-Methods": "'GET'",
+                "method.response.header.Access-Control-Allow-Origin": "'https://www.theguardian.com'",
+                "method.response.header.Vary": "'Origin'",
+              },
+              "ResponseTemplates": {
+                "application/json": "#set($origin = $input.params().header.get("Origin"))
+#if($origin == "")
+  #set($origin = $input.params().header.get("origin"))
+#end
+#if($origin == "https://interactive.guim.co.uk" || $origin == "https://profile.theguardian.com" || $origin == "https://support.theguardian.com")
+  #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)
+#end",
+              },
+              "StatusCode": "204",
+            },
+          ],
+          "RequestTemplates": {
+            "application/json": "{ statusCode: 200 }",
+          },
+          "Type": "MOCK",
+        },
+        "MethodResponses": [
+          {
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Methods": true,
+              "method.response.header.Access-Control-Allow-Origin": true,
+              "method.response.header.Vary": true,
+            },
+            "StatusCode": "204",
+          },
+        ],
         "ResourceId": {
           "Ref": "RestApibenefitsmeD17C4853",
         },

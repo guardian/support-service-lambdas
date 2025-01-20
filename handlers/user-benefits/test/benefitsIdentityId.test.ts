@@ -23,6 +23,9 @@ jest.mock('@modules/product-benefits/userBenefits', () => ({
 		},
 	),
 }));
+jest.mock('@modules/stage', () => ({
+	stageFromEnvironment: () => 'CODE',
+}));
 
 beforeEach(() => {
 	jest.clearAllMocks();
@@ -46,13 +49,14 @@ describe('benefitsIdentityIdHandler', () => {
 			path: `/benefits/${goodIdentityId}`,
 			httpMethod: 'GET',
 			pathParameters: { identityId: goodIdentityId },
+			headers: {},
 		} as unknown as APIGatewayProxyEvent;
 
 		const response = await benefitsIdentityIdHandler(requestEvent);
 
 		expect(response.statusCode).toEqual(200);
 		expect(getUserBenefitsExcludingStaff).toHaveBeenCalledWith(
-			undefined, // stage isn't defined in tests and anything doesn't match undefined
+			'CODE',
 			expect.anything(),
 			goodIdentityId,
 		);
