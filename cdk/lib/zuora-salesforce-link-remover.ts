@@ -162,12 +162,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			},
 		);
 
-		const billingAccountsProcessingMapDefinition =
-			updateZuoraBillingAccountLambdaTask;
-
-		billingAccountsProcessingMap.iterator(
-			billingAccountsProcessingMapDefinition,
-		);
+		billingAccountsProcessingMap.iterator(updateZuoraBillingAccountLambdaTask);
 
 		const billingAccountsExistChoice = new Choice(
 			this,
