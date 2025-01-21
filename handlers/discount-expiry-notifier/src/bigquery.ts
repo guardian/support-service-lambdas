@@ -29,7 +29,7 @@ export const runQuery = async (
 	});
 
 	const query =
-		"SELECT tier.id, tier.tier FROM `datatech-fivetran.zuora.rate_plan_charge_tier` tier WHERE tier.id = '8a12926292c35f1d0192f3ca2e3b7a09'";
+		"SELECT tier.id, tier.tier, charge.id FROM `datatech-fivetran.zuora.rate_plan_charge_tier` tier JOIN `datatech-fivetran.zuora.rate_plan_charge` charge ON charge.id = tier.rate_plan_charge_id WHERE tier.id = '8a12926292c35f1d0192f3ca2e3b7a09'";
 
 	const result = await bigquery.query(query);
 	console.log('result', result);
