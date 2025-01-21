@@ -40,7 +40,7 @@ export class DiscountExpiryNotifier extends GuStack {
 				resources: ['*'],
 			}),
 		);
-		
+
 		const bucket = new Bucket(this, 'Bucket', {
 			bucketName: `${appName}-${this.stage.toLowerCase()}`,
 		});
