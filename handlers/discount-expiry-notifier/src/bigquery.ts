@@ -33,6 +33,7 @@ export const runQuery = async (
 
 	const result = await bigquery.query(query);
 	console.log('result', result);
+	console.log('result.calculated_end_date', result.calculated_end_date);
 
 	return 1;
 };
