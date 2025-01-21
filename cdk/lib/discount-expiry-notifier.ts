@@ -13,6 +13,7 @@ import {
 	Map,
 	Pass,
 	StateMachine,
+	TaskInput,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { nodeVersion } from './node-version';
@@ -22,6 +23,8 @@ export class DiscountExpiryNotifier extends GuStack {
 		super(scope, id, props);
 
 		const appName = 'discount-expiry-notifier';
+
+		const failuresFileName = 'failures.csv';
 
 		const bucket = new Bucket(this, 'Bucket', {
 			bucketName: `${appName}-${this.stage.toLowerCase()}`,
@@ -119,6 +122,13 @@ export class DiscountExpiryNotifier extends GuStack {
 			{
 				lambdaFunction: getSubsWithExpiringDiscountsLambda,
 				outputPath: '$.Payload',
+				payload: TaskInput.fromObject({
+					'resultFiles.$': '$.ResultFiles.FAILED',
+					filePath: JsonPath.format(
+						`{}/${failuresFileName}`,
+						JsonPath.stringAt('$$.Execution.StartTime'),
+					),
+				}),
 			},
 		);
 
