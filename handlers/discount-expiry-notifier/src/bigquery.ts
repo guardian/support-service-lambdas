@@ -55,11 +55,11 @@ export const runQuery = async (
 		sub.is_latest_version,
 		sub.status
 
-	FROM 'datatech-fivetran.zuora.rate_plan_charge_tier' tier
-		JOIN 'datatech-fivetran.zuora.rate_plan_charge' charge ON charge.id = tier.rate_plan_charge_id
-		JOIN 'datatech-fivetran.zuora.rate_plan' rate_plan ON rate_plan.id = charge.rate_plan_id
-		JOIN 'datatech-fivetran.zuora.product' product ON product.id = tier.product_id
-		JOIN 'datatech-fivetran.zuora.subscription' sub ON sub.id = tier.subscription_id
+	FROM datatech-fivetran.zuora.rate_plan_charge_tier tier
+		JOIN datatech-fivetran.zuora.rate_plan_charge charge ON charge.id = tier.rate_plan_charge_id
+		JOIN datatech-fivetran.zuora.rate_plan rate_plan ON rate_plan.id = charge.rate_plan_id
+		JOIN datatech-fivetran.zuora.product product ON product.id = tier.product_id
+		JOIN datatech-fivetran.zuora.subscription sub ON sub.id = tier.subscription_id
 
 	WHERE 
 		product.name = 'Discounts' AND 
