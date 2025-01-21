@@ -941,7 +941,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "RoleName": "discount-expiry-notifier-CODE",
+        "RoleName": "disc-exp-alert-CODE",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -2459,7 +2459,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "RoleName": "discount-expiry-notifier-PROD",
+        "RoleName": "disc-exp-alert-PROD",
         "Tags": [
           {
             "Key": "gu:cdk:version",
