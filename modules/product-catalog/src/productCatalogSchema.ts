@@ -20,22 +20,6 @@ export const productCatalogSchema = z.object({
 			}),
 		}),
 	}),
-	GuardianLight: z.object({
-		billingSystem: z.literal('zuora'),
-		active: z.boolean(),
-		ratePlans: z.object({
-			Monthly: z.object({
-				id: z.string(),
-				pricing: z.object({
-					GBP: z.number(),
-				}),
-				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.GuardianLight.billingPeriods)
-					.optional(),
-			}),
-		}),
-	}),
 	GuardianAdLite: z.object({
 		billingSystem: z.literal('zuora'),
 		active: z.boolean(),
