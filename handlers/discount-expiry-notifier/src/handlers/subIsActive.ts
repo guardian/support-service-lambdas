@@ -2,9 +2,8 @@ import { getSub } from '../zuoraHttp';
 
 export const handler = async () => {
 	try {
+        //sub name will be passed in via json path in state machine
 		const subName = process.env.SUB_NAME ?? 'A-S00954053';
-
-		console.log('subName:', subName);
 
 		const getSubResponse = await getSub(subName);
 
