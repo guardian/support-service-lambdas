@@ -24,7 +24,7 @@ export const runQuery = async (
 	authClient: BaseExternalAccountClient,
 ): Promise<number> => {
 	const bigquery = new BigQuery({
-		projectId: `datatech-fivetran`,
+		projectId: `datatech-platform-code`,
 		authClient,
 	});
 
