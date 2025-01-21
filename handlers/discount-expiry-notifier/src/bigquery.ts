@@ -9,7 +9,9 @@ export const buildAuthClient = async (
 	clientConfig: string,
 ): Promise<BaseExternalAccountClient> => {
 	try {
-		const parsedConfig = JSON.parse(clientConfig) as ExternalAccountClientOptions;
+		const parsedConfig = JSON.parse(
+			clientConfig,
+		) as ExternalAccountClientOptions;
 		const authClient = ExternalAccountClient.fromJSON(parsedConfig);
 
 		if (!authClient) {
@@ -21,7 +23,6 @@ export const buildAuthClient = async (
 		throw new Error(`Error building auth client: ${(error as Error).message}`);
 	}
 };
-
 
 export const runQuery = async (
 	authClient: BaseExternalAccountClient,
@@ -69,7 +70,7 @@ export const runQuery = async (
 		DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = DATE_ADD(current_date(), INTERVAL 32 DAY)
 	ORDER BY 
 		sub.name desc
-		`
+		`;
 	const result = await bigquery.query(query);
 	console.log('result', result);
 
