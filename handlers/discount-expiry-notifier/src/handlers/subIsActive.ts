@@ -1,10 +1,10 @@
-import { getSub } from "../zuoraHttp";
+import { getSub } from '../zuoraHttp';
 
 export const handler = async () => {
 	try {
-        const subName = process.env.SUB_NAME ?? "A-S00954053";
+		const subName = process.env.SUB_NAME ?? 'A-S00954053';
 
-        console.log("subName:", subName);
+		console.log('subName:', subName);
 
 		const getSubResponse = await getSub(subName);
 
