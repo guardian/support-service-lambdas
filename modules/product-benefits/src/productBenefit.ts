@@ -12,7 +12,7 @@ export const supporterPlusBenefits: ProductBenefit[] = [
 	'liveApp',
 	'feastApp',
 	'hideSupportMessaging',
-	'rejectTracking',
+	'allowRejectAll',
 ];
 export const digitalSubscriptionBenefits = supporterPlusBenefits.concat([
 	'newspaperEdition',
@@ -23,7 +23,7 @@ export const tierThreeBenefits = digitalSubscriptionBenefits.concat([
 ]);
 
 export const productBenefitMapping: Record<ProductKey, ProductBenefit[]> = {
-	GuardianAdLite: ['rejectTracking'],
+	GuardianAdLite: ['allowRejectAll'],
 	SupporterPlus: supporterPlusBenefits,
 	DigitalSubscription: digitalSubscriptionBenefits,
 	TierThree: tierThreeBenefits,
