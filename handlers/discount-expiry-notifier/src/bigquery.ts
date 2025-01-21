@@ -24,7 +24,9 @@ export const buildAuthClient = (
 			if (error instanceof Error) {
 				reject(new Error(`Error parsing client config: ${error.message}`));
 			} else {
-				reject(new Error('Error parsing client config: An unknown error occurred'));
+				reject(
+					new Error('Error parsing client config: An unknown error occurred'),
+				);
 			}
 		}
 	});
@@ -57,29 +59,31 @@ export const runQuery = async (
 	try {
 		// Execute the query
 		const [rows] = await bigquery.query({ query });
-	
+
 		// Type the rows as QueryResult[]
 		const typedRows = rows as QueryResult[];
-	
+
 		// Log the results
 		if (typedRows.length > 0) {
 			const firstRow = typedRows[0] ?? null; // Safely assign firstRow or null
-	
+
 			if (firstRow && firstRow.calculated_end_date instanceof BigQueryDate) {
-				console.log('calculated_end_date value:', firstRow.calculated_end_date.value);
+				console.log(
+					'calculated_end_date value:',
+					firstRow.calculated_end_date.value,
+				);
 			} else if (firstRow) {
 				console.log('calculated_end_date:', firstRow.calculated_end_date);
 			}
 		} else {
 			console.log('No rows returned from the query.');
 		}
-	
+
 		return 1;
 	} catch (error) {
 		console.error('Error running query:', (error as Error).message);
 		throw error;
 	}
-	
 };
 
 interface QueryResult {
