@@ -45,6 +45,8 @@ export const runQuery = async (
 		authClient,
 	});
 
+	const prodSubForTesting1 = 'A-S02269182';
+	const prodSubForTesting2 = 'A-S02274098';
 	const query = `
 		WITH expiringDiscounts AS (
 			SELECT
@@ -70,7 +72,7 @@ export const runQuery = async (
 				AND sub.is_latest_version = TRUE 
 				AND sub.status = 'Active' 
 				AND DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = DATE_ADD(CURRENT_DATE(), INTERVAL 32 DAY) 
-				AND sub.name IN ('A-S02269182', 'A-S02274098')
+				AND sub.name IN ('${prodSubForTesting1}', '${prodSubForTesting2}')
 		)
 		SELECT 
 			exp.sub_name as subName,
@@ -104,14 +106,14 @@ export const runQuery = async (
 
 	const devReturnValue = [
 		{
-			subName: 'A-S00954440', //Active sub
+			subName: 'A-S00954440', //Active sub in dev sandbox
 			firstName: 'Tom',
 			paymentAmount: 12,
 			paymentFrequency: 'Month',
 			nextPaymentDate: '2025-02-23',
 		},
 		{
-			subName: 'A-S00954412', // Cancelled sub
+			subName: 'A-S00954412', // Cancelled sub in dev sandbox
 			firstName: 'Rachel',
 			paymentAmount: 33.99,
 			paymentFrequency: 'Month',
