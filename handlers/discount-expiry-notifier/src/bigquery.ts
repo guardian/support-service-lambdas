@@ -26,9 +26,9 @@ export const buildAuthClient = async (
 };
 
 export const BigQueryResultDataSchema = z.array(
-    z.object({
-        id: z.string(),
-    })
+	z.object({
+		id: z.string(),
+	}),
 );
 
 export const runQuery = async (
