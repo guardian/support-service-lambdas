@@ -27,7 +27,8 @@ export const buildAuthClient = async (
 
 export const BigQueryResultDataSchema = z.array(
 	z.object({
-		id: z.number(),
+		tierId: z.string(),
+		tier: z.number(),
 	}),
 );
 
@@ -41,7 +42,7 @@ export const runQuery = async (
 
 	const query = `
 		SELECT 
-			tier.id 
+			tier.id as tierId, tier.tier as tier
 		FROM 
 			datatech-fivetran.zuora.rate_plan_charge_tier tier 
 		WHERE 
@@ -50,23 +51,23 @@ export const runQuery = async (
 
 	// const query = `
 	// SELECT
-	// 	tier.id,
-	// 	tier.tier,
-	// 	charge.id,
-	// 	charge.name,
-	// 	charge.charge_type,
-	// 	charge.up_to_periods,
-	// 	charge.up_to_periods_type,
-	// 	charge.effective_start_date,
-	// 	charge.effective_end_date,
+	// 	tier.id as tierId,
+	// 	tier.tier as tier,
+	// 	charge.id as chargeId,
+	// 	charge.name as chargeName,
+	// 	charge.charge_type as chargeType,
+	// 	charge.up_to_periods as upToPeriods,
+	// 	charge.up_to_periods_type as upToPeriodsType,
+	// 	charge.effective_start_date as effectiveStartDate,
+	// 	charge.effective_end_date as effectiveEndDate,
 	// 	DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) as calculated_end_date,
 	// 	DATE_DIFF(charge.effective_end_date, charge.effective_start_date, MONTH) as months_diff,
-	// 	tier.discount_amount,
-	// 	tier.discount_percentage,
-	// 	tier.price,
+	// 	tier.discount_amount as discountAmount,
+	// 	tier.discount_percentage as discountPercentage,
+	// 	tier.price as price,
 	// 	sub.name as sub_name,
-	// 	sub.is_latest_version,
-	// 	sub.status
+	// 	sub.is_latest_version as isLatestVersion,
+	// 	sub.status as subStatus
 
 	// FROM datatech-fivetran.zuora.rate_plan_charge_tier tier
 	// 	JOIN datatech-fivetran.zuora.rate_plan_charge charge ON charge.id = tier.rate_plan_charge_id
