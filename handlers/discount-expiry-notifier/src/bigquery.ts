@@ -31,9 +31,11 @@ export const BigQueryResultDataSchema = z.array(
 		firstName: z.string(),
 		paymentAmount: z.number().transform((val) => parseFloat(val.toFixed(2))),
 		paymentFrequency: z.string(),
-		nextPaymentDate: z.object({
-			value: z.string(),
-		}),
+		nextPaymentDate: z
+			.object({
+				value: z.string(),
+			})
+			.transform((obj) => obj.value),
 	}),
 );
 
