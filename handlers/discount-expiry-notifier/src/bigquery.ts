@@ -1,4 +1,4 @@
-import { BigQuery, BigQueryDate } from '@google-cloud/bigquery';
+import { BigQuery } from '@google-cloud/bigquery';
 import type {
 	BaseExternalAccountClient,
 	ExternalAccountClientOptions,
