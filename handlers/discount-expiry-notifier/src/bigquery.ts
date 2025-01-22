@@ -78,6 +78,10 @@ export const runQuery = async (
 			datatech-fivetran.zuora.rate_plan_charge_tier tier 
 		JOIN 
 			datatech-fivetran.zuora.rate_plan_charge charge ON charge.id = tier.rate_plan_charge_id
+		JOIN 
+			datatech-fivetran.zuora.rate_plan rate_plan ON rate_plan.id = charge.rate_plan_id
+		JOIN 
+			datatech-fivetran.zuora.subscription sub ON sub.id = tier.subscription_id
 		WHERE 
 			tier.id = '8a12926292c35f1d0192f3ca2e3b7a09'
 		`;
