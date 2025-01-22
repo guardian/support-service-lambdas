@@ -4,6 +4,7 @@ import type {
 	ExternalAccountClientOptions,
 } from 'google-auth-library';
 import { ExternalAccountClient } from 'google-auth-library';
+import { z } from 'zod';
 
 export const buildAuthClient = async (
 	clientConfig: string,
@@ -23,6 +24,12 @@ export const buildAuthClient = async (
 		throw new Error(`Error building auth client: ${(error as Error).message}`);
 	}
 };
+
+export const BigQueryResultDataSchema = z.array(
+    z.object({
+        id: z.string(),
+    })
+);
 
 export const runQuery = async (
 	authClient: BaseExternalAccountClient,
@@ -80,5 +87,7 @@ export const runQuery = async (
 	const result = await bigquery.query(query);
 	console.log('result', result);
 
+	const resultData = BigQueryResultDataSchema.parse(result[0]);
+	console.log('resultData', resultData);
 	return 1;
 };
