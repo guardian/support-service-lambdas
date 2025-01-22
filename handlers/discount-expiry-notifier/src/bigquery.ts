@@ -27,11 +27,11 @@ export const buildAuthClient = async (
 
 export const BigQueryResultDataSchema = z.array(
 	z.object({
-		sub_name: z.string(),
-		first_name: z.string(),
-		payment_amount: z.number(),
-		payment_frequency: z.string(),
-		next_payment_date: z.object({
+		subName: z.string(),
+		firstName: z.string(),
+		paymentAmount: z.number(),
+		paymentFrequency: z.string(),
+		nextPaymentDate: z.object({
 			value: z.string(),
 		}),
 	}),
@@ -73,11 +73,11 @@ export const runQuery = async (
 				AND sub.name IN ('A-S02269182', 'A-S02274098')
 		)
 		SELECT 
-			exp.sub_name,
-			STRING_AGG(DISTINCT contact.first_name) AS first_name,
+			exp.sub_name as subName,
+			STRING_AGG(DISTINCT contact.first_name) AS firstName,
 			SUM(tier.price) AS payment_amount,
-			STRING_AGG(DISTINCT rate_plan_charge.billing_period) AS payment_frequency,
-			MIN(exp.calculated_end_date) AS next_payment_date
+			STRING_AGG(DISTINCT rate_plan_charge.billing_period) AS paymentFrequency,
+			MIN(exp.calculated_end_date) AS nextPaymentDate
 		FROM
 			expiringDiscounts exp
 		INNER JOIN datatech-fivetran.zuora.rate_plan_charge_tier tier 
