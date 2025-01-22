@@ -111,16 +111,16 @@ export const runQuery = async (
 
 	const devReturnValue = [
 		{
-		  calculatedEndDate: '2025-02-23',
-		  subName: 'A-S02274098',
-		  firstName: 'James'
+			calculatedEndDate: '2025-02-23',
+			subName: 'A-S02274098',
+			firstName: 'James',
 		},
 		{
-		  calculatedEndDate: '2025-02-23',
-		  subName: 'A-S02270028',
-		  firstName: 'Sarah'
-		}
-	  ];
+			calculatedEndDate: '2025-02-23',
+			subName: 'A-S02270028',
+			firstName: 'Sarah',
+		},
+	];
 	return devReturnValue;
 };
 
@@ -128,4 +128,4 @@ type DevReturnValueType = Array<{
 	calculatedEndDate: string;
 	subName: string;
 	firstName: string;
-  }>;
+}>;
