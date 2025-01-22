@@ -32,45 +32,45 @@ export const runQuery = async (
 		authClient,
 	});
 
-	// const query =
-	// 	"SELECT tier.id, tier.tier, charge.id, DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) as calculated_end_date, DATE_DIFF(charge.effective_end_date, charge.effective_start_date, MONTH) as months_diff, FROM `datatech-fivetran.zuora.rate_plan_charge_tier` tier JOIN `datatech-fivetran.zuora.rate_plan_charge` charge ON charge.id = tier.rate_plan_charge_id WHERE tier.id = '8a12926292c35f1d0192f3ca2e3b7a09'";
+	const query =
+		"SELECT tier.id FROM `datatech-fivetran.zuora.rate_plan_charge_tier` tier WHERE tier.id = '8a12926292c35f1d0192f3ca2e3b7a09'";
 
-	const query = `
-	SELECT
-		tier.id,
-		tier.tier,
-		charge.id,
-		charge.name,
-		charge.charge_type,
-		charge.up_to_periods,
-		charge.up_to_periods_type,
-		charge.effective_start_date,
-		charge.effective_end_date,
-		DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) as calculated_end_date,
-		DATE_DIFF(charge.effective_end_date, charge.effective_start_date, MONTH) as months_diff,
-		tier.discount_amount,
-		tier.discount_percentage,
-		tier.price,
-		sub.name as sub_name,
-		sub.is_latest_version,
-		sub.status
+	// const query = `
+	// SELECT
+	// 	tier.id,
+	// 	tier.tier,
+	// 	charge.id,
+	// 	charge.name,
+	// 	charge.charge_type,
+	// 	charge.up_to_periods,
+	// 	charge.up_to_periods_type,
+	// 	charge.effective_start_date,
+	// 	charge.effective_end_date,
+	// 	DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) as calculated_end_date,
+	// 	DATE_DIFF(charge.effective_end_date, charge.effective_start_date, MONTH) as months_diff,
+	// 	tier.discount_amount,
+	// 	tier.discount_percentage,
+	// 	tier.price,
+	// 	sub.name as sub_name,
+	// 	sub.is_latest_version,
+	// 	sub.status
 
-	FROM datatech-fivetran.zuora.rate_plan_charge_tier tier
-		JOIN datatech-fivetran.zuora.rate_plan_charge charge ON charge.id = tier.rate_plan_charge_id
-		JOIN datatech-fivetran.zuora.rate_plan rate_plan ON rate_plan.id = charge.rate_plan_id
-		JOIN datatech-fivetran.zuora.product product ON product.id = tier.product_id
-		JOIN datatech-fivetran.zuora.subscription sub ON sub.id = tier.subscription_id
+	// FROM datatech-fivetran.zuora.rate_plan_charge_tier tier
+	// 	JOIN datatech-fivetran.zuora.rate_plan_charge charge ON charge.id = tier.rate_plan_charge_id
+	// 	JOIN datatech-fivetran.zuora.rate_plan rate_plan ON rate_plan.id = charge.rate_plan_id
+	// 	JOIN datatech-fivetran.zuora.product product ON product.id = tier.product_id
+	// 	JOIN datatech-fivetran.zuora.subscription sub ON sub.id = tier.subscription_id
 
-	WHERE 
-		product.name = 'Discounts' AND 
-		charge.charge_type = 'Recurring' AND 
-		charge.up_to_periods IS NOT NULL AND 
-		sub.is_latest_version = true AND 
-		sub.status = 'Active' AND 
-		DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = DATE_ADD(current_date(), INTERVAL 32 DAY)
-	ORDER BY 
-		sub.name desc
-		`;
+	// WHERE 
+	// 	product.name = 'Discounts' AND 
+	// 	charge.charge_type = 'Recurring' AND 
+	// 	charge.up_to_periods IS NOT NULL AND 
+	// 	sub.is_latest_version = true AND 
+	// 	sub.status = 'Active' AND 
+	// 	DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = DATE_ADD(current_date(), INTERVAL 32 DAY)
+	// ORDER BY 
+	// 	sub.name desc
+	// 	`;
 	const result = await bigquery.query(query);
 	console.log('result', result);
 
