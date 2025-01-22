@@ -58,7 +58,7 @@ export const runQuery = async (
 			charge.up_to_periods as upToPeriods,
 			charge.up_to_periods_type as upToPeriodsType,
 			charge.effective_start_date as effectiveStartDate,
-			charge.effective_end_date as effectiveEndDate,
+			charge.effective_end_date as effectiveEndDate
 		FROM 
 			datatech-fivetran.zuora.rate_plan_charge_tier tier 
 		JOIN 
