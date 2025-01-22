@@ -30,13 +30,13 @@ export const buildAuthClient = async (
 // 	.regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format. Expected YYYY-MM-DD.')
 // 	.transform((date) => new Date(date));
 const BigQueryDate1 = z
-	.object({
-		value: z
-			.string()
-			.regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format. Expected YYYY-MM-DD.')
-			.transform((date) => new Date(date)), // Transform the string to a Date object
-	})
-	.transform((obj) => obj.value);
+  .object({
+    value: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format. Expected YYYY-MM-DD.")
+      .transform((date) => new Date(date)), // Transform the string to a Date object
+  })
+  .transform((obj) => obj.value);
 
 export const BigQueryResultDataSchema = z.array(
 	z.object({
