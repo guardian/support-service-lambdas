@@ -47,6 +47,7 @@ export const BigQueryResultDataSchema = z.array(
 		subName: z.string(),
 		isLatestVersion: z.boolean(),
 		subStatus: z.string(),
+		firstName: z.string(),
 	}),
 );
 
@@ -73,7 +74,8 @@ export const runQuery = async (
 			DATE_DIFF(charge.effective_end_date, charge.effective_start_date, MONTH) as monthsDiff,
 			sub.name as subName,
 			sub.is_latest_version as isLatestVersion,
-			sub.status as subStatus
+			sub.status as subStatus,
+			contact.first_name as firstName
 		FROM 
 			datatech-fivetran.zuora.rate_plan_charge_tier tier 
 		JOIN 
@@ -84,6 +86,8 @@ export const runQuery = async (
 			datatech-fivetran.zuora.product product ON product.id = tier.product_id
 		JOIN 
 			datatech-fivetran.zuora.subscription sub ON sub.id = tier.subscription_id
+		JOIN 
+			datatech-fivetran.zuora.contact contact ON contact.id = sub.sold_to_contact_id
 		WHERE 
 			product.name = 'Discounts' AND 
 			charge.charge_type = 'Recurring' AND 
