@@ -29,14 +29,14 @@ export const buildAuthClient = async (
 // 	.string()
 // 	.regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format. Expected YYYY-MM-DD.')
 // 	.transform((date) => new Date(date));
-const BigQueryDate1 = z
-	.object({
-		value: z
-			.string()
-			.regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format. Expected YYYY-MM-DD.')
-			.transform((date) => new Date(date)), // Transform the string to a Date object
-	})
-	.transform((obj) => obj.value);
+// const BigQueryDate1 = z
+// 	.object({
+// 		value: z
+// 			.string()
+// 			.regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format. Expected YYYY-MM-DD.')
+// 			.transform((date) => new Date(date)), // Transform the string to a Date object
+// 	})
+// 	.transform((obj) => obj.value);
 
 export const BigQueryResultDataSchema = z.array(
 	z.object({
@@ -47,9 +47,10 @@ export const BigQueryResultDataSchema = z.array(
 		chargeType: z.string(),
 		upToPeriods: z.number(),
 		upToPeriodsType: z.string(),
-		effectiveStartDate: BigQueryDate1,
-	}),
-);
+		effectiveStartDate: z.object({
+			value: z.string(),
+		}),
+}));
 
 export const runQuery = async (
 	authClient: BaseExternalAccountClient,
