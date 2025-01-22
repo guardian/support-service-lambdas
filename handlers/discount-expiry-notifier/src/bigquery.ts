@@ -104,21 +104,27 @@ export const runQuery = async (
 
 	const devReturnValue = [
 		{
-			calculatedEndDate: '2025-02-23',
-			subName: 'A-S02274098',
-			firstName: 'James',
+			subName: 'A-S11111111',
+			firstName: 'Richard',
+			paymentAmount: 12,
+			paymentFrequency: 'Month',
+			nextPaymentDate: '2025-02-23',
 		},
 		{
-			calculatedEndDate: '2025-02-23',
-			subName: 'A-S02270028',
-			firstName: 'Sarah',
+			subName: 'A-S22222222',
+			firstName: 'Rachel',
+			paymentAmount: 33.989999999999995,
+			paymentFrequency: 'Month',
+			nextPaymentDate: '2025-02-23',
 		},
 	];
 	return devReturnValue;
 };
 
 type DevReturnValueType = Array<{
-	calculatedEndDate: string;
 	subName: string;
 	firstName: string;
+	paymentAmount: number;
+	paymentFrequency: string;
+	nextPaymentDate: string;
 }>;
