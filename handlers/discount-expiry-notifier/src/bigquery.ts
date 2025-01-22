@@ -83,8 +83,25 @@ export const runQuery = async (
 		JOIN 
 			datatech-fivetran.zuora.subscription sub ON sub.id = tier.subscription_id
 		WHERE 
-			tier.id = '8a12926292c35f1d0192f3ca2e3b7a09'
+			product.name = 'Discounts' AND 
+			charge.charge_type = 'Recurring' AND 
+			charge.up_to_periods IS NOT NULL AND 
+			sub.is_latest_version = true AND 
+			sub.status = 'Active' AND 
+			DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = DATE_ADD(current_date(), INTERVAL 32 DAY)
+		ORDER BY 
+			sub.name desc
 		`;
+		// WHERE 
+		// 	tier.id = '8a12926292c35f1d0192f3ca2e3b7a09'
+// 		WHERE product.name = 'Discounts'
+// AND charge.charge_type = 'Recurring'
+// AND charge.up_to_periods IS NOT NULL
+// AND sub.is_latest_version = true
+// AND sub.status = 'Active'
+// AND DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = DATE_ADD(current_date(), INTERVAL 32 DAY)
+
+
 	console.log('query:', query);
 	// const query = `
 	// SELECT
