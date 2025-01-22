@@ -25,6 +25,11 @@ export const buildAuthClient = async (
 	}
 };
 
+const BigQueryDateSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format. Expected YYYY-MM-DD.")
+  .transform((date) => new Date(date)); 
+
 export const BigQueryResultDataSchema = z.array(
 	z.object({
 		tierId: z.string(),
@@ -34,8 +39,8 @@ export const BigQueryResultDataSchema = z.array(
 		chargeType: z.string(),
 		upToPeriods: z.number(),
 		upToPeriodsType: z.string(),
-		effectiveStartDate: z.string(),
-		effectiveEndDate: z.string().transform((date) => new Date(date)),
+		effectiveStartDate: BigQueryDateSchema,
+		effectiveEndDate: BigQueryDateSchema,
 	}),
 );
 
