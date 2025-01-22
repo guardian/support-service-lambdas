@@ -52,7 +52,7 @@ export const runQuery = async (
 			tier.id as tierId, 
 			tier.tier as tier,
 			charge.id as chargeId,
-			charge.name as chargeName
+			charge.name as chargeName,
 			
 			charge.charge_type as chargeType,
 			charge.up_to_periods as upToPeriods,
