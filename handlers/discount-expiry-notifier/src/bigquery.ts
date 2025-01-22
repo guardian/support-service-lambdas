@@ -55,7 +55,7 @@ export const runQuery = async (
 		WHERE 
 			tier.id = '8a12926292c35f1d0192f3ca2e3b7a09'
 		`;
-
+	console.log('query:', query);
 	// const query = `
 	// SELECT
 	// 	tier.id as tierId,
