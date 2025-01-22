@@ -75,7 +75,7 @@ export const runQuery = async (
 		SELECT 
 			exp.sub_name as subName,
 			STRING_AGG(DISTINCT contact.first_name) AS firstName,
-			SUM(tier.price) AS payment_amount,
+			SUM(tier.price) AS paymentAmount,
 			STRING_AGG(DISTINCT rate_plan_charge.billing_period) AS paymentFrequency,
 			MIN(exp.calculated_end_date) AS nextPaymentDate
 		FROM
