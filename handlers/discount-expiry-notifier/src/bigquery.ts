@@ -25,10 +25,10 @@ export const buildAuthClient = async (
 	}
 };
 
-const BigQueryDateSchema = z
-	.string()
-	.regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format. Expected YYYY-MM-DD.')
-	.transform((date) => new Date(date));
+// const BigQueryDateSchema = z
+// 	.string()
+// 	.regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format. Expected YYYY-MM-DD.')
+// 	.transform((date) => new Date(date));
 
 export const BigQueryResultDataSchema = z.array(
 	z.object({
@@ -39,8 +39,7 @@ export const BigQueryResultDataSchema = z.array(
 		chargeType: z.string(),
 		upToPeriods: z.number(),
 		upToPeriodsType: z.string(),
-		effectiveStartDate: BigQueryDateSchema,
-		effectiveEndDate: BigQueryDateSchema,
+		effectiveStartDate: z.string(),
 	}),
 );
 
@@ -62,8 +61,7 @@ export const runQuery = async (
 			charge.charge_type as chargeType,
 			charge.up_to_periods as upToPeriods,
 			charge.up_to_periods_type as upToPeriodsType,
-			charge.effective_start_date as effectiveStartDate,
-			charge.effective_end_date as effectiveEndDate
+			charge.effective_start_date as effectiveStartDate
 		FROM 
 			datatech-fivetran.zuora.rate_plan_charge_tier tier 
 		JOIN 
