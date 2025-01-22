@@ -80,6 +80,8 @@ export const runQuery = async (
 			datatech-fivetran.zuora.rate_plan_charge charge ON charge.id = tier.rate_plan_charge_id
 		JOIN 
 			datatech-fivetran.zuora.rate_plan rate_plan ON rate_plan.id = charge.rate_plan_id
+		JOIN
+			JOIN datatech-fivetran.zuora.product product ON product.id = tier.product_id
 		JOIN 
 			datatech-fivetran.zuora.subscription sub ON sub.id = tier.subscription_id
 		WHERE 
