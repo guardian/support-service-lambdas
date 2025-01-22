@@ -32,6 +32,7 @@ export const BigQueryResultDataSchema = z.array(
 		chargeId: z.string(),
 		chargeName: z.string(),
 		chargeType: z.string(),
+		paymentFrequency: z.string(),
 		upToPeriods: z.number(),
 		upToPeriodsType: z.string(),
 		effectiveStartDate: z.object({
@@ -53,7 +54,7 @@ export const BigQueryResultDataSchema = z.array(
 
 export const runQuery = async (
 	authClient: BaseExternalAccountClient,
-): Promise<number> => {
+): Promise<DevReturnValueType> => {
 	const bigquery = new BigQuery({
 		projectId: `datatech-platform-code`,
 		authClient,
@@ -66,6 +67,7 @@ export const runQuery = async (
 			charge.id as chargeId,
 			charge.name as chargeName,
 			charge.charge_type as chargeType,
+			charge.billing_period as paymentFrequency,
 			charge.up_to_periods as upToPeriods,
 			charge.up_to_periods_type as upToPeriodsType,
 			charge.effective_start_date as effectiveStartDate,
@@ -92,6 +94,7 @@ export const runQuery = async (
 			product.name = 'Discounts' AND 
 			charge.charge_type = 'Recurring' AND 
 			charge.up_to_periods IS NOT NULL AND 
+			charge.up_to_periods > 1 AND
 			sub.is_latest_version = true AND 
 			sub.status = 'Active' AND 
 			DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = DATE_ADD(current_date(), INTERVAL 32 DAY) AND
@@ -105,5 +108,24 @@ export const runQuery = async (
 
 	const resultData = BigQueryResultDataSchema.parse(result[0]);
 	console.log('resultData', resultData);
-	return 1;
+
+	const devReturnValue = [
+		{
+		  calculatedEndDate: '2025-02-23',
+		  subName: 'A-S02274098',
+		  firstName: 'James'
+		},
+		{
+		  calculatedEndDate: '2025-02-23',
+		  subName: 'A-S02270028',
+		  firstName: 'Sarah'
+		}
+	  ];
+	return devReturnValue;
 };
+
+type DevReturnValueType = Array<{
+	calculatedEndDate: string;
+	subName: string;
+	firstName: string;
+  }>;
