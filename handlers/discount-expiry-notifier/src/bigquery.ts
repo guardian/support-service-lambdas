@@ -31,6 +31,11 @@ export const BigQueryResultDataSchema = z.array(
 		tier: z.number(),
 		chargeId: z.string(),
 		chargeName: z.string(),
+		chargeType: z.string(),
+		upToPeriods: z.number(),
+		upToPeriodsType: z.string(),
+		effectiveStartDate: z.date(),
+		effectiveEndDate: z.date(),
 	}),
 );
 
@@ -48,6 +53,12 @@ export const runQuery = async (
 			tier.tier as tier,
 			charge.id as chargeId,
 			charge.name as chargeName
+			
+			charge.charge_type as chargeType,
+			charge.up_to_periods as upToPeriods,
+			charge.up_to_periods_type as upToPeriodsType,
+			charge.effective_start_date as effectiveStartDate,
+			charge.effective_end_date as effectiveEndDate,
 		FROM 
 			datatech-fivetran.zuora.rate_plan_charge_tier tier 
 		JOIN 
