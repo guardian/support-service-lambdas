@@ -39,7 +39,7 @@ export const BigQueryResultDataSchema = z.array(
 		chargeType: z.string(),
 		upToPeriods: z.number(),
 		upToPeriodsType: z.string(),
-		effectiveStartDate: z.string(),
+		effectiveStartDate: z.number(),
 	}),
 );
 
