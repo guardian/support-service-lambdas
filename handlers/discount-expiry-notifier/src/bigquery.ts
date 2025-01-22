@@ -104,16 +104,16 @@ export const runQuery = async (
 
 	const devReturnValue = [
 		{
-			subName: 'A-S11111111',
-			firstName: 'Richard',
+			subName: 'A-S00954440', //Active sub
+			firstName: 'Tom',
 			paymentAmount: 12,
 			paymentFrequency: 'Month',
 			nextPaymentDate: '2025-02-23',
 		},
 		{
-			subName: 'A-S22222222',
+			subName: 'A-S00954412', // Cancelled sub
 			firstName: 'Rachel',
-			paymentAmount: 33.989999999999995,
+			paymentAmount: 33.99,
 			paymentFrequency: 'Month',
 			nextPaymentDate: '2025-02-23',
 		},
