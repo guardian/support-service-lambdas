@@ -25,19 +25,6 @@ export const buildAuthClient = async (
 	}
 };
 
-// const BigQueryDateSchema = z
-// 	.string()
-// 	.regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format. Expected YYYY-MM-DD.')
-// 	.transform((date) => new Date(date));
-// const BigQueryDate1 = z
-// 	.object({
-// 		value: z
-// 			.string()
-// 			.regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format. Expected YYYY-MM-DD.')
-// 			.transform((date) => new Date(date)), // Transform the string to a Date object
-// 	})
-// 	.transform((obj) => obj.value);
-
 export const BigQueryResultDataSchema = z.array(
 	z.object({
 		tierId: z.string(),
@@ -50,6 +37,15 @@ export const BigQueryResultDataSchema = z.array(
 		effectiveStartDate: z.object({
 			value: z.string(),
 		}),
+		effectiveEndDate: z.object({
+			value: z.string(),
+		}),
+		calculatedEndDate: z.object({
+			value: z.string(),
+		}),
+		monthsDiff: z.number(),
+		
+		
 }));
 
 export const runQuery = async (
@@ -66,11 +62,13 @@ export const runQuery = async (
 			tier.tier as tier,
 			charge.id as chargeId,
 			charge.name as chargeName,
-			
 			charge.charge_type as chargeType,
 			charge.up_to_periods as upToPeriods,
 			charge.up_to_periods_type as upToPeriodsType,
-			charge.effective_start_date as effectiveStartDate
+			charge.effective_start_date as effectiveStartDate,
+			charge.effective_end_date as effectiveEndDate,
+			DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) as calculatedEndDate,
+			DATE_DIFF(charge.effective_end_date, charge.effective_start_date, MONTH) as monthsDiff,
 		FROM 
 			datatech-fivetran.zuora.rate_plan_charge_tier tier 
 		JOIN 
@@ -90,8 +88,8 @@ export const runQuery = async (
 	// 	charge.up_to_periods_type as upToPeriodsType,
 	// 	charge.effective_start_date as effectiveStartDate,
 	// 	charge.effective_end_date as effectiveEndDate,
-	// 	DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) as calculated_end_date,
-	// 	DATE_DIFF(charge.effective_end_date, charge.effective_start_date, MONTH) as months_diff,
+	// DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) as calculated_end_date,
+	// DATE_DIFF(charge.effective_end_date, charge.effective_start_date, MONTH) as months_diff,
 	// 	tier.discount_amount as discountAmount,
 	// 	tier.discount_percentage as discountPercentage,
 	// 	tier.price as price,
