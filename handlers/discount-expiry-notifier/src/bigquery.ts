@@ -30,7 +30,6 @@ export const BigQueryResultDataSchema = z.array(
 		tierId: z.string(),
 		tier: z.number(),
 		chargeId: z.string(),
-		chargeName: z.string(),
 	}),
 );
 
@@ -46,8 +45,7 @@ export const runQuery = async (
 		SELECT 
 			tier.id as tierId, 
 			tier.tier as tier,
-			charge.id as chargeId,
-			charge.name as chargeName
+			charge.id as chargeId
 		FROM 
 			datatech-fivetran.zuora.rate_plan_charge_tier tier 
 		JOIN 
