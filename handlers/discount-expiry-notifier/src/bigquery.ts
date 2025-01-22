@@ -44,9 +44,11 @@ export const BigQueryResultDataSchema = z.array(
 			value: z.string(),
 		}),
 		monthsDiff: z.number(),
-		
-		
-}));
+		subName: z.string(),
+		isLatestVersion: z.boolean(),
+		subStatus: z.string(),
+	}),
+);
 
 export const runQuery = async (
 	authClient: BaseExternalAccountClient,
@@ -69,6 +71,9 @@ export const runQuery = async (
 			charge.effective_end_date as effectiveEndDate,
 			DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) as calculatedEndDate,
 			DATE_DIFF(charge.effective_end_date, charge.effective_start_date, MONTH) as monthsDiff,
+			sub.name as subName,
+			sub.is_latest_version as isLatestVersion,
+			sub.status as subStatus
 		FROM 
 			datatech-fivetran.zuora.rate_plan_charge_tier tier 
 		JOIN 
@@ -90,7 +95,6 @@ export const runQuery = async (
 	// 	charge.effective_end_date as effectiveEndDate,
 	// DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) as calculated_end_date,
 	// DATE_DIFF(charge.effective_end_date, charge.effective_start_date, MONTH) as months_diff,
-	// 	tier.discount_amount as discountAmount,
 	// 	tier.discount_percentage as discountPercentage,
 	// 	tier.price as price,
 	// 	sub.name as sub_name,
