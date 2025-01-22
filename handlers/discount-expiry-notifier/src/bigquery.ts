@@ -26,9 +26,9 @@ export const buildAuthClient = async (
 };
 
 const BigQueryDateSchema = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format. Expected YYYY-MM-DD.")
-  .transform((date) => new Date(date)); 
+	.string()
+	.regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format. Expected YYYY-MM-DD.')
+	.transform((date) => new Date(date));
 
 export const BigQueryResultDataSchema = z.array(
 	z.object({
