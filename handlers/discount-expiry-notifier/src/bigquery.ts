@@ -95,7 +95,7 @@ export const runQuery = async (
 			sub.is_latest_version = true AND 
 			sub.status = 'Active' AND 
 			DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = DATE_ADD(current_date(), INTERVAL 32 DAY) AND
-			(tierId='8a129b5d9349013f01935a2d75854d0f' OR tierId = '8a1294769343a965019343cc4cf23590')
+			(tier.id='8a129b5d9349013f01935a2d75854d0f' OR tier.id = '8a1294769343a965019343cc4cf23590')
 		ORDER BY 
 			sub.name desc
 		`;
