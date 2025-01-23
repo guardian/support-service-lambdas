@@ -12,9 +12,14 @@
 		"fix-formatting": "prettier --write **.ts"
 	},
 	"devDependencies": {
-		"@types/aws-lambda": "^8.10.147"
+		"@types/aws-lambda": "^8.10.147",
+		"@types/aws-sdk": "^2.7.4"
 	},
 	"dependencies": {
 		"@aws-sdk/client-s3": "3.665.0"
+		"@google-cloud/bigquery": "^7.9.1",
+		"aws-sdk": "^2.1692.0",
+		"google-auth-library": "^9.15.0",
+		"zod": "^3.23.8"
 	}
 }
