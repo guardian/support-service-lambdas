@@ -4,6 +4,7 @@ import { AlarmsHandler } from '../lib/alarms-handler';
 import { BatchEmailSender } from '../lib/batch-email-sender';
 import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
 import { DiscountApi } from '../lib/discount-api';
+import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
@@ -286,4 +287,12 @@ new UserBenefits(app, 'user-benefits-PROD', {
 	certificateId: supportCertificateId,
 	supporterProductDataTable:
 		'supporter-product-data-tables-PROD-SupporterProductDataTable',
+});
+new DiscountExpiryNotifier(app, 'discount-expiry-notifier-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+});
+new DiscountExpiryNotifier(app, 'discount-expiry-notifier-PROD', {
+	stack: 'support',
+	stage: 'PROD',
 });

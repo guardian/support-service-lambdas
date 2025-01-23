@@ -1,4 +1,4 @@
-export const typeObject = {
+export const activeTypeObject = {
 	OneTimeContribution: {
 		billingPeriods: ['OneTime'],
 		productRatePlans: {
@@ -7,7 +7,7 @@ export const typeObject = {
 			},
 		},
 	},
-	GuardianLight: {
+	GuardianAdLite: {
 		billingPeriods: ['Month'],
 		productRatePlans: {
 			Monthly: {
@@ -96,29 +96,6 @@ export const typeObject = {
 				Friday: {},
 				Saturday: {},
 				Sunday: {},
-			},
-		},
-	},
-	SupporterMembership: {
-		billingPeriods: ['Annual', 'Month'],
-		productRatePlans: {
-			Annual: {
-				Subscription: {},
-			},
-			Monthly: {
-				Subscription: {},
-			},
-			V2DeprecatedAnnual: {
-				Subscription: {},
-			},
-			V1DeprecatedAnnual: {
-				Subscription: {},
-			},
-			V1DeprecatedMonthly: {
-				Subscription: {},
-			},
-			V2DeprecatedMonthly: {
-				Subscription: {},
 			},
 		},
 	},
@@ -256,6 +233,103 @@ export const typeObject = {
 			},
 		},
 	},
+	HomeDelivery: {
+		billingPeriods: ['Month'],
+		productRatePlans: {
+			Everyday: {
+				Sunday: {},
+				Wednesday: {},
+				Friday: {},
+				Thursday: {},
+				Monday: {},
+				Tuesday: {},
+				Saturday: {},
+			},
+			Sunday: {
+				Sunday: {},
+			},
+			Sixday: {
+				Wednesday: {},
+				Friday: {},
+				Thursday: {},
+				Monday: {},
+				Tuesday: {},
+				Saturday: {},
+			},
+			Weekend: {
+				Sunday: {},
+				Saturday: {},
+			},
+			Saturday: {
+				Saturday: {},
+			},
+			'Everyday+': {
+				DigitalPack: {},
+				Wednesday: {},
+				Friday: {},
+				Thursday: {},
+				Sunday: {},
+				Monday: {},
+				Tuesday: {},
+				Saturday: {},
+			},
+			'Weekend+': {
+				DigitalPack: {},
+				Sunday: {},
+				Saturday: {},
+			},
+			'Sixday+': {
+				DigitalPack: {},
+				Wednesday: {},
+				Friday: {},
+				Thursday: {},
+				Monday: {},
+				Tuesday: {},
+				Saturday: {},
+			},
+			'Sunday+': {
+				DigitalPack: {},
+				Sunday: {},
+			},
+			'Saturday+': {
+				DigitalPack: {},
+				Saturday: {},
+			},
+		},
+	},
+	GuardianPatron: {
+		billingPeriods: ['Month'],
+		productRatePlans: {
+			GuardianPatron: {
+				Subscription: {},
+			},
+		},
+	},
+} as const;
+export const inactiveTypeObject = {
+	SupporterMembership: {
+		billingPeriods: ['Annual', 'Month'],
+		productRatePlans: {
+			Annual: {
+				Subscription: {},
+			},
+			Monthly: {
+				Subscription: {},
+			},
+			V2DeprecatedAnnual: {
+				Subscription: {},
+			},
+			V1DeprecatedAnnual: {
+				Subscription: {},
+			},
+			V1DeprecatedMonthly: {
+				Subscription: {},
+			},
+			V2DeprecatedMonthly: {
+				Subscription: {},
+			},
+		},
+	},
 	GuardianWeeklyZoneA: {
 		billingPeriods: [
 			'Annual',
@@ -365,70 +439,6 @@ export const typeObject = {
 			},
 		},
 	},
-	HomeDelivery: {
-		billingPeriods: ['Month'],
-		productRatePlans: {
-			Everyday: {
-				Sunday: {},
-				Wednesday: {},
-				Friday: {},
-				Thursday: {},
-				Monday: {},
-				Tuesday: {},
-				Saturday: {},
-			},
-			Sunday: {
-				Sunday: {},
-			},
-			Sixday: {
-				Wednesday: {},
-				Friday: {},
-				Thursday: {},
-				Monday: {},
-				Tuesday: {},
-				Saturday: {},
-			},
-			Weekend: {
-				Sunday: {},
-				Saturday: {},
-			},
-			Saturday: {
-				Saturday: {},
-			},
-			'Everyday+': {
-				DigitalPack: {},
-				Wednesday: {},
-				Friday: {},
-				Thursday: {},
-				Sunday: {},
-				Monday: {},
-				Tuesday: {},
-				Saturday: {},
-			},
-			'Weekend+': {
-				DigitalPack: {},
-				Sunday: {},
-				Saturday: {},
-			},
-			'Sixday+': {
-				DigitalPack: {},
-				Wednesday: {},
-				Friday: {},
-				Thursday: {},
-				Monday: {},
-				Tuesday: {},
-				Saturday: {},
-			},
-			'Sunday+': {
-				DigitalPack: {},
-				Sunday: {},
-			},
-			'Saturday+': {
-				DigitalPack: {},
-				Saturday: {},
-			},
-		},
-	},
 	PatronMembership: {
 		billingPeriods: ['Month', 'Annual'],
 		productRatePlans: {
@@ -459,14 +469,6 @@ export const typeObject = {
 				Subscription: {},
 			},
 			V1DeprecatedMonthly: {
-				Subscription: {},
-			},
-		},
-	},
-	GuardianPatron: {
-		billingPeriods: ['Month'],
-		productRatePlans: {
-			GuardianPatron: {
 				Subscription: {},
 			},
 		},

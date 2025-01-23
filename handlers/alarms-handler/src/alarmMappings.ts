@@ -87,6 +87,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'generate-product-catalog',
 		'metric-push-api',
 		'press-reader-entitlements',
+		'user-benefits',
 	],
 	PLATFORM: [
 		// fulfilment
@@ -167,4 +168,4 @@ export const buildAlarmMappings = (
 	return { getTeams, getTeamWebhookUrl };
 };
 
-export const ProdAlarmMappings = buildAlarmMappings(teamToAppMappings);
+export const prodAlarmMappings = buildAlarmMappings(teamToAppMappings);

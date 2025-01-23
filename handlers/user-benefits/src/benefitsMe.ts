@@ -7,11 +7,12 @@ import { getUserBenefits } from '@modules/product-benefits/userBenefits';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
+import { stageFromEnvironment } from '@modules/stage';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { buildNonCachedHttpResponse } from './response';
+import { buildHttpResponse } from './response';
 import { getTrialInformation } from './trials';
 
-const stage = process.env.STAGE as Stage;
+const stage = stageFromEnvironment();
 const authenticate = buildAuthenticate(stage, []); //TODO: Do we have any required scopes?
 const productCatalogHelper = new Lazy(
 	async () => new ProductCatalogHelper(await getProductCatalogFromApi(stage)),
@@ -41,7 +42,6 @@ export const benefitsMeHandler = async (
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
 	console.log(`Input is ${JSON.stringify(event)}`);
-
 	try {
 		const maybeAuthenticatedEvent = await authenticate(event);
 
@@ -54,7 +54,11 @@ export const benefitsMeHandler = async (
 			await productCatalogHelper.get(),
 			maybeAuthenticatedEvent.userDetails,
 		);
-		return buildNonCachedHttpResponse(userBenefitsResponse);
+		return buildHttpResponse(
+			stage,
+			event.headers['origin'],
+			userBenefitsResponse,
+		);
 	} catch (error) {
 		console.log('Caught exception with message: ', error);
 		if (error instanceof ValidationError) {

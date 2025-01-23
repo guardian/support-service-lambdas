@@ -27,20 +27,66 @@ jest.mock('@modules/product-benefits/userBenefits', () => ({
 	getUserBenefits: () => ['adFree'],
 }));
 
+jest.mock('@modules/stage', () => ({
+	stageFromEnvironment: () => 'CODE',
+}));
+
+const requestEvent = {
+	path: '/benefits/me',
+	httpMethod: 'GET',
+	headers: {
+		Authorization: 'Bearer good-token',
+	},
+} as unknown as APIGatewayProxyEvent;
+
 describe('benefitsMeHandler', () => {
 	it('returns a 200 with user benefits', async () => {
-		const requestEvent = {
+		const response = await benefitsMeHandler(requestEvent);
+		expect(response.statusCode).toEqual(200);
+		const parsedBody = JSON.parse(response.body) as UserBenefitsResponse;
+		expect(parsedBody.benefits).toEqual(['adFree']);
+	});
+	it('returns CORS headers when the request is from an allowed origin', async () => {
+		const corsEvent = {
 			path: '/benefits/me',
 			httpMethod: 'GET',
 			headers: {
 				Authorization: 'Bearer good-token',
+				origin: 'https://m.code.dev-theguardian.com',
 			},
 		} as unknown as APIGatewayProxyEvent;
-
-		const response = await benefitsMeHandler(requestEvent);
+		const response = await benefitsMeHandler(corsEvent);
 
 		expect(response.statusCode).toEqual(200);
-		const parsedBody = JSON.parse(response.body) as UserBenefitsResponse;
-		expect(parsedBody.benefits).toEqual(['adFree']);
+		expect(response.headers).toEqual(
+			expect.objectContaining({
+				'access-control-allow-origin': 'https://m.code.dev-theguardian.com',
+				vary: 'Origin',
+				'access-control-allow-headers': '*',
+				'access-control-allow-methods': 'GET',
+			}),
+		);
+	});
+	it('does not return CORS headers when the origin header is missing', async () => {
+		const response = await benefitsMeHandler(requestEvent);
+		expect(response.statusCode).toEqual(200);
+		expect(response.headers).toStrictEqual({
+			'Cache-Control': 'private, no-store',
+		});
+	});
+	it('does not return CORS headers when the origin header is not in the allowed list', async () => {
+		const corsEvent = {
+			path: '/benefits/me',
+			httpMethod: 'GET',
+			headers: {
+				Authorization: 'Bearer good-token',
+				origin: 'https://not-allowed.com',
+			},
+		} as unknown as APIGatewayProxyEvent;
+		const response = await benefitsMeHandler(corsEvent);
+		expect(response.statusCode).toEqual(200);
+		expect(response.headers).toStrictEqual({
+			'Cache-Control': 'private, no-store',
+		});
 	});
 });
