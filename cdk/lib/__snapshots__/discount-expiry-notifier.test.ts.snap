@@ -968,15 +968,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": [
-                "logs:CreateLogGroup",
-                "logs:CreateLogStream",
-                "logs:PutLogEvents",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-            {
               "Action": "ssm:GetParameter",
               "Effect": "Allow",
               "Resource": {
@@ -2525,15 +2516,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
       "Properties": {
         "PolicyDocument": {
           "Statement": [
-            {
-              "Action": [
-                "logs:CreateLogGroup",
-                "logs:CreateLogStream",
-                "logs:PutLogEvents",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
-            },
             {
               "Action": "ssm:GetParameter",
               "Effect": "Allow",
