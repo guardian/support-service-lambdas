@@ -117,7 +117,7 @@ export class DiscountExpiryNotifier extends GuStack {
 				architecture: Architecture.ARM_64,
 				initialPolicy: [
 					new PolicyStatement({
-						actions: ['s3:PutObject'],
+						actions: ['s3:GetObject', 's3:PutObject'],
 						resources: [bucket.arnForObjects('*')],
 					}),
 				],
