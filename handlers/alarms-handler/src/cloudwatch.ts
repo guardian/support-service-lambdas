@@ -49,10 +49,14 @@ const buildCloudwatchClient = (awsAccountId: string): CloudWatchClient => {
 	return new CloudWatchClient({ region: 'eu-west-1' });
 };
 
-const getTags = async (
+export type Tags = {
+	App?: string;
+};
+
+export const getTags = async (
 	alarmArn: string,
 	awsAccountId: string,
-): Promise<Tag[]> => {
+): Promise<Tags> => {
 	const client = buildCloudwatchClient(awsAccountId);
 
 	const request = new ListTagsForResourceCommand({
@@ -60,13 +64,9 @@ const getTags = async (
 	});
 
 	const response = await client.send(request);
-	return response.Tags ?? [];
-};
-
-export const getAppNameTag = async (
-	alarmArn: string,
-	awsAccountId: string,
-): Promise<string | undefined> => {
-	const tags = await getTags(alarmArn, awsAccountId);
-	return tags.find((tag: Tag) => tag.Key === 'App')?.Value;
+	const tags = response.Tags ?? [];
+	const entries = tags.flatMap((tag: Tag) =>
+		tag.Key && tag.Value ? [[tag.Key, tag.Value]] : [],
+	);
+	return Object.fromEntries(entries) as Tags;
 };
