@@ -73,7 +73,6 @@ export const runQuery = async (
 				AND sub.status = 'Active' 
 				AND DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = DATE_ADD(CURRENT_DATE(), INTERVAL 32 DAY) 
 			LIMIT 2
-			')
 		)
 		SELECT 
 			exp.sub_name as subName,
