@@ -167,4 +167,4 @@ export const buildAlarmMappings = (
 	return { getTeams, getTeamWebhookUrl };
 };
 
-export const ProdAlarmMappings = buildAlarmMappings(teamToAppMappings);
+export const prodAlarmMappings = buildAlarmMappings(teamToAppMappings);
