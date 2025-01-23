@@ -1,12 +1,14 @@
+import type {
+	 GetObjectCommandInput,
+	 PutObjectCommandInput,
+} from '@aws-sdk/client-s3';
 import {
 	GetObjectCommand,
-	type GetObjectCommandInput,
 	PutObjectCommand,
-	type PutObjectCommandInput,
 	S3Client,
 } from '@aws-sdk/client-s3';
 
-const s3Client = new S3Client({ region: process.env.region });
+const s3Client = new S3Client({ region: 'eu-west-1' });
 
 export const uploadFileToS3 = async ({
 	bucketName,
