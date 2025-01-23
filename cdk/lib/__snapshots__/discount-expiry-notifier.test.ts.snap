@@ -1197,7 +1197,10 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "s3:PutObject",
+              "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+              ],
               "Effect": "Allow",
               "Resource": {
                 "Fn::Join": [
@@ -2743,7 +2746,10 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "s3:PutObject",
+              "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+              ],
               "Effect": "Allow",
               "Resource": {
                 "Fn::Join": [
