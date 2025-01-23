@@ -59,6 +59,14 @@ export class DiscountExpiryNotifier extends GuStack {
 				handler: 'subIsActive.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['secretsmanager:GetSecretValue'],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+						],
+					}),
+				],
 			},
 		);
 
