@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { typeObject } from '@modules/product-catalog/typeObject';
+import { typeObject } from '@modules/product-catalog/productCatalog';
 
 export const productCatalogSchema = z.object({
 	GuardianPatron: z.object({
@@ -20,7 +20,7 @@ export const productCatalogSchema = z.object({
 			}),
 		}),
 	}),
-	GuardianLight: z.object({
+	GuardianAdLite: z.object({
 		billingSystem: z.literal('zuora'),
 		active: z.boolean(),
 		ratePlans: z.object({
@@ -31,7 +31,7 @@ export const productCatalogSchema = z.object({
 				}),
 				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
 				billingPeriod: z
-					.enum(typeObject.GuardianLight.billingPeriods)
+					.enum(typeObject.GuardianAdLite.billingPeriods)
 					.optional(),
 			}),
 		}),

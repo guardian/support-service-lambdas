@@ -1,7 +1,7 @@
 import type { SNSEventRecord, SQSEvent, SQSRecord } from 'aws-lambda';
 import { z } from 'zod';
 import type { AlarmMappings } from './alarmMappings';
-import { ProdAlarmMappings } from './alarmMappings';
+import { prodAlarmMappings } from './alarmMappings';
 import { getTags } from './cloudwatch';
 
 const cloudWatchAlarmMessageSchema = z.object({
@@ -27,7 +27,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 		for (const record of event.Records) {
 			const maybeChatMessages = await getChatMessages(
 				record,
-				ProdAlarmMappings,
+				prodAlarmMappings,
 			);
 
 			if (maybeChatMessages) {
@@ -51,7 +51,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 export async function getChatMessages(
 	record: SQSRecord,
 	alarmMappings: AlarmMappings,
-) {
+): Promise<{ webhookUrls: string[]; text: string } | undefined> {
 	console.log('sqsRecord', record);
 
 	const { Message, MessageAttributes } = JSON.parse(
@@ -68,9 +68,9 @@ export async function getChatMessages(
 
 	let message;
 	if (parsedMessage) {
-		message = await handleCloudWatchAlarmMessage(parsedMessage);
+		message = await buildCloudWatchAlarmMessage(parsedMessage);
 	} else {
-		message = handleSnsPublishMessage({
+		message = buildSnsPublishMessage({
 			message: Message,
 			messageAttributes: MessageAttributes,
 		});
@@ -78,7 +78,7 @@ export async function getChatMessages(
 
 	if (message) {
 		const teams = alarmMappings.getTeams(message.app);
-		console.log('sending message to teams', teams);
+		console.log(`app ${message.app} is assigned to teams ${teams.join(', ')}`);
 		const webhookUrls = teams.map(alarmMappings.getTeamWebhookUrl);
 		return { webhookUrls, text: message.text };
 	} else {
@@ -99,7 +99,7 @@ const attemptToParseMessageString = ({
 	}
 };
 
-const handleCloudWatchAlarmMessage = async ({
+const buildCloudWatchAlarmMessage = async ({
 	AlarmArn,
 	AlarmName,
 	NewStateReason,
@@ -181,7 +181,7 @@ function getCloudwatchLogsLink(
 	return logLink;
 }
 
-const handleSnsPublishMessage = ({
+const buildSnsPublishMessage = ({
 	message,
 	messageAttributes,
 }: {
@@ -196,9 +196,7 @@ const handleSnsPublishMessage = ({
 
 	const app = messageAttributes.app?.Value;
 
-	const text = message;
-
 	console.log(`SNS publish message from ${app}`);
 
-	return { app, text };
+	return { app, text: message };
 };
