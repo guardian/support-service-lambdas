@@ -8,10 +8,7 @@ export const handler = async () => {
 		const subName = process.env.SUB_NAME ?? 'A-S00954053';
 
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
-		const getSubResponse = await getSubscription(
-			zuoraClient,
-			subName
-		);
+		const getSubResponse = await getSubscription(zuoraClient, subName);
 		return {
 			status: getSubResponse.status,
 		};
