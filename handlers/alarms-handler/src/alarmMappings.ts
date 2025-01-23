@@ -123,10 +123,12 @@ const teamToAppMappings: Record<Team, string[]> = {
 	],
 };
 
-const buildAppToTeamMappings = (): Record<string, Team[]> => {
+const buildAppToTeamMappings = (
+	theMappings: Record<Team, string[]>,
+): Record<string, Team[]> => {
 	const mappings: Record<string, Team[]> = {};
 
-	for (const [team, apps] of Object.entries(teamToAppMappings)) {
+	for (const [team, apps] of Object.entries(theMappings)) {
 		for (const app of apps) {
 			const teams = mappings[app] ?? [];
 			teams.push(team as Team);
@@ -137,19 +139,33 @@ const buildAppToTeamMappings = (): Record<string, Team[]> => {
 	return mappings;
 };
 
-const appToTeamMappings: Record<string, Team[]> = buildAppToTeamMappings();
-
-export const getTeams = (appName?: string): Team[] => {
-	if (appName && appToTeamMappings[appName]) {
-		return appToTeamMappings[appName];
-	}
-
-	return ['SRE'];
+export type AlarmMappings = {
+	getTeams: (appName?: string) => Team[];
+	getTeamWebhookUrl: (team: Team) => string;
 };
 
-export const getTeamWebhookUrl = (team: Team): string => {
-	return getIfDefined<string>(
-		process.env[`${team}_WEBHOOK`],
-		`${team}_WEBHOOK environment variable not set`,
-	);
+export const buildAlarmMappings = (
+	mappings: Record<string, string[]>,
+): AlarmMappings => {
+	const appToTeamMappings: Record<string, Team[]> =
+		buildAppToTeamMappings(mappings);
+
+	const getTeams = (appName?: string): Team[] => {
+		if (appName && appToTeamMappings[appName]) {
+			return appToTeamMappings[appName];
+		}
+
+		return ['SRE'];
+	};
+
+	const getTeamWebhookUrl = (team: Team): string => {
+		return getIfDefined<string>(
+			process.env[`${team}_WEBHOOK`],
+			`${team}_WEBHOOK environment variable not set`,
+		);
+	};
+
+	return { getTeams, getTeamWebhookUrl };
 };
+
+export const prodAlarmMappings = buildAlarmMappings(teamToAppMappings);

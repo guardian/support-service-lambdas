@@ -15,14 +15,6 @@ export const activeTypeObject = {
 			},
 		},
 	},
-	GuardianLight: {
-		billingPeriods: ['Month'],
-		productRatePlans: {
-			Monthly: {
-				Subscription: {},
-			},
-		},
-	},
 	TierThree: {
 		billingPeriods: ['Annual', 'Month'],
 		productRatePlans: {
