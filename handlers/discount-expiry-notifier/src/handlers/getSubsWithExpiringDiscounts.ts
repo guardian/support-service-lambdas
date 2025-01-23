@@ -10,5 +10,6 @@ export const handler = async () => {
 	const authClient = await buildAuthClient(gcpConfig);
 	const result = await runQuery(authClient);
 	console.log('result: ', result);
+	
 	return result;
 };
