@@ -47,8 +47,6 @@ export const runQuery = async (
 		authClient,
 	});
 
-	const prodSubForTesting1 = 'A-S02269182';
-	const prodSubForTesting2 = 'A-S02274098';
 	const query = `
 		WITH expiringDiscounts AS (
 			SELECT
@@ -74,7 +72,8 @@ export const runQuery = async (
 				AND sub.is_latest_version = TRUE 
 				AND sub.status = 'Active' 
 				AND DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = DATE_ADD(CURRENT_DATE(), INTERVAL 32 DAY) 
-				AND sub.name IN ('${prodSubForTesting1}', '${prodSubForTesting2}')
+			LIMIT 2
+			')
 		)
 		SELECT 
 			exp.sub_name as subName,
