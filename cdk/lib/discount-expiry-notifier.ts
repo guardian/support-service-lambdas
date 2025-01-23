@@ -31,16 +31,6 @@ export class DiscountExpiryNotifier extends GuStack {
 		});
 		role.addToPolicy(
 			new PolicyStatement({
-				actions: [
-					'logs:CreateLogGroup',
-					'logs:CreateLogStream',
-					'logs:PutLogEvents',
-				],
-				resources: ['*'],
-			}),
-		);
-		role.addToPolicy(
-			new PolicyStatement({
 				actions: ['ssm:GetParameter'],
 				resources: [
 					`arn:aws:ssm:${this.region}:${this.account}:parameter/discount-expiry-notifier/${this.stage}/gcp-credentials-config`,
