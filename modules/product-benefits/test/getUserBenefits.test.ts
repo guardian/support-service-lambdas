@@ -57,7 +57,7 @@ test('getUserBenefitsFromUserProducts', () => {
 		digitalSubscriptionBenefits,
 	);
 	expect(getUserBenefitsFromUserProducts(['GuardianAdLite'])).toEqual([
-		'rejectTracking',
+		'allowRejectAll',
 	]);
 	expect(getUserBenefitsFromUserProducts(['SupporterPlus'])).toEqual(
 		supporterPlusBenefits,
@@ -83,5 +83,5 @@ test('getUserBenefitsFromUserProducts returns the union of two benefit sets', ()
 			'GuardianAdLite',
 			'GuardianWeeklyDomestic',
 		]),
-	).toEqual(['rejectTracking', 'hideSupportMessaging']);
+	).toEqual(['allowRejectAll', 'hideSupportMessaging']);
 });
