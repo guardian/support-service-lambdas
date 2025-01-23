@@ -30,7 +30,6 @@ export class DiscountExpiryNotifier extends GuStack {
 			assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
 		});
 		role.addToPolicy(
-			// Logging permissions
 			new PolicyStatement({
 				actions: [
 					'logs:CreateLogGroup',
@@ -38,6 +37,14 @@ export class DiscountExpiryNotifier extends GuStack {
 					'logs:PutLogEvents',
 				],
 				resources: ['*'],
+			}),
+		);
+		role.addToPolicy(
+			new PolicyStatement({
+				actions: ['ssm:GetParameter'],
+				resources: [
+					`arn:aws:ssm:${this.region}:${this.account}:parameter/discount-expiry-notifier/${this.stage}/gcp-credentials-config`,
+				],
 			}),
 		);
 
