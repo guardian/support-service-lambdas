@@ -12,6 +12,6 @@ export const handler = async () => {
 	console.log('result: ', result);
 
 	return {
-		discountsToProcess: result,
+		expiringDiscountsToProcess: result,
 	};
 };

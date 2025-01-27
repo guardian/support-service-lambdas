@@ -13,8 +13,8 @@ type ExpiringDiscountProcessingAttempt = {
 };
 
 type LambdaInput = {
-	discountsToProcess: ExpiringDiscountToProcess[];
-	discountProcessingAttempts: ExpiringDiscountProcessingAttempt[];
+	expiringDiscountsToProcess: ExpiringDiscountToProcess[];
+	expiringDiscountProcessingAttempts: ExpiringDiscountProcessingAttempt[];
 };
 
 export const handler = async (event: LambdaInput) => {
