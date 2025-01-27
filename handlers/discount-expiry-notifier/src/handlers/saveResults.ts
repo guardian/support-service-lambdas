@@ -15,13 +15,13 @@ export const handler = async () => {
 		},
 	];
 
-    const content = convertArrayToCsv({
+	const content = convertArrayToCsv({
 		arr: failedRows.map((row) => ({
 			name: row.name,
 			subName: row.subName,
 		})),
 	});
-    
+
 	const filePath = 'abc/def';
 
 	await uploadFileToS3({
