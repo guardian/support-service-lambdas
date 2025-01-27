@@ -6,6 +6,6 @@
     "fix-formatting": "prettier --write **.ts"
   },
   "dependencies": {
-    "@aws-sdk/credential-provider-node": "3.699.0"
+    "@aws-sdk/credential-provider-node": "3.726.0"
   }
 }
