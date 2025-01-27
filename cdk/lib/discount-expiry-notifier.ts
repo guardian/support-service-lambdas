@@ -144,7 +144,7 @@ export class DiscountExpiryNotifier extends GuStack {
 			'Get subs with expiring discounts',
 			{
 				lambdaFunction: getSubsWithExpiringDiscountsLambda,
-				outputPath: '$.Payload'
+				outputPath: '$.Payload',
 			},
 		);
 
