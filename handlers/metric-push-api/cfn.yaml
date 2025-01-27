@@ -42,7 +42,7 @@ Resources:
             ApiKeyRequired: false
             RestApiId: !Ref MetricPushAPI
             ResourceId: !Ref MetricPushProxyResource
-            HttpMethod: GET
+            HttpMethod: HEAD
             Integration:
               Type: MOCK
               RequestTemplates:
