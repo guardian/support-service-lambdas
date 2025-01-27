@@ -33,7 +33,7 @@ export const handler = async (event: StateMachineEvent) => {
 	await uploadFileToS3({
 		bucketName,
 		filePath,
-		content: JSON.stringify(event)
+		content: JSON.stringify(event),
 	});
 
 	return {
