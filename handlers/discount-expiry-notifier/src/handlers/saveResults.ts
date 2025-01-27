@@ -2,7 +2,7 @@ import { convertArrayToCsv } from '../csv';
 import { uploadFileToS3 } from '../s3';
 
 export const handler = async (event) => {
-    console.log('event:',event);
+	console.log('event:', event);
 	const bucketName = 'discount-expiry-notifier-code';
 
 	const failedRows = [
