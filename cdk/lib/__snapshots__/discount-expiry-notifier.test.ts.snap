@@ -401,7 +401,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Is Subscription Active?":{"Type":"Choice","Choices":[{"Variable":"$.isActive","BooleanEquals":true,"Next":"Build email payload"}],"Default":"Skip Processing"},"Skip Processing":{"Type":"Pass","ResultPath":null,"End":true},"Build email payload":{"Next":"Initiate email send","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Is Subscription Active?":{"Type":"Choice","Choices":[{"Variable":"$.status","StringEquals":"Active","Next":"Build email payload"}],"Default":"Skip Processing"},"Skip Processing":{"Type":"Pass","ResultPath":null,"End":true},"Build email payload":{"Next":"Initiate email send","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1953,7 +1953,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Is Subscription Active?":{"Type":"Choice","Choices":[{"Variable":"$.isActive","BooleanEquals":true,"Next":"Build email payload"}],"Default":"Skip Processing"},"Skip Processing":{"Type":"Pass","ResultPath":null,"End":true},"Build email payload":{"Next":"Initiate email send","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Is Subscription Active?":{"Type":"Choice","Choices":[{"Variable":"$.status","StringEquals":"Active","Next":"Build email payload"}],"Default":"Skip Processing"},"Skip Processing":{"Type":"Pass","ResultPath":null,"End":true},"Build email payload":{"Next":"Initiate email send","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
