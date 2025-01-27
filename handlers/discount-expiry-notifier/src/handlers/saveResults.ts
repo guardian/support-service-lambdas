@@ -1,6 +1,6 @@
 import { uploadFileToS3 } from '../s3';
 
-type DiscountToProcess = {
+type ExpiringDiscountToProcess = {
 	subName: string;
 	firstName: string;
 	paymentAmount: number;
@@ -8,16 +8,16 @@ type DiscountToProcess = {
 	nextPaymentDate: string;
 };
 
-type DiscountProcessingAttempt = {
+type ExpiringDiscountProcessingAttempt = {
 	status: string;
 };
 
-type StateMachineEvent = {
-	discountsToProcess: DiscountToProcess[];
-	discountProcessingAttempts: DiscountProcessingAttempt[];
+type LambdaInput = {
+	discountsToProcess: ExpiringDiscountToProcess[];
+	discountProcessingAttempts: ExpiringDiscountProcessingAttempt[];
 };
 
-export const handler = async (event: StateMachineEvent) => {
+export const handler = async (event: LambdaInput) => {
 	const bucketName = 'discount-expiry-notifier-code';
 
 	const getCurrentDateFormatted = (): string => {
