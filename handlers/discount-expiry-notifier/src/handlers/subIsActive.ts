@@ -18,10 +18,16 @@ export const handler = async (event: Item[]) => {
 
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const getSubResponse = await getSubscription(zuoraClient, subName);
-		return {
-			...event,
+		console.log('getSubResponse:', getSubResponse);
+
+		const toReturn = event.map((item) => ({
+			...item,
 			status: getSubResponse.status,
-		};
+			test: 'yes',
+		}));
+		console.log('toReturn:', toReturn);
+
+		return toReturn;
 	} catch (error) {
 		throw new Error(
 			`Error retrieving sub from Zuora: ${JSON.stringify(error)}`,
