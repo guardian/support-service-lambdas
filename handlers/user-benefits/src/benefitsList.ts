@@ -30,9 +30,26 @@ const getHttpResponse = (
 const getHtmlBody = (): string => {
 	return `
 		<!DOCTYPE html>
-		<html>
+		<html lang="en">
 			<head>
-				<title>Benefits List</title>
+				<title>Product Benefits List</title>
+				<meta name="robots" content="noindex">
+				<style>
+					table {
+						border-collapse: collapse;
+					}
+					th, td {
+						border: 1px solid black;
+						padding: 8px;
+						text-align: left;
+					}
+					th {
+						background-color: #CCC;
+					}
+					tr:nth-child(odd) {
+ 						background-color: #EEE;
+					}
+				</style>
 			</head>
 			<body>
 				<h1>Product Benefits List</h1>
@@ -41,12 +58,12 @@ const getHtmlBody = (): string => {
 					<tr>
 						<th>Product</th>
 						<th>Benefits</th>
-					${Object.entries(productBenefitMapping)
-						.map(
-							([key, value]) =>
-								`<tr><td>${key}</td><td>${value.join(',')}</td></tr>`,
-						)
-						.join('')}
+						${Object.entries(productBenefitMapping)
+							.map(
+								([key, value]) =>
+									`<tr><td>${key}</td><td>${value.join(', ')}</td></tr>`,
+							)
+							.join('')}
 				</table>
 			</body>
 		</html>
