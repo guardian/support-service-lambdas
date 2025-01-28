@@ -98,11 +98,11 @@ export const runQuery = async (
 			exp.sub_name DESC;
 		`;
 
-	const result = await bigquery.query(query);
-	console.log('result', result);
+	// const result = await bigquery.query(query);
+	// console.log('result', result);
 
-	const resultData = BigQueryResultDataSchema.parse(result[0]);
-	console.log('resultData', resultData);
+	// const resultData = BigQueryResultDataSchema.parse(result[0]);
+	// console.log('resultData', resultData);
 
 	const devReturnValue = [
 		{
