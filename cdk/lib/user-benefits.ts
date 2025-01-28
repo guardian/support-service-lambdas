@@ -75,6 +75,17 @@ export class UserBenefits extends GuStack {
 				...commonLambdaProps,
 			},
 		);
+		const userBenefitsListLambda = new GuLambdaFunction(
+			this,
+			`user-benefits-list-lambda`,
+			{
+				description:
+					'An API Gateway triggered lambda to get the benefits of the user identified in the request path',
+				functionName: `user-benefits-list-${this.stage}`,
+				handler: 'index.benefitsListHandler',
+				...commonLambdaProps,
+			},
+		);
 		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {
 			app,
 			targets: [
@@ -89,6 +100,11 @@ export class UserBenefits extends GuStack {
 					httpMethod: 'GET',
 					lambda: userBenefitsIdentityIdLambda,
 					apiKeyRequired: true,
+				},
+				{
+					path: '/benefits/list',
+					httpMethod: 'GET',
+					lambda: userBenefitsListLambda,
 				},
 			],
 			defaultCorsPreflightOptions: {
