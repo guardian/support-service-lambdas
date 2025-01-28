@@ -2,7 +2,6 @@ import { DataExtensionNames, sendEmail } from '@modules/email/email';
 import { stageFromEnvironment } from '@modules/stage';
 
 export const handler = async () => {
-
 	const emailMessageWithUserId = {
 		...{
 			To: {
