@@ -193,7 +193,7 @@ Resources:
               Stat: Sum
               Metric:
                 Namespace: AWS/ApiGateway
-                MetricName: 5XXError
+                MetricName: 4XXError
                 Dimensions:
                   - Name: ApiName
                     Value: !FindInMap [StageMap, !Ref Stage, ApiName]
