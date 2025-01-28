@@ -1,3 +1,4 @@
+import { stageFromEnvironment } from '@modules/stage';
 import { uploadFileToS3 } from '../s3';
 
 type ExpiringDiscountToProcess = {
@@ -18,7 +19,7 @@ type LambdaInput = {
 };
 
 export const handler = async (event: LambdaInput) => {
-	const bucketName = 'discount-expiry-notifier-code';
+	const bucketName = `discount-expiry-notifier-${stageFromEnvironment()}`;
 
 	const getCurrentDateFormatted = (): string => {
 		const now = new Date();
