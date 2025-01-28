@@ -7,7 +7,7 @@ import type {
 import { DataExtensionNames, sendEmail } from '@modules/email/email';
 import { stageFromEnvironment } from '@modules/stage';
 
-export const handler = () => {
+export const handler = async () => {
 	const emailPayload: EmailPayload = {
 		Address: 'david.pepper@guardian.co.uk',
 		ContactAttributes: {
@@ -35,7 +35,7 @@ export const handler = () => {
 	const emailMessageWithUserId: EmailMessageWithUserId =
 		emailMessageWithSfContactId;
 
-	const emailSend = sendEmail(stageFromEnvironment(), emailMessageWithUserId);
+	const emailSend = await sendEmail(stageFromEnvironment(), emailMessageWithUserId);
 
 	console.log('emailSend:', emailSend);
 };
