@@ -9,6 +9,6 @@
     "lint": "eslint src/**/*.ts test/**/*.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-sqs": "3.699.0"
+    "@aws-sdk/client-sqs": "3.734.0"
   }
 }

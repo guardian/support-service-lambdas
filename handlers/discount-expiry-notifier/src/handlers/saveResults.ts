@@ -1,4 +1,4 @@
-import { stageFromEnvironment } from '@modules/stage';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import { uploadFileToS3 } from '../s3';
 
 type ExpiringDiscountToProcess = {
@@ -19,9 +19,12 @@ type LambdaInput = {
 };
 
 export const handler = async (event: LambdaInput) => {
-	const bucketName = `discount-expiry-notifier-${stageFromEnvironment()}`;
+	const bucketName = getIfDefined<string>(
+		process.env.S3_BUCKET,
+		'S3_BUCKET environment variable not set',
+	);
 
-	const getCurrentDateFormatted = (): string => {
+	const getCurrentDateString = (): string => {
 		const now = new Date();
 		const year = now.getFullYear();
 		const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-based
@@ -29,8 +32,9 @@ export const handler = async (event: LambdaInput) => {
 		return `${year}-${month}-${day}`;
 	};
 
-	const filePath = getCurrentDateFormatted();
+	const filePath = getCurrentDateString();
 
+	//TODO add a precheck to find out if the file exists already and either append or create a separate file
 	await uploadFileToS3({
 		bucketName,
 		filePath,
@@ -38,6 +42,6 @@ export const handler = async (event: LambdaInput) => {
 	});
 
 	return {
-		failedRowsFilePath: filePath,
+		filePath,
 	};
 };

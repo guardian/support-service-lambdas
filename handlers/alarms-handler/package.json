@@ -11,8 +11,8 @@
 		"fix-formatting": "prettier --write **.ts"
 	},
 	"dependencies": {
-		"@aws-sdk/client-cloudwatch": "3.699.0",
-		"@aws-sdk/credential-providers": "3.665.0",
+		"@aws-sdk/client-cloudwatch": "3.734.0",
+		"@aws-sdk/credential-providers": "3.734.0",
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
