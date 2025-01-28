@@ -30,7 +30,7 @@ export const handler = () => {
 
 	const emailMessageWithSfContactId: EmailMessageWithSfContactId = {
 		...emailMessage,
-		SfContactId: 'someSfContactIdValue',
+		SfContactId: '0039E00001HiIGlQAN',
 	};
 	const emailMessageWithUserId: EmailMessageWithUserId =
 		emailMessageWithSfContactId;
