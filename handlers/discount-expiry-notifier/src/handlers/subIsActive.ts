@@ -2,32 +2,24 @@ import { stageFromEnvironment } from '@modules/stage';
 import { getSubscription } from '@modules/zuora/getSubscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 
-type Item = {
-	subName: string;
-	firstName: string;
-	paymentAmount: number;
-	paymentFrequency: string;
-	nextPaymentDate: string;
-};
-
-export const handler = async (event: Item[]) => {
+export const handler = async (event: {
+	item: {
+		subName: string;
+		firstName: string;
+		paymentAmount: number;
+		paymentFrequency: string;
+		nextPaymentDate: string;
+	};
+}) => {
 	try {
-		console.log('event:', event);
-		//sub name will be passed in via json path in state machine
-		const subName = process.env.SUB_NAME ?? 'A-S00954053';
-
+		const subName = event.item.subName;
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const getSubResponse = await getSubscription(zuoraClient, subName);
-		console.log('getSubResponse:', getSubResponse);
 
-		const toReturn = event.map((item) => ({
-			...item,
+		return {
+			...event.item,
 			status: getSubResponse.status,
-			test: 'yes',
-		}));
-		console.log('toReturn:', toReturn);
-
-		return toReturn;
+		};
 	} catch (error) {
 		throw new Error(
 			`Error retrieving sub from Zuora: ${JSON.stringify(error)}`,
