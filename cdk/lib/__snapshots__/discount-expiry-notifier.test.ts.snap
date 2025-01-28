@@ -176,7 +176,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
             "APP": "discount-expiry-notifier",
             "STACK": "membership",
             "STAGE": "CODE",
-            "Stage": "CODE",
           },
         },
         "FunctionName": "discount-expiry-notifier-build-email-payload-CODE",
@@ -401,7 +400,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Is Subscription Active?":{"Type":"Choice","Choices":[{"Variable":"$.isActive","BooleanEquals":true,"Next":"Build email payload"}],"Default":"Skip Processing"},"Skip Processing":{"Type":"Pass","ResultPath":null,"End":true},"Build email payload":{"Next":"Initiate email send","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Is Subscription Active?":{"Type":"Choice","Choices":[{"Variable":"$.status","StringEquals":"Active","Next":"Build email payload"}],"Default":"Skip Processing"},"Skip Processing":{"Type":"Pass","ResultPath":null,"End":true},"Build email payload":{"Next":"Initiate email send","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -423,7 +422,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.discountsToProcess","MaxConcurrency":10},"Save results":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.expiringDiscountsToProcess","MaxConcurrency":10},"Save results":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -676,7 +675,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
             "APP": "discount-expiry-notifier",
             "STACK": "membership",
             "STAGE": "CODE",
-            "Stage": "CODE",
           },
         },
         "FunctionName": "discount-expiry-notifier-get-subs-with-expiring-discounts-CODE",
@@ -735,7 +733,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
             "APP": "discount-expiry-notifier",
             "STACK": "membership",
             "STAGE": "CODE",
-            "Stage": "CODE",
           },
         },
         "FunctionName": "discount-expiry-notifier-initiate-email-send-CODE",
@@ -1101,9 +1098,11 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "discount-expiry-notifier",
+            "S3_BUCKET": {
+              "Ref": "Bucket83908E77",
+            },
             "STACK": "membership",
             "STAGE": "CODE",
-            "Stage": "CODE",
           },
         },
         "FunctionName": "discount-expiry-notifier-save-results-CODE",
@@ -1200,7 +1199,10 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "s3:PutObject",
+              "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+              ],
               "Effect": "Allow",
               "Resource": {
                 "Fn::Join": [
@@ -1333,7 +1335,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
             "APP": "discount-expiry-notifier",
             "STACK": "membership",
             "STAGE": "CODE",
-            "Stage": "CODE",
           },
         },
         "FunctionName": "discount-expiry-notifier-sub-is-active-CODE",
@@ -1725,7 +1726,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
             "APP": "discount-expiry-notifier",
             "STACK": "membership",
             "STAGE": "PROD",
-            "Stage": "PROD",
           },
         },
         "FunctionName": "discount-expiry-notifier-build-email-payload-PROD",
@@ -1950,7 +1950,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Is Subscription Active?":{"Type":"Choice","Choices":[{"Variable":"$.isActive","BooleanEquals":true,"Next":"Build email payload"}],"Default":"Skip Processing"},"Skip Processing":{"Type":"Pass","ResultPath":null,"End":true},"Build email payload":{"Next":"Initiate email send","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Is Subscription Active?":{"Type":"Choice","Choices":[{"Variable":"$.status","StringEquals":"Active","Next":"Build email payload"}],"Default":"Skip Processing"},"Skip Processing":{"Type":"Pass","ResultPath":null,"End":true},"Build email payload":{"Next":"Initiate email send","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1972,7 +1972,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.discountsToProcess","MaxConcurrency":10},"Save results":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.expiringDiscountsToProcess","MaxConcurrency":10},"Save results":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -2225,7 +2225,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
             "APP": "discount-expiry-notifier",
             "STACK": "membership",
             "STAGE": "PROD",
-            "Stage": "PROD",
           },
         },
         "FunctionName": "discount-expiry-notifier-get-subs-with-expiring-discounts-PROD",
@@ -2284,7 +2283,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
             "APP": "discount-expiry-notifier",
             "STACK": "membership",
             "STAGE": "PROD",
-            "Stage": "PROD",
           },
         },
         "FunctionName": "discount-expiry-notifier-initiate-email-send-PROD",
@@ -2650,9 +2648,11 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "discount-expiry-notifier",
+            "S3_BUCKET": {
+              "Ref": "Bucket83908E77",
+            },
             "STACK": "membership",
             "STAGE": "PROD",
-            "Stage": "PROD",
           },
         },
         "FunctionName": "discount-expiry-notifier-save-results-PROD",
@@ -2749,7 +2749,10 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "s3:PutObject",
+              "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+              ],
               "Effect": "Allow",
               "Resource": {
                 "Fn::Join": [
@@ -2882,7 +2885,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
             "APP": "discount-expiry-notifier",
             "STACK": "membership",
             "STAGE": "PROD",
-            "Stage": "PROD",
           },
         },
         "FunctionName": "discount-expiry-notifier-sub-is-active-PROD",
