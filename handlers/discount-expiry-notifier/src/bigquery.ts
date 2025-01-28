@@ -53,7 +53,8 @@ export const runQuery = async (
 				DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) AS calculated_end_date,
 				sub.name AS sub_name,
 				sub.id AS sub_id,
-				contact.id AS contact_id
+				contact.id AS contact_id,
+				contact.work_email as email
 			FROM 
 				datatech-fivetran.zuora.rate_plan_charge charge
 			INNER JOIN datatech-fivetran.zuora.rate_plan rate_plan 
@@ -76,6 +77,7 @@ export const runQuery = async (
 		)
 		SELECT 
 			exp.sub_name as subName,
+			STRING_AGG(DISTINCT contact.work_email) AS email,
 			STRING_AGG(DISTINCT contact.first_name) AS firstName,
 			SUM(tier.price) AS paymentAmount,
 			STRING_AGG(DISTINCT rate_plan_charge.billing_period) AS paymentFrequency,
@@ -107,6 +109,7 @@ export const runQuery = async (
 	const devReturnValue = [
 		{
 			subName: 'A-S00814342', //Active sub in dev sandbox
+			email: 'david.pepper@guardian.co.uk',
 			firstName: 'David',
 			paymentAmount: 12,
 			paymentFrequency: 'Month',
