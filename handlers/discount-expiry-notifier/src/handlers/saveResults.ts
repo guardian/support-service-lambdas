@@ -1,4 +1,4 @@
-import { stageFromEnvironment } from '@modules/stage';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import { uploadFileToS3 } from '../s3';
 
 type ExpiringDiscountToProcess = {
@@ -19,7 +19,10 @@ type LambdaInput = {
 };
 
 export const handler = async (event: LambdaInput) => {
-	const bucketName = `discount-expiry-notifier-${stageFromEnvironment()}`;
+	const bucketName = getIfDefined<string>(
+		process.env.S3_BUCKET,
+		'S3_BUCKET environment variable not set',
+	);
 
 	const getCurrentDateString = (): string => {
 		const now = new Date();
