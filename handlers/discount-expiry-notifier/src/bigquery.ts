@@ -106,20 +106,23 @@ export const runQuery = async (
 
 	const devReturnValue = [
 		{
-			subName: 'A-S00954440', //Active sub in dev sandbox
-			firstName: 'Tom',
+			subName: 'A-S00814342', //Active sub in dev sandbox
+			firstName: 'David',
 			paymentAmount: 12,
 			paymentFrequency: 'Month',
-			nextPaymentDate: '2025-02-23',
-		},
-		{
-			subName: 'A-S00954412', // Cancelled sub in dev sandbox
-			firstName: 'Rachel',
-			paymentAmount: 33.99,
-			paymentFrequency: 'Month',
-			nextPaymentDate: '2025-02-23',
+			nextPaymentDate: '2025-02-28',
 		},
 	];
+
+	// 	,
+	// 	{
+	// 		subName: 'A-S00954412', // Cancelled sub in dev sandbox
+	// 		firstName: 'Rachel',
+	// 		paymentAmount: 33.99,
+	// 		paymentFrequency: 'Month',
+	// 		nextPaymentDate: '2025-02-23',
+	// 	},
+	// ];
 	return devReturnValue;
 };
 
