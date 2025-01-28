@@ -89,22 +89,6 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
-		const buildEmailPayloadLambda = new GuLambdaFunction(
-			this,
-			'build-email-payload-lambda',
-			{
-				app: appName,
-				functionName: `${appName}-build-email-payload-${this.stage}`,
-				runtime: nodeVersion,
-				environment: {
-					Stage: this.stage,
-				},
-				handler: 'buildEmailPayload.handler',
-				fileName: `${appName}.zip`,
-				architecture: Architecture.ARM_64,
-			},
-		);
-
 		const initiateEmailSendLambda = new GuLambdaFunction(
 			this,
 			'initiate-email-send-lambda',
@@ -163,15 +147,6 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
-		const buildEmailPayloadLambdaTask = new LambdaInvoke(
-			this,
-			'Build email payload',
-			{
-				lambdaFunction: buildEmailPayloadLambda,
-				outputPath: '$.Payload',
-			},
-		);
-
 		const saveResultsLambdaTask = new LambdaInvoke(this, 'Save results', {
 			lambdaFunction: saveResultsLambda,
 			outputPath: '$.Payload',
@@ -202,7 +177,7 @@ export class DiscountExpiryNotifier extends GuStack {
 				isSubActiveChoice
 					.when(
 						Condition.stringEquals('$.status', 'Active'),
-						buildEmailPayloadLambdaTask.next(initiateEmailSendLambdaTask),
+						initiateEmailSendLambdaTask,
 					)
 					.otherwise(
 						new Pass(this, 'Skip Processing', { resultPath: JsonPath.DISCARD }),
