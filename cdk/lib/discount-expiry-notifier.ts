@@ -97,6 +97,9 @@ export class DiscountExpiryNotifier extends GuStack {
 				app: appName,
 				functionName: `${appName}-initiate-email-send-${this.stage}`,
 				runtime: nodeVersion,
+				environment: {
+					S3_BUCKET: bucket.bucketName,
+				},
 				handler: 'initiateEmailSend.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
