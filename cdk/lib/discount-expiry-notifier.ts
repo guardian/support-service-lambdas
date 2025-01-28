@@ -124,6 +124,7 @@ export class DiscountExpiryNotifier extends GuStack {
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
+					S3_BUCKET: bucket.bucketName,
 				},
 				handler: 'saveResults.handler',
 				fileName: `${appName}.zip`,
