@@ -8,17 +8,22 @@ export const benefitsListHandler = async (
 
 	const format = event.queryStringParameters?.format;
 	if (format !== 'html') {
-		return Promise.resolve({
-			statusCode: 200,
-			headers: {
-				'Content-Type': 'text/html',
-			},
-			body: getHtmlBody(),
-		});
+		return getHttpResponse(getHtmlBody(), 'text/html');
 	}
+	return getHttpResponse(JSON.stringify(productBenefitMapping));
+};
+
+const getHttpResponse = (
+	body: string,
+	contentType?: string,
+): Promise<APIGatewayProxyResult> => {
 	return Promise.resolve({
 		statusCode: 200,
-		body: JSON.stringify(productBenefitMapping),
+		headers: {
+			'Content-Type': contentType ?? 'application/json',
+			'Cache-Control': 'max-age=60',
+		},
+		body,
 	});
 };
 
@@ -30,12 +35,19 @@ const getHtmlBody = (): string => {
 				<title>Benefits List</title>
 			</head>
 			<body>
-				<h1>Benefits List</h1>
-				<ul>
+				<h1>Product Benefits List</h1>
+				<table>
+				<tbody>
+					<tr>
+						<th>Product</th>
+						<th>Benefits</th>
 					${Object.entries(productBenefitMapping)
-						.map(([key, value]) => `<li>${key}: ${value.join(',')}</li>`)
+						.map(
+							([key, value]) =>
+								`<tr><td>${key}</td><td>${value.join(',')}</td></tr>`,
+						)
 						.join('')}
-				</ul>
+				</table>
 			</body>
 		</html>
 	`;
