@@ -49,9 +49,6 @@ export class DiscountExpiryNotifier extends GuStack {
 				app: appName,
 				functionName: `${appName}-get-subs-with-expiring-discounts-${this.stage}`,
 				runtime: nodeVersion,
-				environment: {
-					Stage: this.stage,
-				},
 				handler: 'getSubsWithExpiringDiscounts.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
@@ -66,9 +63,6 @@ export class DiscountExpiryNotifier extends GuStack {
 				app: appName,
 				functionName: `${appName}-sub-is-active-${this.stage}`,
 				runtime: nodeVersion,
-				environment: {
-					Stage: this.stage,
-				},
 				handler: 'subIsActive.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
@@ -90,9 +84,6 @@ export class DiscountExpiryNotifier extends GuStack {
 				app: appName,
 				functionName: `${appName}-build-email-payload-${this.stage}`,
 				runtime: nodeVersion,
-				environment: {
-					Stage: this.stage,
-				},
 				handler: 'buildEmailPayload.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
@@ -106,9 +97,6 @@ export class DiscountExpiryNotifier extends GuStack {
 				app: appName,
 				functionName: `${appName}-initiate-email-send-${this.stage}`,
 				runtime: nodeVersion,
-				environment: {
-					Stage: this.stage,
-				},
 				handler: 'initiateEmailSend.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
@@ -123,7 +111,6 @@ export class DiscountExpiryNotifier extends GuStack {
 				functionName: `${appName}-save-results-${this.stage}`,
 				runtime: nodeVersion,
 				environment: {
-					Stage: this.stage,
 					S3_BUCKET: bucket.bucketName,
 				},
 				handler: 'saveResults.handler',
