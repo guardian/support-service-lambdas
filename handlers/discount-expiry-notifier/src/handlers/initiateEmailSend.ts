@@ -8,7 +8,6 @@ export const handler = async (event: {
 	paymentFrequency: string;
 	nextPaymentDate: string;
 }) => {
-	console.log('event.nextPaymentDate:', event.nextPaymentDate);
 
 	const emailMessageWithUserId = {
 		...{
@@ -19,7 +18,7 @@ export const handler = async (event: {
 						EmailAddress: 'david.pepper@guardian.co.uk',
 						paymentAmount: '70.00',
 						first_name: 'David',
-						date_of_payment: '28 February 2025',
+						date_of_payment: formatDate(event.nextPaymentDate),
 						paymentFrequency: 'month',
 					},
 				},
@@ -39,3 +38,12 @@ export const handler = async (event: {
 
 	return emailSend;
 };
+
+function formatDate(inputDate: string): string {
+	const date = new Date(inputDate);
+	const day = date.getDate();
+	const monthName = date.toLocaleString('en-US', { month: 'long' });
+	const year = date.getFullYear();
+
+	return `${day} ${monthName} ${year}`;
+}
