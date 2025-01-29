@@ -14,7 +14,7 @@ export const handler = async (event: {
 }) => {
 	const currencySymbol = getCurrencySymbol(event.paymentCurrency);
 
-	const emailMessageWithUserId = {
+	const payload = {
 		...{
 			To: {
 				Address: 'david.pepper@guardian.co.uk', // hard code this during testing
@@ -36,7 +36,7 @@ export const handler = async (event: {
 
 	const emailSend = await sendEmail(
 		stageFromEnvironment(),
-		emailMessageWithUserId,
+		payload,
 	);
 
 	console.log('emailSend:', emailSend);
