@@ -4,12 +4,15 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 export const handler = async (event: {
 	item: {
-		subName: string;
 		firstName: string;
-		currency: string;
-		paymentAmount: number;
-		paymentFrequency: string;
 		nextPaymentDate: string;
+		paymentAmount: number;
+		paymentCurrency: string;
+		paymentFrequency: string;
+		productName: string;
+		sfContactId: string;
+		subName: string;
+		workEmail: string;
 	};
 }) => {
 	try {

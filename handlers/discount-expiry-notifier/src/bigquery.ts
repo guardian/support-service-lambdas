@@ -28,7 +28,6 @@ export const buildAuthClient = async (
 export const BigQueryResultDataSchema = z.array(
 	z.object({
 		firstName: z.string(),
-		identityId: z.string(),
 		nextPaymentDate: z
 			.object({
 				value: z.string(),
@@ -46,7 +45,6 @@ export const BigQueryResultDataSchema = z.array(
 
 type DevReturnValueType = Array<{
 	firstName: string;
-	identityId: string;
 	nextPaymentDate: string;
 	paymentAmount: number;
 	paymentCurrency: string;
@@ -69,7 +67,6 @@ export const runQuery = async (
 		WITH expiringDiscounts AS (
 			SELECT
 				account.currency as paymentCurrency,
-                account.identity_id_c as identityId,
 				account.sf_contact_id_c as sfContactId,
                 DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) AS calculated_end_date,
                 contact.first_name as firstName,
@@ -102,7 +99,6 @@ export const runQuery = async (
 		)
 		SELECT 
 			STRING_AGG(DISTINCT firstName) as firstName,
-            STRING_AGG(DISTINCT identityId) as identityId,
             MIN(exp.calculated_end_date) AS nextPaymentDate,
 			SUM(tier.price) AS paymentAmount,
     		STRING_AGG(DISTINCT paymentCurrency) as paymentCurrency,
@@ -136,7 +132,6 @@ export const runQuery = async (
 	const devReturnValue = [
 		{
 			firstName: 'David',
-			identityId: '111',
 			nextPaymentDate: '2025-02-28',
 			paymentAmount: 12,
 			paymentCurrency: 'GBP',

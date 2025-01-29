@@ -2,14 +2,16 @@ import { DataExtensionNames, sendEmail } from '@modules/email/email';
 import { stageFromEnvironment } from '@modules/stage';
 
 export const handler = async (event: {
-	subName: string;
 	firstName: string;
-	paymentCurrency: string;
-	paymentAmount: number;
-	paymentFrequency: string;
 	nextPaymentDate: string;
+	paymentAmount: number;
+	paymentCurrency: string;
+	paymentFrequency: string;
+	productName: string;
+	sfContactId: string;
+	subName: string;
+	workEmail: string;
 }) => {
-	console.log('event:', event);
 	const currencySymbol = getCurrencySymbol(event.paymentCurrency);
 
 	const emailMessageWithUserId = {
@@ -32,7 +34,6 @@ export const handler = async (event: {
 		SfContactId: '111',
 	};
 
-	console.log('emailMessageWithUserId:', emailMessageWithUserId);
 	const emailSend = await sendEmail(
 		stageFromEnvironment(),
 		emailMessageWithUserId,

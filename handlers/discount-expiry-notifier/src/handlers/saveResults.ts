@@ -2,11 +2,15 @@ import { getIfDefined } from '@modules/nullAndUndefined';
 import { uploadFileToS3 } from '../s3';
 
 type ExpiringDiscountToProcess = {
-	subName: string;
 	firstName: string;
-	paymentAmount: number;
-	paymentFrequency: string;
 	nextPaymentDate: string;
+	paymentAmount: number;
+	paymentCurrency: string;
+	paymentFrequency: string;
+	productName: string;
+	sfContactId: string;
+	subName: string;
+	workEmail: string;
 };
 
 type ExpiringDiscountProcessingAttempt = {
