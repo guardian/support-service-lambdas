@@ -125,7 +125,10 @@ export const runQuery = async (
 		{
 			subName: 'A-S00814342', //Active sub in dev sandbox
 			firstName: 'David',
-			email: 'david.pepper@guardian.co.uk',
+			identityId: '111',
+			sfContactId: '222',
+			productName: 'Supporter Plus',
+			workEmail: 'david.pepper@guardian.co.uk',
 			paymentCurrency: 'GBP',
 			paymentAmount: 12,
 			paymentFrequency: 'Month',
@@ -138,7 +141,11 @@ export const runQuery = async (
 type DevReturnValueType = Array<{
 	subName: string;
 	firstName: string;
-	email: string;
+	identityId: string;
+	sfContactId: string;
+	productName: string;
+	workEmail: string;
+	paymentCurrency: string;
 	paymentAmount: number;
 	paymentFrequency: string;
 	nextPaymentDate: string;
