@@ -54,7 +54,12 @@ export const runQuery = async (
 				sub.name AS sub_name,
 				sub.id AS sub_id,
 				contact.id AS contact_id,
-        		product.name as productName
+				contact.first_name as firstName,
+				contact.work_email as workEmail,
+				contact.personal_email as personalEmail,
+				product.name as productName,
+				account.identity_id_c as identityId,
+				account.sf_contact_id_c as sfContactId
 			FROM 
 				datatech-fivetran.zuora.rate_plan_charge charge
 			INNER JOIN datatech-fivetran.zuora.rate_plan rate_plan 
@@ -65,6 +70,8 @@ export const runQuery = async (
 				ON sub.id = charge.subscription_id
 			INNER JOIN datatech-fivetran.zuora.contact contact 
 				ON contact.id = sub.sold_to_contact_id
+			INNER JOIN datatech-fivetran.zuora.account account 
+				ON account.sold_to_contact_id = contact.id
 			WHERE 
 				product.name = 'Discounts' 
 				AND charge.charge_type = 'Recurring' 
@@ -72,13 +79,17 @@ export const runQuery = async (
 				AND charge.up_to_periods > 1 
 				AND sub.is_latest_version = TRUE 
 				AND sub.status = 'Active' 
-				AND DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = DATE_ADD(CURRENT_DATE(), INTERVAL 32 DAY) 
-				AND sub.name = 'A-S02282302'
+				AND DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = DATE_ADD(CURRENT_DATE(), INTERVAL 32 DAY) AND
+				sub.name = 'A-S02284587'	
 		)
 		SELECT 
-			exp.sub_name as subName,
-			STRING_AGG(DISTINCT contact.first_name) AS firstName,
-			SUM(tier.price) AS paymentAmount,
+			exp.sub_name,
+			STRING_AGG(DISTINCT identityId) as identityId,
+			STRING_AGG(DISTINCT sfContactId) as sfContactId,
+			STRING_AGG(DISTINCT productName) as productName,
+			STRING_AGG(DISTINCT workEmail) as workEmail,
+			STRING_AGG(DISTINCT firstName) as firstName,
+			SUM(tier.price) AS payment_amount,
 			STRING_AGG(DISTINCT rate_plan_charge.billing_period) AS paymentFrequency,
 			MIN(exp.calculated_end_date) AS nextPaymentDate
 		FROM
@@ -89,8 +100,6 @@ export const runQuery = async (
 			ON rate_plan_charge.id = tier.rate_plan_charge_id
 		INNER JOIN datatech-fivetran.zuora.product product 
 			ON product.id = rate_plan_charge.product_id
-		INNER JOIN datatech-fivetran.zuora.contact contact 
-			ON contact.id = exp.contact_id
 		WHERE 
 			product.name != 'Discounts'
 		GROUP BY 
