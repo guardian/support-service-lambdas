@@ -8,6 +8,9 @@ export const handler = async (event: {
 	paymentFrequency: string;
 	nextPaymentDate: string;
 }) => {
+	console.log('event.nextPaymentDate:', event.nextPaymentDate);
+	const fullDate = formatDate(event.nextPaymentDate);
+	console.log('fullDate:', fullDate);
 
 	const emailMessageWithUserId = {
 		...{
@@ -18,7 +21,7 @@ export const handler = async (event: {
 						EmailAddress: 'david.pepper@guardian.co.uk',
 						paymentAmount: '70.00',
 						first_name: 'David',
-						date_of_payment: formatDate(event.nextPaymentDate),
+						date_of_payment: '28 February 2025',
 						paymentFrequency: 'month',
 					},
 				},
@@ -40,10 +43,9 @@ export const handler = async (event: {
 };
 
 function formatDate(inputDate: string): string {
-	const date = new Date(inputDate);
-	const day = date.getDate();
-	const monthName = date.toLocaleString('en-US', { month: 'long' });
-	const year = date.getFullYear();
-
-	return `${day} ${monthName} ${year}`;
+	return new Date(inputDate).toLocaleDateString('en-GB', {
+		day: '2-digit',
+		month: 'long',
+		year: 'numeric',
+	});
 }
