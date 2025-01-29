@@ -19,6 +19,7 @@ import {
 	Map,
 	Pass,
 	StateMachine,
+	TaskInput,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { nodeVersion } from './node-version';
@@ -145,6 +146,9 @@ export class DiscountExpiryNotifier extends GuStack {
 			{
 				lambdaFunction: getSubsWithExpiringDiscountsLambda,
 				outputPath: '$.Payload',
+				payload: TaskInput.fromObject({
+					executionDate: JsonPath.format('yyyy-MM-dd'),
+				}),
 			},
 		);
 
