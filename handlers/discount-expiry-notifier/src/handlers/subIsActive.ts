@@ -6,6 +6,7 @@ export const handler = async (event: {
 	item: {
 		subName: string;
 		firstName: string;
+		currency: string;
 		paymentAmount: number;
 		paymentFrequency: string;
 		nextPaymentDate: string;

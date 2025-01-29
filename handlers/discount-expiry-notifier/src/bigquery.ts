@@ -29,6 +29,7 @@ export const BigQueryResultDataSchema = z.array(
 	z.object({
 		subName: z.string(),
 		firstName: z.string(),
+		paymentCurrency: z.string(),
 		paymentAmount: z.number().transform((val) => parseFloat(val.toFixed(2))),
 		paymentFrequency: z.string(),
 		nextPaymentDate: z
@@ -121,21 +122,12 @@ export const runQuery = async (
 			subName: 'A-S00814342', //Active sub in dev sandbox
 			firstName: 'David',
 			email: 'david.pepper@guardian.co.uk',
+			paymentCurrency: 'GBP',
 			paymentAmount: 12,
 			paymentFrequency: 'Month',
 			nextPaymentDate: '2025-02-28',
 		},
 	];
-
-	// 	,
-	// 	{
-	// 		subName: 'A-S00954412', // Cancelled sub in dev sandbox
-	// 		firstName: 'Rachel',
-	// 		paymentAmount: 33.99,
-	// 		paymentFrequency: 'Month',
-	// 		nextPaymentDate: '2025-02-23',
-	// 	},
-	// ];
 	return devReturnValue;
 };
 
