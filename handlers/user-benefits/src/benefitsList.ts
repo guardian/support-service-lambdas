@@ -6,8 +6,8 @@ export const benefitsListHandler = async (
 ): Promise<APIGatewayProxyResult> => {
 	console.log(`Input is ${JSON.stringify(event)}`);
 
-	const format = event.pathParameters?.format;
-	if (format === 'html') {
+	const returnHtml = event.headers.accept?.includes('text/html');
+	if (returnHtml) {
 		return getHttpResponse(getHtmlBody(), 'text/html');
 	}
 	return getHttpResponse(JSON.stringify(productBenefitMapping));

@@ -102,7 +102,7 @@ export class UserBenefits extends GuStack {
 					apiKeyRequired: true,
 				},
 				{
-					path: '/benefits/list/{format+}',
+					path: '/benefits/list',
 					httpMethod: 'GET',
 					lambda: userBenefitsListLambda,
 				},
