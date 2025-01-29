@@ -76,7 +76,6 @@ export const runQuery = async (
 				contact.id AS contactId,
 				contact.personal_email as personalEmail,
 				contact.work_email as workEmail,
-                product.name as productName,
                 sub.id AS subId,
 				sub.name AS subName
 			FROM 
@@ -108,7 +107,7 @@ export const runQuery = async (
 			SUM(tier.price) AS paymentAmount,
     		STRING_AGG(DISTINCT paymentCurrency) as paymentCurrency,
             STRING_AGG(DISTINCT rate_plan_charge.billing_period) AS paymentFrequency,
-			STRING_AGG(DISTINCT productName) as productName,
+			STRING_AGG(DISTINCT product.name) as productName,
             STRING_AGG(DISTINCT sfContactId) as sfContactId,
             exp.subName as subName,
 			STRING_AGG(DISTINCT workEmail) as workEmail,
