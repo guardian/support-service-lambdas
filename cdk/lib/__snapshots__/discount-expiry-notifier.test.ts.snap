@@ -2,115 +2,6 @@
 
 exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
 {
-  "Mappings": {
-    "ServiceprincipalMap": {
-      "af-south-1": {
-        "states": "states.af-south-1.amazonaws.com",
-      },
-      "ap-east-1": {
-        "states": "states.ap-east-1.amazonaws.com",
-      },
-      "ap-northeast-1": {
-        "states": "states.ap-northeast-1.amazonaws.com",
-      },
-      "ap-northeast-2": {
-        "states": "states.ap-northeast-2.amazonaws.com",
-      },
-      "ap-northeast-3": {
-        "states": "states.ap-northeast-3.amazonaws.com",
-      },
-      "ap-south-1": {
-        "states": "states.ap-south-1.amazonaws.com",
-      },
-      "ap-south-2": {
-        "states": "states.ap-south-2.amazonaws.com",
-      },
-      "ap-southeast-1": {
-        "states": "states.ap-southeast-1.amazonaws.com",
-      },
-      "ap-southeast-2": {
-        "states": "states.ap-southeast-2.amazonaws.com",
-      },
-      "ap-southeast-3": {
-        "states": "states.ap-southeast-3.amazonaws.com",
-      },
-      "ap-southeast-4": {
-        "states": "states.ap-southeast-4.amazonaws.com",
-      },
-      "ca-central-1": {
-        "states": "states.ca-central-1.amazonaws.com",
-      },
-      "cn-north-1": {
-        "states": "states.cn-north-1.amazonaws.com",
-      },
-      "cn-northwest-1": {
-        "states": "states.cn-northwest-1.amazonaws.com",
-      },
-      "eu-central-1": {
-        "states": "states.eu-central-1.amazonaws.com",
-      },
-      "eu-central-2": {
-        "states": "states.eu-central-2.amazonaws.com",
-      },
-      "eu-north-1": {
-        "states": "states.eu-north-1.amazonaws.com",
-      },
-      "eu-south-1": {
-        "states": "states.eu-south-1.amazonaws.com",
-      },
-      "eu-south-2": {
-        "states": "states.eu-south-2.amazonaws.com",
-      },
-      "eu-west-1": {
-        "states": "states.eu-west-1.amazonaws.com",
-      },
-      "eu-west-2": {
-        "states": "states.eu-west-2.amazonaws.com",
-      },
-      "eu-west-3": {
-        "states": "states.eu-west-3.amazonaws.com",
-      },
-      "il-central-1": {
-        "states": "states.il-central-1.amazonaws.com",
-      },
-      "me-central-1": {
-        "states": "states.me-central-1.amazonaws.com",
-      },
-      "me-south-1": {
-        "states": "states.me-south-1.amazonaws.com",
-      },
-      "sa-east-1": {
-        "states": "states.sa-east-1.amazonaws.com",
-      },
-      "us-east-1": {
-        "states": "states.us-east-1.amazonaws.com",
-      },
-      "us-east-2": {
-        "states": "states.us-east-2.amazonaws.com",
-      },
-      "us-gov-east-1": {
-        "states": "states.us-gov-east-1.amazonaws.com",
-      },
-      "us-gov-west-1": {
-        "states": "states.us-gov-west-1.amazonaws.com",
-      },
-      "us-iso-east-1": {
-        "states": "states.amazonaws.com",
-      },
-      "us-iso-west-1": {
-        "states": "states.amazonaws.com",
-      },
-      "us-isob-east-1": {
-        "states": "states.amazonaws.com",
-      },
-      "us-west-1": {
-        "states": "states.us-west-1.amazonaws.com",
-      },
-      "us-west-2": {
-        "states": "states.us-west-2.amazonaws.com",
-      },
-    },
-  },
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
@@ -180,6 +71,9 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
         },
         "FunctionName": "discount-expiry-notifier-build-email-payload-CODE",
         "Handler": "buildEmailPayload.handler",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
@@ -389,7 +283,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Email sends processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Save results","Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Check sub is active","States":{"Check sub is active":{"Next":"Is Subscription Active?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Email sends processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Save results","Parameters":{"item.$":"$$.Map.Item.Value"},"ItemsPath":"$.expiringDiscountsToProcess","MaxConcurrency":10,"Iterator":{"StartAt":"Check sub is active","States":{"Check sub is active":{"Next":"Is Subscription Active?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -422,7 +316,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.expiringDiscountsToProcess","MaxConcurrency":10},"Save results":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}}}}},"Save results":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -474,15 +368,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
               "Principal": {
-                "Service": {
-                  "Fn::FindInMap": [
-                    "ServiceprincipalMap",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    "states",
-                  ],
-                },
+                "Service": "states.amazonaws.com",
               },
             },
           ],
@@ -679,6 +565,9 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
         },
         "FunctionName": "discount-expiry-notifier-get-subs-with-expiring-discounts-CODE",
         "Handler": "getSubsWithExpiringDiscounts.handler",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
@@ -737,6 +626,9 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
         },
         "FunctionName": "discount-expiry-notifier-initiate-email-send-CODE",
         "Handler": "initiateEmailSend.handler",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
@@ -1107,6 +999,9 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
         },
         "FunctionName": "discount-expiry-notifier-save-results-CODE",
         "Handler": "saveResults.handler",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
@@ -1339,6 +1234,9 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
         },
         "FunctionName": "discount-expiry-notifier-sub-is-active-CODE",
         "Handler": "subIsActive.handler",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
@@ -1552,115 +1450,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
 
 exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
 {
-  "Mappings": {
-    "ServiceprincipalMap": {
-      "af-south-1": {
-        "states": "states.af-south-1.amazonaws.com",
-      },
-      "ap-east-1": {
-        "states": "states.ap-east-1.amazonaws.com",
-      },
-      "ap-northeast-1": {
-        "states": "states.ap-northeast-1.amazonaws.com",
-      },
-      "ap-northeast-2": {
-        "states": "states.ap-northeast-2.amazonaws.com",
-      },
-      "ap-northeast-3": {
-        "states": "states.ap-northeast-3.amazonaws.com",
-      },
-      "ap-south-1": {
-        "states": "states.ap-south-1.amazonaws.com",
-      },
-      "ap-south-2": {
-        "states": "states.ap-south-2.amazonaws.com",
-      },
-      "ap-southeast-1": {
-        "states": "states.ap-southeast-1.amazonaws.com",
-      },
-      "ap-southeast-2": {
-        "states": "states.ap-southeast-2.amazonaws.com",
-      },
-      "ap-southeast-3": {
-        "states": "states.ap-southeast-3.amazonaws.com",
-      },
-      "ap-southeast-4": {
-        "states": "states.ap-southeast-4.amazonaws.com",
-      },
-      "ca-central-1": {
-        "states": "states.ca-central-1.amazonaws.com",
-      },
-      "cn-north-1": {
-        "states": "states.cn-north-1.amazonaws.com",
-      },
-      "cn-northwest-1": {
-        "states": "states.cn-northwest-1.amazonaws.com",
-      },
-      "eu-central-1": {
-        "states": "states.eu-central-1.amazonaws.com",
-      },
-      "eu-central-2": {
-        "states": "states.eu-central-2.amazonaws.com",
-      },
-      "eu-north-1": {
-        "states": "states.eu-north-1.amazonaws.com",
-      },
-      "eu-south-1": {
-        "states": "states.eu-south-1.amazonaws.com",
-      },
-      "eu-south-2": {
-        "states": "states.eu-south-2.amazonaws.com",
-      },
-      "eu-west-1": {
-        "states": "states.eu-west-1.amazonaws.com",
-      },
-      "eu-west-2": {
-        "states": "states.eu-west-2.amazonaws.com",
-      },
-      "eu-west-3": {
-        "states": "states.eu-west-3.amazonaws.com",
-      },
-      "il-central-1": {
-        "states": "states.il-central-1.amazonaws.com",
-      },
-      "me-central-1": {
-        "states": "states.me-central-1.amazonaws.com",
-      },
-      "me-south-1": {
-        "states": "states.me-south-1.amazonaws.com",
-      },
-      "sa-east-1": {
-        "states": "states.sa-east-1.amazonaws.com",
-      },
-      "us-east-1": {
-        "states": "states.us-east-1.amazonaws.com",
-      },
-      "us-east-2": {
-        "states": "states.us-east-2.amazonaws.com",
-      },
-      "us-gov-east-1": {
-        "states": "states.us-gov-east-1.amazonaws.com",
-      },
-      "us-gov-west-1": {
-        "states": "states.us-gov-west-1.amazonaws.com",
-      },
-      "us-iso-east-1": {
-        "states": "states.amazonaws.com",
-      },
-      "us-iso-west-1": {
-        "states": "states.amazonaws.com",
-      },
-      "us-isob-east-1": {
-        "states": "states.amazonaws.com",
-      },
-      "us-west-1": {
-        "states": "states.us-west-1.amazonaws.com",
-      },
-      "us-west-2": {
-        "states": "states.us-west-2.amazonaws.com",
-      },
-    },
-  },
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
@@ -1730,6 +1519,9 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
         },
         "FunctionName": "discount-expiry-notifier-build-email-payload-PROD",
         "Handler": "buildEmailPayload.handler",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
@@ -1939,7 +1731,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Email sends processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Save results","Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Check sub is active","States":{"Check sub is active":{"Next":"Is Subscription Active?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Email sends processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Save results","Parameters":{"item.$":"$$.Map.Item.Value"},"ItemsPath":"$.expiringDiscountsToProcess","MaxConcurrency":10,"Iterator":{"StartAt":"Check sub is active","States":{"Check sub is active":{"Next":"Is Subscription Active?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1972,7 +1764,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.expiringDiscountsToProcess","MaxConcurrency":10},"Save results":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}}}}},"Save results":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -2024,15 +1816,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
               "Principal": {
-                "Service": {
-                  "Fn::FindInMap": [
-                    "ServiceprincipalMap",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    "states",
-                  ],
-                },
+                "Service": "states.amazonaws.com",
               },
             },
           ],
@@ -2229,6 +2013,9 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
         },
         "FunctionName": "discount-expiry-notifier-get-subs-with-expiring-discounts-PROD",
         "Handler": "getSubsWithExpiringDiscounts.handler",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
@@ -2287,6 +2074,9 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
         },
         "FunctionName": "discount-expiry-notifier-initiate-email-send-PROD",
         "Handler": "initiateEmailSend.handler",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
@@ -2657,6 +2447,9 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
         },
         "FunctionName": "discount-expiry-notifier-save-results-PROD",
         "Handler": "saveResults.handler",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
@@ -2889,6 +2682,9 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
         },
         "FunctionName": "discount-expiry-notifier-sub-is-active-PROD",
         "Handler": "subIsActive.handler",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
