@@ -9,7 +9,6 @@ export const handler = async (event: {
 	paymentFrequency: string;
 	nextPaymentDate: string;
 }) => {
-
 	const currencySymbol = getCurrencySymbol(event.paymentCurrency);
 
 	const emailMessageWithUserId = {
@@ -52,12 +51,12 @@ function formatDate(inputDate: string): string {
 
 function getCurrencySymbol(currencyCode: string): string {
 	const symbols: Record<string, string> = {
-	  GBP: "£",
-	  AUD: "$",
-	  EUR: "€",
-	  USD: "$",
-	  CAD: "$",
-	  NZD: "$",
+		GBP: '£',
+		AUD: '$',
+		EUR: '€',
+		USD: '$',
+		CAD: '$',
+		NZD: '$',
 	};
-	return symbols[currencyCode] ?? "";
-  }
+	return symbols[currencyCode] ?? '';
+}
