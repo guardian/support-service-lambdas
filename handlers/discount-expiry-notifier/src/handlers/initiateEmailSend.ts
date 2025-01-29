@@ -10,7 +10,6 @@ export const handler = async (event: {
 }) => {
 	console.log('event.nextPaymentDate:', event.nextPaymentDate);
 
-
 	const emailMessageWithUserId = {
 		...{
 			To: {
