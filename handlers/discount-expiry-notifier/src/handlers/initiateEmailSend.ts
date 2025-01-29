@@ -8,10 +8,6 @@ export const handler = async (event: {
 	paymentFrequency: string;
 	nextPaymentDate: string;
 }) => {
-	console.log('event.nextPaymentDate:', event.nextPaymentDate);
-	const fullDate = formatDate(event.nextPaymentDate);
-	console.log('fullDate:', fullDate);
-
 	const emailMessageWithUserId = {
 		...{
 			To: {
@@ -19,9 +15,9 @@ export const handler = async (event: {
 				ContactAttributes: {
 					SubscriberAttributes: {
 						EmailAddress: 'david.pepper@guardian.co.uk',
-						paymentAmount: '70.00',
+						paymentAmount: '70.00', //todo add currency
 						first_name: 'David',
-						date_of_payment: '28 February 2025',
+						date_of_payment: formatDate(event.nextPaymentDate),
 						paymentFrequency: 'month',
 					},
 				},
