@@ -742,6 +742,15 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
             },
             {
               "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
                 "s3:GetObject*",
                 "s3:GetBucket*",
                 "s3:List*",
@@ -2086,6 +2095,15 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                   ],
                 ],
               },
+            },
+            {
+              "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
             },
             {
               "Action": [

@@ -43,6 +43,16 @@ export class DiscountExpiryNotifier extends GuStack {
 				],
 			}),
 		);
+		role.addToPolicy(
+			new PolicyStatement({
+				actions: [
+					'logs:CreateLogGroup',
+					'logs:CreateLogStream',
+					'logs:PutLogEvents',
+				],
+				resources: ['*'],
+			}),
+		);
 
 		const bucket = new Bucket(this, 'Bucket', {
 			bucketName: `${appName}-${this.stage.toLowerCase()}`,
