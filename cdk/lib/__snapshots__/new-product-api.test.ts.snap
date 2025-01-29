@@ -84,6 +84,24 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
         "Namespace": "AWS/ApiGateway",
         "Period": 900,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
         "Threshold": 6,
       },
       "Type": "AWS::CloudWatch::Alarm",
@@ -123,6 +141,24 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
         "Namespace": "AWS/ApiGateway",
         "Period": 60,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
         "Threshold": 1,
       },
       "Type": "AWS::CloudWatch::Alarm",
@@ -834,6 +870,9 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
         },
         "FunctionName": "add-subscription-CODE",
         "Handler": "com.gu.newproduct.api.addsubscription.Handler::apply",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 1536,
         "Role": {
           "Fn::GetAtt": [
@@ -1114,6 +1153,9 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
         },
         "FunctionName": "product-catalog-CODE",
         "Handler": "com.gu.newproduct.api.productcatalog.Handler::apply",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 1536,
         "Role": {
           "Fn::GetAtt": [
@@ -1499,6 +1541,24 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
         "Namespace": "AWS/ApiGateway",
         "Period": 900,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
         "Threshold": 6,
       },
       "Type": "AWS::CloudWatch::Alarm",
@@ -1538,6 +1598,24 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
         "Namespace": "AWS/ApiGateway",
         "Period": 60,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
         "Threshold": 1,
       },
       "Type": "AWS::CloudWatch::Alarm",
@@ -2249,6 +2327,9 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
         },
         "FunctionName": "add-subscription-PROD",
         "Handler": "com.gu.newproduct.api.addsubscription.Handler::apply",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 1536,
         "Role": {
           "Fn::GetAtt": [
@@ -2529,6 +2610,9 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
         },
         "FunctionName": "product-catalog-PROD",
         "Handler": "com.gu.newproduct.api.productcatalog.Handler::apply",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 1536,
         "Role": {
           "Fn::GetAtt": [
