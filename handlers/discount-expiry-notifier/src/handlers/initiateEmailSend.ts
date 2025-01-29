@@ -9,7 +9,7 @@ export const handler = async (event: {
 	paymentFrequency: string;
 	nextPaymentDate: string;
 }) => {
-	console.log('event:',event);
+	console.log('event:', event);
 	const currencySymbol = getCurrencySymbol(event.paymentCurrency);
 
 	const emailMessageWithUserId = {
@@ -32,7 +32,7 @@ export const handler = async (event: {
 		SfContactId: '0039E00001HiIGlQAN',
 	};
 
-	console.log('emailMessageWithUserId:',emailMessageWithUserId);
+	console.log('emailMessageWithUserId:', emailMessageWithUserId);
 	const emailSend = await sendEmail(
 		stageFromEnvironment(),
 		emailMessageWithUserId,
