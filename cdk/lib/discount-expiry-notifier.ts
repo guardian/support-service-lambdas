@@ -147,10 +147,7 @@ export class DiscountExpiryNotifier extends GuStack {
 				lambdaFunction: getSubsWithExpiringDiscountsLambda,
 				outputPath: '$.Payload',
 				payload: TaskInput.fromObject({
-					executionDate: JsonPath.stringAt('$$.Execution.StartTime').substring(
-						0,
-						10,
-					),
+					executionDate: JsonPath.stringAt('$$.Execution.StartTime'),
 				}),
 			},
 		);
