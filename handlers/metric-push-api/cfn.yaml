@@ -9,17 +9,16 @@ Parameters:
             - PROD
             - CODE
 
-Conditions:
-  CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
-
 Mappings:
     StageMap:
         CODE:
             ApiName: metric-push-api-api-CODE
             DomainName: metric-push-api-code.support.guardianapis.com
+            AlarmActionsEnabled: FALSE
         PROD:
             ApiName: metric-push-api-api-PROD
             DomainName: metric-push-api-prod.support.guardianapis.com
+            AlarmActionsEnabled: TRUE
     Constants:
       Alarm:
         Process: Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit
@@ -122,10 +121,10 @@ Resources:
 
     5xxApiAlarm:
       Type: AWS::CloudWatch::Alarm
-      Condition: CreateProdMonitoring
       Properties:
         AlarmActions:
           - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-${Stage}
+        ActionsEnabled: !FindInMap [StageMap, !Ref Stage, AlarmActionsEnabled]
         AlarmName: !Join
         - ' '
         - - !FindInMap [ Constants, Alarm, Urgent ]
@@ -148,10 +147,10 @@ Resources:
 
     HighClientSideErrorRateAlarm:
       Type: AWS::CloudWatch::Alarm
-      Condition: CreateProdMonitoring
       Properties:
         AlarmActions:
           - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-${Stage}
+        ActionsEnabled: !FindInMap [StageMap, !Ref Stage, AlarmActionsEnabled]
         AlarmName: !Join
           - ' '
           - - !FindInMap [ Constants, Alarm, Urgent ]
@@ -162,17 +161,46 @@ Resources:
           - - 'Impact - some or all browsers are failing to render support client side pages. Log in to Sentry to see these errors: https://the-guardian.sentry.io/discover/results/?project=1213654&query=%22Fatal%20error%20rendering%20page%22&queryDataset=error-events&sort=-count&statsPeriod=24h'
             - !FindInMap [ Constants, Alarm, Process ]
             - !FindInMap [StageMap, !Ref Stage, ApiName]
-        MetricName: Count
-        Namespace: AWS/ApiGateway
-        Dimensions:
-          - Name: ApiName
-            Value: !FindInMap [StageMap, !Ref Stage, ApiName]
+        Metrics:
+          - Id: mtotal2xx
+            Expression: 'mtotalcount - (m5xxcount + m4xxcount)'
+          - Id: mtotalcount
+            ReturnData: false
+            MetricStat:
+              Period: 60
+              Stat: Sum
+              Metric:
+                Namespace: AWS/ApiGateway
+                MetricName: Count
+                Dimensions:
+                  - Name: ApiName
+                    Value: !FindInMap [StageMap, !Ref Stage, ApiName]
+          - Id: m5xxcount
+            ReturnData: false
+            MetricStat:
+              Period: 60
+              Stat: Sum
+              Metric:
+                Namespace: AWS/ApiGateway
+                MetricName: 5XXError
+                Dimensions:
+                  - Name: ApiName
+                    Value: !FindInMap [StageMap, !Ref Stage, ApiName]
+          - Id: m4xxcount
+            ReturnData: false
+            MetricStat:
+              Period: 60
+              Stat: Sum
+              Metric:
+                Namespace: AWS/ApiGateway
+                MetricName: 4XXError
+                Dimensions:
+                  - Name: ApiName
+                    Value: !FindInMap [StageMap, !Ref Stage, ApiName]
         ComparisonOperator: GreaterThanOrEqualToThreshold
         Threshold: 2
         DatapointsToAlarm: 3
-        Period: 60
         EvaluationPeriods: 5
-        Statistic: Sum
         TreatMissingData: notBreaching
       DependsOn:
         - MetricPushAPI

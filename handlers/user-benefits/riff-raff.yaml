@@ -23,4 +23,5 @@ deployments:
       functionNames:
       - user-benefits-me-
       - user-benefits-identity-id-
+      - user-benefits-list-
     dependencies: [user-benefits-cloudformation]
