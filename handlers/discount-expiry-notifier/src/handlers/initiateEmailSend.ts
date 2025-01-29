@@ -9,6 +9,7 @@ export const handler = async (event: {
 	paymentFrequency: string;
 	nextPaymentDate: string;
 }) => {
+	console.log('event:',event);
 	const currencySymbol = getCurrencySymbol(event.paymentCurrency);
 
 	const emailMessageWithUserId = {
