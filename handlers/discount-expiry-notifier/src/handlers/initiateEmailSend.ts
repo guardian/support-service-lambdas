@@ -18,10 +18,10 @@ export const handler = async (event: {
 				ContactAttributes: {
 					SubscriberAttributes: {
 						EmailAddress: 'david.pepper@guardian.co.uk',
-						paymentAmount: `${currencySymbol}70.00`,
-						first_name: 'David',
+						paymentAmount: `${currencySymbol}${event.paymentAmount}`,
+						first_name: event.firstName,
 						date_of_payment: formatDate(event.nextPaymentDate),
-						paymentFrequency: 'month',
+						paymentFrequency: event.paymentFrequency,
 					},
 				},
 			},
