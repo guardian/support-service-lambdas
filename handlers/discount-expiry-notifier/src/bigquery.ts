@@ -27,22 +27,36 @@ export const buildAuthClient = async (
 
 export const BigQueryResultDataSchema = z.array(
 	z.object({
-		subName: z.string(),
 		firstName: z.string(),
 		identityId: z.string(),
-		sfContactId: z.string(),
-		productName: z.string(),
-		workEmail: z.string(),
-		paymentCurrency: z.string(),
-		paymentAmount: z.number().transform((val) => parseFloat(val.toFixed(2))),
-		paymentFrequency: z.string(),
 		nextPaymentDate: z
 			.object({
 				value: z.string(),
 			})
 			.transform((obj) => obj.value),
+		paymentAmount: z.number().transform((val) => parseFloat(val.toFixed(2))),
+		paymentCurrency: z.string(),
+		paymentFrequency: z.string(),
+		productName: z.string(),
+		sfContactId: z.string(),
+		subName: z.string(),
+		workEmail: z.string(),
 	}),
 );
+
+type DevReturnValueType = Array<{
+	firstName: string;
+	identityId: string;
+	nextPaymentDate: string;
+	paymentAmount: number;
+	paymentCurrency: string;
+	paymentFrequency: string;
+	productName: string;
+	sfContactId: string;
+	subName: string;
+	workEmail: string;
+}>;
+
 
 export const runQuery = async (
 	authClient: BaseExternalAccountClient,
@@ -89,16 +103,16 @@ export const runQuery = async (
 				sub.name = 'A-S02284587'	
 		)
 		SELECT 
-			exp.sub_name as subName,
-    		STRING_AGG(DISTINCT paymentCurrency) as paymentCurrency,
-			STRING_AGG(DISTINCT identityId) as identityId,
-			STRING_AGG(DISTINCT sfContactId) as sfContactId,
-			STRING_AGG(DISTINCT productName) as productName,
-			STRING_AGG(DISTINCT workEmail) as workEmail,
 			STRING_AGG(DISTINCT firstName) as firstName,
-			SUM(tier.price) AS payment_amount,
-			STRING_AGG(DISTINCT rate_plan_charge.billing_period) AS paymentFrequency,
-			MIN(exp.calculated_end_date) AS nextPaymentDate
+            STRING_AGG(DISTINCT identityId) as identityId,
+            MIN(exp.calculated_end_date) AS nextPaymentDate,
+			SUM(tier.price) AS paymentAmount,
+    		STRING_AGG(DISTINCT paymentCurrency) as paymentCurrency,
+            STRING_AGG(DISTINCT rate_plan_charge.billing_period) AS paymentFrequency,
+			STRING_AGG(DISTINCT productName) as productName,
+            STRING_AGG(DISTINCT sfContactId) as sfContactId,
+            exp.sub_name as subName,
+			STRING_AGG(DISTINCT workEmail) as workEmail,
 		FROM
 			expiringDiscounts exp
 		INNER JOIN datatech-fivetran.zuora.rate_plan_charge_tier tier 
@@ -123,30 +137,17 @@ export const runQuery = async (
 
 	const devReturnValue = [
 		{
-			subName: 'A-S00814342', //Active sub in dev sandbox
 			firstName: 'David',
 			identityId: '111',
-			sfContactId: '222',
-			productName: 'Supporter Plus',
-			workEmail: 'david.pepper@guardian.co.uk',
-			paymentCurrency: 'GBP',
-			paymentAmount: 12,
-			paymentFrequency: 'Month',
 			nextPaymentDate: '2025-02-28',
+			paymentAmount: 12,
+			paymentCurrency: 'GBP',
+			paymentFrequency: 'Month',
+			productName: 'Supporter Plus',
+			sfContactId: '222',
+			subName: 'A-S00814342', // Active sub in dev sandbox
+			workEmail: 'david.pepper@guardian.co.uk'
 		},
 	];
 	return devReturnValue;
 };
-
-type DevReturnValueType = Array<{
-	subName: string;
-	firstName: string;
-	identityId: string;
-	sfContactId: string;
-	productName: string;
-	workEmail: string;
-	paymentCurrency: string;
-	paymentAmount: number;
-	paymentFrequency: string;
-	nextPaymentDate: string;
-}>;
