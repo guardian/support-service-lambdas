@@ -17,10 +17,10 @@ export const handler = async (event: {
 	const emailMessageWithUserId = {
 		...{
 			To: {
-				Address: 'david.pepper@guardian.co.uk',
+				Address: 'david.pepper@guardian.co.uk', // hard code this during testing
 				ContactAttributes: {
 					SubscriberAttributes: {
-						EmailAddress: 'david.pepper@guardian.co.uk',
+						EmailAddress: 'david.pepper@guardian.co.uk', // hard code this during testing
 						paymentAmount: `${currencySymbol}${event.paymentAmount}`,
 						first_name: event.firstName,
 						date_of_payment: formatDate(event.nextPaymentDate),
@@ -31,7 +31,7 @@ export const handler = async (event: {
 			// subscriptionCancelledEmail used for testing. will update data extension to active one when published
 			DataExtensionName: DataExtensionNames.subscriptionCancelledEmail,
 		},
-		SfContactId: '111',
+		SfContactId: event.sfContactId,
 	};
 
 	const emailSend = await sendEmail(
