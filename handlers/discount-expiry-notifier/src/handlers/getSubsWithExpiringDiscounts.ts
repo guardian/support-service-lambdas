@@ -7,6 +7,7 @@ export const handler = async (event: { executionDate: string }) => {
 		'gcp-credentials-config',
 		stageFromEnvironment(),
 	);
+	console.log('event:', event);
 	const authClient = await buildAuthClient(gcpConfig);
 	const executionDate = new Date().toISOString().split('T')[0] as string;
 	const result = await runQuery(authClient, getQuery(executionDate));
@@ -16,7 +17,7 @@ export const handler = async (event: { executionDate: string }) => {
 	};
 };
 
-const getQuery = (executionDate: string): string => 
+const getQuery = (executionDate: string): string =>
 	`WITH expiringDiscounts AS (
 		SELECT
 			account.currency as paymentCurrency,
