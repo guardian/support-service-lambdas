@@ -494,16 +494,6 @@ lazy val `dev-env-cleaner` = lambdaProject(
   Seq(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-cloudwatch`),
 )
 
-lazy val `revenue-recogniser-job` = lambdaProject(
-  "revenue-recogniser-job",
-  "Finds unrecognised revenue in zuora and recognises it appropariately",
-  Seq(
-    "com.nrinaudo" %% "kantan.csv-generic" % "0.7.0",
-    "com.nrinaudo" %% "kantan.csv-java8" % "0.7.0",
-  ),
-  Seq(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-cloudwatch`),
-)
-
 lazy val `sf-contact-merge` = lambdaProject(
   "sf-contact-merge",
   "Merges together the salesforce account referenced by a set of zuora accounts",

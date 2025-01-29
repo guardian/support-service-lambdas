@@ -31,7 +31,7 @@ export const productBenefitMapping: Record<ProductKey, ProductBenefit[]> = {
 	NationalDelivery: digitalSubscriptionBenefits,
 	NewspaperVoucher: digitalSubscriptionBenefits,
 	SubscriptionCard: digitalSubscriptionBenefits,
-	SupporterMembership: ['liveApp', 'hideSupportMessaging'],
+	SupporterMembership: ['liveApp', 'feastApp', 'hideSupportMessaging'],
 	PartnerMembership: ['liveApp', 'feastApp', 'hideSupportMessaging'],
 	PatronMembership: digitalSubscriptionBenefits,
 	GuardianPatron: digitalSubscriptionBenefits,

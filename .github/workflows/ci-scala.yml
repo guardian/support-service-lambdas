@@ -95,7 +95,6 @@ jobs:
           - identity-retention
           - metric-push-api
           - product-move-api
-          - revenue-recogniser-job
           - sf-api-user-credentials-setter
           - sf-contact-merge
           - sf-datalake-export

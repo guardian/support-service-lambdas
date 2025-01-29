@@ -49,9 +49,6 @@ export class DiscountExpiryNotifier extends GuStack {
 				app: appName,
 				functionName: `${appName}-get-subs-with-expiring-discounts-${this.stage}`,
 				runtime: nodeVersion,
-				environment: {
-					Stage: this.stage,
-				},
 				handler: 'getSubsWithExpiringDiscounts.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
@@ -66,9 +63,6 @@ export class DiscountExpiryNotifier extends GuStack {
 				app: appName,
 				functionName: `${appName}-sub-is-active-${this.stage}`,
 				runtime: nodeVersion,
-				environment: {
-					Stage: this.stage,
-				},
 				handler: 'subIsActive.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
@@ -90,9 +84,6 @@ export class DiscountExpiryNotifier extends GuStack {
 				app: appName,
 				functionName: `${appName}-build-email-payload-${this.stage}`,
 				runtime: nodeVersion,
-				environment: {
-					Stage: this.stage,
-				},
 				handler: 'buildEmailPayload.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
@@ -106,9 +97,6 @@ export class DiscountExpiryNotifier extends GuStack {
 				app: appName,
 				functionName: `${appName}-initiate-email-send-${this.stage}`,
 				runtime: nodeVersion,
-				environment: {
-					Stage: this.stage,
-				},
 				handler: 'initiateEmailSend.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
@@ -123,14 +111,14 @@ export class DiscountExpiryNotifier extends GuStack {
 				functionName: `${appName}-save-results-${this.stage}`,
 				runtime: nodeVersion,
 				environment: {
-					Stage: this.stage,
+					S3_BUCKET: bucket.bucketName,
 				},
 				handler: 'saveResults.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
 				initialPolicy: [
 					new PolicyStatement({
-						actions: ['s3:PutObject'],
+						actions: ['s3:GetObject', 's3:PutObject'],
 						resources: [bucket.arnForObjects('*')],
 					}),
 				],
@@ -180,7 +168,7 @@ export class DiscountExpiryNotifier extends GuStack {
 
 		const emailSendsProcessingMap = new Map(this, 'Email sends processor map', {
 			maxConcurrency: 10,
-			itemsPath: JsonPath.stringAt('$.discountsToProcess'),
+			itemsPath: JsonPath.stringAt('$.expiringDiscountsToProcess'),
 			parameters: {
 				item: JsonPath.stringAt('$$.Map.Item.Value'),
 			},
@@ -193,7 +181,7 @@ export class DiscountExpiryNotifier extends GuStack {
 			subIsActiveLambdaTask.next(
 				isSubActiveChoice
 					.when(
-						Condition.booleanEquals('$.isActive', true),
+						Condition.stringEquals('$.status', 'Active'),
 						buildEmailPayloadLambdaTask.next(initiateEmailSendLambdaTask),
 					)
 					.otherwise(

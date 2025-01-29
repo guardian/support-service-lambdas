@@ -11,5 +11,7 @@ export const handler = async () => {
 	const result = await runQuery(authClient);
 	console.log('result: ', result);
 
-	return result;
+	return {
+		expiringDiscountsToProcess: result,
+	};
 };

@@ -9,8 +9,8 @@
     "lint": "eslint src/**/*.ts test/**/*.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.665.0",
-    "@aws-sdk/client-secrets-manager": "3.682.0",
+    "@aws-sdk/client-s3": "3.734.0",
+    "@aws-sdk/client-secrets-manager": "3.734.0",
     "dayjs": "^1.11.13",
     "zod": "^3.23.8"
   }
