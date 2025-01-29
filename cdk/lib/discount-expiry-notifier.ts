@@ -140,10 +140,6 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
-		const datePart = JsonPath.stringAt('$$.Execution.StartTime').substring(
-			0,
-			10,
-		);
 		const getSubsWithExpiringDiscountsLambdaTask = new LambdaInvoke(
 			this,
 			'Get subs with expiring discounts',
@@ -151,7 +147,10 @@ export class DiscountExpiryNotifier extends GuStack {
 				lambdaFunction: getSubsWithExpiringDiscountsLambda,
 				outputPath: '$.Payload',
 				payload: TaskInput.fromObject({
-					executionDate: datePart,
+					executionDate: JsonPath.stringAt('$$.Execution.StartTime').substring(
+						0,
+						10,
+					),
 				}),
 			},
 		);
