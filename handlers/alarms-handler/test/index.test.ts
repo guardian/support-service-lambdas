@@ -68,7 +68,7 @@ describe('Handler', () => {
 	it('should handle captured CloudWatch alarm message', async () => {
 		(getTags as jest.Mock).mockResolvedValueOnce({
 			App: 'mock-app',
-			DiagnosticLinks: 'cloudwatchLambdaLog:mock-app-CODE',
+			DiagnosticLinks: 'lambda:mock-app-CODE',
 		});
 
 		const result = await getChatMessages(
@@ -112,10 +112,9 @@ describe('Handler', () => {
 	it('should add multiple urls where specified', async () => {
 		(getTags as jest.Mock).mockResolvedValueOnce({
 			App: 'mock-app',
-			DiagnosticLinks: [
-				'cloudwatchLambdaLog:mock-app-CODE',
-				'cloudwatchLambdaLog:another-app-CODE',
-			].join(','),
+			DiagnosticLinks: ['lambda:mock-app-CODE', 'lambda:another-app-CODE'].join(
+				',',
+			),
 		});
 
 		const result = await getChatMessages(

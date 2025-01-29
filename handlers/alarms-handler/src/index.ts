@@ -120,7 +120,7 @@ const buildCloudWatchAlarmMessage = async ({
 
 	const links = diagnosticUrlTemplates.flatMap((diagnosticUrlTemplate) => {
 		let result;
-		if (diagnosticUrlTemplate.prefix === 'cloudwatchLambdaLog') {
+		if (diagnosticUrlTemplate.prefix === 'lambda') {
 			result = getCloudwatchLogsLink(
 				`/aws/lambda/${diagnosticUrlTemplate.value}`,
 				Trigger,
