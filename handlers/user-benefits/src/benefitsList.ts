@@ -1,9 +1,9 @@
 import { productBenefitMapping } from '@modules/product-benefits/productBenefit';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-export const benefitsListHandler = (
+export const benefitsListHandler = async (
 	event: APIGatewayProxyEvent,
-): APIGatewayProxyResult => {
+): Promise<APIGatewayProxyResult> => {
 	console.log(`Input is ${JSON.stringify(event)}`);
 
 	const returnHtml = event.headers.accept?.includes('text/html');
@@ -16,15 +16,15 @@ export const benefitsListHandler = (
 const getHttpResponse = (
 	body: string,
 	contentType?: string,
-): APIGatewayProxyResult => {
-	return {
+): Promise<APIGatewayProxyResult> => {
+	return Promise.resolve({
 		statusCode: 200,
 		headers: {
 			'Content-Type': contentType ?? 'application/json',
 			'Cache-Control': 'max-age=60',
 		},
 		body,
-	};
+	});
 };
 
 const getHtmlBody = (): string => {
