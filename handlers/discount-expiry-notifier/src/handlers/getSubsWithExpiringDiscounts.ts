@@ -9,7 +9,8 @@ export const handler = async (event: { executionDate: string }) => {
 	);
 	console.log('event:', event);
 	const authClient = await buildAuthClient(gcpConfig);
-	const executionDate = new Date().toISOString().split('T')[0] as string;
+	const executionDate = event.executionDate.substring(0, 10);
+	console.log('derived executionDate:', executionDate);
 	const result = await runQuery(authClient, getQuery(executionDate));
 
 	return {
