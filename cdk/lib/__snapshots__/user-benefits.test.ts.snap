@@ -1371,7 +1371,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
           },
           "S3Key": "membership/CODE/user-benefits/user-benefits.zip",
         },
-        "Description": "An API Gateway triggered lambda to get the benefits of the user identified in the request path",
+        "Description": "An API Gateway triggered lambda to return the full list of benefits for each product in html or json format",
         "Environment": {
           "Variables": {
             "APP": "user-benefits",
@@ -3172,7 +3172,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
           },
           "S3Key": "membership/PROD/user-benefits/user-benefits.zip",
         },
-        "Description": "An API Gateway triggered lambda to get the benefits of the user identified in the request path",
+        "Description": "An API Gateway triggered lambda to return the full list of benefits for each product in html or json format",
         "Environment": {
           "Variables": {
             "APP": "user-benefits",

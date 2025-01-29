@@ -80,7 +80,7 @@ export class UserBenefits extends GuStack {
 			`user-benefits-list-lambda`,
 			{
 				description:
-					'An API Gateway triggered lambda to get the benefits of the user identified in the request path',
+					'An API Gateway triggered lambda to return the full list of benefits for each product in html or json format',
 				functionName: `user-benefits-list-${this.stage}`,
 				handler: 'index.benefitsListHandler',
 				...commonLambdaProps,
