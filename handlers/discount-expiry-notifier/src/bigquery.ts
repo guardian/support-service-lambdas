@@ -94,13 +94,13 @@ export const runQuery = async (
 			INNER JOIN datatech-fivetran.zuora.account account 
 				ON account.sold_to_contact_id = contact.id
 			WHERE 
-				product.name = 'Discounts' 
-				AND charge.charge_type = 'Recurring' 
-				AND charge.up_to_periods IS NOT NULL 
-				AND charge.up_to_periods > 1 
-				AND sub.is_latest_version = TRUE 
-				AND sub.status = 'Active' 
-				AND DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = DATE_ADD(DATE '${executionDateString}', INTERVAL 32 DAY) AND
+				product.name = 'Discounts' AND 
+				charge.charge_type = 'Recurring' AND 
+				charge.up_to_periods IS NOT NULL AND 
+				charge.up_to_periods > 1 AND 
+				sub.is_latest_version = TRUE AND 
+				sub.status = 'Active' AND 
+				DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = DATE_ADD(DATE '${executionDateString}', INTERVAL 32 DAY) AND
 				sub.name = 'A-S02284587'	
 		)
 		SELECT 
