@@ -59,7 +59,8 @@ export const runQuery = async (
 				contact.personal_email as personalEmail,
 				product.name as productName,
 				account.identity_id_c as identityId,
-				account.sf_contact_id_c as sfContactId
+				account.sf_contact_id_c as sfContactId,
+        		account.currency as paymentCurrency
 			FROM 
 				datatech-fivetran.zuora.rate_plan_charge charge
 			INNER JOIN datatech-fivetran.zuora.rate_plan rate_plan 
@@ -84,6 +85,7 @@ export const runQuery = async (
 		)
 		SELECT 
 			exp.sub_name,
+    		STRING_AGG(DISTINCT paymentCurrency) as paymentCurrency,
 			STRING_AGG(DISTINCT identityId) as identityId,
 			STRING_AGG(DISTINCT sfContactId) as sfContactId,
 			STRING_AGG(DISTINCT productName) as productName,
