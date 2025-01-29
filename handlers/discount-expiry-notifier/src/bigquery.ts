@@ -57,7 +57,6 @@ type DevReturnValueType = Array<{
 	workEmail: string;
 }>;
 
-
 export const runQuery = async (
 	authClient: BaseExternalAccountClient,
 ): Promise<DevReturnValueType> => {
@@ -111,7 +110,7 @@ export const runQuery = async (
             STRING_AGG(DISTINCT rate_plan_charge.billing_period) AS paymentFrequency,
 			STRING_AGG(DISTINCT productName) as productName,
             STRING_AGG(DISTINCT sfContactId) as sfContactId,
-            exp.sub_name as subName,
+            exp.subName as subName,
 			STRING_AGG(DISTINCT workEmail) as workEmail,
 		FROM
 			expiringDiscounts exp
@@ -124,9 +123,9 @@ export const runQuery = async (
 		WHERE 
 			product.name != 'Discounts'
 		GROUP BY 
-			exp.sub_name
+			exp.subName
 		ORDER BY 
-			exp.sub_name DESC;
+			exp.subName DESC;
 		`;
 
 	const result = await bigquery.query(query);
@@ -146,7 +145,7 @@ export const runQuery = async (
 			productName: 'Supporter Plus',
 			sfContactId: '222',
 			subName: 'A-S00814342', // Active sub in dev sandbox
-			workEmail: 'david.pepper@guardian.co.uk'
+			workEmail: 'david.pepper@guardian.co.uk',
 		},
 	];
 	return devReturnValue;
