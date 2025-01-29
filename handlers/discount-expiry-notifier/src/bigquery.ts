@@ -63,6 +63,12 @@ export const runQuery = async (
 		authClient,
 	});
 
+	const executionDate = new Date();
+	executionDate.setDate(executionDate.getDate() + 32);
+
+	const executionDateString = executionDate.toISOString().split('T')[0]; // Format as 'YYYY-MM-DD'
+
+
 	const query = `
 		WITH expiringDiscounts AS (
 			SELECT
@@ -94,7 +100,7 @@ export const runQuery = async (
 				AND charge.up_to_periods > 1 
 				AND sub.is_latest_version = TRUE 
 				AND sub.status = 'Active' 
-				AND DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = DATE_ADD(CURRENT_DATE(), INTERVAL 32 DAY) AND
+				AND DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = DATE_ADD(DATE '${executionDateString}', INTERVAL 32 DAY) AND
 				sub.name = 'A-S02284587'	
 		)
 		SELECT 
