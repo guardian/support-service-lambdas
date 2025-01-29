@@ -31,6 +31,7 @@ export const handler = async (event: {
 		SfContactId: '0039E00001HiIGlQAN',
 	};
 
+	console.log('emailMessageWithUserId:',emailMessageWithUserId);
 	const emailSend = await sendEmail(
 		stageFromEnvironment(),
 		emailMessageWithUserId,
