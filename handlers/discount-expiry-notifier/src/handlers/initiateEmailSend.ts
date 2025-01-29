@@ -23,6 +23,7 @@ export const handler = async (event: {
 					},
 				},
 			},
+			// subscriptionCancelledEmail used for testing. will update data extension to active one when published
 			DataExtensionName: DataExtensionNames.subscriptionCancelledEmail,
 		},
 		SfContactId: '0039E00001HiIGlQAN',
