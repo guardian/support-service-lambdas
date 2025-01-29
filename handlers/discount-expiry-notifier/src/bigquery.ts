@@ -68,7 +68,6 @@ export const runQuery = async (
 
 	const executionDateString = executionDate.toISOString().split('T')[0]; // Format as 'YYYY-MM-DD'
 
-
 	const query = `
 		WITH expiringDiscounts AS (
 			SELECT
