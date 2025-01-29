@@ -4,7 +4,7 @@ import { awsConfig } from '@modules/aws/config';
 import { prettyPrint } from '@modules/prettyPrint';
 import type { Stage } from '@modules/stage';
 
-export type EmailMessage = {
+type EmailMessage = {
 	To: EmailPayload;
 	DataExtensionName: DataExtensionName;
 };
