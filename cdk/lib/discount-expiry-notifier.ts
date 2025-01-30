@@ -19,7 +19,6 @@ import {
 	Map,
 	Pass,
 	StateMachine,
-	TaskInput,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { nodeVersion } from './node-version';
