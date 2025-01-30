@@ -54,12 +54,12 @@ export const getSupporterPlusData = (
 		[supporterPlus.Monthly.id]: {
 			productRatePlan: supporterPlus.Monthly,
 			chargeToUpdateId: supporterPlus.Monthly.charges.Contribution.id,
-			baseChargeId: supporterPlus.Monthly.charges.Subscription.id
+			baseChargeId: supporterPlus.Monthly.charges.Subscription.id,
 		},
 		[supporterPlus.Annual.id]: {
 			productRatePlan: supporterPlus.Annual,
 			chargeToUpdateId: supporterPlus.Annual.charges.Contribution.id,
-			baseChargeId: supporterPlus.Annual.charges.Subscription.id
+			baseChargeId: supporterPlus.Annual.charges.Subscription.id,
 		},
 		[supporterPlus.V1DeprecatedMonthly.id]: {
 			productRatePlan: supporterPlus.V1DeprecatedMonthly,
@@ -110,13 +110,15 @@ export const getSupporterPlusData = (
 
 	logger.log('updatable charge', chargeToUpdate.id);
 
-	const basePriceMinorUnits = productData.baseChargeId ? getIfDefined(
-		ratePlan.ratePlanCharges.find(
-			(charge) =>
-				charge.productRatePlanChargeId === productData.baseChargeId,
-		)?.price,
-		`Could not find the base charge with price property (with the id ${productData.baseChargeId}) in this rate plan`,
-	) * 100 : 0;
+	const basePriceMinorUnits = productData.baseChargeId
+		? getIfDefined(
+				ratePlan.ratePlanCharges.find(
+					(charge) =>
+						charge.productRatePlanChargeId === productData.baseChargeId,
+				)?.price,
+				`Could not find the base charge with price property (with the id ${productData.baseChargeId}) in this rate plan`,
+			) * 100
+		: 0;
 
 	logger.log('basePriceMinorUnits', basePriceMinorUnits);
 
@@ -124,7 +126,7 @@ export const getSupporterPlusData = (
 		ratePlan,
 		productRatePlan: productData.productRatePlan,
 		chargeToUpdate,
-		basePriceMinorUnits
+		basePriceMinorUnits,
 	};
 };
 
@@ -204,7 +206,8 @@ export const updateSupporterPlusAmount = async (
 
 	validateNewAmount(newPaymentAmount, currency, billingPeriod);
 
-	const newContributionAmount = ((newPaymentAmount * 100) - supporterPlusData.basePriceMinorUnits) / 100;
+	const newContributionAmount =
+		(newPaymentAmount * 100 - supporterPlusData.basePriceMinorUnits) / 100;
 
 	const { chargeToUpdate } = supporterPlusData;
 
