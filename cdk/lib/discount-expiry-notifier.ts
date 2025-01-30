@@ -2,7 +2,13 @@ import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
-import { PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import {
+	Effect,
+	Policy,
+	PolicyStatement,
+	Role,
+	ServicePrincipal,
+} from 'aws-cdk-lib/aws-iam';
 import { Architecture } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
@@ -37,6 +43,16 @@ export class DiscountExpiryNotifier extends GuStack {
 				],
 			}),
 		);
+		role.addToPolicy(
+			new PolicyStatement({
+				actions: [
+					'logs:CreateLogGroup',
+					'logs:CreateLogStream',
+					'logs:PutLogEvents',
+				],
+				resources: ['*'],
+			}),
+		);
 
 		const bucket = new Bucket(this, 'Bucket', {
 			bucketName: `${appName}-${this.stage.toLowerCase()}`,
@@ -49,6 +65,9 @@ export class DiscountExpiryNotifier extends GuStack {
 				app: appName,
 				functionName: `${appName}-get-subs-with-expiring-discounts-${this.stage}`,
 				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+				},
 				handler: 'getSubsWithExpiringDiscounts.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
@@ -63,6 +82,9 @@ export class DiscountExpiryNotifier extends GuStack {
 				app: appName,
 				functionName: `${appName}-sub-is-active-${this.stage}`,
 				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+				},
 				handler: 'subIsActive.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
@@ -77,19 +99,6 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
-		const buildEmailPayloadLambda = new GuLambdaFunction(
-			this,
-			'build-email-payload-lambda',
-			{
-				app: appName,
-				functionName: `${appName}-build-email-payload-${this.stage}`,
-				runtime: nodeVersion,
-				handler: 'buildEmailPayload.handler',
-				fileName: `${appName}.zip`,
-				architecture: Architecture.ARM_64,
-			},
-		);
-
 		const initiateEmailSendLambda = new GuLambdaFunction(
 			this,
 			'initiate-email-send-lambda',
@@ -97,6 +106,10 @@ export class DiscountExpiryNotifier extends GuStack {
 				app: appName,
 				functionName: `${appName}-initiate-email-send-${this.stage}`,
 				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+					S3_BUCKET: bucket.bucketName,
+				},
 				handler: 'initiateEmailSend.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
@@ -111,6 +124,7 @@ export class DiscountExpiryNotifier extends GuStack {
 				functionName: `${appName}-save-results-${this.stage}`,
 				runtime: nodeVersion,
 				environment: {
+					Stage: this.stage,
 					S3_BUCKET: bucket.bucketName,
 				},
 				handler: 'saveResults.handler',
@@ -139,15 +153,6 @@ export class DiscountExpiryNotifier extends GuStack {
 			'Check sub is active',
 			{
 				lambdaFunction: subIsActiveLambda,
-				outputPath: '$.Payload',
-			},
-		);
-
-		const buildEmailPayloadLambdaTask = new LambdaInvoke(
-			this,
-			'Build email payload',
-			{
-				lambdaFunction: buildEmailPayloadLambda,
 				outputPath: '$.Payload',
 			},
 		);
@@ -182,7 +187,7 @@ export class DiscountExpiryNotifier extends GuStack {
 				isSubActiveChoice
 					.when(
 						Condition.stringEquals('$.status', 'Active'),
-						buildEmailPayloadLambdaTask.next(initiateEmailSendLambdaTask),
+						initiateEmailSendLambdaTask,
 					)
 					.otherwise(
 						new Pass(this, 'Skip Processing', { resultPath: JsonPath.DISCARD }),
@@ -195,6 +200,20 @@ export class DiscountExpiryNotifier extends GuStack {
 				.next(emailSendsProcessingMap)
 				.next(saveResultsLambdaTask),
 		);
+
+		const sqsInlinePolicy: Policy = new Policy(this, 'sqs-inline-policy', {
+			statements: [
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: ['sqs:GetQueueUrl', 'sqs:SendMessage'],
+					resources: [
+						`arn:aws:sqs:${this.region}:${this.account}:braze-emails-${this.stage}`,
+					],
+				}),
+			],
+		});
+
+		initiateEmailSendLambda.role?.attachInlinePolicy(sqsInlinePolicy);
 
 		new StateMachine(this, `${appName}-state-machine-${this.stage}`, {
 			stateMachineName: `${appName}-${this.stage}`,

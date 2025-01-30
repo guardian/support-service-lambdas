@@ -2,14 +2,26 @@ import { stageFromEnvironment } from '@modules/stage';
 import { getSubscription } from '@modules/zuora/getSubscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 
-export const handler = async () => {
+export const handler = async (event: {
+	item: {
+		firstName: string;
+		nextPaymentDate: string;
+		paymentAmount: number;
+		paymentCurrency: string;
+		paymentFrequency: string;
+		productName: string;
+		sfContactId: string;
+		subName: string;
+		workEmail: string;
+	};
+}) => {
 	try {
-		//sub name will be passed in via json path in state machine
-		const subName = process.env.SUB_NAME ?? 'A-S00954053';
-
+		const subName = event.item.subName;
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const getSubResponse = await getSubscription(zuoraClient, subName);
+
 		return {
+			...event.item,
 			status: getSubResponse.status,
 		};
 	} catch (error) {
