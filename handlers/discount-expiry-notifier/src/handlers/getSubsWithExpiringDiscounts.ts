@@ -2,18 +2,18 @@ import { stageFromEnvironment } from '@modules/stage';
 import { buildAuthClient, runQuery } from '../bigquery';
 import { getSSMParam } from '../ssm';
 
+//to manually run the state machine for a specified date, enter execution date {"executionDate":"2025-11-23"} in aws console
 export const handler = async (event: { executionDate?: string }) => {
 	const gcpConfig = await getSSMParam(
 		'gcp-credentials-config',
 		stageFromEnvironment(),
 	);
-	console.log('event:', event);
+
 	const authClient = await buildAuthClient(gcpConfig);
 	const executionDate = event.executionDate
 		? event.executionDate.substring(0, 10)
 		: new Date().toISOString().substring(0, 10);
-
-	console.log('derived executionDate:', executionDate);
+	
 	const result = await runQuery(authClient, getQuery(executionDate));
 
 	return {
