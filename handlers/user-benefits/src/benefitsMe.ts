@@ -19,7 +19,7 @@ const productCatalogHelper = new Lazy(
 	'Get product catalog helper',
 );
 
-const getUserBenefitsResponse = async (
+export const getUserBenefitsResponse = async (
 	stage: Stage,
 	productCatalogHelper: ProductCatalogHelper,
 	userDetails: IdentityUserDetails,
