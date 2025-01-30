@@ -99,7 +99,6 @@ export const getSupporterPlusData = (
 	);
 
 	const { ratePlan, productData } = relevantRatePlan;
-	const { productRatePlan } = productData;
 
 	const chargeToUpdate = getIfDefined(
 		ratePlan.ratePlanCharges.find(
@@ -123,7 +122,7 @@ export const getSupporterPlusData = (
 
 	return {
 		ratePlan,
-		productRatePlan,
+		productRatePlan: productData.productRatePlan,
 		chargeToUpdate,
 		basePriceMinorUnits
 	};
