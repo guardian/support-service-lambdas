@@ -13,7 +13,7 @@ export const handler = async (event: { executionDate?: string }) => {
 	const executionDate = event.executionDate
 		? event.executionDate.substring(0, 10)
 		: new Date().toISOString().substring(0, 10);
-	
+
 	const result = await runQuery(authClient, getQuery(executionDate));
 
 	return {
