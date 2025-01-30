@@ -2,14 +2,17 @@ import { stageFromEnvironment } from '@modules/stage';
 import { buildAuthClient, runQuery } from '../bigquery';
 import { getSSMParam } from '../ssm';
 
-export const handler = async (event: { executionDate: string }) => {
+export const handler = async (event: { executionDate?: string }) => {
 	const gcpConfig = await getSSMParam(
 		'gcp-credentials-config',
 		stageFromEnvironment(),
 	);
 	console.log('event:', event);
 	const authClient = await buildAuthClient(gcpConfig);
-	const executionDate = event.executionDate.substring(0, 10);
+	const executionDate = event.executionDate
+		? event.executionDate.substring(0, 10)
+		: new Date().toISOString().substring(0, 10);
+
 	console.log('derived executionDate:', executionDate);
 	const result = await runQuery(authClient, getQuery(executionDate));
 
