@@ -119,32 +119,6 @@ Resources:
       DependsOn:
         - MetricPushDomainName
 
-    5xxApiAlarm:
-      Type: AWS::CloudWatch::Alarm
-      Properties:
-        AlarmActions:
-          - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-${Stage}
-        ActionsEnabled: !FindInMap [StageMap, !Ref Stage, AlarmActionsEnabled]
-        AlarmName: !Join
-        - ' '
-        - - !FindInMap [ Constants, Alarm, Urgent ]
-          - !Ref 'Stage'
-          - !FindInMap [StageMap, !Ref Stage, ApiName]
-          - 'API Gateway is returning 5XX errors'
-        ComparisonOperator: GreaterThanThreshold
-        Dimensions:
-          - Name: ApiName
-            Value: !FindInMap [StageMap, !Ref Stage, ApiName]
-          - Name: Stage
-            Value: !Sub ${Stage}
-        EvaluationPeriods: 1
-        MetricName: 5XXError
-        Namespace: AWS/ApiGateway
-        Period: 60
-        Statistic: Sum
-        Threshold: 2
-        TreatMissingData: notBreaching
-
     HighClientSideErrorRateAlarm:
       Type: AWS::CloudWatch::Alarm
       Properties:

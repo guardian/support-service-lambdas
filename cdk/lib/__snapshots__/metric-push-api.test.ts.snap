@@ -25,7 +25,9 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
     },
   },
   "Metadata": {
-    "gu:cdk:constructs": [],
+    "gu:cdk:constructs": [
+      "GuAlarm",
+    ],
     "gu:cdk:version": "TEST",
   },
   "Parameters": {
@@ -39,68 +41,33 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
-    "5xxApiAlarm": {
+    "5xxApiAlarmF6ACE36F": {
       "Properties": {
-        "ActionsEnabled": {
-          "Fn::FindInMap": [
-            "StageMap",
-            {
-              "Ref": "Stage",
-            },
-            "AlarmActionsEnabled",
-          ],
-        },
+        "ActionsEnabled": false,
         "AlarmActions": [
           {
-            "Fn::Sub": "arn:aws:sns:\${AWS::Region}:\${AWS::AccountId}:alarms-handler-topic-\${Stage}",
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
           },
         ],
-        "AlarmName": {
-          "Fn::Join": [
-            " ",
-            [
-              {
-                "Fn::FindInMap": [
-                  "Constants",
-                  "Alarm",
-                  "Urgent",
-                ],
-              },
-              {
-                "Ref": "Stage",
-              },
-              {
-                "Fn::FindInMap": [
-                  "StageMap",
-                  {
-                    "Ref": "Stage",
-                  },
-                  "ApiName",
-                ],
-              },
-              "API Gateway is returning 5XX errors",
-            ],
-          ],
-        },
+        "AlarmName": "URGENT 9-5 - CODE metric-push-api-CODE API Gateway is returning 5XX errors",
         "ComparisonOperator": "GreaterThanThreshold",
         "Dimensions": [
           {
             "Name": "ApiName",
-            "Value": {
-              "Fn::FindInMap": [
-                "StageMap",
-                {
-                  "Ref": "Stage",
-                },
-                "ApiName",
-              ],
-            },
-          },
-          {
-            "Name": "Stage",
-            "Value": {
-              "Fn::Sub": "\${Stage}",
-            },
+            "Value": "metric-push-api-api-CODE",
           },
         ],
         "EvaluationPeriods": 1,
@@ -532,7 +499,9 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
     },
   },
   "Metadata": {
-    "gu:cdk:constructs": [],
+    "gu:cdk:constructs": [
+      "GuAlarm",
+    ],
     "gu:cdk:version": "TEST",
   },
   "Parameters": {
@@ -546,68 +515,33 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
-    "5xxApiAlarm": {
+    "5xxApiAlarmF6ACE36F": {
       "Properties": {
-        "ActionsEnabled": {
-          "Fn::FindInMap": [
-            "StageMap",
-            {
-              "Ref": "Stage",
-            },
-            "AlarmActionsEnabled",
-          ],
-        },
+        "ActionsEnabled": true,
         "AlarmActions": [
           {
-            "Fn::Sub": "arn:aws:sns:\${AWS::Region}:\${AWS::AccountId}:alarms-handler-topic-\${Stage}",
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
           },
         ],
-        "AlarmName": {
-          "Fn::Join": [
-            " ",
-            [
-              {
-                "Fn::FindInMap": [
-                  "Constants",
-                  "Alarm",
-                  "Urgent",
-                ],
-              },
-              {
-                "Ref": "Stage",
-              },
-              {
-                "Fn::FindInMap": [
-                  "StageMap",
-                  {
-                    "Ref": "Stage",
-                  },
-                  "ApiName",
-                ],
-              },
-              "API Gateway is returning 5XX errors",
-            ],
-          ],
-        },
+        "AlarmName": "URGENT 9-5 - PROD metric-push-api-PROD API Gateway is returning 5XX errors",
         "ComparisonOperator": "GreaterThanThreshold",
         "Dimensions": [
           {
             "Name": "ApiName",
-            "Value": {
-              "Fn::FindInMap": [
-                "StageMap",
-                {
-                  "Ref": "Stage",
-                },
-                "ApiName",
-              ],
-            },
-          },
-          {
-            "Name": "Stage",
-            "Value": {
-              "Fn::Sub": "\${Stage}",
-            },
+            "Value": "metric-push-api-api-PROD",
           },
         ],
         "EvaluationPeriods": 1,
