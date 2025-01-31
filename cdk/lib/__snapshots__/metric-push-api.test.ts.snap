@@ -27,6 +27,7 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuAlarm",
+      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -80,74 +81,37 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
-    "HighClientSideErrorRateAlarm": {
-      "DependsOn": [
-        "MetricPushAPI",
-      ],
+    "HighClientSideErrorRateAlarm0026FCB2": {
       "Properties": {
-        "ActionsEnabled": {
-          "Fn::FindInMap": [
-            "StageMap",
-            {
-              "Ref": "Stage",
-            },
-            "AlarmActionsEnabled",
-          ],
-        },
+        "ActionsEnabled": false,
         "AlarmActions": [
           {
-            "Fn::Sub": "arn:aws:sns:\${AWS::Region}:\${AWS::AccountId}:alarms-handler-topic-\${Stage}",
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
           },
         ],
-        "AlarmDescription": {
-          "Fn::Join": [
-            " ",
-            [
-              "Impact - some or all browsers are failing to render support client side pages. Log in to Sentry to see these errors: https://the-guardian.sentry.io/discover/results/?project=1213654&query=%22Fatal%20error%20rendering%20page%22&queryDataset=error-events&sort=-count&statsPeriod=24h",
-              {
-                "Fn::FindInMap": [
-                  "Constants",
-                  "Alarm",
-                  "Process",
-                ],
-              },
-              {
-                "Fn::FindInMap": [
-                  "StageMap",
-                  {
-                    "Ref": "Stage",
-                  },
-                  "ApiName",
-                ],
-              },
-            ],
-          ],
-        },
-        "AlarmName": {
-          "Fn::Join": [
-            " ",
-            [
-              {
-                "Fn::FindInMap": [
-                  "Constants",
-                  "Alarm",
-                  "Urgent",
-                ],
-              },
-              {
-                "Ref": "Stage",
-              },
-              "client-side fatal errors are being reported to sentry for support-frontend",
-            ],
-          ],
-        },
+        "AlarmDescription": "Impact - some or all browsers are failing to render support client side pages. Log in to Sentry to see these errors: https://the-guardian.sentry.io/discover/results/?project=1213654&query="Fatal error rendering page"&queryDataset=error-events&sort=-count&statsPeriod=24h Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit metric-push-api-CODE",
+        "AlarmName": "URGENT 9-5 - client-side fatal errors are being reported to sentry for support-frontend",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "DatapointsToAlarm": 3,
         "EvaluationPeriods": 5,
         "Metrics": [
           {
             "Expression": "mtotalcount - (m5xxcount + m4xxcount)",
-            "Id": "mtotal2xx",
+            "Id": "expr_1",
+            "Label": "mtotal2xx",
           },
           {
             "Id": "mtotalcount",
@@ -156,15 +120,7 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": {
-                      "Fn::FindInMap": [
-                        "StageMap",
-                        {
-                          "Ref": "Stage",
-                        },
-                        "ApiName",
-                      ],
-                    },
+                    "Value": "metric-push-api-api-CODE",
                   },
                 ],
                 "MetricName": "Count",
@@ -182,15 +138,7 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": {
-                      "Fn::FindInMap": [
-                        "StageMap",
-                        {
-                          "Ref": "Stage",
-                        },
-                        "ApiName",
-                      ],
-                    },
+                    "Value": "metric-push-api-api-CODE",
                   },
                 ],
                 "MetricName": "5XXError",
@@ -208,15 +156,7 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": {
-                      "Fn::FindInMap": [
-                        "StageMap",
-                        {
-                          "Ref": "Stage",
-                        },
-                        "ApiName",
-                      ],
-                    },
+                    "Value": "metric-push-api-api-CODE",
                   },
                 ],
                 "MetricName": "4XXError",
@@ -501,6 +441,7 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuAlarm",
+      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -554,74 +495,37 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
-    "HighClientSideErrorRateAlarm": {
-      "DependsOn": [
-        "MetricPushAPI",
-      ],
+    "HighClientSideErrorRateAlarm0026FCB2": {
       "Properties": {
-        "ActionsEnabled": {
-          "Fn::FindInMap": [
-            "StageMap",
-            {
-              "Ref": "Stage",
-            },
-            "AlarmActionsEnabled",
-          ],
-        },
+        "ActionsEnabled": true,
         "AlarmActions": [
           {
-            "Fn::Sub": "arn:aws:sns:\${AWS::Region}:\${AWS::AccountId}:alarms-handler-topic-\${Stage}",
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
           },
         ],
-        "AlarmDescription": {
-          "Fn::Join": [
-            " ",
-            [
-              "Impact - some or all browsers are failing to render support client side pages. Log in to Sentry to see these errors: https://the-guardian.sentry.io/discover/results/?project=1213654&query=%22Fatal%20error%20rendering%20page%22&queryDataset=error-events&sort=-count&statsPeriod=24h",
-              {
-                "Fn::FindInMap": [
-                  "Constants",
-                  "Alarm",
-                  "Process",
-                ],
-              },
-              {
-                "Fn::FindInMap": [
-                  "StageMap",
-                  {
-                    "Ref": "Stage",
-                  },
-                  "ApiName",
-                ],
-              },
-            ],
-          ],
-        },
-        "AlarmName": {
-          "Fn::Join": [
-            " ",
-            [
-              {
-                "Fn::FindInMap": [
-                  "Constants",
-                  "Alarm",
-                  "Urgent",
-                ],
-              },
-              {
-                "Ref": "Stage",
-              },
-              "client-side fatal errors are being reported to sentry for support-frontend",
-            ],
-          ],
-        },
+        "AlarmDescription": "Impact - some or all browsers are failing to render support client side pages. Log in to Sentry to see these errors: https://the-guardian.sentry.io/discover/results/?project=1213654&query="Fatal error rendering page"&queryDataset=error-events&sort=-count&statsPeriod=24h Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit metric-push-api-PROD",
+        "AlarmName": "URGENT 9-5 - client-side fatal errors are being reported to sentry for support-frontend",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "DatapointsToAlarm": 3,
         "EvaluationPeriods": 5,
         "Metrics": [
           {
             "Expression": "mtotalcount - (m5xxcount + m4xxcount)",
-            "Id": "mtotal2xx",
+            "Id": "expr_1",
+            "Label": "mtotal2xx",
           },
           {
             "Id": "mtotalcount",
@@ -630,15 +534,7 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": {
-                      "Fn::FindInMap": [
-                        "StageMap",
-                        {
-                          "Ref": "Stage",
-                        },
-                        "ApiName",
-                      ],
-                    },
+                    "Value": "metric-push-api-api-PROD",
                   },
                 ],
                 "MetricName": "Count",
@@ -656,15 +552,7 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": {
-                      "Fn::FindInMap": [
-                        "StageMap",
-                        {
-                          "Ref": "Stage",
-                        },
-                        "ApiName",
-                      ],
-                    },
+                    "Value": "metric-push-api-api-PROD",
                   },
                 ],
                 "MetricName": "5XXError",
@@ -682,15 +570,7 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": {
-                      "Fn::FindInMap": [
-                        "StageMap",
-                        {
-                          "Ref": "Stage",
-                        },
-                        "ApiName",
-                      ],
-                    },
+                    "Value": "metric-push-api-api-PROD",
                   },
                 ],
                 "MetricName": "4XXError",
