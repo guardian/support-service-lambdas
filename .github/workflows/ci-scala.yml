@@ -93,7 +93,6 @@ jobs:
           - holiday-stop-processor
           - identity-backfill
           - identity-retention
-          - metric-push-api
           - product-move-api
           - sf-api-user-credentials-setter
           - sf-contact-merge

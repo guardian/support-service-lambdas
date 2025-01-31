@@ -50,6 +50,7 @@ jobs:
           - salesforce-disaster-recovery
           - salesforce-disaster-recovery-health-check
           - zuora-salesforce-link-remover
+          - metric-push-api
     runs-on: ubuntu-latest
     permissions:
       id-token: write

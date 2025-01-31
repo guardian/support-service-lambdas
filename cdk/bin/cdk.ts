@@ -6,6 +6,7 @@ import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
 import { DiscountApi } from '../lib/discount-api';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
+import { MetricPushApi } from '../lib/metric-push-api';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
 import { PressReaderEntitlements } from '../lib/press-reader-entitlements';
@@ -295,4 +296,14 @@ new DiscountExpiryNotifier(app, 'discount-expiry-notifier-CODE', {
 new DiscountExpiryNotifier(app, 'discount-expiry-notifier-PROD', {
 	stack: 'support',
 	stage: 'PROD',
+});
+new MetricPushApi(app, 'metric-push-api-CODE', {
+	stack: 'membership',
+	stage: 'CODE',
+	cloudFormationStackName: 'membership-CODE-metric-push-api',
+});
+new MetricPushApi(app, 'metric-push-api-PROD', {
+	stack: 'membership',
+	stage: 'PROD',
+	cloudFormationStackName: 'membership-PROD-metric-push-api',
 });
