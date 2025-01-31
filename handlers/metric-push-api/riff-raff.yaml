@@ -1,12 +1,12 @@
 stacks:
-- membership
+  - membership
 regions:
-- eu-west-1
+  - eu-west-1
 allowedStages:
   - CODE
   - PROD
 deployments:
-  cfn:
+  metric-push-api-cloudformation:
     type: cloud-formation
     app: metric-push-api
     parameters:
