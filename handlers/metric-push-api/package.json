@@ -1,7 +1,7 @@
 {
 	"name": "metric-push-api",
 	"scripts": {
-		"package": "touch target/metric-push-api.zip"
+		"package": "mkdir target && touch target/metric-push-api.zip"
 	},
 	"dependencies": {},
 	"devDependencies": {}
