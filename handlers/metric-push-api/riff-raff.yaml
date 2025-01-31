@@ -10,4 +10,6 @@ deployments:
     type: cloud-formation
     app: metric-push-api
     parameters:
-      templatePath: cfn.yaml
+      templateStagePaths:
+        CODE: metric-push-api-CODE.template.json
+        PROD: metric-push-api-PROD.template.json

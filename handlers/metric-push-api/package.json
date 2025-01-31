@@ -1,0 +1,8 @@
+{
+	"name": "metric-push-api",
+	"scripts": {
+		"package": "touch target/metric-push-api.zip"
+	},
+	"dependencies": {},
+	"devDependencies": {}
+}

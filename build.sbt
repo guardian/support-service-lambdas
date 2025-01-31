@@ -683,9 +683,6 @@ lazy val `product-move-api` = lambdaProject(
     }
   }
 
-lazy val `metric-push-api` =
-  lambdaProject("metric-push-api", "HTTP API to push a metric to cloudwatch so we can alarm on errors")
-
 lazy val `sf-move-subscriptions-api` = lambdaProject(
   "sf-move-subscriptions-api",
   "API for for moving subscriptions in ZUORA from SalesForce",
