@@ -289,7 +289,7 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "support",
+            "Value": "membership",
           },
           {
             "Key": "Stage",
@@ -345,7 +345,7 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "support",
+            "Value": "membership",
           },
           {
             "Key": "Stage",
@@ -435,7 +435,7 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "support",
+            "Value": "membership",
           },
           {
             "Key": "Stage",
@@ -796,7 +796,7 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "support",
+            "Value": "membership",
           },
           {
             "Key": "Stage",
@@ -852,7 +852,7 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "support",
+            "Value": "membership",
           },
           {
             "Key": "Stage",
@@ -942,7 +942,7 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "support",
+            "Value": "membership",
           },
           {
             "Key": "Stage",

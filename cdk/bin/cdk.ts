@@ -298,10 +298,12 @@ new DiscountExpiryNotifier(app, 'discount-expiry-notifier-PROD', {
 	stage: 'PROD',
 });
 new MetricPushApi(app, 'metric-push-api-CODE', {
-	stack: 'support',
+	stack: 'membership',
 	stage: 'CODE',
+	cloudFormationStackName: 'membership-CODE-metric-push-api',
 });
 new MetricPushApi(app, 'metric-push-api-PROD', {
-	stack: 'support',
+	stack: 'membership',
 	stage: 'PROD',
+	cloudFormationStackName: 'membership-PROD-metric-push-api',
 });
