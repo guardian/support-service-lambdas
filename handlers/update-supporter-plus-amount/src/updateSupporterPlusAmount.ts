@@ -35,13 +35,13 @@ export type SupporterPlusData = {
 	ratePlan: RatePlan;
 	productRatePlan: ProductRatePlan<'SupporterPlus', UpdatablePlans>;
 	chargeToUpdate: RatePlanCharge;
-	planHasSeparateContributionCharge: boolean;
+	basePriceMinorUnits: number;
 };
 
 type ProductData = {
 	productRatePlan: ProductRatePlan<'SupporterPlus', UpdatablePlans>;
 	chargeToUpdateId: string;
-	planHasSeparateContributionCharge: boolean;
+	baseChargeId?: string;
 };
 
 export const getSupporterPlusData = (
@@ -54,24 +54,22 @@ export const getSupporterPlusData = (
 		[supporterPlus.Monthly.id]: {
 			productRatePlan: supporterPlus.Monthly,
 			chargeToUpdateId: supporterPlus.Monthly.charges.Contribution.id,
-			planHasSeparateContributionCharge: true,
+			baseChargeId: supporterPlus.Monthly.charges.Subscription.id,
 		},
 		[supporterPlus.Annual.id]: {
 			productRatePlan: supporterPlus.Annual,
 			chargeToUpdateId: supporterPlus.Annual.charges.Contribution.id,
-			planHasSeparateContributionCharge: true,
+			baseChargeId: supporterPlus.Annual.charges.Subscription.id,
 		},
 		[supporterPlus.V1DeprecatedMonthly.id]: {
 			productRatePlan: supporterPlus.V1DeprecatedMonthly,
 			chargeToUpdateId:
 				supporterPlus.V1DeprecatedMonthly.charges.Subscription.id,
-			planHasSeparateContributionCharge: false,
 		},
 		[supporterPlus.V1DeprecatedAnnual.id]: {
 			productRatePlan: supporterPlus.V1DeprecatedAnnual,
 			chargeToUpdateId:
 				supporterPlus.V1DeprecatedAnnual.charges.Subscription.id,
-			planHasSeparateContributionCharge: false,
 		},
 	};
 
@@ -101,23 +99,34 @@ export const getSupporterPlusData = (
 	);
 
 	const { ratePlan, productData } = relevantRatePlan;
-	const { productRatePlan, planHasSeparateContributionCharge } = productData;
 
 	const chargeToUpdate = getIfDefined(
 		ratePlan.ratePlanCharges.find(
 			(charge) =>
 				charge.productRatePlanChargeId === productData.chargeToUpdateId,
 		),
-		`Could not find a charge with the id ${productData.chargeToUpdateId} in this rate plan`,
+		`Could not find the contribution charge (with the id ${productData.chargeToUpdateId}) in this rate plan`,
 	);
 
 	logger.log('updatable charge', chargeToUpdate.id);
 
+	const basePriceMinorUnits = productData.baseChargeId
+		? getIfDefined(
+				ratePlan.ratePlanCharges.find(
+					(charge) =>
+						charge.productRatePlanChargeId === productData.baseChargeId,
+				)?.price,
+				`Could not find the base charge with price property (with the id ${productData.baseChargeId}) in this rate plan`,
+			) * 100
+		: 0;
+
+	logger.log('basePriceMinorUnits', basePriceMinorUnits);
+
 	return {
 		ratePlan,
-		productRatePlan,
+		productRatePlan: productData.productRatePlan,
 		chargeToUpdate,
-		planHasSeparateContributionCharge,
+		basePriceMinorUnits,
 	};
 };
 
@@ -197,14 +206,8 @@ export const updateSupporterPlusAmount = async (
 
 	validateNewAmount(newPaymentAmount, currency, billingPeriod);
 
-	const productPrice = getIfDefined(
-		supporterPlusData.productRatePlan.pricing[currency],
-		`SupporterPlus pricing was undefined for currency ${currency}`,
-	);
 	const newContributionAmount =
-		supporterPlusData.planHasSeparateContributionCharge
-			? newPaymentAmount - productPrice
-			: newPaymentAmount;
+		(newPaymentAmount * 100 - supporterPlusData.basePriceMinorUnits) / 100;
 
 	const { chargeToUpdate } = supporterPlusData;
 

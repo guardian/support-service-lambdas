@@ -161,12 +161,19 @@ function getCloudwatchLogsLink(
 	StateChangeTime: Date,
 ) {
 	const assumedTimeForCompositeAlarms = 300;
+	// API gateway metrics within a one minute period sometimes seem to be assigned to the next minute datapoint
+	const extraTimeForPropagation = 60;
 	const alarmCoveredTimeSeconds = Trigger
 		? Trigger.EvaluationPeriods * Trigger.Period
 		: assumedTimeForCompositeAlarms;
-	const alarmEndTimeMillis = StateChangeTime.getTime();
+	// alarms only evaluate once a minute so the actual error might have occurred up to a minute earlier
+	const alarmEndTimeMillis = (function () {
+		const stateChangeForMinute = new Date(StateChangeTime.getTime());
+		return stateChangeForMinute.setSeconds(0, 0);
+	})();
 	const alarmStartTimeMillis =
-		alarmEndTimeMillis - 1000 * alarmCoveredTimeSeconds;
+		alarmEndTimeMillis -
+		1000 * (alarmCoveredTimeSeconds + extraTimeForPropagation);
 
 	const cloudwatchLogsBaseUrl =
 		'https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/';
