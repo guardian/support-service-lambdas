@@ -7,17 +7,23 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 	try {
 		for (const record of event.Records) {
 			const body = JSON.parse(record.body) as {
+				time: string;
 				detail: Stripe.CheckoutSessionCompletedEvent;
 			};
 
 			console.log('Logging Stripe event...');
 			console.log(JSON.stringify(body));
 
+			const created = body.time;
 			const session = body.detail.data.object;
 			const email = session.customer_details?.email;
 			const firstName = session.customer_details?.name;
 			const currency = session.currency?.toUpperCase();
 			const amount = session.amount_total;
+			const paymentId =
+				typeof session.payment_intent === 'string'
+					? session.payment_intent
+					: session.payment_intent?.id!;
 
 			if (!email) {
 				throw new Error('Customer email not present in event');
@@ -37,6 +43,11 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			if (!process.env.BRAZE_EMAILS_QUEUE_URL) {
 				throw new Error('Braze queue URL not found in environment variables');
 			}
+			if (!process.env.CONTRIBUTIONS_STORE_QUEUE_URL) {
+				throw new Error(
+					'Contributions store URL not found in environment variables',
+				);
+			}
 
 			const { userId: identityId } = await getOrCreateGuestUser({
 				email,
@@ -49,6 +60,16 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				currency,
 				firstName,
 				identityId,
+				amount,
+			});
+
+			await saveRecordInContributionsStore({
+				queueUrl: process.env.CONTRIBUTIONS_STORE_QUEUE_URL,
+				paymentId,
+				identityId,
+				email,
+				created,
+				currency,
 				amount,
 			});
 		}
@@ -139,6 +160,42 @@ const sendThankYouEmail = async ({
 	});
 };
 
+const saveRecordInContributionsStore = async ({
+	queueUrl,
+	paymentId,
+	identityId,
+	email,
+	created,
+	currency,
+	amount,
+}: {
+	queueUrl: string;
+	paymentId: string;
+	identityId: string;
+	email: string;
+	created: string;
+	currency: string;
+	amount: number;
+}) => {
+	await sendMessageToSqsQueue({
+		queueUrl,
+		messageBody: JSON.stringify({
+			paymentProvider: 'Stripe',
+			paymentStatus: 'Paid',
+			paymentId,
+			identityId,
+			email,
+			created,
+			currency,
+			amount: (amount / 100).toFixed(2),
+			countryCode: '',
+			countrySubdivisionCode: '',
+			contributionId: crypto.randomUUID(),
+			postalCode: '',
+		}),
+	});
+};
+
 // const workInProgress = () => {
 // 	const acquisitionPayload = {
 // 		// eventTimeStamp: DateTime,
@@ -167,7 +224,7 @@ const sendThankYouEmail = async ({
 
 // 	const supporterProductDataPayload = {
 // 		identityId,
-// 		subscriptionName: `Stripe - ${typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent?.id}`,
+// 		subscriptionName: `Stripe - ${paymentId}`,
 // 		productRatePlanId: 'single_contribution',
 // 		productRatePlanName: 'Single Contribution',
 // 	};
