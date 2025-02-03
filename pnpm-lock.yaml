@@ -144,6 +144,8 @@ importers:
         specifier: ^8.10.147
         version: 8.10.147
 
+  handlers/metric-push-api: {}
+
   handlers/press-reader-entitlements:
     dependencies:
       '@aws-sdk/client-dynamodb':
@@ -277,8 +279,8 @@ importers:
   modules/aws:
     dependencies:
       '@aws-sdk/credential-provider-node':
-        specifier: 3.734.0
-        version: 3.734.0
+        specifier: 3.738.0
+        version: 3.738.0
 
   modules/email:
     dependencies:
@@ -544,6 +546,10 @@ packages:
 
   '@aws-sdk/credential-provider-node@3.734.0':
     resolution: {integrity: sha512-9NOSNbkPVb91JwaXOhyfahkzAwWdMsbWHL6fh5/PHlXYpsDjfIfT23I++toepNF2nODAJNLnOEHGYIxgNgf6jQ==}
+    engines: {node: '>=18.0.0'}
+
+  '@aws-sdk/credential-provider-node@3.738.0':
+    resolution: {integrity: sha512-3MuREsazwBxghKb2sQQHvie+uuK4dX4/ckFYiSoffzJQd0YHxaGxf8cr4NOSCQCUesWu8D3Y0SzlnHGboVSkpA==}
     engines: {node: '>=18.0.0'}
 
   '@aws-sdk/credential-provider-process@3.693.0':
@@ -5490,6 +5496,23 @@ snapshots:
       '@smithy/shared-ini-file-loader': 4.0.1
       '@smithy/types': 4.1.0
       tslib: 2.6.2
+    transitivePeerDependencies:
+      - aws-crt
+
+  '@aws-sdk/credential-provider-node@3.738.0':
+    dependencies:
+      '@aws-sdk/credential-provider-env': 3.734.0
+      '@aws-sdk/credential-provider-http': 3.734.0
+      '@aws-sdk/credential-provider-ini': 3.734.0
+      '@aws-sdk/credential-provider-process': 3.734.0
+      '@aws-sdk/credential-provider-sso': 3.734.0
+      '@aws-sdk/credential-provider-web-identity': 3.734.0
+      '@aws-sdk/types': 3.734.0
+      '@smithy/credential-provider-imds': 4.0.1
+      '@smithy/property-provider': 4.0.1
+      '@smithy/shared-ini-file-loader': 4.0.1
+      '@smithy/types': 4.1.0
+      tslib: 2.8.1
     transitivePeerDependencies:
       - aws-crt
 
