@@ -17,6 +17,7 @@ export const handler = async (event: { discountExpiresOnDate?: string }) => {
 	const result = await runQuery(authClient, getQuery(discountExpiresOnDate));
 
 	return {
+		discountExpiresOnDate,
 		expiringDiscountsToProcess: result,
 	};
 };
@@ -53,7 +54,7 @@ const getQuery = (discountExpiresOnDate: string): string =>
 			sub.is_latest_version = TRUE AND 
 			sub.status = 'Active' AND 
 			DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = DATE_ADD(DATE '${discountExpiresOnDate}', INTERVAL 32 DAY) AND
-			sub.name = 'A-S02284587'	
+			sub.name = 'A-S02287430'	
 	)
 	SELECT 
 		STRING_AGG(DISTINCT firstName) as firstName,
