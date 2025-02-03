@@ -14,7 +14,9 @@ export const handler = async (event: { discountExpiresOnDate?: string }) => {
 		? event.discountExpiresOnDate.substring(0, 10)
 		: addDays(new Date(),32);
 
-	const result = await runQuery(authClient, getQuery(discountExpiresOnDate));
+	const query = getQuery(discountExpiresOnDate);
+	console.log('query', query);
+	const result = await runQuery(authClient, query);
 
 	return {
 		discountExpiresOnDate,
