@@ -70,7 +70,7 @@ export const runQuery = async (
 	const resultData = BigQueryResultDataSchema.parse(result[0]);
 	console.log('resultData', resultData);
 
-	const devReturnValue = [
+	return [
 		{
 			firstName: 'David',
 			nextPaymentDate: '2025-02-28',
@@ -83,5 +83,4 @@ export const runQuery = async (
 			workEmail: 'david.pepper@guardian.co.uk',
 		},
 	];
-	return devReturnValue;
 };
