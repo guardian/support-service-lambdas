@@ -74,7 +74,10 @@ export class StripeCheckoutSpike extends GuStack {
 				APP: app,
 				STACK: this.stack,
 				STAGE: this.stage,
+				SUPPORTER_PRODUCT_DATA_TABLE_NAME: `SupporterProductData-${this.stage.toUpperCase()}`,
 				BRAZE_EMAILS_QUEUE_URL: `https://sqs.${this.region}.amazonaws.com/${this.account}/braze-emails-${this.stage}`,
+				CONTRIBUTIONS_STORE_QUEUE_URL: `https://sqs.${this.region}.amazonaws.com/${this.account}/contributions-store-queue-${this.stage}`,
+				SOFT_OPT_IN_CONSENT_QUEUE_URL: `https://sqs.${this.region}.amazonaws.com/${this.account}/soft-opt-in-consent-setter-queue-${this.stage}`,
 				IDENTITY_API_URL:
 					this.stage === 'PROD'
 						? 'https://idapi.theguardian.com'

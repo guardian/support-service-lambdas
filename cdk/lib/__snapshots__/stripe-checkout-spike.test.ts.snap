@@ -79,9 +79,42 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 1`] = `
                 ],
               ],
             },
+            "CONTRIBUTIONS_STORE_QUEUE_URL": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://sqs.",
+                  {
+                    "Ref": "AWS::Region",
+                  },
+                  ".amazonaws.com/",
+                  {
+                    "Ref": "AWS::AccountId",
+                  },
+                  "/contributions-store-queue-CODE",
+                ],
+              ],
+            },
             "IDENTITY_API_URL": "https://idapi.code.dev-theguardian.com",
+            "SOFT_OPT_IN_CONSENT_QUEUE_URL": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://sqs.",
+                  {
+                    "Ref": "AWS::Region",
+                  },
+                  ".amazonaws.com/",
+                  {
+                    "Ref": "AWS::AccountId",
+                  },
+                  "/soft-opt-in-consent-setter-queue-CODE",
+                ],
+              ],
+            },
             "STACK": "support",
             "STAGE": "CODE",
+            "SUPPORTER_PRODUCT_DATA_TABLE_NAME": "SupporterProductData-CODE",
           },
         },
         "FunctionName": "checkout-session-completed-event-handler-CODE",
@@ -614,9 +647,42 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 2`] = `
                 ],
               ],
             },
+            "CONTRIBUTIONS_STORE_QUEUE_URL": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://sqs.",
+                  {
+                    "Ref": "AWS::Region",
+                  },
+                  ".amazonaws.com/",
+                  {
+                    "Ref": "AWS::AccountId",
+                  },
+                  "/contributions-store-queue-PROD",
+                ],
+              ],
+            },
             "IDENTITY_API_URL": "https://idapi.theguardian.com",
+            "SOFT_OPT_IN_CONSENT_QUEUE_URL": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://sqs.",
+                  {
+                    "Ref": "AWS::Region",
+                  },
+                  ".amazonaws.com/",
+                  {
+                    "Ref": "AWS::AccountId",
+                  },
+                  "/soft-opt-in-consent-setter-queue-PROD",
+                ],
+              ],
+            },
             "STACK": "support",
             "STAGE": "PROD",
+            "SUPPORTER_PRODUCT_DATA_TABLE_NAME": "SupporterProductData-PROD",
           },
         },
         "FunctionName": "checkout-session-completed-event-handler-PROD",
