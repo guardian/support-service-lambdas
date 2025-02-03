@@ -22,6 +22,7 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
+      - run: npm install --global corepack@0.31.0
       - run: corepack enable
         shell: bash
       - uses: actions/setup-node@v4
@@ -58,6 +59,7 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
+      - run: npm install --global corepack@0.31.0
       - run: corepack enable
         shell: bash
       - uses: actions/setup-node@v4
