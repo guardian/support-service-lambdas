@@ -29,14 +29,14 @@ const addDays = (date: Date, days: number): string => {
 	return date.toISOString().substring(0, 10);
 };
 
-const daysUntilDiscountExpiryDate = (): number =>{
+const daysUntilDiscountExpiryDate = (): number => {
 	return parseInt(
 		getIfDefined<string>(
 			process.env.DAYS_UNTIL_DISCOUNT_EXPIRY_DATE,
 			'DAYS_UNTIL_DISCOUNT_EXPIRY_DATE environment variable not set',
 		),
 	);
-}
+};
 
 const getQuery = (discountExpiresOnDate: string): string =>
 	`WITH expiringDiscounts AS (
