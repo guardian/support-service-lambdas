@@ -1,7 +1,9 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { uploadFileToS3 } from '../s3';
 
+//todo add a type check on the input event
 export const handler = async (event: {
+	discountExpiresOnDate: string;
 	expiringDiscountsToProcess: Array<{
 		firstName: string;
 		nextPaymentDate: string;
@@ -22,12 +24,10 @@ export const handler = async (event: {
 		'S3_BUCKET environment variable not set',
 	);
 
-	const runForDate = '2024-10-13';
 	const executionDateTime = new Date().toISOString();
 
-	const filePath = `${runForDate}/${executionDateTime}`;
+	const filePath = `${event.discountExpiresOnDate}/${executionDateTime}`;
 
-	//TODO add a precheck to find out if the file exists already and either append or create a separate file
 	await uploadFileToS3({
 		bucketName,
 		filePath,
