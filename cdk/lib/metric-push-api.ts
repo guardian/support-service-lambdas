@@ -3,12 +3,14 @@ import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { type App, Duration } from 'aws-cdk-lib';
+import type { CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
 import {
 	ComparisonOperator,
 	MathExpression,
 	Metric,
 	TreatMissingData,
 } from 'aws-cdk-lib/aws-cloudwatch';
+import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { CfnInclude } from 'aws-cdk-lib/cloudformation-include';
 
 export class MetricPushApi extends GuStack {
@@ -21,8 +23,21 @@ export class MetricPushApi extends GuStack {
 			__dirname,
 			'../../handlers/metric-push-api/cfn.yaml',
 		);
-		new CfnInclude(this, 'YamlTemplate', {
+		const cloudformation = new CfnInclude(this, 'YamlTemplate', {
 			templateFile: yamlTemplateFilePath,
+		});
+
+		const domainName = cloudformation.getResource(
+			'MetricPushDomainName',
+		) as CfnDomainName;
+
+		new CfnRecordSet(this, 'DNSRecord', {
+			name: `metric-push-api-${this.stage.toLowerCase()}.support.guardianapis.com`,
+			type: 'CNAME',
+			comment: `CNAME for metric-push-api API ${this.stage}`,
+			hostedZoneName: 'support.guardianapis.com.',
+			ttl: '120',
+			resourceRecords: [domainName.attrRegionalDomainName],
 		});
 
 		new GuAlarm(this, '5xxApiAlarm', {
