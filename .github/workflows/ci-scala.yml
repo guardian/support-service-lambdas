@@ -50,7 +50,7 @@ jobs:
 
       - name: Run tests and build subproject JAR
         run: sbt "project ${{ matrix.subproject }}" test assembly
-      - run: npm install --global corepack@latest
+      - run: npm install --global corepack@0.31.0
       - run: corepack enable
         shell: bash
       - uses: actions/setup-node@v4
