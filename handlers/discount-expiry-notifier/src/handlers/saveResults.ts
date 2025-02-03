@@ -24,9 +24,14 @@ export const handler = async (event: {
 		'S3_BUCKET environment variable not set',
 	);
 
+	const discountExpiresOnDate = getIfDefined<string>(
+		event.discountExpiresOnDate,
+		'event.discountExpiresOnDate variable not set',
+	);
+
 	const executionDateTime = new Date().toISOString();
 
-	const filePath = `${event.discountExpiresOnDate}/${executionDateTime}`;
+	const filePath = `${discountExpiresOnDate}/${executionDateTime}`;
 
 	await uploadFileToS3({
 		bucketName,
