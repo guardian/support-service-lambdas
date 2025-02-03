@@ -17,15 +17,19 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			const email = session.customer_details?.email;
 			const firstName = session.customer_details?.name;
 			const currency = session.currency?.toUpperCase();
+			const amount = session.amount_total;
 
 			if (!email) {
 				throw new Error('Customer email not present in event');
 			}
 			if (!firstName) {
-				throw new Error('Firstname not present in event');
+				throw new Error('First name not present in event');
 			}
 			if (!currency) {
 				throw new Error('Currency not present in event');
+			}
+			if (!amount) {
+				throw new Error('Amount not present in event');
 			}
 			if (!process.env.IDENTITY_API_URL) {
 				throw new Error('Identity API URL not found in environment variables');
@@ -34,87 +38,19 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				throw new Error('Braze queue URL not found in environment variables');
 			}
 
-			const { user: existingUser } = await getUser({ email });
-
-			let identityId;
-
-			if (existingUser) {
-				identityId = existingUser.userId;
-			} else {
-				const { user: guestUser, errors } = await createGuestUser({
-					email,
-					firstName,
-				});
-				if (guestUser) {
-					identityId = guestUser.userId;
-				} else {
-					throw new Error(JSON.stringify(errors));
-				}
-			}
-
-			await sendMessageToSqsQueue({
-				queueUrl: process.env.BRAZE_EMAILS_QUEUE_URL,
-				messageBody: JSON.stringify({
-					To: {
-						Address: email,
-						SubscriberKey: email,
-						ContactAttributes: {
-							SubscriberAttributes: {
-								EmailAddress: email,
-								edition: getEdition(currency),
-								'payment method': 'credit / debit card',
-								currency,
-								amount: (session.amount_total! / 100).toFixed(2),
-								first_name: firstName,
-								date_of_payment: formatToCustomDate(Date.now()),
-							},
-						},
-					},
-					DataExtensionName: 'contribution-thank-you',
-					IdentityUserId: identityId,
-				}),
+			const { userId: identityId } = await getOrCreateGuestUser({
+				email,
+				firstName,
 			});
 
-			const eventPayload = {
-				// eventTimeStamp: DateTime,
-				// product: AcquisitionProduct,
-				// amount: Option[BigDecimal],
-				// country: Country,
-				currency,
-				// source: Option[String],
-				// referrerUrl: Option[String],
-				// abTests: List[AbTest],
-				// paymentFrequency: PaymentFrequency,
-				// paymentProvider: Option[PaymentProvider],
-				identityId,
-				// labels: List[String],
-				// promoCode: Option[String],
-				// reusedExistingPaymentMethod: Boolean,
-				// readerType: ReaderType,
-				// acquisitionType: AcquisitionType,
-				// contributionId: Option[String],
-				// paymentId: Option[String],
-				// queryParameters: List[QueryParameter],
-				// platform: Option[String],
+			await sendThankYouEmail({
 				email,
-			};
-			console.log(eventPayload);
-
-			const supporterProductDataPayload = {
+				queueUrl: process.env.BRAZE_EMAILS_QUEUE_URL,
+				currency,
+				firstName,
 				identityId,
-				subscriptionName: `Stripe - ${typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent?.id}`,
-				productRatePlanId: 'single_contribution',
-				productRatePlanName: 'Single Contribution',
-			};
-			console.log(supporterProductDataPayload);
-
-			// Supporter data
-			// case class SupporterRatePlanItem(
-			// 	gifteeIdentityId: Option[String], // Unique identifier for user if this is a DS gift subscription
-			// 	termEndDate: LocalDate, // Date that this subscription term ends
-			// 	contractEffectiveDate: LocalDate, // Date that this subscription started
-			// 	contributionAmount: Option[ContributionAmount],
-			// )
+				amount,
+			});
 		}
 	} catch (error) {
 		console.error(error);
@@ -139,3 +75,109 @@ const formatToCustomDate = (instant: number): string => {
 		year: 'numeric',
 	}).format(new Date(instant));
 };
+
+const getOrCreateGuestUser = async ({
+	email,
+	firstName,
+}: {
+	email: string;
+	firstName: string;
+}) => {
+	const { user: existingUser } = await getUser({ email });
+
+	if (existingUser) {
+		return existingUser;
+	} else {
+		const { user: guestUser, errors } = await createGuestUser({
+			email,
+			firstName,
+		});
+		if (guestUser) {
+			return guestUser;
+		} else {
+			throw new Error(JSON.stringify(errors));
+		}
+	}
+};
+
+const sendThankYouEmail = async ({
+	email,
+	queueUrl,
+	currency,
+	firstName,
+	identityId,
+	amount,
+}: {
+	email: string;
+	queueUrl: string;
+	currency: string;
+	firstName: string;
+	identityId: string;
+	amount: number;
+}) => {
+	await sendMessageToSqsQueue({
+		queueUrl,
+		messageBody: JSON.stringify({
+			To: {
+				Address: email,
+				SubscriberKey: email,
+				ContactAttributes: {
+					SubscriberAttributes: {
+						EmailAddress: email,
+						edition: getEdition(currency),
+						'payment method': 'credit / debit card',
+						currency,
+						amount: (amount / 100).toFixed(2),
+						first_name: firstName,
+						date_of_payment: formatToCustomDate(Date.now()),
+					},
+				},
+			},
+			DataExtensionName: 'contribution-thank-you',
+			IdentityUserId: identityId,
+		}),
+	});
+};
+
+// const workInProgress = () => {
+// 	const acquisitionPayload = {
+// 		// eventTimeStamp: DateTime,
+// 		// product: AcquisitionProduct,
+// 		// amount: Option[BigDecimal],
+// 		// country: Country,
+// 		currency,
+// 		// source: Option[String],
+// 		// referrerUrl: Option[String],
+// 		// abTests: List[AbTest],
+// 		// paymentFrequency: PaymentFrequency,
+// 		// paymentProvider: Option[PaymentProvider],
+// 		identityId,
+// 		// labels: List[String],
+// 		// promoCode: Option[String],
+// 		// reusedExistingPaymentMethod: Boolean,
+// 		// readerType: ReaderType,
+// 		// acquisitionType: AcquisitionType,
+// 		// contributionId: Option[String],
+// 		// paymentId: Option[String],
+// 		// queryParameters: List[QueryParameter],
+// 		// platform: Option[String],
+// 		email,
+// 	};
+// 	console.log(acquisitionPayload);
+
+// 	const supporterProductDataPayload = {
+// 		identityId,
+// 		subscriptionName: `Stripe - ${typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent?.id}`,
+// 		productRatePlanId: 'single_contribution',
+// 		productRatePlanName: 'Single Contribution',
+// 	};
+// 	console.log(supporterProductDataPayload);
+
+// 	// Supporter data
+// 	// case class SupporterRatePlanItem(
+// 	// 	gifteeIdentityId: Option[String], // Unique identifier for user if this is a DS gift subscription
+// 	// 	termEndDate: LocalDate, // Date that this subscription term ends
+// 	// 	contractEffectiveDate: LocalDate, // Date that this subscription started
+// 	// 	contributionAmount: Option[ContributionAmount],
+// 	// )
+// };
