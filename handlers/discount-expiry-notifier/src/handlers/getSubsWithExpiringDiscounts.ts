@@ -2,26 +2,26 @@ import { stageFromEnvironment } from '@modules/stage';
 import { buildAuthClient, runQuery } from '../bigquery';
 import { getSSMParam } from '../ssm';
 
-//to manually run the state machine for a specified date, enter execution date {"executionDate":"2025-11-23"} in aws console
-export const handler = async (event: { executionDate?: string }) => {
+//to manually run the state machine for a specified discount expiry date, enter {"discountExpiresOnDate":"2025-11-23"} in aws console
+export const handler = async (event: { discountExpiresOnDate?: string }) => {
 	const gcpConfig = await getSSMParam(
 		'gcp-credentials-config',
 		stageFromEnvironment(),
 	);
 
 	const authClient = await buildAuthClient(gcpConfig);
-	const executionDate = event.executionDate
-		? event.executionDate.substring(0, 10)
+	const discountExpiresOnDate = event.discountExpiresOnDate
+		? event.discountExpiresOnDate.substring(0, 10)
 		: new Date().toISOString().substring(0, 10);
 
-	const result = await runQuery(authClient, getQuery(executionDate));
+	const result = await runQuery(authClient, getQuery(discountExpiresOnDate));
 
 	return {
 		expiringDiscountsToProcess: result,
 	};
 };
 
-const getQuery = (executionDate: string): string =>
+const getQuery = (discountExpiresOnDate: string): string =>
 	`WITH expiringDiscounts AS (
 		SELECT
 			account.currency as paymentCurrency,
@@ -52,7 +52,7 @@ const getQuery = (executionDate: string): string =>
 			charge.up_to_periods > 1 AND 
 			sub.is_latest_version = TRUE AND 
 			sub.status = 'Active' AND 
-			DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = DATE_ADD(DATE '${executionDate}', INTERVAL 32 DAY) AND
+			DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = DATE_ADD(DATE '${discountExpiresOnDate}', INTERVAL 32 DAY) AND
 			sub.name = 'A-S02284587'	
 	)
 	SELECT 
