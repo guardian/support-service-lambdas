@@ -23,7 +23,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			const paymentId =
 				typeof session.payment_intent === 'string'
 					? session.payment_intent
-					: session.payment_intent?.id!;
+					: (session.payment_intent?.id ?? '');
 
 			if (!email) {
 				throw new Error('Customer email not present in event');
