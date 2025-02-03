@@ -1,3 +1,4 @@
+import { getIfDefined } from '@modules/nullAndUndefined';
 import { stageFromEnvironment } from '@modules/stage';
 import { buildAuthClient, runQuery } from '../bigquery';
 import { getSSMParam } from '../ssm';
@@ -12,10 +13,9 @@ export const handler = async (event: { discountExpiresOnDate?: string }) => {
 	const authClient = await buildAuthClient(gcpConfig);
 	const discountExpiresOnDate = event.discountExpiresOnDate
 		? event.discountExpiresOnDate.substring(0, 10)
-		: addDays(new Date(), 32);
+		: addDays(new Date(), daysUntilDiscountExpiryDate());
 
 	const query = getQuery(discountExpiresOnDate);
-	console.log('query', query);
 	const result = await runQuery(authClient, query);
 
 	return {
@@ -29,7 +29,15 @@ const addDays = (date: Date, days: number): string => {
 	return date.toISOString().substring(0, 10);
 };
 
-//todo take logic out of query for determining the discount expiry date
+const daysUntilDiscountExpiryDate = (): number =>{
+	return parseInt(
+		getIfDefined<string>(
+			process.env.DAYS_UNTIL_DISCOUNT_EXPIRY_DATE,
+			'DAYS_UNTIL_DISCOUNT_EXPIRY_DATE environment variable not set',
+		),
+	);
+}
+
 const getQuery = (discountExpiresOnDate: string): string =>
 	`WITH expiringDiscounts AS (
 		SELECT
