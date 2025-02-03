@@ -46,17 +46,19 @@ export const BigQueryResultDataSchema = z.array(
 export const runQuery = async (
 	authClient: BaseExternalAccountClient,
 	query: string,
-): Promise<Array<{
-	firstName: string;
-	nextPaymentDate: string;
-	paymentAmount: number;
-	paymentCurrency: string;
-	paymentFrequency: string;
-	productName: string;
-	sfContactId: string;
-	subName: string;
-	workEmail: string;
-}>> => {
+): Promise<
+	Array<{
+		firstName: string;
+		nextPaymentDate: string;
+		paymentAmount: number;
+		paymentCurrency: string;
+		paymentFrequency: string;
+		productName: string;
+		sfContactId: string;
+		subName: string;
+		workEmail: string;
+	}>
+> => {
 	const bigquery = new BigQuery({
 		projectId: `datatech-platform-code`,
 		authClient,
