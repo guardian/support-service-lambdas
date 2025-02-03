@@ -14,6 +14,7 @@ import {
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
+import { allowedOriginsForStage } from '../../handlers/user-benefits/src/cors';
 import { nodeVersion } from './node-version';
 
 export interface UserBenefitsProps extends GuStackProps {
@@ -74,6 +75,17 @@ export class UserBenefits extends GuStack {
 				...commonLambdaProps,
 			},
 		);
+		const userBenefitsListLambda = new GuLambdaFunction(
+			this,
+			`user-benefits-list-lambda`,
+			{
+				description:
+					'An API Gateway triggered lambda to return the full list of benefits for each product in html or json format',
+				functionName: `user-benefits-list-${this.stage}`,
+				handler: 'index.benefitsListHandler',
+				...commonLambdaProps,
+			},
+		);
 		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {
 			app,
 			targets: [
@@ -89,7 +101,17 @@ export class UserBenefits extends GuStack {
 					lambda: userBenefitsIdentityIdLambda,
 					apiKeyRequired: true,
 				},
+				{
+					path: '/benefits/list',
+					httpMethod: 'GET',
+					lambda: userBenefitsListLambda,
+				},
 			],
+			defaultCorsPreflightOptions: {
+				allowHeaders: ['*'],
+				allowMethods: ['GET'],
+				allowOrigins: allowedOriginsForStage(this.stage),
+			},
 			monitoringConfiguration: {
 				http5xxAlarm: { tolerated5xxPercentage: 5 },
 				snsTopicName: `alarms-handler-topic-${this.stage}`,

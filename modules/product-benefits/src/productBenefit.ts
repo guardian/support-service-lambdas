@@ -12,7 +12,7 @@ export const supporterPlusBenefits: ProductBenefit[] = [
 	'liveApp',
 	'feastApp',
 	'hideSupportMessaging',
-	'rejectTracking',
+	'allowRejectAll',
 ];
 export const digitalSubscriptionBenefits = supporterPlusBenefits.concat([
 	'newspaperEdition',
@@ -23,8 +23,7 @@ export const tierThreeBenefits = digitalSubscriptionBenefits.concat([
 ]);
 
 export const productBenefitMapping: Record<ProductKey, ProductBenefit[]> = {
-	GuardianLight: ['rejectTracking'],
-	GuardianAdLite: ['rejectTracking'],
+	GuardianAdLite: ['allowRejectAll'],
 	SupporterPlus: supporterPlusBenefits,
 	DigitalSubscription: digitalSubscriptionBenefits,
 	TierThree: tierThreeBenefits,
@@ -32,7 +31,7 @@ export const productBenefitMapping: Record<ProductKey, ProductBenefit[]> = {
 	NationalDelivery: digitalSubscriptionBenefits,
 	NewspaperVoucher: digitalSubscriptionBenefits,
 	SubscriptionCard: digitalSubscriptionBenefits,
-	SupporterMembership: ['liveApp', 'hideSupportMessaging'],
+	SupporterMembership: ['liveApp', 'feastApp', 'hideSupportMessaging'],
 	PartnerMembership: ['liveApp', 'feastApp', 'hideSupportMessaging'],
 	PatronMembership: digitalSubscriptionBenefits,
 	GuardianPatron: digitalSubscriptionBenefits,

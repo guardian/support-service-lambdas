@@ -56,8 +56,8 @@ test('getUserBenefitsFromUserProducts', () => {
 	expect(getUserBenefitsFromUserProducts(['DigitalSubscription'])).toEqual(
 		digitalSubscriptionBenefits,
 	);
-	expect(getUserBenefitsFromUserProducts(['GuardianLight'])).toEqual([
-		'rejectTracking',
+	expect(getUserBenefitsFromUserProducts(['GuardianAdLite'])).toEqual([
+		'allowRejectAll',
 	]);
 	expect(getUserBenefitsFromUserProducts(['SupporterPlus'])).toEqual(
 		supporterPlusBenefits,
@@ -80,8 +80,8 @@ test('getUserBenefitsFromUserProducts returns distinct benefits', () => {
 test('getUserBenefitsFromUserProducts returns the union of two benefit sets', () => {
 	expect(
 		getUserBenefitsFromUserProducts([
-			'GuardianLight',
+			'GuardianAdLite',
 			'GuardianWeeklyDomestic',
 		]),
-	).toEqual(['rejectTracking', 'hideSupportMessaging']);
+	).toEqual(['allowRejectAll', 'hideSupportMessaging']);
 });

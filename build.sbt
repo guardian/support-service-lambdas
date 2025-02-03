@@ -494,16 +494,6 @@ lazy val `dev-env-cleaner` = lambdaProject(
   Seq(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-cloudwatch`),
 )
 
-lazy val `revenue-recogniser-job` = lambdaProject(
-  "revenue-recogniser-job",
-  "Finds unrecognised revenue in zuora and recognises it appropariately",
-  Seq(
-    "com.nrinaudo" %% "kantan.csv-generic" % "0.7.0",
-    "com.nrinaudo" %% "kantan.csv-java8" % "0.7.0",
-  ),
-  Seq(`zuora-reports`, handler, effectsDepIncludingTestFolder, testDep, `effects-s3`, `effects-cloudwatch`),
-)
-
 lazy val `sf-contact-merge` = lambdaProject(
   "sf-contact-merge",
   "Merges together the salesforce account referenced by a set of zuora accounts",
@@ -692,9 +682,6 @@ lazy val `product-move-api` = lambdaProject(
       s"aws lambda update-function-code --function-name product-switch-salesforce-tracking-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
     }
   }
-
-lazy val `metric-push-api` =
-  lambdaProject("metric-push-api", "HTTP API to push a metric to cloudwatch so we can alarm on errors")
 
 lazy val `sf-move-subscriptions-api` = lambdaProject(
   "sf-move-subscriptions-api",
