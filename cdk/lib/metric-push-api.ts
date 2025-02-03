@@ -31,13 +31,17 @@ export class MetricPushApi extends GuStack {
 			'MetricPushDomainName',
 		) as CfnDomainName;
 
-		new CfnRecordSet(this, 'DNSRecord', {
+		const dnsRecord = new CfnRecordSet(this, 'MetricPushDNSRecord', {
 			name: `metric-push-api-${this.stage.toLowerCase()}.support.guardianapis.com`,
 			type: 'CNAME',
 			comment: `CNAME for metric-push-api API ${this.stage}`,
 			hostedZoneName: 'support.guardianapis.com.',
 			ttl: '120',
 			resourceRecords: [domainName.attrRegionalDomainName],
+		});
+		this.overrideLogicalId(dnsRecord, {
+			logicalId: 'MetricPushDNSRecord',
+			reason: 'Retaining logical ID for DNS record, previously defined in yaml',
 		});
 
 		new GuAlarm(this, '5xxApiAlarm', {
