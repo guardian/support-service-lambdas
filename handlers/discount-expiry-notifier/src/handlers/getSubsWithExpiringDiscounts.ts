@@ -12,7 +12,7 @@ export const handler = async (event: { discountExpiresOnDate?: string }) => {
 	const authClient = await buildAuthClient(gcpConfig);
 	const discountExpiresOnDate = event.discountExpiresOnDate
 		? event.discountExpiresOnDate.substring(0, 10)
-		: new Date().toISOString().substring(0, 10);
+		: addDays(new Date(),32);
 
 	const result = await runQuery(authClient, getQuery(discountExpiresOnDate));
 
@@ -22,6 +22,12 @@ export const handler = async (event: { discountExpiresOnDate?: string }) => {
 	};
 };
 
+const addDays = (date: Date, days: number): string => {
+    date.setDate(date.getDate() + days);
+    return date.toISOString().substring(0, 10);
+};
+
+//todo take logic out of query for determining the discount expiry date
 const getQuery = (discountExpiresOnDate: string): string =>
 	`WITH expiringDiscounts AS (
 		SELECT
@@ -53,7 +59,7 @@ const getQuery = (discountExpiresOnDate: string): string =>
 			charge.up_to_periods > 1 AND 
 			sub.is_latest_version = TRUE AND 
 			sub.status = 'Active' AND 
-			DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = DATE_ADD(DATE '${discountExpiresOnDate}', INTERVAL 32 DAY) AND
+			DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = '${discountExpiresOnDate}' AND
 			sub.name = 'A-S02287430'	
 	)
 	SELECT 
