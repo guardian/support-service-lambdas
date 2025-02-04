@@ -117,7 +117,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
       "GuLambdaFunction",
       "GuLambdaFunction",
       "GuLambdaFunction",
-      "GuLambdaFunction",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -177,7 +176,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Email sends processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Save results","Parameters":{"item.$":"$$.Map.Item.Value"},"OutputPath":"$.discountProcessingAttempts","Iterator":{"StartAt":"Check sub is active","States":{"Check sub is active":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Email sends processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"EmailSendsProcessingMap","Parameters":{"item.$":"$$.Map.Item.Value"},"OutputPath":"$.discountProcessingAttempts","Iterator":{"StartAt":"Check sub is active","States":{"Check sub is active":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -188,18 +187,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.expiringDiscountsToProcess","MaxConcurrency":10},"Save results":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
-              {
-                "Fn::GetAtt": [
-                  "saveresultslambda2CAFC532",
-                  "Arn",
-                ],
-              },
-              "","Payload.$":"$"}}}}",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.expiringDiscountsToProcess","MaxConcurrency":10},"EmailSendsProcessingMap":{"Type":"Map","ResultPath":"$.processedItems","End":true,"Iterator":{"StartAt":"Check Subscription Status","States":{"Check Subscription Status":{"Type":"Choice","Choices":[{"Variable":"$.subStatus","StringEquals":"Active","Next":"Add to Active Subs"},{"Variable":"$.subStatus","StringEquals":"Cancelled","Next":"Add to Cancelled Subs"}],"Default":"No Match"},"No Match":{"Type":"Pass","ResultPath":"$","End":true},"Add to Active Subs":{"Type":"Pass","ResultPath":"$","Parameters":{"activeSubs.$":"States.ArrayAppend($.activeSubs, $$.Map.Item.Value)"},"End":true},"Add to Cancelled Subs":{"Type":"Pass","ResultPath":"$","Parameters":{"cancelledSubs.$":"States.ArrayAppend($.cancelledSubs, $$.Map.Item.Value)"},"End":true}}},"ItemsPath":"$.expiringDiscountsToProcess","MaxConcurrency":10}}}",
             ],
           ],
         },
@@ -296,32 +284,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                       {
                         "Fn::GetAtt": [
                           "getsubswithexpiringdiscountslambda78A8A9ED",
-                          "Arn",
-                        ],
-                      },
-                      ":*",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": "lambda:InvokeFunction",
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "saveresultslambda2CAFC532",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "saveresultslambda2CAFC532",
                           "Arn",
                         ],
                       },
@@ -809,242 +771,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "saveresultslambda2CAFC532": {
-      "DependsOn": [
-        "saveresultslambdaServiceRoleDefaultPolicyC690A6F5",
-        "saveresultslambdaServiceRoleDD59B626",
-      ],
-      "Properties": {
-        "Architectures": [
-          "arm64",
-        ],
-        "Code": {
-          "S3Bucket": {
-            "Ref": "DistributionBucketName",
-          },
-          "S3Key": "membership/CODE/discount-expiry-notifier/discount-expiry-notifier.zip",
-        },
-        "Environment": {
-          "Variables": {
-            "APP": "discount-expiry-notifier",
-            "S3_BUCKET": {
-              "Ref": "Bucket83908E77",
-            },
-            "STACK": "membership",
-            "STAGE": "CODE",
-            "Stage": "CODE",
-          },
-        },
-        "FunctionName": "discount-expiry-notifier-save-results-CODE",
-        "Handler": "saveResults.handler",
-        "MemorySize": 512,
-        "Role": {
-          "Fn::GetAtt": [
-            "saveresultslambdaServiceRoleDD59B626",
-            "Arn",
-          ],
-        },
-        "Runtime": "nodejs20.x",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "discount-expiry-notifier",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "Timeout": 30,
-      },
-      "Type": "AWS::Lambda::Function",
-    },
-    "saveresultslambdaServiceRoleDD59B626": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "discount-expiry-notifier",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "saveresultslambdaServiceRoleDefaultPolicyC690A6F5": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "s3:GetObject",
-                "s3:PutObject",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    {
-                      "Fn::GetAtt": [
-                        "Bucket83908E77",
-                        "Arn",
-                      ],
-                    },
-                    "/*",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "s3:GetObject*",
-                "s3:GetBucket*",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                      "/membership/CODE/discount-expiry-notifier/discount-expiry-notifier.zip",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": "ssm:GetParametersByPath",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/CODE/membership/discount-expiry-notifier",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "ssm:GetParameters",
-                "ssm:GetParameter",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/CODE/membership/discount-expiry-notifier/*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "saveresultslambdaServiceRoleDefaultPolicyC690A6F5",
-        "Roles": [
-          {
-            "Ref": "saveresultslambdaServiceRoleDD59B626",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
     "sqsinlinepolicyA7B14341": {
       "Properties": {
         "PolicyDocument": {
@@ -1437,7 +1163,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
       "GuLambdaFunction",
       "GuLambdaFunction",
       "GuLambdaFunction",
-      "GuLambdaFunction",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -1497,7 +1222,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Email sends processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Save results","Parameters":{"item.$":"$$.Map.Item.Value"},"OutputPath":"$.discountProcessingAttempts","Iterator":{"StartAt":"Check sub is active","States":{"Check sub is active":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Email sends processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"EmailSendsProcessingMap","Parameters":{"item.$":"$$.Map.Item.Value"},"OutputPath":"$.discountProcessingAttempts","Iterator":{"StartAt":"Check sub is active","States":{"Check sub is active":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1508,18 +1233,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.expiringDiscountsToProcess","MaxConcurrency":10},"Save results":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
-              {
-                "Fn::GetAtt": [
-                  "saveresultslambda2CAFC532",
-                  "Arn",
-                ],
-              },
-              "","Payload.$":"$"}}}}",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.expiringDiscountsToProcess","MaxConcurrency":10},"EmailSendsProcessingMap":{"Type":"Map","ResultPath":"$.processedItems","End":true,"Iterator":{"StartAt":"Check Subscription Status","States":{"Check Subscription Status":{"Type":"Choice","Choices":[{"Variable":"$.subStatus","StringEquals":"Active","Next":"Add to Active Subs"},{"Variable":"$.subStatus","StringEquals":"Cancelled","Next":"Add to Cancelled Subs"}],"Default":"No Match"},"No Match":{"Type":"Pass","ResultPath":"$","End":true},"Add to Active Subs":{"Type":"Pass","ResultPath":"$","Parameters":{"activeSubs.$":"States.ArrayAppend($.activeSubs, $$.Map.Item.Value)"},"End":true},"Add to Cancelled Subs":{"Type":"Pass","ResultPath":"$","Parameters":{"cancelledSubs.$":"States.ArrayAppend($.cancelledSubs, $$.Map.Item.Value)"},"End":true}}},"ItemsPath":"$.expiringDiscountsToProcess","MaxConcurrency":10}}}",
             ],
           ],
         },
@@ -1616,32 +1330,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                       {
                         "Fn::GetAtt": [
                           "getsubswithexpiringdiscountslambda78A8A9ED",
-                          "Arn",
-                        ],
-                      },
-                      ":*",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": "lambda:InvokeFunction",
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "saveresultslambda2CAFC532",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "saveresultslambda2CAFC532",
                           "Arn",
                         ],
                       },
@@ -2124,242 +1812,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
         "Roles": [
           {
             "Ref": "querylambdaroleC6C8A94B",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "saveresultslambda2CAFC532": {
-      "DependsOn": [
-        "saveresultslambdaServiceRoleDefaultPolicyC690A6F5",
-        "saveresultslambdaServiceRoleDD59B626",
-      ],
-      "Properties": {
-        "Architectures": [
-          "arm64",
-        ],
-        "Code": {
-          "S3Bucket": {
-            "Ref": "DistributionBucketName",
-          },
-          "S3Key": "membership/PROD/discount-expiry-notifier/discount-expiry-notifier.zip",
-        },
-        "Environment": {
-          "Variables": {
-            "APP": "discount-expiry-notifier",
-            "S3_BUCKET": {
-              "Ref": "Bucket83908E77",
-            },
-            "STACK": "membership",
-            "STAGE": "PROD",
-            "Stage": "PROD",
-          },
-        },
-        "FunctionName": "discount-expiry-notifier-save-results-PROD",
-        "Handler": "saveResults.handler",
-        "MemorySize": 512,
-        "Role": {
-          "Fn::GetAtt": [
-            "saveresultslambdaServiceRoleDD59B626",
-            "Arn",
-          ],
-        },
-        "Runtime": "nodejs20.x",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "discount-expiry-notifier",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "Timeout": 30,
-      },
-      "Type": "AWS::Lambda::Function",
-    },
-    "saveresultslambdaServiceRoleDD59B626": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "discount-expiry-notifier",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "saveresultslambdaServiceRoleDefaultPolicyC690A6F5": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "s3:GetObject",
-                "s3:PutObject",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    {
-                      "Fn::GetAtt": [
-                        "Bucket83908E77",
-                        "Arn",
-                      ],
-                    },
-                    "/*",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "s3:GetObject*",
-                "s3:GetBucket*",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                      "/membership/PROD/discount-expiry-notifier/discount-expiry-notifier.zip",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": "ssm:GetParametersByPath",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/PROD/membership/discount-expiry-notifier",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "ssm:GetParameters",
-                "ssm:GetParameter",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/PROD/membership/discount-expiry-notifier/*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "saveresultslambdaServiceRoleDefaultPolicyC690A6F5",
-        "Roles": [
-          {
-            "Ref": "saveresultslambdaServiceRoleDD59B626",
           },
         ],
       },
