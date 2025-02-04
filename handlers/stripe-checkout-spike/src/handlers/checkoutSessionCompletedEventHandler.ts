@@ -59,7 +59,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			}
 
 			console.info('Getting or creating guest identity profile...');
-			const { userId: identityId } = await getOrCreateGuestUser({
+			const identityId = await getOrCreateUserIdentity({
 				email,
 				firstName,
 			});
@@ -118,19 +118,19 @@ const formatToCustomDate = (instant: number): string => {
 	}).format(new Date(instant));
 };
 
-const getOrCreateGuestUser = async ({
+const getOrCreateUserIdentity = async ({
 	email,
 	firstName,
 }: {
 	email: string;
 	firstName: string;
-}): Promise<GuestRegistrationRequest> => {
+}): Promise<string> => {
 	const { user: existingUser } = await getUser({ email });
 	console.log(existingUser);
 
 	if (existingUser) {
 		console.info('User exists with this email...');
-		return existingUser;
+		return existingUser.id;
 	} else {
 		console.info('User does not exists with this email...');
 		const { user: guestUser, errors } = await createGuestUser({
@@ -138,7 +138,7 @@ const getOrCreateGuestUser = async ({
 			firstName,
 		});
 		if (guestUser) {
-			return guestUser;
+			return guestUser.userId;
 		} else {
 			throw new Error(JSON.stringify(errors));
 		}

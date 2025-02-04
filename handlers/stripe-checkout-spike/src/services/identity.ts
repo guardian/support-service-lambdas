@@ -1,14 +1,23 @@
 import { getSecretValue } from './secretsManager';
 
-export type GuestRegistrationRequest = {
+type User = {
+	id: string;
+};
+
+type GuestRegistrationRequest = {
 	token: string;
 	userId: string;
 	timeIssued: string;
 };
 
-type SuccessResponse = {
+type CreateUserSuccessResponse = {
 	status: 'ok';
 	guestRegistrationRequest: GuestRegistrationRequest;
+};
+
+type GetUserSuccessResponse = {
+	status: 'ok';
+	user: User;
 };
 
 type ErrorDetail = {
@@ -22,7 +31,8 @@ type ErrorResponse = {
 	errors: ErrorDetail[];
 };
 
-type FetchResponse = SuccessResponse | ErrorResponse;
+type CreateUserResponse = CreateUserSuccessResponse | ErrorResponse;
+type GetUserResponse = GetUserSuccessResponse | ErrorResponse;
 
 export const getBearerToken = async () => {
 	try {
@@ -51,10 +61,10 @@ export const getUser = async ({ email }: { email: string }) => {
 				},
 			},
 		);
-		const data = (await response.json()) as FetchResponse;
+		const data = (await response.json()) as GetUserResponse;
 		console.log(data);
 		if (data.status == 'ok') {
-			return { user: data.guestRegistrationRequest };
+			return { user: data.user };
 		} else {
 			return { errors: data.errors };
 		}
@@ -91,7 +101,7 @@ export const createGuestUser = async ({
 				}),
 			},
 		);
-		const data = (await response.json()) as FetchResponse;
+		const data = (await response.json()) as CreateUserResponse;
 		console.log(data);
 		if (data.status == 'ok') {
 			return { user: data.guestRegistrationRequest };
