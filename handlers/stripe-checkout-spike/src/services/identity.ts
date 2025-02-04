@@ -38,7 +38,7 @@ export const getBearerToken = async () => {
 
 export const getUser = async ({ email }: { email: string }) => {
 	try {
-		console.log('Fetching use from Identity API...');
+		console.log('Fetching user from Identity API...');
 		const response = await fetch(
 			`${process.env.IDENTITY_API_URL}/user?` +
 				new URLSearchParams({
@@ -51,8 +51,8 @@ export const getUser = async ({ email }: { email: string }) => {
 				},
 			},
 		);
-		console.log(response);
 		const data = (await response.json()) as FetchResponse;
+		console.log(data);
 		if (data.status == 'ok') {
 			return { user: data.guestRegistrationRequest };
 		} else {
@@ -91,8 +91,8 @@ export const createGuestUser = async ({
 				}),
 			},
 		);
-		console.log(response);
 		const data = (await response.json()) as FetchResponse;
+		console.log(data);
 		if (data.status == 'ok') {
 			return { user: data.guestRegistrationRequest };
 		} else {
