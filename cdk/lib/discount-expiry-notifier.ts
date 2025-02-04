@@ -117,28 +117,28 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
-		// const saveResultsLambda = new GuLambdaFunction(
-		// 	this,
-		// 	'save-results-lambda',
-		// 	{
-		// 		app: appName,
-		// 		functionName: `${appName}-save-results-${this.stage}`,
-		// 		runtime: nodeVersion,
-		// 		environment: {
-		// 			Stage: this.stage,
-		// 			S3_BUCKET: bucket.bucketName,
-		// 		},
-		// 		handler: 'saveResults.handler',
-		// 		fileName: `${appName}.zip`,
-		// 		architecture: Architecture.ARM_64,
-		// 		initialPolicy: [
-		// 			new PolicyStatement({
-		// 				actions: ['s3:GetObject', 's3:PutObject'],
-		// 				resources: [bucket.arnForObjects('*')],
-		// 			}),
-		// 		],
-		// 	},
-		// );
+		const saveResultsLambda = new GuLambdaFunction(
+			this,
+			'save-results-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-save-results-${this.stage}`,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+					S3_BUCKET: bucket.bucketName,
+				},
+				handler: 'saveResults.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['s3:GetObject', 's3:PutObject'],
+						resources: [bucket.arnForObjects('*')],
+					}),
+				],
+			},
+		);
 
 		const getSubsWithExpiringDiscountsLambdaTask = new LambdaInvoke(
 			this,
@@ -154,10 +154,10 @@ export class DiscountExpiryNotifier extends GuStack {
 			outputPath: '$.Payload',
 		});
 
-		// const saveResultsLambdaTask = new LambdaInvoke(this, 'Save results', {
-		// 	lambdaFunction: saveResultsLambda,
-		// 	outputPath: '$.Payload',
-		// });
+		const saveResultsLambdaTask = new LambdaInvoke(this, 'Save results', {
+			lambdaFunction: saveResultsLambda,
+			outputPath: '$.Payload',
+		});
 
 		const initiateEmailSendLambdaTask = new LambdaInvoke(
 			this,
@@ -221,7 +221,8 @@ export class DiscountExpiryNotifier extends GuStack {
 		const definitionBody = DefinitionBody.fromChainable(
 			getSubsWithExpiringDiscountsLambdaTask
 				.next(subStatusFetcherMap)
-				.next(expiringDiscountProcessorMap),
+				.next(expiringDiscountProcessorMap)
+				.next(saveResultsLambdaTask),
 		);
 
 		const sqsInlinePolicy: Policy = new Policy(this, 'sqs-inline-policy', {
