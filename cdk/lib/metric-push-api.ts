@@ -62,7 +62,7 @@ export class MetricPushApi extends GuStack {
 		});
 		new GuAlarm(this, 'HighClientSideErrorRateAlarm', {
 			app,
-			alarmName: `URGENT 9-5 - client-side fatal errors are being reported to sentry for support-frontend`,
+			alarmName: `URGENT 9-5 - ${this.stage} client-side fatal errors are being reported to sentry for support-frontend`,
 			alarmDescription: `Impact - some or all browsers are failing to render support client side pages. Log in to Sentry to see these errors: https://the-guardian.sentry.io/discover/results/?project=1213654&query="Fatal error rendering page"&queryDataset=error-events&sort=-count&statsPeriod=24h Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit ${nameWithStage}`,
 			threshold: 2,
 			evaluationPeriods: 5,
