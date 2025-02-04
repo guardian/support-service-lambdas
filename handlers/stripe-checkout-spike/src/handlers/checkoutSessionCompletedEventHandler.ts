@@ -188,10 +188,10 @@ const saveRecordInContributionsStore = async ({
 			created,
 			currency,
 			amount: (amount / 100).toFixed(2),
-			countryCode: '',
-			countrySubdivisionCode: '',
+			countryCode: null, // This could come from the Stripe session if we collect address
+			countrySubdivisionCode: null, // This could come from the Stripe session if we collect address
 			contributionId: crypto.randomUUID(),
-			postalCode: '',
+			postalCode: null, // This could come from the Stripe session if we collect address
 		}),
 	});
 };
