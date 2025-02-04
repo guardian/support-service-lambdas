@@ -41,7 +41,7 @@ export const handler = async (event: {
 			emailSendAttempt: {
 				status: 'success',
 				payload,
-				response
+				response,
 			},
 		};
 	} catch (error) {
