@@ -11,8 +11,8 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				detail: Stripe.CheckoutSessionCompletedEvent;
 			};
 
-			console.log('Logging Stripe event...');
-			console.log(JSON.stringify(body));
+			console.info('Logging Stripe event...');
+			console.info(JSON.stringify(body));
 
 			const created = body.time;
 			const session = body.detail.data.object;
@@ -48,14 +48,19 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 					'Contributions store URL not found in environment variables',
 				);
 			}
+			if (!process.env.SOFT_OPT_IN_CONSENT_QUEUE_URL) {
+				throw new Error(
+					'Soft opt in consent queue URL not found in environment variables',
+				);
+			}
 
-			console.log('Getting or creating guest identity profile...');
+			console.info('Getting or creating guest identity profile...');
 			const { userId: identityId } = await getOrCreateGuestUser({
 				email,
 				firstName,
 			});
 
-			console.log('Sending thank you email...');
+			console.info('Sending thank you email...');
 			await sendThankYouEmail({
 				email,
 				queueUrl: process.env.BRAZE_EMAILS_QUEUE_URL,
@@ -65,7 +70,8 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				amount,
 			});
 
-			console.log('Saving record into contributions store...');
+			const contributionId = crypto.randomUUID();
+			console.info('Saving record in contributions store...');
 			await saveRecordInContributionsStore({
 				queueUrl: process.env.CONTRIBUTIONS_STORE_QUEUE_URL,
 				paymentId,
@@ -74,6 +80,14 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				created,
 				currency,
 				amount,
+				contributionId,
+			});
+
+			console.info('Saving soft opt in consent...');
+			await saveSoftOptInConsent({
+				queueUrl: process.env.SOFT_OPT_IN_CONSENT_QUEUE_URL,
+				identityId,
+				contributionId,
 			});
 		}
 	} catch (error) {
@@ -110,10 +124,10 @@ const getOrCreateGuestUser = async ({
 	const { user: existingUser } = await getUser({ email });
 
 	if (existingUser) {
-		console.log('User exists with this email...');
+		console.info('User exists with this email...');
 		return existingUser;
 	} else {
-		console.log('User does not exists with this email...');
+		console.info('User does not exists with this email...');
 		const { user: guestUser, errors } = await createGuestUser({
 			email,
 			firstName,
@@ -173,6 +187,7 @@ const saveRecordInContributionsStore = async ({
 	created,
 	currency,
 	amount,
+	contributionId,
 }: {
 	queueUrl: string;
 	paymentId: string;
@@ -181,6 +196,7 @@ const saveRecordInContributionsStore = async ({
 	created: string;
 	currency: string;
 	amount: number;
+	contributionId: string;
 }) => {
 	await sendMessageToSqsQueue({
 		queueUrl,
@@ -194,11 +210,31 @@ const saveRecordInContributionsStore = async ({
 				created,
 				currency,
 				amount: amount / 100,
-				countryCode: null, // This could come from the Stripe session if we collect address
-				countrySubdivisionCode: null, // This could come from the Stripe session if we collect address
-				contributionId: crypto.randomUUID(),
-				postalCode: null, // This could come from the Stripe session if we collect address
+				countryCode: null,
+				countrySubdivisionCode: null,
+				contributionId,
+				postalCode: null,
 			},
+		}),
+	});
+};
+
+const saveSoftOptInConsent = async ({
+	queueUrl,
+	identityId,
+	contributionId,
+}: {
+	queueUrl: string;
+	identityId: string;
+	contributionId: string;
+}) => {
+	await sendMessageToSqsQueue({
+		queueUrl,
+		messageBody: JSON.stringify({
+			subscriptionId: contributionId,
+			identityId,
+			eventType: 'Acquisition',
+			productName: 'Contribution',
 		}),
 	});
 };
@@ -227,7 +263,7 @@ const saveRecordInContributionsStore = async ({
 // 		// platform: Option[String],
 // 		email,
 // 	};
-// 	console.log(acquisitionPayload);
+// 	console.info(acquisitionPayload);
 
 // 	const supporterProductDataPayload = {
 // 		identityId,
@@ -235,7 +271,7 @@ const saveRecordInContributionsStore = async ({
 // 		productRatePlanId: 'single_contribution',
 // 		productRatePlanName: 'Single Contribution',
 // 	};
-// 	console.log(supporterProductDataPayload);
+// 	console.info(supporterProductDataPayload);
 
 // 	// Supporter data
 // 	// case class SupporterRatePlanItem(
