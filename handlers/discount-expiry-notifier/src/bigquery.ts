@@ -73,14 +73,25 @@ export const runQuery = async (
 	return [
 		{
 			firstName: 'David',
-			nextPaymentDate: '2025-02-28',
-			paymentAmount: 12,
+			nextPaymentDate: '2025-02-27',
+			paymentAmount: 1.23,
 			paymentCurrency: 'GBP',
 			paymentFrequency: 'Month',
 			productName: 'Supporter Plus',
 			sfContactId: '0039E00001HiIGlQAN',
-			subName: 'A-S00814342', // Active sub in dev sandbox
-			workEmail: 'david.pepper@guardian.co.uk',
+			subName: 'A-S00886188', // Active sub in dev sandbox
+			workEmail: 'david.pepper+david@guardian.co.uk',
+		},
+		{
+			firstName: 'Mary',
+			nextPaymentDate: '2025-02-29',
+			paymentAmount: 4.56,
+			paymentCurrency: 'USD',
+			paymentFrequency: 'Month',
+			productName: 'Supporter Plus',
+			sfContactId: '0039E00001HiIGlQAN',
+			subName: 'A-S00814343', // Active sub in dev sandbox
+			workEmail: 'david.pepper+mary@guardian.co.uk',
 		},
 	];
 };
