@@ -3,12 +3,8 @@ import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { type App, Duration } from 'aws-cdk-lib';
-import type {
-	CfnRestApi} from 'aws-cdk-lib/aws-apigateway';
-import {
-	CfnBasePathMapping,
-	CfnDomainName
-} from 'aws-cdk-lib/aws-apigateway';
+import type { CfnRestApi } from 'aws-cdk-lib/aws-apigateway';
+import { CfnBasePathMapping, CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
 import {
 	ComparisonOperator,
 	MathExpression,
