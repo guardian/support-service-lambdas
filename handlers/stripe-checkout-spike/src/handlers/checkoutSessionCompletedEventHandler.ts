@@ -110,8 +110,10 @@ const getOrCreateGuestUser = async ({
 	const { user: existingUser } = await getUser({ email });
 
 	if (existingUser) {
+		console.log('User exists with this email...');
 		return existingUser;
 	} else {
+		console.log('User does not exists with this email...');
 		const { user: guestUser, errors } = await createGuestUser({
 			email,
 			firstName,
