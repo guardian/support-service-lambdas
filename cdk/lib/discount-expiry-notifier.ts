@@ -172,6 +172,15 @@ export class DiscountExpiryNotifier extends GuStack {
 		// 	},
 		// );
 
+		// const emailSendsProcessingMap = new Map(this, 'Email sends processor map', {
+		// 	maxConcurrency: 10,
+		// 	itemsPath: JsonPath.stringAt('$.expiringDiscountsToProcess'),
+		// 	parameters: {
+		// 		item: JsonPath.stringAt('$$.Map.Item.Value'),
+		// 	},
+		// 	resultPath: '$.discountProcessingAttempts',
+		// });
+
 		const emailSendsProcessingMap = new Map(this, 'Email sends processor map', {
 			maxConcurrency: 10,
 			itemsPath: JsonPath.stringAt('$.expiringDiscountsToProcess'),
@@ -179,6 +188,7 @@ export class DiscountExpiryNotifier extends GuStack {
 				item: JsonPath.stringAt('$$.Map.Item.Value'),
 			},
 			resultPath: '$.discountProcessingAttempts',
+			outputPath: '$[?(@.discountProcessingAttempts)]',
 		});
 
 		// const isSubActiveChoice = new Choice(this, 'Is Subscription Active?');
