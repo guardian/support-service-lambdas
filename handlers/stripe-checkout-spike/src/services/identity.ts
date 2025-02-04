@@ -97,7 +97,7 @@ export const createGuestUser = async ({
 				},
 				body: JSON.stringify({
 					primaryEmailAddress: email,
-					publicFields: { firstName },
+					privateFields: { firstName },
 				}),
 			},
 		);
