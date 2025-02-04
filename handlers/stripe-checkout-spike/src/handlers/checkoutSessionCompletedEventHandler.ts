@@ -1,10 +1,6 @@
 import { type SQSEvent } from 'aws-lambda';
 import type Stripe from 'stripe';
-import {
-	createGuestUser,
-	getUser,
-	type GuestRegistrationRequest,
-} from '../services/identity';
+import { createGuestUser, getUser } from '../services/identity';
 import { sendMessageToSqsQueue } from '../services/sqs';
 
 export const handler = async (event: SQSEvent): Promise<void> => {
@@ -85,6 +81,9 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				currency,
 				amount,
 				contributionId,
+				countryCode: session.customer_details?.address?.country ?? null,
+				postalCode: session.customer_details?.address?.postal_code ?? null,
+				state: session.customer_details?.address?.state ?? null,
 			});
 
 			console.info('Saving soft opt in consent...');
@@ -193,6 +192,9 @@ const saveRecordInContributionsStore = async ({
 	currency,
 	amount,
 	contributionId,
+	countryCode,
+	postalCode,
+	state,
 }: {
 	queueUrl: string;
 	paymentId: string;
@@ -202,6 +204,9 @@ const saveRecordInContributionsStore = async ({
 	currency: string;
 	amount: number;
 	contributionId: string;
+	countryCode: string | null;
+	postalCode: string | null;
+	state: string | null;
 }): Promise<void> => {
 	await sendMessageToSqsQueue({
 		queueUrl,
@@ -215,10 +220,10 @@ const saveRecordInContributionsStore = async ({
 				created,
 				currency,
 				amount: amount / 100,
-				countryCode: null,
-				countrySubdivisionCode: null,
+				countryCode,
+				countrySubdivisionCode: state,
 				contributionId,
-				postalCode: null,
+				postalCode,
 			},
 		}),
 	});
