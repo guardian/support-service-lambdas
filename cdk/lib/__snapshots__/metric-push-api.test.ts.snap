@@ -81,24 +81,6 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
-    "DNSRecord": {
-      "Properties": {
-        "Comment": "CNAME for metric-push-api API CODE",
-        "HostedZoneName": "support.guardianapis.com.",
-        "Name": "metric-push-api-code.support.guardianapis.com",
-        "ResourceRecords": [
-          {
-            "Fn::GetAtt": [
-              "MetricPushDomainName",
-              "RegionalDomainName",
-            ],
-          },
-        ],
-        "TTL": "120",
-        "Type": "CNAME",
-      },
-      "Type": "AWS::Route53::RecordSet",
-    },
     "HighClientSideErrorRateAlarm0026FCB2": {
       "Properties": {
         "ActionsEnabled": false,
@@ -299,6 +281,24 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::BasePathMapping",
     },
+    "MetricPushDNSRecord": {
+      "Properties": {
+        "Comment": "CNAME for metric-push-api API CODE",
+        "HostedZoneName": "support.guardianapis.com.",
+        "Name": "metric-push-api-code.support.guardianapis.com",
+        "ResourceRecords": [
+          {
+            "Fn::GetAtt": [
+              "MetricPushDomainName",
+              "RegionalDomainName",
+            ],
+          },
+        ],
+        "TTL": "120",
+        "Type": "CNAME",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
     "MetricPushDomainName": {
       "Properties": {
         "DomainName": {
@@ -481,24 +481,6 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
         "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
-    },
-    "DNSRecord": {
-      "Properties": {
-        "Comment": "CNAME for metric-push-api API PROD",
-        "HostedZoneName": "support.guardianapis.com.",
-        "Name": "metric-push-api-prod.support.guardianapis.com",
-        "ResourceRecords": [
-          {
-            "Fn::GetAtt": [
-              "MetricPushDomainName",
-              "RegionalDomainName",
-            ],
-          },
-        ],
-        "TTL": "120",
-        "Type": "CNAME",
-      },
-      "Type": "AWS::Route53::RecordSet",
     },
     "HighClientSideErrorRateAlarm0026FCB2": {
       "Properties": {
@@ -699,6 +681,24 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
         },
       },
       "Type": "AWS::ApiGateway::BasePathMapping",
+    },
+    "MetricPushDNSRecord": {
+      "Properties": {
+        "Comment": "CNAME for metric-push-api API PROD",
+        "HostedZoneName": "support.guardianapis.com.",
+        "Name": "metric-push-api-prod.support.guardianapis.com",
+        "ResourceRecords": [
+          {
+            "Fn::GetAtt": [
+              "MetricPushDomainName",
+              "RegionalDomainName",
+            ],
+          },
+        ],
+        "TTL": "120",
+        "Type": "CNAME",
+      },
+      "Type": "AWS::Route53::RecordSet",
     },
     "MetricPushDomainName": {
       "Properties": {

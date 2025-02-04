@@ -39,10 +39,7 @@ export class MetricPushApi extends GuStack {
 			ttl: '120',
 			resourceRecords: [domainName.attrRegionalDomainName],
 		});
-		this.overrideLogicalId(dnsRecord, {
-			logicalId: 'MetricPushDNSRecord',
-			reason: 'Retaining logical ID for DNS record, previously defined in yaml',
-		});
+		dnsRecord.overrideLogicalId('MetricPushDNSRecord');
 
 		new GuAlarm(this, '5xxApiAlarm', {
 			app,
