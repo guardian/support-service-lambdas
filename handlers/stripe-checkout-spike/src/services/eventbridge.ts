@@ -30,7 +30,7 @@ export type AcquisitionEvent = {
 	zuoraSubscriptionNumber: null;
 	contributionId: string;
 	paymentId: string;
-	queryParameters: { name: string; value: string }[];
+	queryParameters: Array<{ name: string; value: string }>;
 	platform: string;
 	postalCode: string | null;
 	state: string | null;

@@ -1,8 +1,9 @@
 import { type SQSEvent } from 'aws-lambda';
 import type Stripe from 'stripe';
+import type { AcquisitionEvent } from '../services/eventbridge';
+import { putEvent } from '../services/eventbridge';
 import { createGuestUser, getUser } from '../services/identity';
 import { sendMessageToSqsQueue } from '../services/sqs';
-import { AcquisitionEvent, putEvent } from '../services/eventbridge';
 
 export const handler = async (event: SQSEvent): Promise<void> => {
 	try {
