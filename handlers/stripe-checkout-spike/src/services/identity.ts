@@ -64,6 +64,8 @@ export const getUser = async ({ email }: { email: string }) => {
 		const data = (await response.json()) as GetUserResponse;
 		console.log(data);
 		if (data.status == 'ok') {
+			console.log(data.status);
+			console.log('data.status is ok');
 			return { user: data.user };
 		} else {
 			return { errors: data.errors };

@@ -125,12 +125,12 @@ const getOrCreateUserIdentity = async ({
 	email: string;
 	firstName: string;
 }): Promise<string> => {
-	const { user: existingUser } = await getUser({ email });
-	console.log(existingUser);
+	const { user } = await getUser({ email });
+	console.log(user);
 
-	if (existingUser) {
+	if (user) {
 		console.info('User exists with this email...');
-		return existingUser.id;
+		return user.id;
 	} else {
 		console.info('User does not exists with this email...');
 		const { user: guestUser, errors } = await createGuestUser({
