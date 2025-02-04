@@ -181,20 +181,21 @@ export class DiscountExpiryNotifier extends GuStack {
 			resultPath: '$.discountProcessingAttempts',
 		});
 
-		const isSubActiveChoice = new Choice(this, 'Is Subscription Active?');
+		// const isSubActiveChoice = new Choice(this, 'Is Subscription Active?');
 
-		emailSendsProcessingMap.iterator(
-			subIsActiveLambdaTask.next(
-				isSubActiveChoice
-					.when(
-						Condition.stringEquals('$.status', 'Active'),
-						initiateEmailSendLambdaTask,
-					)
-					.otherwise(
-						new Pass(this, 'Skip Processing', { resultPath: JsonPath.DISCARD }),
-					),
-			),
-		);
+		// emailSendsProcessingMap.iterator(
+		// 	subIsActiveLambdaTask.next(
+		// 		isSubActiveChoice
+		// 			.when(
+		// 				Condition.stringEquals('$.status', 'Active'),
+		// 				initiateEmailSendLambdaTask,
+		// 			)
+		// 			.otherwise(
+		// 				new Pass(this, 'Skip Processing', { resultPath: JsonPath.DISCARD }),
+		// 			),
+		// 	),
+		// );
+		emailSendsProcessingMap.iterator(subIsActiveLambdaTask);
 
 		const definitionBody = DefinitionBody.fromChainable(
 			getSubsWithExpiringDiscountsLambdaTask
