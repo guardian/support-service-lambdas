@@ -70,7 +70,7 @@ const getQuery = (discountExpiresOnDate: string): string =>
 			sub.is_latest_version = TRUE AND 
 			sub.status = 'Active' AND 
 			DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = '${discountExpiresOnDate}' AND
-			sub.name = 'A-S02287430'	
+			sub.name = 'xxxxx'	
 	)
 	SELECT 
 		STRING_AGG(DISTINCT firstName) as firstName,
