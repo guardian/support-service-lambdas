@@ -62,6 +62,7 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 1`] = `
         },
         "Environment": {
           "Variables": {
+            "ACQUISITION_BUS_NAME": "acquisitions-bus-CODE",
             "APP": "stripe-checkout-spike",
             "BRAZE_EMAILS_QUEUE_URL": {
               "Fn::Join": [
@@ -630,6 +631,7 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 2`] = `
         },
         "Environment": {
           "Variables": {
+            "ACQUISITION_BUS_NAME": "acquisitions-bus-PROD",
             "APP": "stripe-checkout-spike",
             "BRAZE_EMAILS_QUEUE_URL": {
               "Fn::Join": [
