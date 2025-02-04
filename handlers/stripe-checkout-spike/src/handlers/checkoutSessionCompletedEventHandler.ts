@@ -2,6 +2,7 @@ import { type SQSEvent } from 'aws-lambda';
 import type Stripe from 'stripe';
 import { createGuestUser, getUser } from '../services/identity';
 import { sendMessageToSqsQueue } from '../services/sqs';
+import { AcquisitionEvent, putEvent } from '../services/eventbridge';
 
 export const handler = async (event: SQSEvent): Promise<void> => {
 	try {
@@ -14,12 +15,15 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			console.info('Logging Stripe event...');
 			console.info(JSON.stringify(body));
 
-			const created = body.time;
+			const timestamp = body.time;
 			const session = body.detail.data.object;
 			const email = session.customer_details?.email;
 			const firstName = session.customer_details?.name;
 			const currency = session.currency?.toUpperCase();
 			const amount = session.amount_total;
+			const country = session.customer_details?.address?.country ?? null;
+			const postalCode = session.customer_details?.address?.postal_code ?? null;
+			const state = session.customer_details?.address?.state ?? null;
 			const paymentId =
 				typeof session.payment_intent === 'string'
 					? session.payment_intent
@@ -82,13 +86,13 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				paymentId,
 				identityId,
 				email,
-				created,
+				created: timestamp,
 				currency,
 				amount,
 				contributionId,
-				countryCode: session.customer_details?.address?.country ?? null,
-				postalCode: session.customer_details?.address?.postal_code ?? null,
-				state: session.customer_details?.address?.state ?? null,
+				country,
+				postalCode,
+				state,
 			});
 
 			console.info('Saving soft opt in consent...');
@@ -99,7 +103,42 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			});
 
 			console.info('Sending acquisition event...');
-			await sendAcquisitionEvent({ busName: process.env.ACQUISITION_BUS_NAME });
+			await sendAcquisitionEvent({
+				eventBusName: process.env.ACQUISITION_BUS_NAME,
+				event: {
+					eventTimeStamp: timestamp,
+					product: 'CONTRIBUTION',
+					amount: amount / 100,
+					country,
+					currency,
+					componentId: null,
+					componentType: null,
+					campaignCode: null,
+					source: null,
+					referrerUrl: null,
+					abTests: [],
+					paymentFrequency: 'ONE_OFF',
+					paymentProvider: 'STRIPE',
+					printOptions: null,
+					browserId: null,
+					identityId,
+					pageViewId: null,
+					referrerPageViewId: null,
+					labels: ['one-time-checkout'],
+					promoCode: null,
+					reusedExistingPaymentMethod: false,
+					readerType: 'Direct',
+					acquisitionType: 'Purchase',
+					zuoraSubscriptionNumber: null,
+					contributionId,
+					paymentId,
+					queryParameters: [],
+					platform: 'STRIPE_CHECKOUT_SPIKE',
+					postalCode,
+					state,
+					email,
+				},
+			});
 		}
 	} catch (error) {
 		console.error(error);
@@ -199,7 +238,7 @@ const saveRecordInContributionsStore = async ({
 	currency,
 	amount,
 	contributionId,
-	countryCode,
+	country,
 	postalCode,
 	state,
 }: {
@@ -211,7 +250,7 @@ const saveRecordInContributionsStore = async ({
 	currency: string;
 	amount: number;
 	contributionId: string;
-	countryCode: string | null;
+	country: string | null;
 	postalCode: string | null;
 	state: string | null;
 }): Promise<void> => {
@@ -227,7 +266,7 @@ const saveRecordInContributionsStore = async ({
 				created,
 				currency,
 				amount: amount / 100,
-				countryCode,
+				countryCode: country,
 				countrySubdivisionCode: state,
 				contributionId,
 				postalCode,
@@ -256,7 +295,16 @@ const saveSoftOptInConsent = async ({
 	});
 };
 
-const sendAcquisitionEvent = async ({ busName }: { busName: string }) => {};
+const sendAcquisitionEvent = async ({
+	eventBusName,
+	event,
+}: {
+	eventBusName: string;
+	event: AcquisitionEvent;
+}) => {
+	console.log(eventBusName);
+	await putEvent({ eventBusName, event });
+};
 
 // const workInProgress = () => {
 // 	const acquisitionPayload = {
