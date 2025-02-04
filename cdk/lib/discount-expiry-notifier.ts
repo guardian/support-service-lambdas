@@ -163,14 +163,14 @@ export class DiscountExpiryNotifier extends GuStack {
 			outputPath: '$.Payload',
 		});
 
-		const initiateEmailSendLambdaTask = new LambdaInvoke(
-			this,
-			'Initiate email send',
-			{
-				lambdaFunction: initiateEmailSendLambda,
-				outputPath: '$.Payload',
-			},
-		);
+		// const initiateEmailSendLambdaTask = new LambdaInvoke(
+		// 	this,
+		// 	'Initiate email send',
+		// 	{
+		// 		lambdaFunction: initiateEmailSendLambda,
+		// 		outputPath: '$.Payload',
+		// 	},
+		// );
 
 		const emailSendsProcessingMap = new Map(this, 'Email sends processor map', {
 			maxConcurrency: 10,
