@@ -12,11 +12,14 @@ import {
 import { Architecture } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
+	Choice,
+	Condition,
 	// Choice,
 	// Condition,
 	DefinitionBody,
 	JsonPath,
 	Map,
+	Pass,
 	// Pass,
 	StateMachine,
 } from 'aws-cdk-lib/aws-stepfunctions';
@@ -117,28 +120,28 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
-		const saveResultsLambda = new GuLambdaFunction(
-			this,
-			'save-results-lambda',
-			{
-				app: appName,
-				functionName: `${appName}-save-results-${this.stage}`,
-				runtime: nodeVersion,
-				environment: {
-					Stage: this.stage,
-					S3_BUCKET: bucket.bucketName,
-				},
-				handler: 'saveResults.handler',
-				fileName: `${appName}.zip`,
-				architecture: Architecture.ARM_64,
-				initialPolicy: [
-					new PolicyStatement({
-						actions: ['s3:GetObject', 's3:PutObject'],
-						resources: [bucket.arnForObjects('*')],
-					}),
-				],
-			},
-		);
+		// const saveResultsLambda = new GuLambdaFunction(
+		// 	this,
+		// 	'save-results-lambda',
+		// 	{
+		// 		app: appName,
+		// 		functionName: `${appName}-save-results-${this.stage}`,
+		// 		runtime: nodeVersion,
+		// 		environment: {
+		// 			Stage: this.stage,
+		// 			S3_BUCKET: bucket.bucketName,
+		// 		},
+		// 		handler: 'saveResults.handler',
+		// 		fileName: `${appName}.zip`,
+		// 		architecture: Architecture.ARM_64,
+		// 		initialPolicy: [
+		// 			new PolicyStatement({
+		// 				actions: ['s3:GetObject', 's3:PutObject'],
+		// 				resources: [bucket.arnForObjects('*')],
+		// 			}),
+		// 		],
+		// 	},
+		// );
 
 		const getSubsWithExpiringDiscountsLambdaTask = new LambdaInvoke(
 			this,
@@ -158,10 +161,10 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
-		const saveResultsLambdaTask = new LambdaInvoke(this, 'Save results', {
-			lambdaFunction: saveResultsLambda,
-			outputPath: '$.Payload',
-		});
+		// const saveResultsLambdaTask = new LambdaInvoke(this, 'Save results', {
+		// 	lambdaFunction: saveResultsLambda,
+		// 	outputPath: '$.Payload',
+		// });
 
 		// const initiateEmailSendLambdaTask = new LambdaInvoke(
 		// 	this,
@@ -205,14 +208,50 @@ export class DiscountExpiryNotifier extends GuStack {
 		// 			),
 		// 	),
 		// );
+		const mapState = new Map(this, 'EmailSendsProcessingMap', {
+			maxConcurrency: 10,
+			itemsPath: JsonPath.stringAt('$.expiringDiscountsToProcess'),
+			resultPath: JsonPath.stringAt('$.processedItems'),
+		});
+
 		emailSendsProcessingMap.iterator(subIsActiveLambdaTask);
 
 		const definitionBody = DefinitionBody.fromChainable(
 			getSubsWithExpiringDiscountsLambdaTask
 				.next(emailSendsProcessingMap)
-				.next(saveResultsLambdaTask),
+				// .next(saveResultsLambdaTask),
+				.next(mapState),
 		);
+		const choiceState = new Choice(this, 'Check Subscription Status');
 
+		const addToActiveSubs = new Pass(this, 'Add to Active Subs', {
+			parameters: {
+				'activeSubs.$': 'States.ArrayAppend($.activeSubs, $$.Map.Item.Value)',
+			},
+			resultPath: '$',
+		});
+
+		const addToCancelledSubs = new Pass(this, 'Add to Cancelled Subs', {
+			parameters: {
+				'cancelledSubs.$':
+					'States.ArrayAppend($.cancelledSubs, $$.Map.Item.Value)',
+			},
+			resultPath: '$',
+		});
+
+		const noMatch = new Pass(this, 'No Match', {
+			resultPath: '$',
+		});
+
+		mapState.iterator(
+			choiceState
+				.when(Condition.stringEquals('$.subStatus', 'Active'), addToActiveSubs)
+				.when(
+					Condition.stringEquals('$.subStatus', 'Cancelled'),
+					addToCancelledSubs,
+				)
+				.otherwise(noMatch),
+		);
 		const sqsInlinePolicy: Policy = new Policy(this, 'sqs-inline-policy', {
 			statements: [
 				new PolicyStatement({
