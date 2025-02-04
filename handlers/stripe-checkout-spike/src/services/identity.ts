@@ -1,6 +1,6 @@
 import { getSecretValue } from './secretsManager';
 
-type GuestRegistrationRequest = {
+export type GuestRegistrationRequest = {
 	token: string;
 	userId: string;
 	timeIssued: string;

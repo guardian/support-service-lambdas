@@ -1,6 +1,10 @@
 import { type SQSEvent } from 'aws-lambda';
 import type Stripe from 'stripe';
-import { createGuestUser, getUser } from '../services/identity';
+import {
+	createGuestUser,
+	getUser,
+	type GuestRegistrationRequest,
+} from '../services/identity';
 import { sendMessageToSqsQueue } from '../services/sqs';
 
 export const handler = async (event: SQSEvent): Promise<void> => {
@@ -96,7 +100,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 	}
 };
 
-const getEdition = (currency: string) => {
+const getEdition = (currency: string): string => {
 	const editionsMapping: Record<string, string> = {
 		GBP: 'uk',
 		USD: 'us',
@@ -120,8 +124,9 @@ const getOrCreateGuestUser = async ({
 }: {
 	email: string;
 	firstName: string;
-}) => {
+}): Promise<GuestRegistrationRequest> => {
 	const { user: existingUser } = await getUser({ email });
+	console.log(existingUser);
 
 	if (existingUser) {
 		console.info('User exists with this email...');
@@ -154,7 +159,7 @@ const sendThankYouEmail = async ({
 	firstName: string;
 	identityId: string;
 	amount: number;
-}) => {
+}): Promise<void> => {
 	await sendMessageToSqsQueue({
 		queueUrl,
 		messageBody: JSON.stringify({
@@ -197,7 +202,7 @@ const saveRecordInContributionsStore = async ({
 	currency: string;
 	amount: number;
 	contributionId: string;
-}) => {
+}): Promise<void> => {
 	await sendMessageToSqsQueue({
 		queueUrl,
 		messageBody: JSON.stringify({
@@ -227,7 +232,7 @@ const saveSoftOptInConsent = async ({
 	queueUrl: string;
 	identityId: string;
 	contributionId: string;
-}) => {
+}): Promise<void> => {
 	await sendMessageToSqsQueue({
 		queueUrl,
 		messageBody: JSON.stringify({
