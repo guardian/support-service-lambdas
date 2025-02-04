@@ -121,28 +121,28 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
-		const saveResultsLambda = new GuLambdaFunction(
-			this,
-			'save-results-lambda',
-			{
-				app: appName,
-				functionName: `${appName}-save-results-${this.stage}`,
-				runtime: nodeVersion,
-				environment: {
-					Stage: this.stage,
-					S3_BUCKET: bucket.bucketName,
-				},
-				handler: 'saveResults.handler',
-				fileName: `${appName}.zip`,
-				architecture: Architecture.ARM_64,
-				initialPolicy: [
-					new PolicyStatement({
-						actions: ['s3:GetObject', 's3:PutObject'],
-						resources: [bucket.arnForObjects('*')],
-					}),
-				],
-			},
-		);
+		// const saveResultsLambda = new GuLambdaFunction(
+		// 	this,
+		// 	'save-results-lambda',
+		// 	{
+		// 		app: appName,
+		// 		functionName: `${appName}-save-results-${this.stage}`,
+		// 		runtime: nodeVersion,
+		// 		environment: {
+		// 			Stage: this.stage,
+		// 			S3_BUCKET: bucket.bucketName,
+		// 		},
+		// 		handler: 'saveResults.handler',
+		// 		fileName: `${appName}.zip`,
+		// 		architecture: Architecture.ARM_64,
+		// 		initialPolicy: [
+		// 			new PolicyStatement({
+		// 				actions: ['s3:GetObject', 's3:PutObject'],
+		// 				resources: [bucket.arnForObjects('*')],
+		// 			}),
+		// 		],
+		// 	},
+		// );
 
 		const getSubsWithExpiringDiscountsLambdaTask = new LambdaInvoke(
 			this,
@@ -162,19 +162,19 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
-		const saveResultsLambdaTask = new LambdaInvoke(this, 'Save results', {
-			lambdaFunction: saveResultsLambda,
-			outputPath: '$.Payload',
-		});
+		// const saveResultsLambdaTask = new LambdaInvoke(this, 'Save results', {
+		// 	lambdaFunction: saveResultsLambda,
+		// 	outputPath: '$.Payload',
+		// });
 
-		const initiateEmailSendLambdaTask = new LambdaInvoke(
-			this,
-			'Initiate email send',
-			{
-				lambdaFunction: initiateEmailSendLambda,
-				outputPath: '$.Payload',
-			},
-		);
+		// const initiateEmailSendLambdaTask = new LambdaInvoke(
+		// 	this,
+		// 	'Initiate email send',
+		// 	{
+		// 		lambdaFunction: initiateEmailSendLambda,
+		// 		outputPath: '$.Payload',
+		// 	},
+		// );
 
 		// const emailSendsProcessingMap = new Map(this, 'Email sends processor map', {
 		// 	maxConcurrency: 10,
