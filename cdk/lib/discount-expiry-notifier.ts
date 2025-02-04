@@ -188,9 +188,9 @@ export class DiscountExpiryNotifier extends GuStack {
 				'discountExpiresOnDate.$': '$.discountExpiresOnDate',
 				'expiringDiscountsToProcess.$': '$.expiringDiscountsToProcess',
 				'successes.$':
-					'States.ArrayFilter($.discountProcessingAttempts, $.emailSendAttempt.status == "success")',
+					"States.ArrayFilter($.discountProcessingAttempts, item.emailSendAttempt.status == 'success')",
 				'failures.$':
-					'States.ArrayFilter($.discountProcessingAttempts, $.emailSendAttempt.status == "error")',
+					"States.ArrayFilter($.discountProcessingAttempts, item.emailSendAttempt.status == 'error')",
 			},
 			resultPath: '$.segmentedResults',
 		});
