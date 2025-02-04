@@ -22,7 +22,7 @@ export const handler = async (event: {
 
 		return {
 			...event.item,
-			status: getSubResponse.status,
+			subIsActive: getSubResponse.status==='Active',
 		};
 	} catch (error) {
 		throw new Error(

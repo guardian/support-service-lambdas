@@ -187,7 +187,7 @@ export class DiscountExpiryNotifier extends GuStack {
 			subIsActiveLambdaTask.next(
 				isSubActiveChoice
 					.when(
-						Condition.stringEquals('$.status', 'Active'),
+						Condition.booleanEquals('$.subIsActive', true),
 						initiateEmailSendLambdaTask,
 					)
 					.otherwise(
