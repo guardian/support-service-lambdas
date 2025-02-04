@@ -2,44 +2,12 @@
 
 exports[`The MetricPushApi stack matches the snapshot 1`] = `
 {
-  "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "HTTP API to push a metric to cloudwatch so we can alarm on errors",
-  "Mappings": {
-    "Constants": {
-      "Alarm": {
-        "Process": "Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
-        "Urgent": "URGENT 9-5 -",
-      },
-    },
-    "StageMap": {
-      "CODE": {
-        "AlarmActionsEnabled": false,
-        "ApiName": "metric-push-api-api-CODE",
-        "DomainName": "metric-push-api-code.support.guardianapis.com",
-      },
-      "PROD": {
-        "AlarmActionsEnabled": true,
-        "ApiName": "metric-push-api-api-PROD",
-        "DomainName": "metric-push-api-prod.support.guardianapis.com",
-      },
-    },
-  },
   "Metadata": {
     "gu:cdk:constructs": [
       "GuAlarm",
       "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
-  },
-  "Parameters": {
-    "Stage": {
-      "AllowedValues": [
-        "PROD",
-        "CODE",
-      ],
-      "Description": "Stage name",
-      "Type": "String",
-    },
   },
   "Resources": {
     "5xxApiAlarmF6ACE36F": {
@@ -176,15 +144,7 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
     "MetricPushAPI": {
       "Properties": {
         "Description": "HTTP API to push a metric to cloudwatch so we can alarm on errors",
-        "Name": {
-          "Fn::FindInMap": [
-            "StageMap",
-            {
-              "Ref": "Stage",
-            },
-            "ApiName",
-          ],
-        },
+        "Name": "metric-push-api-api-CODE",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -207,9 +167,6 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
       "Type": "AWS::ApiGateway::RestApi",
     },
     "MetricPushAPIDeployment": {
-      "DependsOn": [
-        "MetricPushMethod",
-      ],
       "Properties": {
         "Description": "Deploys metric-push-api into an environment/stage",
         "RestApiId": {
@@ -219,9 +176,6 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
       "Type": "AWS::ApiGateway::Deployment",
     },
     "MetricPushAPIStage": {
-      "DependsOn": [
-        "MetricPushMethod",
-      ],
       "Properties": {
         "DeploymentId": {
           "Ref": "MetricPushAPIDeployment",
@@ -231,16 +185,14 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
           {
             "DataTraceEnabled": true,
             "HttpMethod": "*",
-            "LoggingLevel": "ERROR",
+            "LoggingLevel": "INFO",
             "ResourcePath": "/*",
           },
         ],
         "RestApiId": {
           "Ref": "MetricPushAPI",
         },
-        "StageName": {
-          "Fn::Sub": "\${Stage}",
-        },
+        "StageName": "CODE",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -338,10 +290,6 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
       "Type": "AWS::ApiGateway::DomainName",
     },
     "MetricPushMethod": {
-      "DependsOn": [
-        "MetricPushAPI",
-        "MetricPushProxyResource",
-      ],
       "Properties": {
         "ApiKeyRequired": false,
         "AuthorizationType": "NONE",
@@ -378,9 +326,6 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
       "Type": "AWS::ApiGateway::Method",
     },
     "MetricPushProxyResource": {
-      "DependsOn": [
-        "MetricPushAPI",
-      ],
       "Properties": {
         "ParentId": {
           "Fn::GetAtt": [
@@ -401,44 +346,12 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
 
 exports[`The MetricPushApi stack matches the snapshot 2`] = `
 {
-  "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "HTTP API to push a metric to cloudwatch so we can alarm on errors",
-  "Mappings": {
-    "Constants": {
-      "Alarm": {
-        "Process": "Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
-        "Urgent": "URGENT 9-5 -",
-      },
-    },
-    "StageMap": {
-      "CODE": {
-        "AlarmActionsEnabled": false,
-        "ApiName": "metric-push-api-api-CODE",
-        "DomainName": "metric-push-api-code.support.guardianapis.com",
-      },
-      "PROD": {
-        "AlarmActionsEnabled": true,
-        "ApiName": "metric-push-api-api-PROD",
-        "DomainName": "metric-push-api-prod.support.guardianapis.com",
-      },
-    },
-  },
   "Metadata": {
     "gu:cdk:constructs": [
       "GuAlarm",
       "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
-  },
-  "Parameters": {
-    "Stage": {
-      "AllowedValues": [
-        "PROD",
-        "CODE",
-      ],
-      "Description": "Stage name",
-      "Type": "String",
-    },
   },
   "Resources": {
     "5xxApiAlarmF6ACE36F": {
@@ -575,15 +488,7 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
     "MetricPushAPI": {
       "Properties": {
         "Description": "HTTP API to push a metric to cloudwatch so we can alarm on errors",
-        "Name": {
-          "Fn::FindInMap": [
-            "StageMap",
-            {
-              "Ref": "Stage",
-            },
-            "ApiName",
-          ],
-        },
+        "Name": "metric-push-api-api-PROD",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -606,9 +511,6 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
       "Type": "AWS::ApiGateway::RestApi",
     },
     "MetricPushAPIDeployment": {
-      "DependsOn": [
-        "MetricPushMethod",
-      ],
       "Properties": {
         "Description": "Deploys metric-push-api into an environment/stage",
         "RestApiId": {
@@ -618,9 +520,6 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
       "Type": "AWS::ApiGateway::Deployment",
     },
     "MetricPushAPIStage": {
-      "DependsOn": [
-        "MetricPushMethod",
-      ],
       "Properties": {
         "DeploymentId": {
           "Ref": "MetricPushAPIDeployment",
@@ -630,16 +529,14 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
           {
             "DataTraceEnabled": true,
             "HttpMethod": "*",
-            "LoggingLevel": "ERROR",
+            "LoggingLevel": "INFO",
             "ResourcePath": "/*",
           },
         ],
         "RestApiId": {
           "Ref": "MetricPushAPI",
         },
-        "StageName": {
-          "Fn::Sub": "\${Stage}",
-        },
+        "StageName": "PROD",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -737,10 +634,6 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
       "Type": "AWS::ApiGateway::DomainName",
     },
     "MetricPushMethod": {
-      "DependsOn": [
-        "MetricPushAPI",
-        "MetricPushProxyResource",
-      ],
       "Properties": {
         "ApiKeyRequired": false,
         "AuthorizationType": "NONE",
@@ -777,9 +670,6 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
       "Type": "AWS::ApiGateway::Method",
     },
     "MetricPushProxyResource": {
-      "DependsOn": [
-        "MetricPushAPI",
-      ],
       "Properties": {
         "ParentId": {
           "Fn::GetAtt": [
