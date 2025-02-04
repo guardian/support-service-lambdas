@@ -91,7 +91,7 @@ export const runQuery = async (
 			productName: 'Supporter Plus',
 			sfContactId: '0039E00001HiIGlQAN',
 			subName: 'A-S00886159', // Active subscription in dev sandbox
-			workEmail: 'david.pepper+mary@guardian.co.uk',
+			workEmail: 'graham.hopgood@guardian.co.uk',
 		},
 	];
 };
