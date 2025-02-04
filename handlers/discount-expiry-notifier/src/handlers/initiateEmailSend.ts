@@ -17,10 +17,10 @@ export const handler = async (event: {
 	const payload = {
 		...{
 			To: {
-				Address: 'david.pepper@guardian.co.uk', // hard code this during testing
+				Address: event.workEmail,
 				ContactAttributes: {
 					SubscriberAttributes: {
-						EmailAddress: 'david.pepper@guardian.co.uk', // hard code this during testing
+						EmailAddress: event.workEmail,
 						paymentAmount: `${currencySymbol}${event.paymentAmount}`,
 						first_name: event.firstName,
 						date_of_payment: formatDate(event.nextPaymentDate),
@@ -33,12 +33,27 @@ export const handler = async (event: {
 		},
 		SfContactId: event.sfContactId,
 	};
+	try {
+		const response = await sendEmail(stageFromEnvironment(), payload);
 
-	const emailSend = await sendEmail(stageFromEnvironment(), payload);
-
-	console.log('emailSend:', emailSend);
-
-	return emailSend;
+		return {
+			detail: event,
+			emailSendAttempt: {
+				status: 'success',
+				payload,
+				response,
+			},
+		};
+	} catch (error) {
+		return {
+			detail: event,
+			emailSendAttempt: {
+				status: 'error',
+				payload,
+				response: error as string,
+			},
+		};
+	}
 };
 
 function formatDate(inputDate: string): string {
