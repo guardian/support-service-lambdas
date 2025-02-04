@@ -133,12 +133,12 @@ const getOrCreateUserIdentity = async ({
 		return user.id;
 	} else {
 		console.info('User does not exists with this email...');
-		const { user: guestUser, errors } = await createGuestUser({
+		const { guestRegistrationRequest, errors } = await createGuestUser({
 			email,
 			firstName,
 		});
-		if (guestUser) {
-			return guestUser.userId;
+		if (guestRegistrationRequest) {
+			return guestRegistrationRequest.userId;
 		} else {
 			throw new Error(JSON.stringify(errors));
 		}

@@ -104,7 +104,7 @@ export const createGuestUser = async ({
 		const data = (await response.json()) as CreateUserResponse;
 		console.log(data);
 		if (data.status == 'ok') {
-			return { user: data.guestRegistrationRequest };
+			return { guestRegistrationRequest: data.guestRegistrationRequest };
 		} else {
 			return { errors: data.errors };
 		}
