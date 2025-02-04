@@ -49,11 +49,13 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				);
 			}
 
+			console.log('Getting or creating guest identity profile...');
 			const { userId: identityId } = await getOrCreateGuestUser({
 				email,
 				firstName,
 			});
 
+			console.log('Sending thank you email...');
 			await sendThankYouEmail({
 				email,
 				queueUrl: process.env.BRAZE_EMAILS_QUEUE_URL,
@@ -63,6 +65,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				amount,
 			});
 
+			console.log('Saving record into contributions store...');
 			await saveRecordInContributionsStore({
 				queueUrl: process.env.CONTRIBUTIONS_STORE_QUEUE_URL,
 				paymentId,
@@ -180,18 +183,20 @@ const saveRecordInContributionsStore = async ({
 	await sendMessageToSqsQueue({
 		queueUrl,
 		messageBody: JSON.stringify({
-			paymentProvider: 'Stripe',
-			paymentStatus: 'Paid',
-			paymentId,
-			identityId,
-			email,
-			created,
-			currency,
-			amount: amount / 100,
-			countryCode: null, // This could come from the Stripe session if we collect address
-			countrySubdivisionCode: null, // This could come from the Stripe session if we collect address
-			contributionId: crypto.randomUUID(),
-			postalCode: null, // This could come from the Stripe session if we collect address
+			newContributionData: {
+				paymentProvider: 'Stripe',
+				paymentStatus: 'Paid',
+				paymentId,
+				identityId,
+				email,
+				created,
+				currency,
+				amount: amount / 100,
+				countryCode: null, // This could come from the Stripe session if we collect address
+				countrySubdivisionCode: null, // This could come from the Stripe session if we collect address
+				contributionId: crypto.randomUUID(),
+				postalCode: null, // This could come from the Stripe session if we collect address
+			},
 		}),
 	});
 };
