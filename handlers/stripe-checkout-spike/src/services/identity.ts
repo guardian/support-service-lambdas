@@ -48,7 +48,7 @@ export const getBearerToken = async () => {
 
 export const getUser = async ({ email }: { email: string }) => {
 	try {
-		console.log('Fetching user from Identity API...');
+		console.info('Fetching user from Identity API...');
 		const response = await fetch(
 			`${process.env.IDENTITY_API_URL}/user?` +
 				new URLSearchParams({
@@ -62,10 +62,8 @@ export const getUser = async ({ email }: { email: string }) => {
 			},
 		);
 		const data = (await response.json()) as GetUserResponse;
-		console.log(data);
+		console.info(data);
 		if (data.status == 'ok') {
-			console.log(data.status);
-			console.log('data.status is ok');
 			return { user: data.user };
 		} else {
 			return { errors: data.errors };
@@ -84,7 +82,7 @@ export const createGuestUser = async ({
 	firstName: string;
 }) => {
 	try {
-		console.log('Creating new guest user...');
+		console.info('Creating new guest user...');
 		const response = await fetch(
 			`${process.env.IDENTITY_API_URL}/guest?` +
 				new URLSearchParams({
@@ -102,7 +100,7 @@ export const createGuestUser = async ({
 			},
 		);
 		const data = (await response.json()) as CreateUserResponse;
-		console.log(data);
+		console.info(data);
 		if (data.status == 'ok') {
 			return { guestRegistrationRequest: data.guestRegistrationRequest };
 		} else {

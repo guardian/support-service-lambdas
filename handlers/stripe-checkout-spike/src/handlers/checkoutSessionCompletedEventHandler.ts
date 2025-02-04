@@ -53,6 +53,11 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 					'Soft opt in consent queue URL not found in environment variables',
 				);
 			}
+			if (!process.env.ACQUISITION_BUS_NAME) {
+				throw new Error(
+					'Acquisition bus name not found in environment variables',
+				);
+			}
 
 			console.info('Getting or creating guest identity profile...');
 			const identityId = await getOrCreateUserIdentity({
@@ -92,6 +97,9 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				identityId,
 				contributionId,
 			});
+
+			console.info('Sending acquisition event...');
+			await sendAcquisitionEvent({ busName: process.env.ACQUISITION_BUS_NAME });
 		}
 	} catch (error) {
 		console.error(error);
@@ -125,7 +133,6 @@ const getOrCreateUserIdentity = async ({
 	firstName: string;
 }): Promise<string> => {
 	const { user } = await getUser({ email });
-	console.log(user);
 
 	if (user) {
 		console.info('User exists with this email...');
@@ -248,6 +255,8 @@ const saveSoftOptInConsent = async ({
 		}),
 	});
 };
+
+const sendAcquisitionEvent = async ({ busName }: { busName: string }) => {};
 
 // const workInProgress = () => {
 // 	const acquisitionPayload = {
