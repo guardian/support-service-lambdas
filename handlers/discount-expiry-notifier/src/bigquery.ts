@@ -90,7 +90,7 @@ export const runQuery = async (
 			paymentFrequency: 'Month',
 			productName: 'Supporter Plus',
 			sfContactId: '0039E00001HiIGlQAN',
-			subName: 'A-S00814343', // Active subscription in dev sandbox
+			subName: 'A-S00886159', // Active subscription in dev sandbox
 			workEmail: 'david.pepper+mary@guardian.co.uk',
 		},
 	];
