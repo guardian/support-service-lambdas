@@ -12,12 +12,12 @@ import {
 import { Architecture } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
-	Choice,
-	Condition,
+	// Choice,
+	// Condition,
 	DefinitionBody,
 	JsonPath,
 	Map,
-	Pass,
+	// Pass,
 	StateMachine,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
