@@ -177,7 +177,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Email sends processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Save results","Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Check sub is active","States":{"Check sub is active":{"Next":"Is Subscription Active?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Email sends processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"SegmentResults","Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Check sub is active","States":{"Check sub is active":{"Next":"Is Subscription Active?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -199,7 +199,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.expiringDiscountsToProcess","MaxConcurrency":10},"Save results":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.expiringDiscountsToProcess","MaxConcurrency":10},"SegmentResults":{"Type":"Pass","ResultPath":"$.segmentedResults","Parameters":{"discountExpiresOnDate.$":"$.discountExpiresOnDate","expiringDiscountsToProcess.$":"$.expiringDiscountsToProcess","successes.$":"States.ArrayFilter($.discountProcessingAttempts, $.emailSendAttempt.status == \\"success\\")","failures.$":"States.ArrayFilter($.discountProcessingAttempts, $.emailSendAttempt.status == \\"error\\")"},"Next":"Save results"},"Save results":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1534,7 +1534,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Email sends processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Save results","Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Check sub is active","States":{"Check sub is active":{"Next":"Is Subscription Active?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Email sends processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"SegmentResults","Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Check sub is active","States":{"Check sub is active":{"Next":"Is Subscription Active?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1556,7 +1556,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.expiringDiscountsToProcess","MaxConcurrency":10},"Save results":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.expiringDiscountsToProcess","MaxConcurrency":10},"SegmentResults":{"Type":"Pass","ResultPath":"$.segmentedResults","Parameters":{"discountExpiresOnDate.$":"$.discountExpiresOnDate","expiringDiscountsToProcess.$":"$.expiringDiscountsToProcess","successes.$":"States.ArrayFilter($.discountProcessingAttempts, $.emailSendAttempt.status == \\"success\\")","failures.$":"States.ArrayFilter($.discountProcessingAttempts, $.emailSendAttempt.status == \\"error\\")"},"Next":"Save results"},"Save results":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
