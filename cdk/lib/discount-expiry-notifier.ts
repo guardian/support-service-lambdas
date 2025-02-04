@@ -67,6 +67,7 @@ export class DiscountExpiryNotifier extends GuStack {
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
+					DAYS_UNTIL_DISCOUNT_EXPIRY_DATE: '32',
 				},
 				handler: 'getSubsWithExpiringDiscounts.handler',
 				fileName: `${appName}.zip`,
