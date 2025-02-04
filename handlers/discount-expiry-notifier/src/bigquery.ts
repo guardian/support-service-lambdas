@@ -78,7 +78,7 @@ export const runQuery = async (
 			paymentCurrency: 'GBP',
 			paymentFrequency: 'Month',
 			productName: 'Supporter Plus',
-			sfContactId: '222',
+			sfContactId: '0039E00001HiIGlQAN',
 			subName: 'A-S00814342', // Active sub in dev sandbox
 			workEmail: 'david.pepper@guardian.co.uk',
 		},
