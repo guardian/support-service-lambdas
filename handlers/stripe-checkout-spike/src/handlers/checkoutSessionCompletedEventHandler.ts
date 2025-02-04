@@ -187,7 +187,7 @@ const saveRecordInContributionsStore = async ({
 			email,
 			created,
 			currency,
-			amount: (amount / 100).toFixed(2),
+			amount: amount / 100,
 			countryCode: null, // This could come from the Stripe session if we collect address
 			countrySubdivisionCode: null, // This could come from the Stripe session if we collect address
 			contributionId: crypto.randomUUID(),
