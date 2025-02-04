@@ -5,6 +5,7 @@ import type {
 } from 'google-auth-library';
 import { ExternalAccountClient } from 'google-auth-library';
 import { z } from 'zod';
+import { testQueryResponse } from './testQueryResponse';
 
 export const buildAuthClient = async (
 	clientConfig: string,
@@ -70,17 +71,5 @@ export const runQuery = async (
 	const resultData = BigQueryResultDataSchema.parse(result[0]);
 	console.log('resultData', resultData);
 
-	return [
-		{
-			firstName: 'David',
-			nextPaymentDate: '2025-02-28',
-			paymentAmount: 12,
-			paymentCurrency: 'GBP',
-			paymentFrequency: 'Month',
-			productName: 'Supporter Plus',
-			sfContactId: '0039E00001HiIGlQAN',
-			subName: 'A-S00814342', // Active sub in dev sandbox
-			workEmail: 'david.pepper@guardian.co.uk',
-		},
-	];
+	return testQueryResponse;
 };
