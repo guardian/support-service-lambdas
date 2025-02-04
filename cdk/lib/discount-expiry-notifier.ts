@@ -12,12 +12,12 @@ import {
 import { Architecture } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
-	Choice,
-	Condition,
+	// Choice,
+	// Condition,
 	DefinitionBody,
 	JsonPath,
 	Map,
-	Pass,
+	// Pass,
 	StateMachine,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
@@ -163,14 +163,14 @@ export class DiscountExpiryNotifier extends GuStack {
 			outputPath: '$.Payload',
 		});
 
-		const initiateEmailSendLambdaTask = new LambdaInvoke(
-			this,
-			'Initiate email send',
-			{
-				lambdaFunction: initiateEmailSendLambda,
-				outputPath: '$.Payload',
-			},
-		);
+		// const initiateEmailSendLambdaTask = new LambdaInvoke(
+		// 	this,
+		// 	'Initiate email send',
+		// 	{
+		// 		lambdaFunction: initiateEmailSendLambda,
+		// 		outputPath: '$.Payload',
+		// 	},
+		// );
 
 		const emailSendsProcessingMap = new Map(this, 'Email sends processor map', {
 			maxConcurrency: 10,
@@ -181,20 +181,21 @@ export class DiscountExpiryNotifier extends GuStack {
 			resultPath: '$.discountProcessingAttempts',
 		});
 
-		const isSubActiveChoice = new Choice(this, 'Is Subscription Active?');
+		// const isSubActiveChoice = new Choice(this, 'Is Subscription Active?');
 
-		emailSendsProcessingMap.iterator(
-			subIsActiveLambdaTask.next(
-				isSubActiveChoice
-					.when(
-						Condition.stringEquals('$.status', 'Active'),
-						initiateEmailSendLambdaTask,
-					)
-					.otherwise(
-						new Pass(this, 'Skip Processing', { resultPath: JsonPath.DISCARD }),
-					),
-			),
-		);
+		// emailSendsProcessingMap.iterator(
+		// 	subIsActiveLambdaTask.next(
+		// 		isSubActiveChoice
+		// 			.when(
+		// 				Condition.stringEquals('$.status', 'Active'),
+		// 				initiateEmailSendLambdaTask,
+		// 			)
+		// 			.otherwise(
+		// 				new Pass(this, 'Skip Processing', { resultPath: JsonPath.DISCARD }),
+		// 			),
+		// 	),
+		// );
+		emailSendsProcessingMap.iterator(subIsActiveLambdaTask);
 
 		const definitionBody = DefinitionBody.fromChainable(
 			getSubsWithExpiringDiscountsLambdaTask
