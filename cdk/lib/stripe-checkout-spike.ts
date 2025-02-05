@@ -116,6 +116,12 @@ export class StripeCheckoutSpike extends GuStack {
 						`arn:aws:events:${this.region}:${this.account}:event-bus/acquisitions-bus-${this.stage}`,
 					],
 				}),
+				new PolicyStatement({
+					actions: ['dynamodb:GetItem', 'dynamodb:PutItem'],
+					resources: [
+						`arn:aws:dynamodb:${this.region}:${this.account}:table/SupporterProductData-${this.stage}`,
+					],
+				}),
 			],
 		});
 	}

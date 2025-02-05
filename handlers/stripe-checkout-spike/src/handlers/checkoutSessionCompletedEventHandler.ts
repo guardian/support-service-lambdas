@@ -1,5 +1,6 @@
 import { type SQSEvent } from 'aws-lambda';
 import type Stripe from 'stripe';
+import { putItem } from '../services/dynamodb';
 import type { AcquisitionEvent } from '../services/eventbridge';
 import { putEvent } from '../services/eventbridge';
 import { createGuestUser, getUser } from '../services/identity';
@@ -21,7 +22,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			const email = session.customer_details?.email;
 			const firstName = session.customer_details?.name;
 			const currency = session.currency?.toUpperCase();
-			const amount = session.amount_total;
+			const amount = (session.amount_total ?? 0) / 100;
 			const country = session.customer_details?.address?.country ?? null;
 			const postalCode = session.customer_details?.address?.postal_code ?? null;
 			const state = session.customer_details?.address?.state ?? null;
@@ -61,6 +62,11 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			if (!process.env.ACQUISITION_BUS_NAME) {
 				throw new Error(
 					'Acquisition bus name not found in environment variables',
+				);
+			}
+			if (!process.env.SUPPORTER_PRODUCT_DATA_TABLE_NAME) {
+				throw new Error(
+					'Supporter product data table name not found in environment variables',
 				);
 			}
 
@@ -109,7 +115,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				event: {
 					eventTimeStamp: timestamp,
 					product: 'CONTRIBUTION',
-					amount: amount / 100,
+					amount,
 					country,
 					currency,
 					componentId: null,
@@ -139,6 +145,28 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 					state,
 					email,
 				},
+			});
+
+			console.info('Saving record in supporter data database...');
+			await saveRecordInSupporterDataDatabase({
+				tableName: process.env.SUPPORTER_PRODUCT_DATA_TABLE_NAME,
+				identityId,
+				subscriptionName: `Stripe - ${paymentId}`,
+				productRatePlanId: 'single_contribution',
+				productRatePlanName: 'Single Contribution',
+				contributionAmount: amount,
+				contributionCurrency: currency,
+				contractEffectiveDate: new Date().toISOString().split('T')[0] ?? '',
+				termEndDate:
+					new Date(
+						new Date().setFullYear(
+							new Date().getFullYear() + 8,
+							new Date().getMonth(),
+							new Date().getDate() + 7,
+						),
+					)
+						.toISOString()
+						.split('T')[0] ?? '', // 8 years and 1 week is our standard data retention period. As there are no benefits attached to a single contribution we don't need to remove them sooner
 			});
 		}
 	} catch (error) {
@@ -218,7 +246,7 @@ const sendThankYouEmail = async ({
 						edition: getEdition(currency),
 						'payment method': 'credit / debit card',
 						currency,
-						amount: (amount / 100).toFixed(2),
+						amount: amount.toFixed(2),
 						first_name: firstName,
 						date_of_payment: formatToCustomDate(Date.now()),
 					},
@@ -266,7 +294,7 @@ const saveRecordInContributionsStore = async ({
 				email,
 				created,
 				currency,
-				amount: amount / 100,
+				amount,
 				countryCode: country,
 				countrySubdivisionCode: state,
 				contributionId,
@@ -303,49 +331,39 @@ const sendAcquisitionEvent = async ({
 	eventBusName: string;
 	event: AcquisitionEvent;
 }) => {
-	console.log(eventBusName);
 	await putEvent({ eventBusName, event });
 };
 
-// const workInProgress = () => {
-// 	const acquisitionPayload = {
-// 		// eventTimeStamp: DateTime,
-// 		// product: AcquisitionProduct,
-// 		// amount: Option[BigDecimal],
-// 		// country: Country,
-// 		currency,
-// 		// source: Option[String],
-// 		// referrerUrl: Option[String],
-// 		// abTests: List[AbTest],
-// 		// paymentFrequency: PaymentFrequency,
-// 		// paymentProvider: Option[PaymentProvider],
-// 		identityId,
-// 		// labels: List[String],
-// 		// promoCode: Option[String],
-// 		// reusedExistingPaymentMethod: Boolean,
-// 		// readerType: ReaderType,
-// 		// acquisitionType: AcquisitionType,
-// 		// contributionId: Option[String],
-// 		// paymentId: Option[String],
-// 		// queryParameters: List[QueryParameter],
-// 		// platform: Option[String],
-// 		email,
-// 	};
-// 	console.info(acquisitionPayload);
-
-// 	const supporterProductDataPayload = {
-// 		identityId,
-// 		subscriptionName: `Stripe - ${paymentId}`,
-// 		productRatePlanId: 'single_contribution',
-// 		productRatePlanName: 'Single Contribution',
-// 	};
-// 	console.info(supporterProductDataPayload);
-
-// 	// Supporter data
-// 	// case class SupporterRatePlanItem(
-// 	// 	gifteeIdentityId: Option[String], // Unique identifier for user if this is a DS gift subscription
-// 	// 	termEndDate: LocalDate, // Date that this subscription term ends
-// 	// 	contractEffectiveDate: LocalDate, // Date that this subscription started
-// 	// 	contributionAmount: Option[ContributionAmount],
-// 	// )
-// };
+const saveRecordInSupporterDataDatabase = async ({
+	tableName,
+	identityId,
+	subscriptionName,
+	productRatePlanId,
+	productRatePlanName,
+	contributionAmount,
+	contributionCurrency,
+	contractEffectiveDate,
+	termEndDate,
+}: {
+	tableName: string;
+	identityId: string;
+	subscriptionName: string;
+	productRatePlanId: string;
+	productRatePlanName: string;
+	contributionAmount: number;
+	contributionCurrency: string;
+	contractEffectiveDate: string;
+	termEndDate: string;
+}) => {
+	await putItem({
+		tableName,
+		identityId,
+		subscriptionName,
+		productRatePlanId,
+		productRatePlanName,
+		contributionAmount,
+		contributionCurrency,
+		contractEffectiveDate,
+		termEndDate,
+	});
+};

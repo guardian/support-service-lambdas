@@ -313,6 +313,29 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 1`] = `
             },
             {
               "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:dynamodb:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":table/SupporterProductData-CODE",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
                 "sqs:ReceiveMessage",
                 "sqs:ChangeMessageVisibility",
                 "sqs:GetQueueUrl",
@@ -876,6 +899,29 @@ exports[`The StripeCheckoutSpike stack matches the snapshot 2`] = `
                       "Ref": "AWS::AccountId",
                     },
                     ":event-bus/acquisitions-bus-PROD",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:dynamodb:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":table/SupporterProductData-PROD",
                   ],
                 ],
               },
