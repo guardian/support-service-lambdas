@@ -25,7 +25,6 @@ export class MetricPushApi extends GuStack {
 		const app = 'metric-push-api';
 		const nameWithStage = `${app}-${this.stage}`;
 
-		// const api = cloudformation.getResource('MetricPushAPI') as CfnRestApi;
 		const api = new CfnRestApi(this, 'MetricPushAPI', {
 			description:
 				'HTTP API to push a metric to cloudwatch so we can alarm on errors',
