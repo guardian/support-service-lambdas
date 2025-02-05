@@ -78,7 +78,8 @@ export class DiscountExpiryNotifier extends GuStack {
 			runtime: nodeVersion,
 			environment: {
 				Stage: this.stage,
-				REGION: 'US,USA',
+				FILTER_BY_REGIONS: 'US,USA',
+				FILTER_BY_PRODUCTS: 'GW',
 			},
 			handler: 'filterSubs.handler',
 			fileName: `${appName}.zip`,

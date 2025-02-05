@@ -22,30 +22,44 @@ export const handler = async (event: {
 	}>;
 }) => {
 	try {
-		const region = getIfDefined<string>(
-			process.env.REGION,
-			'S3_BUCKET environment variable REGION not set',
+		const FILTER_BY_REGIONS = getIfDefined<string>(
+			process.env.FILTER_BY_REGIONS,
+			'FILTER_BY_REGIONS environment variable not set',
+		);
+		const FILTER_BY_PRODUCTS = getIfDefined<string>(
+			process.env.FILTER_BY_REGIONS,
+			'FILTER_BY_PRODUCTS environment variable not set',
 		);
 
 		console.log('event: ', event);
-		console.log('region: ', region);
+		console.log('FILTER_BY_REGIONS: ', FILTER_BY_REGIONS);
+		console.log('FILTER_BY_PRODUCTS: ', FILTER_BY_PRODUCTS);
 
-		const regions = region.split(',');
+		const filterByRegions = FILTER_BY_REGIONS.split(',');
+		const filterByProducts = FILTER_BY_PRODUCTS.split(',');
 
-		const subsFilteredByRegion = event.expiringDiscountsToProcess.filter(
+		const subsFilteredByRegions = event.expiringDiscountsToProcess.filter(
 			(sub) =>
-				regions.includes(sub.contactCountry) ||
-				regions.includes(sub.sfBuyerContactMailingCountry) ||
-				regions.includes(sub.sfBuyerContactOtherCountry) ||
-				regions.includes(sub.sfRecipientContactMailingCountry) ||
-				regions.includes(sub.sfRecipientContactOtherCountry),
+				filterByRegions.includes(sub.contactCountry) ||
+				filterByRegions.includes(sub.sfBuyerContactMailingCountry) ||
+				filterByRegions.includes(sub.sfBuyerContactOtherCountry) ||
+				filterByRegions.includes(sub.sfRecipientContactMailingCountry) ||
+				filterByRegions.includes(sub.sfRecipientContactOtherCountry),
 		);
 
-		console.log('subsFilteredByRegion: ', subsFilteredByRegion);
+		const subsFilteredByRegionsAndProducts = subsFilteredByRegions.filter(
+			(sub) => filterByProducts.includes(sub.productName),
+		);
+
+		console.log('subsFilteredByRegions: ', subsFilteredByRegions);
+		console.log(
+			'subsFilteredByRegionsAndProducts: ',
+			subsFilteredByRegionsAndProducts,
+		);
 
 		return {
 			...event,
-			subsFilteredByRegion,
+			subsFilteredByRegionsAndProducts,
 		};
 	} catch (error) {
 		console.error('Error:', error);
