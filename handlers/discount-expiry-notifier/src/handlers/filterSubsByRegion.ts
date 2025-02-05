@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/require-await -- this is required to ensure the lambda returns a value*/
+
 import { getIfDefined } from '@modules/nullAndUndefined';
 
-export const handler = (event: {
+export const handler = async (event: {
 	discountExpiresOnDate: string;
 	expiringDiscountsToProcess: Array<{
 		firstName: string;
@@ -38,13 +40,10 @@ export const handler = (event: {
 		);
 		console.log('subsFilteredByRegion: ', subsFilteredByRegion);
 
-		const returnValue = {
+		return {
 			...event,
 			subsFilteredByRegion,
 		};
-		console.log('returnValue: ', returnValue);
-
-		return 'hello';
 	} catch (error) {
 		console.error('Error:', error);
 		throw error; // Ensure errors propagate correctly
