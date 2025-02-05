@@ -12,6 +12,7 @@ export const handler = (event: {
 		sfContactId: string;
 		subName: string;
 		workEmail: string;
+		contactCountry: string;
 		sfBuyerContactMailingCountry: string;
 		sfBuyerContactOtherCountry: string;
 		sfRecipientContactMailingCountry: string;
@@ -26,7 +27,21 @@ export const handler = (event: {
 	console.log('event: ', event);
 	console.log('region: ', region);
 
-	return {
-		region,
+	const subsFilteredByRegion = event.expiringDiscountsToProcess.filter(
+		(sub) =>
+			sub.contactCountry === region ||
+			sub.sfBuyerContactMailingCountry === region ||
+			sub.sfBuyerContactOtherCountry === region ||
+			sub.sfRecipientContactMailingCountry === region ||
+			sub.sfRecipientContactOtherCountry === region,
+	);
+	console.log('subsFilteredByRegion: ', subsFilteredByRegion);
+
+	const returnValue = {
+		...event,
+		subsFilteredByRegion,
 	};
+	console.log('returnValue: ', returnValue);
+
+	return returnValue;
 };
