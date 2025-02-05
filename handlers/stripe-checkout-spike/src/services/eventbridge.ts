@@ -46,6 +46,8 @@ export const putEvent = async ({
 	eventBusName: string;
 	event: AcquisitionEvent;
 }) => {
+	console.info('Acquisition event...');
+	console.info(JSON.stringify(event));
 	const input = {
 		Entries: [
 			{
@@ -55,7 +57,6 @@ export const putEvent = async ({
 				EventBusName: eventBusName,
 			},
 		],
-		EndpointId: 'STRING_VALUE',
 	};
 	const command = new PutEventsCommand(input);
 	const response = await client.send(command);
