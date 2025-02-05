@@ -9,11 +9,11 @@ export const testQueryResponse = [
 		sfContactId: '0039E00001HiIGlQAN',
 		subName: 'A-S00886188', // Active sub in dev sandbox
 		workEmail: 'david.pepper+david@guardian.co.uk',
-		contactCountry: 'United Kingdom',
-		sfBuyerContactMailingCountry: 'United Kingdom',
-		sfBuyerContactOtherCountry: 'United Kingdom',
-		sfRecipientContactMailingCountry: 'United Kingdom',
-		sfRecipientContactOtherCountry: 'United Kingdom',
+		contactCountry: 'USA',
+		sfBuyerContactMailingCountry: 'USA',
+		sfBuyerContactOtherCountry: 'USA',
+		sfRecipientContactMailingCountry: 'USA',
+		sfRecipientContactOtherCountry: 'USA',
 	},
 	{
 		firstName: 'Mary',
