@@ -12,6 +12,10 @@ export const handler = (event: {
 		sfContactId: string;
 		subName: string;
 		workEmail: string;
+		sfBuyerContactMailingCountry: string;
+		sfBuyerContactOtherCountry: string;
+		sfRecipientContactMailingCountry: string;
+		sfRecipientContactOtherCountry: string;
 	}>;
 }) => {
 	const region = getIfDefined<string>(
