@@ -19,7 +19,7 @@ export const handler = (event: {
 		sfRecipientContactOtherCountry: string;
 	}>;
 }) => {
-	try{
+	try {
 		const region = getIfDefined<string>(
 			process.env.REGION,
 			'S3_BUCKET environment variable REGION not set',
@@ -47,6 +47,6 @@ export const handler = (event: {
 		return returnValue;
 	} catch (error) {
 		console.error('Error:', error);
-		throw error;  // Ensure errors propagate correctly
+		throw error; // Ensure errors propagate correctly
 	}
 };
