@@ -197,7 +197,7 @@ export class DiscountExpiryNotifier extends GuStack {
 					item: JsonPath.stringAt('$$.Map.Item.Value'),
 				},
 				resultPath: '$.discountProcessingAttempts',
-				outputPath: '$.discountProcessingAttempts',
+				// outputPath: '$.discountProcessingAttempts',
 			},
 		);
 
