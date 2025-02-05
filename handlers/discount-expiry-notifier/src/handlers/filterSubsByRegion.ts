@@ -14,7 +14,6 @@ export const handler = (event: {
 		workEmail: string;
 	}>;
 }) => {
-
 	const region = getIfDefined<string>(
 		process.env.REGION,
 		'S3_BUCKET environment variable REGION not set',
