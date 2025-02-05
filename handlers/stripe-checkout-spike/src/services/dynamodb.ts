@@ -36,6 +36,8 @@ export const putItem = async ({
 		termEndDate: { S: termEndDate },
 	};
 
+	console.info(item);
+
 	const command = new PutItemCommand({
 		TableName: tableName,
 		Item: item,
