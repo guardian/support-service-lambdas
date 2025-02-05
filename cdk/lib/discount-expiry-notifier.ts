@@ -86,7 +86,6 @@ export class DiscountExpiryNotifier extends GuStack {
 				handler: 'filterSubsByRegion.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
-				role,
 			},
 		);
 
