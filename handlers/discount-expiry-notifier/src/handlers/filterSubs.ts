@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/require-await -- this is required to ensure the lambda returns a value*/
-
 import { getIfDefined } from '@modules/nullAndUndefined';
 
 export const handler = async (event: {
@@ -61,7 +60,7 @@ export const handler = async (event: {
 			...event,
 			subsFilteredByRegionsAndProducts,
 		};
-	} catch (error) {
+	} catch (error) { //todo attention here
 		console.error('Error:', error);
 		throw error; // Ensure errors propagate correctly
 	}
