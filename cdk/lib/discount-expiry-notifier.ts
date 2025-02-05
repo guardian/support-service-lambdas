@@ -167,7 +167,7 @@ export class DiscountExpiryNotifier extends GuStack {
 			'Filter subs by region',
 			{
 				lambdaFunction: filterSubsByRegionLambda,
-				outputPath: '$.Payload',
+				// outputPath: '$.Payload',
 			},
 		);
 
