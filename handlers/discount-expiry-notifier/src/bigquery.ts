@@ -5,6 +5,7 @@ import type {
 } from 'google-auth-library';
 import { ExternalAccountClient } from 'google-auth-library';
 import { z } from 'zod';
+import { testQueryResponse } from './testQueryResponse';
 
 export const buildAuthClient = async (
 	clientConfig: string,
@@ -43,22 +44,22 @@ export const BigQueryResultDataSchema = z.array(
 	}),
 );
 
-type DevReturnValueType = Array<{
-	firstName: string;
-	nextPaymentDate: string;
-	paymentAmount: number;
-	paymentCurrency: string;
-	paymentFrequency: string;
-	productName: string;
-	sfContactId: string;
-	subName: string;
-	workEmail: string;
-}>;
-
 export const runQuery = async (
 	authClient: BaseExternalAccountClient,
 	query: string,
-): Promise<DevReturnValueType> => {
+): Promise<
+	Array<{
+		firstName: string;
+		nextPaymentDate: string;
+		paymentAmount: number;
+		paymentCurrency: string;
+		paymentFrequency: string;
+		productName: string;
+		sfContactId: string;
+		subName: string;
+		workEmail: string;
+	}>
+> => {
 	const bigquery = new BigQuery({
 		projectId: `datatech-platform-code`,
 		authClient,
@@ -70,18 +71,5 @@ export const runQuery = async (
 	const resultData = BigQueryResultDataSchema.parse(result[0]);
 	console.log('resultData', resultData);
 
-	const devReturnValue = [
-		{
-			firstName: 'David',
-			nextPaymentDate: '2025-02-28',
-			paymentAmount: 12,
-			paymentCurrency: 'GBP',
-			paymentFrequency: 'Month',
-			productName: 'Supporter Plus',
-			sfContactId: '222',
-			subName: 'A-S00814342', // Active sub in dev sandbox
-			workEmail: 'david.pepper@guardian.co.uk',
-		},
-	];
-	return devReturnValue;
+	return testQueryResponse;
 };

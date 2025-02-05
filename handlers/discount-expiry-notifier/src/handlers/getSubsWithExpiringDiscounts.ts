@@ -1,27 +1,45 @@
+import { getIfDefined } from '@modules/nullAndUndefined';
 import { stageFromEnvironment } from '@modules/stage';
 import { buildAuthClient, runQuery } from '../bigquery';
 import { getSSMParam } from '../ssm';
+import { testQueryResponse } from '../testQueryResponse';
 
-//to manually run the state machine for a specified date, enter execution date {"executionDate":"2025-11-23"} in aws console
-export const handler = async (event: { executionDate?: string }) => {
+//to manually run the state machine for a specified discount expiry date, enter {"discountExpiresOnDate":"2025-11-23"} in aws console
+export const handler = async (event: { discountExpiresOnDate?: string }) => {
 	const gcpConfig = await getSSMParam(
 		'gcp-credentials-config',
 		stageFromEnvironment(),
 	);
 
 	const authClient = await buildAuthClient(gcpConfig);
-	const executionDate = event.executionDate
-		? event.executionDate.substring(0, 10)
-		: new Date().toISOString().substring(0, 10);
+	const discountExpiresOnDate = event.discountExpiresOnDate
+		? event.discountExpiresOnDate.substring(0, 10)
+		: addDays(new Date(), daysUntilDiscountExpiryDate());
 
-	const result = await runQuery(authClient, getQuery(executionDate));
-
+	const query = getQuery(discountExpiresOnDate);
+	const result = await runQuery(authClient, query);
+	console.log('result', result);
 	return {
-		expiringDiscountsToProcess: result,
+		discountExpiresOnDate,
+		expiringDiscountsToProcess: testQueryResponse,
 	};
 };
 
-const getQuery = (executionDate: string): string =>
+const addDays = (date: Date, days: number): string => {
+	date.setDate(date.getDate() + days);
+	return date.toISOString().substring(0, 10);
+};
+
+const daysUntilDiscountExpiryDate = (): number => {
+	return parseInt(
+		getIfDefined<string>(
+			process.env.DAYS_UNTIL_DISCOUNT_EXPIRY_DATE,
+			'DAYS_UNTIL_DISCOUNT_EXPIRY_DATE environment variable not set',
+		),
+	);
+};
+
+const getQuery = (discountExpiresOnDate: string): string =>
 	`WITH expiringDiscounts AS (
 		SELECT
 			account.currency as paymentCurrency,
@@ -52,8 +70,8 @@ const getQuery = (executionDate: string): string =>
 			charge.up_to_periods > 1 AND 
 			sub.is_latest_version = TRUE AND 
 			sub.status = 'Active' AND 
-			DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = DATE_ADD(DATE '${executionDate}', INTERVAL 32 DAY) AND
-			sub.name = 'A-S02284587'	
+			DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = '${discountExpiresOnDate}' AND
+			sub.name = 'A-S02287430'	
 	)
 	SELECT 
 		STRING_AGG(DISTINCT firstName) as firstName,
