@@ -44,7 +44,7 @@ export const handler = (event: {
 		};
 		console.log('returnValue: ', returnValue);
 
-		return returnValue;
+		return 'hello';
 	} catch (error) {
 		console.error('Error:', error);
 		throw error; // Ensure errors propagate correctly
