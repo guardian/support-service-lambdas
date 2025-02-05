@@ -2,43 +2,78 @@ import { DataExtensionNames, sendEmail } from '@modules/email/email';
 import { stageFromEnvironment } from '@modules/stage';
 
 export const handler = async (event: {
-	firstName: string;
-	nextPaymentDate: string;
-	paymentAmount: number;
-	paymentCurrency: string;
-	paymentFrequency: string;
-	productName: string;
-	sfContactId: string;
-	subName: string;
-	workEmail: string;
+	item: {
+		firstName: string;
+		nextPaymentDate: string;
+		paymentAmount: number;
+		paymentCurrency: string;
+		paymentFrequency: string;
+		productName: string;
+		sfContactId: string;
+		subName: string;
+		workEmail: string;
+		subStatus: string;
+	};
 }) => {
-	const currencySymbol = getCurrencySymbol(event.paymentCurrency);
+	console.log('event:', event);
+	console.log('event.item.firstName:', event.item.firstName);
+	console.log('event.item.subStatus:', event.item.subStatus);
+	if (event.item.subStatus === 'Cancelled') {
+		return {
+			detail: event,
+			emailSendAttempt: {
+				status: 'skipped',
+				payload: {},
+				response: 'Subscription status is cancelled',
+			},
+		};
+	}
+	const currencySymbol = getCurrencySymbol(event.item.paymentCurrency);
 
 	const payload = {
 		...{
 			To: {
-				Address: 'david.pepper@guardian.co.uk', // hard code this during testing
+				Address: event.item.workEmail,
 				ContactAttributes: {
 					SubscriberAttributes: {
-						EmailAddress: 'david.pepper@guardian.co.uk', // hard code this during testing
-						paymentAmount: `${currencySymbol}${event.paymentAmount}`,
-						first_name: event.firstName,
-						date_of_payment: formatDate(event.nextPaymentDate),
-						paymentFrequency: event.paymentFrequency,
+						EmailAddress: event.item.workEmail,
+						paymentAmount: `${currencySymbol}${event.item.paymentAmount}`,
+						first_name: event.item.firstName,
+						date_of_payment: formatDate(event.item.nextPaymentDate),
+						paymentFrequency: event.item.paymentFrequency,
 					},
 				},
 			},
 			// subscriptionCancelledEmail used for testing. will update data extension to active one when published
 			DataExtensionName: DataExtensionNames.subscriptionCancelledEmail,
 		},
-		SfContactId: event.sfContactId,
+		SfContactId: event.item.sfContactId,
 	};
 
-	const emailSend = await sendEmail(stageFromEnvironment(), payload);
+	const emailSendAttempt = await sendEmail(stageFromEnvironment(), payload);
 
-	console.log('emailSend:', emailSend);
+	console.log('emailSendAttempt:', emailSendAttempt);
+	try {
+		const response = await sendEmail(stageFromEnvironment(), payload);
 
-	return emailSend;
+		return {
+			detail: event,
+			emailSendAttempt: {
+				status: 'success',
+				payload,
+				response,
+			},
+		};
+	} catch (error) {
+		return {
+			detail: event,
+			emailSendAttempt: {
+				status: 'error',
+				payload,
+				response: error as string,
+			},
+		};
+	}
 };
 
 function formatDate(inputDate: string): string {

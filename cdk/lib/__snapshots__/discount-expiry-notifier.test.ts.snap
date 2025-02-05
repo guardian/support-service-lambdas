@@ -166,7 +166,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
           "Fn::Join": [
             "",
             [
-              "{"StartAt":"Get subs with expiring discounts","States":{"Get subs with expiring discounts":{"Next":"Email sends processor map","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "{"StartAt":"Get subs with expiring discounts","States":{"Get subs with expiring discounts":{"Next":"Sub status fetcher map","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -177,7 +177,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Email sends processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Save results","Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Check sub is active","States":{"Check sub is active":{"Next":"Is Subscription Active?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Sub status fetcher map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Expiring discount processor map","Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Get sub status","States":{"Get sub status":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -188,7 +188,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Is Subscription Active?":{"Type":"Choice","Choices":[{"Variable":"$.status","StringEquals":"Active","Next":"Initiate email send"}],"Default":"Skip Processing"},"Skip Processing":{"Type":"Pass","ResultPath":null,"End":true},"Initiate email send":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.expiringDiscountsToProcess","MaxConcurrency":10},"Expiring discount processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Save results","Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Initiate email send","States":{"Initiate email send":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -199,7 +199,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.expiringDiscountsToProcess","MaxConcurrency":10},"Save results":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.discountProcessingAttempts","MaxConcurrency":10},"Save results":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -348,7 +348,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "subisactivelambda106BDEEC",
+                    "initiateemailsendlambdaE5C79A3B",
                     "Arn",
                   ],
                 },
@@ -358,7 +358,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "subisactivelambda106BDEEC",
+                          "initiateemailsendlambdaE5C79A3B",
                           "Arn",
                         ],
                       },
@@ -374,7 +374,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "initiateemailsendlambdaE5C79A3B",
+                    "subisactivelambda106BDEEC",
                     "Arn",
                   ],
                 },
@@ -384,7 +384,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "initiateemailsendlambdaE5C79A3B",
+                          "subisactivelambda106BDEEC",
                           "Arn",
                         ],
                       },
@@ -1523,7 +1523,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
           "Fn::Join": [
             "",
             [
-              "{"StartAt":"Get subs with expiring discounts","States":{"Get subs with expiring discounts":{"Next":"Email sends processor map","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "{"StartAt":"Get subs with expiring discounts","States":{"Get subs with expiring discounts":{"Next":"Sub status fetcher map","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1534,7 +1534,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Email sends processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Save results","Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Check sub is active","States":{"Check sub is active":{"Next":"Is Subscription Active?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Sub status fetcher map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Expiring discount processor map","Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Get sub status","States":{"Get sub status":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1545,7 +1545,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Is Subscription Active?":{"Type":"Choice","Choices":[{"Variable":"$.status","StringEquals":"Active","Next":"Initiate email send"}],"Default":"Skip Processing"},"Skip Processing":{"Type":"Pass","ResultPath":null,"End":true},"Initiate email send":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.expiringDiscountsToProcess","MaxConcurrency":10},"Expiring discount processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Save results","Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Initiate email send","States":{"Initiate email send":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1556,7 +1556,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.expiringDiscountsToProcess","MaxConcurrency":10},"Save results":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.discountProcessingAttempts","MaxConcurrency":10},"Save results":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1705,7 +1705,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "subisactivelambda106BDEEC",
+                    "initiateemailsendlambdaE5C79A3B",
                     "Arn",
                   ],
                 },
@@ -1715,7 +1715,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "subisactivelambda106BDEEC",
+                          "initiateemailsendlambdaE5C79A3B",
                           "Arn",
                         ],
                       },
@@ -1731,7 +1731,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "initiateemailsendlambdaE5C79A3B",
+                    "subisactivelambda106BDEEC",
                     "Arn",
                   ],
                 },
@@ -1741,7 +1741,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "initiateemailsendlambdaE5C79A3B",
+                          "subisactivelambda106BDEEC",
                           "Arn",
                         ],
                       },
