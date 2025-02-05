@@ -1,8 +1,8 @@
 import { DataExtensionNames, sendEmail } from '@modules/email/email';
 import { stageFromEnvironment } from '@modules/stage';
 
-export const handler = async (event: { 
-	item: {	
+export const handler = async (event: {
+	item: {
 		firstName: string;
 		nextPaymentDate: string;
 		paymentAmount: number;
