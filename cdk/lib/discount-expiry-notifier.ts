@@ -179,10 +179,10 @@ export class DiscountExpiryNotifier extends GuStack {
 
 		const subStatusFetcherMap = new Map(this, 'Sub status fetcher map', {
 			maxConcurrency: 10,
-			itemsPath: JsonPath.stringAt('$.expiringDiscountsToProcess'),
-			parameters: {
-				item: JsonPath.stringAt('$$.Map.Item.Value'),
-			},
+			// itemsPath: JsonPath.stringAt('$.expiringDiscountsToProcess'),
+			// parameters: {
+			// 	item: JsonPath.stringAt('$$.Map.Item.Value'),
+			// },
 			resultPath: '$.discountProcessingAttempts',
 			// outputPath: '$.discountProcessingAttempts',
 		});
@@ -192,10 +192,10 @@ export class DiscountExpiryNotifier extends GuStack {
 			'Expiring discount processor map',
 			{
 				maxConcurrency: 10,
-				itemsPath: JsonPath.stringAt('$.discountProcessingAttempts'),
-				parameters: {
-					item: JsonPath.stringAt('$$.Map.Item.Value'),
-				},
+				// itemsPath: JsonPath.stringAt('$.discountProcessingAttempts'),
+				// parameters: {
+				// 	item: JsonPath.stringAt('$$.Map.Item.Value'),
+				// },
 				resultPath: '$.discountProcessingAttempts',
 				outputPath: '$.discountProcessingAttempts',
 			},

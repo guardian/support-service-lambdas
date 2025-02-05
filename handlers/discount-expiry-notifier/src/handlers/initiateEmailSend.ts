@@ -11,16 +11,30 @@ export const handler = async (event: {
 	sfContactId: string;
 	subName: string;
 	workEmail: string;
+	subStatus: string;
 }) => {
+	console.log('event:', event);
+	// console.log('event.firstName:', event.firstName);
+	// console.log('event.subStatus:', event.subStatus);
+	if (event.subStatus === 'Cancelled') {
+		return {
+			detail: event,
+			emailSendAttempt: {
+				status: 'skipped',
+				payload: {},
+				response: 'Subscription status is cancelled',
+			},
+		};
+	}
 	const currencySymbol = getCurrencySymbol(event.paymentCurrency);
 
 	const payload = {
 		...{
 			To: {
-				Address: 'david.pepper@guardian.co.uk', // hard code this during testing
+				Address: event.workEmail,
 				ContactAttributes: {
 					SubscriberAttributes: {
-						EmailAddress: 'david.pepper@guardian.co.uk', // hard code this during testing
+						EmailAddress: event.workEmail,
 						paymentAmount: `${currencySymbol}${event.paymentAmount}`,
 						first_name: event.firstName,
 						date_of_payment: formatDate(event.nextPaymentDate),
@@ -34,11 +48,30 @@ export const handler = async (event: {
 		SfContactId: event.sfContactId,
 	};
 
-	const emailSend = await sendEmail(stageFromEnvironment(), payload);
+	const emailSendAttempt = await sendEmail(stageFromEnvironment(), payload);
 
-	console.log('emailSend:', emailSend);
+	console.log('emailSendAttempt:', emailSendAttempt);
+	try {
+		const response = await sendEmail(stageFromEnvironment(), payload);
 
-	return emailSend;
+		return {
+			detail: event,
+			emailSendAttempt: {
+				status: 'success',
+				payload,
+				response,
+			},
+		};
+	} catch (error) {
+		return {
+			detail: event,
+			emailSendAttempt: {
+				status: 'error',
+				payload,
+				response: error as string,
+			},
+		};
+	}
 };
 
 function formatDate(inputDate: string): string {
