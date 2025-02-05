@@ -20,7 +20,8 @@ export const handler = async (event: { discountExpiresOnDate?: string }) => {
 	try {
 		const result = await runQuery(authClient, query);
 		console.log('result', result);
-	} catch (error) { //throw error here in prod. just catch error for now in dev
+	} catch (error) {
+		//throw error here in prod. just catch error for now in dev
 		console.log('error', JSON.stringify(error, null, 2));
 	}
 	return {
