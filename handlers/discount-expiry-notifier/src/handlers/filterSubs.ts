@@ -27,7 +27,7 @@ export const handler = async (event: {
 			'FILTER_BY_REGIONS environment variable not set',
 		);
 		const FILTER_BY_PRODUCTS = getIfDefined<string>(
-			process.env.FILTER_BY_REGIONS,
+			process.env.FILTER_BY_PRODUCTS,
 			'FILTER_BY_PRODUCTS environment variable not set',
 		);
 

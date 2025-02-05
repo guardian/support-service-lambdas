@@ -5,7 +5,7 @@ export const testQueryResponse = [
 		paymentAmount: 1.23,
 		paymentCurrency: 'GBP',
 		paymentFrequency: 'Month',
-		productName: 'Supporter Plus',
+		productName: 'GW',
 		sfContactId: '0039E00001HiIGlQAN',
 		subName: 'A-S00886188', // Active sub in dev sandbox
 		workEmail: 'david.pepper+david@guardian.co.uk',
