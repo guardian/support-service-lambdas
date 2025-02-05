@@ -72,6 +72,23 @@ export class DiscountExpiryNotifier extends GuStack {
 				role,
 			},
 		);
+		const filterSubsByRegionLambda = new GuLambdaFunction(
+			this,
+			'filter-subs-by-region-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-filter-subs-by-region-${this.stage}`,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+					REGION: 'US',
+				},
+				handler: 'filterSubsByRegion.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+				role,
+			},
+		);
 
 		const getSubStatusLambda = new GuLambdaFunction(
 			this,
@@ -146,6 +163,15 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
+		const filterSubsByRegionLambdaTask = new LambdaInvoke(
+			this,
+			'Filter subs by region',
+			{
+				lambdaFunction: filterSubsByRegionLambda,
+				outputPath: '$.Payload',
+			},
+		);
+
 		const getSubStatusLambdaTask = new LambdaInvoke(this, 'Get sub status', {
 			lambdaFunction: getSubStatusLambda,
 			outputPath: '$.Payload',
@@ -192,6 +218,7 @@ export class DiscountExpiryNotifier extends GuStack {
 
 		const definitionBody = DefinitionBody.fromChainable(
 			getSubsWithExpiringDiscountsLambdaTask
+				.next(filterSubsByRegionLambdaTask)
 				.next(subStatusFetcherMap)
 				.next(expiringDiscountProcessorMap)
 				.next(saveResultsLambdaTask),

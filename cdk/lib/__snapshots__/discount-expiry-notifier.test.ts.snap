@@ -118,6 +118,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
       "GuLambdaFunction",
       "GuLambdaFunction",
       "GuLambdaFunction",
+      "GuLambdaFunction",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -166,7 +167,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
           "Fn::Join": [
             "",
             [
-              "{"StartAt":"Get subs with expiring discounts","States":{"Get subs with expiring discounts":{"Next":"Sub status fetcher map","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "{"StartAt":"Get subs with expiring discounts","States":{"Get subs with expiring discounts":{"Next":"Filter subs by region","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -174,6 +175,17 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
               {
                 "Fn::GetAtt": [
                   "getsubswithexpiringdiscountslambda78A8A9ED",
+                  "Arn",
+                ],
+              },
+              "","Payload.$":"$"}},"Filter subs by region":{"Next":"Sub status fetcher map","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
+              {
+                "Fn::GetAtt": [
+                  "filtersubsbyregionlambdaFE0BA6F6",
                   "Arn",
                 ],
               },
@@ -322,6 +334,32 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
+                    "filtersubsbyregionlambdaFE0BA6F6",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "filtersubsbyregionlambdaFE0BA6F6",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
                     "saveresultslambda2CAFC532",
                     "Arn",
                   ],
@@ -405,6 +443,66 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "filtersubsbyregionlambdaFE0BA6F6": {
+      "DependsOn": [
+        "querylambdaroleDefaultPolicy929B9FB7",
+        "querylambdaroleC6C8A94B",
+      ],
+      "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "membership/CODE/discount-expiry-notifier/discount-expiry-notifier.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "APP": "discount-expiry-notifier",
+            "REGIONS": "US",
+            "STACK": "membership",
+            "STAGE": "CODE",
+            "Stage": "CODE",
+          },
+        },
+        "FunctionName": "discount-expiry-notifier-filter-subs-by-region-CODE",
+        "Handler": "filterSubsByRegion.handler",
+        "MemorySize": 512,
+        "Role": {
+          "Fn::GetAtt": [
+            "querylambdaroleC6C8A94B",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "discount-expiry-notifier",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 30,
+      },
+      "Type": "AWS::Lambda::Function",
     },
     "getsubswithexpiringdiscountslambda78A8A9ED": {
       "DependsOn": [
@@ -1475,6 +1573,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
       "GuLambdaFunction",
       "GuLambdaFunction",
       "GuLambdaFunction",
+      "GuLambdaFunction",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -1523,7 +1622,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
           "Fn::Join": [
             "",
             [
-              "{"StartAt":"Get subs with expiring discounts","States":{"Get subs with expiring discounts":{"Next":"Sub status fetcher map","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "{"StartAt":"Get subs with expiring discounts","States":{"Get subs with expiring discounts":{"Next":"Filter subs by region","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1531,6 +1630,17 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
               {
                 "Fn::GetAtt": [
                   "getsubswithexpiringdiscountslambda78A8A9ED",
+                  "Arn",
+                ],
+              },
+              "","Payload.$":"$"}},"Filter subs by region":{"Next":"Sub status fetcher map","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
+              {
+                "Fn::GetAtt": [
+                  "filtersubsbyregionlambdaFE0BA6F6",
                   "Arn",
                 ],
               },
@@ -1679,6 +1789,32 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
+                    "filtersubsbyregionlambdaFE0BA6F6",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "filtersubsbyregionlambdaFE0BA6F6",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
                     "saveresultslambda2CAFC532",
                     "Arn",
                   ],
@@ -1762,6 +1898,66 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "filtersubsbyregionlambdaFE0BA6F6": {
+      "DependsOn": [
+        "querylambdaroleDefaultPolicy929B9FB7",
+        "querylambdaroleC6C8A94B",
+      ],
+      "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "membership/PROD/discount-expiry-notifier/discount-expiry-notifier.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "APP": "discount-expiry-notifier",
+            "REGIONS": "US",
+            "STACK": "membership",
+            "STAGE": "PROD",
+            "Stage": "PROD",
+          },
+        },
+        "FunctionName": "discount-expiry-notifier-filter-subs-by-region-PROD",
+        "Handler": "filterSubsByRegion.handler",
+        "MemorySize": 512,
+        "Role": {
+          "Fn::GetAtt": [
+            "querylambdaroleC6C8A94B",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "discount-expiry-notifier",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 30,
+      },
+      "Type": "AWS::Lambda::Function",
     },
     "getsubswithexpiringdiscountslambda78A8A9ED": {
       "DependsOn": [
