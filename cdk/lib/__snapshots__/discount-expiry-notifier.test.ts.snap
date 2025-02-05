@@ -185,7 +185,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
               ":states:::lambda:invoke","Parameters":{"FunctionName":"",
               {
                 "Fn::GetAtt": [
-                  "filtersubsbyregionlambdaFE0BA6F6",
+                  "filtersubslambdaC3C4D67D",
                   "Arn",
                 ],
               },
@@ -334,7 +334,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "filtersubsbyregionlambdaFE0BA6F6",
+                    "filtersubslambdaC3C4D67D",
                     "Arn",
                   ],
                 },
@@ -344,7 +344,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "filtersubsbyregionlambdaFE0BA6F6",
+                          "filtersubslambdaC3C4D67D",
                           "Arn",
                         ],
                       },
@@ -444,10 +444,10 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "filtersubsbyregionlambdaFE0BA6F6": {
+    "filtersubslambdaC3C4D67D": {
       "DependsOn": [
-        "filtersubsbyregionlambdaServiceRoleDefaultPolicyA535A6A4",
-        "filtersubsbyregionlambdaServiceRole502EBAC1",
+        "filtersubslambdaServiceRoleDefaultPolicyF5DEA603",
+        "filtersubslambdaServiceRoleF9BD9334",
       ],
       "Properties": {
         "Architectures": [
@@ -462,18 +462,18 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "discount-expiry-notifier",
-            "REGION": "US",
+            "REGION": "US,USA",
             "STACK": "membership",
             "STAGE": "CODE",
             "Stage": "CODE",
           },
         },
-        "FunctionName": "discount-expiry-notifier-filter-subs-by-region-CODE",
-        "Handler": "filterSubsByRegion.handler",
+        "FunctionName": "discount-expiry-notifier-filter-subs-CODE",
+        "Handler": "filterSubs.handler",
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
-            "filtersubsbyregionlambdaServiceRole502EBAC1",
+            "filtersubslambdaServiceRoleF9BD9334",
             "Arn",
           ],
         },
@@ -504,60 +504,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "filtersubsbyregionlambdaServiceRole502EBAC1": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "discount-expiry-notifier",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "filtersubsbyregionlambdaServiceRoleDefaultPolicyA535A6A4": {
+    "filtersubslambdaServiceRoleDefaultPolicyF5DEA603": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -648,14 +595,67 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "filtersubsbyregionlambdaServiceRoleDefaultPolicyA535A6A4",
+        "PolicyName": "filtersubslambdaServiceRoleDefaultPolicyF5DEA603",
         "Roles": [
           {
-            "Ref": "filtersubsbyregionlambdaServiceRole502EBAC1",
+            "Ref": "filtersubslambdaServiceRoleF9BD9334",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "filtersubslambdaServiceRoleF9BD9334": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "discount-expiry-notifier",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
     },
     "getsubswithexpiringdiscountslambda78A8A9ED": {
       "DependsOn": [
@@ -1793,7 +1793,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
               ":states:::lambda:invoke","Parameters":{"FunctionName":"",
               {
                 "Fn::GetAtt": [
-                  "filtersubsbyregionlambdaFE0BA6F6",
+                  "filtersubslambdaC3C4D67D",
                   "Arn",
                 ],
               },
@@ -1942,7 +1942,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "filtersubsbyregionlambdaFE0BA6F6",
+                    "filtersubslambdaC3C4D67D",
                     "Arn",
                   ],
                 },
@@ -1952,7 +1952,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "filtersubsbyregionlambdaFE0BA6F6",
+                          "filtersubslambdaC3C4D67D",
                           "Arn",
                         ],
                       },
@@ -2052,10 +2052,10 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "filtersubsbyregionlambdaFE0BA6F6": {
+    "filtersubslambdaC3C4D67D": {
       "DependsOn": [
-        "filtersubsbyregionlambdaServiceRoleDefaultPolicyA535A6A4",
-        "filtersubsbyregionlambdaServiceRole502EBAC1",
+        "filtersubslambdaServiceRoleDefaultPolicyF5DEA603",
+        "filtersubslambdaServiceRoleF9BD9334",
       ],
       "Properties": {
         "Architectures": [
@@ -2070,18 +2070,18 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "discount-expiry-notifier",
-            "REGION": "US",
+            "REGION": "US,USA",
             "STACK": "membership",
             "STAGE": "PROD",
             "Stage": "PROD",
           },
         },
-        "FunctionName": "discount-expiry-notifier-filter-subs-by-region-PROD",
-        "Handler": "filterSubsByRegion.handler",
+        "FunctionName": "discount-expiry-notifier-filter-subs-PROD",
+        "Handler": "filterSubs.handler",
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
-            "filtersubsbyregionlambdaServiceRole502EBAC1",
+            "filtersubslambdaServiceRoleF9BD9334",
             "Arn",
           ],
         },
@@ -2112,60 +2112,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "filtersubsbyregionlambdaServiceRole502EBAC1": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "discount-expiry-notifier",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "filtersubsbyregionlambdaServiceRoleDefaultPolicyA535A6A4": {
+    "filtersubslambdaServiceRoleDefaultPolicyF5DEA603": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -2256,14 +2203,67 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "filtersubsbyregionlambdaServiceRoleDefaultPolicyA535A6A4",
+        "PolicyName": "filtersubslambdaServiceRoleDefaultPolicyF5DEA603",
         "Roles": [
           {
-            "Ref": "filtersubsbyregionlambdaServiceRole502EBAC1",
+            "Ref": "filtersubslambdaServiceRoleF9BD9334",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "filtersubslambdaServiceRoleF9BD9334": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "discount-expiry-notifier",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
     },
     "getsubswithexpiringdiscountslambda78A8A9ED": {
       "DependsOn": [
