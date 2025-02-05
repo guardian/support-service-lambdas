@@ -30,14 +30,17 @@ export const handler = async (event: {
 		console.log('event: ', event);
 		console.log('region: ', region);
 
+		const regions = region.split(',');
+
 		const subsFilteredByRegion = event.expiringDiscountsToProcess.filter(
 			(sub) =>
-				sub.contactCountry === region ||
-				sub.sfBuyerContactMailingCountry === region ||
-				sub.sfBuyerContactOtherCountry === region ||
-				sub.sfRecipientContactMailingCountry === region ||
-				sub.sfRecipientContactOtherCountry === region,
+				regions.includes(sub.contactCountry) ||
+				regions.includes(sub.sfBuyerContactMailingCountry) ||
+				regions.includes(sub.sfBuyerContactOtherCountry) ||
+				regions.includes(sub.sfRecipientContactMailingCountry) ||
+				regions.includes(sub.sfRecipientContactOtherCountry),
 		);
+
 		console.log('subsFilteredByRegion: ', subsFilteredByRegion);
 
 		return {
