@@ -11,12 +11,12 @@ export const handler = async (event: {
 		paymentFrequency: string;
 		productName: string;
 		sfContactId: string;
-		subName: string;
+		zuoraSubName: string;
 		workEmail: string;
 	};
 }) => {
 	try {
-		const subName = event.item.subName;
+		const subName = event.item.zuoraSubName;
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const getSubResponse = await getSubscription(zuoraClient, subName);
 

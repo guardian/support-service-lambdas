@@ -11,7 +11,7 @@ export const handler = async (event: {
 		paymentFrequency: string;
 		productName: string;
 		sfContactId: string;
-		subName: string;
+		zuoraSubName: string;
 		workEmail: string;
 		contactCountry: string;
 		sfBuyerContactMailingCountry: string;

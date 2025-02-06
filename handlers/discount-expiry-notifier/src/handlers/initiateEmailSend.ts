@@ -10,14 +10,11 @@ export const handler = async (event: {
 		paymentFrequency: string;
 		productName: string;
 		sfContactId: string;
-		subName: string;
+		zuoraSubName: string;
 		workEmail: string;
 		subStatus: string;
 	};
 }) => {
-	console.log('event:', event);
-	console.log('event.item.firstName:', event.item.firstName);
-	console.log('event.item.subStatus:', event.item.subStatus);
 	if (event.item.subStatus === 'Cancelled') {
 		return {
 			detail: event,
@@ -44,7 +41,6 @@ export const handler = async (event: {
 					},
 				},
 			},
-			// subscriptionCancelledEmail used for testing. will update data extension to active one when published
 			DataExtensionName: DataExtensionNames.discountExpiryNotificationEmail,
 		},
 		SfContactId: event.item.sfContactId,
