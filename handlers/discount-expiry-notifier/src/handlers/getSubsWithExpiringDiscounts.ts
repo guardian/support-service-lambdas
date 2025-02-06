@@ -40,7 +40,8 @@ const daysUntilDiscountExpiryDate = (): number => {
 };
 
 const getQuery = (discountExpiresOnDate: string): string =>
-	`WITH expiringDiscounts AS (
+	`
+WITH expiringDiscounts AS (
 	SELECT
 		contact.country as contactCountry,
 		contact.first_name as firstName,
@@ -52,7 +53,7 @@ const getQuery = (discountExpiresOnDate: string): string =>
 		zuoraSub.id AS zuoraSubId,
 		zuoraSub.name AS zuoraSubName,
 		sfBuyerContact.mailing_country as sfBuyerContactMailingCountry,
-		sfBuyerContact.other_country as sfBuyerContactOtherCountry,
+		sfBuyerContact.billing_country as sfBuyerContactOtherCountry,
 		sfRecipientContact.mailing_country as sfRecipientContactMailingCountry,
 		sfRecipientContact.other_country as sfRecipientContactOtherCountry,
 	FROM 
@@ -67,21 +68,20 @@ const getQuery = (discountExpiresOnDate: string): string =>
 		ON contact.id = zuoraSub.sold_to_contact_id
 	INNER JOIN datatech-fivetran.zuora.account account 
 		ON account.sold_to_contact_id = contact.id
-	INNER JOIN datatech-fivetran.salesforce.sf_subscription_c sfSub 
-		ON sfSub.name = zuoraSub.name
-	INNER JOIN datatech-fivetran.salesforce.contact sfBuyerContact 
-		ON sfBuyerContact.id = sfSub.buyer_c
+	INNER JOIN datatech-platform-prod.intermediate.stg_salesforce_subscription sfSub 
+		ON sfSub.subscription_name = zuoraSub.name
+	INNER JOIN datatech-platform-prod.intermediate.stg_salesforce_contact sfBuyerContact 
+		ON sfBuyerContact.contact_id = sfSub.buyer
 	INNER JOIN datatech-fivetran.salesforce.contact sfRecipientContact 
-		ON sfRecipientContact.id = sfSub.recipient_c
+		ON sfRecipientContact.id = sfSub.recipient
 	WHERE 
 		product.name = 'Discounts' 
 		AND charge.charge_type = 'Recurring' 
 		AND charge.up_to_periods IS NOT NULL 
 		AND charge.up_to_periods > 1 
 		AND zuoraSub.is_latest_version = TRUE 
-		AND zuoraSub.status = 'Active'
-		AND DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = '${discountExpiresOnDate}' 
-		LIMIT 2
+		AND zuoraSub.status = 'Active' 
+		AND DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = '${discountExpiresOnDate}'
 )
 SELECT 
 	STRING_AGG(DISTINCT contactCountry) as contactCountry,
