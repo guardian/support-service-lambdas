@@ -12,12 +12,9 @@ import {
 import { Architecture } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
-	// Choice,
-	// Condition,
 	DefinitionBody,
 	JsonPath,
 	Map,
-	// Pass,
 	StateMachine,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
@@ -75,6 +72,19 @@ export class DiscountExpiryNotifier extends GuStack {
 				role,
 			},
 		);
+		const filterSubsLambda = new GuLambdaFunction(this, 'filter-subs-lambda', {
+			app: appName,
+			functionName: `${appName}-filter-subs-${this.stage}`,
+			runtime: nodeVersion,
+			environment: {
+				Stage: this.stage,
+				FILTER_BY_REGIONS: 'US,USA',
+				FILTER_BY_PRODUCTS: 'GW',
+			},
+			handler: 'filterSubs.handler',
+			fileName: `${appName}.zip`,
+			architecture: Architecture.ARM_64,
+		});
 
 		const getSubStatusLambda = new GuLambdaFunction(
 			this,
@@ -149,6 +159,15 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
+		const filterSubsLambdaTask = new LambdaInvoke(
+			this,
+			'Filter subs by region',
+			{
+				lambdaFunction: filterSubsLambda,
+				outputPath: '$.Payload',
+			},
+		);
+
 		const getSubStatusLambdaTask = new LambdaInvoke(this, 'Get sub status', {
 			lambdaFunction: getSubStatusLambda,
 			outputPath: '$.Payload',
@@ -168,23 +187,13 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
-		// const emailSendsProcessingMap = new Map(this, 'Email sends processor map', {
-		// 	maxConcurrency: 10,
-		// 	itemsPath: JsonPath.stringAt('$.expiringDiscountsToProcess'),
-		// 	parameters: {
-		// 		item: JsonPath.stringAt('$$.Map.Item.Value'),
-		// 	},
-		// 	resultPath: '$.discountProcessingAttempts',
-		// });
-
 		const subStatusFetcherMap = new Map(this, 'Sub status fetcher map', {
 			maxConcurrency: 10,
-			itemsPath: JsonPath.stringAt('$.expiringDiscountsToProcess'),
+			itemsPath: JsonPath.stringAt('$.filteredSubs'),
 			parameters: {
 				item: JsonPath.stringAt('$$.Map.Item.Value'),
 			},
 			resultPath: '$.discountProcessingAttempts',
-			// outputPath: '$.discountProcessingAttempts',
 		});
 
 		const expiringDiscountProcessorMap = new Map(
@@ -197,29 +206,15 @@ export class DiscountExpiryNotifier extends GuStack {
 					item: JsonPath.stringAt('$$.Map.Item.Value'),
 				},
 				resultPath: '$.discountProcessingAttempts',
-				// outputPath: '$.discountProcessingAttempts',
 			},
 		);
 
-		// const isSubActiveChoice = new Choice(this, 'Is Subscription Active?');
-
-		// emailSendsProcessingMap.iterator(
-		// 	subIsActiveLambdaTask.next(
-		// 		isSubActiveChoice
-		// 			.when(
-		// 				Condition.stringEquals('$.status', 'Active'),
-		// 				initiateEmailSendLambdaTask,
-		// 			)
-		// 			.otherwise(
-		// 				new Pass(this, 'Skip Processing', { resultPath: JsonPath.DISCARD }),
-		// 			),
-		// 	),
-		// );
 		subStatusFetcherMap.iterator(getSubStatusLambdaTask);
 		expiringDiscountProcessorMap.iterator(initiateEmailSendLambdaTask);
 
 		const definitionBody = DefinitionBody.fromChainable(
 			getSubsWithExpiringDiscountsLambdaTask
+				.next(filterSubsLambdaTask)
 				.next(subStatusFetcherMap)
 				.next(expiringDiscountProcessorMap)
 				.next(saveResultsLambdaTask),

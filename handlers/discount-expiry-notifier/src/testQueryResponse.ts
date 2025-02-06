@@ -5,10 +5,15 @@ export const testQueryResponse = [
 		paymentAmount: 1.23,
 		paymentCurrency: 'GBP',
 		paymentFrequency: 'Month',
-		productName: 'Supporter Plus',
+		productName: 'GW',
 		sfContactId: '0039E00001HiIGlQAN',
 		subName: 'A-S00886188', // Active sub in dev sandbox
 		workEmail: 'david.pepper+david@guardian.co.uk',
+		contactCountry: 'USA',
+		sfBuyerContactMailingCountry: 'USA',
+		sfBuyerContactOtherCountry: 'USA',
+		sfRecipientContactMailingCountry: 'USA',
+		sfRecipientContactOtherCountry: 'USA',
 	},
 	{
 		firstName: 'Mary',
@@ -20,6 +25,11 @@ export const testQueryResponse = [
 		sfContactId: '0039E00001HwhM9QAJ',
 		subName: 'A-S00886159', // Active subscription in dev sandbox
 		workEmail: 'graham.hopgood@guardian.co.uk',
+		contactCountry: 'US',
+		sfBuyerContactMailingCountry: 'US',
+		sfBuyerContactOtherCountry: 'US',
+		sfRecipientContactMailingCountry: 'US',
+		sfRecipientContactOtherCountry: 'US',
 	},
 	{
 		firstName: 'Robert',
@@ -31,5 +41,10 @@ export const testQueryResponse = [
 		sfContactId: '0039E00001lNoXrQAK',
 		subName: 'A-S00515481', // cancelled subscription in dev sandbox
 		workEmail: 'david.pepper+3003+1@guardian.co.uk',
+		contactCountry: 'Germany',
+		sfBuyerContactMailingCountry: 'Germany',
+		sfBuyerContactOtherCountry: 'Germany',
+		sfRecipientContactMailingCountry: 'Germany',
+		sfRecipientContactOtherCountry: 'Germany',
 	},
 ];
