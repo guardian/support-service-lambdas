@@ -30,10 +30,6 @@ export const handler = async (event: {
 			'FILTER_BY_PRODUCTS environment variable not set',
 		);
 
-		console.log('event: ', event);
-		console.log('FILTER_BY_REGIONS: ', FILTER_BY_REGIONS);
-		console.log('FILTER_BY_PRODUCTS: ', FILTER_BY_PRODUCTS);
-
 		const filterByRegions = FILTER_BY_REGIONS.split(',');
 		const filterByProducts = FILTER_BY_PRODUCTS.split(',');
 
@@ -46,19 +42,13 @@ export const handler = async (event: {
 				filterByRegions.includes(sub.sfRecipientContactOtherCountry),
 		);
 
-		const subsFilteredByRegionsAndProducts = subsFilteredByRegions.filter(
+		const filteredSubs = subsFilteredByRegions.filter(
 			(sub) => filterByProducts.includes(sub.productName),
-		);
-
-		console.log('subsFilteredByRegions: ', subsFilteredByRegions);
-		console.log(
-			'subsFilteredByRegionsAndProducts: ',
-			subsFilteredByRegionsAndProducts,
 		);
 
 		return {
 			...event,
-			subsFilteredByRegionsAndProducts,
+			filteredSubs,
 		};
 	} catch (error) { //todo attention here
 		console.error('Error:', error);

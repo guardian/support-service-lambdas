@@ -17,13 +17,8 @@ export const handler = async (event: { discountExpiresOnDate?: string }) => {
 		: addDays(new Date(), daysUntilDiscountExpiryDate());
 
 	const query = getQuery(discountExpiresOnDate);
-	try {
-		const result = await runQuery(authClient, query);
-		console.log('result', result);
-	} catch (error) {
-		//throw error here in prod. just catch error for now in dev
-		console.log('error', JSON.stringify(error, null, 2));
-	}
+	const result = await runQuery(authClient, query);
+	console.log('result', result);
 	return {
 		discountExpiresOnDate,
 		expiringDiscountsToProcess: testQueryResponse,
