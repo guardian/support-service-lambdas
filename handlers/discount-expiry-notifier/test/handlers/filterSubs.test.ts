@@ -8,16 +8,12 @@ describe('filterSubs handler', () => {
 	beforeEach(() => {
 		jest.resetAllMocks();
 		process.env.FILTER_BY_REGIONS = 'US,USA';
-		process.env.FILTER_BY_PRODUCTS = 'GW';
 	});
 
 	it('should filter subscriptions based on region (USA) and product (GW)', async () => {
 		(getIfDefined as jest.Mock).mockImplementation((envVar, errorMessage) => {
 			if (envVar === process.env.FILTER_BY_REGIONS) {
 				return process.env.FILTER_BY_REGIONS;
-			}
-			if (envVar === process.env.FILTER_BY_PRODUCTS) {
-				return process.env.FILTER_BY_PRODUCTS;
 			}
 			throw new Error(errorMessage as string);
 		});

@@ -462,7 +462,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "discount-expiry-notifier",
-            "FILTER_BY_PRODUCTS": "GW",
             "FILTER_BY_REGIONS": "US,USA",
             "STACK": "membership",
             "STAGE": "CODE",
@@ -2071,7 +2070,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "discount-expiry-notifier",
-            "FILTER_BY_PRODUCTS": "GW",
             "FILTER_BY_REGIONS": "US,USA",
             "STACK": "membership",
             "STAGE": "PROD",
