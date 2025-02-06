@@ -55,7 +55,7 @@ WITH expiringDiscounts AS (
 		sfBuyerContact.mailing_country as sfBuyerContactMailingCountry,
 		sfBuyerContact.billing_country as sfBuyerContactOtherCountry,
 		sfRecipientContact.mailing_country as sfRecipientContactMailingCountry,
-		sfRecipientContact.other_country as sfRecipientContactOtherCountry,
+		sfRecipientContact.billing_country as sfRecipientContactOtherCountry,
 	FROM 
 		datatech-fivetran.zuora.rate_plan_charge charge
 	INNER JOIN datatech-fivetran.zuora.rate_plan rate_plan 
@@ -72,8 +72,8 @@ WITH expiringDiscounts AS (
 		ON sfSub.subscription_name = zuoraSub.name
 	INNER JOIN datatech-platform-prod.intermediate.stg_salesforce_contact sfBuyerContact 
 		ON sfBuyerContact.contact_id = sfSub.buyer
-	INNER JOIN datatech-fivetran.salesforce.contact sfRecipientContact 
-		ON sfRecipientContact.id = sfSub.recipient
+	INNER JOIN datatech-platform-prod.intermediate.stg_salesforce_contact sfRecipientContact 
+		ON sfRecipientContact.contact_id = sfSub.recipient
 	WHERE 
 		product.name = 'Discounts' 
 		AND charge.charge_type = 'Recurring' 
