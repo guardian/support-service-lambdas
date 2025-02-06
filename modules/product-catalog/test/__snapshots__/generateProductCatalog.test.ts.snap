@@ -96,6 +96,23 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "USD": 99,
         },
       },
+      "Quarterly": {
+        "billingPeriod": "Quarter",
+        "charges": {
+          "Subscription": {
+            "id": "2c92c0f84bbfec58014bc6a2d5691f5d",
+          },
+        },
+        "id": "2c92c0f84bbfec58014bc6a2d43a1f5b",
+        "pricing": {
+          "AUD": 79.99,
+          "CAD": 82.31,
+          "EUR": 56.19,
+          "GBP": 44.94,
+          "NZD": 79.99,
+          "USD": 74.94,
+        },
+      },
       "ThreeMonthGift": {
         "charges": {
           "Subscription": {
@@ -1723,6 +1740,9 @@ exports[`code Generated product catalog types match snapshot 1`] = `
         "OneYearGift": {
           "Subscription": {},
         },
+        "Quarterly": {
+          "Subscription": {},
+        },
         "ThreeMonthGift": {
           "Subscription": {},
         },
@@ -2330,6 +2350,23 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 99,
           "NZD": 175,
           "USD": 165,
+        },
+      },
+      "Quarterly": {
+        "billingPeriod": "Quarter",
+        "charges": {
+          "Subscription": {
+            "id": "2c92a0fb4edd70c9014edeaa4fd42186",
+          },
+        },
+        "id": "2c92a0fb4edd70c8014edeaa4e8521fe",
+        "pricing": {
+          "AUD": 79.99,
+          "CAD": 82.31,
+          "EUR": 56.19,
+          "GBP": 44.94,
+          "NZD": 79.99,
+          "USD": 74.94,
         },
       },
       "ThreeMonthGift": {
@@ -3885,6 +3922,9 @@ exports[`prod Generated product catalog types match snapshot 1`] = `
           "Subscription": {},
         },
         "OneYearGift": {
+          "Subscription": {},
+        },
+        "Quarterly": {
           "Subscription": {},
         },
         "ThreeMonthGift": {
