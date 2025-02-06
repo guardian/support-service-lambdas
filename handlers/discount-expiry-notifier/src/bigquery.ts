@@ -39,7 +39,7 @@ export const BigQueryResultDataSchema = z.array(
 		paymentFrequency: z.string(),
 		productName: z.string(),
 		sfContactId: z.string(),
-		subName: z.string(),
+		zuoraSubName: z.string(),
 		workEmail: z.string(),
 	}),
 );
@@ -56,7 +56,7 @@ export const runQuery = async (
 		paymentFrequency: string;
 		productName: string;
 		sfContactId: string;
-		subName: string;
+		zuoraSubName: string;
 		workEmail: string;
 	}>
 > => {

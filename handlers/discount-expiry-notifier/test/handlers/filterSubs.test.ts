@@ -39,13 +39,13 @@ describe('filterSubs handler', () => {
 			),
 		).toBe(true);
 		expect(
-			result.filteredSubs.some((sub) => sub.subName === 'A-S00886188'),
+			result.filteredSubs.some((sub) => sub.zuoraSubName === 'A-S00886188'),
 		).toBe(true);
 		expect(
-			result.filteredSubs.some((sub) => sub.subName === 'A-S00886159'),
+			result.filteredSubs.some((sub) => sub.zuoraSubName === 'A-S00886159'),
 		).toBe(false);
 		expect(
-			result.filteredSubs.some((sub) => sub.subName === 'A-S00515481'),
+			result.filteredSubs.some((sub) => sub.zuoraSubName === 'A-S00515481'),
 		).toBe(false);
 	});
 
