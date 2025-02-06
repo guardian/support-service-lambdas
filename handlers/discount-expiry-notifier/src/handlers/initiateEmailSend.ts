@@ -45,7 +45,7 @@ export const handler = async (event: {
 				},
 			},
 			// subscriptionCancelledEmail used for testing. will update data extension to active one when published
-			DataExtensionName: DataExtensionNames.DiscountExpiryNotificationEmail,
+			DataExtensionName: DataExtensionNames.discountExpiryNotificationEmail,
 		},
 		SfContactId: event.item.sfContactId,
 	};
