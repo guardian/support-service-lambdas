@@ -7,7 +7,7 @@ export const testQueryResponse = [
 		paymentFrequency: 'Month',
 		productName: 'GW',
 		sfContactId: '0039E00001HiIGlQAN',
-		subName: 'A-S00886188', // Active sub in dev sandbox
+		zuoraSubName: 'A-S00886188', // Active sub in dev sandbox
 		workEmail: 'david.pepper+david@guardian.co.uk',
 		contactCountry: 'USA',
 		sfBuyerContactMailingCountry: 'USA',
@@ -23,7 +23,7 @@ export const testQueryResponse = [
 		paymentFrequency: 'Month',
 		productName: 'Supporter Plus',
 		sfContactId: '0039E00001HwhM9QAJ',
-		subName: 'A-S00886159', // Active subscription in dev sandbox
+		zuoraSubName: 'A-S00886159', // Active subscription in dev sandbox
 		workEmail: 'graham.hopgood@guardian.co.uk',
 		contactCountry: 'US',
 		sfBuyerContactMailingCountry: 'US',
@@ -39,7 +39,7 @@ export const testQueryResponse = [
 		paymentFrequency: 'Month',
 		productName: 'Supporter Plus',
 		sfContactId: '0039E00001lNoXrQAK',
-		subName: 'A-S00515481', // cancelled subscription in dev sandbox
+		zuoraSubName: 'A-S00515481', // cancelled subscription in dev sandbox
 		workEmail: 'david.pepper+3003+1@guardian.co.uk',
 		contactCountry: 'Germany',
 		sfBuyerContactMailingCountry: 'Germany',
