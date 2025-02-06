@@ -26,7 +26,7 @@ export const handler = async (event: { discountExpiresOnDate?: string }) => {
 		};
 	} catch (error) {
 		console.error('Error:', error);
-		// throw error;
+		throw error;
 	}
 	return {
 		discountExpiresOnDate: '2025-03-10',
