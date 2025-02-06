@@ -39,7 +39,7 @@ export const DataExtensionNames = {
 		'digipack-monthly-discount-confirmation-email',
 	supporterPlusAnnualDiscountConfirmationEmail:
 		'supporter-plus-annual-discount-confirmation-email',
-	DiscountExpiryNotificationEmail: 'discount-expiry-email',
+	discountExpiryNotificationEmail: 'discount-expiry-email',
 } as const;
 
 export type DataExtensionName =
