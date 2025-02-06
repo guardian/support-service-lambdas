@@ -7,10 +7,20 @@ jest.mock('@modules/nullAndUndefined');
 describe('filterSubs handler', () => {
     beforeEach(() => {
         jest.resetAllMocks();
+        process.env.FILTER_BY_REGIONS = 'US,USA';
+        process.env.FILTER_BY_PRODUCTS = 'GW';
     });
 
-    it('should filter subscriptions based on regions', async () => {
-        (getIfDefined as jest.Mock).mockReturnValue('US,CA');
+    it('should filter subscriptions based on region (USA) and product (GW)', async () => {
+        (getIfDefined as jest.Mock).mockImplementation((envVar, errorMessage) => {
+            if (envVar === process.env.FILTER_BY_REGIONS) {
+                return process.env.FILTER_BY_REGIONS;
+            }
+            if (envVar === process.env.FILTER_BY_PRODUCTS) {
+                return process.env.FILTER_BY_PRODUCTS;
+            }
+            throw new Error(errorMessage as string);
+        });
 
         const event = {
             discountExpiresOnDate: '2024-03-21',
@@ -20,9 +30,13 @@ describe('filterSubs handler', () => {
         const result = await handler(event);
 
         expect(result).toBeDefined();
+
         expect(result.filteredSubs).toBeInstanceOf(Array);
         expect(result.filteredSubs.length).toBeGreaterThan(0);
-        expect(result.filteredSubs.every(sub => ['US', 'CA'].includes(sub.contactCountry))).toBe(true);
+        expect(result.filteredSubs.every(sub => ['US', 'USA'].includes(sub.contactCountry))).toBe(true);
+        expect(result.filteredSubs.some(sub => sub.subName === 'A-S00886188')).toBe(true);
+        expect(result.filteredSubs.some(sub => sub.subName === 'A-S00886159')).toBe(false);
+        expect(result.filteredSubs.some(sub => sub.subName === 'A-S00515481')).toBe(false);
     });
 
     it('should return an empty array if no subscriptions match the regions', async () => {
