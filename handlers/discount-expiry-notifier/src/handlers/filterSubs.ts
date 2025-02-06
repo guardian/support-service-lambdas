@@ -42,8 +42,8 @@ export const handler = async (event: {
 				filterByRegions.includes(sub.sfRecipientContactOtherCountry),
 		);
 
-		const filteredSubs = subsFilteredByRegions.filter(
-			(sub) => filterByProducts.includes(sub.productName),
+		const filteredSubs = subsFilteredByRegions.filter((sub) =>
+			filterByProducts.includes(sub.productName),
 		);
 
 		return {
