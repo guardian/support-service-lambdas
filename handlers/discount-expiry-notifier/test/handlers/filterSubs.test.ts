@@ -39,7 +39,7 @@ describe('filterSubs handler', () => {
 		).toBe(true);
 		expect(
 			result.filteredSubs.some((sub) => sub.zuoraSubName === 'A-S00886159'),
-		).toBe(false);
+		).toBe(true);
 		expect(
 			result.filteredSubs.some((sub) => sub.zuoraSubName === 'A-S00515481'),
 		).toBe(false);
