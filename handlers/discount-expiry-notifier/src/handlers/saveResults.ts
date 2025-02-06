@@ -36,7 +36,7 @@ export const handler = async (event: {
 	await uploadFileToS3({
 		bucketName,
 		filePath,
-		content: JSON.stringify(event),
+		content: JSON.stringify(event, null, 2),
 	});
 
 	return {
