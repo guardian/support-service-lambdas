@@ -28,6 +28,8 @@ jobs:
           cache: 'pnpm'
       - run: corepack enable
         shell: bash
+      - run: which corepack
+      - run: corepack --version
       - run: pnpm install
       - run: pnpm --filter "./modules/**" check-formatting
       - run: pnpm --filter "./modules/**" lint
