@@ -22,13 +22,12 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
-      - run: npm install --global corepack@0.31.0
-      - run: corepack enable
-        shell: bash
       - uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
+      - run: corepack enable
+        shell: bash
       - run: pnpm install
       - run: pnpm --filter "./modules/**" check-formatting
       - run: pnpm --filter "./modules/**" lint
