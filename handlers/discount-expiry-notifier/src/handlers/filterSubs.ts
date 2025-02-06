@@ -50,8 +50,8 @@ export const handler = async (event: {
 			...event,
 			filteredSubs,
 		};
-	} catch (error) { //todo attention here
+	} catch (error) {
 		console.error('Error:', error);
-		throw error; // Ensure errors propagate correctly
+		throw error;
 	}
 };
