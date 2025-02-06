@@ -39,6 +39,7 @@ export const handler = async (event: {
 
 		return {
 			...event,
+			filteredSubsCount: filteredSubs.length,
 			filteredSubs,
 		};
 	} catch (error) {

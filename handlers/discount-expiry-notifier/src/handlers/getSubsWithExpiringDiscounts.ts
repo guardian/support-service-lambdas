@@ -30,6 +30,7 @@ export const handler = async (event: { discountExpiresOnDate?: string }) => {
 	}
 	return {
 		discountExpiresOnDate: '2025-03-10',
+		expiringDiscountsToProcessCount: testQueryResponse.length,
 		expiringDiscountsToProcess: testQueryResponse,
 	};
 };
