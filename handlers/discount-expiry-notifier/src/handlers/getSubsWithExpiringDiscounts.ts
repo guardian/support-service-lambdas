@@ -6,21 +6,30 @@ import { testQueryResponse } from '../testQueryResponse';
 
 //to manually run the state machine for a specified discount expiry date, enter {"discountExpiresOnDate":"2025-11-23"} in aws console
 export const handler = async (event: { discountExpiresOnDate?: string }) => {
-	const gcpConfig = await getSSMParam(
-		'gcp-credentials-config',
-		stageFromEnvironment(),
-	);
+	try {
+		const gcpConfig = await getSSMParam(
+			'gcp-credentials-config',
+			stageFromEnvironment(),
+		);
 
-	const authClient = await buildAuthClient(gcpConfig);
-	const discountExpiresOnDate = event.discountExpiresOnDate
-		? event.discountExpiresOnDate.substring(0, 10)
-		: addDays(new Date(), daysUntilDiscountExpiryDate());
+		const authClient = await buildAuthClient(gcpConfig);
+		const discountExpiresOnDate = event.discountExpiresOnDate
+			? event.discountExpiresOnDate.substring(0, 10)
+			: addDays(new Date(), daysUntilDiscountExpiryDate());
 
-	const query = getQuery(discountExpiresOnDate);
-	const result = await runQuery(authClient, query);
-	console.log('result', result);
+		const query = getQuery(discountExpiresOnDate);
+		const result = await runQuery(authClient, query);
+		console.log('result', result);
+		return {
+			discountExpiresOnDate,
+			expiringDiscountsToProcess: testQueryResponse,
+		};
+	} catch (error) {
+		console.error('Error:', error);
+		// throw error;
+	}
 	return {
-		discountExpiresOnDate,
+		discountExpiresOnDate: '2025-03-10',
 		expiringDiscountsToProcess: testQueryResponse,
 	};
 };
