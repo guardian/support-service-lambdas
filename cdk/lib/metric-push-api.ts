@@ -63,7 +63,7 @@ export class MetricPushApi extends GuStack {
 		new CfnBasePathMapping(this, 'MetricPushBasePathMapping', {
 			restApiId: lambda.api.restApiId,
 			domainName: domainName.ref,
-			stage: this.stage,
+			stage: lambda.api.deploymentStage.stageName,
 		});
 
 		const dnsRecord = new CfnRecordSet(this, 'MetricPushDNSRecord', {
