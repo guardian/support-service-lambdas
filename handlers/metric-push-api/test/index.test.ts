@@ -54,6 +54,7 @@ describe('handler', () => {
 			const response = await handler(requestEvent);
 
 			expect(response.statusCode).toEqual(204);
+			expect(response.headers?.['Cache-Control']).toEqual('private, no-store');
 		});
 
 		it('returns 204 No Content if no referer is provided', async () => {
@@ -66,6 +67,7 @@ describe('handler', () => {
 			const response = await handler(requestEvent);
 
 			expect(response.statusCode).toEqual(204);
+			expect(response.headers?.['Cache-Control']).toEqual('private, no-store');
 		});
 	});
 });
