@@ -93,7 +93,9 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
         "RestApiId": {
           "Ref": "metricpushapilambdametricpushapiCODE87B70A97",
         },
-        "Stage": "CODE",
+        "Stage": {
+          "Ref": "metricpushapilambdametricpushapiCODEDeploymentStageCODED2BD8FA5",
+        },
       },
       "Type": "AWS::ApiGateway::BasePathMapping",
     },
@@ -874,7 +876,9 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
         "RestApiId": {
           "Ref": "metricpushapilambdametricpushapiPRODF582713E",
         },
-        "Stage": "PROD",
+        "Stage": {
+          "Ref": "metricpushapilambdametricpushapiPRODDeploymentStagePRODBE69BCFC",
+        },
       },
       "Type": "AWS::ApiGateway::BasePathMapping",
     },
