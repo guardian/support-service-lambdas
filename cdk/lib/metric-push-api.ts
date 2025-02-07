@@ -81,7 +81,7 @@ export class MetricPushApi extends GuStack {
 				{
 					resourcePath: '/*',
 					httpMethod: '*',
-					loggingLevel: 'INFO',
+					loggingLevel: 'ERROR',
 					dataTraceEnabled: true,
 				},
 			],

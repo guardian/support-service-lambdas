@@ -185,7 +185,7 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
           {
             "DataTraceEnabled": true,
             "HttpMethod": "*",
-            "LoggingLevel": "INFO",
+            "LoggingLevel": "ERROR",
             "ResourcePath": "/*",
           },
         ],
@@ -529,7 +529,7 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
           {
             "DataTraceEnabled": true,
             "HttpMethod": "*",
-            "LoggingLevel": "INFO",
+            "LoggingLevel": "ERROR",
             "ResourcePath": "/*",
           },
         ],
