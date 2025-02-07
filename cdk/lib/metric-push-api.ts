@@ -1,9 +1,16 @@
-import { join } from 'path';
 import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { type App, Duration } from 'aws-cdk-lib';
-import type { CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
+import {
+	CfnBasePathMapping,
+	CfnDeployment,
+	CfnDomainName,
+	CfnMethod,
+	CfnResource,
+	CfnRestApi,
+	CfnStage,
+} from 'aws-cdk-lib/aws-apigateway';
 import {
 	ComparisonOperator,
 	MathExpression,
@@ -11,7 +18,6 @@ import {
 	TreatMissingData,
 } from 'aws-cdk-lib/aws-cloudwatch';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
-import { CfnInclude } from 'aws-cdk-lib/cloudformation-include';
 
 export class MetricPushApi extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {
@@ -19,17 +25,81 @@ export class MetricPushApi extends GuStack {
 		const app = 'metric-push-api';
 		const nameWithStage = `${app}-${this.stage}`;
 
-		const yamlTemplateFilePath = join(
-			__dirname,
-			'../../handlers/metric-push-api/cfn.yaml',
-		);
-		const cloudformation = new CfnInclude(this, 'YamlTemplate', {
-			templateFile: yamlTemplateFilePath,
+		const api = new CfnRestApi(this, 'MetricPushAPI', {
+			description:
+				'HTTP API to push a metric to cloudwatch so we can alarm on errors',
+			name: `${app}-api-${this.stage}`, // The existing resource has -api twice!
 		});
 
-		const domainName = cloudformation.getResource(
-			'MetricPushDomainName',
-		) as CfnDomainName;
+		const resource = new CfnResource(this, 'MetricPushProxyResource', {
+			restApiId: api.ref,
+			parentId: api.attrRootResourceId,
+			pathPart: 'metric-push-api',
+		});
+
+		new CfnMethod(this, 'MetricPushMethod', {
+			authorizationType: 'NONE',
+			apiKeyRequired: false,
+			restApiId: api.ref,
+			resourceId: resource.ref,
+			httpMethod: 'GET',
+			integration: {
+				type: 'MOCK',
+				requestTemplates: {
+					'application/json': '{"statusCode": 200}',
+				},
+				integrationResponses: [
+					{
+						statusCode: '204',
+						responseParameters: {
+							'method.response.header.Cache-control': "'no-cache'",
+						},
+					},
+				],
+			},
+			methodResponses: [
+				{
+					statusCode: '204',
+					responseParameters: {
+						'method.response.header.Cache-control': true,
+					},
+				},
+			],
+		});
+
+		const deployment = new CfnDeployment(this, 'MetricPushAPIDeployment', {
+			description: 'Deploys metric-push-api into an environment/stage',
+			restApiId: api.ref,
+		});
+
+		new CfnStage(this, 'MetricPushAPIStage', {
+			description: 'Stage for metric-push-api',
+			restApiId: api.ref,
+			deploymentId: deployment.ref,
+			stageName: this.stage,
+			methodSettings: [
+				{
+					resourcePath: '/*',
+					httpMethod: '*',
+					loggingLevel: 'ERROR',
+					dataTraceEnabled: true,
+				},
+			],
+		});
+
+		const domainName = new CfnDomainName(this, 'MetricPushDomainName', {
+			regionalCertificateArn: `arn:aws:acm:${this.region}:${this.account}:certificate/b384a6a0-2f54-4874-b99b-96eeff96c009`,
+			domainName: `metric-push-api-${this.stage.toLowerCase()}.support.guardianapis.com`,
+			endpointConfiguration: {
+				types: ['REGIONAL'],
+			},
+		});
+
+		new CfnBasePathMapping(this, 'MetricPushBasePathMapping', {
+			restApiId: api.ref,
+			domainName: domainName.ref,
+			stage: this.stage,
+		});
 
 		const dnsRecord = new CfnRecordSet(this, 'MetricPushDNSRecord', {
 			name: `metric-push-api-${this.stage.toLowerCase()}.support.guardianapis.com`,
