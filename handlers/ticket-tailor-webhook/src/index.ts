@@ -1,5 +1,5 @@
+import { putMetric } from '@modules/aws/cloudwatch';
 import type { SQSEvent, SQSRecord } from 'aws-lambda';
-import { putMetric } from './cloudwatch';
 import { createGuestAccount, fetchUserType } from './idapiService';
 import { validateRequest } from './validateRequest';
 

@@ -15,7 +15,7 @@ const mockKey: HmacKey = {
 	secret: '9dn189d53me1ania7d73a45d5de4674d',
 };
 
-jest.mock('@modules/secrets-manager/src/getSecret', () => ({
+jest.mock('@modules/secrets-manager/getSecret', () => ({
 	getSecretValue: () => mockKey,
 }));
 
