@@ -7,6 +7,12 @@ const validReferers = [
 	'https://support.theguardian.com/',
 ];
 
+const buildResponse = (statusCode: number) => ({
+	statusCode,
+	body: '',
+	headers: { 'Cache-Control': 'private, no-store' },
+});
+
 const router = new Router([
 	{
 		httpMethod: 'GET',
@@ -18,9 +24,9 @@ const router = new Router([
 				event.headers?.referer &&
 				validReferers.includes(event.headers.referer)
 			) {
-				return Promise.resolve({ statusCode: 201, body: '' });
+				return Promise.resolve(buildResponse(201));
 			} else {
-				return Promise.resolve({ statusCode: 204, body: '' });
+				return Promise.resolve(buildResponse(204));
 			}
 		},
 	},
