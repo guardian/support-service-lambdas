@@ -144,7 +144,11 @@ importers:
         specifier: ^8.10.147
         version: 8.10.147
 
-  handlers/metric-push-api: {}
+  handlers/metric-push-api:
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.147
+        version: 8.10.147
 
   handlers/press-reader-entitlements:
     dependencies:

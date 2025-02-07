@@ -13,3 +13,13 @@ deployments:
       templateStagePaths:
         CODE: metric-push-api-CODE.template.json
         PROD: metric-push-api-PROD.template.json
+
+  metric-push-api:
+    type: aws-lambda
+    parameters:
+      fileName: metric-push-api.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - metric-push-api-
+    dependencies: [metric-push-api-cloudformation]
