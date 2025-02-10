@@ -26,15 +26,15 @@ export const handler = async (event: {
 			'FILTER_BY_REGIONS environment variable not set',
 		);
 
-		const filterByRegions = FILTER_BY_REGIONS.split(',');
+		const filterByRegions = FILTER_BY_REGIONS.toLowerCase().split(',');
 
 		const filteredSubs = event.expiringDiscountsToProcess.filter(
 			(sub) =>
-				filterByRegions.includes(sub.contactCountry) ||
-				filterByRegions.includes(sub.sfBuyerContactMailingCountry) ||
-				filterByRegions.includes(sub.sfBuyerContactOtherCountry) ||
-				filterByRegions.includes(sub.sfRecipientContactMailingCountry) ||
-				filterByRegions.includes(sub.sfRecipientContactOtherCountry),
+				filterByRegions.includes(sub.contactCountry.toLowerCase()) ||
+                filterByRegions.includes(sub.sfBuyerContactMailingCountry.toLowerCase()) ||
+                filterByRegions.includes(sub.sfBuyerContactOtherCountry.toLowerCase()) ||
+                filterByRegions.includes(sub.sfRecipientContactMailingCountry.toLowerCase()) ||
+                filterByRegions.includes(sub.sfRecipientContactOtherCountry.toLowerCase()),
 		);
 
 		return {
