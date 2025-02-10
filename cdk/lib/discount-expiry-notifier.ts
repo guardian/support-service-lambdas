@@ -2,6 +2,14 @@ import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
+import { aws_cloudwatch, Duration } from 'aws-cdk-lib';
+import {
+	Alarm,
+	Metric,
+	Stats,
+	TreatMissingData,
+} from 'aws-cdk-lib/aws-cloudwatch';
+import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import {
 	Effect,
 	Policy,
@@ -11,6 +19,7 @@ import {
 } from 'aws-cdk-lib/aws-iam';
 import { Architecture } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
+import { Topic } from 'aws-cdk-lib/aws-sns';
 import {
 	DefinitionBody,
 	JsonPath,
@@ -236,6 +245,43 @@ export class DiscountExpiryNotifier extends GuStack {
 		new StateMachine(this, `${appName}-state-machine-${this.stage}`, {
 			stateMachineName: `${appName}-${this.stage}`,
 			definitionBody: definitionBody,
+		});
+
+		const topic = Topic.fromTopicArn(
+			this,
+			'Topic',
+			`arn:aws:sns:${this.region}:${this.account}:alarms-handler-topic-${this.stage}`,
+		);
+
+		const lambdaFunctionsToAlarmOn = [
+			getSubsWithExpiringDiscountsLambda,
+			filterSubsLambda,
+			saveResultsLambda,
+		];
+
+		lambdaFunctionsToAlarmOn.forEach((lambdaFunction, index) => {
+			const alarm = new Alarm(this, `alarm-${index}`, {
+				alarmName: `Discount Expiry Notifier - ${lambdaFunction.functionName} - something went wrong - ${this.stage}`,
+				alarmDescription:
+					'Something went wrong when executing the Discount Expiry Notifier. See Cloudwatch logs for more information on the error.',
+				datapointsToAlarm: 1,
+				evaluationPeriods: 1,
+				actionsEnabled: true,
+				comparisonOperator:
+					aws_cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+				metric: new Metric({
+					metricName: 'Errors',
+					namespace: 'AWS/Lambda',
+					statistic: Stats.SUM,
+					period: Duration.seconds(60),
+					dimensionsMap: {
+						FunctionName: lambdaFunction.functionName,
+					},
+				}),
+				threshold: 0,
+				treatMissingData: TreatMissingData.MISSING,
+			});
+			alarm.addAlarmAction(new SnsAction(topic));
 		});
 	}
 }
