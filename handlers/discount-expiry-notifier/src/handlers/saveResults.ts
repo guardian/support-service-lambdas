@@ -40,6 +40,7 @@ export const handler = async (event: {
 	});
 	console.log('uploadAttempt', uploadAttempt);
 	return {
+		...event,
 		uploadAttempt,
 		filePath,
 	};

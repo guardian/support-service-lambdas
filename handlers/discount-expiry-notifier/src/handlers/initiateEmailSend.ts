@@ -71,7 +71,7 @@ export const handler = async (event: {
 			emailSendAttempt: {
 				status: 'error',
 				payload,
-				response: error as string,
+				response: JSON.stringify(error, null, 2),
 			},
 		};
 	}
