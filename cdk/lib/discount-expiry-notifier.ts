@@ -168,17 +168,17 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
-		const alarmOnErrorsLambda = new GuLambdaFunction(
+		const alarmOnFailuresLambda = new GuLambdaFunction(
 			this,
-			'alarm-on-errors-lambda',
+			'alarm-on-failures-lambda',
 			{
 				app: appName,
-				functionName: `${appName}-alarm-on-errors-${this.stage}`,
+				functionName: `${appName}-alarm-on-failures-${this.stage}`,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
 				},
-				handler: 'alarmOnErrors.handler',
+				handler: 'alarmOnFailures.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
 				initialPolicy: [allowPutMetric],
@@ -213,8 +213,8 @@ export class DiscountExpiryNotifier extends GuStack {
 			outputPath: '$.Payload',
 		});
 
-		const alarmOnErrorsLambdaTask = new LambdaInvoke(this, 'Alarm on errors', {
-			lambdaFunction: alarmOnErrorsLambda,
+		const alarmOnFailuresLambdaTask = new LambdaInvoke(this, 'Alarm on errors', {
+			lambdaFunction: alarmOnFailuresLambda,
 			outputPath: '$.Payload',
 		});
 
@@ -258,7 +258,7 @@ export class DiscountExpiryNotifier extends GuStack {
 				.next(subStatusFetcherMap)
 				.next(expiringDiscountProcessorMap)
 				.next(saveResultsLambdaTask)
-				.next(alarmOnErrorsLambdaTask),
+				.next(alarmOnFailuresLambdaTask),
 		);
 
 		const sqsInlinePolicy: Policy = new Policy(this, 'sqs-inline-policy', {
