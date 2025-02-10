@@ -62,7 +62,7 @@ export const handler = async (event: {
 			emailSendAttempt: {
 				status: 'success',
 				payload,
-				response: await sendEmail(stageFromEnvironment(), payload)
+				response: await sendEmail(stageFromEnvironment(), payload),
 			},
 		};
 	} catch (error) {
