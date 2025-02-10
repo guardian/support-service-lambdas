@@ -25,6 +25,16 @@ export const handler = async (event: {
 			},
 		};
 	}
+	if (event.item.subStatus === 'Error') {
+		return {
+			detail: event,
+			emailSendAttempt: {
+				status: 'error',
+				payload: {},
+				response: 'Error getting sub status from Zuora',
+			},
+		};
+	}
 	const currencySymbol = getCurrencySymbol(event.item.paymentCurrency);
 
 	const payload = {
@@ -91,3 +101,4 @@ function getCurrencySymbol(currencyCode: string): string {
 	};
 	return symbols[currencyCode] ?? '';
 }
+
