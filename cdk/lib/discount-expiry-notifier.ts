@@ -257,8 +257,8 @@ export class DiscountExpiryNotifier extends GuStack {
 				.next(filterSubsLambdaTask)
 				.next(subStatusFetcherMap)
 				.next(expiringDiscountProcessorMap)
-				.next(alarmOnErrorsLambdaTask)
-				.next(saveResultsLambdaTask),
+				.next(saveResultsLambdaTask)
+				.next(alarmOnErrorsLambdaTask),
 		);
 
 		const sqsInlinePolicy: Policy = new Policy(this, 'sqs-inline-policy', {

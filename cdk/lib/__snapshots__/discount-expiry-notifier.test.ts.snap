@@ -526,7 +526,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.filteredSubs","MaxConcurrency":10},"Expiring discount processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Alarm on errors","Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Initiate email send","States":{"Initiate email send":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.filteredSubs","MaxConcurrency":10},"Expiring discount processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Save results","Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Initiate email send","States":{"Initiate email send":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -537,18 +537,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.discountProcessingAttempts","MaxConcurrency":10},"Alarm on errors":{"Next":"Save results","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
-              {
-                "Fn::GetAtt": [
-                  "alarmonerrorslambda72A700C9",
-                  "Arn",
-                ],
-              },
-              "","Payload.$":"$"}},"Save results":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.discountProcessingAttempts","MaxConcurrency":10},"Save results":{"Next":"Alarm on errors","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -556,6 +545,17 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
               {
                 "Fn::GetAtt": [
                   "saveresultslambda2CAFC532",
+                  "Arn",
+                ],
+              },
+              "","Payload.$":"$"}},"Alarm on errors":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
+              {
+                "Fn::GetAtt": [
+                  "alarmonerrorslambda72A700C9",
                   "Arn",
                 ],
               },
@@ -697,7 +697,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "alarmonerrorslambda72A700C9",
+                    "saveresultslambda2CAFC532",
                     "Arn",
                   ],
                 },
@@ -707,7 +707,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "alarmonerrorslambda72A700C9",
+                          "saveresultslambda2CAFC532",
                           "Arn",
                         ],
                       },
@@ -723,7 +723,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "saveresultslambda2CAFC532",
+                    "alarmonerrorslambda72A700C9",
                     "Arn",
                   ],
                 },
@@ -733,7 +733,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "saveresultslambda2CAFC532",
+                          "alarmonerrorslambda72A700C9",
                           "Arn",
                         ],
                       },
@@ -2512,7 +2512,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.filteredSubs","MaxConcurrency":10},"Expiring discount processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Alarm on errors","Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Initiate email send","States":{"Initiate email send":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.filteredSubs","MaxConcurrency":10},"Expiring discount processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Save results","Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Initiate email send","States":{"Initiate email send":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -2523,18 +2523,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.discountProcessingAttempts","MaxConcurrency":10},"Alarm on errors":{"Next":"Save results","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
-              {
-                "Fn::GetAtt": [
-                  "alarmonerrorslambda72A700C9",
-                  "Arn",
-                ],
-              },
-              "","Payload.$":"$"}},"Save results":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.discountProcessingAttempts","MaxConcurrency":10},"Save results":{"Next":"Alarm on errors","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -2542,6 +2531,17 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
               {
                 "Fn::GetAtt": [
                   "saveresultslambda2CAFC532",
+                  "Arn",
+                ],
+              },
+              "","Payload.$":"$"}},"Alarm on errors":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
+              {
+                "Fn::GetAtt": [
+                  "alarmonerrorslambda72A700C9",
                   "Arn",
                 ],
               },
@@ -2683,7 +2683,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "alarmonerrorslambda72A700C9",
+                    "saveresultslambda2CAFC532",
                     "Arn",
                   ],
                 },
@@ -2693,7 +2693,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "alarmonerrorslambda72A700C9",
+                          "saveresultslambda2CAFC532",
                           "Arn",
                         ],
                       },
@@ -2709,7 +2709,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "saveresultslambda2CAFC532",
+                    "alarmonerrorslambda72A700C9",
                     "Arn",
                   ],
                 },
@@ -2719,7 +2719,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "saveresultslambda2CAFC532",
+                          "alarmonerrorslambda72A700C9",
                           "Arn",
                         ],
                       },
