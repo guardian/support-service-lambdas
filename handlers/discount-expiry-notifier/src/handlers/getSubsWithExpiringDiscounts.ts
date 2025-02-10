@@ -7,7 +7,6 @@ import { getSSMParam } from '../ssm';
 //to manually run the state machine for a specified discount expiry date, enter {"discountExpiresOnDate":"2025-11-23"} in aws console
 export const handler = async (event: { discountExpiresOnDate?: string }) => {
 	try {
-		
 		const gcpConfig = await getSSMParam(
 			'gcp-credentials-config',
 			stageFromEnvironment(),
