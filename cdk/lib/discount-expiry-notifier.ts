@@ -293,6 +293,7 @@ export class DiscountExpiryNotifier extends GuStack {
 		const lambdaFunctionsToAlarmOn = [
 			getSubsWithExpiringDiscountsLambda,
 			filterSubsLambda,
+			alarmOnFailuresLambda,
 		];
 
 		lambdaFunctionsToAlarmOn.forEach((lambdaFunction, index) => {
