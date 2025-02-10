@@ -60,6 +60,12 @@ export class DiscountExpiryNotifier extends GuStack {
 			}),
 		);
 
+		const allowPutMetric = new PolicyStatement({
+			effect: Effect.ALLOW,
+			actions: ['cloudwatch:PutMetricData'],
+			resources: ['*'],
+		});
+
 		const bucket = new Bucket(this, 'Bucket', {
 			bucketName: `${appName}-${this.stage.toLowerCase()}`,
 		});
@@ -78,9 +84,11 @@ export class DiscountExpiryNotifier extends GuStack {
 				handler: 'getSubsWithExpiringDiscounts.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
+				initialPolicy: [allowPutMetric],
 				role,
 			},
 		);
+
 		const filterSubsLambda = new GuLambdaFunction(this, 'filter-subs-lambda', {
 			app: appName,
 			functionName: `${appName}-filter-subs-${this.stage}`,
@@ -92,6 +100,7 @@ export class DiscountExpiryNotifier extends GuStack {
 			handler: 'filterSubs.handler',
 			fileName: `${appName}.zip`,
 			architecture: Architecture.ARM_64,
+			initialPolicy: [allowPutMetric],
 		});
 
 		const getSubStatusLambda = new GuLambdaFunction(
@@ -154,7 +163,25 @@ export class DiscountExpiryNotifier extends GuStack {
 						actions: ['s3:GetObject', 's3:PutObject'],
 						resources: [bucket.arnForObjects('*')],
 					}),
+					allowPutMetric,
 				],
+			},
+		);
+
+		const alarmOnErrorsLambda = new GuLambdaFunction(
+			this,
+			'alarm-on-errors-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-alarm-on-errors-${this.stage}`,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+				},
+				handler: 'alarmOnErrors.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+				initialPolicy: [allowPutMetric],
 			},
 		);
 
@@ -183,6 +210,11 @@ export class DiscountExpiryNotifier extends GuStack {
 
 		const saveResultsLambdaTask = new LambdaInvoke(this, 'Save results', {
 			lambdaFunction: saveResultsLambda,
+			outputPath: '$.Payload',
+		});
+
+		const alarmOnErrorsLambdaTask = new LambdaInvoke(this, 'Alarm on errors', {
+			lambdaFunction: alarmOnErrorsLambda,
 			outputPath: '$.Payload',
 		});
 
@@ -225,6 +257,7 @@ export class DiscountExpiryNotifier extends GuStack {
 				.next(filterSubsLambdaTask)
 				.next(subStatusFetcherMap)
 				.next(expiringDiscountProcessorMap)
+				.next(alarmOnErrorsLambdaTask)
 				.next(saveResultsLambdaTask),
 		);
 
