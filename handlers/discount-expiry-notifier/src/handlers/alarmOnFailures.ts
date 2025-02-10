@@ -137,8 +137,11 @@ export const errorsOccurred = async (event: {
 			response: string;
 		};
 	}>;
+	uploadAttemptStatus: string;
 }): Promise<boolean> => {
 	return event.discountProcessingAttempts.some(
-		(attempt) => attempt.emailSendAttempt.status === 'error',
+		(attempt) =>
+			attempt.emailSendAttempt.status === 'error' ||
+			event.uploadAttemptStatus === 'error',
 	);
 };
