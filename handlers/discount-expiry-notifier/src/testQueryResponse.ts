@@ -9,11 +9,11 @@ export const testQueryResponse = [
 		sfContactId: '0039E00001HiIGlQAN',
 		zuoraSubName: 'A-S00886188', // Active sub in dev sandbox
 		workEmail: 'david.pepper+david@guardian.co.uk',
-		contactCountry: 'USA',
-		sfBuyerContactMailingCountry: 'USA',
-		sfBuyerContactOtherCountry: 'USA',
-		sfRecipientContactMailingCountry: 'USA',
-		sfRecipientContactOtherCountry: 'USA',
+		contactCountry: 'united states of america',
+		sfBuyerContactMailingCountry: 'united states of america',
+		sfBuyerContactOtherCountry: 'united states of america',
+		sfRecipientContactMailingCountry: 'united states of america',
+		sfRecipientContactOtherCountry: 'united states of america',
 	},
 	{
 		firstName: 'Mary',
@@ -25,11 +25,11 @@ export const testQueryResponse = [
 		sfContactId: '0039E00001HwhM9QAJ',
 		zuoraSubName: 'A-S00886159', // Active subscription in dev sandbox
 		workEmail: 'graham.hopgood@guardian.co.uk',
-		contactCountry: 'US',
-		sfBuyerContactMailingCountry: 'US',
-		sfBuyerContactOtherCountry: 'US',
-		sfRecipientContactMailingCountry: 'US',
-		sfRecipientContactOtherCountry: 'US',
+		contactCountry: 'United States',
+		sfBuyerContactMailingCountry: 'United States',
+		sfBuyerContactOtherCountry: 'United States',
+		sfRecipientContactMailingCountry: 'United States',
+		sfRecipientContactOtherCountry: 'United States',
 	},
 	{
 		firstName: 'Robert',
