@@ -10,7 +10,6 @@ describe('filterSubs handler', () => {
 		process.env.FILTER_BY_REGIONS = 'United States,United States of America';
 	});
 
-	//todo update logic to be case-agnostic (united states of america fails when using lowercase)
 	it('should filter subscriptions based on region (USA)', async () => {
 		(getIfDefined as jest.Mock).mockImplementation((envVar, errorMessage) => {
 			if (envVar === process.env.FILTER_BY_REGIONS) {
