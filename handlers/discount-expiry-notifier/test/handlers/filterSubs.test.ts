@@ -11,76 +11,82 @@ describe('filterSubs handler', () => {
 	});
 
 	it('should filter subscriptions based on region', async () => {
-        (getIfDefined as jest.Mock).mockImplementation((envVar, errorMessage) => {
-            if (envVar === process.env.FILTER_BY_REGIONS) {
-                return process.env.FILTER_BY_REGIONS;
-            }
-            throw new Error(errorMessage as string);
-        });
+		(getIfDefined as jest.Mock).mockImplementation((envVar, errorMessage) => {
+			if (envVar === process.env.FILTER_BY_REGIONS) {
+				return process.env.FILTER_BY_REGIONS;
+			}
+			throw new Error(errorMessage as string);
+		});
 
-        const event = {
-            discountExpiresOnDate: '2024-03-21',
-            expiringDiscountsToProcess: [
-                {
-                    firstName: 'John',
-                    nextPaymentDate: '2024-04-21',
-                    paymentAmount: 100,
-                    paymentCurrency: 'USD',
-                    paymentFrequency: 'Monthly',
-                    productName: 'Product A',
-                    sfContactId: '001',
-                    zuoraSubName: 'A-S001',
-                    workEmail: 'john@example.com',
-                    contactCountry: 'United States',
-                    sfBuyerContactMailingCountry: 'Canada',
-                    sfBuyerContactOtherCountry: 'Mexico',
-                    sfRecipientContactMailingCountry: 'Brazil',
-                    sfRecipientContactOtherCountry: 'Argentina',
-                },
-                {
-                    firstName: 'Jane',
-                    nextPaymentDate: '2024-05-21',
-                    paymentAmount: 200,
-                    paymentCurrency: 'USD',
-                    paymentFrequency: 'Monthly',
-                    productName: 'Product B',
-                    sfContactId: '002',
-                    zuoraSubName: 'A-S002',
-                    workEmail: 'jane@example.com',
-                    contactCountry: 'Canada',
-                    sfBuyerContactMailingCountry: 'United States of America',
-                    sfBuyerContactOtherCountry: 'Mexico',
-                    sfRecipientContactMailingCountry: 'Brazil',
-                    sfRecipientContactOtherCountry: 'Argentina',
-                },
-                {
-                    firstName: 'Doe',
-                    nextPaymentDate: '2024-06-21',
-                    paymentAmount: 300,
-                    paymentCurrency: 'USD',
-                    paymentFrequency: 'Monthly',
-                    productName: 'Product C',
-                    sfContactId: '003',
-                    zuoraSubName: 'A-S003',
-                    workEmail: 'doe@example.com',
-                    contactCountry: 'Canada',
-                    sfBuyerContactMailingCountry: 'Mexico',
-                    sfBuyerContactOtherCountry: 'Mexico',
-                    sfRecipientContactMailingCountry: 'Brazil',
-                    sfRecipientContactOtherCountry: 'Argentina',
-                },
-            ],
-        };
+		const event = {
+			discountExpiresOnDate: '2024-03-21',
+			expiringDiscountsToProcess: [
+				{
+					firstName: 'John',
+					nextPaymentDate: '2024-04-21',
+					paymentAmount: 100,
+					paymentCurrency: 'USD',
+					paymentFrequency: 'Monthly',
+					productName: 'Product A',
+					sfContactId: '001',
+					zuoraSubName: 'A-S001',
+					workEmail: 'john@example.com',
+					contactCountry: 'United States',
+					sfBuyerContactMailingCountry: 'Canada',
+					sfBuyerContactOtherCountry: 'Mexico',
+					sfRecipientContactMailingCountry: 'Brazil',
+					sfRecipientContactOtherCountry: 'Argentina',
+				},
+				{
+					firstName: 'Jane',
+					nextPaymentDate: '2024-05-21',
+					paymentAmount: 200,
+					paymentCurrency: 'USD',
+					paymentFrequency: 'Monthly',
+					productName: 'Product B',
+					sfContactId: '002',
+					zuoraSubName: 'A-S002',
+					workEmail: 'jane@example.com',
+					contactCountry: 'Canada',
+					sfBuyerContactMailingCountry: 'United States of America',
+					sfBuyerContactOtherCountry: 'Mexico',
+					sfRecipientContactMailingCountry: 'Brazil',
+					sfRecipientContactOtherCountry: 'Argentina',
+				},
+				{
+					firstName: 'Doe',
+					nextPaymentDate: '2024-06-21',
+					paymentAmount: 300,
+					paymentCurrency: 'USD',
+					paymentFrequency: 'Monthly',
+					productName: 'Product C',
+					sfContactId: '003',
+					zuoraSubName: 'A-S003',
+					workEmail: 'doe@example.com',
+					contactCountry: 'Canada',
+					sfBuyerContactMailingCountry: 'Mexico',
+					sfBuyerContactOtherCountry: 'Mexico',
+					sfRecipientContactMailingCountry: 'Brazil',
+					sfRecipientContactOtherCountry: 'Argentina',
+				},
+			],
+		};
 
-        const result = await handler(event);
+		const result = await handler(event);
 
-        expect(result).toBeDefined();
-        expect(result.filteredSubs).toBeInstanceOf(Array);
-        expect(result.filteredSubs.length).toBe(2);
-        expect(result.filteredSubs.some(sub => sub.zuoraSubName === 'A-S001')).toBe(true);
-        expect(result.filteredSubs.some(sub => sub.zuoraSubName === 'A-S002')).toBe(true);
-        expect(result.filteredSubs.some(sub => sub.zuoraSubName === 'A-S003')).toBe(false);
-    });
+		expect(result).toBeDefined();
+		expect(result.filteredSubs).toBeInstanceOf(Array);
+		expect(result.filteredSubs.length).toBe(2);
+		expect(
+			result.filteredSubs.some((sub) => sub.zuoraSubName === 'A-S001'),
+		).toBe(true);
+		expect(
+			result.filteredSubs.some((sub) => sub.zuoraSubName === 'A-S002'),
+		).toBe(true);
+		expect(
+			result.filteredSubs.some((sub) => sub.zuoraSubName === 'A-S003'),
+		).toBe(false);
+	});
 
 	it('should return an empty array if no subscriptions match the regions', async () => {
 		(getIfDefined as jest.Mock).mockReturnValue('UK');
