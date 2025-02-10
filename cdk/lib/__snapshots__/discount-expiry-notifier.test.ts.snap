@@ -265,10 +265,10 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
-    "alarmonerrorslambda72A700C9": {
+    "alarmonfailureslambda88ECE430": {
       "DependsOn": [
-        "alarmonerrorslambdaServiceRoleDefaultPolicy46613D2B",
-        "alarmonerrorslambdaServiceRoleDC304615",
+        "alarmonfailureslambdaServiceRoleDefaultPolicy215DBC39",
+        "alarmonfailureslambdaServiceRoleD407BFA6",
       ],
       "Properties": {
         "Architectures": [
@@ -288,12 +288,12 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
             "Stage": "CODE",
           },
         },
-        "FunctionName": "discount-expiry-notifier-alarm-on-errors-CODE",
-        "Handler": "alarmOnErrors.handler",
+        "FunctionName": "discount-expiry-notifier-alarm-on-failures-CODE",
+        "Handler": "alarmOnFailures.handler",
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
-            "alarmonerrorslambdaServiceRoleDC304615",
+            "alarmonfailureslambdaServiceRoleD407BFA6",
             "Arn",
           ],
         },
@@ -324,7 +324,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "alarmonerrorslambdaServiceRoleDC304615": {
+    "alarmonfailureslambdaServiceRoleD407BFA6": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -377,7 +377,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "alarmonerrorslambdaServiceRoleDefaultPolicy46613D2B": {
+    "alarmonfailureslambdaServiceRoleDefaultPolicy215DBC39": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -473,10 +473,10 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "alarmonerrorslambdaServiceRoleDefaultPolicy46613D2B",
+        "PolicyName": "alarmonfailureslambdaServiceRoleDefaultPolicy215DBC39",
         "Roles": [
           {
-            "Ref": "alarmonerrorslambdaServiceRoleDC304615",
+            "Ref": "alarmonfailureslambdaServiceRoleD407BFA6",
           },
         ],
       },
@@ -555,7 +555,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
               ":states:::lambda:invoke","Parameters":{"FunctionName":"",
               {
                 "Fn::GetAtt": [
-                  "alarmonerrorslambda72A700C9",
+                  "alarmonfailureslambda88ECE430",
                   "Arn",
                 ],
               },
@@ -723,7 +723,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "alarmonerrorslambda72A700C9",
+                    "alarmonfailureslambda88ECE430",
                     "Arn",
                   ],
                 },
@@ -733,7 +733,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "alarmonerrorslambda72A700C9",
+                          "alarmonfailureslambda88ECE430",
                           "Arn",
                         ],
                       },
@@ -2251,10 +2251,10 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
-    "alarmonerrorslambda72A700C9": {
+    "alarmonfailureslambda88ECE430": {
       "DependsOn": [
-        "alarmonerrorslambdaServiceRoleDefaultPolicy46613D2B",
-        "alarmonerrorslambdaServiceRoleDC304615",
+        "alarmonfailureslambdaServiceRoleDefaultPolicy215DBC39",
+        "alarmonfailureslambdaServiceRoleD407BFA6",
       ],
       "Properties": {
         "Architectures": [
@@ -2274,12 +2274,12 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
             "Stage": "PROD",
           },
         },
-        "FunctionName": "discount-expiry-notifier-alarm-on-errors-PROD",
-        "Handler": "alarmOnErrors.handler",
+        "FunctionName": "discount-expiry-notifier-alarm-on-failures-PROD",
+        "Handler": "alarmOnFailures.handler",
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
-            "alarmonerrorslambdaServiceRoleDC304615",
+            "alarmonfailureslambdaServiceRoleD407BFA6",
             "Arn",
           ],
         },
@@ -2310,7 +2310,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "alarmonerrorslambdaServiceRoleDC304615": {
+    "alarmonfailureslambdaServiceRoleD407BFA6": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -2363,7 +2363,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "alarmonerrorslambdaServiceRoleDefaultPolicy46613D2B": {
+    "alarmonfailureslambdaServiceRoleDefaultPolicy215DBC39": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -2459,10 +2459,10 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "alarmonerrorslambdaServiceRoleDefaultPolicy46613D2B",
+        "PolicyName": "alarmonfailureslambdaServiceRoleDefaultPolicy215DBC39",
         "Roles": [
           {
-            "Ref": "alarmonerrorslambdaServiceRoleDC304615",
+            "Ref": "alarmonfailureslambdaServiceRoleD407BFA6",
           },
         ],
       },
@@ -2541,7 +2541,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
               ":states:::lambda:invoke","Parameters":{"FunctionName":"",
               {
                 "Fn::GetAtt": [
-                  "alarmonerrorslambda72A700C9",
+                  "alarmonfailureslambda88ECE430",
                   "Arn",
                 ],
               },
@@ -2709,7 +2709,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "alarmonerrorslambda72A700C9",
+                    "alarmonfailureslambda88ECE430",
                     "Arn",
                   ],
                 },
@@ -2719,7 +2719,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "alarmonerrorslambda72A700C9",
+                          "alarmonfailureslambda88ECE430",
                           "Arn",
                         ],
                       },

@@ -213,10 +213,14 @@ export class DiscountExpiryNotifier extends GuStack {
 			outputPath: '$.Payload',
 		});
 
-		const alarmOnFailuresLambdaTask = new LambdaInvoke(this, 'Alarm on errors', {
-			lambdaFunction: alarmOnFailuresLambda,
-			outputPath: '$.Payload',
-		});
+		const alarmOnFailuresLambdaTask = new LambdaInvoke(
+			this,
+			'Alarm on errors',
+			{
+				lambdaFunction: alarmOnFailuresLambda,
+				outputPath: '$.Payload',
+			},
+		);
 
 		const initiateEmailSendLambdaTask = new LambdaInvoke(
 			this,
