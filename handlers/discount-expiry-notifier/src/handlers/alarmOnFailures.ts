@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/require-await -- this is required to ensure the lambda returns a value*/
+
 export const handler = async (event: {
 	discountExpiresOnDate: string;
 	expiringDiscountsToProcessCount: number;
@@ -62,14 +63,12 @@ export const handler = async (event: {
 			response: string;
 		};
 	}>;
+	uploadAttemptStatus: string;
 }) => {
 	console.log('event', event);
 
 	if (await errorsOccurred(event)) {
-		console.log('errorsOccurred: TRUE');
 		throw new Error('Errors occurred. Check logs.');
-	} else {
-		console.log('errorsOccurred: FALSE');
 	}
 	return {};
 };

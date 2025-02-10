@@ -18,7 +18,7 @@ export const handler = async (event: {
 	try {
 		const subName = event.item.zuoraSubName;
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
-		const getSubResponse = await getSubscription(zuoraClient, subName + '222x');
+		const getSubResponse = await getSubscription(zuoraClient, subName);
 
 		return {
 			...event.item,

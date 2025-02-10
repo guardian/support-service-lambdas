@@ -20,11 +20,11 @@ export const handler = async (event: {
 	}>;
 }) => {
 	try {
-		// const bucketName = getIfDefined<string>(
-		// 	process.env.S3_BUCKET,
-		// 	'S3_BUCKET environment variable not set',
-		// );
-		const bucketName = 'discount-expiry-notifier123';
+		const bucketName = getIfDefined<string>(
+			process.env.S3_BUCKET,
+			'S3_BUCKET environment variable not set',
+		);
+
 		const discountExpiresOnDate = getIfDefined<string>(
 			event.discountExpiresOnDate,
 			'event.discountExpiresOnDate variable not set',
@@ -39,7 +39,7 @@ export const handler = async (event: {
 			filePath,
 			content: JSON.stringify(event, null, 2),
 		});
-		console.log('uploadAttempt', uploadAttempt);
+
 		return {
 			...event,
 			uploadAttemptStatus: 'success',
