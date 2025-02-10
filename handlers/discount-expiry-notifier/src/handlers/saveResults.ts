@@ -19,29 +19,39 @@ export const handler = async (event: {
 		status: string;
 	}>;
 }) => {
-	const bucketName = getIfDefined<string>(
-		process.env.S3_BUCKET,
-		'S3_BUCKET environment variable not set',
-	);
+	try {
+		// const bucketName = getIfDefined<string>(
+		// 	process.env.S3_BUCKET,
+		// 	'S3_BUCKET environment variable not set',
+		// );
+		const bucketName = 'discount-expiry-notifier123';
+		const discountExpiresOnDate = getIfDefined<string>(
+			event.discountExpiresOnDate,
+			'event.discountExpiresOnDate variable not set',
+		);
 
-	const discountExpiresOnDate = getIfDefined<string>(
-		event.discountExpiresOnDate,
-		'event.discountExpiresOnDate variable not set',
-	);
+		const executionDateTime = new Date().toISOString();
 
-	const executionDateTime = new Date().toISOString();
+		const filePath = `${discountExpiresOnDate}/${executionDateTime}`;
 
-	const filePath = `${discountExpiresOnDate}/${executionDateTime}`;
-
-	const uploadAttempt = await uploadFileToS3({
-		bucketName,
-		filePath,
-		content: JSON.stringify(event, null, 2),
-	});
-	console.log('uploadAttempt', uploadAttempt);
-	return {
-		...event,
-		uploadAttempt,
-		filePath,
-	};
+		const uploadAttempt = await uploadFileToS3({
+			bucketName,
+			filePath,
+			content: JSON.stringify(event, null, 2),
+		});
+		console.log('uploadAttempt', uploadAttempt);
+		return {
+			...event,
+			uploadAttemptStatus: 'success',
+			uploadAttempt,
+			filePath,
+		};
+	} catch (error) {
+		return {
+			...event,
+			uploadAttemptStatus: 'error',
+			errorDetail:
+				error instanceof Error ? error.message : JSON.stringify(error, null, 2),
+		};
+	}
 };
