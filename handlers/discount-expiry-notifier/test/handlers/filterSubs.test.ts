@@ -7,45 +7,84 @@ jest.mock('@modules/nullAndUndefined');
 describe('filterSubs handler', () => {
 	beforeEach(() => {
 		jest.resetAllMocks();
-		process.env.FILTER_BY_REGIONS = 'US,USA';
-		process.env.FILTER_BY_PRODUCTS = 'GW';
+		process.env.FILTER_BY_REGIONS = 'United States,United States of America';
 	});
 
-	it('should filter subscriptions based on region (USA) and product (GW)', async () => {
+	it('should filter subscriptions based on region', async () => {
 		(getIfDefined as jest.Mock).mockImplementation((envVar, errorMessage) => {
 			if (envVar === process.env.FILTER_BY_REGIONS) {
 				return process.env.FILTER_BY_REGIONS;
-			}
-			if (envVar === process.env.FILTER_BY_PRODUCTS) {
-				return process.env.FILTER_BY_PRODUCTS;
 			}
 			throw new Error(errorMessage as string);
 		});
 
 		const event = {
 			discountExpiresOnDate: '2024-03-21',
-			expiringDiscountsToProcess: testQueryResponse,
+			expiringDiscountsToProcess: [
+				{
+					firstName: 'John',
+					nextPaymentDate: '2024-04-21',
+					paymentAmount: 100,
+					paymentCurrency: 'USD',
+					paymentFrequency: 'Monthly',
+					productName: 'Product A',
+					sfContactId: '001',
+					zuoraSubName: 'A-S001',
+					workEmail: 'john@example.com',
+					contactCountry: 'United States',
+					sfBuyerContactMailingCountry: 'Canada',
+					sfBuyerContactOtherCountry: 'Mexico',
+					sfRecipientContactMailingCountry: 'Brazil',
+					sfRecipientContactOtherCountry: 'Argentina',
+				},
+				{
+					firstName: 'Jane',
+					nextPaymentDate: '2024-05-21',
+					paymentAmount: 200,
+					paymentCurrency: 'USD',
+					paymentFrequency: 'Monthly',
+					productName: 'Product B',
+					sfContactId: '002',
+					zuoraSubName: 'A-S002',
+					workEmail: 'jane@example.com',
+					contactCountry: 'Canada',
+					sfBuyerContactMailingCountry: 'United states of america',
+					sfBuyerContactOtherCountry: 'Mexico',
+					sfRecipientContactMailingCountry: 'Brazil',
+					sfRecipientContactOtherCountry: 'Argentina',
+				},
+				{
+					firstName: 'Doe',
+					nextPaymentDate: '2024-06-21',
+					paymentAmount: 300,
+					paymentCurrency: 'USD',
+					paymentFrequency: 'Monthly',
+					productName: 'Product C',
+					sfContactId: '003',
+					zuoraSubName: 'A-S003',
+					workEmail: 'doe@example.com',
+					contactCountry: 'Canada',
+					sfBuyerContactMailingCountry: 'Mexico',
+					sfBuyerContactOtherCountry: 'Mexico',
+					sfRecipientContactMailingCountry: 'Brazil',
+					sfRecipientContactOtherCountry: 'Argentina',
+				},
+			],
 		};
 
 		const result = await handler(event);
 
 		expect(result).toBeDefined();
-
 		expect(result.filteredSubs).toBeInstanceOf(Array);
-		expect(result.filteredSubs.length).toBeGreaterThan(0);
+		expect(result.filteredSubs.length).toBe(2);
 		expect(
-			result.filteredSubs.every((sub) =>
-				['US', 'USA'].includes(sub.contactCountry),
-			),
+			result.filteredSubs.some((sub) => sub.zuoraSubName === 'A-S001'),
 		).toBe(true);
 		expect(
-			result.filteredSubs.some((sub) => sub.subName === 'A-S00886188'),
+			result.filteredSubs.some((sub) => sub.zuoraSubName === 'A-S002'),
 		).toBe(true);
 		expect(
-			result.filteredSubs.some((sub) => sub.subName === 'A-S00886159'),
-		).toBe(false);
-		expect(
-			result.filteredSubs.some((sub) => sub.subName === 'A-S00515481'),
+			result.filteredSubs.some((sub) => sub.zuoraSubName === 'A-S003'),
 		).toBe(false);
 	});
 

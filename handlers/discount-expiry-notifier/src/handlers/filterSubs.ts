@@ -11,7 +11,7 @@ export const handler = async (event: {
 		paymentFrequency: string;
 		productName: string;
 		sfContactId: string;
-		subName: string;
+		zuoraSubName: string;
 		workEmail: string;
 		contactCountry: string;
 		sfBuyerContactMailingCountry: string;
@@ -25,29 +25,29 @@ export const handler = async (event: {
 			process.env.FILTER_BY_REGIONS,
 			'FILTER_BY_REGIONS environment variable not set',
 		);
-		const FILTER_BY_PRODUCTS = getIfDefined<string>(
-			process.env.FILTER_BY_PRODUCTS,
-			'FILTER_BY_PRODUCTS environment variable not set',
-		);
 
-		const filterByRegions = FILTER_BY_REGIONS.split(',');
-		const filterByProducts = FILTER_BY_PRODUCTS.split(',');
+		const filterByRegions = FILTER_BY_REGIONS.toLowerCase().split(',');
 
-		const subsFilteredByRegions = event.expiringDiscountsToProcess.filter(
+		const filteredSubs = event.expiringDiscountsToProcess.filter(
 			(sub) =>
-				filterByRegions.includes(sub.contactCountry) ||
-				filterByRegions.includes(sub.sfBuyerContactMailingCountry) ||
-				filterByRegions.includes(sub.sfBuyerContactOtherCountry) ||
-				filterByRegions.includes(sub.sfRecipientContactMailingCountry) ||
-				filterByRegions.includes(sub.sfRecipientContactOtherCountry),
-		);
-
-		const filteredSubs = subsFilteredByRegions.filter((sub) =>
-			filterByProducts.includes(sub.productName),
+				filterByRegions.includes(sub.contactCountry.toLowerCase()) ||
+				filterByRegions.includes(
+					sub.sfBuyerContactMailingCountry.toLowerCase(),
+				) ||
+				filterByRegions.includes(
+					sub.sfBuyerContactOtherCountry.toLowerCase(),
+				) ||
+				filterByRegions.includes(
+					sub.sfRecipientContactMailingCountry.toLowerCase(),
+				) ||
+				filterByRegions.includes(
+					sub.sfRecipientContactOtherCountry.toLowerCase(),
+				),
 		);
 
 		return {
 			...event,
+			filteredSubsCount: filteredSubs.length,
 			filteredSubs,
 		};
 	} catch (error) {

@@ -12,7 +12,7 @@ export const handler = async (event: {
 		paymentFrequency: string;
 		productName: string;
 		sfContactId: string;
-		subName: string;
+		zuoraSubName: string;
 		workEmail: string;
 	}>;
 	expiringDiscountProcessingAttempts: Array<{

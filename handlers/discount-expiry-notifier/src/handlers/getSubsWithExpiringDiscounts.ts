@@ -22,16 +22,13 @@ export const handler = async (event: { discountExpiresOnDate?: string }) => {
 		console.log('result', result);
 		return {
 			discountExpiresOnDate,
+			expiringDiscountsToProcessCount: testQueryResponse.length,
 			expiringDiscountsToProcess: testQueryResponse,
 		};
 	} catch (error) {
 		console.error('Error:', error);
-		// throw error;
+		throw error;
 	}
-	return {
-		discountExpiresOnDate: '2025-03-10',
-		expiringDiscountsToProcess: testQueryResponse,
-	};
 };
 
 const addDays = (date: Date, days: number): string => {

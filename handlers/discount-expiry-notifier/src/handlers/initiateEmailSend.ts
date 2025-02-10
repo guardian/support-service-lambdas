@@ -10,14 +10,11 @@ export const handler = async (event: {
 		paymentFrequency: string;
 		productName: string;
 		sfContactId: string;
-		subName: string;
+		zuoraSubName: string;
 		workEmail: string;
 		subStatus: string;
 	};
 }) => {
-	console.log('event:', event);
-	console.log('event.item.firstName:', event.item.firstName);
-	console.log('event.item.subStatus:', event.item.subStatus);
 	if (event.item.subStatus === 'Cancelled') {
 		return {
 			detail: event,
@@ -25,6 +22,16 @@ export const handler = async (event: {
 				status: 'skipped',
 				payload: {},
 				response: 'Subscription status is cancelled',
+			},
+		};
+	}
+	if (event.item.subStatus === 'Error') {
+		return {
+			detail: event,
+			emailSendAttempt: {
+				status: 'error',
+				payload: {},
+				response: 'Error getting sub status from Zuora',
 			},
 		};
 	}
@@ -37,15 +44,14 @@ export const handler = async (event: {
 				ContactAttributes: {
 					SubscriberAttributes: {
 						EmailAddress: event.item.workEmail,
-						paymentAmount: `${currencySymbol}${event.item.paymentAmount}`,
+						payment_amount: `${currencySymbol}${event.item.paymentAmount}`,
 						first_name: event.item.firstName,
-						date_of_payment: formatDate(event.item.nextPaymentDate),
-						paymentFrequency: event.item.paymentFrequency,
+						next_payment_date: formatDate(event.item.nextPaymentDate),
+						payment_frequency: event.item.paymentFrequency,
 					},
 				},
 			},
-			// subscriptionCancelledEmail used for testing. will update data extension to active one when published
-			DataExtensionName: DataExtensionNames.subscriptionCancelledEmail,
+			DataExtensionName: DataExtensionNames.discountExpiryNotificationEmail,
 		},
 		SfContactId: event.item.sfContactId,
 	};
