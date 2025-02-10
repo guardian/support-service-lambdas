@@ -56,18 +56,13 @@ export const handler = async (event: {
 		SfContactId: event.item.sfContactId,
 	};
 
-	const emailSendAttempt = await sendEmail(stageFromEnvironment(), payload);
-
-	console.log('emailSendAttempt:', emailSendAttempt);
 	try {
-		const response = await sendEmail(stageFromEnvironment(), payload);
-
 		return {
 			detail: event,
 			emailSendAttempt: {
 				status: 'success',
 				payload,
-				response,
+				response: await sendEmail(stageFromEnvironment(), payload)
 			},
 		};
 	} catch (error) {
