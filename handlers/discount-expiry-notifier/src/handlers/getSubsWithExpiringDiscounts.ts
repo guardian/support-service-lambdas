@@ -2,11 +2,12 @@ import { getIfDefined } from '@modules/nullAndUndefined';
 import { stageFromEnvironment } from '@modules/stage';
 import { buildAuthClient, runQuery } from '../bigquery';
 import { getSSMParam } from '../ssm';
-import { testQueryResponse } from '../testQueryResponse';
+// import { testQueryResponse } from '../testQueryResponse';
 
 //to manually run the state machine for a specified discount expiry date, enter {"discountExpiresOnDate":"2025-11-23"} in aws console
 export const handler = async (event: { discountExpiresOnDate?: string }) => {
 	try {
+		
 		const gcpConfig = await getSSMParam(
 			'gcp-credentials-config',
 			stageFromEnvironment(),
@@ -20,11 +21,13 @@ export const handler = async (event: { discountExpiresOnDate?: string }) => {
 		const query = getQuery(discountExpiresOnDate);
 		const result = await runQuery(authClient, query);
 		console.log('result', result);
-		return {
-			discountExpiresOnDate,
-			expiringDiscountsToProcessCount: testQueryResponse.length,
-			expiringDiscountsToProcess: testQueryResponse,
-		};
+
+		throw Error('Not implemented');
+		// return {
+		// 	discountExpiresOnDate,
+		// 	expiringDiscountsToProcessCount: testQueryResponse.length,
+		// 	expiringDiscountsToProcess: testQueryResponse,
+		// };
 	} catch (error) {
 		console.error('Error:', error);
 		throw error;
