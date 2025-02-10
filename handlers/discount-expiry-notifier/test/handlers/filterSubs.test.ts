@@ -48,7 +48,7 @@ describe('filterSubs handler', () => {
 					zuoraSubName: 'A-S002',
 					workEmail: 'jane@example.com',
 					contactCountry: 'Canada',
-					sfBuyerContactMailingCountry: 'United States of America',
+					sfBuyerContactMailingCountry: 'United states of america',
 					sfBuyerContactOtherCountry: 'Mexico',
 					sfRecipientContactMailingCountry: 'Brazil',
 					sfRecipientContactOtherCountry: 'Argentina',
