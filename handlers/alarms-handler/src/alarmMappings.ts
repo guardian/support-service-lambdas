@@ -120,6 +120,9 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'identity-retention',
 		'zuora-retention', //https://github.com/guardian/zuora-retention
 		'zuora-salesforce-link-remover',
+
+		// misc
+		'discount-expiry-notifier',
 	],
 };
 
