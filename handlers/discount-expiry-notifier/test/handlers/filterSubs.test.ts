@@ -18,10 +18,11 @@ describe('filterSubs handler', () => {
 			}
 			throw new Error(errorMessage as string);
 		});
-		if(process.env.FILTER_BY_REGIONS===undefined){
+		if (process.env.FILTER_BY_REGIONS === undefined) {
 			throw new Error('FILTER_BY_REGIONS environment variable not set');
 		}
-		const filterByRegions = process.env.FILTER_BY_REGIONS.toLowerCase().split(',');
+		const filterByRegions =
+			process.env.FILTER_BY_REGIONS.toLowerCase().split(',');
 
 		const event = {
 			discountExpiresOnDate: '2024-03-21',
@@ -39,9 +40,15 @@ describe('filterSubs handler', () => {
 				filterByRegions.includes(sub.contactCountry.toLowerCase()),
 			),
 		).toBe(true);
-		expect(result.filteredSubs.some((sub) => sub.zuoraSubName === 'A-S00886188'),).toBe(true);
-		expect(result.filteredSubs.some((sub) => sub.zuoraSubName === 'A-S00886159'),).toBe(true);
-		expect(result.filteredSubs.some((sub) => sub.zuoraSubName === 'A-S00515481'),).toBe(false);
+		expect(
+			result.filteredSubs.some((sub) => sub.zuoraSubName === 'A-S00886188'),
+		).toBe(true);
+		expect(
+			result.filteredSubs.some((sub) => sub.zuoraSubName === 'A-S00886159'),
+		).toBe(true);
+		expect(
+			result.filteredSubs.some((sub) => sub.zuoraSubName === 'A-S00515481'),
+		).toBe(false);
 	});
 
 	it('should return an empty array if no subscriptions match the regions', async () => {

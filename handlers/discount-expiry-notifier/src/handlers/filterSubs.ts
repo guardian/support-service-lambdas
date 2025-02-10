@@ -31,10 +31,18 @@ export const handler = async (event: {
 		const filteredSubs = event.expiringDiscountsToProcess.filter(
 			(sub) =>
 				filterByRegions.includes(sub.contactCountry.toLowerCase()) ||
-                filterByRegions.includes(sub.sfBuyerContactMailingCountry.toLowerCase()) ||
-                filterByRegions.includes(sub.sfBuyerContactOtherCountry.toLowerCase()) ||
-                filterByRegions.includes(sub.sfRecipientContactMailingCountry.toLowerCase()) ||
-                filterByRegions.includes(sub.sfRecipientContactOtherCountry.toLowerCase()),
+				filterByRegions.includes(
+					sub.sfBuyerContactMailingCountry.toLowerCase(),
+				) ||
+				filterByRegions.includes(
+					sub.sfBuyerContactOtherCountry.toLowerCase(),
+				) ||
+				filterByRegions.includes(
+					sub.sfRecipientContactMailingCountry.toLowerCase(),
+				) ||
+				filterByRegions.includes(
+					sub.sfRecipientContactOtherCountry.toLowerCase(),
+				),
 		);
 
 		return {

@@ -101,4 +101,3 @@ function getCurrencySymbol(currencyCode: string): string {
 	};
 	return symbols[currencyCode] ?? '';
 }
-
