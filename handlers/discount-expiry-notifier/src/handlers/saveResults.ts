@@ -33,13 +33,14 @@ export const handler = async (event: {
 
 	const filePath = `${discountExpiresOnDate}/${executionDateTime}`;
 
-	await uploadFileToS3({
+	const uploadAttempt = await uploadFileToS3({
 		bucketName,
 		filePath,
 		content: JSON.stringify(event, null, 2),
 	});
-
+	console.log('uploadAttempt', uploadAttempt);
 	return {
+		uploadAttempt,
 		filePath,
 	};
 };
