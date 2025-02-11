@@ -7,6 +7,7 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
       "GuDistributionBucketParameter",
       "GuApiLambda",
       "GuAlarm",
+      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -78,6 +79,51 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
         "EvaluationPeriods": 1,
         "MetricName": "5XXError",
         "Namespace": "AWS/ApiGateway",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Threshold": 2,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "HighClientSideErrorRateAlarm0026FCB2": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "Impact - some or all browsers are failing to render support client side pages. Log in to Sentry to see these errors: https://the-guardian.sentry.io/discover/results/?project=1213654&query="Fatal error rendering page"&queryDataset=error-events&sort=-count&statsPeriod=24h Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit metric-push-api-CODE",
+        "AlarmName": "URGENT 9-5 - CODE fatal client-side errors are being reported to sentry for support-frontend",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "DatapointsToAlarm": 3,
+        "Dimensions": [
+          {
+            "Name": "App",
+            "Value": "metric-push-api",
+          },
+          {
+            "Name": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "EvaluationPeriods": 5,
+        "MetricName": "metric-push-api-success",
+        "Namespace": "support-service-lambdas",
         "Period": 60,
         "Statistic": "Sum",
         "Threshold": 2,
@@ -790,6 +836,7 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
       "GuDistributionBucketParameter",
       "GuApiLambda",
       "GuAlarm",
+      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -861,6 +908,51 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
         "EvaluationPeriods": 1,
         "MetricName": "5XXError",
         "Namespace": "AWS/ApiGateway",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Threshold": 2,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "HighClientSideErrorRateAlarm0026FCB2": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "Impact - some or all browsers are failing to render support client side pages. Log in to Sentry to see these errors: https://the-guardian.sentry.io/discover/results/?project=1213654&query="Fatal error rendering page"&queryDataset=error-events&sort=-count&statsPeriod=24h Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit metric-push-api-PROD",
+        "AlarmName": "URGENT 9-5 - PROD fatal client-side errors are being reported to sentry for support-frontend",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "DatapointsToAlarm": 3,
+        "Dimensions": [
+          {
+            "Name": "App",
+            "Value": "metric-push-api",
+          },
+          {
+            "Name": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "EvaluationPeriods": 5,
+        "MetricName": "metric-push-api-success",
+        "Namespace": "support-service-lambdas",
         "Period": 60,
         "Statistic": "Sum",
         "Threshold": 2,

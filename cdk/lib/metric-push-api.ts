@@ -96,48 +96,28 @@ export class MetricPushApi extends GuStack {
 				},
 			}),
 		});
-		// new GuAlarm(this, 'HighClientSideErrorRateAlarm', {
-		// 	app,
-		// 	alarmName: `URGENT 9-5 - ${this.stage} fatal client-side errors are being reported to sentry for support-frontend`,
-		// 	alarmDescription: `Impact - some or all browsers are failing to render support client side pages. Log in to Sentry to see these errors: https://the-guardian.sentry.io/discover/results/?project=1213654&query="Fatal error rendering page"&queryDataset=error-events&sort=-count&statsPeriod=24h Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit ${nameWithStage}`,
-		// 	threshold: 2,
-		// 	evaluationPeriods: 5,
-		// 	datapointsToAlarm: 3,
-		// 	snsTopicName: `alarms-handler-topic-${this.stage}`,
-		// 	actionsEnabled: this.stage === 'PROD',
-		// 	treatMissingData: TreatMissingData.NOT_BREACHING,
-		// 	comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-		// 	metric: new MathExpression({
-		// 		label: 'mtotal2xx',
-		// 		expression: 'mtotalcount - (m5xxcount + m4xxcount)',
-		// 		period: Duration.seconds(60),
-		// 		usingMetrics: {
-		// 			mtotalcount: new Metric({
-		// 				metricName: `Count`,
-		// 				namespace: 'AWS/ApiGateway',
-		// 				statistic: 'Sum',
-		// 				dimensionsMap: {
-		// 					ApiName: `${app}-api-${this.stage}`, // The existing resource has -api twice!
-		// 				},
-		// 			}),
-		// 			m5xxcount: new Metric({
-		// 				metricName: `5XXError`,
-		// 				namespace: 'AWS/ApiGateway',
-		// 				statistic: 'Sum',
-		// 				dimensionsMap: {
-		// 					ApiName: `${app}-api-${this.stage}`, // The existing resource has -api twice!
-		// 				},
-		// 			}),
-		// 			m4xxcount: new Metric({
-		// 				metricName: `4XXError`,
-		// 				namespace: 'AWS/ApiGateway',
-		// 				statistic: 'Sum',
-		// 				dimensionsMap: {
-		// 					ApiName: `${app}-api-${this.stage}`, // The existing resource has -api twice!
-		// 				},
-		// 			}),
-		// 		},
-		// 	}),
-		// });
+
+		new GuAlarm(this, 'HighClientSideErrorRateAlarm', {
+			app,
+			alarmName: `URGENT 9-5 - ${this.stage} fatal client-side errors are being reported to sentry for support-frontend`,
+			alarmDescription: `Impact - some or all browsers are failing to render support client side pages. Log in to Sentry to see these errors: https://the-guardian.sentry.io/discover/results/?project=1213654&query="Fatal error rendering page"&queryDataset=error-events&sort=-count&statsPeriod=24h Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit ${nameWithStage}`,
+			threshold: 2,
+			evaluationPeriods: 5,
+			datapointsToAlarm: 3,
+			snsTopicName: `alarms-handler-topic-${this.stage}`,
+			actionsEnabled: this.stage === 'PROD',
+			treatMissingData: TreatMissingData.NOT_BREACHING,
+			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+			metric: new Metric({
+				metricName: 'metric-push-api-success',
+				namespace: 'support-service-lambdas',
+				statistic: 'Sum',
+				period: Duration.seconds(60),
+				dimensionsMap: {
+					Stage: this.stage,
+					App: app,
+				},
+			}),
+		});
 	}
 }
