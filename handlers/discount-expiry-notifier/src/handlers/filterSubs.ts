@@ -6,7 +6,7 @@ import { BigQueryResultDataSchema } from '../bigquery';
 export const FilterSubsInputSchema = z.object({
 	discountExpiresOnDate: z.string(),
 	allRecordsFromBigQuery: BigQueryResultDataSchema,
-});
+});//
 export type FilterSubsInput = z.infer<typeof FilterSubsInputSchema>;
 
 export const handler = async (event: FilterSubsInput) => {
