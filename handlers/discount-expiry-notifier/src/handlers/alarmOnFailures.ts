@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/require-await -- this is required to ensure the lambda returns a value*/
 import type {
-	DiscountProcessingAttempt,
 	BigQueryRecord,
+	DiscountProcessingAttempt,
 	RecordForEmailSend,
 } from '../types';
 
