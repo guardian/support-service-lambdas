@@ -400,7 +400,7 @@ lazy val `identity-backfill` = lambdaProject(
 lazy val `digital-subscription-expiry` = lambdaProject(
   "digital-subscription-expiry",
   "check digital subscription expiration for authorisation purposes",
-  Seq(contentAuthCommon),
+  Seq(jodaTime, commonsIO, typesafeConfig),
   Seq(zuora, handler, effectsDepIncludingTestFolder, testDep),
 )
 
