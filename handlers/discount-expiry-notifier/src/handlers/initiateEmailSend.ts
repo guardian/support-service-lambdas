@@ -91,27 +91,6 @@ function getEmailSendEligibility(
 		eligibleForEmailSend: subStatus === 'Active' && !!workEmail,
 		ineligibilityReason: getIneligibilityReason(subStatus, workEmail),
 	};
-	// if (subStatus === 'Cancelled') {
-	// 	return {
-	// 		detail: event,
-	// 		emailSendAttempt: {
-	// 			status: 'skipped',
-	// 			payload: {},
-	// 			response: 'Subscription status is cancelled',
-	// 		},
-	// 	};
-	// }
-	// if (subStatus === 'Error') {
-	// 	return {
-	// 		detail: event,
-	// 		emailSendAttempt: {
-	// 			status: 'error',
-	// 			payload: {},
-	// 			response: 'Error getting sub status from Zuora',
-	// 		},
-	// 	};
-	// }
-	// return subStatus === 'Active' && !!workEmail;
 }
 
 function formatDate(inputDate: string): string {
