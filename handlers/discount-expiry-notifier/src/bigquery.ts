@@ -6,6 +6,7 @@ import type {
 import { ExternalAccountClient } from 'google-auth-library';
 import { z } from 'zod';
 import { testQueryResponse } from './testQueryResponse';
+import type { ExpiringDiscountToProcess } from './types';
 
 export const buildAuthClient = async (
 	clientConfig: string,
@@ -52,19 +53,7 @@ export const BigQueryResultDataSchema = z.array(
 export const runQuery = async (
 	authClient: BaseExternalAccountClient,
 	query: string,
-): Promise<
-	Array<{
-		firstName: string;
-		nextPaymentDate: string;
-		paymentAmount: number;
-		paymentCurrency: string;
-		paymentFrequency: string;
-		productName: string;
-		sfContactId: string;
-		zuoraSubName: string;
-		workEmail: string;
-	}>
-> => {
+): Promise<ExpiringDiscountToProcess[]> => {
 	const bigquery = new BigQuery({
 		projectId: `datatech-platform-code`,
 		authClient,
