@@ -8,10 +8,10 @@ export const handler = async (event: { item: RecordForEmailSend }) => {
 		event.item.workEmail,
 	);
 
-	if (!emailSendEligibility.eligibleForEmailSend) {
+	if (!emailSendEligibility.isEligible) {
 		return {
 			detail: {
-				event,
+				record: event.item,
 				emailSendAttempt: {
 					status: 'skipped',
 					response: emailSendEligibility.ineligibilityReason,
@@ -22,7 +22,7 @@ export const handler = async (event: { item: RecordForEmailSend }) => {
 
 	const currencySymbol = getCurrencySymbol(event.item.paymentCurrency);
 
-	const payload = {
+	const request = {
 		...{
 			To: {
 				Address: event.item.workEmail,
@@ -42,26 +42,34 @@ export const handler = async (event: { item: RecordForEmailSend }) => {
 	};
 
 	try {
+		const response = await sendEmail(stageFromEnvironment(), request);
+
+		if (response.$metadata.httpStatusCode !== 200) {
+			throw new Error('Failed to send email');
+		}
 		return {
 			detail: {
-				event,
+				record: event.item,
 				emailSendEligibility,
 				emailSendAttempt: {
-					status: 'success',
-					payload,
-					response: await sendEmail(stageFromEnvironment(), payload),
+					request,
+					response: {
+						status: 'success',
+					},
 				},
 			},
 		};
 	} catch (error) {
 		return {
 			detail: {
-				event,
+				record: event.item,
 				emailSendEligibility,
 				emailSendAttempt: {
-					status: 'error',
-					payload,
-					response: JSON.stringify(error, null, 2),
+					request,
+					response: {
+						status: 'error',
+						errorDetail: JSON.stringify(error, null, 2),
+					},
 				},
 			},
 		};
@@ -88,7 +96,7 @@ function getEmailSendEligibility(
 	workEmail: string | undefined,
 ) {
 	return {
-		eligibleForEmailSend: subStatus === 'Active' && !!workEmail,
+		isEligible: subStatus === 'Active' && !!workEmail,
 		ineligibilityReason: getIneligibilityReason(subStatus, workEmail),
 	};
 }
