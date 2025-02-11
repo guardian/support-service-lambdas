@@ -1,14 +1,14 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { uploadFileToS3 } from '../s3';
-import type { ExpiringDiscountsToProcess } from '../types';
+import type { DiscountProcessingAttempt, ExpiringDiscountsToProcess, FilteredSubs } from '../types';
 
-//todo add a type check on the input event
 export const handler = async (event: {
 	discountExpiresOnDate: string;
+	expiringDiscountsToProcessCount: number;
 	expiringDiscountsToProcess: ExpiringDiscountsToProcess[];
-	expiringDiscountProcessingAttempts: Array<{
-		status: string;
-	}>;
+	filteredSubsCount: number;
+	filteredSubs: FilteredSubs[];
+	discountProcessingAttempts: DiscountProcessingAttempt[];
 }) => {
 	try {
 		const bucketName = getIfDefined<string>(
