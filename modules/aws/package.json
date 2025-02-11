@@ -7,6 +7,6 @@
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch": "3.734.0",
-    "@aws-sdk/credential-provider-node": "3.734.0"
+    "@aws-sdk/credential-provider-node": "3.744.0"
   }
 }
