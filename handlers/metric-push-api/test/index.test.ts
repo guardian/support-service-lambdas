@@ -1,6 +1,5 @@
+import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { handler } from '../src/index';
-
-import { APIGatewayProxyEvent } from 'aws-lambda';
 
 describe('handler', () => {
 	it('returns 404 Not Found for an unknown path', async () => {
@@ -28,46 +27,56 @@ describe('handler', () => {
 	});
 
 	describe('GET /', () => {
-		it('returns 201 Accepted if the referer is valid', async () => {
-			const requestEvent = {
-				path: '/',
-				httpMethod: 'GET',
-				headers: {
-					referer: 'https://support.thegulocal.com/',
-				},
-			} as unknown as APIGatewayProxyEvent;
+		describe('if the referred is valid', () => {
+			it('returns 201 Accepted', async () => {
+				const requestEvent = {
+					path: '/',
+					httpMethod: 'GET',
+					headers: {
+						referer: 'https://support.thegulocal.com/',
+					},
+				} as unknown as APIGatewayProxyEvent;
 
-			const response = await handler(requestEvent);
+				const response = await handler(requestEvent);
 
-			expect(response.statusCode).toEqual(201);
+				expect(response.statusCode).toEqual(201);
+			});
 		});
 
-		it('returns 204 No Content if the referer is invalid', async () => {
-			const requestEvent = {
-				path: '/',
-				httpMethod: 'GET',
-				headers: {
-					referer: 'https://www.example.com/',
-				},
-			} as unknown as APIGatewayProxyEvent;
+		describe('if the referer is invalid', () => {
+			it('returns 204 No Content', async () => {
+				const requestEvent = {
+					path: '/',
+					httpMethod: 'GET',
+					headers: {
+						referer: 'https://www.example.com/',
+					},
+				} as unknown as APIGatewayProxyEvent;
 
-			const response = await handler(requestEvent);
+				const response = await handler(requestEvent);
 
-			expect(response.statusCode).toEqual(204);
-			expect(response.headers?.['Cache-Control']).toEqual('private, no-store');
+				expect(response.statusCode).toEqual(204);
+				expect(response.headers?.['Cache-Control']).toEqual(
+					'private, no-store',
+				);
+			});
 		});
 
-		it('returns 204 No Content if no referer is provided', async () => {
-			const requestEvent = {
-				path: '/',
-				httpMethod: 'GET',
-				headers: {},
-			} as unknown as APIGatewayProxyEvent;
+		describe('if no referer is provided', () => {
+			it('returns 204 No Content', async () => {
+				const requestEvent = {
+					path: '/',
+					httpMethod: 'GET',
+					headers: {},
+				} as unknown as APIGatewayProxyEvent;
 
-			const response = await handler(requestEvent);
+				const response = await handler(requestEvent);
 
-			expect(response.statusCode).toEqual(204);
-			expect(response.headers?.['Cache-Control']).toEqual('private, no-store');
+				expect(response.statusCode).toEqual(204);
+				expect(response.headers?.['Cache-Control']).toEqual(
+					'private, no-store',
+				);
+			});
 		});
 	});
 });
