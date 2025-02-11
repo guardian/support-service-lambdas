@@ -2,9 +2,7 @@ import { DataExtensionNames, sendEmail } from '@modules/email/email';
 import { stageFromEnvironment } from '@modules/stage';
 import type { RecordForEmailSend } from '../types';
 
-export const handler = async (event: {
-	item: RecordForEmailSend;
-}) => {
+export const handler = async (event: { item: RecordForEmailSend }) => {
 	const emailSendEligibility = getEmailSendEligibility(
 		event.item.subStatus,
 		event.item.workEmail,

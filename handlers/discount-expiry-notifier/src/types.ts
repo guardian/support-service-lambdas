@@ -16,7 +16,7 @@ export type BigQueryRecord = {
 };
 
 export type RecordForEmailSend = BigQueryRecord & {
-    subStatus: string;
+	subStatus: string;
 };
 
 export type DiscountProcessingAttempt = {
