@@ -1,146 +1,40 @@
 /* eslint-disable @typescript-eslint/require-await -- this is required to ensure the lambda returns a value*/
+import type {
+	DiscountProcessingAttempt,
+	ExpiringDiscountsToProcess,
+	FilteredSubs,
+} from '../types';
 
 export const handler = async (event: {
 	discountExpiresOnDate: string;
 	expiringDiscountsToProcessCount: number;
-	expiringDiscountsToProcess: Array<{
-		firstName: string;
-		nextPaymentDate: string;
-		paymentAmount: number;
-		paymentCurrency: string;
-		paymentFrequency: string;
-		productName: string;
-		sfContactId: string;
-		zuoraSubName: string;
-		workEmail: string;
-		contactCountry: string;
-		sfBuyerContactMailingCountry: string;
-		sfBuyerContactOtherCountry: string;
-		sfRecipientContactMailingCountry: string;
-		sfRecipientContactOtherCountry: string;
-	}>;
+	expiringDiscountsToProcess: ExpiringDiscountsToProcess[];
 	filteredSubsCount: number;
-	filteredSubs: Array<{
-		firstName: string;
-		nextPaymentDate: string;
-		paymentAmount: number;
-		paymentCurrency: string;
-		paymentFrequency: string;
-		productName: string;
-		sfContactId: string;
-		zuoraSubName: string;
-		workEmail: string;
-		contactCountry: string;
-		sfBuyerContactMailingCountry: string;
-		sfBuyerContactOtherCountry: string;
-		sfRecipientContactMailingCountry: string;
-		sfRecipientContactOtherCountry: string;
-	}>;
-	discountProcessingAttempts: Array<{
-		detail: {
-			item: {
-				firstName: string;
-				nextPaymentDate: string;
-				paymentAmount: number;
-				paymentCurrency: string;
-				paymentFrequency: string;
-				productName: string;
-				sfContactId: string;
-				zuoraSubName: string;
-				workEmail: string;
-				contactCountry: string;
-				sfBuyerContactMailingCountry: string;
-				sfBuyerContactOtherCountry: string;
-				sfRecipientContactMailingCountry: string;
-				sfRecipientContactOtherCountry: string;
-				subStatus: string;
-				errorDetail: string;
-			};
-		};
-		emailSendAttempt: {
-			status: string;
-			payload: object;
-			response: string;
-		};
-	}>;
+	filteredSubs: FilteredSubs[];
+	discountProcessingAttempts: DiscountProcessingAttempt[];
 	uploadAttemptStatus: string;
 }) => {
 	console.log('event', event);
 
-	if (await errorsOccurred(event)) {
+	if (
+		await errorsOccurred(
+			event.discountProcessingAttempts,
+			event.uploadAttemptStatus,
+		)
+	) {
 		throw new Error('Errors occurred. Check logs.');
 	}
 	return {};
 };
 
-export const errorsOccurred = async (event: {
-	discountExpiresOnDate: string;
-	expiringDiscountsToProcessCount: number;
-	expiringDiscountsToProcess: Array<{
-		firstName: string;
-		nextPaymentDate: string;
-		paymentAmount: number;
-		paymentCurrency: string;
-		paymentFrequency: string;
-		productName: string;
-		sfContactId: string;
-		zuoraSubName: string;
-		workEmail: string;
-		contactCountry: string;
-		sfBuyerContactMailingCountry: string;
-		sfBuyerContactOtherCountry: string;
-		sfRecipientContactMailingCountry: string;
-		sfRecipientContactOtherCountry: string;
-	}>;
-	filteredSubsCount: number;
-	filteredSubs: Array<{
-		firstName: string;
-		nextPaymentDate: string;
-		paymentAmount: number;
-		paymentCurrency: string;
-		paymentFrequency: string;
-		productName: string;
-		sfContactId: string;
-		zuoraSubName: string;
-		workEmail: string;
-		contactCountry: string;
-		sfBuyerContactMailingCountry: string;
-		sfBuyerContactOtherCountry: string;
-		sfRecipientContactMailingCountry: string;
-		sfRecipientContactOtherCountry: string;
-	}>;
-	discountProcessingAttempts: Array<{
-		detail: {
-			item: {
-				firstName: string;
-				nextPaymentDate: string;
-				paymentAmount: number;
-				paymentCurrency: string;
-				paymentFrequency: string;
-				productName: string;
-				sfContactId: string;
-				zuoraSubName: string;
-				workEmail: string;
-				contactCountry: string;
-				sfBuyerContactMailingCountry: string;
-				sfBuyerContactOtherCountry: string;
-				sfRecipientContactMailingCountry: string;
-				sfRecipientContactOtherCountry: string;
-				subStatus: string;
-				errorDetail: string;
-			};
-		};
-		emailSendAttempt: {
-			status: string;
-			payload: object;
-			response: string;
-		};
-	}>;
-	uploadAttemptStatus: string;
-}): Promise<boolean> => {
-	return event.discountProcessingAttempts.some(
-		(attempt) =>
-			attempt.emailSendAttempt.status === 'error' ||
-			event.uploadAttemptStatus === 'error',
+const errorsOccurred = async (
+	discountProcessingAttempts: DiscountProcessingAttempt[],
+	uploadAttemptStatus: string,
+): Promise<boolean> => {
+	return (
+		uploadAttemptStatus === 'error' ||
+		discountProcessingAttempts.some(
+			(attempt) => attempt.emailSendAttempt.status === 'error',
+		)
 	);
 };
