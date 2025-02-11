@@ -2,6 +2,7 @@ import { GuApiLambda } from '@guardian/cdk';
 import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
+import { GuPutCloudwatchMetricsPolicy } from '@guardian/cdk/lib/constructs/iam';
 import { type App, Duration } from 'aws-cdk-lib';
 import { CfnBasePathMapping, CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
 import {
@@ -50,6 +51,9 @@ export class MetricPushApi extends GuStack {
 				},
 			},
 		});
+
+		const cloudwatchPutMetricPolicy = new GuPutCloudwatchMetricsPolicy(this);
+		lambda.role?.attachInlinePolicy(cloudwatchPutMetricPolicy);
 
 		// DNS
 		const domainName = new CfnDomainName(this, 'MetricPushDomainName', {

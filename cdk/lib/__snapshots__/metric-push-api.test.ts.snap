@@ -6,6 +6,7 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
       "GuApiLambda",
+      "GuPutCloudwatchMetricsPolicy",
       "GuAlarm",
       "GuAlarm",
     ],
@@ -85,6 +86,27 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
         "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
+    },
+    "GuPutCloudwatchMetricsPolicyC5BCE402": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "cloudwatch:PutMetricData",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "GuPutCloudwatchMetricsPolicyC5BCE402",
+        "Roles": [
+          {
+            "Ref": "metricpushapilambdaServiceRole910E7F90",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "HighClientSideErrorRateAlarm0026FCB2": {
       "Properties": {
@@ -835,6 +857,7 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
       "GuApiLambda",
+      "GuPutCloudwatchMetricsPolicy",
       "GuAlarm",
       "GuAlarm",
     ],
@@ -914,6 +937,27 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
         "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
+    },
+    "GuPutCloudwatchMetricsPolicyC5BCE402": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "cloudwatch:PutMetricData",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "GuPutCloudwatchMetricsPolicyC5BCE402",
+        "Roles": [
+          {
+            "Ref": "metricpushapilambdaServiceRole910E7F90",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "HighClientSideErrorRateAlarm0026FCB2": {
       "Properties": {
