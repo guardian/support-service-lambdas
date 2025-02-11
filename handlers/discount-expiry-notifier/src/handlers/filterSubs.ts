@@ -4,7 +4,7 @@ import type { BigQueryRecord } from '../types';
 
 export const handler = async (event: {
 	discountExpiresOnDate: string;
-	expiringDiscountsToProcess: BigQueryRecord[];
+	allRecordsFromBigQuery: BigQueryRecord[];
 }) => {
 	try {
 		const FILTER_BY_REGIONS = getIfDefined<string>(
@@ -14,7 +14,7 @@ export const handler = async (event: {
 
 		const filterByRegions = FILTER_BY_REGIONS.toLowerCase().split(',');
 
-		const filteredSubs = event.expiringDiscountsToProcess.filter(
+		const filteredSubs = event.allRecordsFromBigQuery.filter(
 			(sub) =>
 				filterByRegions.includes(sub.contactCountry.toLowerCase()) ||
 				filterByRegions.includes(

@@ -22,8 +22,8 @@ export const handler = async (event: { discountExpiresOnDate?: string }) => {
 		console.log('result', result);
 		return {
 			discountExpiresOnDate,
-			expiringDiscountsToProcessCount: testQueryResponse.length,
-			expiringDiscountsToProcess: testQueryResponse,
+			allRecordsFromBigQueryCount: testQueryResponse.length,
+			allRecordsFromBigQuery: testQueryResponse,
 		};
 	} catch (error) {
 		console.error('Error:', error);

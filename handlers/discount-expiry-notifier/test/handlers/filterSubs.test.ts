@@ -20,7 +20,7 @@ describe('filterSubs handler', () => {
 
 		const event = {
 			discountExpiresOnDate: '2024-03-21',
-			expiringDiscountsToProcess: [
+			allRecordsFromBigQuery: [
 				{
 					firstName: 'John',
 					nextPaymentDate: '2024-04-21',
@@ -93,7 +93,7 @@ describe('filterSubs handler', () => {
 
 		const event = {
 			discountExpiresOnDate: '2024-03-21',
-			expiringDiscountsToProcess: testQueryResponse,
+			allRecordsFromBigQuery: testQueryResponse,
 		};
 
 		const result = await handler(event);
@@ -110,7 +110,7 @@ describe('filterSubs handler', () => {
 
 		const event = {
 			discountExpiresOnDate: '2024-03-21',
-			expiringDiscountsToProcess: testQueryResponse,
+			allRecordsFromBigQuery: testQueryResponse,
 		};
 
 		await expect(handler(event)).rejects.toThrow(
