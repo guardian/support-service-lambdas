@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/require-await -- this is required to ensure the lambda returns a value*/
 import { getIfDefined } from '@modules/nullAndUndefined';
-import type { ExpiringDiscountToProcess } from '../types';
+import type { BigQueryRecord } from '../types';
 
 export const handler = async (event: {
 	discountExpiresOnDate: string;
-	expiringDiscountsToProcess: ExpiringDiscountToProcess[];
+	expiringDiscountsToProcess: BigQueryRecord[];
 }) => {
 	try {
 		const FILTER_BY_REGIONS = getIfDefined<string>(

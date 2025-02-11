@@ -1,17 +1,17 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { uploadFileToS3 } from '../s3';
 import type {
+	BigQueryRecord,
 	DiscountProcessingAttempt,
-	ExpiringDiscountToProcess,
-	FilteredSub,
+	RecordForEmailSend,
 } from '../types';
 
 export const handler = async (event: {
 	discountExpiresOnDate: string;
 	expiringDiscountsToProcessCount: number;
-	expiringDiscountsToProcess: ExpiringDiscountToProcess[];
+	expiringDiscountsToProcess: BigQueryRecord[];
 	filteredSubsCount: number;
-	filteredSubs: FilteredSub[];
+	filteredSubs: RecordForEmailSend[];
 	discountProcessingAttempts: DiscountProcessingAttempt[];
 }) => {
 	try {

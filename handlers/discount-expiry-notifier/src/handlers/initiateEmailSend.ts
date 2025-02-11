@@ -1,19 +1,9 @@
 import { DataExtensionNames, sendEmail } from '@modules/email/email';
 import { stageFromEnvironment } from '@modules/stage';
+import type { RecordForEmailSend } from '../types';
 
 export const handler = async (event: {
-	item: {
-		firstName: string;
-		nextPaymentDate: string;
-		paymentAmount: number;
-		paymentCurrency: string;
-		paymentFrequency: string;
-		productName: string;
-		sfContactId: string;
-		zuoraSubName: string;
-		workEmail: string;
-		subStatus: string;
-	};
+	item: RecordForEmailSend;
 }) => {
 	const emailSendEligibility = getEmailSendEligibility(
 		event.item.subStatus,

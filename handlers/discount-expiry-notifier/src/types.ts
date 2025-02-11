@@ -1,4 +1,4 @@
-export type ExpiringDiscountToProcess = {
+export type BigQueryRecord = {
 	firstName: string;
 	nextPaymentDate: string;
 	paymentAmount: number;
@@ -15,20 +15,20 @@ export type ExpiringDiscountToProcess = {
 	sfRecipientContactOtherCountry: string;
 };
 
-export type FilteredSub = ExpiringDiscountToProcess;
+export type RecordForEmailSend = BigQueryRecord & {
+    subStatus: string;
+};
 
 export type DiscountProcessingAttempt = {
 	detail: {
-		item: ExpiringDiscountToProcess & {
+		item: BigQueryRecord & {
 			subStatus: string;
 			errorDetail: string;
 		};
-		emailSendAttempt: EmailSendAttempt;
+		emailSendAttempt: {
+			status: string;
+			payload: object;
+			response: string;
+		};
 	};
-};
-
-export type EmailSendAttempt = {
-	status: string;
-	payload: object;
-	response: string;
 };

@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/require-await -- this is required to ensure the lambda returns a value*/
 import type {
 	DiscountProcessingAttempt,
-	ExpiringDiscountToProcess,
-	FilteredSub,
+	BigQueryRecord,
+	RecordForEmailSend,
 } from '../types';
 
 export const handler = async (event: {
 	discountExpiresOnDate: string;
 	expiringDiscountsToProcessCount: number;
-	expiringDiscountsToProcess: ExpiringDiscountToProcess[];
+	expiringDiscountsToProcess: BigQueryRecord[];
 	filteredSubsCount: number;
-	filteredSubs: FilteredSub[];
+	filteredSubs: RecordForEmailSend[];
 	discountProcessingAttempts: DiscountProcessingAttempt[];
 	uploadAttemptStatus: string;
 }) => {
