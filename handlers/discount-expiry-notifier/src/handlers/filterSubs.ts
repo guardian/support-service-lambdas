@@ -17,11 +17,13 @@ export const handler = async (event: FilterSubsInput) => {
 		);
 
 		const filterByRegions = FILTER_BY_REGIONS.toLowerCase().split(',');
-
+		console.log('filterByRegions', filterByRegions);
+		console.log('event.allRecordsFromBigQuery', event.allRecordsFromBigQuery);
 		const filteredRecords = event.allRecordsFromBigQuery.filter(
 			(sub) =>
-				(sub.contactCountry &&
-					filterByRegions.includes(sub.contactCountry.toLowerCase())) ||
+				filterByRegions.includes(
+					sub.contactCountry?.toLowerCase() ?? '',
+				) ||
 				filterByRegions.includes(
 					sub.sfBuyerContactMailingCountry?.toLowerCase() ?? '',
 				) ||
@@ -35,6 +37,7 @@ export const handler = async (event: FilterSubsInput) => {
 					sub.sfRecipientContactOtherCountry?.toLowerCase() ?? '',
 				),
 		);
+		console.log('filteredRecords', filteredRecords);
 
 		return {
 			...event,
