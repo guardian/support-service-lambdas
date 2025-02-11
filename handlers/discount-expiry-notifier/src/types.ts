@@ -19,16 +19,38 @@ export type RecordForEmailSend = BigQueryRecord & {
 	subStatus: string;
 };
 
+export type EmailSendEligibility = {
+    isEligible: boolean;
+    ineligibilityReason: string;
+};
+
+export type EmailSendAttempt = {
+    request: {
+        To: {
+            Address: string;
+            ContactAttributes: {
+                SubscriberAttributes: {
+                    EmailAddress: string;
+                    payment_amount: string;
+                    first_name: string;
+                    next_payment_date: string;
+                    payment_frequency: string;
+                };
+            };
+        };
+        DataExtensionName: string;
+        SfContactId: string;
+    };
+    response: {
+        status: string;
+		errorDetail: string;
+    };
+};
+
 export type DiscountProcessingAttempt = {
-	detail: {
-		item: BigQueryRecord & {
-			subStatus: string;
-			errorDetail: string;
-		};
-		emailSendAttempt: {
-			status: string;
-			payload: object;
-			response: string;
-		};
-	};
+    detail: {
+        record: RecordForEmailSend;
+        emailSendEligibility: EmailSendEligibility;
+        emailSendAttempt: EmailSendAttempt;
+    };
 };

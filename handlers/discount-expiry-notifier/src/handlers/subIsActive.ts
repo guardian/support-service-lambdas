@@ -1,19 +1,10 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { getSubscription } from '@modules/zuora/getSubscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { RecordForEmailSend } from '../types';
 
 export const handler = async (event: {
-	item: {
-		firstName: string;
-		nextPaymentDate: string;
-		paymentAmount: number;
-		paymentCurrency: string;
-		paymentFrequency: string;
-		productName: string;
-		sfContactId: string;
-		zuoraSubName: string;
-		workEmail: string;
-	};
+	item: RecordForEmailSend;
 }) => {
 	try {
 		const subName = event.item.zuoraSubName;
