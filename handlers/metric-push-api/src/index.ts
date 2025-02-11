@@ -1,5 +1,5 @@
-import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { Router } from '@modules/routing/router';
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 const validReferers = [
 	'https://support.thegulocal.com/',
@@ -21,7 +21,7 @@ const router = new Router([
 			console.log(`Input is ${JSON.stringify(event)}`);
 
 			if (
-				event.headers?.referer &&
+				event.headers.referer &&
 				validReferers.includes(event.headers.referer)
 			) {
 				return Promise.resolve(buildResponse(201));
