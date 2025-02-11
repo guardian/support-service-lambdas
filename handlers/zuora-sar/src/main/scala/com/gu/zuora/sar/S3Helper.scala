@@ -118,7 +118,10 @@ object S3Helper extends S3Service with LazyLogging {
                 )
                 .toEither
                 .left
-                .map(err => S3Error(err.getMessage))
+                .map { err =>
+                  logger.info(s"Error copying S3 object: ${err}")
+                  S3Error(err.toString)
+                }
             }
             createCompletedObject("ResultsCompleted", initiationReference, config)
           }.map(_ => S3WriteSuccess())
