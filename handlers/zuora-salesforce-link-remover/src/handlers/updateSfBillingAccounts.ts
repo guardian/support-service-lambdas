@@ -10,7 +10,7 @@ import type {
 	SalesforceUpdateResponseArray,
 } from '@modules/salesforce/src/updateRecords';
 import { doCompositeCallout } from '@modules/salesforce/src/updateRecords';
-import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
+import { getSecretValue } from '@modules/secrets-manager/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
 import type { Handler } from 'aws-lambda';
 import { z } from 'zod';
