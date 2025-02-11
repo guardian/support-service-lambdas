@@ -109,7 +109,7 @@ export class MetricPushApi extends GuStack {
 			treatMissingData: TreatMissingData.NOT_BREACHING,
 			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 			metric: new Metric({
-				metricName: 'metric-push-api-success',
+				metricName: 'metric-push-api-client-side-error',
 				namespace: 'support-service-lambdas',
 				statistic: 'Sum',
 				period: Duration.seconds(60),

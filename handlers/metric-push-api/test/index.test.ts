@@ -58,7 +58,9 @@ describe('handler', () => {
 
 				await handler(requestEvent);
 
-				expect(putMetric).toHaveBeenCalledWith('metric-push-api-success');
+				expect(putMetric).toHaveBeenCalledWith(
+					'metric-push-api-client-side-error',
+				);
 			});
 		});
 

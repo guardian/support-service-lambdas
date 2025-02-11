@@ -25,7 +25,7 @@ const router = new Router([
 				event.headers.referer &&
 				validReferers.includes(event.headers.referer)
 			) {
-				await putMetric('metric-push-api-success');
+				await putMetric('metric-push-api-client-side-error');
 				return Promise.resolve(buildResponse(201));
 			} else {
 				return Promise.resolve(buildResponse(204));
