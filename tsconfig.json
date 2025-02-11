@@ -40,6 +40,7 @@
       "@modules/supporter-product-data/*": ["./modules/supporter-product-data/src/*"],
       "@modules/identity/*": ["./modules/identity/src/*"],
       "@modules/routing/*": ["./modules/routing/src/*"],
+      "@modules/secrets-manager/*": ["./modules/secrets-manager/src/*"],
       "@modules/*": ["./modules/*"]
     },
     // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */

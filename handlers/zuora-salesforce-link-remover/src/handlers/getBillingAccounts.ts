@@ -5,7 +5,7 @@ import type {
 import { doSfAuth } from '@modules/salesforce/src/auth';
 import { executeSalesforceQuery } from '@modules/salesforce/src/query';
 import { RecordSchema } from '@modules/salesforce/src/recordSchema';
-import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
+import { getSecretValue } from '@modules/secrets-manager/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
 import { z } from 'zod';
 import { getSalesforceSecretNames } from '../secrets';
