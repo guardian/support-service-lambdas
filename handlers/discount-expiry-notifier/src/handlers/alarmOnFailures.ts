@@ -17,7 +17,7 @@ export const handler = async (event: {
 	console.log('event', event);
 
 	if (
-		await errorsOccurred(
+		await failuresOccurred(
 			event.discountProcessingAttempts,
 			event.uploadAttemptStatus,
 		)
@@ -27,14 +27,14 @@ export const handler = async (event: {
 	return {};
 };
 
-const errorsOccurred = async (
+const failuresOccurred = async (
 	discountProcessingAttempts: DiscountProcessingAttempt[],
 	uploadAttemptStatus: string,
 ): Promise<boolean> => {
 	return (
 		uploadAttemptStatus === 'error' ||
 		discountProcessingAttempts.some(
-			(attempt) => attempt.detail.emailSendAttempt.status === 'error',
+			(attempt) => attempt.detail.emailSendAttempt.status === 'skipped',
 		)
 	);
 };

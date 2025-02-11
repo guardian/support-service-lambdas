@@ -15,26 +15,23 @@ export const handler = async (event: {
 		subStatus: string;
 	};
 }) => {
-	if (event.item.subStatus === 'Cancelled') {
+	const emailSendEligibility = getEmailSendEligibility(
+		event.item.subStatus,
+		event.item.workEmail,
+	);
+
+	if (!emailSendEligibility.eligibleForEmailSend) {
 		return {
-			detail: event,
-			emailSendAttempt: {
-				status: 'skipped',
-				payload: {},
-				response: 'Subscription status is cancelled',
+			detail: {
+				event,
+				emailSendAttempt: {
+					status: 'skipped',
+					response: emailSendEligibility.ineligibilityReason,
+				},
 			},
 		};
 	}
-	if (event.item.subStatus === 'Error') {
-		return {
-			detail: event,
-			emailSendAttempt: {
-				status: 'error',
-				payload: {},
-				response: 'Error getting sub status from Zuora',
-			},
-		};
-	}
+
 	const currencySymbol = getCurrencySymbol(event.item.paymentCurrency);
 
 	const payload = {
@@ -60,6 +57,7 @@ export const handler = async (event: {
 		return {
 			detail: {
 				event,
+				emailSendEligibility,
 				emailSendAttempt: {
 					status: 'success',
 					payload,
@@ -71,6 +69,7 @@ export const handler = async (event: {
 		return {
 			detail: {
 				event,
+				emailSendEligibility,
 				emailSendAttempt: {
 					status: 'error',
 					payload,
@@ -80,6 +79,52 @@ export const handler = async (event: {
 		};
 	}
 };
+
+function getIneligibilityReason(
+	subStatus: string,
+	workEmail: string | undefined,
+) {
+	if (subStatus === 'Cancelled') {
+		return 'Subscription status is cancelled';
+	}
+	if (subStatus === 'Error') {
+		return 'Error getting sub status from Zuora';
+	}
+	if (!workEmail) {
+		return 'No value for work email';
+	}
+	return '';
+}
+function getEmailSendEligibility(
+	subStatus: string,
+	workEmail: string | undefined,
+) {
+	return {
+		eligibleForEmailSend: subStatus === 'Active' && !!workEmail,
+		ineligibilityReason: getIneligibilityReason(subStatus, workEmail),
+	};
+	// if (subStatus === 'Cancelled') {
+	// 	return {
+	// 		detail: event,
+	// 		emailSendAttempt: {
+	// 			status: 'skipped',
+	// 			payload: {},
+	// 			response: 'Subscription status is cancelled',
+	// 		},
+	// 	};
+	// }
+	// if (subStatus === 'Error') {
+	// 	return {
+	// 		detail: event,
+	// 		emailSendAttempt: {
+	// 			status: 'error',
+	// 			payload: {},
+	// 			response: 'Error getting sub status from Zuora',
+	// 		},
+	// 	};
+	// }
+	// return subStatus === 'Active' && !!workEmail;
+}
 
 function formatDate(inputDate: string): string {
 	return new Date(inputDate).toLocaleDateString('en-GB', {
