@@ -18,7 +18,7 @@ export const handler = async (event: {
 
 	const emailSendEligibility = getEmailSendEligibility(event.item.subStatus, event.item.workEmail);
 
-	if(!emailSendEligibility.isEligibleForEmailSend){
+	if(!emailSendEligibility.eligibleForEmailSend){
 		return {
 			detail: {
 				event,
@@ -55,6 +55,7 @@ export const handler = async (event: {
 		return {
 			detail: {
 				event,
+				emailSendEligibility,
 				emailSendAttempt: {
 					status: 'success',
 					payload,
@@ -66,6 +67,7 @@ export const handler = async (event: {
 		return {
 			detail: {
 				event,
+				emailSendEligibility,
 				emailSendAttempt: {
 					status: 'error',
 					payload,
@@ -91,7 +93,7 @@ function getIneligibilityReason(subStatus: string, workEmail: string | undefined
 function getEmailSendEligibility(subStatus: string, workEmail: string | undefined) {
 
 	return {
-		isEligibleForEmailSend: subStatus === 'Active' && !!workEmail,
+		eligibleForEmailSend: subStatus === 'Active' && !!workEmail,
 		ineligibilityReason: getIneligibilityReason(subStatus, workEmail)
 	};	
 	// if (subStatus === 'Cancelled') {
