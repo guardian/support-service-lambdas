@@ -81,6 +81,48 @@ export const handler = async (event: {
 	}
 };
 
+function getIneligibilityReason(subStatus: string, workEmail: string | undefined) {
+	if (subStatus === 'Cancelled') {
+		return 'Subscription status is cancelled';
+	}
+	if (subStatus === 'Error') {
+		return 'Error getting sub status from Zuora';
+	}
+	if (!workEmail) {
+		return 'No value for work email';
+	}
+	return '';
+
+}
+function getEmailSendEligibility(subStatus: string, workEmail: string | undefined) {
+
+	return {
+		isEligibleForEmailSend: subStatus === 'Active' && !!workEmail,
+		ineligibilityReason: 'Subscription status is cancelled'	
+	};	
+	// if (subStatus === 'Cancelled') {
+	// 	return {
+	// 		detail: event,
+	// 		emailSendAttempt: {
+	// 			status: 'skipped',
+	// 			payload: {},
+	// 			response: 'Subscription status is cancelled',
+	// 		},
+	// 	};
+	// }
+	// if (subStatus === 'Error') {
+	// 	return {
+	// 		detail: event,
+	// 		emailSendAttempt: {
+	// 			status: 'error',
+	// 			payload: {},
+	// 			response: 'Error getting sub status from Zuora',
+	// 		},
+	// 	};
+	// }
+	// return subStatus === 'Active' && !!workEmail;
+}
+
 function formatDate(inputDate: string): string {
 	return new Date(inputDate).toLocaleDateString('en-GB', {
 		day: '2-digit',
