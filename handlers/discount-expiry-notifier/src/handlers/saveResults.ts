@@ -34,7 +34,7 @@ export const handler = async (event: {
 
 		const filePath = `${discountExpiresOnDate}/${executionDateTime}`;
 
-		const uploadAttempt = await uploadFileToS3({
+		const s3UploadAttempt = await uploadFileToS3({
 			bucketName,
 			filePath,
 			content: JSON.stringify(event, null, 2),
@@ -42,14 +42,14 @@ export const handler = async (event: {
 
 		return {
 			...event,
-			uploadAttemptStatus: 'success',
-			uploadAttempt,
+			s3UploadAttemptStatus: 'success',
+			s3UploadAttempt,
 			filePath,
 		};
 	} catch (error) {
 		return {
 			...event,
-			uploadAttemptStatus: 'error',
+			s3UploadAttemptStatus: 'error',
 			errorDetail:
 				error instanceof Error ? error.message : JSON.stringify(error, null, 2),
 		};
