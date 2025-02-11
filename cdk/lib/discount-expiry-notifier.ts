@@ -2,6 +2,14 @@ import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
+import { aws_cloudwatch, Duration } from 'aws-cdk-lib';
+import {
+	Alarm,
+	Metric,
+	Stats,
+	TreatMissingData,
+} from 'aws-cdk-lib/aws-cloudwatch';
+import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import {
 	Effect,
 	Policy,
@@ -11,6 +19,7 @@ import {
 } from 'aws-cdk-lib/aws-iam';
 import { Architecture } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
+import { Topic } from 'aws-cdk-lib/aws-sns';
 import {
 	DefinitionBody,
 	JsonPath,
@@ -51,6 +60,12 @@ export class DiscountExpiryNotifier extends GuStack {
 			}),
 		);
 
+		const allowPutMetric = new PolicyStatement({
+			effect: Effect.ALLOW,
+			actions: ['cloudwatch:PutMetricData'],
+			resources: ['*'],
+		});
+
 		const bucket = new Bucket(this, 'Bucket', {
 			bucketName: `${appName}-${this.stage.toLowerCase()}`,
 		});
@@ -69,9 +84,11 @@ export class DiscountExpiryNotifier extends GuStack {
 				handler: 'getSubsWithExpiringDiscounts.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
+				initialPolicy: [allowPutMetric],
 				role,
 			},
 		);
+
 		const filterSubsLambda = new GuLambdaFunction(this, 'filter-subs-lambda', {
 			app: appName,
 			functionName: `${appName}-filter-subs-${this.stage}`,
@@ -83,6 +100,7 @@ export class DiscountExpiryNotifier extends GuStack {
 			handler: 'filterSubs.handler',
 			fileName: `${appName}.zip`,
 			architecture: Architecture.ARM_64,
+			initialPolicy: [allowPutMetric],
 		});
 
 		const getSubStatusLambda = new GuLambdaFunction(
@@ -145,7 +163,25 @@ export class DiscountExpiryNotifier extends GuStack {
 						actions: ['s3:GetObject', 's3:PutObject'],
 						resources: [bucket.arnForObjects('*')],
 					}),
+					allowPutMetric,
 				],
+			},
+		);
+
+		const alarmOnFailuresLambda = new GuLambdaFunction(
+			this,
+			'alarm-on-failures-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-alarm-on-failures-${this.stage}`,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+				},
+				handler: 'alarmOnFailures.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+				initialPolicy: [allowPutMetric],
 			},
 		);
 
@@ -176,6 +212,15 @@ export class DiscountExpiryNotifier extends GuStack {
 			lambdaFunction: saveResultsLambda,
 			outputPath: '$.Payload',
 		});
+
+		const alarmOnFailuresLambdaTask = new LambdaInvoke(
+			this,
+			'Alarm on errors',
+			{
+				lambdaFunction: alarmOnFailuresLambda,
+				outputPath: '$.Payload',
+			},
+		);
 
 		const initiateEmailSendLambdaTask = new LambdaInvoke(
 			this,
@@ -216,7 +261,8 @@ export class DiscountExpiryNotifier extends GuStack {
 				.next(filterSubsLambdaTask)
 				.next(subStatusFetcherMap)
 				.next(expiringDiscountProcessorMap)
-				.next(saveResultsLambdaTask),
+				.next(saveResultsLambdaTask)
+				.next(alarmOnFailuresLambdaTask),
 		);
 
 		const sqsInlinePolicy: Policy = new Policy(this, 'sqs-inline-policy', {
@@ -236,6 +282,43 @@ export class DiscountExpiryNotifier extends GuStack {
 		new StateMachine(this, `${appName}-state-machine-${this.stage}`, {
 			stateMachineName: `${appName}-${this.stage}`,
 			definitionBody: definitionBody,
+		});
+
+		const topic = Topic.fromTopicArn(
+			this,
+			'Topic',
+			`arn:aws:sns:${this.region}:${this.account}:alarms-handler-topic-${this.stage}`,
+		);
+
+		const lambdaFunctionsToAlarmOn = [
+			getSubsWithExpiringDiscountsLambda,
+			filterSubsLambda,
+			alarmOnFailuresLambda,
+		];
+
+		lambdaFunctionsToAlarmOn.forEach((lambdaFunction, index) => {
+			const alarm = new Alarm(this, `alarm-${index}`, {
+				alarmName: `Discount Expiry Notifier - ${lambdaFunction.functionName} - something went wrong - ${this.stage}`,
+				alarmDescription:
+					'Something went wrong when executing the Discount Expiry Notifier. See Cloudwatch logs for more information on the error.',
+				datapointsToAlarm: 1,
+				evaluationPeriods: 1,
+				actionsEnabled: true,
+				comparisonOperator:
+					aws_cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+				metric: new Metric({
+					metricName: 'Errors',
+					namespace: 'AWS/Lambda',
+					statistic: Stats.SUM,
+					period: Duration.seconds(60),
+					dimensionsMap: {
+						FunctionName: lambdaFunction.functionName,
+					},
+				}),
+				threshold: 0,
+				treatMissingData: TreatMissingData.MISSING,
+			});
+			alarm.addAlarmAction(new SnsAction(topic));
 		});
 	}
 }

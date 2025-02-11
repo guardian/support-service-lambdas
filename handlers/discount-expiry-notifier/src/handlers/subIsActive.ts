@@ -18,7 +18,7 @@ export const handler = async (event: {
 	try {
 		const subName = event.item.zuoraSubName;
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
-		const getSubResponse = await getSubscription(zuoraClient, subName + '1');
+		const getSubResponse = await getSubscription(zuoraClient, subName);
 
 		return {
 			...event.item,
@@ -28,7 +28,8 @@ export const handler = async (event: {
 		return {
 			...event.item,
 			subStatus: 'Error',
-			errorDetail: JSON.stringify(error, null, 2),
+			errorDetail:
+				error instanceof Error ? error.message : JSON.stringify(error, null, 2),
 		};
 	}
 };

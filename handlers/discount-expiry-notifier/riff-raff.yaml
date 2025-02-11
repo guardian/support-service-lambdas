@@ -25,4 +25,5 @@ deployments:
         - discount-expiry-notifier-sub-is-active-
         - discount-expiry-notifier-initiate-email-send-
         - discount-expiry-notifier-save-results-
+        - discount-expiry-notifier-alarm-on-failures-
     dependencies: [discount-expiry-notifier-cloudformation]
