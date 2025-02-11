@@ -1,11 +1,15 @@
 /* eslint-disable @typescript-eslint/require-await -- this is required to ensure the lambda returns a value*/
 import { getIfDefined } from '@modules/nullAndUndefined';
-import type { BigQueryRecord } from '../types';
+import { z } from 'zod';
+import { BigQueryResultDataSchema } from '../bigquery';
 
-export const handler = async (event: {
-	discountExpiresOnDate: string;
-	allRecordsFromBigQuery: BigQueryRecord[];
-}) => {
+export const FilterSubsInputSchema = z.object({
+    discountExpiresOnDate: z.string(),
+	allRecordsFromBigQuery: BigQueryResultDataSchema
+});
+export type FilterSubsInput = z.infer<typeof FilterSubsInputSchema>;
+
+export const handler = async (event: FilterSubsInput) => {
 	try {
 		const FILTER_BY_REGIONS = getIfDefined<string>(
 			process.env.FILTER_BY_REGIONS,
@@ -16,18 +20,18 @@ export const handler = async (event: {
 
 		const filteredRecords = event.allRecordsFromBigQuery.filter(
 			(sub) =>
-				filterByRegions.includes(sub.contactCountry.toLowerCase()) ||
+				(sub.contactCountry && filterByRegions.includes(sub.contactCountry.toLowerCase())) ||
 				filterByRegions.includes(
-					sub.sfBuyerContactMailingCountry.toLowerCase(),
+					sub.sfBuyerContactMailingCountry?.toLowerCase() ?? '',
 				) ||
 				filterByRegions.includes(
-					sub.sfBuyerContactOtherCountry.toLowerCase(),
+					sub.sfBuyerContactOtherCountry?.toLowerCase() ?? '',
 				) ||
 				filterByRegions.includes(
-					sub.sfRecipientContactMailingCountry.toLowerCase(),
+					sub.sfRecipientContactMailingCountry?.toLowerCase() ?? '',
 				) ||
 				filterByRegions.includes(
-					sub.sfRecipientContactOtherCountry.toLowerCase(),
+					sub.sfRecipientContactOtherCountry?.toLowerCase() ?? '',
 				),
 		);
 
