@@ -15,10 +15,12 @@ export const handler = async (event: {
 		subStatus: string;
 	};
 }) => {
+	const emailSendEligibility = getEmailSendEligibility(
+		event.item.subStatus,
+		event.item.workEmail,
+	);
 
-	const emailSendEligibility = getEmailSendEligibility(event.item.subStatus, event.item.workEmail);
-
-	if(!emailSendEligibility.eligibleForEmailSend){
+	if (!emailSendEligibility.eligibleForEmailSend) {
 		return {
 			detail: {
 				event,
@@ -78,7 +80,10 @@ export const handler = async (event: {
 	}
 };
 
-function getIneligibilityReason(subStatus: string, workEmail: string | undefined) {
+function getIneligibilityReason(
+	subStatus: string,
+	workEmail: string | undefined,
+) {
 	if (subStatus === 'Cancelled') {
 		return 'Subscription status is cancelled';
 	}
@@ -90,12 +95,14 @@ function getIneligibilityReason(subStatus: string, workEmail: string | undefined
 	}
 	return '';
 }
-function getEmailSendEligibility(subStatus: string, workEmail: string | undefined) {
-
+function getEmailSendEligibility(
+	subStatus: string,
+	workEmail: string | undefined,
+) {
 	return {
 		eligibleForEmailSend: subStatus === 'Active' && !!workEmail,
-		ineligibilityReason: getIneligibilityReason(subStatus, workEmail)
-	};	
+		ineligibilityReason: getIneligibilityReason(subStatus, workEmail),
+	};
 	// if (subStatus === 'Cancelled') {
 	// 	return {
 	// 		detail: event,
