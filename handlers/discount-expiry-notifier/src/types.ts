@@ -18,13 +18,13 @@ export type ExpiringDiscountToProcess = {
 export type FilteredSub = ExpiringDiscountToProcess;
 
 export type DiscountProcessingAttempt = {
-    detail: {
-        item: ExpiringDiscountToProcess & {
-            subStatus: string;
-            errorDetail: string;
-        };
+	detail: {
+		item: ExpiringDiscountToProcess & {
+			subStatus: string;
+			errorDetail: string;
+		};
 		emailSendAttempt: EmailSendAttempt;
-    };
+	};
 };
 
 export type EmailSendAttempt = {

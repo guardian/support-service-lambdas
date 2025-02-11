@@ -1,6 +1,10 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { uploadFileToS3 } from '../s3';
-import type { DiscountProcessingAttempt, ExpiringDiscountToProcess, FilteredSub } from '../types';
+import type {
+	DiscountProcessingAttempt,
+	ExpiringDiscountToProcess,
+	FilteredSub,
+} from '../types';
 
 export const handler = async (event: {
 	discountExpiresOnDate: string;
