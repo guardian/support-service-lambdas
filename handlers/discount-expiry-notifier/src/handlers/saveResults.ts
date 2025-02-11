@@ -1,13 +1,13 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { uploadFileToS3 } from '../s3';
-import type { DiscountProcessingAttempt, ExpiringDiscountsToProcess, FilteredSubs } from '../types';
+import type { DiscountProcessingAttempt, ExpiringDiscountToProcess, FilteredSub } from '../types';
 
 export const handler = async (event: {
 	discountExpiresOnDate: string;
 	expiringDiscountsToProcessCount: number;
-	expiringDiscountsToProcess: ExpiringDiscountsToProcess[];
+	expiringDiscountsToProcess: ExpiringDiscountToProcess[];
 	filteredSubsCount: number;
-	filteredSubs: FilteredSubs[];
+	filteredSubs: FilteredSub[];
 	discountProcessingAttempts: DiscountProcessingAttempt[];
 }) => {
 	try {

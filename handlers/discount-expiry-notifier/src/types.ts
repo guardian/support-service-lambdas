@@ -1,4 +1,4 @@
-export type ExpiringDiscountsToProcess = {
+export type ExpiringDiscountToProcess = {
 	firstName: string;
 	nextPaymentDate: string;
 	paymentAmount: number;
@@ -15,30 +15,16 @@ export type ExpiringDiscountsToProcess = {
 	sfRecipientContactOtherCountry: string;
 };
 
-export type FilteredSubs = ExpiringDiscountsToProcess;
+export type FilteredSub = ExpiringDiscountToProcess;
 
 export type DiscountProcessingAttempt = {
-	detail: {
-		item: {
-			firstName: string;
-			nextPaymentDate: string;
-			paymentAmount: number;
-			paymentCurrency: string;
-			paymentFrequency: string;
-			productName: string;
-			sfContactId: string;
-			zuoraSubName: string;
-			workEmail: string;
-			contactCountry: string;
-			sfBuyerContactMailingCountry: string;
-			sfBuyerContactOtherCountry: string;
-			sfRecipientContactMailingCountry: string;
-			sfRecipientContactOtherCountry: string;
-			subStatus: string;
-			errorDetail: string;
-		};
-	};
-	emailSendAttempt: EmailSendAttempt;
+    detail: {
+        item: ExpiringDiscountToProcess & {
+            subStatus: string;
+            errorDetail: string;
+        };
+		emailSendAttempt: EmailSendAttempt;
+    };
 };
 
 export type EmailSendAttempt = {

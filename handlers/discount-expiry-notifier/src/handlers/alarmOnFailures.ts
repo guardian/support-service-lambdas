@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/require-await -- this is required to ensure the lambda returns a value*/
 import type {
 	DiscountProcessingAttempt,
-	ExpiringDiscountsToProcess,
-	FilteredSubs,
+	ExpiringDiscountToProcess,
+	FilteredSub,
 } from '../types';
 
 export const handler = async (event: {
 	discountExpiresOnDate: string;
 	expiringDiscountsToProcessCount: number;
-	expiringDiscountsToProcess: ExpiringDiscountsToProcess[];
+	expiringDiscountsToProcess: ExpiringDiscountToProcess[];
 	filteredSubsCount: number;
-	filteredSubs: FilteredSubs[];
+	filteredSubs: FilteredSub[];
 	discountProcessingAttempts: DiscountProcessingAttempt[];
 	uploadAttemptStatus: string;
 }) => {
@@ -34,7 +34,7 @@ const errorsOccurred = async (
 	return (
 		uploadAttemptStatus === 'error' ||
 		discountProcessingAttempts.some(
-			(attempt) => attempt.emailSendAttempt.status === 'error',
+			(attempt) => attempt.detail.emailSendAttempt.status === 'error',
 		)
 	);
 };

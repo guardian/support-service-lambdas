@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/require-await -- this is required to ensure the lambda returns a value*/
 import { getIfDefined } from '@modules/nullAndUndefined';
-import type { ExpiringDiscountsToProcess } from '../types';
+import type { ExpiringDiscountToProcess } from '../types';
 
 export const handler = async (event: {
 	discountExpiresOnDate: string;
-	expiringDiscountsToProcess: ExpiringDiscountsToProcess[];
+	expiringDiscountsToProcess: ExpiringDiscountToProcess[];
 }) => {
 	try {
 		const FILTER_BY_REGIONS = getIfDefined<string>(
