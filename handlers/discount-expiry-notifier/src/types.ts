@@ -48,9 +48,7 @@ export type EmailSendAttempt = {
 };
 
 export type DiscountProcessingAttempt = {
-	detail: {
-		record: RecordForEmailSend;
-		emailSendEligibility: EmailSendEligibility;
-		emailSendAttempt: EmailSendAttempt;
-	};
+	record: RecordForEmailSend;
+	emailSendEligibility: EmailSendEligibility;
+	emailSendAttempt: EmailSendAttempt;
 };

@@ -10,12 +10,10 @@ export const handler = async (event: { item: RecordForEmailSend }) => {
 
 	if (!emailSendEligibility.isEligible) {
 		return {
-			detail: {
-				record: event.item,
-				emailSendAttempt: {
-					status: 'skipped',
-					response: emailSendEligibility.ineligibilityReason,
-				},
+			record: event.item,
+			emailSendAttempt: {
+				status: 'skipped',
+				response: emailSendEligibility.ineligibilityReason,
 			},
 		};
 	}
@@ -48,28 +46,24 @@ export const handler = async (event: { item: RecordForEmailSend }) => {
 			throw new Error('Failed to send email');
 		}
 		return {
-			detail: {
-				record: event.item,
-				emailSendEligibility,
-				emailSendAttempt: {
-					request,
-					response: {
-						status: 'success',
-					},
+			record: event.item,
+			emailSendEligibility,
+			emailSendAttempt: {
+				request,
+				response: {
+					status: 'success',
 				},
 			},
 		};
 	} catch (error) {
 		return {
-			detail: {
-				record: event.item,
-				emailSendEligibility,
-				emailSendAttempt: {
-					request,
-					response: {
-						status: 'error',
-						errorDetail: JSON.stringify(error, null, 2),
-					},
+			record: event.item,
+			emailSendEligibility,
+			emailSendAttempt: {
+				request,
+				response: {
+					status: 'error',
+					errorDetail: JSON.stringify(error, null, 2),
 				},
 			},
 		};
