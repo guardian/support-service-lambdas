@@ -25,26 +25,28 @@ export type EmailSendEligibility = {
 };
 
 export type EmailSendAttempt = {
-	request: {
-		To: {
-			Address: string;
-			ContactAttributes: {
-				SubscriberAttributes: {
-					EmailAddress: string;
-					payment_amount: string;
-					first_name: string;
-					next_payment_date: string;
-					payment_frequency: string;
-				};
-			};
-		};
-		DataExtensionName: string;
-		SfContactId: string;
-	};
+	request: EmailSendRequest;
 	response: {
 		status: string;
 		errorDetail: string;
 	};
+};
+
+export type EmailSendRequest = {
+	To: {
+		Address: string;
+		ContactAttributes: {
+			SubscriberAttributes: {
+				EmailAddress: string;
+				payment_amount: string;
+				first_name: string;
+				next_payment_date: string;
+				payment_frequency: string;
+			};
+		};
+	};
+	DataExtensionName: string;
+	SfContactId: string;
 };
 
 export type DiscountProcessingAttempt = {

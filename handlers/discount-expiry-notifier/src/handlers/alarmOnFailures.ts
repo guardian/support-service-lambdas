@@ -33,7 +33,7 @@ const failuresOccurred = async (
 		uploadAttemptStatus === 'error' ||
 		discountProcessingAttempts.some(
 			(attempt) =>
-				attempt.detail.emailSendAttempt.response.status === 'skipped',
+				attempt.emailSendAttempt.response.status === 'skipped',
 		)
 	);
 };
