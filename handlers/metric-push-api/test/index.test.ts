@@ -1,5 +1,10 @@
+import { putMetric } from '@modules/aws/cloudwatch';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { handler } from '../src/index';
+
+jest.mock('@modules/aws/cloudwatch', () => ({
+	putMetric: jest.fn(),
+}));
 
 describe('handler', () => {
 	it('returns 404 Not Found for an unknown path', async () => {
@@ -41,6 +46,20 @@ describe('handler', () => {
 
 				expect(response.statusCode).toEqual(201);
 			});
+
+			it('emits a cloudwatch metric', async () => {
+				const requestEvent = {
+					path: '/',
+					httpMethod: 'GET',
+					headers: {
+						referer: 'https://support.thegulocal.com/',
+					},
+				} as unknown as APIGatewayProxyEvent;
+
+				await handler(requestEvent);
+
+				expect(putMetric).toHaveBeenCalledWith('metric-push-api-success');
+			});
 		});
 
 		describe('if the referer is invalid', () => {
@@ -60,6 +79,20 @@ describe('handler', () => {
 					'private, no-store',
 				);
 			});
+
+			it('does not emit a cloudwatch metric', async () => {
+				const requestEvent = {
+					path: '/',
+					httpMethod: 'GET',
+					headers: {
+						referer: 'https://www.example.com/',
+					},
+				} as unknown as APIGatewayProxyEvent;
+
+				await handler(requestEvent);
+
+				expect(putMetric).not.toHaveBeenCalled();
+			});
 		});
 
 		describe('if no referer is provided', () => {
@@ -76,6 +109,18 @@ describe('handler', () => {
 				expect(response.headers?.['Cache-Control']).toEqual(
 					'private, no-store',
 				);
+			});
+
+			it('does not emit a cloudwatch metric', async () => {
+				const requestEvent = {
+					path: '/',
+					httpMethod: 'GET',
+					headers: {},
+				} as unknown as APIGatewayProxyEvent;
+
+				await handler(requestEvent);
+
+				expect(putMetric).not.toHaveBeenCalled();
 			});
 		});
 	});

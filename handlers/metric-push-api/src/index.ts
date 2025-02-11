@@ -1,3 +1,4 @@
+import { putMetric } from '@modules/aws/cloudwatch';
 import { Router } from '@modules/routing/router';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
@@ -17,13 +18,14 @@ const router = new Router([
 	{
 		httpMethod: 'GET',
 		path: '/',
-		handler: (event: APIGatewayProxyEvent) => {
+		handler: async (event: APIGatewayProxyEvent) => {
 			console.log(`Input is ${JSON.stringify(event)}`);
 
 			if (
 				event.headers.referer &&
 				validReferers.includes(event.headers.referer)
 			) {
+				await putMetric('metric-push-api-success');
 				return Promise.resolve(buildResponse(201));
 			} else {
 				return Promise.resolve(buildResponse(204));
