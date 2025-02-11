@@ -4,8 +4,8 @@ import { z } from 'zod';
 import { BigQueryResultDataSchema } from '../bigquery';
 
 export const FilterSubsInputSchema = z.object({
-    discountExpiresOnDate: z.string(),
-	allRecordsFromBigQuery: BigQueryResultDataSchema
+	discountExpiresOnDate: z.string(),
+	allRecordsFromBigQuery: BigQueryResultDataSchema,
 });
 export type FilterSubsInput = z.infer<typeof FilterSubsInputSchema>;
 
@@ -20,7 +20,8 @@ export const handler = async (event: FilterSubsInput) => {
 
 		const filteredRecords = event.allRecordsFromBigQuery.filter(
 			(sub) =>
-				(sub.contactCountry && filterByRegions.includes(sub.contactCountry.toLowerCase())) ||
+				(sub.contactCountry &&
+					filterByRegions.includes(sub.contactCountry.toLowerCase())) ||
 				filterByRegions.includes(
 					sub.sfBuyerContactMailingCountry?.toLowerCase() ?? '',
 				) ||
