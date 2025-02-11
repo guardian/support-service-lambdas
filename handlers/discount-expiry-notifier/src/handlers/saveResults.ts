@@ -1,20 +1,11 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { uploadFileToS3 } from '../s3';
+import type { ExpiringDiscountsToProcess } from '../types';
 
 //todo add a type check on the input event
 export const handler = async (event: {
 	discountExpiresOnDate: string;
-	expiringDiscountsToProcess: Array<{
-		firstName: string;
-		nextPaymentDate: string;
-		paymentAmount: number;
-		paymentCurrency: string;
-		paymentFrequency: string;
-		productName: string;
-		sfContactId: string;
-		zuoraSubName: string;
-		workEmail: string;
-	}>;
+	expiringDiscountsToProcess: ExpiringDiscountsToProcess[];
 	expiringDiscountProcessingAttempts: Array<{
 		status: string;
 	}>;
