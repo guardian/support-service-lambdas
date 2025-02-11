@@ -78,7 +78,6 @@ object Dependencies {
   val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "2.0.0"
   val supportInternationalisation =
     "com.gu" %% "support-internationalisation" % "0.13"
-  val contentAuthCommon = "com.gu" %% "content-authorisation-common" % "0.6"
 
   // Other
   val zio = "dev.zio" %% "zio" % "1.0.17"
@@ -89,6 +88,9 @@ object Dependencies {
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.3.0"
   val stripe = "com.stripe" % "stripe-java" % "22.31.0"
   val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4"
+  val commonsIO = "commons-io" % "commons-io" % "2.18.0"
+  val jodaTime = "joda-time" % "joda-time" % "2.13.1"
+  val typesafeConfig = "com.typesafe" % "config" % "1.4.3"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest-should" % "0.9.0" % Test
