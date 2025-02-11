@@ -8,10 +8,10 @@ import type {
 
 export const handler = async (event: {
 	discountExpiresOnDate: string;
-	expiringDiscountsToProcessCount: number;
-	expiringDiscountsToProcess: BigQueryRecord[];
-	filteredSubsCount: number;
-	filteredSubs: RecordForEmailSend[];
+	allRecordsFromBigQueryCount: number;
+	allRecordsFromBigQuery: BigQueryRecord[];
+	recordsForEmailSendCount: number;
+	recordsForEmailSend: RecordForEmailSend[];
 	discountProcessingAttempts: DiscountProcessingAttempt[];
 }) => {
 	try {

@@ -75,16 +75,16 @@ describe('filterSubs handler', () => {
 		const result = await handler(event);
 
 		expect(result).toBeDefined();
-		expect(result.filteredSubs).toBeInstanceOf(Array);
-		expect(result.filteredSubs.length).toBe(2);
+		expect(result.recordsForEmailSend).toBeInstanceOf(Array);
+		expect(result.recordsForEmailSend.length).toBe(2);
 		expect(
-			result.filteredSubs.some((sub) => sub.zuoraSubName === 'A-S001'),
+			result.recordsForEmailSend.some((sub) => sub.zuoraSubName === 'A-S001'),
 		).toBe(true);
 		expect(
-			result.filteredSubs.some((sub) => sub.zuoraSubName === 'A-S002'),
+			result.recordsForEmailSend.some((sub) => sub.zuoraSubName === 'A-S002'),
 		).toBe(true);
 		expect(
-			result.filteredSubs.some((sub) => sub.zuoraSubName === 'A-S003'),
+			result.recordsForEmailSend.some((sub) => sub.zuoraSubName === 'A-S003'),
 		).toBe(false);
 	});
 
@@ -99,8 +99,8 @@ describe('filterSubs handler', () => {
 		const result = await handler(event);
 
 		expect(result).toBeDefined();
-		expect(result.filteredSubs).toBeInstanceOf(Array);
-		expect(result.filteredSubs.length).toBe(0);
+		expect(result.recordsForEmailSend).toBeInstanceOf(Array);
+		expect(result.recordsForEmailSend.length).toBe(0);
 	});
 
 	it('should throw an error if FILTER_BY_REGIONS is not set', async () => {

@@ -14,7 +14,7 @@ export const handler = async (event: {
 
 		const filterByRegions = FILTER_BY_REGIONS.toLowerCase().split(',');
 
-		const filteredSubs = event.allRecordsFromBigQuery.filter(
+		const filteredRecords = event.allRecordsFromBigQuery.filter(
 			(sub) =>
 				filterByRegions.includes(sub.contactCountry.toLowerCase()) ||
 				filterByRegions.includes(
@@ -33,8 +33,8 @@ export const handler = async (event: {
 
 		return {
 			...event,
-			filteredSubsCount: filteredSubs.length,
-			filteredSubs,
+			recordsForEmailSendCount: filteredRecords.length,
+			recordsForEmailSend: filteredRecords,
 		};
 	} catch (error) {
 		console.error('Error:', error);

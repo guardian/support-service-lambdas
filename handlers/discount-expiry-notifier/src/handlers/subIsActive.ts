@@ -3,9 +3,7 @@ import { getSubscription } from '@modules/zuora/getSubscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { RecordForEmailSend } from '../types';
 
-export const handler = async (event: {
-	item: RecordForEmailSend;
-}) => {
+export const handler = async (event: { item: RecordForEmailSend }) => {
 	try {
 		const subName = event.item.zuoraSubName;
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());

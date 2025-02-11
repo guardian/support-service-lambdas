@@ -9,13 +9,11 @@ export const handler = async (event: {
 	discountExpiresOnDate: string;
 	allRecordsFromBigQueryCount: number;
 	allRecordsFromBigQuery: BigQueryRecord[];
-	filteredSubsCount: number;
-	filteredSubs: RecordForEmailSend[];
+	recordsForEmailSendCount: number;
+	recordsForEmailSend: RecordForEmailSend[];
 	discountProcessingAttempts: DiscountProcessingAttempt[];
 	uploadAttemptStatus: string;
 }) => {
-	console.log('event', event);
-
 	if (
 		await failuresOccurred(
 			event.discountProcessingAttempts,
@@ -34,7 +32,8 @@ const failuresOccurred = async (
 	return (
 		uploadAttemptStatus === 'error' ||
 		discountProcessingAttempts.some(
-			(attempt) => attempt.detail.emailSendAttempt.response.status === 'skipped',
+			(attempt) =>
+				attempt.detail.emailSendAttempt.response.status === 'skipped',
 		)
 	);
 };
