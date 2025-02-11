@@ -1,23 +1,18 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { uploadFileToS3 } from '../s3';
+import type {
+	DiscountProcessingAttempt,
+	ExpiringDiscountToProcess,
+	FilteredSub,
+} from '../types';
 
-//todo add a type check on the input event
 export const handler = async (event: {
 	discountExpiresOnDate: string;
-	expiringDiscountsToProcess: Array<{
-		firstName: string;
-		nextPaymentDate: string;
-		paymentAmount: number;
-		paymentCurrency: string;
-		paymentFrequency: string;
-		productName: string;
-		sfContactId: string;
-		zuoraSubName: string;
-		workEmail: string;
-	}>;
-	expiringDiscountProcessingAttempts: Array<{
-		status: string;
-	}>;
+	expiringDiscountsToProcessCount: number;
+	expiringDiscountsToProcess: ExpiringDiscountToProcess[];
+	filteredSubsCount: number;
+	filteredSubs: FilteredSub[];
+	discountProcessingAttempts: DiscountProcessingAttempt[];
 }) => {
 	try {
 		const bucketName = getIfDefined<string>(
@@ -40,6 +35,9 @@ export const handler = async (event: {
 			content: JSON.stringify(event, null, 2),
 		});
 
+		if (s3UploadAttempt.$metadata.httpStatusCode !== 200) {
+			throw new Error('Failed to upload to S3');
+		}
 		return {
 			...event,
 			s3UploadAttemptStatus: 'success',

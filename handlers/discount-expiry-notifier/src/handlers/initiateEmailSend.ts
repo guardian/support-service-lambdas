@@ -58,20 +58,24 @@ export const handler = async (event: {
 
 	try {
 		return {
-			detail: event,
-			emailSendAttempt: {
-				status: 'success',
-				payload,
-				response: await sendEmail(stageFromEnvironment(), payload),
+			detail: {
+				event,
+				emailSendAttempt: {
+					status: 'success',
+					payload,
+					response: await sendEmail(stageFromEnvironment(), payload),
+				},
 			},
 		};
 	} catch (error) {
 		return {
-			detail: event,
-			emailSendAttempt: {
-				status: 'error',
-				payload,
-				response: JSON.stringify(error, null, 2),
+			detail: {
+				event,
+				emailSendAttempt: {
+					status: 'error',
+					payload,
+					response: JSON.stringify(error, null, 2),
+				},
 			},
 		};
 	}
