@@ -119,7 +119,7 @@ object S3Helper extends S3Service with LazyLogging {
                 .toEither
                 .left
                 .map { err =>
-                  println(s"Error copying S3 object: ${err}")
+                  logger.info(s"Error copying S3 object: ${err}")
                   S3Error(err.toString)
                 }
             }
