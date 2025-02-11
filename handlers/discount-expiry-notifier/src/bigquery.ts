@@ -40,7 +40,12 @@ export const BigQueryResultDataSchema = z.array(
 		productName: z.string(),
 		sfContactId: z.string(),
 		zuoraSubName: z.string(),
-		workEmail: z.string(),
+		workEmail: z.string().nullable(),
+		contactCountry: z.string().nullable(),
+		sfBuyerContactMailingCountry: z.string().nullable(),
+		sfBuyerContactOtherCountry: z.string().nullable(),
+		sfRecipientContactMailingCountry: z.string().nullable(),
+		sfRecipientContactOtherCountry: z.string().nullable(),
 	}),
 );
 
