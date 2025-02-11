@@ -92,5 +92,8 @@ object ConsentsMapping {
       yourSupportOnboarding,
       similarGuardianProducts,
     ),
+    "Guardian Ad-Lite" -> Set(
+      yourSupportOnboarding,
+    ),
   )
 }
