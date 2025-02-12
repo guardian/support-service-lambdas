@@ -5,7 +5,7 @@ import type {
 	ExternalAccountClientOptions,
 } from 'google-auth-library';
 import { ExternalAccountClient } from 'google-auth-library';
-// import { testQueryResponse } from './testQueryResponse';
+import { testQueryResponse } from './testQueryResponse';
 import { BigQueryResultDataSchema } from './types';
 import type { BigQueryRecord } from './types';
 
@@ -43,6 +43,5 @@ export const runQuery = async (
 	const resultData = BigQueryResultDataSchema.parse(result[0]);
 	console.log('resultData', resultData);
 
-	return resultData;
-	// return testQueryResponse;
+	return testQueryResponse;
 };

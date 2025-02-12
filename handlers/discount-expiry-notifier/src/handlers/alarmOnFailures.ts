@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/require-await -- this is required to ensure the lambda returns a value*/
 import { z } from 'zod';
 import {
-	BaseRecordForEmailSendSchema,
 	BigQueryRecordSchema,
 	DiscountProcessingAttemptSchema,
 } from '../types';
@@ -13,7 +12,7 @@ export const AlarmOnFailuresInputSchema = z
 		allRecordsFromBigQueryCount: z.number(),
 		allRecordsFromBigQuery: z.array(BigQueryRecordSchema),
 		recordsForEmailSendCount: z.number(),
-		recordsForEmailSend: z.array(BaseRecordForEmailSendSchema),
+		recordsForEmailSend: z.array(BigQueryRecordSchema),
 		discountProcessingAttempts: z.array(DiscountProcessingAttemptSchema),
 		s3UploadAttemptStatus: z.string(),
 	})
