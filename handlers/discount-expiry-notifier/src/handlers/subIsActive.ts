@@ -2,7 +2,7 @@ import { stageFromEnvironment } from '@modules/stage';
 import { getSubscription } from '@modules/zuora/getSubscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { z } from 'zod';
-import { BigQueryRecordSchema } from '../bigquery';
+import { BigQueryRecordSchema } from '../types';
 
 export type SubIsActiveInput = z.infer<typeof BigQueryRecordSchema>;
 

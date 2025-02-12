@@ -1,13 +1,11 @@
 import { DataExtensionNames, sendEmail } from '@modules/email/email';
 import { stageFromEnvironment } from '@modules/stage';
-import { z } from 'zod';
-import { BigQueryRecordSchema } from '../bigquery';
+import type { z } from 'zod';
+import { BaseRecordForEmailSendSchema } from '../types';
 
-export const InitiateEmailSendInputSchema = BigQueryRecordSchema.extend({
-	subStatus: z.string(),
-}).strict();
+export const InitiateEmailSendInputSchema = BaseRecordForEmailSendSchema;
 export type InitiateEmailSendInput = z.infer<
-	typeof InitiateEmailSendInputSchema
+	typeof BaseRecordForEmailSendSchema
 >;
 
 export const handler = async (event: InitiateEmailSendInput) => {

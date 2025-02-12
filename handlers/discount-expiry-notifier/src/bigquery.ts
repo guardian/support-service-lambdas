@@ -4,8 +4,8 @@ import type {
 	ExternalAccountClientOptions,
 } from 'google-auth-library';
 import { ExternalAccountClient } from 'google-auth-library';
-import { z } from 'zod';
 import { testQueryResponse } from './testQueryResponse';
+import { BigQueryResultDataSchema } from './types';
 import type { BigQueryRecord } from './types';
 
 export const buildAuthClient = async (
@@ -26,33 +26,6 @@ export const buildAuthClient = async (
 		throw new Error(`Error building auth client: ${(error as Error).message}`);
 	}
 };
-
-export const BigQueryRecordSchema = z
-	.object({
-		firstName: z.string(),
-		nextPaymentDate: z
-			.union([
-				z.object({
-					value: z.string(),
-				}),
-				z.string(),
-			])
-			.transform((val) => (typeof val === 'string' ? val : val.value)),
-		paymentAmount: z.number().transform((val) => parseFloat(val.toFixed(2))),
-		paymentCurrency: z.string(),
-		paymentFrequency: z.string(),
-		productName: z.string(),
-		sfContactId: z.string(),
-		zuoraSubName: z.string(),
-		workEmail: z.string().nullable(),
-		contactCountry: z.string().nullable(),
-		sfBuyerContactMailingCountry: z.string().nullable(),
-		sfBuyerContactOtherCountry: z.string().nullable(),
-		sfRecipientContactMailingCountry: z.string().nullable(),
-		sfRecipientContactOtherCountry: z.string().nullable(),
-	})
-	.strict();
-export const BigQueryResultDataSchema = z.array(BigQueryRecordSchema);
 
 export const runQuery = async (
 	authClient: BaseExternalAccountClient,

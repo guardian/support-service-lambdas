@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/require-await -- this is required to ensure the lambda returns a value*/
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { z } from 'zod';
-import { BigQueryResultDataSchema } from '../bigquery';
+import { BigQueryResultDataSchema } from '../types';
 
 export const FilterSubsInputSchema = z
 	.object({
@@ -15,7 +15,12 @@ export type FilterSubsInput = z.infer<typeof FilterSubsInputSchema>;
 
 export const handler = async (event: FilterSubsInput) => {
 	try {
-		const parsedEvent = FilterSubsInputSchema.parse(event);
+		const parsedEventResult = FilterSubsInputSchema.safeParse(event);
+
+		if (!parsedEventResult.success) {
+			throw new Error('Invalid event data');
+		}
+		const parsedEvent = parsedEventResult.data;
 
 		const FILTER_BY_REGIONS = getIfDefined<string>(
 			process.env.FILTER_BY_REGIONS,
