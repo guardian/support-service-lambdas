@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/require-await -- this is required to ensure the lambda returns a value*/
 import { DataExtensionNames } from '@modules/email/email';
 import { prettyPrint } from '@modules/prettyPrint';
 // import { stageFromEnvironment } from '@modules/stage';
