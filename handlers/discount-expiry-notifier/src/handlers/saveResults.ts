@@ -1,5 +1,4 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
-import { prettyPrint } from '@modules/prettyPrint';
 import { z } from 'zod';
 import { uploadFileToS3 } from '../s3';
 import {
