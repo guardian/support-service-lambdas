@@ -23,7 +23,7 @@ deployments:
         - discount-expiry-notifier-get-customers-with-expiring-discounts-
         - discount-expiry-notifier-filter-records-
         - discount-expiry-notifier-get-sub-status-
-        - discount-expiry-notifier-initiate-email-send-
+        - discount-expiry-notifier-send-email-
         - discount-expiry-notifier-save-results-
         - discount-expiry-notifier-alarm-on-failures-
     dependencies: [discount-expiry-notifier-cloudformation]

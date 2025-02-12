@@ -3,13 +3,11 @@ import { stageFromEnvironment } from '@modules/stage';
 import type { z } from 'zod';
 import { BaseRecordForEmailSendSchema } from '../types';
 
-export const InitiateEmailSendInputSchema = BaseRecordForEmailSendSchema;
-export type InitiateEmailSendInput = z.infer<
-	typeof BaseRecordForEmailSendSchema
->;
+export const SendEmailInputSchema = BaseRecordForEmailSendSchema;
+export type SendEmailInput = z.infer<typeof BaseRecordForEmailSendSchema>;
 
-export const handler = async (event: InitiateEmailSendInput) => {
-	const parsedEventResult = InitiateEmailSendInputSchema.safeParse(event);
+export const handler = async (event: SendEmailInput) => {
+	const parsedEventResult = SendEmailInputSchema.safeParse(event);
 
 	if (!parsedEventResult.success) {
 		throw new Error('Invalid event data');

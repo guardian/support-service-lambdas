@@ -131,22 +131,18 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
-		const initiateEmailSendLambda = new GuLambdaFunction(
-			this,
-			'initiate-email-send-lambda',
-			{
-				app: appName,
-				functionName: `${appName}-initiate-email-send-${this.stage}`,
-				runtime: nodeVersion,
-				environment: {
-					Stage: this.stage,
-					S3_BUCKET: bucket.bucketName,
-				},
-				handler: 'initiateEmailSend.handler',
-				fileName: `${appName}.zip`,
-				architecture: Architecture.ARM_64,
+		const sendEmailLambda = new GuLambdaFunction(this, 'send-email-lambda', {
+			app: appName,
+			functionName: `${appName}-send-email-${this.stage}`,
+			runtime: nodeVersion,
+			environment: {
+				Stage: this.stage,
+				S3_BUCKET: bucket.bucketName,
 			},
-		);
+			handler: 'sendEmail.handler',
+			fileName: `${appName}.zip`,
+			architecture: Architecture.ARM_64,
+		});
 
 		const saveResultsLambda = new GuLambdaFunction(
 			this,
@@ -226,14 +222,10 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
-		const initiateEmailSendLambdaTask = new LambdaInvoke(
-			this,
-			'Initiate email send',
-			{
-				lambdaFunction: initiateEmailSendLambda,
-				outputPath: '$.Payload',
-			},
-		);
+		const sendEmailLambdaTask = new LambdaInvoke(this, 'Send email', {
+			lambdaFunction: sendEmailLambda,
+			outputPath: '$.Payload',
+		});
 
 		const subStatusFetcherMap = new Map(this, 'Sub status fetcher map', {
 			maxConcurrency: 10,
@@ -252,7 +244,7 @@ export class DiscountExpiryNotifier extends GuStack {
 		);
 
 		subStatusFetcherMap.iterator(getSubStatusLambdaTask);
-		expiringDiscountProcessorMap.iterator(initiateEmailSendLambdaTask);
+		expiringDiscountProcessorMap.iterator(sendEmailLambdaTask);
 
 		const definitionBody = DefinitionBody.fromChainable(
 			getCustomersWithExpiringDiscountsLambdaTask
@@ -275,7 +267,7 @@ export class DiscountExpiryNotifier extends GuStack {
 			],
 		});
 
-		initiateEmailSendLambda.role?.attachInlinePolicy(sqsInlinePolicy);
+		sendEmailLambda.role?.attachInlinePolicy(sqsInlinePolicy);
 
 		new StateMachine(this, `${appName}-state-machine-${this.stage}`, {
 			stateMachineName: `${appName}-${this.stage}`,
