@@ -6,11 +6,15 @@ import { BigQueryResultDataSchema } from '../bigquery';
 export const FilterSubsInputSchema = z.object({
 	discountExpiresOnDate: z.string(),
 	allRecordsFromBigQuery: BigQueryResultDataSchema,
+	allRecordsFromBigQueryCount: z.number(),
 });
+
 export type FilterSubsInput = z.infer<typeof FilterSubsInputSchema>;
 
 export const handler = async (event: FilterSubsInput) => {
 	try {
+		const parsedEvent = FilterSubsInputSchema.parse(event);
+
 		const FILTER_BY_REGIONS = getIfDefined<string>(
 			process.env.FILTER_BY_REGIONS,
 			'FILTER_BY_REGIONS environment variable not set',
@@ -18,7 +22,7 @@ export const handler = async (event: FilterSubsInput) => {
 
 		const filterByRegions = FILTER_BY_REGIONS.toLowerCase().split(',');
 
-		const filteredRecords = event.allRecordsFromBigQuery.filter(
+		const filteredRecords = parsedEvent.allRecordsFromBigQuery.filter(
 			(sub) =>
 				filterByRegions.includes(sub.contactCountry?.toLowerCase() ?? '') ||
 				filterByRegions.includes(
@@ -36,7 +40,7 @@ export const handler = async (event: FilterSubsInput) => {
 		);
 
 		return {
-			...event,
+			...parsedEvent,
 			recordsForEmailSendCount: filteredRecords.length,
 			recordsForEmailSend: filteredRecords,
 		};
