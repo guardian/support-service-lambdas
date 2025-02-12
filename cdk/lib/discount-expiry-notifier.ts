@@ -243,9 +243,6 @@ export class DiscountExpiryNotifier extends GuStack {
 			{
 				maxConcurrency: 10,
 				itemsPath: JsonPath.stringAt('$.discountProcessingAttempts'),
-				parameters: {
-					item: JsonPath.stringAt('$$.Map.Item.Value'),
-				},
 				resultPath: '$.discountProcessingAttempts',
 			},
 		);

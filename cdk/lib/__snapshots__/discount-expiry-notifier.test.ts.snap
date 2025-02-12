@@ -580,7 +580,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.recordsForEmailSend","MaxConcurrency":10},"Expiring discount processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Save results","Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Initiate email send","States":{"Initiate email send":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.recordsForEmailSend","MaxConcurrency":10},"Expiring discount processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Save results","Iterator":{"StartAt":"Initiate email send","States":{"Initiate email send":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -2620,7 +2620,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.recordsForEmailSend","MaxConcurrency":10},"Expiring discount processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Save results","Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Initiate email send","States":{"Initiate email send":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.recordsForEmailSend","MaxConcurrency":10},"Expiring discount processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Save results","Iterator":{"StartAt":"Initiate email send","States":{"Initiate email send":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
