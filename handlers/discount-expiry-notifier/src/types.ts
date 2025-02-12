@@ -15,7 +15,7 @@ export type BigQueryRecord = {
 	sfRecipientContactOtherCountry: string;
 };
 
-export type RecordForEmailSend = BigQueryRecord & {
+export type BaseRecordForEmailSend = BigQueryRecord & {
 	subStatus: string;
 };
 
@@ -50,7 +50,7 @@ export type EmailSendRequest = {
 };
 
 export type DiscountProcessingAttempt = {
-	record: RecordForEmailSend;
+	record: BaseRecordForEmailSend;
 	emailSendEligibility: EmailSendEligibility;
 	emailSendAttempt: EmailSendAttempt;
 };

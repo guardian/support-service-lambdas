@@ -1,9 +1,16 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { getSubscription } from '@modules/zuora/getSubscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { RecordForEmailSend } from '../types';
+import { z } from 'zod';
+import { BigQueryRecordSchema } from '../bigquery';
 
-export const handler = async (event: { item: RecordForEmailSend }) => {
+export type BigQueryRecord = z.infer<typeof BigQueryRecordSchema>;
+export const SubIsActiveInputSchema = BigQueryRecordSchema.extend({
+	subStatus: z.string(),
+}).strict();
+export type SubIsActiveInput = z.infer<typeof SubIsActiveInputSchema>;
+
+export const handler = async (event: { item: SubIsActiveInput }) => {
 	try {
 		const subName = event.item.zuoraSubName;
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());

@@ -2,7 +2,7 @@
 import type {
 	BigQueryRecord,
 	DiscountProcessingAttempt,
-	RecordForEmailSend,
+	BaseRecordForEmailSend,
 } from '../types';
 
 export const handler = async (event: {
@@ -10,7 +10,7 @@ export const handler = async (event: {
 	allRecordsFromBigQueryCount: number;
 	allRecordsFromBigQuery: BigQueryRecord[];
 	recordsForEmailSendCount: number;
-	recordsForEmailSend: RecordForEmailSend[];
+	recordsForEmailSend: BaseRecordForEmailSend[];
 	discountProcessingAttempts: DiscountProcessingAttempt[];
 	uploadAttemptStatus: string;
 }) => {

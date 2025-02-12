@@ -27,50 +27,30 @@ export const buildAuthClient = async (
 	}
 };
 
-export const BigQueryResultDataSchema = z.array(
-	z.object({
-		firstName: z.string(),
-		nextPaymentDate: z
-			.union([
-				z.object({
-					value: z.string(),
-				}),
-				z.string(),
-			])
-			.transform((val) => (typeof val === 'string' ? val : val.value)),
-		paymentAmount: z.number().transform((val) => parseFloat(val.toFixed(2))),
-		paymentCurrency: z.string(),
-		paymentFrequency: z.string(),
-		productName: z.string(),
-		sfContactId: z.string(),
-		zuoraSubName: z.string(),
-		workEmail: z.string().nullable(),
-		contactCountry: z.string().nullable(),
-		sfBuyerContactMailingCountry: z.string().nullable(),
-		sfBuyerContactOtherCountry: z.string().nullable(),
-		sfRecipientContactMailingCountry: z.string().nullable(),
-		sfRecipientContactOtherCountry: z.string().nullable(),
-	}),
-);
-
-// export const BigQueryResultDataSchema2 = z.array(
-// 	z.object({
-// 		firstName: z.string(),
-// 		nextPaymentDate: z.string(),
-// 		paymentAmount: z.number().transform((val) => parseFloat(val.toFixed(2))),
-// 		paymentCurrency: z.string(),
-// 		paymentFrequency: z.string(),
-// 		productName: z.string(),
-// 		sfContactId: z.string(),
-// 		zuoraSubName: z.string(),
-// 		workEmail: z.string().nullable(),
-// 		contactCountry: z.string().nullable(),
-// 		sfBuyerContactMailingCountry: z.string().nullable(),
-// 		sfBuyerContactOtherCountry: z.string().nullable(),
-// 		sfRecipientContactMailingCountry: z.string().nullable(),
-// 		sfRecipientContactOtherCountry: z.string().nullable(),
-// 	}),
-// );
+export const BigQueryRecordSchema = z.object({
+	firstName: z.string(),
+	nextPaymentDate: z
+		.union([
+			z.object({
+				value: z.string(),
+			}),
+			z.string(),
+		])
+		.transform((val) => (typeof val === 'string' ? val : val.value)),
+	paymentAmount: z.number().transform((val) => parseFloat(val.toFixed(2))),
+	paymentCurrency: z.string(),
+	paymentFrequency: z.string(),
+	productName: z.string(),
+	sfContactId: z.string(),
+	zuoraSubName: z.string(),
+	workEmail: z.string().nullable(),
+	contactCountry: z.string().nullable(),
+	sfBuyerContactMailingCountry: z.string().nullable(),
+	sfBuyerContactOtherCountry: z.string().nullable(),
+	sfRecipientContactMailingCountry: z.string().nullable(),
+	sfRecipientContactOtherCountry: z.string().nullable(),
+});
+export const BigQueryResultDataSchema = z.array(BigQueryRecordSchema);
 
 export const runQuery = async (
 	authClient: BaseExternalAccountClient,
