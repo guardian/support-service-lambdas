@@ -10,19 +10,20 @@ export const SubIsActiveInputSchema = BigQueryRecordSchema.extend({
 }).strict();
 export type SubIsActiveInput = z.infer<typeof SubIsActiveInputSchema>;
 
-export const handler = async (event: { item: SubIsActiveInput }) => {
+export const handler = async (event: SubIsActiveInput) => {
 	try {
-		const subName = event.item.zuoraSubName;
+		const parsedEvent = SubIsActiveInputSchema.parse(event);
+		const subName = parsedEvent.zuoraSubName;
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const getSubResponse = await getSubscription(zuoraClient, subName);
 
 		return {
-			...event.item,
+			...parsedEvent,
 			subStatus: getSubResponse.status,
 		};
 	} catch (error) {
 		return {
-			...event.item,
+			...event,
 			subStatus: 'Error',
 			errorDetail:
 				error instanceof Error ? error.message : JSON.stringify(error, null, 2),
