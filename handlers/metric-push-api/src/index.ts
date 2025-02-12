@@ -17,7 +17,7 @@ const buildResponse = (statusCode: number) => ({
 const router = new Router([
 	{
 		httpMethod: 'GET',
-		path: '/',
+		path: '/metric-push-api',
 		handler: async (event: APIGatewayProxyEvent) => {
 			console.log(`Input is ${JSON.stringify(event)}`);
 

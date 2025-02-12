@@ -21,7 +21,7 @@ describe('handler', () => {
 
 	it('returns 404 Not Found for an unknown method', async () => {
 		const requestEvent = {
-			path: '/',
+			path: '/metric-push-api',
 			httpMethod: 'POST',
 			headers: {},
 		} as unknown as APIGatewayProxyEvent;
@@ -35,7 +35,7 @@ describe('handler', () => {
 		describe('if the referred is valid', () => {
 			it('returns 201 Accepted', async () => {
 				const requestEvent = {
-					path: '/',
+					path: '/metric-push-api',
 					httpMethod: 'GET',
 					headers: {
 						referer: 'https://support.thegulocal.com/',
@@ -49,7 +49,7 @@ describe('handler', () => {
 
 			it('emits a cloudwatch metric', async () => {
 				const requestEvent = {
-					path: '/',
+					path: '/metric-push-api',
 					httpMethod: 'GET',
 					headers: {
 						referer: 'https://support.thegulocal.com/',
@@ -67,7 +67,7 @@ describe('handler', () => {
 		describe('if the referer is invalid', () => {
 			it('returns 204 No Content', async () => {
 				const requestEvent = {
-					path: '/',
+					path: '/metric-push-api',
 					httpMethod: 'GET',
 					headers: {
 						referer: 'https://www.example.com/',
@@ -84,7 +84,7 @@ describe('handler', () => {
 
 			it('does not emit a cloudwatch metric', async () => {
 				const requestEvent = {
-					path: '/',
+					path: '/metric-push-api',
 					httpMethod: 'GET',
 					headers: {
 						referer: 'https://www.example.com/',
@@ -100,7 +100,7 @@ describe('handler', () => {
 		describe('if no referer is provided', () => {
 			it('returns 204 No Content', async () => {
 				const requestEvent = {
-					path: '/',
+					path: '/metric-push-api',
 					httpMethod: 'GET',
 					headers: {},
 				} as unknown as APIGatewayProxyEvent;
@@ -115,7 +115,7 @@ describe('handler', () => {
 
 			it('does not emit a cloudwatch metric', async () => {
 				const requestEvent = {
-					path: '/',
+					path: '/metric-push-api',
 					httpMethod: 'GET',
 					headers: {},
 				} as unknown as APIGatewayProxyEvent;
