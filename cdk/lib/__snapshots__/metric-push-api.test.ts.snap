@@ -4,10 +4,48 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
+      "GuDistributionBucketParameter",
+      "GuApiLambda",
+      "GuPutCloudwatchMetricsPolicy",
       "GuAlarm",
       "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
+  },
+  "Outputs": {
+    "metricpushapilambdametricpushapiCODEEndpoint87F9CE85": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "metricpushapilambdametricpushapiCODE87B70A97",
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region",
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "metricpushapilambdametricpushapiCODEDeploymentStageCODED2BD8FA5",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "DistributionBucketName": {
+      "Default": "/account/services/artifact.bucket",
+      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
   },
   "Resources": {
     "5xxApiAlarmF6ACE36F": {
@@ -36,7 +74,7 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
         "Dimensions": [
           {
             "Name": "ApiName",
-            "Value": "metric-push-api-api-CODE",
+            "Value": "metric-push-api-CODE",
           },
         ],
         "EvaluationPeriods": 1,
@@ -48,6 +86,27 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
         "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
+    },
+    "GuPutCloudwatchMetricsPolicyC5BCE402": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "cloudwatch:PutMetricData",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "GuPutCloudwatchMetricsPolicyC5BCE402",
+        "Roles": [
+          {
+            "Ref": "metricpushapilambdaServiceRole910E7F90",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "HighClientSideErrorRateAlarm0026FCB2": {
       "Properties": {
@@ -74,145 +133,25 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
         "AlarmName": "URGENT 9-5 - CODE fatal client-side errors are being reported to sentry for support-frontend",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "DatapointsToAlarm": 3,
-        "EvaluationPeriods": 5,
-        "Metrics": [
+        "Dimensions": [
           {
-            "Expression": "mtotalcount - (m5xxcount + m4xxcount)",
-            "Id": "expr_1",
-            "Label": "mtotal2xx",
+            "Name": "App",
+            "Value": "metric-push-api",
           },
           {
-            "Id": "mtotalcount",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "metric-push-api-api-CODE",
-                  },
-                ],
-                "MetricName": "Count",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "Sum",
-            },
-            "ReturnData": false,
-          },
-          {
-            "Id": "m5xxcount",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "metric-push-api-api-CODE",
-                  },
-                ],
-                "MetricName": "5XXError",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "Sum",
-            },
-            "ReturnData": false,
-          },
-          {
-            "Id": "m4xxcount",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "metric-push-api-api-CODE",
-                  },
-                ],
-                "MetricName": "4XXError",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "Sum",
-            },
-            "ReturnData": false,
+            "Name": "Stage",
+            "Value": "CODE",
           },
         ],
+        "EvaluationPeriods": 5,
+        "MetricName": "metric-push-api-client-side-error",
+        "Namespace": "support-service-lambdas",
+        "Period": 60,
+        "Statistic": "Sum",
         "Threshold": 2,
         "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
-    },
-    "MetricPushAPI": {
-      "Properties": {
-        "Description": "HTTP API to push a metric to cloudwatch so we can alarm on errors",
-        "Name": "metric-push-api-api-CODE",
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::RestApi",
-    },
-    "MetricPushAPIDeployment": {
-      "Properties": {
-        "Description": "Deploys metric-push-api into an environment/stage",
-        "RestApiId": {
-          "Ref": "MetricPushAPI",
-        },
-      },
-      "Type": "AWS::ApiGateway::Deployment",
-    },
-    "MetricPushAPIStage": {
-      "Properties": {
-        "DeploymentId": {
-          "Ref": "MetricPushAPIDeployment",
-        },
-        "Description": "Stage for metric-push-api",
-        "MethodSettings": [
-          {
-            "DataTraceEnabled": true,
-            "HttpMethod": "*",
-            "LoggingLevel": "ERROR",
-            "ResourcePath": "/*",
-          },
-        ],
-        "RestApiId": {
-          "Ref": "MetricPushAPI",
-        },
-        "StageName": "CODE",
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::Stage",
     },
     "MetricPushBasePathMapping": {
       "Properties": {
@@ -220,9 +159,11 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
           "Ref": "MetricPushDomainName",
         },
         "RestApiId": {
-          "Ref": "MetricPushAPI",
+          "Ref": "metricpushapilambdametricpushapiCODE87B70A97",
         },
-        "Stage": "CODE",
+        "Stage": {
+          "Ref": "metricpushapilambdametricpushapiCODEDeploymentStageCODED2BD8FA5",
+        },
       },
       "Type": "AWS::ApiGateway::BasePathMapping",
     },
@@ -289,53 +230,619 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
-    "MetricPushMethod": {
+    "metricpushapilambda0761BDD0": {
+      "DependsOn": [
+        "metricpushapilambdaServiceRoleDefaultPolicyE40FF18E",
+        "metricpushapilambdaServiceRole910E7F90",
+      ],
       "Properties": {
-        "ApiKeyRequired": false,
-        "AuthorizationType": "NONE",
-        "HttpMethod": "GET",
-        "Integration": {
-          "IntegrationResponses": [
-            {
-              "ResponseParameters": {
-                "method.response.header.Cache-control": "'no-cache'",
-              },
-              "StatusCode": "204",
-            },
-          ],
-          "RequestTemplates": {
-            "application/json": "{"statusCode": 200}",
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
           },
-          "Type": "MOCK",
+          "S3Key": "membership/CODE/metric-push-api/metric-push-api.zip",
         },
-        "MethodResponses": [
+        "Description": "API triggered lambda to push a metric to cloudwatch so we can alarm on errors",
+        "Environment": {
+          "Variables": {
+            "APP": "metric-push-api",
+            "App": "metric-push-api",
+            "STACK": "membership",
+            "STAGE": "CODE",
+            "Stack": "membership",
+            "Stage": "CODE",
+          },
+        },
+        "FunctionName": "metric-push-api-CODE",
+        "Handler": "index.handler",
+        "MemorySize": 512,
+        "Role": {
+          "Fn::GetAtt": [
+            "metricpushapilambdaServiceRole910E7F90",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
           {
-            "ResponseParameters": {
-              "method.response.header.Cache-control": true,
-            },
-            "StatusCode": "204",
+            "Key": "App",
+            "Value": "metric-push-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
           },
         ],
+        "Timeout": 60,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "metricpushapilambdaServiceRole910E7F90": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "metric-push-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "metricpushapilambdaServiceRoleDefaultPolicyE40FF18E": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/membership/CODE/metric-push-api/metric-push-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/membership/metric-push-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/membership/metric-push-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "metricpushapilambdaServiceRoleDefaultPolicyE40FF18E",
+        "Roles": [
+          {
+            "Ref": "metricpushapilambdaServiceRole910E7F90",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "metricpushapilambdametricpushapiCODE87B70A97": {
+      "Properties": {
+        "Description": "API Gateway endpoint for the metric-push-api-CODE lambda",
+        "Name": "metric-push-api-CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "metric-push-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "metricpushapilambdametricpushapiCODEANY7DBEC52E": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "metricpushapilambda0761BDD0",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
         "ResourceId": {
-          "Ref": "MetricPushProxyResource",
+          "Fn::GetAtt": [
+            "metricpushapilambdametricpushapiCODE87B70A97",
+            "RootResourceId",
+          ],
         },
         "RestApiId": {
-          "Ref": "MetricPushAPI",
+          "Ref": "metricpushapilambdametricpushapiCODE87B70A97",
         },
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "MetricPushProxyResource": {
+    "metricpushapilambdametricpushapiCODEANYApiPermissionTestmetricpushapiCODEmetricpushapilambdametricpushapiCODE7192A6B0ANYA598A7B2": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "metricpushapilambda0761BDD0",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "metricpushapilambdametricpushapiCODE87B70A97",
+              },
+              "/test-invoke-stage/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "metricpushapilambdametricpushapiCODEANYApiPermissionmetricpushapiCODEmetricpushapilambdametricpushapiCODE7192A6B0ANY872C891B": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "metricpushapilambda0761BDD0",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "metricpushapilambdametricpushapiCODE87B70A97",
+              },
+              "/",
+              {
+                "Ref": "metricpushapilambdametricpushapiCODEDeploymentStageCODED2BD8FA5",
+              },
+              "/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "metricpushapilambdametricpushapiCODEAccountA4210FEA": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "metricpushapilambdametricpushapiCODE87B70A97",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "metricpushapilambdametricpushapiCODECloudWatchRole979C7B9B",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "metricpushapilambdametricpushapiCODECloudWatchRole979C7B9B": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "metric-push-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "metricpushapilambdametricpushapiCODEDeployment9B65369Cbfd935d3e15ba02166d0d2a3efbb3b26": {
+      "DependsOn": [
+        "metricpushapilambdametricpushapiCODEproxyANYC000D577",
+        "metricpushapilambdametricpushapiCODEproxyBBD345B3",
+        "metricpushapilambdametricpushapiCODEANY7DBEC52E",
+      ],
+      "Properties": {
+        "Description": "API Gateway endpoint for the metric-push-api-CODE lambda",
+        "RestApiId": {
+          "Ref": "metricpushapilambdametricpushapiCODE87B70A97",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "metricpushapilambdametricpushapiCODEDeploymentStageCODED2BD8FA5": {
+      "DependsOn": [
+        "metricpushapilambdametricpushapiCODEAccountA4210FEA",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "metricpushapilambdametricpushapiCODEDeployment9B65369Cbfd935d3e15ba02166d0d2a3efbb3b26",
+        },
+        "RestApiId": {
+          "Ref": "metricpushapilambdametricpushapiCODE87B70A97",
+        },
+        "StageName": "CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "metric-push-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "metricpushapilambdametricpushapiCODEproxyANYApiPermissionTestmetricpushapiCODEmetricpushapilambdametricpushapiCODE7192A6B0ANYproxy0A01E80E": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "metricpushapilambda0761BDD0",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "metricpushapilambdametricpushapiCODE87B70A97",
+              },
+              "/test-invoke-stage/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "metricpushapilambdametricpushapiCODEproxyANYApiPermissionmetricpushapiCODEmetricpushapilambdametricpushapiCODE7192A6B0ANYproxyA2E27C34": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "metricpushapilambda0761BDD0",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "metricpushapilambdametricpushapiCODE87B70A97",
+              },
+              "/",
+              {
+                "Ref": "metricpushapilambdametricpushapiCODEDeploymentStageCODED2BD8FA5",
+              },
+              "/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "metricpushapilambdametricpushapiCODEproxyANYC000D577": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "metricpushapilambda0761BDD0",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "metricpushapilambdametricpushapiCODEproxyBBD345B3",
+        },
+        "RestApiId": {
+          "Ref": "metricpushapilambdametricpushapiCODE87B70A97",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "metricpushapilambdametricpushapiCODEproxyBBD345B3": {
       "Properties": {
         "ParentId": {
           "Fn::GetAtt": [
-            "MetricPushAPI",
+            "metricpushapilambdametricpushapiCODE87B70A97",
             "RootResourceId",
           ],
         },
-        "PathPart": "metric-push-api",
+        "PathPart": "{proxy+}",
         "RestApiId": {
-          "Ref": "MetricPushAPI",
+          "Ref": "metricpushapilambdametricpushapiCODE87B70A97",
         },
       },
       "Type": "AWS::ApiGateway::Resource",
@@ -348,10 +855,48 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
+      "GuDistributionBucketParameter",
+      "GuApiLambda",
+      "GuPutCloudwatchMetricsPolicy",
       "GuAlarm",
       "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
+  },
+  "Outputs": {
+    "metricpushapilambdametricpushapiPRODEndpoint1719E15A": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "metricpushapilambdametricpushapiPRODF582713E",
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region",
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "metricpushapilambdametricpushapiPRODDeploymentStagePRODBE69BCFC",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "DistributionBucketName": {
+      "Default": "/account/services/artifact.bucket",
+      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
   },
   "Resources": {
     "5xxApiAlarmF6ACE36F": {
@@ -380,7 +925,7 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
         "Dimensions": [
           {
             "Name": "ApiName",
-            "Value": "metric-push-api-api-PROD",
+            "Value": "metric-push-api-PROD",
           },
         ],
         "EvaluationPeriods": 1,
@@ -392,6 +937,27 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
         "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
+    },
+    "GuPutCloudwatchMetricsPolicyC5BCE402": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "cloudwatch:PutMetricData",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "GuPutCloudwatchMetricsPolicyC5BCE402",
+        "Roles": [
+          {
+            "Ref": "metricpushapilambdaServiceRole910E7F90",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "HighClientSideErrorRateAlarm0026FCB2": {
       "Properties": {
@@ -418,145 +984,25 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
         "AlarmName": "URGENT 9-5 - PROD fatal client-side errors are being reported to sentry for support-frontend",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "DatapointsToAlarm": 3,
-        "EvaluationPeriods": 5,
-        "Metrics": [
+        "Dimensions": [
           {
-            "Expression": "mtotalcount - (m5xxcount + m4xxcount)",
-            "Id": "expr_1",
-            "Label": "mtotal2xx",
+            "Name": "App",
+            "Value": "metric-push-api",
           },
           {
-            "Id": "mtotalcount",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "metric-push-api-api-PROD",
-                  },
-                ],
-                "MetricName": "Count",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "Sum",
-            },
-            "ReturnData": false,
-          },
-          {
-            "Id": "m5xxcount",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "metric-push-api-api-PROD",
-                  },
-                ],
-                "MetricName": "5XXError",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "Sum",
-            },
-            "ReturnData": false,
-          },
-          {
-            "Id": "m4xxcount",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "metric-push-api-api-PROD",
-                  },
-                ],
-                "MetricName": "4XXError",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "Sum",
-            },
-            "ReturnData": false,
+            "Name": "Stage",
+            "Value": "PROD",
           },
         ],
+        "EvaluationPeriods": 5,
+        "MetricName": "metric-push-api-client-side-error",
+        "Namespace": "support-service-lambdas",
+        "Period": 60,
+        "Statistic": "Sum",
         "Threshold": 2,
         "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
-    },
-    "MetricPushAPI": {
-      "Properties": {
-        "Description": "HTTP API to push a metric to cloudwatch so we can alarm on errors",
-        "Name": "metric-push-api-api-PROD",
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::RestApi",
-    },
-    "MetricPushAPIDeployment": {
-      "Properties": {
-        "Description": "Deploys metric-push-api into an environment/stage",
-        "RestApiId": {
-          "Ref": "MetricPushAPI",
-        },
-      },
-      "Type": "AWS::ApiGateway::Deployment",
-    },
-    "MetricPushAPIStage": {
-      "Properties": {
-        "DeploymentId": {
-          "Ref": "MetricPushAPIDeployment",
-        },
-        "Description": "Stage for metric-push-api",
-        "MethodSettings": [
-          {
-            "DataTraceEnabled": true,
-            "HttpMethod": "*",
-            "LoggingLevel": "ERROR",
-            "ResourcePath": "/*",
-          },
-        ],
-        "RestApiId": {
-          "Ref": "MetricPushAPI",
-        },
-        "StageName": "PROD",
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::Stage",
     },
     "MetricPushBasePathMapping": {
       "Properties": {
@@ -564,9 +1010,11 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
           "Ref": "MetricPushDomainName",
         },
         "RestApiId": {
-          "Ref": "MetricPushAPI",
+          "Ref": "metricpushapilambdametricpushapiPRODF582713E",
         },
-        "Stage": "PROD",
+        "Stage": {
+          "Ref": "metricpushapilambdametricpushapiPRODDeploymentStagePRODBE69BCFC",
+        },
       },
       "Type": "AWS::ApiGateway::BasePathMapping",
     },
@@ -633,56 +1081,622 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
-    "MetricPushMethod": {
+    "metricpushapilambda0761BDD0": {
+      "DependsOn": [
+        "metricpushapilambdaServiceRoleDefaultPolicyE40FF18E",
+        "metricpushapilambdaServiceRole910E7F90",
+      ],
       "Properties": {
-        "ApiKeyRequired": false,
-        "AuthorizationType": "NONE",
-        "HttpMethod": "GET",
-        "Integration": {
-          "IntegrationResponses": [
-            {
-              "ResponseParameters": {
-                "method.response.header.Cache-control": "'no-cache'",
-              },
-              "StatusCode": "204",
-            },
-          ],
-          "RequestTemplates": {
-            "application/json": "{"statusCode": 200}",
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
           },
-          "Type": "MOCK",
+          "S3Key": "membership/PROD/metric-push-api/metric-push-api.zip",
         },
-        "MethodResponses": [
+        "Description": "API triggered lambda to push a metric to cloudwatch so we can alarm on errors",
+        "Environment": {
+          "Variables": {
+            "APP": "metric-push-api",
+            "App": "metric-push-api",
+            "STACK": "membership",
+            "STAGE": "PROD",
+            "Stack": "membership",
+            "Stage": "PROD",
+          },
+        },
+        "FunctionName": "metric-push-api-PROD",
+        "Handler": "index.handler",
+        "MemorySize": 512,
+        "Role": {
+          "Fn::GetAtt": [
+            "metricpushapilambdaServiceRole910E7F90",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
           {
-            "ResponseParameters": {
-              "method.response.header.Cache-control": true,
-            },
-            "StatusCode": "204",
+            "Key": "App",
+            "Value": "metric-push-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
           },
         ],
+        "Timeout": 60,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "metricpushapilambdaServiceRole910E7F90": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "metric-push-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "metricpushapilambdaServiceRoleDefaultPolicyE40FF18E": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/membership/PROD/metric-push-api/metric-push-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/membership/metric-push-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/membership/metric-push-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "metricpushapilambdaServiceRoleDefaultPolicyE40FF18E",
+        "Roles": [
+          {
+            "Ref": "metricpushapilambdaServiceRole910E7F90",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "metricpushapilambdametricpushapiPRODANYApiPermissionTestmetricpushapiPRODmetricpushapilambdametricpushapiPROD82FDF238ANYAF62DC85": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "metricpushapilambda0761BDD0",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "metricpushapilambdametricpushapiPRODF582713E",
+              },
+              "/test-invoke-stage/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "metricpushapilambdametricpushapiPRODANYApiPermissionmetricpushapiPRODmetricpushapilambdametricpushapiPROD82FDF238ANY15C19A59": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "metricpushapilambda0761BDD0",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "metricpushapilambdametricpushapiPRODF582713E",
+              },
+              "/",
+              {
+                "Ref": "metricpushapilambdametricpushapiPRODDeploymentStagePRODBE69BCFC",
+              },
+              "/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "metricpushapilambdametricpushapiPRODANYD7FD3932": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "metricpushapilambda0761BDD0",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
         "ResourceId": {
-          "Ref": "MetricPushProxyResource",
+          "Fn::GetAtt": [
+            "metricpushapilambdametricpushapiPRODF582713E",
+            "RootResourceId",
+          ],
         },
         "RestApiId": {
-          "Ref": "MetricPushAPI",
+          "Ref": "metricpushapilambdametricpushapiPRODF582713E",
         },
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "MetricPushProxyResource": {
+    "metricpushapilambdametricpushapiPRODAccountE0A9FC31": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "metricpushapilambdametricpushapiPRODF582713E",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "metricpushapilambdametricpushapiPRODCloudWatchRole8D1A7A99",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "metricpushapilambdametricpushapiPRODCloudWatchRole8D1A7A99": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "metric-push-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "metricpushapilambdametricpushapiPRODDeployment353B728D2f7424849f61ebeb3f6f6ef9013cc2f9": {
+      "DependsOn": [
+        "metricpushapilambdametricpushapiPRODproxyANY9737E265",
+        "metricpushapilambdametricpushapiPRODproxy1154D5C4",
+        "metricpushapilambdametricpushapiPRODANYD7FD3932",
+      ],
+      "Properties": {
+        "Description": "API Gateway endpoint for the metric-push-api-PROD lambda",
+        "RestApiId": {
+          "Ref": "metricpushapilambdametricpushapiPRODF582713E",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "metricpushapilambdametricpushapiPRODDeploymentStagePRODBE69BCFC": {
+      "DependsOn": [
+        "metricpushapilambdametricpushapiPRODAccountE0A9FC31",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "metricpushapilambdametricpushapiPRODDeployment353B728D2f7424849f61ebeb3f6f6ef9013cc2f9",
+        },
+        "RestApiId": {
+          "Ref": "metricpushapilambdametricpushapiPRODF582713E",
+        },
+        "StageName": "PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "metric-push-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "metricpushapilambdametricpushapiPRODF582713E": {
+      "Properties": {
+        "Description": "API Gateway endpoint for the metric-push-api-PROD lambda",
+        "Name": "metric-push-api-PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "metric-push-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "metricpushapilambdametricpushapiPRODproxy1154D5C4": {
       "Properties": {
         "ParentId": {
           "Fn::GetAtt": [
-            "MetricPushAPI",
+            "metricpushapilambdametricpushapiPRODF582713E",
             "RootResourceId",
           ],
         },
-        "PathPart": "metric-push-api",
+        "PathPart": "{proxy+}",
         "RestApiId": {
-          "Ref": "MetricPushAPI",
+          "Ref": "metricpushapilambdametricpushapiPRODF582713E",
         },
       },
       "Type": "AWS::ApiGateway::Resource",
+    },
+    "metricpushapilambdametricpushapiPRODproxyANY9737E265": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "metricpushapilambda0761BDD0",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "metricpushapilambdametricpushapiPRODproxy1154D5C4",
+        },
+        "RestApiId": {
+          "Ref": "metricpushapilambdametricpushapiPRODF582713E",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "metricpushapilambdametricpushapiPRODproxyANYApiPermissionTestmetricpushapiPRODmetricpushapilambdametricpushapiPROD82FDF238ANYproxy328E0807": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "metricpushapilambda0761BDD0",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "metricpushapilambdametricpushapiPRODF582713E",
+              },
+              "/test-invoke-stage/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "metricpushapilambdametricpushapiPRODproxyANYApiPermissionmetricpushapiPRODmetricpushapilambdametricpushapiPROD82FDF238ANYproxy31D39D5D": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "metricpushapilambda0761BDD0",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "metricpushapilambdametricpushapiPRODF582713E",
+              },
+              "/",
+              {
+                "Ref": "metricpushapilambdametricpushapiPRODDeploymentStagePRODBE69BCFC",
+              },
+              "/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
     },
   },
 }
