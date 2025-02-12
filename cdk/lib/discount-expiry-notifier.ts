@@ -70,18 +70,18 @@ export class DiscountExpiryNotifier extends GuStack {
 			bucketName: `${appName}-${this.stage.toLowerCase()}`,
 		});
 
-		const getSubsWithExpiringDiscountsLambda = new GuLambdaFunction(
+		const getCustomersWithExpiringDiscountsLambda = new GuLambdaFunction(
 			this,
-			'get-subs-with-expiring-discounts-lambda',
+			'get-customers-with-expiring-discounts-lambda',
 			{
 				app: appName,
-				functionName: `${appName}-get-subs-with-expiring-discounts-${this.stage}`,
+				functionName: `${appName}-get-customers-with-expiring-discounts-${this.stage}`,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
 					DAYS_UNTIL_DISCOUNT_EXPIRY_DATE: '32',
 				},
-				handler: 'getSubsWithExpiringDiscounts.handler',
+				handler: 'getCustomersWithExpiringDiscounts.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
 				initialPolicy: [allowPutMetric],
@@ -185,11 +185,11 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
-		const getSubsWithExpiringDiscountsLambdaTask = new LambdaInvoke(
+		const getCustomersWithExpiringDiscountsLambdaTask = new LambdaInvoke(
 			this,
-			'Get subs with expiring discounts',
+			'Get customers with expiring discounts',
 			{
-				lambdaFunction: getSubsWithExpiringDiscountsLambda,
+				lambdaFunction: getCustomersWithExpiringDiscountsLambda,
 				outputPath: '$.Payload',
 			},
 		);
@@ -251,7 +251,7 @@ export class DiscountExpiryNotifier extends GuStack {
 		expiringDiscountProcessorMap.iterator(initiateEmailSendLambdaTask);
 
 		const definitionBody = DefinitionBody.fromChainable(
-			getSubsWithExpiringDiscountsLambdaTask
+			getCustomersWithExpiringDiscountsLambdaTask
 				.next(filterSubsLambdaTask)
 				.next(subStatusFetcherMap)
 				.next(expiringDiscountProcessorMap)
@@ -285,7 +285,7 @@ export class DiscountExpiryNotifier extends GuStack {
 		);
 
 		const lambdaFunctionsToAlarmOn = [
-			getSubsWithExpiringDiscountsLambda,
+			getCustomersWithExpiringDiscountsLambda,
 			filterSubsLambda,
 			alarmOnFailuresLambda,
 		];
