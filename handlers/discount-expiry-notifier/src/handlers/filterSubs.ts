@@ -20,9 +20,7 @@ export const handler = async (event: FilterSubsInput) => {
 
 		const filteredRecords = event.allRecordsFromBigQuery.filter(
 			(sub) =>
-				filterByRegions.includes(
-					sub.contactCountry?.toLowerCase() ?? '',
-				) ||
+				filterByRegions.includes(sub.contactCountry?.toLowerCase() ?? '') ||
 				filterByRegions.includes(
 					sub.sfBuyerContactMailingCountry?.toLowerCase() ?? '',
 				) ||
