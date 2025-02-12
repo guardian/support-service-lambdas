@@ -70,18 +70,18 @@ export class DiscountExpiryNotifier extends GuStack {
 			bucketName: `${appName}-${this.stage.toLowerCase()}`,
 		});
 
-		const getSubsWithExpiringDiscountsLambda = new GuLambdaFunction(
+		const getExpiringDiscountsLambda = new GuLambdaFunction(
 			this,
-			'get-subs-with-expiring-discounts-lambda',
+			'get-expiring-discounts-lambda',
 			{
 				app: appName,
-				functionName: `${appName}-get-subs-with-expiring-discounts-${this.stage}`,
+				functionName: `${appName}-get-expiring-discounts-${this.stage}`,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
 					DAYS_UNTIL_DISCOUNT_EXPIRY_DATE: '32',
 				},
-				handler: 'getSubsWithExpiringDiscounts.handler',
+				handler: 'getExpiringDiscounts.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
 				initialPolicy: [allowPutMetric],
@@ -89,31 +89,35 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
-		const filterSubsLambda = new GuLambdaFunction(this, 'filter-subs-lambda', {
-			app: appName,
-			functionName: `${appName}-filter-subs-${this.stage}`,
-			runtime: nodeVersion,
-			environment: {
-				Stage: this.stage,
-				FILTER_BY_REGIONS: 'US,USA,United States,United States of America',
+		const filterRecordsLambda = new GuLambdaFunction(
+			this,
+			'filter-records-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-filter-records-${this.stage}`,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+					FILTER_BY_REGIONS: 'US,USA,United States,United States of America',
+				},
+				handler: 'filterRecords.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+				initialPolicy: [allowPutMetric],
 			},
-			handler: 'filterSubs.handler',
-			fileName: `${appName}.zip`,
-			architecture: Architecture.ARM_64,
-			initialPolicy: [allowPutMetric],
-		});
+		);
 
 		const getSubStatusLambda = new GuLambdaFunction(
 			this,
-			'sub-is-active-lambda',
+			'get-sub-status-lambda',
 			{
 				app: appName,
-				functionName: `${appName}-sub-is-active-${this.stage}`,
+				functionName: `${appName}-get-sub-status-${this.stage}`,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
 				},
-				handler: 'subIsActive.handler',
+				handler: 'getSubStatus.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
 				initialPolicy: [
@@ -127,22 +131,18 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
-		const initiateEmailSendLambda = new GuLambdaFunction(
-			this,
-			'initiate-email-send-lambda',
-			{
-				app: appName,
-				functionName: `${appName}-initiate-email-send-${this.stage}`,
-				runtime: nodeVersion,
-				environment: {
-					Stage: this.stage,
-					S3_BUCKET: bucket.bucketName,
-				},
-				handler: 'initiateEmailSend.handler',
-				fileName: `${appName}.zip`,
-				architecture: Architecture.ARM_64,
+		const sendEmailLambda = new GuLambdaFunction(this, 'send-email-lambda', {
+			app: appName,
+			functionName: `${appName}-send-email-${this.stage}`,
+			runtime: nodeVersion,
+			environment: {
+				Stage: this.stage,
+				S3_BUCKET: bucket.bucketName,
 			},
-		);
+			handler: 'sendEmail.handler',
+			fileName: `${appName}.zip`,
+			architecture: Architecture.ARM_64,
+		});
 
 		const saveResultsLambda = new GuLambdaFunction(
 			this,
@@ -185,20 +185,20 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
-		const getSubsWithExpiringDiscountsLambdaTask = new LambdaInvoke(
+		const getExpiringDiscountsLambdaTask = new LambdaInvoke(
 			this,
-			'Get subs with expiring discounts',
+			'Get expiring discounts',
 			{
-				lambdaFunction: getSubsWithExpiringDiscountsLambda,
+				lambdaFunction: getExpiringDiscountsLambda,
 				outputPath: '$.Payload',
 			},
 		);
 
-		const filterSubsLambdaTask = new LambdaInvoke(
+		const filterRecordsLambdaTask = new LambdaInvoke(
 			this,
-			'Filter subs by region',
+			'Filter records by region',
 			{
-				lambdaFunction: filterSubsLambda,
+				lambdaFunction: filterRecordsLambda,
 				outputPath: '$.Payload',
 			},
 		);
@@ -222,14 +222,10 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
-		const initiateEmailSendLambdaTask = new LambdaInvoke(
-			this,
-			'Initiate email send',
-			{
-				lambdaFunction: initiateEmailSendLambda,
-				outputPath: '$.Payload',
-			},
-		);
+		const sendEmailLambdaTask = new LambdaInvoke(this, 'Send email', {
+			lambdaFunction: sendEmailLambda,
+			outputPath: '$.Payload',
+		});
 
 		const subStatusFetcherMap = new Map(this, 'Sub status fetcher map', {
 			maxConcurrency: 10,
@@ -248,11 +244,11 @@ export class DiscountExpiryNotifier extends GuStack {
 		);
 
 		subStatusFetcherMap.iterator(getSubStatusLambdaTask);
-		expiringDiscountProcessorMap.iterator(initiateEmailSendLambdaTask);
+		expiringDiscountProcessorMap.iterator(sendEmailLambdaTask);
 
 		const definitionBody = DefinitionBody.fromChainable(
-			getSubsWithExpiringDiscountsLambdaTask
-				.next(filterSubsLambdaTask)
+			getExpiringDiscountsLambdaTask
+				.next(filterRecordsLambdaTask)
 				.next(subStatusFetcherMap)
 				.next(expiringDiscountProcessorMap)
 				.next(saveResultsLambdaTask)
@@ -271,7 +267,7 @@ export class DiscountExpiryNotifier extends GuStack {
 			],
 		});
 
-		initiateEmailSendLambda.role?.attachInlinePolicy(sqsInlinePolicy);
+		sendEmailLambda.role?.attachInlinePolicy(sqsInlinePolicy);
 
 		new StateMachine(this, `${appName}-state-machine-${this.stage}`, {
 			stateMachineName: `${appName}-${this.stage}`,
@@ -285,8 +281,8 @@ export class DiscountExpiryNotifier extends GuStack {
 		);
 
 		const lambdaFunctionsToAlarmOn = [
-			getSubsWithExpiringDiscountsLambda,
-			filterSubsLambda,
+			getExpiringDiscountsLambda,
+			filterRecordsLambda,
 			alarmOnFailuresLambda,
 		];
 
