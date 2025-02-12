@@ -3,11 +3,13 @@ import { getIfDefined } from '@modules/nullAndUndefined';
 import { z } from 'zod';
 import { BigQueryResultDataSchema } from '../bigquery';
 
-export const FilterSubsInputSchema = z.object({
-	discountExpiresOnDate: z.string(),
-	allRecordsFromBigQuery: BigQueryResultDataSchema,
-	allRecordsFromBigQueryCount: z.number(),
-});
+export const FilterSubsInputSchema = z
+	.object({
+		discountExpiresOnDate: z.string(),
+		allRecordsFromBigQuery: BigQueryResultDataSchema,
+		allRecordsFromBigQueryCount: z.number(),
+	})
+	.strict();
 
 export type FilterSubsInput = z.infer<typeof FilterSubsInputSchema>;
 
