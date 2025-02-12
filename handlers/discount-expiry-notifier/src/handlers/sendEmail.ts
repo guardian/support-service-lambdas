@@ -8,7 +8,8 @@ export type SendEmailInput = z.infer<typeof BaseRecordForEmailSendSchema>;
 
 export const handler = async (event: SendEmailInput) => {
 	const parsedEventResult = SendEmailInputSchema.safeParse(event);
-
+	console.log('event:', event);
+	console.log('parsedEventResult:', parsedEventResult);
 	if (!parsedEventResult.success) {
 		throw new Error('Invalid event data');
 	}
