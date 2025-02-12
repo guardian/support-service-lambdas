@@ -21,7 +21,9 @@ export type SaveResultsInput = z.infer<typeof SaveResultsInputSchema>;
 
 export const handler = async (event: SaveResultsInput) => {
 	try {
+		console.log('event:', event);
 		const parsedEventResult = SaveResultsInputSchema.safeParse(event);
+		console.log('parsedEventResult:', parsedEventResult);
 
 		if (!parsedEventResult.success) {
 			throw new Error('Invalid event data');
