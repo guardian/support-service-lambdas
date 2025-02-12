@@ -70,18 +70,18 @@ export class DiscountExpiryNotifier extends GuStack {
 			bucketName: `${appName}-${this.stage.toLowerCase()}`,
 		});
 
-		const getCustomersWithExpiringDiscountsLambda = new GuLambdaFunction(
+		const getExpiringDiscountsLambda = new GuLambdaFunction(
 			this,
-			'get-customers-with-expiring-discounts-lambda',
+			'get-expiring-discounts-lambda',
 			{
 				app: appName,
-				functionName: `${appName}-get-customers-with-expiring-discounts-${this.stage}`,
+				functionName: `${appName}-get-expiring-discounts-${this.stage}`,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
 					DAYS_UNTIL_DISCOUNT_EXPIRY_DATE: '32',
 				},
-				handler: 'getCustomersWithExpiringDiscounts.handler',
+				handler: 'getExpiringDiscounts.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
 				initialPolicy: [allowPutMetric],
@@ -185,11 +185,11 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
-		const getCustomersWithExpiringDiscountsLambdaTask = new LambdaInvoke(
+		const getExpiringDiscountsLambdaTask = new LambdaInvoke(
 			this,
-			'Get customers with expiring discounts',
+			'Get expiring discounts',
 			{
-				lambdaFunction: getCustomersWithExpiringDiscountsLambda,
+				lambdaFunction: getExpiringDiscountsLambda,
 				outputPath: '$.Payload',
 			},
 		);
@@ -247,7 +247,7 @@ export class DiscountExpiryNotifier extends GuStack {
 		expiringDiscountProcessorMap.iterator(sendEmailLambdaTask);
 
 		const definitionBody = DefinitionBody.fromChainable(
-			getCustomersWithExpiringDiscountsLambdaTask
+			getExpiringDiscountsLambdaTask
 				.next(filterRecordsLambdaTask)
 				.next(subStatusFetcherMap)
 				.next(expiringDiscountProcessorMap)
@@ -281,7 +281,7 @@ export class DiscountExpiryNotifier extends GuStack {
 		);
 
 		const lambdaFunctionsToAlarmOn = [
-			getCustomersWithExpiringDiscountsLambda,
+			getExpiringDiscountsLambda,
 			filterRecordsLambda,
 			alarmOnFailuresLambda,
 		];

@@ -20,7 +20,7 @@ deployments:
       bucketSsmLookup: true
       prefixStack: false
       functionNames:
-        - discount-expiry-notifier-get-customers-with-expiring-discounts-
+        - discount-expiry-notifier-get-expiring-discounts-
         - discount-expiry-notifier-filter-records-
         - discount-expiry-notifier-get-sub-status-
         - discount-expiry-notifier-send-email-
