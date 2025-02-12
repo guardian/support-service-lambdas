@@ -7,8 +7,8 @@ export const testQueryResponse = [
 		paymentFrequency: 'Month',
 		productName: 'GW',
 		sfContactId: '0030J000022u2hrQAA',
-		zuoraSubName: 'A-S02360124', // Active sub in dev sandbox
-		workEmail: 'david.pepper@guardian.co.uk',
+		zuoraSubName: 'A-S02360124', // Active sub in prod
+		workEmail: 'david.pepper@theguardian.com',
 		contactCountry: 'united states of america',
 		sfBuyerContactMailingCountry: 'united states of america',
 		sfBuyerContactOtherCountry: 'united states of america',
@@ -22,8 +22,8 @@ export const testQueryResponse = [
 		paymentCurrency: 'USD',
 		paymentFrequency: 'Month',
 		productName: 'Supporter Plus',
-		sfContactId: '0035I00000UUFyHQAX	',
-		zuoraSubName: 'A-S02360127', // Active subscription in dev sandbox
+		sfContactId: '0035I00000MQmHlQAL',
+		zuoraSubName: 'A-S02360146', // Active subscription in prod
 		workEmail: 'graham.hopgood@guardian.co.uk',
 		contactCountry: 'United States',
 		sfBuyerContactMailingCountry: 'United States',
