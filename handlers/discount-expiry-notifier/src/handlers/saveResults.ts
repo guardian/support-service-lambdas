@@ -24,8 +24,7 @@ export const handler = async (event: SaveResultsInput) => {
 	try {
 		console.log(`event ${prettyPrint(event)}`);
 		const parsedEventResult = SaveResultsInputSchema.safeParse(event);
-		console.log('parsedEventResult:', parsedEventResult);
-
+		console.log(`parsedEventResult ${prettyPrint(parsedEventResult)}`);
 		if (!parsedEventResult.success) {
 			throw new Error('Invalid event data');
 		}
