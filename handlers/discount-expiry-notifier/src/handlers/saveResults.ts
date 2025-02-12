@@ -1,9 +1,9 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { uploadFileToS3 } from '../s3';
 import type {
+	BaseRecordForEmailSend,
 	BigQueryRecord,
 	DiscountProcessingAttempt,
-	BaseRecordForEmailSend,
 } from '../types';
 
 export const handler = async (event: {
