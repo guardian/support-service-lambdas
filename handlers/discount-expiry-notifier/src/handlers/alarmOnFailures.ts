@@ -15,7 +15,7 @@ export const AlarmOnFailuresInputSchema = z
 		recordsForEmailSendCount: z.number(),
 		recordsForEmailSend: z.array(BaseRecordForEmailSendSchema),
 		discountProcessingAttempts: z.array(DiscountProcessingAttemptSchema),
-		uploadAttemptStatus: z.string(),
+		s3UploadAttemptStatus: z.string(),
 	})
 	.strict();
 export type AlarmOnFailuresInput = z.infer<typeof AlarmOnFailuresInputSchema>;
@@ -31,7 +31,7 @@ export const handler = async (event: AlarmOnFailuresInput) => {
 		if (
 			await failuresOccurred(
 				parsedEvent.discountProcessingAttempts,
-				parsedEvent.uploadAttemptStatus,
+				parsedEvent.s3UploadAttemptStatus,
 			)
 		) {
 			throw new Error('Errors occurred. Check logs.');
@@ -44,10 +44,10 @@ export const handler = async (event: AlarmOnFailuresInput) => {
 
 const failuresOccurred = async (
 	discountProcessingAttempts: DiscountProcessingAttempt[],
-	uploadAttemptStatus: string,
+	s3UploadAttemptStatus: string,
 ): Promise<boolean> => {
 	return (
-		uploadAttemptStatus === 'error' ||
+		s3UploadAttemptStatus === 'error' ||
 		discountProcessingAttempts.some(
 			(attempt) => attempt.emailSendAttempt.response.status === 'skipped',
 		)
