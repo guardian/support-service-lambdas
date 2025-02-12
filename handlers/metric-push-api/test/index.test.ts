@@ -32,7 +32,7 @@ describe('handler', () => {
 	});
 
 	describe('GET /', () => {
-		describe('if the referred is valid', () => {
+		describe('if the referer header is valid', () => {
 			it('returns 201 Accepted', async () => {
 				const requestEvent = {
 					path: '/metric-push-api',
@@ -61,6 +61,22 @@ describe('handler', () => {
 				expect(putMetric).toHaveBeenCalledWith(
 					'metric-push-api-client-side-error',
 				);
+			});
+
+			describe('and the header starts with a capital letter', () => {
+				it('returns 201 Accepted', async () => {
+					const requestEvent = {
+						path: '/metric-push-api',
+						httpMethod: 'GET',
+						headers: {
+							Referer: 'https://support.thegulocal.com/',
+						},
+					} as unknown as APIGatewayProxyEvent;
+
+					const response = await handler(requestEvent);
+
+					expect(response.statusCode).toEqual(201);
+				});
 			});
 		});
 
