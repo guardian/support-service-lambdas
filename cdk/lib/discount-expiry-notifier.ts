@@ -105,15 +105,15 @@ export class DiscountExpiryNotifier extends GuStack {
 
 		const getSubStatusLambda = new GuLambdaFunction(
 			this,
-			'sub-is-active-lambda',
+			'get-sub-status-lambda',
 			{
 				app: appName,
-				functionName: `${appName}-sub-is-active-${this.stage}`,
+				functionName: `${appName}-get-sub-status-${this.stage}`,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
 				},
-				handler: 'subIsActive.handler',
+				handler: 'getSubStatus.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
 				initialPolicy: [
