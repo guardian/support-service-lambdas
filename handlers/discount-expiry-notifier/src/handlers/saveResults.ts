@@ -1,4 +1,5 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
+import { prettyPrint } from '@modules/prettyPrint';
 import { z } from 'zod';
 import { uploadFileToS3 } from '../s3';
 import {
@@ -21,7 +22,7 @@ export type SaveResultsInput = z.infer<typeof SaveResultsInputSchema>;
 
 export const handler = async (event: SaveResultsInput) => {
 	try {
-		console.log('event:', event);
+		console.log(`event ${prettyPrint(event)}`);
 		const parsedEventResult = SaveResultsInputSchema.safeParse(event);
 		console.log('parsedEventResult:', parsedEventResult);
 
