@@ -40,13 +40,14 @@ export const handler = async (event: SaveResultsInput) => {
 		const executionDateTime = new Date().toISOString();
 
 		const filePath = `${discountExpiresOnDate}/${executionDateTime}`;
+		console.log('filePath:', filePath);
 
 		const s3UploadAttempt = await uploadFileToS3({
 			bucketName,
 			filePath,
 			content: JSON.stringify(parsedEvent, null, 2),
 		});
-
+		console.log('s3UploadAttempt:', s3UploadAttempt);
 		if (s3UploadAttempt.$metadata.httpStatusCode !== 200) {
 			throw new Error('Failed to upload to S3');
 		}
