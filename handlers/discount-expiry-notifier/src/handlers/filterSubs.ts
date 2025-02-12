@@ -1,12 +1,27 @@
 /* eslint-disable @typescript-eslint/require-await -- this is required to ensure the lambda returns a value*/
 import { getIfDefined } from '@modules/nullAndUndefined';
-import type { ExpiringDiscountToProcess } from '../types';
+import { z } from 'zod';
+import { BigQueryResultDataSchema } from '../types';
 
-export const handler = async (event: {
-	discountExpiresOnDate: string;
-	expiringDiscountsToProcess: ExpiringDiscountToProcess[];
-}) => {
+export const FilterSubsInputSchema = z
+	.object({
+		discountExpiresOnDate: z.string(),
+		allRecordsFromBigQuery: BigQueryResultDataSchema,
+		allRecordsFromBigQueryCount: z.number(),
+	})
+	.strict();
+
+export type FilterSubsInput = z.infer<typeof FilterSubsInputSchema>;
+
+export const handler = async (event: FilterSubsInput) => {
 	try {
+		const parsedEventResult = FilterSubsInputSchema.safeParse(event);
+
+		if (!parsedEventResult.success) {
+			throw new Error('Invalid event data');
+		}
+		const parsedEvent = parsedEventResult.data;
+
 		const FILTER_BY_REGIONS = getIfDefined<string>(
 			process.env.FILTER_BY_REGIONS,
 			'FILTER_BY_REGIONS environment variable not set',
@@ -14,27 +29,27 @@ export const handler = async (event: {
 
 		const filterByRegions = FILTER_BY_REGIONS.toLowerCase().split(',');
 
-		const filteredSubs = event.expiringDiscountsToProcess.filter(
+		const filteredRecords = parsedEvent.allRecordsFromBigQuery.filter(
 			(sub) =>
-				filterByRegions.includes(sub.contactCountry.toLowerCase()) ||
+				filterByRegions.includes(sub.contactCountry?.toLowerCase() ?? '') ||
 				filterByRegions.includes(
-					sub.sfBuyerContactMailingCountry.toLowerCase(),
+					sub.sfBuyerContactMailingCountry?.toLowerCase() ?? '',
 				) ||
 				filterByRegions.includes(
-					sub.sfBuyerContactOtherCountry.toLowerCase(),
+					sub.sfBuyerContactOtherCountry?.toLowerCase() ?? '',
 				) ||
 				filterByRegions.includes(
-					sub.sfRecipientContactMailingCountry.toLowerCase(),
+					sub.sfRecipientContactMailingCountry?.toLowerCase() ?? '',
 				) ||
 				filterByRegions.includes(
-					sub.sfRecipientContactOtherCountry.toLowerCase(),
+					sub.sfRecipientContactOtherCountry?.toLowerCase() ?? '',
 				),
 		);
 
 		return {
-			...event,
-			filteredSubsCount: filteredSubs.length,
-			filteredSubs,
+			...parsedEvent,
+			recordsForEmailSendCount: filteredRecords.length,
+			recordsForEmailSend: filteredRecords,
 		};
 	} catch (error) {
 		console.error('Error:', error);

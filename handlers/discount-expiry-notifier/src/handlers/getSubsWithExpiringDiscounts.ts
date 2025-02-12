@@ -22,8 +22,8 @@ export const handler = async (event: { discountExpiresOnDate?: string }) => {
 		console.log('result', result);
 		return {
 			discountExpiresOnDate,
-			expiringDiscountsToProcessCount: testQueryResponse.length,
-			expiringDiscountsToProcess: testQueryResponse,
+			allRecordsFromBigQueryCount: testQueryResponse.length,
+			allRecordsFromBigQuery: testQueryResponse,
 		};
 	} catch (error) {
 		console.error('Error:', error);
@@ -51,7 +51,6 @@ WITH expiringDiscounts AS (
 	SELECT
 		contact.country as contactCountry,
 		contact.first_name as firstName,
-		account.identity_id_c as identityId,
 		DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) AS nextPaymentDate,
 		account.currency as paymentCurrency,
 		account.sf_contact_id_c as sfContactId,
@@ -92,7 +91,6 @@ WITH expiringDiscounts AS (
 SELECT 
 	STRING_AGG(DISTINCT contactCountry) as contactCountry,
 	STRING_AGG(DISTINCT firstName) as firstName,
-	STRING_AGG(DISTINCT identityId) as identityId,
 	MIN(exp.nextPaymentDate) AS nextPaymentDate,
 	SUM(tier.price) AS paymentAmount,
 	STRING_AGG(DISTINCT paymentCurrency) as paymentCurrency,

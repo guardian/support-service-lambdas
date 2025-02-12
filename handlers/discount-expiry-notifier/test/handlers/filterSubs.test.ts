@@ -20,7 +20,8 @@ describe('filterSubs handler', () => {
 
 		const event = {
 			discountExpiresOnDate: '2024-03-21',
-			expiringDiscountsToProcess: [
+			allRecordsFromBigQueryCount: 3,
+			allRecordsFromBigQuery: [
 				{
 					firstName: 'John',
 					nextPaymentDate: '2024-04-21',
@@ -47,7 +48,7 @@ describe('filterSubs handler', () => {
 					sfContactId: '002',
 					zuoraSubName: 'A-S002',
 					workEmail: 'jane@example.com',
-					contactCountry: 'Canada',
+					contactCountry: '',
 					sfBuyerContactMailingCountry: 'United states of america',
 					sfBuyerContactOtherCountry: 'Mexico',
 					sfRecipientContactMailingCountry: 'Brazil',
@@ -75,16 +76,16 @@ describe('filterSubs handler', () => {
 		const result = await handler(event);
 
 		expect(result).toBeDefined();
-		expect(result.filteredSubs).toBeInstanceOf(Array);
-		expect(result.filteredSubs.length).toBe(2);
+		expect(result.recordsForEmailSend).toBeInstanceOf(Array);
+		expect(result.recordsForEmailSend.length).toBe(2);
 		expect(
-			result.filteredSubs.some((sub) => sub.zuoraSubName === 'A-S001'),
+			result.recordsForEmailSend.some((sub) => sub.zuoraSubName === 'A-S001'),
 		).toBe(true);
 		expect(
-			result.filteredSubs.some((sub) => sub.zuoraSubName === 'A-S002'),
+			result.recordsForEmailSend.some((sub) => sub.zuoraSubName === 'A-S002'),
 		).toBe(true);
 		expect(
-			result.filteredSubs.some((sub) => sub.zuoraSubName === 'A-S003'),
+			result.recordsForEmailSend.some((sub) => sub.zuoraSubName === 'A-S003'),
 		).toBe(false);
 	});
 
@@ -93,14 +94,15 @@ describe('filterSubs handler', () => {
 
 		const event = {
 			discountExpiresOnDate: '2024-03-21',
-			expiringDiscountsToProcess: testQueryResponse,
+			allRecordsFromBigQueryCount: 3,
+			allRecordsFromBigQuery: testQueryResponse,
 		};
 
 		const result = await handler(event);
 
 		expect(result).toBeDefined();
-		expect(result.filteredSubs).toBeInstanceOf(Array);
-		expect(result.filteredSubs.length).toBe(0);
+		expect(result.recordsForEmailSend).toBeInstanceOf(Array);
+		expect(result.recordsForEmailSend.length).toBe(0);
 	});
 
 	it('should throw an error if FILTER_BY_REGIONS is not set', async () => {
@@ -110,7 +112,8 @@ describe('filterSubs handler', () => {
 
 		const event = {
 			discountExpiresOnDate: '2024-03-21',
-			expiringDiscountsToProcess: testQueryResponse,
+			allRecordsFromBigQueryCount: 3,
+			allRecordsFromBigQuery: testQueryResponse,
 		};
 
 		await expect(handler(event)).rejects.toThrow(

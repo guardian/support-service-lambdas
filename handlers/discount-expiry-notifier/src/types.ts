@@ -1,34 +1,87 @@
-export type ExpiringDiscountToProcess = {
-	firstName: string;
-	nextPaymentDate: string;
-	paymentAmount: number;
-	paymentCurrency: string;
-	paymentFrequency: string;
-	productName: string;
-	sfContactId: string;
-	zuoraSubName: string;
-	workEmail: string;
-	contactCountry: string;
-	sfBuyerContactMailingCountry: string;
-	sfBuyerContactOtherCountry: string;
-	sfRecipientContactMailingCountry: string;
-	sfRecipientContactOtherCountry: string;
-};
+import { z } from 'zod';
 
-export type FilteredSub = ExpiringDiscountToProcess;
+export const BigQueryRecordSchema = z
+	.object({
+		firstName: z.string(),
+		nextPaymentDate: z
+			.union([
+				z.object({
+					value: z.string(),
+				}),
+				z.string(),
+			])
+			.transform((val) => (typeof val === 'string' ? val : val.value)),
+		paymentAmount: z.number().transform((val) => parseFloat(val.toFixed(2))),
+		paymentCurrency: z.string(),
+		paymentFrequency: z.string(),
+		productName: z.string(),
+		sfContactId: z.string(),
+		zuoraSubName: z.string(),
+		workEmail: z.string().nullable(),
+		contactCountry: z.string().nullable(),
+		sfBuyerContactMailingCountry: z.string().nullable(),
+		sfBuyerContactOtherCountry: z.string().nullable(),
+		sfRecipientContactMailingCountry: z.string().nullable(),
+		sfRecipientContactOtherCountry: z.string().nullable(),
+	})
+	.strict();
+export type BigQueryRecord = z.infer<typeof BigQueryRecordSchema>;
 
-export type DiscountProcessingAttempt = {
-	detail: {
-		item: ExpiringDiscountToProcess & {
-			subStatus: string;
-			errorDetail: string;
-		};
-		emailSendAttempt: EmailSendAttempt;
-	};
-};
+export const BigQueryResultDataSchema = z.array(BigQueryRecordSchema);
 
-export type EmailSendAttempt = {
-	status: string;
-	payload: object;
-	response: string;
-};
+export const BaseRecordForEmailSendSchema = BigQueryRecordSchema.extend({
+	subStatus: z.string(),
+}).strict();
+export type BaseRecordForEmailSend = z.infer<
+	typeof BaseRecordForEmailSendSchema
+>;
+
+export const EmailSendEligibilitySchema = z
+	.object({
+		isEligible: z.boolean(),
+		ineligibilityReason: z.string(),
+	})
+	.strict();
+export type EmailSendEligibility = z.infer<typeof EmailSendEligibilitySchema>;
+
+export const EmailSendRequestSchema = z
+	.object({
+		To: z.object({
+			Address: z.string(),
+			ContactAttributes: z.object({
+				SubscriberAttributes: z.object({
+					EmailAddress: z.string(),
+					payment_amount: z.string(),
+					first_name: z.string(),
+					next_payment_date: z.string(),
+					payment_frequency: z.string(),
+				}),
+			}),
+		}),
+		DataExtensionName: z.string(),
+		SfContactId: z.string(),
+	})
+	.strict();
+export type EmailSendRequest = z.infer<typeof EmailSendRequestSchema>;
+
+export const EmailSendAttemptSchema = z
+	.object({
+		request: EmailSendRequestSchema,
+		response: z.object({
+			status: z.string(),
+			errorDetail: z.string(),
+		}),
+	})
+	.strict();
+export type EmailSendAttempt = z.infer<typeof EmailSendAttemptSchema>;
+
+export const DiscountProcessingAttemptSchema = z
+	.object({
+		record: BaseRecordForEmailSendSchema,
+		emailSendEligibility: EmailSendEligibilitySchema,
+		emailSendAttempt: EmailSendAttemptSchema,
+	})
+	.strict();
+export type DiscountProcessingAttempt = z.infer<
+	typeof DiscountProcessingAttemptSchema
+>;

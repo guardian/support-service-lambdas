@@ -1,79 +1,81 @@
 import { DataExtensionNames, sendEmail } from '@modules/email/email';
 import { stageFromEnvironment } from '@modules/stage';
+import type { z } from 'zod';
+import { BaseRecordForEmailSendSchema } from '../types';
 
-export const handler = async (event: {
-	item: {
-		firstName: string;
-		nextPaymentDate: string;
-		paymentAmount: number;
-		paymentCurrency: string;
-		paymentFrequency: string;
-		productName: string;
-		sfContactId: string;
-		zuoraSubName: string;
-		workEmail: string;
-		subStatus: string;
-	};
-}) => {
+export const InitiateEmailSendInputSchema = BaseRecordForEmailSendSchema;
+export type InitiateEmailSendInput = z.infer<
+	typeof BaseRecordForEmailSendSchema
+>;
+
+export const handler = async (event: InitiateEmailSendInput) => {
+	const parsedEventResult = InitiateEmailSendInputSchema.safeParse(event);
+
+	if (!parsedEventResult.success) {
+		throw new Error('Invalid event data');
+	}
+	const parsedEvent = parsedEventResult.data;
 	const emailSendEligibility = getEmailSendEligibility(
-		event.item.subStatus,
-		event.item.workEmail,
+		parsedEvent.subStatus,
+		parsedEvent.workEmail,
 	);
 
-	if (!emailSendEligibility.eligibleForEmailSend) {
+	if (!emailSendEligibility.isEligible) {
 		return {
-			detail: {
-				event,
-				emailSendAttempt: {
-					status: 'skipped',
-					response: emailSendEligibility.ineligibilityReason,
-				},
+			record: parsedEvent,
+			emailSendAttempt: {
+				status: 'skipped',
+				response: emailSendEligibility.ineligibilityReason,
 			},
 		};
 	}
 
-	const currencySymbol = getCurrencySymbol(event.item.paymentCurrency);
+	const currencySymbol = getCurrencySymbol(parsedEvent.paymentCurrency);
 
-	const payload = {
+	const request = {
 		...{
 			To: {
-				Address: event.item.workEmail,
+				Address: parsedEvent.workEmail ?? '',
 				ContactAttributes: {
 					SubscriberAttributes: {
-						EmailAddress: event.item.workEmail,
-						payment_amount: `${currencySymbol}${event.item.paymentAmount}`,
-						first_name: event.item.firstName,
-						next_payment_date: formatDate(event.item.nextPaymentDate),
-						payment_frequency: event.item.paymentFrequency,
+						EmailAddress: parsedEvent.workEmail ?? '',
+						payment_amount: `${currencySymbol}${parsedEvent.paymentAmount}`,
+						first_name: parsedEvent.firstName,
+						next_payment_date: formatDate(parsedEvent.nextPaymentDate),
+						payment_frequency: parsedEvent.paymentFrequency,
 					},
 				},
 			},
 			DataExtensionName: DataExtensionNames.discountExpiryNotificationEmail,
 		},
-		SfContactId: event.item.sfContactId,
+		SfContactId: parsedEvent.sfContactId,
 	};
 
 	try {
+		const response = await sendEmail(stageFromEnvironment(), request);
+
+		if (response.$metadata.httpStatusCode !== 200) {
+			throw new Error('Failed to send email');
+		}
 		return {
-			detail: {
-				event,
-				emailSendEligibility,
-				emailSendAttempt: {
+			record: parsedEvent,
+			emailSendEligibility,
+			emailSendAttempt: {
+				request,
+				response: {
 					status: 'success',
-					payload,
-					response: await sendEmail(stageFromEnvironment(), payload),
 				},
 			},
 		};
 	} catch (error) {
 		return {
-			detail: {
-				event,
-				emailSendEligibility,
-				emailSendAttempt: {
+			record: event,
+			emailSendEligibility,
+			emailSendAttempt: {
+				request,
+				response: {
 					status: 'error',
-					payload,
-					response: JSON.stringify(error, null, 2),
+					errorDetail: JSON.stringify(error, null, 2),
 				},
 			},
 		};
@@ -82,7 +84,7 @@ export const handler = async (event: {
 
 function getIneligibilityReason(
 	subStatus: string,
-	workEmail: string | undefined,
+	workEmail: string | null | undefined,
 ) {
 	if (subStatus === 'Cancelled') {
 		return 'Subscription status is cancelled';
@@ -97,33 +99,12 @@ function getIneligibilityReason(
 }
 function getEmailSendEligibility(
 	subStatus: string,
-	workEmail: string | undefined,
+	workEmail: string | null | undefined,
 ) {
 	return {
-		eligibleForEmailSend: subStatus === 'Active' && !!workEmail,
+		isEligible: subStatus === 'Active' && !!workEmail,
 		ineligibilityReason: getIneligibilityReason(subStatus, workEmail),
 	};
-	// if (subStatus === 'Cancelled') {
-	// 	return {
-	// 		detail: event,
-	// 		emailSendAttempt: {
-	// 			status: 'skipped',
-	// 			payload: {},
-	// 			response: 'Subscription status is cancelled',
-	// 		},
-	// 	};
-	// }
-	// if (subStatus === 'Error') {
-	// 	return {
-	// 		detail: event,
-	// 		emailSendAttempt: {
-	// 			status: 'error',
-	// 			payload: {},
-	// 			response: 'Error getting sub status from Zuora',
-	// 		},
-	// 	};
-	// }
-	// return subStatus === 'Active' && !!workEmail;
 }
 
 function formatDate(inputDate: string): string {

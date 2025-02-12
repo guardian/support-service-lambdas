@@ -1,32 +1,26 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { getSubscription } from '@modules/zuora/getSubscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { z } from 'zod';
+import { BigQueryRecordSchema } from '../types';
 
-export const handler = async (event: {
-	item: {
-		firstName: string;
-		nextPaymentDate: string;
-		paymentAmount: number;
-		paymentCurrency: string;
-		paymentFrequency: string;
-		productName: string;
-		sfContactId: string;
-		zuoraSubName: string;
-		workEmail: string;
-	};
-}) => {
+export type SubIsActiveInput = z.infer<typeof BigQueryRecordSchema>;
+
+export const handler = async (event: SubIsActiveInput) => {
+	console.log('Enter lambda. event:', event);
 	try {
-		const subName = event.item.zuoraSubName;
+		const parsedEvent = BigQueryRecordSchema.parse(event);
+		const subName = parsedEvent.zuoraSubName;
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const getSubResponse = await getSubscription(zuoraClient, subName);
 
 		return {
-			...event.item,
+			...parsedEvent,
 			subStatus: getSubResponse.status,
 		};
 	} catch (error) {
 		return {
-			...event.item,
+			...event,
 			subStatus: 'Error',
 			errorDetail:
 				error instanceof Error ? error.message : JSON.stringify(error, null, 2),
