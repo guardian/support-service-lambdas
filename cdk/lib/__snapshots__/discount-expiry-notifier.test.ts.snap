@@ -569,7 +569,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Sub status fetcher map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Expiring discount processor map","Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Get sub status","States":{"Get sub status":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Sub status fetcher map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Expiring discount processor map","Iterator":{"StartAt":"Get sub status","States":{"Get sub status":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -2609,7 +2609,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Sub status fetcher map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Expiring discount processor map","Parameters":{"item.$":"$$.Map.Item.Value"},"Iterator":{"StartAt":"Get sub status","States":{"Get sub status":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Sub status fetcher map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Expiring discount processor map","Iterator":{"StartAt":"Get sub status","States":{"Get sub status":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
