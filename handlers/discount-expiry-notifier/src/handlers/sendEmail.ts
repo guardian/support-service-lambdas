@@ -51,11 +51,12 @@ export const handler = async (event: SendEmailInput) => {
 	};
 	console.log('request: ', request);
 	try {
-		const response = await sendEmail(stageFromEnvironment(), request);
+		console.log('sendEmail() is disabled: ');
+		// const response = await sendEmail(stageFromEnvironment(), request);
 
-		if (response.$metadata.httpStatusCode !== 200) {
-			throw new Error('Failed to send email');
-		}
+		// if (response.$metadata.httpStatusCode !== 200) {
+		// 	throw new Error('Failed to send email');
+		// }
 		return {
 			record: parsedEvent,
 			emailSendEligibility,
