@@ -1,16 +1,30 @@
 import { DataExtensionNames, sendEmail } from '@modules/email/email';
 import { stageFromEnvironment } from '@modules/stage';
-import type { BaseRecordForEmailSend } from '../types';
+import { z } from 'zod';
+import { BigQueryRecordSchema } from '../bigquery';
 
-export const handler = async (event: BaseRecordForEmailSend) => {
+export const InitiateEmailSendInputSchema = BigQueryRecordSchema.extend({
+	subStatus: z.string(),
+}).strict();
+export type InitiateEmailSendInput = z.infer<
+	typeof InitiateEmailSendInputSchema
+>;
+
+export const handler = async (event: InitiateEmailSendInput) => {
+	const parsedEventResult = InitiateEmailSendInputSchema.safeParse(event);
+
+	if (!parsedEventResult.success) {
+		throw new Error('Invalid event data');
+	}
+	const parsedEvent = parsedEventResult.data;
 	const emailSendEligibility = getEmailSendEligibility(
-		event.subStatus,
-		event.workEmail,
+		parsedEvent.subStatus,
+		parsedEvent.workEmail,
 	);
 
 	if (!emailSendEligibility.isEligible) {
 		return {
-			record: event,
+			record: parsedEvent,
 			emailSendAttempt: {
 				status: 'skipped',
 				response: emailSendEligibility.ineligibilityReason,
@@ -18,25 +32,25 @@ export const handler = async (event: BaseRecordForEmailSend) => {
 		};
 	}
 
-	const currencySymbol = getCurrencySymbol(event.paymentCurrency);
+	const currencySymbol = getCurrencySymbol(parsedEvent.paymentCurrency);
 
 	const request = {
 		...{
 			To: {
-				Address: event.workEmail,
+				Address: parsedEvent.workEmail ?? '',
 				ContactAttributes: {
 					SubscriberAttributes: {
-						EmailAddress: event.workEmail,
-						payment_amount: `${currencySymbol}${event.paymentAmount}`,
-						first_name: event.firstName,
-						next_payment_date: formatDate(event.nextPaymentDate),
-						payment_frequency: event.paymentFrequency,
+						EmailAddress: parsedEvent.workEmail ?? '',
+						payment_amount: `${currencySymbol}${parsedEvent.paymentAmount}`,
+						first_name: parsedEvent.firstName,
+						next_payment_date: formatDate(parsedEvent.nextPaymentDate),
+						payment_frequency: parsedEvent.paymentFrequency,
 					},
 				},
 			},
 			DataExtensionName: DataExtensionNames.discountExpiryNotificationEmail,
 		},
-		SfContactId: event.sfContactId,
+		SfContactId: parsedEvent.sfContactId,
 	};
 
 	try {
@@ -46,7 +60,7 @@ export const handler = async (event: BaseRecordForEmailSend) => {
 			throw new Error('Failed to send email');
 		}
 		return {
-			record: event,
+			record: parsedEvent,
 			emailSendEligibility,
 			emailSendAttempt: {
 				request,
@@ -72,7 +86,7 @@ export const handler = async (event: BaseRecordForEmailSend) => {
 
 function getIneligibilityReason(
 	subStatus: string,
-	workEmail: string | undefined,
+	workEmail: string | null | undefined,
 ) {
 	if (subStatus === 'Cancelled') {
 		return 'Subscription status is cancelled';
@@ -87,7 +101,7 @@ function getIneligibilityReason(
 }
 function getEmailSendEligibility(
 	subStatus: string,
-	workEmail: string | undefined,
+	workEmail: string | null | undefined,
 ) {
 	return {
 		isEligible: subStatus === 'Active' && !!workEmail,
