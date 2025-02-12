@@ -1,5 +1,6 @@
-import { DataExtensionNames, sendEmail } from '@modules/email/email';
-import { stageFromEnvironment } from '@modules/stage';
+import { DataExtensionNames } from '@modules/email/email';
+import { prettyPrint } from '@modules/prettyPrint';
+// import { stageFromEnvironment } from '@modules/stage';
 import type { z } from 'zod';
 import { BaseRecordForEmailSendSchema } from '../types';
 
@@ -49,9 +50,10 @@ export const handler = async (event: SendEmailInput) => {
 		},
 		SfContactId: parsedEvent.sfContactId,
 	};
-	console.log('request: ', request);
+
+	console.log(`Sending email message ${prettyPrint(request)}`);
 	try {
-		console.log('sendEmail() is disabled: ');
+		console.log('sendEmail() is disabled');
 		// const response = await sendEmail(stageFromEnvironment(), request);
 
 		// if (response.$metadata.httpStatusCode !== 200) {
