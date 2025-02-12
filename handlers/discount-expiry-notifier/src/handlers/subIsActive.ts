@@ -1,18 +1,15 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { getSubscription } from '@modules/zuora/getSubscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { z } from 'zod';
+import type { z } from 'zod';
 import { BigQueryRecordSchema } from '../bigquery';
 
-export type BigQueryRecord = z.infer<typeof BigQueryRecordSchema>;
-export const SubIsActiveInputSchema = BigQueryRecordSchema.extend({
-	subStatus: z.string(),
-}).strict();
-export type SubIsActiveInput = z.infer<typeof SubIsActiveInputSchema>;
+export type SubIsActiveInput = z.infer<typeof BigQueryRecordSchema>;
 
 export const handler = async (event: SubIsActiveInput) => {
+	console.log('Enter lambda. event:', event);
 	try {
-		const parsedEvent = SubIsActiveInputSchema.parse(event);
+		const parsedEvent = BigQueryRecordSchema.parse(event);
 		const subName = parsedEvent.zuoraSubName;
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const getSubResponse = await getSubscription(zuoraClient, subName);
