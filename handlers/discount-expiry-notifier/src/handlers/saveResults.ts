@@ -3,7 +3,6 @@ import { prettyPrint } from '@modules/prettyPrint';
 import { z } from 'zod';
 import { uploadFileToS3 } from '../s3';
 import {
-	BaseRecordForEmailSendSchema,
 	BigQueryRecordSchema,
 	DiscountProcessingAttemptSchema,
 } from '../types';
@@ -14,7 +13,7 @@ export const SaveResultsInputSchema = z
 		allRecordsFromBigQueryCount: z.number(),
 		allRecordsFromBigQuery: z.array(BigQueryRecordSchema),
 		recordsForEmailSendCount: z.number(),
-		recordsForEmailSend: z.array(BaseRecordForEmailSendSchema),
+		recordsForEmailSend: z.array(BigQueryRecordSchema),
 		discountProcessingAttempts: z.array(DiscountProcessingAttemptSchema),
 	})
 	.strict();
