@@ -3,7 +3,7 @@ import { getIfDefined } from '@modules/nullAndUndefined';
 import { z } from 'zod';
 import { BigQueryResultDataSchema } from '../types';
 
-export const FilterSubsInputSchema = z
+export const FilterRecordsInputSchema = z
 	.object({
 		discountExpiresOnDate: z.string(),
 		allRecordsFromBigQuery: BigQueryResultDataSchema,
@@ -11,11 +11,11 @@ export const FilterSubsInputSchema = z
 	})
 	.strict();
 
-export type FilterSubsInput = z.infer<typeof FilterSubsInputSchema>;
+export type FilterRecordsInput = z.infer<typeof FilterRecordsInputSchema>;
 
-export const handler = async (event: FilterSubsInput) => {
+export const handler = async (event: FilterRecordsInput) => {
 	try {
-		const parsedEventResult = FilterSubsInputSchema.safeParse(event);
+		const parsedEventResult = FilterRecordsInputSchema.safeParse(event);
 
 		if (!parsedEventResult.success) {
 			throw new Error('Invalid event data');
@@ -30,19 +30,19 @@ export const handler = async (event: FilterSubsInput) => {
 		const filterByRegions = FILTER_BY_REGIONS.toLowerCase().split(',');
 
 		const filteredRecords = parsedEvent.allRecordsFromBigQuery.filter(
-			(sub) =>
-				filterByRegions.includes(sub.contactCountry?.toLowerCase() ?? '') ||
+			(record) =>
+				filterByRegions.includes(record.contactCountry?.toLowerCase() ?? '') ||
 				filterByRegions.includes(
-					sub.sfBuyerContactMailingCountry?.toLowerCase() ?? '',
+					record.sfBuyerContactMailingCountry?.toLowerCase() ?? '',
 				) ||
 				filterByRegions.includes(
-					sub.sfBuyerContactOtherCountry?.toLowerCase() ?? '',
+					record.sfBuyerContactOtherCountry?.toLowerCase() ?? '',
 				) ||
 				filterByRegions.includes(
-					sub.sfRecipientContactMailingCountry?.toLowerCase() ?? '',
+					record.sfRecipientContactMailingCountry?.toLowerCase() ?? '',
 				) ||
 				filterByRegions.includes(
-					sub.sfRecipientContactOtherCountry?.toLowerCase() ?? '',
+					record.sfRecipientContactOtherCountry?.toLowerCase() ?? '',
 				),
 		);
 

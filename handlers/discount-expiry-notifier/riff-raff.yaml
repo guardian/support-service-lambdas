@@ -21,7 +21,7 @@ deployments:
       prefixStack: false
       functionNames:
         - discount-expiry-notifier-get-customers-with-expiring-discounts-
-        - discount-expiry-notifier-filter-subs-
+        - discount-expiry-notifier-filter-records-
         - discount-expiry-notifier-get-sub-status-
         - discount-expiry-notifier-initiate-email-send-
         - discount-expiry-notifier-save-results-

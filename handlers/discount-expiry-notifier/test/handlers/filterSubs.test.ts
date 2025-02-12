@@ -1,5 +1,5 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
-import { handler } from '../../src/handlers/filterSubs';
+import { handler } from '../../src/handlers/filterRecords';
 import { testQueryResponse } from '../../src/testQueryResponse';
 
 jest.mock('@modules/nullAndUndefined');
