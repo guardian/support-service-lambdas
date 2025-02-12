@@ -1,5 +1,6 @@
-import { DataExtensionNames, sendEmail } from '@modules/email/email';
-import { stageFromEnvironment } from '@modules/stage';
+// import { DataExtensionNames, sendEmail } from '@modules/email/email';
+import { DataExtensionNames } from '@modules/email/email';
+// import { stageFromEnvironment } from '@modules/stage';
 import type { z } from 'zod';
 import { BaseRecordForEmailSendSchema } from '../types';
 
@@ -49,13 +50,13 @@ export const handler = async (event: SendEmailInput) => {
 		},
 		SfContactId: parsedEvent.sfContactId,
 	};
-
+	console.log('request: ', request);
 	try {
-		const response = await sendEmail(stageFromEnvironment(), request);
+		//const response = await sendEmail(stageFromEnvironment(), request);
 
-		if (response.$metadata.httpStatusCode !== 200) {
-			throw new Error('Failed to send email');
-		}
+		// if (response.$metadata.httpStatusCode !== 200) {
+		// 	throw new Error('Failed to send email');
+		// }
 		return {
 			record: parsedEvent,
 			emailSendEligibility,
