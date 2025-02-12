@@ -69,7 +69,7 @@ export const EmailSendAttemptSchema = z
 		request: EmailSendRequestSchema,
 		response: z.object({
 			status: z.string(),
-			errorDetail: z.string(),
+			errorDetail: z.string().optional(),
 		}),
 	})
 	.strict();
