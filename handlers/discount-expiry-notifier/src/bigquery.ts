@@ -33,7 +33,7 @@ export const runQuery = async (
 	query: string,
 ): Promise<BigQueryRecord[]> => {
 	const bigquery = new BigQuery({
-		projectId: `datatech-platform-${stageFromEnvironment()}`,
+		projectId: `datatech-platform-${stageFromEnvironment().toLowerCase()}`,
 		authClient,
 	});
 
