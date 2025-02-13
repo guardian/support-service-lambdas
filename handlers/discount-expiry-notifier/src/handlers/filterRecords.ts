@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/require-await -- this is required to ensure the lambda returns a value*/
-import { getIfDefined } from '@modules/nullAndUndefined';
+// import { getIfDefined } from '@modules/nullAndUndefined';
 import { z } from 'zod';
 import { BigQueryResultDataSchema } from '../types';
 
@@ -22,12 +22,12 @@ export const handler = async (event: FilterRecordsInput) => {
 		}
 		const parsedEvent = parsedEventResult.data;
 
-		const FILTER_BY_REGIONS = getIfDefined<string>(
-			process.env.FILTER_BY_REGIONS,
-			'FILTER_BY_REGIONS environment variable not set',
-		);
+		// const FILTER_BY_REGIONS = getIfDefined<string>(
+		// 	process.env.FILTER_BY_REGIONS,
+		// 	'FILTER_BY_REGIONS environment variable not set',
+		// );
 
-		const filterByRegions = FILTER_BY_REGIONS.toLowerCase().split(',');
+		// const filterByRegions = FILTER_BY_REGIONS.toLowerCase().split(',');
 
 		// const filteredRecords = parsedEvent.allRecordsFromBigQuery.filter(
 		// 	(record) =>
