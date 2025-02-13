@@ -20,8 +20,8 @@ export const handler = async (event: { discountExpiresOnDate?: string }) => {
 		console.log('result', result);
 		return {
 			discountExpiresOnDate,
-			allRecordsFromBigQueryCount: testQueryResponse.length,
-			allRecordsFromBigQuery: testQueryResponse,
+			allRecordsFromBigQueryCount: result.length,
+			allRecordsFromBigQuery: result,
 		};
 	} catch (error) {
 		console.error('Error:', error);
@@ -84,7 +84,7 @@ WITH expiringDiscounts AS (
 		AND charge.up_to_periods > 1 
 		AND zuoraSub.is_latest_version = TRUE 
 		AND zuoraSub.status = 'Active' 
-		AND DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = '${discountExpiresOnDate}'
+		LIMIT 10
 )
 SELECT 
 	STRING_AGG(DISTINCT contactCountry) as contactCountry,

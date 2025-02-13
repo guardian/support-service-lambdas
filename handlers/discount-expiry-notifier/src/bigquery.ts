@@ -43,5 +43,6 @@ export const runQuery = async (
 	const resultData = BigQueryResultDataSchema.parse(result[0]);
 	console.log('resultData', resultData);
 
-	return testQueryResponse;
+	// return testQueryResponse;
+	return resultData;
 };
