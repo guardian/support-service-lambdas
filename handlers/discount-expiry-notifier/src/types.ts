@@ -31,6 +31,7 @@ export const BigQueryResultDataSchema = z.array(BigQueryRecordSchema);
 
 export const BaseRecordForEmailSendSchema = BigQueryRecordSchema.extend({
 	subStatus: z.string(),
+	errorDetail: z.string().optional(),
 }).strict();
 export type BaseRecordForEmailSend = z.infer<
 	typeof BaseRecordForEmailSendSchema
