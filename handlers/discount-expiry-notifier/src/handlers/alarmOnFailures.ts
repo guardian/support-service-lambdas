@@ -48,7 +48,7 @@ const failuresOccurred = async (
 	return (
 		s3UploadAttemptStatus === 'error' ||
 		discountProcessingAttempts.some(
-			(attempt) => attempt.emailSendAttempt.response.status === 'skipped',
+			(attempt) => attempt.emailSendAttempt.response?.status === 'skipped',
 		)
 	);
 };
