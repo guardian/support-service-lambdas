@@ -86,7 +86,7 @@ WITH expiringDiscounts AS (
 		AND charge.up_to_periods > 1 
 		AND zuoraSub.is_latest_version = TRUE 
 		AND zuoraSub.status = 'Active' 
-		LIMIT 10
+		LIMIT 100
 )
 SELECT 
 	STRING_AGG(DISTINCT contactCountry) as contactCountry,
