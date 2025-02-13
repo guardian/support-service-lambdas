@@ -29,22 +29,23 @@ export const handler = async (event: FilterRecordsInput) => {
 
 		const filterByRegions = FILTER_BY_REGIONS.toLowerCase().split(',');
 
-		const filteredRecords = parsedEvent.allRecordsFromBigQuery.filter(
-			(record) =>
-				filterByRegions.includes(record.contactCountry?.toLowerCase() ?? '') ||
-				filterByRegions.includes(
-					record.sfBuyerContactMailingCountry?.toLowerCase() ?? '',
-				) ||
-				filterByRegions.includes(
-					record.sfBuyerContactOtherCountry?.toLowerCase() ?? '',
-				) ||
-				filterByRegions.includes(
-					record.sfRecipientContactMailingCountry?.toLowerCase() ?? '',
-				) ||
-				filterByRegions.includes(
-					record.sfRecipientContactOtherCountry?.toLowerCase() ?? '',
-				),
-		);
+		// const filteredRecords = parsedEvent.allRecordsFromBigQuery.filter(
+		// 	(record) =>
+		// 		filterByRegions.includes(record.contactCountry?.toLowerCase() ?? '') ||
+		// 		filterByRegions.includes(
+		// 			record.sfBuyerContactMailingCountry?.toLowerCase() ?? '',
+		// 		) ||
+		// 		filterByRegions.includes(
+		// 			record.sfBuyerContactOtherCountry?.toLowerCase() ?? '',
+		// 		) ||
+		// 		filterByRegions.includes(
+		// 			record.sfRecipientContactMailingCountry?.toLowerCase() ?? '',
+		// 		) ||
+		// 		filterByRegions.includes(
+		// 			record.sfRecipientContactOtherCountry?.toLowerCase() ?? '',
+		// 		),
+		// );
+		const filteredRecords = parsedEvent.allRecordsFromBigQuery;
 
 		return {
 			...parsedEvent,
