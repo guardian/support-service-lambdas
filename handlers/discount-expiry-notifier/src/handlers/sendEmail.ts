@@ -23,7 +23,9 @@ export const handler = async (event: SendEmailInput) => {
 			record: parsedEvent,
 			emailSendEligibility,
 			emailSendAttempt: {
-				status: 'skipped',
+				response: {
+					status: 'skipped',
+				},
 			},
 		};
 	}
