@@ -66,11 +66,13 @@ export type EmailSendRequest = z.infer<typeof EmailSendRequestSchema>;
 
 export const EmailSendAttemptSchema = z
 	.object({
-		request: EmailSendRequestSchema,
-		response: z.object({
-			status: z.string(),
-			errorDetail: z.string().optional(),
-		}),
+		request: EmailSendRequestSchema.optional(),
+		response: z
+			.object({
+				status: z.string(),
+				errorDetail: z.string().optional(),
+			})
+			.optional(),
 	})
 	.strict();
 export type EmailSendAttempt = z.infer<typeof EmailSendAttemptSchema>;

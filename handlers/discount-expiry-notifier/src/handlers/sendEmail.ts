@@ -21,9 +21,9 @@ export const handler = async (event: SendEmailInput) => {
 	if (!emailSendEligibility.isEligible) {
 		return {
 			record: parsedEvent,
+			emailSendEligibility,
 			emailSendAttempt: {
 				status: 'skipped',
-				response: emailSendEligibility.ineligibilityReason,
 			},
 		};
 	}
