@@ -12,7 +12,7 @@ export const handler = async (event: SubIsActiveInput) => {
 		const parsedEvent = BigQueryRecordSchema.parse(event);
 		const subName = parsedEvent.zuoraSubName;
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
-		const getSubResponse = await getSubscription(zuoraClient, subName);
+		const getSubResponse = await getSubscription(zuoraClient, subName + '111');
 
 		return {
 			...parsedEvent,
