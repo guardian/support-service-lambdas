@@ -5,7 +5,7 @@ import type {
 	ExternalAccountClientOptions,
 } from 'google-auth-library';
 import { ExternalAccountClient } from 'google-auth-library';
-import { testQueryResponse } from './testQueryResponse';
+// import { testQueryResponse } from './testQueryResponse';
 import { BigQueryResultDataSchema } from './types';
 import type { BigQueryRecord } from './types';
 
