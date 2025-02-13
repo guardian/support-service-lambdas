@@ -23,7 +23,7 @@ export const testQueryResponse = [
 		paymentFrequency: 'Month',
 		productName: 'Supporter Plus',
 		sfContactId: '0039E00001HwhM9QAJ',
-		zuoraSubName: 'A-S00886159', // Active subscription in prod
+		zuoraSubName: 'A-S00886159', // Active subscription in dev
 		workEmail: 'graham.hopgood@guardian.co.uk',
 		contactCountry: 'United States',
 		sfBuyerContactMailingCountry: 'United States',
