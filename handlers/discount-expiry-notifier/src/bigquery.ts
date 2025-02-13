@@ -43,5 +43,10 @@ export const runQuery = async (
 	const resultData = BigQueryResultDataSchema.parse(result[0]);
 	console.log('resultData', resultData);
 
-	return testQueryResponse;
+	console.log('stageFromEnvironment()', stageFromEnvironment());
+	const dataToUse =
+		stageFromEnvironment().toLowerCase() === 'prod'
+			? resultData
+			: testQueryResponse;
+	return dataToUse;
 };
