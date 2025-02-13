@@ -2,7 +2,7 @@ import { getIfDefined } from '@modules/nullAndUndefined';
 import { stageFromEnvironment } from '@modules/stage';
 import { buildAuthClient, runQuery } from '../bigquery';
 import { getSSMParam } from '../ssm';
-import { testQueryResponse } from '../testQueryResponse';
+// import { testQueryResponse } from '../testQueryResponse';
 
 //to manually run the state machine for a specified discount expiry date, enter {"discountExpiresOnDate":"2025-11-23"} in aws console
 export const handler = async (event: { discountExpiresOnDate?: string }) => {
@@ -15,7 +15,8 @@ export const handler = async (event: { discountExpiresOnDate?: string }) => {
 		const discountExpiresOnDate = event.discountExpiresOnDate
 			? event.discountExpiresOnDate.substring(0, 10)
 			: addDays(new Date(), daysUntilDiscountExpiryDate());
-		const query = getQuery(discountExpiresOnDate);
+		// const query = getQuery(discountExpiresOnDate);
+		const query = getQuery();
 		const result = await runQuery(authClient, query);
 		console.log('result', result);
 		return {
@@ -43,7 +44,8 @@ const daysUntilDiscountExpiryDate = (): number => {
 	);
 };
 
-const getQuery = (discountExpiresOnDate: string): string =>
+// const getQuery = (discountExpiresOnDate: string): string =>
+const getQuery = (): string =>
 	`
 WITH expiringDiscounts AS (
 	SELECT
