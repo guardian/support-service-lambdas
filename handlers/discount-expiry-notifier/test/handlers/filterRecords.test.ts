@@ -1,6 +1,6 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { handler } from '../../src/handlers/filterRecords';
-import { testQueryResponse } from '../../src/testQueryResponse';
+// import { testQueryResponse } from '../../src/testQueryResponse';
 
 jest.mock('@modules/nullAndUndefined');
 
