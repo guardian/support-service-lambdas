@@ -1,4 +1,5 @@
 import { BigQuery } from '@google-cloud/bigquery';
+import { stageFromEnvironment } from '@modules/stage';
 import type {
 	BaseExternalAccountClient,
 	ExternalAccountClientOptions,
@@ -32,7 +33,7 @@ export const runQuery = async (
 	query: string,
 ): Promise<BigQueryRecord[]> => {
 	const bigquery = new BigQuery({
-		projectId: `datatech-platform-code`,
+		projectId: `datatech-platform-${stageFromEnvironment().toLowerCase()}`,
 		authClient,
 	});
 
@@ -42,5 +43,9 @@ export const runQuery = async (
 	const resultData = BigQueryResultDataSchema.parse(result[0]);
 	console.log('resultData', resultData);
 
-	return testQueryResponse;
+	const dataToUse =
+		stageFromEnvironment().toLowerCase() === 'prod'
+			? resultData
+			: testQueryResponse;
+	return dataToUse;
 };

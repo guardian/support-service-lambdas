@@ -31,6 +31,7 @@ export const BigQueryResultDataSchema = z.array(BigQueryRecordSchema);
 
 export const BaseRecordForEmailSendSchema = BigQueryRecordSchema.extend({
 	subStatus: z.string(),
+	errorDetail: z.string().optional(),
 }).strict();
 export type BaseRecordForEmailSend = z.infer<
 	typeof BaseRecordForEmailSendSchema
@@ -66,11 +67,13 @@ export type EmailSendRequest = z.infer<typeof EmailSendRequestSchema>;
 
 export const EmailSendAttemptSchema = z
 	.object({
-		request: EmailSendRequestSchema,
-		response: z.object({
-			status: z.string(),
-			errorDetail: z.string(),
-		}),
+		request: EmailSendRequestSchema.optional(),
+		response: z
+			.object({
+				status: z.string(),
+				errorDetail: z.string().optional(),
+			})
+			.optional(),
 	})
 	.strict();
 export type EmailSendAttempt = z.infer<typeof EmailSendAttemptSchema>;

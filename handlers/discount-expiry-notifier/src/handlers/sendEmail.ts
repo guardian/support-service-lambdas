@@ -8,7 +8,6 @@ export type SendEmailInput = z.infer<typeof BaseRecordForEmailSendSchema>;
 
 export const handler = async (event: SendEmailInput) => {
 	const parsedEventResult = SendEmailInputSchema.safeParse(event);
-
 	if (!parsedEventResult.success) {
 		throw new Error('Invalid event data');
 	}
@@ -21,9 +20,11 @@ export const handler = async (event: SendEmailInput) => {
 	if (!emailSendEligibility.isEligible) {
 		return {
 			record: parsedEvent,
+			emailSendEligibility,
 			emailSendAttempt: {
-				status: 'skipped',
-				response: emailSendEligibility.ineligibilityReason,
+				response: {
+					status: 'skipped',
+				},
 			},
 		};
 	}

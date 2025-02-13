@@ -7,7 +7,6 @@ import { BigQueryRecordSchema } from '../types';
 export type SubIsActiveInput = z.infer<typeof BigQueryRecordSchema>;
 
 export const handler = async (event: SubIsActiveInput) => {
-	console.log('Enter lambda. event:', event);
 	try {
 		const parsedEvent = BigQueryRecordSchema.parse(event);
 		const subName = parsedEvent.zuoraSubName;

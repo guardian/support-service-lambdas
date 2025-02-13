@@ -2,7 +2,6 @@ import { getIfDefined } from '@modules/nullAndUndefined';
 import { z } from 'zod';
 import { uploadFileToS3 } from '../s3';
 import {
-	BaseRecordForEmailSendSchema,
 	BigQueryRecordSchema,
 	DiscountProcessingAttemptSchema,
 } from '../types';
@@ -13,7 +12,7 @@ export const SaveResultsInputSchema = z
 		allRecordsFromBigQueryCount: z.number(),
 		allRecordsFromBigQuery: z.array(BigQueryRecordSchema),
 		recordsForEmailSendCount: z.number(),
-		recordsForEmailSend: z.array(BaseRecordForEmailSendSchema),
+		recordsForEmailSend: z.array(BigQueryRecordSchema),
 		discountProcessingAttempts: z.array(DiscountProcessingAttemptSchema),
 	})
 	.strict();
@@ -22,7 +21,6 @@ export type SaveResultsInput = z.infer<typeof SaveResultsInputSchema>;
 export const handler = async (event: SaveResultsInput) => {
 	try {
 		const parsedEventResult = SaveResultsInputSchema.safeParse(event);
-
 		if (!parsedEventResult.success) {
 			throw new Error('Invalid event data');
 		}
@@ -53,7 +51,6 @@ export const handler = async (event: SaveResultsInput) => {
 		return {
 			...parsedEvent,
 			s3UploadAttemptStatus: 'success',
-			s3UploadAttempt,
 			filePath,
 		};
 	} catch (error) {
