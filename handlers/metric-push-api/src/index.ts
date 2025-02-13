@@ -21,10 +21,9 @@ const router = new Router([
 		handler: async (event: APIGatewayProxyEvent) => {
 			console.log(`Input is ${JSON.stringify(event)}`);
 
-			if (
-				event.headers.referer &&
-				validReferers.includes(event.headers.referer)
-			) {
+			const referer = event.headers.referer ?? event.headers.Referer;
+
+			if (referer && validReferers.includes(referer)) {
 				await putMetric('metric-push-api-client-side-error');
 				return Promise.resolve(buildResponse(201));
 			} else {
