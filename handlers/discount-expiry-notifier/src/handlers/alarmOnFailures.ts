@@ -35,10 +35,13 @@ export const handler = async (event: AlarmOnFailuresInput) => {
 				parsedEvent.s3UploadAttemptStatus,
 			)
 		) {
-			throw new Error('Errors occurred. Check logs.');
+			throw new Error('Failure occurred. Check logs.');
 		}
 	} catch (error) {
 		console.log('Error occurred:', error);
+		throw new Error(
+			error instanceof Error ? error.message : JSON.stringify(error, null, 2),
+		);
 	}
 	return {};
 };
