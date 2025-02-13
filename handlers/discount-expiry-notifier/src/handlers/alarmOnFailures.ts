@@ -15,6 +15,8 @@ export const AlarmOnFailuresInputSchema = z
 		recordsForEmailSend: z.array(BigQueryRecordSchema),
 		discountProcessingAttempts: z.array(DiscountProcessingAttemptSchema),
 		s3UploadAttemptStatus: z.string(),
+		filePath: z.string().optional(),
+		errorDetail: z.string().optional(),
 	})
 	.strict();
 export type AlarmOnFailuresInput = z.infer<typeof AlarmOnFailuresInputSchema>;

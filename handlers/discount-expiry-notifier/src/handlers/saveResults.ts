@@ -51,7 +51,6 @@ export const handler = async (event: SaveResultsInput) => {
 		return {
 			...parsedEvent,
 			s3UploadAttemptStatus: 'success',
-			s3UploadAttempt,
 			filePath,
 		};
 	} catch (error) {
