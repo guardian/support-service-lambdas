@@ -85,8 +85,6 @@ WITH expiringDiscounts AS (
         AND zuoraSub.is_latest_version = TRUE 
         AND zuoraSub.status = 'Active' 
 		AND DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = '${discountExpiresOnDate}'
-        -- AND zuoraSub.name = 'A-S02291785'
-        -- Limit 10
 )
 SELECT 
     STRING_AGG(DISTINCT contactCountry) as contactCountry,
@@ -103,7 +101,6 @@ SELECT
     STRING_AGG(DISTINCT sfBuyerContactOtherCountry) as sfBuyerContactOtherCountry,
     STRING_AGG(DISTINCT sfRecipientContactMailingCountry) as sfRecipientContactMailingCountry,
     STRING_AGG(DISTINCT sfRecipientContactOtherCountry) as sfRecipientContactOtherCountry,
-    STRING_AGG(DISTINCT rate_plan.amendment_type) as amendment_types
 FROM
     expiringDiscounts exp
 INNER JOIN datatech-fivetran.zuora.rate_plan_charge_tier tier 

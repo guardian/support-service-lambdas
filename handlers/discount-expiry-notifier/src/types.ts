@@ -23,7 +23,6 @@ export const BigQueryRecordSchema = z
 		sfBuyerContactOtherCountry: z.string().nullable(),
 		sfRecipientContactMailingCountry: z.string().nullable(),
 		sfRecipientContactOtherCountry: z.string().nullable(),
-		amendment_types: z.string().nullable(),
 	})
 	.strict();
 export type BigQueryRecord = z.infer<typeof BigQueryRecordSchema>;
