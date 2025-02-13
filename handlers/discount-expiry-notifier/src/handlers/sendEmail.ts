@@ -51,7 +51,6 @@ export const handler = async (event: SendEmailInput) => {
 	};
 
 	try {
-		console.log('sendEmail() is ENABLED');
 		const response = await sendEmail(stageFromEnvironment(), request);
 
 		if (response.$metadata.httpStatusCode !== 200) {
