@@ -1,0 +1,21 @@
+name: Snyk growth team
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  security:
+    uses: guardian/.github/.github/workflows/sbt-node-snyk.yml@main
+    with:
+      DEBUG: true
+      ORG: the-guardian-cuu
+      SKIP_NODE: true
+#      EXCLUDE: handlers
+      PROJECT_FILE: handlers/alarms-handler/package.json
+      JAVA_VERSION: 21
+    secrets:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
