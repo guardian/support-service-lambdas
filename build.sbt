@@ -309,7 +309,10 @@ lazy val `zuora-models` = library(
   scala3Settings,
 )
   .settings(
-    libraryDependencies += "com.gu" %% "support-internationalisation" % "0.16" exclude ("com.typesafe.scala-logging", "scala-logging_2.13"),
+    libraryDependencies += "com.gu" %% "support-internationalisation" % "0.16" exclude (
+      "com.typesafe.scala-logging",
+      "scala-logging_2.13",
+    ),
   )
 
 lazy val `credit-processor` = library(
@@ -630,7 +633,10 @@ lazy val `product-move-api` = lambdaProject(
     ) exclude ("com.typesafe.scala-logging", "scala-logging_2.13"),
     awsEvents,
     awsLambda,
-    "com.softwaremill.sttp.client3" %% "zio" % sttpVersion exclude ("org.scala-lang.modules", "scala-collection-compat_2.13"),
+    "com.softwaremill.sttp.client3" %% "zio" % sttpVersion exclude (
+      "org.scala-lang.modules",
+      "scala-collection-compat_2.13",
+    ),
     awsS3,
     awsSQS,
     scalatest,

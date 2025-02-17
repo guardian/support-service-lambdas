@@ -3,7 +3,8 @@ package com.gu.util.resthttp
 import com.gu.util.resthttp.Types.{ClientFailableOp, ClientFailure, ClientSuccess}
 import com.typesafe.scalalogging.LazyLogging
 
-object ClientFailableOpLogging extends LazyLogging { // in future maybe put logging into a context so the messages stack together like a stack trace
+object ClientFailableOpLogging
+    extends LazyLogging { // in future maybe put logging into a context so the messages stack together like a stack trace
 
   implicit class LogImplicit2[A](apiGatewayOp: ClientFailableOp[A]) {
 

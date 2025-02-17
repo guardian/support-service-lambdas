@@ -31,11 +31,13 @@ object Handler extends LazyLogging {
       imovo <- ImovoClient(sttpBackend, config.imovo)
         .leftMap(e => DigitalVoucherSuspendFailure(s"Failed to create Imovo client: $e"))
       suspensions <- fetchSuspensionsToBeProcessed(salesforce).leftWiden[Failure]
-      suspensionResults <- EitherT.right[Failure].apply(
-        suspensions.traverse(suspension =>
-          sendSuspensionToDigitalVoucherApi(salesforce, imovo, LocalDateTime.now)(suspension).value
+      suspensionResults <- EitherT
+        .right[Failure]
+        .apply(
+          suspensions.traverse(suspension =>
+            sendSuspensionToDigitalVoucherApi(salesforce, imovo, LocalDateTime.now)(suspension).value,
+          ),
         )
-      )
       maybeFailures = suspensionResults.collect { case Left(failure) => failure } match {
         case Nil => None
         case failures => Some[Failure](CompositeFailure(failures))
