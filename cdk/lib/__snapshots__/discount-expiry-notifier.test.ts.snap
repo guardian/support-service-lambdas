@@ -580,18 +580,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.recordsForEmailSend","MaxConcurrency":10},"Expiring discount processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Save results","Iterator":{"StartAt":"Send email","States":{"Send email":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
-              {
-                "Fn::GetAtt": [
-                  "sendemaillambda0F1C0CA1",
-                  "Arn",
-                ],
-              },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.discountProcessingAttempts","MaxConcurrency":10},"Save results":{"Next":"Alarm on errors","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.recordsForEmailSend","MaxConcurrency":10},"Expiring discount processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Save results","Iterator":{"StartAt":"test pass","States":{"test pass":{"Type":"Pass","End":true}}},"ItemsPath":"$.discountProcessingAttempts","MaxConcurrency":10},"Save results":{"Next":"Alarm on errors","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -788,32 +777,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                       {
                         "Fn::GetAtt": [
                           "alarmonfailureslambda88ECE430",
-                          "Arn",
-                        ],
-                      },
-                      ":*",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": "lambda:InvokeFunction",
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "sendemaillambda0F1C0CA1",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "sendemaillambda0F1C0CA1",
                           "Arn",
                         ],
                       },
@@ -2620,18 +2583,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.recordsForEmailSend","MaxConcurrency":10},"Expiring discount processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Save results","Iterator":{"StartAt":"Send email","States":{"Send email":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
-              {
-                "Fn::GetAtt": [
-                  "sendemaillambda0F1C0CA1",
-                  "Arn",
-                ],
-              },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.discountProcessingAttempts","MaxConcurrency":10},"Save results":{"Next":"Alarm on errors","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.recordsForEmailSend","MaxConcurrency":10},"Expiring discount processor map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Save results","Iterator":{"StartAt":"test pass","States":{"test pass":{"Type":"Pass","End":true}}},"ItemsPath":"$.discountProcessingAttempts","MaxConcurrency":10},"Save results":{"Next":"Alarm on errors","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -2828,32 +2780,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                       {
                         "Fn::GetAtt": [
                           "alarmonfailureslambda88ECE430",
-                          "Arn",
-                        ],
-                      },
-                      ":*",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": "lambda:InvokeFunction",
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "sendemaillambda0F1C0CA1",
-                    "Arn",
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "sendemaillambda0F1C0CA1",
                           "Arn",
                         ],
                       },
