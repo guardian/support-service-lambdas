@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  micromatch>braces: ^3.0.3
+
 importers:
 
   .:
