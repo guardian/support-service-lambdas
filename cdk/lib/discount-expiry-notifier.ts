@@ -24,6 +24,7 @@ import {
 	DefinitionBody,
 	JsonPath,
 	Map,
+	Pass,
 	StateMachine,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
@@ -222,10 +223,10 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
-		const sendEmailLambdaTask = new LambdaInvoke(this, 'Send email', {
-			lambdaFunction: sendEmailLambda,
-			outputPath: '$.Payload',
-		});
+		// const sendEmailLambdaTask = new LambdaInvoke(this, 'Send email', {
+		// 	lambdaFunction: sendEmailLambda,
+		// 	outputPath: '$.Payload',
+		// });
 
 		const subStatusFetcherMap = new Map(this, 'Sub status fetcher map', {
 			maxConcurrency: 10,
@@ -244,7 +245,7 @@ export class DiscountExpiryNotifier extends GuStack {
 		);
 
 		subStatusFetcherMap.iterator(getSubStatusLambdaTask);
-		expiringDiscountProcessorMap.iterator(sendEmailLambdaTask);
+		expiringDiscountProcessorMap.iterator(new Pass(this, 'test pass'));
 
 		const definitionBody = DefinitionBody.fromChainable(
 			getExpiringDiscountsLambdaTask
