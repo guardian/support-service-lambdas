@@ -66,9 +66,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 		// contributions-platform
 		'fixation',
 
-		// members-data-api
-		'membership-attribute-service',
-
 		// zuora-finance
 		'zuora-creditor',
 
@@ -120,6 +117,9 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'identity-retention',
 		'zuora-retention', //https://github.com/guardian/zuora-retention
 		'zuora-salesforce-link-remover',
+
+		// members-data-api
+		'membership-attribute-service',
 
 		// misc
 		'discount-expiry-notifier',
