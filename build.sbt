@@ -1,7 +1,7 @@
 import Dependencies.*
 
 val scala2Settings = Seq(
-  ThisBuild / scalaVersion := "2.13.15",
+  ThisBuild / scalaVersion := "2.13.16",
   version := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
@@ -25,7 +25,7 @@ val scala2Settings = Seq(
 )
 
 val scala3Settings = Seq(
-  scalaVersion := "3.3.4",
+  scalaVersion := "3.3.5",
   version := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
@@ -309,7 +309,10 @@ lazy val `zuora-models` = library(
   scala3Settings,
 )
   .settings(
-    libraryDependencies += "com.gu" %% "support-internationalisation" % "0.16" exclude ("com.typesafe.scala-logging", "scala-logging_2.13"),
+    libraryDependencies += "com.gu" %% "support-internationalisation" % "0.16" exclude (
+      "com.typesafe.scala-logging",
+      "scala-logging_2.13",
+    ),
   )
 
 lazy val `credit-processor` = library(
@@ -630,12 +633,15 @@ lazy val `product-move-api` = lambdaProject(
     ) exclude ("com.typesafe.scala-logging", "scala-logging_2.13"),
     awsEvents,
     awsLambda,
-    "com.softwaremill.sttp.client3" %% "zio" % sttpVersion exclude ("org.scala-lang.modules", "scala-collection-compat_2.13"),
+    "com.softwaremill.sttp.client3" %% "zio" % sttpVersion exclude (
+      "org.scala-lang.modules",
+      "scala-collection-compat_2.13",
+    ),
     awsS3,
     awsSQS,
     scalatest,
     "com.softwaremill.sttp.client3" %% "zio-json" % sttpVersion,
-    "dev.zio" %% "zio-logging-slf4j" % "2.1.17",
+    "dev.zio" %% "zio-logging-slf4j" % "2.4.0",
     "dev.zio" %% "zio-test" % zio2Version % Test,
     "dev.zio" %% "zio-test-sbt" % zio2Version % Test,
     "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,

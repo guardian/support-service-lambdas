@@ -7,12 +7,12 @@ import sbtassembly.PathList
 object Dependencies {
   val awsSdkVersion = "2.27.24"
   val circeVersion = "0.14.10"
-  val sttpVersion = "3.10.1"
-  val http4sVersion = "0.22.15" // keep version 0.22.15, later versions pull in cats effect 3 which is not compatible
-  val catsVersion = "2.12.0"
-  val catsEffectVersion = "2.5.5"
+  val sttpVersion = "3.10.3"
+  val http4sVersion = "0.23.30" // keep version 0.23.30, later versions pull in cats effect 3 which is not compatible
+  val catsVersion = "2.13.0"
+  val catsEffectVersion = "3.5.7"
   val logging: Seq[ModuleID] = Seq(
-    "ch.qos.logback" % "logback-classic" % "1.5.11",
+    "ch.qos.logback" % "logback-classic" % "1.5.16",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
   )
 
@@ -38,7 +38,7 @@ object Dependencies {
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
   // GCP
-  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.43.1"
+  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.43.3"
 
   // Cats
   val catsCore = "org.typelevel" %% "cats-core" % catsVersion
@@ -59,7 +59,7 @@ object Dependencies {
 
   // Override to fix this vulnerability https://github.com/guardian/support-service-lambdas/security/dependabot/24
   // This is a transitive dependency of async-http-client-backend-cats-ce2 so when we upgrade that we can remove this
-  val asyncHttpClientOverride = "org.asynchttpclient" % "async-http-client" % "2.12.4"
+  val asyncHttpClientOverride = "org.asynchttpclient" % "async-http-client" % "3.0.1"
   val sttpAsyncHttpClientBackendCats =
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats-ce2" % sttpVersion
 
@@ -80,14 +80,14 @@ object Dependencies {
     "com.gu" %% "support-internationalisation" % "0.13"
 
   // Other
-  val zio = "dev.zio" %% "zio" % "1.0.17"
-  val zio2Version = "2.0.22"
+  val zio = "dev.zio" %% "zio" % "1.0.18"
+  val zio2Version = "2.1.15"
   val zio2 = "dev.zio" %% "zio" % zio2Version
-  val tapirVersion = "1.9.11"
+  val tapirVersion = "1.11.14"
   val enumeratum = "com.beachape" %% "enumeratum" % "1.7.5"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.3.0"
-  val stripe = "com.stripe" % "stripe-java" % "22.31.0"
-  val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4"
+  val stripe = "com.stripe" % "stripe-java" % "28.3.1"
+  val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0"
   val commonsIO = "commons-io" % "commons-io" % "2.18.0"
   val jodaTime = "joda-time" % "joda-time" % "2.13.1"
   val typesafeConfig = "com.typesafe" % "config" % "1.4.3"
@@ -95,11 +95,11 @@ object Dependencies {
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest-should" % "0.9.0" % Test
   val scalatest = "org.scalatest" %% "scalatest" % "3.2.19" % Test
-  val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.17.1" % Test
-  val scalaMock = "org.scalamock" %% "scalamock" % "5.2.0" % Test
-  val mockito = "org.mockito" % "mockito-core" % "5.14.1" % Test
+  val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.18.1" % Test
+  val scalaMock = "org.scalamock" %% "scalamock" % "6.2.0" % Test
+  val mockito = "org.mockito" % "mockito-core" % "5.14.2" % Test
   // play-json still uses an old version of jackson-core which has a vulnerability - https://security.snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-7569538
-  val jacksonVersion = "2.17.2"
+  val jacksonVersion = "2.17.3"
 
   val jacksonDependencies: Seq[ModuleID] = Seq(
     "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
