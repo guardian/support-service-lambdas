@@ -31,6 +31,8 @@ export const handler = async (event: GetPaymentAmountInput) => {
 			...parsedEvent,
 		};
 	} catch (error) {
+		console.log('error:', error);
+
 		return {
 			...event,
 			subStatus: 'Error',
