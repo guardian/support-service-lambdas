@@ -41,7 +41,7 @@ export const handler = async (event: SendEmailInput) => {
 						payment_amount: `${currencySymbol}${parsedEvent.paymentAmount}`,
 						first_name: parsedEvent.firstName,
 						next_payment_date: formatDate(parsedEvent.nextPaymentDate),
-						payment_frequency: parsedEvent.paymentFrequency,
+						payment_frequency: parsedEvent.paymentFrequency.toLowerCase(),
 					},
 				},
 			},
