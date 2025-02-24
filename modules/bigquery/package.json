@@ -1,0 +1,23 @@
+{
+	"name": "bigquery",
+	"version": "1.0.0",
+	"scripts": {
+		"test": "jest --group=-integration",
+		"it-test": "jest --group=integration",
+		"check-formatting": "prettier --check **.ts",
+		"fix-formatting": "prettier --write **.ts",
+		"lint": "eslint src/**/*.ts test/**/*.ts"
+	},
+	"dependencies": {
+		"@aws-sdk/client-s3": "3.744.0",
+		"@google-cloud/bigquery": "^7.9.1",
+		"aws-sdk": "^2.1692.0",
+		"google-auth-library": "^9.15.0",
+		"zod": "^3.23.8"
+	},
+	"devDependencies": {
+		"@types/jest": "^29.5.14",
+		"jest": "^29.7.0",
+		"ts-jest": "^29.2.5"
+	}
+}
