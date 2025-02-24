@@ -125,6 +125,9 @@ importers:
       aws-sdk:
         specifier: ^2.1692.0
         version: 2.1692.0
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.13
       google-auth-library:
         specifier: ^9.15.0
         version: 9.15.0
