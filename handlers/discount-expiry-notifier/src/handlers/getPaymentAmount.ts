@@ -3,8 +3,7 @@ import { getBillingPreview } from '@modules/zuora/billingPreview';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import type { z } from 'zod';
-import { BigQueryRecordSchema } from '../types';
-import type { BaseRecordForEmailSendSchema } from '../types';
+import { BaseRecordForEmailSendSchema } from '../types';
 
 export type GetPaymentAmountInput = z.infer<
 	typeof BaseRecordForEmailSendSchema
@@ -12,10 +11,16 @@ export type GetPaymentAmountInput = z.infer<
 
 export const handler = async (event: GetPaymentAmountInput) => {
 	try {
-		const parsedEvent = BigQueryRecordSchema.parse(event);
+		console.log('event:', event);
+
+		const parsedEvent = BaseRecordForEmailSendSchema.parse(event);
+		console.log('parsedEvent:', parsedEvent);
 		const billingAccountId = parsedEvent.billingAccountId;
+		console.log('billingAccountId:', billingAccountId);
 		const nextPaymentDate = parsedEvent.nextPaymentDate;
+		console.log('nextPaymentDate:', nextPaymentDate);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
+		console.log('zuoraClient:', zuoraClient);
 		const getBillingPreviewResponse = await getBillingPreview(
 			zuoraClient,
 			dayjs(nextPaymentDate),
