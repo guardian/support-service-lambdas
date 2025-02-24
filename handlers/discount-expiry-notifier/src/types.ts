@@ -13,7 +13,7 @@ export const BigQueryRecordSchema = z
 			.transform((val) => (typeof val === 'string' ? val : val.value)),
 		paymentAmount: z.number().transform((val) => parseFloat(val.toFixed(2))),
 		paymentCurrency: z.string(),
-		paymentFrequency: z.string().toLowerCase(),
+		paymentFrequency: z.string(),
 		productName: z.string(),
 		sfContactId: z.string(),
 		zuoraSubName: z.string(),
