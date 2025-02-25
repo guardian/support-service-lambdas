@@ -19,7 +19,7 @@ export const handler = async (event: GetPaymentAmountInput) => {
 			dayjs(parsedEvent.nextPaymentDate),
 			parsedEvent.billingAccountId,
 		);
-		const invoiceItemsForSubscription = filterRecordsBySubscriptionName(
+		const invoiceItemsForSubscription = filterRecords(
 			getBillingPreviewResponse.invoiceItems,
 			parsedEvent.zuoraSubName,
 			parsedEvent.nextPaymentDate,
@@ -42,7 +42,7 @@ export const handler = async (event: GetPaymentAmountInput) => {
 	}
 };
 
-const filterRecordsBySubscriptionName = (
+const filterRecords = (
 	invoiceItems: InvoiceItem[],
 	subscriptionName: string,
 	nextPaymentDate: string,
