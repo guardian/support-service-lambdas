@@ -51,11 +51,6 @@ export const handler = async (event: SendEmailInput) => {
 	};
 
 	try {
-		const response = await sendEmail(stageFromEnvironment(), request);
-
-		if (response.$metadata.httpStatusCode !== 200) {
-			throw new Error('Failed to send email');
-		}
 		return {
 			record: parsedEvent,
 			emailSendEligibility,
