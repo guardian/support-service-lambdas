@@ -23,6 +23,7 @@ describe('filterSubs handler', () => {
 			allRecordsFromBigQueryCount: 3,
 			allRecordsFromBigQuery: [
 				{
+					billingAccountId: '2c92a0fe70cd67e30170cedc1156701d',
 					firstName: 'John',
 					nextPaymentDate: '2024-04-21',
 					paymentAmount: 100,
@@ -39,6 +40,7 @@ describe('filterSubs handler', () => {
 					sfRecipientContactOtherCountry: 'Argentina',
 				},
 				{
+					billingAccountId: '2c92a0fe70cd67e30170cedc1156701e',
 					firstName: 'Jane',
 					nextPaymentDate: '2024-05-21',
 					paymentAmount: 200,
@@ -55,6 +57,7 @@ describe('filterSubs handler', () => {
 					sfRecipientContactOtherCountry: 'Argentina',
 				},
 				{
+					billingAccountId: '2c92a0fe70cd67e30170cedc1156701f',
 					firstName: 'Doe',
 					nextPaymentDate: '2024-06-21',
 					paymentAmount: 300,

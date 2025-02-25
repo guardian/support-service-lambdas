@@ -1,30 +1,29 @@
 import { z } from 'zod';
 
-export const BigQueryRecordSchema = z
-	.object({
-		firstName: z.string(),
-		nextPaymentDate: z
-			.union([
-				z.object({
-					value: z.string(),
-				}),
-				z.string(),
-			])
-			.transform((val) => (typeof val === 'string' ? val : val.value)),
-		paymentAmount: z.number().transform((val) => parseFloat(val.toFixed(2))),
-		paymentCurrency: z.string(),
-		paymentFrequency: z.string(),
-		productName: z.string(),
-		sfContactId: z.string(),
-		zuoraSubName: z.string(),
-		workEmail: z.string().nullable(),
-		contactCountry: z.string().nullable(),
-		sfBuyerContactMailingCountry: z.string().nullable(),
-		sfBuyerContactOtherCountry: z.string().nullable(),
-		sfRecipientContactMailingCountry: z.string().nullable(),
-		sfRecipientContactOtherCountry: z.string().nullable(),
-	})
-	.strict();
+export const BigQueryRecordSchema = z.object({
+	billingAccountId: z.string(),
+	firstName: z.string(),
+	nextPaymentDate: z
+		.union([
+			z.object({
+				value: z.string(),
+			}),
+			z.string(),
+		])
+		.transform((val) => (typeof val === 'string' ? val : val.value)),
+	paymentAmount: z.number().optional(),
+	paymentCurrency: z.string(),
+	paymentFrequency: z.string(),
+	productName: z.string(),
+	sfContactId: z.string(),
+	zuoraSubName: z.string(),
+	workEmail: z.string().nullable(),
+	contactCountry: z.string().nullable(),
+	sfBuyerContactMailingCountry: z.string().nullable(),
+	sfBuyerContactOtherCountry: z.string().nullable(),
+	sfRecipientContactMailingCountry: z.string().nullable(),
+	sfRecipientContactOtherCountry: z.string().nullable(),
+});
 export type BigQueryRecord = z.infer<typeof BigQueryRecordSchema>;
 
 export const BigQueryResultDataSchema = z.array(BigQueryRecordSchema);

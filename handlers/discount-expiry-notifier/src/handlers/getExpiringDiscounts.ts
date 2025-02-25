@@ -48,6 +48,7 @@ WITH expiringDiscounts AS (
         contact.country as contactCountry,
         contact.first_name as firstName,
         DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) AS nextPaymentDate,
+        account.account_number as billingAccountId,
         account.currency as paymentCurrency,
         account.sf_contact_id_c as sfContactId,
         contact.work_email as workEmail,
@@ -85,10 +86,10 @@ WITH expiringDiscounts AS (
 		AND DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = '${discountExpiresOnDate}'
 )
 SELECT 
+    STRING_AGG(DISTINCT billingAccountId) as billingAccountId,
     STRING_AGG(DISTINCT contactCountry) as contactCountry,
     STRING_AGG(DISTINCT firstName) as firstName,
     MIN(exp.nextPaymentDate) AS nextPaymentDate,
-    SUM(tier.price) AS paymentAmount,
     STRING_AGG(DISTINCT paymentCurrency) as paymentCurrency,
     STRING_AGG(DISTINCT rate_plan_charge.billing_period) AS paymentFrequency,
     STRING_AGG(DISTINCT product.name) as productName,
