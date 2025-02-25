@@ -13,14 +13,15 @@ export const handler = async (event: { discountExpiresOnDate?: string }) => {
 			stageFromEnvironment(),
 		);
 		const authClient = await buildAuthClient(gcpConfig);
+
 		const discountExpiresOnDate = event.discountExpiresOnDate
 			? event.discountExpiresOnDate.substring(0, 10)
 			: addDays(new Date(), daysUntilDiscountExpiryDate());
-		const query = getQuery(discountExpiresOnDate);
+
 		const result = await runQuery(
 			authClient,
 			`datatech-platform-${stageFromEnvironment().toLowerCase()}`,
-			query,
+			query(discountExpiresOnDate),
 		);
 
 		const resultData = BigQueryResultDataSchema.parse(result[0]);
@@ -51,7 +52,7 @@ const daysUntilDiscountExpiryDate = (): number => {
 	);
 };
 
-const getQuery = (discountExpiresOnDate: string): string =>
+const query = (discountExpiresOnDate: string): string =>
 	`
 WITH expiringDiscounts AS (
     SELECT
