@@ -1,13 +1,10 @@
+import type { QueryRowsResponse } from '@google-cloud/bigquery';
 import { BigQuery } from '@google-cloud/bigquery';
-import { stageFromEnvironment } from '@modules/stage';
 import type {
 	BaseExternalAccountClient,
 	ExternalAccountClientOptions,
 } from 'google-auth-library';
 import { ExternalAccountClient } from 'google-auth-library';
-import type { BigQueryRecord } from '../../../handlers/discount-expiry-notifier/src/types';
-import { testQueryResponse } from './testQueryResponse';
-import { BigQueryResultDataSchema } from './types';
 
 export const buildAuthClient = async (
 	clientConfig: string,
@@ -30,22 +27,12 @@ export const buildAuthClient = async (
 
 export const runQuery = async (
 	authClient: BaseExternalAccountClient,
+	projectId: string,
 	query: string,
-): Promise<BigQueryRecord[]> => {
-	const bigquery = new BigQuery({
-		projectId: `datatech-platform-${stageFromEnvironment().toLowerCase()}`,
+): Promise<QueryRowsResponse> => {
+	const bigQueryClient = new BigQuery({
+		projectId,
 		authClient,
 	});
-
-	const result = await bigquery.query(query);
-	console.log('result', result);
-
-	const resultData = BigQueryResultDataSchema.parse(result[0]);
-	console.log('resultData', resultData);
-
-	const dataToUse =
-		stageFromEnvironment().toLowerCase() === 'prod'
-			? resultData
-			: testQueryResponse;
-	return dataToUse;
+	return await bigQueryClient.query(query);
 };

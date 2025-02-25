@@ -1,7 +1,9 @@
+import { buildAuthClient, runQuery } from '@modules/bigquery/src/bigquery';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { stageFromEnvironment } from '@modules/stage';
-import { buildAuthClient, runQuery } from '../bigquery';
 import { getSSMParam } from '../ssm';
+import { testQueryResponse } from '../testQueryResponse';
+import { BigQueryResultDataSchema } from '../types';
 
 //to manually run the state machine for a specified discount expiry date, enter {"discountExpiresOnDate":"2025-11-23"} in aws console
 export const handler = async (event: { discountExpiresOnDate?: string }) => {
@@ -15,11 +17,19 @@ export const handler = async (event: { discountExpiresOnDate?: string }) => {
 			? event.discountExpiresOnDate.substring(0, 10)
 			: addDays(new Date(), daysUntilDiscountExpiryDate());
 		const query = getQuery(discountExpiresOnDate);
-		const result = await runQuery(authClient, query);
+		const result = await runQuery(
+			authClient,
+			`datatech-platform-${stageFromEnvironment().toLowerCase()}`,
+			query,
+		);
+
+		const resultData = BigQueryResultDataSchema.parse(result[0]);
+		console.log('resultData', resultData);
+
 		return {
 			discountExpiresOnDate,
-			allRecordsFromBigQueryCount: result.length,
-			allRecordsFromBigQuery: result,
+			allRecordsFromBigQueryCount: testQueryResponse.length,
+			allRecordsFromBigQuery: testQueryResponse,
 		};
 	} catch (error) {
 		console.error('Error:', error);
