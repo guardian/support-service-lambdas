@@ -1,14 +1,14 @@
 export const testQueryResponse = [
 	{
-		billingAccountId: 'A00900266',
+		billingAccountId: 'A00265729',
 		firstName: 'David',
-		nextPaymentDate: '2025-03-31',
+		nextPaymentDate: '2025-03-22',
 		paymentAmount: 1.23,
 		paymentCurrency: 'GBP',
 		paymentFrequency: 'Month',
 		productName: 'GW',
 		sfContactId: '0039E00001HiIGlQAN', //dev
-		zuoraSubName: 'A-S00886188', // Active sub in dev
+		zuoraSubName: 'A-S00424163', // Active sub in dev
 		workEmail: 'david.pepper@guardian.co.uk', // dev
 		contactCountry: 'united states of america',
 		sfBuyerContactMailingCountry: 'united states of america',
