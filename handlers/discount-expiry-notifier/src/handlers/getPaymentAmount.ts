@@ -24,11 +24,11 @@ export const handler = async (event: GetPaymentAmountInput) => {
 			parsedEvent.zuoraSubName,
 			parsedEvent.nextPaymentDate,
 		);
-		const totalChargeAmount = getTotalChargeAmount(invoiceItemsForSubscription);
+		const paymentAmount = getPaymentAmount(invoiceItemsForSubscription);
 
 		return {
 			...parsedEvent,
-			paymentAmount: totalChargeAmount,
+			paymentAmount,
 		};
 	} catch (error) {
 		console.log('error:', error);
@@ -54,6 +54,6 @@ const filterRecords = (
 	);
 };
 
-const getTotalChargeAmount = (invoiceItems: InvoiceItem[]): number => {
+const getPaymentAmount = (invoiceItems: InvoiceItem[]): number => {
 	return invoiceItems.reduce((total, item) => total + item.chargeAmount, 0);
 };
