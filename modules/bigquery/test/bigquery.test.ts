@@ -6,16 +6,6 @@ jest.mock('@google-cloud/bigquery');
 jest.mock('google-auth-library');
 
 describe('bigquery.ts', () => {
-	//   const mockClientConfig = JSON.stringify({
-	//     type: 'external_account',
-	//     audience: 'test-audience',
-	//     subject_token_type: 'urn:ietf:params:oauth:token-type:jwt',
-	//     token_url: 'https://oauth2.googleapis.com/token',
-	//     credential_source: {
-	//       file: '/path/to/credentials.json',
-	//     },
-	//   });
-
 	const mockAuthClient: Partial<BaseExternalAccountClient> = {
 		getAccessToken: jest.fn().mockResolvedValue('mock-access-token'),
 		request: jest.fn(),
