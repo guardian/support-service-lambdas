@@ -55,8 +55,5 @@ const filterRecords = (
 };
 
 const getPaymentAmount = (invoiceItems: InvoiceItem[]): number => {
-	return invoiceItems.reduce(
-		(total, item) => total + (item.chargeAmount + item.taxAmount),
-		0,
-	);
+	return invoiceItems.reduce((total, item) => total + item.paymentAmount, 0);
 };

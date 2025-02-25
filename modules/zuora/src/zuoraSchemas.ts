@@ -154,15 +154,20 @@ export type ZuoraUpperCaseSuccessResponse = z.infer<
 export const billingPreviewSchema = z.object({
 	accountId: z.string(),
 	invoiceItems: z.array(
-		z.object({
-			id: z.optional(z.string()),
-			subscriptionName: z.string(),
-			serviceStartDate: z.coerce.date(),
-			serviceEndDate: z.coerce.date(),
-			chargeAmount: z.number(),
-			chargeName: z.string(),
-			taxAmount: z.number(),
-		}),
+		z
+			.object({
+				id: z.optional(z.string()),
+				subscriptionName: z.string(),
+				serviceStartDate: z.coerce.date(),
+				serviceEndDate: z.coerce.date(),
+				chargeAmount: z.number(),
+				chargeName: z.string(),
+				taxAmount: z.number(),
+			})
+			.transform((item) => ({
+				...item,
+				paymentAmount: item.chargeAmount + item.taxAmount,
+			})),
 	),
 });
 
