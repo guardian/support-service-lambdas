@@ -2,7 +2,7 @@ export const testQueryResponse = [
 	{
 		billingAccountId: 'A00900266',
 		firstName: 'David',
-		nextPaymentDate: '2025-02-27',
+		nextPaymentDate: '2025-03-31',
 		paymentAmount: 1.23,
 		paymentCurrency: 'GBP',
 		paymentFrequency: 'Month',
