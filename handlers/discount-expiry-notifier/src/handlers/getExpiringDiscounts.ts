@@ -90,7 +90,6 @@ SELECT
     STRING_AGG(DISTINCT contactCountry) as contactCountry,
     STRING_AGG(DISTINCT firstName) as firstName,
     MIN(exp.nextPaymentDate) AS nextPaymentDate,
-    SUM(tier.price) AS paymentAmount,
     STRING_AGG(DISTINCT paymentCurrency) as paymentCurrency,
     STRING_AGG(DISTINCT rate_plan_charge.billing_period) AS paymentFrequency,
     STRING_AGG(DISTINCT product.name) as productName,
