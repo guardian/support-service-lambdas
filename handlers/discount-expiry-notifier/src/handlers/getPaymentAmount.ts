@@ -12,24 +12,18 @@ export type GetPaymentAmountInput = z.infer<
 
 export const handler = async (event: GetPaymentAmountInput) => {
 	try {
-		console.log('event:', event);
-
 		const parsedEvent = BaseRecordForEmailSendSchema.parse(event);
-		const billingAccountId = parsedEvent.billingAccountId;
-		const nextPaymentDate = parsedEvent.nextPaymentDate;
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const getBillingPreviewResponse = await getBillingPreview(
 			zuoraClient,
-			dayjs(nextPaymentDate),
-			billingAccountId,
+			dayjs(parsedEvent.nextPaymentDate),
+			parsedEvent.billingAccountId,
 		);
-
 		const invoiceItemsForSubscription = filterRecordsBySubscriptionName(
 			getBillingPreviewResponse.invoiceItems,
 			parsedEvent.zuoraSubName,
-			nextPaymentDate,
+			parsedEvent.nextPaymentDate,
 		);
-
 		const totalChargeAmount = getTotalChargeAmount(invoiceItemsForSubscription);
 
 		return {
