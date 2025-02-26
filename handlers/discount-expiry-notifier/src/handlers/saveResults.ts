@@ -1,6 +1,6 @@
+import { uploadFileToS3 } from '@modules/aws/s3';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { z } from 'zod';
-import { uploadFileToS3 } from '../s3';
 import {
 	BigQueryRecordSchema,
 	DiscountProcessingAttemptSchema,
