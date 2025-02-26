@@ -1,4 +1,5 @@
 import { BigQuery } from '@google-cloud/bigquery';
+import type { QueryRowsResponse } from '@google-cloud/bigquery';
 import type { BaseExternalAccountClient } from 'google-auth-library';
 import { runQuery } from '../src/bigquery';
 
@@ -6,6 +7,9 @@ jest.mock('@google-cloud/bigquery');
 jest.mock('google-auth-library');
 
 describe('bigquery.ts', () => {
+	const projectId = 'test-project-id';
+	const query = 'SELECT * FROM test_table';
+
 	const mockAuthClient: Partial<BaseExternalAccountClient> = {
 		getAccessToken: jest.fn().mockResolvedValue('mock-access-token'),
 		request: jest.fn(),
@@ -18,19 +22,20 @@ describe('bigquery.ts', () => {
 
 	describe('runQuery', () => {
 		it('should run a query and return the result', async () => {
-			const mockQueryResponse = [{ rows: [] }];
+			const mockQueryResponse: QueryRowsResponse = [[{ rows: [] }]];
+
 			(BigQuery.prototype.query as jest.Mock).mockResolvedValue(
 				mockQueryResponse,
 			);
 
 			const result = await runQuery(
 				mockAuthClient as BaseExternalAccountClient,
-				'test-project-id',
-				'SELECT * FROM test_table',
+				projectId,
+				query,
 			);
 
 			expect(BigQuery).toHaveBeenCalledWith({
-				projectId: 'test-project-id',
+				projectId: projectId,
 				authClient: mockAuthClient,
 			});
 			expect(result).toBe(mockQueryResponse);
@@ -42,11 +47,7 @@ describe('bigquery.ts', () => {
 			);
 
 			await expect(
-				runQuery(
-					mockAuthClient as BaseExternalAccountClient,
-					'test-project-id',
-					'SELECT * FROM test_table',
-				),
+				runQuery(mockAuthClient as BaseExternalAccountClient, projectId, query),
 			).rejects.toThrow('Query execution failed');
 		});
 	});
