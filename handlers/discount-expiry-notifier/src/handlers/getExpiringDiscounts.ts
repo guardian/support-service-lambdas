@@ -1,14 +1,13 @@
+import { getSSMParam } from '@modules/aws/ssm';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { stageFromEnvironment } from '@modules/stage';
 import { buildAuthClient, runQuery } from '../bigquery';
-import { getSSMParam } from '../ssm';
 
 //to manually run the state machine for a specified discount expiry date, enter {"discountExpiresOnDate":"2025-11-23"} in aws console
 export const handler = async (event: { discountExpiresOnDate?: string }) => {
 	try {
 		const gcpConfig = await getSSMParam(
-			'gcp-credentials-config',
-			stageFromEnvironment(),
+			`/discount-expiry-notifier/${stageFromEnvironment()}/gcp-credentials-config`,
 		);
 		const authClient = await buildAuthClient(gcpConfig);
 		const discountExpiresOnDate = event.discountExpiresOnDate
