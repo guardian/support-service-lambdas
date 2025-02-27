@@ -4,7 +4,7 @@ import { testQueryResponse } from '../../src/testQueryResponse';
 
 jest.mock('@modules/nullAndUndefined');
 
-describe('filterSubs handler', () => {
+describe('filterRecords handler', () => {
 	beforeEach(() => {
 		jest.resetAllMocks();
 		process.env.FILTER_BY_REGIONS = 'United States,United States of America';
