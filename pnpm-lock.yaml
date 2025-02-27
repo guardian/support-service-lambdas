@@ -301,6 +301,9 @@ importers:
       aws-sdk:
         specifier: ^2.1692.0
         version: 2.1692.0
+      aws-sdk-client-mock:
+        specifier: 4.1.0
+        version: 4.1.0
 
   modules/bigquery:
     dependencies:
@@ -8238,7 +8241,7 @@ snapshots:
     dependencies:
       '@types/sinon': 17.0.3
       sinon: 18.0.1
-      tslib: 2.6.2
+      tslib: 2.8.1
 
   aws-sdk@2.1692.0:
     dependencies:
