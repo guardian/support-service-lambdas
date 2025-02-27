@@ -1,7 +1,9 @@
 import { getSSMParam } from '@modules/aws/ssm';
+import { buildAuthClient, runQuery } from '@modules/bigquery/src/bigquery';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { stageFromEnvironment } from '@modules/stage';
-import { buildAuthClient, runQuery } from '../bigquery';
+import { testQueryResponse } from '../testQueryResponse';
+import { BigQueryResultDataSchema } from '../types';
 
 //to manually run the state machine for a specified discount expiry date, enter {"discountExpiresOnDate":"2025-11-23"} in aws console
 export const handler = async (event: { discountExpiresOnDate?: string }) => {
@@ -10,15 +12,24 @@ export const handler = async (event: { discountExpiresOnDate?: string }) => {
 			`/discount-expiry-notifier/${stageFromEnvironment()}/gcp-credentials-config`,
 		);
 		const authClient = await buildAuthClient(gcpConfig);
+
 		const discountExpiresOnDate = event.discountExpiresOnDate
 			? event.discountExpiresOnDate.substring(0, 10)
 			: addDays(new Date(), daysUntilDiscountExpiryDate());
-		const query = getQuery(discountExpiresOnDate);
-		const result = await runQuery(authClient, query);
+
+		const result = await runQuery(
+			authClient,
+			`datatech-platform-${stageFromEnvironment().toLowerCase()}`,
+			query(discountExpiresOnDate),
+		);
+
+		const resultData = BigQueryResultDataSchema.parse(result[0]);
+		console.log('resultData', resultData);
+
 		return {
 			discountExpiresOnDate,
-			allRecordsFromBigQueryCount: result.length,
-			allRecordsFromBigQuery: result,
+			allRecordsFromBigQueryCount: testQueryResponse.length,
+			allRecordsFromBigQuery: testQueryResponse,
 		};
 	} catch (error) {
 		console.error('Error:', error);
@@ -40,7 +51,7 @@ const daysUntilDiscountExpiryDate = (): number => {
 	);
 };
 
-const getQuery = (discountExpiresOnDate: string): string =>
+const query = (discountExpiresOnDate: string): string =>
 	`
 WITH expiringDiscounts AS (
     SELECT
