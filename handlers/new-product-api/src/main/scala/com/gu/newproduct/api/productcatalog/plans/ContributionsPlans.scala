@@ -16,7 +16,7 @@ class ContributionsPlans(today: LocalDate) {
 
   val planInfo: List[(PlanId, PlanDescription, StartDateRules, BillingPeriod)] = List(
     (MonthlyContribution, PlanDescription("Monthly"), rule, Monthly),
-    (AnnualContribution, PlanDescription("Annual"), rule, Monthly),
+    (AnnualContribution, PlanDescription("Annual"), rule, Annual),
   )
 
 }
