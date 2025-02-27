@@ -94,9 +94,10 @@ import scala.language.postfixOps
 object HandlerSpec extends ZIOSpecDefault {
 
   def spec = {
-    val time = OffsetDateTime.of(LocalDateTime.of(2022, 5, 10, 10, 2), ZoneOffset.ofHours(0)).toInstant
-    val time2 = OffsetDateTime.of(LocalDateTime.of(2023, 2, 6, 10, 2), ZoneOffset.ofHours(0)).toInstant
-    val time3 = OffsetDateTime.of(LocalDateTime.of(2021, 2, 15, 5, 2), ZoneOffset.ofHours(0)).toInstant
+    val zoneOffset = ZoneOffset.ofHours(0)
+    val time = OffsetDateTime.of(LocalDateTime.of(2022, 5, 10, 10, 2), zoneOffset).toInstant
+    val time2 = OffsetDateTime.of(LocalDateTime.of(2023, 2, 6, 10, 2), zoneOffset).toInstant
+    val time3 = OffsetDateTime.of(LocalDateTime.of(2021, 2, 15, 5, 2), zoneOffset).toInstant
     val subscriptionName = SubscriptionName("A-S00339056")
 
     def getSubscriptionStubs(subscriptionResponse: GetSubscriptionResponse = getSubscriptionResponse) = {
@@ -588,6 +589,7 @@ object HandlerSpec extends ZIOSpecDefault {
             zuoraSetCancellationReason = new MockZuoraSetCancellationReason(
               Map((SubscriptionName("A-S00339056"), 2, "mma_other") -> UpdateResponse(true)),
             ),
+            LocalDate.ofInstant(time, zoneOffset),
           ).subscriptionCancel(subscriptionName, input, someIdentityId.get)
         } yield {
           assert(output)(
