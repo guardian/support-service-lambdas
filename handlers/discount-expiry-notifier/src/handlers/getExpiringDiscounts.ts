@@ -3,7 +3,7 @@ import { buildAuthClient, runQuery } from '@modules/bigquery/src/bigquery';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { stageFromEnvironment } from '@modules/stage';
 import { testQueryResponse } from '../testQueryResponse';
-import { BigQueryResultDataSchema } from '../types';
+import { BigQueryRecordSchema } from '../types';
 
 //to manually run the state machine for a specified discount expiry date, enter {"discountExpiresOnDate":"2025-11-23"} in aws console
 export const handler = async (event: { discountExpiresOnDate?: string }) => {
@@ -11,7 +11,6 @@ export const handler = async (event: { discountExpiresOnDate?: string }) => {
 		const gcpConfig = await getSSMParam(
 			`/discount-expiry-notifier/${stageFromEnvironment()}/gcp-credentials-config`,
 		);
-		console.log('gcpConfig:', gcpConfig);
 		const authClient = await buildAuthClient(gcpConfig);
 
 		const discountExpiresOnDate = event.discountExpiresOnDate
@@ -24,7 +23,7 @@ export const handler = async (event: { discountExpiresOnDate?: string }) => {
 			query(discountExpiresOnDate),
 		);
 
-		const resultData = BigQueryResultDataSchema.parse(result[0]);
+		const resultData = BigQueryRecordSchema.parse(result[0]);
 		console.log('resultData', resultData);
 
 		return {
