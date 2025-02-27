@@ -33,6 +33,7 @@ class SubscriptionCancelEndpointSteps(
     sqs: SQS,
     stage: Stage,
     zuoraSetCancellationReason: ZuoraSetCancellationReason,
+    today: LocalDate,
 ) {
   private[productmove] def subscriptionCancel(
       subscriptionName: SubscriptionName,
@@ -63,9 +64,13 @@ class SubscriptionCancelEndpointSteps(
       // this means that only the currently active rate plan will contain charge information (even if it has a
       // lastChangeType of 'Remove')
       ratePlan <- asSingle(
-        subscription.ratePlans.filter(ratePlan =>
-          ratePlan.productName != "Discounts" && ratePlan.ratePlanCharges.nonEmpty,
-        ),
+        subscription.ratePlans.filter { ratePlan =>
+          val isDiscount = ratePlan.productName == "Discounts"
+          // we found that contrary to the docs, if effectiveStartDate and effectiveEndDate are today,
+          // zuora still returns it as a current-segment, so we need to ignore it
+          val hasCharges = ratePlan.ratePlanCharges.exists(_.effectiveEndDate != today)
+          !isDiscount && hasCharges
+        },
         "ratePlan",
       )
       charges <- asNonEmptyList(

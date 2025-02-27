@@ -24,7 +24,7 @@ import zio.*
 import zio.test.Assertion.equalTo
 import zio.test.{Spec, TestAspect, TestClock, TestEnvironment, ZIOSpecDefault, assert}
 
-import java.time.{LocalDateTime, ZoneOffset}
+import java.time.{LocalDate, LocalDateTime, ZoneOffset}
 
 object SubscriptionCancelSpec extends ZIOAppDefault {
 
@@ -49,6 +49,7 @@ object SubscriptionCancelSpec extends ZIOAppDefault {
         sqs,
         stage,
         zuoraSetCancellationReason,
+        LocalDate.now(),
       )
         .subscriptionCancel(
           SubscriptionName("A-S00499867"),
