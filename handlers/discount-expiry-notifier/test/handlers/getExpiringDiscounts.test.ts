@@ -3,8 +3,8 @@ import { buildAuthClient, runQuery } from '@modules/bigquery/src/bigquery';
 import { stageFromEnvironment } from '@modules/stage';
 import { addDays, handler } from '../../src/handlers/getExpiringDiscounts';
 
-jest.mock('../../src/ssm');
-jest.mock('../../src/bigquery');
+jest.mock('@modules/aws/ssm');
+jest.mock('@modules/bigquery/src/bigquery');
 jest.mock('@modules/stage');
 
 describe('getExpiringDiscounts handler', () => {
