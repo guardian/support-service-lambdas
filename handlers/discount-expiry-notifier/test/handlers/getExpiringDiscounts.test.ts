@@ -1,7 +1,7 @@
+import { getSSMParam } from '@modules/aws/ssm';
+import { buildAuthClient, runQuery } from '@modules/bigquery/src/bigquery';
 import { stageFromEnvironment } from '@modules/stage';
-import { buildAuthClient, runQuery } from '../../src/bigquery';
 import { addDays, handler } from '../../src/handlers/getExpiringDiscounts';
-import { getSSMParam } from '../../src/ssm';
 
 jest.mock('../../src/ssm');
 jest.mock('../../src/bigquery');
