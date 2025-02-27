@@ -7,6 +7,14 @@ export const activeTypeObject = {
 			},
 		},
 	},
+	Foo: {
+		billingPeriods: ['Month'],
+		productRatePlans: {
+			Monthly: {
+				Subscription: {},
+			},
+		},
+	},
 	GuardianAdLite: {
 		billingPeriods: ['Month'],
 		productRatePlans: {
