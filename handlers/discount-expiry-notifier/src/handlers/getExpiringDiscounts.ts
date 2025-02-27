@@ -27,7 +27,7 @@ export const handler = async (event: { discountExpiresOnDate?: string }) => {
 	}
 };
 
-const addDays = (date: Date, days: number): string => {
+export const addDays = (date: Date, days: number): string => {
 	date.setDate(date.getDate() + days);
 	return date.toISOString().substring(0, 10);
 };
