@@ -1,7 +1,7 @@
+import { getSSMParam } from '@modules/aws/ssm';
 import { buildAuthClient, runQuery } from '@modules/bigquery/src/bigquery';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { stageFromEnvironment } from '@modules/stage';
-import { getSSMParam } from '../ssm';
 import { testQueryResponse } from '../testQueryResponse';
 import { BigQueryResultDataSchema } from '../types';
 
@@ -9,8 +9,7 @@ import { BigQueryResultDataSchema } from '../types';
 export const handler = async (event: { discountExpiresOnDate?: string }) => {
 	try {
 		const gcpConfig = await getSSMParam(
-			'gcp-credentials-config',
-			stageFromEnvironment(),
+			`/discount-expiry-notifier/${stageFromEnvironment()}/gcp-credentials-config`,
 		);
 		const authClient = await buildAuthClient(gcpConfig);
 

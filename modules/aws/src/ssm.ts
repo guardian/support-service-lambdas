@@ -1,13 +1,10 @@
 import * as AWS from 'aws-sdk';
 
-export const getSSMParam = (
-	key: string,
-	stage: 'CODE' | 'PROD',
-): Promise<string> => {
+export const getSSMParam = (name: string): Promise<string> => {
 	const ssm = new AWS.SSM({ region: 'eu-west-1' });
 	return ssm
 		.getParameter({
-			Name: `/discount-expiry-notifier/${stage}/${key}`,
+			Name: name,
 			WithDecryption: true,
 		})
 		.promise()
@@ -18,6 +15,8 @@ export const getSSMParam = (
 				return value;
 			}
 
-			throw new Error(`Failed to retrieve config from parameter store: ${key}`);
+			throw new Error(
+				`Failed to retrieve config from parameter store: ${name}`,
+			);
 		});
 };
