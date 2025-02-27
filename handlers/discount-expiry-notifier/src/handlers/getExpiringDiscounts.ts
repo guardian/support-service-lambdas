@@ -11,6 +11,7 @@ export const handler = async (event: { discountExpiresOnDate?: string }) => {
 		const gcpConfig = await getSSMParam(
 			`/discount-expiry-notifier/${stageFromEnvironment()}/gcp-credentials-config`,
 		);
+		console.log('gcpConfig:', gcpConfig);
 		const authClient = await buildAuthClient(gcpConfig);
 
 		const discountExpiresOnDate = event.discountExpiresOnDate
