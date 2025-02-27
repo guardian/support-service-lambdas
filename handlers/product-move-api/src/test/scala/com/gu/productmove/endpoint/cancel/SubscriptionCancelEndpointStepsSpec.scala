@@ -59,6 +59,7 @@ object SubscriptionCancelEndpointStepsSpec extends ZIOSpecDefault {
       null,
       null,
       null,
+      LocalDate.now(),
     ).subscriptionCancel(
       SubscriptionName(sub),
       null,
