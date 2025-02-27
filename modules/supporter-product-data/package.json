@@ -6,7 +6,7 @@
     "lint": "eslint src/**/*.ts test/**/*.ts"
   },
   "devDependencies": {
-    "@aws-sdk/client-dynamodb": "^3.734.0",
+    "@aws-sdk/client-dynamodb": "^3.751.0",
     "@aws-sdk/util-dynamodb": "^3.734.0"
   }
 }
