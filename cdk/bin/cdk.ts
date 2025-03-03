@@ -24,8 +24,8 @@ import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
 import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
 import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
 import { UserBenefits } from '../lib/user-benefits';
-import { ZuoraSalesforceLinkRemover } from '../lib/zuora-salesforce-link-remover';
 import { WriteOffUnpaidInvoices } from '../lib/write-off-unpaid-invoices';
+import { ZuoraSalesforceLinkRemover } from '../lib/zuora-salesforce-link-remover';
 
 const app = new App();
 const membershipHostedZoneId = 'Z1E4V12LQGXFEC';
