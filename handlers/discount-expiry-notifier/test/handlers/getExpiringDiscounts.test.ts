@@ -35,7 +35,7 @@ describe('getExpiringDiscounts handler', () => {
 			expect.any(String),
 			expect.any(String),
 		);
-		console.log('result (test):', result);
+
 		expect(result).toEqual({
 			discountExpiresOnDate: '2025-11-23',
 			allRecordsFromBigQueryCount: 3,
