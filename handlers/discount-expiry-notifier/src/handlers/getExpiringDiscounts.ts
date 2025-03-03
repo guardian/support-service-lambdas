@@ -2,6 +2,7 @@ import { getSSMParam } from '@modules/aws/ssm';
 import { buildAuthClient, runQuery } from '@modules/bigquery/src/bigquery';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { stageFromEnvironment } from '@modules/stage';
+import { functionalTestQueryResponse } from '../../test/handlers/data/functionalTestQueryResponse';
 import { BigQueryResultDataSchema } from '../types';
 
 //to manually run the state machine for a specified discount expiry date, enter {"discountExpiresOnDate":"2025-11-23"} in aws console
@@ -27,8 +28,8 @@ export const handler = async (event: { discountExpiresOnDate?: string }) => {
 
 		return {
 			discountExpiresOnDate,
-			allRecordsFromBigQueryCount: resultData.length,
-			allRecordsFromBigQuery: resultData,
+			allRecordsFromBigQueryCount: functionalTestQueryResponse.length,
+			allRecordsFromBigQuery: functionalTestQueryResponse,
 		};
 	} catch (error) {
 		console.error('Error:', error);
