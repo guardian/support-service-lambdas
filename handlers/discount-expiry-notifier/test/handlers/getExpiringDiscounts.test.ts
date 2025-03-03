@@ -65,27 +65,27 @@ describe('getExpiringDiscounts handler', () => {
 		});
 	});
 
-	// test('should throw an error when an exception occurs', async () => {
-	// 	const event = { discountExpiresOnDate: '2025-11-23' };
-	// 	(runQuery as jest.Mock).mockRejectedValue(new Error('Query failed'));
+	test('should throw an error when an exception occurs', async () => {
+		const event = { discountExpiresOnDate: '2025-11-23' };
+		(runQuery as jest.Mock).mockRejectedValue(new Error('Query failed'));
 
-	// 	await expect(handler(event)).rejects.toThrow('Query failed');
-	// });
+		await expect(handler(event)).rejects.toThrow('Query failed');
+	});
 });
 
-// describe('addDays function', () => {
-// 	beforeEach(() => {
-// 		jest.restoreAllMocks();
-// 	});
-// 	test('should add days to the given date', () => {
-// 		const date = new Date('2025-11-23');
-// 		const result = addDays(date, 10);
-// 		expect(result).toBe('2025-12-03');
-// 	});
+describe('addDays function', () => {
+	beforeEach(() => {
+		jest.restoreAllMocks();
+	});
+	test('should add days to the given date', () => {
+		const date = new Date('2025-11-23');
+		const result = addDays(date, 10);
+		expect(result).toBe('2025-12-03');
+	});
 
-// 	test('should handle leap year correctly', () => {
-// 		const date = new Date('2024-02-28');
-// 		const result = addDays(date, 1);
-// 		expect(result).toBe('2024-02-29');
-// 	});
-// });
+	test('should handle leap year correctly', () => {
+		const date = new Date('2024-02-28');
+		const result = addDays(date, 1);
+		expect(result).toBe('2024-02-29');
+	});
+});
