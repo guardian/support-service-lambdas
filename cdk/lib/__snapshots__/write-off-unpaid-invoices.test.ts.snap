@@ -280,7 +280,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":secret:CSBX/Zuora/User/AndreaDiotallevi",
+                    ":secret:CSBX/Zuora/User/AndreaDiotallevi-*",
                   ],
                 ],
               },
@@ -852,7 +852,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":secret:PROD/Zuora/User/AndreaDiotallevi",
+                    ":secret:PROD/Zuora/User/AndreaDiotallevi-*",
                   ],
                 ],
               },

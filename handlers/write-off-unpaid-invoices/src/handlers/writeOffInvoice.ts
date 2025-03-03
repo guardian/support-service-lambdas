@@ -139,6 +139,7 @@ export const handler = async (event: { Items: InvoiceData[] }) => {
 
 			for (let k = 0; k < payloads.length; k++) {
 				const payload = payloads[k];
+				console.log('Payload: ' + payload);
 
 				try {
 					const accessToken = await getZuoraOAuthToken({ stage });
