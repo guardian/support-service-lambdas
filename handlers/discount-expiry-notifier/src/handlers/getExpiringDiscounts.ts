@@ -26,10 +26,14 @@ export const handler = async (event: { discountExpiresOnDate?: string }) => {
 		const resultData = BigQueryResultDataSchema.parse(result[0]);
 		console.log('resultData', resultData);
 
+		const records =
+			stageFromEnvironment() === 'PROD'
+				? resultData
+				: functionalTestQueryResponse;
 		return {
 			discountExpiresOnDate,
-			allRecordsFromBigQueryCount: functionalTestQueryResponse.length,
-			allRecordsFromBigQuery: functionalTestQueryResponse,
+			allRecordsFromBigQueryCount: records.length,
+			allRecordsFromBigQuery: records,
 		};
 	} catch (error) {
 		console.error('Error:', error);
