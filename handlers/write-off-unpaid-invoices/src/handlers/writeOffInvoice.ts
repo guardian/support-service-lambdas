@@ -29,6 +29,7 @@ export const handler = async (event: { Items: InvoiceData[] }) => {
 		const invoiceAmount = Number.parseFloat(item.invoice_amount);
 
 		if (ids.includes(invoiceId)) {
+			console.log('Skipping ' + invoiceId);
 			continue;
 		}
 
@@ -166,6 +167,7 @@ export const handler = async (event: { Items: InvoiceData[] }) => {
 							Success?: boolean;
 							reasons?: Array<{ code: string; message: string }>;
 						};
+						console.log(JSON.stringify(responseData));
 
 						if (
 							responseData.success == false ||
@@ -182,7 +184,7 @@ export const handler = async (event: { Items: InvoiceData[] }) => {
 						}
 					} else {
 						const errorData = await response.json();
-						console.error(errorData);
+						console.error(JSON.stringify(errorData));
 						throw JSON.stringify(errorData);
 					}
 				} catch (error) {

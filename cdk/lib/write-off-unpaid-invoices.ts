@@ -41,7 +41,7 @@ export class WriteOffUnpaidInvoices extends GuStack {
 			fileName: `${app}.zip`,
 			runtime: nodeVersion,
 			timeout: Duration.seconds(300),
-			environment: { APP: app, STACK: this.stack, STAGE: this.stage },
+			environment: { Stage: this.stage },
 		};
 
 		const writeOffInvoiceLambda = new GuLambdaFunction(
