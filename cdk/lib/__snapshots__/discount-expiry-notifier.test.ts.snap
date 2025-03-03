@@ -570,7 +570,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Sub status fetcher map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Expiring discount processor map","Iterator":{"StartAt":"Get sub status","States":{"Get sub status":{"Next":"Get payment amount","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Sub status fetcher map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Expiring discount processor map","Iterator":{"StartAt":"Get sub status","States":{"Get sub status":{"Next":"Get new payment amount","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -581,14 +581,14 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Get payment amount":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Get new payment amount":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
               ":states:::lambda:invoke","Parameters":{"FunctionName":"",
               {
                 "Fn::GetAtt": [
-                  "getpaymentamountlambdaD677D729",
+                  "getnewpaymentamountlambda2CBB8AA8",
                   "Arn",
                 ],
               },
@@ -867,7 +867,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "getpaymentamountlambdaD677D729",
+                    "getnewpaymentamountlambda2CBB8AA8",
                     "Arn",
                   ],
                 },
@@ -877,7 +877,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "getpaymentamountlambdaD677D729",
+                          "getnewpaymentamountlambda2CBB8AA8",
                           "Arn",
                         ],
                       },
@@ -1177,10 +1177,10 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "getpaymentamountlambdaD677D729": {
+    "getnewpaymentamountlambda2CBB8AA8": {
       "DependsOn": [
-        "getpaymentamountlambdaServiceRoleDefaultPolicy454BF626",
-        "getpaymentamountlambdaServiceRole7A988439",
+        "getnewpaymentamountlambdaServiceRoleDefaultPolicy6E0FDE1A",
+        "getnewpaymentamountlambdaServiceRoleC3565057",
       ],
       "Properties": {
         "Architectures": [
@@ -1200,12 +1200,12 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
             "Stage": "CODE",
           },
         },
-        "FunctionName": "discount-expiry-notifier-get-payment-amount-CODE",
-        "Handler": "getPaymentAmount.handler",
+        "FunctionName": "discount-expiry-notifier-get-new-payment-amount-CODE",
+        "Handler": "getNewPaymentAmount.handler",
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
-            "getpaymentamountlambdaServiceRole7A988439",
+            "getnewpaymentamountlambdaServiceRoleC3565057",
             "Arn",
           ],
         },
@@ -1236,7 +1236,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "getpaymentamountlambdaServiceRole7A988439": {
+    "getnewpaymentamountlambdaServiceRoleC3565057": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -1289,7 +1289,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "getpaymentamountlambdaServiceRoleDefaultPolicy454BF626": {
+    "getnewpaymentamountlambdaServiceRoleDefaultPolicy6E0FDE1A": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -1400,10 +1400,10 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "getpaymentamountlambdaServiceRoleDefaultPolicy454BF626",
+        "PolicyName": "getnewpaymentamountlambdaServiceRoleDefaultPolicy6E0FDE1A",
         "Roles": [
           {
-            "Ref": "getpaymentamountlambdaServiceRole7A988439",
+            "Ref": "getnewpaymentamountlambdaServiceRoleC3565057",
           },
         ],
       },
@@ -2880,7 +2880,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Sub status fetcher map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Expiring discount processor map","Iterator":{"StartAt":"Get sub status","States":{"Get sub status":{"Next":"Get payment amount","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Sub status fetcher map":{"Type":"Map","ResultPath":"$.discountProcessingAttempts","Next":"Expiring discount processor map","Iterator":{"StartAt":"Get sub status","States":{"Get sub status":{"Next":"Get new payment amount","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -2891,14 +2891,14 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Get payment amount":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Get new payment amount":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
               ":states:::lambda:invoke","Parameters":{"FunctionName":"",
               {
                 "Fn::GetAtt": [
-                  "getpaymentamountlambdaD677D729",
+                  "getnewpaymentamountlambda2CBB8AA8",
                   "Arn",
                 ],
               },
@@ -3177,7 +3177,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "getpaymentamountlambdaD677D729",
+                    "getnewpaymentamountlambda2CBB8AA8",
                     "Arn",
                   ],
                 },
@@ -3187,7 +3187,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "getpaymentamountlambdaD677D729",
+                          "getnewpaymentamountlambda2CBB8AA8",
                           "Arn",
                         ],
                       },
@@ -3487,10 +3487,10 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "getpaymentamountlambdaD677D729": {
+    "getnewpaymentamountlambda2CBB8AA8": {
       "DependsOn": [
-        "getpaymentamountlambdaServiceRoleDefaultPolicy454BF626",
-        "getpaymentamountlambdaServiceRole7A988439",
+        "getnewpaymentamountlambdaServiceRoleDefaultPolicy6E0FDE1A",
+        "getnewpaymentamountlambdaServiceRoleC3565057",
       ],
       "Properties": {
         "Architectures": [
@@ -3510,12 +3510,12 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
             "Stage": "PROD",
           },
         },
-        "FunctionName": "discount-expiry-notifier-get-payment-amount-PROD",
-        "Handler": "getPaymentAmount.handler",
+        "FunctionName": "discount-expiry-notifier-get-new-payment-amount-PROD",
+        "Handler": "getNewPaymentAmount.handler",
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
-            "getpaymentamountlambdaServiceRole7A988439",
+            "getnewpaymentamountlambdaServiceRoleC3565057",
             "Arn",
           ],
         },
@@ -3546,7 +3546,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "getpaymentamountlambdaServiceRole7A988439": {
+    "getnewpaymentamountlambdaServiceRoleC3565057": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -3599,7 +3599,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "getpaymentamountlambdaServiceRoleDefaultPolicy454BF626": {
+    "getnewpaymentamountlambdaServiceRoleDefaultPolicy6E0FDE1A": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -3710,10 +3710,10 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "getpaymentamountlambdaServiceRoleDefaultPolicy454BF626",
+        "PolicyName": "getnewpaymentamountlambdaServiceRoleDefaultPolicy6E0FDE1A",
         "Roles": [
           {
-            "Ref": "getpaymentamountlambdaServiceRole7A988439",
+            "Ref": "getnewpaymentamountlambdaServiceRoleC3565057",
           },
         ],
       },
