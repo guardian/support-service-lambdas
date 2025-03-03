@@ -225,3 +225,20 @@ export const invoiceItemAdjustmentResultSchema = z.object({
 export type InvoiceItemAdjustmentResult = z.infer<
 	typeof invoiceItemAdjustmentResultSchema
 >;
+
+// --------------- query ---------------
+export const invoiceItemRecordSchema = z.object({
+	SubscriptionNumber: z.string(),
+	ChargeAmount: z.number(),
+	TaxAmount: z.number(),
+	ServiceStartDate: z.string(),
+});
+
+export const invoiceItemResponseSchema = z.object({
+	size: z.number(),
+	records: z.array(invoiceItemRecordSchema),
+	done: z.boolean(),
+});
+
+export type InvoiceItemRecord = z.infer<typeof invoiceItemRecordSchema>;
+export type InvoiceItemResponse = z.infer<typeof invoiceItemResponseSchema>;
