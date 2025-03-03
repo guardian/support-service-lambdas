@@ -131,17 +131,17 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
-		const getPaymentAmountLambda = new GuLambdaFunction(
+		const getNewPaymentAmountLambda = new GuLambdaFunction(
 			this,
-			'get-payment-amount-lambda',
+			'get-new-payment-amount-lambda',
 			{
 				app: appName,
-				functionName: `${appName}-get-payment-amount-${this.stage}`,
+				functionName: `${appName}-get-new-payment-amount-${this.stage}`,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
 				},
-				handler: 'getPaymentAmount.handler',
+				handler: 'getNewPaymentAmount.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
 				initialPolicy: [
@@ -232,11 +232,11 @@ export class DiscountExpiryNotifier extends GuStack {
 			outputPath: '$.Payload',
 		});
 
-		const getPaymentAmountLambdaTask = new LambdaInvoke(
+		const getNewPaymentAmountLambdaTask = new LambdaInvoke(
 			this,
-			'Get payment amount',
+			'Get new payment amount',
 			{
-				lambdaFunction: getPaymentAmountLambda,
+				lambdaFunction: getNewPaymentAmountLambda,
 				outputPath: '$.Payload',
 			},
 		);
@@ -277,7 +277,7 @@ export class DiscountExpiryNotifier extends GuStack {
 		);
 
 		subStatusFetcherMap.iterator(
-			getSubStatusLambdaTask.next(getPaymentAmountLambdaTask),
+			getSubStatusLambdaTask.next(getNewPaymentAmountLambdaTask),
 		);
 		expiringDiscountProcessorMap.iterator(sendEmailLambdaTask);
 

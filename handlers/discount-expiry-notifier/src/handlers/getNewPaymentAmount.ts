@@ -6,11 +6,11 @@ import dayjs from 'dayjs';
 import type { z } from 'zod';
 import { BaseRecordForEmailSendSchema } from '../types';
 
-export type GetPaymentAmountInput = z.infer<
+export type GetNewPaymentAmountInput = z.infer<
 	typeof BaseRecordForEmailSendSchema
 >;
 
-export const handler = async (event: GetPaymentAmountInput) => {
+export const handler = async (event: GetNewPaymentAmountInput) => {
 	try {
 		const parsedEvent = BaseRecordForEmailSendSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
@@ -24,11 +24,11 @@ export const handler = async (event: GetPaymentAmountInput) => {
 			parsedEvent.zuoraSubName,
 			parsedEvent.nextPaymentDate,
 		);
-		const paymentAmount = getPaymentAmount(invoiceItemsForSubscription);
+		const newPaymentAmount = getNewPaymentAmount(invoiceItemsForSubscription);
 
 		return {
 			...parsedEvent,
-			paymentAmount,
+			newPaymentAmount: newPaymentAmount,
 		};
 	} catch (error) {
 		console.log('error:', error);
@@ -54,6 +54,6 @@ const filterRecords = (
 	);
 };
 
-const getPaymentAmount = (invoiceItems: InvoiceItem[]): number => {
+const getNewPaymentAmount = (invoiceItems: InvoiceItem[]): number => {
 	return invoiceItems.reduce((total, item) => total + item.paymentAmount, 0);
 };
