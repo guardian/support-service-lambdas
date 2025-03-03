@@ -22,7 +22,7 @@ export const handler = async (event: { discountExpiresOnDate?: string }) => {
 			`datatech-platform-${stageFromEnvironment().toLowerCase()}`,
 			query(discountExpiresOnDate),
 		);
-
+		console.log('result', result);
 		const resultData = BigQueryRecordSchema.parse(result[0]);
 		console.log('resultData', resultData);
 
