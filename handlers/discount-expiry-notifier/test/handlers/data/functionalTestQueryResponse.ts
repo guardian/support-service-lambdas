@@ -1,4 +1,5 @@
-export const testQueryResponse = [
+//Used for dev testing since there is no dev sandbox for bigquery tables
+export const functionalTestQueryResponse = [
 	{
 		billingAccountId: 'A00265729',
 		firstName: 'David',
@@ -7,9 +8,9 @@ export const testQueryResponse = [
 		paymentCurrency: 'GBP',
 		paymentFrequency: 'Month',
 		productName: 'GW',
-		sfContactId: '0039E00001HiIGlQAN', //dev
+		sfContactId: '0039E00001HiIGlQAN',
 		zuoraSubName: 'A-S00424163', // Active sub in dev
-		workEmail: 'david.pepper@guardian.co.uk', // dev
+		workEmail: 'david.pepper@guardian.co.uk',
 		contactCountry: 'united states of america',
 		sfBuyerContactMailingCountry: 'united states of america',
 		sfBuyerContactOtherCountry: 'united states of america',
@@ -17,7 +18,7 @@ export const testQueryResponse = [
 		sfRecipientContactOtherCountry: 'united states of america',
 	},
 	{
-		billingAccountId: 'A00992502',
+		billingAccountId: 'A00900236',
 		firstName: 'Graham',
 		nextPaymentDate: '2025-02-28',
 		paymentAmount: 4.56,
@@ -25,7 +26,7 @@ export const testQueryResponse = [
 		paymentFrequency: 'Month',
 		productName: 'Supporter Plus',
 		sfContactId: '0039E00001HwhM9QAJ',
-		zuoraSubName: 'A-S00886159', // Active subscription in dev
+		zuoraSubName: 'A-S00886159', // Active sub in dev
 		workEmail: 'graham.hopgood@guardian.co.uk',
 		contactCountry: 'United States',
 		sfBuyerContactMailingCountry: 'United States',
@@ -34,7 +35,7 @@ export const testQueryResponse = [
 		sfRecipientContactOtherCountry: 'United States',
 	},
 	{
-		billingAccountId: 'A00992502',
+		billingAccountId: 'A00512380',
 		firstName: 'Robert',
 		nextPaymentDate: '2025-02-28',
 		paymentAmount: 7.89,
@@ -42,7 +43,7 @@ export const testQueryResponse = [
 		paymentFrequency: 'Month',
 		productName: 'Supporter Plus',
 		sfContactId: '0039E00001lNoXrQAK',
-		zuoraSubName: 'A-S00515481', // cancelled subscription in dev sandbox
+		zuoraSubName: 'A-S00515481', // Cancelled sub in dev
 		workEmail: 'david.pepper+3003+1@guardian.co.uk',
 		contactCountry: 'Germany',
 		sfBuyerContactMailingCountry: 'Germany',

@@ -2,7 +2,7 @@ import { getSSMParam } from '@modules/aws/ssm';
 import { buildAuthClient, runQuery } from '@modules/bigquery/src/bigquery';
 import { stageFromEnvironment } from '@modules/stage';
 import { addDays, handler } from '../../src/handlers/getExpiringDiscounts';
-import { testQueryResponse } from '../../src/testQueryResponse';
+import { testQueryResponse } from './data/getExpiringDiscounts/testQueryResponse';
 
 jest.mock('@modules/bigquery/src/bigquery');
 jest.mock('@modules/stage');
@@ -22,7 +22,7 @@ describe('getExpiringDiscounts handler', () => {
 		process.env.DAYS_UNTIL_DISCOUNT_EXPIRY_DATE = '32';
 	});
 
-	test('should return results when discountExpiresOnDate is provided', async () => {
+	test('should return results when discountExpiresOnDate value is provided', async () => {
 		const event = { discountExpiresOnDate: '2025-11-23' };
 		const result = await handler(event);
 
@@ -38,11 +38,11 @@ describe('getExpiringDiscounts handler', () => {
 		expect(result).toEqual({
 			discountExpiresOnDate: '2025-11-23',
 			allRecordsFromBigQueryCount: 3,
-			allRecordsFromBigQuery: mockQueryResult,
+			allRecordsFromBigQuery: mockQueryResult[0],
 		});
 	});
 
-	test('should return results when discountExpiresOnDate is not provided', async () => {
+	test('should return results when discountExpiresOnDate value is not provided', async () => {
 		const event = {};
 		const mockDate = new Date(2025, 10, 23);
 		jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
@@ -60,7 +60,7 @@ describe('getExpiringDiscounts handler', () => {
 		expect(result).toEqual({
 			discountExpiresOnDate: '2025-12-25',
 			allRecordsFromBigQueryCount: 3,
-			allRecordsFromBigQuery: mockQueryResult,
+			allRecordsFromBigQuery: mockQueryResult[0],
 		});
 	});
 
