@@ -22,7 +22,7 @@ describe('getExpiringDiscounts handler', () => {
 		process.env.DAYS_UNTIL_DISCOUNT_EXPIRY_DATE = '32';
 	});
 
-	test('should return results when discountExpiresOnDate is provided', async () => {
+	test('should return results when discountExpiresOnDate value is provided', async () => {
 		const event = { discountExpiresOnDate: '2025-11-23' };
 		const result = await handler(event);
 
@@ -42,7 +42,7 @@ describe('getExpiringDiscounts handler', () => {
 		});
 	});
 
-	test('should return results when discountExpiresOnDate is not provided', async () => {
+	test('should return results when discountExpiresOnDate value is not provided', async () => {
 		const event = {};
 		const mockDate = new Date(2025, 10, 23);
 		jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
