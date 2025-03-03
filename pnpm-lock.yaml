@@ -268,11 +268,7 @@ importers:
         specifier: ^8.10.147
         version: 8.10.147
 
-  handlers/write-off-unpaid-invoices:
-    dependencies:
-      '@aws-sdk/client-secrets-manager':
-        specifier: 3.734.0
-        version: 3.734.0
+  handlers/write-off-unpaid-invoices: {}
 
   handlers/zuora-salesforce-link-remover:
     dependencies:

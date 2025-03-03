@@ -1,37 +1,16 @@
-import {
-	GetSecretValueCommand,
-	SecretsManagerClient,
-} from '@aws-sdk/client-secrets-manager';
-
-const client = new SecretsManagerClient({ region: 'eu-west-1' });
+import { getSecretValue } from '@modules/secrets-manager/getSecret';
 
 type Stage = 'CODE' | 'CSBX' | 'PROD';
-
-async function getZuoraOAuthSecret({ stage }: { stage: Stage }): Promise<{
-	client_id: string;
-	client_secret: string;
-}> {
-	const secretId = `${stage}/Zuora/User/AndreaDiotallevi`;
-
-	try {
-		const command = new GetSecretValueCommand({ SecretId: secretId });
-		const response = await client.send(command);
-
-		return JSON.parse(response.SecretString ?? '') as {
-			client_id: string;
-			client_secret: string;
-		};
-	} catch (error) {
-		throw error;
-	}
-}
 
 export async function getZuoraOAuthToken({
 	stage,
 }: {
 	stage: Stage;
 }): Promise<string> {
-	const { client_id, client_secret } = await getZuoraOAuthSecret({ stage });
+	const { client_id, client_secret } = await getSecretValue<{
+		client_id: string;
+		client_secret: string;
+	}>(`${stage}/Zuora/User/AndreaDiotallevi`);
 
 	const endpoint = {
 		CODE: `https://rest.apisandbox.zuora.com/oauth/token`,
