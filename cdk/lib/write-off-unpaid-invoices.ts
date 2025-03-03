@@ -57,7 +57,7 @@ export class WriteOffUnpaidInvoices extends GuStack {
 					new PolicyStatement({
 						actions: ['secretsmanager:GetSecretValue'],
 						resources: [
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora/User/AndreaDiotallevi`,
 						],
 					}),
 				],
