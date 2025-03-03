@@ -1,11 +1,11 @@
 import {
-	SecretsManagerClient,
 	GetSecretValueCommand,
+	SecretsManagerClient,
 } from '@aws-sdk/client-secrets-manager';
 
-// import { Stage } from '../scripts/createInvoiceItemAdjustment';
-
 const client = new SecretsManagerClient({ region: 'eu-west-1' });
+
+type Stage = 'CODE' | 'CSBX' | 'PROD';
 
 async function getZuoraOAuthSecret({ stage }: { stage: Stage }): Promise<{
 	client_id: string;
@@ -17,7 +17,7 @@ async function getZuoraOAuthSecret({ stage }: { stage: Stage }): Promise<{
 		const command = new GetSecretValueCommand({ SecretId: secretId });
 		const response = await client.send(command);
 
-		return JSON.parse(response.SecretString || '') as {
+		return JSON.parse(response.SecretString ?? '') as {
 			client_id: string;
 			client_secret: string;
 		};

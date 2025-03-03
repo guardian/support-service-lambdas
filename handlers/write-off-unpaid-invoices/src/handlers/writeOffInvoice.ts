@@ -1,5 +1,5 @@
-import { getZuoraOAuthToken } from '../services/getOAuthToken';
 import { stageFromEnvironment } from '@modules/stage';
+import { getZuoraOAuthToken } from '../services/getOAuthToken';
 
 type InvoiceData = {
 	accounting_code_project_codes: string;
@@ -28,7 +28,9 @@ export const handler = async (event: { Items: InvoiceData[] }) => {
 		const invoiceId = item.invoice_id;
 		const invoiceAmount = Number.parseFloat(item.invoice_amount);
 
-		if (ids.includes(invoiceId)) continue;
+		if (ids.includes(invoiceId)) {
+			continue;
+		}
 
 		const invoiceItems = item.invoice_items_data
 			.split(',')
@@ -63,8 +65,9 @@ export const handler = async (event: { Items: InvoiceData[] }) => {
 			if (
 				(invoiceAmount > 0 && totalAdjustment <= 0) ||
 				(invoiceAmount < 0 && totalAdjustment >= 0)
-			)
+			) {
 				break;
+			}
 
 			const {
 				invoiceItemId,
@@ -76,8 +79,9 @@ export const handler = async (event: { Items: InvoiceData[] }) => {
 			if (
 				(invoiceAmount > 0 && invoiceItemAmount <= 0) ||
 				(invoiceAmount < 0 && invoiceItemAmount >= 0)
-			)
+			) {
 				continue;
+			}
 
 			const adjustmentAmount =
 				Math.abs(totalAdjustment) > Math.abs(invoiceItemAmount)
@@ -160,7 +164,7 @@ export const handler = async (event: { Items: InvoiceData[] }) => {
 						const responseData = (await response.json()) as {
 							success?: boolean;
 							Success?: boolean;
-							reasons?: { code: string; message: string }[];
+							reasons?: Array<{ code: string; message: string }>;
 						};
 
 						if (
