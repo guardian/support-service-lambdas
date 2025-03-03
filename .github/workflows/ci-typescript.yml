@@ -52,6 +52,7 @@ jobs:
           - salesforce-disaster-recovery-health-check
           - zuora-salesforce-link-remover
           - metric-push-api
+          - write-off-unpaid-invoices
     runs-on: ubuntu-latest
     permissions:
       id-token: write
