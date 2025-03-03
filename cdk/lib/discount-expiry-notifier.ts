@@ -131,6 +131,29 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
+		const getOldPaymentAmountLambda = new GuLambdaFunction(
+			this,
+			'get-old-payment-amount-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-get-old-payment-amount-${this.stage}`,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+				},
+				handler: 'getOldPaymentAmount.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['secretsmanager:GetSecretValue'],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+						],
+					}),
+				],
+			},
+		);
 		const getNewPaymentAmountLambda = new GuLambdaFunction(
 			this,
 			'get-new-payment-amount-lambda',
@@ -232,6 +255,15 @@ export class DiscountExpiryNotifier extends GuStack {
 			outputPath: '$.Payload',
 		});
 
+		const getOldPaymentAmountLambdaTask = new LambdaInvoke(
+			this,
+			'Get old payment amount',
+			{
+				lambdaFunction: getOldPaymentAmountLambda,
+				outputPath: '$.Payload',
+			},
+		);
+
 		const getNewPaymentAmountLambdaTask = new LambdaInvoke(
 			this,
 			'Get new payment amount',
@@ -277,7 +309,9 @@ export class DiscountExpiryNotifier extends GuStack {
 		);
 
 		subStatusFetcherMap.iterator(
-			getSubStatusLambdaTask.next(getNewPaymentAmountLambdaTask),
+			getSubStatusLambdaTask
+				.next(getOldPaymentAmountLambdaTask)
+				.next(getNewPaymentAmountLambdaTask),
 		);
 		expiringDiscountProcessorMap.iterator(sendEmailLambdaTask);
 
