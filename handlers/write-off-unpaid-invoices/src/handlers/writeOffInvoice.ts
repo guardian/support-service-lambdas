@@ -139,7 +139,7 @@ export const handler = async (event: { Items: InvoiceData[] }) => {
 
 			for (let k = 0; k < payloads.length; k++) {
 				const payload = payloads[k];
-				console.log('Payload: ' + payload);
+				console.log('Payload: ' + JSON.stringify(payload));
 
 				try {
 					const accessToken = await getZuoraOAuthToken({ stage });
@@ -168,7 +168,7 @@ export const handler = async (event: { Items: InvoiceData[] }) => {
 							Success?: boolean;
 							reasons?: Array<{ code: string; message: string }>;
 						};
-						console.log(JSON.stringify(responseData));
+						console.log('Response: ' + JSON.stringify(responseData));
 
 						if (
 							responseData.success == false ||
