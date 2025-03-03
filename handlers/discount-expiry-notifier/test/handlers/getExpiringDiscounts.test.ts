@@ -38,7 +38,7 @@ describe('getExpiringDiscounts handler', () => {
 		expect(result).toEqual({
 			discountExpiresOnDate: '2025-11-23',
 			allRecordsFromBigQueryCount: 3,
-			allRecordsFromBigQuery: mockQueryResult,
+			allRecordsFromBigQuery: mockQueryResult[0],
 		});
 	});
 
@@ -60,7 +60,7 @@ describe('getExpiringDiscounts handler', () => {
 		expect(result).toEqual({
 			discountExpiresOnDate: '2025-12-25',
 			allRecordsFromBigQueryCount: 3,
-			allRecordsFromBigQuery: mockQueryResult,
+			allRecordsFromBigQuery: mockQueryResult[0],
 		});
 	});
 
