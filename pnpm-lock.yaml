@@ -268,11 +268,7 @@ importers:
         specifier: ^8.10.147
         version: 8.10.147
 
-  handlers/write-off-unpaid-invoices:
-    devDependencies:
-      '@types/aws-lambda':
-        specifier: ^8.10.147
-        version: 8.10.147
+  handlers/write-off-unpaid-invoices: {}
 
   handlers/zuora-salesforce-link-remover:
     dependencies:
