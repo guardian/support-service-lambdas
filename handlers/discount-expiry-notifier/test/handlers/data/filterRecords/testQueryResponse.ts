@@ -8,9 +8,9 @@ export const testQueryResponse = [
 			paymentCurrency: 'GBP',
 			paymentFrequency: 'Month',
 			productName: 'GW',
-			sfContactId: '0039E00001HiIGlQAN', //dev
-			zuoraSubName: 'A-S00424163', // Active sub in dev
-			workEmail: 'david.pepper@guardian.co.uk', // dev
+			sfContactId: '0039E00001HiIGlQAN',
+			zuoraSubName: 'A-S00424163',
+			workEmail: 'abc@guardian.co.uk',
 			contactCountry: 'united states of america',
 			sfBuyerContactMailingCountry: 'united states of america',
 			sfBuyerContactOtherCountry: 'united states of america',
@@ -26,8 +26,8 @@ export const testQueryResponse = [
 			paymentFrequency: 'Month',
 			productName: 'Supporter Plus',
 			sfContactId: '0039E00001HwhM9QAJ',
-			zuoraSubName: 'A-S00886159', // Active subscription in dev
-			workEmail: 'graham.hopgood@guardian.co.uk',
+			zuoraSubName: 'A-S00886159',
+			workEmail: 'defg@guardian.co.uk',
 			contactCountry: 'United States',
 			sfBuyerContactMailingCountry: 'United States',
 			sfBuyerContactOtherCountry: 'United States',
@@ -43,8 +43,8 @@ export const testQueryResponse = [
 			paymentFrequency: 'Month',
 			productName: 'Supporter Plus',
 			sfContactId: '0039E00001lNoXrQAK',
-			zuoraSubName: 'A-S00515481', // cancelled subscription in dev sandbox
-			workEmail: 'david.pepper+3003+1@guardian.co.uk',
+			zuoraSubName: 'A-S00515481',
+			workEmail: 'hijk@guardian.co.uk',
 			contactCountry: 'Germany',
 			sfBuyerContactMailingCountry: 'Germany',
 			sfBuyerContactOtherCountry: 'Germany',
