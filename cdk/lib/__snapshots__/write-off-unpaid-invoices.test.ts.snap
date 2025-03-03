@@ -489,6 +489,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 1`] = `
               "Action": [
                 "s3:GetObject",
                 "s3:PutObject",
+                "s3:ListBucket",
               ],
               "Effect": "Allow",
               "Resource": {
@@ -1059,6 +1060,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 2`] = `
               "Action": [
                 "s3:GetObject",
                 "s3:PutObject",
+                "s3:ListBucket",
               ],
               "Effect": "Allow",
               "Resource": {
