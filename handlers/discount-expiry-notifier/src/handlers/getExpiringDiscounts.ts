@@ -72,6 +72,7 @@ WITH expiringDiscounts AS (
         sfBuyerContact.billing_country as sfBuyerContactOtherCountry,
         sfRecipientContact.mailing_country as sfRecipientContactMailingCountry,
         sfRecipientContact.billing_country as sfRecipientContactOtherCountry,
+        
     FROM 
         datatech-fivetran.zuora.rate_plan_charge charge
     INNER JOIN datatech-fivetran.zuora.rate_plan rate_plan 
