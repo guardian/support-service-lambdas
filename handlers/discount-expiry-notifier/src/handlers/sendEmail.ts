@@ -15,6 +15,8 @@ export const handler = async (event: SendEmailInput) => {
 	const emailSendEligibility = getEmailSendEligibility(
 		parsedEvent.subStatus,
 		parsedEvent.workEmail,
+		parsedEvent.oldPaymentAmount,
+		parsedEvent.newPaymentAmount,
 	);
 
 	if (!emailSendEligibility.isEligible) {
@@ -81,6 +83,8 @@ export const handler = async (event: SendEmailInput) => {
 function getIneligibilityReason(
 	subStatus: string,
 	workEmail: string | null | undefined,
+	oldPaymentAmount: number,
+	newPaymentAmount: number,
 ) {
 	if (subStatus === 'Cancelled') {
 		return 'Subscription status is cancelled';
@@ -91,15 +95,28 @@ function getIneligibilityReason(
 	if (!workEmail) {
 		return 'No value for work email';
 	}
+	if (oldPaymentAmount === newPaymentAmount) {
+		return 'Old and new payment amounts are the same';
+	}
 	return '';
 }
 function getEmailSendEligibility(
 	subStatus: string,
 	workEmail: string | null | undefined,
+	oldPaymentAmount: number,
+	newPaymentAmount: number,
 ) {
 	return {
-		isEligible: subStatus === 'Active' && !!workEmail,
-		ineligibilityReason: getIneligibilityReason(subStatus, workEmail),
+		isEligible:
+			subStatus === 'Active' &&
+			!!workEmail &&
+			oldPaymentAmount !== newPaymentAmount,
+		ineligibilityReason: getIneligibilityReason(
+			subStatus,
+			workEmail,
+			oldPaymentAmount,
+			newPaymentAmount,
+		),
 	};
 }
 
