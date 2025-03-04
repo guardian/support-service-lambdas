@@ -98,6 +98,7 @@ WITH expiringDiscounts AS (
         AND zuoraSub.is_latest_version = TRUE 
         AND zuoraSub.status = 'Active' 
 		AND DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = '${discountExpiresOnDate}'
+        AND zuoraSub.auto_renew = true
 )
 SELECT 
     STRING_AGG(DISTINCT billingAccountId) as billingAccountId,
