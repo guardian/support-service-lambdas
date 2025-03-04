@@ -57,20 +57,7 @@ const calculateTotalAmount = (records: InvoiceItemRecord[]) => {
 };
 
 const query = (subName: string, serviceStartDate: string): string =>
-	`
-	SELECT 
-		ChargeAmount, 
-		TaxAmount, 
-		ServiceStartDate, 
-		SubscriptionNumber 
-	FROM 
-		InvoiceItem 
-	WHERE 
-		SubscriptionNumber = '${subName}' AND 
-		ServiceStartDate = '${serviceStartDate}' AND
-		ChargeName!='Delivery-problem credit' AND 
-		ChargeName!='Holiday Credit'
-	`;
+	`SELECT ChargeAmount, TaxAmount, ServiceStartDate, SubscriptionNumber FROM InvoiceItem WHERE SubscriptionNumber = '${subName}' AND ServiceStartDate = '${serviceStartDate}' ANDChargeName!='Delivery-problem credit' AND ChargeName!='Holiday Credit'`;
 
 export function getLastPaymentDateBeforeDiscountExpiry(
 	nextPaymentDate: string,
