@@ -6,38 +6,38 @@ import dayjs from 'dayjs';
 import type { z } from 'zod';
 import { BaseRecordForEmailSendSchema } from '../types';
 
-export type GetPaymentAmountInput = z.infer<
+export type GetNewPaymentAmountInput = z.infer<
 	typeof BaseRecordForEmailSendSchema
 >;
 
-export const handler = async (event: GetPaymentAmountInput) => {
+export const handler = async (event: GetNewPaymentAmountInput) => {
 	try {
 		const parsedEvent = BaseRecordForEmailSendSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const getBillingPreviewResponse = await getBillingPreview(
 			zuoraClient,
-			dayjs(parsedEvent.nextPaymentDate),
+			dayjs(parsedEvent.firstPaymentDateAfterDiscountExpiry),
 			parsedEvent.billingAccountId,
 		);
 		const invoiceItemsForSubscription = filterRecords(
 			getBillingPreviewResponse.invoiceItems,
 			parsedEvent.zuoraSubName,
-			parsedEvent.nextPaymentDate,
+			parsedEvent.firstPaymentDateAfterDiscountExpiry,
 		);
-		const paymentAmount = getPaymentAmount(invoiceItemsForSubscription);
+		const newPaymentAmount = getNewPaymentAmount(invoiceItemsForSubscription);
 
 		return {
 			...parsedEvent,
-			paymentAmount,
+			newPaymentAmount,
 		};
 	} catch (error) {
 		console.log('error:', error);
-
+		const errorMessage =
+			'Error getting new payment amount:' +
+			(error instanceof Error ? error.message : JSON.stringify(error, null, 2));
 		return {
 			...event,
-			subStatus: 'Error',
-			errorDetail:
-				error instanceof Error ? error.message : JSON.stringify(error, null, 2),
+			errorDetail: errorMessage,
 		};
 	}
 };
@@ -45,15 +45,18 @@ export const handler = async (event: GetPaymentAmountInput) => {
 const filterRecords = (
 	invoiceItems: InvoiceItem[],
 	subscriptionName: string,
-	nextPaymentDate: string,
+	firstPaymentDateAfterDiscountExpiry: string,
 ): InvoiceItem[] => {
 	return invoiceItems.filter(
 		(item) =>
 			item.subscriptionName === subscriptionName &&
-			dayjs(item.serviceStartDate).isSame(dayjs(nextPaymentDate), 'day'),
+			dayjs(item.serviceStartDate).isSame(
+				dayjs(firstPaymentDateAfterDiscountExpiry),
+				'day',
+			),
 	);
 };
 
-const getPaymentAmount = (invoiceItems: InvoiceItem[]): number => {
+const getNewPaymentAmount = (invoiceItems: InvoiceItem[]): number => {
 	return invoiceItems.reduce((total, item) => total + item.paymentAmount, 0);
 };
