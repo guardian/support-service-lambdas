@@ -32,12 +32,12 @@ export const handler = async (event: GetNewPaymentAmountInput) => {
 		};
 	} catch (error) {
 		console.log('error:', error);
-
+		const errorMessage =
+			'Error getting new payment amount:' +
+			(error instanceof Error ? error.message : JSON.stringify(error, null, 2));
 		return {
 			...event,
-			subStatus: 'Error',
-			errorDetail:
-				error instanceof Error ? error.message : JSON.stringify(error, null, 2),
+			errorDetail: errorMessage,
 		};
 	}
 };
