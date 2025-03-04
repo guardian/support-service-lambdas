@@ -34,6 +34,7 @@ export const handler = async (event: GetOldPaymentAmountInput) => {
 		console.log('getInvoiceItemsResponse:', getInvoiceItemsResponse);
 		return {
 			...parsedEvent,
+			lastPaymentDateBeforeDiscountExpiry,
 			oldPaymentAmount,
 		};
 	} catch (error) {
@@ -82,7 +83,7 @@ export function getLastPaymentDateBeforeDiscountExpiry(
 		date.setDate(28);
 	}
 
-	switch (paymentFrequency) {
+	switch (paymentFrequency.toLowerCase()) {
 		case 'annual':
 			date.setFullYear(date.getFullYear() - 1);
 			break;

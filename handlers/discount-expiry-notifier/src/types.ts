@@ -11,6 +11,7 @@ export const BigQueryRecordSchema = z.object({
 			z.string(),
 		])
 		.transform((val) => (typeof val === 'string' ? val : val.value)),
+	lastPaymentDateBeforeDiscountExpiry: z.string().optional(),
 	oldPaymentAmount: z.number().optional(),
 	newPaymentAmount: z.number().optional(),
 	paymentCurrency: z.string(),
