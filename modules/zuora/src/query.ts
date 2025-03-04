@@ -6,7 +6,9 @@ export const doQuery = async (
 	zuoraClient: ZuoraClient,
 	query: string,
 ): Promise<QueryResponse> => {
-	console.log(`Querying zuora for invoice items...`);
+	console.log('Querying zuora...');
+	console.log('Query:', query);
+
 	const result = await zuoraClient.post(
 		'/v1/action/query',
 		JSON.stringify({
@@ -14,9 +16,6 @@ export const doQuery = async (
 		}),
 		queryResponseSchema,
 	);
-	console.log('Query result:', result);
+
 	return result as QueryResponse;
-	// if (!result.Success) {
-	// 	throw new Error('An error occurred while creating the payment');
-	// }
 };
