@@ -16,13 +16,13 @@ export const handler = async (event: GetNewPaymentAmountInput) => {
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const getBillingPreviewResponse = await getBillingPreview(
 			zuoraClient,
-			dayjs(parsedEvent.nextPaymentDate),
+			dayjs(parsedEvent.firstPaymentDateAfterDiscountExpiry),
 			parsedEvent.billingAccountId,
 		);
 		const invoiceItemsForSubscription = filterRecords(
 			getBillingPreviewResponse.invoiceItems,
 			parsedEvent.zuoraSubName,
-			parsedEvent.nextPaymentDate,
+			parsedEvent.firstPaymentDateAfterDiscountExpiry,
 		);
 		const newPaymentAmount = getNewPaymentAmount(invoiceItemsForSubscription);
 
@@ -45,12 +45,15 @@ export const handler = async (event: GetNewPaymentAmountInput) => {
 const filterRecords = (
 	invoiceItems: InvoiceItem[],
 	subscriptionName: string,
-	nextPaymentDate: string,
+	firstPaymentDateAfterDiscountExpiry: string,
 ): InvoiceItem[] => {
 	return invoiceItems.filter(
 		(item) =>
 			item.subscriptionName === subscriptionName &&
-			dayjs(item.serviceStartDate).isSame(dayjs(nextPaymentDate), 'day'),
+			dayjs(item.serviceStartDate).isSame(
+				dayjs(firstPaymentDateAfterDiscountExpiry),
+				'day',
+			),
 	);
 };
 

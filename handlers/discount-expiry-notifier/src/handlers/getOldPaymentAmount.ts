@@ -15,7 +15,7 @@ export const handler = async (event: GetOldPaymentAmountInput) => {
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const lastPaymentDateBeforeDiscountExpiry =
 			getLastPaymentDateBeforeDiscountExpiry(
-				parsedEvent.nextPaymentDate,
+				parsedEvent.firstPaymentDateAfterDiscountExpiry,
 				parsedEvent.paymentFrequency,
 			);
 		console.log(
@@ -25,7 +25,10 @@ export const handler = async (event: GetOldPaymentAmountInput) => {
 
 		const getInvoiceItemsResponse = await doQuery(
 			zuoraClient,
-			query(parsedEvent.zuoraSubName, parsedEvent.nextPaymentDate),
+			query(
+				parsedEvent.zuoraSubName,
+				parsedEvent.firstPaymentDateAfterDiscountExpiry,
+			),
 		);
 		const oldPaymentAmount = calculateTotalAmount(
 			getInvoiceItemsResponse.records,

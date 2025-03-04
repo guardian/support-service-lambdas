@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const BigQueryRecordSchema = z.object({
 	billingAccountId: z.string(),
 	firstName: z.string(),
-	nextPaymentDate: z
+	firstPaymentDateAfterDiscountExpiry: z
 		.union([
 			z.object({
 				value: z.string(),
