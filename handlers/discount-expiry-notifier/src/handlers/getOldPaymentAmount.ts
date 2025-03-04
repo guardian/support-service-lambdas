@@ -23,6 +23,8 @@ export const handler = async (event: GetOldPaymentAmountInput) => {
 			lastPaymentDateBeforeDiscountExpiry,
 		);
 
+		//todo if lastPaymentDateBeforeDiscountExpiry is in the past of now,
+		//use query to get invoice items, otherwise use billing-preview endpoint
 		const getInvoiceItemsResponse = await doQuery(
 			zuoraClient,
 			query(
