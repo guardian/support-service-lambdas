@@ -12,6 +12,12 @@ export const handler = async (event: SendEmailInput) => {
 		throw new Error('Invalid event data');
 	}
 	const parsedEvent = parsedEventResult.data;
+	if (
+		parsedEvent.oldPaymentAmount === undefined ||
+		parsedEvent.newPaymentAmount === undefined
+	) {
+		throw new Error('Payment amounts must be defined');
+	}
 	const emailSendEligibility = getEmailSendEligibility(
 		parsedEvent.subStatus,
 		parsedEvent.workEmail,
