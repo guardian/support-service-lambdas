@@ -8,17 +8,15 @@ import { BaseRecordForEmailSendSchema } from '../types';
 export type GetOldPaymentAmountInput = z.infer<
 	typeof BaseRecordForEmailSendSchema
 >;
-const calculateTotalAmount = (records: InvoiceItemRecord[]) => {
-	return records.reduce(
-		(total, record) => total + record.ChargeAmount + record.TaxAmount,
-		0,
-	);
-};
+
 export const handler = async (event: GetOldPaymentAmountInput) => {
 	try {
 		const parsedEvent = BaseRecordForEmailSendSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
-		const getInvoiceItemsResponse = await doQuery(zuoraClient);
+		const getInvoiceItemsResponse = await doQuery(
+			zuoraClient,
+			query('A-S00424163', '2025-02-22'),
+		);
 		const oldPaymentAmount = calculateTotalAmount(
 			getInvoiceItemsResponse.records,
 		);
@@ -39,3 +37,26 @@ export const handler = async (event: GetOldPaymentAmountInput) => {
 		};
 	}
 };
+
+const calculateTotalAmount = (records: InvoiceItemRecord[]) => {
+	return records.reduce(
+		(total, record) => total + record.ChargeAmount + record.TaxAmount,
+		0,
+	);
+};
+
+const query = (subName: string, serviceStartDate: string): string =>
+	`
+	SELECT 
+		ChargeAmount, 
+		TaxAmount, 
+		ServiceStartDate, 
+		SubscriptionNumber 
+	FROM 
+		InvoiceItem 
+	WHERE 
+		SubscriptionNumber = '${subName}' AND 
+		ServiceStartDate = '${serviceStartDate}' AND
+		ChargeName!='Delivery-problem credit' AND 
+		ChargeName!='Holiday Credit'
+	`;
