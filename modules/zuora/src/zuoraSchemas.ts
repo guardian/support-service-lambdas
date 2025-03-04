@@ -234,11 +234,12 @@ export const invoiceItemRecordSchema = z.object({
 	ServiceStartDate: z.string(),
 });
 
-export const invoiceItemResponseSchema = z.object({
+export const queryResponseSchema = z.object({
 	size: z.number(),
 	records: z.array(invoiceItemRecordSchema),
 	done: z.boolean(),
 });
 
+//refine this
 export type InvoiceItemRecord = z.infer<typeof invoiceItemRecordSchema>;
-export type InvoiceItemResponse = z.infer<typeof invoiceItemResponseSchema>;
+export type QueryResponse = z.infer<typeof queryResponseSchema>;
