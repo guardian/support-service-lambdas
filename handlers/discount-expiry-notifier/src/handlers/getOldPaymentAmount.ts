@@ -13,9 +13,19 @@ export const handler = async (event: GetOldPaymentAmountInput) => {
 	try {
 		const parsedEvent = BaseRecordForEmailSendSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
+		const lastPaymentDateBeforeDiscountExpiry =
+			getLastPaymentDateBeforeDiscountExpiry(
+				parsedEvent.nextPaymentDate,
+				parsedEvent.paymentFrequency,
+			);
+		console.log(
+			'lastPaymentDateBeforeDiscountExpiry:',
+			lastPaymentDateBeforeDiscountExpiry,
+		);
+
 		const getInvoiceItemsResponse = await doQuery(
 			zuoraClient,
-			query('A-S00424163', '2025-02-22'),
+			query(parsedEvent.zuoraSubName, parsedEvent.nextPaymentDate),
 		);
 		const oldPaymentAmount = calculateTotalAmount(
 			getInvoiceItemsResponse.records,
@@ -60,3 +70,31 @@ const query = (subName: string, serviceStartDate: string): string =>
 		ChargeName!='Delivery-problem credit' AND 
 		ChargeName!='Holiday Credit'
 	`;
+
+export function getLastPaymentDateBeforeDiscountExpiry(
+	nextPaymentDate: string,
+	paymentFrequency: string,
+): string {
+	const date = new Date(nextPaymentDate);
+
+	//if the date is a leap year, set the last day of February
+	if (date.getMonth() === 1 && date.getDate() === 29) {
+		date.setDate(28);
+	}
+
+	switch (paymentFrequency) {
+		case 'annual':
+			date.setFullYear(date.getFullYear() - 1);
+			break;
+		case 'quarter':
+			date.setMonth(date.getMonth() - 3);
+			break;
+		case 'month':
+			date.setMonth(date.getMonth() - 1);
+			break;
+		default:
+			throw new Error('Invalid payment frequency');
+	}
+
+	return date.toISOString().split('T')[0] ?? '';
+}
