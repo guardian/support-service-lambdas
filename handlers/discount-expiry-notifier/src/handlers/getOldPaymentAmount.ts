@@ -63,10 +63,10 @@ const query = (subName: string, serviceStartDate: string): string =>
 	`SELECT ChargeAmount, TaxAmount, ServiceStartDate, SubscriptionNumber FROM InvoiceItem WHERE SubscriptionNumber = '${subName}' AND ServiceStartDate = '${serviceStartDate}' ANDChargeName!='Delivery-problem credit' AND ChargeName!='Holiday Credit'`;
 
 export function getLastPaymentDateBeforeDiscountExpiry(
-	nextPaymentDate: string,
+	firstPaymentDateAfterDiscountExpiry: string,
 	paymentFrequency: string,
 ): string {
-	const date = new Date(nextPaymentDate);
+	const date = new Date(firstPaymentDateAfterDiscountExpiry);
 
 	//if the date is a leap year, set the last day of February
 	if (date.getMonth() === 1 && date.getDate() === 29) {
