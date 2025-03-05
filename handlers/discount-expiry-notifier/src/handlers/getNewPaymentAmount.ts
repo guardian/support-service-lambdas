@@ -60,5 +60,8 @@ const filterRecords = (
 const getNewPaymentAmount = (
 	invoiceItems: BillingPreviewInvoiceItem[],
 ): number => {
-	return invoiceItems.reduce((total, item) => total + item.paymentAmount, 0);
+	return invoiceItems.reduce(
+		(total, record) => total + record.chargeAmount + record.taxAmount,
+		0,
+	);
 };
