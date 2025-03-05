@@ -1,7 +1,9 @@
 import { stageFromEnvironment } from '@modules/stage';
+import { getBillingPreview } from '@modules/zuora/billingPreview';
 import { doQuery } from '@modules/zuora/query';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { InvoiceItemRecord } from '@modules/zuora/zuoraSchemas';
+import type { InvoiceItem } from '@modules/zuora/zuoraSchemas';
+import dayjs from 'dayjs';
 import type { z } from 'zod';
 import { BaseRecordForEmailSendSchema } from '../types';
 
@@ -13,6 +15,7 @@ export const handler = async (event: GetOldPaymentAmountInput) => {
 	try {
 		const parsedEvent = BaseRecordForEmailSendSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
+		console.log('zuoraClient:', zuoraClient);
 		const lastPaymentDateBeforeDiscountExpiry =
 			getLastPaymentDateBeforeDiscountExpiry(
 				parsedEvent.firstPaymentDateAfterDiscountExpiry,
@@ -23,25 +26,30 @@ export const handler = async (event: GetOldPaymentAmountInput) => {
 			lastPaymentDateBeforeDiscountExpiry,
 		);
 
-		//todo if lastPaymentDateBeforeDiscountExpiry is in the past of now,
-		//use query to get invoice items, otherwise use billing-preview endpoint
-		const getInvoiceItemsResponse = await doQuery(
-			zuoraClient,
-			query(
-				parsedEvent.zuoraSubName,
-				parsedEvent.firstPaymentDateAfterDiscountExpiry,
-			),
-		);
-		const oldPaymentAmount = calculateTotalAmount(
-			getInvoiceItemsResponse.records,
-		);
+		const today = dayjs();
+		const targetDate = dayjs(lastPaymentDateBeforeDiscountExpiry);
 
-		console.log('getInvoiceItemsResponse:', getInvoiceItemsResponse);
-		return {
-			...parsedEvent,
+		if (targetDate.isBefore(today)) {
+			return await handleTargetDateBeforeToday(
+				zuoraClient,
+				parsedEvent,
+				lastPaymentDateBeforeDiscountExpiry,
+			);
+		}
+
+		if (targetDate.isAfter(today)) {
+			return await handleTargetDateAfterToday(
+				zuoraClient,
+				parsedEvent,
+				lastPaymentDateBeforeDiscountExpiry,
+			);
+		}
+
+		return await handleTargetDateIsToday(
+			zuoraClient,
+			parsedEvent,
 			lastPaymentDateBeforeDiscountExpiry,
-			oldPaymentAmount,
-		};
+		);
 	} catch (error) {
 		console.log('error:', error);
 		const errorMessage =
@@ -54,15 +62,167 @@ export const handler = async (event: GetOldPaymentAmountInput) => {
 	}
 };
 
-const calculateTotalAmount = (records: InvoiceItemRecord[]) => {
+const handleTargetDateBeforeToday = async (
+	zuoraClient: ZuoraClient,
+	parsedEvent: GetOldPaymentAmountInput,
+	lastPaymentDateBeforeDiscountExpiry: string,
+) => {
+	const oldPaymentAmount = await getOldPaymentAmountWhenTargetDateIsBeforeToday(
+		zuoraClient,
+		parsedEvent.zuoraSubName,
+		lastPaymentDateBeforeDiscountExpiry,
+	);
+	console.log(
+		'oldPaymentAmount (target date is before today):',
+		oldPaymentAmount,
+	);
+
+	return {
+		...parsedEvent,
+		lastPaymentDateBeforeDiscountExpiry,
+		oldPaymentAmount,
+	};
+};
+
+const handleTargetDateAfterToday = async (
+	zuoraClient: ZuoraClient,
+	parsedEvent: GetOldPaymentAmountInput,
+	lastPaymentDateBeforeDiscountExpiry: string,
+) => {
+	const oldPaymentAmount = await getOldPaymentAmountWhenTargetDateIsAfterToday(
+		zuoraClient,
+		parsedEvent.zuoraSubName,
+		parsedEvent.billingAccountId,
+		lastPaymentDateBeforeDiscountExpiry,
+	);
+	console.log(
+		'oldPaymentAmount (target date is after today):',
+		oldPaymentAmount,
+	);
+
+	return {
+		...parsedEvent,
+		lastPaymentDateBeforeDiscountExpiry,
+		oldPaymentAmount,
+	};
+};
+
+//when target date is today, whether we use the query or billing preview depends on whether a bill run
+//has been run today. We try the billing-preview first for the target date, then use a query if nothing is return from the billing-preview
+export const handleTargetDateIsToday = async (
+	zuoraClient: ZuoraClient,
+	parsedEvent: GetOldPaymentAmountInput,
+	lastPaymentDateBeforeDiscountExpiry: string,
+) => {
+	const futureInvoiceItems = await getFutureInvoiceItems(
+		zuoraClient,
+		parsedEvent.zuoraSubName,
+		parsedEvent.billingAccountId,
+		lastPaymentDateBeforeDiscountExpiry,
+	);
+	console.log(
+		'handleTargetDateIsToday futureInvoiceItems:',
+		futureInvoiceItems,
+	);
+	if (futureInvoiceItems.length > 0) {
+		return {
+			...parsedEvent,
+			lastPaymentDateBeforeDiscountExpiry,
+			oldPaymentAmount: calculateTotalAmount(futureInvoiceItems),
+		};
+	} else {
+		const pastInvoiceItems = await getPastInvoiceItems(
+			zuoraClient,
+			parsedEvent.zuoraSubName,
+			lastPaymentDateBeforeDiscountExpiry,
+		);
+		console.log('handleTargetDateIsToday pastInvoiceItems:', pastInvoiceItems);
+		if (pastInvoiceItems.length > 0) {
+			return {
+				...parsedEvent,
+				lastPaymentDateBeforeDiscountExpiry,
+				oldPaymentAmount: calculateTotalAmount(pastInvoiceItems),
+			};
+		}
+	}
+	return {
+		...parsedEvent,
+		errorDetail: 'Error getting old payment amount',
+	};
+};
+
+const getOldPaymentAmountWhenTargetDateIsAfterToday = async (
+	zuoraClient: ZuoraClient,
+	subName: string,
+	billingAccountId: string,
+	targetDate: string,
+): Promise<number> => {
+	const invoiceItemsForSubscription: InvoiceItem[] =
+		await getFutureInvoiceItems(
+			zuoraClient,
+			subName,
+			billingAccountId,
+			targetDate,
+		);
+
+	return calculateTotalAmount(invoiceItemsForSubscription);
+};
+
+const getOldPaymentAmountWhenTargetDateIsBeforeToday = async (
+	zuoraClient: ZuoraClient,
+	subName: string,
+	targetDate: string,
+): Promise<number> => {
+	const pastInvoiceItems = await getPastInvoiceItems(
+		zuoraClient,
+		subName,
+		targetDate,
+	);
+	console.log('pastInvoiceItems:', pastInvoiceItems);
+
+	return calculateTotalAmount(pastInvoiceItems);
+};
+
+export const getFutureInvoiceItems = async (
+	zuoraClient: ZuoraClient,
+	subName: string,
+	billingAccountId: string,
+	targetDate: string,
+): Promise<InvoiceItem[]> => {
+	const getBillingPreviewResponse = await getBillingPreview(
+		zuoraClient,
+		dayjs(targetDate),
+		billingAccountId,
+	);
+	const invoiceItemsForSubscription = filterRecords(
+		getBillingPreviewResponse.invoiceItems,
+		subName,
+		targetDate,
+	);
+	return invoiceItemsForSubscription;
+};
+
+export const getPastInvoiceItems = async (
+	zuoraClient: ZuoraClient,
+	subName: string,
+	targetDate: string,
+) => {
+	const getInvoiceItemsResponse = await doQuery(
+		zuoraClient,
+		query(subName, targetDate),
+	);
+	return getInvoiceItemsResponse.records;
+};
+
+export const calculateTotalAmount = (records: InvoiceItem[]) => {
 	return records.reduce(
-		(total, record) => total + record.ChargeAmount + record.TaxAmount,
+		(total, record) => total + record.chargeAmount + record.taxAmount,
 		0,
 	);
 };
 
 const query = (subName: string, serviceStartDate: string): string =>
-	`SELECT ChargeAmount, TaxAmount, ServiceStartDate, SubscriptionNumber FROM InvoiceItem WHERE SubscriptionNumber = '${subName}' AND ServiceStartDate = '${serviceStartDate}' AND ChargeName!='Delivery-problem credit' AND ChargeName!='Holiday Credit'`;
+	`SELECT chargeAmount, taxAmount, serviceStartDate, subscriptionNumber FROM InvoiceItem WHERE SubscriptionNumber = '${subName}' AND ServiceStartDate = '${serviceStartDate}' AND ChargeName!='Delivery-problem credit' AND ChargeName!='Holiday Credit'`;
 
 export function getLastPaymentDateBeforeDiscountExpiry(
 	firstPaymentDateAfterDiscountExpiry: string,
@@ -91,3 +251,19 @@ export function getLastPaymentDateBeforeDiscountExpiry(
 
 	return date.toISOString().split('T')[0] ?? '';
 }
+
+//this function is duplicated in getNewPaymentAmount.ts
+const filterRecords = (
+	invoiceItems: InvoiceItem[],
+	subscriptionName: string,
+	firstPaymentDateAfterDiscountExpiry: string,
+): InvoiceItem[] => {
+	return invoiceItems.filter(
+		(item) =>
+			item.subscriptionName === subscriptionName &&
+			dayjs(item.serviceStartDate).isSame(
+				dayjs(firstPaymentDateAfterDiscountExpiry),
+				'day',
+			),
+	);
+};
