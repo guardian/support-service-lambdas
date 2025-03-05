@@ -15,7 +15,7 @@ export const handler = async (event: GetOldPaymentAmountInput) => {
 	try {
 		const parsedEvent = BaseRecordForEmailSendSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
-
+		console.log('zuoraClient:', zuoraClient);
 		const lastPaymentDateBeforeDiscountExpiry =
 			getLastPaymentDateBeforeDiscountExpiry(
 				parsedEvent.firstPaymentDateAfterDiscountExpiry,
@@ -109,7 +109,7 @@ const handleTargetDateAfterToday = async (
 
 //when target date is today, whether we use the query or billing preview depends on whether a bill run
 //has been run today. If a bill run has been run today, we use the query, otherwise we use the billing preview
-const handleTargetDateIsToday = async (
+export const handleTargetDateIsToday = async (
 	zuoraClient: ZuoraClient,
 	parsedEvent: GetOldPaymentAmountInput,
 	lastPaymentDateBeforeDiscountExpiry: string,
@@ -183,7 +183,7 @@ const getOldPaymentAmountWhenTargetDateIsBeforeToday = async (
 	return calculateTotalAmount(pastInvoiceItems);
 };
 
-const getFutureInvoiceItems = async (
+export const getFutureInvoiceItems = async (
 	zuoraClient: ZuoraClient,
 	subName: string,
 	billingAccountId: string,
@@ -202,7 +202,7 @@ const getFutureInvoiceItems = async (
 	return invoiceItemsForSubscription;
 };
 
-const getPastInvoiceItems = async (
+export const getPastInvoiceItems = async (
 	zuoraClient: ZuoraClient,
 	subName: string,
 	targetDate: string,
@@ -214,7 +214,7 @@ const getPastInvoiceItems = async (
 	return getInvoiceItemsResponse.records;
 };
 
-const calculateTotalAmount = (records: InvoiceItem[]) => {
+export const calculateTotalAmount = (records: InvoiceItem[]) => {
 	return records.reduce(
 		(total, record) => total + record.chargeAmount + record.taxAmount,
 		0,
