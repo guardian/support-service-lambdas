@@ -108,7 +108,7 @@ const handleTargetDateAfterToday = async (
 };
 
 //when target date is today, whether we use the query or billing preview depends on whether a bill run
-//has been run today. If a bill run has been run today, we use the query, otherwise we use the billing preview
+//has been run today. We try the billing-preview first for the target date, then use a query if nothing is return from the billing-preview
 export const handleTargetDateIsToday = async (
 	zuoraClient: ZuoraClient,
 	parsedEvent: GetOldPaymentAmountInput,
