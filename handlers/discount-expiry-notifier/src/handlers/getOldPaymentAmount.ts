@@ -204,8 +204,10 @@ export const getPastInvoiceItems = async (
 	subName: string,
 	targetDate: string,
 ): Promise<QueryInvoiceItem[]> => {
-	const getInvoiceItemsResponse = queryResponseSchema.parse(
-		await doQuery<QueryResponse>(zuoraClient, query(subName, targetDate)),
+	const getInvoiceItemsResponse = await doQuery<QueryResponse>(
+		zuoraClient,
+		query(subName, targetDate),
+		queryResponseSchema,
 	);
 	return getInvoiceItemsResponse.records;
 };
@@ -277,18 +279,13 @@ const transformZuoraResponseKeys = (
 	}));
 };
 
-export const queryInvoiceItemSchema = z
-	.object({
-		Id: z.optional(z.string()),
-		SubscriptionName: z.string(),
-		ServiceStartDate: z.coerce.date(),
-		ChargeAmount: z.number(),
-		TaxAmount: z.number(),
-	})
-	.transform((item) => ({
-		...item,
-		paymentAmount: item.ChargeAmount + item.TaxAmount,
-	}));
+export const queryInvoiceItemSchema = z.object({
+	Id: z.optional(z.string()),
+	SubscriptionName: z.string(),
+	ServiceStartDate: z.coerce.date(),
+	ChargeAmount: z.number(),
+	TaxAmount: z.number(),
+});
 export type QueryInvoiceItem = z.infer<typeof queryInvoiceItemSchema>;
 export const queryResponseSchema = z.object({
 	size: z.number(),

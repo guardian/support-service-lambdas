@@ -171,33 +171,23 @@ export const getInvoiceItemsSchema = z.object({
 
 export type GetInvoiceItemsResponse = z.infer<typeof getInvoiceItemsSchema>;
 
-export const invoiceItemSchema = z
-	.object({
-		id: z.optional(z.string()),
-		subscriptionName: z.string(),
-		serviceStartDate: z.coerce.date(),
-		serviceEndDate: z.coerce.date(),
-		chargeAmount: z.number(),
-		chargeName: z.string(),
-		taxAmount: z.number(),
-	})
-	.transform((item) => ({
-		...item,
-		paymentAmount: item.chargeAmount + item.taxAmount,
-	}));
+export const invoiceItemSchema = z.object({
+	id: z.optional(z.string()),
+	subscriptionName: z.string(),
+	serviceStartDate: z.coerce.date(),
+	serviceEndDate: z.coerce.date(),
+	chargeAmount: z.number(),
+	chargeName: z.string(),
+	taxAmount: z.number(),
+});
 // --------------- Billing preview ---------------
-export const billingPreviewInvoiceItemSchema = z
-	.object({
-		id: z.optional(z.string()),
-		subscriptionName: z.string(),
-		serviceStartDate: z.coerce.date(),
-		chargeAmount: z.number(),
-		taxAmount: z.number(),
-	})
-	.transform((item) => ({
-		...item,
-		paymentAmount: item.chargeAmount + item.taxAmount,
-	}));
+export const billingPreviewInvoiceItemSchema = z.object({
+	id: z.optional(z.string()),
+	subscriptionName: z.string(),
+	serviceStartDate: z.coerce.date(),
+	chargeAmount: z.number(),
+	taxAmount: z.number(),
+});
 
 export const billingPreviewSchema = z.object({
 	accountId: z.string(),
