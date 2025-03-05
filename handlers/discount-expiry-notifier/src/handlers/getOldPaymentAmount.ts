@@ -2,9 +2,9 @@ import { stageFromEnvironment } from '@modules/stage';
 import { getBillingPreview } from '@modules/zuora/billingPreview';
 import { doQuery } from '@modules/zuora/query';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { InvoiceItem } from '@modules/zuora/zuoraSchemas';
+import type { BillingPreviewInvoiceItem } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
-import type { z } from 'zod';
+import { z } from 'zod';
 import { BaseRecordForEmailSendSchema } from '../types';
 
 export type GetOldPaymentAmountInput = z.infer<
@@ -15,16 +15,11 @@ export const handler = async (event: GetOldPaymentAmountInput) => {
 	try {
 		const parsedEvent = BaseRecordForEmailSendSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
-		console.log('zuoraClient:', zuoraClient);
 		const lastPaymentDateBeforeDiscountExpiry =
 			getLastPaymentDateBeforeDiscountExpiry(
 				parsedEvent.firstPaymentDateAfterDiscountExpiry,
 				parsedEvent.paymentFrequency,
 			);
-		console.log(
-			'lastPaymentDateBeforeDiscountExpiry:',
-			lastPaymentDateBeforeDiscountExpiry,
-		);
 
 		const today = dayjs();
 		const targetDate = dayjs(lastPaymentDateBeforeDiscountExpiry);
@@ -141,7 +136,9 @@ export const handleTargetDateIsToday = async (
 			return {
 				...parsedEvent,
 				lastPaymentDateBeforeDiscountExpiry,
-				oldPaymentAmount: calculateTotalAmount(pastInvoiceItems),
+				oldPaymentAmount: calculateTotalAmount(
+					transformZuoraResponseKeys(pastInvoiceItems),
+				),
 			};
 		}
 	}
@@ -157,7 +154,7 @@ const getOldPaymentAmountWhenTargetDateIsAfterToday = async (
 	billingAccountId: string,
 	targetDate: string,
 ): Promise<number> => {
-	const invoiceItemsForSubscription: InvoiceItem[] =
+	const invoiceItemsForSubscription: BillingPreviewInvoiceItem[] =
 		await getFutureInvoiceItems(
 			zuoraClient,
 			subName,
@@ -173,14 +170,14 @@ const getOldPaymentAmountWhenTargetDateIsBeforeToday = async (
 	subName: string,
 	targetDate: string,
 ): Promise<number> => {
-	const pastInvoiceItems = await getPastInvoiceItems(
+	const pastInvoiceItems: QueryInvoiceItem[] = await getPastInvoiceItems(
 		zuoraClient,
 		subName,
 		targetDate,
 	);
 	console.log('pastInvoiceItems:', pastInvoiceItems);
 
-	return calculateTotalAmount(pastInvoiceItems);
+	return calculateTotalAmount(transformZuoraResponseKeys(pastInvoiceItems));
 };
 
 export const getFutureInvoiceItems = async (
@@ -188,7 +185,7 @@ export const getFutureInvoiceItems = async (
 	subName: string,
 	billingAccountId: string,
 	targetDate: string,
-): Promise<InvoiceItem[]> => {
+): Promise<BillingPreviewInvoiceItem[]> => {
 	const getBillingPreviewResponse = await getBillingPreview(
 		zuoraClient,
 		dayjs(targetDate),
@@ -206,15 +203,14 @@ export const getPastInvoiceItems = async (
 	zuoraClient: ZuoraClient,
 	subName: string,
 	targetDate: string,
-) => {
-	const getInvoiceItemsResponse = await doQuery(
-		zuoraClient,
-		query(subName, targetDate),
+): Promise<QueryInvoiceItem[]> => {
+	const getInvoiceItemsResponse = queryResponseSchema.parse(
+		await doQuery<QueryResponse>(zuoraClient, query(subName, targetDate)),
 	);
 	return getInvoiceItemsResponse.records;
 };
 
-export const calculateTotalAmount = (records: InvoiceItem[]) => {
+export const calculateTotalAmount = (records: BillingPreviewInvoiceItem[]) => {
 	return records.reduce(
 		(total, record) => total + record.chargeAmount + record.taxAmount,
 		0,
@@ -254,10 +250,10 @@ export function getLastPaymentDateBeforeDiscountExpiry(
 
 //this function is duplicated in getNewPaymentAmount.ts
 const filterRecords = (
-	invoiceItems: InvoiceItem[],
+	invoiceItems: BillingPreviewInvoiceItem[],
 	subscriptionName: string,
 	firstPaymentDateAfterDiscountExpiry: string,
-): InvoiceItem[] => {
+): BillingPreviewInvoiceItem[] => {
 	return invoiceItems.filter(
 		(item) =>
 			item.subscriptionName === subscriptionName &&
@@ -267,3 +263,37 @@ const filterRecords = (
 			),
 	);
 };
+
+// Function to transform keys of the Zuora response
+const transformZuoraResponseKeys = (
+	records: QueryInvoiceItem[],
+): BillingPreviewInvoiceItem[] => {
+	return records.map((record) => ({
+		chargeAmount: record.ChargeAmount,
+		taxAmount: record.TaxAmount,
+		serviceStartDate: new Date(record.ServiceStartDate),
+		subscriptionName: record.SubscriptionName,
+		paymentAmount: record.ChargeAmount + record.TaxAmount,
+	}));
+};
+
+export const queryInvoiceItemSchema = z
+	.object({
+		Id: z.optional(z.string()),
+		SubscriptionName: z.string(),
+		ServiceStartDate: z.coerce.date(),
+		ChargeAmount: z.number(),
+		TaxAmount: z.number(),
+	})
+	.transform((item) => ({
+		...item,
+		paymentAmount: item.ChargeAmount + item.TaxAmount,
+	}));
+export type QueryInvoiceItem = z.infer<typeof queryInvoiceItemSchema>;
+export const queryResponseSchema = z.object({
+	size: z.number(),
+	records: z.array(queryInvoiceItemSchema),
+	done: z.boolean(),
+});
+
+export type QueryResponse = z.infer<typeof queryResponseSchema>;

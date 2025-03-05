@@ -1,7 +1,7 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { getBillingPreview } from '@modules/zuora/billingPreview';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { InvoiceItem } from '@modules/zuora/zuoraSchemas';
+import type { BillingPreviewInvoiceItem } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
 import type { z } from 'zod';
 import { BaseRecordForEmailSendSchema } from '../types';
@@ -43,10 +43,10 @@ export const handler = async (event: GetNewPaymentAmountInput) => {
 };
 
 const filterRecords = (
-	invoiceItems: InvoiceItem[],
+	invoiceItems: BillingPreviewInvoiceItem[],
 	subscriptionName: string,
 	firstPaymentDateAfterDiscountExpiry: string,
-): InvoiceItem[] => {
+): BillingPreviewInvoiceItem[] => {
 	return invoiceItems.filter(
 		(item) =>
 			item.subscriptionName === subscriptionName &&
@@ -57,6 +57,8 @@ const filterRecords = (
 	);
 };
 
-const getNewPaymentAmount = (invoiceItems: InvoiceItem[]): number => {
+const getNewPaymentAmount = (
+	invoiceItems: BillingPreviewInvoiceItem[],
+): number => {
 	return invoiceItems.reduce((total, item) => total + item.paymentAmount, 0);
 };

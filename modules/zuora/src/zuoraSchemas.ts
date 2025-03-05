@@ -186,14 +186,28 @@ export const invoiceItemSchema = z
 		paymentAmount: item.chargeAmount + item.taxAmount,
 	}));
 // --------------- Billing preview ---------------
+export const billingPreviewInvoiceItemSchema = z
+	.object({
+		id: z.optional(z.string()),
+		subscriptionName: z.string(),
+		serviceStartDate: z.coerce.date(),
+		chargeAmount: z.number(),
+		taxAmount: z.number(),
+	})
+	.transform((item) => ({
+		...item,
+		paymentAmount: item.chargeAmount + item.taxAmount,
+	}));
 
 export const billingPreviewSchema = z.object({
 	accountId: z.string(),
-	invoiceItems: z.array(invoiceItemSchema),
+	invoiceItems: z.array(billingPreviewInvoiceItemSchema),
 });
 
 export type BillingPreview = z.infer<typeof billingPreviewSchema>;
-export type InvoiceItem = BillingPreview['invoiceItems'][number];
+export type BillingPreviewInvoiceItem = z.infer<
+	typeof billingPreviewInvoiceItemSchema
+>;
 
 // --------------- Add discount preview ---------------
 export const addDiscountPreviewSchema = z.object({
@@ -224,13 +238,3 @@ export const invoiceItemAdjustmentResultSchema = z.object({
 export type InvoiceItemAdjustmentResult = z.infer<
 	typeof invoiceItemAdjustmentResultSchema
 >;
-
-// --------------- query ---------------
-//refine this, records will not always be of invoiceItemSchema type
-export const queryResponseSchema = z.object({
-	size: z.number(),
-	records: z.array(invoiceItemSchema),
-	done: z.boolean(),
-});
-
-export type QueryResponse = z.infer<typeof queryResponseSchema>;
