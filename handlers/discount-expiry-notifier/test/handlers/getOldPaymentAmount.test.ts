@@ -14,6 +14,7 @@ describe('getLastPaymentDateBeforeDiscountExpiry', () => {
 			'2025-03-04',
 			'annual',
 		);
+
 		expect(result).toBe('2024-03-04');
 	});
 
