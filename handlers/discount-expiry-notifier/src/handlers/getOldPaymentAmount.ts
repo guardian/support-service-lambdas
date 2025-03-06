@@ -274,14 +274,14 @@ const transformZuoraResponseKeys = (
 		chargeAmount: record.ChargeAmount,
 		taxAmount: record.TaxAmount,
 		serviceStartDate: new Date(record.ServiceStartDate),
-		subscriptionNumber: record.subscriptionNumber,
+		subscriptionNumber: record.SubscriptionNumber,
 		paymentAmount: record.ChargeAmount + record.TaxAmount,
 	}));
 };
 
 export const queryInvoiceItemSchema = z.object({
 	Id: z.optional(z.string()),
-	subscriptionNumber: z.string(),
+	SubscriptionNumber: z.string(),
 	ServiceStartDate: z.coerce.date(),
 	ChargeAmount: z.number(),
 	TaxAmount: z.number(),
