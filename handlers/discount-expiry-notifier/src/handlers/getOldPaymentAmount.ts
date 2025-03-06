@@ -220,7 +220,7 @@ export const calculateTotalAmount = (records: BillingPreviewInvoiceItem[]) => {
 };
 
 const query = (subName: string, serviceStartDate: string): string =>
-	`SELECT chargeAmount, taxAmount, serviceStartDate, SubscriptionName FROM InvoiceItem WHERE SubscriptionName = '${subName}' AND ServiceStartDate = '${serviceStartDate}' AND ChargeName!='Delivery-problem credit' AND ChargeName!='Holiday Credit'`;
+	`SELECT chargeAmount, taxAmount, serviceStartDate, subscriptionNumber FROM InvoiceItem WHERE subscriptionNumber = '${subName}' AND ServiceStartDate = '${serviceStartDate}' AND ChargeName!='Delivery-problem credit' AND ChargeName!='Holiday Credit'`;
 
 export function getLastPaymentDateBeforeDiscountExpiry(
 	firstPaymentDateAfterDiscountExpiry: string,
@@ -253,12 +253,12 @@ export function getLastPaymentDateBeforeDiscountExpiry(
 //this function is duplicated in getNewPaymentAmount.ts
 const filterRecords = (
 	invoiceItems: BillingPreviewInvoiceItem[],
-	subscriptionName: string,
+	subscriptionNumber: string,
 	firstPaymentDateAfterDiscountExpiry: string,
 ): BillingPreviewInvoiceItem[] => {
 	return invoiceItems.filter(
 		(item) =>
-			item.subscriptionName === subscriptionName &&
+			item.subscriptionNumber === subscriptionNumber &&
 			dayjs(item.serviceStartDate).isSame(
 				dayjs(firstPaymentDateAfterDiscountExpiry),
 				'day',
@@ -274,14 +274,14 @@ const transformZuoraResponseKeys = (
 		chargeAmount: record.ChargeAmount,
 		taxAmount: record.TaxAmount,
 		serviceStartDate: new Date(record.ServiceStartDate),
-		subscriptionName: record.SubscriptionName,
+		subscriptionNumber: record.subscriptionNumber,
 		paymentAmount: record.ChargeAmount + record.TaxAmount,
 	}));
 };
 
 export const queryInvoiceItemSchema = z.object({
 	Id: z.optional(z.string()),
-	SubscriptionName: z.string(),
+	subscriptionNumber: z.string(),
 	ServiceStartDate: z.coerce.date(),
 	ChargeAmount: z.number(),
 	TaxAmount: z.number(),
