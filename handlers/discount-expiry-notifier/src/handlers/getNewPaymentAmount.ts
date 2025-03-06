@@ -44,12 +44,12 @@ export const handler = async (event: GetNewPaymentAmountInput) => {
 
 const filterRecords = (
 	invoiceItems: BillingPreviewInvoiceItem[],
-	subscriptionName: string,
+	subscriptionNumber: string,
 	firstPaymentDateAfterDiscountExpiry: string,
 ): BillingPreviewInvoiceItem[] => {
 	return invoiceItems.filter(
 		(item) =>
-			item.subscriptionName === subscriptionName &&
+			item.subscriptionNumber === subscriptionNumber &&
 			dayjs(item.serviceStartDate).isSame(
 				dayjs(firstPaymentDateAfterDiscountExpiry),
 				'day',
