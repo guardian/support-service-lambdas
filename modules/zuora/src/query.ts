@@ -1,11 +1,11 @@
+import type { z } from 'zod';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { QueryResponse } from '@modules/zuora/zuoraSchemas';
-import { queryResponseSchema } from '@modules/zuora/zuoraSchemas';
 
-export const doQuery = async (
+export const doQuery = async <T>(
 	zuoraClient: ZuoraClient,
 	query: string,
-): Promise<QueryResponse> => {
+	queryResponseSchema: z.Schema<T>,
+): Promise<T> => {
 	console.log('Querying zuora...');
 	console.log('Query:', query);
 
@@ -17,5 +17,5 @@ export const doQuery = async (
 		queryResponseSchema,
 	);
 
-	return result as QueryResponse;
+	return result as T;
 };
