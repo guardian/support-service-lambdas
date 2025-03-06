@@ -173,7 +173,7 @@ export type GetInvoiceItemsResponse = z.infer<typeof getInvoiceItemsSchema>;
 
 export const invoiceItemSchema = z.object({
 	id: z.optional(z.string()),
-	subscriptionName: z.string(),
+	subscriptionNumber: z.string(),
 	serviceStartDate: z.coerce.date(),
 	serviceEndDate: z.coerce.date(),
 	chargeAmount: z.number(),
@@ -183,7 +183,7 @@ export const invoiceItemSchema = z.object({
 // --------------- Billing preview ---------------
 export const billingPreviewInvoiceItemSchema = z.object({
 	id: z.optional(z.string()),
-	subscriptionName: z.string(),
+	subscriptionNumber: z.string(),
 	serviceStartDate: z.coerce.date(),
 	chargeAmount: z.number(),
 	taxAmount: z.number(),
