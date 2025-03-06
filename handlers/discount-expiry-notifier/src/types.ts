@@ -12,8 +12,14 @@ export const BigQueryRecordSchema = z.object({
 		])
 		.transform((val) => (typeof val === 'string' ? val : val.value)),
 	lastPaymentDateBeforeDiscountExpiry: z.string().optional(),
-	oldPaymentAmount: z.number().optional(),
-	newPaymentAmount: z.number().optional(),
+	oldPaymentAmount: z
+		.number()
+		.transform((val) => parseFloat(val.toFixed(2)))
+		.optional(),
+	newPaymentAmount: z
+		.number()
+		.transform((val) => parseFloat(val.toFixed(2)))
+		.optional(),
 	paymentCurrency: z.string(),
 	paymentFrequency: z.string(),
 	productName: z.string(),
