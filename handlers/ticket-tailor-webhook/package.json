@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch": "3.758.0",
-    "@aws-sdk/client-secrets-manager": "3.734.0",
+    "@aws-sdk/client-secrets-manager": "3.758.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
