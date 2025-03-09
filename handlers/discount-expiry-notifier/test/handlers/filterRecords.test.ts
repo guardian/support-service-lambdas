@@ -1,6 +1,6 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { handler } from '../../src/handlers/filterRecords';
-import { testQueryResponse } from '../../src/testQueryResponse';
+import { allRecordsFromBigQuery } from './data/filterRecords/allRecordsFromBigQuery';
 
 jest.mock('@modules/nullAndUndefined');
 
@@ -21,59 +21,7 @@ describe('filterRecords handler', () => {
 		const event = {
 			discountExpiresOnDate: '2024-03-21',
 			allRecordsFromBigQueryCount: 3,
-			allRecordsFromBigQuery: [
-				{
-					billingAccountId: '2c92a0fe70cd67e30170cedc1156701d',
-					firstName: 'John',
-					nextPaymentDate: '2024-04-21',
-					paymentAmount: 100,
-					paymentCurrency: 'USD',
-					paymentFrequency: 'Monthly',
-					productName: 'Product A',
-					sfContactId: '001',
-					zuoraSubName: 'A-S001',
-					workEmail: 'john@example.com',
-					contactCountry: 'United States',
-					sfBuyerContactMailingCountry: 'Canada',
-					sfBuyerContactOtherCountry: 'Mexico',
-					sfRecipientContactMailingCountry: 'Brazil',
-					sfRecipientContactOtherCountry: 'Argentina',
-				},
-				{
-					billingAccountId: '2c92a0fe70cd67e30170cedc1156701e',
-					firstName: 'Jane',
-					nextPaymentDate: '2024-05-21',
-					paymentAmount: 200,
-					paymentCurrency: 'USD',
-					paymentFrequency: 'Monthly',
-					productName: 'Product B',
-					sfContactId: '002',
-					zuoraSubName: 'A-S002',
-					workEmail: 'jane@example.com',
-					contactCountry: '',
-					sfBuyerContactMailingCountry: 'United states of america',
-					sfBuyerContactOtherCountry: 'Mexico',
-					sfRecipientContactMailingCountry: 'Brazil',
-					sfRecipientContactOtherCountry: 'Argentina',
-				},
-				{
-					billingAccountId: '2c92a0fe70cd67e30170cedc1156701f',
-					firstName: 'Doe',
-					nextPaymentDate: '2024-06-21',
-					paymentAmount: 300,
-					paymentCurrency: 'USD',
-					paymentFrequency: 'Monthly',
-					productName: 'Product C',
-					sfContactId: '003',
-					zuoraSubName: 'A-S003',
-					workEmail: 'doe@example.com',
-					contactCountry: 'Canada',
-					sfBuyerContactMailingCountry: 'Mexico',
-					sfBuyerContactOtherCountry: 'Mexico',
-					sfRecipientContactMailingCountry: 'Brazil',
-					sfRecipientContactOtherCountry: 'Argentina',
-				},
-			],
+			allRecordsFromBigQuery,
 		};
 
 		const result = await handler(event);
@@ -81,6 +29,7 @@ describe('filterRecords handler', () => {
 		expect(result).toBeDefined();
 		expect(result.recordsForEmailSend).toBeInstanceOf(Array);
 		expect(result.recordsForEmailSend.length).toBe(2);
+		console.log('result.recordsForEmailSend:', result.recordsForEmailSend);
 		expect(
 			result.recordsForEmailSend.some((sub) => sub.zuoraSubName === 'A-S001'),
 		).toBe(true);
@@ -98,7 +47,7 @@ describe('filterRecords handler', () => {
 		const event = {
 			discountExpiresOnDate: '2024-03-21',
 			allRecordsFromBigQueryCount: 3,
-			allRecordsFromBigQuery: testQueryResponse,
+			allRecordsFromBigQuery,
 		};
 
 		const result = await handler(event);
@@ -116,7 +65,7 @@ describe('filterRecords handler', () => {
 		const event = {
 			discountExpiresOnDate: '2024-03-21',
 			allRecordsFromBigQueryCount: 3,
-			allRecordsFromBigQuery: testQueryResponse,
+			allRecordsFromBigQuery,
 		};
 
 		await expect(handler(event)).rejects.toThrow(

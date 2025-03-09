@@ -131,17 +131,40 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
-		const getPaymentAmountLambda = new GuLambdaFunction(
+		const getOldPaymentAmountLambda = new GuLambdaFunction(
 			this,
-			'get-payment-amount-lambda',
+			'get-old-payment-amount-lambda',
 			{
 				app: appName,
-				functionName: `${appName}-get-payment-amount-${this.stage}`,
+				functionName: `${appName}-get-old-payment-amount-${this.stage}`,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
 				},
-				handler: 'getPaymentAmount.handler',
+				handler: 'getOldPaymentAmount.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['secretsmanager:GetSecretValue'],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+						],
+					}),
+				],
+			},
+		);
+		const getNewPaymentAmountLambda = new GuLambdaFunction(
+			this,
+			'get-new-payment-amount-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-get-new-payment-amount-${this.stage}`,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+				},
+				handler: 'getNewPaymentAmount.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
 				initialPolicy: [
@@ -232,11 +255,20 @@ export class DiscountExpiryNotifier extends GuStack {
 			outputPath: '$.Payload',
 		});
 
-		const getPaymentAmountLambdaTask = new LambdaInvoke(
+		const getOldPaymentAmountLambdaTask = new LambdaInvoke(
 			this,
-			'Get payment amount',
+			'Get old payment amount',
 			{
-				lambdaFunction: getPaymentAmountLambda,
+				lambdaFunction: getOldPaymentAmountLambda,
+				outputPath: '$.Payload',
+			},
+		);
+
+		const getNewPaymentAmountLambdaTask = new LambdaInvoke(
+			this,
+			'Get new payment amount',
+			{
+				lambdaFunction: getNewPaymentAmountLambda,
 				outputPath: '$.Payload',
 			},
 		);
@@ -277,7 +309,9 @@ export class DiscountExpiryNotifier extends GuStack {
 		);
 
 		subStatusFetcherMap.iterator(
-			getSubStatusLambdaTask.next(getPaymentAmountLambdaTask),
+			getSubStatusLambdaTask
+				.next(getOldPaymentAmountLambdaTask)
+				.next(getNewPaymentAmountLambdaTask),
 		);
 		expiringDiscountProcessorMap.iterator(sendEmailLambdaTask);
 

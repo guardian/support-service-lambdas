@@ -2,8 +2,8 @@ import { getSSMParam } from '@modules/aws/ssm';
 import { buildAuthClient, runQuery } from '@modules/bigquery/src/bigquery';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { stageFromEnvironment } from '@modules/stage';
-import { testQueryResponse } from '../testQueryResponse';
-import { BigQueryRecordSchema } from '../types';
+import { functionalTestQueryResponse } from '../../test/handlers/data/functionalTestQueryResponse';
+import { BigQueryResultDataSchema } from '../types';
 
 //to manually run the state machine for a specified discount expiry date, enter {"discountExpiresOnDate":"2025-11-23"} in aws console
 export const handler = async (event: { discountExpiresOnDate?: string }) => {
@@ -22,14 +22,18 @@ export const handler = async (event: { discountExpiresOnDate?: string }) => {
 			`datatech-platform-${stageFromEnvironment().toLowerCase()}`,
 			query(discountExpiresOnDate),
 		);
-
-		const resultData = BigQueryRecordSchema.parse(result[0]);
+		console.log('result', result);
+		const resultData = BigQueryResultDataSchema.parse(result[0]);
 		console.log('resultData', resultData);
 
+		const records =
+			stageFromEnvironment() === 'PROD'
+				? resultData
+				: functionalTestQueryResponse;
 		return {
 			discountExpiresOnDate,
-			allRecordsFromBigQueryCount: testQueryResponse.length,
-			allRecordsFromBigQuery: testQueryResponse,
+			allRecordsFromBigQueryCount: records.length,
+			allRecordsFromBigQuery: records,
 		};
 	} catch (error) {
 		console.error('Error:', error);
@@ -57,7 +61,7 @@ WITH expiringDiscounts AS (
     SELECT
         contact.country as contactCountry,
         contact.first_name as firstName,
-        DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) AS nextPaymentDate,
+        DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) AS firstPaymentDateAfterDiscountExpiry,
         account.account_number as billingAccountId,
         account.currency as paymentCurrency,
         account.sf_contact_id_c as sfContactId,
@@ -94,12 +98,13 @@ WITH expiringDiscounts AS (
         AND zuoraSub.is_latest_version = TRUE 
         AND zuoraSub.status = 'Active' 
 		AND DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = '${discountExpiresOnDate}'
+        AND zuoraSub.auto_renew = true
 )
 SELECT 
     STRING_AGG(DISTINCT billingAccountId) as billingAccountId,
     STRING_AGG(DISTINCT contactCountry) as contactCountry,
     STRING_AGG(DISTINCT firstName) as firstName,
-    MIN(exp.nextPaymentDate) AS nextPaymentDate,
+    MIN(exp.firstPaymentDateAfterDiscountExpiry) AS firstPaymentDateAfterDiscountExpiry,
     STRING_AGG(DISTINCT paymentCurrency) as paymentCurrency,
     STRING_AGG(DISTINCT rate_plan_charge.billing_period) AS paymentFrequency,
     STRING_AGG(DISTINCT product.name) as productName,
