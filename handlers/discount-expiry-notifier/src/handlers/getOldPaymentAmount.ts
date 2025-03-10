@@ -57,7 +57,7 @@ export const handler = async (event: GetOldPaymentAmountInput) => {
 	}
 };
 
-const handleTargetDateBeforeToday = async (
+export const handleTargetDateBeforeToday = async (
 	zuoraClient: ZuoraClient,
 	parsedEvent: GetOldPaymentAmountInput,
 	lastPaymentDateBeforeDiscountExpiry: string,
@@ -209,6 +209,7 @@ export const getPastInvoiceItems = async (
 		query(subName, targetDate),
 		queryResponseSchema,
 	);
+	console.log('xxx getInvoiceItemsResponse:', getInvoiceItemsResponse);
 	return getInvoiceItemsResponse.records;
 };
 
