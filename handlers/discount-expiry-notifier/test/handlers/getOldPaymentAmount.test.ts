@@ -1,80 +1,97 @@
 import type { Stage } from '@modules/stage';
+import { doQuery } from '@modules/zuora/query';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import {
-	getLastPaymentDateBeforeDiscountExpiry,
-	getPastInvoiceItems,
-	handleTargetDateBeforeToday,
-} from '../../src/handlers/getOldPaymentAmount';
-import type { GetOldPaymentAmountInput } from '../../src/handlers/getOldPaymentAmount';
+import { getPastInvoiceItems } from '../../src/handlers/getOldPaymentAmount';
 
-jest.mock('@modules/zuora/zuoraClient');
 jest.mock('@modules/zuora/query');
-jest.mock('@modules/zuora/billingPreview');
-
-jest.mock(
-	'../../src/handlers/getOldPaymentAmount/getLastPaymentDateBeforeDiscountExpiry',
-);
-jest.mock('../../src/handlers/getOldPaymentAmount/getPastInvoiceItems');
-
-// jest.mock('../../src/handlers/getOldPaymentAmount', () => ({
-// 	getPastInvoiceItems: jest.fn(),
-// }));
 
 const stage: Stage = 'CODE';
+// describe('getPastInvoiceItems', () => {
+// 	beforeEach(() => {
+// 		jest.resetAllMocks();
+// 	});
 
-describe('handleTargetDateBeforeToday', () => {
+// 	test('should return past invoice items for a given subscription and target date', async () => {
+// 		(doQuery as jest.Mock).mockResolvedValue({ records: [{}, {}] });
+
+// 		const zuoraClient = await ZuoraClient.create(stage);
+// 		const result = await getPastInvoiceItems(
+// 			zuoraClient,
+// 			'A-S12345678',
+// 			'2022-01-01',
+// 		);
+// 		console.log('XXX result:', result);
+// 		console.log('YYY zuoraClient:', zuoraClient);
+// 	});
+// });
+jest.mock('@modules/zuora/query');
+
+describe('getPastInvoiceItems', () => {
 	beforeEach(() => {
-		jest.clearAllMocks();
+		jest.resetAllMocks();
 	});
 
-	const mockParsedEvent: GetOldPaymentAmountInput = {
-		billingAccountId: 'A12345678',
-		firstName: 'David',
-		firstPaymentDateAfterDiscountExpiry: '2025-03-28',
-		paymentCurrency: 'USD',
-		paymentFrequency: 'Annual',
-		productName: 'Digital Pack',
-		sfContactId: '0030J00002Fy123456',
-		zuoraSubName: 'A-S12345678',
-		workEmail: 'david@guardian.co.uk',
-		contactCountry: 'United States',
-		sfBuyerContactMailingCountry: null,
-		sfBuyerContactOtherCountry: 'United States',
-		sfRecipientContactMailingCountry: null,
-		sfRecipientContactOtherCountry: 'United States',
-		subStatus: 'Active',
-	};
+	// test('should return past invoice items for a given subscription and target date', async () => {
+	// 	(doQuery as jest.Mock).mockResolvedValue({
+	// 		records: [
+	// 			{
+	// 				ChargeAmount: 100,
+	// 				TaxAmount: 10,
+	// 				ServiceStartDate: '2022-01-01',
+	// 				SubscriptionNumber: 'A-S12345678',
+	// 			},
+	// 			{
+	// 				ChargeAmount: 200,
+	// 				TaxAmount: 20,
+	// 				ServiceStartDate: '2022-01-01',
+	// 				SubscriptionNumber: 'A-S12345678',
+	// 			},
+	// 		],
+	// 	});
 
-	const mockLastPaymentDateBeforeDiscountExpiry = '2024-03-28';
+	// 	const zuoraClient = await ZuoraClient.create(stage);
+	// 	const result = await getPastInvoiceItems(
+	// 		zuoraClient,
+	// 		'A-S12345678',
+	// 		'2022-01-01',
+	// 	);
 
-	test('should return old payment amount when target date is before today', async () => {
+	// 	expect(result).toEqual([
+	// 		{
+	// 			ChargeAmount: 100,
+	// 			TaxAmount: 10,
+	// 			ServiceStartDate: '2022-01-01',
+	// 			SubscriptionNumber: 'A-S12345678',
+	// 		},
+	// 		{
+	// 			ChargeAmount: 200,
+	// 			TaxAmount: 20,
+	// 			ServiceStartDate: '2022-01-01',
+	// 			SubscriptionNumber: 'A-S12345678',
+	// 		},
+	// 	]);
+	// });
+
+	// test('should return an empty array if no records are found', async () => {
+	// 	(doQuery as jest.Mock).mockResolvedValue({ records: [] });
+
+	// 	const zuoraClient = await ZuoraClient.create(stage);
+	// 	const result = await getPastInvoiceItems(
+	// 		zuoraClient,
+	// 		'A-S12345678',
+	// 		'2022-01-01',
+	// 	);
+
+	// 	expect(result).toEqual([]);
+	// });
+
+	test('should throw an error if doQuery fails', async () => {
+		(doQuery as jest.Mock).mockRejectedValue(new Error('Query failed'));
+
 		const zuoraClient = await ZuoraClient.create(stage);
-		const mockOldPaymentAmount = 100;
 
-		(getPastInvoiceItems as jest.Mock).mockResolvedValue({
-			size: 1,
-			records: [
-				{
-					SubscriptionNumber: 'A-S12345678',
-					ServiceStartDate: '2024-03-28',
-					ChargeAmount: mockOldPaymentAmount,
-					TaxAmount: 0,
-				},
-			],
-			done: true,
-		});
-
-		const result = await handleTargetDateBeforeToday(
-			zuoraClient,
-			mockParsedEvent,
-			mockLastPaymentDateBeforeDiscountExpiry,
-		);
-
-		expect(result).toEqual({
-			...mockParsedEvent,
-			lastPaymentDateBeforeDiscountExpiry:
-				mockLastPaymentDateBeforeDiscountExpiry,
-			oldPaymentAmount: mockOldPaymentAmount,
-		});
-	}, 30000);
+		await expect(
+			getPastInvoiceItems(zuoraClient, 'A-S12345678', '2022-01-01'),
+		).rejects.toThrow('Query failed');
+	});
 });

@@ -57,7 +57,7 @@ export const handler = async (event: GetOldPaymentAmountInput) => {
 	}
 };
 
-export const handleTargetDateBeforeToday = async (
+const handleTargetDateBeforeToday = async (
 	zuoraClient: ZuoraClient,
 	parsedEvent: GetOldPaymentAmountInput,
 	lastPaymentDateBeforeDiscountExpiry: string,
@@ -209,7 +209,7 @@ export const getPastInvoiceItems = async (
 		query(subName, targetDate),
 		queryResponseSchema,
 	);
-	console.log('xxx getInvoiceItemsResponse:', getInvoiceItemsResponse);
+	console.log('TTT getInvoiceItemsResponse:', getInvoiceItemsResponse);
 	return getInvoiceItemsResponse.records;
 };
 
@@ -280,18 +280,22 @@ const transformZuoraResponseKeys = (
 	}));
 };
 
-export const queryInvoiceItemSchema = z.object({
-	Id: z.optional(z.string()),
-	SubscriptionNumber: z.string(),
-	ServiceStartDate: z.coerce.date(),
-	ChargeAmount: z.number(),
-	TaxAmount: z.number(),
-});
+export const queryInvoiceItemSchema = z
+	.object({
+		Id: z.optional(z.string()),
+		SubscriptionNumber: z.string(),
+		ServiceStartDate: z.coerce.date(),
+		ChargeAmount: z.number(),
+		TaxAmount: z.number(),
+	})
+	.strict();
 export type QueryInvoiceItem = z.infer<typeof queryInvoiceItemSchema>;
-export const queryResponseSchema = z.object({
-	size: z.number(),
-	records: z.array(queryInvoiceItemSchema),
-	done: z.boolean(),
-});
+export const queryResponseSchema = z
+	.object({
+		size: z.number(),
+		records: z.array(queryInvoiceItemSchema),
+		done: z.boolean(),
+	})
+	.strict();
 
 export type QueryResponse = z.infer<typeof queryResponseSchema>;
