@@ -16,6 +16,12 @@ export const doQuery = async <T>(
 		}),
 		queryResponseSchema,
 	);
-
+	const parsedResult = queryResponseSchema.parse(result) as { done: boolean };
+	console.log('parsedResult:', parsedResult);
+	if (parsedResult.done) {
+		console.log('Query is complete.');
+	} else {
+		console.log('Query is not complete.');
+	}
 	return result as T;
 };
