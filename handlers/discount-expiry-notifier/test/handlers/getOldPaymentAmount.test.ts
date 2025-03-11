@@ -2,10 +2,12 @@ import { getBillingPreview } from '@modules/zuora/billingPreview';
 import { doQuery } from '@modules/zuora/query';
 import type { BillingPreviewInvoiceItem } from '@modules/zuora/zuoraSchemas';
 import { mockZuoraClient } from '../../../../modules/zuora/test/mocks/mockZuoraClient';
+import type { QueryInvoiceItem } from '../../src/handlers/getOldPaymentAmount';
 import {
 	calculateTotalAmount,
 	getFutureInvoiceItems,
 	getPastInvoiceItems,
+	transformZuoraResponseKeys,
 } from '../../src/handlers/getOldPaymentAmount';
 
 jest.mock('@modules/zuora/query');
@@ -179,5 +181,51 @@ describe('calculateTotalAmount', () => {
 
 		const result = calculateTotalAmount(invoiceItems);
 		expect(result).toBe(0);
+	});
+});
+
+describe('transformZuoraResponseKeys', () => {
+	test('should transform Zuora response keys to BillingPreviewInvoiceItem format', () => {
+		const queryInvoiceItems: QueryInvoiceItem[] = [
+			{
+				Id: '1',
+				SubscriptionNumber: 'A-S12345678',
+				ServiceStartDate: new Date('2025-01-01'),
+				ChargeAmount: 100,
+				TaxAmount: 10,
+			},
+			{
+				Id: '2',
+				SubscriptionNumber: 'A-S12345678',
+				ServiceStartDate: new Date('2025-01-01'),
+				ChargeAmount: 200,
+				TaxAmount: 20,
+			},
+		];
+
+		const expectedBillingPreviewInvoiceItems: BillingPreviewInvoiceItem[] = [
+			{
+				subscriptionNumber: 'A-S12345678',
+				serviceStartDate: new Date('2025-01-01'),
+				chargeAmount: 100,
+				taxAmount: 10,
+			},
+			{
+				subscriptionNumber: 'A-S12345678',
+				serviceStartDate: new Date('2025-01-01'),
+				chargeAmount: 200,
+				taxAmount: 20,
+			},
+		];
+
+		const result = transformZuoraResponseKeys(queryInvoiceItems);
+		expect(result).toEqual(expectedBillingPreviewInvoiceItems);
+	});
+
+	test('should handle an empty array', () => {
+		const queryInvoiceItems: QueryInvoiceItem[] = [];
+
+		const result = transformZuoraResponseKeys(queryInvoiceItems);
+		expect(result).toEqual([]);
 	});
 });
