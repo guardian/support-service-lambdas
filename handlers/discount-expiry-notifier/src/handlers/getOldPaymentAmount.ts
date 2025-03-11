@@ -5,7 +5,10 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { BillingPreviewInvoiceItem } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
 import { z } from 'zod';
-import { BaseRecordForEmailSendSchema } from '../types';
+import {
+	BaseRecordForEmailSendSchema,
+	createQueryResponseSchema,
+} from '../types';
 
 export type GetOldPaymentAmountInput = z.infer<
 	typeof BaseRecordForEmailSendSchema
@@ -267,7 +270,6 @@ const filterRecords = (
 	);
 };
 
-// Function to transform keys of the Zuora response
 const transformZuoraResponseKeys = (
 	records: QueryInvoiceItem[],
 ): BillingPreviewInvoiceItem[] => {
@@ -290,12 +292,8 @@ export const queryInvoiceItemSchema = z
 	})
 	.strict();
 export type QueryInvoiceItem = z.infer<typeof queryInvoiceItemSchema>;
-export const queryResponseSchema = z
-	.object({
-		size: z.number(),
-		records: z.array(queryInvoiceItemSchema),
-		done: z.boolean(),
-	})
-	.strict();
 
+export const queryResponseSchema = createQueryResponseSchema(
+	queryInvoiceItemSchema,
+);
 export type QueryResponse = z.infer<typeof queryResponseSchema>;
