@@ -1,7 +1,9 @@
 import { getBillingPreview } from '@modules/zuora/billingPreview';
 import { doQuery } from '@modules/zuora/query';
+import type { BillingPreviewInvoiceItem } from '@modules/zuora/zuoraSchemas';
 import { mockZuoraClient } from '../../../../modules/zuora/test/mocks/mockZuoraClient';
 import {
+	calculateTotalAmount,
 	getFutureInvoiceItems,
 	getPastInvoiceItems,
 } from '../../src/handlers/getOldPaymentAmount';
@@ -124,5 +126,58 @@ describe('getPastInvoiceItems', () => {
 		);
 
 		expect(result).toEqual(records);
+	});
+});
+
+describe('calculateTotalAmount', () => {
+	test('should return the total amount for given invoice items', () => {
+		const invoiceItems: BillingPreviewInvoiceItem[] = [
+			{
+				id: '1',
+				subscriptionNumber: 'A-S12345678',
+				serviceStartDate: new Date('2025-01-01'),
+				chargeAmount: 100,
+				taxAmount: 10,
+			},
+			{
+				id: '2',
+				subscriptionNumber: 'A-S12345678',
+				serviceStartDate: new Date('2025-01-01'),
+				chargeAmount: 200,
+				taxAmount: 20,
+			},
+		];
+
+		const result = calculateTotalAmount(invoiceItems);
+		expect(result).toBe(330);
+	});
+
+	test('should return 0 if no invoice items are provided', () => {
+		const invoiceItems: BillingPreviewInvoiceItem[] = [];
+
+		const result = calculateTotalAmount(invoiceItems);
+		expect(result).toBe(0);
+	});
+
+	test('should handle invoice items with zero amounts', () => {
+		const invoiceItems: BillingPreviewInvoiceItem[] = [
+			{
+				id: '1',
+				subscriptionNumber: 'A-S12345678',
+				serviceStartDate: new Date('2025-01-01'),
+				chargeAmount: 0,
+				taxAmount: 0,
+			},
+			{
+				id: '2',
+				subscriptionNumber: 'A-S12345678',
+				serviceStartDate: new Date('2025-01-01'),
+				chargeAmount: 0,
+				taxAmount: 0,
+			},
+		];
+
+		const result = calculateTotalAmount(invoiceItems);
+		expect(result).toBe(0);
 	});
 });
