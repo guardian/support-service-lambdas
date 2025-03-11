@@ -1,16 +1,16 @@
 export const testQueryResponse = [
 	[
 		{
-			billingAccountId: 'A00265729',
+			billingAccountId: 'A00336466',
 			firstName: 'David',
-			firstPaymentDateAfterDiscountExpiry: '2025-03-22',
+			firstPaymentDateAfterDiscountExpiry: '2025-04-12',
 			paymentAmount: 1.23,
 			paymentCurrency: 'GBP',
 			paymentFrequency: 'Month',
 			productName: 'GW',
-			sfContactId: '0039E00001HiIGlQAN',
-			zuoraSubName: 'A-S00424163',
-			workEmail: 'david.pepper@guardian.co.uk',
+			sfContactId: '0039E00001RJslFQAT',
+			zuoraSubName: 'A-S00348201', // Active sub in dev
+			workEmail: 'david.pepper+pm2022-_04618577@guardian.co.uk',
 			contactCountry: 'united states of america',
 			sfBuyerContactMailingCountry: 'united states of america',
 			sfBuyerContactOtherCountry: 'united states of america',

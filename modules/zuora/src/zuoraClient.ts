@@ -20,7 +20,7 @@ export class ZuoraClient {
 		const bearerTokenProvider = new BearerTokenProvider(stage, credentials);
 		return new ZuoraClient(stage, bearerTokenProvider, logger);
 	}
-	private zuoraServerUrl: string;
+	protected zuoraServerUrl: string;
 	constructor(
 		stage: Stage,
 		private tokenProvider: BearerTokenProvider,
@@ -61,7 +61,7 @@ export class ZuoraClient {
 		return await this.fetch(path, 'DELETE', schema);
 	}
 
-	private async fetch<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
+	public async fetch<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
 		method: string,
 		schema: T,
