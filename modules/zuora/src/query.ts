@@ -29,7 +29,6 @@ export const doQuery = async <T>(
 	} catch (error) {
 		const errorMessage =
 			error instanceof Error ? error.message : JSON.stringify(error, null, 2);
-		console.error('Error querying Zuora:', errorMessage);
 
 		throw new Error(errorMessage);
 	}
