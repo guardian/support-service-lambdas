@@ -5,6 +5,7 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { BillingPreviewInvoiceItem } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
 import { z } from 'zod';
+import { calculateTotalAmount, filterRecords } from '../helpers';
 import {
 	BaseRecordForEmailSendSchema,
 	createQueryResponseSchema,
@@ -204,13 +205,6 @@ export const getPastInvoiceItems = async (
 	return getInvoiceItemsResponse.records;
 };
 
-export const calculateTotalAmount = (records: BillingPreviewInvoiceItem[]) => {
-	return records.reduce(
-		(total, record) => total + record.chargeAmount + record.taxAmount,
-		0,
-	);
-};
-
 const query = (subName: string, serviceStartDate: string): string =>
 	`SELECT chargeAmount, taxAmount, serviceStartDate, subscriptionNumber FROM InvoiceItem WHERE subscriptionNumber = '${subName}' AND ServiceStartDate = '${serviceStartDate}' AND ChargeName!='Delivery-problem credit' AND ChargeName!='Holiday Credit'`;
 
@@ -241,22 +235,6 @@ export function getLastPaymentDateBeforeDiscountExpiry(
 
 	return date.toISOString().split('T')[0] ?? '';
 }
-
-//this function is duplicated in getNewPaymentAmount.ts
-const filterRecords = (
-	invoiceItems: BillingPreviewInvoiceItem[],
-	subscriptionNumber: string,
-	firstPaymentDateAfterDiscountExpiry: string,
-): BillingPreviewInvoiceItem[] => {
-	return invoiceItems.filter(
-		(item) =>
-			item.subscriptionNumber === subscriptionNumber &&
-			dayjs(item.serviceStartDate).isSame(
-				dayjs(firstPaymentDateAfterDiscountExpiry),
-				'day',
-			),
-	);
-};
 
 export const transformZuoraResponseKeys = (
 	records: QueryInvoiceItem[],
