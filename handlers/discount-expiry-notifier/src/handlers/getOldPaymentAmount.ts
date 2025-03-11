@@ -266,7 +266,6 @@ const transformZuoraResponseKeys = (
 		taxAmount: record.TaxAmount,
 		serviceStartDate: new Date(record.ServiceStartDate),
 		subscriptionNumber: record.SubscriptionNumber,
-		paymentAmount: record.ChargeAmount + record.TaxAmount,
 	}));
 };
 
