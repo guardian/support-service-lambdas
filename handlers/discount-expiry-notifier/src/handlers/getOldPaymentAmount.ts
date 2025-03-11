@@ -52,7 +52,6 @@ export const handler = async (event: GetOldPaymentAmountInput) => {
 		const errorMessage =
 			'Error getting old payment amount:' +
 			(error instanceof Error ? error.message : JSON.stringify(error, null, 2));
-		console.log('Something went wrong:', errorMessage);
 
 		return {
 			...event,
@@ -70,10 +69,6 @@ const handleTargetDateBeforeToday = async (
 		zuoraClient,
 		parsedEvent.zuoraSubName,
 		lastPaymentDateBeforeDiscountExpiry,
-	);
-	console.log(
-		'oldPaymentAmount (target date is before today):',
-		oldPaymentAmount,
 	);
 
 	return {
@@ -93,10 +88,6 @@ const handleTargetDateAfterToday = async (
 		parsedEvent.zuoraSubName,
 		parsedEvent.billingAccountId,
 		lastPaymentDateBeforeDiscountExpiry,
-	);
-	console.log(
-		'oldPaymentAmount (target date is after today):',
-		oldPaymentAmount,
 	);
 
 	return {
@@ -119,10 +110,7 @@ export const handleTargetDateIsToday = async (
 		parsedEvent.billingAccountId,
 		lastPaymentDateBeforeDiscountExpiry,
 	);
-	console.log(
-		'handleTargetDateIsToday futureInvoiceItems:',
-		futureInvoiceItems,
-	);
+
 	if (futureInvoiceItems.length > 0) {
 		return {
 			...parsedEvent,
@@ -135,7 +123,7 @@ export const handleTargetDateIsToday = async (
 			parsedEvent.zuoraSubName,
 			lastPaymentDateBeforeDiscountExpiry,
 		);
-		console.log('handleTargetDateIsToday pastInvoiceItems:', pastInvoiceItems);
+
 		if (pastInvoiceItems.length > 0) {
 			return {
 				...parsedEvent,
@@ -179,7 +167,6 @@ const getOldPaymentAmountWhenTargetDateIsBeforeToday = async (
 		subName,
 		targetDate,
 	);
-	console.log('pastInvoiceItems:', pastInvoiceItems);
 
 	return calculateTotalAmount(transformZuoraResponseKeys(pastInvoiceItems));
 };
@@ -213,7 +200,7 @@ export const getPastInvoiceItems = async (
 		query(subName, targetDate),
 		queryResponseSchema,
 	);
-	console.log('TTT getInvoiceItemsResponse:', getInvoiceItemsResponse);
+
 	return getInvoiceItemsResponse.records;
 };
 
