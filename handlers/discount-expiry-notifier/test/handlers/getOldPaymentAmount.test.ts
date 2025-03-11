@@ -1,8 +1,73 @@
+import { getBillingPreview } from '@modules/zuora/billingPreview';
 import { doQuery } from '@modules/zuora/query';
 import { mockZuoraClient } from '../../../../modules/zuora/test/mocks/mockZuoraClient';
-import { getPastInvoiceItems } from '../../src/handlers/getOldPaymentAmount';
+import {
+	getFutureInvoiceItems,
+	getPastInvoiceItems,
+} from '../../src/handlers/getOldPaymentAmount';
 
 jest.mock('@modules/zuora/query');
+jest.mock('@modules/zuora/billingPreview');
+
+describe('getFutureInvoiceItems', () => {
+	beforeEach(() => {
+		jest.resetAllMocks();
+	});
+
+	test('should return records for a given subscription and target date', async () => {
+		const mockBillingPreviewResponse = {
+			accountId: '8ad0823f800415d501801dd4b73b3c61',
+			invoiceItems: [],
+		};
+		(getBillingPreview as jest.Mock).mockResolvedValue(
+			mockBillingPreviewResponse,
+		);
+
+		const result = await getFutureInvoiceItems(
+			mockZuoraClient,
+			'A-S00348201',
+			'A00112233',
+			'2025-03-12',
+		);
+
+		expect(result).toEqual([]);
+	});
+
+	test('should return records for a given subscription and target date', async () => {
+		const mockBillingPreviewResponse = {
+			accountId: '8ad0823f800415d501801dd4b73b3c61',
+			invoiceItems: [
+				{
+					id: 'b932148ca2424f59b7f860c9200c2fa0',
+					subscriptionNumber: 'A-S00348201',
+					serviceStartDate: '2025-03-12T00:00:00.000Z',
+					chargeAmount: 7.18,
+					taxAmount: 0,
+				},
+			],
+		};
+		(getBillingPreview as jest.Mock).mockResolvedValue(
+			mockBillingPreviewResponse,
+		);
+
+		const result = await getFutureInvoiceItems(
+			mockZuoraClient,
+			'A-S00348201',
+			'A00112233',
+			'2025-03-12',
+		);
+
+		expect(result).toEqual([
+			{
+				id: 'b932148ca2424f59b7f860c9200c2fa0',
+				subscriptionNumber: 'A-S00348201',
+				serviceStartDate: '2025-03-12T00:00:00.000Z',
+				chargeAmount: 7.18,
+				taxAmount: 0,
+			},
+		]);
+	});
+});
 
 describe('getPastInvoiceItems', () => {
 	beforeEach(() => {
