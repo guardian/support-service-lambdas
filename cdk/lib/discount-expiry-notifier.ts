@@ -239,7 +239,11 @@ export class DiscountExpiryNotifier extends GuStack {
 				lambdaFunction: getExpiringDiscountsLambda,
 				outputPath: '$.Payload',
 			},
-		);
+		).addRetry({
+			errors: ['States.ALL'],
+			interval: Duration.seconds(10),
+			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
+		});
 
 		const filterRecordsLambdaTask = new LambdaInvoke(
 			this,
