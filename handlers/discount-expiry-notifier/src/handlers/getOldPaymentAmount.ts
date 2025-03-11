@@ -258,7 +258,7 @@ const filterRecords = (
 	);
 };
 
-const transformZuoraResponseKeys = (
+export const transformZuoraResponseKeys = (
 	records: QueryInvoiceItem[],
 ): BillingPreviewInvoiceItem[] => {
 	return records.map((record) => ({
