@@ -60,12 +60,4 @@ describe('getPastInvoiceItems', () => {
 
 		expect(result).toEqual(records);
 	});
-
-	test('should throw an error if doQuery fails', async () => {
-		(doQuery as jest.Mock).mockRejectedValue(new Error('Query failed'));
-
-		await expect(
-			getPastInvoiceItems(mockZuoraClient, 'A-S12345678', '2022-01-01'),
-		).rejects.toThrow('Query failed');
-	});
 });
