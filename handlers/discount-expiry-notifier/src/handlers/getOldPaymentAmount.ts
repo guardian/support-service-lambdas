@@ -49,10 +49,11 @@ export const handler = async (event: GetOldPaymentAmountInput) => {
 			lastPaymentDateBeforeDiscountExpiry,
 		);
 	} catch (error) {
-		console.log('error:', error);
 		const errorMessage =
 			'Error getting old payment amount:' +
 			(error instanceof Error ? error.message : JSON.stringify(error, null, 2));
+		console.log('Something went wrong:', errorMessage);
+
 		return {
 			...event,
 			errorDetail: errorMessage,
