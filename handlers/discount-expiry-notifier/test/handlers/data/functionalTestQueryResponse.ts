@@ -3,7 +3,7 @@ export const functionalTestQueryResponse = [
 	{
 		billingAccountId: 'A00265729',
 		firstName: 'David',
-		nextPaymentDate: '2025-03-22',
+		firstPaymentDateAfterDiscountExpiry: '2025-03-22',
 		paymentAmount: 1.23,
 		paymentCurrency: 'GBP',
 		paymentFrequency: 'Month',
@@ -20,7 +20,7 @@ export const functionalTestQueryResponse = [
 	{
 		billingAccountId: 'A00900236',
 		firstName: 'Graham',
-		nextPaymentDate: '2025-02-28',
+		firstPaymentDateAfterDiscountExpiry: '2025-02-28',
 		paymentAmount: 4.56,
 		paymentCurrency: 'USD',
 		paymentFrequency: 'Month',
@@ -37,7 +37,7 @@ export const functionalTestQueryResponse = [
 	{
 		billingAccountId: 'A00512380',
 		firstName: 'Robert',
-		nextPaymentDate: '2025-02-28',
+		firstPaymentDateAfterDiscountExpiry: '2025-02-28',
 		paymentAmount: 7.89,
 		paymentCurrency: 'USD',
 		paymentFrequency: 'Month',

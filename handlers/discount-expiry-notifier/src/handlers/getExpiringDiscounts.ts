@@ -61,7 +61,7 @@ WITH expiringDiscounts AS (
     SELECT
         contact.country as contactCountry,
         contact.first_name as firstName,
-        DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) AS nextPaymentDate,
+        DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) AS firstPaymentDateAfterDiscountExpiry,
         account.account_number as billingAccountId,
         account.currency as paymentCurrency,
         account.sf_contact_id_c as sfContactId,
@@ -98,12 +98,13 @@ WITH expiringDiscounts AS (
         AND zuoraSub.is_latest_version = TRUE 
         AND zuoraSub.status = 'Active' 
 		AND DATE_ADD(charge.effective_start_date, INTERVAL charge.up_to_periods MONTH) = '${discountExpiresOnDate}'
+        AND zuoraSub.auto_renew = true
 )
 SELECT 
     STRING_AGG(DISTINCT billingAccountId) as billingAccountId,
     STRING_AGG(DISTINCT contactCountry) as contactCountry,
     STRING_AGG(DISTINCT firstName) as firstName,
-    MIN(exp.nextPaymentDate) AS nextPaymentDate,
+    MIN(exp.firstPaymentDateAfterDiscountExpiry) AS firstPaymentDateAfterDiscountExpiry,
     STRING_AGG(DISTINCT paymentCurrency) as paymentCurrency,
     STRING_AGG(DISTINCT rate_plan_charge.billing_period) AS paymentFrequency,
     STRING_AGG(DISTINCT product.name) as productName,

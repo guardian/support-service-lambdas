@@ -12,9 +12,17 @@ export const handler = async (event: SendEmailInput) => {
 		throw new Error('Invalid event data');
 	}
 	const parsedEvent = parsedEventResult.data;
+	if (
+		parsedEvent.oldPaymentAmount === undefined ||
+		parsedEvent.newPaymentAmount === undefined
+	) {
+		throw new Error('Payment amounts must be defined');
+	}
 	const emailSendEligibility = getEmailSendEligibility(
 		parsedEvent.subStatus,
 		parsedEvent.workEmail,
+		parsedEvent.oldPaymentAmount,
+		parsedEvent.newPaymentAmount,
 	);
 
 	if (!emailSendEligibility.isEligible) {
@@ -38,9 +46,11 @@ export const handler = async (event: SendEmailInput) => {
 				ContactAttributes: {
 					SubscriberAttributes: {
 						EmailAddress: parsedEvent.workEmail ?? '',
-						payment_amount: `${currencySymbol}${parsedEvent.paymentAmount}`,
+						payment_amount: `${currencySymbol}${parsedEvent.newPaymentAmount}`,
 						first_name: parsedEvent.firstName,
-						next_payment_date: formatDate(parsedEvent.nextPaymentDate),
+						next_payment_date: formatDate(
+							parsedEvent.firstPaymentDateAfterDiscountExpiry,
+						),
 						payment_frequency: parsedEvent.paymentFrequency.toLowerCase(),
 					},
 				},
@@ -79,6 +89,8 @@ export const handler = async (event: SendEmailInput) => {
 function getIneligibilityReason(
 	subStatus: string,
 	workEmail: string | null | undefined,
+	oldPaymentAmount: number,
+	newPaymentAmount: number,
 ) {
 	if (subStatus === 'Cancelled') {
 		return 'Subscription status is cancelled';
@@ -89,15 +101,28 @@ function getIneligibilityReason(
 	if (!workEmail) {
 		return 'No value for work email';
 	}
+	if (oldPaymentAmount === newPaymentAmount) {
+		return 'Old and new payment amounts are the same';
+	}
 	return '';
 }
 function getEmailSendEligibility(
 	subStatus: string,
 	workEmail: string | null | undefined,
+	oldPaymentAmount: number,
+	newPaymentAmount: number,
 ) {
 	return {
-		isEligible: subStatus === 'Active' && !!workEmail,
-		ineligibilityReason: getIneligibilityReason(subStatus, workEmail),
+		isEligible:
+			subStatus === 'Active' &&
+			!!workEmail &&
+			oldPaymentAmount !== newPaymentAmount,
+		ineligibilityReason: getIneligibilityReason(
+			subStatus,
+			workEmail,
+			oldPaymentAmount,
+			newPaymentAmount,
+		),
 	};
 }
 
