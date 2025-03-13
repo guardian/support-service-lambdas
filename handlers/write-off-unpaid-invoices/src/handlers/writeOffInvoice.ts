@@ -109,7 +109,13 @@ export const handler = async (event: { Items: InvoiceDateInput[] }) => {
 		let currentBalance = invoiceBalance;
 		let completed = false;
 
+		const roundToTwo = (num: number) => Math.round(num * 100) / 100;
+
 		while (!completed) {
+			if (roundToTwo(currentBalance) == 0) {
+				break;
+			}
+
 			for (let k = 0; k < payloads.length; k++) {
 				if (payloadsCompletedArr[k]) {
 					continue;
@@ -121,10 +127,28 @@ export const handler = async (event: { Items: InvoiceDateInput[] }) => {
 				const newBalance = currentBalance + diff;
 
 				if (
+					(newBalance <= 0 && currentBalance >= 0) ||
+					(newBalance >= 0 && currentBalance <= 0)
+				) {
+					item.Amount = Math.abs(currentBalance);
+					orderedItems.push(item);
+					payloadsCompletedArr[k] = true;
+					break;
+				}
+
+				// console.log(item);
+				// console.log(invoiceAmount);
+				// console.log(invoiceBalance);
+				// console.log(newBalance);
+				// console.log(payloadsCompletedArr);
+
+				if (
 					(invoiceAmount > 0 &&
-						newBalance >= 0 &&
-						newBalance <= invoiceAmount) ||
-					(invoiceAmount < 0 && newBalance <= 0 && newBalance >= invoiceAmount)
+						roundToTwo(newBalance) >= 0 &&
+						roundToTwo(newBalance) <= roundToTwo(invoiceAmount)) ||
+					(invoiceAmount < 0 &&
+						roundToTwo(newBalance) <= 0 &&
+						roundToTwo(newBalance) >= roundToTwo(invoiceAmount))
 				) {
 					orderedItems.push(item);
 					payloadsCompletedArr[k] = true;
