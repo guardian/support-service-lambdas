@@ -15,6 +15,8 @@ import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type { CatalogInformation } from './catalogInformation';
 import { getCatalogInformation } from './catalogInformation';
+import type { Discount} from './discounts';
+import { getDiscount } from './discounts';
 import type { ProductSwitchRequestBody } from './schemas';
 
 export type AccountInformation = {
@@ -44,6 +46,7 @@ export type SwitchInformation = {
 	account: AccountInformation;
 	subscription: SubscriptionInformation;
 	catalog: CatalogInformation;
+	discount?: Discount;
 };
 
 const getAccountInformation = (account: ZuoraAccount): AccountInformation => {
@@ -188,6 +191,16 @@ export const getSwitchInformationWithOwnerCheck = (
 	const startOfToday = today.startOf('day');
 	const startNewTerm = termStartDate.isBefore(startOfToday);
 
+	const maybeDiscount = getDiscount(
+		!!input.applyDiscountIfAvailable,
+		input.price,
+		catalogInformation.supporterPlus.price,
+		billingPeriod,
+		subscription.status,
+		account.metrics.totalInvoiceBalance,
+		stage
+	);
+
 	return {
 		stage,
 		input,
@@ -196,5 +209,6 @@ export const getSwitchInformationWithOwnerCheck = (
 		account: userInformation,
 		subscription: subscriptionInformation,
 		catalog: catalogInformation,
-	};
+		discount: maybeDiscount
+	}
 };
