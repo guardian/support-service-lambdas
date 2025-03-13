@@ -85,7 +85,7 @@ export class WriteOffUnpaidInvoices extends GuStack {
 						},
 					},
 					ItemBatcher: {
-						MaxItemsPerBatch: 1,
+						MaxItemsPerBatch: 20,
 					},
 					ItemProcessor: {
 						ProcessorConfig: {

@@ -395,7 +395,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 1`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key":"query-result.csv"}},"ItemBatcher":{"MaxItemsPerBatch":1},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"WriteOffInvoice","States":{"WriteOffInvoice":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
+              "","Key":"query-result.csv"}},"ItemBatcher":{"MaxItemsPerBatch":20},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"WriteOffInvoice","States":{"WriteOffInvoice":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
               {
                 "Fn::GetAtt": [
                   "WriteOffInvoiceLambda5DC658D6",
@@ -968,7 +968,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 2`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key":"query-result.csv"}},"ItemBatcher":{"MaxItemsPerBatch":1},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"WriteOffInvoice","States":{"WriteOffInvoice":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
+              "","Key":"query-result.csv"}},"ItemBatcher":{"MaxItemsPerBatch":20},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"WriteOffInvoice","States":{"WriteOffInvoice":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
               {
                 "Fn::GetAtt": [
                   "WriteOffInvoiceLambda5DC658D6",
