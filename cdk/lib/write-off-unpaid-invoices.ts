@@ -70,7 +70,7 @@ export class WriteOffUnpaidInvoices extends GuStack {
 			{
 				stateJson: {
 					Type: 'Map',
-					MaxConcurrency: 30,
+					MaxConcurrency: 1,
 					ToleratedFailurePercentage: 100,
 					Comment: `ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches`,
 					ItemReader: {
