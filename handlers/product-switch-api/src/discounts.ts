@@ -11,7 +11,9 @@ export type Discount = {
 	discountPercentage: number;
 };
 
-const annualContribHalfPriceSupporterPlusForOneYear = (stage:Stage): Discount => ({
+const annualContribHalfPriceSupporterPlusForOneYear = (
+	stage: Stage,
+): Discount => ({
 	productRatePlanId: stage === 'PROD' ? '' : '71a1383e2b395842e6f58a2754ad00c1',
 	name: 'Cancellation Save - Annual Contribution to Supporter Plus Switch 50% off 1 year',
 	upToPeriods: 1,
@@ -26,7 +28,7 @@ export const getDiscount = (
 	billingPeriod: BillingPeriod,
 	subscriptionStatus: string,
 	invoiceBalance: number,
-    stage:Stage,
+	stage: Stage,
 ): Discount | undefined => {
 	const isEligibleForDiscount =
 		clientWantsADiscount &&
@@ -35,7 +37,9 @@ export const getDiscount = (
 		subscriptionStatus === 'Active' &&
 		invoiceBalance === 0;
 	if (isEligibleForDiscount) {
+		console.log('Subscription is eligible for discount');
 		return annualContribHalfPriceSupporterPlusForOneYear(stage);
 	}
+	console.log('Subscription is not eligible for discount');
 	return;
 };
