@@ -107,54 +107,55 @@ export const handler = async (event: { Items: InvoiceDateInput[] }) => {
 		const orderedItems = [];
 		const payloadsCompletedArr: boolean[] = payloads.map(() => false);
 		let currentBalance = invoiceBalance;
-		// let completed = false;
+		let completed = false;
 
-		// while (!completed) {
-		for (let k = 0; k < payloads.length; k++) {
-			if (payloadsCompletedArr[k]) {
-				continue;
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- comment
+		while (!completed) {
+			for (let k = 0; k < payloads.length; k++) {
+				if (payloadsCompletedArr[k]) {
+					continue;
+				}
+
+				const item = payloads[k] as InvoiceAdjustmentPayload;
+
+				const diff = item.Type == 'Charge' ? item.Amount : -item.Amount;
+				const newBalance = currentBalance + diff;
+
+				if (
+					(newBalance <= 0 && currentBalance >= 0) ||
+					(newBalance >= 0 && currentBalance <= 0)
+				) {
+					item.Amount = Math.abs(currentBalance);
+					orderedItems.push(item);
+					payloadsCompletedArr[k] = true;
+					break;
+				}
+
+				const roundToTwo = (num: number) => Math.round(num * 100) / 100;
+
+				if (
+					(invoiceAmount > 0 &&
+						roundToTwo(newBalance) >= 0 &&
+						roundToTwo(newBalance) <= roundToTwo(invoiceAmount)) ||
+					(invoiceAmount < 0 &&
+						roundToTwo(newBalance) <= 0 &&
+						roundToTwo(newBalance) >= roundToTwo(invoiceAmount))
+				) {
+					orderedItems.push(item);
+					payloadsCompletedArr[k] = true;
+					currentBalance = newBalance;
+				}
+
+				if (roundToTwo(currentBalance) == 0) {
+					break;
+				}
 			}
 
-			const item = payloads[k] as InvoiceAdjustmentPayload;
-
-			const diff = item.Type == 'Charge' ? item.Amount : -item.Amount;
-			const newBalance = currentBalance + diff;
-
-			if (
-				(newBalance <= 0 && currentBalance >= 0) ||
-				(newBalance >= 0 && currentBalance <= 0)
-			) {
-				item.Amount = Math.abs(currentBalance);
-				orderedItems.push(item);
-				payloadsCompletedArr[k] = true;
-				break;
+			if (payloadsCompletedArr.filter((item) => !item).length == 0) {
+				completed = true;
 			}
-
-			const roundToTwo = (num: number) => Math.round(num * 100) / 100;
-
-			if (
-				(invoiceAmount > 0 &&
-					roundToTwo(newBalance) >= 0 &&
-					roundToTwo(newBalance) <= roundToTwo(invoiceAmount)) ||
-				(invoiceAmount < 0 &&
-					roundToTwo(newBalance) <= 0 &&
-					roundToTwo(newBalance) >= roundToTwo(invoiceAmount))
-			) {
-				orderedItems.push(item);
-				payloadsCompletedArr[k] = true;
-				currentBalance = newBalance;
-			}
-
-			if (roundToTwo(currentBalance) == 0) {
-				break;
-			}
+			break;
 		}
-
-		// if (payloadsCompletedArr.filter((item) => !item).length == 0) {
-		// 	completed = true;
-		// }
-		// break;
-		// }
 
 		console.log(orderedItems);
 
