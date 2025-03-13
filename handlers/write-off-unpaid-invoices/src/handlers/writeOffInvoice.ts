@@ -107,123 +107,125 @@ export const handler = async (event: { Items: InvoiceDateInput[] }) => {
 		const orderedItems = [];
 		const payloadsCompletedArr: boolean[] = payloads.map(() => false);
 		let currentBalance = invoiceBalance;
-		let completed = false;
+		// let completed = false;
 
-		const roundToTwo = (num: number) => Math.round(num * 100) / 100;
+		// while (!completed) {
+		for (let k = 0; k < payloads.length; k++) {
+			if (payloadsCompletedArr[k]) {
+				continue;
+			}
 
-		while (!completed) {
-			if (roundToTwo(currentBalance) == 0) {
+			const item = payloads[k] as InvoiceAdjustmentPayload;
+
+			const diff = item.Type == 'Charge' ? item.Amount : -item.Amount;
+			const newBalance = currentBalance + diff;
+
+			if (
+				(newBalance <= 0 && currentBalance >= 0) ||
+				(newBalance >= 0 && currentBalance <= 0)
+			) {
+				item.Amount = Math.abs(currentBalance);
+				orderedItems.push(item);
+				payloadsCompletedArr[k] = true;
 				break;
 			}
 
-			for (let k = 0; k < payloads.length; k++) {
-				if (payloadsCompletedArr[k]) {
-					continue;
-				}
+			const roundToTwo = (num: number) => Math.round(num * 100) / 100;
 
-				const item = payloads[k] as InvoiceAdjustmentPayload;
-
-				const diff = item.Type == 'Charge' ? item.Amount : -item.Amount;
-				const newBalance = currentBalance + diff;
-
-				if (
-					(newBalance <= 0 && currentBalance >= 0) ||
-					(newBalance >= 0 && currentBalance <= 0)
-				) {
-					item.Amount = Math.abs(currentBalance);
-					orderedItems.push(item);
-					payloadsCompletedArr[k] = true;
-					break;
-				}
-
-				// console.log(item);
-				// console.log(invoiceAmount);
-				// console.log(invoiceBalance);
-				// console.log(newBalance);
-				// console.log(payloadsCompletedArr);
-
-				if (
-					(invoiceAmount > 0 &&
-						roundToTwo(newBalance) >= 0 &&
-						roundToTwo(newBalance) <= roundToTwo(invoiceAmount)) ||
-					(invoiceAmount < 0 &&
-						roundToTwo(newBalance) <= 0 &&
-						roundToTwo(newBalance) >= roundToTwo(invoiceAmount))
-				) {
-					orderedItems.push(item);
-					payloadsCompletedArr[k] = true;
-					currentBalance = newBalance;
-				}
+			if (
+				(invoiceAmount > 0 &&
+					roundToTwo(newBalance) >= 0 &&
+					roundToTwo(newBalance) <= roundToTwo(invoiceAmount)) ||
+				(invoiceAmount < 0 &&
+					roundToTwo(newBalance) <= 0 &&
+					roundToTwo(newBalance) >= roundToTwo(invoiceAmount))
+			) {
+				orderedItems.push(item);
+				payloadsCompletedArr[k] = true;
+				currentBalance = newBalance;
 			}
 
-			if (payloadsCompletedArr.filter((item) => !item).length == 0) {
-				completed = true;
+			if (roundToTwo(currentBalance) == 0) {
+				break;
 			}
 		}
 
+		// if (payloadsCompletedArr.filter((item) => !item).length == 0) {
+		// 	completed = true;
+		// }
+		// break;
+		// }
+
 		console.log(orderedItems);
 
-		try {
-			const accessToken = await getZuoraOAuthToken({ stage });
+		for (
+			let chunkIndex = 0;
+			chunkIndex < orderedItems.length;
+			chunkIndex += 50
+		) {
+			const chunk = orderedItems.slice(chunkIndex, chunkIndex + 50);
 
-			const domain = {
-				CODE: `https://rest.apisandbox.zuora.com`,
-				CSBX: `https://rest.test.zuora.com`,
-				PROD: `https://rest.zuora.com`,
-			};
+			try {
+				const accessToken = await getZuoraOAuthToken({ stage });
 
-			const response = await fetch(`${domain[stage]}/v1/action/create`, {
-				method: 'POST',
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					objects: orderedItems,
-					type: 'InvoiceItemAdjustment',
-				}),
-			});
+				const domain = {
+					CODE: `https://rest.apisandbox.zuora.com`,
+					CSBX: `https://rest.test.zuora.com`,
+					PROD: `https://rest.zuora.com`,
+				};
 
-			if (response.ok) {
-				const responseData = (await response.json()) as Array<{
-					Id: string;
-					Success: boolean;
-					Errors?: Array<{ Code: string; Message: string }>;
-				}>;
-
-				console.log(JSON.stringify(responseData, null, 2));
-
-				responseData.forEach((item) => {
-					if (!item.Success) {
-						failedRecords.push({
-							invoice_id: invoiceId,
-							error: (item.Errors ?? [])
-								.map((error) => `${error.Code}: ${error.Message}`)
-								.join(', '),
-						});
-						console.error(
-							`Invoice ${invoiceId} failed: ${JSON.stringify(
-								item.Errors,
-								null,
-								2,
-							)}`,
-						);
-					}
+				const response = await fetch(`${domain[stage]}/v1/action/create`, {
+					method: 'POST',
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						objects: chunk,
+						type: 'InvoiceItemAdjustment',
+					}),
 				});
-			} else {
-				const errorData = await response.json();
-				failedRecords.push({
-					invoice_id: invoiceId,
-					error: JSON.stringify(errorData, null, 2),
-				});
-				console.error(
-					'Failed to process invoice:',
-					JSON.stringify(errorData, null, 2),
-				);
+
+				if (response.ok) {
+					const responseData = (await response.json()) as Array<{
+						Id: string;
+						Success: boolean;
+						Errors?: Array<{ Code: string; Message: string }>;
+					}>;
+					console.log(responseData);
+
+					responseData.forEach((item) => {
+						if (!item.Success) {
+							failedRecords.push({
+								invoice_id: invoiceId,
+								error: (item.Errors || [])
+									.map((error) => `${error.Code}: ${error.Message}`)
+									.join(', '),
+							});
+							console.error(
+								`Invoice ${invoiceId} failed: ${JSON.stringify(
+									item.Errors,
+									null,
+									2,
+								)}`,
+							);
+						}
+					});
+				} else {
+					const errorData = await response.json();
+					failedRecords.push({
+						invoice_id: invoiceId,
+						error: JSON.stringify(errorData, null, 2),
+					});
+					console.error(
+						'Failed to process invoice:',
+						JSON.stringify(errorData, null, 2),
+					);
+				}
+			} catch (error) {
+				console.error('Error during API call:', error);
+				failedRecords.push({ invoice_id: invoiceId, error: String(error) });
 			}
-		} catch (error) {
-			console.error('Error during API call:', error);
-			failedRecords.push({ invoice_id: invoiceId, error: String(error) });
 		}
 	}
 
