@@ -89,9 +89,9 @@ describe('product-switching behaviour', () => {
 	});
 
 	it('can preview an annual recurring contribution switch with 50% discount', async () => {
-		const subscriptionNumber = 'A-S00695309';
-		const identityId = '200111098';
-		const input = { price: 150, preview: true, applyDiscountIfAvailable: true };
+		const subscriptionNumber = 'A-S00913236';
+		const identityId = '200275077';
+		const input = { price: 120, preview: true, applyDiscountIfAvailable: true };
 		const zuoraClient = await ZuoraClient.create('CODE');
 		const productCatalog = await getProductCatalogFromApi('CODE');
 		const subscription = await getSubscription(zuoraClient, subscriptionNumber);
