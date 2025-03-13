@@ -109,11 +109,17 @@ export const handler = async (event: { Items: InvoiceDateInput[] }) => {
 		let currentBalance = invoiceBalance;
 		let completed = false;
 
+		const roundToTwo = (num: number) => Math.round(num * 100) / 100;
+
 		// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- comment
 		while (!completed) {
 			for (let k = 0; k < payloads.length; k++) {
 				if (payloadsCompletedArr[k]) {
 					continue;
+				}
+
+				if (roundToTwo(currentBalance) == 0) {
+					break;
 				}
 
 				const item = payloads[k] as InvoiceAdjustmentPayload;
@@ -131,8 +137,6 @@ export const handler = async (event: { Items: InvoiceDateInput[] }) => {
 					break;
 				}
 
-				const roundToTwo = (num: number) => Math.round(num * 100) / 100;
-
 				if (
 					(invoiceAmount > 0 &&
 						roundToTwo(newBalance) >= 0 &&
@@ -144,10 +148,6 @@ export const handler = async (event: { Items: InvoiceDateInput[] }) => {
 					orderedItems.push(item);
 					payloadsCompletedArr[k] = true;
 					currentBalance = newBalance;
-				}
-
-				if (roundToTwo(currentBalance) == 0) {
-					break;
 				}
 			}
 
