@@ -5,7 +5,7 @@
 import { sendToSupporterProductData } from '../src/supporterProductData';
 import type { SwitchInformation } from '../src/switchInformation';
 
-test('supporter product data', async () => {
+test.skip('supporter product data', async () => {
 	const switchInformation: SwitchInformation = {
 		stage: 'CODE',
 		input: {

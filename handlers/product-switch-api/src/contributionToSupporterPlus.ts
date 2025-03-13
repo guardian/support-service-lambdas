@@ -16,6 +16,7 @@ import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import { removePendingUpdateAmendments } from './amendments';
 import type { CatalogInformation } from './catalogInformation';
+import type { Discount } from './discounts';
 import { takePaymentOrAdjustInvoice } from './payment';
 import { sendThankYouEmail } from './productSwitchEmail';
 import { sendSalesforceTracking } from './salesforceTracking';
@@ -32,11 +33,19 @@ import {
 import { sendToSupporterProductData } from './supporterProductData';
 import type { SwitchInformation } from './switchInformation';
 
+export interface SwitchDiscountResponse {
+	discountedPrice: number;
+	upToPeriods: number; // 3,
+	upToPeriodsType: 'Months' | 'Years';
+	discountPercentage: number; // 25,
+}
+
 export type PreviewResponse = {
 	amountPayableToday: number;
 	contributionRefundAmount: number;
 	supporterPlusPurchaseAmount: number;
 	nextPaymentDate: string;
+	discount?: SwitchDiscountResponse;
 };
 
 export type SwitchResponse = { message: string };
@@ -145,7 +154,9 @@ export const previewResponseFromZuoraResponse = (
 		'No supporter plus invoice item found in the preview response',
 	);
 
-	return {
+	// const possibleDiscount: SwitchDiscountResponse | null = {};
+
+	const response: PreviewResponse = {
 		amountPayableToday: invoice.amount,
 		contributionRefundAmount,
 		supporterPlusPurchaseAmount:
@@ -155,6 +166,22 @@ export const previewResponseFromZuoraResponse = (
 			dayjs(supporterPlusSubscriptionInvoiceItem.serviceEndDate).add(1, 'days'),
 		),
 	};
+	// if (possibleDiscount) {
+	// 	response.discount = possibleDiscount;
+	// }
+	return response;
+	/*
+    amountPayableToday: number;
+	contributionRefundAmount: number;
+	supporterPlusPurchaseAmount: number;
+	nextPaymentDate: string;
+    discount?: {
+        discountedPrice:number;
+        upToPeriods: number; // 3,
+        upToPeriodsType: 'Months' | 'Years';
+        discountPercentage: number; // 25,
+    };
+    */
 };
 
 export const preview = async (
@@ -206,6 +233,31 @@ export const doSwitch = async (
 	return zuoraResponse;
 };
 
+const buildAddDiscountOrderAction = (discount: Discount, orderDate: Dayjs): OrderAction[] => {
+	return [
+		{
+			type: 'AddProduct',
+			triggerDates: [
+				{
+					name: 'ContractEffective',
+					triggerDate: zuoraDateFormat(orderDate),
+				},
+				{
+					name: 'ServiceActivation',
+					triggerDate: zuoraDateFormat(orderDate),
+				},
+				{
+					name: 'CustomerAcceptance',
+					triggerDate: zuoraDateFormat(orderDate),
+				},
+			],
+			addProduct: {
+				productRatePlanId: discount.productRatePlanId,
+			},
+		},
+	];
+};
+
 const buildChangePlanOrderAction = (
 	orderDate: Dayjs,
 	catalog: CatalogInformation,
@@ -255,6 +307,10 @@ const buildPreviewRequestBody = (
 	const { accountNumber, subscriptionNumber } =
 		productSwitchInformation.subscription;
 
+	const discountOrderAction = productSwitchInformation.discount
+		? buildAddDiscountOrderAction(productSwitchInformation.discount, orderDate)
+		: [];
+
 	return {
 		orderDate: zuoraDateFormat(orderDate),
 		existingAccountNumber: accountNumber,
@@ -268,6 +324,7 @@ const buildPreviewRequestBody = (
 				subscriptionNumber,
 				orderActions: [
 					buildChangePlanOrderAction(orderDate, catalog, contributionAmount),
+					...discountOrderAction,
 				],
 			},
 		],
@@ -329,6 +386,10 @@ export const buildSwitchRequestBody = (
 			]
 		: [];
 
+	const discountOrderAction = productSwitchInformation.discount
+		? buildAddDiscountOrderAction(productSwitchInformation.discount, orderDate)
+		: [];
+
 	return {
 		orderDate: zuoraDateFormat(orderDate),
 		existingAccountNumber: accountNumber,
@@ -341,9 +402,10 @@ export const buildSwitchRequestBody = (
 				subscriptionNumber,
 				orderActions: [
 					buildChangePlanOrderAction(orderDate, catalog, contributionAmount),
+					...discountOrderAction,
 					...newTermOrderActions,
 				],
 			},
-		],
+		],	
 	};
 };
