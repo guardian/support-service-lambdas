@@ -192,7 +192,7 @@ export const handler = async (event: { Items: InvoiceDateInput[] }) => {
 						Success: boolean;
 						Errors?: Array<{ Code: string; Message: string }>;
 					}>;
-					console.log(responseData);
+					console.log(JSON.stringify(responseData, null, 2));
 
 					responseData.forEach((item) => {
 						if (!item.Success) {
