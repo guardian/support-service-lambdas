@@ -88,6 +88,34 @@ describe('product-switching behaviour', () => {
 		expect(result).toMatchObject(expectedResult);
 	});
 
+	it('can preview an annual recurring contribution switch with 50% discount', async () => {
+		const subscriptionNumber = 'A-S00695309';
+		const identityId = '200111098';
+		const input = { price: 150, preview: true, applyDiscountIfAvailable: true };
+		const zuoraClient = await ZuoraClient.create('CODE');
+		const productCatalog = await getProductCatalogFromApi('CODE');
+		const subscription = await getSubscription(zuoraClient, subscriptionNumber);
+		const account = await getAccount(zuoraClient, subscription.accountNumber);
+
+		const switchInformation = getSwitchInformationWithOwnerCheck(
+			stage,
+			input,
+			subscription,
+			account,
+			productCatalog,
+			identityId,
+		);
+
+		const result = await preview(zuoraClient, switchInformation, subscription);
+
+		const expectedResult = {
+			supporterPlusPurchaseAmount: 120,
+			nextPaymentDate: zuoraDateFormat(dayjs().add(1, 'year').endOf('day')),
+		};
+
+		expect(result).toMatchObject(expectedResult);
+	});
+
 	it(
 		'can switch a recurring contribution',
 		async () => {

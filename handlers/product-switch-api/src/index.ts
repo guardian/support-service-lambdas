@@ -10,6 +10,7 @@ import { contributionToSupporterPlusEndpoint } from './productSwitchEndpoint';
 import { parseUrlPath } from './urlParsing';
 
 const stage = process.env.STAGE as Stage;
+
 export const handler: Handler = async (
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
