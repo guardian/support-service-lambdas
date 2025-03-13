@@ -1,5 +1,6 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { getZuoraOAuthToken } from '../services/getOAuthToken';
+import { error } from 'console';
 
 type InvoiceDateInput = {
 	accounting_code_project_codes: string;
@@ -197,9 +198,16 @@ export const handler = async (event: { Items: InvoiceDateInput[] }) => {
 
 					responseData.forEach((item) => {
 						if (!item.Success) {
+							// if (item.)
 							failedRecords.push({
 								invoice_id: invoiceId,
 								error: (item.Errors ?? [])
+									.filter(
+										(error) =>
+											!error.Message.includes(
+												'Adjustment amount cannot be negative or zero',
+											),
+									)
 									.map((error) => `${error.Code}: ${error.Message}`)
 									.join(', '),
 							});
@@ -230,12 +238,7 @@ export const handler = async (event: { Items: InvoiceDateInput[] }) => {
 		}
 	}
 
-	if (
-		failedRecords.filter(
-			(item) =>
-				!item.error.includes('Adjustment amount cannot be negative or zero'),
-		).length > 0
-	) {
+	if (failedRecords.length > 0) {
 		throw new Error(JSON.stringify(failedRecords));
 	}
 };
