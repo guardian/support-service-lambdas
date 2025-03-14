@@ -53,7 +53,18 @@ export const getValidUserProducts = (
 export const userHasGuardianEmail = (email: string): boolean =>
 	email.endsWith('@theguardian.com') || email.endsWith('@guardian.co.uk');
 
-export const getUserBenefitsExcludingStaff = async (
+const getOverrideBenefits = (
+	identityId: string,
+	userBenefitsOverrides: UserBenefitsOverrides,
+): ProductBenefit[] | undefined => {
+	const maybeOverride = userBenefitsOverrides.userOverrides.find(
+		(user) => user.identityId === identityId,
+	);
+
+	return maybeOverride?.benefits;
+};
+
+const getUserBenefitsExcludingStaffAndOverrides = async (
 	stage: Stage,
 	productCatalogHelper: ProductCatalogHelper,
 	identityId: string,
@@ -67,22 +78,43 @@ export const getUserBenefitsExcludingStaff = async (
 	return getUserBenefitsFromUserProducts(userProducts);
 };
 
+export const getUserBenefitsExcludingStaff = async (
+	stage: Stage,
+	productCatalogHelper: ProductCatalogHelper,
+	userBenefitsOverrides: UserBenefitsOverrides,
+	identityId: string,
+): Promise<ProductBenefit[]> => {
+	const maybeOverrideBenefits = getOverrideBenefits(
+		identityId,
+		userBenefitsOverrides,
+	);
+	if (maybeOverrideBenefits !== undefined) {
+		return Promise.resolve(maybeOverrideBenefits);
+	}
+	return getUserBenefitsExcludingStaffAndOverrides(
+		stage,
+		productCatalogHelper,
+		identityId,
+	);
+};
+
 export const getUserBenefits = (
 	stage: Stage,
 	productCatalogHelper: ProductCatalogHelper,
 	userBenefitsOverrides: UserBenefitsOverrides,
 	userDetails: IdentityUserDetails,
 ): Promise<ProductBenefit[]> => {
-	const maybeOverride = userBenefitsOverrides.userOverrides.find(
-		(user) => user.identityId === userDetails.identityId,
+	const maybeOverrideBenefits = getOverrideBenefits(
+		userDetails.identityId,
+		userBenefitsOverrides,
 	);
-	if (maybeOverride !== undefined) {
-		return Promise.resolve(maybeOverride.benefits);
+	if (maybeOverrideBenefits !== undefined) {
+		return Promise.resolve(maybeOverrideBenefits);
 	}
 	if (userHasGuardianEmail(userDetails.email)) {
 		return Promise.resolve(allProductBenefits);
 	}
-	return getUserBenefitsExcludingStaff(
+	return getUserBenefitsExcludingStaffAndOverrides(
 		stage,
 		productCatalogHelper,
 		userDetails.identityId,

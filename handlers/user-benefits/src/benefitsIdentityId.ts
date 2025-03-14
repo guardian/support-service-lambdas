@@ -1,5 +1,8 @@
 import { Lazy } from '@modules/lazy';
-import type { UserBenefitsResponse } from '@modules/product-benefits/schemas';
+import type {
+	UserBenefitsOverrides,
+	UserBenefitsResponse,
+} from '@modules/product-benefits/schemas';
 import { getUserBenefitsExcludingStaff } from '@modules/product-benefits/userBenefits';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
@@ -8,21 +11,28 @@ import { stageFromEnvironment } from '@modules/stage';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { buildHttpResponse } from './response';
 import { getTrialInformation } from './trials';
+import { getUserOverrides } from './userOverrides';
 
 const stage = stageFromEnvironment();
 const productCatalogHelper = new Lazy(
 	async () => new ProductCatalogHelper(await getProductCatalogFromApi(stage)),
 	'Get product catalog helper',
 );
+const userBenefitsOverrides = new Lazy(
+	async () => await getUserOverrides(stage),
+	'Get user benefits overrides',
+);
 
 const getUserBenefitsResponse = async (
 	stage: Stage,
 	productCatalogHelper: ProductCatalogHelper,
+	userBenefitsOverrides: UserBenefitsOverrides,
 	identityId: string,
 ): Promise<UserBenefitsResponse> => {
 	const benefits = await getUserBenefitsExcludingStaff(
 		stage,
 		productCatalogHelper,
+		userBenefitsOverrides,
 		identityId,
 	);
 	console.log(`Benefits for user ${identityId} are: `, benefits);
@@ -52,6 +62,7 @@ export const benefitsIdentityIdHandler = async (
 	const userBenefitsResponse = await getUserBenefitsResponse(
 		stage,
 		await productCatalogHelper.get(),
+		await userBenefitsOverrides.get(),
 		identityId,
 	);
 
