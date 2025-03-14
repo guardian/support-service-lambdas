@@ -101,26 +101,11 @@ export class WriteOffUnpaidInvoices extends GuStack {
 								Parameters: {
 									'Payload.$': '$',
 									FunctionName: writeOffInvoiceLambda.functionArn,
+									'Comment.$': JsonPath.stringAt('$$.Execution.Input.comment'),
+									'ReasonCode.$': JsonPath.stringAt(
+										'$$.Execution.Input.reasonCode',
+									),
 								},
-								Retry: [
-									{
-										ErrorEquals: [
-											'Lambda.ServiceException',
-											'Lambda.AWSLambdaException',
-											'Lambda.SdkClientException',
-											'Lambda.TooManyRequestsException',
-										],
-										IntervalSeconds: 2,
-										MaxAttempts: 6,
-										BackoffRate: 2,
-									},
-									{
-										ErrorEquals: ['ZuoraError'],
-										IntervalSeconds: 10,
-										MaxAttempts: 5,
-										BackoffRate: 5,
-									},
-								],
 								End: true,
 							},
 						},
