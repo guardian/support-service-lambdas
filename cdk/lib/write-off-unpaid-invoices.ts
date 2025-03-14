@@ -99,12 +99,16 @@ export class WriteOffUnpaidInvoices extends GuStack {
 								Resource: 'arn:aws:states:::lambda:invoke',
 								OutputPath: '$.Payload',
 								Parameters: {
-									'Payload.$': '$',
 									FunctionName: writeOffInvoiceLambda.functionArn,
-									'Comment.$': JsonPath.stringAt('$$.Execution.Input.comment'),
-									'ReasonCode.$': JsonPath.stringAt(
-										'$$.Execution.Input.reasonCode',
-									),
+									Payload: {
+										'comment.$': JsonPath.stringAt(
+											'$$.Execution.Input.comment',
+										),
+										'reasonCode.$': JsonPath.stringAt(
+											'$$.Execution.Input.reasonCode',
+										),
+										'Items.$': JsonPath.listAt('$.Items'),
+									},
 								},
 								End: true,
 							},

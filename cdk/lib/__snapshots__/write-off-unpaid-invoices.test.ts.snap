@@ -395,14 +395,14 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 1`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key":"query-result.csv"}},"ItemBatcher":{"MaxItemsPerBatch":40},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"WriteOffInvoice","States":{"WriteOffInvoice":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
+              "","Key":"query-result.csv"}},"ItemBatcher":{"MaxItemsPerBatch":40},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"WriteOffInvoice","States":{"WriteOffInvoice":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"FunctionName":"",
               {
                 "Fn::GetAtt": [
                   "WriteOffInvoiceLambda5DC658D6",
                   "Arn",
                 ],
               },
-              "","Comment.$":"$$.Execution.Input.comment","ReasonCode.$":"$$.Execution.Input.reasonCode"},"End":true}}},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
+              "","Payload":{"comment.$":"$$.Execution.Input.comment","reasonCode.$":"$$.Execution.Input.reasonCode","Items.$":"$.Items"}},"End":true}}},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -968,14 +968,14 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 2`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key":"query-result.csv"}},"ItemBatcher":{"MaxItemsPerBatch":40},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"WriteOffInvoice","States":{"WriteOffInvoice":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
+              "","Key":"query-result.csv"}},"ItemBatcher":{"MaxItemsPerBatch":40},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"WriteOffInvoice","States":{"WriteOffInvoice":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"FunctionName":"",
               {
                 "Fn::GetAtt": [
                   "WriteOffInvoiceLambda5DC658D6",
                   "Arn",
                 ],
               },
-              "","Comment.$":"$$.Execution.Input.comment","ReasonCode.$":"$$.Execution.Input.reasonCode"},"End":true}}},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
+              "","Payload":{"comment.$":"$$.Execution.Input.comment","reasonCode.$":"$$.Execution.Input.reasonCode","Items.$":"$.Items"}},"End":true}}},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
