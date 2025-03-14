@@ -27,8 +27,7 @@ type InvoiceAdjustmentPayload = {
 	ReasonCode?: string;
 };
 
-const comment =
-	'Auto-cancel cancelling the subscription but not balancing negative and positive invoices. Write-off processed for the invoices.';
+const comment = 'Invoices left over by CSRs after Salesforce cancellations.';
 
 const reasonCode = undefined;
 
