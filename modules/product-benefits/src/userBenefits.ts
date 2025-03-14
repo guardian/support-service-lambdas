@@ -12,7 +12,10 @@ import {
 	itemIsValidForProduct,
 	productBenefitMapping,
 } from '@modules/product-benefits/productBenefit';
-import type { ProductBenefit } from '@modules/product-benefits/schemas';
+import type {
+	ProductBenefit,
+	UserBenefitsOverrides,
+} from '@modules/product-benefits/schemas';
 
 export const getUserProducts = async (
 	stage: Stage,
@@ -50,7 +53,18 @@ export const getValidUserProducts = (
 export const userHasGuardianEmail = (email: string): boolean =>
 	email.endsWith('@theguardian.com') || email.endsWith('@guardian.co.uk');
 
-export const getUserBenefitsExcludingStaff = async (
+const getOverrideBenefitsForIdentityId = (
+	identityId: string,
+	userBenefitsOverrides: UserBenefitsOverrides,
+): ProductBenefit[] | undefined => {
+	const maybeOverride = userBenefitsOverrides.userOverrides.find(
+		(user) => user.identityId === identityId,
+	);
+
+	return maybeOverride?.benefits;
+};
+
+const getUserBenefitsExcludingStaffAndOverrides = async (
 	stage: Stage,
 	productCatalogHelper: ProductCatalogHelper,
 	identityId: string,
@@ -64,15 +78,43 @@ export const getUserBenefitsExcludingStaff = async (
 	return getUserBenefitsFromUserProducts(userProducts);
 };
 
+export const getUserBenefitsExcludingStaff = async (
+	stage: Stage,
+	productCatalogHelper: ProductCatalogHelper,
+	userBenefitsOverrides: UserBenefitsOverrides,
+	identityId: string,
+): Promise<ProductBenefit[]> => {
+	const maybeOverrideBenefits = getOverrideBenefitsForIdentityId(
+		identityId,
+		userBenefitsOverrides,
+	);
+	if (maybeOverrideBenefits !== undefined) {
+		return Promise.resolve(maybeOverrideBenefits);
+	}
+	return getUserBenefitsExcludingStaffAndOverrides(
+		stage,
+		productCatalogHelper,
+		identityId,
+	);
+};
+
 export const getUserBenefits = (
 	stage: Stage,
 	productCatalogHelper: ProductCatalogHelper,
+	userBenefitsOverrides: UserBenefitsOverrides,
 	userDetails: IdentityUserDetails,
 ): Promise<ProductBenefit[]> => {
+	const maybeOverrideBenefits = getOverrideBenefitsForIdentityId(
+		userDetails.identityId,
+		userBenefitsOverrides,
+	);
+	if (maybeOverrideBenefits !== undefined) {
+		return Promise.resolve(maybeOverrideBenefits);
+	}
 	if (userHasGuardianEmail(userDetails.email)) {
 		return Promise.resolve(allProductBenefits);
 	}
-	return getUserBenefitsExcludingStaff(
+	return getUserBenefitsExcludingStaffAndOverrides(
 		stage,
 		productCatalogHelper,
 		userDetails.identityId,

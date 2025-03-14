@@ -2,7 +2,10 @@ import { ValidationError } from '@modules/errors';
 import { buildAuthenticate } from '@modules/identity/apiGateway';
 import type { IdentityUserDetails } from '@modules/identity/identity';
 import { Lazy } from '@modules/lazy';
-import type { UserBenefitsResponse } from '@modules/product-benefits/schemas';
+import type {
+	UserBenefitsOverrides,
+	UserBenefitsResponse,
+} from '@modules/product-benefits/schemas';
 import { getUserBenefits } from '@modules/product-benefits/userBenefits';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
@@ -11,6 +14,7 @@ import { stageFromEnvironment } from '@modules/stage';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { buildHttpResponse } from './response';
 import { getTrialInformation } from './trials';
+import { getUserOverrides } from './userOverrides';
 
 const stage = stageFromEnvironment();
 const authenticate = buildAuthenticate(stage, []); //TODO: Do we have any required scopes?
@@ -18,15 +22,21 @@ const productCatalogHelper = new Lazy(
 	async () => new ProductCatalogHelper(await getProductCatalogFromApi(stage)),
 	'Get product catalog helper',
 );
+const userBenefitsOverrides = new Lazy(
+	async () => await getUserOverrides(stage),
+	'Get user benefits overrides',
+);
 
 const getUserBenefitsResponse = async (
 	stage: Stage,
 	productCatalogHelper: ProductCatalogHelper,
+	userBenefitsOverrides: UserBenefitsOverrides,
 	userDetails: IdentityUserDetails,
 ): Promise<UserBenefitsResponse> => {
 	const benefits = await getUserBenefits(
 		stage,
 		productCatalogHelper,
+		userBenefitsOverrides,
 		userDetails,
 	);
 	console.log(`Benefits for user ${userDetails.identityId} are: `, benefits);
@@ -52,6 +62,7 @@ export const benefitsMeHandler = async (
 		const userBenefitsResponse = await getUserBenefitsResponse(
 			stage,
 			await productCatalogHelper.get(),
+			await userBenefitsOverrides.get(),
 			maybeAuthenticatedEvent.userDetails,
 		);
 		return buildHttpResponse(

@@ -9,6 +9,9 @@
     "check-formatting": "prettier --check **.ts",
     "fix-formatting": "prettier --write **.ts"
   },
+  "dependencies": {
+    "@aws-sdk/client-ssm": "^3.759.0"
+  },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147"
   }

@@ -58,6 +58,7 @@ describe('benefitsIdentityIdHandler', () => {
 		expect(getUserBenefitsExcludingStaff).toHaveBeenCalledWith(
 			'CODE',
 			expect.anything(),
+			expect.anything(),
 			goodIdentityId,
 		);
 	});
