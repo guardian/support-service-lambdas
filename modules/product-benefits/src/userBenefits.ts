@@ -53,7 +53,7 @@ export const getValidUserProducts = (
 export const userHasGuardianEmail = (email: string): boolean =>
 	email.endsWith('@theguardian.com') || email.endsWith('@guardian.co.uk');
 
-const getOverrideBenefits = (
+const getOverrideBenefitsForIdentityId = (
 	identityId: string,
 	userBenefitsOverrides: UserBenefitsOverrides,
 ): ProductBenefit[] | undefined => {
@@ -84,7 +84,7 @@ export const getUserBenefitsExcludingStaff = async (
 	userBenefitsOverrides: UserBenefitsOverrides,
 	identityId: string,
 ): Promise<ProductBenefit[]> => {
-	const maybeOverrideBenefits = getOverrideBenefits(
+	const maybeOverrideBenefits = getOverrideBenefitsForIdentityId(
 		identityId,
 		userBenefitsOverrides,
 	);
@@ -104,7 +104,7 @@ export const getUserBenefits = (
 	userBenefitsOverrides: UserBenefitsOverrides,
 	userDetails: IdentityUserDetails,
 ): Promise<ProductBenefit[]> => {
-	const maybeOverrideBenefits = getOverrideBenefits(
+	const maybeOverrideBenefits = getOverrideBenefitsForIdentityId(
 		userDetails.identityId,
 		userBenefitsOverrides,
 	);
