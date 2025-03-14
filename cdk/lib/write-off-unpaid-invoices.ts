@@ -8,10 +8,11 @@ import { type App, Duration } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
-	// Choice,
-	// Condition,
+	Choice,
+	Condition,
 	CustomState,
 	DefinitionBody,
+	Fail,
 	JsonPath,
 	// Pass,
 	StateMachine,
@@ -131,7 +132,18 @@ export class WriteOffUnpaidInvoices extends GuStack {
 			{
 				stateMachineName: `${app}-${this.stage}`,
 				definitionBody: DefinitionBody.fromChainable(
-					processCsvInDistributedMap,
+					new Choice(this, 'ValidateInput')
+						.when(
+							Condition.or(
+								Condition.isNull('$.comment'),
+								Condition.isNull('$.reasonCode'),
+							),
+							new Fail(
+								this,
+								'Please provide a comment and reasonCode in input',
+							),
+						)
+						.otherwise(processCsvInDistributedMap),
 				),
 			},
 		);
