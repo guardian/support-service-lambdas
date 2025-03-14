@@ -197,25 +197,30 @@ export const handler = async (event: { Items: InvoiceDateInput[] }) => {
 
 					responseData.forEach((item) => {
 						if (!item.Success) {
-							failedRecords.push({
-								invoice_id: invoiceId,
-								error: (item.Errors ?? [])
-									.filter(
-										(error) =>
-											!error.Message.includes(
-												'Adjustment amount cannot be negative or zero',
-											),
-									)
-									.map((error) => `${error.Code}: ${error.Message}`)
-									.join(', '),
-							});
-							console.error(
-								`Invoice ${invoiceId} failed: ${JSON.stringify(
-									item.Errors,
-									null,
-									2,
-								)}`,
-							);
+							if (
+								(item.Errors ?? []).filter(
+									(error) =>
+										!error.Message.includes(
+											'Adjustment amount cannot be negative or zero',
+										),
+								).length == 0
+							) {
+								// Ignore error
+							} else {
+								failedRecords.push({
+									invoice_id: invoiceId,
+									error: (item.Errors ?? [])
+										.map((error) => `${error.Code}: ${error.Message}`)
+										.join(', '),
+								});
+								console.error(
+									`Invoice ${invoiceId} failed: ${JSON.stringify(
+										item.Errors,
+										null,
+										2,
+									)}`,
+								);
+							}
 						}
 					});
 				} else {
