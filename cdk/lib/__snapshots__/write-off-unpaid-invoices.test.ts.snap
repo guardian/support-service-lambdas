@@ -391,22 +391,22 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 1`] = `
           "Fn::Join": [
             "",
             [
-              "{"StartAt":"ValidateInput","States":{"ValidateInput":{"Type":"Choice","Choices":[{"Or":[{"Variable":"$.comment","IsNull":true},{"Variable":"$.reasonCode","IsNull":true}],"Next":"Please provide a comment and reasonCode in input"}],"Default":"ProcessCsvInDistributedMap"},"ProcessCsvInDistributedMap":{"End":true,"Type":"Map","MaxConcurrency":1,"ToleratedFailurePercentage":100,"Comment":"ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches","ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
+              "{"StartAt":"ProcessCsvInDistributedMap","States":{"ProcessCsvInDistributedMap":{"End":true,"Type":"Map","MaxConcurrency":1,"ToleratedFailurePercentage":100,"Comment":"ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches","ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key":"query-result.csv"}},"ItemBatcher":{"MaxItemsPerBatch":40},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"WriteOffInvoice","States":{"WriteOffInvoice":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"FunctionName":"",
+              "","Key":"query-result.csv"}},"ItemBatcher":{"MaxItemsPerBatch":40},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"WriteOffInvoice","States":{"WriteOffInvoice":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
               {
                 "Fn::GetAtt": [
                   "WriteOffInvoiceLambda5DC658D6",
                   "Arn",
                 ],
               },
-              "","Payload":{"comment.$":"$$.Execution.Input.comment","reasonCode.$":"$$.Execution.Input.reasonCode","Items.$":"$.Items"}},"End":true}}},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
+              ""},"End":true}}},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Prefix.$":"$$.Execution.StartTime"}}},"Please provide a comment and reasonCode in input":{"Type":"Fail"}}}",
+              "","Prefix.$":"$$.Execution.StartTime"}}}}}",
             ],
           ],
         },
@@ -964,22 +964,22 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 2`] = `
           "Fn::Join": [
             "",
             [
-              "{"StartAt":"ValidateInput","States":{"ValidateInput":{"Type":"Choice","Choices":[{"Or":[{"Variable":"$.comment","IsNull":true},{"Variable":"$.reasonCode","IsNull":true}],"Next":"Please provide a comment and reasonCode in input"}],"Default":"ProcessCsvInDistributedMap"},"ProcessCsvInDistributedMap":{"End":true,"Type":"Map","MaxConcurrency":1,"ToleratedFailurePercentage":100,"Comment":"ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches","ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
+              "{"StartAt":"ProcessCsvInDistributedMap","States":{"ProcessCsvInDistributedMap":{"End":true,"Type":"Map","MaxConcurrency":1,"ToleratedFailurePercentage":100,"Comment":"ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches","ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"CSV","CSVHeaderLocation":"FIRST_ROW"},"Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key":"query-result.csv"}},"ItemBatcher":{"MaxItemsPerBatch":40},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"WriteOffInvoice","States":{"WriteOffInvoice":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"FunctionName":"",
+              "","Key":"query-result.csv"}},"ItemBatcher":{"MaxItemsPerBatch":40},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"WriteOffInvoice","States":{"WriteOffInvoice":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
               {
                 "Fn::GetAtt": [
                   "WriteOffInvoiceLambda5DC658D6",
                   "Arn",
                 ],
               },
-              "","Payload":{"comment.$":"$$.Execution.Input.comment","reasonCode.$":"$$.Execution.Input.reasonCode","Items.$":"$.Items"}},"End":true}}},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
+              ""},"End":true}}},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Prefix.$":"$$.Execution.StartTime"}}},"Please provide a comment and reasonCode in input":{"Type":"Fail"}}}",
+              "","Prefix.$":"$$.Execution.StartTime"}}}}}",
             ],
           ],
         },

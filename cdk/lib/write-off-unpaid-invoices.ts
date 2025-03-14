@@ -8,11 +8,10 @@ import { type App, Duration } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
-	Choice,
-	Condition,
+	// Choice,
+	// Condition,
 	CustomState,
 	DefinitionBody,
-	Fail,
 	JsonPath,
 	// Pass,
 	StateMachine,
@@ -100,16 +99,8 @@ export class WriteOffUnpaidInvoices extends GuStack {
 								Resource: 'arn:aws:states:::lambda:invoke',
 								OutputPath: '$.Payload',
 								Parameters: {
+									'Payload.$': '$',
 									FunctionName: writeOffInvoiceLambda.functionArn,
-									Payload: {
-										'comment.$': JsonPath.stringAt(
-											'$$.Execution.Input.comment',
-										),
-										'reasonCode.$': JsonPath.stringAt(
-											'$$.Execution.Input.reasonCode',
-										),
-										'Items.$': JsonPath.listAt('$.Items'),
-									},
 								},
 								End: true,
 							},
@@ -132,18 +123,7 @@ export class WriteOffUnpaidInvoices extends GuStack {
 			{
 				stateMachineName: `${app}-${this.stage}`,
 				definitionBody: DefinitionBody.fromChainable(
-					new Choice(this, 'ValidateInput')
-						.when(
-							Condition.or(
-								Condition.isNull(JsonPath.stringAt('$.comment')),
-								Condition.isNull(JsonPath.stringAt('$.reasonCode')),
-							),
-							new Fail(
-								this,
-								'Please provide a comment and reasonCode in input',
-							),
-						)
-						.otherwise(processCsvInDistributedMap),
+					processCsvInDistributedMap,
 				),
 			},
 		);
