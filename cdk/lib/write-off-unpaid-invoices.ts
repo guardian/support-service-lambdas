@@ -135,8 +135,8 @@ export class WriteOffUnpaidInvoices extends GuStack {
 					new Choice(this, 'ValidateInput')
 						.when(
 							Condition.or(
-								Condition.isNull('$.comment'),
-								Condition.isNull('$.reasonCode'),
+								Condition.isNull(JsonPath.stringAt('$.comment')),
+								Condition.isNull(JsonPath.stringAt('$.reasonCode')),
 							),
 							new Fail(
 								this,
