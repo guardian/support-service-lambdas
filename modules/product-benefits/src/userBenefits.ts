@@ -12,7 +12,10 @@ import {
 	itemIsValidForProduct,
 	productBenefitMapping,
 } from '@modules/product-benefits/productBenefit';
-import type { ProductBenefit } from '@modules/product-benefits/schemas';
+import type {
+	ProductBenefit,
+	UserBenefitsOverrides,
+} from '@modules/product-benefits/schemas';
 
 export const getUserProducts = async (
 	stage: Stage,
@@ -67,8 +70,15 @@ export const getUserBenefitsExcludingStaff = async (
 export const getUserBenefits = (
 	stage: Stage,
 	productCatalogHelper: ProductCatalogHelper,
+	userBenefitsOverrides: UserBenefitsOverrides,
 	userDetails: IdentityUserDetails,
 ): Promise<ProductBenefit[]> => {
+	const maybeOverride = userBenefitsOverrides.userOverrides.find(
+		(user) => user.identityId === userDetails.identityId,
+	);
+	if (maybeOverride !== undefined) {
+		return Promise.resolve(maybeOverride.benefits);
+	}
 	if (userHasGuardianEmail(userDetails.email)) {
 		return Promise.resolve(allProductBenefits);
 	}

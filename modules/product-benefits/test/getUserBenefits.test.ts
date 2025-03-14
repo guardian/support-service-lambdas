@@ -7,7 +7,9 @@ import {
 	supporterPlusBenefits,
 	tierThreeBenefits,
 } from '@modules/product-benefits/productBenefit';
+import type { UserBenefitsOverrides } from '@modules/product-benefits/schemas';
 import {
+	getUserBenefits,
 	getUserBenefitsFromUserProducts,
 	getValidUserProducts,
 } from '@modules/product-benefits/userBenefits';
@@ -84,4 +86,25 @@ test('getUserBenefitsFromUserProducts returns the union of two benefit sets', ()
 			'GuardianWeeklyDomestic',
 		]),
 	).toEqual(['allowRejectAll', 'hideSupportMessaging']);
+});
+
+test('User benefits overrides work correctly', async () => {
+	const overrides: UserBenefitsOverrides = {
+		userOverrides: [
+			{
+				identityId: '12345',
+				benefits: ['feastApp', 'adFree'],
+			},
+		],
+	};
+	const benefits = await getUserBenefits(
+		'CODE',
+		{} as ProductCatalogHelper,
+		overrides,
+		{
+			email: 'test@test.com',
+			identityId: '12345',
+		},
+	);
+	expect(benefits).toEqual(['feastApp', 'adFree']);
 });

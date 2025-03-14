@@ -27,4 +27,17 @@ export const userBenefitsSchema = z.object({
 	trials: trialInformationSchema,
 });
 
+const userBenefitsOverrideSchema = z.object({
+	identityId: z.string(),
+	benefits: z.array(productBenefitListSchema),
+});
+
+export const userBenefitsOverrideListSchema = z.object({
+	userOverrides: z.array(userBenefitsOverrideSchema),
+});
+
+export type UserBenefitsOverrides = z.infer<
+	typeof userBenefitsOverrideListSchema
+>;
+
 export type UserBenefitsResponse = z.infer<typeof userBenefitsSchema>;
