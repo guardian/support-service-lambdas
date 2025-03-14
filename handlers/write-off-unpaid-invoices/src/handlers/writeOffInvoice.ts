@@ -27,9 +27,17 @@ type InvoiceAdjustmentPayload = {
 	ReasonCode?: string;
 };
 
-const comment = 'Invoices left over by CSRs after Salesforce cancellations.';
+const comment =
+	'Invoices left over after manual cancellation made in Salesforce or Zuora UI.';
 
 const reasonCode = undefined;
+
+const errorMessagesToIgnore = [
+	'Adjustment amount cannot be negative or zero.',
+	'Adjustment amount is out of range. Please change the amount.',
+	'You can not adjust the invoice balance from a negative amount to a positive amount.',
+	'You can not adjust the invoice balance from a positive amount to a negative amount.',
+];
 
 export const handler = async (event: { Items: InvoiceDateInput[] }) => {
 	const failedRecords = [];
@@ -198,10 +206,7 @@ export const handler = async (event: { Items: InvoiceDateInput[] }) => {
 						if (!item.Success) {
 							if (
 								(item.Errors ?? []).filter(
-									(error) =>
-										!error.Message.includes(
-											'Adjustment amount cannot be negative or zero',
-										),
+									(error) => !errorMessagesToIgnore.includes(error.Message),
 								).length == 0
 							) {
 								// Ignore error
