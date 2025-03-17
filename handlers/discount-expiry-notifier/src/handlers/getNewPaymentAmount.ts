@@ -1,9 +1,9 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { getBillingPreview } from '@modules/zuora/billingPreview';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { BillingPreviewInvoiceItem } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
 import type { z } from 'zod';
+import { calculateTotalAmount, filterRecords } from '../helpers';
 import { BaseRecordForEmailSendSchema } from '../types';
 
 export type GetNewPaymentAmountInput = z.infer<
@@ -24,7 +24,7 @@ export const handler = async (event: GetNewPaymentAmountInput) => {
 			parsedEvent.zuoraSubName,
 			parsedEvent.firstPaymentDateAfterDiscountExpiry,
 		);
-		const newPaymentAmount = getNewPaymentAmount(invoiceItemsForSubscription);
+		const newPaymentAmount = calculateTotalAmount(invoiceItemsForSubscription);
 
 		return {
 			...parsedEvent,
@@ -40,28 +40,4 @@ export const handler = async (event: GetNewPaymentAmountInput) => {
 			errorDetail: errorMessage,
 		};
 	}
-};
-
-const filterRecords = (
-	invoiceItems: BillingPreviewInvoiceItem[],
-	subscriptionNumber: string,
-	firstPaymentDateAfterDiscountExpiry: string,
-): BillingPreviewInvoiceItem[] => {
-	return invoiceItems.filter(
-		(item) =>
-			item.subscriptionNumber === subscriptionNumber &&
-			dayjs(item.serviceStartDate).isSame(
-				dayjs(firstPaymentDateAfterDiscountExpiry),
-				'day',
-			),
-	);
-};
-
-const getNewPaymentAmount = (
-	invoiceItems: BillingPreviewInvoiceItem[],
-): number => {
-	return invoiceItems.reduce(
-		(total, record) => total + record.chargeAmount + record.taxAmount,
-		0,
-	);
 };
