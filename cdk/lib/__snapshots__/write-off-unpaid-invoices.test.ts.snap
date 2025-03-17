@@ -174,7 +174,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 1`] = `
         },
         "FunctionName": "write-off-invoice-CSBX",
         "Handler": "writeOffInvoice.handler",
-        "MemorySize": 10240,
+        "MemorySize": 2048,
         "Role": {
           "Fn::GetAtt": [
             "WriteOffInvoiceLambdaServiceRole542EFEC7",
@@ -747,7 +747,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 2`] = `
         },
         "FunctionName": "write-off-invoice-PROD",
         "Handler": "writeOffInvoice.handler",
-        "MemorySize": 10240,
+        "MemorySize": 2048,
         "Role": {
           "Fn::GetAtt": [
             "WriteOffInvoiceLambdaServiceRole542EFEC7",
