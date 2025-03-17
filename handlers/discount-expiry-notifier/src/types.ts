@@ -95,3 +95,15 @@ export const DiscountProcessingAttemptSchema = z
 export type DiscountProcessingAttempt = z.infer<
 	typeof DiscountProcessingAttemptSchema
 >;
+
+export const createQueryResponseSchema = <T extends z.ZodTypeAny>(
+	itemSchema: T,
+) => {
+	return z
+		.object({
+			size: z.number(),
+			records: z.array(itemSchema),
+			done: z.boolean(),
+		})
+		.strict();
+};
