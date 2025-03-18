@@ -5,7 +5,7 @@ export const productSwitchRequestSchema = z.object({
 	preview: z.boolean(),
 	csrUserId: z.optional(z.string()),
 	caseId: z.optional(z.string()),
-    applyDiscountIfAvailable: z.optional(z.boolean()),
+	applyDiscountIfAvailable: z.optional(z.boolean()),
 });
 
 export type ProductSwitchRequestBody = z.infer<
