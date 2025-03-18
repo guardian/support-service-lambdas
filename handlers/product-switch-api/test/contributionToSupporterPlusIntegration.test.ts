@@ -74,7 +74,7 @@ describe('product-switching behaviour', () => {
 
 		expect(result).toMatchObject(expectedResult);
 	});
-	it.only('can preview an annual recurring contribution switch with 50% discount', async () => {
+	it('can preview an annual recurring contribution switch with 50% discount', async () => {
 		const subscriptionNumber = 'A-S00913236';
 		const identityId = '200275077';
 		const input = { price: 120, preview: true, applyDiscountIfAvailable: true };
@@ -97,6 +97,12 @@ describe('product-switching behaviour', () => {
 		const expectedResult = {
 			supporterPlusPurchaseAmount: 120,
 			nextPaymentDate: zuoraDateFormat(dayjs().add(1, 'year').endOf('day')),
+			discount: {
+				discountedPrice: 60,
+				discountPercentage: 50,
+				upToPeriods: 1,
+				upToPeriodsType: 'Years',
+			},
 		};
 
 		expect(result).toMatchObject(expectedResult);
