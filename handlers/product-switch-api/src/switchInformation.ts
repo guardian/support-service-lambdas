@@ -15,7 +15,7 @@ import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type { CatalogInformation } from './catalogInformation';
 import { getCatalogInformation } from './catalogInformation';
-import type { Discount} from './discounts';
+import type { Discount } from './discounts';
 import { getDiscount } from './discounts';
 import type { ProductSwitchRequestBody } from './schemas';
 
@@ -198,7 +198,7 @@ export const getSwitchInformationWithOwnerCheck = (
 		billingPeriod,
 		subscription.status,
 		account.metrics.totalInvoiceBalance,
-		stage
+		stage,
 	);
 
 	return {
@@ -209,6 +209,6 @@ export const getSwitchInformationWithOwnerCheck = (
 		account: userInformation,
 		subscription: subscriptionInformation,
 		catalog: catalogInformation,
-		discount: maybeDiscount
-	}
+		discount: maybeDiscount,
+	};
 };
