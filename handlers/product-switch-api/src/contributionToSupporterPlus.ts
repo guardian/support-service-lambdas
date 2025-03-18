@@ -154,8 +154,6 @@ export const previewResponseFromZuoraResponse = (
 		'No supporter plus invoice item found in the preview response',
 	);
 
-	// const possibleDiscount: SwitchDiscountResponse | null = {};
-
 	const response: PreviewResponse = {
 		amountPayableToday: invoice.amount,
 		contributionRefundAmount,
@@ -166,22 +164,24 @@ export const previewResponseFromZuoraResponse = (
 			dayjs(supporterPlusSubscriptionInvoiceItem.serviceEndDate).add(1, 'days'),
 		),
 	};
-	// if (possibleDiscount) {
-	// 	response.discount = possibleDiscount;
-	// }
+
+	const possibleDiscount = invoice.invoiceItems.find(
+		(invoiceItem) =>
+			invoiceItem.processingType === 'Discount' &&
+			invoiceItem.chargeName === '50% off for 1 Year',
+	);
+	if (possibleDiscount) {
+		const discountPercentage = possibleDiscount.unitPrice;
+		response.discount = {
+			discountedPrice:
+				supporterPlusSubscriptionInvoiceItem.unitPrice +
+				possibleDiscount.amountWithoutTax,
+			discountPercentage: discountPercentage,
+			upToPeriods: 1,
+			upToPeriodsType: 'Years',
+		};
+	}
 	return response;
-	/*
-    amountPayableToday: number;
-	contributionRefundAmount: number;
-	supporterPlusPurchaseAmount: number;
-	nextPaymentDate: string;
-    discount?: {
-        discountedPrice:number;
-        upToPeriods: number; // 3,
-        upToPeriodsType: 'Months' | 'Years';
-        discountPercentage: number; // 25,
-    };
-    */
 };
 
 export const preview = async (
@@ -233,7 +233,10 @@ export const doSwitch = async (
 	return zuoraResponse;
 };
 
-const buildAddDiscountOrderAction = (discount: Discount, orderDate: Dayjs): OrderAction[] => {
+const buildAddDiscountOrderAction = (
+	discount: Discount,
+	orderDate: Dayjs,
+): OrderAction[] => {
 	return [
 		{
 			type: 'AddProduct',
@@ -406,6 +409,6 @@ export const buildSwitchRequestBody = (
 					...newTermOrderActions,
 				],
 			},
-		],	
+		],
 	};
 };

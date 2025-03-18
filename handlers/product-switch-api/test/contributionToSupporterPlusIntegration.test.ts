@@ -111,6 +111,12 @@ describe('product-switching behaviour', () => {
 		const expectedResult = {
 			supporterPlusPurchaseAmount: 120,
 			nextPaymentDate: zuoraDateFormat(dayjs().add(1, 'year').endOf('day')),
+			discount: {
+				discountedPrice: 60,
+				discountPercentage: 50,
+				upToPeriods: 1,
+				upToPeriodsType: 'Years',
+			},
 		};
 
 		expect(result).toMatchObject(expectedResult);
@@ -155,6 +161,7 @@ describe('product-switching behaviour', () => {
 		},
 		1000 * 60,
 	);
+
 	it(
 		'can adjust an invoice to zero',
 		async () => {
