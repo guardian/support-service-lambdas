@@ -5,12 +5,12 @@ import sbtassembly.AssemblyPlugin.autoImport.{MergeStrategy, assemblyMergeStrate
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsSdkVersion = "2.31.1"
+  val awsSdkVersion = "2.31.3"
   val circeVersion = "0.14.12"
   val sttpVersion = "3.10.3"
   val http4sVersion = "0.23.30" // keep version 0.23.30, later versions pull in cats effect 3 which is not compatible
   val catsVersion = "2.13.0"
-  val catsEffectVersion = "3.5.7"
+  val catsEffectVersion = "2.5.5"
   val logging: Seq[ModuleID] = Seq(
     "ch.qos.logback" % "logback-classic" % "1.5.18",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
@@ -25,7 +25,7 @@ object Dependencies {
   val awsDynamo = "software.amazon.awssdk" % "dynamodb" % awsSdkVersion
 
   val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.3"
-  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.11.6"
+  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.15.0"
 
   // scalaLambda depends on the old version of circe, until this PR is merged
   // https://github.com/mkotsur/aws-lambda-scala/pull/30
@@ -75,9 +75,9 @@ object Dependencies {
   val http4sCore = "org.http4s" %% "http4s-core" % http4sVersion
 
   // Guardian
-  val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "2.0.0"
+  val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "5.0.1"
   val supportInternationalisation =
-    "com.gu" %% "support-internationalisation" % "0.13"
+    "com.gu" %% "support-internationalisation" % "0.16"
 
   // Other
   val zio = "dev.zio" %% "zio" % "1.0.18"
@@ -137,5 +137,4 @@ object Dependencies {
       val oldStrategy = (assembly / assemblyMergeStrategy).value
       oldStrategy(x)
   }
-
 }
