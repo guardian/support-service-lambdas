@@ -124,6 +124,7 @@ export const previewResponseFromZuoraResponse = (
 	zuoraResponse: ZuoraPreviewResponse,
 	catalogInformation: CatalogInformation,
 	subscription: ZuoraSubscription,
+	possibleDiscount?: Discount,
 ): PreviewResponse => {
 	const invoice: ZuoraPreviewResponseInvoice = getIfDefined(
 		zuoraResponse.previewResult?.invoices[0],
@@ -165,22 +166,25 @@ export const previewResponseFromZuoraResponse = (
 		),
 	};
 
-	const possibleDiscount = invoice.invoiceItems.find(
-		(invoiceItem) =>
-			invoiceItem.processingType === 'Discount' &&
-			invoiceItem.chargeName === '50% off for 1 Year',
-	);
 	if (possibleDiscount) {
-		const discountPercentage = possibleDiscount.unitPrice;
-		response.discount = {
-			discountedPrice:
-				supporterPlusSubscriptionInvoiceItem.unitPrice +
-				possibleDiscount.amountWithoutTax,
-			discountPercentage: discountPercentage,
-			upToPeriods: 1,
-			upToPeriodsType: 'Years',
-		};
+		const discountInvoiceItem = invoice.invoiceItems.find(
+			(invoiceItem) =>
+				invoiceItem.productRatePlanChargeId ===
+				possibleDiscount.productRatePlanChargeId,
+		);
+		if (discountInvoiceItem) {
+			response.discount = {
+				discountedPrice:
+					supporterPlusSubscriptionInvoiceItem.unitPrice +
+					(discountInvoiceItem.amountWithoutTax +
+						discountInvoiceItem.taxAmount),
+				discountPercentage: possibleDiscount.discountPercentage,
+				upToPeriods: possibleDiscount.upToPeriods,
+				upToPeriodsType: possibleDiscount.upToPeriodsType,
+			};
+		}
 	}
+
 	return response;
 };
 
@@ -203,6 +207,7 @@ export const preview = async (
 			zuoraResponse,
 			productSwitchInformation.catalog,
 			subscription,
+			productSwitchInformation.discount,
 		);
 	} else {
 		throw new Error(zuoraResponse.reasons?.[0]?.message ?? 'Unknown error');
