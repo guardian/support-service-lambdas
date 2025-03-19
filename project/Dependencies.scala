@@ -77,7 +77,7 @@ object Dependencies {
   // Guardian
   val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "5.0.1"
   val supportInternationalisation =
-    "com.gu" %% "support-internationalisation" % "0.13"
+    "com.gu" %% "support-internationalisation" % "0.16"
 
   // Other
   val zio = "dev.zio" %% "zio" % "1.0.17"
