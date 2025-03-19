@@ -124,8 +124,8 @@ describe('product-switching behaviour', () => {
 		expect(result).toEqual(expectedResult);
 	});
 	it('can preview an annual recurring contribution (non UK - German) switch with 50% discount', async () => {
-		const subscriptionNumber = 'A-S00913236';
-		const identityId = '200275077';
+		const subscriptionNumber = 'A-S00946209';
+		const identityId = '200196235';
 		const input = { price: 120, preview: true, applyDiscountIfAvailable: true };
 		const zuoraClient = await ZuoraClient.create('CODE');
 		const productCatalog = await getProductCatalogFromApi('CODE');
@@ -146,8 +146,8 @@ describe('product-switching behaviour', () => {
 		const expectedResult = {
 			supporterPlusPurchaseAmount: 120,
 			nextPaymentDate: zuoraDateFormat(dayjs().add(1, 'year').endOf('day')),
-			amountPayableToday: 58.39,
-			contributionRefundAmount: -1.61,
+			amountPayableToday: 22.33,
+			contributionRefundAmount: -37.67,
 			discount: {
 				discountedPrice: 60,
 				discountPercentage: 50,
