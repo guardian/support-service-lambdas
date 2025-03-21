@@ -1,0 +1,24 @@
+stacks:
+  - support
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  observer-data-export-cloudformation:
+    type: cloud-formation
+    app: observer-data-export
+    parameters:
+      templateStagePaths:
+        CSBX: observer-data-export-CODE.template.json
+        PROD: observer-data-export-PROD.template.json
+  observer-data-export:
+    type: aws-lambda
+    parameters:
+      fileName: observer-data-export.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - placeholder-
+    dependencies: [observer-data-export-cloudformation]

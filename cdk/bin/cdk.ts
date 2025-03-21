@@ -9,6 +9,7 @@ import { GenerateProductCatalog } from '../lib/generate-product-catalog';
 import { MetricPushApi } from '../lib/metric-push-api';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
+import { ObserverDataExport } from '../lib/observer-data-export';
 import { PressReaderEntitlements } from '../lib/press-reader-entitlements';
 import { ProductSwitchApi } from '../lib/product-switch-api';
 import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery';
@@ -306,4 +307,12 @@ new MetricPushApi(app, 'metric-push-api-PROD', {
 	stack: 'membership',
 	stage: 'PROD',
 	cloudFormationStackName: 'membership-PROD-metric-push-api',
+});
+new ObserverDataExport(app, 'observer-data-export-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+});
+new ObserverDataExport(app, 'observer-data-export-PROD', {
+	stack: 'support',
+	stage: 'PROD',
 });
