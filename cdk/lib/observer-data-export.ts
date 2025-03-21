@@ -5,7 +5,6 @@ import {
 	GuLambdaFunction,
 } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
-import { ReadWriteType, Trail } from 'aws-cdk-lib/aws-cloudtrail';
 import { User } from 'aws-cdk-lib/aws-iam';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { nodeVersion } from './node-version';
@@ -26,22 +25,6 @@ export class ObserverDataExport extends GuStack {
 		});
 
 		bucket.grantRead(unifidaUser);
-
-		const trailBucket = new Bucket(
-			this,
-			'ObserverDataExportCloudTrailLogsBucket',
-			{
-				bucketName: `${app}-${this.stage.toLowerCase()}-cloudtrail`,
-			},
-		);
-
-		new Trail(this, 'ObserverDataExportCloudTrail', {
-			trailName: `${app}-${this.stage.toLowerCase()}-s3-bucket-audit-trail`,
-			bucket: trailBucket,
-			isMultiRegionTrail: true,
-			includeGlobalServiceEvents: true,
-			managementEvents: ReadWriteType.ALL,
-		});
 
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
