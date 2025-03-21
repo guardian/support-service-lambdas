@@ -47,51 +47,12 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
             "Value": "CODE",
           },
         ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
-    },
-    "BucketPolicyE9A3008A": {
-      "Properties": {
-        "Bucket": {
-          "Ref": "Bucket83908E77",
-        },
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "s3:GetObject",
-                "s3:ListBucket",
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": {
-                  "Fn::GetAtt": [
-                    "UnifidaUserA0A8377C",
-                    "Arn",
-                  ],
-                },
-              },
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    {
-                      "Fn::GetAtt": [
-                        "Bucket83908E77",
-                        "Arn",
-                      ],
-                    },
-                    "/*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-      },
-      "Type": "AWS::S3::BucketPolicy",
     },
     "PlaceholderLambda70A0AE5C": {
       "DependsOn": [
@@ -423,51 +384,12 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
             "Value": "PROD",
           },
         ],
+        "VersioningConfiguration": {
+          "Status": "Enabled",
+        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
-    },
-    "BucketPolicyE9A3008A": {
-      "Properties": {
-        "Bucket": {
-          "Ref": "Bucket83908E77",
-        },
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "s3:GetObject",
-                "s3:ListBucket",
-              ],
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": {
-                  "Fn::GetAtt": [
-                    "UnifidaUserA0A8377C",
-                    "Arn",
-                  ],
-                },
-              },
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    {
-                      "Fn::GetAtt": [
-                        "Bucket83908E77",
-                        "Arn",
-                      ],
-                    },
-                    "/*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-      },
-      "Type": "AWS::S3::BucketPolicy",
     },
     "PlaceholderLambda70A0AE5C": {
       "DependsOn": [
