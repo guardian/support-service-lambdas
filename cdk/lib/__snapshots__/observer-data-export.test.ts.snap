@@ -47,12 +47,131 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
             "Value": "CODE",
           },
         ],
-        "VersioningConfiguration": {
-          "Status": "Enabled",
-        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
+    },
+    "ObserverDataExportCloudTrail1A1E4304": {
+      "DependsOn": [
+        "ObserverDataExportCloudTrailLogsBucketPolicy3B6F3123",
+      ],
+      "Properties": {
+        "EnableLogFileValidation": true,
+        "EventSelectors": [
+          {
+            "IncludeManagementEvents": true,
+            "ReadWriteType": "All",
+          },
+        ],
+        "IncludeGlobalServiceEvents": true,
+        "IsLogging": true,
+        "IsMultiRegionTrail": true,
+        "S3BucketName": {
+          "Ref": "ObserverDataExportCloudTrailLogsBucketC970BAD7",
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "TrailName": "observer-data-export-code-s3-bucket-audit-trail",
+      },
+      "Type": "AWS::CloudTrail::Trail",
+    },
+    "ObserverDataExportCloudTrailLogsBucketC970BAD7": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "BucketName": "observer-data-export-code-cloudtrail",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "ObserverDataExportCloudTrailLogsBucketPolicy3B6F3123": {
+      "Properties": {
+        "Bucket": {
+          "Ref": "ObserverDataExportCloudTrailLogsBucketC970BAD7",
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetBucketAcl",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "cloudtrail.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "ObserverDataExportCloudTrailLogsBucketC970BAD7",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": "s3:PutObject",
+              "Condition": {
+                "StringEquals": {
+                  "s3:x-amz-acl": "bucket-owner-full-control",
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "cloudtrail.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "ObserverDataExportCloudTrailLogsBucketC970BAD7",
+                        "Arn",
+                      ],
+                    },
+                    "/AWSLogs/",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    "/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
     },
     "PlaceholderLambda70A0AE5C": {
       "DependsOn": [
@@ -384,12 +503,131 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
             "Value": "PROD",
           },
         ],
-        "VersioningConfiguration": {
-          "Status": "Enabled",
-        },
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
+    },
+    "ObserverDataExportCloudTrail1A1E4304": {
+      "DependsOn": [
+        "ObserverDataExportCloudTrailLogsBucketPolicy3B6F3123",
+      ],
+      "Properties": {
+        "EnableLogFileValidation": true,
+        "EventSelectors": [
+          {
+            "IncludeManagementEvents": true,
+            "ReadWriteType": "All",
+          },
+        ],
+        "IncludeGlobalServiceEvents": true,
+        "IsLogging": true,
+        "IsMultiRegionTrail": true,
+        "S3BucketName": {
+          "Ref": "ObserverDataExportCloudTrailLogsBucketC970BAD7",
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "TrailName": "observer-data-export-prod-s3-bucket-audit-trail",
+      },
+      "Type": "AWS::CloudTrail::Trail",
+    },
+    "ObserverDataExportCloudTrailLogsBucketC970BAD7": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "BucketName": "observer-data-export-prod-cloudtrail",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "ObserverDataExportCloudTrailLogsBucketPolicy3B6F3123": {
+      "Properties": {
+        "Bucket": {
+          "Ref": "ObserverDataExportCloudTrailLogsBucketC970BAD7",
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetBucketAcl",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "cloudtrail.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "ObserverDataExportCloudTrailLogsBucketC970BAD7",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": "s3:PutObject",
+              "Condition": {
+                "StringEquals": {
+                  "s3:x-amz-acl": "bucket-owner-full-control",
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "cloudtrail.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "ObserverDataExportCloudTrailLogsBucketC970BAD7",
+                        "Arn",
+                      ],
+                    },
+                    "/AWSLogs/",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    "/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
     },
     "PlaceholderLambda70A0AE5C": {
       "DependsOn": [
