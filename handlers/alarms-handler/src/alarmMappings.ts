@@ -60,6 +60,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'update-supporter-plus-amount',
 		'product-move-api',
 		'workflow',
+		'consent-autolapse',
 	],
 	SRE: ['alarms-handler', 'gchat-test-app'],
 	PORTFOLIO: [
