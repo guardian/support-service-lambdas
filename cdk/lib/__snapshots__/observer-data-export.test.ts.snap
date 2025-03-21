@@ -21,6 +21,14 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
       "DeletionPolicy": "Retain",
       "Properties": {
         "BucketName": "observer-data-export-code",
+        "LifecycleConfiguration": {
+          "Rules": [
+            {
+              "ExpirationInDays": 28,
+              "Status": "Enabled",
+            },
+          ],
+        },
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -277,6 +285,14 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
       "DeletionPolicy": "Retain",
       "Properties": {
         "BucketName": "observer-data-export-prod",
+        "LifecycleConfiguration": {
+          "Rules": [
+            {
+              "ExpirationInDays": 28,
+              "Status": "Enabled",
+            },
+          ],
+        },
         "Tags": [
           {
             "Key": "gu:cdk:version",

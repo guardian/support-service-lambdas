@@ -17,6 +17,7 @@ export class ObserverDataExport extends GuStack {
 
 		new Bucket(this, 'Bucket', {
 			bucketName: `${app}-${this.stage.toLowerCase()}`,
+			lifecycleRules: [{ expiration: Duration.days(28) }],
 		});
 
 		const lambdaDefaultConfig: Pick<
