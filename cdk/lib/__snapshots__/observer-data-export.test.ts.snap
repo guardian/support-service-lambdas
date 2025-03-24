@@ -132,6 +132,49 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
     },
+    "BucketPolicyE9A3008A": {
+      "Properties": {
+        "Bucket": {
+          "Ref": "Bucket83908E77",
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::GetAtt": [
+                    "AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolderDD1FBF15",
+                    "Arn",
+                  ],
+                },
+              },
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "Bucket83908E77",
+                        "Arn",
+                      ],
+                    },
+                    "/Observer_newsletter_subscribers/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
+    },
     "ObserverDataExportPlaceholderLambdaE320A2A9": {
       "DependsOn": [
         "ObserverDataExportPlaceholderLambdaServiceRoleDefaultPolicy801551DE",
@@ -546,6 +589,49 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
+    },
+    "BucketPolicyE9A3008A": {
+      "Properties": {
+        "Bucket": {
+          "Ref": "Bucket83908E77",
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::GetAtt": [
+                    "AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolderDD1FBF15",
+                    "Arn",
+                  ],
+                },
+              },
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "Bucket83908E77",
+                        "Arn",
+                      ],
+                    },
+                    "/Observer_newsletter_subscribers/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
     },
     "ObserverDataExportPlaceholderLambdaE320A2A9": {
       "DependsOn": [

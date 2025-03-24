@@ -34,23 +34,30 @@ export class ObserverDataExport extends GuStack {
 			},
 		);
 
-		const airflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolderRole =
-			new Role(
-				this,
-				'AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolder',
-				{
-					assumedBy: new ArnPrincipal(
-						airflowCloudComposerUserArnParameter.valueAsString,
-					),
-					roleName:
-						'AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolder',
-				},
-			);
+		const dataTechCrossAccountRole = new Role(
+			this,
+			'AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolder',
+			{
+				assumedBy: new ArnPrincipal(
+					airflowCloudComposerUserArnParameter.valueAsString,
+				),
+				roleName:
+					'AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolder',
+			},
+		);
 
-		airflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolderRole.addToPolicy(
+		dataTechCrossAccountRole.addToPolicy(
 			new PolicyStatement({
 				actions: ['s3:GetObject', 's3:PutObject', 's3:List*'],
 				resources: [`${bucket.bucketArn}/Observer_newsletter_subscribers/*`],
+			}),
+		);
+
+		bucket.addToResourcePolicy(
+			new PolicyStatement({
+				actions: ['s3:GetObject', 's3:PutObject', 's3:List*'],
+				resources: [`${bucket.bucketArn}/Observer_newsletter_subscribers/*`],
+				principals: [dataTechCrossAccountRole],
 			}),
 		);
 
