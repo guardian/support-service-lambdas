@@ -4,6 +4,7 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
+      "GuStringParameter",
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
     ],
@@ -15,8 +16,88 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
+    "observerdataexportairflowcloudcomposeruserarn": {
+      "Description": "Airflow cloud composer user ARN (Ophan Account)",
+      "Type": "String",
+    },
   },
   "Resources": {
+    "AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolderDD1FBF15": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Ref": "observerdataexportairflowcloudcomposeruserarn",
+                },
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "RoleName": "AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolder",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolderDefaultPolicy9FE176DC": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "Bucket83908E77",
+                        "Arn",
+                      ],
+                    },
+                    "/Observer_newsletter_subscribers/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolderDefaultPolicy9FE176DC",
+        "Roles": [
+          {
+            "Ref": "AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolderDD1FBF15",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "Bucket83908E77": {
       "DeletionPolicy": "Retain",
       "Properties": {
@@ -338,6 +419,7 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
+      "GuStringParameter",
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
     ],
@@ -349,8 +431,88 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
+    "observerdataexportairflowcloudcomposeruserarn": {
+      "Description": "Airflow cloud composer user ARN (Ophan Account)",
+      "Type": "String",
+    },
   },
   "Resources": {
+    "AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolderDD1FBF15": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Ref": "observerdataexportairflowcloudcomposeruserarn",
+                },
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "RoleName": "AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolder",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolderDefaultPolicy9FE176DC": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "Bucket83908E77",
+                        "Arn",
+                      ],
+                    },
+                    "/Observer_newsletter_subscribers/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolderDefaultPolicy9FE176DC",
+        "Roles": [
+          {
+            "Ref": "AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolderDD1FBF15",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "Bucket83908E77": {
       "DeletionPolicy": "Retain",
       "Properties": {

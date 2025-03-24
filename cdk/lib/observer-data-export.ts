@@ -1,11 +1,11 @@
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
-import { GuStack } from '@guardian/cdk/lib/constructs/core';
+import { GuStack, GuStringParameter } from '@guardian/cdk/lib/constructs/core';
 import {
 	type GuFunctionProps,
 	GuLambdaFunction,
 } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
-import { User } from 'aws-cdk-lib/aws-iam';
+import { ArnPrincipal, PolicyStatement, Role, User } from 'aws-cdk-lib/aws-iam';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { nodeVersion } from './node-version';
 
@@ -25,6 +25,34 @@ export class ObserverDataExport extends GuStack {
 		});
 
 		bucket.grantRead(unifidaUser);
+
+		const airflowCloudComposerUserArnParameter = new GuStringParameter(
+			this,
+			`${app}-airflow-cloud-composer-user-arn`,
+			{
+				description: `Airflow cloud composer user ARN (Ophan Account)`,
+			},
+		);
+
+		const airflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolderRole =
+			new Role(
+				this,
+				'AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolder',
+				{
+					assumedBy: new ArnPrincipal(
+						airflowCloudComposerUserArnParameter.valueAsString,
+					),
+					roleName:
+						'AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolder',
+				},
+			);
+
+		airflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolderRole.addToPolicy(
+			new PolicyStatement({
+				actions: ['s3:GetObject', 's3:PutObject', 's3:List*'],
+				resources: [`${bucket.bucketArn}/Observer_newsletter_subscribers/*`],
+			}),
+		);
 
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
