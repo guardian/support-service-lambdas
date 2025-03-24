@@ -206,7 +206,7 @@ export const getPastInvoiceItems = async (
 };
 
 const query = (subName: string, serviceStartDate: string): string =>
-	`SELECT chargeAmount, taxAmount, serviceStartDate, subscriptionNumber FROM InvoiceItem WHERE subscriptionNumber = '${subName}' AND ServiceStartDate = '${serviceStartDate}' AND ChargeName!='Delivery-problem credit' AND ChargeName!='Holiday Credit'`;
+	`SELECT chargeName, chargeAmount, taxAmount, serviceStartDate, subscriptionNumber FROM InvoiceItem WHERE subscriptionNumber = '${subName}' AND ServiceStartDate = '${serviceStartDate}' AND ChargeName!='Delivery-problem credit' AND ChargeName!='Holiday Credit'`;
 
 export function getLastPaymentDateBeforeDiscountExpiry(
 	firstPaymentDateAfterDiscountExpiry: string,
@@ -244,6 +244,7 @@ export const transformZuoraResponseKeys = (
 		taxAmount: record.TaxAmount,
 		serviceStartDate: new Date(record.ServiceStartDate),
 		subscriptionNumber: record.SubscriptionNumber,
+		chargeName: record.ChargeName,
 	}));
 };
 
@@ -252,6 +253,7 @@ export const queryInvoiceItemSchema = z
 		Id: z.optional(z.string()),
 		SubscriptionNumber: z.string(),
 		ServiceStartDate: z.coerce.date(),
+		ChargeName: z.string(),
 		ChargeAmount: z.number(),
 		TaxAmount: z.number(),
 	})
