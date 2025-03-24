@@ -38,10 +38,10 @@ export class ObserverDataExport extends GuStack {
 			environment: { Stage: this.stage },
 		};
 
-		new GuLambdaFunction(this, 'PlaceholderLambda', {
+		new GuLambdaFunction(this, 'ObserverDataExportPlaceholderLambda', {
 			...lambdaDefaultConfig,
-			handler: 'placeholder.handler',
-			functionName: `placeholder-${this.stage}`,
+			handler: 'observerDataExportPlaceholder.handler',
+			functionName: `observer-data-export-placeholder-${this.stage}`,
 		});
 	}
 }

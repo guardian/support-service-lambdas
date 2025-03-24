@@ -51,10 +51,10 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
     },
-    "PlaceholderLambda70A0AE5C": {
+    "ObserverDataExportPlaceholderLambdaE320A2A9": {
       "DependsOn": [
-        "PlaceholderLambdaServiceRoleDefaultPolicyAFB2D31B",
-        "PlaceholderLambdaServiceRole60B84823",
+        "ObserverDataExportPlaceholderLambdaServiceRoleDefaultPolicy801551DE",
+        "ObserverDataExportPlaceholderLambdaServiceRole134BD8E9",
       ],
       "Properties": {
         "Code": {
@@ -71,12 +71,12 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
             "Stage": "CODE",
           },
         },
-        "FunctionName": "placeholder-CODE",
-        "Handler": "placeholder.handler",
+        "FunctionName": "observer-data-export-placeholder-CODE",
+        "Handler": "observerDataExportPlaceholder.handler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "PlaceholderLambdaServiceRole60B84823",
+            "ObserverDataExportPlaceholderLambdaServiceRole134BD8E9",
             "Arn",
           ],
         },
@@ -107,7 +107,7 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "PlaceholderLambdaServiceRole60B84823": {
+    "ObserverDataExportPlaceholderLambdaServiceRole134BD8E9": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -160,7 +160,7 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "PlaceholderLambdaServiceRoleDefaultPolicyAFB2D31B": {
+    "ObserverDataExportPlaceholderLambdaServiceRoleDefaultPolicy801551DE": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -251,10 +251,10 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "PlaceholderLambdaServiceRoleDefaultPolicyAFB2D31B",
+        "PolicyName": "ObserverDataExportPlaceholderLambdaServiceRoleDefaultPolicy801551DE",
         "Roles": [
           {
-            "Ref": "PlaceholderLambdaServiceRole60B84823",
+            "Ref": "ObserverDataExportPlaceholderLambdaServiceRole134BD8E9",
           },
         ],
       },
@@ -385,10 +385,10 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
     },
-    "PlaceholderLambda70A0AE5C": {
+    "ObserverDataExportPlaceholderLambdaE320A2A9": {
       "DependsOn": [
-        "PlaceholderLambdaServiceRoleDefaultPolicyAFB2D31B",
-        "PlaceholderLambdaServiceRole60B84823",
+        "ObserverDataExportPlaceholderLambdaServiceRoleDefaultPolicy801551DE",
+        "ObserverDataExportPlaceholderLambdaServiceRole134BD8E9",
       ],
       "Properties": {
         "Code": {
@@ -405,12 +405,12 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
             "Stage": "PROD",
           },
         },
-        "FunctionName": "placeholder-PROD",
-        "Handler": "placeholder.handler",
+        "FunctionName": "observer-data-export-placeholder-PROD",
+        "Handler": "observerDataExportPlaceholder.handler",
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "PlaceholderLambdaServiceRole60B84823",
+            "ObserverDataExportPlaceholderLambdaServiceRole134BD8E9",
             "Arn",
           ],
         },
@@ -441,7 +441,7 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "PlaceholderLambdaServiceRole60B84823": {
+    "ObserverDataExportPlaceholderLambdaServiceRole134BD8E9": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -494,7 +494,7 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "PlaceholderLambdaServiceRoleDefaultPolicyAFB2D31B": {
+    "ObserverDataExportPlaceholderLambdaServiceRoleDefaultPolicy801551DE": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -585,10 +585,10 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "PlaceholderLambdaServiceRoleDefaultPolicyAFB2D31B",
+        "PolicyName": "ObserverDataExportPlaceholderLambdaServiceRoleDefaultPolicy801551DE",
         "Roles": [
           {
-            "Ref": "PlaceholderLambdaServiceRole60B84823",
+            "Ref": "ObserverDataExportPlaceholderLambdaServiceRole134BD8E9",
           },
         ],
       },
