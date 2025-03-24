@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/require-await -- this is required to ensure the lambda returns a value*/
-import { DataExtensionNames } from '@modules/email/email';
+import { DataExtensionNames, sendEmail } from '@modules/email/email';
+import { stageFromEnvironment } from '@modules/stage';
 import type { z } from 'zod';
 import { BaseRecordForEmailSendSchema } from '../types';
 
@@ -61,6 +61,11 @@ export const handler = async (event: SendEmailInput) => {
 	};
 
 	try {
+		const response = await sendEmail(stageFromEnvironment(), request);
+
+		if (response.$metadata.httpStatusCode !== 200) {
+			throw new Error('Failed to send email');
+		}
 		return {
 			record: parsedEvent,
 			emailSendEligibility,
