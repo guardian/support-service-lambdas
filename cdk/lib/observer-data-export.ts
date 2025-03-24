@@ -36,13 +36,13 @@ export class ObserverDataExport extends GuStack {
 
 		const dataTechCrossAccountRole = new Role(
 			this,
-			'AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolder',
+			'AirflowCloudComposerUserReadWriteToObserverDataExportS3Bucket',
 			{
 				assumedBy: new ArnPrincipal(
 					airflowCloudComposerUserArnParameter.valueAsString,
 				),
 				roleName:
-					'AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolder',
+					'AirflowCloudComposerUserReadWriteToObserverDataExportS3Bucket',
 			},
 		);
 

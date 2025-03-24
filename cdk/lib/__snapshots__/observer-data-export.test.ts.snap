@@ -22,7 +22,7 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
-    "AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolderDD1FBF15": {
+    "AirflowCloudComposerUserReadWriteToObserverDataExportS3Bucket07DBFF18": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -38,7 +38,7 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "RoleName": "AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolder",
+        "RoleName": "AirflowCloudComposerUserReadWriteToObserverDataExportS3Bucket",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -60,7 +60,7 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolderDefaultPolicy9FE176DC": {
+    "AirflowCloudComposerUserReadWriteToObserverDataExportS3BucketDefaultPolicy0FC3EE44": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -89,10 +89,10 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolderDefaultPolicy9FE176DC",
+        "PolicyName": "AirflowCloudComposerUserReadWriteToObserverDataExportS3BucketDefaultPolicy0FC3EE44",
         "Roles": [
           {
-            "Ref": "AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolderDD1FBF15",
+            "Ref": "AirflowCloudComposerUserReadWriteToObserverDataExportS3Bucket07DBFF18",
           },
         ],
       },
@@ -149,7 +149,7 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
               "Principal": {
                 "AWS": {
                   "Fn::GetAtt": [
-                    "AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolderDD1FBF15",
+                    "AirflowCloudComposerUserReadWriteToObserverDataExportS3Bucket07DBFF18",
                     "Arn",
                   ],
                 },
@@ -480,7 +480,7 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
-    "AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolderDD1FBF15": {
+    "AirflowCloudComposerUserReadWriteToObserverDataExportS3Bucket07DBFF18": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -496,7 +496,7 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "RoleName": "AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolder",
+        "RoleName": "AirflowCloudComposerUserReadWriteToObserverDataExportS3Bucket",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -518,7 +518,7 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolderDefaultPolicy9FE176DC": {
+    "AirflowCloudComposerUserReadWriteToObserverDataExportS3BucketDefaultPolicy0FC3EE44": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -547,10 +547,10 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolderDefaultPolicy9FE176DC",
+        "PolicyName": "AirflowCloudComposerUserReadWriteToObserverDataExportS3BucketDefaultPolicy0FC3EE44",
         "Roles": [
           {
-            "Ref": "AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolderDD1FBF15",
+            "Ref": "AirflowCloudComposerUserReadWriteToObserverDataExportS3Bucket07DBFF18",
           },
         ],
       },
@@ -607,7 +607,7 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
               "Principal": {
                 "AWS": {
                   "Fn::GetAtt": [
-                    "AirflowCloudComposerUserReadWriteAccessToObserverDataExportS3BucketSubfolderDD1FBF15",
+                    "AirflowCloudComposerUserReadWriteToObserverDataExportS3Bucket07DBFF18",
                     "Arn",
                   ],
                 },
