@@ -24,6 +24,7 @@ export const handler = async (event: GetNewPaymentAmountInput) => {
 			parsedEvent.zuoraSubName,
 			parsedEvent.firstPaymentDateAfterDiscountExpiry,
 		);
+		console.log('invoiceItemsForSubscription:', invoiceItemsForSubscription);
 		const newPaymentAmount = calculateTotalAmount(invoiceItemsForSubscription);
 
 		return {
