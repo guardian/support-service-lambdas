@@ -22,82 +22,6 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
-    "AirflowCloudComposerUserReadWriteToObserverDataExportS3Bucket07DBFF18": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": {
-                  "Ref": "observerdataexportairflowcloudcomposeruserarn",
-                },
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "RoleName": "AirflowCloudComposerUserReadWriteToObserverDataExportS3Bucket",
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "AirflowCloudComposerUserReadWriteToObserverDataExportS3BucketDefaultPolicy0FC3EE44": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "s3:GetObject",
-                "s3:PutObject",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    {
-                      "Fn::GetAtt": [
-                        "Bucket83908E77",
-                        "Arn",
-                      ],
-                    },
-                    "/Observer_newsletter_subscribers/*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "AirflowCloudComposerUserReadWriteToObserverDataExportS3BucketDefaultPolicy0FC3EE44",
-        "Roles": [
-          {
-            "Ref": "AirflowCloudComposerUserReadWriteToObserverDataExportS3Bucket07DBFF18",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
     "Bucket83908E77": {
       "DeletionPolicy": "Retain",
       "Properties": {
@@ -149,7 +73,7 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
               "Principal": {
                 "AWS": {
                   "Fn::GetAtt": [
-                    "AirflowCloudComposerUserReadWriteToObserverDataExportS3Bucket07DBFF18",
+                    "CODEAirflowCloudComposerUserReadWriteObserverDataExportS3Bucket064E81EB",
                     "Arn",
                   ],
                 },
@@ -174,6 +98,82 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
         },
       },
       "Type": "AWS::S3::BucketPolicy",
+    },
+    "CODEAirflowCloudComposerUserReadWriteObserverDataExportS3Bucket064E81EB": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Ref": "observerdataexportairflowcloudcomposeruserarn",
+                },
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "RoleName": "CODE-AirflowCloudComposerUserReadWriteObserverDataExportS3Bucket",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "CODEAirflowCloudComposerUserReadWriteObserverDataExportS3BucketDefaultPolicy4BB5DE41": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "Bucket83908E77",
+                        "Arn",
+                      ],
+                    },
+                    "/Observer_newsletter_subscribers/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "CODEAirflowCloudComposerUserReadWriteObserverDataExportS3BucketDefaultPolicy4BB5DE41",
+        "Roles": [
+          {
+            "Ref": "CODEAirflowCloudComposerUserReadWriteObserverDataExportS3Bucket064E81EB",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "ObserverDataExportPlaceholderLambdaE320A2A9": {
       "DependsOn": [
@@ -480,82 +480,6 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
-    "AirflowCloudComposerUserReadWriteToObserverDataExportS3Bucket07DBFF18": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": {
-                  "Ref": "observerdataexportairflowcloudcomposeruserarn",
-                },
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "RoleName": "AirflowCloudComposerUserReadWriteToObserverDataExportS3Bucket",
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "AirflowCloudComposerUserReadWriteToObserverDataExportS3BucketDefaultPolicy0FC3EE44": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "s3:GetObject",
-                "s3:PutObject",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    {
-                      "Fn::GetAtt": [
-                        "Bucket83908E77",
-                        "Arn",
-                      ],
-                    },
-                    "/Observer_newsletter_subscribers/*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "AirflowCloudComposerUserReadWriteToObserverDataExportS3BucketDefaultPolicy0FC3EE44",
-        "Roles": [
-          {
-            "Ref": "AirflowCloudComposerUserReadWriteToObserverDataExportS3Bucket07DBFF18",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
     "Bucket83908E77": {
       "DeletionPolicy": "Retain",
       "Properties": {
@@ -607,7 +531,7 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
               "Principal": {
                 "AWS": {
                   "Fn::GetAtt": [
-                    "AirflowCloudComposerUserReadWriteToObserverDataExportS3Bucket07DBFF18",
+                    "PRODAirflowCloudComposerUserReadWriteObserverDataExportS3Bucket0735E4DF",
                     "Arn",
                   ],
                 },
@@ -837,6 +761,82 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
         "Roles": [
           {
             "Ref": "ObserverDataExportPlaceholderLambdaServiceRole134BD8E9",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "PRODAirflowCloudComposerUserReadWriteObserverDataExportS3Bucket0735E4DF": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Ref": "observerdataexportairflowcloudcomposeruserarn",
+                },
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "RoleName": "PROD-AirflowCloudComposerUserReadWriteObserverDataExportS3Bucket",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "PRODAirflowCloudComposerUserReadWriteObserverDataExportS3BucketDefaultPolicyE9678F9A": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "Bucket83908E77",
+                        "Arn",
+                      ],
+                    },
+                    "/Observer_newsletter_subscribers/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "PRODAirflowCloudComposerUserReadWriteObserverDataExportS3BucketDefaultPolicyE9678F9A",
+        "Roles": [
+          {
+            "Ref": "PRODAirflowCloudComposerUserReadWriteObserverDataExportS3Bucket0735E4DF",
           },
         ],
       },
