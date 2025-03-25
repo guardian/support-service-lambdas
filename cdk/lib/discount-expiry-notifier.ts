@@ -87,6 +87,7 @@ export class DiscountExpiryNotifier extends GuStack {
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
 				initialPolicy: [allowPutMetric],
+				timeout: Duration.seconds(300),
 				role,
 			},
 		);
