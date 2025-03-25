@@ -5,7 +5,7 @@ import {
 	GuLambdaFunction,
 } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
-import { ArnPrincipal, PolicyStatement, Role, User } from 'aws-cdk-lib/aws-iam';
+import { ArnPrincipal, PolicyStatement, User } from 'aws-cdk-lib/aws-iam';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { nodeVersion } from './node-version';
 
@@ -34,29 +34,13 @@ export class ObserverDataExport extends GuStack {
 			},
 		);
 
-		const dataTechCrossAccountRole = new Role(
-			this,
-			`${this.stage}-AirflowCloudComposerUserReadWriteObserverDataExportS3Bucket`,
-			{
-				assumedBy: new ArnPrincipal(
-					airflowCloudComposerUserArnParameter.valueAsString,
-				),
-				roleName: `${this.stage}-AirflowCloudComposerUserReadWriteObserverDataExportS3Bucket`,
-			},
-		);
-
-		dataTechCrossAccountRole.addToPolicy(
-			new PolicyStatement({
-				actions: ['s3:GetObject', 's3:PutObject', 's3:List*'],
-				resources: [`${bucket.bucketArn}/Observer_newsletter_subscribers/*`],
-			}),
-		);
-
 		bucket.addToResourcePolicy(
 			new PolicyStatement({
 				actions: ['s3:GetObject', 's3:PutObject', 's3:List*'],
 				resources: [`${bucket.bucketArn}/Observer_newsletter_subscribers/*`],
-				principals: [dataTechCrossAccountRole],
+				principals: [
+					new ArnPrincipal(airflowCloudComposerUserArnParameter.valueAsString),
+				],
 			}),
 		);
 
