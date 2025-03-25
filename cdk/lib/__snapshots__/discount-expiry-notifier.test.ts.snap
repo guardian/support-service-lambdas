@@ -159,6 +159,27 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
     },
+    "ScheduleStateMachineRule91756851": {
+      "Properties": {
+        "ScheduleExpression": "cron(0 0 1 1 ? *)",
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Ref": "discountexpirynotifierstatemachineCODE793C8056",
+            },
+            "Id": "Target0",
+            "RoleArn": {
+              "Fn::GetAtt": [
+                "discountexpirynotifierstatemachineCODEEventsRoleCFE52C1B",
+                "Arn",
+              ],
+            },
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
     "alarm05E1DB6A1": {
       "Properties": {
         "ActionsEnabled": true,
@@ -669,6 +690,64 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
       },
       "Type": "AWS::StepFunctions::StateMachine",
       "UpdateReplacePolicy": "Delete",
+    },
+    "discountexpirynotifierstatemachineCODEEventsRoleCFE52C1B": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "discountexpirynotifierstatemachineCODEEventsRoleDefaultPolicy87906F27": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "discountexpirynotifierstatemachineCODE793C8056",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "discountexpirynotifierstatemachineCODEEventsRoleDefaultPolicy87906F27",
+        "Roles": [
+          {
+            "Ref": "discountexpirynotifierstatemachineCODEEventsRoleCFE52C1B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "discountexpirynotifierstatemachineCODERole18E0A204": {
       "Properties": {
@@ -1211,7 +1290,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
             "Value": "CODE",
           },
         ],
-        "Timeout": 30,
+        "Timeout": 300,
       },
       "Type": "AWS::Lambda::Function",
     },
@@ -2739,6 +2818,27 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
     },
+    "ScheduleStateMachineRule91756851": {
+      "Properties": {
+        "ScheduleExpression": "cron(0 12 * * ? *)",
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Ref": "discountexpirynotifierstatemachinePROD71101E82",
+            },
+            "Id": "Target0",
+            "RoleArn": {
+              "Fn::GetAtt": [
+                "discountexpirynotifierstatemachinePRODEventsRoleDEC50E60",
+                "Arn",
+              ],
+            },
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
     "alarm05E1DB6A1": {
       "Properties": {
         "ActionsEnabled": true,
@@ -3249,6 +3349,64 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
       },
       "Type": "AWS::StepFunctions::StateMachine",
       "UpdateReplacePolicy": "Delete",
+    },
+    "discountexpirynotifierstatemachinePRODEventsRoleDEC50E60": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "discountexpirynotifierstatemachinePRODEventsRoleDefaultPolicyE946FBE8": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "discountexpirynotifierstatemachinePROD71101E82",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "discountexpirynotifierstatemachinePRODEventsRoleDefaultPolicyE946FBE8",
+        "Roles": [
+          {
+            "Ref": "discountexpirynotifierstatemachinePRODEventsRoleDEC50E60",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "discountexpirynotifierstatemachinePRODRole2A258F7B": {
       "Properties": {
@@ -3791,7 +3949,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
             "Value": "PROD",
           },
         ],
-        "Timeout": 30,
+        "Timeout": 300,
       },
       "Type": "AWS::Lambda::Function",
     },
