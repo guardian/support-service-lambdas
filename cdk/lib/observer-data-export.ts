@@ -34,15 +34,22 @@ export class ObserverDataExport extends GuStack {
 			},
 		);
 
-		bucket.addToResourcePolicy(
-			new PolicyStatement({
-				actions: ['s3:GetObject', 's3:PutObject', 's3:List*'],
-				resources: [`${bucket.bucketArn}/Observer_newsletter_subscribers/*`],
-				principals: [
-					new ArnPrincipal(airflowCloudComposerUserArnParameter.valueAsString),
-				],
-			}),
+		bucket.grantReadWrite(
+			new ArnPrincipal(airflowCloudComposerUserArnParameter.valueAsString),
 		);
+
+		// bucket.addToResourcePolicy(
+		// 	new PolicyStatement({
+		// 		actions: ['s3:GetObject', 's3:PutObject', 's3:List*'],
+		// 		resources: [
+		// 			`${bucket.bucketArn}/Observer_newsletter_subscribers`,
+		// 			`${bucket.bucketArn}/Observer_newsletter_subscribers/*`,
+		// 		],
+		// 		principals: [
+		// 			new ArnPrincipal(airflowCloudComposerUserArnParameter.valueAsString),
+		// 		],
+		// 	}),
+		// );
 
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,

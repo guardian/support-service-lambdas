@@ -65,9 +65,16 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
           "Statement": [
             {
               "Action": [
-                "s3:GetObject",
-                "s3:PutObject",
+                "s3:GetObject*",
+                "s3:GetBucket*",
                 "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject",
+                "s3:PutObjectLegalHold",
+                "s3:PutObjectRetention",
+                "s3:PutObjectTagging",
+                "s3:PutObjectVersionTagging",
+                "s3:Abort*",
               ],
               "Effect": "Allow",
               "Principal": {
@@ -75,20 +82,28 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
                   "Ref": "observerdataexportairflowcloudcomposeruserarn",
                 },
               },
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    {
-                      "Fn::GetAtt": [
-                        "Bucket83908E77",
-                        "Arn",
-                      ],
-                    },
-                    "/Observer_newsletter_subscribers/*",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "Bucket83908E77",
+                    "Arn",
                   ],
-                ],
-              },
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "Bucket83908E77",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
             },
           ],
           "Version": "2012-10-17",
@@ -444,9 +459,16 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
           "Statement": [
             {
               "Action": [
-                "s3:GetObject",
-                "s3:PutObject",
+                "s3:GetObject*",
+                "s3:GetBucket*",
                 "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject",
+                "s3:PutObjectLegalHold",
+                "s3:PutObjectRetention",
+                "s3:PutObjectTagging",
+                "s3:PutObjectVersionTagging",
+                "s3:Abort*",
               ],
               "Effect": "Allow",
               "Principal": {
@@ -454,20 +476,28 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
                   "Ref": "observerdataexportairflowcloudcomposeruserarn",
                 },
               },
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    {
-                      "Fn::GetAtt": [
-                        "Bucket83908E77",
-                        "Arn",
-                      ],
-                    },
-                    "/Observer_newsletter_subscribers/*",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "Bucket83908E77",
+                    "Arn",
                   ],
-                ],
-              },
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "Bucket83908E77",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
             },
           ],
           "Version": "2012-10-17",
