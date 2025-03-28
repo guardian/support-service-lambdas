@@ -5,7 +5,7 @@ import {
 	GuLambdaFunction,
 } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
-import { ArnPrincipal, User } from 'aws-cdk-lib/aws-iam';
+import { ArnPrincipal, Role, User } from 'aws-cdk-lib/aws-iam';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { nodeVersion } from './node-version';
 
@@ -36,20 +36,8 @@ export class ObserverDataExport extends GuStack {
 
 		bucket.grantReadWrite(
 			new ArnPrincipal(airflowCloudComposerUserArnParameter.valueAsString),
+			`Observer_newsletter_eligible/*`,
 		);
-
-		// bucket.addToResourcePolicy(
-		// 	new PolicyStatement({
-		// 		actions: ['s3:GetObject', 's3:PutObject', 's3:List*'],
-		// 		resources: [
-		// 			`${bucket.bucketArn}/Observer_newsletter_subscribers`,
-		// 			`${bucket.bucketArn}/Observer_newsletter_subscribers/*`,
-		// 		],
-		// 		principals: [
-		// 			new ArnPrincipal(airflowCloudComposerUserArnParameter.valueAsString),
-		// 		],
-		// 	}),
-		// );
 
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
