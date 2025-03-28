@@ -5,7 +5,7 @@ import {
 	GuLambdaFunction,
 } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
-import { ArnPrincipal, Role, User } from 'aws-cdk-lib/aws-iam';
+import { ArnPrincipal, User } from 'aws-cdk-lib/aws-iam';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { nodeVersion } from './node-version';
 
