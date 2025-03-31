@@ -157,7 +157,11 @@ importers:
         specifier: ^8.10.147
         version: 8.10.147
 
-  handlers/observer-data-export: {}
+  handlers/observer-data-export:
+    dependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.147
+        version: 8.10.147
 
   handlers/press-reader-entitlements:
     dependencies:
