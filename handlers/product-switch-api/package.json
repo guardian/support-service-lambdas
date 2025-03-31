@@ -11,7 +11,7 @@
     "fix-formatting": "prettier --write **.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-sqs": "3.734.0",
+    "@aws-sdk/client-sqs": "3.777.0",
     "dayjs": "^1.11.13",
     "zod": "^3.23.8"
   },
