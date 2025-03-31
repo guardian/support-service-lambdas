@@ -4,6 +4,7 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
+      "GuStringParameter",
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
     ],
@@ -14,6 +15,10 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
       "Default": "/account/services/artifact.bucket",
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+    "observerdataexportairflowcloudcomposeruserarn": {
+      "Description": "Airflow cloud composer user ARN (Ophan Account)",
+      "Type": "String",
     },
   },
   "Resources": {
@@ -50,6 +55,61 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
+    },
+    "BucketPolicyE9A3008A": {
+      "Properties": {
+        "Bucket": {
+          "Ref": "Bucket83908E77",
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject",
+                "s3:PutObjectLegalHold",
+                "s3:PutObjectRetention",
+                "s3:PutObjectTagging",
+                "s3:PutObjectVersionTagging",
+                "s3:Abort*",
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Ref": "observerdataexportairflowcloudcomposeruserarn",
+                },
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "Bucket83908E77",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "Bucket83908E77",
+                          "Arn",
+                        ],
+                      },
+                      "/Observer_newsletter_eligible/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
     },
     "ObserverDataExportPlaceholderLambdaE320A2A9": {
       "DependsOn": [
@@ -338,6 +398,7 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
+      "GuStringParameter",
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
     ],
@@ -348,6 +409,10 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
       "Default": "/account/services/artifact.bucket",
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+    "observerdataexportairflowcloudcomposeruserarn": {
+      "Description": "Airflow cloud composer user ARN (Ophan Account)",
+      "Type": "String",
     },
   },
   "Resources": {
@@ -384,6 +449,61 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
+    },
+    "BucketPolicyE9A3008A": {
+      "Properties": {
+        "Bucket": {
+          "Ref": "Bucket83908E77",
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject",
+                "s3:PutObjectLegalHold",
+                "s3:PutObjectRetention",
+                "s3:PutObjectTagging",
+                "s3:PutObjectVersionTagging",
+                "s3:Abort*",
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Ref": "observerdataexportairflowcloudcomposeruserarn",
+                },
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "Bucket83908E77",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "Bucket83908E77",
+                          "Arn",
+                        ],
+                      },
+                      "/Observer_newsletter_eligible/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
     },
     "ObserverDataExportPlaceholderLambdaE320A2A9": {
       "DependsOn": [

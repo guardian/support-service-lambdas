@@ -1,11 +1,11 @@
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
-import { GuStack } from '@guardian/cdk/lib/constructs/core';
+import { GuStack, GuStringParameter } from '@guardian/cdk/lib/constructs/core';
 import {
 	type GuFunctionProps,
 	GuLambdaFunction,
 } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
-import { User } from 'aws-cdk-lib/aws-iam';
+import { ArnPrincipal, User } from 'aws-cdk-lib/aws-iam';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { nodeVersion } from './node-version';
 
@@ -25,6 +25,19 @@ export class ObserverDataExport extends GuStack {
 		});
 
 		bucket.grantRead(unifidaUser);
+
+		const airflowCloudComposerUserArnParameter = new GuStringParameter(
+			this,
+			`${app}-airflow-cloud-composer-user-arn`,
+			{
+				description: `Airflow cloud composer user ARN (Ophan Account)`,
+			},
+		);
+
+		bucket.grantReadWrite(
+			new ArnPrincipal(airflowCloudComposerUserArnParameter.valueAsString),
+			`Observer_newsletter_eligible/*`,
+		);
 
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
