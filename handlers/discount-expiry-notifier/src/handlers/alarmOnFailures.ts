@@ -30,7 +30,7 @@ export const handler = async (event: AlarmOnFailuresInput) => {
 		}
 		const parsedEvent = parsedEventResult.data;
 		if (
-			await failuresOccurred(
+			await shouldSendErrorNotification(
 				parsedEvent.discountProcessingAttempts,
 				parsedEvent.s3UploadAttemptStatus,
 			)
@@ -46,14 +46,23 @@ export const handler = async (event: AlarmOnFailuresInput) => {
 	return {};
 };
 
-const failuresOccurred = async (
+const shouldSendErrorNotification = async (
 	discountProcessingAttempts: DiscountProcessingAttempt[],
 	s3UploadAttemptStatus: string,
 ): Promise<boolean> => {
 	return (
 		s3UploadAttemptStatus === 'error' ||
 		discountProcessingAttempts.some(
-			(attempt) => attempt.emailSendAttempt.response?.status === 'skipped',
+			(attempt) =>
+				attempt.emailSendAttempt.response?.status === 'skipped' &&
+				ERROR_NOTIFICATION_REASONS.includes(
+					attempt.emailSendEligibility.ineligibilityReason,
+				),
 		)
 	);
 };
+
+const ERROR_NOTIFICATION_REASONS = [
+	'Error getting sub status from Zuora',
+	'No value for work email',
+];
