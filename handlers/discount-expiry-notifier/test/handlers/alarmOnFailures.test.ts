@@ -12,7 +12,7 @@ describe('shouldSendErrorNotification', () => {
 		expect(result).toBe(true);
 	});
 
-	it('returns true when a discountProcessingAttempt isEligible is false and ineligibilityReason that warrants error notification', async () => {
+	it('returns true when a discountProcessingAttempt isEligible is false and ineligibilityReason is one of error notification reasons', async () => {
 		const discountProcessingAttempts: DiscountProcessingAttempt[] = [
 			{
 				emailSendAttempt: {
