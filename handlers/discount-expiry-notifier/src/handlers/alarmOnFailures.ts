@@ -46,7 +46,7 @@ export const handler = async (event: AlarmOnFailuresInput) => {
 	return {};
 };
 
-const shouldSendErrorNotification = async (
+export const shouldSendErrorNotification = async (
 	discountProcessingAttempts: DiscountProcessingAttempt[],
 	s3UploadAttemptStatus: string,
 ): Promise<boolean> => {
@@ -54,7 +54,7 @@ const shouldSendErrorNotification = async (
 		s3UploadAttemptStatus === 'error' ||
 		discountProcessingAttempts.some(
 			(attempt) =>
-				attempt.emailSendAttempt.response?.status === 'skipped' &&
+				!attempt.emailSendEligibility.isEligible &&
 				ERROR_NOTIFICATION_REASONS.includes(
 					attempt.emailSendEligibility.ineligibilityReason,
 				),
