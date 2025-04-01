@@ -39,6 +39,11 @@ export class ObserverDataExport extends GuStack {
 			`Observer_newsletter_eligible/*`,
 		);
 
+		bucket.grantRead(
+			new ArnPrincipal(airflowCloudComposerUserArnParameter.valueAsString),
+			`Public_keys/unifida_public_rsa_key.pem`,
+		);
+
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
 			'app' | 'memorySize' | 'fileName' | 'runtime' | 'timeout' | 'environment'
