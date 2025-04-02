@@ -24,6 +24,7 @@ import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
 import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
 import { UserBenefits } from '../lib/user-benefits';
 import { ZuoraSalesforceLinkRemover } from '../lib/zuora-salesforce-link-remover';
+import { SoftOptInConsentSetter } from '../lib/soft-opt-in-consent-setter';
 
 const app = new App();
 const membershipHostedZoneId = 'Z1E4V12LQGXFEC';
@@ -59,6 +60,15 @@ export const prodProps: NewProductApiProps = {
 	fulfilmentDateCalculatorS3Resource:
 		'arn:aws:s3:::fulfilment-date-calculator-prod/*',
 };
+
+new SoftOptInConsentSetter(app, 'soft-opt-in-consent-setter-CODE', {
+	stack: "membership",
+	stage: "CODE"
+});
+new SoftOptInConsentSetter(app, 'soft-opt-in-consent-setter-PROD', {
+	stack: "membership",
+	stage: "PROD"
+});
 
 new BatchEmailSender(app, 'batch-email-sender-CODE', {
 	stack: 'membership',
