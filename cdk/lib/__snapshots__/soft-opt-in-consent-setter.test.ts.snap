@@ -55,9 +55,9 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
   "Resources": {
     "LambdaFunction": {
       "Properties": {
-        "CodeUri": {
-          "Bucket": "support-service-lambdas-dist",
-          "Key": {
+        "Code": {
+          "S3Bucket": "support-service-lambdas-dist",
+          "S3Key": {
             "Fn::Sub": "membership/\${Stage}/soft-opt-in-consent-setter/soft-opt-in-consent-setter.jar",
           },
         },
@@ -70,89 +70,49 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
             "sfApiVersion": "v46.0",
           },
         },
-        "Events": {
-          "ScheduledRun": {
-            "Properties": {
-              "Description": "Runs Soft Opt-In Consent Setter",
-              "Enabled": true,
-              "Schedule": {
-                "Fn::FindInMap": [
-                  "StageMap",
-                  {
-                    "Ref": "Stage",
-                  },
-                  "Schedule",
-                ],
-              },
-            },
-            "Type": "Schedule",
-          },
-        },
         "FunctionName": {
           "Fn::Sub": "soft-opt-in-consent-setter-\${Stage}",
         },
         "Handler": "com.gu.soft_opt_in_consent_setter.Handler::handleRequest",
         "MemorySize": 512,
-        "Policies": [
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaFunctionRole",
+            "Arn",
+          ],
+        },
+        "Runtime": "java11",
+        "Tags": [
           {
-            "Statement": [
-              {
-                "Action": "cloudwatch:PutMetricData",
-                "Effect": "Allow",
-                "Resource": "*",
-              },
-            ],
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
           },
           {
-            "Statement": [
-              {
-                "Action": "s3:GetObject",
-                "Effect": "Allow",
-                "Resource": [
-                  "arn:aws:s3::*:membership-dist/*",
-                ],
-                "Sid": "readDeployedArtefact",
-              },
-            ],
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
           },
           {
-            "Statement": [
-              {
-                "Action": [
-                  "secretsmanager:DescribeSecret",
-                  "secretsmanager:GetSecretValue",
-                ],
-                "Effect": "Allow",
-                "Resource": [
-                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl",
-                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/ConnectedApp/TouchpointUpdate-lolLqP",
-                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/SoftOptInConsentSetterAPIUser-KjHQBG",
-                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/SoftOptInConsentSetterAPIUser-EonJb0",
-                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Identity/SoftOptInConsentAPI-n7Elrb",
-                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Identity/SoftOptInConsentAPI-sJJo2s",
-                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/MobilePurchasesAPI/User/GetSubscriptions-iCUzGN",
-                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/MobilePurchasesAPI/User/GetSubscriptions-HZuC6H",
-                ],
-              },
-            ],
+            "Key": "lambda:createdBy",
+            "Value": "SAM",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
           },
         ],
-        "Runtime": "java11",
-        "Tags": {
-          "Stack": "membership",
-          "Stage": "TEST",
-          "gu:cdk:version": "TEST",
-          "gu:repo": "guardian/support-service-lambdas",
-        },
         "Timeout": 900,
       },
-      "Type": "AWS::Serverless::Function",
+      "Type": "AWS::Lambda::Function",
     },
     "LambdaFunctionIAP": {
       "Properties": {
-        "CodeUri": {
-          "Bucket": "support-service-lambdas-dist",
-          "Key": {
+        "Code": {
+          "S3Bucket": "support-service-lambdas-dist",
+          "S3Key": {
             "Fn::Sub": "membership/\${Stage}/soft-opt-in-consent-setter/soft-opt-in-consent-setter.jar",
           },
         },
@@ -170,89 +130,313 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
         },
         "Handler": "com.gu.soft_opt_in_consent_setter.HandlerIAP::handleRequest",
         "MemorySize": 512,
-        "Policies": [
-          "AWSLambdaBasicExecutionRole",
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaFunctionIAPRole",
+            "Arn",
+          ],
+        },
+        "Runtime": "java11",
+        "Tags": [
           {
-            "Statement": [
-              {
-                "Action": [
-                  "dynamodb:PutItem",
-                ],
-                "Effect": "Allow",
-                "Resource": [
-                  {
-                    "Fn::Sub": "arn:aws:dynamodb:\${AWS::Region}:\${AWS::AccountId}:table/soft-opt-in-consent-setter-\${Stage}-logging",
-                  },
-                ],
-              },
-            ],
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
           },
           {
-            "Statement": [
-              {
-                "Action": "cloudwatch:PutMetricData",
-                "Effect": "Allow",
-                "Resource": "*",
-              },
-            ],
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
           },
           {
-            "Statement": [
-              {
-                "Action": "s3:GetObject",
-                "Effect": "Allow",
-                "Resource": [
-                  "arn:aws:s3::*:membership-dist/*",
-                ],
-                "Sid": "readDeployedArtefact",
-              },
-            ],
+            "Key": "lambda:createdBy",
+            "Value": "SAM",
           },
           {
-            "Statement": {
-              "Action": [
-                "sqs:DeleteMessage",
-                "sqs:GetQueueAttributes",
-                "sqs:ReceiveMessage",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": "SoftOptInsQueue.Arn",
-              },
-            },
+            "Key": "Stack",
+            "Value": "membership",
           },
           {
-            "Statement": [
-              {
-                "Action": [
-                  "secretsmanager:DescribeSecret",
-                  "secretsmanager:GetSecretValue",
-                ],
-                "Effect": "Allow",
-                "Resource": [
-                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl",
-                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/ConnectedApp/TouchpointUpdate-lolLqP",
-                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/SoftOptInConsentSetterAPIUser-KjHQBG",
-                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/SoftOptInConsentSetterAPIUser-EonJb0",
-                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Identity/SoftOptInConsentAPI-n7Elrb",
-                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Identity/SoftOptInConsentAPI-sJJo2s",
-                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/MobilePurchasesAPI/User/GetSubscriptions-iCUzGN",
-                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/MobilePurchasesAPI/User/GetSubscriptions-HZuC6H",
-                ],
-              },
-            ],
+            "Key": "Stage",
+            "Value": "TEST",
           },
         ],
-        "Runtime": "java11",
-        "Tags": {
-          "Stack": "membership",
-          "Stage": "TEST",
-          "gu:cdk:version": "TEST",
-          "gu:repo": "guardian/support-service-lambdas",
-        },
         "Timeout": 300,
       },
-      "Type": "AWS::Serverless::Function",
+      "Type": "AWS::Lambda::Function",
+    },
+    "LambdaFunctionIAPRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sts:AssumeRole",
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+        ],
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "dynamodb:PutItem",
+                  ],
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::Sub": "arn:aws:dynamodb:\${AWS::Region}:\${AWS::AccountId}:table/soft-opt-in-consent-setter-\${Stage}-logging",
+                    },
+                  ],
+                },
+              ],
+            },
+            "PolicyName": "LambdaFunctionIAPRolePolicy1",
+          },
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": "cloudwatch:PutMetricData",
+                  "Effect": "Allow",
+                  "Resource": "*",
+                },
+              ],
+            },
+            "PolicyName": "LambdaFunctionIAPRolePolicy2",
+          },
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": "s3:GetObject",
+                  "Effect": "Allow",
+                  "Resource": [
+                    "arn:aws:s3::*:membership-dist/*",
+                  ],
+                  "Sid": "readDeployedArtefact",
+                },
+              ],
+            },
+            "PolicyName": "LambdaFunctionIAPRolePolicy3",
+          },
+          {
+            "PolicyDocument": {
+              "Statement": {
+                "Action": [
+                  "sqs:DeleteMessage",
+                  "sqs:GetQueueAttributes",
+                  "sqs:ReceiveMessage",
+                ],
+                "Effect": "Allow",
+                "Resource": {
+                  "Fn::GetAtt": "SoftOptInsQueue.Arn",
+                },
+              },
+            },
+            "PolicyName": "LambdaFunctionIAPRolePolicy4",
+          },
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "secretsmanager:DescribeSecret",
+                    "secretsmanager:GetSecretValue",
+                  ],
+                  "Effect": "Allow",
+                  "Resource": [
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl",
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/ConnectedApp/TouchpointUpdate-lolLqP",
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/SoftOptInConsentSetterAPIUser-KjHQBG",
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/SoftOptInConsentSetterAPIUser-EonJb0",
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Identity/SoftOptInConsentAPI-n7Elrb",
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Identity/SoftOptInConsentAPI-sJJo2s",
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/MobilePurchasesAPI/User/GetSubscriptions-iCUzGN",
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/MobilePurchasesAPI/User/GetSubscriptions-HZuC6H",
+                  ],
+                },
+              ],
+            },
+            "PolicyName": "LambdaFunctionIAPRolePolicy5",
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "lambda:createdBy",
+            "Value": "SAM",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "LambdaFunctionRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sts:AssumeRole",
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+        ],
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": "cloudwatch:PutMetricData",
+                  "Effect": "Allow",
+                  "Resource": "*",
+                },
+              ],
+            },
+            "PolicyName": "LambdaFunctionRolePolicy0",
+          },
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": "s3:GetObject",
+                  "Effect": "Allow",
+                  "Resource": [
+                    "arn:aws:s3::*:membership-dist/*",
+                  ],
+                  "Sid": "readDeployedArtefact",
+                },
+              ],
+            },
+            "PolicyName": "LambdaFunctionRolePolicy1",
+          },
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "secretsmanager:DescribeSecret",
+                    "secretsmanager:GetSecretValue",
+                  ],
+                  "Effect": "Allow",
+                  "Resource": [
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl",
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/ConnectedApp/TouchpointUpdate-lolLqP",
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/SoftOptInConsentSetterAPIUser-KjHQBG",
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/SoftOptInConsentSetterAPIUser-EonJb0",
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Identity/SoftOptInConsentAPI-n7Elrb",
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Identity/SoftOptInConsentAPI-sJJo2s",
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/MobilePurchasesAPI/User/GetSubscriptions-iCUzGN",
+                    "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/MobilePurchasesAPI/User/GetSubscriptions-HZuC6H",
+                  ],
+                },
+              ],
+            },
+            "PolicyName": "LambdaFunctionRolePolicy2",
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "lambda:createdBy",
+            "Value": "SAM",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "LambdaFunctionScheduledRun": {
+      "Properties": {
+        "Description": "Runs Soft Opt-In Consent Setter",
+        "ScheduleExpression": {
+          "Fn::FindInMap": [
+            "StageMap",
+            {
+              "Ref": "Stage",
+            },
+            "Schedule",
+          ],
+        },
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "LambdaFunction",
+                "Arn",
+              ],
+            },
+            "Id": "LambdaFunctionScheduledRunLambdaTarget",
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "LambdaFunctionScheduledRunPermission": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Ref": "LambdaFunction",
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "LambdaFunctionScheduledRun",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
     },
     "SQSTrigger": {
       "Properties": {
@@ -637,6 +821,5 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
       "Type": "AWS::CloudWatch::Alarm",
     },
   },
-  "Transform": "AWS::Serverless-2016-10-31",
 }
 `;
