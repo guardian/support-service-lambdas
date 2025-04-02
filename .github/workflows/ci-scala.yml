@@ -23,6 +23,7 @@ jobs:
           - new-product-api
           - single-contribution-salesforce-writes
           - stripe-webhook-endpoints
+          - soft-opt-in-consent-setter
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -100,7 +101,6 @@ jobs:
           - sf-emails-to-s3-exporter
           - sf-gocardless-sync
           - sf-move-subscriptions-api
-          - soft-opt-in-consent-setter
           - zuora-callout-apis
           - zuora-datalake-export
           - zuora-rer
