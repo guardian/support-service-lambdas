@@ -62,12 +62,12 @@ export const prodProps: NewProductApiProps = {
 };
 
 new SoftOptInConsentSetter(app, 'soft-opt-in-consent-setter-CODE', {
-	stack: "membership",
-	stage: "CODE"
+	stack: 'membership',
+	stage: 'CODE',
 });
 new SoftOptInConsentSetter(app, 'soft-opt-in-consent-setter-PROD', {
-	stack: "membership",
-	stage: "PROD"
+	stack: 'membership',
+	stage: 'PROD',
 });
 
 new BatchEmailSender(app, 'batch-email-sender-CODE', {
