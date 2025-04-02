@@ -1,0 +1,642 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
+{
+  "Conditions": {
+    "IsProd": {
+      "Fn::Equals": [
+        {
+          "Ref": "Stage",
+        },
+        "PROD",
+      ],
+    },
+  },
+  "Mappings": {
+    "StageMap": {
+      "CODE": {
+        "AppName": "AwsConnectorSandbox",
+        "IdentityStage": "CODE",
+        "MpapiStage": "CODE",
+        "SalesforceStage": "CODE",
+        "SalesforceUsername": "SoftOptInConsentSetterAPIUser",
+        "Schedule": "rate(365 days)",
+      },
+      "PROD": {
+        "AppName": "TouchpointUpdate",
+        "IdentityStage": "PROD",
+        "MpapiStage": "PROD",
+        "SalesforceStage": "PROD",
+        "SalesforceUsername": "SoftOptInConsentSetterAPIUser",
+        "Schedule": "rate(30 minutes)",
+      },
+    },
+  },
+  "Metadata": {
+    "gu:cdk:constructs": [],
+    "gu:cdk:version": "TEST",
+  },
+  "Parameters": {
+    "MobileAccountId": {
+      "Default": "mobileAccountId",
+      "Description": "The AWS Account ID of the mobile account",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+    "Stage": {
+      "AllowedValues": [
+        "PROD",
+        "CODE",
+      ],
+      "Default": "CODE",
+      "Description": "Stage name",
+      "Type": "String",
+    },
+  },
+  "Resources": {
+    "LambdaFunction": {
+      "Properties": {
+        "CodeUri": {
+          "Bucket": "support-service-lambdas-dist",
+          "Key": {
+            "Fn::Sub": "membership/\${Stage}/soft-opt-in-consent-setter/soft-opt-in-consent-setter.jar",
+          },
+        },
+        "Description": "Updates Identity Soft Opt-In Consents upon Acquisition and Cancellation of Subscriptions in Salesforce",
+        "Environment": {
+          "Variables": {
+            "Stage": {
+              "Ref": "Stage",
+            },
+            "sfApiVersion": "v46.0",
+          },
+        },
+        "Events": {
+          "ScheduledRun": {
+            "Properties": {
+              "Description": "Runs Soft Opt-In Consent Setter",
+              "Enabled": true,
+              "Schedule": {
+                "Fn::FindInMap": [
+                  "StageMap",
+                  {
+                    "Ref": "Stage",
+                  },
+                  "Schedule",
+                ],
+              },
+            },
+            "Type": "Schedule",
+          },
+        },
+        "FunctionName": {
+          "Fn::Sub": "soft-opt-in-consent-setter-\${Stage}",
+        },
+        "Handler": "com.gu.soft_opt_in_consent_setter.Handler::handleRequest",
+        "MemorySize": 512,
+        "Policies": [
+          {
+            "Statement": [
+              {
+                "Action": "cloudwatch:PutMetricData",
+                "Effect": "Allow",
+                "Resource": "*",
+              },
+            ],
+          },
+          {
+            "Statement": [
+              {
+                "Action": "s3:GetObject",
+                "Effect": "Allow",
+                "Resource": [
+                  "arn:aws:s3::*:membership-dist/*",
+                ],
+                "Sid": "readDeployedArtefact",
+              },
+            ],
+          },
+          {
+            "Statement": [
+              {
+                "Action": [
+                  "secretsmanager:DescribeSecret",
+                  "secretsmanager:GetSecretValue",
+                ],
+                "Effect": "Allow",
+                "Resource": [
+                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl",
+                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/ConnectedApp/TouchpointUpdate-lolLqP",
+                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/SoftOptInConsentSetterAPIUser-KjHQBG",
+                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/SoftOptInConsentSetterAPIUser-EonJb0",
+                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Identity/SoftOptInConsentAPI-n7Elrb",
+                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Identity/SoftOptInConsentAPI-sJJo2s",
+                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/MobilePurchasesAPI/User/GetSubscriptions-iCUzGN",
+                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/MobilePurchasesAPI/User/GetSubscriptions-HZuC6H",
+                ],
+              },
+            ],
+          },
+        ],
+        "Runtime": "java11",
+        "Tags": {
+          "Stack": "membership",
+          "Stage": "TEST",
+          "gu:cdk:version": "TEST",
+          "gu:repo": "guardian/support-service-lambdas",
+        },
+        "Timeout": 900,
+      },
+      "Type": "AWS::Serverless::Function",
+    },
+    "LambdaFunctionIAP": {
+      "Properties": {
+        "CodeUri": {
+          "Bucket": "support-service-lambdas-dist",
+          "Key": {
+            "Fn::Sub": "membership/\${Stage}/soft-opt-in-consent-setter/soft-opt-in-consent-setter.jar",
+          },
+        },
+        "Description": "Updates Identity Soft Opt-In Consents upon Acquisition and Cancellation of Subscriptions based on a queue populated by Salesforce and the Mobile Purchases API",
+        "Environment": {
+          "Variables": {
+            "Stage": {
+              "Ref": "Stage",
+            },
+            "sfApiVersion": "v56.0",
+          },
+        },
+        "FunctionName": {
+          "Fn::Sub": "soft-opt-in-consent-setter-IAP-\${Stage}",
+        },
+        "Handler": "com.gu.soft_opt_in_consent_setter.HandlerIAP::handleRequest",
+        "MemorySize": 512,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole",
+          {
+            "Statement": [
+              {
+                "Action": [
+                  "dynamodb:PutItem",
+                ],
+                "Effect": "Allow",
+                "Resource": [
+                  {
+                    "Fn::Sub": "arn:aws:dynamodb:\${AWS::Region}:\${AWS::AccountId}:table/soft-opt-in-consent-setter-\${Stage}-logging",
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            "Statement": [
+              {
+                "Action": "cloudwatch:PutMetricData",
+                "Effect": "Allow",
+                "Resource": "*",
+              },
+            ],
+          },
+          {
+            "Statement": [
+              {
+                "Action": "s3:GetObject",
+                "Effect": "Allow",
+                "Resource": [
+                  "arn:aws:s3::*:membership-dist/*",
+                ],
+                "Sid": "readDeployedArtefact",
+              },
+            ],
+          },
+          {
+            "Statement": {
+              "Action": [
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:ReceiveMessage",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": "SoftOptInsQueue.Arn",
+              },
+            },
+          },
+          {
+            "Statement": [
+              {
+                "Action": [
+                  "secretsmanager:DescribeSecret",
+                  "secretsmanager:GetSecretValue",
+                ],
+                "Effect": "Allow",
+                "Resource": [
+                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl",
+                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/ConnectedApp/TouchpointUpdate-lolLqP",
+                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/SoftOptInConsentSetterAPIUser-KjHQBG",
+                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/SoftOptInConsentSetterAPIUser-EonJb0",
+                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Identity/SoftOptInConsentAPI-n7Elrb",
+                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Identity/SoftOptInConsentAPI-sJJo2s",
+                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/MobilePurchasesAPI/User/GetSubscriptions-iCUzGN",
+                  "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/MobilePurchasesAPI/User/GetSubscriptions-HZuC6H",
+                ],
+              },
+            ],
+          },
+        ],
+        "Runtime": "java11",
+        "Tags": {
+          "Stack": "membership",
+          "Stage": "TEST",
+          "gu:cdk:version": "TEST",
+          "gu:repo": "guardian/support-service-lambdas",
+        },
+        "Timeout": 300,
+      },
+      "Type": "AWS::Serverless::Function",
+    },
+    "SQSTrigger": {
+      "Properties": {
+        "BatchSize": 1,
+        "Enabled": true,
+        "EventSourceArn": {
+          "Fn::GetAtt": "SoftOptInsQueue.Arn",
+        },
+        "FunctionName": {
+          "Ref": "LambdaFunctionIAP",
+        },
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "SoftOptInsDeadLetterQueue": {
+      "Properties": {
+        "MessageRetentionPeriod": 864000,
+        "QueueName": {
+          "Fn::Sub": "soft-opt-in-consent-setter-dead-letter-queue-\${Stage}",
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+    },
+    "SoftOptInsLoggingTable": {
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "timestamp",
+            "AttributeType": "N",
+          },
+          {
+            "AttributeName": "identityId",
+            "AttributeType": "S",
+          },
+          {
+            "AttributeName": "subscriptionId",
+            "AttributeType": "S",
+          },
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "GlobalSecondaryIndexes": [
+          {
+            "IndexName": "subscriptionId-index",
+            "KeySchema": [
+              {
+                "AttributeName": "subscriptionId",
+                "KeyType": "HASH",
+              },
+            ],
+            "Projection": {
+              "ProjectionType": "ALL",
+            },
+          },
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "identityId",
+            "KeyType": "HASH",
+          },
+          {
+            "AttributeName": "timestamp",
+            "KeyType": "RANGE",
+          },
+        ],
+        "PointInTimeRecoverySpecification": {
+          "PointInTimeRecoveryEnabled": true,
+        },
+        "SSESpecification": {
+          "SSEEnabled": true,
+        },
+        "TableName": {
+          "Fn::Sub": "soft-opt-in-consent-setter-\${Stage}-logging",
+        },
+        "Tags": [
+          {
+            "Key": "devx-backup-enabled",
+            "Value": "true",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::DynamoDB::Table",
+    },
+    "SoftOptInsQueue": {
+      "Properties": {
+        "QueueName": {
+          "Fn::Sub": "soft-opt-in-consent-setter-queue-\${Stage}",
+        },
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": "SoftOptInsDeadLetterQueue.Arn",
+          },
+          "maxReceiveCount": 3,
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+        "VisibilityTimeout": 3000,
+      },
+      "Type": "AWS::SQS::Queue",
+    },
+    "SoftOptInsQueueCrossAccountRole": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Sub": "\${MobileAccountId}",
+                },
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "sqs:SendMessage",
+                    "sqs:ReceiveMessage",
+                    "sqs:DeleteMessage",
+                    "sqs:GetQueueAttributes",
+                  ],
+                  "Effect": "Allow",
+                  "Resource": {
+                    "Fn::GetAtt": "SoftOptInsQueue.Arn",
+                  },
+                },
+              ],
+              "Version": "2012-10-17",
+            },
+            "PolicyName": "SQSAccess",
+          },
+        ],
+        "RoleName": {
+          "Fn::Sub": "\${AWS::StackName}-QueueCrossAccountRole",
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "deadLetterBuildUpAlarmIAP": {
+      "Condition": "IsProd",
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Fn::Sub": "arn:aws:sns:\${AWS::Region}:\${AWS::AccountId}:alarms-handler-topic-PROD",
+          },
+        ],
+        "AlarmDescription": "Five or more runs found an error and were unable to complete. See https://github.com/guardian/support-service-lambdas/blob/main/handlers/soft-opt-in-consent-setter/README.md#failedRunAlarm for possible causes, impacts and fixes.
+",
+        "AlarmName": {
+          "Fn::Sub": "soft-opt-in-consent-setter-IAP-\${Stage} failed to run and sent the message to the dead letter queue.",
+        },
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": "SoftOptInsDeadLetterQueue.QueueName",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Threshold": 5,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "exceptionsAlarmIAP": {
+      "Condition": "IsProd",
+      "DependsOn": [
+        "LambdaFunctionIAP",
+      ],
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Fn::Sub": "arn:aws:sns:\${AWS::Region}:\${AWS::AccountId}:alarms-handler-topic-PROD",
+          },
+        ],
+        "AlarmDescription": "Five or more runs found an error and were unable to complete. See https://github.com/guardian/support-service-lambdas/blob/main/handlers/soft-opt-in-consent-setter/README.md#failedRunAlarm for possible causes, impacts and fixes.
+",
+        "AlarmName": {
+          "Fn::Sub": "soft-opt-in-consent-setter-IAP-\${Stage} threw an exception",
+        },
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "LambdaFunctionIAP",
+            },
+          },
+        ],
+        "EvaluationPeriods": 2,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 3600,
+        "Statistic": "Sum",
+        "Threshold": 5,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "failedDynamoUpdateAlarm": {
+      "Condition": "IsProd",
+      "DependsOn": [
+        "LambdaFunction",
+      ],
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Fn::Sub": "arn:aws:sns:\${AWS::Region}:\${AWS::AccountId}:alarms-handler-topic-PROD",
+          },
+        ],
+        "AlarmDescription": "A run failed to update (some) records in Salesforce in the last hour. See https://github.com/guardian/support-service-lambdas/blob/main/handlers/soft-opt-in-consent-setter/README.md#failedUpdateAlarm for possible causes, impacts and fixes.
+",
+        "AlarmName": {
+          "Fn::Sub": "soft-opt-in-consent-setter-\${Stage} failed to update the Dynamo logging table.",
+        },
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "Stage",
+            "Value": {
+              "Fn::Sub": "\${Stage}",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "failed_dynamo_update",
+        "Namespace": "soft-opt-in-consent-setter",
+        "Period": 3600,
+        "Statistic": "Sum",
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "failedRunAlarm": {
+      "Condition": "IsProd",
+      "DependsOn": [
+        "LambdaFunction",
+      ],
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Fn::Sub": "arn:aws:sns:\${AWS::Region}:\${AWS::AccountId}:alarms-handler-topic-PROD",
+          },
+        ],
+        "AlarmDescription": "Five or more runs found an error and were unable to complete. See https://github.com/guardian/support-service-lambdas/blob/main/handlers/soft-opt-in-consent-setter/README.md#failedRunAlarm for possible causes, impacts and fixes.
+",
+        "AlarmName": {
+          "Fn::Sub": "soft-opt-in-consent-setter-\${Stage} failed to run",
+        },
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "LambdaFunction",
+            },
+          },
+        ],
+        "EvaluationPeriods": 2,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 3600,
+        "Statistic": "Sum",
+        "Threshold": 5,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "failedUpdateAlarm": {
+      "Condition": "IsProd",
+      "DependsOn": [
+        "LambdaFunction",
+      ],
+      "Properties": {
+        "AlarmActions": [
+          {
+            "Fn::Sub": "arn:aws:sns:\${AWS::Region}:\${AWS::AccountId}:alarms-handler-topic-PROD",
+          },
+        ],
+        "AlarmDescription": "A run failed to update (some) records in Salesforce in the last hour. See https://github.com/guardian/support-service-lambdas/blob/main/handlers/soft-opt-in-consent-setter/README.md#failedUpdateAlarm for possible causes, impacts and fixes.
+",
+        "AlarmName": {
+          "Fn::Sub": "soft-opt-in-consent-setter-\${Stage} failed to update Salesforce records",
+        },
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "Stage",
+            "Value": {
+              "Fn::Sub": "\${Stage}",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "failed_salesforce_update",
+        "Namespace": "soft-opt-in-consent-setter",
+        "Period": 3600,
+        "Statistic": "Sum",
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+  },
+  "Transform": "AWS::Serverless-2016-10-31",
+}
+`;
