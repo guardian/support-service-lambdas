@@ -274,7 +274,7 @@ Resources:
           sfApiVersion: v46.0
       Tags:
         - Key: lambda:createdBy
-          Value: SAM
+          Value: SAMl
   LambdaFunctionRole:
     Type: AWS::IAM::Role
     Properties:

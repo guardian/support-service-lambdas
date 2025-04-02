@@ -6,6 +6,8 @@ describe('The SoftOptInConsentSetter stack', () => {
 	it('matches the snapshot', () => {
 		const app = new App();
 		const stack = new SoftOptInConsentSetter(app, 'SoftOptInConsentSetter', {
+			mobileAccountIdSSMParam: 'mobileAccountId',
+			schedule: 'rate(365 days)',
 			stack: 'membership',
 			stage: 'TEST',
 		});
