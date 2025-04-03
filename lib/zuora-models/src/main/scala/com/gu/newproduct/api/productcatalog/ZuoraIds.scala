@@ -250,7 +250,6 @@ object ZuoraIds {
         ),
         VoucherZuoraIds(
           everyday = ProductRatePlanId("2c92a0fd56fe270b0157040dd79b35da"),
-          sunday = ProductRatePlanId("2c92a0fe5af9a6b9015b0fe1ecc0116c"),
           saturday = ProductRatePlanId("2c92a0fd6205707201621f9f6d7e0116"),
           weekend = ProductRatePlanId("2c92a0ff56fe33f00157040f9a537f4b"),
           sixDay = ProductRatePlanId("2c92a0fd56fe270b0157040e42e536ef"),
@@ -264,7 +263,6 @@ object ZuoraIds {
           everyday = ProductRatePlanId("2c92a0fd560d13880156136b72e50f0c"),
           sixDay = ProductRatePlanId("2c92a0ff560d311b0156136f2afe5315"),
           weekend = ProductRatePlanId("2c92a0fd5614305c01561dc88f3275be"),
-          sunday = ProductRatePlanId("2c92a0ff5af9b657015b0fea5b653f81"),
           saturday = ProductRatePlanId("2c92a0fd5e1dcf0d015e3cb39d0a7ddb"),
           saturdayPlus = ProductRatePlanId("2c92a0ff6205708e01622484bb2c4613"),
           sundayPlus = ProductRatePlanId("2c92a0fd560d13880156136b8e490f8b"),
@@ -288,7 +286,6 @@ object ZuoraIds {
         ),
         DigitalVoucherZuoraIds(
           everyday = ProductRatePlanId("2c92a00870ec598001710740c78d2f13"),
-          sunday = ProductRatePlanId("2c92a00870ec598001710740d0d83017"),
           saturday = ProductRatePlanId("2c92a00870ec598001710740cdd02fbd"),
           weekend = ProductRatePlanId("2c92a00870ec598001710740d24b3022"),
           sixDay = ProductRatePlanId("2c92a00870ec598001710740ca532f69"),
@@ -343,7 +340,6 @@ object ZuoraIds {
         ),
         VoucherZuoraIds(
           everyday = ProductRatePlanId("2c92c0f9555cf10501556e84a70440e2"),
-          sunday = ProductRatePlanId("2c92c0f95aff3b56015b1045fb9332d2"),
           saturday = ProductRatePlanId("2c92c0f861f9c26d0161fc434bfe004c"),
           weekend = ProductRatePlanId("2c92c0f8555ce5cf01556e7f01b81b94"),
           sixDay = ProductRatePlanId("2c92c0f8555ce5cf01556e7f01771b8a"),
@@ -357,7 +353,6 @@ object ZuoraIds {
           everyday = ProductRatePlanId("2c92c0f955c3cf0f0155c5d9e2493c43"),
           sixDay = ProductRatePlanId("2c92c0f955c3cf0f0155c5d9ddf13bc5"),
           weekend = ProductRatePlanId("2c92c0f955c3cf0f0155c5d9df433bf7"),
-          sunday = ProductRatePlanId("2c92c0f85aff3453015b1041dfd2317f"),
           sundayPlus = ProductRatePlanId("2c92c0f955c3cf0f0155c5d9e83a3cb7"),
           saturday = ProductRatePlanId("2c92c0f961f9cf300161fc4d2e3e3664"),
           saturdayPlus = ProductRatePlanId("2c92c0f961f9cf300161fc4f71473a34"),
@@ -381,7 +376,6 @@ object ZuoraIds {
         ),
         DigitalVoucherZuoraIds(
           everyday = ProductRatePlanId("2c92c0f86fa49142016fa49ea56a2938"),
-          sunday = ProductRatePlanId("2c92c0f86fa49142016fa49eb0a42a01"),
           saturday = ProductRatePlanId("2c92c0f86fa49142016fa49ea442291b"),
           weekend = ProductRatePlanId("2c92c0f86fa49142016fa49ea0d028b6"),
           sixDay = ProductRatePlanId("2c92c0f86fa49142016fa49e9b9a286f"),
