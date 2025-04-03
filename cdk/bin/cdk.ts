@@ -18,6 +18,7 @@ import {
 	APP_NAME as SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME,
 	SingleContributionSalesforceWrites,
 } from '../lib/single-contribution-salesforce-writes';
+import { SoftOptInConsentSetter } from '../lib/soft-opt-in-consent-setter';
 import type { StripeWebhookEndpointsProps } from '../lib/stripe-webhook-endpoints';
 import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
 import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
@@ -59,6 +60,15 @@ export const prodProps: NewProductApiProps = {
 	fulfilmentDateCalculatorS3Resource:
 		'arn:aws:s3:::fulfilment-date-calculator-prod/*',
 };
+
+new SoftOptInConsentSetter(app, 'soft-opt-in-consent-setter-CODE', {
+	stack: 'membership',
+	stage: 'CODE',
+});
+new SoftOptInConsentSetter(app, 'soft-opt-in-consent-setter-PROD', {
+	stack: 'membership',
+	stage: 'PROD',
+});
 
 new BatchEmailSender(app, 'batch-email-sender-CODE', {
 	stack: 'membership',
