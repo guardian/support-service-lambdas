@@ -421,7 +421,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
             ],
           },
         ],
-        "RoleName": "SoftOptInConsentSetter-LambdaFunctionIAPRole",
+        "RoleName": "membership-TEST-soft-opt-in-consent-setter-LambdaFunctionIAPRole",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -509,7 +509,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
             ],
           },
         ],
-        "RoleName": "SoftOptInConsentSetter-LambdaFunctionRole",
+        "RoleName": "membership-TEST-soft-opt-in-consent-setter-LambdaFunctionRole",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -919,7 +919,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
             "PolicyName": "SQSAccess",
           },
         ],
-        "RoleName": "SoftOptInConsentSetter-QueueCrossAccountRole",
+        "RoleName": "membership-TEST-soft-opt-in-consent-setter-QueueCrossAccountRole",
         "Tags": [
           {
             "Key": "gu:cdk:version",

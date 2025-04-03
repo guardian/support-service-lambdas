@@ -68,7 +68,7 @@ export class SoftOptInConsentSetter extends GuStack {
 
 		// IAM Roles
 		new Role(this, 'SoftOptInsQueueCrossAccountRole', {
-			roleName: `${this.stackName}-QueueCrossAccountRole`,
+			roleName: `membership-${this.stage}-soft-opt-in-consent-setter-QueueCrossAccountRole`,
 			assumedBy: new AccountPrincipal(mobileAccountId),
 			inlinePolicies: {
 				SQSAccess: new PolicyDocument({
@@ -89,7 +89,7 @@ export class SoftOptInConsentSetter extends GuStack {
 		});
 
 		const lambdaFunctionRole = new Role(this, 'LambdaFunctionRole', {
-			roleName: `${this.stackName}-LambdaFunctionRole`,
+			roleName: `membership-${this.stage}-soft-opt-in-consent-setter-LambdaFunctionRole`,
 			assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
 			managedPolicies: [
 				ManagedPolicy.fromAwsManagedPolicyName(
@@ -112,7 +112,7 @@ export class SoftOptInConsentSetter extends GuStack {
 		);
 
 		const lambdaFunctionIAPRole = new Role(this, 'LambdaFunctionIAPRole', {
-			roleName: `${this.stackName}-LambdaFunctionIAPRole`,
+			roleName: `membership-${this.stage}-soft-opt-in-consent-setter-LambdaFunctionIAPRole`,
 			assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
 			managedPolicies: [
 				ManagedPolicy.fromAwsManagedPolicyName(
