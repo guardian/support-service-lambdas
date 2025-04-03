@@ -51,7 +51,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
             "sfApiVersion": "v46.0",
           },
         },
-        "FunctionName": "soft-opt-in-consent-setter-TEST",
+        "FunctionName": "soft-opt-in-consent-setter-TEST-CDK",
         "Handler": "com.gu.soft_opt_in_consent_setter.Handler::handleRequest",
         "MemorySize": 512,
         "Role": {
@@ -108,7 +108,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
             "sfApiVersion": "v56.0",
           },
         },
-        "FunctionName": "soft-opt-in-consent-setter-IAP-TEST",
+        "FunctionName": "soft-opt-in-consent-setter-IAP-TEST-CDK",
         "Handler": "com.gu.soft_opt_in_consent_setter.HandlerIAP::handleRequest",
         "MemorySize": 512,
         "Role": {
@@ -421,6 +421,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
             ],
           },
         ],
+        "RoleName": "SoftOptInConsentSetter-LambdaFunctioIAPnRole-CDK",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -508,6 +509,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
             ],
           },
         ],
+        "RoleName": "SoftOptInConsentSetter-LambdaFunctionRole-CDK",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -917,7 +919,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
             "PolicyName": "SQSAccess",
           },
         ],
-        "RoleName": "SoftOptInConsentSetter-QueueCrossAccountRole",
+        "RoleName": "SoftOptInConsentSetter-QueueCrossAccountRole-CDK",
         "Tags": [
           {
             "Key": "gu:cdk:version",
