@@ -421,7 +421,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
             ],
           },
         ],
-        "RoleName": "SoftOptInConsentSetter-LambdaFunctioIAPnRole",
+        "RoleName": "SoftOptInConsentSetter-LambdaFunctionIAPRole",
         "Tags": [
           {
             "Key": "gu:cdk:version",

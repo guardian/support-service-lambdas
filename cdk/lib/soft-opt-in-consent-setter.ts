@@ -112,7 +112,7 @@ export class SoftOptInConsentSetter extends GuStack {
 		);
 
 		const lambdaFunctionIAPRole = new Role(this, 'LambdaFunctionIAPRole', {
-			roleName: `${this.stackName}-LambdaFunctioIAPnRole`,
+			roleName: `${this.stackName}-LambdaFunctionIAPRole`,
 			assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
 			managedPolicies: [
 				ManagedPolicy.fromAwsManagedPolicyName(
