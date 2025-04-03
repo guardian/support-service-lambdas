@@ -30,7 +30,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
-    "LambdaFunctionBF21E41F": {
+    "LambdaFunction": {
       "DependsOn": [
         "LambdaFunctionServiceRoleDefaultPolicy32EEEE35",
         "LambdaFunctionServiceRoleC555A460",
@@ -51,7 +51,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
             "sfApiVersion": "v46.0",
           },
         },
-        "FunctionName": "soft-opt-in-consent-setter-TEST-CDK",
+        "FunctionName": "soft-opt-in-consent-setter-TEST",
         "Handler": "com.gu.soft_opt_in_consent_setter.Handler::handleRequest",
         "MemorySize": 512,
         "Role": {
@@ -87,7 +87,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "LambdaFunctionIAPAC6CD3E4": {
+    "LambdaFunctionIAP": {
       "DependsOn": [
         "LambdaFunctionIAPRoleDefaultPolicyDBABFBD9",
         "LambdaFunctionIAPRoleE662CE52",
@@ -108,7 +108,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
             "sfApiVersion": "v56.0",
           },
         },
-        "FunctionName": "soft-opt-in-consent-setter-IAP-TEST-CDK",
+        "FunctionName": "soft-opt-in-consent-setter-IAP-TEST",
         "Handler": "com.gu.soft_opt_in_consent_setter.HandlerIAP::handleRequest",
         "MemorySize": 512,
         "Role": {
@@ -421,7 +421,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
             ],
           },
         ],
-        "RoleName": "SoftOptInConsentSetter-LambdaFunctioIAPnRole-CDK",
+        "RoleName": "SoftOptInConsentSetter-LambdaFunctioIAPnRole",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -448,7 +448,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
           "Fn::GetAtt": [
-            "LambdaFunctionBF21E41F",
+            "LambdaFunction",
             "Arn",
           ],
         },
@@ -471,7 +471,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
           {
             "Arn": {
               "Fn::GetAtt": [
-                "LambdaFunctionBF21E41F",
+                "LambdaFunction",
                 "Arn",
               ],
             },
@@ -509,7 +509,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
             ],
           },
         ],
-        "RoleName": "SoftOptInConsentSetter-LambdaFunctionRole-CDK",
+        "RoleName": "SoftOptInConsentSetter-LambdaFunctionRole",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -722,7 +722,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
           ],
         },
         "FunctionName": {
-          "Ref": "LambdaFunctionIAPAC6CD3E4",
+          "Ref": "LambdaFunctionIAP",
         },
       },
       "Type": "AWS::Lambda::EventSourceMapping",
@@ -919,7 +919,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
             "PolicyName": "SQSAccess",
           },
         ],
-        "RoleName": "SoftOptInConsentSetter-QueueCrossAccountRole-CDK",
+        "RoleName": "SoftOptInConsentSetter-QueueCrossAccountRole",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -1014,7 +1014,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
           {
             "Name": "FunctionName",
             "Value": {
-              "Ref": "LambdaFunctionIAPAC6CD3E4",
+              "Ref": "LambdaFunctionIAP",
             },
           },
         ],
@@ -1096,7 +1096,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
           {
             "Name": "FunctionName",
             "Value": {
-              "Ref": "LambdaFunctionBF21E41F",
+              "Ref": "LambdaFunction",
             },
           },
         ],

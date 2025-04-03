@@ -372,33 +372,33 @@ export class SoftOptInConsentSetter extends GuStack {
 		const resourcesKeepingExistingLogicalIds: Array<{
 			construct: IConstruct;
 			forcedLogicalId: string;
-			reason: string
+			reason: string;
 		}> = [
 			{
 				construct: softOptInsQueue,
 				forcedLogicalId: 'SoftOptInsQueue',
-				reason: 'Retaining a stateful resource previously defined in YAML'
+				reason: 'Retaining a stateful resource previously defined in YAML',
 			},
 			{
 				construct: softOptInsDeadLetterQueue,
 				forcedLogicalId: 'SoftOptInsDeadLetterQueue',
-				reason: 'Retaining a stateful resource previously defined in YAML'
+				reason: 'Retaining a stateful resource previously defined in YAML',
 			},
 			{
 				construct: softOptInsLoggingTable,
 				forcedLogicalId: 'SoftOptInsLoggingTable',
-				reason: 'Retaining a stateful resource previously defined in YAML'
+				reason: 'Retaining a stateful resource previously defined in YAML',
 			},
 			{
 				construct: lambdaFunction,
 				forcedLogicalId: 'LambdaFunction',
-				reason: 'Moving existing lambda to CDK'
+				reason: 'Moving existing lambda to CDK',
 			},
 			{
 				construct: lambdaFunctionIAP,
 				forcedLogicalId: 'LambdaFunctionIAP',
-				reason: 'Moving existing lambda to CDK'
-			}
+				reason: 'Moving existing lambda to CDK',
+			},
 		];
 		resourcesKeepingExistingLogicalIds.forEach((resource) => {
 			this.overrideLogicalId(resource.construct, {
