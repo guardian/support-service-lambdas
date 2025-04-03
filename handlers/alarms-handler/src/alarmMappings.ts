@@ -124,6 +124,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 
 		// misc
 		'discount-expiry-notifier',
+		'observer-data-export',
 	],
 };
 
