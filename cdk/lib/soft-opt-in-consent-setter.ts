@@ -382,7 +382,6 @@ export class SoftOptInConsentSetter extends GuStack {
 		];
 		resourcesKeepingExistingLogicalIds.forEach((resource) => {
 			this.overrideLogicalId(resource.construct, {
-				// Sets the first letter to uppercase but keeps the rest of the string unchanged
 				logicalId: resource.forcedLogicalId,
 				reason: 'Retaining a stateful resource previously defined in YAML',
 			});
