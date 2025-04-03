@@ -8,6 +8,8 @@ describe('The SoftOptInConsentSetter stack', () => {
 		const stack = new SoftOptInConsentSetter(app, 'SoftOptInConsentSetter', {
 			mobileAccountIdSSMParam: 'mobileAccountId',
 			schedule: 'rate(365 days)',
+			acquisitionsEventBusArn:
+				'arn:aws:events:eu-west-1:865473395570:event-bus/acquisitions-bus-CODE',
 			stack: 'membership',
 			stage: 'TEST',
 		});
