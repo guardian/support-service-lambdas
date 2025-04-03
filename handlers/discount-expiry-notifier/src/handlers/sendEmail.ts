@@ -133,9 +133,9 @@ export function getEmailSendEligibility(
 }
 
 export function formatDate(inputDate: string): string {
-    if (isNaN(new Date(inputDate).getTime())) {
-        throw new Error(`Invalid date string: ${inputDate}`);
-    }
+	if (isNaN(new Date(inputDate).getTime())) {
+		throw new Error(`Invalid date string: ${inputDate}`);
+	}
 	return new Date(inputDate).toLocaleDateString('en-GB', {
 		day: '2-digit',
 		month: 'long',
