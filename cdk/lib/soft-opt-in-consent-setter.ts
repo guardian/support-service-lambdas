@@ -187,7 +187,7 @@ export class SoftOptInConsentSetter extends GuStack {
 				},
 			],
 			functionName: `soft-opt-in-consent-setter-${this.stage}`,
-			runtime: Runtime.JAVA_11,
+			runtime: Runtime.JAVA_11, // keep on 11 for now due to http PATCH issue
 			handler: 'com.gu.soft_opt_in_consent_setter.Handler::handleRequest',
 			memorySize: 512,
 			timeout: Duration.seconds(900),
