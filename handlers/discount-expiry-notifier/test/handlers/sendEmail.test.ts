@@ -1,4 +1,4 @@
-import { getEmailSendEligibility, getIneligibilityReason } from "../../src/handlers/sendEmail";
+import { formatDate, getEmailSendEligibility, getIneligibilityReason } from "../../src/handlers/sendEmail";
 
 describe('getIneligibilityReason', () => {
     it('should return "Subscription status is cancelled" when subStatus is "Cancelled"', () => {
@@ -80,4 +80,30 @@ describe('getEmailSendEligibility', () => {
 			ineligibilityReason: '',
 		});
 	});
+});
+
+describe('formatDate', () => {
+    it('should format a valid date string to "DD Month YYYY" format', () => {
+        const result = formatDate('2023-10-15');
+        expect(result).toBe('15 October 2023');
+    });
+
+    it('should handle a date string with time and format it correctly', () => {
+        const result = formatDate('2023-10-15T14:30:00Z');
+        expect(result).toBe('15 October 2023');
+    });
+
+    it('should throw an error for an invalid date string', () => {
+        expect(() => formatDate('invalid-date')).toThrow();
+    });
+
+    it('should handle edge cases like leap years correctly', () => {
+        const result = formatDate('2024-02-29');
+        expect(result).toBe('29 February 2024');
+    });
+
+    it('should handle single-digit months and days correctly', () => {
+        const result = formatDate('2023-01-05');
+        expect(result).toBe('05 January 2023');
+    });
 });
