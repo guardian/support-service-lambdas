@@ -68,7 +68,7 @@ export class SoftOptInConsentSetter extends GuStack {
 
 		// IAM Roles
 		new Role(this, 'SoftOptInsQueueCrossAccountRole', {
-			roleName: `${this.stackName}-QueueCrossAccountRole-CDK`,
+			roleName: `${this.stackName}-QueueCrossAccountRole`,
 			assumedBy: new AccountPrincipal(mobileAccountId),
 			inlinePolicies: {
 				SQSAccess: new PolicyDocument({
@@ -89,7 +89,7 @@ export class SoftOptInConsentSetter extends GuStack {
 		});
 
 		const lambdaFunctionRole = new Role(this, 'LambdaFunctionRole', {
-			roleName: `${this.stackName}-LambdaFunctionRole-CDK`,
+			roleName: `${this.stackName}-LambdaFunctionRole`,
 			assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
 			managedPolicies: [
 				ManagedPolicy.fromAwsManagedPolicyName(
@@ -112,7 +112,7 @@ export class SoftOptInConsentSetter extends GuStack {
 		);
 
 		const lambdaFunctionIAPRole = new Role(this, 'LambdaFunctionIAPRole', {
-			roleName: `${this.stackName}-LambdaFunctioIAPnRole-CDK`,
+			roleName: `${this.stackName}-LambdaFunctioIAPnRole`,
 			assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
 			managedPolicies: [
 				ManagedPolicy.fromAwsManagedPolicyName(
@@ -186,7 +186,7 @@ export class SoftOptInConsentSetter extends GuStack {
 					description: 'Runs Soft Opt-In Consent Setter',
 				},
 			],
-			functionName: `soft-opt-in-consent-setter-${this.stage}-CDK`,
+			functionName: `soft-opt-in-consent-setter-${this.stage}`,
 			runtime: Runtime.JAVA_11,
 			handler: 'com.gu.soft_opt_in_consent_setter.Handler::handleRequest',
 			memorySize: 512,
@@ -201,7 +201,7 @@ export class SoftOptInConsentSetter extends GuStack {
 			app: 'soft-opt-in-consent-setter',
 			fileName: 'soft-opt-in-consent-setter.jar',
 			role: lambdaFunctionIAPRole,
-			functionName: `soft-opt-in-consent-setter-IAP-${this.stage}-CDK`,
+			functionName: `soft-opt-in-consent-setter-IAP-${this.stage}`,
 			runtime: Runtime.JAVA_11,
 			handler: 'com.gu.soft_opt_in_consent_setter.HandlerIAP::handleRequest',
 			memorySize: 512,
@@ -372,19 +372,33 @@ export class SoftOptInConsentSetter extends GuStack {
 		const resourcesKeepingExistingLogicalIds: Array<{
 			construct: IConstruct;
 			forcedLogicalId: string;
+			reason: string
 		}> = [
 			{
 				construct: softOptInsQueue,
 				forcedLogicalId: 'SoftOptInsQueue',
+				reason: 'Retaining a stateful resource previously defined in YAML'
 			},
 			{
 				construct: softOptInsDeadLetterQueue,
 				forcedLogicalId: 'SoftOptInsDeadLetterQueue',
+				reason: 'Retaining a stateful resource previously defined in YAML'
 			},
 			{
 				construct: softOptInsLoggingTable,
 				forcedLogicalId: 'SoftOptInsLoggingTable',
+				reason: 'Retaining a stateful resource previously defined in YAML'
 			},
+			{
+				construct: lambdaFunction,
+				forcedLogicalId: 'LambdaFunction',
+				reason: 'Moving existing lambda to CDK'
+			},
+			{
+				construct: lambdaFunctionIAP,
+				forcedLogicalId: 'LambdaFunctionIAP',
+				reason: 'Moving existing lambda to CDK'
+			}
 		];
 		resourcesKeepingExistingLogicalIds.forEach((resource) => {
 			this.overrideLogicalId(resource.construct, {
