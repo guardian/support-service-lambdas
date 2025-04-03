@@ -1,4 +1,4 @@
-import { formatDate, getEmailSendEligibility, getIneligibilityReason } from "../../src/handlers/sendEmail";
+import { formatDate, getCurrencySymbol, getEmailSendEligibility, getIneligibilityReason } from "../../src/handlers/sendEmail";
 
 describe('getIneligibilityReason', () => {
     it('should return "Subscription status is cancelled" when subStatus is "Cancelled"', () => {
@@ -105,5 +105,47 @@ describe('formatDate', () => {
     it('should handle single-digit months and days correctly', () => {
         const result = formatDate('2023-01-05');
         expect(result).toBe('05 January 2023');
+    });
+});
+
+describe('getCurrencySymbol', () => {
+    it('should return "£" for GBP', () => {
+        const result = getCurrencySymbol('GBP');
+        expect(result).toBe('£');
+    });
+
+    it('should return "$" for USD', () => {
+        const result = getCurrencySymbol('USD');
+        expect(result).toBe('$');
+    });
+
+    it('should return "€" for EUR', () => {
+        const result = getCurrencySymbol('EUR');
+        expect(result).toBe('€');
+    });
+
+    it('should return "$" for AUD', () => {
+        const result = getCurrencySymbol('AUD');
+        expect(result).toBe('$');
+    });
+
+    it('should return "$" for CAD', () => {
+        const result = getCurrencySymbol('CAD');
+        expect(result).toBe('$');
+    });
+
+    it('should return "$" for NZD', () => {
+        const result = getCurrencySymbol('NZD');
+        expect(result).toBe('$');
+    });
+
+    it('should return an empty string for an unsupported currency code', () => {
+        const result = getCurrencySymbol('XYZ');
+        expect(result).toBe('');
+    });
+
+    it('should return an empty string for an empty currency code', () => {
+        const result = getCurrencySymbol('');
+        expect(result).toBe('');
     });
 });
