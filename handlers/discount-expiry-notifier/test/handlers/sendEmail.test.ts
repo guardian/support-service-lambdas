@@ -1,4 +1,4 @@
-import { getIneligibilityReason } from "../../src/handlers/sendEmail";
+import { getEmailSendEligibility, getIneligibilityReason } from "../../src/handlers/sendEmail";
 
 describe('getIneligibilityReason', () => {
     it('should return "Subscription status is cancelled" when subStatus is "Cancelled"', () => {
@@ -30,4 +30,54 @@ describe('getIneligibilityReason', () => {
         const result = getIneligibilityReason('Active', 'test@example.com', 100, 200);
         expect(result).toBe('');
     });
+});
+
+describe('getEmailSendEligibility', () => {
+	it('should return isEligible as false and correct ineligibilityReason when subStatus is "Cancelled"', () => {
+		const result = getEmailSendEligibility('Cancelled', 'test@example.com', 100, 200);
+		expect(result).toEqual({
+			isEligible: false,
+			ineligibilityReason: 'Subscription status is cancelled',
+		});
+	});
+
+	it('should return isEligible as false and correct ineligibilityReason when subStatus is "Error"', () => {
+		const result = getEmailSendEligibility('Error', 'test@example.com', 100, 200);
+		expect(result).toEqual({
+			isEligible: false,
+			ineligibilityReason: 'Error getting sub status from Zuora',
+		});
+	});
+
+	it('should return isEligible as false and correct ineligibilityReason when workEmail is null', () => {
+		const result = getEmailSendEligibility('Active', null, 100, 200);
+		expect(result).toEqual({
+			isEligible: false,
+			ineligibilityReason: 'No value for work email',
+		});
+	});
+
+	it('should return isEligible as false and correct ineligibilityReason when workEmail is undefined', () => {
+		const result = getEmailSendEligibility('Active', undefined, 100, 200);
+		expect(result).toEqual({
+			isEligible: false,
+			ineligibilityReason: 'No value for work email',
+		});
+	});
+
+	it('should return isEligible as false and correct ineligibilityReason when oldPaymentAmount equals newPaymentAmount', () => {
+		const result = getEmailSendEligibility('Active', 'test@example.com', 100, 100);
+		expect(result).toEqual({
+			isEligible: false,
+			ineligibilityReason: 'Old and new payment amounts are the same',
+		});
+	});
+
+	it('should return isEligible as true and an empty ineligibilityReason when all conditions are met', () => {
+		const result = getEmailSendEligibility('Active', 'test@example.com', 100, 200);
+		expect(result).toEqual({
+			isEligible: true,
+			ineligibilityReason: '',
+		});
+	});
 });
