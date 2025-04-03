@@ -213,7 +213,7 @@ export class SoftOptInConsentSetter extends GuStack {
 		});
 
 		// SQS Triggers
-		new aws_lambda.EventSourceMapping(this, 'SQSTrigger', {
+		const sqsTrigger = new aws_lambda.EventSourceMapping(this, 'SQSTrigger', {
 			eventSourceArn: softOptInsQueue.queueArn,
 			target: lambdaFunctionIAP,
 			batchSize: 1,
@@ -397,6 +397,11 @@ export class SoftOptInConsentSetter extends GuStack {
 			{
 				construct: lambdaFunctionIAP,
 				forcedLogicalId: 'LambdaFunctionIAP',
+				reason: 'Moving existing lambda to CDK',
+			},
+			{
+				construct: sqsTrigger,
+				forcedLogicalId: 'SQSTrigger',
 				reason: 'Moving existing lambda to CDK',
 			},
 		];

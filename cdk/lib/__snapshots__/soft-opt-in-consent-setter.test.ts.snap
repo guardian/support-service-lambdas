@@ -711,7 +711,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SQSTriggerAAE0E6E8": {
+    "SQSTrigger": {
       "Properties": {
         "BatchSize": 1,
         "Enabled": true,
