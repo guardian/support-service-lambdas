@@ -202,7 +202,7 @@ export class SoftOptInConsentSetter extends GuStack {
 			fileName: 'soft-opt-in-consent-setter.jar',
 			role: lambdaFunctionIAPRole,
 			functionName: `soft-opt-in-consent-setter-IAP-${this.stage}`,
-			runtime: Runtime.JAVA_11,
+			runtime: Runtime.JAVA_11, // keep on 11 for now due to http PATCH issue
 			handler: 'com.gu.soft_opt_in_consent_setter.HandlerIAP::handleRequest',
 			memorySize: 512,
 			timeout: Duration.seconds(300),
