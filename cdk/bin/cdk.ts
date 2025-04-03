@@ -62,10 +62,14 @@ export const prodProps: NewProductApiProps = {
 };
 
 new SoftOptInConsentSetter(app, 'soft-opt-in-consent-setter-CODE', {
+	mobileAccountIdSSMParam: 'mobileAccountId',
+	schedule: 'rate(365 days)',
 	stack: 'membership',
 	stage: 'CODE',
 });
 new SoftOptInConsentSetter(app, 'soft-opt-in-consent-setter-PROD', {
+	mobileAccountIdSSMParam: 'mobileAccountId',
+	schedule: 'rate(30 minutes)',
 	stack: 'membership',
 	stage: 'PROD',
 });
