@@ -32,19 +32,19 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
   "Resources": {
     "LambdaFunctionBF21E41F": {
       "DependsOn": [
-        "LambdaFunctionRoleDefaultPolicy5A080877",
-        "LambdaFunctionRole9F417943",
+        "LambdaFunctionServiceRoleDefaultPolicy32EEEE35",
+        "LambdaFunctionServiceRoleC555A460",
       ],
       "Properties": {
         "Code": {
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/TEST//",
+          "S3Key": "membership/TEST/soft-opt-in-consent-setter/soft-opt-in-consent-setter.jar",
         },
         "Environment": {
           "Variables": {
-            "APP": "",
+            "APP": "soft-opt-in-consent-setter",
             "STACK": "membership",
             "STAGE": "TEST",
             "Stage": "TEST",
@@ -56,7 +56,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
-            "LambdaFunctionRole9F417943",
+            "LambdaFunctionServiceRoleC555A460",
             "Arn",
           ],
         },
@@ -64,7 +64,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "",
+            "Value": "soft-opt-in-consent-setter",
           },
           {
             "Key": "gu:cdk:version",
@@ -97,11 +97,11 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/TEST//",
+          "S3Key": "membership/TEST/soft-opt-in-consent-setter/soft-opt-in-consent-setter.jar",
         },
         "Environment": {
           "Variables": {
-            "APP": "",
+            "APP": "soft-opt-in-consent-setter",
             "STACK": "membership",
             "STAGE": "TEST",
             "Stage": "TEST",
@@ -121,7 +121,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "",
+            "Value": "soft-opt-in-consent-setter",
           },
           {
             "Key": "gu:cdk:version",
@@ -244,7 +244,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/TEST//",
+                      "/membership/TEST/soft-opt-in-consent-setter/soft-opt-in-consent-setter.jar",
                     ],
                   ],
                 },
@@ -265,7 +265,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/TEST/membership/",
+                    ":parameter/TEST/membership/soft-opt-in-consent-setter",
                   ],
                 ],
               },
@@ -288,7 +288,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/TEST/membership//*",
+                    ":parameter/TEST/membership/soft-opt-in-consent-setter/*",
                   ],
                 ],
               },
@@ -456,6 +456,75 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
               "Resource": "arn:aws:s3::*:membership-dist/*",
               "Sid": "readDeployedArtefact",
             },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "LambdaFunctionRoleDefaultPolicy5A080877",
+        "Roles": [
+          {
+            "Ref": "LambdaFunctionRole9F417943",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "LambdaFunctionServiceRoleC555A460": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "soft-opt-in-consent-setter",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "LambdaFunctionServiceRoleDefaultPolicy32EEEE35": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
             {
               "Action": [
                 "s3:GetObject*",
@@ -491,7 +560,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/TEST//",
+                      "/membership/TEST/soft-opt-in-consent-setter/soft-opt-in-consent-setter.jar",
                     ],
                   ],
                 },
@@ -512,7 +581,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/TEST/membership/",
+                    ":parameter/TEST/membership/soft-opt-in-consent-setter",
                   ],
                 ],
               },
@@ -535,7 +604,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/TEST/membership//*",
+                    ":parameter/TEST/membership/soft-opt-in-consent-setter/*",
                   ],
                 ],
               },
@@ -543,10 +612,10 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "LambdaFunctionRoleDefaultPolicy5A080877",
+        "PolicyName": "LambdaFunctionServiceRoleDefaultPolicy32EEEE35",
         "Roles": [
           {
-            "Ref": "LambdaFunctionRole9F417943",
+            "Ref": "LambdaFunctionServiceRoleC555A460",
           },
         ],
       },
