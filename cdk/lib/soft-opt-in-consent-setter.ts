@@ -68,7 +68,7 @@ export class SoftOptInConsentSetter extends GuStack {
 
 		// IAM Roles
 		new Role(this, 'SoftOptInsQueueCrossAccountRole', {
-			roleName: `${this.stackName}-QueueCrossAccountRole`,
+			roleName: `${this.stackName}-QueueCrossAccountRole-CDK`,
 			assumedBy: new AccountPrincipal(mobileAccountId),
 			inlinePolicies: {
 				SQSAccess: new PolicyDocument({
@@ -89,6 +89,7 @@ export class SoftOptInConsentSetter extends GuStack {
 		});
 
 		const lambdaFunctionRole = new Role(this, 'LambdaFunctionRole', {
+			roleName: `${this.stackName}-LambdaFunctionRole-CDK`,
 			assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
 			managedPolicies: [
 				ManagedPolicy.fromAwsManagedPolicyName(
@@ -111,6 +112,7 @@ export class SoftOptInConsentSetter extends GuStack {
 		);
 
 		const lambdaFunctionIAPRole = new Role(this, 'LambdaFunctionIAPRole', {
+			roleName: `${this.stackName}-LambdaFunctioIAPnRole-CDK`,
 			assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
 			managedPolicies: [
 				ManagedPolicy.fromAwsManagedPolicyName(
@@ -184,7 +186,7 @@ export class SoftOptInConsentSetter extends GuStack {
 					description: 'Runs Soft Opt-In Consent Setter',
 				},
 			],
-			functionName: `soft-opt-in-consent-setter-${this.stage}`,
+			functionName: `soft-opt-in-consent-setter-${this.stage}-CDK`,
 			runtime: Runtime.JAVA_11,
 			handler: 'com.gu.soft_opt_in_consent_setter.Handler::handleRequest',
 			memorySize: 512,
@@ -199,7 +201,7 @@ export class SoftOptInConsentSetter extends GuStack {
 			app: 'soft-opt-in-consent-setter',
 			fileName: 'soft-opt-in-consent-setter.jar',
 			role: lambdaFunctionIAPRole,
-			functionName: `soft-opt-in-consent-setter-IAP-${this.stage}`,
+			functionName: `soft-opt-in-consent-setter-IAP-${this.stage}-CDK`,
 			runtime: Runtime.JAVA_11,
 			handler: 'com.gu.soft_opt_in_consent_setter.HandlerIAP::handleRequest',
 			memorySize: 512,
