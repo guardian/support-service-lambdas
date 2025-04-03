@@ -163,7 +163,11 @@ export class SoftOptInConsentSetter extends GuStack {
 					'PROD/Identity/SoftOptInConsentAPI-sJJo2s',
 					'CODE/MobilePurchasesAPI/User/GetSubscriptions-iCUzGN',
 					'PROD/MobilePurchasesAPI/User/GetSubscriptions-HZuC6H',
-				].map(resource => `arn:aws:secretsmanager:eu-west-1:${this.account}:secret:` + resource),
+				].map(
+					(resource) =>
+						`arn:aws:secretsmanager:eu-west-1:${this.account}:secret:` +
+						resource,
+				),
 			}),
 		);
 

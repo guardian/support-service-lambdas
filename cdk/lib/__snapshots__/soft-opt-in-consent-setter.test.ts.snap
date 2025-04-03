@@ -199,14 +199,102 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
               ],
               "Effect": "Allow",
               "Resource": [
-                "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl",
-                "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/ConnectedApp/TouchpointUpdate-lolLqP",
-                "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/SoftOptInConsentSetterAPIUser-KjHQBG",
-                "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/SoftOptInConsentSetterAPIUser-EonJb0",
-                "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Identity/SoftOptInConsentAPI-n7Elrb",
-                "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Identity/SoftOptInConsentAPI-sJJo2s",
-                "arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/MobilePurchasesAPI/User/GetSubscriptions-iCUzGN",
-                "arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/MobilePurchasesAPI/User/GetSubscriptions-HZuC6H",
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:PROD/Salesforce/ConnectedApp/TouchpointUpdate-lolLqP",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:CODE/Salesforce/User/SoftOptInConsentSetterAPIUser-KjHQBG",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:PROD/Salesforce/User/SoftOptInConsentSetterAPIUser-EonJb0",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:CODE/Identity/SoftOptInConsentAPI-n7Elrb",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:PROD/Identity/SoftOptInConsentAPI-sJJo2s",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:CODE/MobilePurchasesAPI/User/GetSubscriptions-iCUzGN",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:eu-west-1:",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:PROD/MobilePurchasesAPI/User/GetSubscriptions-HZuC6H",
+                    ],
+                  ],
+                },
               ],
             },
             {
