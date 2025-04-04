@@ -177,6 +177,7 @@ export class SoftOptInConsentSetter extends GuStack {
 		const lambdaFunction = new GuScheduledLambda(this, 'LambdaFunction', {
 			app: 'soft-opt-in-consent-setter',
 			fileName: 'soft-opt-in-consent-setter.jar',
+			role: lambdaFunctionRole,
 			monitoringConfiguration: {
 				noMonitoring: true,
 			},
