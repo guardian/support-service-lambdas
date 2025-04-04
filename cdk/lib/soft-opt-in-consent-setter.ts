@@ -66,6 +66,39 @@ export class SoftOptInConsentSetter extends GuStack {
 			},
 		});
 
+		// Shared Policies
+		const sharedPolicies: PolicyStatement[] = [
+			new PolicyStatement({
+				actions: ['cloudwatch:PutMetricData'],
+				resources: ['*'],
+			}),
+			new PolicyStatement({
+				sid: 'readDeployedArtefact',
+				actions: ['s3:GetObject'],
+				resources: ['arn:aws:s3::*:membership-dist/*'],
+			}),
+			new PolicyStatement({
+				actions: [
+					'secretsmanager:DescribeSecret',
+					'secretsmanager:GetSecretValue',
+				],
+				resources: [
+					'CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl',
+					'PROD/Salesforce/ConnectedApp/TouchpointUpdate-lolLqP',
+					'CODE/Salesforce/User/SoftOptInConsentSetterAPIUser-KjHQBG',
+					'PROD/Salesforce/User/SoftOptInConsentSetterAPIUser-EonJb0',
+					'CODE/Identity/SoftOptInConsentAPI-n7Elrb',
+					'PROD/Identity/SoftOptInConsentAPI-sJJo2s',
+					'CODE/MobilePurchasesAPI/User/GetSubscriptions-iCUzGN',
+					'PROD/MobilePurchasesAPI/User/GetSubscriptions-HZuC6H',
+				].map(
+					(resource) =>
+						`arn:aws:secretsmanager:eu-west-1:${this.account}:secret:` +
+						resource,
+				),
+			}),
+		];
+
 		// IAM Roles
 		new Role(this, 'SoftOptInsQueueCrossAccountRole', {
 			roleName: `membership-${this.stage}-soft-opt-in-consent-setter-QueueCrossAccountRole`,
@@ -97,19 +130,7 @@ export class SoftOptInConsentSetter extends GuStack {
 				),
 			],
 		});
-		lambdaFunctionRole.addToPolicy(
-			new PolicyStatement({
-				actions: ['cloudwatch:PutMetricData'],
-				resources: ['*'],
-			}),
-		);
-		lambdaFunctionRole.addToPolicy(
-			new PolicyStatement({
-				sid: 'readDeployedArtefact',
-				actions: ['s3:GetObject'],
-				resources: ['arn:aws:s3::*:membership-dist/*'],
-			}),
-		);
+		sharedPolicies.forEach((policy) => lambdaFunctionRole.addToPolicy(policy));
 
 		const lambdaFunctionIAPRole = new Role(this, 'LambdaFunctionIAPRole', {
 			roleName: `membership-${this.stage}-soft-opt-in-consent-setter-LambdaFunctionIAPRole`,
@@ -130,18 +151,6 @@ export class SoftOptInConsentSetter extends GuStack {
 		);
 		lambdaFunctionIAPRole.addToPolicy(
 			new PolicyStatement({
-				actions: ['cloudwatch:PutMetricData'],
-				resources: ['*'],
-			}),
-		);
-		lambdaFunctionIAPRole.addToPolicy(
-			new PolicyStatement({
-				actions: ['s3:GetObject'],
-				resources: ['arn:aws:s3::*:membership-dist/*'],
-			}),
-		);
-		lambdaFunctionIAPRole.addToPolicy(
-			new PolicyStatement({
 				actions: [
 					'sqs:DeleteMessage',
 					'sqs:GetQueueAttributes',
@@ -150,27 +159,8 @@ export class SoftOptInConsentSetter extends GuStack {
 				resources: [softOptInsQueue.queueArn],
 			}),
 		);
-		lambdaFunctionIAPRole.addToPolicy(
-			new PolicyStatement({
-				actions: [
-					'secretsmanager:DescribeSecret',
-					'secretsmanager:GetSecretValue',
-				],
-				resources: [
-					'CODE/Salesforce/ConnectedApp/AwsConnectorSandbox-jaCgRl',
-					'PROD/Salesforce/ConnectedApp/TouchpointUpdate-lolLqP',
-					'CODE/Salesforce/User/SoftOptInConsentSetterAPIUser-KjHQBG',
-					'PROD/Salesforce/User/SoftOptInConsentSetterAPIUser-EonJb0',
-					'CODE/Identity/SoftOptInConsentAPI-n7Elrb',
-					'PROD/Identity/SoftOptInConsentAPI-sJJo2s',
-					'CODE/MobilePurchasesAPI/User/GetSubscriptions-iCUzGN',
-					'PROD/MobilePurchasesAPI/User/GetSubscriptions-HZuC6H',
-				].map(
-					(resource) =>
-						`arn:aws:secretsmanager:eu-west-1:${this.account}:secret:` +
-						resource,
-				),
-			}),
+		sharedPolicies.forEach((policy) =>
+			lambdaFunctionIAPRole.addToPolicy(policy),
 		);
 
 		// Lambda Functions
