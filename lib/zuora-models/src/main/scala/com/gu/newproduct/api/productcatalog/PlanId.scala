@@ -34,8 +34,6 @@ object PlanId {
 
   case object VoucherSaturday extends PlanId("voucher_saturday") with VoucherPlanId
 
-  case object VoucherSunday extends PlanId("voucher_sunday") with VoucherPlanId
-
   case object VoucherWeekendPlus extends PlanId("voucher_weekend_plus") with VoucherPlanId
 
   case object VoucherEveryDayPlus extends PlanId("voucher_everyday_plus") with VoucherPlanId
@@ -51,8 +49,6 @@ object PlanId {
   case object HomeDeliverySixDay extends PlanId("home_delivery_sixday") with HomeDeliveryPlanId
 
   case object HomeDeliveryWeekend extends PlanId("home_delivery_weekend") with HomeDeliveryPlanId
-
-  case object HomeDeliverySunday extends PlanId("home_delivery_sunday") with HomeDeliveryPlanId
 
   case object HomeDeliveryEveryDayPlus extends PlanId("home_delivery_everyday_plus") with HomeDeliveryPlanId
 
@@ -106,8 +102,6 @@ object PlanId {
 
   case object DigitalVoucherSaturdayPlus extends PlanId("digital_voucher_saturday_plus") with DigitalVoucherPlanId
 
-  case object DigitalVoucherSunday extends PlanId("digital_voucher_sunday") with DigitalVoucherPlanId
-
   case object DigitalVoucherSundayPlus extends PlanId("digital_voucher_sunday_plus") with DigitalVoucherPlanId
 
   case object DigitalVoucherSixday extends PlanId("digital_voucher_sixday") with DigitalVoucherPlanId
@@ -127,7 +121,6 @@ object PlanId {
     VoucherSaturdayPlus,
     VoucherSixDay,
     VoucherSixDayPlus,
-    VoucherSunday,
     VoucherSundayPlus,
     VoucherWeekend,
     VoucherWeekendPlus,
@@ -150,7 +143,6 @@ object PlanId {
     HomeDeliverySaturdayPlus,
     HomeDeliverySixDay,
     HomeDeliverySixDayPlus,
-    HomeDeliverySunday,
     HomeDeliverySundayPlus,
     HomeDeliveryWeekend,
     HomeDeliveryWeekendPlus,
@@ -180,7 +172,6 @@ object PlanId {
     DigitalVoucherEverydayPlus,
     DigitalVoucherSaturday,
     DigitalVoucherSaturdayPlus,
-    DigitalVoucherSunday,
     DigitalVoucherSundayPlus,
     DigitalVoucherSixday,
     DigitalVoucherSixdayPlus,

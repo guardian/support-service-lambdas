@@ -210,7 +210,7 @@ class PaperEmailDataTest extends AnyFlatSpec with Matchers {
 
   it should "IncludesDigipack should be false for non plus plans " in {
 
-    val nonDigipackPlans = List(VoucherEveryDay, VoucherWeekend, VoucherSixDay, VoucherSaturday, VoucherSunday)
+    val nonDigipackPlans = List(VoucherEveryDay, VoucherWeekend, VoucherSixDay, VoucherSaturday)
 
     val allNonDigipackPlanFields: List[Map[String, String]] = fieldsForPlanIds(nonDigipackPlans)
 
