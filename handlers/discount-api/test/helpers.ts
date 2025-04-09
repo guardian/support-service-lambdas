@@ -3,9 +3,7 @@ import type {
 	ZuoraSubscription,
 	ZuoraSuccessResponse,
 } from '@modules/zuora/zuoraSchemas';
-import {
-	zuoraSuccessResponseSchema,
-} from '@modules/zuora/zuoraSchemas';
+import { zuoraSuccessResponseSchema } from '@modules/zuora/zuoraSchemas';
 import type { Dayjs } from 'dayjs';
 import { updateSubscriptionBody } from './fixtures/request-bodies/update-subscription-body';
 
