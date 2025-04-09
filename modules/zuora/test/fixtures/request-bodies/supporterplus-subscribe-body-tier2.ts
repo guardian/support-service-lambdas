@@ -1,6 +1,6 @@
 import { zuoraDateFormat } from '@modules/zuora/common';
 import type { Dayjs } from 'dayjs';
-import { catalog } from '../../../src/productToDiscountMapping';
+import { catalog } from '../../../../../handlers/discount-api/src/productToDiscountMapping';
 
 export const supporterPlusSubscribeBody = (subscriptionDate: Dayjs) => {
 	return {
