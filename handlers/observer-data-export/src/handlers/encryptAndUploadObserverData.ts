@@ -17,6 +17,7 @@ export const handler = async (event: SQSEvent) => {
 				process.env.UnifidaPublicRsaKeyFilePath;
 			const observerNewspaperSubscribersFolder =
 				process.env.ObserverNewspaperSubscribersFolder;
+			const md5FingerprintsBucketName = process.env.Md5FingerprintsBucketName;
 
 			const utcTimestamp = new Date().toISOString();
 			const todayDate = new Date().toISOString().split('T')[0];
@@ -93,6 +94,16 @@ export const handler = async (event: SQSEvent) => {
 							null,
 							2,
 						),
+					}),
+				),
+			);
+
+			await Promise.all(
+				uploadFolders.map((folder) =>
+					uploadFileToS3({
+						bucketName: md5FingerprintsBucketName,
+						filePath: `${folder}/data.md5`,
+						content: md5Hash,
 					}),
 				),
 			);

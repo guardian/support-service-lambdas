@@ -10,6 +10,7 @@ The architecture involves multiple AWS resources, including:
 
 **AWS S3 Buckets**: For data storage, including the storage of encrypted files and manifests.
 **AWS AppFlow**: For extracting data from the Observer Subscriber Data custom object in Salesforce into a CSV file
+
 - **AWS Lambda**: For encrypting the Salesforce data and uploading it to the shared bucket.
 - **AWS SQS**: For handling events triggered when new data is uploaded to the Salesforce data transfer bucket.
 - **CloudWatch Alarms**: For monitoring and alerting in case of failures.
@@ -70,6 +71,31 @@ The Salesforce data extraction process is scheduled to run every **Tuesday at 7 
 - **DataTech IAM User**:
   - Has permissions to write to the **Observer_newsletter_eligible/** folder for the Observer data in subscriptions that include other products, not just Observer-only data.
 
-## Conclusion
+## MD5 Fingerprint Backup Bucket
 
-The **ObserverDataExport** project ensures secure handling and transfer of Observer subscriber data, providing Unifida with the tools to decrypt and verify the data while maintaining full audit and security controls on the AWS infrastructure.
+In addition to uploading encrypted data to the shared bucket (UnifidaSharedBucketName), the system also generates and stores a `data.md5` file for each export. This file contains the MD5 hex fingerprint of the unencrypted CSV file before encryption.
+
+The MD5 fingerprint is stored in a separate S3 bucket:
+
+- `observer-data-export-md5-fingerprints-code`
+- `observer-data-export-md5-fingerprints-prod`
+
+This bucket mirrors the folder structure of the main shared bucket. For example:
+
+```
+observer-data-export-prod/
+└── Observer_newspaper_subscribers/
+    ├── 2025-04-14/data.csv.enc, ...
+    └── latest/data.csv.enc, ...
+
+observer-data-export-md5-fingerprints-prod/
+└── Observer_newspaper_subscribers/
+    ├── 2025-04-14/data.md5
+    └── latest/data.md5
+```
+
+### Purpose
+
+The `data.md5` file serves as a long-term, immutable reference to verify what data was shared with Unifida. Unlike the shared bucket (which enforces a 28-day expiration policy), the MD5 fingerprint bucket has no expiration policy, meaning these fingerprints are preserved indefinitely.
+
+If Unifida later claims that a particular data export was not shared with them or was altered, we can use the MD5 fingerprint to confirm exactly what data was sent. This mechanism ensures a reliable audit trail and strengthens data integrity assurance.

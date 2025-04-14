@@ -37,6 +37,10 @@ export class ObserverDataExport extends GuStack {
 			lifecycleRules: [{ expiration: Duration.days(28) }],
 		});
 
+		const md5FingerprintsBucket = new Bucket(this, 'Md5FingerprintsBucket', {
+			bucketName: `${app}-md5-fingerprints-${this.stage.toLowerCase()}`,
+		});
+
 		const unifidaUser = new User(this, 'UnifidaUser', {
 			userName: `unifida-${this.stage.toLowerCase()}`,
 		});
@@ -140,12 +144,6 @@ export class ObserverDataExport extends GuStack {
 			fileName: `${app}.zip`,
 			runtime: nodeVersion,
 			timeout: Duration.seconds(300),
-			environment: {
-				Stage: this.stage,
-				UnifidaSharedBucketName: sharedBucket.bucketName,
-				UnifidaPublicRsaKeyFilePath: unifidaPublicRsaKeyFilePath,
-				ObserverNewspaperSubscribersFolder: observerNewspaperSubscribersFolder,
-			},
 		};
 
 		const deadLetterQueue = new Queue(this, `dead-letters-${app}-queue`, {
@@ -167,6 +165,14 @@ export class ObserverDataExport extends GuStack {
 			'EncryptAndUploadObserverDataLambda',
 			{
 				...lambdaDefaultConfig,
+				environment: {
+					Stage: this.stage,
+					UnifidaSharedBucketName: sharedBucket.bucketName,
+					UnifidaPublicRsaKeyFilePath: unifidaPublicRsaKeyFilePath,
+					ObserverNewspaperSubscribersFolder:
+						observerNewspaperSubscribersFolder,
+					Md5FingerprintsBucketName: md5FingerprintsBucket.bucketName,
+				},
 				handler: 'encryptAndUploadObserverData.handler',
 				functionName: `encrypt-and-upload-observer-data-${this.stage}`,
 				initialPolicy: [
@@ -182,6 +188,10 @@ export class ObserverDataExport extends GuStack {
 						resources: [
 							`${sharedBucket.bucketArn}/${observerNewspaperSubscribersFolder}/*`,
 						],
+					}),
+					new PolicyStatement({
+						actions: ['s3:PutObject'],
+						resources: [`${md5FingerprintsBucket.bucketArn}/*`],
 					}),
 				],
 				events: [new SqsEventSource(queue)],

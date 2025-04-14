@@ -373,6 +373,9 @@ def submit_response(event: dict, context, response_status: str, error_message: s
         "Environment": {
           "Variables": {
             "APP": "observer-data-export",
+            "Md5FingerprintsBucketName": {
+              "Ref": "Md5FingerprintsBucketBFF631AE",
+            },
             "ObserverNewspaperSubscribersFolder": "Observer_newspaper_subscribers",
             "STACK": "support",
             "STAGE": "CODE",
@@ -529,6 +532,24 @@ def submit_response(event: dict, context, response_status: str, error_message: s
               },
             },
             {
+              "Action": "s3:PutObject",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "Md5FingerprintsBucketBFF631AE",
+                        "Arn",
+                      ],
+                    },
+                    "/*",
+                  ],
+                ],
+              },
+            },
+            {
               "Action": [
                 "sqs:ReceiveMessage",
                 "sqs:ChangeMessageVisibility",
@@ -653,6 +674,32 @@ def submit_response(event: dict, context, response_status: str, error_message: s
         },
       },
       "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "Md5FingerprintsBucketBFF631AE": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "BucketName": "observer-data-export-md5-fingerprints-code",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
     },
     "SalesforceObserverDataTransferBucketC46E06F4": {
       "DeletionPolicy": "Retain",
@@ -2023,6 +2070,9 @@ def submit_response(event: dict, context, response_status: str, error_message: s
         "Environment": {
           "Variables": {
             "APP": "observer-data-export",
+            "Md5FingerprintsBucketName": {
+              "Ref": "Md5FingerprintsBucketBFF631AE",
+            },
             "ObserverNewspaperSubscribersFolder": "Observer_newspaper_subscribers",
             "STACK": "support",
             "STAGE": "PROD",
@@ -2179,6 +2229,24 @@ def submit_response(event: dict, context, response_status: str, error_message: s
               },
             },
             {
+              "Action": "s3:PutObject",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "Md5FingerprintsBucketBFF631AE",
+                        "Arn",
+                      ],
+                    },
+                    "/*",
+                  ],
+                ],
+              },
+            },
+            {
               "Action": [
                 "sqs:ReceiveMessage",
                 "sqs:ChangeMessageVisibility",
@@ -2303,6 +2371,32 @@ def submit_response(event: dict, context, response_status: str, error_message: s
         },
       },
       "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "Md5FingerprintsBucketBFF631AE": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "BucketName": "observer-data-export-md5-fingerprints-prod",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
     },
     "SalesforceObserverDataTransferBucketC46E06F4": {
       "DeletionPolicy": "Retain",
