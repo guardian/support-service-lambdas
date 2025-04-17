@@ -17,7 +17,6 @@ class SubscriptionUpdateTest extends AnyFlatSpec with Matchers with DiffShouldMa
       creditProduct = CreditProduct(
         productRatePlanId = "prp1",
         productRatePlanChargeId = "prpc3",
-        productRatePlanChargeName = "",
       ),
       subscription = Fixtures.subscriptionFromJson("GWTermEndsBeforeInvoiceDate.json"),
       account = Fixtures.mkAccount(),

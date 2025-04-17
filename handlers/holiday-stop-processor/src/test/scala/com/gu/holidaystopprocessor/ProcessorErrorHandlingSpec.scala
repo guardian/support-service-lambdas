@@ -74,7 +74,7 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
       request: HolidayStopRequestsDetail,
   ) =
     SubscriptionUpdate(
-      creditProduct(subscription),
+      creditProduct.forSubscription(subscription),
       subscription,
       account,
       request.Stopped_Publication_Date__c,

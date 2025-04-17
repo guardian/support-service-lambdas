@@ -15,7 +15,9 @@ import scala.collection.parallel.ForkJoinTaskSupport
 
 object Processor {
 
-  type CreditProductForSubscription = Subscription => CreditProduct
+  trait CreditProductForSubscription {
+    def forSubscription(subscription: Subscription): CreditProduct
+  }
 
   private val logger = LoggerFactory.getLogger(getClass)
 
