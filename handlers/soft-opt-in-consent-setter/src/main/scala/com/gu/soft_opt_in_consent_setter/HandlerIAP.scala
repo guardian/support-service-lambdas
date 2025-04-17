@@ -38,6 +38,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       eventType: EventType,
       productName: String,
       previousProductName: Option[String],
+      similarGuardianProductsConsent: Option[Boolean] = None
   )
 
   private def handleError[T <: Exception](exception: T) = {
@@ -145,7 +146,17 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
   ): Either[SoftOptInError, Unit] =
     for {
       consents <- consentsCalculator.getSoftOptInsByProduct(message.productName)
-      consentsBody = consentsCalculator.buildConsentsBody(consents, state = true)
+
+      finalConsents = message.similarGuardianProductsConsent match {
+        case Some(true) =>
+          consents + "similar_guardian_products"
+        case Some(false) =>
+          consents - "similar_guardian_products"
+        case None =>
+          consents
+      }
+
+      consentsBody = consentsCalculator.buildConsentsBody(finalConsents, state = true)
       _ <- {
         logger.info(
           s"(acquisition) Sending consents request for identityId ${message.identityId} with payload: $consentsBody",
