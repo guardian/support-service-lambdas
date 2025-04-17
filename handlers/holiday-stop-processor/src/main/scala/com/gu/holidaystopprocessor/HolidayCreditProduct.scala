@@ -11,73 +11,91 @@ import com.gu.zuora.subscription.{CreditProduct, RatePlan}
   */
 object HolidayCreditProduct {
 
-  final val ProductRatePlanChargeName: String = "Holiday Credit"
+  private[holidaystopprocessor] case class HolidayCreditProductForStage(
+      GuardianWeekly: CreditProduct,
+      Voucher: CreditProduct,
+      VoucherObserverOnly: CreditProduct,
+      DigitalVoucher: CreditProduct,
+      DigitalVoucherObserverOnly: CreditProduct,
+      HomeDelivery: CreditProduct,
+      HomeDeliveryObserverOnly: CreditProduct,
+      NationalDelivery: CreditProduct,
+  )
 
-  object Prod {
-
-    val GuardianWeekly: CreditProduct = CreditProduct(
+  private[holidaystopprocessor] val Prod: HolidayCreditProductForStage = HolidayCreditProductForStage(
+    GuardianWeekly = CreditProduct(
       productRatePlanId = "2c92a0076ae9189c016b080c930a6186",
       productRatePlanChargeId = "2c92a0086ae928d7016b080f638477a6",
-      ProductRatePlanChargeName,
-    )
-
-    val Voucher: CreditProduct = CreditProduct(
+    ),
+    Voucher = CreditProduct(
       productRatePlanId = "2c92a0117468816901748bdb3a8c1ac4",
       productRatePlanChargeId = "2c92a0117468816901748bdb3aab1ac6",
-      ProductRatePlanChargeName,
-    )
-
-    val DigitalVoucher: CreditProduct = CreditProduct(
+    ),
+    VoucherObserverOnly = CreditProduct(
+      productRatePlanId = "8a12994695dbb387019610e3b64b4985",
+      productRatePlanChargeId = "8a12994695dbb387019610e3b675498b",
+    ),
+    DigitalVoucher = CreditProduct(
       productRatePlanId = "2c92a0fe750b35d001750d4522f43817",
       productRatePlanChargeId = "2c92a0fe750b35d001750d4523103819",
-      ProductRatePlanChargeName,
-    )
-
-    val HomeDelivery: CreditProduct = CreditProduct(
+    ),
+    DigitalVoucherObserverOnly = CreditProduct(
+      productRatePlanId = "8a12817595db977f019610de92e23fde",
+      productRatePlanChargeId = "8a12817595db977f019610de93323fe9",
+    ),
+    HomeDelivery = CreditProduct(
       productRatePlanId = "2c92a00f7468817d01748bd88f0d1d6c",
       productRatePlanChargeId = "2c92a00f7468817d01748bd88f2e1d6e",
-      ProductRatePlanChargeName,
-    )
-
-    val NationalDelivery: CreditProduct = CreditProduct(
+    ),
+    HomeDeliveryObserverOnly = CreditProduct(
+      productRatePlanId = "8a12994695dbb387019610e2556647ac",
+      productRatePlanChargeId = "8a12994695dbb387019610e2559747ae",
+    ),
+    NationalDelivery = CreditProduct(
       productRatePlanId = "8a128e208aff0721018b003d0dfe59d9",
       productRatePlanChargeId = "8a128e208aff0721018b003d0e5959e0",
-      ProductRatePlanChargeName,
-    )
-  }
+    ),
+  )
 
-  object Code {
-
-    val GuardianWeekly: CreditProduct = CreditProduct(
+  private[holidaystopprocessor] val Code: HolidayCreditProductForStage = HolidayCreditProductForStage(
+    GuardianWeekly = CreditProduct(
       productRatePlanId = "2c92c0f96b03800b016b081fc04f1ba2",
       productRatePlanChargeId = "2c92c0f96b03800b016b081fc0f41bb4",
-      ProductRatePlanChargeName,
-    )
-
-    val Voucher: CreditProduct = CreditProduct(
+    ),
+    Voucher = CreditProduct(
       productRatePlanId = "2c92c0f8736c34b901737160f7df3a97",
       productRatePlanChargeId = "2c92c0f8736c34b901737160f7f63a99",
-      ProductRatePlanChargeName,
-    )
-
-    val DigitalVoucher: CreditProduct = CreditProduct(
+    ),
+    VoucherObserverOnly = CreditProduct(
+      productRatePlanId = "71a1383e252961a05cf63e2f8a7c0059",
+      productRatePlanChargeId = "71a1383e252961a05cf63e2f8ac5005a",
+    ),
+    DigitalVoucher = CreditProduct(
       productRatePlanId = "2c92c0f9750689ea01750d7cabf44c38",
       productRatePlanChargeId = "2c92c0f9750689ea01750d7cac184c3b",
-      ProductRatePlanChargeName,
-    )
-
-    val HomeDelivery: CreditProduct = CreditProduct(
+    ),
+    DigitalVoucherObserverOnly = CreditProduct(
+      productRatePlanId = "71a1166282d961a192563e2dedc80106",
+      productRatePlanChargeId = "71a1166282d961a192563e2dee4b0107",
+    ),
+    HomeDelivery = CreditProduct(
       productRatePlanId = "2c92c0f8736c34cb01737160e5e469de",
       productRatePlanChargeId = "2c92c0f8736c34cb01737160e5fa69e0",
-      ProductRatePlanChargeName,
-    )
-
-    val NationalDelivery: CreditProduct = CreditProduct(
+    ),
+    HomeDeliveryObserverOnly = CreditProduct(
+      productRatePlanId = "71a1166280e961a192563e2f5311019b",
+      productRatePlanChargeId = "71a1166280e961a192563e2f533b019c",
+    ),
+    NationalDelivery = CreditProduct(
       productRatePlanId = "8ad08f068aff62a4018affd6efc7743c",
       productRatePlanChargeId = "8ad08f068aff62a4018affd6eff97440",
-      ProductRatePlanChargeName,
-    )
-  }
+    ),
+  )
+
+  private val stages: Map[Stage, HolidayCreditProductForStage] = Map(
+    Stage.Code -> Code,
+    Stage.Prod -> Prod,
+  )
 
   /** <p>Determines which CreditProduct is applicable for the given subscription in the given deployment stage.</p>
     *
@@ -95,27 +113,27 @@ object HolidayCreditProduct {
     */
   def forStage(stage: Stage): CreditProductForSubscription = {
 
-    def creditProduct(stage: Stage)(plan: RatePlan): Option[CreditProduct] = (stage, plan.productName) match {
-      case (Stage.Prod, s"Guardian Weekly$_") => Some(HolidayCreditProduct.Prod.GuardianWeekly)
-      // We need to match 'Tier Three' here because that is what the product is called in Zuora,
-      // however the delivery product we are doing a credit for is Guardian Weekly
-      case (Stage.Prod, "Tier Three") => Some(HolidayCreditProduct.Prod.GuardianWeekly)
-      case (Stage.Prod, "Newspaper Delivery") => Some(HolidayCreditProduct.Prod.HomeDelivery)
-      case (Stage.Prod, "Newspaper Voucher") => Some(HolidayCreditProduct.Prod.Voucher)
-      case (Stage.Prod, "Newspaper Digital Voucher") => Some(HolidayCreditProduct.Prod.DigitalVoucher)
-      case (Stage.Prod, "Newspaper - National Delivery") => Some(HolidayCreditProduct.Prod.NationalDelivery)
-      case (Stage.Code, s"Guardian Weekly$_") => Some(HolidayCreditProduct.Code.GuardianWeekly)
-      case (Stage.Code, "Tier Three") => Some(HolidayCreditProduct.Code.GuardianWeekly)
-      case (Stage.Code, "Newspaper Delivery") => Some(HolidayCreditProduct.Code.HomeDelivery)
-      case (Stage.Code, "Newspaper Voucher") => Some(HolidayCreditProduct.Code.Voucher)
-      case (Stage.Code, "Newspaper Digital Voucher") => Some(HolidayCreditProduct.Code.DigitalVoucher)
-      case (Stage.Code, "Newspaper - National Delivery") => Some(HolidayCreditProduct.Code.NationalDelivery)
-      case _ => None
+    val creditProductForStage = stages.getOrElse(stage, throw new RuntimeException(s"stage $stage does not exist"))
+
+    def creditProduct: PartialFunction[RatePlan, CreditProduct] = { plan =>
+      (plan.productName, plan.ratePlanName) match {
+        case (s"Guardian Weekly$_", _) => creditProductForStage.GuardianWeekly
+        // We need to match 'Tier Three' here because that is what the product is called in Zuora,
+        // however the delivery product we are doing a credit for is Guardian Weekly
+        case ("Tier Three", _) => creditProductForStage.GuardianWeekly
+        case ("Newspaper Delivery", "Sunday") => creditProductForStage.HomeDeliveryObserverOnly
+        case ("Newspaper Delivery", _) => creditProductForStage.HomeDelivery
+        case ("Newspaper Voucher", "Sunday") => creditProductForStage.VoucherObserverOnly
+        case ("Newspaper Voucher", _) => creditProductForStage.Voucher
+        case ("Newspaper Digital Voucher", "Sunday") => creditProductForStage.DigitalVoucherObserverOnly
+        case ("Newspaper Digital Voucher", _) => creditProductForStage.DigitalVoucher
+        case ("Newspaper - National Delivery", _) => creditProductForStage.NationalDelivery
+      }
     }
 
     subscription =>
       subscription.ratePlans
-        .flatMap(creditProduct(stage))
+        .flatMap(creditProduct.lift)
         .headOption
         .getOrElse(
           throw new IllegalArgumentException(
