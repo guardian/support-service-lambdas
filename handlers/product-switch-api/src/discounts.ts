@@ -1,5 +1,11 @@
 import type { BillingPeriod } from '@modules/billingPeriod';
 import type { Stage } from '@modules/stage';
+import {
+	billingPreviewToSimpleInvoiceItems,
+	getBillingPreview,
+} from '@modules/zuora/billingPreview';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import dayjs from 'dayjs';
 
 export type Discount = {
 	// the following fields match the charge in the zuora catalog
@@ -29,24 +35,50 @@ const annualContribHalfPriceSupporterPlusForOneYear = (
 	discountPercentage: 50,
 });
 
-export const getDiscount = (
+export const getDiscount = async (
 	clientWantsADiscount: boolean,
-	contributionAmount: number,
+	oldContributionAmount: number,
 	supporterPlusPrice: number,
 	billingPeriod: BillingPeriod,
 	subscriptionStatus: string,
+	accountNumber: string,
 	invoiceBalance: number,
 	stage: Stage,
-): Discount | undefined => {
-	const isEligibleForDiscount =
-		clientWantsADiscount &&
-		contributionAmount <= supporterPlusPrice &&
-		billingPeriod === 'Annual' &&
-		subscriptionStatus === 'Active' &&
-		invoiceBalance === 0;
-	if (isEligibleForDiscount) {
-		console.log('Subscription is eligible for discount');
-		return annualContribHalfPriceSupporterPlusForOneYear(stage);
+	zuoraClient: ZuoraClient,
+): Promise<Discount | undefined> => {
+	const discuntDetails = annualContribHalfPriceSupporterPlusForOneYear(stage);
+	const discountedPrice =
+		supporterPlusPrice * (discuntDetails.discountPercentage / 100);
+
+	const subIsActive = subscriptionStatus === 'Active';
+
+	if (subIsActive) {
+		const getBillingPreviewResponse = await getBillingPreview(
+			zuoraClient,
+			dayjs().add(13, 'months'),
+			accountNumber,
+		);
+
+		const nextInvoiceItems = billingPreviewToSimpleInvoiceItems(
+			getBillingPreviewResponse,
+		);
+		const hasUpcomingDiscount = nextInvoiceItems.some(
+			(invoiceItem) => invoiceItem.amount < 0,
+		);
+
+		const isEligibleForDiscount =
+			clientWantsADiscount &&
+			oldContributionAmount <= discountedPrice &&
+			billingPeriod === 'Annual' &&
+			invoiceBalance === 0 &&
+			!hasUpcomingDiscount;
+
+		if (isEligibleForDiscount) {
+			console.log('Subscription is eligible for discount');
+			return discuntDetails;
+		}
+		console.log('Subscription is not eligible for discount');
+		return;
 	}
 	console.log('Subscription is not eligible for discount');
 	return;

@@ -6,6 +6,7 @@ import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type {
 	RatePlan,
 	ZuoraAccount,
@@ -127,15 +128,16 @@ const getCurrency = (contributionRatePlan: RatePlan): Currency => {
 };
 
 // Gets a subscription from Zuora and checks that it is owned by currently logged-in user
-export const getSwitchInformationWithOwnerCheck = (
+export const getSwitchInformationWithOwnerCheck = async (
 	stage: Stage,
 	input: ProductSwitchRequestBody,
 	subscription: ZuoraSubscription,
 	account: ZuoraAccount,
 	productCatalog: ProductCatalog,
 	identityIdFromRequest: string | undefined,
-	today: Dayjs = dayjs(),
-): SwitchInformation => {
+	zuroaClient: ZuoraClient,
+    today: Dayjs = dayjs(),
+): Promise<SwitchInformation> => {
 	console.log(
 		`Checking subscription ${subscription.subscriptionNumber} is owned by the currently logged in user`,
 	);
@@ -191,14 +193,16 @@ export const getSwitchInformationWithOwnerCheck = (
 	const startOfToday = today.startOf('day');
 	const startNewTerm = termStartDate.isBefore(startOfToday);
 
-	const maybeDiscount = getDiscount(
+	const maybeDiscount = await getDiscount(
 		!!input.applyDiscountIfAvailable,
 		input.price,
 		catalogInformation.supporterPlus.price,
 		billingPeriod,
 		subscription.status,
+		subscription.accountNumber,
 		account.metrics.totalInvoiceBalance,
 		stage,
+		zuroaClient,
 	);
 
 	return {
