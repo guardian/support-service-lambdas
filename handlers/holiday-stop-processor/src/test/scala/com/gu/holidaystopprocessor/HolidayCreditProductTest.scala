@@ -25,7 +25,7 @@ class HolidayCreditProductTest extends AnyFlatSpec with Matchers {
     HolidayCreditProduct.forStage(Prod).forSubscription(subscription) shouldBe HolidayCreditProduct.Prod.HomeDelivery
   }
 
-  it should "give correct credit product for a Voucher subscription" in {
+  it should "give correct credit product for an observer only / Voucher subscription" in {
     val subscription = Fixtures.subscriptionFromJson("SundayVoucherSubscription.json")
     val actualCode = HolidayCreditProduct.forStage(Code).forSubscription(subscription)
     actualCode shouldBe HolidayCreditProduct.Code.VoucherObserverOnly
