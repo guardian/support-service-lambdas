@@ -2,7 +2,10 @@ import type { Dayjs } from 'dayjs';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import { catalog } from '../../../../../handlers/discount-api/src/productToDiscountMapping';
 
-export const supporterPlusSubscribeBody = (subscriptionDate: Dayjs) => {
+export const contributionSubscribeBody = (
+	subscriptionDate: Dayjs,
+	price?: number,
+) => {
 	return {
 		subscribes: [
 			{
@@ -24,7 +27,7 @@ export const supporterPlusSubscribeBody = (subscriptionDate: Dayjs) => {
 				BillToContact: {
 					FirstName: 'Test',
 					LastName: 'User',
-					WorkEmail: 'test.user@thegulocal.com',
+					WorkEmail: 'test.user+zuora-contrib-it-creation@thegulocal.com',
 					Country: 'GB',
 				},
 				PaymentMethod: {
@@ -42,16 +45,22 @@ export const supporterPlusSubscribeBody = (subscriptionDate: Dayjs) => {
 					RatePlanData: [
 						{
 							RatePlan: {
-								ProductRatePlanId: catalog.CODE.supporterPlus.Month,
+								ProductRatePlanId: catalog.CODE.recurringContribution.Annual,
 							},
+							RatePlanChargeData: [
+								{
+									RatePlanCharge: {
+										Price: price ?? 100,
+										ProductRatePlanChargeId: '2c92c0f85e2d19af015e3896e84d092e',
+									},
+								},
+							],
 							SubscriptionProductFeatureList: [],
 						},
 					],
 					Subscription: {
 						ContractEffectiveDate: zuoraDateFormat(subscriptionDate),
-						ContractAcceptanceDate: zuoraDateFormat(
-							subscriptionDate.add(16, 'day'),
-						),
+						ContractAcceptanceDate: zuoraDateFormat(subscriptionDate),
 						TermStartDate: zuoraDateFormat(subscriptionDate),
 						AutoRenew: true,
 						InitialTermPeriodType: 'Month',

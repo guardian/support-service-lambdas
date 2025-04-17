@@ -5,6 +5,7 @@ import {
 	type ZuoraSubscribeResponse,
 	zuoraSubscribeResponseSchema,
 } from '@modules/zuora/zuoraSchemas';
+import { contributionSubscribeBody } from '../fixtures/request-bodies/contribution-subscribe-body';
 import { digiSubSubscribeBody } from '../fixtures/request-bodies/digitalSub-subscribe-body-old-price';
 import { supporterPlusSubscribeBody } from '../fixtures/request-bodies/supporterplus-subscribe-body-tier2';
 
@@ -30,6 +31,20 @@ export const createSupporterPlusSubscription = async (
 		supporterPlusSubscribeBody(dayjs()),
 	);
 
+	return getIfDefined(
+		subscribeResponse[0]?.SubscriptionNumber,
+		'SubscriptionNumber was undefined in response from Zuora',
+	);
+};
+
+export const createContribution = async (
+	zuoraClient: ZuoraClient,
+	price?: number,
+): Promise<string> => {
+	const subscribeResponse = await subscribe(
+		zuoraClient,
+		contributionSubscribeBody(dayjs(), price),
+	);
 	return getIfDefined(
 		subscribeResponse[0]?.SubscriptionNumber,
 		'SubscriptionNumber was undefined in response from Zuora',
