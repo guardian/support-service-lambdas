@@ -4,6 +4,7 @@
  * @group integration
  */
 import console from 'console';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import { getAccount } from '@modules/zuora/getAccount';
@@ -138,9 +139,14 @@ describe('product-switching behaviour', () => {
 
 			const switchResponse = await doSwitch(zuoraClient, switchInformation);
 
+			const invoiceId = getIfDefined(
+				switchResponse.invoiceIds?.[0],
+				'invoice id was undefined in response from Zuora',
+			);
+
 			const response = await adjustNonCollectedInvoice(
 				zuoraClient,
-				switchResponse.invoiceIds?.[0] ?? '',
+				invoiceId,
 				0.1,
 				'8ad08e1a858672180185880566606fad',
 			);
