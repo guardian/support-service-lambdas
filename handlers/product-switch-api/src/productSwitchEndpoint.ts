@@ -27,13 +27,14 @@ export const contributionToSupporterPlusEndpoint = async (
 
 	const account = await getAccount(zuoraClient, subscription.accountNumber);
 
-	const switchInformation = getSwitchInformationWithOwnerCheck(
+	const switchInformation = await getSwitchInformationWithOwnerCheck(
 		stage,
 		input,
 		subscription,
 		account,
 		productCatalog,
 		identityId,
+		zuoraClient,
 	);
 
 	const response = input.preview
