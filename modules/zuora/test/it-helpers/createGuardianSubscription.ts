@@ -37,13 +37,25 @@ export const createSupporterPlusSubscription = async (
 	);
 };
 
+export type ContributionTestBillingPeriod = 'Month' | 'Annual';
+export type ContributionTestBillingCountry =
+	| 'United Kingdom'
+	| 'Germany'
+	| 'United States'; // https://knowledgecenter.zuora.com/Quick_References/Country%2C_State%2C_and_Province_Codes/A_Manage_countries_and_regions#View_countries_or_regions (countries are defined in Zuora config)
+export interface ContributionTestAdditionalOptions {
+	billingPeriod?: ContributionTestBillingPeriod;
+	price?: number;
+	billingCountry?: 'United Kingdom' | 'Germany' | 'United States'; // https://knowledgecenter.zuora.com/Quick_References/Country%2C_State%2C_and_Province_Codes/A_Manage_countries_and_regions#View_countries_or_regions (countries are defined in Zuora config)
+    paymentMethod?: 'directDebit' | 'visaCard';
+}
+
 export const createContribution = async (
 	zuoraClient: ZuoraClient,
-	price?: number,
+	additionOptions?: ContributionTestAdditionalOptions,
 ): Promise<string> => {
 	const subscribeResponse = await subscribe(
 		zuoraClient,
-		contributionSubscribeBody(dayjs(), price),
+		contributionSubscribeBody(dayjs(), additionOptions),
 	);
 	return getIfDefined(
 		subscribeResponse[0]?.SubscriptionNumber,
@@ -89,17 +101,29 @@ async function subscribe(
 					InitialTermPeriodType: string;
 				};
 			};
-			PaymentMethod: {
-				BankTransferAccountName: string;
-				Type: string;
-				BankTransferAccountNumber: string;
-				FirstName: string;
-				PaymentGateway: string;
-				BankTransferType: string;
-				Country: string;
-				BankCode: string;
-				LastName: string;
-			};
+			PaymentMethod:
+				| {
+						BankTransferAccountName: string;
+						Type: string;
+						BankTransferAccountNumber: string;
+						FirstName: string;
+						PaymentGateway: string;
+						BankTransferType: string;
+						Country: string;
+						BankCode: string;
+						LastName: string;
+				  }
+				| {
+						TokenId: string;
+						SecondTokenId: string;
+						CreditCardNumber: string;
+						CreditCardCountry: string;
+						CreditCardExpirationMonth: number;
+						CreditCardExpirationYear: number;
+						CreditCardType: string;
+						Type: string;
+						PaymentGateway: string;
+				  };
 			BillToContact: {
 				FirstName: string;
 				Country: string;

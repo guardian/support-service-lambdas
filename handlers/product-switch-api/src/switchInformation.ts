@@ -136,7 +136,7 @@ export const getSwitchInformationWithOwnerCheck = async (
 	productCatalog: ProductCatalog,
 	identityIdFromRequest: string | undefined,
 	zuroaClient: ZuoraClient,
-    today: Dayjs = dayjs(),
+	today: Dayjs = dayjs(),
 ): Promise<SwitchInformation> => {
 	console.log(
 		`Checking subscription ${subscription.subscriptionNumber} is owned by the currently logged in user`,

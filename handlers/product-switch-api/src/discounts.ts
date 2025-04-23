@@ -77,9 +77,9 @@ export const getDiscount = async (
 			console.log('Subscription is eligible for discount');
 			return discuntDetails;
 		}
-		console.log('Subscription is not eligible for discount');
+		console.log('Subscription is not eligible for discount - sub is Active');
 		return;
 	}
-	console.log('Subscription is not eligible for discount');
+	console.log('Subscription is not eligible for discount - sub is NOT active');
 	return;
 };

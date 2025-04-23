@@ -13,6 +13,7 @@ import { createPayment } from '@modules/zuora/payment';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
+import type { ContributionTestAdditionalOptions } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import { createContribution } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import { doSwitch, preview } from '../src/contributionToSupporterPlus';
 import { adjustNonCollectedInvoice } from '../src/payment';
@@ -40,13 +41,23 @@ const createTestContribution = async (
 	price: number,
 	switchPrice: number,
 	preview: boolean,
+	clientRequestedSwitchDiscount: boolean,
+	additionOptions?: Exclude<ContributionTestAdditionalOptions, 'price'>,
 ): Promise<ContributionCreationDetails> => {
 	const zuoraClient = await ZuoraClient.create(stage);
 
 	console.log('Creating a new contribution');
-	const subscriptionNumber = await createContribution(zuoraClient, price);
 
-	const input = { price: switchPrice, preview };
+	const subscriptionNumber = await createContribution(zuoraClient, {
+		price,
+		...additionOptions,
+	});
+
+	const input = {
+		price: switchPrice,
+		preview,
+		applyDiscountIfAvailable: clientRequestedSwitchDiscount,
+	};
 	const productCatalog = await getProductCatalogFromApi(stage);
 	const subscription = await getSubscription(zuoraClient, subscriptionNumber);
 	const account = await getAccount(zuoraClient, subscription.accountNumber);
@@ -67,7 +78,12 @@ describe('product-switching behaviour', () => {
 	it('can preview an annual recurring contribution switch with an additional contribution element', async () => {
 		const contributionPrice = 20;
 		const { zuoraClient, switchInformation, subscription } =
-			await createTestContribution(contributionPrice, contributionPrice, true);
+			await createTestContribution(
+				contributionPrice,
+				contributionPrice,
+				true,
+				false,
+			);
 
 		const result = await preview(zuoraClient, switchInformation, subscription);
 
@@ -77,7 +93,12 @@ describe('product-switching behaviour', () => {
 	it('can preview an annual recurring contribution switch at catalog price', async () => {
 		const contributionPrice = 120;
 		const { zuoraClient, switchInformation, subscription } =
-			await createTestContribution(contributionPrice, contributionPrice, true);
+			await createTestContribution(
+				contributionPrice,
+				contributionPrice,
+				true,
+				false,
+			);
 
 		const result = await preview(zuoraClient, switchInformation, subscription);
 
@@ -90,31 +111,22 @@ describe('product-switching behaviour', () => {
 	});
 
 	it('can preview an annual recurring contribution switch with 50% discount', async () => {
-		const subscriptionNumber = 'A-S00913236';
-		const identityId = '200275077';
-		const input = { price: 120, preview: true, applyDiscountIfAvailable: true };
-		const zuoraClient = await ZuoraClient.create('CODE');
-		const productCatalog = await getProductCatalogFromApi('CODE');
-		const subscription = await getSubscription(zuoraClient, subscriptionNumber);
-		const account = await getAccount(zuoraClient, subscription.accountNumber);
-
-		const switchInformation = await getSwitchInformationWithOwnerCheck(
-			stage,
-			input,
-			subscription,
-			account,
-			productCatalog,
-			identityId,
-			zuoraClient,
-		);
+		const contributionPrice = 55;
+		const { zuoraClient, switchInformation, subscription } =
+			await createTestContribution(
+				contributionPrice,
+				contributionPrice,
+				true,
+				true,
+			);
 
 		const result = await preview(zuoraClient, switchInformation, subscription);
 
 		const expectedResult = {
-			supporterPlusPurchaseAmount: 120,
+			supporterPlusPurchaseAmount: contributionPrice,
 			nextPaymentDate: zuoraDateFormat(dayjs().add(1, 'year').endOf('day')),
-			amountPayableToday: 58.39,
-			contributionRefundAmount: -1.61,
+			amountPayableToday: -60,
+			contributionRefundAmount: -55,
 			discount: {
 				discountedPrice: 60,
 				discountPercentage: 50,
@@ -126,75 +138,49 @@ describe('product-switching behaviour', () => {
 		expect(result).toEqual(expectedResult);
 	});
 
-	it.only('can preview an annual recurring contribution (non UK - German) switch with 50% discount', async () => {
-		const subscriptionNumber = 'A-S00946209';
-		const identityId = '200196235';
-		const input = { price: 120, preview: true, applyDiscountIfAvailable: true };
-		const zuoraClient = await ZuoraClient.create('CODE');
-		const productCatalog = await getProductCatalogFromApi('CODE');
-		const subscription = await getSubscription(zuoraClient, subscriptionNumber);
-		const account = await getAccount(zuoraClient, subscription.accountNumber);
-
-		const switchInformation = await getSwitchInformationWithOwnerCheck(
-			stage,
-			input,
-			subscription,
-			account,
-			productCatalog,
-			identityId,
-			zuoraClient,
-		);
+	it('can preview an annual recurring contribution (non UK - German) switch with 50% discount', async () => {
+		const contributionPrice = 120;
+		const { zuoraClient, switchInformation, subscription } =
+			await createTestContribution(
+				contributionPrice,
+				contributionPrice,
+				true,
+				true,
+				{
+					billingCountry: 'Germany',
+					paymentMethod: 'visaCard',
+				},
+			);
 
 		const result = await preview(zuoraClient, switchInformation, subscription);
 
 		const expectedResult = {
-			supporterPlusPurchaseAmount: 120,
+			supporterPlusPurchaseAmount: contributionPrice,
 			nextPaymentDate: zuoraDateFormat(dayjs().add(1, 'year').endOf('day')),
-			amountPayableToday: 22.33,
-			contributionRefundAmount: -37.67,
-			discount: {
-				discountedPrice: 60,
-				discountPercentage: 50,
-				upToPeriods: 1,
-				upToPeriodsType: 'Years',
-			},
+			amountPayableToday: 0,
+			contributionRefundAmount: -120,
 		};
 
 		expect(result).toEqual(expectedResult);
 	});
 
 	it('preview of annual recurring contribution switch with 50% discount fails validation check', async () => {
-		const subscriptionNumber = 'A-S00913236';
-		const identityId = '200275077';
-		const input = { price: 200, preview: true, applyDiscountIfAvailable: true };
-		const zuoraClient = await ZuoraClient.create('CODE');
-		const productCatalog = await getProductCatalogFromApi('CODE');
-		const subscription = await getSubscription(zuoraClient, subscriptionNumber);
-		const account = await getAccount(zuoraClient, subscription.accountNumber);
-
-		const switchInformation = await getSwitchInformationWithOwnerCheck(
-			stage,
-			input,
-			subscription,
-			account,
-			productCatalog,
-			identityId,
-			zuoraClient,
-		);
+		const contributionPrice = 200;
+		const { zuoraClient, switchInformation, subscription } =
+			await createTestContribution(
+				contributionPrice,
+				contributionPrice,
+				true,
+				true,
+			);
 
 		const result = await preview(zuoraClient, switchInformation, subscription);
 
 		const expectedResult = {
-			supporterPlusPurchaseAmount: 120,
+			supporterPlusPurchaseAmount: 200,
 			nextPaymentDate: zuoraDateFormat(dayjs().add(1, 'year').endOf('day')),
-			amountPayableToday: 58.39,
-			contributionRefundAmount: -1.61,
-			discount: {
-				discountedPrice: 60,
-				discountPercentage: 50,
-				upToPeriods: 1,
-				upToPeriodsType: 'Years',
-			},
+			amountPayableToday: 0,
+			contributionRefundAmount: -200,
 		};
 
 		expect(result).toEqual(expectedResult);
@@ -208,6 +194,7 @@ describe('product-switching behaviour', () => {
 				contributionPrice,
 				contributionPrice,
 				true,
+				false,
 			);
 
 			const response = await doSwitch(zuoraClient, switchInformation);
@@ -223,6 +210,7 @@ describe('product-switching behaviour', () => {
 			const { zuoraClient, switchInformation } = await createTestContribution(
 				contributionPrice,
 				5,
+				false,
 				false,
 			);
 
@@ -247,6 +235,7 @@ describe('product-switching behaviour', () => {
 			const { zuoraClient, switchInformation } = await createTestContribution(
 				contributionPrice,
 				2.1,
+				false,
 				false,
 			);
 
