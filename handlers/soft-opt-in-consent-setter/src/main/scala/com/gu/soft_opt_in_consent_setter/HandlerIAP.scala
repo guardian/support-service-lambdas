@@ -17,6 +17,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
   val readyToProcessAcquisitionStatus = "Ready to process acquisition"
   val readyToProcessCancellationStatus = "Ready to process cancellation"
   val readyProcessSwitchStatus = "Ready to process switch"
+  private val similarGuardianProducts = "similar_guardian_products"
 
   sealed trait EventType
   case object Acquisition extends EventType
@@ -150,13 +151,21 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
   ): Either[SoftOptInError, Unit] =
     for {
       consents <- consentsCalculator.getSoftOptInsByProduct(message.productName)
-      consentsBody = consentsCalculator.buildConsentsBody(consents, state = true)
-      _ <- {
-        logger.info(
-          s"(acquisition) Sending consents request for identityId ${message.identityId} with payload: $consentsBody",
-        )
-        sendConsentsReq(message.identityId, consentsBody)
+      amendedConsents = {
+        val isOptedIntoSimilarGuardianProducts =
+          message.userConsentsOverrides.flatMap(_.similarGuardianProducts).contains(true)
+
+        if (isOptedIntoSimilarGuardianProducts)
+          consents + similarGuardianProducts
+        else
+          consents
       }
+      consentsBody = consentsCalculator.buildConsentsBody(amendedConsents, state = true)
+
+      _ = logger.info(
+        s"(acquisition) Sending consents request for identityId ${message.identityId} with payload: $consentsBody"
+      )
+      _ <- sendConsentsReq(message.identityId, consentsBody)
     } yield ()
 
   def buildProductSwitchConsents(
