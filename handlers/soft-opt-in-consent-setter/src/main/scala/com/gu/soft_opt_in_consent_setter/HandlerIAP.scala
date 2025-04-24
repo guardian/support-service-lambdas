@@ -43,7 +43,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       eventType: EventType,
       productName: String,
       previousProductName: Option[String],
-      userConsentsOverrides: Option[UserConsentsOverrides]
+      userConsentsOverrides: Option[UserConsentsOverrides] = None
   )
 
   private def handleError[T <: Exception](exception: T) = {
