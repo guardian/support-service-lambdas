@@ -2,7 +2,6 @@ package com.gu.soft_opt_in_consent_setter.models
 
 object ConsentsMapping {
   val yourSupportOnboarding = "your_support_onboarding"
-//  val similarGuardianProducts = "similar_guardian_products"
   val supporterNewsletter = "supporter_newsletter"
   val subscriberPreview = "subscriber_preview"
   val guardianWeeklyNewsletter = "guardian_weekly_newsletter"

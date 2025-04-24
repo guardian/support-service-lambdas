@@ -32,12 +32,17 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
     }
   }
 
+  case class UserConsentsOverrides(
+      similarGuardianProducts: Option[Boolean]
+  )
+
   case class MessageBody(
       subscriptionId: String,
       identityId: String,
       eventType: EventType,
       productName: String,
       previousProductName: Option[String],
+      userConsentsOverrides: Option[UserConsentsOverrides]
   )
 
   private def handleError[T <: Exception](exception: T) = {
