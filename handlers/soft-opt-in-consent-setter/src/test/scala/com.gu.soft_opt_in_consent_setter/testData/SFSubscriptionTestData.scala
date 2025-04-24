@@ -63,12 +63,12 @@ object SFSubscriptionTestData {
   val overlappingAssociatedSub2 = SFAssociatedSubRecord("contribution", identityId)
   val nonOverlappingAssociatedSub2 = SFAssociatedSubRecord("contribution", s"identityId${0}")
 
-  val associatedSubsWithOverlap2: Seq[SFAssociatedSubRecord] = Seq(
+  lazy val associatedSubsWithOverlap2: Seq[SFAssociatedSubRecord] = Seq(
     overlappingAssociatedSub,
     nonOverlappingAssociatedSub,
   )
 
-  val associatedSubsWithoutOverlap2: Seq[SFAssociatedSubRecord] = Seq(nonOverlappingAssociatedSub)
+  lazy val associatedSubsWithoutOverlap2: Seq[SFAssociatedSubRecord] = Seq(nonOverlappingAssociatedSub)
 
   val Soft_Opt_in_Processed__c = true
 

@@ -121,7 +121,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
         """[
           |]""".stripMargin,
       )
-      .never
+      .never()
     mockGetMobileSubscriptions.expects("someIdentityId").returning(Right(mobileSubscriptions))
     mockSfConnector.getActiveSubs _ expects Seq("someIdentityId") returning Right(
       SFAssociatedSubResponse(

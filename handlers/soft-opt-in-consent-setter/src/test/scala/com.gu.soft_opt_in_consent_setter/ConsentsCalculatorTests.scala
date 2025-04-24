@@ -88,11 +88,11 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
 
   // buildConsentsBody success cases
   "buildConsentsBody" should "return an empty JSON array when consents is empty" in {
-    removeWhitespace(calculator.buildConsentsBody(Set(), true)) shouldBe removeWhitespace("""[]""".stripMargin)
+    removeWhitespace(calculator.buildConsentsBody(Map.empty)) shouldBe removeWhitespace("""[]""".stripMargin)
   }
 
   "buildConsentsBody" should "return a correctly populated JSON array when consents is not empty and state is true" in {
-    removeWhitespace(calculator.buildConsentsBody(guWeeklyMapping, true)) shouldBe
+    removeWhitespace(calculator.buildConsentsBody(guWeeklyMapping.map(_ -> true).toMap)) shouldBe
       removeWhitespace("""[
     |  {
     |    "id" : "your_support_onboarding",
@@ -106,7 +106,7 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
   }
 
   "buildConsentsBody" should "return a correctly populated JSON array when consents is not empty and state is false" in {
-    removeWhitespace(calculator.buildConsentsBody(guWeeklyMapping, false)) shouldBe
+    removeWhitespace(calculator.buildConsentsBody(guWeeklyMapping.map(_ -> false).toMap)) shouldBe
       removeWhitespace("""[
     |  {
     |    "id" : "your_support_onboarding",
@@ -126,10 +126,6 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
       Set("Guardian Weekly"),
       calculator,
     ) shouldBe Right("""[
-        |  {
-        |    "id" : "similar_guardian_products",
-        |    "consented" : false
-        |  },
         |  {
         |    "id" : "supporter_newsletter",
         |    "consented" : false
@@ -165,10 +161,6 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
         |  {
         |    "id" : "guardian_weekly_newsletter",
         |    "consented" : false
-        |  },
-        |  {
-        |    "id" : "similar_guardian_products",
-        |    "consented" : true
         |  },
         |  {
         |    "id" : "subscriber_preview",
