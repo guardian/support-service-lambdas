@@ -5,7 +5,7 @@ import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
 import com.gu.soft_opt_in_consent_setter.models._
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.ParsingFailure
-import io.circe.{Decoder, DecodingFailure}
+import io.circe.{Decoder}
 import io.circe.generic.auto._
 import io.circe.parser.{decode => circeDecode}
 import io.circe.syntax._
@@ -152,10 +152,10 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
     for {
       consents <- consentsCalculator.getSoftOptInsByProduct(message.productName)
       amendedConsents = {
-        val isOptedIntoSimilarGuardianProducts =
+        val userHasOptedIntoSimilarGuardianProducts =
           message.userConsentsOverrides.flatMap(_.similarGuardianProducts).contains(true)
 
-        if (isOptedIntoSimilarGuardianProducts)
+        if (userHasOptedIntoSimilarGuardianProducts)
           consents + similarGuardianProducts
         else
           consents
@@ -264,8 +264,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
         messageBody.productName,
         productNames.toSet,
       )
-      consentWithoutSimilarProducts = consentsCalculator.removeSimilarGuardianProductFromSet(consents)
-      _ <- sendCancellationConsents(messageBody.identityId, consentWithoutSimilarProducts)
+      _ <- sendCancellationConsents(messageBody.identityId, consents)
     } yield ()
   }
 
