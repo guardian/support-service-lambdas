@@ -9,6 +9,7 @@ import { GenerateProductCatalog } from '../lib/generate-product-catalog';
 import { MetricPushApi } from '../lib/metric-push-api';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
+import { ObserverDataExport } from '../lib/observer-data-export';
 import { PressReaderEntitlements } from '../lib/press-reader-entitlements';
 import { ProductSwitchApi } from '../lib/product-switch-api';
 import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery';
@@ -17,6 +18,7 @@ import {
 	APP_NAME as SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME,
 	SingleContributionSalesforceWrites,
 } from '../lib/single-contribution-salesforce-writes';
+import { SoftOptInConsentSetter } from '../lib/soft-opt-in-consent-setter';
 import type { StripeWebhookEndpointsProps } from '../lib/stripe-webhook-endpoints';
 import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
 import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
@@ -59,6 +61,19 @@ export const prodProps: NewProductApiProps = {
 	fulfilmentDateCalculatorS3Resource:
 		'arn:aws:s3:::fulfilment-date-calculator-prod/*',
 };
+
+new SoftOptInConsentSetter(app, 'soft-opt-in-consent-setter-CODE', {
+	mobileAccountIdSSMParam: 'mobileAccountId',
+	schedule: 'rate(365 days)',
+	stack: 'membership',
+	stage: 'CODE',
+});
+new SoftOptInConsentSetter(app, 'soft-opt-in-consent-setter-PROD', {
+	mobileAccountIdSSMParam: 'mobileAccountId',
+	schedule: 'rate(30 minutes)',
+	stack: 'membership',
+	stage: 'PROD',
+});
 
 new BatchEmailSender(app, 'batch-email-sender-CODE', {
 	stack: 'membership',
@@ -313,6 +328,14 @@ new WriteOffUnpaidInvoices(app, 'write-off-unpaid-invoices-CSBX', {
 	stage: 'CSBX',
 });
 new WriteOffUnpaidInvoices(app, 'write-off-unpaid-invoices-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+});
+new ObserverDataExport(app, 'observer-data-export-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+});
+new ObserverDataExport(app, 'observer-data-export-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 });

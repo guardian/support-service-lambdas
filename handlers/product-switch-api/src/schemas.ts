@@ -54,7 +54,7 @@ export type ZuoraPreviewResponse = z.infer<typeof zuoraPreviewResponseSchema>;
 
 export const zuoraSwitchResponseSchema = z.object({
 	success: z.boolean(),
-	invoiceNumbers: z.optional(z.array(z.string())),
+	invoiceIds: z.optional(z.array(z.string())),
 	reasons: z.optional(z.array(z.object({ message: z.string() }))),
 });
 

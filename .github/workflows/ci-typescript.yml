@@ -53,6 +53,7 @@ jobs:
           - zuora-salesforce-link-remover
           - metric-push-api
           - write-off-unpaid-invoices
+          - observer-data-export
     runs-on: ubuntu-latest
     permissions:
       id-token: write

@@ -154,23 +154,6 @@
       } ],
       "paymentPlan" : "GBP 47.62 every month"
     }, {
-      "id" : "voucher_sunday",
-      "label" : "Sunday",
-      "startDateRules" : {
-        "daysOfWeek" : [ "Sunday" ],
-        "selectableWindow" : {
-          "startDate" : "2020-03-03",
-          "sizeInDays" : 35
-        }
-      },
-      "paymentPlans" : [ {
-        "currencyCode" : "GBP",
-        "amount" : 10.79,
-        "billingPeriod" : "Monthly",
-        "description" : "GBP 10.79 every month"
-      } ],
-      "paymentPlan" : "GBP 10.79 every month"
-    }, {
       "id" : "voucher_sunday_plus",
       "label" : "Sunday+",
       "startDateRules" : {
@@ -326,23 +309,6 @@
         "description" : "GBP 11.11 every month"
       } ],
       "paymentPlan" : "GBP 11.11 every month"
-    }, {
-      "id" : "home_delivery_sunday",
-      "label" : "Sunday",
-      "startDateRules" : {
-        "daysOfWeek" : [ "Sunday" ],
-        "selectableWindow" : {
-          "startDate" : "2020-02-04",
-          "sizeInDays" : 28
-        }
-      },
-      "paymentPlans" : [ {
-        "currencyCode" : "GBP",
-        "amount" : 3.21,
-        "billingPeriod" : "Monthly",
-        "description" : "GBP 3.21 every month"
-      } ],
-      "paymentPlan" : "GBP 3.21 every month"
     }, {
       "id" : "home_delivery_sunday_plus",
       "label" : "Sunday+",
@@ -686,23 +652,6 @@
         "description" : "GBP 70.08 every month"
       } ],
       "paymentPlan" : "GBP 70.08 every month"
-    }, {
-      "id" : "digital_voucher_sunday",
-      "label" : "Sunday",
-      "startDateRules" : {
-        "daysOfWeek" : [ "Sunday" ],
-        "selectableWindow" : {
-          "startDate" : "2020-04-05",
-          "sizeInDays" : 1
-        }
-      },
-      "paymentPlans" : [ {
-        "currencyCode" : "GBP",
-        "amount" : 70.09,
-        "billingPeriod" : "Monthly",
-        "description" : "GBP 70.09 every month"
-      } ],
-      "paymentPlan" : "GBP 70.09 every month"
     }, {
       "id" : "digital_voucher_sunday_plus",
       "label" : "Sunday+",

@@ -9,7 +9,8 @@ import { addDiscount } from '@modules/zuora/addDiscount';
 import { getSubscription } from '@modules/zuora/getSubscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import { createDigitalSubscription, doPriceRise } from './helpers';
+import { createDigitalSubscription } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
+import { doPriceRise } from './helpers';
 
 const stage: Stage = 'CODE';
 const subscribeDate = dayjs();

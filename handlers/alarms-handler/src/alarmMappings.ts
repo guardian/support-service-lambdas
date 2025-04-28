@@ -43,6 +43,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 	VALUE: [
 		'apps-metering-events',
 		'cancellation-sf-cases-api',
+		'comms-sqs', // membership-workflow queues
 		'contact-us-api',
 		'delivery-records-api',
 		'delivery-problem-credit-processor',
@@ -60,6 +61,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'update-supporter-plus-amount',
 		'product-move-api',
 		'workflow',
+		'consent-autolapse',
 	],
 	SRE: ['alarms-handler', 'gchat-test-app'],
 	PORTFOLIO: [
@@ -123,6 +125,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 
 		// misc
 		'discount-expiry-notifier',
+		'observer-data-export',
 	],
 };
 

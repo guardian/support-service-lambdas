@@ -29,7 +29,6 @@ class VoucherPlans(getStartDateFromFulfilmentFiles: (ProductType, List[DayOfWeek
   val planInfo: List[(PlanId, PlanDescription, StartDateRules, BillingPeriod)] = List(
     (VoucherWeekend, PlanDescription("Weekend"), saturdayDateRules, Monthly),
     (VoucherSaturday, PlanDescription("Saturday"), saturdayDateRules, Monthly),
-    (VoucherSunday, PlanDescription("Sunday"), sundayDateRules, Monthly),
     (VoucherEveryDay, PlanDescription("Everyday"), mondayRules, Monthly),
     (VoucherSixDay, PlanDescription("Sixday"), mondayRules, Monthly),
     (VoucherWeekendPlus, PlanDescription("Weekend+"), saturdayDateRules, Monthly),

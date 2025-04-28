@@ -9,8 +9,8 @@
 		"lint": "eslint src/**/*.ts test/**/*.ts"
 	},
 	"dependencies": {
-		"@aws-sdk/client-s3": "3.744.0",
-		"@google-cloud/bigquery": "^7.9.1",
+		"@aws-sdk/client-s3": "3.777.0",
+		"@google-cloud/bigquery": "^7.9.3",
 		"aws-sdk": "^2.1692.0",
 		"google-auth-library": "^9.15.0",
 		"zod": "^3.23.8"

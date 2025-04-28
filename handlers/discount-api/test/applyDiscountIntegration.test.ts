@@ -8,12 +8,12 @@ import { zuoraDateFormat } from '@modules/zuora/common';
 import { Logger } from '@modules/zuora/logger';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import { applyDiscountEndpoint } from '../src/discountEndpoint';
-import type { ApplyDiscountResponseBody } from '../src/responseSchema';
 import {
 	createDigitalSubscription,
 	createSupporterPlusSubscription,
-} from './helpers';
+} from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
+import { applyDiscountEndpoint } from '../src/discountEndpoint';
+import type { ApplyDiscountResponseBody } from '../src/responseSchema';
 
 const stage: Stage = 'CODE';
 const validIdentityId = '200175946';

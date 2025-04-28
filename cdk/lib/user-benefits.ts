@@ -1,5 +1,4 @@
 import { GuApiGatewayWithLambdaByPath } from '@guardian/cdk';
-import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuCname } from '@guardian/cdk/lib/constructs/dns';
@@ -11,7 +10,6 @@ import {
 	CfnDomainName,
 	UsagePlan,
 } from 'aws-cdk-lib/aws-apigateway';
-import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { allowedOriginsForStage } from '../../handlers/user-benefits/src/cors';
@@ -132,35 +130,6 @@ export class UserBenefits extends GuStack {
 			apiKeyName: `${app}-api-key-${this.stage}`,
 		});
 		usagePlan.addApiKey(apiKey);
-
-		// ---- Alarms ---- //
-		const alarmName = (shortDescription: string) =>
-			`user-benefits-${this.stage} ${shortDescription}`;
-
-		const alarmDescription = (description: string) =>
-			`Impact - ${description}. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit`;
-
-		new GuAlarm(this, 'ApiGateway4XXAlarmCDK', {
-			app,
-			alarmName: alarmName('API gateway 4XX response'),
-			alarmDescription: alarmDescription(
-				'User benefits received an invalid request',
-			),
-			evaluationPeriods: 1,
-			threshold: 1,
-			snsTopicName: `alarms-handler-topic-${this.stage}`,
-			actionsEnabled: this.stage === 'PROD',
-			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-			metric: new Metric({
-				metricName: '4XXError',
-				namespace: 'AWS/ApiGateway',
-				statistic: 'Sum',
-				period: Duration.seconds(300),
-				dimensionsMap: {
-					ApiName: apiGateway.api.restApiName,
-				},
-			}),
-		});
 
 		// ---- DNS ---- //
 		const certificateArn = `arn:aws:acm:eu-west-1:${this.account}:certificate/${props.certificateId}`;

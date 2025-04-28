@@ -2,7 +2,6 @@ export const mockEvent = {
 	billingAccountId: 'A-S001',
 	firstName: 'David',
 	firstPaymentDateAfterDiscountExpiry: '2025-03-22',
-	paymentAmount: 1.23,
 	paymentCurrency: 'GBP',
 	paymentFrequency: 'Month',
 	productName: 'GW',

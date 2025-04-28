@@ -10,6 +10,8 @@ import {
 	TreatMissingData,
 } from 'aws-cdk-lib/aws-cloudwatch';
 import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
+import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
+import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import {
 	Effect,
 	Policy,
@@ -85,6 +87,7 @@ export class DiscountExpiryNotifier extends GuStack {
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
 				initialPolicy: [allowPutMetric],
+				timeout: Duration.seconds(300),
 				role,
 			},
 		);
@@ -239,7 +242,11 @@ export class DiscountExpiryNotifier extends GuStack {
 				lambdaFunction: getExpiringDiscountsLambda,
 				outputPath: '$.Payload',
 			},
-		);
+		).addRetry({
+			errors: ['States.ALL'],
+			interval: Duration.seconds(10),
+			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
+		});
 
 		const filterRecordsLambdaTask = new LambdaInvoke(
 			this,
@@ -338,9 +345,25 @@ export class DiscountExpiryNotifier extends GuStack {
 
 		sendEmailLambda.role?.attachInlinePolicy(sqsInlinePolicy);
 
-		new StateMachine(this, `${appName}-state-machine-${this.stage}`, {
-			stateMachineName: `${appName}-${this.stage}`,
-			definitionBody: definitionBody,
+		const stateMachine = new StateMachine(
+			this,
+			`${appName}-state-machine-${this.stage}`,
+			{
+				stateMachineName: `${appName}-${this.stage}`,
+				definitionBody: definitionBody,
+			},
+		);
+
+		const cronEveryDayAtNoon = { minute: '0', hour: '12' };
+		const cronOncePerYear = { minute: '0', hour: '0', day: '1', month: '1' };
+
+		const executionFrequency =
+			this.stage === 'PROD' ? cronEveryDayAtNoon : cronOncePerYear;
+
+		new Rule(this, 'ScheduleStateMachineRule', {
+			schedule: Schedule.cron(executionFrequency),
+			targets: [new SfnStateMachine(stateMachine)],
+			enabled: true,
 		});
 
 		const topic = Topic.fromTopicArn(

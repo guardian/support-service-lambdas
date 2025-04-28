@@ -32,7 +32,6 @@ class CatalogWireTest extends AnyFlatSpec with Matchers with ResourceLoader {
   def fakePricesFor(planId: PlanId): Map[Currency, AmountMinorUnits] = planId match {
     case VoucherWeekendPlus => gbpPrice(2942)
     case VoucherWeekend => gbpPrice(2076)
-    case VoucherSunday => gbpPrice(1079)
     case VoucherSundayPlus => gbpPrice(2206)
     case VoucherSaturday => gbpPrice(1036)
     case VoucherSaturdayPlus => gbpPrice(2162)
@@ -46,7 +45,6 @@ class CatalogWireTest extends AnyFlatSpec with Matchers with ResourceLoader {
     case AnnualContribution => Map.empty
     case HomeDeliveryEveryDay => gbpPrice(123)
     case HomeDeliverySaturday => gbpPrice(456)
-    case HomeDeliverySunday => gbpPrice(321)
     case HomeDeliverySixDay => gbpPrice(777)
     case HomeDeliveryWeekend => gbpPrice(888)
     case HomeDeliveryEveryDayPlus => gbpPrice(999)
@@ -102,7 +100,6 @@ class CatalogWireTest extends AnyFlatSpec with Matchers with ResourceLoader {
     case DigitalVoucherWeekendPlus => gbpPrice(7006)
     case DigitalVoucherSaturday => gbpPrice(7007)
     case DigitalVoucherSaturdayPlus => gbpPrice(7008)
-    case DigitalVoucherSunday => gbpPrice(7009)
     case DigitalVoucherSundayPlus => gbpPrice(7010)
     case NationalDeliveryEveryday => gbpPrice(7100)
     case NationalDeliverySixday => gbpPrice(7101)

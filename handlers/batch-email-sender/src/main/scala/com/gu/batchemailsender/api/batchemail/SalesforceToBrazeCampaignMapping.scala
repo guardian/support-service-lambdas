@@ -21,6 +21,7 @@ object SalesforceToBrazeCampaignMapping {
       case ("Holiday_Stop_Request__c", "amend") => "SV_HolidayStopAmend"
       case ("Holiday_Stop_Request__c", "withdraw") => "SV_HolidayStopWithdrawal"
       case ("Digital_Voucher__c", "create") => "SV_SC_BarcodeAccess_Day0_plus_15"
+      case ("Digital_Voucher__c", "create_observer") => "SV_SC_ObserverBarcodeAccess_Day0_plus_15"
       case ("Digital_Voucher__c", "replace") => "SV_SC_LostItem"
       case ("Case", "Delivery issues") => "SV_DeliveryProblemConfirmation"
       case ("Contact", "Delivery address change") => "SV_DeliveryAddressChangeConfirmation"

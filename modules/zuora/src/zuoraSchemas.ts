@@ -185,6 +185,7 @@ export const billingPreviewInvoiceItemSchema = z.object({
 	id: z.optional(z.string()),
 	subscriptionNumber: z.string(),
 	serviceStartDate: z.coerce.date(),
+	chargeName: z.string(),
 	chargeAmount: z.number(),
 	taxAmount: z.number(),
 });
