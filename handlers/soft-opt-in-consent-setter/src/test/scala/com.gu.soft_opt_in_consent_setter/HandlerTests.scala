@@ -61,6 +61,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       previousProductName = Some("Contributor"),
       eventType = Switch,
       subscriptionId = "A-S12345678",
+      userConsentsOverrides = None,
     )
 
     val result = processProductSwitchSub(
@@ -97,6 +98,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       previousProductName = None,
       eventType = Acquisition,
       subscriptionId = "A-S12345678",
+      userConsentsOverrides = None,
     )
 
     val result = processAcquiredSub(
@@ -137,6 +139,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       previousProductName = None,
       eventType = Cancellation,
       subscriptionId = "A-S12345678",
+      userConsentsOverrides = None,
     )
 
     val result = processCancelledSub(
@@ -183,6 +186,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       previousProductName = None,
       eventType = Cancellation,
       subscriptionId = "A-S12345678",
+      userConsentsOverrides = None,
     )
 
     val result = processCancelledSub(
@@ -231,6 +235,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       previousProductName = None,
       eventType = Cancellation,
       subscriptionId = "A-S12345678",
+      userConsentsOverrides = None,
     )
 
     val result = processCancelledSub(
@@ -270,6 +275,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       previousProductName = None,
       eventType = Acquisition,
       subscriptionId = "A-S12345678",
+      userConsentsOverrides = None,
     )
 
     val result = processAcquiredSub(
