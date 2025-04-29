@@ -286,4 +286,90 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
 
     result shouldBe Right(())
   }
+
+  test(testName = "processAcquiredSub should set `similar guardian products` consent to false when specified") {
+    mockSendConsentsReq
+      .expects(
+        "someIdentityId",
+        """[
+          |  {
+          |    "id" : "your_support_onboarding",
+          |    "consented" : true
+          |  },
+          |  {
+          |    "id" : "supporter_newsletter",
+          |    "consented" : true
+          |  },
+          |  {
+          |    "id" : "guardian_weekly_newsletter",
+          |    "consented" : true
+          |  },
+          |  {
+          |    "id" : "similar_guardian_products",
+          |    "consented" : false
+          |  }
+          |]""".stripMargin,
+      )
+      .returning(Right(()))
+
+    val testMessageBody = MessageBody(
+      identityId = "someIdentityId",
+      productName = "Tier Three",
+      previousProductName = None,
+      eventType = Acquisition,
+      subscriptionId = "A-S12345678",
+      userConsentsOverrides = Some(UserConsentsOverrides(similarGuardianProducts = Some(false)))
+    )
+
+    val result = processAcquiredSub(
+      testMessageBody,
+      mockSendConsentsReq,
+      calculator,
+    )
+
+    result shouldBe Right(())
+  }
+
+  test(testName = "processAcquiredSub should set `similar guardian products` consent to true when specified") {
+    mockSendConsentsReq
+      .expects(
+        "someIdentityId",
+        """[
+          |  {
+          |    "id" : "your_support_onboarding",
+          |    "consented" : true
+          |  },
+          |  {
+          |    "id" : "supporter_newsletter",
+          |    "consented" : true
+          |  },
+          |  {
+          |    "id" : "guardian_weekly_newsletter",
+          |    "consented" : true
+          |  },
+          |  {
+          |    "id" : "similar_guardian_products",
+          |    "consented" : true
+          |  }
+          |]""".stripMargin,
+      )
+      .returning(Right(()))
+
+    val testMessageBody = MessageBody(
+      identityId = "someIdentityId",
+      productName = "Tier Three",
+      previousProductName = None,
+      eventType = Acquisition,
+      subscriptionId = "A-S12345678",
+      userConsentsOverrides = Some(UserConsentsOverrides(similarGuardianProducts = Some(true)))
+    )
+
+    val result = processAcquiredSub(
+      testMessageBody,
+      mockSendConsentsReq,
+      calculator,
+    )
+
+    result shouldBe Right(())
+  }
 }
