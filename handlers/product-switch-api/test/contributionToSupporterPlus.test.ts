@@ -19,8 +19,6 @@ import {
 	refundExpected,
 } from '../src/contributionToSupporterPlus';
 import { buildEmailMessage } from '../src/productSwitchEmail';
-import type { ProductSwitchRequestBody } from '../src/schemas';
-import { productSwitchRequestSchema } from '../src/schemas';
 import {
 	getFirstContributionRatePlan,
 	getSwitchInformationWithOwnerCheck,
@@ -35,14 +33,6 @@ import zuoraSubscriptionWithMonthlyContribution from './fixtures/zuora-subscript
 
 export const getProductCatalogFromFixture = (): ProductCatalog =>
 	generateProductCatalog(zuoraCatalogFixture);
-
-test('request body serialisation', () => {
-	const result: ProductSwitchRequestBody = productSwitchRequestSchema.parse({
-		price: 10,
-		preview: false,
-	});
-	expect(result.price).toEqual(10);
-});
 
 test('url parsing', () => {
 	const successfulParsing = parseUrlPath(
@@ -87,7 +77,7 @@ test('startNewTerm is only true when the termStartDate is before today', async (
 
 	const switchInformation = await getSwitchInformationWithOwnerCheck(
 		'CODE',
-		{ price: 95, preview: false },
+		{ preview: false },
 		subscription,
 		account,
 		productCatalog,
@@ -107,7 +97,7 @@ test('owner check is bypassed for salesforce calls', async () => {
 
 	const switchInformation = await getSwitchInformationWithOwnerCheck(
 		'CODE',
-		{ price: 95, preview: false },
+		{ preview: false },
 		subscription,
 		account,
 		productCatalog,
@@ -128,7 +118,7 @@ test("owner check doesn't allow incorrect owner", async () => {
 	const switchInformation = async () =>
 		await getSwitchInformationWithOwnerCheck(
 			'CODE',
-			{ price: 95, preview: false },
+			{ preview: false },
 			subscription,
 			account,
 			productCatalog,

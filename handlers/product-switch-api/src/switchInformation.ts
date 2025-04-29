@@ -44,6 +44,7 @@ export type SwitchInformation = {
 	input: ProductSwitchRequestBody;
 	startNewTerm: boolean;
 	contributionAmount: number;
+	actualTotalPrice: number;
 	account: AccountInformation;
 	subscription: SubscriptionInformation;
 	catalog: CatalogInformation;
@@ -176,8 +177,30 @@ export const getSwitchInformationWithOwnerCheck = async (
 		currency,
 	);
 
-	const contributionAmount =
-		input.price - catalogInformation.supporterPlus.price;
+	const maybeDiscount = await getDiscount(
+		!!input.applyDiscountIfAvailable,
+		previousAmount,
+		catalogInformation.supporterPlus.price,
+		billingPeriod,
+		subscription.status,
+		subscription.accountNumber,
+		account.metrics.totalInvoiceBalance,
+		stage,
+		zuroaClient,
+	);
+
+	const actualBasePrice =
+		maybeDiscount?.discountedPrice ?? catalogInformation.supporterPlus.price;
+
+	const contributionAmount = Math.max(0, previousAmount - actualBasePrice);
+
+	/*
+	 * existing situation: the price is passed in when someone switches.
+	 * a min of the supporterplus base price is passed through, more if the user already contributes more than the min
+	 *
+	 * propsoal: continue to pass through the price from the client, however also calculate this figure on the backend and use the 2 as a comparison.
+	 *
+	 */
 
 	const subscriptionInformation = {
 		accountNumber: subscription.accountNumber,
@@ -193,23 +216,12 @@ export const getSwitchInformationWithOwnerCheck = async (
 	const startOfToday = today.startOf('day');
 	const startNewTerm = termStartDate.isBefore(startOfToday);
 
-	const maybeDiscount = await getDiscount(
-		!!input.applyDiscountIfAvailable,
-		input.price,
-		catalogInformation.supporterPlus.price,
-		billingPeriod,
-		subscription.status,
-		subscription.accountNumber,
-		account.metrics.totalInvoiceBalance,
-		stage,
-		zuroaClient,
-	);
-
 	return {
 		stage,
 		input,
 		startNewTerm,
 		contributionAmount,
+		actualTotalPrice: contributionAmount + actualBasePrice,
 		account: userInformation,
 		subscription: subscriptionInformation,
 		catalog: catalogInformation,

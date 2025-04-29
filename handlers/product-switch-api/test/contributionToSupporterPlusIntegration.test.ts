@@ -83,6 +83,7 @@ describe('product-switching behaviour', () => {
 				contributionPrice,
 				true,
 				false,
+				{ billingPeriod: 'Month' },
 			);
 
 		const result = await preview(zuoraClient, switchInformation, subscription);
@@ -111,7 +112,7 @@ describe('product-switching behaviour', () => {
 	});
 
 	it('can preview an annual recurring contribution switch with 50% discount', async () => {
-		const contributionPrice = 55;
+		const contributionPrice = 60;
 		const { zuoraClient, switchInformation, subscription } =
 			await createTestContribution(
 				contributionPrice,
@@ -122,11 +123,14 @@ describe('product-switching behaviour', () => {
 
 		const result = await preview(zuoraClient, switchInformation, subscription);
 
+		console.log('switchInformation = ', switchInformation);
+		console.log('result = ', result);
+
 		const expectedResult = {
-			supporterPlusPurchaseAmount: contributionPrice,
+			supporterPlusPurchaseAmount: 120,
 			nextPaymentDate: zuoraDateFormat(dayjs().add(1, 'year').endOf('day')),
-			amountPayableToday: -60,
-			contributionRefundAmount: -55,
+			amountPayableToday: 0,
+			contributionRefundAmount: -60,
 			discount: {
 				discountedPrice: 60,
 				discountPercentage: 50,
@@ -177,9 +181,9 @@ describe('product-switching behaviour', () => {
 		const result = await preview(zuoraClient, switchInformation, subscription);
 
 		const expectedResult = {
-			supporterPlusPurchaseAmount: 200,
+			supporterPlusPurchaseAmount: 120,
 			nextPaymentDate: zuoraDateFormat(dayjs().add(1, 'year').endOf('day')),
-			amountPayableToday: 0,
+			amountPayableToday: -80,
 			contributionRefundAmount: -200,
 		};
 
@@ -209,9 +213,10 @@ describe('product-switching behaviour', () => {
 			const contributionPrice = 2;
 			const { zuoraClient, switchInformation } = await createTestContribution(
 				contributionPrice,
-				5,
+				12,
 				false,
 				false,
+				{ billingPeriod: 'Month' },
 			);
 
 			const response = await doSwitch(zuoraClient, switchInformation);
@@ -219,7 +224,7 @@ describe('product-switching behaviour', () => {
 			await createPayment(
 				zuoraClient,
 				response.invoiceIds?.[0] ?? '',
-				3,
+				10,
 				switchInformation.account.id,
 				switchInformation.account.defaultPaymentMethodId,
 				dayjs(),

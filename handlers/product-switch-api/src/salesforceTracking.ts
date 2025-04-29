@@ -28,20 +28,19 @@ export function createSQSMessageBody(
 		previousRatePlanName,
 		previousAmount,
 	} = switchInformation.subscription;
-	const { price, csrUserId, caseId } = switchInformation.input;
 
 	const salesforceTrackingInput: SalesforceTrackingInput = {
 		subscriptionName: subscriptionNumber,
 		previousAmount,
-		newAmount: price,
+		newAmount: switchInformation.actualTotalPrice,
 		previousProductName: previousProductName,
 		previousRatePlanName: previousRatePlanName,
 		newRatePlanName: 'Supporter Plus',
 		requestedDate: now.toISOString().substring(0, 10),
 		effectiveDate: now.toISOString().substring(0, 10),
 		paidAmount,
-		csrUserId: csrUserId,
-		caseId: caseId,
+		csrUserId: switchInformation.input.csrUserId,
+		caseId: switchInformation.input.caseId,
 	};
 	return JSON.stringify(salesforceTrackingInput);
 }
