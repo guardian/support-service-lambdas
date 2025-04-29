@@ -24,6 +24,7 @@ import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
 import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
 import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
 import { UserBenefits } from '../lib/user-benefits';
+import { WriteOffUnpaidInvoices } from '../lib/write-off-unpaid-invoices';
 import { ZuoraSalesforceLinkRemover } from '../lib/zuora-salesforce-link-remover';
 
 const app = new App();
@@ -321,6 +322,14 @@ new MetricPushApi(app, 'metric-push-api-PROD', {
 	stack: 'membership',
 	stage: 'PROD',
 	cloudFormationStackName: 'membership-PROD-metric-push-api',
+});
+new WriteOffUnpaidInvoices(app, 'write-off-unpaid-invoices-CSBX', {
+	stack: 'support',
+	stage: 'CSBX',
+});
+new WriteOffUnpaidInvoices(app, 'write-off-unpaid-invoices-PROD', {
+	stack: 'support',
+	stage: 'PROD',
 });
 new ObserverDataExport(app, 'observer-data-export-CODE', {
 	stack: 'support',
