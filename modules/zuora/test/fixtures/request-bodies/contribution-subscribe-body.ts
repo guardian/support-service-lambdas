@@ -1,6 +1,9 @@
 import type { Dayjs } from 'dayjs';
 import { zuoraDateFormat } from '@modules/zuora/common';
-import { catalog } from '../../../../../handlers/discount-api/src/productToDiscountMapping';
+import {
+	catalog,
+	sandboxProductRatePlanChargeIds,
+} from '../../../../../handlers/discount-api/src/productToDiscountMapping';
 import type { ContributionTestAdditionalOptions } from '../../it-helpers/createGuardianSubscription';
 
 export const contributionSubscribeBody = (
@@ -31,6 +34,7 @@ export const contributionSubscribeBody = (
 			PaymentGateway: 'Stripe Gateway 1',
 		},
 	};
+	const billingPeriod = additionOptions?.billingPeriod ?? 'Annual';
 	return {
 		subscribes: [
 			{
@@ -65,15 +69,17 @@ export const contributionSubscribeBody = (
 						{
 							RatePlan: {
 								ProductRatePlanId:
-									catalog.CODE.recurringContribution[
-										additionOptions?.billingPeriod ?? 'Annual'
-									],
+									catalog.CODE.recurringContribution[billingPeriod],
 							},
 							RatePlanChargeData: [
 								{
 									RatePlanCharge: {
 										Price: additionOptions?.price ?? 100,
-										ProductRatePlanChargeId: '2c92c0f85e2d19af015e3896e84d092e',
+										ProductRatePlanChargeId:
+											sandboxProductRatePlanChargeIds.recurringContribution[
+												billingPeriod
+											],
+										EndDateCondition: 'SubscriptionEnd',
 									},
 								},
 							],

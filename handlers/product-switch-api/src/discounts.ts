@@ -16,11 +16,14 @@ export type Discount = {
 	upToPeriods: number;
 	upToPeriodsType: 'Months' | 'Years';
 	discountPercentage: number;
+	discountedPrice: number;
 };
+
+type PartialDiscount = Omit<Discount, 'discountedPrice'>;
 
 const annualContribHalfPriceSupporterPlusForOneYear = (
 	stage: Stage,
-): Discount => ({
+): PartialDiscount => ({
 	productRatePlanId:
 		stage === 'PROD'
 			? '8a12994695aa4f680195ae2dc9d221d8'
@@ -46,9 +49,9 @@ export const getDiscount = async (
 	stage: Stage,
 	zuoraClient: ZuoraClient,
 ): Promise<Discount | undefined> => {
-	const discuntDetails = annualContribHalfPriceSupporterPlusForOneYear(stage);
+	const discountDetails = annualContribHalfPriceSupporterPlusForOneYear(stage);
 	const discountedPrice =
-		supporterPlusPrice * (discuntDetails.discountPercentage / 100);
+		(supporterPlusPrice * (100 - discountDetails.discountPercentage)) / 100;
 
 	const subIsActive = subscriptionStatus === 'Active';
 
@@ -75,7 +78,7 @@ export const getDiscount = async (
 
 		if (isEligibleForDiscount) {
 			console.log('Subscription is eligible for discount');
-			return discuntDetails;
+			return { ...discountDetails, discountedPrice };
 		}
 		console.log('Subscription is not eligible for discount - sub is Active');
 		return;
