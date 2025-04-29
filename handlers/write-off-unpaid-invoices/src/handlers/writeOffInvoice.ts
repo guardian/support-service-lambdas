@@ -35,21 +35,21 @@ const errorMessagesToIgnore = [
 ];
 
 export const handler = async (event: {
-	Items: {
-		batchItems: InvoiceDataInput[];
+	Items: Array<{
+		item: InvoiceDataInput;
 		comment: string;
 		reasonCode: string;
-	};
+	}>;
 }) => {
 	const failedRecords = [];
 	const stage = stageFromEnvironment();
-	const {
-		Items: { batchItems, comment, reasonCode },
-	} = event;
+	const { Items } = event;
 
 	console.log(JSON.stringify(event, null, 2));
 
-	for (const item of batchItems) {
+	for (const batchInput of Items) {
+		const { item, comment, reasonCode } = batchInput;
+
 		const invoiceId = item.invoice_id;
 		const invoiceAmount = Number.parseFloat(item.invoice_amount);
 		const invoiceBalance = Number.parseFloat(item.invoice_balance);
