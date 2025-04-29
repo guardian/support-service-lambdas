@@ -1,7 +1,7 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { getZuoraOAuthToken } from '../services/getOAuthToken';
 
-type InvoiceDateInput = {
+type InvoiceDataInput = {
 	accounting_code_project_codes: string;
 	product_rate_plan_analysis_codes: string;
 	account_id: string;
@@ -27,11 +27,6 @@ type InvoiceAdjustmentPayload = {
 	ReasonCode?: string;
 };
 
-const comment =
-	'Invoices left over after manual cancellation made in Salesforce or Zuora UI.';
-
-const reasonCode = undefined;
-
 const errorMessagesToIgnore = [
 	'Adjustment amount cannot be negative or zero.',
 	'Adjustment amount is out of range. Please change the amount.',
@@ -39,13 +34,22 @@ const errorMessagesToIgnore = [
 	'You can not adjust the invoice balance from a positive amount to a negative amount.',
 ];
 
-export const handler = async (event: { Items: InvoiceDateInput[] }) => {
+export const handler = async (event: {
+	Items: {
+		batchItems: InvoiceDataInput[];
+		comment: string;
+		reasonCode: string;
+	};
+}) => {
 	const failedRecords = [];
 	const stage = stageFromEnvironment();
-	const { Items } = event;
-	console.log(event);
+	const {
+		Items: { batchItems, comment, reasonCode },
+	} = event;
 
-	for (const item of Items) {
+	console.log(JSON.stringify(event, null, 2));
+
+	for (const item of batchItems) {
 		const invoiceId = item.invoice_id;
 		const invoiceAmount = Number.parseFloat(item.invoice_amount);
 		const invoiceBalance = Number.parseFloat(item.invoice_balance);

@@ -106,6 +106,11 @@ export class WriteOffUnpaidInvoices extends GuStack {
 							},
 						},
 					},
+					ItemSelector: {
+						'batchItems.$': '$$.Map.Item.Value',
+						'comment.$': JsonPath.stringAt('$$.Execution.Input.Comment'),
+						'reasonCode.$': JsonPath.stringAt('$$.Execution.Input.ReasonCode'),
+					},
 					ResultWriter: {
 						Resource: 'arn:aws:states:::s3:putObject',
 						Parameters: {
