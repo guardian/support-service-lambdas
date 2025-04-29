@@ -402,7 +402,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              ""},"End":true}}},"ItemSelector":{"batchItems.$":"$$.Map.Item.Value","comment.$":"$$.Execution.Input.Comment","reasonCode.$":"$$.Execution.Input.ReasonCode"},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
+              ""},"End":true}}},"ItemSelector":{"item.$":"$$.Map.Item.Value","comment.$":"$$.Execution.Input.Comment","reasonCode.$":"$$.Execution.Input.ReasonCode"},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
@@ -975,7 +975,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              ""},"End":true}}},"ItemSelector":{"batchItems.$":"$$.Map.Item.Value","comment.$":"$$.Execution.Input.Comment","reasonCode.$":"$$.Execution.Input.ReasonCode"},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
+              ""},"End":true}}},"ItemSelector":{"item.$":"$$.Map.Item.Value","comment.$":"$$.Execution.Input.Comment","reasonCode.$":"$$.Execution.Input.ReasonCode"},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
               {
                 "Ref": "Bucket83908E77",
               },
