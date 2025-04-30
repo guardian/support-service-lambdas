@@ -21,7 +21,7 @@ class SendConfirmationEmailTest extends AsyncFlatSpec with Matchers {
       payload shouldBe ETPayload(
         "billToEmail@mail.com",
         testVoucherData,
-        DataExtensionName("paper-voucher"),
+        DataExtensionName("sunday-paper-voucher"),
         Some("sfContactId"),
       )
       ()
