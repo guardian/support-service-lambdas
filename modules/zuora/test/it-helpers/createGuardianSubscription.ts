@@ -46,7 +46,7 @@ export interface ContributionTestAdditionalOptions {
 	billingPeriod?: ContributionTestBillingPeriod;
 	price?: number;
 	billingCountry?: 'United Kingdom' | 'Germany' | 'United States'; // https://knowledgecenter.zuora.com/Quick_References/Country%2C_State%2C_and_Province_Codes/A_Manage_countries_and_regions#View_countries_or_regions (countries are defined in Zuora config)
-    paymentMethod?: 'directDebit' | 'visaCard';
+	paymentMethod?: 'directDebit' | 'visaCard';
 }
 
 export const createContribution = async (
