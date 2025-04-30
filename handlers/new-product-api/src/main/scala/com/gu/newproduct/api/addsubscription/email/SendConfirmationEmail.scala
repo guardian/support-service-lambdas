@@ -2,6 +2,7 @@ package com.gu.newproduct.api.addsubscription.email
 
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.productcatalog._
+import com.gu.newproduct.api.productcatalog.PlanId._
 import com.gu.util.Logging
 import com.gu.util.apigateway.ApiGatewayResponse
 import com.gu.util.reader.AsyncTypes.{AsyncApiGatewayOp, _}
