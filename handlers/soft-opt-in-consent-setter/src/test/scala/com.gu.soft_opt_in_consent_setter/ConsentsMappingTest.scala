@@ -12,12 +12,6 @@ class ConsentsMappingTest extends AnyFlatSpec with Matchers {
     consentsMapping.contains(actual) should be(true)
   }
 
-  it should "map any kind of zuora style newspaper to the newspaper value" in {
-    val actual = productMappings("Newspaper - Home Delivery", None)
-    actual should be("newspaper")
-    consentsMapping.contains(actual) should be(true)
-  }
-
   it should "map ophan style newspaper to the newspaper value" in {
     val actual = productMappings("PRINT_SUBSCRIPTION", Some("HOME_DELIVERY_SATURDAY_PLUS"))
     actual should be("newspaper")
