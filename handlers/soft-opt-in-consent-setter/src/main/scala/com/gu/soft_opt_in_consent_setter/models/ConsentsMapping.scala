@@ -19,7 +19,6 @@ object ConsentsMapping {
       case "PRINT_SUBSCRIPTION" if !printOptions.contains("GUARDIAN_WEEKLY") => "newspaper"
       case "PRINT_SUBSCRIPTION" if printOptions.contains("GUARDIAN_WEEKLY") => "Guardian Weekly"
       case "GUARDIAN_AD_LITE" => "Guardian Ad-Lite"
-      case s"Newspaper - $_" => "newspaper"
       case other => other
     }
   }
@@ -46,6 +45,26 @@ object ConsentsMapping {
       supporterNewsletter,
     ),
     "newspaper" -> Set(
+      yourSupportOnboarding,
+      subscriberPreview,
+      supporterNewsletter,
+    ),
+    "Newspaper - Home Delivery" -> Set(
+      yourSupportOnboarding,
+      subscriberPreview,
+      supporterNewsletter,
+    ),
+    "Newspaper - Voucher Book" -> Set(
+      yourSupportOnboarding,
+      subscriberPreview,
+      supporterNewsletter,
+    ),
+    "Newspaper - Digital Voucher" -> Set(
+      yourSupportOnboarding,
+      subscriberPreview,
+      supporterNewsletter,
+    ),
+    "Newspaper - National Delivery" -> Set(
       yourSupportOnboarding,
       subscriberPreview,
       supporterNewsletter,
