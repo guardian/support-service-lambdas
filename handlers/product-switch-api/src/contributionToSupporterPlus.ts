@@ -35,9 +35,9 @@ import type { SwitchInformation } from './switchInformation';
 
 export interface SwitchDiscountResponse {
 	discountedPrice: number;
-	upToPeriods: number; // 3,
+	upToPeriods: number;
 	upToPeriodsType: 'Months' | 'Years';
-	discountPercentage: number; // 25,
+	discountPercentage: number;
 }
 
 export type PreviewResponse = {
