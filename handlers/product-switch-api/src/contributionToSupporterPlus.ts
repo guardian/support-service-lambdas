@@ -192,7 +192,7 @@ export const doSwitch = async (
 
 	const requestBody = buildSwitchRequestBody(dayjs(), productSwitchInformation);
 	const zuoraResponse: ZuoraSwitchResponse = await zuoraClient.post(
-		'v1/orders',
+		'v1/orders?returnIds=true',
 		JSON.stringify(requestBody),
 		zuoraSwitchResponseSchema,
 	);

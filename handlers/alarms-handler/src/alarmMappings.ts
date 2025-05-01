@@ -43,6 +43,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 	VALUE: [
 		'apps-metering-events',
 		'cancellation-sf-cases-api',
+		'comms-sqs', // membership-workflow queues
 		'contact-us-api',
 		'delivery-records-api',
 		'delivery-problem-credit-processor',

@@ -6,7 +6,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.Json
 
-class DigitalVoucherNewCardTest extends AnyFlatSpec with Matchers with TripleEquals {
+class DigitalVoucherNewObserverCardTest extends AnyFlatSpec with Matchers with TripleEquals {
   val rawSalesforceMessage =
     """
       |{
@@ -24,7 +24,7 @@ class DigitalVoucherNewCardTest extends AnyFlatSpec with Matchers with TripleEqu
       |                "identity_id": "102372126",
       |                "holiday_stop_request": null,
       |                "first_name": "elrg5OHBZOAiuLNIkmc",
-      |                "email_stage": "create",
+      |                "email_stage": "create_observer",
       |                "digital_voucher": {
       |                    "barcode_url": "https://digitalvouchers-uat-voucher.azurewebsites.net/voucher/a2F3E000001GpVQUA0/GSUB"
       |                }
@@ -53,13 +53,13 @@ class DigitalVoucherNewCardTest extends AnyFlatSpec with Matchers with TripleEqu
       |      }
       |    }
       |  },
-      |  "DataExtensionName" : "SV_SC_BarcodeAccess_Day0_plus_15",
+      |  "DataExtensionName" : "SV_SC_ObserverBarcodeAccess_Day0_plus_15",
       |  "SfContactId" : "0033E00001CjpYRQAZ",
       |  "IdentityUserId" : "102372126",
       |  "recordId" : "xR9"
       |}""".stripMargin
 
-  "Digital voucher new card Salesforce message" should "transform to Braze SQS message for membership-workflow pickup" in {
+  "Digital voucher new Observer card Salesforce message" should "transform to Braze SQS message for membership-workflow pickup" in {
     val sfMsg = Json.parse(rawSalesforceMessage).as[SalesforceBatchItems].batch_items.head
     val brazeMsg = BrazeSqsMessage.fromSalesforceMessage(sfMsg)
     val actualRawBrazeSqsMessage = Json.prettyPrint(Json.toJson(brazeMsg))

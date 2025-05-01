@@ -91,7 +91,7 @@ export const handler = async (event: SendEmailInput) => {
 	}
 };
 
-function getIneligibilityReason(
+export function getIneligibilityReason(
 	subStatus: string,
 	workEmail: string | null | undefined,
 	oldPaymentAmount: number,
@@ -111,7 +111,8 @@ function getIneligibilityReason(
 	}
 	return '';
 }
-function getEmailSendEligibility(
+
+export function getEmailSendEligibility(
 	subStatus: string,
 	workEmail: string | null | undefined,
 	oldPaymentAmount: number,
@@ -131,7 +132,10 @@ function getEmailSendEligibility(
 	};
 }
 
-function formatDate(inputDate: string): string {
+export function formatDate(inputDate: string): string {
+	if (isNaN(new Date(inputDate).getTime())) {
+		throw new Error(`Invalid date string: ${inputDate}`);
+	}
 	return new Date(inputDate).toLocaleDateString('en-GB', {
 		day: '2-digit',
 		month: 'long',
@@ -139,7 +143,7 @@ function formatDate(inputDate: string): string {
 	});
 }
 
-function getCurrencySymbol(currencyCode: string): string {
+export function getCurrencySymbol(currencyCode: string): string {
 	const symbols: Record<string, string> = {
 		GBP: '£',
 		AUD: '$',

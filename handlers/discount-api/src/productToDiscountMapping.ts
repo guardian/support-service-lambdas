@@ -66,6 +66,7 @@ export const catalog = {
 		},
 		recurringContribution: {
 			Month: '2c92c0f85a6b134e015a7fcd9f0c7855',
+			Annual: '2c92c0f85e2d19af015e3896e824092c',
 		},
 	},
 	PROD: {
@@ -80,6 +81,7 @@ export const catalog = {
 		},
 		recurringContribution: {
 			Month: '2c92a0fc5aacfadd015ad24db4ff5e97',
+			Annual: '2c92a0fc5e1dc084015e37f58c200eea',
 		},
 	},
 };
