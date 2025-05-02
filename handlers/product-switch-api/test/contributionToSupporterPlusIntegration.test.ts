@@ -123,9 +123,6 @@ describe('product-switching behaviour', () => {
 
 		const result = await preview(zuoraClient, switchInformation, subscription);
 
-		console.log('switchInformation = ', switchInformation);
-		console.log('result = ', result);
-
 		const expectedResult = {
 			supporterPlusPurchaseAmount: 120,
 			nextPaymentDate: zuoraDateFormat(dayjs().add(1, 'year').endOf('day')),
