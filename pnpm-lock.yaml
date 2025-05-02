@@ -249,8 +249,8 @@ importers:
         specifier: ^8.10.147
         version: 8.10.147
       fetch-mock:
-        specifier: ^11.1.1
-        version: 11.1.5
+        specifier: ^12.5.2
+        version: 12.5.2
 
   handlers/update-supporter-plus-amount:
     dependencies:
@@ -3121,14 +3121,9 @@ packages:
       picomatch:
         optional: true
 
-  fetch-mock@11.1.5:
-    resolution: {integrity: sha512-KHmZDnZ1ry0pCTrX4YG5DtThHi0MH+GNI9caESnzX/nMJBrvppUHMvLx47M0WY9oAtKOMiPfZDRpxhlHg89BOA==}
-    engines: {node: '>=8.0.0'}
-    peerDependencies:
-      node-fetch: '*'
-    peerDependenciesMeta:
-      node-fetch:
-        optional: true
+  fetch-mock@12.5.2:
+    resolution: {integrity: sha512-b5KGDFmdmado2MPQjZl6ix3dAG3iwCitb0XQwN72y2s9VnWZ3ObaGNy+bkpm1390foiLDybdJ7yjRGKD36kATw==}
+    engines: {node: '>=18.11.0'}
 
   fflate@0.8.1:
     resolution: {integrity: sha512-/exOvEuc+/iaUm105QIiOt4LpBdMTWsXxqR0HDF35vx3fmaKzw7354gTilCh5rkzEt8WYyG//ku3h3nRmd7CHQ==}
@@ -3545,9 +3540,6 @@ packages:
   is-subdir@1.2.0:
     resolution: {integrity: sha512-2AT6j+gXe/1ueqbW6fLZJiIw3F8iXGJtt0yDrZaBhAZEG1raiTxKWU+IPqMCzQAXOUCKdA4UDMgacKH25XG2Cw==}
     engines: {node: '>=4'}
-
-  is-subset@0.1.1:
-    resolution: {integrity: sha512-6Ybun0IkarhmEqxXCNw/C0bna6Zb/TkfUX9UbwJtK6ObwAVCxmAP308WWTHviM/zAqXk05cdhYsUsZeGQh99iw==}
 
   is-symbol@1.1.1:
     resolution: {integrity: sha512-9gGx6GTtCQM73BgmHQXfDmLtfjjTUDSyoxTCbp5WtoixAhfgsDirWIcVQ/IHpvI5Vgd5i/J5F7B9cN/WlVbC/w==}
@@ -9804,12 +9796,11 @@ snapshots:
     optionalDependencies:
       picomatch: 4.0.2
 
-  fetch-mock@11.1.5:
+  fetch-mock@12.5.2:
     dependencies:
       '@types/glob-to-regexp': 0.4.4
       dequal: 2.0.3
       glob-to-regexp: 0.4.1
-      is-subset: 0.1.1
       regexparam: 3.0.0
 
   fflate@0.8.1: {}
@@ -10274,8 +10265,6 @@ snapshots:
   is-subdir@1.2.0:
     dependencies:
       better-path-resolve: 1.0.0
-
-  is-subset@0.1.1: {}
 
   is-symbol@1.1.1:
     dependencies:
