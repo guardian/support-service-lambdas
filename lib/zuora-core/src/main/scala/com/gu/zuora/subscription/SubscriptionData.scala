@@ -28,16 +28,22 @@ case class IssueData(issueDate: LocalDate, billDates: BillDates, credit: Double)
   }
 }
 
-trait SubscriptionData {
+trait SubscriptionIssueData {
   @deprecated("Migrate to https://github.com/guardian/invoicing-api/pull/20") def issueDataForDate(
       issueDate: LocalDate,
   ): Either[ZuoraApiFailure, IssueData]
   def issueDataForPeriod(startDateInclusive: LocalDate, endDateInclusive: LocalDate): List[IssueData]
-  def productType: ZuoraProductType
-  def subscriptionAnnualIssueLimit: Int
-  def editionDaysOfWeek: List[DayOfWeek]
 }
+
+case class SubscriptionData(
+    productType: ZuoraProductType,
+    subscriptionAnnualIssueLimit: Int,
+    editionDaysOfWeek: List[DayOfWeek],
+    subscriptionIssueData: SubscriptionIssueData,
+)
+
 object SubscriptionData {
+
   def apply(subscription: Subscription, account: ZuoraAccount): Either[ZuoraApiFailure, SubscriptionData] = {
     val supportedRatePlanCharges: List[(RatePlanCharge, SupportedRatePlanCharge, SupportedProduct)] = for {
       ratePlan <- subscription.ratePlans if ratePlan.lastChangeType =!= Some("Remove")
@@ -62,85 +68,77 @@ object SubscriptionData {
       }
       productType <- getZuoraProductType(supportedRatePlanCharges.map(_._3))
       annualIssueLimitPerEdition <- getAnnualIssueLimitPerEdition(supportedRatePlanCharges.map(_._3))
-    } yield createSubscriptionData(nonZeroRatePlanChargeDatas, productType, annualIssueLimitPerEdition, subscription)
+      editionDaysOfWeek = nonZeroRatePlanChargeDatas.map(_.issueDayOfWeek).distinct
+      subscriptionIssueData = new MySubscriptionIssueData(nonZeroRatePlanChargeDatas, subscription)
+    } yield SubscriptionData(
+      productType,
+      annualIssueLimitPerEdition * editionDaysOfWeek.size,
+      editionDaysOfWeek,
+      subscriptionIssueData,
+    )
   }
 
-  private def createSubscriptionData(
+  class MySubscriptionIssueData(
       nonZeroRatePlanChargeDatas: List[RatePlanChargeData],
-      zuoraProductType: ZuoraProductType,
-      productAnnualIssueLimitPerEdition: Int,
       subscription: Subscription,
-  ): SubscriptionData = {
-    new SubscriptionData {
-      def issueDataForDate(issueDate: LocalDate): Either[ZuoraApiFailure, IssueData] = {
-        for {
-          ratePlanChargeData <- ratePlanChargeDataForDate(nonZeroRatePlanChargeDatas, issueDate)
-          billingPeriod <- ratePlanChargeData.billingSchedule.billDatesCoveringDate(issueDate)
-        } yield {
-          applyAnyDiscounts(IssueData(issueDate, billingPeriod, ratePlanChargeData.issueCreditAmount))
-        }
+  ) extends SubscriptionIssueData {
+
+    def issueDataForDate(issueDate: LocalDate): Either[ZuoraApiFailure, IssueData] = {
+      for {
+        ratePlanChargeData <- ratePlanChargeDataForDate(nonZeroRatePlanChargeDatas, issueDate)
+        billingPeriod <- ratePlanChargeData.billingSchedule.billDatesCoveringDate(issueDate)
+      } yield {
+        applyAnyDiscounts(IssueData(issueDate, billingPeriod, ratePlanChargeData.issueCreditAmount))
       }
-
-      // Calculate credit by taking into account potential discounts, otherwise return original credit
-      def applyAnyDiscounts(issueData: IssueData): IssueData = {
-        import issueData._
-
-        def isActiveDiscount(start: LocalDate, end: LocalDate): Boolean =
-          (start.isEqual(issueDate) || start.isBefore(issueDate)) && end.isAfter(issueDate)
-
-        val discounts: List[Double] =
-          subscription.ratePlans.iterator
-            .filter(_.productName == "Discounts")
-            .flatMap(
-              _.ratePlanCharges.map(rpc => (rpc.discountPercentage, rpc.effectiveStartDate, rpc.effectiveEndDate)),
-            )
-            .collect { case (percent, start, end) if percent.isDefined && isActiveDiscount(start, end) => percent }
-            .flatten
-            .map(_ / 100)
-            .toList
-
-        def verify(discountedCredit: Double): Double = {
-          discountedCredit
-            .tap(v =>
-              assert(abs(v) <= abs(issueData.credit), "Discounted credit should not be more than un-discounted"),
-            )
-            .tap(v => assert(v <= 0, "Credit should be negative"))
-            .tap(v =>
-              assert(v.toString.dropWhile(_ != '.').tail.length <= 2, "Credit should have up to two decimal places"),
-            )
-            // an arbitrarily high threshold - any discount higher than this is probably a mistaken calculation
-            .tap(v => assert(abs(v) < 15.0, "Credit should not go beyond maximum bound"))
-            .tap(v =>
-              if (discounts.isEmpty)
-                assert(v == issueData.credit, "Credit should not be affected if there are no discounts"),
-            )
-        }
-
-        discounts
-          .foldLeft(issueData.credit) { case (acc, next) => acc * (1 - next) }
-          .pipe(round2Places)
-          .pipe(verify)
-          .pipe(discountedCredit => issueData.copy(credit = discountedCredit))
-      }
-
-      def issueDataForPeriod(startDateInclusive: LocalDate, endDateInclusive: LocalDate): List[IssueData] = {
-        nonZeroRatePlanChargeDatas
-          .flatMap(_.getIssuesForPeriod(startDateInclusive, endDateInclusive))
-          .map(applyAnyDiscounts)
-          .sortBy(_.issueDate)(Ordering.fromLessThan(_.isBefore(_)))
-      }
-
-      override def productType: ZuoraProductType = {
-        zuoraProductType
-      }
-
-      override def subscriptionAnnualIssueLimit: Int = {
-        productAnnualIssueLimitPerEdition * editionDaysOfWeek.size
-      }
-
-      override def editionDaysOfWeek: List[DayOfWeek] =
-        nonZeroRatePlanChargeDatas.map(_.issueDayOfWeek).distinct
     }
+
+    // Calculate credit by taking into account potential discounts, otherwise return original credit
+    def applyAnyDiscounts(issueData: IssueData): IssueData = {
+      import issueData._
+
+      def isActiveDiscount(start: LocalDate, end: LocalDate): Boolean =
+        (start.isEqual(issueDate) || start.isBefore(issueDate)) && end.isAfter(issueDate)
+
+      val discounts: List[Double] =
+        subscription.ratePlans.iterator
+          .filter(_.productName == "Discounts")
+          .flatMap(
+            _.ratePlanCharges.map(rpc => (rpc.discountPercentage, rpc.effectiveStartDate, rpc.effectiveEndDate)),
+          )
+          .collect { case (percent, start, end) if percent.isDefined && isActiveDiscount(start, end) => percent }
+          .flatten
+          .map(_ / 100)
+          .toList
+
+      def verify(discountedCredit: Double): Double = {
+        discountedCredit
+          .tap(v => assert(abs(v) <= abs(issueData.credit), "Discounted credit should not be more than un-discounted"))
+          .tap(v => assert(v <= 0, "Credit should be negative"))
+          .tap(v =>
+            assert(v.toString.dropWhile(_ != '.').tail.length <= 2, "Credit should have up to two decimal places"),
+          )
+          // an arbitrarily high threshold - any discount higher than this is probably a mistaken calculation
+          .tap(v => assert(abs(v) < 15.0, "Credit should not go beyond maximum bound"))
+          .tap(v =>
+            if (discounts.isEmpty)
+              assert(v == issueData.credit, "Credit should not be affected if there are no discounts"),
+          )
+      }
+
+      discounts
+        .foldLeft(issueData.credit) { case (acc, next) => acc * (1 - next) }
+        .pipe(round2Places)
+        .pipe(verify)
+        .pipe(discountedCredit => issueData.copy(credit = discountedCredit))
+    }
+
+    def issueDataForPeriod(startDateInclusive: LocalDate, endDateInclusive: LocalDate): List[IssueData] = {
+      nonZeroRatePlanChargeDatas
+        .flatMap(_.getIssuesForPeriod(startDateInclusive, endDateInclusive))
+        .map(applyAnyDiscounts)
+        .sortBy(_.issueDate)(Ordering.fromLessThan(_.isBefore(_)))
+    }
+
   }
 
   private def getSupportedRatePlanCharge(
