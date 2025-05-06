@@ -34,6 +34,10 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
               "ExpirationInDays": 28,
               "Status": "Enabled",
             },
+            {
+              "Prefix": "Public_keys/",
+              "Status": "Enabled",
+            },
           ],
         },
         "Tags": [
@@ -1729,6 +1733,10 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
           "Rules": [
             {
               "ExpirationInDays": 28,
+              "Status": "Enabled",
+            },
+            {
+              "Prefix": "Public_keys/",
               "Status": "Enabled",
             },
           ],
