@@ -174,20 +174,18 @@ class Steps(log: String => Unit) {
         .map { case id :: termEndDate :: Nil => cancelSub.run(id, dateToCancel(LocalDate.parse(termEndDate), today())) }
         .toList
         .sequence
-      accountsToCancel = queryResults(accounts_to_cancel).toList
-      _ <- accountsToCancel
+      _ <- queryResults(accounts_to_cancel)
         .map { case id :: creditBalance :: Nil =>
-          creditBalance.toDouble match {
-            case 0 => cancelAccount.run(id)
-            case _ =>
-              removeAccountCrm.run(id) // can't cancel an account with a credit balance, so just remove the CRMId
-          }
+          for {
+            _ <- creditBalance.toDouble match {
+              case 0 => cancelAccount.run(id)
+              case _ =>
+                removeAccountCrm.run(id) // can't cancel an account with a credit balance, so just remove the CRMId
+            }
+            _ <- deleteAccount.run(id)
+          } yield ()
         }
-        .sequence
-      _ <- accountsToCancel
-        .map { case id :: _ =>
-          deleteAccount.run(id)
-        }
+        .toList
         .sequence
     } yield ()
     zRes.toDisjunction.leftMap(failure =>
