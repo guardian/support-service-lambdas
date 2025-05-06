@@ -82,6 +82,7 @@ object Handler extends RequestStreamHandler {
       cancelSub = CancelSub(log, requests)
       cancelAccount = CancelAccount(log, requests)
       removeAccountCrm = RemoveAccountCrm(log, requests)
+      deleteAccount = DeleteAccount(log, requests)
       downloadRequests = ZuoraAquaRequestMaker(downloadResponse, zuoraRestConfig)
       aquaQuerier = Querier.lowLevel(downloadRequests) _
       getJobResult = GetJobResult(downloadRequests.get[AquaJobResponse]) _
@@ -92,6 +93,7 @@ object Handler extends RequestStreamHandler {
         cancelSub,
         cancelAccount,
         removeAccountCrm,
+        deleteAccount,
         () => RawEffects.now().toLocalDate,
       )
     } yield ()
@@ -132,6 +134,7 @@ class Steps(log: String => Unit) {
       cancelSub: CancelSub,
       cancelAccount: CancelAccount,
       removeAccountCrm: RemoveAccountCrm,
+      deleteAccount: DeleteAccount,
       today: () => LocalDate,
   ): Either[Throwable, Unit] = {
     val subs_to_cancel = "subs_to_cancel"
@@ -171,7 +174,8 @@ class Steps(log: String => Unit) {
         .map { case id :: termEndDate :: Nil => cancelSub.run(id, dateToCancel(LocalDate.parse(termEndDate), today())) }
         .toList
         .sequence
-      _ <- queryResults(accounts_to_cancel)
+      accountsToCancel = queryResults(accounts_to_cancel).toList
+      _ <- accountsToCancel
         .map { case id :: creditBalance :: Nil =>
           creditBalance.toDouble match {
             case 0 => cancelAccount.run(id)
@@ -179,7 +183,11 @@ class Steps(log: String => Unit) {
               removeAccountCrm.run(id) // can't cancel an account with a credit balance, so just remove the CRMId
           }
         }
-        .toList
+        .sequence
+      _ <- accountsToCancel
+        .map { case id :: _ =>
+          deleteAccount.run(id)
+        }
         .sequence
     } yield ()
     zRes.toDisjunction.leftMap(failure =>
@@ -276,6 +284,14 @@ case class RemoveAccountCrm(log: String => Unit, restRequestMaker: RestRequestMa
   def run(accountId: String): ClientFailableOp[Unit] = {
     println(s"UNLINK ACC: $accountId")
     restRequestMaker.put[RemoveAccountCrmRequest, Unit](RemoveAccountCrmRequest(), s"object/account/$accountId")
+  }
+
+}
+
+case class DeleteAccount(log: String => Unit, restRequestMaker: RestRequestMaker.Requests) {
+  def run(accountId: String): ClientFailableOp[Unit] = {
+    log(s"Delete account: $accountId")
+    restRequestMaker.delete[Unit](s"accounts/$accountId")
   }
 
 }
