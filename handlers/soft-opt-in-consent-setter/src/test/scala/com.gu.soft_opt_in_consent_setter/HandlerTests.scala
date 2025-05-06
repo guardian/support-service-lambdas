@@ -86,6 +86,10 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
           |    "consented" : true
           |  },
           |  {
+          |    "id" : "similar_guardian_products",
+          |    "consented" : true
+          |  },
+          |  {
           |    "id" : "supporter_newsletter",
           |    "consented" : true
           |  }
@@ -165,6 +169,10 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
         """[
           |  {
           |    "id" : "your_support_onboarding",
+          |    "consented" : false
+          |  },
+          |  {
+          |    "id" : "similar_guardian_products",
           |    "consented" : false
           |  },
           |  {
@@ -263,6 +271,10 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
           |    "consented" : true
           |  },
           |  {
+          |    "id" : "similar_guardian_products",
+          |    "consented" : true
+          |  },
+          |  {
           |    "id" : "supporter_newsletter",
           |    "consented" : true
           |  },
@@ -303,16 +315,16 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
           |    "consented" : true
           |  },
           |  {
+          |    "id" : "similar_guardian_products",
+          |    "consented" : false
+          |  },
+          |  {
           |    "id" : "supporter_newsletter",
           |    "consented" : true
           |  },
           |  {
           |    "id" : "guardian_weekly_newsletter",
           |    "consented" : true
-          |  },
-          |  {
-          |    "id" : "similar_guardian_products",
-          |    "consented" : false
           |  }
           |]""".stripMargin,
       )
@@ -347,15 +359,15 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
           |    "consented" : true
           |  },
           |  {
+          |    "id" : "similar_guardian_products",
+          |    "consented" : true
+          |  },
+          |  {
           |    "id" : "supporter_newsletter",
           |    "consented" : true
           |  },
           |  {
           |    "id" : "guardian_weekly_newsletter",
-          |    "consented" : true
-          |  },
-          |  {
-          |    "id" : "similar_guardian_products",
           |    "consented" : true
           |  }
           |]""".stripMargin,
