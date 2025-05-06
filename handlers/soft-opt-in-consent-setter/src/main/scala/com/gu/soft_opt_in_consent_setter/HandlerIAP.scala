@@ -263,7 +263,8 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
         messageBody.productName,
         productNames.toSet,
       )
-      _ <- sendCancellationConsents(messageBody.identityId, consents)
+      consentWithoutSimilarProducts = consentsCalculator.removeSimilarGuardianProductFromSet(consents)
+      _ <- sendCancellationConsents(messageBody.identityId, consentWithoutSimilarProducts)
     } yield ()
   }
 
