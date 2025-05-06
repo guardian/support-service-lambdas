@@ -120,6 +120,32 @@ export const getContributionRefundAmount = (
 	return contributionRefundAmount ?? 0;
 };
 
+function getDiscountResponse(
+	invoice: ZuoraPreviewResponseInvoice,
+	possibleDiscount: Discount,
+	supporterPlusSubscriptionInvoiceItem: {
+		productRatePlanChargeId: string;
+		unitPrice: number;
+	},
+) {
+	const discountInvoiceItem = invoice.invoiceItems.find(
+		(invoiceItem) =>
+			invoiceItem.productRatePlanChargeId ===
+			possibleDiscount.productRatePlanChargeId,
+	);
+	return discountInvoiceItem
+		? {
+				discountedPrice:
+					supporterPlusSubscriptionInvoiceItem.unitPrice +
+					(discountInvoiceItem.amountWithoutTax +
+						discountInvoiceItem.taxAmount),
+				discountPercentage: possibleDiscount.discountPercentage,
+				upToPeriods: possibleDiscount.upToPeriods,
+				upToPeriodsType: possibleDiscount.upToPeriodsType,
+			}
+		: undefined;
+}
+
 export const previewResponseFromZuoraResponse = (
 	zuoraResponse: ZuoraPreviewResponse,
 	catalogInformation: CatalogInformation,
@@ -155,7 +181,15 @@ export const previewResponseFromZuoraResponse = (
 		'No supporter plus invoice item found in the preview response',
 	);
 
-	const response: PreviewResponse = {
+	const discount: SwitchDiscountResponse | undefined = possibleDiscount
+		? getDiscountResponse(
+				invoice,
+				possibleDiscount,
+				supporterPlusSubscriptionInvoiceItem,
+			)
+		: undefined;
+
+	return {
 		amountPayableToday: invoice.amount,
 		contributionRefundAmount,
 		supporterPlusPurchaseAmount:
@@ -164,28 +198,8 @@ export const previewResponseFromZuoraResponse = (
 		nextPaymentDate: zuoraDateFormat(
 			dayjs(supporterPlusSubscriptionInvoiceItem.serviceEndDate).add(1, 'days'),
 		),
+		discount,
 	};
-
-	if (possibleDiscount) {
-		const discountInvoiceItem = invoice.invoiceItems.find(
-			(invoiceItem) =>
-				invoiceItem.productRatePlanChargeId ===
-				possibleDiscount.productRatePlanChargeId,
-		);
-		if (discountInvoiceItem) {
-			response.discount = {
-				discountedPrice:
-					supporterPlusSubscriptionInvoiceItem.unitPrice +
-					(discountInvoiceItem.amountWithoutTax +
-						discountInvoiceItem.taxAmount),
-				discountPercentage: possibleDiscount.discountPercentage,
-				upToPeriods: possibleDiscount.upToPeriods,
-				upToPeriodsType: possibleDiscount.upToPeriodsType,
-			};
-		}
-	}
-
-	return response;
 };
 
 export const preview = async (
