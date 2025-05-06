@@ -73,7 +73,7 @@ class ToRecurringContributionImpl(
         .orElseFail(new Throwable(s"billingPeriod is null for rate plan charge $activeRatePlanCharge"))
 
       // Make sure that price is valid and acceptable
-      _ <- validatePrice(currency, billingPeriod, price)
+      _ <- validateOldMembershipPrice(currency, billingPeriod, price)
 
       updateRequestBody <- getRatePlans(
         billingPeriod,
@@ -206,17 +206,17 @@ class ToRecurringContributionImpl(
     if ratePlanCharge.chargedThroughDate.isDefined
   } yield (ratePlan, ratePlanCharge)).headOption
 
-  private def validatePrice(
+  private def validateOldMembershipPrice(
       currency: Currency,
       billingPeriod: BillingPeriod,
       price: BigDecimal,
   ): Task[Unit] = {
     val expectedPrices = Map(
-      "GBP" -> Map("month" -> 7, "year" -> 75),
-      "USD" -> Map("month" -> 9.99, "year" -> 120),
-      "EUR" -> Map("month" -> 9.99, "year" -> 95),
-      "AUD" -> Map("month" -> 14.99, "year" -> 160),
-      "CAD" -> Map("month" -> 12.99, "year" -> 120),
+      "GBP" -> Map("month" -> 5, "year" -> 49),
+      "USD" -> Map("month" -> 6.99, "year" -> 69),
+      "EUR" -> Map("month" -> 4.99, "year" -> 49),
+      "AUD" -> Map("month" -> 10, "year" -> 100),
+      "CAD" -> Map("month" -> 6.99, "year" -> 69),
     )
 
     val periodKey = billingPeriod match {
