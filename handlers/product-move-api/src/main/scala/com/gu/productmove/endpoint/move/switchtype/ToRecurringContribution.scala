@@ -71,9 +71,12 @@ class ToRecurringContributionImpl(
         .fromOption(activeRatePlanCharge.billingPeriod)
         .orElseFail(new Throwable(s"billingPeriod is null for rate plan charge $activeRatePlanCharge"))
 
+      // Make sure that price is valid and acceptable
+      _ <- validatePrice(currency, billingPeriod, price)
+
       updateRequestBody <- getRatePlans(
         billingPeriod,
-        previousAmount,
+        price,
         subscription.ratePlans,
         activeRatePlanCharge.chargedThroughDate.get,
       ).map { case (addRatePlan, removeRatePlan) =>
@@ -167,7 +170,7 @@ class ToRecurringContributionImpl(
 
   private def getRatePlans(
       billingPeriod: BillingPeriod,
-      previousAmount: Double,
+      price: BigDecimal,
       ratePlanAmendments: Seq[GetSubscription.RatePlan],
       chargedThroughDate: LocalDate,
   ): Task[(List[AddRatePlan], List[RemoveRatePlan])] =
@@ -176,7 +179,7 @@ class ToRecurringContributionImpl(
         getRecurringContributionRatePlanId(stage, billingPeriod),
       )
 
-      overrideAmount = previousAmount
+      overrideAmount = price
 
       chargeOverride = ChargeOverrides(
         price = Some(overrideAmount),
@@ -202,4 +205,36 @@ class ToRecurringContributionImpl(
     if ratePlanCharge.chargedThroughDate.isDefined
   } yield (ratePlan, ratePlanCharge)).headOption
 
+  private def validatePrice(
+      currency: Currency,
+      billingPeriod: BillingPeriod,
+      price: BigDecimal,
+  ): Task[Unit] = {
+    val expectedPrices = Map(
+      "GBP" -> Map("month" -> 7, "year" -> 75),
+      "USD" -> Map("month" -> 9.99, "year" -> 120),
+      "EUR" -> Map("month" -> 9.99, "year" -> 95),
+      "AUD" -> Map("month" -> 14.99, "year" -> 160),
+      "CAD" -> Map("month" -> 12.99, "year" -> 120),
+    )
+
+    val periodKey = billingPeriod match {
+      case Monthly => "month"
+      case Annual => "year"
+      case _ => throw new IllegalArgumentException(s"Unsupported billing period: $billingPeriod")
+    }
+
+    expectedPrices.get(currency.symbol) match {
+      case Some(prices) if prices.get(periodKey).contains(price.toDouble) =>
+        ZIO.unit
+      case _ =>
+        ZIO.fail(
+          new Throwable(
+            s"Invalid price $price for currency ${currency.symbol} and billing period $billingPeriod. Expected: ${expectedPrices
+                .get(currency.symbol)
+                .flatMap(_.get(periodKey))}",
+          ),
+        )
+    }
+  }
 }
