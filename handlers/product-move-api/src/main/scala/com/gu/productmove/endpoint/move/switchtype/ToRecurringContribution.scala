@@ -1,5 +1,6 @@
 package com.gu.productmove.endpoint.move.switchtype
 
+import com.gu.i18n.Currency
 import com.gu.newproduct.api.productcatalog.ZuoraIds.zuoraIdsForStage
 import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.productmove.*
