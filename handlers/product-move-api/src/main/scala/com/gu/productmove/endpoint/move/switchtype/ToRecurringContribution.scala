@@ -212,11 +212,11 @@ class ToRecurringContributionImpl(
       price: BigDecimal,
   ): Task[Unit] = {
     val expectedPrices = Map(
-      Currency.GBP -> Map("month" -> 7, "year" -> 75),
-      Currency.USD -> Map("month" -> 9.99, "year" -> 120),
-      Currency.EUR -> Map("month" -> 9.99, "year" -> 95),
-      Currency.AUD -> Map("month" -> 14.99, "year" -> 160),
-      Currency.CAD -> Map("month" -> 12.99, "year" -> 120),
+      "GBP" -> Map("month" -> 7, "year" -> 75),
+      "USD" -> Map("month" -> 9.99, "year" -> 120),
+      "EUR" -> Map("month" -> 9.99, "year" -> 95),
+      "AUD" -> Map("month" -> 14.99, "year" -> 160),
+      "CAD" -> Map("month" -> 12.99, "year" -> 120),
     )
 
     val periodKey = billingPeriod match {
@@ -225,17 +225,20 @@ class ToRecurringContributionImpl(
       case _ => throw new IllegalArgumentException(s"Unsupported billing period: $billingPeriod")
     }
 
-    expectedPrices.get(currency) match {
+    val currencyCode = currency.iso
+
+    expectedPrices.get(currencyCode) match {
       case Some(prices) if prices.get(periodKey).contains(price.toDouble) =>
         ZIO.unit
       case _ =>
         ZIO.fail(
           new Throwable(
-            s"Invalid price $price for currency ${currency.iso} and billing period $billingPeriod. Expected: ${expectedPrices
-                .get(currency)
+            s"Invalid price $price for currency $currencyCode and billing period $billingPeriod. Expected: ${expectedPrices
+                .get(currencyCode)
                 .flatMap(_.get(periodKey))}",
           ),
         )
     }
   }
+
 }
