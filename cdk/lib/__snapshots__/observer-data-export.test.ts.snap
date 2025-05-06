@@ -32,6 +32,17 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
           "Rules": [
             {
               "ExpirationInDays": 28,
+              "Prefix": "Observer_newsletter_eligible/",
+              "Status": "Enabled",
+            },
+            {
+              "ExpirationInDays": 28,
+              "Prefix": "Observer_newsletter_subscribers/",
+              "Status": "Enabled",
+            },
+            {
+              "ExpirationInDays": 28,
+              "Prefix": "Observer_newspaper_subscribers/",
               "Status": "Enabled",
             },
           ],
@@ -1729,6 +1740,17 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
           "Rules": [
             {
               "ExpirationInDays": 28,
+              "Prefix": "Observer_newsletter_eligible/",
+              "Status": "Enabled",
+            },
+            {
+              "ExpirationInDays": 28,
+              "Prefix": "Observer_newsletter_subscribers/",
+              "Status": "Enabled",
+            },
+            {
+              "ExpirationInDays": 28,
+              "Prefix": "Observer_newspaper_subscribers/",
               "Status": "Enabled",
             },
           ],
