@@ -1,10 +1,10 @@
 package com.gu.productmove.endpoint.move.switchtype
 
+import com.gu.i18n.Currency
 import com.gu.newproduct.api.productcatalog.ZuoraIds.zuoraIdsForStage
 import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.productmove.*
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.endpoint.available.Currency
 import com.gu.productmove.endpoint.move.ProductMoveEndpoint.SwitchType
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.*
 import com.gu.productmove.endpoint.move.stringFor
@@ -212,11 +212,11 @@ class ToRecurringContributionImpl(
       price: BigDecimal,
   ): Task[Unit] = {
     val expectedPrices = Map(
-      "GBP" -> Map("month" -> 7, "year" -> 75),
-      "USD" -> Map("month" -> 9.99, "year" -> 120),
-      "EUR" -> Map("month" -> 9.99, "year" -> 95),
-      "AUD" -> Map("month" -> 14.99, "year" -> 160),
-      "CAD" -> Map("month" -> 12.99, "year" -> 120),
+      Currency.GBP -> Map("month" -> 7, "year" -> 75),
+      Currency.USD -> Map("month" -> 9.99, "year" -> 120),
+      Currency.EUR -> Map("month" -> 9.99, "year" -> 95),
+      Currency.AUD -> Map("month" -> 14.99, "year" -> 160),
+      Currency.CAD -> Map("month" -> 12.99, "year" -> 120),
     )
 
     val periodKey = billingPeriod match {
@@ -225,14 +225,14 @@ class ToRecurringContributionImpl(
       case _ => throw new IllegalArgumentException(s"Unsupported billing period: $billingPeriod")
     }
 
-    expectedPrices.get(currency.symbol) match {
+    expectedPrices.get(currency) match {
       case Some(prices) if prices.get(periodKey).contains(price.toDouble) =>
         ZIO.unit
       case _ =>
         ZIO.fail(
           new Throwable(
-            s"Invalid price $price for currency ${currency.symbol} and billing period $billingPeriod. Expected: ${expectedPrices
-                .get(currency.symbol)
+            s"Invalid price $price for currency ${currency.iso} and billing period $billingPeriod. Expected: ${expectedPrices
+                .get(currency)
                 .flatMap(_.get(periodKey))}",
           ),
         )
