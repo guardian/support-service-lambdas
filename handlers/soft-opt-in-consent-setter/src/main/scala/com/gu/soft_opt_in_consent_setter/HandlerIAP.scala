@@ -152,14 +152,16 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
   ): Either[SoftOptInError, Unit] = {
     val mappingProductName = ConsentsMapping.productMappings(message.productName, message.printOptions)
     for {
-      softConsentKeys <- consentsCalculator.getSoftOptInsByProduct(mappingProductName)
-      softConsents = softConsentKeys.map(_ -> true).toMap
+      consentKeys <- consentsCalculator.getSoftOptInsByProduct(mappingProductName)
+      implicitConsents = consentKeys.map(_ -> true).toMap
+
       explicitConsents =
         for {
           userConsentsOverrides <- message.userConsentsOverrides
           consented <- userConsentsOverrides.similarGuardianProducts
         } yield similarGuardianProducts -> consented
-      consentsBody = consentsCalculator.buildConsentsBody(softConsents ++ explicitConsents)
+
+      consentsBody = consentsCalculator.buildConsentsBody(implicitConsents ++ explicitConsents)
 
       _ = logger.info(
         s"(acquisition) Sending consents request for identityId ${message.identityId} with payload: $consentsBody",
