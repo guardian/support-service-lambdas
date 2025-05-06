@@ -440,7 +440,10 @@ export class SoftOptInConsentSetter extends GuStack {
 						identityId: aws_events.EventField.fromPath('$.detail.identityId'),
 						eventType: 'Acquisition',
 						productName: aws_events.EventField.fromPath(
-							'$.detail.ZuoraProductName',
+							'$.detail.product',
+						),
+						printOptions: aws_events.EventField.fromPath(
+							'$.detail.printOptions',
 						),
 						previousProductName: null,
 					}),
