@@ -2,7 +2,6 @@ package com.gu.cleaner
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream}
 import java.time.LocalDate
-
 import cats.syntax.all._
 import com.amazonaws.services.lambda.runtime._
 import com.gu.aws.AwsCloudWatch
@@ -10,6 +9,7 @@ import com.gu.aws.AwsCloudWatch._
 import com.gu.cleaner.CancelAccount.CancelAccountRequest
 import com.gu.cleaner.RemoveAccountCrm.RemoveAccountCrmRequest
 import com.gu.cleaner.CancelSub._
+import com.gu.cleaner.DeleteAccount.DeleteAccountRequest
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.RestRequestMaker
@@ -81,6 +81,7 @@ object Handler extends RequestStreamHandler {
       requests = ZuoraRestRequestMaker(response, zuoraRestConfig)
       cancelSub = CancelSub(log, requests)
       cancelAccount = CancelAccount(log, requests)
+      deleteAccount = DeleteAccount(log, requests)
       removeAccountCrm = RemoveAccountCrm(log, requests)
       downloadRequests = ZuoraAquaRequestMaker(downloadResponse, zuoraRestConfig)
       aquaQuerier = Querier.lowLevel(downloadRequests) _
@@ -91,6 +92,7 @@ object Handler extends RequestStreamHandler {
         downloadRequests,
         cancelSub,
         cancelAccount,
+        deleteAccount,
         removeAccountCrm,
         () => RawEffects.now().toLocalDate,
       )
@@ -131,6 +133,7 @@ class Steps(log: String => Unit) {
       downloadRequests: RestRequestMaker.Requests,
       cancelSub: CancelSub,
       cancelAccount: CancelAccount,
+      deleteAccount: DeleteAccount,
       removeAccountCrm: RemoveAccountCrm,
       today: () => LocalDate,
   ): Either[Throwable, Unit] = {
@@ -174,7 +177,9 @@ class Steps(log: String => Unit) {
       _ <- queryResults(accounts_to_cancel)
         .map { case id :: creditBalance :: Nil =>
           creditBalance.toDouble match {
-            case 0 => cancelAccount.run(id)
+            case 0 =>
+              cancelAccount.run(id)
+              deleteAccount.run(id)
             case _ =>
               removeAccountCrm.run(id) // can't cancel an account with a credit balance, so just remove the CRMId
           }
@@ -261,6 +266,21 @@ case class CancelAccount(log: String => Unit, restRequestMaker: RestRequestMaker
   def run(accountId: String): ClientFailableOp[Unit] = {
     println(s"CANCEL ACC: $accountId")
     restRequestMaker.put[CancelAccountRequest, Unit](CancelAccountRequest(), s"object/account/$accountId")
+  }
+
+}
+
+object DeleteAccount {
+  case class DeleteAccountRequest(
+      Status: String = "Deleted",
+  )
+  implicit val writes = Json.writes[DeleteAccountRequest]
+
+}
+case class DeleteAccount(log: String => Unit, restRequestMaker: RestRequestMaker.Requests) {
+  def run(accountId: String): ClientFailableOp[Unit] = {
+    println(s"CANCEL ACC: $accountId")
+    restRequestMaker.delete[Unit](s"object/account/$accountId")
   }
 
 }
