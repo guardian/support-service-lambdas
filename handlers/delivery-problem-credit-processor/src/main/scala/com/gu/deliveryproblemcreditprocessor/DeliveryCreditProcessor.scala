@@ -12,13 +12,7 @@ import com.gu.salesforce.{RecordsWrapperCaseClass, SFAuthConfig}
 import com.gu.util.Logging
 import com.gu.util.config.ConfigReads.ConfigFailure
 import com.gu.util.config.{ConfigLocation, LoadConfigModule, Stage}
-import com.gu.zuora.ZuoraProductTypes.{
-  GuardianWeekly,
-  NewspaperHomeDelivery,
-  NewspaperNationalDelivery,
-  TierThree,
-  ZuoraProductType,
-}
+import com.gu.zuora.ZuoraProductTypes._
 import com.gu.zuora.subscription._
 import com.gu.zuora.{AccessToken, HolidayStopProcessorZuoraConfig, Zuora}
 import io.circe.generic.auto._
@@ -31,13 +25,11 @@ import zio.duration._
 import zio.{RIO, Task, ZIO}
 
 import java.time.{DayOfWeek, LocalDate, LocalDateTime}
-import scala.collection.parallel.CollectionConverters.ImmutableIterableIsParallelizable
-import scala.collection.parallel.ForkJoinTaskSupport
 import scala.concurrent.ExecutionContext
 
 object DeliveryCreditProcessor extends Logging {
 
-  private implicit val contextShift = IO.contextShift(ExecutionContext.global)
+  private implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
   private val zuoraSttpBackend = HttpURLConnectionBackend()
   private val sfSttpBackend = AsyncHttpClientCatsBackend.usingClient[IO](new DefaultAsyncHttpClient())
 
@@ -148,7 +140,7 @@ object DeliveryCreditProcessor extends Logging {
       request: DeliveryCreditRequest,
   ): ZuoraApiResponse[SubscriptionUpdate] =
     SubscriptionUpdate(
-      creditProduct(subscription),
+      creditProduct.forSubscription(subscription),
       subscription,
       account,
       AffectedPublicationDate(request.Delivery_Date__c),
