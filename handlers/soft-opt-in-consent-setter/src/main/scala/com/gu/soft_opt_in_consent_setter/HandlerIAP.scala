@@ -154,15 +154,12 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
     for {
       consentKeys <- consentsCalculator.getSoftOptInsByProduct(mappingProductName)
       implicitConsents = consentKeys.map(_ -> true).toMap
-
-      explicitConsents =
-        for {
-          userConsentsOverrides <- message.userConsentsOverrides
-          consented <- userConsentsOverrides.similarGuardianProducts
-        } yield similarGuardianProducts -> consented
-
-      consentsBody = consentsCalculator.buildConsentsBody(implicitConsents ++ explicitConsents)
-
+      explicitConsents: Map[String, Boolean] =
+        message.userConsentsOverrides
+          .flatMap(_.similarGuardianProducts.map(similarGuardianProducts -> _))
+          .toMap
+      mergedConsents = implicitConsents ++ explicitConsents
+      consentsBody = consentsCalculator.buildConsentsBody(mergedConsents)
       _ = logger.info(
         s"(acquisition) Sending consents request for identityId ${message.identityId} with payload: $consentsBody",
       )
