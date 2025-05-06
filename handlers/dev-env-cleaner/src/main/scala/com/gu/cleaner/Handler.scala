@@ -9,7 +9,6 @@ import com.gu.aws.AwsCloudWatch._
 import com.gu.cleaner.CancelAccount.CancelAccountRequest
 import com.gu.cleaner.RemoveAccountCrm.RemoveAccountCrmRequest
 import com.gu.cleaner.CancelSub._
-import com.gu.cleaner.DeleteAccount.DeleteAccountRequest
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.util.config.{LoadConfigModule, Stage}
 import com.gu.util.resthttp.RestRequestMaker
@@ -270,13 +269,6 @@ case class CancelAccount(log: String => Unit, restRequestMaker: RestRequestMaker
 
 }
 
-object DeleteAccount {
-  case class DeleteAccountRequest(
-      Status: String = "Deleted",
-  )
-  implicit val writes = Json.writes[DeleteAccountRequest]
-
-}
 case class DeleteAccount(log: String => Unit, restRequestMaker: RestRequestMaker.Requests) {
   def run(accountId: String): ClientFailableOp[Unit] = {
     println(s"CANCEL ACC: $accountId")
