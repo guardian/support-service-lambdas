@@ -788,11 +788,12 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
             "Id": "Target0",
             "InputTransformer": {
               "InputPathsMap": {
-                "detail-ZuoraProductName": "$.detail.ZuoraProductName",
                 "detail-identityId": "$.detail.identityId",
+                "detail-printOptions": "$.detail.printOptions",
+                "detail-product": "$.detail.product",
                 "detail-zuoraSubscriptionNumber": "$.detail.zuoraSubscriptionNumber",
               },
-              "InputTemplate": "{"subscriptionId":<detail-zuoraSubscriptionNumber>,"identityId":<detail-identityId>,"eventType":"Acquisition","productName":<detail-ZuoraProductName>,"previousProductName":null}",
+              "InputTemplate": "{"subscriptionId":<detail-zuoraSubscriptionNumber>,"identityId":<detail-identityId>,"eventType":"Acquisition","productName":<detail-product>,"printOptions":<detail-printOptions>,"previousProductName":null}",
             },
           },
         ],
