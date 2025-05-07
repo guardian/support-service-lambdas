@@ -89,7 +89,7 @@ object Handler extends LazyLogging {
         val updateResult =
           for {
             consents <- consentsCalculator.getSoftOptInsByProduct(sub.Product__c)
-            consentsBody = consentsCalculator.buildConsentsBody(consents, state = true)
+            consentsBody = consentsCalculator.buildConsentsBody(consents.map(_ -> true).toMap)
             _ = logger.info(
               s"Sending consents request - sub ${sub.Name}, Identity id ${sub.Buyer__r.IdentityID__c}, product ${sub.Product__c} with body $consentsBody",
             )
@@ -194,7 +194,7 @@ object Handler extends LazyLogging {
       if (consents.nonEmpty) {
         sendConsentsReq(
           identityId,
-          consentsCalculator.buildConsentsBody(consents, state = false),
+          consentsCalculator.buildConsentsBody(consents.map(_ -> false).toMap),
         )
       } else {
         Right(())
