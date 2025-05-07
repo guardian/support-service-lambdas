@@ -183,7 +183,7 @@ object Handler extends LazyLogging {
       if (consents.nonEmpty) {
         sendConsentsReq(
           identityId,
-          consentsCalculator.buildConsentsBody(consents, state = false),
+          consentsCalculator.buildConsentsBody(consents.map(_ -> false).toMap),
         )
       } else {
         Right(())
