@@ -214,7 +214,8 @@ object Handler extends LazyLogging {
               sub.Product__c,
               associatedActiveNonGiftSubs.map(_.Product__c).toSet,
             )
-            _ <- sendCancellationConsents(sub.Buyer__r.IdentityID__c, consents)
+            consentWithoutSimilarProducts = consentsCalculator.removeSimilarGuardianProductFromSet(consents)
+            _ <- sendCancellationConsents(sub.Buyer__r.IdentityID__c, consentWithoutSimilarProducts)
           } yield ()
 
         logErrors(updateResult)
