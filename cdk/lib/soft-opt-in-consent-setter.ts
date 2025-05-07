@@ -435,6 +435,9 @@ export class SoftOptInConsentSetter extends GuStack {
 							'$.detail.printOptions',
 						),
 						previousProductName: null,
+						userConsentsOverrides: {
+							similarGuardianProducts: aws_events.EventField.fromPath('$.detail.similarProductsConsent'),
+						},
 					}),
 				}),
 			],
