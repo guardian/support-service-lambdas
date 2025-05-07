@@ -5,6 +5,7 @@ import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
 import {
 	aws_dynamodb,
+	aws_events,
 	aws_lambda,
 	CfnCondition,
 	Duration,
@@ -12,7 +13,8 @@ import {
 	Tags,
 } from 'aws-cdk-lib';
 import { CfnAlarm } from 'aws-cdk-lib/aws-cloudwatch';
-import { Schedule } from 'aws-cdk-lib/aws-events';
+import { EventBus, Rule, Schedule } from 'aws-cdk-lib/aws-events';
+import { SqsQueue } from 'aws-cdk-lib/aws-events-targets';
 import {
 	AccountPrincipal,
 	Effect,
@@ -30,6 +32,7 @@ import type { IConstruct } from 'constructs';
 export interface SoftOptInConsentSetterProps extends GuStackProps {
 	mobileAccountIdSSMParam: string;
 	schedule: string;
+	acquisitionsEventBusArn: string;
 }
 
 export class SoftOptInConsentSetter extends GuStack {
@@ -401,6 +404,45 @@ export class SoftOptInConsentSetter extends GuStack {
 				logicalId: resource.forcedLogicalId,
 				reason: 'Retaining a stateful resource previously defined in YAML',
 			});
+		});
+
+		// Acquisitions Event Bus (defined in support-frontend CDK)
+		const acquisitionsEventBus = EventBus.fromEventBusArn(
+			this,
+			'AcquisitionsEventBus',
+			props.acquisitionsEventBusArn,
+		);
+
+		// Rules
+		new Rule(this, 'SoftOptInToSQSRule', {
+			description:
+				'Send all events received via support-workers onto soft opt-in SQS queue',
+			eventBus: acquisitionsEventBus,
+			eventPattern: {
+				region: ['eu-west-1'],
+				source: ['support-workers.1'],
+			},
+			targets: [
+				new SqsQueue(softOptInsQueue, {
+					message: aws_events.RuleTargetInput.fromObject({
+						subscriptionId: aws_events.EventField.fromPath(
+							'$.detail.zuoraSubscriptionNumber',
+						),
+						identityId: aws_events.EventField.fromPath('$.detail.identityId'),
+						eventType: 'Acquisition',
+						productName: aws_events.EventField.fromPath('$.detail.product'),
+						printOptions: aws_events.EventField.fromPath(
+							'$.detail.printOptions',
+						),
+						previousProductName: null,
+						userConsentsOverrides: {
+							similarGuardianProducts: aws_events.EventField.fromPath(
+								'$.detail.similarProductsConsent',
+							),
+						},
+					}),
+				}),
+			],
 		});
 	}
 }
