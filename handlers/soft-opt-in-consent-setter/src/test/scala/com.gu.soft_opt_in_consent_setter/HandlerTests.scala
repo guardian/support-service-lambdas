@@ -58,9 +58,11 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
       productName = "Supporter Plus",
+      printOptions = None,
       previousProductName = Some("Contributor"),
       eventType = Switch,
       subscriptionId = "A-S12345678",
+      userConsentsOverrides = None,
     )
 
     val result = processProductSwitchSub(
@@ -98,9 +100,11 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
       productName = "Supporter Plus",
+      printOptions = None,
       previousProductName = None,
       eventType = Acquisition,
       subscriptionId = "A-S12345678",
+      userConsentsOverrides = None,
     )
 
     val result = processAcquiredSub(
@@ -125,7 +129,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
         """[
           |]""".stripMargin,
       )
-      .never
+      .never()
     mockGetMobileSubscriptions.expects("someIdentityId").returning(Right(mobileSubscriptions))
     mockSfConnector.getActiveSubs _ expects Seq("someIdentityId") returning Right(
       SFAssociatedSubResponse(
@@ -138,9 +142,11 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
       productName = "Supporter Plus",
+      printOptions = None,
       previousProductName = None,
       eventType = Cancellation,
       subscriptionId = "A-S12345678",
+      userConsentsOverrides = None,
     )
 
     val result = processCancelledSub(
@@ -184,9 +190,11 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
       productName = "Supporter Plus",
+      printOptions = None,
       previousProductName = None,
       eventType = Cancellation,
       subscriptionId = "A-S12345678",
+      userConsentsOverrides = None,
     )
 
     val result = processCancelledSub(
@@ -232,9 +240,11 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
       productName = "Supporter Plus",
+      printOptions = None,
       previousProductName = None,
       eventType = Cancellation,
       subscriptionId = "A-S12345678",
+      userConsentsOverrides = None,
     )
 
     val result = processCancelledSub(
@@ -275,9 +285,99 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
       productName = "Tier Three",
+      printOptions = None,
       previousProductName = None,
       eventType = Acquisition,
       subscriptionId = "A-S12345678",
+      userConsentsOverrides = None,
+    )
+
+    val result = processAcquiredSub(
+      testMessageBody,
+      mockSendConsentsReq,
+      calculator,
+    )
+
+    result shouldBe Right(())
+  }
+
+  test(testName = "processAcquiredSub should set `similar guardian products` consent to false when specified") {
+    mockSendConsentsReq
+      .expects(
+        "someIdentityId",
+        """[
+          |  {
+          |    "id" : "your_support_onboarding",
+          |    "consented" : true
+          |  },
+          |  {
+          |    "id" : "similar_guardian_products",
+          |    "consented" : false
+          |  },
+          |  {
+          |    "id" : "supporter_newsletter",
+          |    "consented" : true
+          |  },
+          |  {
+          |    "id" : "guardian_weekly_newsletter",
+          |    "consented" : true
+          |  }
+          |]""".stripMargin,
+      )
+      .returning(Right(()))
+
+    val testMessageBody = MessageBody(
+      identityId = "someIdentityId",
+      productName = "Tier Three",
+      printOptions = None,
+      previousProductName = None,
+      eventType = Acquisition,
+      subscriptionId = "A-S12345678",
+      userConsentsOverrides = Some(UserConsentsOverrides(similarGuardianProducts = Some(false)))
+    )
+
+    val result = processAcquiredSub(
+      testMessageBody,
+      mockSendConsentsReq,
+      calculator,
+    )
+
+    result shouldBe Right(())
+  }
+
+  test(testName = "processAcquiredSub should set `similar guardian products` consent to true when specified") {
+    mockSendConsentsReq
+      .expects(
+        "someIdentityId",
+        """[
+          |  {
+          |    "id" : "your_support_onboarding",
+          |    "consented" : true
+          |  },
+          |  {
+          |    "id" : "similar_guardian_products",
+          |    "consented" : true
+          |  },
+          |  {
+          |    "id" : "supporter_newsletter",
+          |    "consented" : true
+          |  },
+          |  {
+          |    "id" : "guardian_weekly_newsletter",
+          |    "consented" : true
+          |  }
+          |]""".stripMargin,
+      )
+      .returning(Right(()))
+
+    val testMessageBody = MessageBody(
+      identityId = "someIdentityId",
+      productName = "Tier Three",
+      printOptions = None,
+      previousProductName = None,
+      eventType = Acquisition,
+      subscriptionId = "A-S12345678",
+      userConsentsOverrides = Some(UserConsentsOverrides(similarGuardianProducts = Some(true)))
     )
 
     val result = processAcquiredSub(
