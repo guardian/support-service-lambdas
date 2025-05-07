@@ -40,7 +40,7 @@ object Handler extends LazyLogging {
       consentsCalculator = new ConsentsCalculator(ConsentsMapping.consentsMapping)
 
       acqSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessAcquisitionStatus))
-      _ <- processAcquiredSubs(acqSubs, identityConnector.sendConsentsReq, sfConnector.updateSubs, consentsCalculator)
+      _ <- markAcquiredSubsProcessed(acqSubs, sfConnector.updateSubs)
 
       cancelledSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessCancellationStatus))
       cancelledSubsIdentityIds = cancelledSubs.map(sub => sub.Buyer__r.IdentityID__c)
@@ -76,32 +76,21 @@ object Handler extends LazyLogging {
       })
   }
 
-  def processAcquiredSubs(
+  def markAcquiredSubsProcessed(
       acquiredSubs: Seq[SFSubRecord],
-      sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
       updateSubs: String => Either[SoftOptInError, Unit],
-      consentsCalculator: ConsentsCalculator,
   ): Either[SoftOptInError, Unit] = {
     Metrics.put(event = "acquisitions_to_process", acquiredSubs.size)
 
     val recordsToUpdate = acquiredSubs
       .map(sub => {
-        val updateResult =
-          for {
-            consents <- consentsCalculator.getSoftOptInsByProduct(sub.Product__c)
-            consentsBody = consentsCalculator.buildConsentsBody(consents.map(_ -> true).toMap)
-            _ = logger.info(
-              s"Sending consents request - sub ${sub.Name}, Identity id ${sub.Buyer__r.IdentityID__c}, product ${sub.Product__c} with body $consentsBody",
-            )
-            _ <- sendConsentsReq(sub.Buyer__r.IdentityID__c, consentsBody)
-          } yield ()
-
-        logErrors(updateResult)
-
-        SFSubRecordUpdate(
+        // as cleanup, we could stop salesforce making these available in the first place
+        logger.info(
+          s"acquisition consents are set via event bus/queue, marking as processed: ${sub.Name} on ${sub.Buyer__r.IdentityID__c}",
+        )
+        SFSubRecordUpdate.successfulUpdate(
           sub,
           "Acquisition",
-          updateResult,
         )
       })
 
