@@ -57,6 +57,7 @@ object ConsentsMapping {
       subscriberPreview,
       supporterNewsletter,
     ),
+    "Newspaper - Observer only" -> Set.empty,
     "Newspaper - National Delivery" -> Set(
       yourSupportOnboarding,
       similarGuardianProducts,
