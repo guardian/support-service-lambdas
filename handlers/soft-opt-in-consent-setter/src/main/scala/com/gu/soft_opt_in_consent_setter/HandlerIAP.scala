@@ -42,7 +42,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       identityId: String,
       eventType: EventType,
       productName: String,
-      printOptions: Option[String],
+      printProduct: Option[String],
       previousProductName: Option[String],
       userConsentsOverrides: Option[UserConsentsOverrides],
   )
@@ -150,7 +150,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
       consentsCalculator: ConsentsCalculator,
   ): Either[SoftOptInError, Unit] = {
-    val mappingProductName = ConsentsMapping.productMappings(message.productName, message.printOptions)
+    val mappingProductName = ConsentsMapping.productMappings(message.productName, message.printProduct)
     for {
       consentKeys <- consentsCalculator.getSoftOptInsByProduct(mappingProductName)
       implicitConsents = consentKeys.map(_ -> true).toMap

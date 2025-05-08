@@ -58,7 +58,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
       productName = "Supporter Plus",
-      printOptions = None,
+      printProduct = None,
       previousProductName = Some("Contributor"),
       eventType = Switch,
       subscriptionId = "A-S12345678",
@@ -100,7 +100,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
       productName = "Supporter Plus",
-      printOptions = None,
+      printProduct = None,
       previousProductName = None,
       eventType = Acquisition,
       subscriptionId = "A-S12345678",
@@ -142,7 +142,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
       productName = "Supporter Plus",
-      printOptions = None,
+      printProduct = None,
       previousProductName = None,
       eventType = Cancellation,
       subscriptionId = "A-S12345678",
@@ -190,7 +190,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
       productName = "Supporter Plus",
-      printOptions = None,
+      printProduct = None,
       previousProductName = None,
       eventType = Cancellation,
       subscriptionId = "A-S12345678",
@@ -240,7 +240,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
       productName = "Supporter Plus",
-      printOptions = None,
+      printProduct = None,
       previousProductName = None,
       eventType = Cancellation,
       subscriptionId = "A-S12345678",
@@ -285,7 +285,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
       productName = "Tier Three",
-      printOptions = None,
+      printProduct = None,
       previousProductName = None,
       eventType = Acquisition,
       subscriptionId = "A-S12345678",
@@ -329,7 +329,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
       productName = "Tier Three",
-      printOptions = None,
+      printProduct = None,
       previousProductName = None,
       eventType = Acquisition,
       subscriptionId = "A-S12345678",
@@ -373,7 +373,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
     val testMessageBody = MessageBody(
       identityId = "someIdentityId",
       productName = "Tier Three",
-      printOptions = None,
+      printProduct = None,
       previousProductName = None,
       eventType = Acquisition,
       subscriptionId = "A-S12345678",
