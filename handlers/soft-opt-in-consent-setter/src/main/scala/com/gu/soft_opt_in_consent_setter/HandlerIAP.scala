@@ -62,11 +62,12 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
           case Left(pf: ParsingFailure) =>
             val exception = SoftOptInError(
               s"Error '${pf.message}' when decoding JSON to MessageBody with cause :${pf.getCause} with body: ${message.getBody}",
+              pf,
             )
             handleError(exception)
-          case Left(_) =>
+          case Left(ex) =>
             val exception =
-              SoftOptInError(s"Unknown error when decoding JSON to MessageBody with body: ${message.getBody}")
+              SoftOptInError(s"Unknown error when decoding JSON to MessageBody with body: ${message.getBody}", ex)
             handleError(exception)
           case Right(result) =>
             logger.info(s"Decoded message body: $result")

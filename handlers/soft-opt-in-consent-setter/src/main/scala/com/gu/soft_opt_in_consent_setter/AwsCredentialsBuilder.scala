@@ -27,7 +27,7 @@ object AwsCredentialsBuilder extends LazyLogging {
       case Success(credentialsProvider) => Right(credentialsProvider)
       case Failure(e) =>
         logger.error("Failed to build AWS credentials", e)
-        Left(SoftOptInError("Failed to build AWS credentials"))
+        Left(SoftOptInError("Failed to build AWS credentials", e))
     }
   }
 }
