@@ -8,8 +8,8 @@ import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 
 export type Discount = {
-	// the following fields match the charge in the zuora catalog
-	// https://knowledgecenter.zuora.com/Zuora_Platform/API/G_SOAP_API/E1_SOAP_API_Object_Reference/ProductRatePlanCharge
+	// Zuora discount API reference:
+	// https://developer.zuora.com/v1-api-reference/api/operation/GET_ProductRatePlans/
 	productRatePlanId: string;
 	productRatePlanChargeId: string;
 	name: string;
