@@ -28,20 +28,19 @@ export const sendSalesforceTracking = async (
 		previousRatePlanName,
 		previousAmount,
 	} = switchInformation.subscription;
-	const { price, csrUserId, caseId } = switchInformation.input;
 
 	const salesforceTrackingInput: SalesforceTrackingInput = {
 		subscriptionName: subscriptionNumber,
 		previousAmount,
-		newAmount: price,
+		newAmount: switchInformation.actualTotalPrice,
 		previousProductName: previousProductName,
 		previousRatePlanName: previousRatePlanName,
 		newRatePlanName: 'Supporter Plus',
 		requestedDate: new Date(),
 		effectiveDate: new Date(),
 		paidAmount,
-		csrUserId: csrUserId,
-		caseId: caseId,
+		csrUserId: switchInformation.input.csrUserId,
+		caseId: switchInformation.input.caseId,
 	};
 	console.log(
 		`Sending Salesforce tracking message ${prettyPrint(

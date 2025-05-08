@@ -20,16 +20,6 @@ export type ContributionAmount = { amount: number; currency: string };
 export const supporterRatePlanItemFromSwitchInformation = (
 	switchInformation: SwitchInformation,
 ): SupporterRatePlanItem => {
-	const contributionAmount =
-		switchInformation.contributionAmount > 0
-			? {
-					contributionAmount: {
-						amount: switchInformation.contributionAmount,
-						currency: 'GBP',
-					},
-				}
-			: {};
-
 	const productRatePlanName =
 		switchInformation.subscription.billingPeriod == 'Month'
 			? `Supporter Plus V2 - Monthly`
@@ -43,7 +33,6 @@ export const supporterRatePlanItemFromSwitchInformation = (
 		productRatePlanName,
 		termEndDate: zuoraDateFormat(dayjs().add(1, 'year')),
 		contractEffectiveDate: zuoraDateFormat(dayjs()),
-		...contributionAmount,
 	};
 };
 

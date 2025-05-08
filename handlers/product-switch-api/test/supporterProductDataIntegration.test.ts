@@ -8,8 +8,8 @@ import type { SwitchInformation } from '../src/switchInformation';
 test('supporter product data', async () => {
 	const switchInformation: SwitchInformation = {
 		stage: 'CODE',
+		actualTotalPrice: 10,
 		input: {
-			price: 10,
 			preview: false,
 		},
 		startNewTerm: true,

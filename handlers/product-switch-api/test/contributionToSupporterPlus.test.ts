@@ -6,6 +6,7 @@ import type { EmailMessageWithUserId } from '@modules/email/email';
 import { ValidationError } from '@modules/errors';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
+import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 import {
 	zuoraAccountSchema,
@@ -18,8 +19,6 @@ import {
 	refundExpected,
 } from '../src/contributionToSupporterPlus';
 import { buildEmailMessage } from '../src/productSwitchEmail';
-import type { ProductSwitchRequestBody } from '../src/schemas';
-import { productSwitchRequestSchema } from '../src/schemas';
 import {
 	getFirstContributionRatePlan,
 	getSwitchInformationWithOwnerCheck,
@@ -34,14 +33,6 @@ import zuoraSubscriptionWithMonthlyContribution from './fixtures/zuora-subscript
 
 export const getProductCatalogFromFixture = (): ProductCatalog =>
 	generateProductCatalog(zuoraCatalogFixture);
-
-test('request body serialisation', () => {
-	const result: ProductSwitchRequestBody = productSwitchRequestSchema.parse({
-		price: 10,
-		preview: false,
-	});
-	expect(result.price).toEqual(10);
-});
 
 test('url parsing', () => {
 	const successfulParsing = parseUrlPath(
@@ -77,56 +68,62 @@ test('url parsing', () => {
 	);
 });
 
-test('startNewTerm is only true when the termStartDate is before today', () => {
+test('startNewTerm is only true when the termStartDate is before today', async () => {
 	const today = dayjs('2024-05-09T23:10:10.663+01:00');
 	const subscription = zuoraSubscriptionResponseSchema.parse(subscriptionJson);
 	const account = zuoraAccountSchema.parse(accountJson);
 	const productCatalog = getProductCatalogFromFixture();
+	const zuoraClient = await ZuoraClient.create('CODE');
 
-	const switchInformation = getSwitchInformationWithOwnerCheck(
+	const switchInformation = await getSwitchInformationWithOwnerCheck(
 		'CODE',
-		{ price: 95, preview: false },
+		{ preview: false },
 		subscription,
 		account,
 		productCatalog,
 		'999999999999',
+		zuoraClient,
 		today,
 	);
 	expect(switchInformation.startNewTerm).toEqual(false);
 });
 
-test('owner check is bypassed for salesforce calls', () => {
+test('owner check is bypassed for salesforce calls', async () => {
 	const today = dayjs('2024-05-09T23:10:10.663+01:00');
 	const subscription = zuoraSubscriptionResponseSchema.parse(subscriptionJson);
 	const account = zuoraAccountSchema.parse(accountJson);
 	const productCatalog = getProductCatalogFromFixture();
+	const zuoraClient = await ZuoraClient.create('CODE');
 
-	const switchInformation = getSwitchInformationWithOwnerCheck(
+	const switchInformation = await getSwitchInformationWithOwnerCheck(
 		'CODE',
-		{ price: 95, preview: false },
+		{ preview: false },
 		subscription,
 		account,
 		productCatalog,
 		undefined, // salesforce doesn't send the header
+		zuoraClient,
 		today,
 	);
 	expect(switchInformation.startNewTerm).toEqual(false);
 });
 
-test("owner check doesn't allow incorrect owner", () => {
+test("owner check doesn't allow incorrect owner", async () => {
 	const today = dayjs('2024-05-09T23:10:10.663+01:00');
 	const subscription = zuoraSubscriptionResponseSchema.parse(subscriptionJson);
 	const account = zuoraAccountSchema.parse(accountJson);
 	const productCatalog = getProductCatalogFromFixture();
+	const zuoraClient = await ZuoraClient.create('CODE');
 
-	const switchInformation = () =>
-		getSwitchInformationWithOwnerCheck(
+	const switchInformation = async () =>
+		await getSwitchInformationWithOwnerCheck(
 			'CODE',
-			{ price: 95, preview: false },
+			{ preview: false },
 			subscription,
 			account,
 			productCatalog,
 			'12345', // incorrect identity id
+			zuoraClient,
 			today,
 		);
 	expect(switchInformation).toThrow(ValidationError);

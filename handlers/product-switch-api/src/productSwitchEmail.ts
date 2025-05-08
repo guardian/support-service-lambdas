@@ -66,7 +66,7 @@ export const sendThankYouEmail = async (
 		firstName: firstName,
 		lastName: lastName,
 		currency: currency,
-		productPrice: switchInformation.input.price,
+		productPrice: switchInformation.actualTotalPrice,
 		firstPaymentAmount: firstPaymentAmount,
 		billingPeriod: billingPeriod,
 		subscriptionNumber: subscriptionNumber,

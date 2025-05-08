@@ -7,8 +7,8 @@ const getSwitchInformation = (
 	contributionAmount: number,
 ): SwitchInformation => ({
 	stage: 'CODE',
+	actualTotalPrice: 1,
 	input: {
-		price: 1,
 		preview: false,
 	},
 	startNewTerm: true,
