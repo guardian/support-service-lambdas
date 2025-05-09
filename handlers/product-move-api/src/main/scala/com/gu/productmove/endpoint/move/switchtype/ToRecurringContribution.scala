@@ -191,17 +191,20 @@ class ToRecurringContributionImpl(
         contributionRatePlanIds.ratePlanId,
         chargeOverrides = List(chargeOverride),
       )
-      removeRatePlans = ratePlanAmendments.map(ratePlan => {
-        val effectiveStartDate = ratePlan.ratePlanCharges.headOption.map(_.effectiveStartDate)
-        val removeDate = effectiveStartDate.filter(_.isAfter(chargedThroughDate)).getOrElse(chargedThroughDate)
-        RemoveRatePlan(removeDate, ratePlan.id)
-      })
+      removeRatePlans = ratePlanAmendments
+        .filterNot(_.lastChangeType.contains("Remove"))
+        .map { ratePlan =>
+          val effectiveStartDate = ratePlan.ratePlanCharges.headOption.map(_.effectiveStartDate)
+          val removeDate = effectiveStartDate.filter(_.isAfter(chargedThroughDate)).getOrElse(chargedThroughDate)
+          RemoveRatePlan(removeDate, ratePlan.id)
+        }
     } yield (List(addRatePlan), removeRatePlans.toList)
 
   private def getActiveRatePlanAndCharge(
       ratePlanAmendments: List[GetSubscription.RatePlan],
   ): Option[(GetSubscription.RatePlan, GetSubscription.RatePlanCharge)] = (for {
     ratePlan <- ratePlanAmendments
+    if !ratePlan.lastChangeType.contains("Remove")
     ratePlanCharge <- ratePlan.ratePlanCharges
     if ratePlanCharge.chargedThroughDate.isDefined
   } yield (ratePlan, ratePlanCharge)).headOption
