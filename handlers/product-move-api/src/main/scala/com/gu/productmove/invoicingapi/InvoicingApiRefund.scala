@@ -89,7 +89,7 @@ object InvoicingApiRefund {
         {
             "AdjustmentDate": "2022-09-29",
             "Amount": 30,
-            "Comments": "e6282ccd-d06a-49bd-ad2e-9c362e912232",
+            "Comment": "e6282ccd-d06a-49bd-ad2e-9c362e912232",
             "InvoiceId": "8ad0877b8373493d018389a5f5301259",
             "Type": "Credit",
             "SourceType": "InvoiceDetail",

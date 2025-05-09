@@ -37,7 +37,7 @@ export const creditInvoice = async (
 	invoiceId: string,
 	invoiceItemId: string,
 	amount: number,
-	comments?: string,
+	comment?: string,
 ): Promise<InvoiceItemAdjustmentResult> => {
 	console.log(`Adjusting invoice ${invoiceId} by ${amount}`);
 	return await zuoraClient.post(
@@ -49,7 +49,7 @@ export const creditInvoice = async (
 			SourceId: invoiceItemId,
 			SourceType: 'InvoiceDetail',
 			Type: 'Credit',
-			Comments: comments ?? 'Created by support-service-lambdas',
+			Comment: comment ?? 'Created by support-service-lambdas',
 		}),
 		invoiceItemAdjustmentResultSchema,
 	);
