@@ -444,5 +444,33 @@ export class SoftOptInConsentSetter extends GuStack {
 				}),
 			],
 		});
+
+		new Rule(this, 'PaymentApiSoftOptInToSQSRule', {
+			description:
+				'Send all events received via payment-api onto soft opt-in SQS queue',
+			eventBus: acquisitionsEventBus,
+			eventPattern: {
+				region: ['eu-west-1'],
+				source: ['payment-api.1'],
+			},
+			targets: [
+				new SqsQueue(softOptInsQueue, {
+					message: aws_events.RuleTargetInput.fromObject({
+						subscriptionId: aws_events.EventField.fromPath(
+							'$.detail.contributionId',
+						),
+						identityId: aws_events.EventField.fromPath('$.detail.identityId'),
+						eventType: 'Acquisition',
+						productName: aws_events.EventField.fromPath('$.detail.product'),
+						previousProductName: null,
+						userConsentsOverrides: {
+							similarGuardianProducts: aws_events.EventField.fromPath(
+								'$.detail.similarProductsConsent',
+							),
+						},
+					}),
+				}),
+			],
+		});
 	}
 }
