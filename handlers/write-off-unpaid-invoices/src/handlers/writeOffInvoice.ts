@@ -19,7 +19,7 @@ type InvoiceDataInput = {
 type InvoiceAdjustmentPayload = {
 	AdjustmentDate: string;
 	Amount: number;
-	Comments: string;
+	Comment: string;
 	InvoiceId: string;
 	SourceId: string;
 	SourceType: 'InvoiceDetail' | 'Tax';
@@ -90,7 +90,7 @@ export const handler = async (event: {
 			const chargeAmountPayload: InvoiceAdjustmentPayload = {
 				AdjustmentDate: new Date().toISOString().split('T')[0] ?? '',
 				Amount: Math.abs(invoiceItemAmount),
-				Comments: comment,
+				Comment: comment,
 				InvoiceId: invoiceId,
 				SourceId: invoiceItemId,
 				SourceType: 'InvoiceDetail',
@@ -104,7 +104,7 @@ export const handler = async (event: {
 				const taxAmountPayload = {
 					AdjustmentDate: new Date().toISOString().split('T')[0],
 					Amount: Math.abs(invoiceItemTaxAmount),
-					Comments: comment,
+					Comment: comment,
 					InvoiceId: invoiceId,
 					SourceId: taxationItemId,
 					SourceType: 'Tax',
