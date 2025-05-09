@@ -77,7 +77,7 @@ class ToRecurringContributionImpl(
 
       updateRequestBody <- getRatePlans(
         billingPeriod,
-        previousAmount,
+        price,
         subscription.ratePlans,
         activeRatePlanCharge.chargedThroughDate.get,
       ).map { case (addRatePlan, removeRatePlan) =>
