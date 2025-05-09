@@ -334,7 +334,7 @@ export const productCatalogSchema = z.object({
 					.enum(typeObject.HomeDelivery.billingPeriods)
 					.optional(),
 			}),
-			'Everyday+': z.object({
+			EverydayPlus: z.object({
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
 				charges: z.object({
@@ -351,7 +351,7 @@ export const productCatalogSchema = z.object({
 					.enum(typeObject.HomeDelivery.billingPeriods)
 					.optional(),
 			}),
-			'Sixday+': z.object({
+			SixdayPlus: z.object({
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
 				charges: z.object({
@@ -367,7 +367,7 @@ export const productCatalogSchema = z.object({
 					.enum(typeObject.HomeDelivery.billingPeriods)
 					.optional(),
 			}),
-			'Weekend+': z.object({
+			WeekendPlus: z.object({
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
 				charges: z.object({
@@ -379,7 +379,7 @@ export const productCatalogSchema = z.object({
 					.enum(typeObject.HomeDelivery.billingPeriods)
 					.optional(),
 			}),
-			'Saturday+': z.object({
+			SaturdayPlus: z.object({
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
 				charges: z.object({
@@ -390,7 +390,7 @@ export const productCatalogSchema = z.object({
 					.enum(typeObject.HomeDelivery.billingPeriods)
 					.optional(),
 			}),
-			'Sunday+': z.object({
+			SundayPlus: z.object({
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
 				charges: z.object({
@@ -513,7 +513,7 @@ export const productCatalogSchema = z.object({
 					.enum(typeObject.SubscriptionCard.billingPeriods)
 					.optional(),
 			}),
-			'Everyday+': z.object({
+			EverydayPlus: z.object({
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
 				charges: z.object({
@@ -530,7 +530,7 @@ export const productCatalogSchema = z.object({
 					.enum(typeObject.SubscriptionCard.billingPeriods)
 					.optional(),
 			}),
-			'Sixday+': z.object({
+			SixdayPlus: z.object({
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
 				charges: z.object({
@@ -546,7 +546,7 @@ export const productCatalogSchema = z.object({
 					.enum(typeObject.SubscriptionCard.billingPeriods)
 					.optional(),
 			}),
-			'Weekend+': z.object({
+			WeekendPlus: z.object({
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
 				charges: z.object({
@@ -558,7 +558,7 @@ export const productCatalogSchema = z.object({
 					.enum(typeObject.SubscriptionCard.billingPeriods)
 					.optional(),
 			}),
-			'Saturday+': z.object({
+			SaturdayPlus: z.object({
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
 				charges: z.object({
@@ -569,7 +569,7 @@ export const productCatalogSchema = z.object({
 					.enum(typeObject.SubscriptionCard.billingPeriods)
 					.optional(),
 			}),
-			'Sunday+': z.object({
+			SundayPlus: z.object({
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
 				charges: z.object({
@@ -644,7 +644,7 @@ export const productCatalogSchema = z.object({
 					.enum(typeObject.NewspaperVoucher.billingPeriods)
 					.optional(),
 			}),
-			'Everyday+': z.object({
+			EverydayPlus: z.object({
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
 				charges: z.object({
@@ -661,7 +661,7 @@ export const productCatalogSchema = z.object({
 					.enum(typeObject.NewspaperVoucher.billingPeriods)
 					.optional(),
 			}),
-			'Sixday+': z.object({
+			SixdayPlus: z.object({
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
 				charges: z.object({
@@ -677,7 +677,7 @@ export const productCatalogSchema = z.object({
 					.enum(typeObject.NewspaperVoucher.billingPeriods)
 					.optional(),
 			}),
-			'Weekend+': z.object({
+			WeekendPlus: z.object({
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
 				charges: z.object({
@@ -689,7 +689,7 @@ export const productCatalogSchema = z.object({
 					.enum(typeObject.NewspaperVoucher.billingPeriods)
 					.optional(),
 			}),
-			'Saturday+': z.object({
+			SaturdayPlus: z.object({
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
 				charges: z.object({
@@ -700,7 +700,7 @@ export const productCatalogSchema = z.object({
 					.enum(typeObject.NewspaperVoucher.billingPeriods)
 					.optional(),
 			}),
-			'Sunday+': z.object({
+			SundayPlus: z.object({
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
 				charges: z.object({

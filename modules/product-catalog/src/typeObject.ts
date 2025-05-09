@@ -57,7 +57,7 @@ export const activeTypeObject = {
 		},
 	},
 	DigitalSubscription: {
-		billingPeriods: ['Quarter', 'Month', 'Annual'],
+		billingPeriods: ['Month', 'Annual'],
 		productRatePlans: {
 			Monthly: {
 				Subscription: {},
@@ -161,14 +161,6 @@ export const activeTypeObject = {
 	SubscriptionCard: {
 		billingPeriods: ['Month'],
 		productRatePlans: {
-			Sixday: {
-				Friday: {},
-				Monday: {},
-				Tuesday: {},
-				Thursday: {},
-				Wednesday: {},
-				Saturday: {},
-			},
 			Everyday: {
 				Monday: {},
 				Tuesday: {},
@@ -182,13 +174,21 @@ export const activeTypeObject = {
 				Saturday: {},
 				Sunday: {},
 			},
+			Sixday: {
+				Friday: {},
+				Monday: {},
+				Tuesday: {},
+				Thursday: {},
+				Wednesday: {},
+				Saturday: {},
+			},
 			Sunday: {
 				Sunday: {},
 			},
 			Saturday: {
 				Saturday: {},
 			},
-			'Everyday+': {
+			EverydayPlus: {
 				DigitalPack: {},
 				Saturday: {},
 				Tuesday: {},
@@ -198,7 +198,7 @@ export const activeTypeObject = {
 				Sunday: {},
 				Friday: {},
 			},
-			'Sixday+': {
+			SixdayPlus: {
 				DigitalPack: {},
 				Thursday: {},
 				Wednesday: {},
@@ -207,16 +207,16 @@ export const activeTypeObject = {
 				Monday: {},
 				Tuesday: {},
 			},
-			'Sunday+': {
+			SundayPlus: {
 				DigitalPack: {},
 				Sunday: {},
 			},
-			'Weekend+': {
+			WeekendPlus: {
 				DigitalPack: {},
 				Saturday: {},
 				Sunday: {},
 			},
-			'Saturday+': {
+			SaturdayPlus: {
 				DigitalPack: {},
 				Saturday: {},
 			},
@@ -245,9 +245,6 @@ export const activeTypeObject = {
 				Tuesday: {},
 				Saturday: {},
 			},
-			Sunday: {
-				Sunday: {},
-			},
 			Sixday: {
 				Wednesday: {},
 				Friday: {},
@@ -260,10 +257,13 @@ export const activeTypeObject = {
 				Sunday: {},
 				Saturday: {},
 			},
+			Sunday: {
+				Sunday: {},
+			},
 			Saturday: {
 				Saturday: {},
 			},
-			'Everyday+': {
+			EverydayPlus: {
 				DigitalPack: {},
 				Wednesday: {},
 				Friday: {},
@@ -273,12 +273,12 @@ export const activeTypeObject = {
 				Tuesday: {},
 				Saturday: {},
 			},
-			'Weekend+': {
+			WeekendPlus: {
 				DigitalPack: {},
 				Sunday: {},
 				Saturday: {},
 			},
-			'Sixday+': {
+			SixdayPlus: {
 				DigitalPack: {},
 				Wednesday: {},
 				Friday: {},
@@ -287,11 +287,11 @@ export const activeTypeObject = {
 				Tuesday: {},
 				Saturday: {},
 			},
-			'Sunday+': {
+			SundayPlus: {
 				DigitalPack: {},
 				Sunday: {},
 			},
-			'Saturday+': {
+			SaturdayPlus: {
 				DigitalPack: {},
 				Saturday: {},
 			},
@@ -387,7 +387,7 @@ export const inactiveTypeObject = {
 				Wednesday: {},
 				Sunday: {},
 			},
-			'Everyday+': {
+			EverydayPlus: {
 				DigitalPack: {},
 				Saturday: {},
 				Tuesday: {},
@@ -405,7 +405,7 @@ export const inactiveTypeObject = {
 				Wednesday: {},
 				Saturday: {},
 			},
-			'Sixday+': {
+			SixdayPlus: {
 				DigitalPack: {},
 				Thursday: {},
 				Wednesday: {},
@@ -418,7 +418,7 @@ export const inactiveTypeObject = {
 				Saturday: {},
 				Sunday: {},
 			},
-			'Weekend+': {
+			WeekendPlus: {
 				DigitalPack: {},
 				Saturday: {},
 				Sunday: {},
@@ -426,14 +426,14 @@ export const inactiveTypeObject = {
 			Sunday: {
 				Sunday: {},
 			},
-			'Sunday+': {
+			SundayPlus: {
 				DigitalPack: {},
 				Sunday: {},
 			},
 			Saturday: {
 				Saturday: {},
 			},
-			'Saturday+': {
+			SaturdayPlus: {
 				DigitalPack: {},
 				Saturday: {},
 			},

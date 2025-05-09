@@ -93,11 +93,11 @@ const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 	Weekend: 'Weekend',
 	Sixday: 'Sixday',
 	// Paper+ rate plans
-	'Everyday+': 'Everyday+',
-	'Saturday+': 'Saturday+',
-	'Sunday+': 'Sunday+',
-	'Weekend+': 'Weekend+',
-	'Sixday+': 'Sixday+',
+	'Everyday+': 'EverydayPlus',
+	'Saturday+': 'SaturdayPlus',
+	'Sunday+': 'SundayPlus',
+	'Weekend+': 'WeekendPlus',
+	'Sixday+': 'SixdayPlus',
 	'Guardian Ad-Lite Monthly': 'Monthly',
 	// Membership rate plans
 	'Supporter - monthly': 'V1DeprecatedMonthly',
