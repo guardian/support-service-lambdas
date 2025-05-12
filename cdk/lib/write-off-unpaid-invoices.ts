@@ -44,7 +44,7 @@ export class WriteOffUnpaidInvoices extends GuStack {
 				...lambdaDefaultConfig,
 				timeout: Duration.minutes(15),
 				memorySize: 512,
-				handler: 'createInvoiceItemAdjustments.handler',
+				handler: 'resolveUnpaidInvoices.handler',
 				functionName: `write-off-invoice-${this.stage}`,
 				initialPolicy: [
 					new PolicyStatement({

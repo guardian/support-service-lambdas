@@ -1,19 +1,12 @@
 import { stageFromEnvironment } from '@modules/stage';
+import { type LambdaEvent } from '../handlers/resolveUnpaidInvoices';
 import { getZuoraOAuthToken } from '../services/getOAuthToken';
 
-type InvoiceDataInput = {
-	accounting_code_project_codes: string;
-	product_rate_plan_analysis_codes: string;
-	account_id: string;
-	subscription_number: string;
-	contact_sold_to_country: string;
+export type CreateInvoiceItemAdjustmentsInput = {
 	invoice_balance: string;
 	invoice_id: string;
 	invoice_items_data: string;
-	product_rate_plan_charge_product_codes: string;
-	invoice_currency: string;
 	invoice_amount: string;
-	invoice_date: string;
 };
 
 type InvoiceAdjustmentPayload = {
@@ -34,13 +27,9 @@ const errorMessagesToIgnore = [
 	'You can not adjust the invoice balance from a positive amount to a negative amount.',
 ];
 
-export const handler = async (event: {
-	Items: Array<{
-		item: InvoiceDataInput;
-		comment: string;
-		reasonCode: string;
-	}>;
-}) => {
+export const createInvoiceItemAdjustments = async (
+	event: LambdaEvent<CreateInvoiceItemAdjustmentsInput>,
+) => {
 	const failedRecords = [];
 	const stage = stageFromEnvironment();
 	const { Items } = event;
