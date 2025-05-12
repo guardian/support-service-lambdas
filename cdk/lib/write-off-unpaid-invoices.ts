@@ -44,7 +44,7 @@ export class WriteOffUnpaidInvoices extends GuStack {
 				...lambdaDefaultConfig,
 				timeout: Duration.minutes(15),
 				memorySize: 512,
-				handler: 'writeOffInvoice.handler',
+				handler: 'createInvoiceItemAdjustments.handler',
 				functionName: `write-off-invoice-${this.stage}`,
 				initialPolicy: [
 					new PolicyStatement({
@@ -78,7 +78,7 @@ export class WriteOffUnpaidInvoices extends GuStack {
 						},
 					},
 					ItemBatcher: {
-						MaxItemsPerBatch: 20,
+						MaxItemsPerBatch: 100,
 					},
 					ItemProcessor: {
 						ProcessorConfig: {

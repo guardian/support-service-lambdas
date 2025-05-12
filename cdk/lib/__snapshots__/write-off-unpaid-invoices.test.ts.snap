@@ -173,7 +173,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 1`] = `
           },
         },
         "FunctionName": "write-off-invoice-CSBX",
-        "Handler": "writeOffInvoice.handler",
+        "Handler": "createInvoiceItemAdjustments.handler",
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
@@ -395,7 +395,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 1`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key.$":"$$.Execution.Input.FilePath"}},"ItemBatcher":{"MaxItemsPerBatch":20},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"WriteOffInvoice","States":{"WriteOffInvoice":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
+              "","Key.$":"$$.Execution.Input.FilePath"}},"ItemBatcher":{"MaxItemsPerBatch":100},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"WriteOffInvoice","States":{"WriteOffInvoice":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
               {
                 "Fn::GetAtt": [
                   "WriteOffInvoiceLambda5DC658D6",
@@ -746,7 +746,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 2`] = `
           },
         },
         "FunctionName": "write-off-invoice-PROD",
-        "Handler": "writeOffInvoice.handler",
+        "Handler": "createInvoiceItemAdjustments.handler",
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
@@ -968,7 +968,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 2`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Key.$":"$$.Execution.Input.FilePath"}},"ItemBatcher":{"MaxItemsPerBatch":20},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"WriteOffInvoice","States":{"WriteOffInvoice":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
+              "","Key.$":"$$.Execution.Input.FilePath"}},"ItemBatcher":{"MaxItemsPerBatch":100},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"WriteOffInvoice","States":{"WriteOffInvoice":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
               {
                 "Fn::GetAtt": [
                   "WriteOffInvoiceLambda5DC658D6",
