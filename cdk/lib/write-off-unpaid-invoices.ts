@@ -103,6 +103,9 @@ export class WriteOffUnpaidInvoices extends GuStack {
 						'item.$': '$$.Map.Item.Value',
 						'comment.$': JsonPath.stringAt('$$.Execution.Input.Comment'),
 						'reasonCode.$': JsonPath.stringAt('$$.Execution.Input.ReasonCode'),
+						'remediationStrategy.$': JsonPath.stringAt(
+							'$$.Execution.Input.RemediationStrategy',
+						),
 					},
 					ResultWriter: {
 						Resource: 'arn:aws:states:::s3:putObject',

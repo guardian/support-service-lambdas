@@ -32,6 +32,7 @@ const errorMessagesToIgnore = [
 	'Adjustment amount is out of range. Please change the amount.',
 	'You can not adjust the invoice balance from a negative amount to a positive amount.',
 	'You can not adjust the invoice balance from a positive amount to a negative amount.',
+	'Invoice Item Adjustments cannot be created for invoices with Canceled status.',
 ];
 
 export const handler = async (event: {
