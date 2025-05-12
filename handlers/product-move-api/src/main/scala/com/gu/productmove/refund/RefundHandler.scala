@@ -13,6 +13,7 @@ import com.gu.productmove.zuora.{
   GetRefundInvoiceDetailsLive,
   InvoiceItemAdjustment,
   InvoiceItemAdjustmentLive,
+  RunBillingLive,
 }
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SttpClientLive}
@@ -56,6 +57,7 @@ class RefundHandler extends RequestHandler[SQSEvent, Unit] {
             GetInvoiceLive.layer,
             InvoiceItemAdjustmentLive.layer,
             SecretsLive.layer,
+            RunBillingLive.layer,
           ),
       ) match {
         case Exit.Success(value) => value

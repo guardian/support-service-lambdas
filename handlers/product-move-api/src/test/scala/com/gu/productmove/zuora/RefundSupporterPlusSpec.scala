@@ -18,6 +18,8 @@ import zio.*
 import zio.test.Assertion.*
 import zio.test.*
 
+import java.time.LocalDate
+
 object RefundSupporterPlusSpec extends ZIOSpecDefault {
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("RefundSupporterPlus")(
@@ -27,7 +29,9 @@ object RefundSupporterPlusSpec extends ZIOSpecDefault {
          */
         for {
           _ <- RefundSupporterPlus
-            .applyRefund(RefundInput(SubscriptionName("A-S00631533")))
+            .applyRefund(
+              RefundInput(SubscriptionName("A-S00631533"), ZuoraAccountId("choose your id here"), LocalDate.now()),
+            )
             .provide(
               AwsS3Live.layer,
               AwsCredentialsLive.layer,
@@ -41,6 +45,7 @@ object RefundSupporterPlusSpec extends ZIOSpecDefault {
               GetInvoiceLive.layer,
               InvoiceItemAdjustmentLive.layer,
               SecretsLive.layer,
+              RunBillingLive.layer,
             )
         } yield assert(true)(equalTo(true))
       } @@ TestAspect.ignore,
@@ -51,7 +56,9 @@ object RefundSupporterPlusSpec extends ZIOSpecDefault {
         for {
           _ <- TestClock.setTime(java.time.Instant.now())
           _ <- RefundSupporterPlus
-            .applyRefund(RefundInput(SubscriptionName("A-S00629631")))
+            .applyRefund(
+              RefundInput(SubscriptionName("A-S00629631"), ZuoraAccountId("choose your id here"), LocalDate.now()),
+            )
             .provide(
               AwsS3Live.layer,
               AwsCredentialsLive.layer,
@@ -65,6 +72,7 @@ object RefundSupporterPlusSpec extends ZIOSpecDefault {
               GetInvoiceLive.layer,
               InvoiceItemAdjustmentLive.layer,
               SecretsLive.layer,
+              RunBillingLive.layer,
             )
         } yield assert(true)(equalTo(true))
       } @@ TestAspect.ignore,

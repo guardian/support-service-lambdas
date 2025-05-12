@@ -12,7 +12,11 @@ import zio.{Task, ZIO}
 
 import java.time.LocalDate
 
-case class RefundInput(subscriptionName: SubscriptionName)
+case class RefundInput(
+    subscriptionName: SubscriptionName,
+    accountId: ZuoraAccountId,
+    cancellationBillingDate: LocalDate,
+)
 
 case class ChargeWithDiscount(charge: InvoiceItemWithTaxDetails, discount: Option[InvoiceItemWithTaxDetails])
 
@@ -33,14 +37,15 @@ object RefundSupporterPlus {
       with AwsS3
       with GetRefundInvoiceDetails
       with GetInvoice
-      with InvoiceItemAdjustment,
+      with InvoiceItemAdjustment
+      with RunBilling,
     Throwable | TransactionError,
     Unit,
   ] = {
 
     for {
       _ <- ZIO.log(s"Generating negative invoice for sub ${refundInput.subscriptionName}")
-      _ <- RunBilling.run(refundInput.subscriptionName)
+      _ <- ZIO.serviceWithZIO[RunBilling](_.run(refundInput.accountId, refundInput.cancellationBillingDate))
       _ <- ZIO.log(s"Getting invoice items for sub ${refundInput.subscriptionName}")
       refundInvoiceDetails <- GetRefundInvoiceDetails.get(refundInput.subscriptionName)
       _ <- ZIO.log(s"Amount to refund is ${refundInvoiceDetails.refundAmount}")

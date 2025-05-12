@@ -20,7 +20,7 @@ object CreatePaymentSpec extends ZIOSpecDefault {
         for {
           _ <- CreatePayment
             .create(
-              accountId = "8ad09be48bae944c018baf50186850a5",
+              accountId = ZuoraAccountId("8ad09be48bae944c018baf50186850a5"),
               invoiceId = "8ad087d28bb86b72018bb9e90bad101d",
               paymentMethodId = "8ad09be48bae944c018baf50189950aa",
               amount = 45.270000000,

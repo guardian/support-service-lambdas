@@ -239,7 +239,7 @@ val getSubscriptionResponseNoChargedThroughDate = GetSubscriptionResponse(
 //-----------------------------------------------------
 val getAccountResponse = GetAccountResponse(
   BasicInfo(
-    "id",
+    ZuoraAccountId("id"),
     DefaultPaymentMethod("paymentMethodId", Some(LocalDate.of(2030, 12, 1))),
     someIdentityId,
     "sfContactId",
@@ -252,7 +252,7 @@ val getAccountResponse = GetAccountResponse(
 
 val getAccountResponse2 = GetAccountResponse(
   BasicInfo(
-    "id",
+    ZuoraAccountId("id"),
     DefaultPaymentMethod("paymentMethodId", Some(LocalDate.of(2030, 12, 1))),
     None,
     "sfContactId",
@@ -265,7 +265,7 @@ val getAccountResponse2 = GetAccountResponse(
 
 val directDebitGetAccountResponse = GetAccountResponse(
   BasicInfo(
-    "id",
+    ZuoraAccountId("id"),
     DefaultPaymentMethod("paymentMethodId", None),
     None,
     "sfContactId",
@@ -424,10 +424,6 @@ val emailMessageBody2 = EmailMessage(
   "SV_MBtoRC_Switch",
   "sfContactId",
   someIdentityId,
-)
-
-val refundInput1 = RefundInput(
-  subscriptionName = SubscriptionName("A-S00339056"),
 )
 
 val salesforceRecordInput1 = SalesforceRecordInput(
