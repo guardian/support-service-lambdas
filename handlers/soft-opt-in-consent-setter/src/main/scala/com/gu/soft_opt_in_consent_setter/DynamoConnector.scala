@@ -59,7 +59,7 @@ object DynamoConnector extends LazyLogging {
         case Success(dynamoDbClient) => Right(new DynamoConnector(dynamoDbClient))
         case Failure(e) =>
           logger.error("Failed to build DynamoDB client", e)
-          Left(SoftOptInError("Failed to build DynamoDB client"))
+          Left(SoftOptInError("Failed to build DynamoDB client", e))
       }
     }
 }

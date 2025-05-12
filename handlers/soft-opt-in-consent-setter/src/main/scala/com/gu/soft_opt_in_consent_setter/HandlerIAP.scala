@@ -5,7 +5,7 @@ import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
 import com.gu.soft_opt_in_consent_setter.models._
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.ParsingFailure
-import io.circe.{Decoder, DecodingFailure}
+import io.circe.{Decoder}
 import io.circe.generic.auto._
 import io.circe.parser.{decode => circeDecode}
 import io.circe.syntax._
@@ -17,6 +17,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
   val readyToProcessAcquisitionStatus = "Ready to process acquisition"
   val readyToProcessCancellationStatus = "Ready to process cancellation"
   val readyProcessSwitchStatus = "Ready to process switch"
+  private val similarGuardianProducts = "similar_guardian_products"
 
   sealed trait EventType
   case object Acquisition extends EventType
@@ -32,12 +33,18 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
     }
   }
 
+  case class UserConsentsOverrides(
+      similarGuardianProducts: Option[Boolean],
+  )
+
   case class MessageBody(
       subscriptionId: String,
       identityId: String,
       eventType: EventType,
       productName: String,
+      printProduct: Option[String],
       previousProductName: Option[String],
+      userConsentsOverrides: Option[UserConsentsOverrides],
   )
 
   private def handleError[T <: Exception](exception: T) = {
@@ -55,11 +62,12 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
           case Left(pf: ParsingFailure) =>
             val exception = SoftOptInError(
               s"Error '${pf.message}' when decoding JSON to MessageBody with cause :${pf.getCause} with body: ${message.getBody}",
+              pf,
             )
             handleError(exception)
-          case Left(_) =>
+          case Left(ex) =>
             val exception =
-              SoftOptInError(s"Unknown error when decoding JSON to MessageBody with body: ${message.getBody}")
+              SoftOptInError(s"Unknown error when decoding JSON to MessageBody with body: ${message.getBody}", ex)
             handleError(exception)
           case Right(result) =>
             logger.info(s"Decoded message body: $result")
@@ -142,17 +150,23 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       message: MessageBody,
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
       consentsCalculator: ConsentsCalculator,
-  ): Either[SoftOptInError, Unit] =
+  ): Either[SoftOptInError, Unit] = {
+    val mappingProductName = ConsentsMapping.productMappings(message.productName, message.printProduct)
     for {
-      consents <- consentsCalculator.getSoftOptInsByProduct(message.productName)
-      consentsBody = consentsCalculator.buildConsentsBody(consents, state = true)
-      _ <- {
-        logger.info(
-          s"(acquisition) Sending consents request for identityId ${message.identityId} with payload: $consentsBody",
-        )
-        sendConsentsReq(message.identityId, consentsBody)
-      }
+      consentKeys <- consentsCalculator.getSoftOptInsByProduct(mappingProductName)
+      implicitConsents = consentKeys.map(_ -> true).toMap
+      explicitConsents: Map[String, Boolean] =
+        message.userConsentsOverrides
+          .flatMap(_.similarGuardianProducts.map(similarGuardianProducts -> _))
+          .toMap
+      mergedConsents = implicitConsents ++ explicitConsents
+      consentsBody = consentsCalculator.buildConsentsBody(mergedConsents)
+      _ = logger.info(
+        s"(acquisition) Sending consents request for identityId ${message.identityId} with payload: $consentsBody",
+      )
+      _ <- sendConsentsReq(message.identityId, consentsBody)
     } yield ()
+  }
 
   def buildProductSwitchConsents(
       oldProductName: String,
@@ -224,7 +238,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       if (consents.nonEmpty) {
         for {
           _ <- {
-            val consentsBody = consentsCalculator.buildConsentsBody(consents, state = false)
+            val consentsBody = consentsCalculator.buildConsentsBody(consents.map(_ -> false).toMap)
             logger.info(
               s"(cancellation) Sending consents request for identityId $identityId with payload: $consentsBody",
             )

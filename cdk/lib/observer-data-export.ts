@@ -34,7 +34,14 @@ export class ObserverDataExport extends GuStack {
 
 		const sharedBucket = new Bucket(this, 'Bucket', {
 			bucketName: `${app}-${this.stage.toLowerCase()}`,
-			lifecycleRules: [{ expiration: Duration.days(28) }],
+			lifecycleRules: [
+				'Observer_newsletter_eligible/',
+				'Observer_newsletter_subscribers/',
+				'Observer_newspaper_subscribers/',
+			].map((prefix) => ({
+				expiration: Duration.days(28),
+				prefix,
+			})),
 		});
 
 		const md5FingerprintsBucket = new Bucket(this, 'Md5FingerprintsBucket', {

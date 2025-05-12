@@ -59,8 +59,8 @@ class ConsentsCalculator(consentsMappings: Map[String, Set[String]]) {
       })
   }
 
-  def buildConsentsBody(consents: Set[String], state: Boolean): String = {
-    consents.map(ConsentsObject(_, state)).asJson.toString()
+  def buildConsentsBody(consents: Map[String, Boolean]): String = {
+    consents.map { case (consent, state) => ConsentsObject(consent, state) }.asJson.toString()
   }
 
   def removeSimilarGuardianProductFromSet(consents: Set[String]): Set[String] = {
@@ -72,5 +72,4 @@ class ConsentsCalculator(consentsMappings: Map[String, Set[String]]) {
 
     consents - "similar_guardian_products"
   }
-
 }
