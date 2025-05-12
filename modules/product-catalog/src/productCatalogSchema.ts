@@ -275,133 +275,143 @@ export const productCatalogSchema = z.object({
 	HomeDelivery: z.object({
 		billingSystem: z.literal('zuora'),
 		active: z.boolean(),
-		ratePlans: z.object({
-			Everyday: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Monday: z.object({ id: z.string() }),
-					Tuesday: z.object({ id: z.string() }),
-					Wednesday: z.object({ id: z.string() }),
-					Thursday: z.object({ id: z.string() }),
-					Friday: z.object({ id: z.string() }),
-					Saturday: z.object({ id: z.string() }),
-					Sunday: z.object({ id: z.string() }),
+		ratePlans: z
+			.object({
+				Everyday: z.object({
+					id: z.string(),
+					pricing: z.object({ GBP: z.number() }),
+					charges: z.object({
+						Monday: z.object({ id: z.string() }),
+						Tuesday: z.object({ id: z.string() }),
+						Wednesday: z.object({ id: z.string() }),
+						Thursday: z.object({ id: z.string() }),
+						Friday: z.object({ id: z.string() }),
+						Saturday: z.object({ id: z.string() }),
+						Sunday: z.object({ id: z.string() }),
+					}),
+					billingPeriod: z
+						.enum(typeObject.HomeDelivery.billingPeriods)
+						.optional(),
 				}),
-				billingPeriod: z
-					.enum(typeObject.HomeDelivery.billingPeriods)
-					.optional(),
-			}),
-			Sixday: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Monday: z.object({ id: z.string() }),
-					Tuesday: z.object({ id: z.string() }),
-					Wednesday: z.object({ id: z.string() }),
-					Thursday: z.object({ id: z.string() }),
-					Friday: z.object({ id: z.string() }),
-					Saturday: z.object({ id: z.string() }),
+				Sixday: z.object({
+					id: z.string(),
+					pricing: z.object({ GBP: z.number() }),
+					charges: z.object({
+						Monday: z.object({ id: z.string() }),
+						Tuesday: z.object({ id: z.string() }),
+						Wednesday: z.object({ id: z.string() }),
+						Thursday: z.object({ id: z.string() }),
+						Friday: z.object({ id: z.string() }),
+						Saturday: z.object({ id: z.string() }),
+					}),
+					billingPeriod: z
+						.enum(typeObject.HomeDelivery.billingPeriods)
+						.optional(),
 				}),
-				billingPeriod: z
-					.enum(typeObject.HomeDelivery.billingPeriods)
-					.optional(),
-			}),
-			Weekend: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Saturday: z.object({ id: z.string() }),
-					Sunday: z.object({ id: z.string() }),
+				Weekend: z.object({
+					id: z.string(),
+					pricing: z.object({ GBP: z.number() }),
+					charges: z.object({
+						Saturday: z.object({ id: z.string() }),
+						Sunday: z.object({ id: z.string() }),
+					}),
+					billingPeriod: z
+						.enum(typeObject.HomeDelivery.billingPeriods)
+						.optional(),
 				}),
-				billingPeriod: z
-					.enum(typeObject.HomeDelivery.billingPeriods)
-					.optional(),
-			}),
-			Saturday: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({ Saturday: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.HomeDelivery.billingPeriods)
-					.optional(),
-			}),
-			Sunday: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({ Sunday: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.HomeDelivery.billingPeriods)
-					.optional(),
-			}),
-			EverydayPlus: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Monday: z.object({ id: z.string() }),
-					Tuesday: z.object({ id: z.string() }),
-					Wednesday: z.object({ id: z.string() }),
-					Thursday: z.object({ id: z.string() }),
-					Friday: z.object({ id: z.string() }),
-					Saturday: z.object({ id: z.string() }),
-					Sunday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
+				Saturday: z.object({
+					id: z.string(),
+					pricing: z.object({ GBP: z.number() }),
+					charges: z.object({ Saturday: z.object({ id: z.string() }) }),
+					billingPeriod: z
+						.enum(typeObject.HomeDelivery.billingPeriods)
+						.optional(),
 				}),
-				billingPeriod: z
-					.enum(typeObject.HomeDelivery.billingPeriods)
-					.optional(),
-			}),
-			SixdayPlus: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Monday: z.object({ id: z.string() }),
-					Tuesday: z.object({ id: z.string() }),
-					Wednesday: z.object({ id: z.string() }),
-					Thursday: z.object({ id: z.string() }),
-					Friday: z.object({ id: z.string() }),
-					Saturday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
+				Sunday: z.object({
+					id: z.string(),
+					pricing: z.object({ GBP: z.number() }),
+					charges: z.object({ Sunday: z.object({ id: z.string() }) }),
+					billingPeriod: z
+						.enum(typeObject.HomeDelivery.billingPeriods)
+						.optional(),
 				}),
-				billingPeriod: z
-					.enum(typeObject.HomeDelivery.billingPeriods)
+				EverydayPlus: z
+					.object({
+						id: z.string(),
+						pricing: z.object({ GBP: z.number() }),
+						charges: z.object({
+							Monday: z.object({ id: z.string() }),
+							Tuesday: z.object({ id: z.string() }),
+							Wednesday: z.object({ id: z.string() }),
+							Thursday: z.object({ id: z.string() }),
+							Friday: z.object({ id: z.string() }),
+							Saturday: z.object({ id: z.string() }),
+							Sunday: z.object({ id: z.string() }),
+							DigitalPack: z.object({ id: z.string() }),
+						}),
+						billingPeriod: z
+							.enum(typeObject.HomeDelivery.billingPeriods)
+							.optional(),
+					})
 					.optional(),
-			}),
-			WeekendPlus: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Saturday: z.object({ id: z.string() }),
-					Sunday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
+				SixdayPlus: z
+					.object({
+						id: z.string(),
+						pricing: z.object({ GBP: z.number() }),
+						charges: z.object({
+							Monday: z.object({ id: z.string() }),
+							Tuesday: z.object({ id: z.string() }),
+							Wednesday: z.object({ id: z.string() }),
+							Thursday: z.object({ id: z.string() }),
+							Friday: z.object({ id: z.string() }),
+							Saturday: z.object({ id: z.string() }),
+							DigitalPack: z.object({ id: z.string() }),
+						}),
+						billingPeriod: z
+							.enum(typeObject.HomeDelivery.billingPeriods)
+							.optional(),
+					})
+					.optional(),
+				WeekendPlus: z
+					.object({
+						id: z.string(),
+						pricing: z.object({ GBP: z.number() }),
+						charges: z.object({
+							Saturday: z.object({ id: z.string() }),
+							Sunday: z.object({ id: z.string() }),
+							DigitalPack: z.object({ id: z.string() }),
+						}),
+						billingPeriod: z
+							.enum(typeObject.HomeDelivery.billingPeriods)
+							.optional(),
+					})
+					.optional(),
+				SaturdayPlus: z
+					.object({
+						id: z.string(),
+						pricing: z.object({ GBP: z.number() }),
+						charges: z.object({
+							Saturday: z.object({ id: z.string() }),
+							DigitalPack: z.object({ id: z.string() }),
+						}),
+						billingPeriod: z
+							.enum(typeObject.HomeDelivery.billingPeriods)
+							.optional(),
+					})
+					.optional(),
+				SundayPlus: z.object({
+					id: z.string(),
+					pricing: z.object({ GBP: z.number() }),
+					charges: z.object({
+						Sunday: z.object({ id: z.string() }),
+						DigitalPack: z.object({ id: z.string() }),
+					}),
+					billingPeriod: z
+						.enum(typeObject.HomeDelivery.billingPeriods)
+						.optional(),
 				}),
-				billingPeriod: z
-					.enum(typeObject.HomeDelivery.billingPeriods)
-					.optional(),
-			}),
-			SaturdayPlus: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Saturday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.HomeDelivery.billingPeriods)
-					.optional(),
-			}),
-			SundayPlus: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Sunday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.HomeDelivery.billingPeriods)
-					.optional(),
-			}),
-		}),
+			})
+			.optional(),
 	}),
 	NationalDelivery: z.object({
 		billingSystem: z.literal('zuora'),
@@ -513,73 +523,83 @@ export const productCatalogSchema = z.object({
 					.enum(typeObject.SubscriptionCard.billingPeriods)
 					.optional(),
 			}),
-			EverydayPlus: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Monday: z.object({ id: z.string() }),
-					Tuesday: z.object({ id: z.string() }),
-					Wednesday: z.object({ id: z.string() }),
-					Thursday: z.object({ id: z.string() }),
-					Friday: z.object({ id: z.string() }),
-					Saturday: z.object({ id: z.string() }),
-					Sunday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.SubscriptionCard.billingPeriods)
-					.optional(),
-			}),
-			SixdayPlus: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Monday: z.object({ id: z.string() }),
-					Tuesday: z.object({ id: z.string() }),
-					Wednesday: z.object({ id: z.string() }),
-					Thursday: z.object({ id: z.string() }),
-					Friday: z.object({ id: z.string() }),
-					Saturday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.SubscriptionCard.billingPeriods)
-					.optional(),
-			}),
-			WeekendPlus: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Saturday: z.object({ id: z.string() }),
-					Sunday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.SubscriptionCard.billingPeriods)
-					.optional(),
-			}),
-			SaturdayPlus: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Saturday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.SubscriptionCard.billingPeriods)
-					.optional(),
-			}),
-			SundayPlus: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Sunday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.SubscriptionCard.billingPeriods)
-					.optional(),
-			}),
+			EverydayPlus: z
+				.object({
+					id: z.string(),
+					pricing: z.object({ GBP: z.number() }),
+					charges: z.object({
+						Monday: z.object({ id: z.string() }),
+						Tuesday: z.object({ id: z.string() }),
+						Wednesday: z.object({ id: z.string() }),
+						Thursday: z.object({ id: z.string() }),
+						Friday: z.object({ id: z.string() }),
+						Saturday: z.object({ id: z.string() }),
+						Sunday: z.object({ id: z.string() }),
+						DigitalPack: z.object({ id: z.string() }),
+					}),
+					billingPeriod: z
+						.enum(typeObject.SubscriptionCard.billingPeriods)
+						.optional(),
+				})
+				.optional(),
+			SixdayPlus: z
+				.object({
+					id: z.string(),
+					pricing: z.object({ GBP: z.number() }),
+					charges: z.object({
+						Monday: z.object({ id: z.string() }),
+						Tuesday: z.object({ id: z.string() }),
+						Wednesday: z.object({ id: z.string() }),
+						Thursday: z.object({ id: z.string() }),
+						Friday: z.object({ id: z.string() }),
+						Saturday: z.object({ id: z.string() }),
+						DigitalPack: z.object({ id: z.string() }),
+					}),
+					billingPeriod: z
+						.enum(typeObject.SubscriptionCard.billingPeriods)
+						.optional(),
+				})
+				.optional(),
+			WeekendPlus: z
+				.object({
+					id: z.string(),
+					pricing: z.object({ GBP: z.number() }),
+					charges: z.object({
+						Saturday: z.object({ id: z.string() }),
+						Sunday: z.object({ id: z.string() }),
+						DigitalPack: z.object({ id: z.string() }),
+					}),
+					billingPeriod: z
+						.enum(typeObject.SubscriptionCard.billingPeriods)
+						.optional(),
+				})
+				.optional(),
+			SaturdayPlus: z
+				.object({
+					id: z.string(),
+					pricing: z.object({ GBP: z.number() }),
+					charges: z.object({
+						Saturday: z.object({ id: z.string() }),
+						DigitalPack: z.object({ id: z.string() }),
+					}),
+					billingPeriod: z
+						.enum(typeObject.SubscriptionCard.billingPeriods)
+						.optional(),
+				})
+				.optional(),
+			SundayPlus: z
+				.object({
+					id: z.string(),
+					pricing: z.object({ GBP: z.number() }),
+					charges: z.object({
+						Sunday: z.object({ id: z.string() }),
+						DigitalPack: z.object({ id: z.string() }),
+					}),
+					billingPeriod: z
+						.enum(typeObject.SubscriptionCard.billingPeriods)
+						.optional(),
+				})
+				.optional(),
 		}),
 	}),
 	NewspaperVoucher: z.object({
