@@ -74,7 +74,7 @@ export class WriteOffUnpaidInvoices extends GuStack {
 						},
 						Parameters: {
 							Bucket: bucket.bucketName,
-							Key: 'query-result.csv',
+							'Key.$': JsonPath.stringAt('$$.Execution.Input.FilePath'),
 						},
 					},
 					ItemBatcher: {
@@ -108,7 +108,10 @@ export class WriteOffUnpaidInvoices extends GuStack {
 						Resource: 'arn:aws:states:::s3:putObject',
 						Parameters: {
 							Bucket: bucket.bucketName,
-							'Prefix.$': JsonPath.stringAt('$$.Execution.StartTime'),
+							'Prefix.$': JsonPath.format(
+								`executions/{}`,
+								JsonPath.stringAt('$$.Execution.StartTime'),
+							),
 						},
 					},
 				},
