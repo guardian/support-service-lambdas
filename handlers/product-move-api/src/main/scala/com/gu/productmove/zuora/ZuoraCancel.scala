@@ -53,7 +53,7 @@ object ZuoraCancel {
 
 case class CancellationRequest(
     cancellationEffectiveDate: LocalDate,
-    runBilling: Boolean = true,
+    runBilling: Boolean = false,
     cancellationPolicy: String = "SpecificDate",
 )
 
