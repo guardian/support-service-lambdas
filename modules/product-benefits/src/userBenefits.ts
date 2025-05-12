@@ -7,13 +7,13 @@ import type {
 import type { Stage } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import { getSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
+import dayjs from 'dayjs';
 import {
 	allProductBenefits,
 	itemIsValidForProduct,
 	productBenefitMapping,
 } from '@modules/product-benefits/productBenefit';
 import type { ProductBenefit } from '@modules/product-benefits/schemas';
-import dayjs from 'dayjs';
 
 export const getUserProducts = async (
 	stage: Stage,
