@@ -39,6 +39,8 @@ object RefundSupporterPlus {
   ] = {
 
     for {
+      _ <- ZIO.log(s"Generating negative invoice for sub ${refundInput.subscriptionName}")
+      _ <- RunBilling.run(refundInput.subscriptionName)
       _ <- ZIO.log(s"Getting invoice items for sub ${refundInput.subscriptionName}")
       refundInvoiceDetails <- GetRefundInvoiceDetails.get(refundInput.subscriptionName)
       _ <- ZIO.log(s"Amount to refund is ${refundInvoiceDetails.refundAmount}")
