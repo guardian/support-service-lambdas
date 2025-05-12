@@ -8,18 +8,11 @@ import { type App, Duration } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
-	// Choice,
-	// Condition,
 	CustomState,
 	DefinitionBody,
 	JsonPath,
-	// Pass,
 	StateMachine,
-	// TaskInput,
-	// Wait,
-	// WaitTime,
 } from 'aws-cdk-lib/aws-stepfunctions';
-// import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { nodeVersion } from './node-version';
 
 export class WriteOffUnpaidInvoices extends GuStack {
@@ -85,7 +78,7 @@ export class WriteOffUnpaidInvoices extends GuStack {
 						},
 					},
 					ItemBatcher: {
-						MaxItemsPerBatch: 300,
+						MaxItemsPerBatch: 20,
 					},
 					ItemProcessor: {
 						ProcessorConfig: {
