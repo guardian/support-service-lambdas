@@ -13,6 +13,7 @@ import {
 	productBenefitMapping,
 } from '@modules/product-benefits/productBenefit';
 import type { ProductBenefit } from '@modules/product-benefits/schemas';
+import dayjs from 'dayjs';
 
 export const getUserProducts = async (
 	stage: Stage,
@@ -35,6 +36,7 @@ export const getValidUserProducts = (
 	supporterProductDataItems: SupporterRatePlanItem[],
 ): ProductKey[] =>
 	supporterProductDataItems
+		.filter((item) => dayjs(item.termEndDate) >= dayjs())
 		.flatMap((item) => {
 			const product = productCatalogHelper.findProductDetails(
 				item.productRatePlanId,
