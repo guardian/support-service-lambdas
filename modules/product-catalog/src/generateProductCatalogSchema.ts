@@ -6,6 +6,8 @@ import type {
 	ZuoraProductRatePlan,
 	ZuoraProductRatePlanCharge,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
+import { oneTimeContributionSchema } from '@modules/product-catalog/oneTimeContributionProduct';
+import { stripeProductsSchema } from '@modules/product-catalog/stripeProducts';
 import {
 	getProductRatePlanChargeKey,
 	getProductRatePlanKey,
@@ -23,10 +25,14 @@ export const generateSchema = (catalog: ZuoraCatalog): string => {
 	const supportedProducts = catalog.products.filter((product) =>
 		isSupportedProduct(product.name),
 	);
-	const productsSchema = supportedProducts.map((product) =>
+	const zuoraProductsSchema = supportedProducts.map((product) =>
 		generateProductSchema(product),
 	);
-	return `${header}\n${productsSchema.join(',\n')}\n${footer}`;
+	return `${header}
+	${stripeProductsSchema},
+	${oneTimeContributionSchema},
+	${zuoraProductsSchema.join(',\n')}
+	${footer}`;
 };
 
 const generateProductSchema = (product: CatalogProduct) => {

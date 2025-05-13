@@ -1,7 +1,6 @@
-import fs from 'fs';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
+import { productCatalogSchema } from '@modules/product-catalog/generatedSchema';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
-import { generateSchema } from '@modules/product-catalog/generateProductCatalogSchema';
 import { generateTypeObjects } from '@modules/product-catalog/generateTypeObject';
 import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
 import prod from '../../zuora-catalog/test/fixtures/catalog-prod.json';
@@ -35,10 +34,14 @@ describe('code', () => {
 		expect(codeTypeObject).toMatchSnapshot();
 	});
 
-	test('We can generate a product schema', () => {
-		const codeZuoraCatalog = zuoraCatalogSchema.parse(code);
-		const generatedSchema = generateSchema(codeZuoraCatalog);
-		fs.writeFileSync('./src/generatedSchema.ts', generatedSchema);
-		expect(1).toBe(1);
+	test('The generated product schema works', () => {
+		const prodZuoraCatalog = zuoraCatalogSchema.parse(prod);
+		const prodProductCatalog = generateProductCatalog(prodZuoraCatalog);
+		const result = productCatalogSchema.parse(prodProductCatalog);
+		expect(result).toEqual(prodProductCatalog);
+		expect(result.OneTimeContribution.billingSystem).toBe('stripe');
+		expect(
+			Object.keys(result.TierThree.ratePlans.DomesticAnnualV2.charges).length,
+		).toBe(3);
 	});
 });

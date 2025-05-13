@@ -1,6 +1,38 @@
 import { z } from 'zod';
 
 export const productCatalogSchema = z.object({
+	GuardianPatron: z.object({
+		billingSystem: z.literal('stripe'),
+		active: z.boolean(),
+		ratePlans: z.object({
+			GuardianPatron: z.object({
+				id: z.string(),
+				pricing: z.object({}),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+		}),
+	}),
+	OneTimeContribution: z.object({
+		billingSystem: z.literal('stripe'),
+		active: z.boolean(),
+		ratePlans: z.object({
+			OneTime: z.object({
+				id: z.string(),
+				pricing: z.object({}),
+				charges: z.object({
+					Contribution: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('OneTime'),
+			}),
+		}),
+	}),
 	GuardianAdLite: z.object({
 		billingSystem: z.literal('zuora'),
 		active: z.boolean(),

@@ -23,6 +23,23 @@ export const oneTimeContribution: {
 	},
 };
 
+export const oneTimeContributionSchema = `OneTimeContribution: z.object({
+	billingSystem: z.literal('stripe'),
+	active: z.boolean(),
+	ratePlans: z.object({
+		OneTime: z.object({
+			id: z.string(),
+			pricing: z.object({}),
+			charges: z.object({
+				Contribution: z.object({
+					id: z.string(),
+				}),
+			}),
+			billingPeriod: z.literal('OneTime'),
+		}),
+	}),
+})`;
+
 export const oneTimeContributionTypeObject = {
 	OneTimeContribution: {
 		billingPeriods: ['OneTime'],

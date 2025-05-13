@@ -26,6 +26,23 @@ export const stripeProducts: Partial<Record<ProductKey, Product<ProductKey>>> =
 		},
 	};
 
+export const stripeProductsSchema = `GuardianPatron: z.object({
+	billingSystem: z.literal('stripe'),
+	active: z.boolean(),
+	ratePlans: z.object({
+		GuardianPatron: z.object({
+			id: z.string(),
+			pricing: z.object({}),
+			charges: z.object({
+				Subscription: z.object({
+					id: z.string(),
+				}),
+			}),
+			billingPeriod: z.literal('Month'),
+		}),
+	}),
+})`;
+
 export const stripeTypeObject = {
 	GuardianPatron: {
 		billingPeriods: ['Month'],
