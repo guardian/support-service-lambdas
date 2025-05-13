@@ -1,6 +1,6 @@
 // This file defines a one time contribution product. This file is combined
 // with the Zuora & Stripe products to create a full product catalog.
-import type { Product } from '@modules/product-catalog/productCatalog';
+import type { Product } from '@modules/product-catalog/newProductCatalogTypes';
 
 export const oneTimeContribution: {
 	OneTimeContribution: Product<'OneTimeContribution'>;

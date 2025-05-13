@@ -4,7 +4,7 @@
 import type {
 	Product,
 	ProductKey,
-} from '@modules/product-catalog/productCatalog';
+} from '@modules/product-catalog/newProductCatalogTypes';
 
 export const stripeProducts: Partial<Record<ProductKey, Product<ProductKey>>> =
 	{

@@ -1,5 +1,5 @@
 import type { Currency } from '@modules/internationalisation/currency';
-import type { ProductBillingPeriod } from '@modules/product-catalog/productCatalog';
+import type { ProductBillingPeriod } from '@modules/product-catalog/newProductCatalogTypes';
 
 export const supporterPlusAmountBands: {
 	[C in Currency]: {

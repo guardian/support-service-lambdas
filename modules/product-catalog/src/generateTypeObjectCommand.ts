@@ -8,7 +8,7 @@ const writeTypesToFile = async () => {
 	// const activeTypesString = JSON.stringify(types.active, null, 2);
 	// const inactiveTypesString = JSON.stringify(types.inactive, null, 2);
 	const generatedSchema = generateSchema(prodCatalog);
-	fs.writeFileSync('./src/generatedSchema.ts', generatedSchema);
+	fs.writeFileSync('./src/productCatalogSchema.ts', generatedSchema);
 	// fs.writeFileSync(
 	// 	'./src/typeObject.ts',
 	// 	`export const activeTypeObject = ${activeTypesString} as const;\nexport const inactiveTypeObject = ${inactiveTypesString} as const;`,

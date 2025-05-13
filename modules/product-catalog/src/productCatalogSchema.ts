@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { typeObject } from '@modules/product-catalog/productCatalog';
 
 export const productCatalogSchema = z.object({
 	GuardianPatron: z.object({
@@ -14,9 +13,79 @@ export const productCatalogSchema = z.object({
 						id: z.string(),
 					}),
 				}),
-				billingPeriod: z
-					.enum(typeObject.GuardianPatron.billingPeriods)
-					.optional(),
+				billingPeriod: z.literal('Month'),
+			}),
+		}),
+	}),
+	OneTimeContribution: z.object({
+		billingSystem: z.literal('stripe'),
+		active: z.boolean(),
+		ratePlans: z.object({
+			OneTime: z.object({
+				id: z.string(),
+				pricing: z.object({}),
+				charges: z.object({
+					Contribution: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('OneTime'),
+			}),
+		}),
+	}),
+	GuardianWeeklyRestOfWorld: z.object({
+		billingSystem: z.literal('zuora'),
+		active: z.boolean(),
+		ratePlans: z.object({
+			Monthly: z.object({
+				id: z.string(),
+				pricing: z.object({ USD: z.number(), GBP: z.number() }),
+				charges: z.object({
+					Monthly: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			OneYearGift: z.object({
+				id: z.string(),
+				pricing: z.object({ USD: z.number(), GBP: z.number() }),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Annual'),
+			}),
+			Annual: z.object({
+				id: z.string(),
+				pricing: z.object({ USD: z.number(), GBP: z.number() }),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Annual'),
+			}),
+			Quarterly: z.object({
+				id: z.string(),
+				pricing: z.object({ USD: z.number(), GBP: z.number() }),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Quarter'),
+			}),
+			ThreeMonthGift: z.object({
+				id: z.string(),
+				pricing: z.object({ USD: z.number(), GBP: z.number() }),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Quarter'),
 			}),
 		}),
 	}),
@@ -26,187 +95,163 @@ export const productCatalogSchema = z.object({
 		ratePlans: z.object({
 			Monthly: z.object({
 				id: z.string(),
-				pricing: z.object({
-					GBP: z.number(),
-				}),
+				pricing: z.object({ GBP: z.number() }),
 				charges: z.object({
 					Subscription: z.object({
 						id: z.string(),
 					}),
 				}),
-				billingPeriod: z
-					.enum(typeObject.GuardianAdLite.billingPeriods)
-					.optional(),
+				billingPeriod: z.literal('Month'),
 			}),
 		}),
 	}),
-	SupporterMembership: z.object({
+	TierThree: z.object({
 		billingSystem: z.literal('zuora'),
 		active: z.boolean(),
 		ratePlans: z.object({
-			Annual: z.object({
+			RestOfWorldAnnualV2: z.object({
+				id: z.string(),
+				pricing: z.object({ USD: z.number(), GBP: z.number() }),
+				charges: z.object({
+					NewspaperArchive: z.object({
+						id: z.string(),
+					}),
+					SupporterPlus: z.object({
+						id: z.string(),
+					}),
+					GuardianWeekly: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Annual'),
+			}),
+			RestOfWorldMonthlyV2: z.object({
+				id: z.string(),
+				pricing: z.object({ USD: z.number(), GBP: z.number() }),
+				charges: z.object({
+					SupporterPlus: z.object({
+						id: z.string(),
+					}),
+					GuardianWeekly: z.object({
+						id: z.string(),
+					}),
+					NewspaperArchive: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			DomesticAnnualV2: z.object({
 				id: z.string(),
 				pricing: z.object({
-					CAD: z.number(),
-					AUD: z.number(),
+					USD: z.number(),
+					NZD: z.number(),
 					EUR: z.number(),
 					GBP: z.number(),
-					USD: z.number(),
+					CAD: z.number(),
+					AUD: z.number(),
 				}),
 				charges: z.object({
-					Subscription: z.object({ id: z.string() }),
+					NewspaperArchive: z.object({
+						id: z.string(),
+					}),
+					SupporterPlus: z.object({
+						id: z.string(),
+					}),
+					GuardianWeekly: z.object({
+						id: z.string(),
+					}),
 				}),
-				billingPeriod: z
-					.enum(typeObject.SupporterMembership.billingPeriods)
-					.optional(),
+				billingPeriod: z.literal('Annual'),
 			}),
-			Monthly: z.object({
+			DomesticMonthlyV2: z.object({
 				id: z.string(),
 				pricing: z.object({
+					USD: z.number(),
+					NZD: z.number(),
+					EUR: z.number(),
 					GBP: z.number(),
 					CAD: z.number(),
 					AUD: z.number(),
-					EUR: z.number(),
-					USD: z.number(),
 				}),
 				charges: z.object({
-					Subscription: z.object({ id: z.string() }),
+					SupporterPlus: z.object({
+						id: z.string(),
+					}),
+					GuardianWeekly: z.object({
+						id: z.string(),
+					}),
+					NewspaperArchive: z.object({
+						id: z.string(),
+					}),
 				}),
-				billingPeriod: z
-					.enum(typeObject.SupporterMembership.billingPeriods)
-					.optional(),
+				billingPeriod: z.literal('Month'),
 			}),
-			V2DeprecatedAnnual: z.object({
+			RestOfWorldMonthly: z.object({
+				id: z.string(),
+				pricing: z.object({ USD: z.number(), GBP: z.number() }),
+				charges: z.object({
+					SupporterPlus: z.object({
+						id: z.string(),
+					}),
+					GuardianWeekly: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			RestOfWorldAnnual: z.object({
+				id: z.string(),
+				pricing: z.object({ USD: z.number(), GBP: z.number() }),
+				charges: z.object({
+					SupporterPlus: z.object({
+						id: z.string(),
+					}),
+					GuardianWeekly: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Annual'),
+			}),
+			DomesticAnnual: z.object({
 				id: z.string(),
 				pricing: z.object({
 					USD: z.number(),
+					NZD: z.number(),
+					EUR: z.number(),
 					GBP: z.number(),
 					CAD: z.number(),
-					EUR: z.number(),
 					AUD: z.number(),
 				}),
 				charges: z.object({
-					Subscription: z.object({ id: z.string() }),
+					SupporterPlus: z.object({
+						id: z.string(),
+					}),
+					GuardianWeekly: z.object({
+						id: z.string(),
+					}),
 				}),
-				billingPeriod: z
-					.enum(typeObject.SupporterMembership.billingPeriods)
-					.optional(),
+				billingPeriod: z.literal('Annual'),
 			}),
-			V1DeprecatedAnnual: z.object({
+			DomesticMonthly: z.object({
 				id: z.string(),
 				pricing: z.object({
-					GBP: z.number(),
-				}),
-				charges: z.object({
-					Subscription: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.SupporterMembership.billingPeriods)
-					.optional(),
-			}),
-			V1DeprecatedMonthly: z.object({
-				id: z.string(),
-				pricing: z.object({
-					GBP: z.number(),
-				}),
-				charges: z.object({
-					Subscription: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.SupporterMembership.billingPeriods)
-					.optional(),
-			}),
-			V2DeprecatedMonthly: z.object({
-				id: z.string(),
-				pricing: z.object({
-					GBP: z.number(),
 					USD: z.number(),
-					AUD: z.number(),
+					NZD: z.number(),
 					EUR: z.number(),
+					GBP: z.number(),
 					CAD: z.number(),
+					AUD: z.number(),
 				}),
 				charges: z.object({
-					Subscription: z.object({ id: z.string() }),
+					SupporterPlus: z.object({
+						id: z.string(),
+					}),
+					GuardianWeekly: z.object({
+						id: z.string(),
+					}),
 				}),
-				billingPeriod: z
-					.enum(typeObject.SupporterMembership.billingPeriods)
-					.optional(),
-			}),
-		}),
-	}),
-	PatronMembership: z.object({
-		billingSystem: z.literal('zuora'),
-		active: z.boolean(),
-		ratePlans: z.object({
-			Monthly: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Subscription: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z.enum(typeObject.PatronMembership.billingPeriods),
-			}),
-			Annual: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Subscription: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z.enum(typeObject.PatronMembership.billingPeriods),
-			}),
-			V1DeprecatedAnnual: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Subscription: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z.enum(typeObject.PatronMembership.billingPeriods),
-			}),
-			V1DeprecatedMonthly: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Subscription: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z.enum(typeObject.PatronMembership.billingPeriods),
-			}),
-		}),
-	}),
-	PartnerMembership: z.object({
-		billingSystem: z.literal('zuora'),
-		active: z.boolean(),
-		ratePlans: z.object({
-			V1DeprecatedAnnual: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Subscription: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z.enum(typeObject.PartnerMembership.billingPeriods),
-			}),
-			Monthly: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Subscription: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z.enum(typeObject.PartnerMembership.billingPeriods),
-			}),
-			Annual: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Subscription: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z.enum(typeObject.PartnerMembership.billingPeriods),
-			}),
-			V1DeprecatedMonthly: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Subscription: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z.enum(typeObject.PartnerMembership.billingPeriods),
+				billingPeriod: z.literal('Month'),
 			}),
 		}),
 	}),
@@ -214,6 +259,23 @@ export const productCatalogSchema = z.object({
 		billingSystem: z.literal('zuora'),
 		active: z.boolean(),
 		ratePlans: z.object({
+			Monthly: z.object({
+				id: z.string(),
+				pricing: z.object({
+					USD: z.number(),
+					NZD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					CAD: z.number(),
+					AUD: z.number(),
+				}),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
 			Annual: z.object({
 				id: z.string(),
 				pricing: z.object({
@@ -224,10 +286,29 @@ export const productCatalogSchema = z.object({
 					CAD: z.number(),
 					AUD: z.number(),
 				}),
-				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.DigitalSubscription.billingPeriods)
-					.optional(),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Annual'),
+			}),
+			Quarterly: z.object({
+				id: z.string(),
+				pricing: z.object({
+					USD: z.number(),
+					NZD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					CAD: z.number(),
+					AUD: z.number(),
+				}),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Quarter'),
 			}),
 			ThreeMonthGift: z.object({
 				id: z.string(),
@@ -239,10 +320,11 @@ export const productCatalogSchema = z.object({
 					CAD: z.number(),
 					AUD: z.number(),
 				}),
-				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.DigitalSubscription.billingPeriods)
-					.optional(),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
 			}),
 			OneYearGift: z.object({
 				id: z.string(),
@@ -254,156 +336,11 @@ export const productCatalogSchema = z.object({
 					CAD: z.number(),
 					AUD: z.number(),
 				}),
-				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.DigitalSubscription.billingPeriods)
-					.optional(),
-			}),
-			Monthly: z.object({
-				id: z.string(),
-				pricing: z.object({
-					USD: z.number(),
-					NZD: z.number(),
-					EUR: z.number(),
-					GBP: z.number(),
-					CAD: z.number(),
-					AUD: z.number(),
-				}),
-				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.DigitalSubscription.billingPeriods)
-					.optional(),
-			}),
-		}),
-	}),
-	HomeDelivery: z.object({
-		billingSystem: z.literal('zuora'),
-		active: z.boolean(),
-		ratePlans: z.object({
-			Everyday: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
 				charges: z.object({
-					Monday: z.object({ id: z.string() }),
-					Tuesday: z.object({ id: z.string() }),
-					Wednesday: z.object({ id: z.string() }),
-					Thursday: z.object({ id: z.string() }),
-					Friday: z.object({ id: z.string() }),
-					Saturday: z.object({ id: z.string() }),
-					Sunday: z.object({ id: z.string() }),
+					Subscription: z.object({
+						id: z.string(),
+					}),
 				}),
-				billingPeriod: z
-					.enum(typeObject.HomeDelivery.billingPeriods)
-					.optional(),
-			}),
-			Sixday: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Monday: z.object({ id: z.string() }),
-					Tuesday: z.object({ id: z.string() }),
-					Wednesday: z.object({ id: z.string() }),
-					Thursday: z.object({ id: z.string() }),
-					Friday: z.object({ id: z.string() }),
-					Saturday: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.HomeDelivery.billingPeriods)
-					.optional(),
-			}),
-			Weekend: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Saturday: z.object({ id: z.string() }),
-					Sunday: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.HomeDelivery.billingPeriods)
-					.optional(),
-			}),
-			Saturday: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({ Saturday: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.HomeDelivery.billingPeriods)
-					.optional(),
-			}),
-			Sunday: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({ Sunday: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.HomeDelivery.billingPeriods)
-					.optional(),
-			}),
-			'Everyday+': z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Monday: z.object({ id: z.string() }),
-					Tuesday: z.object({ id: z.string() }),
-					Wednesday: z.object({ id: z.string() }),
-					Thursday: z.object({ id: z.string() }),
-					Friday: z.object({ id: z.string() }),
-					Saturday: z.object({ id: z.string() }),
-					Sunday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.HomeDelivery.billingPeriods)
-					.optional(),
-			}),
-			'Sixday+': z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Monday: z.object({ id: z.string() }),
-					Tuesday: z.object({ id: z.string() }),
-					Wednesday: z.object({ id: z.string() }),
-					Thursday: z.object({ id: z.string() }),
-					Friday: z.object({ id: z.string() }),
-					Saturday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.HomeDelivery.billingPeriods)
-					.optional(),
-			}),
-			'Weekend+': z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Saturday: z.object({ id: z.string() }),
-					Sunday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.HomeDelivery.billingPeriods)
-					.optional(),
-			}),
-			'Saturday+': z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Saturday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.HomeDelivery.billingPeriods)
-					.optional(),
-			}),
-			'Sunday+': z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Sunday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.HomeDelivery.billingPeriods)
-					.optional(),
 			}),
 		}),
 	}),
@@ -411,309 +348,161 @@ export const productCatalogSchema = z.object({
 		billingSystem: z.literal('zuora'),
 		active: z.boolean(),
 		ratePlans: z.object({
-			Everyday: z.object({
+			Sixday: z.object({
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
 				charges: z.object({
-					Monday: z.object({ id: z.string() }),
-					Tuesday: z.object({ id: z.string() }),
-					Wednesday: z.object({ id: z.string() }),
-					Thursday: z.object({ id: z.string() }),
-					Friday: z.object({ id: z.string() }),
-					Saturday: z.object({ id: z.string() }),
-					Sunday: z.object({ id: z.string() }),
+					Monday: z.object({
+						id: z.string(),
+					}),
+					Tuesday: z.object({
+						id: z.string(),
+					}),
+					Wednesday: z.object({
+						id: z.string(),
+					}),
+					Thursday: z.object({
+						id: z.string(),
+					}),
+					Friday: z.object({
+						id: z.string(),
+					}),
+					Saturday: z.object({
+						id: z.string(),
+					}),
 				}),
-				billingPeriod: z
-					.enum(typeObject.NationalDelivery.billingPeriods)
-					.optional(),
+				billingPeriod: z.literal('Month'),
 			}),
 			Weekend: z.object({
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
 				charges: z.object({
-					Saturday: z.object({ id: z.string() }),
-					Sunday: z.object({ id: z.string() }),
+					Saturday: z.object({
+						id: z.string(),
+					}),
+					Sunday: z.object({
+						id: z.string(),
+					}),
 				}),
-				billingPeriod: z
-					.enum(typeObject.NationalDelivery.billingPeriods)
-					.optional(),
+				billingPeriod: z.literal('Month'),
 			}),
-			Sixday: z.object({
+			Everyday: z.object({
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
 				charges: z.object({
-					Monday: z.object({ id: z.string() }),
-					Tuesday: z.object({ id: z.string() }),
-					Wednesday: z.object({ id: z.string() }),
-					Thursday: z.object({ id: z.string() }),
-					Friday: z.object({ id: z.string() }),
-					Saturday: z.object({ id: z.string() }),
+					Monday: z.object({
+						id: z.string(),
+					}),
+					Tuesday: z.object({
+						id: z.string(),
+					}),
+					Wednesday: z.object({
+						id: z.string(),
+					}),
+					Thursday: z.object({
+						id: z.string(),
+					}),
+					Friday: z.object({
+						id: z.string(),
+					}),
+					Saturday: z.object({
+						id: z.string(),
+					}),
+					Sunday: z.object({
+						id: z.string(),
+					}),
 				}),
-				billingPeriod: z
-					.enum(typeObject.NationalDelivery.billingPeriods)
-					.optional(),
+				billingPeriod: z.literal('Month'),
 			}),
 		}),
 	}),
-	SubscriptionCard: z.object({
+	SupporterMembership: z.object({
 		billingSystem: z.literal('zuora'),
 		active: z.boolean(),
 		ratePlans: z.object({
-			Everyday: z.object({
+			Annual: z.object({
+				id: z.string(),
+				pricing: z.object({
+					USD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					CAD: z.number(),
+					AUD: z.number(),
+				}),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Annual'),
+			}),
+			Monthly: z.object({
+				id: z.string(),
+				pricing: z.object({
+					USD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					CAD: z.number(),
+					AUD: z.number(),
+				}),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			V2DeprecatedAnnual: z.object({
+				id: z.string(),
+				pricing: z.object({
+					USD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					CAD: z.number(),
+					AUD: z.number(),
+				}),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Annual'),
+			}),
+			V1DeprecatedAnnual: z.object({
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
 				charges: z.object({
-					Monday: z.object({ id: z.string() }),
-					Tuesday: z.object({ id: z.string() }),
-					Wednesday: z.object({ id: z.string() }),
-					Thursday: z.object({ id: z.string() }),
-					Friday: z.object({ id: z.string() }),
-					Saturday: z.object({ id: z.string() }),
-					Sunday: z.object({ id: z.string() }),
+					Subscription: z.object({
+						id: z.string(),
+					}),
 				}),
-				billingPeriod: z
-					.enum(typeObject.SubscriptionCard.billingPeriods)
-					.optional(),
+				billingPeriod: z.literal('Annual'),
 			}),
-			Weekend: z.object({
+			V1DeprecatedMonthly: z.object({
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
 				charges: z.object({
-					Saturday: z.object({ id: z.string() }),
-					Sunday: z.object({ id: z.string() }),
+					Subscription: z.object({
+						id: z.string(),
+					}),
 				}),
-				billingPeriod: z
-					.enum(typeObject.SubscriptionCard.billingPeriods)
-					.optional(),
+				billingPeriod: z.literal('Month'),
 			}),
-			Sixday: z.object({
+			V2DeprecatedMonthly: z.object({
 				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
+				pricing: z.object({
+					USD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					CAD: z.number(),
+					AUD: z.number(),
+				}),
 				charges: z.object({
-					Monday: z.object({ id: z.string() }),
-					Tuesday: z.object({ id: z.string() }),
-					Wednesday: z.object({ id: z.string() }),
-					Thursday: z.object({ id: z.string() }),
-					Friday: z.object({ id: z.string() }),
-					Saturday: z.object({ id: z.string() }),
+					Subscription: z.object({
+						id: z.string(),
+					}),
 				}),
-				billingPeriod: z
-					.enum(typeObject.SubscriptionCard.billingPeriods)
-					.optional(),
-			}),
-			Sunday: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({ Sunday: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.SubscriptionCard.billingPeriods)
-					.optional(),
-			}),
-			Saturday: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({ Saturday: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.SubscriptionCard.billingPeriods)
-					.optional(),
-			}),
-			'Everyday+': z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Monday: z.object({ id: z.string() }),
-					Tuesday: z.object({ id: z.string() }),
-					Wednesday: z.object({ id: z.string() }),
-					Thursday: z.object({ id: z.string() }),
-					Friday: z.object({ id: z.string() }),
-					Saturday: z.object({ id: z.string() }),
-					Sunday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.SubscriptionCard.billingPeriods)
-					.optional(),
-			}),
-			'Sixday+': z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Monday: z.object({ id: z.string() }),
-					Tuesday: z.object({ id: z.string() }),
-					Wednesday: z.object({ id: z.string() }),
-					Thursday: z.object({ id: z.string() }),
-					Friday: z.object({ id: z.string() }),
-					Saturday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.SubscriptionCard.billingPeriods)
-					.optional(),
-			}),
-			'Weekend+': z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Saturday: z.object({ id: z.string() }),
-					Sunday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.SubscriptionCard.billingPeriods)
-					.optional(),
-			}),
-			'Saturday+': z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Saturday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.SubscriptionCard.billingPeriods)
-					.optional(),
-			}),
-			'Sunday+': z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Sunday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.SubscriptionCard.billingPeriods)
-					.optional(),
-			}),
-		}),
-	}),
-	NewspaperVoucher: z.object({
-		billingSystem: z.literal('zuora'),
-		active: z.boolean(),
-		ratePlans: z.object({
-			Everyday: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Monday: z.object({ id: z.string() }),
-					Tuesday: z.object({ id: z.string() }),
-					Wednesday: z.object({ id: z.string() }),
-					Thursday: z.object({ id: z.string() }),
-					Friday: z.object({ id: z.string() }),
-					Saturday: z.object({ id: z.string() }),
-					Sunday: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.NewspaperVoucher.billingPeriods)
-					.optional(),
-			}),
-			Sixday: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Monday: z.object({ id: z.string() }),
-					Tuesday: z.object({ id: z.string() }),
-					Wednesday: z.object({ id: z.string() }),
-					Thursday: z.object({ id: z.string() }),
-					Friday: z.object({ id: z.string() }),
-					Saturday: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.NewspaperVoucher.billingPeriods)
-					.optional(),
-			}),
-			Weekend: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Saturday: z.object({ id: z.string() }),
-					Sunday: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.NewspaperVoucher.billingPeriods)
-					.optional(),
-			}),
-			Saturday: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({ Saturday: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.NewspaperVoucher.billingPeriods)
-					.optional(),
-			}),
-			Sunday: z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({ Sunday: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.NewspaperVoucher.billingPeriods)
-					.optional(),
-			}),
-			'Everyday+': z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Monday: z.object({ id: z.string() }),
-					Tuesday: z.object({ id: z.string() }),
-					Wednesday: z.object({ id: z.string() }),
-					Thursday: z.object({ id: z.string() }),
-					Friday: z.object({ id: z.string() }),
-					Saturday: z.object({ id: z.string() }),
-					Sunday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.NewspaperVoucher.billingPeriods)
-					.optional(),
-			}),
-			'Sixday+': z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Monday: z.object({ id: z.string() }),
-					Tuesday: z.object({ id: z.string() }),
-					Wednesday: z.object({ id: z.string() }),
-					Thursday: z.object({ id: z.string() }),
-					Friday: z.object({ id: z.string() }),
-					Saturday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.NewspaperVoucher.billingPeriods)
-					.optional(),
-			}),
-			'Weekend+': z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Saturday: z.object({ id: z.string() }),
-					Sunday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.NewspaperVoucher.billingPeriods)
-					.optional(),
-			}),
-			'Saturday+': z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Saturday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.NewspaperVoucher.billingPeriods)
-					.optional(),
-			}),
-			'Sunday+': z.object({
-				id: z.string(),
-				pricing: z.object({ GBP: z.number() }),
-				charges: z.object({
-					Sunday: z.object({ id: z.string() }),
-					DigitalPack: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.NewspaperVoucher.billingPeriods)
-					.optional(),
+				billingPeriod: z.literal('Month'),
 			}),
 		}),
 	}),
@@ -732,11 +521,11 @@ export const productCatalogSchema = z.object({
 					AUD: z.number(),
 				}),
 				charges: z.object({
-					Subscription: z.object({ id: z.string() }),
+					Subscription: z.object({
+						id: z.string(),
+					}),
 				}),
-				billingPeriod: z
-					.enum(typeObject.SupporterPlus.billingPeriods)
-					.optional(),
+				billingPeriod: z.literal('Month'),
 			}),
 			V1DeprecatedAnnual: z.object({
 				id: z.string(),
@@ -749,11 +538,11 @@ export const productCatalogSchema = z.object({
 					AUD: z.number(),
 				}),
 				charges: z.object({
-					Subscription: z.object({ id: z.string() }),
+					Subscription: z.object({
+						id: z.string(),
+					}),
 				}),
-				billingPeriod: z
-					.enum(typeObject.SupporterPlus.billingPeriods)
-					.optional(),
+				billingPeriod: z.literal('Annual'),
 			}),
 			Monthly: z.object({
 				id: z.string(),
@@ -766,12 +555,14 @@ export const productCatalogSchema = z.object({
 					AUD: z.number(),
 				}),
 				charges: z.object({
-					Subscription: z.object({ id: z.string() }),
-					Contribution: z.object({ id: z.string() }),
+					Subscription: z.object({
+						id: z.string(),
+					}),
+					Contribution: z.object({
+						id: z.string(),
+					}),
 				}),
-				billingPeriod: z
-					.enum(typeObject.SupporterPlus.billingPeriods)
-					.optional(),
+				billingPeriod: z.literal('Month'),
 			}),
 			Annual: z.object({
 				id: z.string(),
@@ -784,196 +575,14 @@ export const productCatalogSchema = z.object({
 					AUD: z.number(),
 				}),
 				charges: z.object({
-					Subscription: z.object({ id: z.string() }),
-					Contribution: z.object({ id: z.string() }),
+					Contribution: z.object({
+						id: z.string(),
+					}),
+					Subscription: z.object({
+						id: z.string(),
+					}),
 				}),
-				billingPeriod: z
-					.enum(typeObject.SupporterPlus.billingPeriods)
-					.optional(),
-			}),
-		}),
-	}),
-	TierThree: z.object({
-		billingSystem: z.literal('zuora'),
-		active: z.boolean(),
-		ratePlans: z.object({
-			RestOfWorldMonthly: z.object({
-				id: z.string(),
-				pricing: z.object({
-					USD: z.number(),
-					GBP: z.number(),
-				}),
-				charges: z.object({
-					SupporterPlus: z.object({ id: z.string() }),
-					GuardianWeekly: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.SupporterPlus.billingPeriods)
-					.optional(),
-			}),
-			RestOfWorldAnnual: z.object({
-				id: z.string(),
-				pricing: z.object({
-					USD: z.number(),
-					GBP: z.number(),
-				}),
-				charges: z.object({
-					SupporterPlus: z.object({ id: z.string() }),
-					GuardianWeekly: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.SupporterPlus.billingPeriods)
-					.optional(),
-			}),
-			DomesticAnnual: z.object({
-				id: z.string(),
-				pricing: z.object({
-					USD: z.number(),
-					NZD: z.number(),
-					EUR: z.number(),
-					GBP: z.number(),
-					CAD: z.number(),
-					AUD: z.number(),
-				}),
-				charges: z.object({
-					SupporterPlus: z.object({ id: z.string() }),
-					GuardianWeekly: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.SupporterPlus.billingPeriods)
-					.optional(),
-			}),
-			DomesticMonthly: z.object({
-				id: z.string(),
-				pricing: z.object({
-					USD: z.number(),
-					NZD: z.number(),
-					EUR: z.number(),
-					GBP: z.number(),
-					CAD: z.number(),
-					AUD: z.number(),
-				}),
-				charges: z.object({
-					SupporterPlus: z.object({ id: z.string() }),
-					GuardianWeekly: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.SupporterPlus.billingPeriods)
-					.optional(),
-			}),
-			RestOfWorldMonthlyV2: z.object({
-				id: z.string(),
-				pricing: z.object({
-					USD: z.number(),
-					GBP: z.number(),
-				}),
-				charges: z.object({
-					SupporterPlus: z.object({ id: z.string() }),
-					GuardianWeekly: z.object({ id: z.string() }),
-					NewspaperArchive: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.SupporterPlus.billingPeriods)
-					.optional(),
-			}),
-			RestOfWorldAnnualV2: z.object({
-				id: z.string(),
-				pricing: z.object({
-					USD: z.number(),
-					GBP: z.number(),
-				}),
-				charges: z.object({
-					SupporterPlus: z.object({ id: z.string() }),
-					GuardianWeekly: z.object({ id: z.string() }),
-					NewspaperArchive: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.SupporterPlus.billingPeriods)
-					.optional(),
-			}),
-			DomesticAnnualV2: z.object({
-				id: z.string(),
-				pricing: z.object({
-					USD: z.number(),
-					NZD: z.number(),
-					EUR: z.number(),
-					GBP: z.number(),
-					CAD: z.number(),
-					AUD: z.number(),
-				}),
-				charges: z.object({
-					SupporterPlus: z.object({ id: z.string() }),
-					GuardianWeekly: z.object({ id: z.string() }),
-					NewspaperArchive: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.SupporterPlus.billingPeriods)
-					.optional(),
-			}),
-			DomesticMonthlyV2: z.object({
-				id: z.string(),
-				pricing: z.object({
-					USD: z.number(),
-					NZD: z.number(),
-					EUR: z.number(),
-					GBP: z.number(),
-					CAD: z.number(),
-					AUD: z.number(),
-				}),
-				charges: z.object({
-					SupporterPlus: z.object({ id: z.string() }),
-					GuardianWeekly: z.object({ id: z.string() }),
-					NewspaperArchive: z.object({ id: z.string() }),
-				}),
-				billingPeriod: z
-					.enum(typeObject.SupporterPlus.billingPeriods)
-					.optional(),
-			}),
-		}),
-	}),
-	GuardianWeeklyRestOfWorld: z.object({
-		billingSystem: z.literal('zuora'),
-		active: z.boolean(),
-		ratePlans: z.object({
-			ThreeMonthGift: z.object({
-				id: z.string(),
-				pricing: z.object({ USD: z.number(), GBP: z.number() }),
-				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.GuardianWeeklyRestOfWorld.billingPeriods)
-					.optional(),
-			}),
-			OneYearGift: z.object({
-				id: z.string(),
-				pricing: z.object({ USD: z.number(), GBP: z.number() }),
-				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.GuardianWeeklyRestOfWorld.billingPeriods)
-					.optional(),
-			}),
-			Quarterly: z.object({
-				id: z.string(),
-				pricing: z.object({ USD: z.number(), GBP: z.number() }),
-				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.GuardianWeeklyRestOfWorld.billingPeriods)
-					.optional(),
-			}),
-			Annual: z.object({
-				id: z.string(),
-				pricing: z.object({ USD: z.number(), GBP: z.number() }),
-				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.GuardianWeeklyRestOfWorld.billingPeriods)
-					.optional(),
-			}),
-			Monthly: z.object({
-				id: z.string(),
-				pricing: z.object({ USD: z.number(), GBP: z.number() }),
-				charges: z.object({ Monthly: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.GuardianWeeklyRestOfWorld.billingPeriods)
-					.optional(),
+				billingPeriod: z.literal('Annual'),
 			}),
 		}),
 	}),
@@ -981,7 +590,7 @@ export const productCatalogSchema = z.object({
 		billingSystem: z.literal('zuora'),
 		active: z.boolean(),
 		ratePlans: z.object({
-			ThreeMonthGift: z.object({
+			OneYearGift: z.object({
 				id: z.string(),
 				pricing: z.object({
 					USD: z.number(),
@@ -991,25 +600,12 @@ export const productCatalogSchema = z.object({
 					CAD: z.number(),
 					AUD: z.number(),
 				}),
-				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.GuardianWeeklyDomestic.billingPeriods)
-					.optional(),
-			}),
-			Quarterly: z.object({
-				id: z.string(),
-				pricing: z.object({
-					USD: z.number(),
-					NZD: z.number(),
-					EUR: z.number(),
-					GBP: z.number(),
-					CAD: z.number(),
-					AUD: z.number(),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
 				}),
-				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.GuardianWeeklyDomestic.billingPeriods)
-					.optional(),
+				billingPeriod: z.literal('Annual'),
 			}),
 			Annual: z.object({
 				id: z.string(),
@@ -1021,10 +617,29 @@ export const productCatalogSchema = z.object({
 					CAD: z.number(),
 					AUD: z.number(),
 				}),
-				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.GuardianWeeklyDomestic.billingPeriods)
-					.optional(),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Annual'),
+			}),
+			Quarterly: z.object({
+				id: z.string(),
+				pricing: z.object({
+					USD: z.number(),
+					NZD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					CAD: z.number(),
+					AUD: z.number(),
+				}),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Quarter'),
 			}),
 			Monthly: z.object({
 				id: z.string(),
@@ -1036,12 +651,14 @@ export const productCatalogSchema = z.object({
 					CAD: z.number(),
 					AUD: z.number(),
 				}),
-				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.GuardianWeeklyDomestic.billingPeriods)
-					.optional(),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
 			}),
-			OneYearGift: z.object({
+			ThreeMonthGift: z.object({
 				id: z.string(),
 				pricing: z.object({
 					USD: z.number(),
@@ -1051,10 +668,245 @@ export const productCatalogSchema = z.object({
 					CAD: z.number(),
 					AUD: z.number(),
 				}),
-				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.GuardianWeeklyDomestic.billingPeriods)
-					.optional(),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Quarter'),
+			}),
+		}),
+	}),
+	SubscriptionCard: z.object({
+		billingSystem: z.literal('zuora'),
+		active: z.boolean(),
+		ratePlans: z.object({
+			Everyday: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Monday: z.object({
+						id: z.string(),
+					}),
+					Tuesday: z.object({
+						id: z.string(),
+					}),
+					Saturday: z.object({
+						id: z.string(),
+					}),
+					Thursday: z.object({
+						id: z.string(),
+					}),
+					Friday: z.object({
+						id: z.string(),
+					}),
+					Wednesday: z.object({
+						id: z.string(),
+					}),
+					Sunday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			Weekend: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Saturday: z.object({
+						id: z.string(),
+					}),
+					Sunday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			Sixday: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Friday: z.object({
+						id: z.string(),
+					}),
+					Monday: z.object({
+						id: z.string(),
+					}),
+					Tuesday: z.object({
+						id: z.string(),
+					}),
+					Thursday: z.object({
+						id: z.string(),
+					}),
+					Wednesday: z.object({
+						id: z.string(),
+					}),
+					Saturday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			Sunday: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Sunday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			Saturday: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Saturday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			'Everyday+': z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					Saturday: z.object({
+						id: z.string(),
+					}),
+					Tuesday: z.object({
+						id: z.string(),
+					}),
+					Monday: z.object({
+						id: z.string(),
+					}),
+					Thursday: z.object({
+						id: z.string(),
+					}),
+					Wednesday: z.object({
+						id: z.string(),
+					}),
+					Sunday: z.object({
+						id: z.string(),
+					}),
+					Friday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			'Sixday+': z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					Thursday: z.object({
+						id: z.string(),
+					}),
+					Wednesday: z.object({
+						id: z.string(),
+					}),
+					Friday: z.object({
+						id: z.string(),
+					}),
+					Saturday: z.object({
+						id: z.string(),
+					}),
+					Monday: z.object({
+						id: z.string(),
+					}),
+					Tuesday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			'Sunday+': z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					Sunday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			'Weekend+': z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					Saturday: z.object({
+						id: z.string(),
+					}),
+					Sunday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			'Saturday+': z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					Saturday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+		}),
+	}),
+	Contribution: z.object({
+		billingSystem: z.literal('zuora'),
+		active: z.boolean(),
+		ratePlans: z.object({
+			Annual: z.object({
+				id: z.string(),
+				pricing: z.object({
+					USD: z.number(),
+					NZD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					CAD: z.number(),
+					AUD: z.number(),
+				}),
+				charges: z.object({
+					Contribution: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Annual'),
+			}),
+			Monthly: z.object({
+				id: z.string(),
+				pricing: z.object({
+					USD: z.number(),
+					NZD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					CAD: z.number(),
+					AUD: z.number(),
+				}),
+				charges: z.object({
+					Contribution: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
 			}),
 		}),
 	}),
@@ -1062,27 +914,25 @@ export const productCatalogSchema = z.object({
 		billingSystem: z.literal('zuora'),
 		active: z.boolean(),
 		ratePlans: z.object({
-			Quarterly: z.object({
-				id: z.string(),
-				pricing: z.object({
-					USD: z.number(),
-					GBP: z.number(),
-				}),
-				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.GuardianWeeklyZoneA.billingPeriods)
-					.optional(),
-			}),
 			Annual: z.object({
 				id: z.string(),
-				pricing: z.object({
-					USD: z.number(),
-					GBP: z.number(),
+				pricing: z.object({ USD: z.number(), GBP: z.number() }),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
 				}),
-				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.GuardianWeeklyZoneA.billingPeriods)
-					.optional(),
+				billingPeriod: z.literal('Annual'),
+			}),
+			Quarterly: z.object({
+				id: z.string(),
+				pricing: z.object({ USD: z.number(), GBP: z.number() }),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Quarter'),
 			}),
 		}),
 	}),
@@ -1100,10 +950,12 @@ export const productCatalogSchema = z.object({
 					CAD: z.number(),
 					AUD: z.number(),
 				}),
-				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.GuardianWeeklyZoneB.billingPeriods)
-					.optional(),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Quarter'),
 			}),
 			Annual: z.object({
 				id: z.string(),
@@ -1115,10 +967,12 @@ export const productCatalogSchema = z.object({
 					CAD: z.number(),
 					AUD: z.number(),
 				}),
-				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.GuardianWeeklyZoneB.billingPeriods)
-					.optional(),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Annual'),
 			}),
 		}),
 	}),
@@ -1136,10 +990,12 @@ export const productCatalogSchema = z.object({
 					CAD: z.number(),
 					AUD: z.number(),
 				}),
-				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.GuardianWeeklyZoneC.billingPeriods)
-					.optional(),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Quarter'),
 			}),
 			Annual: z.object({
 				id: z.string(),
@@ -1151,43 +1007,490 @@ export const productCatalogSchema = z.object({
 					CAD: z.number(),
 					AUD: z.number(),
 				}),
-				charges: z.object({ Subscription: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.GuardianWeeklyZoneC.billingPeriods)
-					.optional(),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Annual'),
 			}),
 		}),
 	}),
-	Contribution: z.object({
+	NewspaperVoucher: z.object({
 		billingSystem: z.literal('zuora'),
 		active: z.boolean(),
 		ratePlans: z.object({
-			Annual: z.object({
+			Everyday: z.object({
 				id: z.string(),
-				pricing: z.object({}),
-				charges: z.object({ Contribution: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.Contribution.billingPeriods)
-					.optional(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Monday: z.object({
+						id: z.string(),
+					}),
+					Tuesday: z.object({
+						id: z.string(),
+					}),
+					Saturday: z.object({
+						id: z.string(),
+					}),
+					Thursday: z.object({
+						id: z.string(),
+					}),
+					Friday: z.object({
+						id: z.string(),
+					}),
+					Wednesday: z.object({
+						id: z.string(),
+					}),
+					Sunday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
 			}),
-			Monthly: z.object({
+			'Everyday+': z.object({
 				id: z.string(),
-				pricing: z.object({}),
-				charges: z.object({ Contribution: z.object({ id: z.string() }) }),
-				billingPeriod: z
-					.enum(typeObject.Contribution.billingPeriods)
-					.optional(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					Saturday: z.object({
+						id: z.string(),
+					}),
+					Tuesday: z.object({
+						id: z.string(),
+					}),
+					Monday: z.object({
+						id: z.string(),
+					}),
+					Thursday: z.object({
+						id: z.string(),
+					}),
+					Wednesday: z.object({
+						id: z.string(),
+					}),
+					Sunday: z.object({
+						id: z.string(),
+					}),
+					Friday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			Sixday: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Friday: z.object({
+						id: z.string(),
+					}),
+					Monday: z.object({
+						id: z.string(),
+					}),
+					Tuesday: z.object({
+						id: z.string(),
+					}),
+					Thursday: z.object({
+						id: z.string(),
+					}),
+					Wednesday: z.object({
+						id: z.string(),
+					}),
+					Saturday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			'Sixday+': z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					Thursday: z.object({
+						id: z.string(),
+					}),
+					Wednesday: z.object({
+						id: z.string(),
+					}),
+					Friday: z.object({
+						id: z.string(),
+					}),
+					Saturday: z.object({
+						id: z.string(),
+					}),
+					Monday: z.object({
+						id: z.string(),
+					}),
+					Tuesday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			Weekend: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Saturday: z.object({
+						id: z.string(),
+					}),
+					Sunday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			'Weekend+': z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					Saturday: z.object({
+						id: z.string(),
+					}),
+					Sunday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			Sunday: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Sunday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			'Sunday+': z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					Sunday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			Saturday: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Saturday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			'Saturday+': z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					Saturday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
 			}),
 		}),
 	}),
-	OneTimeContribution: z.object({
-		billingSystem: z.literal('stripe'),
+	HomeDelivery: z.object({
+		billingSystem: z.literal('zuora'),
 		active: z.boolean(),
 		ratePlans: z.object({
-			OneTime: z.object({
+			Everyday: z.object({
 				id: z.string(),
-				pricing: z.object({}),
-				charges: z.object({ Contribution: z.object({ id: z.string() }) }),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Sunday: z.object({
+						id: z.string(),
+					}),
+					Wednesday: z.object({
+						id: z.string(),
+					}),
+					Friday: z.object({
+						id: z.string(),
+					}),
+					Thursday: z.object({
+						id: z.string(),
+					}),
+					Monday: z.object({
+						id: z.string(),
+					}),
+					Tuesday: z.object({
+						id: z.string(),
+					}),
+					Saturday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			Sixday: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Wednesday: z.object({
+						id: z.string(),
+					}),
+					Friday: z.object({
+						id: z.string(),
+					}),
+					Thursday: z.object({
+						id: z.string(),
+					}),
+					Monday: z.object({
+						id: z.string(),
+					}),
+					Tuesday: z.object({
+						id: z.string(),
+					}),
+					Saturday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			Weekend: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Sunday: z.object({
+						id: z.string(),
+					}),
+					Saturday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			Sunday: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Sunday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			Saturday: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Saturday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			'Everyday+': z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					Wednesday: z.object({
+						id: z.string(),
+					}),
+					Friday: z.object({
+						id: z.string(),
+					}),
+					Thursday: z.object({
+						id: z.string(),
+					}),
+					Sunday: z.object({
+						id: z.string(),
+					}),
+					Monday: z.object({
+						id: z.string(),
+					}),
+					Tuesday: z.object({
+						id: z.string(),
+					}),
+					Saturday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			'Weekend+': z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					Sunday: z.object({
+						id: z.string(),
+					}),
+					Saturday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			'Sixday+': z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					Wednesday: z.object({
+						id: z.string(),
+					}),
+					Friday: z.object({
+						id: z.string(),
+					}),
+					Thursday: z.object({
+						id: z.string(),
+					}),
+					Monday: z.object({
+						id: z.string(),
+					}),
+					Tuesday: z.object({
+						id: z.string(),
+					}),
+					Saturday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			'Sunday+': z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					Sunday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			'Saturday+': z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					DigitalPack: z.object({
+						id: z.string(),
+					}),
+					Saturday: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+		}),
+	}),
+	PatronMembership: z.object({
+		billingSystem: z.literal('zuora'),
+		active: z.boolean(),
+		ratePlans: z.object({
+			Monthly: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			Annual: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Annual'),
+			}),
+			V1DeprecatedAnnual: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Annual'),
+			}),
+			V1DeprecatedMonthly: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+		}),
+	}),
+	PartnerMembership: z.object({
+		billingSystem: z.literal('zuora'),
+		active: z.boolean(),
+		ratePlans: z.object({
+			V1DeprecatedAnnual: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Annual'),
+			}),
+			Monthly: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
+			}),
+			Annual: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Annual'),
+			}),
+			V1DeprecatedMonthly: z.object({
+				id: z.string(),
+				pricing: z.object({ GBP: z.number() }),
+				charges: z.object({
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				billingPeriod: z.literal('Month'),
 			}),
 		}),
 	}),

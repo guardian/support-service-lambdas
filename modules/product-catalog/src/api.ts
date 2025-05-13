@@ -1,4 +1,4 @@
-import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
+import type { ProductCatalog } from '@modules/product-catalog/newProductCatalogTypes';
 import { productCatalogSchema } from '@modules/product-catalog/productCatalogSchema';
 
 export const getProductCatalogFromApi = async (

@@ -1,7 +1,7 @@
 import type { BillingPeriod } from '@modules/billingPeriod';
 import type { Currency } from '@modules/internationalisation/currency';
 import { getIfDefined } from '@modules/nullAndUndefined';
-import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
+import type { ProductCatalog } from '@modules/product-catalog/newProductCatalogTypes';
 
 export type CatalogInformation = {
 	supporterPlus: {

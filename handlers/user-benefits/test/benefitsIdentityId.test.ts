@@ -1,5 +1,5 @@
 import { getUserBenefitsExcludingStaff } from '@modules/product-benefits/userBenefits';
-import type { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
+import type { ProductCatalogHelper } from '@modules/product-catalog/newProductCatalogTypes';
 import type { Stage } from '@modules/stage';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { benefitsIdentityIdHandler } from '../src/benefitsIdentityId';

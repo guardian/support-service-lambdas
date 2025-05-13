@@ -8,7 +8,7 @@ const writeSchemaToFile = async () => {
 	// const activeTypesString = JSON.stringify(types.active, null, 2);
 	// const inactiveTypesString = JSON.stringify(types.inactive, null, 2);
 	const generatedSchema = generateSchema(prodCatalog);
-	fs.writeFileSync('./src/generatedSchema.ts', generatedSchema);
+	fs.writeFileSync('./src/productCatalogSchema.ts', generatedSchema);
 };
 
 void (async function () {

@@ -8,7 +8,7 @@ import type {
 	ProductBillingPeriod,
 	ProductCatalog,
 	ProductRatePlan,
-} from '@modules/product-catalog/productCatalog';
+} from '@modules/product-catalog/newProductCatalogTypes';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import { getAccount } from '@modules/zuora/getAccount';
 import { getSubscription } from '@modules/zuora/getSubscription';

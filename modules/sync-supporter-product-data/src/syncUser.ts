@@ -1,7 +1,7 @@
 import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 import { awsConfig } from '@modules/aws/config';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
-import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
+import { ProductCatalogHelper } from '@modules/product-catalog/newProductCatalogTypes';
 import type { Stage } from '@modules/stage';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import { getActiveAccountNumbersForIdentityId } from '@modules/zuora/getAccountsForIdentityId';

@@ -1,12 +1,12 @@
 import type { z } from 'zod';
-import type { productCatalogSchema } from '@modules/product-catalog/generatedSchema';
+import type { productCatalogSchema } from '@modules/product-catalog/productCatalogSchema';
 
 type ProductBillingSystem = 'stripe' | 'zuora';
 
-type ProductCatalog = z.infer<typeof productCatalogSchema>;
+export type ProductCatalog = z.infer<typeof productCatalogSchema>;
 // -------- Product --------
-type ProductKey = keyof ProductCatalog;
-type Product<P extends ProductKey> = ProductCatalog[P];
+export type ProductKey = keyof ProductCatalog;
+export type Product<P extends ProductKey> = ProductCatalog[P];
 
 // -------- Product Rate Plan --------
 type ProductRatePlanKey<P extends ProductKey> =

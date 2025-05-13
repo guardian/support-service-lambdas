@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "generateTypes": "ts-node src/generateTypeObjectCommand.ts && prettier --write src/typeObject.ts",
-    "generateSchema": "ts-node src/generateProductSchemaCommand.ts && prettier --write src/generatedSchema.ts",
+    "generateSchema": "ts-node src/generateProductSchemaCommand.ts && prettier --write src/productCatalogSchema.ts",
     "updateSnapshots": "jest -u --group=-integration",
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
