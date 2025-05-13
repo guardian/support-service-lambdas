@@ -17,10 +17,10 @@ export const isSupportedCurrency = (
 const currencyToGlyphMapping: { [C in Currency]: string } = {
 	GBP: '£',
 	EUR: '€',
-	AUD: '$',
-	USD: '$',
-	CAD: '$',
-	NZD: '$',
+	AUD: 'AU$',
+	USD: 'US$',
+	CAD: 'CA$',
+	NZD: 'NZ$',
 };
 
 export const getCurrencyGlyph = (currency: Currency) =>
