@@ -11,7 +11,8 @@ export type OrderActionType =
 	| 'ChangePlan'
 	| 'TermsAndConditions'
 	| 'RenewSubscription'
-	| 'UpdateProduct';
+	| 'UpdateProduct'
+	| 'AddProduct';
 
 type BaseOrderAction = {
 	type: OrderActionType;
@@ -50,6 +51,13 @@ export type ChangePlanOrderAction = BaseOrderAction & {
 		};
 	};
 };
+export type DiscountOrderAction = BaseOrderAction & {
+	type: 'AddProduct';
+	addProduct: {
+		productRatePlanId: string;
+	};
+};
+
 export type UpdateProductOrderAction = BaseOrderAction & {
 	type: 'UpdateProduct';
 	updateProduct: {
@@ -83,7 +91,8 @@ export type OrderAction =
 	| ChangePlanOrderAction
 	| RenewSubscriptionOrderAction
 	| TermsAndConditionsOrderAction
-	| UpdateProductOrderAction;
+	| UpdateProductOrderAction
+	| DiscountOrderAction;
 
 export type OrderRequest = {
 	orderDate: string;

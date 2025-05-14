@@ -16,6 +16,7 @@ import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import { removePendingUpdateAmendments } from './amendments';
 import type { CatalogInformation } from './catalogInformation';
+import type { Discount } from './discounts';
 import { takePaymentOrAdjustInvoice } from './payment';
 import { sendThankYouEmail } from './productSwitchEmail';
 import { sendSalesforceTracking } from './salesforceTracking';
@@ -32,11 +33,19 @@ import {
 import { sendToSupporterProductData } from './supporterProductData';
 import type { SwitchInformation } from './switchInformation';
 
+export interface SwitchDiscountResponse {
+	discountedPrice: number;
+	upToPeriods: number;
+	upToPeriodsType: 'Months' | 'Years';
+	discountPercentage: number;
+}
+
 export type PreviewResponse = {
 	amountPayableToday: number;
 	contributionRefundAmount: number;
 	supporterPlusPurchaseAmount: number;
 	nextPaymentDate: string;
+	discount?: SwitchDiscountResponse;
 };
 
 export type SwitchResponse = { message: string };
@@ -115,6 +124,7 @@ export const previewResponseFromZuoraResponse = (
 	zuoraResponse: ZuoraPreviewResponse,
 	catalogInformation: CatalogInformation,
 	subscription: ZuoraSubscription,
+	possibleDiscount?: Discount,
 ): PreviewResponse => {
 	const invoice: ZuoraPreviewResponseInvoice = getIfDefined(
 		zuoraResponse.previewResult?.invoices[0],
@@ -145,7 +155,7 @@ export const previewResponseFromZuoraResponse = (
 		'No supporter plus invoice item found in the preview response',
 	);
 
-	return {
+	const response: PreviewResponse = {
 		amountPayableToday: invoice.amount,
 		contributionRefundAmount,
 		supporterPlusPurchaseAmount:
@@ -155,6 +165,27 @@ export const previewResponseFromZuoraResponse = (
 			dayjs(supporterPlusSubscriptionInvoiceItem.serviceEndDate).add(1, 'days'),
 		),
 	};
+
+	if (possibleDiscount) {
+		const discountInvoiceItem = invoice.invoiceItems.find(
+			(invoiceItem) =>
+				invoiceItem.productRatePlanChargeId ===
+				possibleDiscount.productRatePlanChargeId,
+		);
+		if (discountInvoiceItem) {
+			response.discount = {
+				discountedPrice:
+					supporterPlusSubscriptionInvoiceItem.unitPrice +
+					(discountInvoiceItem.amountWithoutTax +
+						discountInvoiceItem.taxAmount),
+				discountPercentage: possibleDiscount.discountPercentage,
+				upToPeriods: possibleDiscount.upToPeriods,
+				upToPeriodsType: possibleDiscount.upToPeriodsType,
+			};
+		}
+	}
+
+	return response;
 };
 
 export const preview = async (
@@ -176,6 +207,7 @@ export const preview = async (
 			zuoraResponse,
 			productSwitchInformation.catalog,
 			subscription,
+			productSwitchInformation.discount,
 		);
 	} else {
 		throw new Error(zuoraResponse.reasons?.[0]?.message ?? 'Unknown error');
@@ -204,6 +236,34 @@ export const doSwitch = async (
 	}
 
 	return zuoraResponse;
+};
+
+const buildAddDiscountOrderAction = (
+	discount: Discount,
+	orderDate: Dayjs,
+): OrderAction[] => {
+	return [
+		{
+			type: 'AddProduct',
+			triggerDates: [
+				{
+					name: 'ContractEffective',
+					triggerDate: zuoraDateFormat(orderDate),
+				},
+				{
+					name: 'ServiceActivation',
+					triggerDate: zuoraDateFormat(orderDate),
+				},
+				{
+					name: 'CustomerAcceptance',
+					triggerDate: zuoraDateFormat(orderDate),
+				},
+			],
+			addProduct: {
+				productRatePlanId: discount.productRatePlanId,
+			},
+		},
+	];
 };
 
 const buildChangePlanOrderAction = (
@@ -255,6 +315,10 @@ const buildPreviewRequestBody = (
 	const { accountNumber, subscriptionNumber } =
 		productSwitchInformation.subscription;
 
+	const discountOrderAction = productSwitchInformation.discount
+		? buildAddDiscountOrderAction(productSwitchInformation.discount, orderDate)
+		: [];
+
 	return {
 		orderDate: zuoraDateFormat(orderDate),
 		existingAccountNumber: accountNumber,
@@ -268,6 +332,7 @@ const buildPreviewRequestBody = (
 				subscriptionNumber,
 				orderActions: [
 					buildChangePlanOrderAction(orderDate, catalog, contributionAmount),
+					...discountOrderAction,
 				],
 			},
 		],
@@ -329,6 +394,10 @@ export const buildSwitchRequestBody = (
 			]
 		: [];
 
+	const discountOrderAction = productSwitchInformation.discount
+		? buildAddDiscountOrderAction(productSwitchInformation.discount, orderDate)
+		: [];
+
 	return {
 		orderDate: zuoraDateFormat(orderDate),
 		existingAccountNumber: accountNumber,
@@ -341,6 +410,7 @@ export const buildSwitchRequestBody = (
 				subscriptionNumber,
 				orderActions: [
 					buildChangePlanOrderAction(orderDate, catalog, contributionAmount),
+					...discountOrderAction,
 					...newTermOrderActions,
 				],
 			},

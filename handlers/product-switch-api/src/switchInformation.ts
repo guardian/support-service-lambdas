@@ -6,6 +6,7 @@ import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type {
 	RatePlan,
 	ZuoraAccount,
@@ -15,6 +16,8 @@ import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type { CatalogInformation } from './catalogInformation';
 import { getCatalogInformation } from './catalogInformation';
+import type { Discount } from './discounts';
+import { getDiscount } from './discounts';
 import type { ProductSwitchRequestBody } from './schemas';
 
 export type AccountInformation = {
@@ -41,9 +44,11 @@ export type SwitchInformation = {
 	input: ProductSwitchRequestBody;
 	startNewTerm: boolean;
 	contributionAmount: number;
+	actualTotalPrice: number;
 	account: AccountInformation;
 	subscription: SubscriptionInformation;
 	catalog: CatalogInformation;
+	discount?: Discount;
 };
 
 const getAccountInformation = (account: ZuoraAccount): AccountInformation => {
@@ -124,15 +129,16 @@ const getCurrency = (contributionRatePlan: RatePlan): Currency => {
 };
 
 // Gets a subscription from Zuora and checks that it is owned by currently logged-in user
-export const getSwitchInformationWithOwnerCheck = (
+export const getSwitchInformationWithOwnerCheck = async (
 	stage: Stage,
 	input: ProductSwitchRequestBody,
 	subscription: ZuoraSubscription,
 	account: ZuoraAccount,
 	productCatalog: ProductCatalog,
 	identityIdFromRequest: string | undefined,
+	zuroaClient: ZuoraClient,
 	today: Dayjs = dayjs(),
-): SwitchInformation => {
+): Promise<SwitchInformation> => {
 	console.log(
 		`Checking subscription ${subscription.subscriptionNumber} is owned by the currently logged in user`,
 	);
@@ -171,8 +177,22 @@ export const getSwitchInformationWithOwnerCheck = (
 		currency,
 	);
 
-	const contributionAmount =
-		input.price - catalogInformation.supporterPlus.price;
+	const maybeDiscount = await getDiscount(
+		!!input.applyDiscountIfAvailable,
+		previousAmount,
+		catalogInformation.supporterPlus.price,
+		billingPeriod,
+		subscription.status,
+		subscription.accountNumber,
+		account.metrics.totalInvoiceBalance,
+		stage,
+		zuroaClient,
+	);
+
+	const actualBasePrice =
+		maybeDiscount?.discountedPrice ?? catalogInformation.supporterPlus.price;
+
+	const contributionAmount = Math.max(0, previousAmount - actualBasePrice);
 
 	const subscriptionInformation = {
 		accountNumber: subscription.accountNumber,
@@ -193,8 +213,10 @@ export const getSwitchInformationWithOwnerCheck = (
 		input,
 		startNewTerm,
 		contributionAmount,
+		actualTotalPrice: contributionAmount + actualBasePrice,
 		account: userInformation,
 		subscription: subscriptionInformation,
 		catalog: catalogInformation,
+		discount: maybeDiscount,
 	};
 };
