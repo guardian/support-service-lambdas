@@ -4,7 +4,7 @@ import type { Currency } from '@modules/internationalisation/currency';
 import { isSupportedCurrency } from '@modules/internationalisation/currency';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
-import type { ProductCatalog } from '@modules/product-catalog/newProductCatalogTypes';
+import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import type {
 	RatePlan,

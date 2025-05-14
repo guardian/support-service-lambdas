@@ -3,7 +3,7 @@ import type { IdentityUserDetails } from '@modules/identity/identity';
 import type {
 	ProductCatalogHelper,
 	ProductKey,
-} from '@modules/product-catalog/newProductCatalogTypes';
+} from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import { getSupporterProductData } from '@modules/supporter-product-data/supporterProductData';

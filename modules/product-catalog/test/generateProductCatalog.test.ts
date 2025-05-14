@@ -1,6 +1,6 @@
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
+import { generateProductBillingPeriods } from '@modules/product-catalog/generateProductBillingPeriods';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
-import { generateTypeObjects } from '@modules/product-catalog/generateTypeObject';
 import { productCatalogSchema } from '@modules/product-catalog/productCatalogSchema';
 import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
 import prod from '../../zuora-catalog/test/fixtures/catalog-prod.json';
@@ -13,9 +13,9 @@ describe('prod', () => {
 		expect(prodProductCatalog).toMatchSnapshot();
 	});
 
-	test('Generated product catalog types match snapshot', () => {
+	test('Generated product billing types match snapshot', () => {
 		const prodZuoraCatalog = zuoraCatalogSchema.parse(prod);
-		const prodTypeObject = generateTypeObjects(prodZuoraCatalog);
+		const prodTypeObject = generateProductBillingPeriods(prodZuoraCatalog);
 		expect(prodTypeObject).toMatchSnapshot();
 	});
 });
@@ -28,9 +28,9 @@ describe('code', () => {
 		expect(codeProductCatalog).toMatchSnapshot();
 	});
 
-	test('Generated product catalog types match snapshot', () => {
+	test('Generated product billing period types match snapshot', () => {
 		const codeZuoraCatalog = zuoraCatalogSchema.parse(code);
-		const codeTypeObject = generateTypeObjects(codeZuoraCatalog);
+		const codeTypeObject = generateProductBillingPeriods(codeZuoraCatalog);
 		expect(codeTypeObject).toMatchSnapshot();
 	});
 

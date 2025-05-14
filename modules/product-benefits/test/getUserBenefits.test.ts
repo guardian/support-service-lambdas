@@ -1,5 +1,5 @@
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
-import { ProductCatalogHelper } from '@modules/product-catalog/newProductCatalogTypes';
+import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import dayjs from 'dayjs';
 import {

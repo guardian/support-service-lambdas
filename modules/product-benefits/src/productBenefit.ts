@@ -1,4 +1,4 @@
-import type { ProductKey } from '@modules/product-catalog/newProductCatalogTypes';
+import type { ProductKey } from '@modules/product-catalog/productCatalog';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import dayjs from 'dayjs';
 import type { ProductBenefit } from './schemas';

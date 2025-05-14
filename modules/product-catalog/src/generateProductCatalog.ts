@@ -5,8 +5,7 @@ import type {
 	ZuoraProductRatePlan,
 	ZuoraProductRatePlanCharge,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import type { ProductCatalog } from '@modules/product-catalog/newProductCatalogTypes';
-import { oneTimeContribution } from '@modules/product-catalog/oneTimeContributionProduct';
+import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { stripeProducts } from '@modules/product-catalog/stripeProducts';
 import {
 	activeProducts,
@@ -135,7 +134,6 @@ export const generateProductCatalog = (
 		}),
 	);
 	const productCatalog = {
-		...oneTimeContribution,
 		...stripeProducts,
 		...result,
 	};

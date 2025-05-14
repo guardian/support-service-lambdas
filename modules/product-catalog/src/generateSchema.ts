@@ -6,7 +6,6 @@ import type {
 	ZuoraProductRatePlan,
 	ZuoraProductRatePlanCharge,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import { oneTimeContributionSchema } from '@modules/product-catalog/oneTimeContributionProduct';
 import { stripeProductsSchema } from '@modules/product-catalog/stripeProducts';
 import {
 	getProductRatePlanChargeKey,
@@ -21,21 +20,23 @@ const header = `import { z } from 'zod';
 export const productCatalogSchema = z.object({`;
 
 const footer = `});`;
+
 export const generateSchema = (catalog: ZuoraCatalog): string => {
-	const supportedProducts = catalog.products.filter((product) =>
+	const supportedZuoraProducts = catalog.products.filter((product) =>
 		isSupportedProduct(product.name),
 	);
-	const zuoraProductsSchema = supportedProducts.map((product) =>
-		generateProductSchema(product),
-	);
+
+	const zuoraProductsSchema = supportedZuoraProducts
+		.map((product) => generateZuoraProductSchema(product))
+		.join(',\n');
+
 	return `${header}
-	${stripeProductsSchema},
-	${oneTimeContributionSchema},
-	${zuoraProductsSchema.join(',\n')}
-	${footer}`;
+		${stripeProductsSchema},
+		${zuoraProductsSchema}
+		${footer}`;
 };
 
-const generateProductSchema = (product: CatalogProduct) => {
+const generateZuoraProductSchema = (product: CatalogProduct) => {
 	const productName = getZuoraProductKey(product.name);
 	const supportedRatePlans = product.productRatePlans.filter(
 		(productRatePlan) => isSupportedProductRatePlan(productRatePlan.name),
