@@ -20,7 +20,7 @@ class SalesforceHandler extends RequestHandler[SQSEvent, Unit] {
         salesforceRecordInput <- record.getBody
           .fromJson[SalesforceRecordInput]
           .left
-          .map(msg => new RuntimeException("failed to deserialise input: " + msg))
+          .map(msg => new RuntimeException(s"failed to deserialise input ${record.getBody}: " + msg))
         _ = context.getLogger.log(s"Processing salesforceRecordInput with body: ${record.getBody}")
         _ <- runZio(salesforceRecordInput, context)
       } yield ()
