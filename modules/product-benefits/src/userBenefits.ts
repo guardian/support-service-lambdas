@@ -36,7 +36,7 @@ export const getValidUserProducts = (
 	supporterProductDataItems: SupporterRatePlanItem[],
 ): ProductKey[] =>
 	supporterProductDataItems
-		.filter((item) => dayjs(item.termEndDate) >= dayjs())
+		.filter((item) => dayjs(item.termEndDate) >= dayjs().startOf('day'))
 		.flatMap((item) => {
 			const product = productCatalogHelper.findProductDetails(
 				item.productRatePlanId,

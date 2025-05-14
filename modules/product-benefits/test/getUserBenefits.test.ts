@@ -43,12 +43,14 @@ describe('getUserProductsFromSupporterProductDataItems', () => {
 					subscriptionName: '123',
 					productRatePlanId: '2c92c0f94c510a0d014c569ba8eb45f7',
 					productRatePlanName: 'Non Founder Supporter - monthly',
-					contractEffectiveDate: zuoraDateFormat(dayjs()),
-					termEndDate: zuoraDateFormat(dayjs()),
+					contractEffectiveDate: zuoraDateFormat(
+						dayjs().subtract(1, 'month').startOf('day'),
+					),
+					termEndDate: zuoraDateFormat(dayjs().startOf('day')),
 					identityId: '123',
 				},
-			]),
-		).toEqual([]);
+			]).length,
+		).toEqual(1);
 	});
 
 	test('returns single contribution when there is a single contribution less than 3 months old', () => {
