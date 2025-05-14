@@ -194,14 +194,6 @@ export const getSwitchInformationWithOwnerCheck = async (
 
 	const contributionAmount = Math.max(0, previousAmount - actualBasePrice);
 
-	/*
-	 * existing situation: the price is passed in when someone switches.
-	 * a min of the supporterplus base price is passed through, more if the user already contributes more than the min
-	 *
-	 * propsoal: continue to pass through the price from the client, however also calculate this figure on the backend and use the 2 as a comparison.
-	 *
-	 */
-
 	const subscriptionInformation = {
 		accountNumber: subscription.accountNumber,
 		subscriptionNumber: subscription.subscriptionNumber,
