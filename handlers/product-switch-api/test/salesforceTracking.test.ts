@@ -5,11 +5,11 @@ test('salesforce tracking data is serialised to the queue correctly', () => {
 	const testData: SwitchInformation = {
 		stage: 'CODE',
 		input: {
-			price: 45.5,
 			preview: false,
 			// csrUserId: undefined,
 			// caseId: undefined,
 		},
+		actualTotalPrice: 45.5,
 		startNewTerm: false,
 		contributionAmount: 10.5,
 		account: {
