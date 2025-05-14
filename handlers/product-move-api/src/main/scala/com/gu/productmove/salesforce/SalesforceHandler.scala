@@ -1,12 +1,10 @@
 package com.gu.productmove.salesforce
 
 import com.amazonaws.services.lambda.runtime.events.SQSEvent
-import com.amazonaws.services.lambda.runtime.events.SQSEvent.SQSMessage
-import com.gu.productmove.GuStageLive.Stage
 import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
-import com.gu.productmove.salesforce.CreateRecord.CreateRecordRequest
+import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.salesforce.Salesforce.{SalesforceRecordInput, createSfRecord}
-import com.gu.productmove.{AwsCredentialsLive, AwsS3, AwsS3Live, GuStageLive, SecretsLive, SttpClientLive}
+import com.gu.productmove.{AwsCredentialsLive, GuStageLive, SecretsLive, SttpClientLive}
 import sttp.client3.SttpBackend
 import zio.json.*
 import zio.{Exit, Runtime, Task, Unsafe, ZIO}
@@ -17,18 +15,27 @@ class SalesforceHandler extends RequestHandler[SQSEvent, Unit] {
   override def handleRequest(input: SQSEvent, context: Context): Unit = {
     val records: List[SQSEvent.SQSMessage] = input.getRecords.asScala.toList
 
-    records.map { record =>
-      val maybeSalesforceRecordInput = record.getBody.fromJson[SalesforceRecordInput]
-
-      maybeSalesforceRecordInput match {
-        case Right(salesforceRecordInput) => runZio(salesforceRecordInput, context)
-        case Left(ex) =>
-          context.getLogger.log(s"Error '$ex' when decoding JSON to SalesforceRecordInput with body: ${record.getBody}")
-      }
+    val results = records.map { record =>
+      val result = for {
+        salesforceRecordInput <- record.getBody
+          .fromJson[SalesforceRecordInput]
+          .left
+          .map(msg => new RuntimeException("failed to deserialise input: " + msg))
+        _ = context.getLogger.log(s"Processing salesforceRecordInput with body: ${record.getBody}")
+        _ <- runZio(salesforceRecordInput, context)
+      } yield ()
+      result.left.foreach(ex => context.getLogger.log(ex.toString))
+      result
     }
+    val numErrors =
+      results.collect { case Left(ex) =>
+        ex
+      }.length
+    if (numErrors > 0)
+      throw new RuntimeException("Lambda failed due to previously logged errors")
   }
 
-  def runZio(salesforceRecordInput: SalesforceRecordInput, context: Context) = {
+  def runZio(salesforceRecordInput: SalesforceRecordInput, context: Context): Either[RuntimeException, Unit] = {
     val runtime = Runtime.default
     Unsafe.unsafe { implicit u =>
       runtime.unsafe.run(
@@ -43,10 +50,10 @@ class SalesforceHandler extends RequestHandler[SQSEvent, Unit] {
             GuStageLive.layer,
           ),
       ) match {
-        case Exit.Success(value) => value
+        case Exit.Success(value) => Right(value)
         case Exit.Failure(cause) =>
           context.getLogger.log("Failed with: " + cause.toString)
-          throw new RuntimeException("Salesforce record creation failed with error: " + cause.toString)
+          Left(new RuntimeException("Salesforce record creation failed with error: " + cause.toString))
       }
     }
   }
