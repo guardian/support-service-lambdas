@@ -17,7 +17,7 @@ const getBillingPeriodsForProduct = (
 	distinct(
 		productRatePlans
 			.flatMap((productRatePlan) =>
-				productRatePlan.productRatePlanCharges.flatMap(
+				productRatePlan.productRatePlanCharges.map(
 					(charge) => charge.billingPeriod,
 				),
 			)
@@ -31,14 +31,12 @@ const getBillingPeriodsForStripeProduct = (
 	productKey: StripeProductKey,
 	product: Product<StripeProductKey>,
 ): Record<string, string[]> => {
-	const billingPeriods = Object.entries(product.ratePlans).map(
-		([, ratePlan]) => {
-			const typed = ratePlan as {
-				billingPeriod: string;
-			};
-			return typed.billingPeriod;
-		},
-	);
+	const billingPeriods = Object.values(product.ratePlans).map((ratePlan) => {
+		const typed = ratePlan as {
+			billingPeriod: string;
+		};
+		return typed.billingPeriod;
+	});
 	return {
 		[productKey]: distinct(billingPeriods),
 	};
