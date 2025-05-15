@@ -7,20 +7,24 @@ object ConsentsMapping {
   val subscriberPreview = "subscriber_preview"
   val guardianWeeklyNewsletter = "guardian_weekly_newsletter"
 
+  private val singleAndRecurringContribution = "Contribution"
+
   /*
-  This function is needed because when events come from the acquisition event bus, they have an ophan style product name.
+    This function is needed because when events come from the acquisition event bus, they have an ophan style product name.
    */
   def productMappings(productName: String, printProduct: Option[String]): String = {
     // the values on the left come from https://github.com/guardian/support-frontend/blob/beef97734c1ca1549bc1cb5f1ea5b4501d24fc46/support-modules/acquisition-events/src/main/scala/com/gu/support/acquisitions/models/AcquisitionDataRow.scala#L97
     productName match {
-      case "RECURRING_CONTRIBUTION" => "Contribution"
+      case "RECURRING_CONTRIBUTION" => singleAndRecurringContribution
       case "SUPPORTER_PLUS" => "Supporter Plus"
       case "TIER_THREE" => "Tier Three"
       case "DIGITAL_SUBSCRIPTION" => "Digital Pack"
-      case "PRINT_SUBSCRIPTION" if printProduct.exists(List("HOME_DELIVERY_SUNDAY", "VOUCHER_SUNDAY").contains) => "Newspaper - Observer only" // don't set any consents for observer only
+      case "PRINT_SUBSCRIPTION" if printProduct.exists(List("HOME_DELIVERY_SUNDAY", "VOUCHER_SUNDAY").contains) =>
+        "Newspaper - Observer only" // don't set any consents for observer only
       case "PRINT_SUBSCRIPTION" if !printProduct.contains("GUARDIAN_WEEKLY") => "newspaper"
       case "PRINT_SUBSCRIPTION" if printProduct.contains("GUARDIAN_WEEKLY") => "Guardian Weekly"
       case "GUARDIAN_AD_LITE" => "Guardian Ad-Lite"
+      case "CONTRIBUTION" /* single */ => singleAndRecurringContribution
       case other => other
     }
   }
@@ -36,17 +40,17 @@ object ConsentsMapping {
       similarGuardianProducts,
       supporterNewsletter,
     ),
-    "Contribution" -> Set(
+    singleAndRecurringContribution -> Set(
       yourSupportOnboarding,
       similarGuardianProducts,
       supporterNewsletter,
     ),
-    "Recurring Contribution" -> Set(
+    "Recurring Contribution" -> Set( // unused I think
       yourSupportOnboarding,
       similarGuardianProducts,
       supporterNewsletter,
     ),
-    "Contributor" -> Set(
+    "Contributor" -> Set( // unused I think
       yourSupportOnboarding,
       similarGuardianProducts,
       supporterNewsletter,
