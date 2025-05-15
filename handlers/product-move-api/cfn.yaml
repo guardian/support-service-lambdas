@@ -302,8 +302,8 @@ Resources:
       AlarmActions:
         - Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-${Stage}
       AlarmName:
-        Fn::Sub: ${Stage} No Salesforce tracking of a product switch has been queued recently
-      AlarmDescription: Impact - tracking of product switches is not going to salesforce/bigquery/braze
+        Fn::Sub: ${Stage} No Salesforce tracking of a product switch has been queued for 4 hours
+      AlarmDescription: Impact - tracking of product switches may not be going to salesforce/bigquery/braze
       Metrics:
         - Id: e1
           Expression: "FILL(m1,0)"
@@ -318,7 +318,7 @@ Resources:
                 - Name: FunctionName
                   Value:
                     Fn::Sub: product-switch-salesforce-tracking-${Stage}
-            Period: 3600
+            Period: 14400
             Stat: Sum
             Unit: Count
           ReturnData: false
