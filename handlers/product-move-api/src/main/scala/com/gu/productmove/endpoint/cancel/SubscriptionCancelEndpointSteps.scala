@@ -106,11 +106,14 @@ class SubscriptionCancelEndpointSteps(
       cancellationResponse <- zuoraCancel.cancel(subscriptionName, cancellationDate)
       _ <- ZIO.log("Sub cancelled as of: " + cancellationDate)
 
+      _ <- ZIO.log(
+        if (shouldBeRefunded) s"Adding sub to the queue to do the refund asynchronously" else "No refund needed",
+      )
       _ <-
         if (shouldBeRefunded)
-          doRefund(subscriptionName, account.basicInfo.id, cancellationResponse, today)
+          sqs.queueRefund(RefundInput(subscriptionName, account.basicInfo.id, today))
         else
-          ZIO.succeed(RefundResponse("Success", ""))
+          ZIO.succeed(())
 
       _ <- ZIO.log(s"Attempting to update cancellation reason on Zuora subscription")
       _ <- zuoraSetCancellationReason
@@ -126,17 +129,6 @@ class SubscriptionCancelEndpointSteps(
       case other: Throwable => ZIO.fail(other)
     }
   }
-
-  private def doRefund(
-      subscriptionName: SubscriptionName,
-      accountId: ZuoraAccountId,
-      cancellationResponse: CancellationResponse,
-      today: LocalDate,
-  ): IO[OutputBody | Throwable, Unit] =
-    for {
-      _ <- ZIO.log(s"Adding sub to the queue to do the refund asynchronously")
-      _ <- sqs.queueRefund(RefundInput(subscriptionName, accountId, today))
-    } yield ()
 
   def asSingle[A](list: List[A], message: String): Task[A] =
     list match {
