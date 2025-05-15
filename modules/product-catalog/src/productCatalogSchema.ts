@@ -350,6 +350,87 @@ export const productCatalogSchema = z.object({
 		billingSystem: z.literal('zuora'),
 		active: z.boolean(),
 		ratePlans: z.object({
+			'Everyday+': z
+				.object({
+					id: z.string(),
+					pricing: z.object({ GBP: z.number() }),
+					charges: z.object({
+						Sunday: z.object({
+							id: z.string(),
+						}),
+						Wednesday: z.object({
+							id: z.string(),
+						}),
+						Friday: z.object({
+							id: z.string(),
+						}),
+						Thursday: z.object({
+							id: z.string(),
+						}),
+						Monday: z.object({
+							id: z.string(),
+						}),
+						Tuesday: z.object({
+							id: z.string(),
+						}),
+						Saturday: z.object({
+							id: z.string(),
+						}),
+						DigitalPack: z.object({
+							id: z.string(),
+						}),
+					}),
+					billingPeriod: z.literal('Month'),
+				})
+				.optional(),
+			'Weekend+': z
+				.object({
+					id: z.string(),
+					pricing: z.object({ GBP: z.number() }),
+					charges: z.object({
+						Sunday: z.object({
+							id: z.string(),
+						}),
+						Saturday: z.object({
+							id: z.string(),
+						}),
+						DigitalPack: z.object({
+							id: z.string(),
+						}),
+					}),
+					billingPeriod: z.literal('Month'),
+				})
+				.optional(),
+			'Sixday+': z
+				.object({
+					id: z.string(),
+					pricing: z.object({ GBP: z.number() }),
+					charges: z.object({
+						DigitalPack: z.object({
+							id: z.string(),
+						}),
+						Wednesday: z.object({
+							id: z.string(),
+						}),
+						Friday: z.object({
+							id: z.string(),
+						}),
+						Thursday: z.object({
+							id: z.string(),
+						}),
+						Monday: z.object({
+							id: z.string(),
+						}),
+						Tuesday: z.object({
+							id: z.string(),
+						}),
+						Saturday: z.object({
+							id: z.string(),
+						}),
+					}),
+					billingPeriod: z.literal('Month'),
+				})
+				.optional(),
 			Sixday: z.object({
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
