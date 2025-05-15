@@ -15,7 +15,10 @@ import {
 	isSupportedProductRatePlan,
 } from '@modules/product-catalog/zuoraToProductNameMappings';
 
-const header = `import { z } from 'zod';
+const header = `
+// ---------- This file is auto-generated. Do not edit manually. -------------
+
+import { z } from 'zod';
 
 export const productCatalogSchema = z.object({`;
 

@@ -64,7 +64,10 @@ export const generateProductBillingPeriods = (catalog: ZuoraCatalog) => {
 			);
 		}),
 	);
-	return `import type { ProductKey } from '@modules/product-catalog/productCatalog';
+	return `
+// ---------- This file is auto-generated. Do not edit manually. -------------
+
+import type { ProductKey } from '@modules/product-catalog/productCatalog';
 	
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- we are using this for type generation
 	const productBillingPeriods = ${JSON.stringify({
