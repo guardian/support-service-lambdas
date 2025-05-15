@@ -30,7 +30,7 @@ object RefundSupporterPlusSpec extends ZIOSpecDefault {
         for {
           _ <- RefundSupporterPlus
             .applyRefund(
-              RefundInput(SubscriptionName("A-S00631533"), ZuoraAccountId("choose your id here"), LocalDate.now()),
+              RefundInput(SubscriptionName("A-S00985673"), ZuoraAccountId("8ad090fd96d24cc20196d437f54a600f"), LocalDate.parse("2025-05-15")),
             )
             .provide(
               AwsS3Live.layer,
@@ -48,7 +48,7 @@ object RefundSupporterPlusSpec extends ZIOSpecDefault {
               RunBillingLive.layer,
             )
         } yield assert(true)(equalTo(true))
-      } @@ TestAspect.ignore,
+      },// @@ TestAspect.ignore,
       test("Balance invoices locally") {
         /*
              Test suite used to run the ensureThatNegativeInvoiceBalanceIsZero lambda locally

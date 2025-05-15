@@ -1,25 +1,12 @@
 package com.gu.productmove.zuora
 
-import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
-import com.gu.productmove.AwsS3
-import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
 import com.gu.productmove.zuora.RunBilling.InvoiceId
-import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraGet, ZuoraRestBody}
-import sttp.capabilities.zio.ZioStreams
-import sttp.capabilities.{Effect, WebSockets}
 import sttp.client3.*
-import sttp.client3.httpclient.zio.HttpClientZioBackend
-import sttp.client3.ziojson.*
-import sttp.model.Uri
 import zio.json.*
-import zio.{IO, RIO, Task, URLayer, ZIO, ZLayer}
+import zio.{Task, URLayer, ZIO, ZLayer}
 
-import java.time.format.DateTimeFormatter
-import java.time.{LocalDate, LocalDateTime}
-import scala.collection.immutable.ListMap
-import math.Ordered.orderingToOrdered
+import java.time.LocalDate
 
 object RunBillingLive {
   val layer: URLayer[ZuoraGet, RunBilling] =
@@ -27,32 +14,47 @@ object RunBillingLive {
 }
 
 private class RunBillingLive(zuoraGet: ZuoraGet) extends RunBilling {
+  import RunBilling.*
 
   // https://developer.zuora.com/v1-api-reference/older-api/operation/Action_POSTgenerate/
-  override def run(accountId: ZuoraAccountId, today: LocalDate): Task[InvoiceId] =
-    zuoraGet
-      .post[RunBillingRequest, RunBillingResponse](
-        uri"action/generate",
-        RunBillingRequest(List(AccountToGenerate(accountId, today, today)), "Invoice"),
-        ZuoraRestBody.ZuoraSuccessCheck.SuccessCheckCapitalised,
-      )
-      .map(_.Id)
-      .map(InvoiceId.apply)
+  override def run(accountId: ZuoraAccountId, today: LocalDate): Task[Option[InvoiceId]] =
+    for {
+      errorOrRunBillingResponse <- zuoraGet
+        .post[RunBillingRequest, RunBillingResponse](
+          uri"action/generate",
+          RunBillingRequest(List(AccountToGenerate(accountId, today, today)), "Invoice"),
+          ZuoraRestBody.ZuoraSuccessCheck.None,
+        )
+        .map(_.head) // we have hard coded one item in the request so there will be one in the response
+      maybeInvoiceId <- errorOrRunBillingResponse match {
+        case Left(RunBillingErrorResponse(ZuoraError("INVALID_VALUE", _) :: _)) => ZIO.none
+        case Left(error: RunBillingErrorResponse) => ZIO.fail(new RuntimeException("generate invoice failed with: " + error))
+        case Right(runBillingResponse: RunBillingSuccessResponse) => ZIO.some(InvoiceId(runBillingResponse.Id))
+      }
+    } yield maybeInvoiceId
 
   private case class AccountToGenerate(AccountId: ZuoraAccountId, InvoiceDate: LocalDate, TargetDate: LocalDate)
       derives JsonEncoder
   private case class RunBillingRequest(objects: List[AccountToGenerate], `type`: String) derives JsonEncoder
-
-  private case class RunBillingResponse(
-      Id: String, // ID of the generated invoice
-  ) derives JsonDecoder
 }
 
 trait RunBilling {
-  def run(accountId: ZuoraAccountId, today: LocalDate): Task[InvoiceId]
+  def run(accountId: ZuoraAccountId, today: LocalDate): Task[Option[InvoiceId]]
 }
 
 object RunBilling {
+
+  given eitherDecoder[A: JsonDecoder, B: JsonDecoder]: JsonDecoder[Either[A, B]] =
+    summon[JsonDecoder[A]].orElseEither(summon[JsonDecoder[B]])
+
+  private[zuora] case class RunBillingSuccessResponse(
+    Id: String, // ID of the generated invoice
+  ) derives JsonDecoder
+  private[zuora] case class ZuoraError(Code: String, Message: String) derives JsonDecoder
+  private[zuora] case class RunBillingErrorResponse(Errors: List[ZuoraError]) derives JsonDecoder
+
+  private[zuora] type RunBillingResponse = List[Either[RunBillingErrorResponse, RunBillingSuccessResponse]]
+  given JsonDecoder[RunBillingResponse] = JsonDecoder.list(eitherDecoder[RunBillingErrorResponse, RunBillingSuccessResponse])
 
   case class InvoiceId(id: String)
 
