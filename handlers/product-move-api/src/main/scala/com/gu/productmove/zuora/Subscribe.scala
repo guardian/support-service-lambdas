@@ -68,6 +68,10 @@ case class ChargeOverrides(
 given JsonEncoder[ChargeOverrides] = DeriveJsonEncoder.gen[ChargeOverrides]
 
 case class ZuoraAccountId(value: String) extends AnyVal
+object ZuoraAccountId {
+  given JsonCodec[ZuoraAccountId] = JsonCodec.string.transform(ZuoraAccountId.apply, _.value)
+}
+
 case class CaseId(value: String) extends AnyVal
 case class AcquisitionSource(value: String) extends AnyVal
 

@@ -24,7 +24,7 @@ import java.time.temporal.ChronoUnit
 
 trait CreatePayment {
   def create(
-      accountId: String,
+      accountId: ZuoraAccountId,
       invoiceId: String,
       paymentMethodId: String,
       amount: BigDecimal,
@@ -38,7 +38,7 @@ object CreatePaymentLive {
 
 private class CreatePaymentLive(zuoraGet: ZuoraGet) extends CreatePayment {
   override def create(
-      accountId: String,
+      accountId: ZuoraAccountId,
       invoiceId: String,
       paymentMethodId: String,
       amount: BigDecimal,
@@ -48,7 +48,7 @@ private class CreatePaymentLive(zuoraGet: ZuoraGet) extends CreatePayment {
       s"Attempting to create payment on account $accountId, invoice $invoiceId, paymentMethodId $paymentMethodId for amount $amount",
     )
     requestBody = CreatePaymentRequest(
-      AccountId = accountId,
+      AccountId = accountId.value,
       InvoiceId = invoiceId,
       PaymentMethodId = paymentMethodId,
       Amount = amount,
@@ -68,7 +68,7 @@ private class CreatePaymentLive(zuoraGet: ZuoraGet) extends CreatePayment {
 
 object CreatePayment {
   def create(
-      accountId: String,
+      accountId: ZuoraAccountId,
       invoiceId: String,
       paymentMethodId: String,
       amount: BigDecimal,

@@ -96,7 +96,7 @@ object BuildPreviewResult {
         )
         totalSupporterPlusCost = subscriptionAmount + contributionAmount
         amountPayableToday = totalSupporterPlusCost - refundAmount.abs
-      } yield PreviewResult(
+      } yield PreviewResult(//return the preview as an array
         amountPayableToday,
         isBelowMinimumStripeCharge(amountPayableToday),
         refundAmount,
