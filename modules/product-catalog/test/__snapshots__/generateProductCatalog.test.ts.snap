@@ -1,7 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`code Generated product billing period types match snapshot 1`] = `
-"import type { ProductKey } from '@modules/product-catalog/productCatalog';
+"
+// ---------- This file is auto-generated. Do not edit manually. -------------
+
+import type { ProductKey } from '@modules/product-catalog/productCatalog';
 	
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- we are using this for type generation
 	const productBillingPeriods = {"GuardianAdLite":["Month"],"GuardianWeeklyZoneB":["Semi_Annual","Three_Years","Two_Years","Annual","Quarter"],"TierThree":["Annual","Month"],"DigitalSubscription":["Month","Annual","Quarter"],"HomeDelivery":["Month"],"NationalDelivery":["Month"],"SupporterPlus":["Annual","Month"],"SupporterMembership":["Month","Annual"],"GuardianWeeklyRestOfWorld":["Quarter","Annual","Month"],"GuardianWeeklyDomestic":["Quarter","Annual","Month"],"SubscriptionCard":["Month"],"Contribution":["Annual","Month"],"GuardianWeeklyZoneA":["Semi_Annual","Two_Years","Annual","Three_Years","Quarter"],"GuardianWeeklyZoneC":["Annual","Quarter"],"NewspaperVoucher":["Month"],"PatronMembership":["Annual","Month"],"PartnerMembership":["Annual","Month"],"GuardianPatron":["Month"],"OneTimeContribution":["OneTime"]} as const;
@@ -1718,7 +1721,10 @@ exports[`code Generated product catalog matches snapshot 1`] = `
 `;
 
 exports[`prod Generated product billing types match snapshot 1`] = `
-"import type { ProductKey } from '@modules/product-catalog/productCatalog';
+"
+// ---------- This file is auto-generated. Do not edit manually. -------------
+
+import type { ProductKey } from '@modules/product-catalog/productCatalog';
 	
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- we are using this for type generation
 	const productBillingPeriods = {"GuardianWeeklyRestOfWorld":["Month","Annual","Quarter"],"GuardianAdLite":["Month"],"TierThree":["Annual","Month"],"DigitalSubscription":["Quarter","Month","Annual"],"NationalDelivery":["Month"],"SupporterMembership":["Annual","Month"],"SupporterPlus":["Month","Annual"],"GuardianWeeklyDomestic":["Annual","Quarter","Month"],"SubscriptionCard":["Month"],"Contribution":["Annual","Month"],"GuardianWeeklyZoneA":["Annual","Three_Years","Semi_Annual","Two_Years","Quarter"],"GuardianWeeklyZoneB":["Annual","Three_Years","Two_Years","Semi_Annual","Quarter"],"GuardianWeeklyZoneC":["Semi_Annual","Annual","Quarter"],"NewspaperVoucher":["Month"],"HomeDelivery":["Month"],"PatronMembership":["Month","Annual"],"PartnerMembership":["Annual","Month"],"GuardianPatron":["Month"],"OneTimeContribution":["OneTime"]} as const;
