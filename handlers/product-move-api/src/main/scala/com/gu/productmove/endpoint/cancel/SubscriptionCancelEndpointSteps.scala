@@ -134,15 +134,7 @@ class SubscriptionCancelEndpointSteps(
       today: LocalDate,
   ): IO[OutputBody | Throwable, Unit] =
     for {
-      _ <- ZIO.log(s"Attempting to refund sub")
-      negativeInvoice <- ZIO
-        .fromOption(cancellationResponse.invoiceId)
-        .orElseFail(
-          InternalServerError(
-            s"URGENT: subscription ${subscriptionName.value} should be refunded but has no negative invoice attached.",
-          ),
-        )
-      _ <- ZIO.log(s"Negative invoice id is $negativeInvoice")
+      _ <- ZIO.log(s"Adding sub to the queue to do the refund asynchronously")
       _ <- sqs.queueRefund(RefundInput(subscriptionName, accountId, today))
     } yield ()
 
