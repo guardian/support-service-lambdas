@@ -232,7 +232,7 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
   }
 
   "buildProductSwitchConsents - HandlerIAP" should "return the correct consents when switching from a Guardian Weekly to a Newspaper subscription whilst also owning a Mobile Subscription (IAP)" in {
-    HandlerIAP.buildProductSwitchConsents(
+    IAPMessageProcessor.buildProductSwitchConsents(
       "Guardian Weekly",
       "newspaper",
       Set("newspaper", "InAppPurchase"),
