@@ -63,7 +63,7 @@ export const prodProps: NewProductApiProps = {
 
 new SoftOptInConsentSetter(app, 'soft-opt-in-consent-setter-CODE', {
 	mobileAccountIdSSMParam: 'mobileAccountId',
-	schedule: 'rate(365 days)',
+	schedule: 'rate(30 minutes)',
 	acquisitionsEventBusArn:
 		'arn:aws:events:eu-west-1:865473395570:event-bus/acquisitions-bus-CODE',
 	stack: 'membership',
