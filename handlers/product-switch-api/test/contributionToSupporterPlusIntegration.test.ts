@@ -4,8 +4,13 @@
  * @group integration
  */
 import console from 'console';
+import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
+import {
+	billingPreviewToSimpleInvoiceItems,
+	getBillingPreview,
+} from '@modules/zuora/billingPreview';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import { getAccount } from '@modules/zuora/getAccount';
 import { getSubscription } from '@modules/zuora/getSubscription';
@@ -58,9 +63,20 @@ const createTestContribution = async (
 		preview,
 		applyDiscountIfAvailable: clientRequestedSwitchDiscount,
 	};
+	const today = dayjs();
 	const productCatalog = await getProductCatalogFromApi(stage);
 	const subscription = await getSubscription(zuoraClient, subscriptionNumber);
 	const account = await getAccount(zuoraClient, subscription.accountNumber);
+
+	const lazyBillingPreview = new Lazy(
+		() =>
+			getBillingPreview(
+				zuoraClient,
+				today.add(13, 'months'),
+				subscription.accountNumber,
+			),
+		'get billing preview for the subscription',
+	).then(billingPreviewToSimpleInvoiceItems);
 
 	const switchInformation = await getSwitchInformationWithOwnerCheck(
 		stage,
@@ -69,7 +85,8 @@ const createTestContribution = async (
 		account,
 		productCatalog,
 		contributionIdentityId,
-		zuoraClient,
+		lazyBillingPreview,
+		today,
 	);
 	return { zuoraClient, switchInformation, subscription };
 };

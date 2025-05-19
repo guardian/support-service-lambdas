@@ -4,9 +4,9 @@
  */
 import type { EmailMessageWithUserId } from '@modules/email/email';
 import { ValidationError } from '@modules/errors';
+import { Lazy } from '@modules/lazy';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
-import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 import {
 	zuoraAccountSchema,
@@ -73,7 +73,6 @@ test('startNewTerm is only true when the termStartDate is before today', async (
 	const subscription = zuoraSubscriptionResponseSchema.parse(subscriptionJson);
 	const account = zuoraAccountSchema.parse(accountJson);
 	const productCatalog = getProductCatalogFromFixture();
-	const zuoraClient = await ZuoraClient.create('CODE');
 
 	const switchInformation = await getSwitchInformationWithOwnerCheck(
 		'CODE',
@@ -82,7 +81,7 @@ test('startNewTerm is only true when the termStartDate is before today', async (
 		account,
 		productCatalog,
 		'999999999999',
-		zuoraClient,
+		new Lazy(() => Promise.resolve([]), 'test'),
 		today,
 	);
 	expect(switchInformation.startNewTerm).toEqual(false);
@@ -93,7 +92,6 @@ test('owner check is bypassed for salesforce calls', async () => {
 	const subscription = zuoraSubscriptionResponseSchema.parse(subscriptionJson);
 	const account = zuoraAccountSchema.parse(accountJson);
 	const productCatalog = getProductCatalogFromFixture();
-	const zuoraClient = await ZuoraClient.create('CODE');
 
 	const switchInformation = await getSwitchInformationWithOwnerCheck(
 		'CODE',
@@ -102,7 +100,7 @@ test('owner check is bypassed for salesforce calls', async () => {
 		account,
 		productCatalog,
 		undefined, // salesforce doesn't send the header
-		zuoraClient,
+		new Lazy(() => Promise.resolve([]), 'test'),
 		today,
 	);
 	expect(switchInformation.startNewTerm).toEqual(false);
@@ -113,20 +111,19 @@ test("owner check doesn't allow incorrect owner", async () => {
 	const subscription = zuoraSubscriptionResponseSchema.parse(subscriptionJson);
 	const account = zuoraAccountSchema.parse(accountJson);
 	const productCatalog = getProductCatalogFromFixture();
-	const zuoraClient = await ZuoraClient.create('CODE');
 
-	const switchInformation = async () =>
-		await getSwitchInformationWithOwnerCheck(
+	await expect(
+		getSwitchInformationWithOwnerCheck(
 			'CODE',
 			{ preview: false },
 			subscription,
 			account,
 			productCatalog,
-			'12345', // incorrect identity id
-			zuoraClient,
+			'12345',
+			new Lazy(() => Promise.resolve([]), 'test'),
 			today,
-		);
-	expect(switchInformation).toThrow(ValidationError);
+		),
+	).rejects.toThrow(ValidationError);
 });
 
 test('preview amounts are correct', () => {

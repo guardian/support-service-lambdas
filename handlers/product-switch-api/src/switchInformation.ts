@@ -2,11 +2,12 @@ import type { BillingPeriod } from '@modules/billingPeriod';
 import { ValidationError } from '@modules/errors';
 import type { Currency } from '@modules/internationalisation/currency';
 import { isSupportedCurrency } from '@modules/internationalisation/currency';
+import type { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
-import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { SimpleInvoiceItem } from '@modules/zuora/billingPreview';
 import type {
 	RatePlan,
 	ZuoraAccount,
@@ -136,8 +137,8 @@ export const getSwitchInformationWithOwnerCheck = async (
 	account: ZuoraAccount,
 	productCatalog: ProductCatalog,
 	identityIdFromRequest: string | undefined,
-	zuroaClient: ZuoraClient,
-	today: Dayjs = dayjs(),
+	lazyBillingPreview: Lazy<SimpleInvoiceItem[]>,
+	today: Dayjs,
 ): Promise<SwitchInformation> => {
 	console.log(
 		`Checking subscription ${subscription.subscriptionNumber} is owned by the currently logged in user`,
@@ -183,10 +184,9 @@ export const getSwitchInformationWithOwnerCheck = async (
 		catalogInformation.supporterPlus.price,
 		billingPeriod,
 		subscription.status,
-		subscription.accountNumber,
 		account.metrics.totalInvoiceBalance,
 		stage,
-		zuroaClient,
+		lazyBillingPreview,
 	);
 
 	const actualBasePrice =

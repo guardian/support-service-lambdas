@@ -71,9 +71,5 @@ test('supporterRatePlanItemFromSwitchInformation works with a contribution eleme
 		productRatePlanName: 'Supporter Plus V2 - Monthly',
 		termEndDate: zuoraDateFormat(dayjs().add(1, 'year')),
 		contractEffectiveDate: zuoraDateFormat(dayjs()),
-		contributionAmount: {
-			amount: 10,
-			currency: 'GBP',
-		},
 	});
 });
