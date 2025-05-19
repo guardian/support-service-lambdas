@@ -242,7 +242,16 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
             logger.info(
               s"(cancellation) Sending consents request for identityId $identityId with payload: $consentsBody",
             )
-            sendConsentsReq(identityId, consentsBody)
+            sendConsentsReq(identityId, consentsBody) match {
+              case Left(notFoundErr) if notFoundErr.statusCode.contains(404) =>
+                logger.warn(s"(cancellation) Consents request for $identityId failed with 404 Not Found")
+                Right(())
+              case Left(otherError) =>
+                // Propagate all other errors
+                Left(otherError)
+              case Right(_) =>
+                Right(())
+            }
           }
         } yield ()
       } else {
