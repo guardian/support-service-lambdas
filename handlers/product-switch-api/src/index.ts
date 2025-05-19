@@ -6,7 +6,7 @@ import type {
 	APIGatewayProxyResult,
 	Handler,
 } from 'aws-lambda';
-import { contributionToSupporterPlusEndpoint } from './productSwitchEndpoint';
+import { changeBillingFrequencyFromMonthlyToAnnualEndpoint, contributionToSupporterPlusEndpoint } from './productSwitchEndpoint';
 import { parseUrlPath } from './urlParsing';
 
 const stage = process.env.STAGE as Stage;
@@ -30,6 +30,19 @@ const routeRequest = async (event: APIGatewayProxyEvent) => {
 				'No request body was provided in call to recurring-contribution-to-supporter-plus',
 			);
 			return await contributionToSupporterPlusEndpoint(
+				stage,
+				event.headers,
+				requestBody,
+				parsedUrlPath.subscriptionNumber,
+			);
+		} else if (
+			parsedUrlPath.switchType === 'change-billing-frequency-from-monthly-to-annual'
+		) {
+			const requestBody = getIfDefined(
+				event.body,
+				'No request body was provided in call to change-billing-frequency-from-monthly-to-annual',
+			);
+			return await changeBillingFrequencyFromMonthlyToAnnualEndpoint(
 				stage,
 				event.headers,
 				requestBody,

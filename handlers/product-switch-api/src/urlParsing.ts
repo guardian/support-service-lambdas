@@ -1,7 +1,7 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
 
 const regex =
-	/\/product-move\/(recurring-contribution-to-supporter-plus)\/(A-S\d+)/;
+    /\/product-move\/(recurring-contribution-to-supporter-plus|change-billing-frequency-from-monthly-to-annual)\/(A-S\d+)/;
 export const parseUrlPath = (urlPath: string) => {
 	const match = urlPath.match(regex);
 	const switchType = getIfDefined(
