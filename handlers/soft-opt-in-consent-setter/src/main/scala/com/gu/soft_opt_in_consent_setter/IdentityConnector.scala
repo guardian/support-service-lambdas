@@ -37,6 +37,7 @@ class IdentityConnector(config: IdentityConfig) {
           Left(
             SoftOptInError(
               s"IdentityConnector $errorDesc. Status code: ${response.code}",
+              cause = new Exception(response.body),
               statusCode = Some(response.code),
             ),
           )
