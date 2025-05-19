@@ -34,7 +34,12 @@ class IdentityConnector(config: IdentityConfig) {
         if (response.isSuccess)
           Right(())
         else
-          Left(SoftOptInError(s"IdentityConnector $errorDesc. Status code: ${response.code}"))
+          Left(
+            SoftOptInError(
+              s"IdentityConnector $errorDesc. Status code: ${response.code}",
+              statusCode = Some(response.code),
+            ),
+          )
       }
   }
 
