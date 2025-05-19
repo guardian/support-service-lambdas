@@ -46,13 +46,13 @@ Each input JSON contains:
 
 - ReasonCode: The reason code to be applied to the remediation.
 
-- FilePath: The path of the CSV file inside the S3 bucket write-off-invoices-prod.
+- FilePath: The path of the CSV file inside the S3 bucket `write-off-unpaid-invoices-prod`.
 
 - RemediationStrategy: Determines which remediation logic to apply.
 
 ## Process Overview
 
-- The first Lambda function receives the input and determines the correct remediation strategy using the RemediationStrategy field.
+- The first Lambda function receives the input and determines the correct remediation strategy using the `RemediationStrategy` field.
 
 - The Distributed Map State reads and processes the specified CSV file.
 
@@ -65,8 +65,6 @@ Failures are expected during processing.
 The [Step Function](https://eu-west-1.console.aws.amazon.com/states/home?region=eu-west-1#/statemachines/view/arn%3Aaws%3Astates%3Aeu-west-1%3A865473395570%3AstateMachine%3Awrite-off-unpaid-invoices-PROD?type=standard) is configured with a 100% error tolerance threshold in order to attempt every row in the CSV file.
 
 You must manually review the Map Run results to identify any failures.
-
-⚠️ Please do not assume all invoices were successfully processed just because the step function completed. Always check the execution details for failures.
 
 ## Notes
 
