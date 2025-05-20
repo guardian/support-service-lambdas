@@ -1,0 +1,11 @@
+{
+  "plugins": ["sort-keys-fix"],
+  "overrides": [
+    {
+      "files": ["src/productCatalogSchema.ts", "src/productBillingPeriods.ts"],
+      "rules": {
+        "sort-keys-fix/sort-keys-fix": "warn"
+      }
+    }
+  ]
+}
