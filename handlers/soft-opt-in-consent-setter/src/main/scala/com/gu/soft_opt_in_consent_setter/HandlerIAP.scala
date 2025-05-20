@@ -235,28 +235,19 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       sfConnector: SalesforceConnector,
   ): Either[SoftOptInError, Unit] = {
     def sendCancellationConsents(identityId: String, consents: Set[String]): Either[SoftOptInError, Unit] = {
-      if (consents.nonEmpty) {
+      val maybeError: Option[SoftOptInError] =
         for {
-          _ <- {
-            val consentsBody = consentsCalculator.buildConsentsBody(consents.map(_ -> false).toMap)
-            logger.info(
-              s"(cancellation) Sending consents request for identityId $identityId with payload: $consentsBody",
-            )
-            sendConsentsReq(identityId, consentsBody) match {
-              case Left(notFoundErr) if notFoundErr.statusCode.contains(404) =>
-                logger.warn(s"(cancellation) Consents request for $identityId failed with 404 Not Found")
-                Right(())
-              case Left(otherError) =>
-                // Propagate all other errors
-                Left(otherError)
-              case Right(_) =>
-                Right(())
-            }
-          }
-        } yield ()
-      } else {
-        Right(())
-      }
+          maybeConsents <- Some(consents).filter(_.nonEmpty)
+          consentsBody = consentsCalculator.buildConsentsBody(maybeConsents.map(_ -> false).toMap)
+          _ = logger.info(
+            s"(cancellation) Sending consents request for identityId $identityId with payload: $consentsBody",
+          )
+          error <- sendConsentsReq(identityId, consentsBody).swap.toOption
+          is404 = error.statusCode.contains(404)
+          _ = if (is404) logger.warn(s"(cancellation) Consents request for $identityId failed with 404 Not Found")
+          if !is404
+        } yield error
+      maybeError.toLeft(())
     }
 
     for {
