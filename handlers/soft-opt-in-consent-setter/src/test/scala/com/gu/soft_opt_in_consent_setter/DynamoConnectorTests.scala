@@ -12,7 +12,7 @@ import scala.util.{Success, Try}
 
 class DynamoConnectorTests extends AnyFunSuite with Matchers with MockFactory {
   val mockDbClient = mock[DynamoDbClient]
-  val dynamoConnector = new DynamoConnector(mockDbClient)
+  val dynamoConnector = new DynamoConnector(mockDbClient, "DEV")
 
   val identityId = "someIdentityId"
   val subscriptionId = "A-S12345678"
@@ -44,7 +44,7 @@ class DynamoConnectorTests extends AnyFunSuite with Matchers with MockFactory {
       Success(())
     }
 
-    val dynamoConnector = new DynamoConnector(mockDbClient)
+    val dynamoConnector = new DynamoConnector(mockDbClient, "DEV")
     dynamoConnector.updateLoggingTable(subscriptionId, identityId, Switch, mockPutItem)
   }
 }

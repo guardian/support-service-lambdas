@@ -50,8 +50,8 @@ class JsonCodecSpec extends AnyFlatSpec with should.Matchers with Inside {
       previousProductName = None,
       userConsentsOverrides = Some(UserConsentsOverrides(None)),
     )
-    inside(decode[MessageBody](testData)) {
-      case Right(actual) => actual should be(expected)
+    inside(decode[MessageBody](testData)) { case Right(actual) =>
+      actual should be(expected)
     }
   }
 
@@ -76,8 +76,8 @@ class JsonCodecSpec extends AnyFlatSpec with should.Matchers with Inside {
       previousProductName = None,
       userConsentsOverrides = Some(UserConsentsOverrides(Some(true))),
     )
-    inside(decode[MessageBody](testData)) {
-      case Right(actual) => actual should be(expected)
+    inside(decode[MessageBody](testData)) { case Right(actual) =>
+      actual should be(expected)
     }
   }
 
