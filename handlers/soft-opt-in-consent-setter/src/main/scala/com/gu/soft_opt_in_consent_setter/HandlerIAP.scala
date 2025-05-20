@@ -97,5 +97,5 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
     logger.info("Finished processing messages")
     Metrics.put(event = "successful_run")
   }
-  
+
 }
