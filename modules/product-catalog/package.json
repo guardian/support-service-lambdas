@@ -2,7 +2,11 @@
   "name": "product-catalog",
   "version": "1.0.0",
   "scripts": {
-    "generateTypes": "ts-node src/generateTypeObjectCommand.ts && prettier --write src/typeObject.ts",
+    "generateFiles": "ts-node src/generateSchemaCommand.ts",
+    "validateSchema": "prettier --write src/productCatalogSchema.ts && eslint src/productCatalogSchema.ts",
+    "validateBillingPeriods": "prettier --write src/productBillingPeriods.ts",
+    "buildGeneratedFiles": "tsc --noEmit --skipLibCheck --project tsconfig-for-generated-files.json",
+    "generateSchema": "pnpm run generateFiles && pnpm run validateSchema && pnpm run validateBillingPeriods && pnpm run buildGeneratedFiles",
     "updateSnapshots": "jest -u --group=-integration",
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
