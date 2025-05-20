@@ -12,7 +12,7 @@
     "it-test": "jest --group=integration",
     "check-formatting": "prettier --check **.ts",
     "fix-formatting": "prettier --write **.ts",
-    "lint": "eslint --fix src/**/*.ts test/**/*.ts"
+    "lint": "eslint src/**/*.ts test/**/*.ts"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",
