@@ -6,6 +6,7 @@ import type {
 	APIGatewayProxyResult,
 	Handler,
 } from 'aws-lambda';
+import dayjs from 'dayjs';
 import { contributionToSupporterPlusEndpoint } from './productSwitchEndpoint';
 import { parseUrlPath } from './urlParsing';
 
@@ -35,6 +36,7 @@ const routeRequest = async (event: APIGatewayProxyEvent) => {
 				event.headers,
 				requestBody,
 				parsedUrlPath.subscriptionNumber,
+				dayjs(),
 			);
 		} else {
 			return {

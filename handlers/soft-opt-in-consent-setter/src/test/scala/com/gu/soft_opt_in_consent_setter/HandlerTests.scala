@@ -1,3 +1,6 @@
+package com.gu.soft_opt_in_consent_setter
+
+import IAPMessageProcessor._
 import com.gu.soft_opt_in_consent_setter.HandlerIAP._
 import com.gu.soft_opt_in_consent_setter.models.{
   ConsentsMapping,
@@ -7,6 +10,7 @@ import com.gu.soft_opt_in_consent_setter.models.{
 }
 import com.gu.soft_opt_in_consent_setter.{
   ConsentsCalculator,
+  IAPMessageProcessor,
   MobileSubscription,
   MobileSubscriptions,
   SalesforceConnector,
@@ -65,7 +69,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       userConsentsOverrides = None,
     )
 
-    val result = processProductSwitchSub(
+    val result = IAPMessageProcessor.processProductSwitchSub(
       testMessageBody,
       mockSendConsentsReq,
       mockGetMobileSubscriptions,
@@ -333,7 +337,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       previousProductName = None,
       eventType = Acquisition,
       subscriptionId = "A-S12345678",
-      userConsentsOverrides = Some(UserConsentsOverrides(similarGuardianProducts = Some(false)))
+      userConsentsOverrides = Some(UserConsentsOverrides(similarGuardianProducts = Some(false))),
     )
 
     val result = processAcquiredSub(
@@ -377,7 +381,7 @@ class HandlerTests extends AnyFunSuite with Matchers with MockFactory {
       previousProductName = None,
       eventType = Acquisition,
       subscriptionId = "A-S12345678",
-      userConsentsOverrides = Some(UserConsentsOverrides(similarGuardianProducts = Some(true)))
+      userConsentsOverrides = Some(UserConsentsOverrides(similarGuardianProducts = Some(true))),
     )
 
     val result = processAcquiredSub(

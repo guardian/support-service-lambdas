@@ -1,104 +1,99 @@
 package com.gu.soft_opt_in_consent_setter
 
-import com.amazonaws.services.lambda.runtime.events.SQSEvent
-import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
-import com.gu.soft_opt_in_consent_setter.HandlerIAP.{Acquisition, MessageBody, UserConsentsOverrides}
-import com.gu.soft_opt_in_consent_setter.models._
-import com.typesafe.scalalogging.LazyLogging
-import io.circe.{Decoder, ParsingFailure}
+import com.gu.soft_opt_in_consent_setter.HandlerIAP.{Acquisition, Cancellation, MessageBody, Switch, handleError}
+import com.gu.soft_opt_in_consent_setter.models.ConsentsMapping.similarGuardianProducts
+import com.gu.soft_opt_in_consent_setter.models.{ConsentsMapping, SoftOptInConfig, SoftOptInError}
+import com.typesafe.scalalogging.StrictLogging
 import io.circe.generic.auto._
-import io.circe.parser.{decode => circeDecode}
+import io.circe.syntax._
 
-import scala.jdk.CollectionConverters._
+import scala.util.{Failure, Success}
 
-object RunLocalManualTest extends App {
-  // If you get an inaccessible method error running locally, make sure you run it on an older JRE (java 11)
+class IAPMessageProcessor(
+    sfConnector: SalesforceConnector,
+    identityConnector: IdentityConnector,
+    consentsCalculator: ConsentsCalculator,
+    mpapiConnector: MpapiConnector,
+    dynamoConnector: DynamoConnector,
+) extends StrictLogging {
 
-  val data = MessageBody(
-    "123-456-7898-123",
-    "1234",
-    Acquisition,
-    "CONTRIBUTION",
-    None,
-    None,
-    Some(UserConsentsOverrides(Some(false))),
-  )
+  import IAPMessageProcessor._
 
-  IAPMessageProcessor.create(Some("CODE"), Some("v56.0")).processMessage(data)
+  def processMessage(message: MessageBody): Any = {
+    logger.info(s"Processing message: $message")
 
-}
+    val result = message.eventType match {
+      case Acquisition =>
+        Metrics.put(event = "acquisitions_to_process", 1)
 
-object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
+        processAcquiredSub(
+          message,
+          identityConnector.sendConsentsReq,
+          consentsCalculator,
+        )
+      case Cancellation =>
+        Metrics.put(event = "cancellations_to_process", 1)
 
-  val readyToProcessAcquisitionStatus = "Ready to process acquisition"
-  val readyToProcessCancellationStatus = "Ready to process cancellation"
-  val readyProcessSwitchStatus = "Ready to process switch"
+        processCancelledSub(
+          message,
+          identityConnector.sendConsentsReq,
+          mpapiConnector.getMobileSubscriptions,
+          consentsCalculator,
+          sfConnector,
+        )
+      case Switch =>
+        Metrics.put(event = "product_switches_to_process", 1)
 
-  sealed trait EventType
-  case object Acquisition extends EventType
-  case object Cancellation extends EventType
-  case object Switch extends EventType
+        processProductSwitchSub(
+          message,
+          identityConnector.sendConsentsReq,
+          mpapiConnector.getMobileSubscriptions,
+          consentsCalculator,
+          sfConnector,
+        )
+    }
 
-  object EventType {
-    implicit val eventTypeDecoder: Decoder[EventType] = Decoder.decodeString.emap {
-      case "Acquisition" => Right(Acquisition)
-      case "Cancellation" => Right(Cancellation)
-      case "Switch" => Right(Switch)
-      case unknown => Left(s"Invalid EventType: $unknown")
+    emitIdentityMetric(result)
+
+    result match {
+      case Left(e) => handleError(e)
+      case Right(_) =>
+        dynamoConnector.updateLoggingTable(message.subscriptionId, message.identityId, message.eventType) match {
+          case Success(_) =>
+            logger.info("Logged soft opt-in setting to Dynamo")
+          case Failure(exception) =>
+            logger.error(s"Dynamo write failed for identityId: ${message.identityId}\n$exception")
+            logger.error(s"Exception: ${exception.getMessage}")
+            Metrics.put("failed_dynamo_update")
+        }
     }
   }
 
-  case class UserConsentsOverrides(
-      similarGuardianProducts: Option[Boolean],
-  )
+}
 
-  case class MessageBody(
-      subscriptionId: String,
-      identityId: String,
-      eventType: EventType,
-      productName: String,
-      printProduct: Option[String],
-      previousProductName: Option[String],
-      userConsentsOverrides: Option[UserConsentsOverrides],
-  )
+object IAPMessageProcessor extends StrictLogging {
 
-  def handleError[T <: Exception](exception: T) = {
-    Metrics.put(event = "failed_run")
-    logger.error(s"${exception.getMessage}")
-    throw exception
+  def create(maybeStage: Option[String], maybeSfApiVersion: Option[String]): IAPMessageProcessor = {
+    val clients = for {
+      stage <- maybeStage.toRight(new SoftOptInError("stage is missing", null))
+      config <- SoftOptInConfig(maybeStage, maybeSfApiVersion)
+      sfConnector <- SalesforceConnector(config.sfConfig, config.sfApiVersion)
+      dynamoConnector <- DynamoConnector(stage)
+
+      identityConnector = new IdentityConnector(config.identityConfig)
+      consentsCalculator = new ConsentsCalculator(ConsentsMapping.consentsMapping)
+      mpapiConnector = new MpapiConnector(config.mpapiConfig)
+    } yield new IAPMessageProcessor(sfConnector, identityConnector, consentsCalculator, mpapiConnector, dynamoConnector)
+
+    clients match {
+      case Left(error) => handleError(error)
+      case Right(x) =>
+        logger.info("Setup successful")
+        x
+    }
   }
 
-  override def handleRequest(input: SQSEvent, context: Context): Unit = {
-    logger.info("Handling request")
-
-    val messages =
-      input.getRecords.asScala.toList.map(message =>
-        circeDecode[MessageBody](message.getBody) match {
-          case Left(pf: ParsingFailure) =>
-            val exception = SoftOptInError(
-              s"Error '${pf.message}' when decoding JSON to MessageBody with cause :${pf.getCause} with body: ${message.getBody}",
-              pf,
-            )
-            handleError(exception)
-          case Left(ex) =>
-            val exception =
-              SoftOptInError(s"Unknown error when decoding JSON to MessageBody with body: ${message.getBody}", ex)
-            handleError(exception)
-          case Right(result) =>
-            logger.info(s"Decoded message body: $result")
-            result
-        },
-      )
-
-    val messageProcessor = IAPMessageProcessor.create(sys.env.get("Stage"), sys.env.get("sfApiVersion"))
-
-    messages.foreach(messageProcessor.processMessage)
-
-    logger.info("Finished processing messages")
-    Metrics.put(event = "successful_run")
-  }
-
-  def processAcquiredSub(
+  private[soft_opt_in_consent_setter] def processAcquiredSub(
       message: MessageBody,
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
       consentsCalculator: ConsentsCalculator,
@@ -120,7 +115,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
     } yield ()
   }
 
-  def buildProductSwitchConsents(
+  private[soft_opt_in_consent_setter] def buildProductSwitchConsents(
       oldProductName: String,
       newProductName: String,
       allProductsForUser: Set[String],
@@ -142,7 +137,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
     } yield consentsBody
   }
 
-  def processProductSwitchSub(
+  private[soft_opt_in_consent_setter] def processProductSwitchSub(
       messageBody: MessageBody,
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
       getMobileSubscriptions: String => Either[SoftOptInError, MobileSubscriptions],
@@ -179,7 +174,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       }
     } yield res
 
-  def processCancelledSub(
+  private[soft_opt_in_consent_setter] def processCancelledSub(
       messageBody: MessageBody,
       sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
       getMobileSubscriptions: String => Either[SoftOptInError, MobileSubscriptions],
@@ -187,19 +182,19 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       sfConnector: SalesforceConnector,
   ): Either[SoftOptInError, Unit] = {
     def sendCancellationConsents(identityId: String, consents: Set[String]): Either[SoftOptInError, Unit] = {
-      val maybeError: Option[SoftOptInError] =
+      if (consents.nonEmpty) {
         for {
-          maybeConsents <- Some(consents).filter(_.nonEmpty)
-          consentsBody = consentsCalculator.buildConsentsBody(maybeConsents.map(_ -> false).toMap)
-          _ = logger.info(
-            s"(cancellation) Sending consents request for identityId $identityId with payload: $consentsBody",
-          )
-          error <- sendConsentsReq(identityId, consentsBody).swap.toOption
-          is404 = error.statusCode.contains(404)
-          _ = if (is404) logger.warn(s"(cancellation) Consents request for $identityId failed with 404 Not Found")
-          if !is404
-        } yield error
-      maybeError.toLeft(())
+          _ <- {
+            val consentsBody = consentsCalculator.buildConsentsBody(consents.map(_ -> false).toMap)
+            logger.info(
+              s"(cancellation) Sending consents request for identityId $identityId with payload: $consentsBody",
+            )
+            sendConsentsReq(identityId, consentsBody)
+          }
+        } yield ()
+      } else {
+        Right(())
+      }
     }
 
     for {
@@ -221,10 +216,11 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
     } yield ()
   }
 
-  def emitIdentityMetric(updateResults: Either[SoftOptInError, Unit]): Unit = {
+  private def emitIdentityMetric(updateResults: Either[SoftOptInError, Unit]): Unit = {
     updateResults match {
       case Left(_) => Metrics.put(event = "failed_consents_updates", 1)
       case Right(_) => Metrics.put(event = "successful_consents_updates", 1)
     }
   }
+
 }

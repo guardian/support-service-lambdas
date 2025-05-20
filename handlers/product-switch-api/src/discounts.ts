@@ -1,11 +1,7 @@
 import type { BillingPeriod } from '@modules/billingPeriod';
+import type { Lazy } from '@modules/lazy';
 import type { Stage } from '@modules/stage';
-import {
-	billingPreviewToSimpleInvoiceItems,
-	getBillingPreview,
-} from '@modules/zuora/billingPreview';
-import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import dayjs from 'dayjs';
+import type { SimpleInvoiceItem } from '@modules/zuora/billingPreview';
 
 export type Discount = {
 	// Zuora discount API reference:
@@ -44,10 +40,9 @@ export const getDiscount = async (
 	supporterPlusPrice: number,
 	billingPeriod: BillingPeriod,
 	subscriptionStatus: string,
-	accountNumber: string,
 	invoiceBalance: number,
 	stage: Stage,
-	zuoraClient: ZuoraClient,
+	lazyBillingPreview: Lazy<SimpleInvoiceItem[]>,
 ): Promise<Discount | undefined> => {
 	const discountDetails = annualContribHalfPriceSupporterPlusForOneYear(stage);
 	const discountedPrice =
@@ -56,15 +51,8 @@ export const getDiscount = async (
 	const subIsActive = subscriptionStatus === 'Active';
 
 	if (subIsActive) {
-		const getBillingPreviewResponse = await getBillingPreview(
-			zuoraClient,
-			dayjs().add(13, 'months'),
-			accountNumber,
-		);
+		const nextInvoiceItems = await lazyBillingPreview.get();
 
-		const nextInvoiceItems = billingPreviewToSimpleInvoiceItems(
-			getBillingPreviewResponse,
-		);
 		const hasUpcomingDiscount = nextInvoiceItems.some(
 			(invoiceItem) => invoiceItem.amount < 0,
 		);
