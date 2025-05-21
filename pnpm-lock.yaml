@@ -100,6 +100,9 @@ importers:
       '@types/aws-lambda':
         specifier: ^8.10.147
         version: 8.10.147
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.13
 
   handlers/discount-api:
     dependencies:

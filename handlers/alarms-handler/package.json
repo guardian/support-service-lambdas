@@ -16,6 +16,7 @@
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
-		"@types/aws-lambda": "^8.10.147"
+		"@types/aws-lambda": "^8.10.147",
+		"dayjs": "^1.11.13"
 	}
 }
