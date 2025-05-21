@@ -4,16 +4,12 @@ import type { ProductKey } from '@modules/product-catalog/productCatalog';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- we are using this for type generation
 const productBillingPeriods = {
-	GuardianWeeklyRestOfWorld: ['Month', 'Annual', 'Quarter'],
-	GuardianAdLite: ['Month'],
-	TierThree: ['Annual', 'Month'],
-	DigitalSubscription: ['Quarter', 'Month', 'Annual'],
-	NationalDelivery: ['Month'],
-	SupporterMembership: ['Annual', 'Month'],
-	SupporterPlus: ['Month', 'Annual'],
-	GuardianWeeklyDomestic: ['Annual', 'Quarter', 'Month'],
-	SubscriptionCard: ['Month'],
 	Contribution: ['Annual', 'Month'],
+	DigitalSubscription: ['Quarter', 'Month', 'Annual'],
+	GuardianAdLite: ['Month'],
+	GuardianPatron: ['Month'],
+	GuardianWeeklyDomestic: ['Annual', 'Quarter', 'Month'],
+	GuardianWeeklyRestOfWorld: ['Month', 'Annual', 'Quarter'],
 	GuardianWeeklyZoneA: [
 		'Annual',
 		'Three_Years',
@@ -29,12 +25,16 @@ const productBillingPeriods = {
 		'Quarter',
 	],
 	GuardianWeeklyZoneC: ['Semi_Annual', 'Annual', 'Quarter'],
-	NewspaperVoucher: ['Month'],
 	HomeDelivery: ['Month'],
-	PatronMembership: ['Month', 'Annual'],
-	PartnerMembership: ['Annual', 'Month'],
-	GuardianPatron: ['Month'],
+	NationalDelivery: ['Month'],
+	NewspaperVoucher: ['Month'],
 	OneTimeContribution: ['OneTime'],
+	PartnerMembership: ['Annual', 'Month'],
+	PatronMembership: ['Month', 'Annual'],
+	SubscriptionCard: ['Month'],
+	SupporterMembership: ['Annual', 'Month'],
+	SupporterPlus: ['Month', 'Annual'],
+	TierThree: ['Annual', 'Month'],
 } as const;
 
 export type ProductBillingPeriod<P extends ProductKey> =
