@@ -8,10 +8,6 @@ import zio.test.*
 import zio.test.Assertion.*
 
 object RunBillingSpec extends ZIOSpecDefault {
-
-  case class A(value: Int) derives JsonDecoder
-  case class B(str: String) derives JsonDecoder
-
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("RunBilling")(
       test("serialisers - failure case") {

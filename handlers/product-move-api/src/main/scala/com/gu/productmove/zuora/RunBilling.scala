@@ -54,7 +54,7 @@ object RunBilling {
   private[zuora] case class RunBillingErrorResponse(Errors: List[ZuoraError]) derives JsonDecoder
 
   private[zuora] type RunBillingResponse = List[Either[RunBillingErrorResponse, RunBillingSuccessResponse]]
-  given JsonDecoder[RunBillingResponse] = JsonDecoder.list(eitherDecoder[RunBillingErrorResponse, RunBillingSuccessResponse])
+  given JsonDecoder[RunBillingResponse] = JsonDecoder.list(using eitherDecoder[RunBillingErrorResponse, RunBillingSuccessResponse])
 
   case class InvoiceId(id: String)
 
