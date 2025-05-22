@@ -1,7 +1,8 @@
 import type { MetricAlarm } from '@aws-sdk/client-cloudwatch';
 import { flatten, groupMap } from '@modules/arrayFunctions';
 import { getIfDefined } from '@modules/nullAndUndefined';
-import dayjs, { Dayjs } from 'dayjs';
+import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import type { AlarmMappings } from './alarmMappings';
 import { prodAlarmMappings } from './alarmMappings';
 import type { AlarmWithTags } from './cloudwatch';
@@ -12,7 +13,7 @@ import { buildDiagnosticLinks } from './index';
 // called by AWS
 export const handler = async (): Promise<void> => {
 	try {
-		const now = new Dayjs();
+		const now = dayjs();
 		const alarms = await getAllAlarmsInAlarm(await cloudwatchClients.get());
 
 		const chatMessages = await getChatMessages(
