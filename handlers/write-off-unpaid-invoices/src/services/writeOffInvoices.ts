@@ -1,5 +1,5 @@
 import { stageFromEnvironment } from '@modules/stage';
-import { type LambdaEvent } from '../handlers/resolveUnpaidInvoices';
+import { type LambdaEvent } from '../handlers/writeOffInvoices';
 import { getZuoraOAuthToken } from './getOAuthToken';
 
 export type WriteOffInvoiceInput = {

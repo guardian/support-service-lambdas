@@ -327,6 +327,10 @@ new MetricPushApi(app, 'metric-push-api-PROD', {
 	stage: 'PROD',
 	cloudFormationStackName: 'membership-PROD-metric-push-api',
 });
+new WriteOffUnpaidInvoices(app, 'write-off-unpaid-invoices-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+});
 new WriteOffUnpaidInvoices(app, 'write-off-unpaid-invoices-CSBX', {
 	stack: 'support',
 	stage: 'CSBX',

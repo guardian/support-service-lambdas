@@ -5,6 +5,11 @@ import { WriteOffUnpaidInvoices } from './write-off-unpaid-invoices';
 describe('The WriteOffUnpaidInvoices stack', () => {
 	it('matches the snapshot', () => {
 		const app = new App();
+		const codeStack = new WriteOffUnpaidInvoices(
+			app,
+			`write-off-unpaid-invoices-CODE`,
+			{ stack: 'support', stage: 'CODE' },
+		);
 		const csbxStack = new WriteOffUnpaidInvoices(
 			app,
 			`write-off-unpaid-invoices-CSBX`,
@@ -15,6 +20,7 @@ describe('The WriteOffUnpaidInvoices stack', () => {
 			`write-off-unpaid-invoices-PROD`,
 			{ stack: 'support', stage: 'PROD' },
 		);
+		expect(Template.fromStack(codeStack).toJSON()).toMatchSnapshot();
 		expect(Template.fromStack(csbxStack).toJSON()).toMatchSnapshot();
 		expect(Template.fromStack(prodStack).toJSON()).toMatchSnapshot();
 	});

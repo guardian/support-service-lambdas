@@ -5,14 +5,21 @@ import {
 	GuLambdaFunction,
 } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
-import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import {
+	Policy,
+	PolicyStatement,
+	Role,
+	ServicePrincipal,
+} from 'aws-cdk-lib/aws-iam';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
 	CustomState,
 	DefinitionBody,
 	JsonPath,
 	StateMachine,
+	TaskInput,
 } from 'aws-cdk-lib/aws-stepfunctions';
+import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { nodeVersion } from './node-version';
 
 export class WriteOffUnpaidInvoices extends GuStack {
@@ -25,6 +32,13 @@ export class WriteOffUnpaidInvoices extends GuStack {
 			bucketName: `${app}-${this.stage.toLowerCase()}`,
 		});
 
+		const unpaidInvoicesFileName = 'unpaid-invoices.csv';
+
+		const bigQueryRole = new Role(this, 'BigQueryRole', {
+			roleName: `wrtoff-unpaid-${this.stage}`, // Role name must be short to not break the authentication request to GCP
+			assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
+		});
+
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
 			'app' | 'memorySize' | 'fileName' | 'runtime' | 'timeout' | 'environment'
@@ -33,19 +47,64 @@ export class WriteOffUnpaidInvoices extends GuStack {
 			memorySize: 1024,
 			fileName: `${app}.zip`,
 			runtime: nodeVersion,
-			timeout: Duration.seconds(300),
+			timeout: Duration.minutes(3),
 			environment: { Stage: this.stage },
 		};
 
-		const writeOffInvoiceLambda = new GuLambdaFunction(
+		const getUnpaidInvoicesLambdaTask = new LambdaInvoke(
 			this,
-			'WriteOffInvoiceLambda',
+			'getUnpaidInvoicesLambdaTask',
+			{
+				lambdaFunction: new GuLambdaFunction(this, 'GetUnpaidInvoicesLambda', {
+					...lambdaDefaultConfig,
+					environment: {
+						...lambdaDefaultConfig.environment,
+						GCP_CREDENTIALS_CONFIG_PARAMETER_NAME: `/${app}/${this.stage}/gcp-credentials-config`,
+						GCP_PROJECT_ID: `datatech-platform-${this.stage.toLowerCase()}`,
+						BUCKET_NAME: bucket.bucketName,
+					},
+					handler: 'getUnpaidInvoices.handler',
+					functionName: `get-unpaid-invoices-${this.stage}`,
+					initialPolicy: [
+						new PolicyStatement({
+							actions: ['sts:AssumeRole'],
+							resources: [bigQueryRole.roleArn],
+						}),
+						new PolicyStatement({
+							actions: ['ssm:GetParameter'],
+							resources: [
+								`arn:aws:ssm:${this.region}:${this.account}:parameter/${app}/${this.stage}/gcp-credentials-config`,
+							],
+						}),
+						new PolicyStatement({
+							actions: [
+								's3:GetObject',
+								's3:PutObject',
+								's3:ListBucket',
+								's3:ListMultipartUploadParts',
+							],
+							resources: [bucket.arnForObjects('*')],
+						}),
+					],
+				}),
+				payload: TaskInput.fromObject({
+					filePath: JsonPath.format(
+						`executions/{}/${unpaidInvoicesFileName}`,
+						JsonPath.stringAt('$$.Execution.StartTime'),
+					),
+				}),
+			},
+		);
+
+		const writeOffInvoicesLambda = new GuLambdaFunction(
+			this,
+			'WriteOffInvoicesLambda',
 			{
 				...lambdaDefaultConfig,
-				timeout: Duration.minutes(15),
 				memorySize: 512,
-				handler: 'resolveUnpaidInvoices.handler',
-				functionName: `write-off-invoice-${this.stage}`,
+				timeout: Duration.minutes(15),
+				handler: 'writeOffInvoices.handler',
+				functionName: `write-off-invoices-${this.stage}`,
 				initialPolicy: [
 					new PolicyStatement({
 						actions: ['secretsmanager:GetSecretValue'],
@@ -74,7 +133,10 @@ export class WriteOffUnpaidInvoices extends GuStack {
 						},
 						Parameters: {
 							Bucket: bucket.bucketName,
-							'Key.$': JsonPath.stringAt('$$.Execution.Input.FilePath'),
+							'Key.$': JsonPath.format(
+								`executions/{}/${unpaidInvoicesFileName}`,
+								JsonPath.stringAt('$$.Execution.StartTime'),
+							),
 						},
 					},
 					ItemBatcher: {
@@ -93,7 +155,7 @@ export class WriteOffUnpaidInvoices extends GuStack {
 								OutputPath: '$.Payload',
 								Parameters: {
 									'Payload.$': '$',
-									FunctionName: writeOffInvoiceLambda.functionArn,
+									FunctionName: writeOffInvoicesLambda.functionArn,
 								},
 								End: true,
 							},
@@ -127,7 +189,7 @@ export class WriteOffUnpaidInvoices extends GuStack {
 			{
 				stateMachineName: `${app}-${this.stage}`,
 				definitionBody: DefinitionBody.fromChainable(
-					processCsvInDistributedMap,
+					getUnpaidInvoicesLambdaTask.next(processCsvInDistributedMap),
 				),
 			},
 		);
@@ -163,7 +225,7 @@ export class WriteOffUnpaidInvoices extends GuStack {
 						}),
 						new PolicyStatement({
 							actions: ['lambda:InvokeFunction'],
-							resources: [writeOffInvoiceLambda.functionArn],
+							resources: [writeOffInvoicesLambda.functionArn],
 						}),
 					],
 				},

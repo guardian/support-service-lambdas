@@ -26,16 +26,12 @@ export async function getZuoraOAuthToken({
 		client_secret,
 	});
 
-	try {
-		const response = await fetch(tokenUrl, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-			body: body.toString(),
-		});
+	const response = await fetch(tokenUrl, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+		body: body.toString(),
+	});
 
-		const data = (await response.json()) as { access_token: string };
-		return data.access_token;
-	} catch (error) {
-		throw error;
-	}
+	const data = (await response.json()) as { access_token: string };
+	return data.access_token;
 }

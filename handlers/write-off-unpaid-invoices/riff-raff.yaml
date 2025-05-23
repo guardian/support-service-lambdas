@@ -20,5 +20,6 @@ deployments:
       bucketSsmLookup: true
       prefixStack: false
       functionNames:
-        - write-off-invoice-
+        - get-unpaid-invoices-
+        - write-off-invoices-
     dependencies: [write-off-unpaid-invoices-cloudformation]
