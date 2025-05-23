@@ -16,7 +16,7 @@ class MockCreatePayment(
   def requests = mutableStore.reverse
 
   override def create(
-      accountId: String,
+      accountId: ZuoraAccountId,
       invoiceId: String,
       paymentMethodId: String,
       amount: BigDecimal,

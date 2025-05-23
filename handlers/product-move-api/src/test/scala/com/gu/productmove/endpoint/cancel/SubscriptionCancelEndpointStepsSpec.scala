@@ -76,7 +76,14 @@ object SubscriptionCancelEndpointStepsSpec extends ZIOSpecDefault {
         if (subscriptionNumber.value == expectedAccountNumber)
           ZIO.succeed(
             GetAccountResponse(
-              BasicInfo("", DefaultPaymentMethod("", None), identityIdToReturn.map(IdentityId.apply), "", 0, GBP),
+              BasicInfo(
+                ZuoraAccountId(""),
+                DefaultPaymentMethod("", None),
+                identityIdToReturn.map(IdentityId.apply),
+                "",
+                0,
+                GBP,
+              ),
               null,
               null,
             ),

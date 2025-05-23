@@ -572,7 +572,7 @@ object HandlerSpec extends ZIOSpecDefault {
         val mockZuoraCancel = new MockZuoraCancel(
           Map(
             (subscriptionName, LocalDate.of(2022, 9, 29)) ->
-              CancellationResponse(subscriptionName.value, LocalDate.of(2022, 9, 29), None),
+              CancellationResponse(subscriptionName.value, LocalDate.of(2022, 9, 29)),
           ),
         )
         val mockSQS = new MockSQS(Map(emailMessage -> ()))

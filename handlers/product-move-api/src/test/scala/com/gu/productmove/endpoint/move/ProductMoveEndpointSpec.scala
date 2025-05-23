@@ -20,6 +20,7 @@ import com.gu.productmove.zuora.{
   InvoiceItemAdjustment,
   SubscriptionUpdate,
   TermRenewal,
+  ZuoraAccountId,
   ZuoraProductCatalogue,
 }
 import zio.{Task, UIO, URIO, ZIO}
@@ -81,7 +82,14 @@ object ProductMoveEndpointSpec extends ZIOSpecDefault {
         if (subscriptionNumber.value == expectedAccountNumber)
           ZIO.succeed(
             GetAccountResponse(
-              BasicInfo("", DefaultPaymentMethod("", None), identityIdToReturn.map(IdentityId.apply), "", 0, GBP),
+              BasicInfo(
+                ZuoraAccountId(""),
+                DefaultPaymentMethod("", None),
+                identityIdToReturn.map(IdentityId.apply),
+                "",
+                0,
+                GBP,
+              ),
               null,
               null,
             ),
