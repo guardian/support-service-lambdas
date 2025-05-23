@@ -310,7 +310,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
         },
         "FunctionName": "generate-product-catalog-CODE",
         "Handler": "index.handler",
-        "MemorySize": 1024,
+        "MemorySize": 1232,
         "Role": {
           "Fn::GetAtt": [
             "generateproductcataloglambdaServiceRole5FF40E84",
@@ -922,7 +922,7 @@ def submit_response(event: dict, context, response_status: str, error_message: s
         },
         "FunctionName": "generate-product-catalog-PROD",
         "Handler": "index.handler",
-        "MemorySize": 1024,
+        "MemorySize": 1232,
         "Role": {
           "Fn::GetAtt": [
             "generateproductcataloglambdaServiceRole5FF40E84",

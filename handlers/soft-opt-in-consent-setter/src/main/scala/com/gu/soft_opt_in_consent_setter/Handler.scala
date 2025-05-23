@@ -26,7 +26,7 @@ object Handler extends LazyLogging {
 
   def handleRequest(): Unit = {
     (for {
-      config <- SoftOptInConfig()
+      config <- SoftOptInConfig(sys.env.get("Stage"), sys.env.get("sfApiVersion"))
     } yield for {
       sfConnector <- SalesforceConnector(config.sfConfig, config.sfApiVersion)
 

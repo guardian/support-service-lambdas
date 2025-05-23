@@ -10,47 +10,61 @@ export type SalesforceTrackingInput = {
 	previousProductName: string;
 	previousRatePlanName: string;
 	newRatePlanName: string;
-	requestedDate: Date;
-	effectiveDate: Date;
+	requestedDate: string;
+	effectiveDate: string;
 	paidAmount: number;
 	csrUserId?: string;
 	caseId?: string;
 };
-export const sendSalesforceTracking = async (
-	paidAmount: number,
+
+export function createSQSMessageBody(
 	switchInformation: SwitchInformation,
-) => {
-	const queueName = `product-switch-salesforce-tracking-${switchInformation.stage}`;
-	const client = new SQSClient(awsConfig);
+	paidAmount: number,
+	now: Date,
+) {
 	const {
 		subscriptionNumber,
 		previousProductName,
 		previousRatePlanName,
 		previousAmount,
 	} = switchInformation.subscription;
-	const { price, csrUserId, caseId } = switchInformation.input;
 
 	const salesforceTrackingInput: SalesforceTrackingInput = {
 		subscriptionName: subscriptionNumber,
 		previousAmount,
-		newAmount: price,
+		newAmount: switchInformation.actualTotalPrice,
 		previousProductName: previousProductName,
 		previousRatePlanName: previousRatePlanName,
 		newRatePlanName: 'Supporter Plus',
-		requestedDate: new Date(),
-		effectiveDate: new Date(),
+		requestedDate: now.toISOString().substring(0, 10),
+		effectiveDate: now.toISOString().substring(0, 10),
 		paidAmount,
-		csrUserId: csrUserId,
-		caseId: caseId,
+		csrUserId: switchInformation.input.csrUserId,
+		caseId: switchInformation.input.caseId,
 	};
+	return JSON.stringify(salesforceTrackingInput);
+}
+
+export const sendSalesforceTracking = async (
+	paidAmount: number,
+	switchInformation: SwitchInformation,
+) => {
+	const messageBody = createSQSMessageBody(
+		switchInformation,
+		paidAmount,
+		new Date(),
+	);
+
+	const client = new SQSClient(awsConfig);
+	const queueName = `product-switch-salesforce-tracking-${switchInformation.stage}`;
 	console.log(
 		`Sending Salesforce tracking message ${prettyPrint(
-			salesforceTrackingInput,
+			JSON.parse(messageBody),
 		)} to queue ${queueName}`,
 	);
 	const command = new SendMessageCommand({
 		QueueUrl: queueName,
-		MessageBody: JSON.stringify(salesforceTrackingInput),
+		MessageBody: messageBody,
 	});
 
 	const response = await client.send(command);

@@ -16,14 +16,15 @@ case class MpapiConfig(mpapiUrl: String, mpapiToken: String)
 
 object SoftOptInConfig {
 
-  def apply(): Either[SoftOptInError, SoftOptInConfig] = {
+  def apply(maybeStage: Option[String], maybeSfApiVersion: Option[String]): Either[SoftOptInError, SoftOptInConfig] = {
     (for {
-      salesforceConnectedAppSecrets <- Secrets.getSalesforceConnectedAppSecrets
-      salesforceUserSecrets <- Secrets.getSalesforceUserSecrets
-      identitySoftOptInConsentAPISecrets <- Secrets.getIdentitySoftOptInConsentAPISecrets
-      mobilePurchasesAPIUserGetSubscriptionsSecrets <- Secrets.getMobilePurchasesAPIUserGetSubscriptionsSecrets
-      sfApiVersion <- sys.env.get("sfApiVersion")
-      stage <- sys.env.get("Stage")
+      stage <- maybeStage.toRight("stage is missing")
+      secrets <- Secrets(stage)
+      salesforceConnectedAppSecrets <- secrets.getSalesforceConnectedAppSecrets
+      salesforceUserSecrets <- secrets.getSalesforceUserSecrets
+      identitySoftOptInConsentAPISecrets <- secrets.getIdentitySoftOptInConsentAPISecrets
+      mobilePurchasesAPIUserGetSubscriptionsSecrets <- secrets.getMobilePurchasesAPIUserGetSubscriptionsSecrets
+      sfApiVersion <- maybeSfApiVersion.toRight("sfApiVersion is missing")
     } yield SoftOptInConfig(
       SFAuthConfig(
         salesforceConnectedAppSecrets.authUrl,
@@ -43,9 +44,9 @@ object SoftOptInConfig {
         mobilePurchasesAPIUserGetSubscriptionsSecrets.mpapiToken,
       ),
       stage,
-    )).toRight(
+    )).left.map(err =>
       SoftOptInError(
-        "SoftOptInConfig: Could not obtain all config.",
+        "SoftOptInConfig: Could not obtain all config: " + err,
       ),
     )
   }

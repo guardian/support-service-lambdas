@@ -78,7 +78,7 @@ object InvoiceItemAdjustment {
       SourceId: String, // The invoice item id
       Type: String = "Charge",
       SourceType: String,
-      Comments: String = "Created by the product-move-api refund process to balance a cancelled invoice",
+      Comment: String = "Created by the product-move-api refund process to balance a cancelled invoice",
   )
 
   case class InvoiceItemAdjustmentResult(Success: Boolean, Id: String)

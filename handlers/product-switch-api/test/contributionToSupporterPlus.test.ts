@@ -4,6 +4,7 @@
  */
 import type { EmailMessageWithUserId } from '@modules/email/email';
 import { ValidationError } from '@modules/errors';
+import { Lazy } from '@modules/lazy';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
@@ -18,8 +19,6 @@ import {
 	refundExpected,
 } from '../src/contributionToSupporterPlus';
 import { buildEmailMessage } from '../src/productSwitchEmail';
-import type { ProductSwitchRequestBody } from '../src/schemas';
-import { productSwitchRequestSchema } from '../src/schemas';
 import {
 	getFirstContributionRatePlan,
 	getSwitchInformationWithOwnerCheck,
@@ -34,14 +33,6 @@ import zuoraSubscriptionWithMonthlyContribution from './fixtures/zuora-subscript
 
 export const getProductCatalogFromFixture = (): ProductCatalog =>
 	generateProductCatalog(zuoraCatalogFixture);
-
-test('request body serialisation', () => {
-	const result: ProductSwitchRequestBody = productSwitchRequestSchema.parse({
-		price: 10,
-		preview: false,
-	});
-	expect(result.price).toEqual(10);
-});
 
 test('url parsing', () => {
 	const successfulParsing = parseUrlPath(
@@ -77,59 +68,62 @@ test('url parsing', () => {
 	);
 });
 
-test('startNewTerm is only true when the termStartDate is before today', () => {
+test('startNewTerm is only true when the termStartDate is before today', async () => {
 	const today = dayjs('2024-05-09T23:10:10.663+01:00');
 	const subscription = zuoraSubscriptionResponseSchema.parse(subscriptionJson);
 	const account = zuoraAccountSchema.parse(accountJson);
 	const productCatalog = getProductCatalogFromFixture();
 
-	const switchInformation = getSwitchInformationWithOwnerCheck(
+	const switchInformation = await getSwitchInformationWithOwnerCheck(
 		'CODE',
-		{ price: 95, preview: false },
+		{ preview: false },
 		subscription,
 		account,
 		productCatalog,
 		'999999999999',
+		new Lazy(() => Promise.resolve([]), 'test'),
 		today,
 	);
 	expect(switchInformation.startNewTerm).toEqual(false);
 });
 
-test('owner check is bypassed for salesforce calls', () => {
+test('owner check is bypassed for salesforce calls', async () => {
 	const today = dayjs('2024-05-09T23:10:10.663+01:00');
 	const subscription = zuoraSubscriptionResponseSchema.parse(subscriptionJson);
 	const account = zuoraAccountSchema.parse(accountJson);
 	const productCatalog = getProductCatalogFromFixture();
 
-	const switchInformation = getSwitchInformationWithOwnerCheck(
+	const switchInformation = await getSwitchInformationWithOwnerCheck(
 		'CODE',
-		{ price: 95, preview: false },
+		{ preview: false },
 		subscription,
 		account,
 		productCatalog,
 		undefined, // salesforce doesn't send the header
+		new Lazy(() => Promise.resolve([]), 'test'),
 		today,
 	);
 	expect(switchInformation.startNewTerm).toEqual(false);
 });
 
-test("owner check doesn't allow incorrect owner", () => {
+test("owner check doesn't allow incorrect owner", async () => {
 	const today = dayjs('2024-05-09T23:10:10.663+01:00');
 	const subscription = zuoraSubscriptionResponseSchema.parse(subscriptionJson);
 	const account = zuoraAccountSchema.parse(accountJson);
 	const productCatalog = getProductCatalogFromFixture();
 
-	const switchInformation = () =>
+	await expect(
 		getSwitchInformationWithOwnerCheck(
 			'CODE',
-			{ price: 95, preview: false },
+			{ preview: false },
 			subscription,
 			account,
 			productCatalog,
-			'12345', // incorrect identity id
+			'12345',
+			new Lazy(() => Promise.resolve([]), 'test'),
 			today,
-		);
-	expect(switchInformation).toThrow(ValidationError);
+		),
+	).rejects.toThrow(ValidationError);
 });
 
 test('preview amounts are correct', () => {
@@ -300,18 +294,26 @@ test('handleMissingRefundAmount() called on a date that is not the charge-throug
 test('Email message body is correct', () => {
 	const emailAddress = 'test@thegulocal.com';
 	const dateOfFirstPayment = dayjs('2024-04-16');
-	const emailMessage: EmailMessageWithUserId = buildEmailMessage({
-		dateOfFirstPayment: dateOfFirstPayment,
-		emailAddress: emailAddress,
-		firstName: 'test',
-		lastName: 'user',
-		currency: 'GBP',
-		productPrice: 10,
-		firstPaymentAmount: 5.6,
-		billingPeriod: 'Month',
-		subscriptionNumber: 'A-S123456',
-		identityId: '123456789',
-	});
+	const emailMessage: EmailMessageWithUserId = buildEmailMessage(
+		{
+			first: {
+				date: dateOfFirstPayment,
+				amount: 5.6,
+			},
+			next: {
+				date: dateOfFirstPayment.add(12, 'month'),
+				amount: 10,
+			},
+		},
+		emailAddress,
+		'test',
+		'user',
+		'GBP',
+		10,
+		'Month',
+		'A-S123456',
+		'123456789',
+	);
 
 	const expectedOutput = {
 		To: {
@@ -324,6 +326,8 @@ test('Email message body is correct', () => {
 					price: '10.00',
 					first_payment_amount: '5.60',
 					date_of_first_payment: '16 April 2024',
+					next_payment_amount: '10.00',
+					date_of_next_payment: '16 April 2025',
 					payment_frequency: 'Monthly',
 					subscription_id: 'A-S123456',
 				},

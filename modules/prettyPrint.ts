@@ -1,3 +1,3 @@
-export const prettyPrint = (object: object) => {
+export const prettyPrint = (object: any) => {
 	return JSON.stringify(object, null, 2);
 };

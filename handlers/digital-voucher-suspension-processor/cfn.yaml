@@ -83,7 +83,7 @@ Resources:
         Suspends fulfilment of digital voucher subscriptions.
         Source: https://github.com/guardian/support-service-lambdas/tree/main/handlers/digital-voucher-suspension-processor.
       Runtime: java21
-      MemorySize: 1536
+      MemorySize: 1792
       Timeout: 900
       CodeUri:
         Bucket: support-service-lambdas-dist

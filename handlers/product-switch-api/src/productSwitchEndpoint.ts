@@ -1,10 +1,16 @@
+import { Lazy } from '@modules/lazy';
 import { prettyPrint } from '@modules/prettyPrint';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { Stage } from '@modules/stage';
+import {
+	billingPreviewToSimpleInvoiceItems,
+	getBillingPreview,
+} from '@modules/zuora/billingPreview';
 import { getAccount } from '@modules/zuora/getAccount';
 import { getSubscription } from '@modules/zuora/getSubscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyEventHeaders } from 'aws-lambda';
+import type dayjs from 'dayjs';
 import { preview, switchToSupporterPlus } from './contributionToSupporterPlus';
 import { productSwitchRequestSchema } from './schemas';
 import { getSwitchInformationWithOwnerCheck } from './switchInformation';
@@ -14,6 +20,7 @@ export const contributionToSupporterPlusEndpoint = async (
 	headers: APIGatewayProxyEventHeaders,
 	body: string,
 	subscriptionNumber: string,
+	today: dayjs.Dayjs,
 ) => {
 	const identityId = headers['x-identity-id'];
 	const zuoraClient = await ZuoraClient.create(stage);
@@ -27,13 +34,26 @@ export const contributionToSupporterPlusEndpoint = async (
 
 	const account = await getAccount(zuoraClient, subscription.accountNumber);
 
-	const switchInformation = getSwitchInformationWithOwnerCheck(
+	// don't get the billing preview until we know the subscription is not cancelled
+	const lazyBillingPreview = new Lazy(
+		() =>
+			getBillingPreview(
+				zuoraClient,
+				today.add(13, 'months'),
+				subscription.accountNumber,
+			),
+		'get billing preview for the subscription',
+	).then(billingPreviewToSimpleInvoiceItems);
+
+	const switchInformation = await getSwitchInformationWithOwnerCheck(
 		stage,
 		input,
 		subscription,
 		account,
 		productCatalog,
 		identityId,
+		lazyBillingPreview,
+		today,
 	);
 
 	const response = input.preview

@@ -21,6 +21,38 @@ describe('getUserProductsFromSupporterProductDataItems', () => {
 		expect(getValidUserProducts(codeCatalogHelper, [])).toEqual([]);
 	});
 
+	test('does not return expired products', () => {
+		expect(
+			getValidUserProducts(codeCatalogHelper, [
+				{
+					subscriptionName: '123',
+					productRatePlanId: '2c92c0f94c510a0d014c569ba8eb45f7',
+					productRatePlanName: 'Non Founder Supporter - monthly',
+					contractEffectiveDate: '2017-01-19',
+					termEndDate: '2017-02-19',
+					identityId: '123',
+				},
+			]),
+		).toEqual([]);
+	});
+
+	test('does return products which expire today', () => {
+		expect(
+			getValidUserProducts(codeCatalogHelper, [
+				{
+					subscriptionName: '123',
+					productRatePlanId: '2c92c0f94c510a0d014c569ba8eb45f7',
+					productRatePlanName: 'Non Founder Supporter - monthly',
+					contractEffectiveDate: zuoraDateFormat(
+						dayjs().subtract(1, 'month').startOf('day'),
+					),
+					termEndDate: zuoraDateFormat(dayjs().startOf('day')),
+					identityId: '123',
+				},
+			]).length,
+		).toEqual(1);
+	});
+
 	test('returns single contribution when there is a single contribution less than 3 months old', () => {
 		expect(
 			getValidUserProducts(codeCatalogHelper, [

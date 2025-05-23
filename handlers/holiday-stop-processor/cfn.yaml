@@ -83,7 +83,7 @@ Resources:
           Stage: !Ref Stage
       Role:
         !GetAtt HolidayStopProcessorRole.Arn
-      MemorySize: 1024
+      MemorySize: 1232
       Runtime: java21
       Timeout: 900
       Architectures:
