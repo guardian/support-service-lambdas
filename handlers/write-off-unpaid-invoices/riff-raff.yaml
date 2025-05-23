@@ -3,6 +3,7 @@ stacks:
 regions:
   - eu-west-1
 allowedStages:
+  - CODE
   - CSBX
   - PROD
 deployments:
