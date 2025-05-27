@@ -9,7 +9,7 @@
     "lint": "eslint src/**/*.ts"
   },
   "dependencies": {
-    "zod": "^3.23.8",
+    "zod": "catalog:",
     "dayjs": "^1.11.13"
   }
 }
