@@ -54,7 +54,7 @@ const routeRequest = async (event: APIGatewayProxyEvent) => {
 			};
 		} else {
 			return {
-				body: JSON.stringify(error),
+				body: 'An error occurred, check the logs for details',
 				statusCode: 500,
 			};
 		}
