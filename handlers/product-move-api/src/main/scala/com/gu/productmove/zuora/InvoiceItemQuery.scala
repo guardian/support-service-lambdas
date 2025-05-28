@@ -5,8 +5,7 @@ import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
 import com.gu.productmove.zuora.InvoiceItemQuery.{InvoiceItem, TaxationItem, TaxationItems}
-import com.gu.productmove.zuora.RunBilling.InvoiceId
-import com.gu.productmove.zuora.model.SubscriptionName
+import com.gu.productmove.zuora.model.{InvoiceId, SubscriptionName}
 import com.gu.productmove.zuora.rest.{ZuoraGet, ZuoraRestBody}
 import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}

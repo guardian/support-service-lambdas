@@ -1,6 +1,6 @@
 package com.gu.productmove.zuora
 
-import com.gu.productmove.zuora.RunBilling.InvoiceId
+import com.gu.productmove.zuora.model.InvoiceId
 import com.gu.productmove.zuora.rest.{ZuoraGet, ZuoraRestBody}
 import sttp.client3.*
 import zio.json.*
@@ -57,10 +57,5 @@ object RunBilling {
   private[zuora] type RunBillingResponse = List[Either[RunBillingErrorResponse, RunBillingSuccessResponse]]
   given JsonDecoder[RunBillingResponse] =
     JsonDecoder.list(using eitherDecoder[RunBillingErrorResponse, RunBillingSuccessResponse])
-
-  case class InvoiceId(id: String)
-  object InvoiceId {
-    given JsonCodec[InvoiceId] = JsonCodec.string.transform(InvoiceId.apply, _.id)
-  }
 
 }

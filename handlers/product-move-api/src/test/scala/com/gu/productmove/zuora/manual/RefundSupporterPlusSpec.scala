@@ -51,7 +51,7 @@ object RefundSupporterPlusSpec extends ZIOSpecDefault {
               PostInvoicesLive.layer,
             )
         } yield assert(true)(equalTo(true))
-      }, // @@ TestAspect.ignore,
+      } @@ TestAspect.ignore,
       test("Balance invoices locally") {
         /*
              Test suite used to run the ensureThatNegativeInvoiceBalanceIsZero lambda locally

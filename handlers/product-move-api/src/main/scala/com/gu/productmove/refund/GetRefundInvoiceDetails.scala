@@ -1,7 +1,7 @@
 package com.gu.productmove.refund
 
 import com.gu.productmove.zuora.InvoiceItemQuery.InvoiceItem
-import com.gu.productmove.zuora.RunBilling.InvoiceId
+import com.gu.productmove.zuora.model.InvoiceId
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.{InvoiceItemQuery, InvoiceItemWithTaxDetails, RefundInvoiceDetails, TaxDetails}
 import zio.{RIO, Task, ZIO}
@@ -16,9 +16,9 @@ object GetRefundInvoiceDetails {
       invoiceItems <- invoiceItemQuery.invoiceItemsForSubscription(subscriptionName)
       itemsByInvoice <- groupInvoices(invoiceItems)
       refundAmount = itemsByInvoice.getLastPaidInvoiceAmount
-      lastPaidInvoiceId = itemsByInvoice.latestId
-      negativeInvoiceId = itemsByInvoice.earliestId
-      negativeInvoiceItems = itemsByInvoice.earliestItems
+      lastPaidInvoiceId = itemsByInvoice.previousId
+      negativeInvoiceId = itemsByInvoice.latestId
+      negativeInvoiceItems = itemsByInvoice.latestItems
       taxationItems <-
         if (invoiceItems.exists(_.TaxAmount > 0)) {
           println("Invoice items have tax, fetching taxation items")
@@ -37,9 +37,8 @@ object GetRefundInvoiceDetails {
     val invoices: Map[InvoiceId, List[InvoiceItem]] = items.groupBy(_.InvoiceId)
     val invoiceItemGroups = for {
       (latestId, latestItems) <- invoices.maxByOption(getDate)
-      (earliestId, earliestItems) <- invoices.minByOption(getDate)
-      if latestId != earliestId
-    } yield ZIO.succeed(InvoiceGroups(latestId, latestItems, earliestId, earliestItems))
+      (previousId, previousItems) <- invoices.-(latestId).maxByOption(getDate)
+    } yield ZIO.succeed(InvoiceGroups(latestId, latestItems, previousId, previousItems))
     invoiceItemGroups.getOrElse {
       ZIO.fail(
         new Throwable(
@@ -56,12 +55,12 @@ object GetRefundInvoiceDetails {
   case class InvoiceGroups(
       latestId: InvoiceId,
       latestItems: List[InvoiceItem],
-      earliestId: InvoiceId,
-      earliestItems: List[InvoiceItem],
+      previousId: InvoiceId,
+      previousItems: List[InvoiceItem],
   ) {
 
     lazy val getLastPaidInvoiceAmount: BigDecimal =
-      latestItems.map(invoice => invoice.ChargeAmount + invoice.TaxAmount).sum
+      previousItems.map(invoice => invoice.ChargeAmount + invoice.TaxAmount).sum
 
   }
 

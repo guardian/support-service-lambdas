@@ -1,6 +1,6 @@
 package com.gu.productmove.zuora
 
-import com.gu.productmove.zuora.RunBilling.InvoiceId
+import com.gu.productmove.zuora.model.InvoiceId
 import com.gu.productmove.zuora.rest.{ZuoraGet, ZuoraRestBody}
 import sttp.client3.*
 import zio.json.*
