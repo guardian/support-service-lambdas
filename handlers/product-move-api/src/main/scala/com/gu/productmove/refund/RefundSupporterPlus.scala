@@ -41,7 +41,7 @@ object RefundSupporterPlus {
       _ <- ZIO.log(s"Getting invoice items for sub ${refundInput.subscriptionName}")
       refundInvoiceDetails <- GetRefundInvoiceDetails.get(refundInput.subscriptionName)
       _ <- ZIO.serviceWithZIO[PostInvoices](
-        _.postInvoices(refundInvoiceDetails.lastPaidInvoiceId, refundInput.cancellationBillingDate),
+        _.postInvoices(refundInvoiceDetails.negativeInvoiceId, refundInput.cancellationBillingDate),
       )
       _ <- ZIO.log(
         s"Amount to refund for ${refundInvoiceDetails.lastPaidInvoiceId} is ${refundInvoiceDetails.refundAmount}",
