@@ -1,11 +1,7 @@
 package com.gu.productmove.zuora.manual
 
 import com.gu.productmove.*
-import com.gu.productmove.endpoint.move.ProductMoveEndpoint
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ExpectedInput
-import com.gu.productmove.endpoint.move.switchtype.RecurringContributionToSupporterPlus
 import com.gu.productmove.zuora.model.InvoiceId
-import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import com.gu.productmove.zuora.{CreatePayment, CreatePaymentLive, ZuoraAccountId}
 import zio.*

@@ -1,9 +1,8 @@
 package com.gu.productmove.zuora.manual
 
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.zuora.PostInvoicesLive
 import com.gu.productmove.zuora.model.InvoiceId
-import com.gu.productmove.zuora.{PostInvoicesLive, TermRenewalLive}
-import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
 import com.gu.productmove.{AwsCredentialsLive, GuStageLive, SecretsLive, SttpClientLive}
 import zio.*

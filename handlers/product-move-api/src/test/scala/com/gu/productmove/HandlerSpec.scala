@@ -1,17 +1,15 @@
 package com.gu.productmove
 
+import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
+import com.gu.newproduct.api.productcatalog.{BillingPeriod, Monthly}
 import com.gu.productmove.*
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.GuStageLive.Stage.{CODE, PROD}
-import com.gu.productmove.endpoint.available.{
-  AvailableProductMovesEndpoint,
-  Billing,
-  Currency,
-  MoveToProduct,
-  Offer,
-  TimePeriod,
-  TimeUnit,
-  Trial,
+import com.gu.productmove.endpoint.available.*
+import com.gu.productmove.endpoint.cancel.{
+  SubscriptionCancelEndpoint,
+  SubscriptionCancelEndpointSteps,
+  SubscriptionCancelEndpointTypes,
 }
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{
@@ -20,71 +18,18 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{
   OutputBody,
   PreviewResult,
 }
-import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes
-import com.gu.productmove.endpoint.cancel.{
-  SubscriptionCancelEndpoint,
-  SubscriptionCancelEndpointSteps,
-  SubscriptionCancelEndpointTypes,
-}
+import com.gu.productmove.endpoint.move.switchtype.*
 import com.gu.productmove.invoicingapi.InvoicingApiRefund
 import com.gu.productmove.invoicingapi.InvoicingApiRefund.RefundResponse
 import com.gu.productmove.mocks.MockInvoicingApiRefund
 import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
-import com.gu.productmove.zuora.GetAccount.{
-  AccountSubscription,
-  BasicInfo,
-  BillToContact,
-  GetAccountResponse,
-  PaymentMethodResponse,
-  ZuoraSubscription,
-}
-import com.gu.productmove.zuora.{
-  AddRatePlan,
-  CancellationResponse,
-  ChargeOverrides,
-  CreatePaymentResponse,
-  CreateSubscriptionResponse,
-  DefaultPaymentMethod,
-  GetAccount,
-  GetCatalogue,
-  GetSubscription,
-  MockCatalogue,
-  MockCreatePayment,
-  MockDynamo,
-  MockGetAccount,
-  MockGetInvoice,
-  MockGetInvoiceItems,
-  MockGetSubscription,
-  MockGetSubscriptionToCancel,
-  MockInvoiceItemAdjustment,
-  MockSQS,
-  MockSubscribe,
-  MockSubscriptionUpdate,
-  MockTermRenewal,
-  MockZuoraCancel,
-  MockZuoraSetCancellationReason,
-  RemoveRatePlan,
-  RenewalResponse,
-  SubscriptionUpdatePreviewResponse,
-  SubscriptionUpdateRequest,
-  SubscriptionUpdateResponse,
-  UpdateResponse,
-}
+import com.gu.productmove.zuora.GetAccount.*
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
 import com.gu.productmove.zuora.InvoiceItemAdjustment.InvoiceItemAdjustmentResult
-import com.gu.productmove.zuora.model.{AccountNumber, SubscriptionId, SubscriptionName}
+import com.gu.productmove.zuora.model.{AccountNumber, InvoiceId, SubscriptionId, SubscriptionName}
+import com.gu.productmove.zuora.*
 import com.gu.supporterdata.model.SupporterRatePlanItem
-import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
-import com.gu.newproduct.api.productcatalog.{BillingPeriod, Monthly}
-import com.gu.productmove.endpoint.move.switchtype.{
-  GetRatePlans,
-  RecurringContributionToSupporterPlus,
-  RecurringContributionToSupporterPlusImpl,
-  ToRecurringContribution,
-  ToRecurringContributionImpl,
-}
-import com.gu.productmove.zuora.model.InvoiceId
 import zio.*
 import zio.test.*
 import zio.test.Assertion.*
