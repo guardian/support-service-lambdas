@@ -17,7 +17,7 @@ import java.time.*
 object SubscribeSpec extends ZIOSpecDefault {
   private val time = OffsetDateTime.of(LocalDateTime.of(2022, 5, 16, 10, 2), ZoneOffset.ofHours(0))
 
-  override def spec: Spec[TestEnvironment with Scope, Any] =
+  override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("subscribe layer")(test("createRequest function: JSON request body is created and encoded correctly") {
       val time = OffsetDateTime.of(LocalDateTime.of(2022, 5, 10, 10, 2), ZoneOffset.ofHours(0)).toInstant
       val expectedSubscribeRequest = SubscribeRequest(

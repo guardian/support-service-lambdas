@@ -11,6 +11,7 @@ import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.*
 import com.gu.productmove.zuora.GetAccount.GetAccountResponse
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlanCharge}
+import com.gu.productmove.zuora.RunBilling.InvoiceId
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import zio.*
@@ -312,7 +313,7 @@ class RecurringContributionToSupporterPlusImpl(
       currency: Currency,
       currentRatePlanId: String,
       price: BigDecimal,
-  ): Task[String] = {
+  ): Task[InvoiceId] = {
     for {
       updateRequestBody <- getRatePlans.getRatePlans(billingPeriod, currency, currentRatePlanId, price).map {
         case (addRatePlan, removeRatePlan) =>
@@ -343,7 +344,7 @@ class RecurringContributionToSupporterPlusImpl(
       currency: Currency,
       currentRatePlanId: String,
       price: BigDecimal,
-  ): Task[String] = {
+  ): Task[InvoiceId] = {
     // To start a new term for this subscription we reduce the the current term length so that it ends today in
     // the update subscription request, and then renew the sub using a separate request
     val newTermLength = getNewTermLengthInDays(today, termStartDate)
@@ -378,7 +379,7 @@ class RecurringContributionToSupporterPlusImpl(
      This function is used to adjust the invoice item for the supporter plus subscription charge
    */
   private def adjustNonCollectedInvoice(
-      invoiceId: String,
+      invoiceId: InvoiceId,
       supporterPlusRatePlanIds: SupporterPlusRatePlanIds,
       subscriptionName: SubscriptionName,
       balanceToAdjust: BigDecimal,

@@ -1,11 +1,13 @@
-package com.gu.productmove.zuora
+package com.gu.productmove.zuora.manual
 
 import com.gu.productmove.*
+import com.gu.productmove.endpoint.move.ProductMoveEndpoint
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ExpectedInput
-import com.gu.productmove.endpoint.move.{ProductMoveEndpoint}
 import com.gu.productmove.endpoint.move.switchtype.RecurringContributionToSupporterPlus
+import com.gu.productmove.zuora.RunBilling.InvoiceId
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
+import com.gu.productmove.zuora.{CreatePayment, CreatePaymentLive, ZuoraAccountId}
 import zio.*
 import zio.test.*
 import zio.test.Assertion.*
@@ -14,14 +16,14 @@ import java.time.*
 
 object CreatePaymentSpec extends ZIOSpecDefault {
 
-  override def spec: Spec[TestEnvironment with Scope, Any] =
+  override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("Create Payment")(
       test("Test creating a payment locally") {
         for {
           _ <- CreatePayment
             .create(
               accountId = ZuoraAccountId("8ad09be48bae944c018baf50186850a5"),
-              invoiceId = "8ad087d28bb86b72018bb9e90bad101d",
+              invoiceId = InvoiceId("8ad087d28bb86b72018bb9e90bad101d"),
               paymentMethodId = "8ad09be48bae944c018baf50189950aa",
               amount = 45.270000000,
               today = LocalDate.now(),

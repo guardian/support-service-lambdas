@@ -1,16 +1,17 @@
-package com.gu.productmove.zuora
+package com.gu.productmove.zuora.manual
 
-import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SttpClientLive, SecretsLive}
 import com.gu.productmove.invoicingapi.InvoicingApiRefundLive
-import com.gu.productmove.refund.{RefundSupporterPlus, RefundInput}
-import com.gu.productmove.zuora.RefundSupporterPlusSpec.{suite, test}
+import com.gu.productmove.refund.{RefundInput, RefundSupporterPlus}
+import RefundSupporterPlusSpec.{suite, test}
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
+import com.gu.productmove.zuora.{CreditBalanceAdjustment, CreditBalanceAdjustmentLive}
+import com.gu.productmove.*
 import zio.*
 import zio.test.Assertion.equalTo
 import zio.test.{Spec, TestAspect, TestEnvironment, ZIOSpecDefault, assert}
 
 object CreditBalanceAdjustmentSpec extends ZIOSpecDefault {
-  override def spec: Spec[TestEnvironment with Scope, Any] =
+  override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("Credit balance adjustment")(
       test("Run CreditBalanceAdjustment increase locally") {
         val amount = 27.86

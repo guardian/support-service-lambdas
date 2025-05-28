@@ -4,7 +4,8 @@ import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ErrorResponse
-import com.gu.productmove.zuora.GetInvoiceItems.{GetInvoiceItemsResponse}
+import com.gu.productmove.zuora.GetInvoiceItems.GetInvoiceItemsResponse
+import com.gu.productmove.zuora.RunBilling.InvoiceId
 import com.gu.productmove.zuora.rest.ZuoraRestBody.ZuoraSuccessCheck.None
 import com.gu.productmove.zuora.rest.{ZuoraGet, ZuoraRestBody}
 import sttp.capabilities.zio.ZioStreams
@@ -26,7 +27,7 @@ object GetInvoiceItemsLive {
 }
 
 private class GetInvoiceItemsLive(zuoraGet: ZuoraGet) extends GetInvoiceItems {
-  override def get(invoiceId: String): Task[GetInvoiceItemsResponse] =
+  override def get(invoiceId: InvoiceId): Task[GetInvoiceItemsResponse] =
     zuoraGet.get[GetInvoiceItemsResponse](
       uri"invoices/$invoiceId/items",
       ZuoraRestBody.ZuoraSuccessCheck.None,
@@ -34,7 +35,7 @@ private class GetInvoiceItemsLive(zuoraGet: ZuoraGet) extends GetInvoiceItems {
 }
 
 trait GetInvoiceItems {
-  def get(invoiceId: String): Task[GetInvoiceItemsResponse]
+  def get(invoiceId: InvoiceId): Task[GetInvoiceItemsResponse]
 }
 
 object GetInvoiceItems {
@@ -45,6 +46,6 @@ object GetInvoiceItems {
   given JsonDecoder[InvoiceItem] = DeriveJsonDecoder.gen[InvoiceItem]
   given JsonDecoder[GetInvoiceItemsResponse] = DeriveJsonDecoder.gen[GetInvoiceItemsResponse]
 
-  def get(invoiceId: String): RIO[GetInvoiceItems, GetInvoiceItemsResponse] =
+  def get(invoiceId: InvoiceId): RIO[GetInvoiceItems, GetInvoiceItemsResponse] =
     ZIO.serviceWithZIO[GetInvoiceItems](_.get(invoiceId))
 }

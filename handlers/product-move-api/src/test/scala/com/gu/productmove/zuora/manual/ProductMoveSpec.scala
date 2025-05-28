@@ -1,23 +1,17 @@
-package com.gu.productmove.zuora
+package com.gu.productmove.zuora.manual
 
+import com.gu.productmove.*
+import com.gu.productmove.endpoint.move.ProductMoveEndpoint.SwitchType
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ExpectedInput
+import com.gu.productmove.endpoint.move.switchtype.*
 import com.gu.productmove.endpoint.move.{ProductMoveEndpoint, ProductMoveEndpointSteps}
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
-import com.gu.productmove.SecretsLive
-import com.gu.productmove.*
-import com.gu.productmove.endpoint.move.ProductMoveEndpoint.SwitchType
-import com.gu.productmove.endpoint.move.switchtype.{
-  GetRatePlans,
-  RecurringContributionToSupporterPlus,
-  RecurringContributionToSupporterPlusImpl,
-  ToRecurringContribution,
-  ToRecurringContributionImpl,
-}
+import com.gu.productmove.zuora.*
 import com.gu.supporterdata.model.Stage.CODE
 import zio.*
-import zio.test.Assertion.*
 import zio.test.*
+import zio.test.Assertion.*
 
 import java.time.*
 

@@ -4,6 +4,7 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse,
 import com.gu.productmove.zuora.GetAccount.PaymentMethodResponse
 import com.gu.productmove.zuora.GetInvoiceItems.GetInvoiceItemsResponse
 import com.gu.productmove.zuora.InvoiceItemAdjustment.InvoiceItemAdjustmentResult
+import com.gu.productmove.zuora.RunBilling.InvoiceId
 import com.gu.productmove.zuora.model.AccountNumber
 import zio.*
 
@@ -16,16 +17,16 @@ class MockInvoiceItemAdjustment(
   def requests = mutableStore.reverse
 
   override def update(
-      invoiceId: String,
+      invoiceId: InvoiceId,
       amount: BigDecimal,
       invoiceItemId: String,
       adjustmentType: String,
       sourceType: String,
   ): Task[InvoiceItemAdjustmentResult] = {
-    val params = (invoiceId, amount, invoiceItemId, adjustmentType)
+    val params = (invoiceId.id, amount, invoiceItemId, adjustmentType)
     mutableStore = params :: mutableStore
 
-    response.get(invoiceId, amount, invoiceItemId, adjustmentType) match {
+    response.get(invoiceId.id, amount, invoiceItemId, adjustmentType) match {
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse.head)
       case None => ZIO.fail(new Throwable(s"mock: success = false invoiceItemAdjustment: " + params))
     }

@@ -1,5 +1,6 @@
 package com.gu.productmove.zuora
 
+import com.gu.productmove.zuora.RunBilling.InvoiceId
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.ZuoraGet
 import com.gu.productmove.zuora.rest.ZuoraRestBody.ZuoraSuccessCheck
@@ -59,4 +60,4 @@ case class RenewalRequest(
     collect: Option[Boolean],
     runBilling: Boolean,
 ) derives JsonEncoder
-case class RenewalResponse(success: Option[Boolean], invoiceId: Option[String]) derives JsonDecoder
+case class RenewalResponse(success: Option[Boolean], invoiceId: Option[InvoiceId]) derives JsonDecoder

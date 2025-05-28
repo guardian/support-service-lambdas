@@ -5,6 +5,7 @@ import com.gu.newproduct.api.productcatalog.BillingPeriod
 import com.gu.productmove.GuStageLive
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError, PreviewResult}
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
+import com.gu.productmove.zuora.RunBilling.InvoiceId
 import com.gu.productmove.zuora.{GetSubscription, SubscriptionUpdatePreviewResponse}
 import com.gu.productmove.zuora.model.SubscriptionName
 import zio.json.JsonDecoder
@@ -30,7 +31,7 @@ class MockTermRenewal(
     ZIO.succeed(
       RenewalResponse(
         success = Some(true),
-        invoiceId = Some("invoiceId"),
+        invoiceId = Some(InvoiceId("invoiceId")),
       ),
     )
   }

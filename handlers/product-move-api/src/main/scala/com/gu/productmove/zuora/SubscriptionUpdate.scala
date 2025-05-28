@@ -1,5 +1,6 @@
 package com.gu.productmove.zuora
 
+import com.gu.productmove.zuora.RunBilling.InvoiceId
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.ZuoraGet
 import sttp.client3.*
@@ -85,7 +86,7 @@ case class RemoveRatePlan(
 case class SubscriptionUpdateResponse(
     subscriptionId: String,
     totalDeltaMrr: BigDecimal,
-    invoiceId: Option[String],
+    invoiceId: Option[InvoiceId],
     paidAmount: Option[BigDecimal],
 ) derives JsonDecoder
 

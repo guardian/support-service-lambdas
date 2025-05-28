@@ -4,6 +4,7 @@ import com.gu.i18n.Currency
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError, PreviewResult}
+import com.gu.productmove.zuora.RunBilling.InvoiceId
 import com.gu.productmove.zuora.model.{SubscriptionId, SubscriptionName}
 import com.gu.productmove.zuora.rest.ZuoraGet
 import com.gu.productmove.zuora.rest.ZuoraRestBody.{ZuoraSuccessCheck, ZuoraSuccessLowercase}
@@ -25,7 +26,7 @@ import java.time.temporal.ChronoUnit
 trait CreatePayment {
   def create(
       accountId: ZuoraAccountId,
-      invoiceId: String,
+      invoiceId: InvoiceId,
       paymentMethodId: String,
       amount: BigDecimal,
       today: LocalDate,
@@ -39,7 +40,7 @@ object CreatePaymentLive {
 private class CreatePaymentLive(zuoraGet: ZuoraGet) extends CreatePayment {
   override def create(
       accountId: ZuoraAccountId,
-      invoiceId: String,
+      invoiceId: InvoiceId,
       paymentMethodId: String,
       amount: BigDecimal,
       today: LocalDate,
@@ -69,7 +70,7 @@ private class CreatePaymentLive(zuoraGet: ZuoraGet) extends CreatePayment {
 object CreatePayment {
   def create(
       accountId: ZuoraAccountId,
-      invoiceId: String,
+      invoiceId: InvoiceId,
       paymentMethodId: String,
       amount: BigDecimal,
       today: LocalDate,
@@ -78,7 +79,7 @@ object CreatePayment {
 }
 case class CreatePaymentRequest(
     AccountId: String,
-    InvoiceId: String,
+    InvoiceId: InvoiceId,
     PaymentMethodId: String,
     Amount: BigDecimal,
     AppliedInvoiceAmount: BigDecimal,

@@ -1,6 +1,6 @@
 package com.gu.productmove.zuora
 
-import com.gu.productmove.zuora.PostInvoices.InvoiceId
+import com.gu.productmove.zuora.RunBilling.InvoiceId
 import com.gu.productmove.zuora.rest.{ZuoraGet, ZuoraRestBody}
 import sttp.client3.*
 import zio.json.*
@@ -13,48 +13,62 @@ object PostInvoicesLive {
     ZLayer.fromFunction(PostInvoicesLive(_))
 }
 
-private class PostInvoicesLive(zuoraGet: ZuoraGet) extends PostInvoices {
+private class PostInvoicesLive(zuoraClient: ZuoraGet) extends PostInvoices {
   import PostInvoices.*
 
   // https://developer.zuora.com/v1-api-reference/api/operation/POST_PostInvoices/
-  override def run(invoiceId: InvoiceId, invoiceDate: LocalDate): Task[Unit] =
+  override def postInvoices(invoiceId: InvoiceId, invoiceDate: LocalDate): Task[Unit] =
     for {
-      postInvoicesResponse <- zuoraGet
+      postInvoicesResponse <- zuoraClient
         .post[PostInvoicesRequest, PostInvoicesResponse](
           uri"invoices/bulk-post",
-          PostInvoicesRequest(List(InvoiceToPost(invoiceId, invoiceDate)), "Invoice"),
-//          ZuoraRestBody.ZuoraSuccessCheck.None,
+          PostInvoicesRequest(List(InvoiceToPost(invoiceId, invoiceDate))),
         )
-        .map(_.head) // we have hard coded one item in the request so there will be one in the response
-//      maybeInvoiceId <- errorOrPostInvoicesResponse match {
-//        case Left(PostInvoicesErrorResponse(ZuoraError("INVALID_VALUE", _) :: _)) => ZIO.none
-//        case Left(error: PostInvoicesErrorResponse) => ZIO.fail(new RuntimeException("generate invoice failed with: " + error))
-//        case Right(PostInvoicesResponse: PostInvoicesSuccessResponse) => ZIO.some(InvoiceId(PostInvoicesResponse.Id))
-//      }
+      _ <- ZIO.fromEither(maybeError(postInvoicesResponse).toLeft(()))
     } yield ()
 
-  private case class InvoiceToPost(id: InvoiceId, invoiceDate: LocalDate)
-      derives JsonEncoder
-  private case class PostInvoicesRequest(objects: List[InvoiceToPost], `type`: String) derives JsonEncoder
+  private case class InvoiceToPost(id: InvoiceId, invoiceDate: LocalDate) derives JsonEncoder
+  private case class PostInvoicesRequest(invoices: List[InvoiceToPost]) derives JsonEncoder
+
+  /*
+  could be {
+  "invoices" : [ {
+    "success" : false,
+    "processId" : "A76470DC0101BCBB",
+    "reasons" : [ {
+      "code" : 59210020,
+      "message" : "Only invoices with Draft status can be posted."
+    } ],
+    "id" : "8ad083f096d239110196d438cee520d5"
+  } ],
+  "success" : true
+}
+   * */
 }
 
 trait PostInvoices {
-  def run(accountId: ZuoraAccountId, today: LocalDate): Task[Unit]
+  def postInvoices(invoiceId: InvoiceId, invoiceDate: LocalDate): Task[Unit]
 }
 
 object PostInvoices {
-  given eitherDecoder[A: JsonDecoder, B: JsonDecoder]: JsonDecoder[Either[A, B]] =
-    summon[JsonDecoder[A]].orElseEither(summon[JsonDecoder[B]])
 
-  private[zuora] case class PostInvoicesSuccessResponse(
-    Id: String, // ID of the generated invoice
-  ) derives JsonDecoder
-  private[zuora] case class ZuoraError(Code: String, Message: String) derives JsonDecoder
-  private[zuora] case class PostInvoicesErrorResponse(Errors: List[ZuoraError]) derives JsonDecoder
+  def maybeError(postInvoicesResponse: PostInvoicesResponse): Option[Throwable] = {
+    postInvoicesResponse match {
+      case PostInvoicesResponse(List(InvoiceStatus(true, _))) => None
+      case PostInvoicesResponse(
+            List(
+              InvoiceStatus(false, Some(List(ZuoraError(59210020, "Only invoices with Draft status can be posted.")))),
+            ),
+          ) =>
+        None
+      case resp => Some(new RuntimeException("unexpected bulk-post response: " + resp))
+    }
+  }
 
-  private[zuora] type PostInvoicesResponse = List[Either[PostInvoicesErrorResponse, PostInvoicesSuccessResponse]]
-  given JsonDecoder[PostInvoicesResponse] = JsonDecoder.list(using eitherDecoder[PostInvoicesErrorResponse, PostInvoicesSuccessResponse])
+  private[zuora] case class PostInvoicesResponse(invoices: List[InvoiceStatus]) derives JsonDecoder
 
-  case class InvoiceId(id: String)
+  private[zuora] case class InvoiceStatus(success: Boolean, reasons: Option[List[ZuoraError]]) derives JsonDecoder
+
+  private[zuora] case class ZuoraError(code: Int, message: String) derives JsonDecoder
 
 }

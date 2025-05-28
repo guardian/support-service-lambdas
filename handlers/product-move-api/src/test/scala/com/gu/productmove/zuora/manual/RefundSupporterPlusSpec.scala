@@ -1,27 +1,25 @@
-package com.gu.productmove.zuora
+package com.gu.productmove.zuora.manual
 
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.refund.*
-import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SQSLive, SttpClientLive}
-import com.gu.productmove.endpoint.available.{Billing, Currency, MoveToProduct, Offer, TimePeriod, TimeUnit, Trial}
+import com.gu.productmove.endpoint.available.*
 import com.gu.productmove.endpoint.move.ProductMoveEndpoint
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ExpectedInput
 import com.gu.productmove.invoicingapi.InvoicingApiRefundLive
-import com.gu.productmove.SecretsLive
-import com.gu.productmove.zuora.GetSubscription
-import com.gu.productmove.zuora.Subscribe.*
+import com.gu.productmove.refund.*
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
+import com.gu.productmove.zuora.Subscribe.*
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
+import com.gu.productmove.zuora.*
+import com.gu.productmove.*
 import zio.*
-import zio.*
-import zio.test.Assertion.*
 import zio.test.*
+import zio.test.Assertion.*
 
 import java.time.LocalDate
 
 object RefundSupporterPlusSpec extends ZIOSpecDefault {
-  override def spec: Spec[TestEnvironment with Scope, Any] =
+  override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("RefundSupporterPlus")(
       test("Run refund lambda locally") {
         /*
@@ -30,7 +28,11 @@ object RefundSupporterPlusSpec extends ZIOSpecDefault {
         for {
           _ <- RefundSupporterPlus
             .applyRefund(
-              RefundInput(SubscriptionName("A-S00985673"), ZuoraAccountId("8ad090fd96d24cc20196d437f54a600f"), LocalDate.parse("2025-05-15")),
+              RefundInput(
+                SubscriptionName("A-S00985673"),
+                ZuoraAccountId("8ad090fd96d24cc20196d437f54a600f"),
+                LocalDate.parse("2025-05-15"),
+              ),
             )
             .provide(
               AwsS3Live.layer,
@@ -41,14 +43,15 @@ object RefundSupporterPlusSpec extends ZIOSpecDefault {
               GuStageLive.layer,
               InvoicingApiRefundLive.layer,
               CreditBalanceAdjustmentLive.layer,
-              GetRefundInvoiceDetailsLive.layer,
+              InvoiceItemQueryLive.layer,
               GetInvoiceLive.layer,
               InvoiceItemAdjustmentLive.layer,
               SecretsLive.layer,
               RunBillingLive.layer,
+              PostInvoicesLive.layer,
             )
         } yield assert(true)(equalTo(true))
-      },// @@ TestAspect.ignore,
+      }, // @@ TestAspect.ignore,
       test("Balance invoices locally") {
         /*
              Test suite used to run the ensureThatNegativeInvoiceBalanceIsZero lambda locally
@@ -68,11 +71,12 @@ object RefundSupporterPlusSpec extends ZIOSpecDefault {
               GuStageLive.layer,
               ZLayer.succeed(new MockInvoicingApiRefund()),
               CreditBalanceAdjustmentLive.layer,
-              GetRefundInvoiceDetailsLive.layer,
+              InvoiceItemQueryLive.layer,
               GetInvoiceLive.layer,
               InvoiceItemAdjustmentLive.layer,
               SecretsLive.layer,
               RunBillingLive.layer,
+              PostInvoicesLive.layer,
             )
         } yield assert(true)(equalTo(true))
       } @@ TestAspect.ignore,

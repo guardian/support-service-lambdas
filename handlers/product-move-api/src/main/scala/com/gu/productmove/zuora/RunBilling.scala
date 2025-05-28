@@ -28,7 +28,8 @@ private class RunBillingLive(zuoraGet: ZuoraGet) extends RunBilling {
         .map(_.head) // we have hard coded one item in the request so there will be one in the response
       maybeInvoiceId <- errorOrRunBillingResponse match {
         case Left(RunBillingErrorResponse(ZuoraError("INVALID_VALUE", _) :: _)) => ZIO.none
-        case Left(error: RunBillingErrorResponse) => ZIO.fail(new RuntimeException("generate invoice failed with: " + error))
+        case Left(error: RunBillingErrorResponse) =>
+          ZIO.fail(new RuntimeException("generate invoice failed with: " + error))
         case Right(runBillingResponse: RunBillingSuccessResponse) => ZIO.some(InvoiceId(runBillingResponse.Id))
       }
     } yield maybeInvoiceId
@@ -48,14 +49,18 @@ object RunBilling {
     summon[JsonDecoder[A]].orElseEither(summon[JsonDecoder[B]])
 
   private[zuora] case class RunBillingSuccessResponse(
-    Id: String, // ID of the generated invoice
+      Id: String, // ID of the generated invoice
   ) derives JsonDecoder
   private[zuora] case class ZuoraError(Code: String, Message: String) derives JsonDecoder
   private[zuora] case class RunBillingErrorResponse(Errors: List[ZuoraError]) derives JsonDecoder
 
   private[zuora] type RunBillingResponse = List[Either[RunBillingErrorResponse, RunBillingSuccessResponse]]
-  given JsonDecoder[RunBillingResponse] = JsonDecoder.list(using eitherDecoder[RunBillingErrorResponse, RunBillingSuccessResponse])
+  given JsonDecoder[RunBillingResponse] =
+    JsonDecoder.list(using eitherDecoder[RunBillingErrorResponse, RunBillingSuccessResponse])
 
   case class InvoiceId(id: String)
+  object InvoiceId {
+    given JsonCodec[InvoiceId] = JsonCodec.string.transform(InvoiceId.apply, _.id)
+  }
 
 }
