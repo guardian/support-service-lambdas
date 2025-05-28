@@ -82,7 +82,7 @@ object HandlerManualTests {
   // for testing
   def runTest(method: String, path: String, testInput: Option[String]): Unit = {
     val inputValue = makeTestRequest(method, path, testInput)
-    val inputJson = inputValue.asJson(deriveEncoder).spaces2
+    val inputJson = inputValue.asJson(using deriveEncoder).spaces2
     runStringTest(inputJson)
   }
 
