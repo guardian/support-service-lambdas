@@ -1,15 +1,7 @@
 package com.gu.soft_opt_in_consent_setter
 
-import com.gu.soft_opt_in_consent_setter.models.{
-  ConsentsMapping,
-  EnhancedSub,
-  SFAssociatedSubResponse,
-  SFSubRecord,
-  SFSubRecordUpdate,
-  SFSubRecordUpdateRequest,
-  SoftOptInConfig,
-  SoftOptInError,
-}
+import com.gu.soft_opt_in_consent_setter.models.ConsentsMapping.similarGuardianProducts
+import com.gu.soft_opt_in_consent_setter.models.{ConsentsMapping, EnhancedSub, SFAssociatedSubResponse, SFSubRecord, SFSubRecordUpdate, SFSubRecordUpdateRequest, SoftOptInConfig, SoftOptInError}
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import io.circe.syntax._
@@ -19,7 +11,6 @@ object Handler extends LazyLogging {
   val readyToProcessAcquisitionStatus = "Ready to process acquisition"
   val readyToProcessCancellationStatus = "Ready to process cancellation"
   val readyProcessSwitchStatus = "Ready to process switch"
-  val similarGuardianProducts = "similar_guardian_products"
 
   def main(args: Array[String]): Unit = {
     handleRequest()
