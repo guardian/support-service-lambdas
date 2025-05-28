@@ -14,33 +14,28 @@ import zio.test.Assertion.*
 
 import java.time.*
 
-object CreatePaymentSpec extends ZIOSpecDefault {
+object CreatePaymentSpec extends ZIOAppDefault {
 
-  override def spec: Spec[TestEnvironment & Scope, Any] =
-    suite("Create Payment")(
-      test("Test creating a payment locally") {
-        for {
-          _ <- CreatePayment
-            .create(
-              accountId = ZuoraAccountId("8ad09be48bae944c018baf50186850a5"),
-              invoiceId = InvoiceId("8ad087d28bb86b72018bb9e90bad101d"),
-              paymentMethodId = "8ad09be48bae944c018baf50189950aa",
-              amount = 45.270000000,
-              today = LocalDate.now(),
-            )
-            .provide(
-              ZuoraGetLive.layer,
-              ZuoraClientLive.layer,
-              CreatePaymentLive.layer,
-              SttpClientLive.layer,
-              SecretsLive.layer,
-              AwsCredentialsLive.layer,
-              GuStageLive.layer,
-            )
+  def run: Task[Unit] =
+    for {
+      _ <- CreatePayment
+        .create(
+          accountId = ZuoraAccountId("8ad09be48bae944c018baf50186850a5"),
+          invoiceId = InvoiceId("8ad087d28bb86b72018bb9e90bad101d"),
+          paymentMethodId = "8ad09be48bae944c018baf50189950aa",
+          amount = 45.270000000,
+          today = LocalDate.now(),
+        )
+        .provide(
+          ZuoraGetLive.layer,
+          ZuoraClientLive.layer,
+          CreatePaymentLive.layer,
+          SttpClientLive.layer,
+          SecretsLive.layer,
+          AwsCredentialsLive.layer,
+          GuStageLive.layer,
+        )
 
-        } yield {
-          assert(true)(equalTo(true))
-        }
-      } @@ TestAspect.ignore,
-    )
+    } yield ()
+
 }

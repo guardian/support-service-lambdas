@@ -1,20 +1,15 @@
 package com.gu.productmove.zuora.manual
 
+import com.gu.productmove.*
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointSteps
 import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes.ExpectedInput
-import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes.RefundType.*
-import com.gu.productmove.endpoint.cancel.{SubscriptionCancelEndpoint, SubscriptionCancelEndpointSteps}
 import com.gu.productmove.endpoint.zuora.{GetSubscriptionToCancel, GetSubscriptionToCancelLive}
-import com.gu.productmove.invoicingapi.InvoicingApiRefundLive
-import com.gu.productmove.refund.{RefundInput, RefundSupporterPlus}
-import RefundSupporterPlusSpec.{suite, test}
+import com.gu.productmove.zuora.*
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
-import com.gu.productmove.zuora.*
-import com.gu.productmove.*
 import zio.*
-import zio.test.Assertion.equalTo
-import zio.test.{Spec, TestAspect, TestClock, TestEnvironment, ZIOSpecDefault, assert}
+import zio.test.TestClock
 
 import java.time.{LocalDate, LocalDateTime, ZoneOffset}
 

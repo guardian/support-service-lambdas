@@ -30,20 +30,6 @@ private class PostInvoicesLive(zuoraClient: ZuoraGet) extends PostInvoices {
   private case class InvoiceToPost(id: InvoiceId, invoiceDate: LocalDate) derives JsonEncoder
   private case class PostInvoicesRequest(invoices: List[InvoiceToPost]) derives JsonEncoder
 
-  /*
-  could be {
-  "invoices" : [ {
-    "success" : false,
-    "processId" : "A76470DC0101BCBB",
-    "reasons" : [ {
-      "code" : 59210020,
-      "message" : "Only invoices with Draft status can be posted."
-    } ],
-    "id" : "8ad083f096d239110196d438cee520d5"
-  } ],
-  "success" : true
-}
-   * */
 }
 
 trait PostInvoices {

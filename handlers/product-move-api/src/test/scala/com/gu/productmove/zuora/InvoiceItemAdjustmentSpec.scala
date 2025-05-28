@@ -1,4 +1,4 @@
-package com.gu.productmove.zuora.manual
+package com.gu.productmove.zuora
 
 import com.gu.productmove.*
 import com.gu.productmove.GuStageLive.Stage
@@ -23,27 +23,6 @@ import java.time.*
 object InvoiceItemAdjustmentSpec extends ZIOSpecDefault {
   override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("InvoiceItemAdjustment")(
-      test("Run InvoiceItemAdjustment locally") {
-        for {
-          _ <- TestClock.setTime(LocalDateTime.now.toInstant(ZoneOffset.UTC))
-          _ <- InvoiceItemAdjustment
-            .update(
-              invoiceId = InvoiceId("8ad09b2186bfd8100186c73164d82886"),
-              amount = 11.43,
-              invoiceItemId = "8ad09b2186bfd8100186c73164e92887",
-              "Charge",
-            )
-            .provide(
-              SttpClientLive.layer,
-              ZuoraClientLive.layer,
-              ZuoraGetLive.layer,
-              InvoiceItemAdjustmentLive.layer,
-              SecretsLive.layer,
-              AwsCredentialsLive.layer,
-              GuStageLive.layer,
-            )
-        } yield assert(true)(equalTo(true))
-      } @@ TestAspect.ignore,
       test("buildInvoiceAdjustments function ignores invoice items with zero value") {
         val adjustments = RefundSupporterPlus.buildInvoiceItemAdjustments(
           List(
