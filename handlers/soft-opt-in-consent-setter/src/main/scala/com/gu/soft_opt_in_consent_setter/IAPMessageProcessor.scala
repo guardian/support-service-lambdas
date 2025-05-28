@@ -132,6 +132,7 @@ object IAPMessageProcessor extends StrictLogging {
       toRemove = oldProductSoftOptIns.diff(currentProductSoftOptIns).map(ConsentsObject(_, false))
       toAdd = newProductSoftOptIns
         .filter(option => !oldProductSoftOptIns.contains(option) && !allOtherProductSoftOptIns.contains(option))
+        .filterNot(_ == similarGuardianProducts)
         .map(ConsentsObject(_, true))
       consentsBody = (toRemove ++ toAdd).asJson.toString()
     } yield consentsBody
