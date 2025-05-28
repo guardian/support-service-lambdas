@@ -4,8 +4,8 @@ import type { Currency } from '@modules/internationalisation/currency';
 import { isSupportedCurrency } from '@modules/internationalisation/currency';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
+import type { ProductBillingPeriod } from '@modules/product-catalog/productBillingPeriods';
 import type {
-	ProductBillingPeriod,
 	ProductCatalog,
 	ProductRatePlan,
 } from '@modules/product-catalog/productCatalog';

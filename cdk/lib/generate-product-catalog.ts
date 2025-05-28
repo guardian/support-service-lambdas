@@ -37,7 +37,7 @@ export class GenerateProductCatalog extends GuStack {
 			fileName: `${app}.zip`,
 			handler: 'index.handler',
 			runtime: nodeVersion,
-			memorySize: 1024,
+			memorySize: 1232,
 			timeout: Duration.seconds(300),
 			environment: commonEnvironmentVariables,
 			app: app,

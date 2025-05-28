@@ -86,6 +86,13 @@ export const catalog = {
 	},
 };
 
+export const sandboxProductRatePlanChargeIds = {
+	recurringContribution: {
+		Month: '2c92c0f85a6b1352015a7fcf35ab397c',
+		Annual: '2c92c0f85e2d19af015e3896e84d092e',
+	},
+};
+
 const Discounts = (stage: Stage) => {
 	const getCancellationFree2Mo = (
 		eligibilityCheckForRatePlan: EligibilityCheck,

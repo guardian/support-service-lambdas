@@ -748,6 +748,42 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "PaymentApiSoftOptInToSQSRule769CA5B4": {
+      "Properties": {
+        "Description": "Send all events received via payment-api onto soft opt-in SQS queue",
+        "EventBusName": "acquisitions-bus-CODE",
+        "EventPattern": {
+          "region": [
+            "eu-west-1",
+          ],
+          "source": [
+            "payment-api.1",
+          ],
+        },
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "SoftOptInsQueue",
+                "Arn",
+              ],
+            },
+            "Id": "Target0",
+            "InputTransformer": {
+              "InputPathsMap": {
+                "detail-contributionId": "$.detail.contributionId",
+                "detail-identityId": "$.detail.identityId",
+                "detail-product": "$.detail.product",
+                "detail-similarProductsConsent": "$.detail.similarProductsConsent",
+              },
+              "InputTemplate": "{"subscriptionId":<detail-contributionId>,"identityId":<detail-identityId>,"eventType":"Acquisition","productName":<detail-product>,"previousProductName":null,"userConsentsOverrides":{"similarGuardianProducts":<detail-similarProductsConsent>}}",
+            },
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
     "SQSTrigger": {
       "Properties": {
         "BatchSize": 1,
@@ -1030,6 +1066,33 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
                   "aws:SourceArn": {
                     "Fn::GetAtt": [
                       "SoftOptInToSQSRuleA7A6FB25",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SoftOptInsQueue",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "PaymentApiSoftOptInToSQSRule769CA5B4",
                       "Arn",
                     ],
                   },

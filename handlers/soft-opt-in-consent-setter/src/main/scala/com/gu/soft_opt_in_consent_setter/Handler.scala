@@ -1,15 +1,7 @@
 package com.gu.soft_opt_in_consent_setter
 
-import com.gu.soft_opt_in_consent_setter.models.{
-  ConsentsMapping,
-  EnhancedSub,
-  SFAssociatedSubResponse,
-  SFSubRecord,
-  SFSubRecordUpdate,
-  SFSubRecordUpdateRequest,
-  SoftOptInConfig,
-  SoftOptInError,
-}
+import com.gu.soft_opt_in_consent_setter.models.ConsentsMapping.similarGuardianProducts
+import com.gu.soft_opt_in_consent_setter.models.{ConsentsMapping, EnhancedSub, SFAssociatedSubResponse, SFSubRecord, SFSubRecordUpdate, SFSubRecordUpdateRequest, SoftOptInConfig, SoftOptInError}
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import io.circe.syntax._
@@ -26,7 +18,7 @@ object Handler extends LazyLogging {
 
   def handleRequest(): Unit = {
     (for {
-      config <- SoftOptInConfig()
+      config <- SoftOptInConfig(sys.env.get("Stage"), sys.env.get("sfApiVersion"))
     } yield for {
       sfConnector <- SalesforceConnector(config.sfConfig, config.sfApiVersion)
 
@@ -119,6 +111,7 @@ object Handler extends LazyLogging {
       toRemove = oldProductSoftOptIns.diff(currentProductSoftOptIns).map(ConsentsObject(_, false))
       toAdd = newProductSoftOptIns
         .filter(option => !oldProductSoftOptIns.contains(option) && !allOtherProductSoftOptIns.contains(option))
+        .filterNot(_ == similarGuardianProducts)
         .map(ConsentsObject(_, true))
 
       consentsBody = (toRemove ++ toAdd).asJson.toString()
