@@ -8,7 +8,7 @@ object Dependencies {
   val awsSdkVersion = "2.31.3"
   val circeVersion = "0.14.13"
   val sttpVersion = "3.10.3"
-  val http4sVersion = "0.22.15" // keep version 0.22.15, later versions pull in cats effect 3 which is not compatible
+  val http4sVersion = "0.23.30" // keep version 0.22.15, later versions pull in cats effect 3 which is not compatible
   val catsVersion = "2.12.0"
   val catsEffectVersion = "2.5.5"
   val logging: Seq[ModuleID] = Seq(
