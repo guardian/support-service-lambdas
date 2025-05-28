@@ -49,7 +49,7 @@ private class CreatePaymentLive(zuoraGet: ZuoraGet) extends CreatePayment {
       s"Attempting to create payment on account $accountId, invoice $invoiceId, paymentMethodId $paymentMethodId for amount $amount",
     )
     requestBody = CreatePaymentRequest(
-      AccountId = accountId.value,
+      AccountId = accountId,
       InvoiceId = invoiceId,
       PaymentMethodId = paymentMethodId,
       Amount = amount,
@@ -78,7 +78,7 @@ object CreatePayment {
     ZIO.serviceWithZIO[CreatePayment](_.create(accountId, invoiceId, paymentMethodId, amount, today))
 }
 case class CreatePaymentRequest(
-    AccountId: String,
+    AccountId: ZuoraAccountId,
     InvoiceId: InvoiceId,
     PaymentMethodId: String,
     Amount: BigDecimal,
