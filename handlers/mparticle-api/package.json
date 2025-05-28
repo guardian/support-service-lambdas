@@ -1,0 +1,19 @@
+{
+  "name": "mparticle-api",
+  "scripts": {
+    "test": "jest --group=-integration",
+    "it-test": "jest --group=integration",
+    "type-check": "tsc --noEmit",
+    "build": "esbuild --bundle --platform=node --target=node18 --outfile=target/index.js src/index.ts",
+    "lint": "eslint src/**/*.ts test/**/*.ts",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr mparticle-api.zip ./*.js",
+    "check-formatting": "prettier --check **.ts",
+    "fix-formatting": "prettier --write **.ts"
+  },
+  "dependencies": {
+    "axios": "^1.9.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.147"
+  }
+}
