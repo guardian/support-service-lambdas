@@ -167,10 +167,6 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
         |    "consented" : false
         |  },
         |  {
-        |    "id" : "similar_guardian_products",
-        |    "consented" : true
-        |  },
-        |  {
         |    "id" : "subscriber_preview",
         |    "consented" : true
         |  },
@@ -200,6 +196,24 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
       "Guardian Weekly",
       "newspaper",
       Set("newspaper", "Contributor"),
+      calculator,
+    ) shouldBe Right("""[
+        |  {
+        |    "id" : "guardian_weekly_newsletter",
+        |    "consented" : false
+        |  },
+        |  {
+        |    "id" : "subscriber_preview",
+        |    "consented" : true
+        |  }
+        |]""".stripMargin)
+  }
+
+  "buildProductSwitchConsents" should "return the correct consents when switching from a Guardian Weekly to a Newspaper subscription whilst also owning a Mobile Subscription (IAP)" in {
+    Handler.buildProductSwitchConsents(
+      "Guardian Weekly",
+      "newspaper",
+      Set("newspaper", "InAppPurchase"),
       calculator,
     ) shouldBe Right("""[
         |  {

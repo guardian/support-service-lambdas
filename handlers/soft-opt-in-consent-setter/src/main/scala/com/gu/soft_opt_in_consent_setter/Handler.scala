@@ -19,6 +19,7 @@ object Handler extends LazyLogging {
   val readyToProcessAcquisitionStatus = "Ready to process acquisition"
   val readyToProcessCancellationStatus = "Ready to process cancellation"
   val readyProcessSwitchStatus = "Ready to process switch"
+  val similarGuardianProducts = "similar_guardian_products"
 
   def main(args: Array[String]): Unit = {
     handleRequest()
@@ -119,6 +120,7 @@ object Handler extends LazyLogging {
       toRemove = oldProductSoftOptIns.diff(currentProductSoftOptIns).map(ConsentsObject(_, false))
       toAdd = newProductSoftOptIns
         .filter(option => !oldProductSoftOptIns.contains(option) && !allOtherProductSoftOptIns.contains(option))
+        .filterNot(_ == similarGuardianProducts)
         .map(ConsentsObject(_, true))
 
       consentsBody = (toRemove ++ toAdd).asJson.toString()
