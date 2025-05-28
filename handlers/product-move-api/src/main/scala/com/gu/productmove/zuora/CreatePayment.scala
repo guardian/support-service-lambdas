@@ -4,7 +4,7 @@ import com.gu.i18n.Currency
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError, PreviewResult}
-import com.gu.productmove.zuora.RunBilling.InvoiceId
+import com.gu.productmove.zuora.model.InvoiceId
 import com.gu.productmove.zuora.model.{SubscriptionId, SubscriptionName}
 import com.gu.productmove.zuora.rest.ZuoraGet
 import com.gu.productmove.zuora.rest.ZuoraRestBody.{ZuoraSuccessCheck, ZuoraSuccessLowercase}

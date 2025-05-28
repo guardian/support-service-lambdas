@@ -22,7 +22,7 @@ import com.gu.productmove.zuora.Fixtures.{
 }
 import com.gu.productmove.zuora.GetInvoice.GetInvoiceResponse
 import com.gu.productmove.zuora.GetInvoiceItems.{GetInvoiceItemsResponse, InvoiceItem}
-import com.gu.productmove.zuora.RunBilling.InvoiceId
+import com.gu.productmove.zuora.model.InvoiceId
 import com.gu.productmove.{EmailMessage, EmailPayload, IdentityId, RCtoSPEmailPayloadProductSwitchAttributes}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.util.config.Stage

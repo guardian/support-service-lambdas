@@ -11,7 +11,7 @@ import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.*
 import com.gu.productmove.zuora.GetAccount.GetAccountResponse
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlanCharge}
-import com.gu.productmove.zuora.RunBilling.InvoiceId
+import com.gu.productmove.zuora.model.InvoiceId
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import zio.*

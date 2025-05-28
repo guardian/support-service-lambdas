@@ -84,7 +84,7 @@ import com.gu.productmove.endpoint.move.switchtype.{
   ToRecurringContribution,
   ToRecurringContributionImpl,
 }
-import com.gu.productmove.zuora.RunBilling.InvoiceId
+import com.gu.productmove.zuora.model.InvoiceId
 import zio.*
 import zio.test.*
 import zio.test.Assertion.*
