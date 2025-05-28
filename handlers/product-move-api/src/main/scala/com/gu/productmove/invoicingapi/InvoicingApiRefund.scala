@@ -25,7 +25,7 @@ object InvoicingApiRefundLive {
     given JsonDecoder[InvoicingApiConfig] = DeriveJsonDecoder.gen[InvoicingApiConfig]
   }
 
-  val layer: RLayer[SttpBackend[Task, Any] with AwsS3 with Secrets, InvoicingApiRefundLive] =
+  val layer: RLayer[SttpBackend[Task, Any] & AwsS3 & Secrets, InvoicingApiRefundLive] =
     ZLayer {
       for {
         secrets <- ZIO.service[Secrets]

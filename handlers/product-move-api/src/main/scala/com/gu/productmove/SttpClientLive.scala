@@ -24,7 +24,7 @@ object SttpClientLive {
       ),
     )
 
-  def impl: Task[SttpBackend[Task, ZioStreams with capabilities.WebSockets]] =
+  def impl: Task[SttpBackend[Task, ZioStreams & capabilities.WebSockets]] =
     HttpClientZioBackend()
       .map(underlying =>
         LoggingBackend(

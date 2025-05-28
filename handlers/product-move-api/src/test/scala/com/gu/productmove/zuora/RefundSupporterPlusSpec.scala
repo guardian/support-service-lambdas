@@ -19,7 +19,7 @@ import zio.test.Assertion.*
 import zio.test.*
 
 object RefundSupporterPlusSpec extends ZIOSpecDefault {
-  override def spec: Spec[TestEnvironment with Scope, Any] =
+  override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("RefundSupporterPlus")(
       test("Run refund lambda locally") {
         /*

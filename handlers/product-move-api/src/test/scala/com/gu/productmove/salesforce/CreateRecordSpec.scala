@@ -24,7 +24,7 @@ import zio.*
 import java.time.*
 
 object CreateRecordSpec extends ZIOSpecDefault {
-  override def spec: Spec[TestEnvironment with Scope, Any] =
+  override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("Create Salesforce Record")(
       test("Run locally") {
         /*

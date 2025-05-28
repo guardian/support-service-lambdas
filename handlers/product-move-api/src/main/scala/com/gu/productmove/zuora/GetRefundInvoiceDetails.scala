@@ -123,7 +123,7 @@ private class GetRefundInvoiceDetailsLive(zuoraGet: ZuoraGet) extends GetRefundI
   }
   private def getInvoicesSortedByDate(items: List[InvoiceItem]): Map[String, List[InvoiceItem]] = {
     val invoices: Map[String, List[InvoiceItem]] = items.groupBy(_.InvoiceId)
-    ListMap(invoices.toSeq.sortWith(getDate(_) > getDate(_)): _*)
+    ListMap(invoices.toSeq.sortWith(getDate(_) > getDate(_))*)
   }
   private def getDate(i: (String, List[InvoiceItem])) =
     i._2.headOption.map(_.chargeDateAsDateTime).getOrElse(LocalDateTime.MIN)

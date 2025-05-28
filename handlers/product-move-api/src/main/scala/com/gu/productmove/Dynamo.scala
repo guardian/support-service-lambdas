@@ -1,7 +1,7 @@
 package com.gu.productmove
 
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.supporterdata.model.Stage.{PROD, CODE}
+import com.gu.supporterdata.model.Stage.{CODE, PROD}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.supporterdata.services.SupporterDataDynamoService
 
@@ -9,6 +9,8 @@ import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 import zio.*
 import zio.json.*
+
+import scala.concurrent.ExecutionContext
 
 trait Dynamo {
   def writeItem(item: SupporterRatePlanItem): Task[Unit]
@@ -38,7 +40,7 @@ object DynamoLive {
           override def writeItem(item: SupporterRatePlanItem): Task[Unit] =
             ZIO
               .fromFuture {
-                dynamoService.writeItem(item)
+                dynamoService.writeItem(item)(using _)
               }
               .mapError { ex =>
                 new Throwable(

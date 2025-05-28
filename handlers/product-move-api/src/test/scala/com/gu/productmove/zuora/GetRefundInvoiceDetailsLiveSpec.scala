@@ -18,7 +18,7 @@ import scala.collection.mutable
 import scala.collection.mutable.Stack
 
 object GetRefundInvoiceDetailsLiveSpec extends ZIOSpecDefault {
-  override def spec: Spec[TestEnvironment with Scope, Any] =
+  override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("GetInvoiceItemsForSubscriptionLive")(
       test("finds taxation details for a subscription") {
         for {
