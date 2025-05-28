@@ -21,7 +21,7 @@ import zio.json.JsonDecoder
 import java.time.*
 
 object InvoiceItemAdjustmentSpec extends ZIOSpecDefault {
-  override def spec: Spec[TestEnvironment with Scope, Any] =
+  override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("InvoiceItemAdjustment")(
       test("Run InvoiceItemAdjustment locally") {
         for {

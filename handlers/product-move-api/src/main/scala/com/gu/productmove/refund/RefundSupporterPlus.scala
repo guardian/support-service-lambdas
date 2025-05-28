@@ -26,14 +26,8 @@ object RefundInput {
 
 object RefundSupporterPlus {
   def applyRefund(refundInput: RefundInput): ZIO[
-    InvoicingApiRefund
-      with CreditBalanceAdjustment
-      with Stage
-      with SttpBackend[Task, Any]
-      with AwsS3
-      with GetRefundInvoiceDetails
-      with GetInvoice
-      with InvoiceItemAdjustment,
+    InvoicingApiRefund & CreditBalanceAdjustment & Stage & SttpBackend[Task, Any] & AwsS3 & GetRefundInvoiceDetails &
+      GetInvoice & InvoiceItemAdjustment,
     Throwable | TransactionError,
     Unit,
   ] = {
@@ -52,7 +46,7 @@ object RefundSupporterPlus {
 
   private def ensureThatNegativeInvoiceBalanceIsZero(
       refundInvoiceDetails: RefundInvoiceDetails,
-  ): ZIO[GetInvoice with InvoiceItemAdjustment, Throwable | TransactionError, Unit] = for {
+  ): ZIO[GetInvoice & InvoiceItemAdjustment, Throwable | TransactionError, Unit] = for {
     // unfortunately we can't get an invoice balance from the invoice items, it needs another request
     negativeInvoice <- GetInvoice.get(
       refundInvoiceDetails.negativeInvoiceId,

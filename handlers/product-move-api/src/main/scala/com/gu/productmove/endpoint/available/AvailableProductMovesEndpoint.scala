@@ -129,7 +129,7 @@ object AvailableProductMovesEndpoint {
 
   private[productmove] def runWithEnvironment(
       subscriptionName: SubscriptionName,
-  ): RIO[GetSubscription with GetCatalogue with GetAccount with Stage, OutputBody] = {
+  ): RIO[GetSubscription & GetCatalogue & GetAccount & Stage, OutputBody] = {
     val output = for {
       stage <- ZIO.service[Stage]
       monthlyContributionRatePlanId =

@@ -15,7 +15,7 @@ import sttp.client3.testing.SttpBackendStub
 import java.time.LocalDate
 
 object ZuoraGetSerialisationSpec extends ZIOSpecDefault {
-  override def spec: Spec[TestEnvironment with Scope, Any] =
+  override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("ZuoraGetSerialisation")(
       test("can deserialise a list") {
         for {

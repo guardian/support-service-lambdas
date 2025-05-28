@@ -10,7 +10,7 @@ import scala.collection.mutable
 
 object GetRefundAmountSpec extends ZIOSpecDefault {
 
-  override def spec: Spec[TestEnvironment with Scope, Any] =
+  override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("GetSwitchInvoice")(
       test("finds the right amount for a switched sub") {
 

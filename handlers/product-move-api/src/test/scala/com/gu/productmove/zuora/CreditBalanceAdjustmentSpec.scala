@@ -10,7 +10,7 @@ import zio.test.Assertion.equalTo
 import zio.test.{Spec, TestAspect, TestEnvironment, ZIOSpecDefault, assert}
 
 object CreditBalanceAdjustmentSpec extends ZIOSpecDefault {
-  override def spec: Spec[TestEnvironment with Scope, Any] =
+  override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("Credit balance adjustment")(
       test("Run CreditBalanceAdjustment increase locally") {
         val amount = 27.86

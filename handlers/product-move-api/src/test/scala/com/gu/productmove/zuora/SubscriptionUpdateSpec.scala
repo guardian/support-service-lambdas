@@ -39,7 +39,7 @@ import scala.None
 
 object SubscriptionUpdateSpec extends ZIOSpecDefault {
 
-  override def spec: Spec[TestEnvironment with Scope, Any] =
+  override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("subscription update service")(
       test("SwitchProductUpdateRequest is correct for input (CODE)") {
         val timeLocalDate = LocalDate.of(2022, 5, 10)

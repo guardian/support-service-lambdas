@@ -47,7 +47,7 @@ object Subscribe {
   def create(
       zuoraAccountId: String,
       targetProductId: String,
-  ): RIO[Subscribe with Stage, CreateSubscriptionResponse] =
+  ): RIO[Subscribe & Stage, CreateSubscriptionResponse] =
     ZIO.serviceWithZIO[Subscribe](_.create(zuoraAccountId, targetProductId))
 }
 

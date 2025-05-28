@@ -14,7 +14,7 @@ import java.time.*
 
 object CreatePaymentSpec extends ZIOSpecDefault {
 
-  override def spec: Spec[TestEnvironment with Scope, Any] =
+  override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("Create Payment")(
       test("Test creating a payment locally") {
         for {
