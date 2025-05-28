@@ -84,6 +84,7 @@ import com.gu.productmove.endpoint.move.switchtype.{
   ToRecurringContribution,
   ToRecurringContributionImpl,
 }
+import com.gu.productmove.zuora.model.InvoiceId
 import zio.*
 import zio.test.*
 import zio.test.Assertion.*
@@ -112,7 +113,7 @@ object HandlerSpec extends ZIOSpecDefault {
     val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
     val termRenewalInputsShouldBe: SubscriptionName =
       SubscriptionName("subscription_name")
-    val termRenewalResponse = RenewalResponse(Some(true), Some("invoiceId"))
+    val termRenewalResponse = RenewalResponse(Some(true), Some(InvoiceId("invoiceId")))
     val termRenewalStubs = Map(termRenewalInputsShouldBe -> termRenewalResponse)
     val getAccountStubs = Map(AccountNumber("accountNumber") -> getAccountResponse)
     val getAccountStubs2 = Map(AccountNumber("accountNumber") -> getAccountResponse2)

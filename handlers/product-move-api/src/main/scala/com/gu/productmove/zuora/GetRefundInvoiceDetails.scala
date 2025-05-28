@@ -4,7 +4,7 @@ import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
-import com.gu.productmove.zuora.model.SubscriptionName
+import com.gu.productmove.zuora.model.{InvoiceId, SubscriptionName}
 import com.gu.productmove.zuora.rest.{ZuoraGet, ZuoraRestBody}
 import sttp.capabilities.zio.ZioStreams
 import sttp.capabilities.{Effect, WebSockets}
@@ -28,8 +28,8 @@ object GetRefundInvoiceDetailsLive {
 private class GetRefundInvoiceDetailsLive(zuoraGet: ZuoraGet) extends GetRefundInvoiceDetails {
   private def getInvoiceItemsQuery(subscriptionName: SubscriptionName) =
     s"select Id, AppliedToInvoiceItemId, ChargeAmount, TaxAmount, ChargeDate, InvoiceId FROM InvoiceItem where SubscriptionNumber = '${subscriptionName.value}'"
-  private def getTaxationItemsQuery(invoiceId: String) =
-    s"select Id, InvoiceItemId, InvoiceId from TaxationItem where InvoiceId = '$invoiceId'"
+  private def getTaxationItemsQuery(invoiceId: InvoiceId) =
+    s"select Id, InvoiceItemId, InvoiceId from TaxationItem where InvoiceId = '${invoiceId.id}'"
   override def get(subscriptionName: SubscriptionName): Task[RefundInvoiceDetails] = {
     for {
       invoiceItems <- zuoraGet
@@ -83,7 +83,7 @@ private class GetRefundInvoiceDetailsLive(zuoraGet: ZuoraGet) extends GetRefundI
   }
   private def invoiceIncludesTax(invoiceItems: List[InvoiceItem]) =
     invoiceItems.exists(_.TaxAmount > 0)
-  private def getNegativeInvoice(items: List[InvoiceItem]): Task[(String, List[InvoiceItem])] =
+  private def getNegativeInvoice(items: List[InvoiceItem]): Task[(InvoiceId, List[InvoiceItem])] =
     getInvoicesSortedByDate(items).headOption
       .map(ZIO.succeed(_))
       .getOrElse(
@@ -104,7 +104,7 @@ private class GetRefundInvoiceDetailsLive(zuoraGet: ZuoraGet) extends GetRefundI
   }
   private def getLastPaidInvoice(
       items: List[InvoiceItem],
-  ): Task[(String, List[InvoiceItem])] = {
+  ): Task[(InvoiceId, List[InvoiceItem])] = {
     val sorted = getInvoicesSortedByDate(items)
     sorted.tail.headOption
       .map(ZIO.succeed(_))
@@ -121,15 +121,15 @@ private class GetRefundInvoiceDetailsLive(zuoraGet: ZuoraGet) extends GetRefundI
     case (invoiceId, invoiceItems) =>
       invoiceItems.map(invoice => invoice.ChargeAmount + invoice.TaxAmount).sum
   }
-  private def getInvoicesSortedByDate(items: List[InvoiceItem]): Map[String, List[InvoiceItem]] = {
-    val invoices: Map[String, List[InvoiceItem]] = items.groupBy(_.InvoiceId)
+  private def getInvoicesSortedByDate(items: List[InvoiceItem]): Map[InvoiceId, List[InvoiceItem]] = {
+    val invoices: Map[InvoiceId, List[InvoiceItem]] = items.groupBy(_.InvoiceId)
     ListMap(invoices.toSeq.sortWith(getDate(_) > getDate(_))*)
   }
-  private def getDate(i: (String, List[InvoiceItem])) =
+  private def getDate(i: (InvoiceId, List[InvoiceItem])) =
     i._2.headOption.map(_.chargeDateAsDateTime).getOrElse(LocalDateTime.MIN)
 
   case class PostBody(queryString: String)
-  case class TaxationItem(Id: String, InvoiceId: String, InvoiceItemId: String)
+  case class TaxationItem(Id: String, InvoiceId: InvoiceId, InvoiceItemId: String)
   case class TaxationItems(records: List[TaxationItem])
   case class InvoiceItem(
       Id: String,
@@ -137,7 +137,7 @@ private class GetRefundInvoiceDetailsLive(zuoraGet: ZuoraGet) extends GetRefundI
       ChargeDate: String,
       ChargeAmount: BigDecimal,
       TaxAmount: BigDecimal,
-      InvoiceId: String,
+      InvoiceId: InvoiceId,
   ) {
     def chargeDateAsDateTime = LocalDateTime.parse(ChargeDate, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
   }
@@ -154,7 +154,7 @@ trait GetRefundInvoiceDetails {
 }
 case class RefundInvoiceDetails(
     refundAmount: BigDecimal,
-    negativeInvoiceId: String,
+    negativeInvoiceId: InvoiceId,
     negativeInvoiceItems: List[InvoiceItemWithTaxDetails],
 )
 case class TaxDetails(amount: BigDecimal, taxationId: String)
@@ -164,7 +164,7 @@ case class InvoiceItemWithTaxDetails(
     ChargeDate: String,
     ChargeAmount: BigDecimal,
     TaxDetails: Option[TaxDetails],
-    InvoiceId: String,
+    InvoiceId: InvoiceId,
 ) {
   def taxAmount = TaxDetails.map(_.amount).getOrElse(BigDecimal(0))
   def amountWithTax = ChargeAmount + taxAmount
