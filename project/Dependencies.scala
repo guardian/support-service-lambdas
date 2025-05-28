@@ -84,7 +84,7 @@ object Dependencies {
   val zio2Version = "2.0.22"
   val zio2 = "dev.zio" %% "zio" % zio2Version
   val tapirVersion = "1.9.11"
-  val enumeratum = "com.beachape" %% "enumeratum" % "1.7.5"
+  val enumeratum = "com.beachape" %% "enumeratum" % "1.7.6"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.3.0"
   val stripe = "com.stripe" % "stripe-java" % "22.31.0"
   val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4"
