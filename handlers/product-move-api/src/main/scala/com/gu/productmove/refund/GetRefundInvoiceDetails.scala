@@ -1,12 +1,12 @@
 package com.gu.productmove.refund
 
+import com.gu.productmove.zuora.InvoiceItemQuery
 import com.gu.productmove.zuora.InvoiceItemQuery.InvoiceItem
-import com.gu.productmove.zuora.model.InvoiceId
-import com.gu.productmove.zuora.model.SubscriptionName
-import com.gu.productmove.zuora.{InvoiceItemQuery, InvoiceItemWithTaxDetails, RefundInvoiceDetails, TaxDetails}
+import com.gu.productmove.zuora.model.{InvoiceId, SubscriptionName}
 import zio.{RIO, Task, ZIO}
 
-import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, LocalDateTime}
 
 object GetRefundInvoiceDetails {
 
@@ -64,4 +64,47 @@ object GetRefundInvoiceDetails {
 
   }
 
+}
+
+case class RefundInvoiceDetails(
+    refundAmount: BigDecimal,
+    negativeInvoiceId: InvoiceId,
+    negativeInvoiceItems: List[InvoiceItemWithTaxDetails],
+    lastPaidInvoiceId: InvoiceId,
+)
+case class TaxDetails(amount: BigDecimal, taxationId: String)
+
+object InvoiceItemWithTaxDetails {
+
+  def apply(i: InvoiceItem, taxationItems: List[InvoiceItemQuery.TaxationItem]): InvoiceItemWithTaxDetails = {
+    val maybeTaxDetails = for {
+      negativeInvoiceItem <- Some(i).filter(_.TaxAmount != 0)
+      _ = println(
+        s"Tax amount for invoice item $i is ${negativeInvoiceItem.TaxAmount} searching for matching taxation item",
+      )
+      taxationItem <- taxationItems.find(_.InvoiceItemId == negativeInvoiceItem.Id)
+      _ = println(s"Found taxation item $taxationItem")
+    } yield TaxDetails(i.TaxAmount, taxationItem.Id)
+    InvoiceItemWithTaxDetails(
+      Id = i.Id,
+      AppliedToInvoiceItemId = i.AppliedToInvoiceItemId,
+      ChargeDate = i.ChargeDate,
+      ChargeAmount = i.ChargeAmount,
+      TaxDetails = maybeTaxDetails,
+      InvoiceId = i.InvoiceId,
+    )
+  }
+
+}
+case class InvoiceItemWithTaxDetails(
+    Id: String,
+    AppliedToInvoiceItemId: Option[String] = None,
+    ChargeDate: String,
+    ChargeAmount: BigDecimal,
+    TaxDetails: Option[TaxDetails],
+    InvoiceId: InvoiceId,
+) {
+  def taxAmount = TaxDetails.map(_.amount).getOrElse(BigDecimal(0))
+  def amountWithTax = ChargeAmount + taxAmount
+  def chargeDateAsDate = LocalDate.parse(ChargeDate, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
 }
