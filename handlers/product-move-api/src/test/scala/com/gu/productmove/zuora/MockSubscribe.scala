@@ -1,9 +1,8 @@
 package com.gu.productmove.zuora
 
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
-import com.gu.productmove.zuora.GetSubscription
+import com.gu.productmove.zuora.{CreateSubscriptionResponse, GetSubscription}
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
-import com.gu.productmove.zuora.CreateSubscriptionResponse
 import zio.*
 
 class MockSubscribe(responses: Map[(String, String), CreateSubscriptionResponse]) extends Subscribe {

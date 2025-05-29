@@ -9,20 +9,13 @@ import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.CreateRecord.CreateRecordRequest
 import com.gu.productmove.salesforce.GetSfSubscription.GetSfSubscriptionResponse
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
-import com.gu.productmove.zuora.GetAccount.{AccountSubscription, BasicInfo, BillToContact, GetAccountResponse}
-import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
-import com.gu.productmove.zuora.model.{AccountNumber, SubscriptionName}
 import com.gu.productmove.zuora.*
-import com.gu.productmove.zuora.Fixtures.{
-  invoiceWithMultipleInvoiceItems,
-  invoiceWithTax,
-  subscriptionsPreviewResponse,
-  subscriptionsPreviewResponse2,
-  subscriptionsPreviewResponse3,
-}
+import com.gu.productmove.zuora.Fixtures.*
+import com.gu.productmove.zuora.GetAccount.{AccountSubscription, BasicInfo, BillToContact, GetAccountResponse}
 import com.gu.productmove.zuora.GetInvoice.GetInvoiceResponse
 import com.gu.productmove.zuora.GetInvoiceItems.{GetInvoiceItemsResponse, InvoiceItem}
-import com.gu.productmove.zuora.model.InvoiceId
+import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
+import com.gu.productmove.zuora.model.{AccountNumber, InvoiceId, SubscriptionName}
 import com.gu.productmove.{EmailMessage, EmailPayload, IdentityId, RCtoSPEmailPayloadProductSwitchAttributes}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.util.config.Stage

@@ -3,8 +3,7 @@ package com.gu.productmove.zuora
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
 import com.gu.productmove.zuora.GetAccount.PaymentMethodResponse
 import com.gu.productmove.zuora.GetInvoiceItems.GetInvoiceItemsResponse
-import com.gu.productmove.zuora.model.InvoiceId
-import com.gu.productmove.zuora.model.AccountNumber
+import com.gu.productmove.zuora.model.{AccountNumber, InvoiceId}
 import zio.*
 
 class MockGetInvoiceItems(
