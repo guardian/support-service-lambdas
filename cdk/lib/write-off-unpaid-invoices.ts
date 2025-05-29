@@ -154,7 +154,7 @@ export class WriteOffUnpaidInvoices extends GuStack {
 				{
 					statements: [
 						new PolicyStatement({
-							actions: ['s3:GetObject', 's3:PutObject'],
+							actions: ['s3:GetObject', 's3:PutObject', 's3:ListBucket'],
 							resources: [bucket.arnForObjects('*')],
 						}),
 						new PolicyStatement({
