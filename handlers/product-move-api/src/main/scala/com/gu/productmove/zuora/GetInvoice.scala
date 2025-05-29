@@ -29,7 +29,7 @@ object GetInvoiceLive {
 private class GetInvoiceLive(zuoraGet: ZuoraGet) extends GetInvoice {
   override def get(invoiceId: InvoiceId): Task[GetInvoiceResponse] =
     zuoraGet.get[GetInvoiceResponse](
-      uri"invoices/$invoiceId",
+      uri"invoices/${invoiceId.id}",
       ZuoraRestBody.ZuoraSuccessCheck.None,
     )
 }
