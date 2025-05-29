@@ -264,7 +264,7 @@ export class WriteOffUnpaidInvoices extends GuStack {
 				evaluationPeriods: 1,
 				alarmDescription:
 					'The scheduled job that writes off unpaid invoices has failed. Login to the AWS console and debug the last execution.',
-				alarmName: 'WriteOffUnpaidInvoicesStepFunctionExecutionFailure',
+				alarmName: `${this.stage}: WriteOffUnpaidInvoicesStepFunctionExecutionFailure`,
 				comparisonOperator:
 					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 				// actionsEnabled: this.stage == 'PROD',

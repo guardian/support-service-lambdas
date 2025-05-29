@@ -973,7 +973,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 1`] = `
           },
         ],
         "AlarmDescription": "The scheduled job that writes off unpaid invoices has failed. Login to the AWS console and debug the last execution.",
-        "AlarmName": "WriteOffUnpaidInvoicesStepFunctionExecutionFailure",
+        "AlarmName": "CODE: WriteOffUnpaidInvoicesStepFunctionExecutionFailure",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
@@ -1969,7 +1969,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 2`] = `
           },
         ],
         "AlarmDescription": "The scheduled job that writes off unpaid invoices has failed. Login to the AWS console and debug the last execution.",
-        "AlarmName": "WriteOffUnpaidInvoicesStepFunctionExecutionFailure",
+        "AlarmName": "CSBX: WriteOffUnpaidInvoicesStepFunctionExecutionFailure",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
@@ -2965,7 +2965,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 3`] = `
           },
         ],
         "AlarmDescription": "The scheduled job that writes off unpaid invoices has failed. Login to the AWS console and debug the last execution.",
-        "AlarmName": "WriteOffUnpaidInvoicesStepFunctionExecutionFailure",
+        "AlarmName": "PROD: WriteOffUnpaidInvoicesStepFunctionExecutionFailure",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
