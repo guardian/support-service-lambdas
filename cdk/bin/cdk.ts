@@ -25,6 +25,7 @@ import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
 import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
 import { UserBenefits } from '../lib/user-benefits';
 import { ZuoraSalesforceLinkRemover } from '../lib/zuora-salesforce-link-remover';
+import { WriteOffUnpaidInvoices } from '../lib/write-off-unpaid-invoices';
 
 const app = new App();
 const membershipHostedZoneId = 'Z1E4V12LQGXFEC';
@@ -331,6 +332,18 @@ new ObserverDataExport(app, 'observer-data-export-CODE', {
 	stage: 'CODE',
 });
 new ObserverDataExport(app, 'observer-data-export-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+});
+new WriteOffUnpaidInvoices(app, 'write-off-unpaid-invoices-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+});
+new WriteOffUnpaidInvoices(app, 'write-off-unpaid-invoices-CSBX', {
+	stack: 'support',
+	stage: 'CSBX',
+});
+new WriteOffUnpaidInvoices(app, 'write-off-unpaid-invoices-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 });
