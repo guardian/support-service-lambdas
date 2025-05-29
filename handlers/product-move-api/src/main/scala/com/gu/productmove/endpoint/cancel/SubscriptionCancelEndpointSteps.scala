@@ -16,6 +16,7 @@ import com.gu.productmove.zuora.{
   CancellationResponse,
   GetAccount,
   GetSubscription,
+  ZuoraAccountId,
   ZuoraCancel,
   ZuoraSetCancellationReason,
 }
@@ -47,6 +48,7 @@ class SubscriptionCancelEndpointSteps(
         subscriptionName,
         Some(identityId),
       )
+      (_, account) = subscriptionAccount
       _ <- ZIO.log(s"Cancel Supporter Plus - PostData: $postData")
       subscription <- getSubscriptionToCancel.get(subscriptionName)
       _ <- ZIO.log(s"Subscription is $subscription")
@@ -104,11 +106,14 @@ class SubscriptionCancelEndpointSteps(
       cancellationResponse <- zuoraCancel.cancel(subscriptionName, cancellationDate)
       _ <- ZIO.log("Sub cancelled as of: " + cancellationDate)
 
+      _ <- ZIO.log(
+        if (shouldBeRefunded) s"Adding sub to the queue to do the refund asynchronously" else "No refund needed",
+      )
       _ <-
         if (shouldBeRefunded)
           doRefund(subscriptionName, cancellationResponse)
         else
-          ZIO.succeed(RefundResponse("Success", ""))
+          ZIO.succeed(())
 
       _ <- ZIO.log(s"Attempting to update cancellation reason on Zuora subscription")
       _ <- zuoraSetCancellationReason
@@ -117,7 +122,7 @@ class SubscriptionCancelEndpointSteps(
           subscription.version + 1,
           postData.reason,
         ) // Version +1 because the cancellation will have incremented the version
-      _ <- sqs.sendEmail(EmailMessage.cancellationEmail(subscriptionAccount._2, cancellationDate))
+      _ <- sqs.sendEmail(EmailMessage.cancellationEmail(account, cancellationDate))
     } yield Success(s"Subscription ${subscriptionName.value} was successfully cancelled")
     maybeResult.catchAll {
       case failure: OutputBody => ZIO.succeed(failure)
