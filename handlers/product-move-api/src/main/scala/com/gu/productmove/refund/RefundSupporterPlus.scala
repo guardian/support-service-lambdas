@@ -26,12 +26,11 @@ object RefundInput {
 
 object RefundSupporterPlus {
   def applyRefund(refundInput: RefundInput): ZIO[
-    InvoicingApiRefund & CreditBalanceAdjustment & Stage & SttpBackend[Task, Any] & AwsS3 & GetRefundInvoiceDetails &
+    InvoicingApiRefund & CreditBalanceAdjustment & Stage & SttpBackend[Task, Any] & AwsS3 & InvoiceItemQuery &
       GetInvoice & InvoiceItemAdjustment,
     Throwable | TransactionError,
     Unit,
-  ] = {
-
+  ] =
     for {
       _ <- ZIO.log(s"Getting invoice items for sub ${refundInput.subscriptionName}")
       refundInvoiceDetails <- GetRefundInvoiceDetails.get(refundInput.subscriptionName)
@@ -42,7 +41,6 @@ object RefundSupporterPlus {
       )
       _ <- ensureThatNegativeInvoiceBalanceIsZero(refundInvoiceDetails)
     } yield ()
-  }
 
   private def ensureThatNegativeInvoiceBalanceIsZero(
       refundInvoiceDetails: RefundInvoiceDetails,

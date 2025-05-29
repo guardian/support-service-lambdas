@@ -1,7 +1,7 @@
 package com.gu.productmove.zuora
 
 import com.gu.productmove.*
-import com.gu.productmove.refund.RefundSupporterPlus
+import com.gu.productmove.refund.{GetRefundInvoiceDetails, RefundSupporterPlus, TaxDetails}
 import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.ZuoraGetLive
 import zio.*
@@ -17,7 +17,7 @@ object GetRefundInvoiceDetailsLiveSpec extends ZIOSpecDefault {
           result <- GetRefundInvoiceDetails
             .get(SubscriptionName("A-S00631534"))
             .provide(
-              GetRefundInvoiceDetailsLive.layer,
+              InvoiceItemQueryLive.layer,
               ZLayer.succeed(
                 new MockStackedGetInvoicesZuoraClient(
                   mutable.Stack(
@@ -42,7 +42,7 @@ object GetRefundInvoiceDetailsLiveSpec extends ZIOSpecDefault {
           result <- GetRefundInvoiceDetails
             .get(SubscriptionName("A-S00631534"))
             .provide(
-              GetRefundInvoiceDetailsLive.layer,
+              InvoiceItemQueryLive.layer,
               ZLayer.succeed(
                 new MockStackedGetInvoicesZuoraClient(
                   mutable.Stack(
@@ -65,7 +65,7 @@ object GetRefundInvoiceDetailsLiveSpec extends ZIOSpecDefault {
           result <- GetRefundInvoiceDetails
             .get(SubscriptionName("A-S00637582"))
             .provide(
-              GetRefundInvoiceDetailsLive.layer,
+              InvoiceItemQueryLive.layer,
               ZLayer.succeed(
                 new MockStackedGetInvoicesZuoraClient(
                   mutable.Stack(
