@@ -1,13 +1,13 @@
 package com.gu.productmove.refund
 
 import com.amazonaws.services.lambda.runtime.events.SQSEvent
-import com.amazonaws.services.lambda.runtime.events.SQSEvent.SQSMessage
 import com.amazonaws.services.lambda.runtime.{Context, LambdaRuntime, RequestHandler}
+import com.gu.productmove.*
+import com.gu.productmove.*
 import com.gu.productmove.invoicingapi.InvoicingApiRefundLive
 import com.gu.productmove.refund.*
-import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import com.gu.productmove.zuora.*
-import com.gu.productmove.*
+import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import zio.json.*
 import zio.{Exit, Runtime, Unsafe, ZIO}
 

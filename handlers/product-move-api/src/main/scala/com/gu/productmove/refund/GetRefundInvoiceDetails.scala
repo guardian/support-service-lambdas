@@ -77,6 +77,7 @@ case class TaxDetails(amount: BigDecimal, taxationId: String)
 object InvoiceItemWithTaxDetails {
 
   def apply(i: InvoiceItem, taxationItems: List[InvoiceItemQuery.TaxationItem]): InvoiceItemWithTaxDetails = {
+
     val maybeTaxDetails = for {
       negativeInvoiceItem <- Some(i).filter(_.TaxAmount != 0)
       _ = println(
@@ -85,6 +86,7 @@ object InvoiceItemWithTaxDetails {
       taxationItem <- taxationItems.find(_.InvoiceItemId == negativeInvoiceItem.Id)
       _ = println(s"Found taxation item $taxationItem")
     } yield TaxDetails(i.TaxAmount, taxationItem.Id)
+
     InvoiceItemWithTaxDetails(
       Id = i.Id,
       AppliedToInvoiceItemId = i.AppliedToInvoiceItemId,
@@ -93,6 +95,7 @@ object InvoiceItemWithTaxDetails {
       TaxDetails = maybeTaxDetails,
       InvoiceId = i.InvoiceId,
     )
+
   }
 
 }
