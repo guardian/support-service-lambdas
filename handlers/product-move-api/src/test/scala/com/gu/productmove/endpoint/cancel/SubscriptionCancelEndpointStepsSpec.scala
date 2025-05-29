@@ -6,10 +6,10 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpoint.SwitchType.Recurring
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput, Success}
 import com.gu.productmove.endpoint.move.switchtype.RecurringContributionToSupporterPlus
 import com.gu.productmove.endpoint.zuora.GetSubscriptionToCancel
+import com.gu.productmove.zuora.*
 import com.gu.productmove.zuora.GetAccount.{BasicInfo, GetAccountResponse}
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.model.{AccountNumber, SubscriptionName}
-import com.gu.productmove.zuora.*
 import com.gu.productmove.{Dynamo, IdentityId, SQS}
 import zio.test.{ZIOSpecDefault, assertTrue}
 import zio.{Task, UIO, URIO, ZIO}

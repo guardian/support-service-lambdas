@@ -1,16 +1,15 @@
 package com.gu.productmove.zuora
 
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SttpClientLive}
-import com.gu.productmove.endpoint.available.{Billing, Currency, MoveToProduct, Offer, TimePeriod, TimeUnit, Trial}
+import com.gu.productmove.endpoint.available.*
 import com.gu.productmove.zuora.GetSubscription
-import com.gu.productmove.zuora.Subscribe.*
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
+import com.gu.productmove.zuora.Subscribe.*
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
+import com.gu.productmove.{AwsCredentialsLive, AwsS3Live, GuStageLive, SttpClientLive}
 import zio.*
-import zio.*
-import zio.test.Assertion.*
 import zio.test.*
+import zio.test.Assertion.*
 
 import java.time.*
 

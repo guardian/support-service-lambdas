@@ -1,21 +1,13 @@
 package com.gu.productmove.zuora
 
-import com.gu.productmove.{AwsCredentialsLive, GuStageLive, SQSLive, SecretsLive, SttpClientLive}
-import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpoint
-import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes.ExpectedInput
+import com.gu.productmove.*
 import com.gu.productmove.refund.RefundSupporterPlus
-import com.gu.productmove.zuora.TaxDetails
 import com.gu.productmove.zuora.model.SubscriptionName
-import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
+import com.gu.productmove.zuora.rest.ZuoraGetLive
 import zio.*
-import zio.test.Assertion.{equalTo, isSome}
-import zio.test.{Spec, TestAspect, TestEnvironment, ZIOSpecDefault, assertTrue, assert}
+import zio.test.{Spec, TestEnvironment, ZIOSpecDefault, assertTrue}
 
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import scala.collection.immutable.{ListMap, SortedMap}
 import scala.collection.mutable
-import scala.collection.mutable.Stack
 
 object GetRefundInvoiceDetailsLiveSpec extends ZIOSpecDefault {
   override def spec: Spec[TestEnvironment & Scope, Any] =

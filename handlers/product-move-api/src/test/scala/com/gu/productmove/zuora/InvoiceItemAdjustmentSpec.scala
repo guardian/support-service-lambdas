@@ -1,50 +1,17 @@
 package com.gu.productmove.zuora
 
-import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.endpoint.available.*
-import com.gu.productmove.endpoint.move.ProductMoveEndpoint
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ExpectedInput
-import com.gu.productmove.invoicingapi.InvoicingApiRefundLive
-import com.gu.productmove.refund.*
-import com.gu.productmove.zuora.GetSubscription
-import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
-import com.gu.productmove.zuora.model.InvoiceId
-import com.gu.productmove.zuora.Subscribe.*
-import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
 import com.gu.productmove.*
-import com.gu.productmove.zuora.InvoiceItemWithTaxDetails
+import com.gu.productmove.refund.*
 import com.gu.productmove.zuora.InvoiceItemAdjustment.InvoiceItemAdjustmentResult
-import zio.test.*
-import zio.test.Assertion.*
+import com.gu.productmove.zuora.model.InvoiceId
 import zio.*
 import zio.json.JsonDecoder
-
-import java.time.*
+import zio.test.*
+import zio.test.Assertion.*
 
 object InvoiceItemAdjustmentSpec extends ZIOSpecDefault {
   override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("InvoiceItemAdjustment")(
-      test("Run InvoiceItemAdjustment locally") {
-        for {
-          _ <- TestClock.setTime(LocalDateTime.now.toInstant(ZoneOffset.UTC))
-          _ <- InvoiceItemAdjustment
-            .update(
-              invoiceId = InvoiceId("8ad09b2186bfd8100186c73164d82886"),
-              amount = 11.43,
-              invoiceItemId = "8ad09b2186bfd8100186c73164e92887",
-              "Charge",
-            )
-            .provide(
-              SttpClientLive.layer,
-              ZuoraClientLive.layer,
-              ZuoraGetLive.layer,
-              InvoiceItemAdjustmentLive.layer,
-              SecretsLive.layer,
-              AwsCredentialsLive.layer,
-              GuStageLive.layer,
-            )
-        } yield assert(true)(equalTo(true))
-      } @@ TestAspect.ignore,
       test("buildInvoiceAdjustments function ignores invoice items with zero value") {
         val adjustments = RefundSupporterPlus.buildInvoiceItemAdjustments(
           List(

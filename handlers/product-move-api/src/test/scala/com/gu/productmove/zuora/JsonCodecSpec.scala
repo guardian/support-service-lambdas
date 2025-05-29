@@ -1,16 +1,13 @@
 package com.gu.productmove.zuora
 
-import com.gu.productmove.endpoint.available.Currency
-import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
-import com.gu.productmove.zuora.GetAccount.BasicInfo
 import com.gu.productmove.*
+import com.gu.productmove.endpoint.available.Currency
 import com.gu.productmove.endpoint.zuora.GetSubscriptionToCancel.GetSubscriptionToCancelResponse
-
-import collection.mutable.Stack
+import com.gu.productmove.zuora.GetAccount.BasicInfo
+import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import org.scalatest.*
+import org.scalatest.flatspec.*
 import zio.json.*
-import flatspec.*
-import matchers.*
 
 import java.time.LocalDate
 import scala.io.Source
