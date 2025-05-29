@@ -7,9 +7,9 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpoint
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ExpectedInput
 import com.gu.productmove.invoicingapi.InvoicingApiRefundLive
 import com.gu.productmove.refund.*
-import com.gu.productmove.zuora.*
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.InvoiceItemAdjustment.InvoiceItemAdjustmentResult
+import com.gu.productmove.zuora.{GetSubscription, InvoiceItemWithTaxDetails}
 import com.gu.productmove.zuora.Subscribe.*
 import com.gu.productmove.zuora.model.InvoiceId
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
