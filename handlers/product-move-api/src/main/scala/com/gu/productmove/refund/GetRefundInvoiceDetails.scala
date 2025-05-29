@@ -10,13 +10,12 @@ import java.time.{LocalDate, LocalDateTime}
 
 object GetRefundInvoiceDetails {
 
-  def get(subscriptionName: SubscriptionName): RIO[InvoiceItemQuery, RefundInvoiceDetails] = {
+  def get(subscriptionName: SubscriptionName): RIO[InvoiceItemQuery, RefundInvoiceDetails] =
     for {
       invoiceItemQuery <- ZIO.service[InvoiceItemQuery]
       invoiceItems <- invoiceItemQuery.invoiceItemsForSubscription(subscriptionName)
       itemsByInvoice <- groupInvoices(invoiceItems)
       refundAmount = itemsByInvoice.getLastPaidInvoiceAmount
-      lastPaidInvoiceId = itemsByInvoice.previousId
       negativeInvoiceId = itemsByInvoice.latestId
       negativeInvoiceItems = itemsByInvoice.latestItems
       taxationItems <-
@@ -28,17 +27,14 @@ object GetRefundInvoiceDetails {
       refundAmount,
       negativeInvoiceId,
       negativeInvoiceItems.map(i => InvoiceItemWithTaxDetails(i, taxationItems)),
-      lastPaidInvoiceId,
     )
-
-  }
 
   private def groupInvoices(items: List[InvoiceItem]): Task[InvoiceGroups] = {
     val invoices: Map[InvoiceId, List[InvoiceItem]] = items.groupBy(_.InvoiceId)
     val invoiceItemGroups = for {
       (latestId, latestItems) <- invoices.maxByOption(getDate)
       (previousId, previousItems) <- invoices.-(latestId).maxByOption(getDate)
-    } yield ZIO.succeed(InvoiceGroups(latestId, latestItems, previousId, previousItems))
+    } yield ZIO.succeed(InvoiceGroups(latestId, latestItems, previousItems))
     invoiceItemGroups.getOrElse {
       ZIO.fail(
         new Throwable(
@@ -55,7 +51,6 @@ object GetRefundInvoiceDetails {
   case class InvoiceGroups(
       latestId: InvoiceId,
       latestItems: List[InvoiceItem],
-      previousId: InvoiceId,
       previousItems: List[InvoiceItem],
   ) {
 
@@ -70,7 +65,6 @@ case class RefundInvoiceDetails(
     refundAmount: BigDecimal,
     negativeInvoiceId: InvoiceId,
     negativeInvoiceItems: List[InvoiceItemWithTaxDetails],
-    lastPaidInvoiceId: InvoiceId,
 )
 case class TaxDetails(amount: BigDecimal, taxationId: String)
 
