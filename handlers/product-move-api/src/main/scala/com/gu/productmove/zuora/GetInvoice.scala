@@ -5,6 +5,7 @@ import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ErrorResponse
 import com.gu.productmove.zuora.GetInvoice.GetInvoiceResponse
+import com.gu.productmove.zuora.model.InvoiceId
 import com.gu.productmove.zuora.rest.ZuoraRestBody.ZuoraSuccessCheck.None
 import com.gu.productmove.zuora.rest.{ZuoraGet, ZuoraRestBody}
 import sttp.capabilities.zio.ZioStreams
@@ -26,15 +27,15 @@ object GetInvoiceLive {
 }
 
 private class GetInvoiceLive(zuoraGet: ZuoraGet) extends GetInvoice {
-  override def get(invoiceId: String): Task[GetInvoiceResponse] =
+  override def get(invoiceId: InvoiceId): Task[GetInvoiceResponse] =
     zuoraGet.get[GetInvoiceResponse](
-      uri"invoices/$invoiceId",
+      uri"invoices/${invoiceId.id}",
       ZuoraRestBody.ZuoraSuccessCheck.None,
     )
 }
 
 trait GetInvoice {
-  def get(invoiceId: String): Task[GetInvoiceResponse]
+  def get(invoiceId: InvoiceId): Task[GetInvoiceResponse]
 }
 
 object GetInvoice {
@@ -43,6 +44,6 @@ object GetInvoice {
 
   given JsonDecoder[GetInvoiceResponse] = DeriveJsonDecoder.gen[GetInvoiceResponse]
 
-  def get(invoiceId: String): RIO[GetInvoice, GetInvoiceResponse] =
+  def get(invoiceId: InvoiceId): RIO[GetInvoice, GetInvoiceResponse] =
     ZIO.serviceWithZIO[GetInvoice](_.get(invoiceId))
 }

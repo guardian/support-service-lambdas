@@ -22,6 +22,7 @@ import com.gu.productmove.zuora.Fixtures.{
 }
 import com.gu.productmove.zuora.GetInvoice.GetInvoiceResponse
 import com.gu.productmove.zuora.GetInvoiceItems.{GetInvoiceItemsResponse, InvoiceItem}
+import com.gu.productmove.zuora.model.InvoiceId
 import com.gu.productmove.{EmailMessage, EmailPayload, IdentityId, RCtoSPEmailPayloadProductSwitchAttributes}
 import com.gu.supporterdata.model.SupporterRatePlanItem
 import com.gu.util.config.Stage
@@ -239,7 +240,7 @@ val getSubscriptionResponseNoChargedThroughDate = GetSubscriptionResponse(
 //-----------------------------------------------------
 val getAccountResponse = GetAccountResponse(
   BasicInfo(
-    "id",
+    ZuoraAccountId("id"),
     DefaultPaymentMethod("paymentMethodId", Some(LocalDate.of(2030, 12, 1))),
     someIdentityId,
     "sfContactId",
@@ -252,7 +253,7 @@ val getAccountResponse = GetAccountResponse(
 
 val getAccountResponse2 = GetAccountResponse(
   BasicInfo(
-    "id",
+    ZuoraAccountId("id"),
     DefaultPaymentMethod("paymentMethodId", Some(LocalDate.of(2030, 12, 1))),
     None,
     "sfContactId",
@@ -265,7 +266,7 @@ val getAccountResponse2 = GetAccountResponse(
 
 val directDebitGetAccountResponse = GetAccountResponse(
   BasicInfo(
-    "id",
+    ZuoraAccountId("id"),
     DefaultPaymentMethod("paymentMethodId", None),
     None,
     "sfContactId",
@@ -487,19 +488,39 @@ val salesforceRecordInput4 = SalesforceRecordInput(
 // Stubs for SubscriptionUpdate service
 //-----------------------------------------------------
 val subscriptionUpdateResponse =
-  SubscriptionUpdateResponse("8ad0823f841cf4e601841e61f7b57mkd", 28, Some("89ad8casd9c0asdcaj89sdc98as"), Some(20))
+  SubscriptionUpdateResponse(
+    "8ad0823f841cf4e601841e61f7b57mkd",
+    28,
+    Some(InvoiceId("89ad8casd9c0asdcaj89sdc98as")),
+    Some(20),
+  )
 val subscriptionUpdateResponse2 =
-  SubscriptionUpdateResponse("8ad0823f841cf4e601841e61f7b57osi", -4, Some("80a23d9sdf9a89fs8cjjk2"), Some(10))
+  SubscriptionUpdateResponse(
+    "8ad0823f841cf4e601841e61f7b57osi",
+    -4,
+    Some(InvoiceId("80a23d9sdf9a89fs8cjjk2")),
+    Some(10),
+  )
 val subscriptionUpdateResponse3 =
-  SubscriptionUpdateResponse("8ad0823f841cf4e601841e61f7b57jsd", 28, Some("89ad8casd9c0asdcaj89sdc98as"), None)
+  SubscriptionUpdateResponse(
+    "8ad0823f841cf4e601841e61f7b57jsd",
+    28,
+    Some(InvoiceId("89ad8casd9c0asdcaj89sdc98as")),
+    None,
+  )
 val subscriptionUpdateResponse4 = SubscriptionUpdateResponse(
   "8ad0823f841cf4e601841e61f6d070b8",
   BigDecimal(25),
-  Some("8ad0823f841cf4e601841e61f7b570e8"),
+  Some(InvoiceId("8ad0823f841cf4e601841e61f7b570e8")),
   Some(25),
 )
 val subscriptionUpdateResponse5 =
-  SubscriptionUpdateResponse("8ad08ccf844271800184528017044b36", -4, Some("8ad08ccf844271800184528017b24b4b"), None)
+  SubscriptionUpdateResponse(
+    "8ad08ccf844271800184528017044b36",
+    -4,
+    Some(InvoiceId("8ad08ccf844271800184528017b24b4b")),
+    None,
+  )
 
 val timeLocalDate = LocalDate.of(2022, 5, 10)
 val timeLocalDate2 = LocalDate.of(2023, 2, 6)

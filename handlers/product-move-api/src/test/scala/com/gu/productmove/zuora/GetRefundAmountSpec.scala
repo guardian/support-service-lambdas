@@ -23,7 +23,7 @@ object GetRefundAmountSpec extends ZIOSpecDefault {
               ZuoraGetLive.layer,
             )
         } yield {
-          assert(invoicesForRefund.negativeInvoiceId)(equalTo("8ad0934e86a19cca0186a817d551251e")) &&
+          assert(invoicesForRefund.negativeInvoiceId.id)(equalTo("8ad0934e86a19cca0186a817d551251e")) &&
           assert(invoicesForRefund.refundAmount)(equalTo(12.14))
         }
       },
@@ -45,7 +45,7 @@ object GetRefundAmountSpec extends ZIOSpecDefault {
               ZuoraGetLive.layer,
             )
         } yield {
-          assert(invoicesForRefund.negativeInvoiceId)(equalTo("8ad08dc989e27bbe0189e40e61110aba")) &&
+          assert(invoicesForRefund.negativeInvoiceId.id)(equalTo("8ad08dc989e27bbe0189e40e61110aba")) &&
           assert(invoicesForRefund.refundAmount)(equalTo(10))
         }
       },
@@ -59,7 +59,7 @@ object GetRefundAmountSpec extends ZIOSpecDefault {
               ZuoraGetLive.layer,
             )
         } yield {
-          assert(invoicesForRefund.negativeInvoiceId)(equalTo("8ad09b2186b5fdb50186b708669f2114")) &&
+          assert(invoicesForRefund.negativeInvoiceId.id)(equalTo("8ad09b2186b5fdb50186b708669f2114")) &&
           assert(invoicesForRefund.refundAmount)(equalTo(20))
         }
       },
