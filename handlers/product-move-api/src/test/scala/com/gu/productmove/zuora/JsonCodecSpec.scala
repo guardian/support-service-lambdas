@@ -1,14 +1,15 @@
 package com.gu.productmove.zuora
 
+import com.gu.productmove.*
 import com.gu.productmove.endpoint.available.Currency
+import com.gu.productmove.endpoint.zuora.GetSubscriptionToCancel.GetSubscriptionToCancelResponse
 import com.gu.productmove.zuora.GetAccount.BasicInfo
-import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
+import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import org.scalatest.*
 import org.scalatest.flatspec.*
-import org.scalatest.matchers.*
+import zio.json.*
 
 import java.time.LocalDate
-import scala.collection.mutable.Stack
 import scala.io.Source
 
 class JsonCodecSpec extends AnyFlatSpec {
