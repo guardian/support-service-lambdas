@@ -3,6 +3,7 @@ stacks:
 regions:
   - eu-west-1
 allowedStages:
+  - CODE
   - CSBX
   - PROD
 deployments:
@@ -11,6 +12,7 @@ deployments:
     app: write-off-unpaid-invoices
     parameters:
       templateStagePaths:
+        CODE: write-off-unpaid-invoices-CODE.template.json
         CSBX: write-off-unpaid-invoices-CSBX.template.json
         PROD: write-off-unpaid-invoices-PROD.template.json
   write-off-unpaid-invoices:
@@ -20,5 +22,6 @@ deployments:
       bucketSsmLookup: true
       prefixStack: false
       functionNames:
-        - write-off-invoice-
+        - get-unpaid-invoices-
+        - write-off-invoices-
     dependencies: [write-off-unpaid-invoices-cloudformation]
