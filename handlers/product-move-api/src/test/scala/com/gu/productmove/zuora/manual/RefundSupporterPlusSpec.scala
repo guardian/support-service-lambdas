@@ -21,7 +21,13 @@ object RunRefundLambdaLocally extends ZIOAppDefault {
            Test suite used to run the RefundSupporterPlus lambda locally
      */
     RefundSupporterPlus
-      .applyRefund(RefundInput(SubscriptionName("A-S00985673")))
+      .applyRefund(
+        RefundInput(
+          SubscriptionName("A-S00985673"),
+          ZuoraAccountId("8ad090fd96d24cc20196d437f54a600f"),
+          LocalDate.parse("2025-05-15"),
+        ),
+      )
       .provide(
         AwsS3Live.layer,
         AwsCredentialsLive.layer,
@@ -35,6 +41,8 @@ object RunRefundLambdaLocally extends ZIOAppDefault {
         GetInvoiceLive.layer,
         InvoiceItemAdjustmentLive.layer,
         SecretsLive.layer,
+        RunBillingLive.layer,
+        PostInvoicesLive.layer,
       )
 }
 
@@ -48,7 +56,7 @@ object BalanceInvoicesLocally extends ZIOAppDefault {
       _ <- TestClock.setTime(java.time.Instant.now())
       _ <- RefundSupporterPlus
         .applyRefund(
-          RefundInput(SubscriptionName("A-S00629631")),
+          RefundInput(SubscriptionName("A-S00629631"), ZuoraAccountId("choose your id here"), LocalDate.now()),
         )
         .provide(
           AwsS3Live.layer,
@@ -63,6 +71,8 @@ object BalanceInvoicesLocally extends ZIOAppDefault {
           GetInvoiceLive.layer,
           InvoiceItemAdjustmentLive.layer,
           SecretsLive.layer,
+          RunBillingLive.layer,
+          PostInvoicesLive.layer,
         )
     } yield ()
 

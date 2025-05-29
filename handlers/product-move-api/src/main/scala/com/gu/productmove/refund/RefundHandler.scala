@@ -66,6 +66,8 @@ class RefundHandler extends RequestHandler[SQSEvent, Unit] {
             GetInvoiceLive.layer,
             InvoiceItemAdjustmentLive.layer,
             SecretsLive.layer,
+            RunBillingLive.layer,
+            PostInvoicesLive.layer,
           ),
       ) match {
         case Exit.Success(value) => value

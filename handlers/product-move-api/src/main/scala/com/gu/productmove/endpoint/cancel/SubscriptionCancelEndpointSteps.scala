@@ -111,7 +111,7 @@ class SubscriptionCancelEndpointSteps(
       )
       _ <-
         if (shouldBeRefunded)
-          doRefund(subscriptionName, cancellationResponse)
+          sqs.queueRefund(RefundInput(subscriptionName, account.basicInfo.id, today))
         else
           ZIO.succeed(())
 
@@ -129,23 +129,6 @@ class SubscriptionCancelEndpointSteps(
       case other: Throwable => ZIO.fail(other)
     }
   }
-
-  private def doRefund(
-      subscriptionName: SubscriptionName,
-      cancellationResponse: CancellationResponse,
-  ): IO[OutputBody | Throwable, Unit] =
-    for {
-      _ <- ZIO.log(s"Attempting to refund sub")
-      negativeInvoice <- ZIO
-        .fromOption(cancellationResponse.invoiceId)
-        .orElseFail(
-          InternalServerError(
-            s"URGENT: subscription ${subscriptionName.value} should be refunded but has no negative invoice attached.",
-          ),
-        )
-      _ <- ZIO.log(s"Negative invoice id is $negativeInvoice")
-      _ <- sqs.queueRefund(RefundInput(subscriptionName))
-    } yield ()
 
   def asSingle[A](list: List[A], message: String): Task[A] =
     list match {

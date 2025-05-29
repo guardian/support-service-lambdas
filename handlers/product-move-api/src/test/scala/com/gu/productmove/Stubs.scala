@@ -274,16 +274,9 @@ val directDebitGetAccountResponse = GetAccountResponse(
 // Stubs for ZuoraCancel service
 //-----------------------------------------------------
 
-val cancellationResponse1 = CancellationResponse(
-  "8ad08d29860bd93e0186127£052a6414",
-  cancelledDate = LocalDate.of(2023, 2, 2),
-  Some("Sad08d29860bd93e0186127f060e6444"),
-)
-
 val cancellationResponse2 = CancellationResponse(
   "8a129cc3861a835d01862248d8ee5c9d",
   cancelledDate = LocalDate.of(2023, 2, 19),
-  None,
 )
 
 //-----------------------------------------------------
@@ -418,10 +411,6 @@ val emailMessageBody2 = EmailMessage(
   "SV_MBtoRC_Switch",
   "sfContactId",
   someIdentityId,
-)
-
-val refundInput1 = RefundInput(
-  subscriptionName = SubscriptionName("A-S00339056"),
 )
 
 val salesforceRecordInput1 = SalesforceRecordInput(
