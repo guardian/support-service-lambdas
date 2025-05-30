@@ -1,4 +1,4 @@
-# mParticle Api
+# mParticle API
 
 ## Background
 This project provides a TypeScript AWS Lambda for integrating with the [mParticle Data Subject Request (DSR) API](https://docs.mparticle.com/developers/apis/dsr-api/v3/). It enables the submission and tracking of data subject requests (such as access or erasure requests) in compliance with privacy regulations.
