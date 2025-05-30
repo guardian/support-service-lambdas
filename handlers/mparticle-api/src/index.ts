@@ -15,7 +15,7 @@ const routerHandler = (fn: (event: APIGatewayProxyEvent) => Promise<APIGatewayPr
 			return await fn(event);
 		} catch (err) {
 			if (err instanceof HttpError) {
-				console.warn(`Http Error: ${err.statusCode} ${err.statusText}`, err.body);
+				console.error(`Http Error: ${err.statusCode} ${err.statusText}`, err.body);
 				return {
 					statusCode: err.statusCode,
 					body: JSON.stringify(err.body)

@@ -1,11 +1,11 @@
-// import { getSSMParam } from '@modules/aws/ssm';
-// import { stageFromEnvironment } from '@modules/stage';
+import { stageFromEnvironment } from '@modules/stage';
 import type { DataSubjectRequestForm } from "../../interfaces/data-subject-request-form";
 import type { DataSubjectRequestState } from "../../interfaces/data-subject-request-state";
 import { DataSubjectRequestStatus } from "../../interfaces/data-subject-request-state";
 import type { DataSubjectRequestSubmission } from "../../interfaces/data-subject-request-submission";
 import type { HttpResponse } from "../http";
 import { makeHttpRequest } from "../http";
+import { getSecretValue } from '../secrets';
 
 function parseDataSubjectRequestStatus(status: 'pending' | 'in_progress' | 'completed' | 'cancelled'): DataSubjectRequestStatus {
     switch (status) {
@@ -26,14 +26,14 @@ async function getWorkspaceKeyAndSecret(): Promise<{ key: string; secret: string
     if (!_workspaceKey || !_workspaceSecret) {
         // Load them from AWS Systems Manager Parameter Store
         const [workspaceKey, workspaceSecret] = await Promise.all([
-            // getSSMParam(
-            //     `/mparticle-api/${stageFromEnvironment()}/workspace-key`,
-            // ),
-            // getSSMParam(
-            //     `/mparticle-api/${stageFromEnvironment()}/workspace-secret`,
-            // ),
-            Promise.resolve(process.env.MPARTICLE_WORKSPACE_KEY ?? ''),
-            Promise.resolve(process.env.MPARTICLE_WORKSPACE_SECRET ?? ''),
+            getSecretValue(
+                `/mparticle-api/${stageFromEnvironment()}/workspace-key`,
+                'MPARTICLE_WORKSPACE_KEY'
+            ),
+            getSecretValue(
+                `/mparticle-api/${stageFromEnvironment()}/workspace-secret`,
+                'MPARTICLE_WORKSPACE_SECRET'
+            ),
         ]);
         _workspaceKey = workspaceKey;
         _workspaceSecret = workspaceSecret;
