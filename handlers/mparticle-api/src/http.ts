@@ -57,8 +57,15 @@ export async function makeHttpRequest<T>(url: string, options: {
             }
         }
 
-        const data = await response.json() as T;
-        return { success: true, data };
+        try {
+            const data = await response.json() as T;
+            return { success: true, data };
+        } catch {
+            return {
+                success: true,
+                data: {} as T
+            }
+        }
     } catch (err) {
         // Handle network errors, parsing errors, etc.
         return {

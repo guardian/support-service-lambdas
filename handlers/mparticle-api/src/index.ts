@@ -6,7 +6,9 @@ import type {
 } from 'aws-lambda';
 import { z } from 'zod';
 import type { DataSubjectRequestForm } from '../interfaces/data-subject-request-form';
+import type { EventBatch } from '../interfaces/event-batch';
 import { getStatusOfDataSubjectRequest, submitDataSubjectRequest } from './apis/data-subject-requests';
+import { uploadAnEventBatch } from './apis/events';
 import { HttpError } from './http';
 
 const routerHandler = (fn: (event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult>) =>
@@ -60,7 +62,27 @@ const router = new Router([
 				requestId: z.string().uuid(),
 			})
 		}
-	}
+	},
+	{
+		httpMethod: 'POST',
+		path: '/events',
+		handler: routerHandler(async (event) => {
+			let payload: unknown;
+			try {
+				payload = JSON.parse(event.body ?? '{}');
+			} catch {
+				return {
+					statusCode: 400,
+					body: 'Invalid JSON in request body',
+				};
+			}
+
+			return {
+				statusCode: 201,
+				body: JSON.stringify(await uploadAnEventBatch(payload as EventBatch)),
+			};
+		})
+	},
 ]);
 
 export const handler: Handler = async (

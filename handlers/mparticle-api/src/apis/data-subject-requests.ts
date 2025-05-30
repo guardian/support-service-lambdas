@@ -73,6 +73,7 @@ async function requestDataSubjectRequestApi<T>(url: string, options: {
  * A request in the OpenDSR format communicates a Data Subject’s wish to access or erase their data.
  * The OpenDSR Request takes a JSON request body and requires a Content-Type: application/json header.
  * https://docs.mparticle.com/developers/apis/dsr-api/v3/#submit-a-data-subject-request-dsr
+ * @param {DataSubjectRequestForm} form - The form containing the data subject request details.
  * @returns https://docs.mparticle.com/developers/apis/dsr-api/v3/#example-success-response-body
  */
 export const submitDataSubjectRequest = async (form: DataSubjectRequestForm): Promise<DataSubjectRequestSubmission> => {
