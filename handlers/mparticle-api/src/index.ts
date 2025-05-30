@@ -6,7 +6,7 @@ import type {
 } from 'aws-lambda';
 import { z } from 'zod';
 import type { DataSubjectRequestForm } from '../interfaces/data-subject-request-form';
-import { getStatusOfDataSubjectRequest, submitDataSubjectRequest } from './apis/data-subject-request';
+import { getStatusOfDataSubjectRequest, submitDataSubjectRequest } from './apis/data-subject-requests';
 import { HttpError } from './http';
 
 const routerHandler = (fn: (event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult>) =>
@@ -28,7 +28,7 @@ const routerHandler = (fn: (event: APIGatewayProxyEvent) => Promise<APIGatewayPr
 const router = new Router([
 	{
 		httpMethod: 'POST',
-		path: '/requests',
+		path: '/data-subject-requests',
 		handler: routerHandler(async (event) => {
 			let payload: unknown;
 			try {
@@ -48,7 +48,7 @@ const router = new Router([
 	},
 	{
 		httpMethod: 'GET',
-		path: '/requests/{requestId}',
+		path: '/data-subject-requests/{requestId}',
 		handler: routerHandler(async (event) => {
 			return {
 				statusCode: 200,

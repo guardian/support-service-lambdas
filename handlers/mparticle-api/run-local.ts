@@ -21,7 +21,7 @@ const run = async ({
 }
 run({
     httpMethod: 'GET',
-    path: '/requests/38689d80-4ae9-40f8-a628-b41077e3d62c'
+    path: '/data-subject-requests/38689d80-4ae9-40f8-a628-b41077e3d62c'
 })
     .then((response) => console.log(response))
     .catch((err) => console.error(err));
