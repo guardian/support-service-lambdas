@@ -9,7 +9,7 @@
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr mparticle-api.zip ./*.js",
     "check-formatting": "prettier --check **.ts",
     "fix-formatting": "prettier --write **.ts",
-    "run-local": "npx ts-node run-local.ts"
+    "run-local": "esbuild --bundle --platform=node --target=node18 --outfile=target/run-local.js run-local.ts && node target/run-local.js"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147"
