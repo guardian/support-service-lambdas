@@ -4,9 +4,8 @@ import type {
 	APIGatewayProxyResult,
 	Handler,
 } from 'aws-lambda';
+import { z } from 'zod';
 import type { DataSubjectRequestForm } from '../interfaces/data-subject-request-form';
-import type { DataSubjectRequestState } from '../interfaces/data-subject-request-state';
-import type { DataSubjectRequestSubmission } from '../interfaces/data-subject-request-submission';
 import { getStatusOfDataSubjectRequest, submitDataSubjectRequest } from './apis/data-subject-request';
 import { HttpError } from './http';
 
@@ -41,10 +40,9 @@ const router = new Router([
 				};
 			}
 
-			const result: DataSubjectRequestSubmission = await submitDataSubjectRequest(payload as DataSubjectRequestForm);
 			return {
-				statusCode: 200,
-				body: JSON.stringify(result),
+				statusCode: 201,
+				body: JSON.stringify(await submitDataSubjectRequest(payload as DataSubjectRequestForm)),
 			};
 		})
 	},
@@ -52,20 +50,16 @@ const router = new Router([
 		httpMethod: 'GET',
 		path: '/requests/{requestId}',
 		handler: routerHandler(async (event) => {
-			const requestId = event.pathParameters?.requestId;
-			if (!requestId) {
-				return {
-					statusCode: 400,
-					body: 'Missing "requestId" in path'
-				};
-			}
-
-			const result: DataSubjectRequestState = await getStatusOfDataSubjectRequest(requestId);
 			return {
 				statusCode: 200,
-				body: JSON.stringify(result)
+				body: JSON.stringify(await getStatusOfDataSubjectRequest(event.pathParameters?.requestId ?? ''))
 			};
-		})
+		}),
+		validation: {
+			path: z.object({
+				requestId: z.string().uuid(),
+			})
+		}
 	}
 ]);
 
