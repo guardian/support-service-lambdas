@@ -33,9 +33,9 @@ function matchPath(routePath: string, eventPath: string): { matched: boolean; pa
     for (let i = 0; i < routeParts.length; i++) {
         const routePart = routeParts[i];
         const eventPart = eventParts[i];
-        if (routePart.startsWith('{') && routePart.endsWith('}')) {
+        if (routePart?.startsWith('{') && routePart.endsWith('}')) {
             const paramName = routePart.slice(1, -1);
-            params[paramName] = eventPart;
+            params[paramName] = eventPart as string;
         } else if (routePart !== eventPart) {
             return { matched: false, params: {} };
         }
