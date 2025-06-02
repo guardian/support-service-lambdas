@@ -21,6 +21,6 @@
 		"aws-sdk": "^2.1692.0",
 		"dayjs": "^1.11.13",
 		"google-auth-library": "^9.15.0",
-		"zod": "catalog:"
+		"zod": "^3.23.8"
 	}
 }
