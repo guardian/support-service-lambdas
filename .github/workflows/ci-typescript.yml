@@ -53,7 +53,6 @@ jobs:
           - zuora-salesforce-link-remover
           - metric-push-api
           - observer-data-export
-          - negative-invoices-processor
     runs-on: ubuntu-latest
     permissions:
       id-token: write
