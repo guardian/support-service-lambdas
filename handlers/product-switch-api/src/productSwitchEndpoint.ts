@@ -3,8 +3,9 @@ import { prettyPrint } from '@modules/prettyPrint';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { Stage } from '@modules/stage';
 import {
-	billingPreviewToSimpleInvoiceItems,
 	getBillingPreview,
+	itemsForSubscription,
+	toSimpleInvoiceItems,
 } from '@modules/zuora/billingPreview';
 import { getAccount } from '@modules/zuora/getAccount';
 import { getSubscription } from '@modules/zuora/getSubscription';
@@ -43,7 +44,9 @@ export const contributionToSupporterPlusEndpoint = async (
 				subscription.accountNumber,
 			),
 		'get billing preview for the subscription',
-	).then(billingPreviewToSimpleInvoiceItems);
+	)
+		.then(itemsForSubscription(subscription.subscriptionNumber))
+		.then(toSimpleInvoiceItems);
 
 	const switchInformation = await getSwitchInformationWithOwnerCheck(
 		stage,

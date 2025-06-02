@@ -8,8 +8,9 @@ import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import {
-	billingPreviewToSimpleInvoiceItems,
 	getBillingPreview,
+	itemsForSubscription,
+	toSimpleInvoiceItems,
 } from '@modules/zuora/billingPreview';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import { getAccount } from '@modules/zuora/getAccount';
@@ -76,7 +77,9 @@ const createTestContribution = async (
 				subscription.accountNumber,
 			),
 		'get billing preview for the subscription',
-	).then(billingPreviewToSimpleInvoiceItems);
+	)
+		.then(itemsForSubscription(subscription.subscriptionNumber))
+		.then(toSimpleInvoiceItems);
 
 	const switchInformation = await getSwitchInformationWithOwnerCheck(
 		stage,

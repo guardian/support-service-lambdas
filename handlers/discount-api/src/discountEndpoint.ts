@@ -5,12 +5,13 @@ import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import { addDiscount, previewDiscount } from '@modules/zuora/addDiscount';
 import {
-	billingPreviewToSimpleInvoiceItems,
 	getBillingPreview,
 	getNextInvoice,
 	getNextInvoiceItems,
 	getNextNonFreePaymentDate,
 	getOrderedInvoiceTotals,
+	itemsForSubscription,
+	toSimpleInvoiceItems,
 } from '@modules/zuora/billingPreview';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import { getAccount } from '@modules/zuora/getAccount';
@@ -158,7 +159,9 @@ export const applyDiscountEndpoint = async (
 	);
 
 	const nextPaymentDate = getNextNonFreePaymentDate(
-		billingPreviewToSimpleInvoiceItems(billingPreviewAfter),
+		toSimpleInvoiceItems(
+			itemsForSubscription(subscriptionNumber)(billingPreviewAfter),
+		),
 	);
 
 	const emailPayload = generateCancellationDiscountConfirmationEmail(
@@ -229,7 +232,9 @@ async function getDiscountToApply(
 				subscription.accountNumber,
 			),
 		'get billing preview for the subscription',
-	).then(billingPreviewToSimpleInvoiceItems);
+	)
+		.then(itemsForSubscription(subscription.subscriptionNumber))
+		.then(toSimpleInvoiceItems);
 
 	await eligibilityChecker.assertGenerallyEligible(
 		subscription,
