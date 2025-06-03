@@ -4,7 +4,7 @@ import { stageFromEnvironment } from '@modules/stage';
 import { functionalTestQueryResponse } from '../../test/handlers/data/functionalTestQueryResponse';
 import { BigQueryResultDataSchema } from '../types';
 
-export const handler = async (event: { discountExpiresOnDate?: string }) => {
+export const handler = async () => {
 	try {
 		const gcpConfig = await getSSMParam(
 			`/negative-invoices-processor/${stageFromEnvironment()}/gcp-credentials-config`,
