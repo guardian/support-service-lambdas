@@ -9,7 +9,7 @@ describe('The negative-invoices-processor stack', () => {
 			app,
 			'negative-invoices-processor-CODE',
 			{
-				stack: 'membership',
+				stack: 'support',
 				stage: 'CODE',
 			},
 		);
@@ -17,7 +17,7 @@ describe('The negative-invoices-processor stack', () => {
 			app,
 			'negative-invoices-processor-PROD',
 			{
-				stack: 'membership',
+				stack: 'support',
 				stage: 'PROD',
 			},
 		);

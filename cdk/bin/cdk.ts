@@ -336,10 +336,10 @@ new ObserverDataExport(app, 'observer-data-export-PROD', {
 	stage: 'PROD',
 });
 new NegativeInvoicesProcessor(app, 'negative-invoices-processor-CODE', {
-	stack: 'membership',
+	stack: 'support',
 	stage: 'CODE',
 });
 new NegativeInvoicesProcessor(app, 'negative-invoices-processor-PROD', {
-	stack: 'membership',
+	stack: 'support',
 	stage: 'PROD',
 });

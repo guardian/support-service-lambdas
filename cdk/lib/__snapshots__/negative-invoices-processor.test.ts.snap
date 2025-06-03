@@ -141,7 +141,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -165,12 +165,12 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/CODE/negative-invoices-processor/negative-invoices-processor.zip",
+          "S3Key": "support/CODE/negative-invoices-processor/negative-invoices-processor.zip",
         },
         "Environment": {
           "Variables": {
             "APP": "negative-invoices-processor",
-            "STACK": "membership",
+            "STACK": "support",
             "STAGE": "CODE",
             "Stage": "CODE",
           },
@@ -200,7 +200,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -255,7 +255,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -341,7 +341,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -377,7 +377,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -460,7 +460,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/CODE/negative-invoices-processor/negative-invoices-processor.zip",
+                      "/support/CODE/negative-invoices-processor/negative-invoices-processor.zip",
                     ],
                   ],
                 },
@@ -481,7 +481,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/negative-invoices-processor",
+                    ":parameter/CODE/support/negative-invoices-processor",
                   ],
                 ],
               },
@@ -504,7 +504,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/negative-invoices-processor/*",
+                    ":parameter/CODE/support/negative-invoices-processor/*",
                   ],
                 ],
               },
@@ -666,7 +666,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -690,12 +690,12 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/PROD/negative-invoices-processor/negative-invoices-processor.zip",
+          "S3Key": "support/PROD/negative-invoices-processor/negative-invoices-processor.zip",
         },
         "Environment": {
           "Variables": {
             "APP": "negative-invoices-processor",
-            "STACK": "membership",
+            "STACK": "support",
             "STAGE": "PROD",
             "Stage": "PROD",
           },
@@ -725,7 +725,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -780,7 +780,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -824,7 +824,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -902,7 +902,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -985,7 +985,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/PROD/negative-invoices-processor/negative-invoices-processor.zip",
+                      "/support/PROD/negative-invoices-processor/negative-invoices-processor.zip",
                     ],
                   ],
                 },
@@ -1006,7 +1006,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/negative-invoices-processor",
+                    ":parameter/PROD/support/negative-invoices-processor",
                   ],
                 ],
               },
@@ -1029,7 +1029,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/negative-invoices-processor/*",
+                    ":parameter/PROD/support/negative-invoices-processor/*",
                   ],
                 ],
               },
