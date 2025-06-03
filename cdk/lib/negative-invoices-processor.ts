@@ -52,7 +52,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 			resources: ['*'],
 		});
 
-		const bucket = new Bucket(this, 'Bucket', {
+		new Bucket(this, 'Bucket', {
 			bucketName: `${appName}-${this.stage.toLowerCase()}`,
 		});
 
@@ -85,13 +85,9 @@ export class NegativeInvoicesProcessor extends GuStack {
 		});
 		const definitionBody = DefinitionBody.fromChainable(getInvoicesLambdaTask);
 
-		const stateMachine = new StateMachine(
-			this,
-			`${appName}-state-machine-${this.stage}`,
-			{
-				stateMachineName: `${appName}-${this.stage}`,
-				definitionBody: definitionBody,
-			},
-		);
+		new StateMachine(this, `${appName}-state-machine-${this.stage}`, {
+			stateMachineName: `${appName}-${this.stage}`,
+			definitionBody: definitionBody,
+		});
 	}
 }
