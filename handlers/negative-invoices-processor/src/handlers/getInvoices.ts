@@ -17,6 +17,7 @@ export const handler = async () => {
 			query(),
 		);
 		console.log('result', result);
+
 		const resultData = BigQueryResultDataSchema.parse(result[0]);
 		console.log('resultData', resultData);
 
