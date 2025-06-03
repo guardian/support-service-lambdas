@@ -17,6 +17,7 @@ type Route = {
 	handler: (event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult>;
 	validation?: {
 		path?: z.Schema;
+		body?: z.Schema;
 	};
 };
 
@@ -66,6 +67,10 @@ export class Router {
 					try {
 						if (route.validation?.path) {
 							route.validation.path.parse(eventWithParams.pathParameters);
+						}
+						if (route.validation?.body) {
+							const parsedBody: unknown = eventWithParams.body ? JSON.parse(eventWithParams.body) : undefined;
+							route.validation.body.parse(parsedBody);
 						}
 					} catch (error) {
 						if (error instanceof z.ZodError) {
