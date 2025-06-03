@@ -126,32 +126,6 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
-    "Bucket83908E77": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "BucketName": "negative-invoices-processor-code",
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::S3::Bucket",
-      "UpdateReplacePolicy": "Retain",
-    },
     "getinvoiceslambdaBD92FECC": {
       "DependsOn": [
         "getinvoiceslambdaServiceRoleDefaultPolicy3134B218",
@@ -639,32 +613,6 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
-    "Bucket83908E77": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "BucketName": "negative-invoices-processor-prod",
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::S3::Bucket",
-      "UpdateReplacePolicy": "Retain",
-    },
     "getinvoiceslambdaBD92FECC": {
       "DependsOn": [
         "getinvoiceslambdaServiceRoleDefaultPolicy3134B218",

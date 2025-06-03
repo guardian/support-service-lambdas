@@ -52,9 +52,9 @@ export class NegativeInvoicesProcessor extends GuStack {
 			resources: ['*'],
 		});
 
-		new Bucket(this, 'Bucket', {
-			bucketName: `${appName}-${this.stage.toLowerCase()}`,
-		});
+		// new Bucket(this, 'Bucket', {
+		// 	bucketName: `${appName}-${this.stage.toLowerCase()}`,
+		// });
 
 		const getInvoicesLambda = new GuLambdaFunction(
 			this,
