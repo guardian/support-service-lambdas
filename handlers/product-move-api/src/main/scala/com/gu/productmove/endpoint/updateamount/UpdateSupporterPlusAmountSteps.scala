@@ -20,11 +20,11 @@ import zio.{IO, RIO, Task, ZIO}
 object UpdateSupporterPlusAmountSteps {
 
   private[updateamount] def subscriptionUpdateAmount(subscriptionName: SubscriptionName, postData: ExpectedInput): RIO[
-    GetSubscription with GetAccount with SubscriptionUpdate with SQS with Stage,
+    GetSubscription & GetAccount & SubscriptionUpdate & SQS & Stage,
     OutputBody,
   ] = {
     val maybeResult: ZIO[
-      SQS with SubscriptionUpdate with Stage with GetAccount with GetSubscription,
+      SQS & SubscriptionUpdate & Stage & GetAccount & GetSubscription,
       OutputBody | Throwable,
       Success,
     ] = for {

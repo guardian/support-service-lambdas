@@ -1,45 +1,30 @@
 package com.gu.productmove.zuora
 
-import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.{
-  AwsCredentialsLive,
-  AwsS3Live,
-  GuStageLive,
-  SttpClientLive,
-  getSubscriptionResponse,
-  ratePlanCharge1,
-}
-import com.gu.productmove.endpoint.available.{Billing, Currency, MoveToProduct, Offer, TimePeriod, TimeUnit, Trial}
-import com.gu.productmove.zuora.GetSubscription
-import com.gu.productmove.zuora.Subscribe.*
-import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
-import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
-import zio.*
-import zio.*
-import zio.test.Assertion.*
-import zio.test.*
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.PreviewResult
-import Fixtures.*
 import com.gu.i18n.Currency.GBP
-import com.gu.productmove.GuStageLive.Stage.CODE
-import com.gu.productmove.move.BuildPreviewResult
-import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.newproduct.api.productcatalog.Monthly
-import com.gu.productmove.endpoint.move.switchtype.{
-  GetRatePlans,
-  ProductSwitchRatePlanIds,
-  RecurringContributionRatePlanIds,
-  RecurringContributionToSupporterPlus,
-  RecurringContributionToSupporterPlusImpl,
-  SupporterPlusRatePlanIds,
-}
+import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.GuStageLive.Stage.CODE
+import com.gu.productmove.endpoint.available.*
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.PreviewResult
+import com.gu.productmove.endpoint.move.switchtype.*
+import com.gu.productmove.move.BuildPreviewResult
+import com.gu.productmove.zuora.Fixtures.*
+import com.gu.productmove.zuora.GetSubscription
+import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
+import com.gu.productmove.zuora.Subscribe.*
+import com.gu.productmove.zuora.model.SubscriptionName
+import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
+import com.gu.productmove.*
+import zio.*
+import zio.test.*
+import zio.test.Assertion.*
 
 import java.time.*
 import scala.None
 
 object SubscriptionUpdateSpec extends ZIOSpecDefault {
 
-  override def spec: Spec[TestEnvironment with Scope, Any] =
+  override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("subscription update service")(
       test("SwitchProductUpdateRequest is correct for input (CODE)") {
         val timeLocalDate = LocalDate.of(2022, 5, 10)

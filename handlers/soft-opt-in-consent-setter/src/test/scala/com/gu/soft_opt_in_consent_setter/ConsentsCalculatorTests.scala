@@ -167,10 +167,6 @@ class ConsentsCalculatorTests extends AnyFlatSpec with should.Matchers with Eith
         |    "consented" : false
         |  },
         |  {
-        |    "id" : "similar_guardian_products",
-        |    "consented" : true
-        |  },
-        |  {
         |    "id" : "subscriber_preview",
         |    "consented" : true
         |  },

@@ -110,7 +110,7 @@ class SecretsLive(secretsClient: SecretsManagerClient, stage: Stage) extends Sec
 
 object SecretsLive {
 
-  val layer: ZLayer[AwsCredentialsProvider with Stage, Throwable, Secrets] =
+  val layer: ZLayer[AwsCredentialsProvider & Stage, Throwable, Secrets] =
     ZLayer.scoped {
       for {
         creds <- ZIO.service[AwsCredentialsProvider]

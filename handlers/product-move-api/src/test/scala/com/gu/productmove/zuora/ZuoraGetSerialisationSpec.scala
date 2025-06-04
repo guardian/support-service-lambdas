@@ -1,21 +1,19 @@
 package com.gu.productmove.zuora
 
-import com.gu.productmove.{SecretsLive, SttpClientLive}
 import com.gu.productmove.zuora.InvoiceItemAdjustment.{InvoiceItemAdjustmentResult, InvoiceItemAdjustmentsWriteRequest}
 import com.gu.productmove.zuora.model.SubscriptionName
-import zio.*
-import zio.*
-import zio.*
-import zio.test.Assertion.*
-import zio.test.*
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive, ZuoraRestBody}
+import com.gu.productmove.{SecretsLive, SttpClientLive}
 import sttp.client3.UriContext
 import sttp.client3.testing.SttpBackendStub
+import zio.*
+import zio.test.*
+import zio.test.Assertion.*
 
 import java.time.LocalDate
 
 object ZuoraGetSerialisationSpec extends ZIOSpecDefault {
-  override def spec: Spec[TestEnvironment with Scope, Any] =
+  override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("ZuoraGetSerialisation")(
       test("can deserialise a list") {
         for {

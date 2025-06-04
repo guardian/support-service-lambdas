@@ -41,7 +41,7 @@ trait SalesforceClient {
 
 object SalesforceClientLive {
 
-  val layer: RLayer[SttpBackend[Task, Any] with Secrets, SalesforceClient] =
+  val layer: RLayer[SttpBackend[Task, Any] & Secrets, SalesforceClient] =
     ZLayer.fromZIO(
       for {
         secrets <- ZIO.service[Secrets]

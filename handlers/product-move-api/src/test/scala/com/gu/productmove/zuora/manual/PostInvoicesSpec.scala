@@ -1,18 +1,23 @@
-package com.gu.productmove.zuora
+package com.gu.productmove.zuora.manual
 
 import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.zuora.model.SubscriptionName
+import com.gu.productmove.zuora.PostInvoicesLive
+import com.gu.productmove.zuora.model.InvoiceId
 import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGet, ZuoraGetLive}
 import com.gu.productmove.{AwsCredentialsLive, GuStageLive, SecretsLive, SttpClientLive}
 import zio.*
 
-object TermRenewalSpec extends ZIOAppDefault {
+import java.time.LocalDate
+
+object PostInvoicesSpec extends ZIOAppDefault {
 
   def run: Task[Unit] =
     (for {
-      zuoraGet <- ZIO.service[ZuoraGet]
-      response <- TermRenewalLive(zuoraGet)
-        .renewSubscription(SubscriptionName("A-S00688596"), true)
+      zuoraClient <- ZIO.service[ZuoraGet]
+      response <- PostInvoicesLive(zuoraClient).postInvoices(
+        InvoiceId("8ad083f096d239110196d438cee520d5"),
+        LocalDate.now(),
+      )
       _ <- ZIO.log(s"response: $response")
     } yield ())
       .provide(

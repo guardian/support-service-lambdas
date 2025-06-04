@@ -28,7 +28,7 @@ object Salesforce {
 
   def createSfRecord(
       salesforceRecordInput: SalesforceRecordInput,
-  ): RIO[CreateRecord with GetSfSubscription, Unit] = {
+  ): RIO[CreateRecord & GetSfSubscription, Unit] = {
     import salesforceRecordInput.*
 
     for {
