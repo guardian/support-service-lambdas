@@ -114,7 +114,7 @@ export const submitDataSubjectRequest = async (form: DataSubjectRequestForm): Pr
     return {
         expectedCompletionTime: new Date(response.data.expected_completion_time),
         receivedTime: new Date(response.data.received_time),
-        subjectRequestId: response.data.subject_request_id,
+        requestId: response.data.subject_request_id,
         controllerId: response.data.controller_id,
     };
 };
@@ -150,7 +150,7 @@ export const getStatusOfDataSubjectRequest = async (requestId: string): Promise<
 
     return {
         expectedCompletionTime: new Date(response.data.expected_completion_time),
-        subjectRequestId: response.data.subject_request_id,
+        requestId: response.data.subject_request_id,
         controllerId: response.data.controller_id,
         requestStatus: parseDataSubjectRequestStatus(response.data.request_status),
         resultsUrl: response.data.results_url,

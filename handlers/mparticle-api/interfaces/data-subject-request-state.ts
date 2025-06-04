@@ -18,7 +18,7 @@ export interface DataSubjectRequestState {
     /**
      * The controller-provided identifier of the request in a GUID v4 format.
      */
-    subjectRequestId: string;
+    requestId: string;
 
     /**
      * A unique ID representing the data controller. mParticles sets this to the workspace ID.
