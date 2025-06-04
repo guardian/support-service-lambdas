@@ -5,9 +5,10 @@ import type {
 	Handler,
 } from 'aws-lambda';
 import { z } from 'zod';
+import type { DataSubjectRequestCallback } from '../interfaces/data-subject-request-callback';
 import type { DataSubjectRequestForm } from '../interfaces/data-subject-request-form';
 import type { EventBatch } from '../interfaces/event-batch';
-import { getStatusOfDataSubjectRequest, submitDataSubjectRequest } from './apis/data-subject-requests';
+import { getStatusOfDataSubjectRequest, processDataSubjectRequestCallback, submitDataSubjectRequest } from './apis/data-subject-requests';
 import { uploadAnEventBatch } from './apis/events';
 import { HttpError } from './http';
 
@@ -69,6 +70,46 @@ const router = new Router([
 		validation: {
 			path: z.object({
 				requestId: z.string().uuid(),
+			})
+		}
+	},
+	{
+		httpMethod: 'POST',
+		path: '/data-subject-requests/{requestId}/callback',
+		handler: routerHandler(async (event) => {
+			let payload: unknown;
+			try {
+				payload = JSON.parse(event.body ?? '{}');
+			} catch {
+				return {
+					statusCode: 400,
+					body: 'Invalid JSON in request body',
+				};
+			}
+
+			return {
+				statusCode: 200,
+				body: JSON.stringify(await processDataSubjectRequestCallback(event.pathParameters?.requestId ?? '', payload as DataSubjectRequestCallback))
+			};
+		}),
+		validation: {
+			path: z.object({
+				requestId: z.string().uuid(),
+			}),
+			body: z.object({
+				controller_id: z.string(),
+				expected_completion_time: z.string().datetime(),
+				subject_request_id: z.string().uuid(),
+				group_id: z.string().nullable(),
+				request_status: z.enum(['pending', 'in_progress', 'completed', 'cancelled']),
+				api_version: z.string(),
+				results_url: z.string().url().nullable(),
+				extensions: z.array(z.object({
+					domain: z.string(),
+					name: z.string(),
+					status: z.enum(['pending', 'skipped', 'sent', 'failed']),
+					status_message: z.string(),
+				})).nullable(),
 			})
 		}
 	},

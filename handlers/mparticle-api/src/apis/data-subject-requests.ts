@@ -1,4 +1,5 @@
 import { stageFromEnvironment } from '@modules/stage';
+import type { DataSubjectRequestCallback } from '../../interfaces/data-subject-request-callback';
 import type { DataSubjectRequestForm } from "../../interfaces/data-subject-request-form";
 import type { DataSubjectRequestState } from "../../interfaces/data-subject-request-state";
 import { DataSubjectRequestStatus } from "../../interfaces/data-subject-request-state";
@@ -155,4 +156,24 @@ export const getStatusOfDataSubjectRequest = async (requestId: string): Promise<
         requestStatus: parseDataSubjectRequestStatus(response.data.request_status),
         resultsUrl: response.data.results_url,
     };
+};
+
+/**
+ * Callback post made on completion of the Data Subject Request (DSR) by mParticle
+ * https://docs.mparticle.com/developers/apis/dsr-api/v3/#submit-a-data-subject-request-dsr
+ * https://docs.mparticle.com/developers/apis/dsr-api/v3/#example-response-body
+ * @param {string} requestId - The ID of the request to check the status of.
+ * @param {DataSubjectRequestCallback} payload - The data containing the data subject request state details.
+ */
+export const processDataSubjectRequestCallback = async (requestId: string, payload: DataSubjectRequestCallback): Promise<object> => {
+    // Check the received status and:
+    // - Ignore it if not completed
+    // - If completed, emit a ErasureJobOutcome event to SQS
+    console.log("processDataSubjectRequestCallback", {
+        requestId,
+        form: payload
+    });
+    await Promise.resolve();
+
+    return {};
 };
