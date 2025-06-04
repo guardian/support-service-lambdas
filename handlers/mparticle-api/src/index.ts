@@ -81,6 +81,49 @@ const router = new Router([
 		httpMethod: 'POST',
 		path: '/data-subject-requests/{requestId}/callback',
 		handler: routerHandler(async (event) => {
+			/**
+			 * Callback post made on completion of the Data Subject Request (DSR) by mParticle
+			 * When a request changes status, including when a request is first created, mParticle sends a callback
+			 * POST to all URLs specified in the status_callback_urls array of the request. Callbacks are queued
+			 * and sent every 15 minutes.
+			 * Callback requests are signed and issued over TLS. We must validate the authenticity of the request
+			 * before parsing the request body.
+			 * https://docs.mparticle.com/developers/apis/dsr-api/v3/#callbacks
+			 * https://docs.mparticle.com/developers/apis/dsr-api/v3/#validating-a-callback-request
+			 */
+
+			// 1. Establish a whitelist of all processor domains that we will allow to issue callbacks.
+			if (event.headers['x-opendsr-processor-domain'] !== "opendsr.mparticle.com") {
+				return {
+					statusCode: 401,
+					body: 'Invalid Processor Domain',
+				};
+			}
+
+			// 2. If the X-OpenDSR-Processor-Domain header value is in our whitelist, fetch the certificate. The
+			// certificate URL is available as the value of "processor_certificate" in the /discovery response body.
+			// The certificate can be cached for the lifetime of the certificate.
+			// TODO
+
+			// 3. Validate the certificate. This should be handled by a library. Certificate validation should confirm that:
+			// 3.1 The certificate was issued by a trusted authority.
+			// TODO
+
+			// 3.2 The certificate was issued to the exact string given in the X-OpenDSR-Processor-Domain header value.
+			// TODO
+			
+			// 3.3 The certificate has not expired.
+			// TODO
+
+			// 4. If the certificate is valid, use it to validate the X-OpenDSR-Signature header against the raw request
+			// body. mParticle uses SHA256 RSA as a signing algorithm.
+			// TODO
+
+			// 5. Return a response with a 202 Accepted status header if all validations are successful. Return a response
+			// with a 401 Unauthorized status header if the signature fails to validate or the processor domain is not
+			// in your whitelist.
+			// TODO
+
 			let payload: unknown;
 			try {
 				payload = JSON.parse(event.body ?? '{}');
@@ -92,7 +135,7 @@ const router = new Router([
 			}
 
 			return {
-				statusCode: 200,
+				statusCode: 202,
 				body: JSON.stringify(await processDataSubjectRequestCallback(event.pathParameters?.requestId ?? '', payload as DataSubjectRequestCallback))
 			};
 		}),

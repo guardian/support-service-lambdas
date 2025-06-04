@@ -161,6 +161,9 @@ export const getStatusOfDataSubjectRequest = async (requestId: string): Promise<
 
 /**
  * Callback post made on completion of the Data Subject Request (DSR) by mParticle
+ * When a request changes status, including when a request is first created, mParticle sends a callback
+ * POST to all URLs specified in the status_callback_urls array of the request. Callbacks are queued
+ * and sent every 15 minutes.
  * https://docs.mparticle.com/developers/apis/dsr-api/v3/#submit-a-data-subject-request-dsr
  * https://docs.mparticle.com/developers/apis/dsr-api/v3/#example-response-body
  * @param {string} requestId - The ID of the request to check the status of.
