@@ -46,7 +46,16 @@ const router = new Router([
 				statusCode: 201,
 				body: JSON.stringify(await submitDataSubjectRequest(payload as DataSubjectRequestForm)),
 			};
-		})
+		}),
+		validation: {
+			body: z.object({
+				regulation: z.enum(['gdpr', 'ccpa']),
+				requestId: z.string().uuid(),
+				requestType: z.enum(['access', 'portability', 'erasure']),
+				submittedTime: z.date(),
+				userId: z.string().email(),
+			})
+		}
 	},
 	{
 		httpMethod: 'GET',
