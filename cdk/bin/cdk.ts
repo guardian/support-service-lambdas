@@ -25,6 +25,7 @@ import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
 import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
 import { UserBenefits } from '../lib/user-benefits';
 import { ZuoraSalesforceLinkRemover } from '../lib/zuora-salesforce-link-remover';
+import {MParticleApi} from "../lib/mparticle-api";
 
 const app = new App();
 const membershipHostedZoneId = 'Z1E4V12LQGXFEC';
@@ -333,4 +334,12 @@ new ObserverDataExport(app, 'observer-data-export-CODE', {
 new ObserverDataExport(app, 'observer-data-export-PROD', {
 	stack: 'support',
 	stage: 'PROD',
+});
+new MParticleApi(app, 'mparticle-api-CODE', {
+	stack: 'membership',
+	stage: 'CODE'
+});
+new MParticleApi(app, 'mparticle-api-PROD', {
+	stack: 'membership',
+	stage: 'PROD'
 });
