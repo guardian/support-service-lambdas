@@ -43,9 +43,13 @@ const router = new Router([
 				};
 			}
 
+			const domain = event.headers['host']; // e.g., "abc123.lambda-url.region.on.aws" or API Gateway domain
+			const protocol = event.headers['x-forwarded-proto'] ?? 'https';
+			const lambdaDomainUrl = `${protocol}://${domain}`;
+
 			return {
 				statusCode: 201,
-				body: JSON.stringify(await submitDataSubjectRequest(payload as DataSubjectRequestForm)),
+				body: JSON.stringify(await submitDataSubjectRequest(payload as DataSubjectRequestForm, lambdaDomainUrl)),
 			};
 		}),
 		validation: {
