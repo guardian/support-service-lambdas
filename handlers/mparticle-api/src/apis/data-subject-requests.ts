@@ -87,20 +87,22 @@ export const submitDataSubjectRequest = async (form: DataSubjectRequestForm): Pr
         method: 'POST',
         body: {
             regulation: form.regulation,
-            "subject_request_id": "a7551968-d5d6-44b2-9831-815ac9017798", // <- Should we create this right here or ask to the client for it?
-            subject_request_type: form.subjectRequestType,
+            subject_request_id: form.requestId,
+            subject_request_type: form.requestType,
             submitted_time: form.submittedTime,
             skip_waiting_period: true,
-            subject_identities: form.subjectIdentities.map(identity => ({
-                identity_type: identity.identityType,
-                value: identity.value,
-                encoding: identity.encoding,
-            })),
+            subject_identities: [
+                {
+                    identity_type: 'controller_customer_id',
+                    value: form.userId,
+                    encoding: 'raw',
+                }
+            ],
             api_version: "3.0",
             "status_callback_urls": [
                 "https://exampleurl.com/opendsr/callbacks" // <- We should create an endpoint on this app to receive this status callback and propagate its state. In alternative we can call the BigQuery erasure app.
             ],
-            "group_id": "my-group", // <- Let's maybe use the User Unique Id to group all requests related to that user (max 150 requests per group)
+            group_id: form.userId, // Let's group by User Unique Id to group all requests related to that user (max 150 requests per group)
             extensions: []
         }
     });
