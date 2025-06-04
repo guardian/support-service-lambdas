@@ -71,7 +71,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 				architecture: Architecture.ARM_64,
 				initialPolicy: [allowPutMetric],
 				timeout: Duration.seconds(300),
-				// role,
+				role,
 			},
 		);
 
