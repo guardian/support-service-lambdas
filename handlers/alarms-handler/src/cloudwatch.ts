@@ -6,6 +6,7 @@ import {
 } from '@aws-sdk/client-cloudwatch';
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
 import { flatten } from '@modules/arrayFunctions';
+import { awsConfig } from '@modules/aws/config';
 import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getConfig } from './config';
@@ -30,6 +31,7 @@ type CloudWatchClients = {
 
 export const cloudwatchClients: Lazy<CloudWatchClients> =
 	new Lazy<CloudWatchClients>(() => {
+		// TODO make it use profile credentials for mobile/targeting when running locally
 		const mobile = {
 			[getConfig('MOBILE_AWS_ACCOUNT_ID')]: buildCrossAccountCloudwatchClient(
 				getConfig('MOBILE_ROLE_ARN'),
@@ -40,7 +42,7 @@ export const cloudwatchClients: Lazy<CloudWatchClients> =
 				buildCrossAccountCloudwatchClient(getConfig('TARGETING_ROLE_ARN')),
 		};
 		const cloudWatchClients: CloudWatchClients = {
-			defaultClient: new CloudWatchClient({ region: 'eu-west-1' }),
+			defaultClient: new CloudWatchClient(awsConfig),
 			...mobile,
 			...targeting,
 		};

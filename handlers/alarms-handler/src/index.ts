@@ -161,7 +161,7 @@ const buildCloudWatchAlarmMessage = async ({
 	return { app: App, text };
 };
 
-export function getCloudwatchLogsLink(
+function getCloudwatchLogsLink(
 	logGroupName: string,
 	Trigger:
 		| {

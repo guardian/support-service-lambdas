@@ -94,13 +94,9 @@ function getDiagnosticLinks(
 	DiagnosticLinks: string | undefined,
 	alarm: MetricAlarm,
 ) {
-	const trigger = {
-		Period: getIfDefined(alarm.Period, 'no period in alarm'),
-		EvaluationPeriods: getIfDefined(
-			alarm.EvaluationPeriods,
-			'no evaluation period in alarm',
-		),
-	};
+	const { Period, EvaluationPeriods } = alarm;
+	const trigger =
+		Period && EvaluationPeriods ? { Period, EvaluationPeriods } : undefined;
 	const stateChangeTime = getIfDefined(
 		alarm.StateTransitionedTimestamp,
 		'no transition timestamp',

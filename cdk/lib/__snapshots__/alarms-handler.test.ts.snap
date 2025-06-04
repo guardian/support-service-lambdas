@@ -611,7 +611,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
     },
     "alarmshandlerscheduledlambdaErrorPercentageAlarmForLambda513D2105": {
       "Properties": {
-        "ActionsEnabled": true,
+        "ActionsEnabled": false,
         "AlarmActions": [
           {
             "Fn::Join": [

@@ -74,13 +74,22 @@ export class AlarmsHandler extends GuStack {
 			},
 		);
 
-		const growthWebhookParameter = buildWebhookParameter('GROWTH');
-		const portfolioWebhookParameter = buildWebhookParameter('PORTFOLIO');
-		const platformWebhookParameter = buildWebhookParameter('PLATFORM');
-		const valueWebhookParameter = buildWebhookParameter('VALUE');
-		const sreWebhookParameter = buildWebhookParameter('SRE');
+		const lambdaEnv = {
+			APP: app,
+			STACK: this.stack,
+			STAGE: this.stage,
+			GROWTH_WEBHOOK: buildWebhookParameter('GROWTH').valueAsString,
+			PORTFOLIO_WEBHOOK: buildWebhookParameter('PORTFOLIO').valueAsString,
+			PLATFORM_WEBHOOK: buildWebhookParameter('PLATFORM').valueAsString,
+			VALUE_WEBHOOK: buildWebhookParameter('VALUE').valueAsString,
+			SRE_WEBHOOK: buildWebhookParameter('SRE').valueAsString,
+			// The lambda uses the mobile account role if it needs to fetch tags cross-account
+			MOBILE_AWS_ACCOUNT_ID: mobileAccountId.valueAsString,
+			MOBILE_ROLE_ARN: mobileAccountRoleArn.valueAsString,
+			TARGETING_AWS_ACCOUNT_ID: targetingAccountId.valueAsString,
+			TARGETING_ROLE_ARN: targetingAccountRoleArn.valueAsString,
+		};
 
-		// triggered lambda
 		const triggeredLambda = new GuLambdaFunction(this, `${app}-lambda`, {
 			app,
 			memorySize: 1024,
@@ -90,21 +99,7 @@ export class AlarmsHandler extends GuStack {
 			handler: 'index.handler',
 			functionName: `${app}-${this.stage}`,
 			events: [new SqsEventSource(queue)],
-			environment: {
-				APP: app,
-				STACK: this.stack,
-				STAGE: this.stage,
-				GROWTH_WEBHOOK: growthWebhookParameter.valueAsString,
-				PORTFOLIO_WEBHOOK: portfolioWebhookParameter.valueAsString,
-				PLATFORM_WEBHOOK: platformWebhookParameter.valueAsString,
-				VALUE_WEBHOOK: valueWebhookParameter.valueAsString,
-				SRE_WEBHOOK: sreWebhookParameter.valueAsString,
-				// The lambda uses the mobile account role if it needs to fetch tags cross-account
-				MOBILE_AWS_ACCOUNT_ID: mobileAccountId.valueAsString,
-				MOBILE_ROLE_ARN: mobileAccountRoleArn.valueAsString,
-				TARGETING_AWS_ACCOUNT_ID: targetingAccountId.valueAsString,
-				TARGETING_ROLE_ARN: targetingAccountRoleArn.valueAsString,
-			},
+			environment: lambdaEnv,
 		});
 
 		triggeredLambda.role?.attachInlinePolicy(
@@ -170,7 +165,6 @@ export class AlarmsHandler extends GuStack {
 			actionsEnabled: this.stage === 'PROD',
 		});
 
-		// scheduled lambda
 		const scheduledLambda = new GuScheduledLambda(
 			this,
 			`${app}-scheduled-lambda`,
@@ -182,22 +176,9 @@ export class AlarmsHandler extends GuStack {
 				timeout: Duration.seconds(15),
 				handler: 'indexScheduled.handler',
 				functionName: `${app}-scheduled-${this.stage}`,
-				environment: {
-					APP: app,
-					STACK: this.stack,
-					STAGE: this.stage,
-					GROWTH_WEBHOOK: growthWebhookParameter.valueAsString,
-					PORTFOLIO_WEBHOOK: portfolioWebhookParameter.valueAsString,
-					PLATFORM_WEBHOOK: platformWebhookParameter.valueAsString,
-					VALUE_WEBHOOK: valueWebhookParameter.valueAsString,
-					SRE_WEBHOOK: sreWebhookParameter.valueAsString,
-					// The lambda uses the mobile account role if it needs to fetch tags cross-account
-					MOBILE_AWS_ACCOUNT_ID: mobileAccountId.valueAsString,
-					MOBILE_ROLE_ARN: mobileAccountRoleArn.valueAsString,
-					TARGETING_AWS_ACCOUNT_ID: targetingAccountId.valueAsString,
-					TARGETING_ROLE_ARN: targetingAccountRoleArn.valueAsString,
-				},
+				environment: lambdaEnv,
 				monitoringConfiguration: {
+					actionsEnabled: this.stage === 'PROD',
 					toleratedErrorPercentage: 0,
 					numberOfEvaluationPeriodsAboveThresholdBeforeAlarm: 1,
 					snsTopicName: `alarms-handler-topic-${this.stage}`,
