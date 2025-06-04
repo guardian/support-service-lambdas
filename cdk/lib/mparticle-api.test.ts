@@ -1,11 +1,5 @@
 import { App } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
-import {
-    supportApisDomain,
-    supportCertificateId,
-    supportHostedZoneId,
-} from '../bin/cdk';
-import { DiscountApi } from './discount-api';
 import {MParticleApi} from "./mparticle-api";
 
 describe('The mParticle API stack', () => {
