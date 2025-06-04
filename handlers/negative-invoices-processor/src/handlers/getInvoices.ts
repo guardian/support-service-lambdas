@@ -4,27 +4,22 @@ import { stageFromEnvironment } from '@modules/stage';
 import { functionalTestQueryResponse } from '../../test/handlers/data/functionalTestQueryResponse';
 import { BigQueryResultDataSchema } from '../types';
 
-export const handler = async () => {
+export const handler = async (): Promise<{
+	allRecordsFromBigQueryCount: number;
+	allRecordsFromBigQuery: Array<{
+		id: string;
+		account_id: string;
+		invoice_date: string;
+		currency: string;
+		invoice_amount: number;
+		invoice_balance: number;
+	}>;
+}> => {
 	try {
-		const gcpConfig = await getSSMParam(
-			`/negative-invoices-processor/${stageFromEnvironment()}/gcp-credentials-config`,
-		);
-		const authClient = await buildAuthClient(gcpConfig);
-
-		const result = await runQuery(
-			authClient,
-			`datatech-platform-${stageFromEnvironment().toLowerCase()}`,
-			query(),
-		);
-		console.log('result', result);
-
-		const resultData = BigQueryResultDataSchema.parse(result[0]);
-		console.log('resultData', resultData);
-
 		const records =
 			stageFromEnvironment() === 'PROD'
-				? resultData
-				: functionalTestQueryResponse;
+				? await getPRODData()
+				: await getCODEData();
 		return {
 			allRecordsFromBigQueryCount: records.length,
 			allRecordsFromBigQuery: records,
@@ -33,6 +28,46 @@ export const handler = async () => {
 		console.error('Error:', error);
 		throw error;
 	}
+};
+
+export const getCODEData = (): Promise<
+	Array<{
+		id: string;
+		account_id: string;
+		invoice_date: string;
+		currency: string;
+		invoice_amount: number;
+		invoice_balance: number;
+	}>
+> => {
+	return Promise.resolve(functionalTestQueryResponse);
+};
+
+export const getPRODData = async (): Promise<
+	Array<{
+		id: string;
+		account_id: string;
+		invoice_date: string;
+		currency: string;
+		invoice_amount: number;
+		invoice_balance: number;
+	}>
+> => {
+	const gcpConfig = await getSSMParam(
+		`/negative-invoices-processor/${stageFromEnvironment()}/gcp-credentials-config`,
+	);
+	const authClient = await buildAuthClient(gcpConfig);
+
+	const result = await runQuery(
+		authClient,
+		`datatech-platform-${stageFromEnvironment().toLowerCase()}`,
+		query(),
+	);
+	console.log('result', result);
+
+	const resultData = BigQueryResultDataSchema.parse(result[0]);
+	console.log('resultData', resultData);
+	return resultData;
 };
 
 const query = (): string =>
