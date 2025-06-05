@@ -217,9 +217,10 @@ export class WriteOffUnpaidInvoices extends GuStack {
 				Parameters: {
 					TopicArn: snsTopicArn,
 					'Message.$': JsonPath.format(
-						`Some invoices left over after cancellations failed to be written off:\n{}
-						`,
-						JsonPath.stringAt('$.ResultFiles.FAILED[0]'),
+						`https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}`,
+						bucket.bucketName,
+						this.region,
+						JsonPath.stringAt('$.ResultFiles.FAILED[0].Key'),
 					),
 					MessageAttributes: {
 						app: {

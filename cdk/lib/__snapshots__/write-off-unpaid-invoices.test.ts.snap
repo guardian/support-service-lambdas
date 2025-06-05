@@ -695,7 +695,15 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":alarms-handler-topic-CODE","Message.$":"States.Format('Some invoices left over after cancellations failed to be written off:\\n{}\\n\\t\\t\\t\\t\\t\\t', $.ResultFiles.FAILED[0])","MessageAttributes":{"app":{"DataType":"String","StringValue":"write-off-unpaid-invoices"},"stage":{"DataType":"String","StringValue":"CODE"}}},"ResultPath":"$.TaskResult"},"AllInvoicesWrittenOffSuccessfully":{"Type":"Succeed"}}}",
+              ":alarms-handler-topic-CODE","Message.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "', '",
+              {
+                "Ref": "AWS::Region",
+              },
+              "', $.ResultFiles.FAILED[0].Key)","MessageAttributes":{"app":{"DataType":"String","StringValue":"write-off-unpaid-invoices"},"stage":{"DataType":"String","StringValue":"CODE"}}},"ResultPath":"$.TaskResult"},"AllInvoicesWrittenOffSuccessfully":{"Type":"Succeed"}}}",
             ],
           ],
         },
@@ -1717,7 +1725,15 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 2`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":alarms-handler-topic-PROD","Message.$":"States.Format('Some invoices left over after cancellations failed to be written off:\\n{}\\n\\t\\t\\t\\t\\t\\t', $.ResultFiles.FAILED[0])","MessageAttributes":{"app":{"DataType":"String","StringValue":"write-off-unpaid-invoices"},"stage":{"DataType":"String","StringValue":"PROD"}}},"ResultPath":"$.TaskResult"},"AllInvoicesWrittenOffSuccessfully":{"Type":"Succeed"}}}",
+              ":alarms-handler-topic-PROD","Message.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "', '",
+              {
+                "Ref": "AWS::Region",
+              },
+              "', $.ResultFiles.FAILED[0].Key)","MessageAttributes":{"app":{"DataType":"String","StringValue":"write-off-unpaid-invoices"},"stage":{"DataType":"String","StringValue":"PROD"}}},"ResultPath":"$.TaskResult"},"AllInvoicesWrittenOffSuccessfully":{"Type":"Succeed"}}}",
             ],
           ],
         },
