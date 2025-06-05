@@ -8,4 +8,12 @@ export const CODEDataMockQueryResponse = [
 		invoice_amount: -30,
 		invoice_balance: -30,
 	},
+	{
+		id: '1c91a0ad795f6bcc017966151113650d',
+		account_id: '3c93a0ff5bec3ec3015c0ca913e7415b',
+		invoice_date: '2021-05-29',
+		currency: null,
+		invoice_amount: -31.5,
+		invoice_balance: -31.5,
+	},
 ];
