@@ -76,7 +76,7 @@ export async function getChatMessages(
 		});
 	}
 
-	if (message) {
+	if (message.app) {
 		const teams = alarmMappings.getTeams(message.app);
 		console.log(`app ${message.app} is assigned to teams ${teams.join(', ')}`);
 		const webhookUrls = teams.map(alarmMappings.getTeamWebhookUrl);
