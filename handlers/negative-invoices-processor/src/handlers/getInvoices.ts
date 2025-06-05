@@ -39,11 +39,8 @@ export const getPRODData = async (): Promise<BigQueryRecord[]> => {
 		`datatech-platform-${stageFromEnvironment().toLowerCase()}`,
 		query(),
 	);
-	console.log('result', result);
 
-	const resultData = BigQueryResultDataSchema.parse(result[0]);
-	console.log('resultData', resultData);
-	return resultData;
+	return BigQueryResultDataSchema.parse(result[0]);
 };
 
 const query = (): string =>
