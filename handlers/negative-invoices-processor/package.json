@@ -1,0 +1,26 @@
+{
+	"name": "negative-invoices-processor",
+	"description": "A state machine that identifies and balances negative invoices.",
+	"scripts": {
+		"test": "jest --group=-integration",
+		"it-test": "jest --group=integration",
+		"build": "esbuild --bundle --platform=node --target=node20 --outdir=target src/handlers/*.ts",
+		"lint": "eslint src/**/*.ts test/**/*.ts",
+		"package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr negative-invoices-processor.zip ./*.js",
+		"type-check": "tsc --noEmit",
+		"check-formatting": "prettier --check **.ts",
+		"fix-formatting": "prettier --write **.ts",
+		"watch": "chokidar 'src/**/*.ts' -c 'pnpm fix-formatting'"
+	},
+	"devDependencies": {
+		"@types/aws-lambda": "^8.10.147",
+		"@types/aws-sdk": "^2.7.4"
+	},
+	"dependencies": {
+		"@google-cloud/bigquery": "^7.9.3",
+		"aws-sdk": "^2.1692.0",
+		"dayjs": "^1.11.13",
+		"google-auth-library": "^9.15.0",
+		"zod": "^3.23.8"
+	}
+}
