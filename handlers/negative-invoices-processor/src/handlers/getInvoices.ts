@@ -13,7 +13,7 @@ export const handler = async (): Promise<{
 		const records =
 			stageFromEnvironment() === 'PROD'
 				? await getPRODData()
-				: await getPRODData();
+				: await getCODEData();
 		return {
 			allRecordsFromBigQueryCount: records.length,
 			allRecordsFromBigQuery: records,
