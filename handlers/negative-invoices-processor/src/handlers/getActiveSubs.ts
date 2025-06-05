@@ -28,8 +28,7 @@ export const handler = async (event: ActiveSubsCheckInput) => {
 };
 
 const queryResponseSchema = z.object({
-	done: z.boolean(),
-	records: z.array(z.object({ Id: z.string() })),
+	size: z.number(),
 });
 
 export const hasActiveSubscription = async (
@@ -38,5 +37,5 @@ export const hasActiveSubscription = async (
 ): Promise<boolean> => {
 	const query = `SELECT Id FROM Subscription WHERE AccountId = '${accountId}' AND Status = 'Active'`;
 	const result = await doQuery(zuoraClient, query, queryResponseSchema);
-	return result.records.length > 0;
+	return result.size > 0;
 };
