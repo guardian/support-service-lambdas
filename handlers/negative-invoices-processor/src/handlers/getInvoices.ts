@@ -48,10 +48,6 @@ const query = (): string =>
     SELECT
         inv.id,
         STRING_AGG(distinct inv.account_id, ',') as account_id,
-        STRING_AGG(DISTINCT CAST(inv.invoice_date AS STRING), ',') AS invoice_date,
-        STRING_AGG(distinct inv.currency, ',') as currency,
-        AVG(inv.amount) as invoice_amount,
-        AVG(inv.balance) as invoice_balance,
     FROM 
         datatech-fivetran.zuora.invoice inv
     WHERE 
