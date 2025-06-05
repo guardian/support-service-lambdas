@@ -195,11 +195,11 @@ const buildSnsPublishMessage = ({
 	message: string;
 	messageAttributes: SNSEventRecord['Sns']['MessageAttributes'];
 }) => {
-	const stage = messageAttributes.stage?.Value;
+	// const stage = messageAttributes.stage?.Value;
 
-	if (stage && stage !== 'PROD') {
-		return;
-	}
+	// if (stage && stage !== 'PROD') {
+	// 	return;
+	// }
 
 	const app = messageAttributes.app?.Value;
 
