@@ -76,7 +76,7 @@ export async function getChatMessages(
 		});
 	}
 
-	if (message) {
+	if (message.app) {
 		const teams = alarmMappings.getTeams(message.app);
 		console.log(`app ${message.app} is assigned to teams ${teams.join(', ')}`);
 		const webhookUrls = teams.map(alarmMappings.getTeamWebhookUrl);
@@ -195,11 +195,11 @@ const buildSnsPublishMessage = ({
 	message: string;
 	messageAttributes: SNSEventRecord['Sns']['MessageAttributes'];
 }) => {
-	const stage = messageAttributes.stage?.Value;
+	// const stage = messageAttributes.stage?.Value;
 
-	if (stage && stage !== 'PROD') {
-		return;
-	}
+	// if (stage && stage !== 'PROD') {
+	// 	return;
+	// }
 
 	const app = messageAttributes.app?.Value;
 
