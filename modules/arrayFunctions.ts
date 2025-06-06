@@ -17,6 +17,19 @@ export const groupBy = <T>(
 	}, {});
 };
 
+export const groupMap = <T, R>(
+	array: T[],
+	group: (item: T) => string,
+	map: (item: T) => R,
+): Record<string, R[]> => {
+	return Object.fromEntries(
+		Object.entries(groupBy(array, group)).map(([key, values]) => [
+			key,
+			values.map(map),
+		]),
+	);
+};
+
 export const sortBy = <T>(array: T[], fn: (item: T) => string): T[] => {
 	return array.sort((posGT, negGT) => {
 		const posGTKey = fn(posGT);
@@ -51,3 +64,7 @@ export const arrayToObject = <T>(array: Array<Record<string, T>>) => {
 		return { ...acc, ...val };
 	}, {});
 };
+
+export function flatten<T>(nested: T[][]): T[] {
+	return nested.flatMap((a) => a);
+}
