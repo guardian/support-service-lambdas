@@ -16,7 +16,7 @@ export const handler = async ({ filePath }: { filePath: string }) => {
 	const s3UploadAttempt = await uploadFileToS3({
 		bucketName: process.env.BUCKET_NAME!,
 		filePath,
-		content: JSON.stringify(result[0].slice(0, 2)),
+		content: JSON.stringify(result[0][0]),
 	});
 
 	if (s3UploadAttempt.$metadata.httpStatusCode !== 200) {
