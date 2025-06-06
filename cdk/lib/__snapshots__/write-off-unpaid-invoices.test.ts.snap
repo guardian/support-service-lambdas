@@ -196,6 +196,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 1`] = `
             "GCP_PROJECT_ID": "datatech-platform-code",
             "STACK": "support",
             "STAGE": "CODE",
+            "Stage": "CODE",
           },
         },
         "FunctionName": "get-unpaid-invoices-CODE",
@@ -439,6 +440,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 1`] = `
             "APP": "write-off-unpaid-invoices",
             "STACK": "support",
             "STAGE": "CODE",
+            "Stage": "CODE",
           },
         },
         "FunctionName": "write-off-invoices-CODE",
@@ -549,7 +551,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":secret:CODE/Zuora/User/AndreaDiotallevi-*",
+                    ":secret:CODE/Zuora-OAuth/SupportServiceLambdas-*",
                   ],
                 ],
               },
@@ -687,23 +689,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 1`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Prefix.$":"States.Format('executions/{}', $$.Execution.StartTime)"}}},"GetDistributedMapResult":{"Next":"CheckForFailures","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"CheckForFailures":{"Type":"Choice","Choices":[{"Variable":"$.ResultFiles.FAILED[0]","IsPresent":false,"Next":"AllInvoicesWrittenOffSuccessfully"}],"Default":"NotifyTeamSomeInvoicesFailed"},"NotifyTeamSomeInvoicesFailed":{"End":true,"Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"TopicArn":"arn:aws:sns:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":alarms-handler-topic-CODE","Message.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
-              {
-                "Ref": "Bucket83908E77",
-              },
-              "', '",
-              {
-                "Ref": "AWS::Region",
-              },
-              "', $.ResultFiles.FAILED[0].Key)","MessageAttributes":{"app":{"DataType":"String","StringValue":"write-off-unpaid-invoices"},"stage":{"DataType":"String","StringValue":"CODE"}}},"ResultPath":"$.TaskResult"},"AllInvoicesWrittenOffSuccessfully":{"Type":"Succeed"}}}",
+              "","Prefix.$":"States.Format('executions/{}', $$.Execution.StartTime)"}}},"GetDistributedMapResult":{"Next":"CheckForFailures","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"CheckForFailures":{"Type":"Choice","Choices":[{"Variable":"$.ResultFiles.FAILED[0]","IsPresent":false,"Next":"AllInvoicesWrittenOffSuccessfully"}]},"AllInvoicesWrittenOffSuccessfully":{"Type":"Succeed"}}}",
             ],
           ],
         },
@@ -1226,6 +1212,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 2`] = `
             "GCP_PROJECT_ID": "datatech-platform-prod",
             "STACK": "support",
             "STAGE": "PROD",
+            "Stage": "PROD",
           },
         },
         "FunctionName": "get-unpaid-invoices-PROD",
@@ -1469,6 +1456,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 2`] = `
             "APP": "write-off-unpaid-invoices",
             "STACK": "support",
             "STAGE": "PROD",
+            "Stage": "PROD",
           },
         },
         "FunctionName": "write-off-invoices-PROD",
@@ -1579,7 +1567,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":secret:PROD/Zuora/User/AndreaDiotallevi-*",
+                    ":secret:PROD/Zuora-OAuth/SupportServiceLambdas-*",
                   ],
                 ],
               },
@@ -1717,23 +1705,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 2`] = `
               {
                 "Ref": "Bucket83908E77",
               },
-              "","Prefix.$":"States.Format('executions/{}', $$.Execution.StartTime)"}}},"GetDistributedMapResult":{"Next":"CheckForFailures","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"CheckForFailures":{"Type":"Choice","Choices":[{"Variable":"$.ResultFiles.FAILED[0]","IsPresent":false,"Next":"AllInvoicesWrittenOffSuccessfully"}],"Default":"NotifyTeamSomeInvoicesFailed"},"NotifyTeamSomeInvoicesFailed":{"End":true,"Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"TopicArn":"arn:aws:sns:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":alarms-handler-topic-PROD","Message.$":"States.Format('https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', '",
-              {
-                "Ref": "Bucket83908E77",
-              },
-              "', '",
-              {
-                "Ref": "AWS::Region",
-              },
-              "', $.ResultFiles.FAILED[0].Key)","MessageAttributes":{"app":{"DataType":"String","StringValue":"write-off-unpaid-invoices"},"stage":{"DataType":"String","StringValue":"PROD"}}},"ResultPath":"$.TaskResult"},"AllInvoicesWrittenOffSuccessfully":{"Type":"Succeed"}}}",
+              "","Prefix.$":"States.Format('executions/{}', $$.Execution.StartTime)"}}},"GetDistributedMapResult":{"Next":"CheckForFailures","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"CheckForFailures":{"Type":"Choice","Choices":[{"Variable":"$.ResultFiles.FAILED[0]","IsPresent":false,"Next":"AllInvoicesWrittenOffSuccessfully"}]},"AllInvoicesWrittenOffSuccessfully":{"Type":"Succeed"}}}",
             ],
           ],
         },
