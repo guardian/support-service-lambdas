@@ -974,6 +974,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 1`] = `
     },
     "WriteOffUnpaidInvoicesStepFunctionFailureAlarm082A9590": {
       "Properties": {
+        "ActionsEnabled": false,
         "AlarmActions": [
           {
             "Fn::Join": [
@@ -1990,6 +1991,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 2`] = `
     },
     "WriteOffUnpaidInvoicesStepFunctionFailureAlarm082A9590": {
       "Properties": {
+        "ActionsEnabled": false,
         "AlarmActions": [
           {
             "Fn::Join": [
