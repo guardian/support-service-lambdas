@@ -1,14 +1,13 @@
 package com.gu.productmove.zuora
 
-import com.gu.productmove.GuStageLive
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError, PreviewResult}
-import com.gu.productmove.zuora.GetSubscription
-import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
-import com.gu.productmove.zuora.SubscriptionUpdatePreviewResponse
-import com.gu.productmove.zuora.model.SubscriptionName
-import zio.*
 import com.gu.i18n.Currency
 import com.gu.newproduct.api.productcatalog.BillingPeriod
+import com.gu.productmove.GuStageLive
+import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError, PreviewResult}
+import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
+import com.gu.productmove.zuora.{GetSubscription, SubscriptionUpdatePreviewResponse}
+import com.gu.productmove.zuora.model.SubscriptionName
+import zio.*
 import zio.json.JsonDecoder
 
 class MockSubscriptionUpdate(

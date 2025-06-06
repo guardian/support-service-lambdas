@@ -1,11 +1,8 @@
 package com.gu.productmove.zuora
 
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ErrorResponse
-import com.gu.productmove.zuora.rest.ZuoraRestBody
-import sttp.client3.Request
-import sttp.model.Uri
-import zio.*
 import com.gu.productmove.zuora.rest.ZuoraClient
+import sttp.client3.Request
+import zio.*
 
 import scala.collection.mutable
 

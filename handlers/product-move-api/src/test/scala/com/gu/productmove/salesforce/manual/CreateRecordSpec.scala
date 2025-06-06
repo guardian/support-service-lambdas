@@ -1,30 +1,23 @@
-package com.gu.productmove.salesforce
+package com.gu.productmove.salesforce.manual
 
+import com.gu.productmove.*
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.available.*
 import com.gu.productmove.endpoint.move.ProductMoveEndpoint
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ExpectedInput
 import com.gu.productmove.invoicingapi.InvoicingApiRefundLive
 import com.gu.productmove.refund.*
-import com.gu.productmove.salesforce.{
-  CreateRecordLive,
-  GetSfSubscription,
-  GetSfSubscriptionLive,
-  MockCreateRecord,
-  SalesforceClientLive,
-  SalesforceHandler,
-}
-import com.gu.productmove.*
+import com.gu.productmove.salesforce.*
 import com.gu.productmove.salesforce.CreateRecord.CreateRecordResponse
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
+import zio.*
 import zio.test.*
 import zio.test.Assertion.*
-import zio.*
 
 import java.time.*
 
 object CreateRecordSpec extends ZIOSpecDefault {
-  override def spec: Spec[TestEnvironment with Scope, Any] =
+  override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("Create Salesforce Record")(
       test("Run locally") {
         /*

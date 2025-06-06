@@ -108,7 +108,6 @@ object ConsentsMapping {
     ),
     "InAppPurchase" -> Set(
       yourSupportOnboarding,
-      similarGuardianProducts,
       supporterNewsletter,
     ),
     "FeastInAppPurchase" -> Set(

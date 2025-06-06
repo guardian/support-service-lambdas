@@ -12,7 +12,11 @@ import zio.{Task, ZIO}
 
 import java.time.LocalDate
 
-case class RefundInput(subscriptionName: SubscriptionName)
+case class RefundInput(
+    subscriptionName: SubscriptionName,
+    accountId: ZuoraAccountId,
+    cancellationBillingDate: LocalDate,
+)
 
 case class ChargeWithDiscount(charge: InvoiceItemWithTaxDetails, discount: Option[InvoiceItemWithTaxDetails])
 
@@ -26,21 +30,19 @@ object RefundInput {
 
 object RefundSupporterPlus {
   def applyRefund(refundInput: RefundInput): ZIO[
-    InvoicingApiRefund
-      with CreditBalanceAdjustment
-      with Stage
-      with SttpBackend[Task, Any]
-      with AwsS3
-      with GetRefundInvoiceDetails
-      with GetInvoice
-      with InvoiceItemAdjustment,
+    InvoicingApiRefund & CreditBalanceAdjustment & Stage & SttpBackend[Task, Any] & AwsS3 & InvoiceItemQuery &
+      GetInvoice & InvoiceItemAdjustment & RunBilling & PostInvoices,
     Throwable | TransactionError,
     Unit,
-  ] = {
-
+  ] =
     for {
+      _ <- ZIO.log(s"Generating negative invoice for sub ${refundInput.subscriptionName}")
+      _ <- ZIO.serviceWithZIO[RunBilling](_.run(refundInput.accountId, refundInput.cancellationBillingDate))
       _ <- ZIO.log(s"Getting invoice items for sub ${refundInput.subscriptionName}")
       refundInvoiceDetails <- GetRefundInvoiceDetails.get(refundInput.subscriptionName)
+      _ <- ZIO.serviceWithZIO[PostInvoices](
+        _.postInvoices(refundInvoiceDetails.negativeInvoiceId, refundInput.cancellationBillingDate),
+      )
       _ <- ZIO.log(s"Amount to refund is ${refundInvoiceDetails.refundAmount}")
       _ <- InvoicingApiRefund.refund(
         refundInput.subscriptionName,
@@ -48,11 +50,10 @@ object RefundSupporterPlus {
       )
       _ <- ensureThatNegativeInvoiceBalanceIsZero(refundInvoiceDetails)
     } yield ()
-  }
 
   private def ensureThatNegativeInvoiceBalanceIsZero(
       refundInvoiceDetails: RefundInvoiceDetails,
-  ): ZIO[GetInvoice with InvoiceItemAdjustment, Throwable | TransactionError, Unit] = for {
+  ): ZIO[GetInvoice & InvoiceItemAdjustment, Throwable | TransactionError, Unit] = for {
     // unfortunately we can't get an invoice balance from the invoice items, it needs another request
     negativeInvoice <- GetInvoice.get(
       refundInvoiceDetails.negativeInvoiceId,
