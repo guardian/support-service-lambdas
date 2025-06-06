@@ -91,6 +91,7 @@ export class WriteOffUnpaidInvoices extends GuStack {
 			fileName: `${app}.zip`,
 			runtime: nodeVersion,
 			timeout: Duration.minutes(3),
+			environment: { Stage: this.stage },
 		};
 
 		const getUnpaidInvoices = new LambdaInvoke(
@@ -100,6 +101,7 @@ export class WriteOffUnpaidInvoices extends GuStack {
 				lambdaFunction: new GuLambdaFunction(this, 'GetUnpaidInvoicesLambda', {
 					...lambdaDefaultConfig,
 					environment: {
+						...lambdaDefaultConfig.environment,
 						GCP_CREDENTIALS_CONFIG_PARAMETER_NAME: `/${app}/${this.stage}/gcp-credentials-config`,
 						GCP_PROJECT_ID: `datatech-platform-${this.stage.toLowerCase()}`,
 						BUCKET_NAME: bucket.bucketName,
@@ -130,7 +132,7 @@ export class WriteOffUnpaidInvoices extends GuStack {
 					new PolicyStatement({
 						actions: ['secretsmanager:GetSecretValue'],
 						resources: [
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora/User/AndreaDiotallevi-*`,
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
 						],
 					}),
 				],
@@ -210,14 +212,15 @@ export class WriteOffUnpaidInvoices extends GuStack {
 			},
 		});
 
-		const notifyTeam = new CustomState(this, 'NotifyTeamSomeInvoicesFailed', {
+		new CustomState(this, 'NotifyTeamSomeInvoicesFailed', {
 			stateJson: {
 				Type: 'Task',
 				Resource: 'arn:aws:states:::sns:publish',
 				Parameters: {
 					TopicArn: snsTopicArn,
 					'Message.$': JsonPath.format(
-						`https://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}`,
+						`{} - Some invoices left over after cancellations failed to be written off.\nYou can review the failed invoices here:\nhttps://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}`,
+						this.stage,
 						bucket.bucketName,
 						this.region,
 						JsonPath.stringAt('$.ResultFiles.FAILED[0].Key'),
@@ -237,12 +240,11 @@ export class WriteOffUnpaidInvoices extends GuStack {
 			},
 		});
 
-		const checkForFailures = new Choice(this, 'CheckForFailures')
-			.when(
-				Condition.isNotPresent('$.ResultFiles.FAILED[0]'),
-				new Succeed(this, 'AllInvoicesWrittenOffSuccessfully'),
-			)
-			.otherwise(notifyTeam);
+		const checkForFailures = new Choice(this, 'CheckForFailures').when(
+			Condition.isNotPresent('$.ResultFiles.FAILED[0]'),
+			new Succeed(this, 'AllInvoicesWrittenOffSuccessfully'),
+		);
+		// .otherwise(notifyTeam);
 
 		const stateMachine = new StateMachine(
 			this,
