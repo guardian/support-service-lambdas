@@ -179,5 +179,12 @@ export const processDataSubjectRequestCallback = async (requestId: string, paylo
     });
     await Promise.resolve();
 
-    return {};
+    return {
+        message: 'Callback accepted and processed',
+        timestamp: new Date().toISOString()
+    };
+};
+
+export {
+    requestDataSubjectRequestApi
 };
