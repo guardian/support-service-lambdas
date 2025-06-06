@@ -1,0 +1,72 @@
+{
+	"invoiceItems": [
+		{
+			"id": "8ad0951692c418030192cc90d65b0786",
+			"subscriptionName": "A-S00924911",
+			"subscriptionId": "8ad097049222af5e0192335ae326031d",
+			"serviceStartDate": "2024-10-27",
+			"serviceEndDate": "2024-10-31",
+			"chargeAmount": -0.94,
+			"chargeDescription": "",
+			"chargeName": "Supporter Membership - Monthly",
+			"chargeId": "8ad097049222af5e0192335ae3350321",
+			"productName": "Supporter",
+			"quantity": 1.0,
+			"taxAmount": -0.19,
+			"unitOfMeasure": "",
+			"chargeDate": "2024-10-27 06:01:37",
+			"chargeType": "Recurring",
+			"processingType": "Charge",
+			"balance": -0.94,
+			"appliedToItemId": null,
+			"taxationItems": {
+				"data": [
+					{
+						"balance": -0.19,
+						"paymentAmount": 0.0,
+						"creditAmount": 0.0,
+						"availableToCreditAmount": -0.19,
+						"id": "8ad0951692c418030192cc90d65b0787",
+						"taxAmount": -0.19,
+						"applicableTaxUnRounded": -0.188333333,
+						"country": "GB",
+						"name": "UK VAT",
+						"exemptAmount": 0.0,
+						"jurisdiction": "Country",
+						"locationCode": "GB",
+						"taxCode": "Global Tax",
+						"taxCodeDescription": "20% globally",
+						"taxDate": "2024-10-01",
+						"taxRate": 0.2,
+						"taxRateDescription": "",
+						"taxRateType": "Percentage"
+					}
+				]
+			},
+			"availableToCreditAmount": -0.94,
+			"unitPrice": 7.0,
+			"bookingReference": null,
+			"itemType": null,
+			"purchaseOrderNumber": null,
+			"revRecCode": null,
+			"revRecTriggerCondition": null,
+			"revenueRecognitionRuleName": "Recognize daily over time",
+			"recognizedRevenueAccountingCode": "Supporter - Monthly earned revenue",
+			"deferredRevenueAccountingCode": "Supporter - Monthly",
+			"accountingCode": null,
+			"productRatePlanChargeId": "8ad09ea087756cc4018779f9a7ca6c6e",
+			"sku": "SKU-00000021",
+			"taxCode": "Global Tax",
+			"taxMode": "TaxInclusive",
+			"description": "",
+			"sourceItemType": "SubscriptionComponent",
+			"orderLineItemId": null,
+			"fulfillmentId": null,
+			"soldToContactId": "8ad093fb9222af6b01923320f9335aec",
+			"soldToContactSnapshotId": null,
+			"numberOfDeliveries": 0.0,
+			"reflectDiscountInNetAmount": false
+		}
+	],
+	"success": true
+}

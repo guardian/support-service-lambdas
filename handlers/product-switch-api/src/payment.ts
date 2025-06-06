@@ -30,6 +30,8 @@ export const adjustNonCollectedInvoice = async (
 		invoiceId,
 		supporterPlusInvoiceItem.id,
 		paymentAmount,
+		'Credit',
+		'InvoiceDetail',
 		'Created by the product-switch-api to zero out an amount of less than 50 pence/cents as this is less than the minimum Stripe charge amount',
 	);
 	if (!adjustmentResult.Success) {

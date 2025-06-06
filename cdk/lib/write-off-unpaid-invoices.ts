@@ -330,6 +330,7 @@ export class WriteOffUnpaidInvoices extends GuStack {
 				alarmName: `${this.stage}: WriteOffUnpaidInvoicesStepFunctionExecutionFailure`,
 				comparisonOperator:
 					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+				actionsEnabled: false,
 				// actionsEnabled: this.stage == 'PROD', // To update after sign off from finance
 			},
 		);

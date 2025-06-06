@@ -155,6 +155,8 @@ export const getInvoiceSchema = z.object({
 	id: z.string(),
 	amount: z.number(),
 	amountWithoutTax: z.number(),
+	availableToCreditAmount: z.number(),
+	balance: z.number(),
 });
 
 export type GetInvoiceResponse = z.infer<typeof getInvoiceSchema>;
@@ -164,7 +166,19 @@ export const getInvoiceItemsSchema = z.object({
 	invoiceItems: z.array(
 		z.object({
 			id: z.string(),
+			taxAmount: z.number(),
+			chargeAmount: z.number(),
 			productRatePlanChargeId: z.string(),
+			availableToCreditAmount: z.number(),
+			taxationItems: z.object({
+				data: z.array(
+					z.object({
+						id: z.string(),
+						taxAmount: z.number(),
+						availableToCreditAmount: z.number(),
+					}),
+				),
+			}),
 		}),
 	),
 });

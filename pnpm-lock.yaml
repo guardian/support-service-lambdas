@@ -285,6 +285,9 @@ importers:
       '@aws-sdk/client-secrets-manager':
         specifier: 3.734.0
         version: 3.734.0
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.13
 
   handlers/zuora-salesforce-link-remover:
     dependencies:
