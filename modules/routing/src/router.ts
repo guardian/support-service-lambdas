@@ -63,11 +63,26 @@ export class Router {
 						pathParameters: { ...(event.pathParameters ?? {}), ...params },
 					};
 
-					// Validate request
+					// Validate request path
 					try {
 						if (route.validation?.path) {
 							route.validation.path.parse(eventWithParams.pathParameters);
 						}
+					} catch (error) {
+						if (error instanceof z.ZodError) {
+							return {
+								statusCode: 400,
+								body: JSON.stringify({
+									error: 'Invalid path',
+									details: error.errors
+								})
+							};
+						}
+						throw error;
+					}
+
+					// Validate request body
+					try {
 						if (route.validation?.body) {
 							const parsedBody: unknown = eventWithParams.body ? JSON.parse(eventWithParams.body) : undefined;
 							route.validation.body.parse(parsedBody);
@@ -77,7 +92,7 @@ export class Router {
 							return {
 								statusCode: 400,
 								body: JSON.stringify({
-									error: 'Invalid path parameters',
+									error: 'Invalid body',
 									details: error.errors
 								})
 							};
