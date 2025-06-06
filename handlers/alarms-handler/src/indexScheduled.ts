@@ -4,10 +4,10 @@ import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import type { AlarmMappings } from './alarmMappings';
-import { prodAlarmMappings } from './alarmMappings';
+import type { AppToTeams } from './alarmMappings';
+import { prodAppToTeams } from './alarmMappings';
 import type { AlarmWithTags } from './cloudwatch';
-import { Cloudwatch } from './cloudwatch';
+import { buildCloudwatch } from './cloudwatch';
 import type { Config, WebhookUrls } from './config';
 import { getEnv, loadConfig } from './config';
 import { buildDiagnosticLinks } from './index';
@@ -26,20 +26,19 @@ export const handler = async (): Promise<void> => {
 	await handlerWithStage(dayjs(), stage, config);
 };
 
-export async function handlerWithStage(
+export const handlerWithStage = async (
 	now: dayjs.Dayjs,
 	stage: string,
 	config: Config,
-) {
+) => {
 	try {
-		const cloudwatchClients = new Cloudwatch(config.accounts);
-		const alarms = await cloudwatchClients.getAllAlarmsInAlarm();
+		const alarms = await buildCloudwatch(config.accounts).getAllAlarmsInAlarm();
 
 		const chatMessages = await getChatMessages(
 			now,
 			stage,
 			alarms,
-			prodAlarmMappings,
+			prodAppToTeams,
 			config.webhookUrls,
 		);
 
@@ -57,7 +56,7 @@ export async function handlerWithStage(
 		console.error(error);
 		throw error;
 	}
-}
+};
 
 function activeOverOneDay(now: dayjs.Dayjs) {
 	return (alarm: AlarmWithTags) =>
@@ -78,7 +77,7 @@ export async function getChatMessages(
 	now: Dayjs,
 	stage: string,
 	allAlarmData: AlarmWithTags[],
-	alarmMappings: AlarmMappings,
+	alarmMappings: AppToTeams,
 	configuredWebhookUrls: WebhookUrls,
 ): Promise<Array<{ webhookUrl: string; text: string }>> {
 	const relevantAlarms = allAlarmData

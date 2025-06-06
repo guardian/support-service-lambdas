@@ -28,7 +28,41 @@ const buildCrossAccountCloudwatchClient = (
 type CloudWatchClients = {
 	mobile: CloudWatchClient;
 	targeting: CloudWatchClient;
-	defaultClient: CloudWatchClient;
+	membership: CloudWatchClient;
+};
+
+export type AlarmWithTags = { alarm: MetricAlarm; tags: Lazy<Tags> };
+
+export type Cloudwatch = {
+	getTags: (alarmArn: string, awsAccountId: string) => Promise<Tags>;
+	getAllAlarmsInAlarm: () => Promise<AlarmWithTags[]>;
+};
+
+export const buildCloudwatch = (config: Accounts) => {
+	const { MOBILE, TARGETING } = config;
+	const cloudwatchClients: CloudWatchClients = {
+		membership: new CloudWatchClient(awsConfig),
+		mobile: buildCrossAccountCloudwatchClient(MOBILE.roleArn, 'mobile'),
+		targeting: buildCrossAccountCloudwatchClient(
+			TARGETING.roleArn,
+			'targeting',
+		),
+	};
+
+	// Use the awsAccountId of the alarm to decide which credentials are needed to fetch the alarm's tags
+	const buildCloudwatchClient = (awsAccountId: string): CloudWatchClient => {
+		const accountIds = {
+			[config.MOBILE.id]: 'mobile',
+			[config.TARGETING.id]: 'targeting',
+		} as const;
+		return cloudwatchClients[accountIds[awsAccountId] ?? 'membership'];
+	};
+
+	return {
+		getTags: (alarmArn: string, awsAccountId: string) =>
+			getTags(alarmArn, buildCloudwatchClient(awsAccountId)),
+		getAllAlarmsInAlarm: () => getAllAlarmsInAlarm(cloudwatchClients),
+	};
 };
 
 export type Tags = {
@@ -36,42 +70,7 @@ export type Tags = {
 	DiagnosticLinks?: string;
 };
 
-export type AlarmWithTags = { alarm: MetricAlarm; tags: Lazy<Tags> };
-
-export class Cloudwatch {
-	private cloudwatchClients: CloudWatchClients;
-	constructor(private config: Accounts) {
-		const mobileArn = config.MOBILE.roleArn;
-		const targetingArn = config.TARGETING.roleArn;
-		this.cloudwatchClients = {
-			defaultClient: new CloudWatchClient(awsConfig),
-			mobile: buildCrossAccountCloudwatchClient(mobileArn, 'mobile'),
-			targeting: buildCrossAccountCloudwatchClient(targetingArn, 'targeting'),
-		};
-	}
-
-	// Use the awsAccountId of the alarm to decide which credentials are needed to fetch the alarm's tags
-	private getCloudwatchClientForAccountId = (
-		awsAccountId: string,
-	): CloudWatchClient => {
-		const accountIds = {
-			[this.config.MOBILE.id]: 'mobile',
-			[this.config.TARGETING.id]: 'targeting',
-		} as const;
-		return this.cloudwatchClients[accountIds[awsAccountId] ?? 'defaultClient'];
-	};
-
-	getTags = (alarmArn: string, awsAccountId: string): Promise<Tags> =>
-		getTagsForClient(
-			alarmArn,
-			this.getCloudwatchClientForAccountId(awsAccountId),
-		);
-
-	getAllAlarmsInAlarm: () => Promise<AlarmWithTags[]> = () =>
-		getAllAlarmsInAlarm(this.cloudwatchClients);
-}
-
-const getTagsForClient = async (
+const getTags = async (
 	alarmArn: string,
 	client: CloudWatchClient,
 ): Promise<Tags> => {
@@ -114,10 +113,7 @@ async function getAlarmsInAlarmForClient(
 		const alarmArn = getIfDefined(alarm.AlarmArn, 'no alarm ARN');
 		return {
 			alarm,
-			tags: new Lazy(
-				() => getTagsForClient(alarmArn, client),
-				'tags for ' + alarmArn,
-			),
+			tags: new Lazy(() => getTags(alarmArn, client), 'tags for ' + alarmArn),
 		};
 	});
 }

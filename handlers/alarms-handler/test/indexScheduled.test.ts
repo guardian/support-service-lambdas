@@ -1,7 +1,7 @@
 import type { MetricAlarm } from '@aws-sdk/client-cloudwatch';
 import { Lazy } from '@modules/lazy';
 import dayjs from 'dayjs';
-import { prodAlarmMappings } from '../src/alarmMappings';
+import { prodAppToTeams } from '../src/alarmMappings';
 import type { Tags } from '../src/cloudwatch';
 import type { WebhookUrls } from '../src/config';
 import { getChatMessages } from '../src/indexScheduled';
@@ -18,7 +18,7 @@ it('should convert some alarms into a chat message', async () => {
 		dayjs(new Date(2025, 4, 21, 16, 16)),
 		'PROD',
 		testData,
-		prodAlarmMappings,
+		prodAppToTeams,
 		webhookUrls,
 	);
 	console.log('alarmsalarms', alarms);
@@ -73,15 +73,15 @@ const testData: Array<{ alarm: MetricAlarm; tags: Lazy<Tags> }> = [
 			() =>
 				Promise.resolve({
 					App: 'product-move-api',
-					// 'aws:cloudformation:stack-name': 'membership-PROD-product-move-api',
-					// 'gu:repo': 'guardian/support-service-lambdas',
-					// 'aws:cloudformation:stack-id':
-					// 	'arn:aws:cloudformation:eu-west-1:12345:stack/membership-PROD-product-move-api/df79fb50-dc3a-11ec-9e94-0236dc1500d9',
-					// Stage: 'PROD',
-					// 'aws:cloudformation:logical-id': 'RefundLambdaDeadLetterQueueAlarm',
-					// 'gu:riff-raff:project': 'support-service-lambdas::product-move-api',
-					// 'gu:build-tool': 'unknown',
-					// Stack: 'membership',
+					'aws:cloudformation:stack-name': 'membership-PROD-product-move-api',
+					'gu:repo': 'guardian/support-service-lambdas',
+					'aws:cloudformation:stack-id':
+						'arn:aws:cloudformation:eu-west-1:12345:stack/membership-PROD-product-move-api/df79fb50-dc3a-11ec-9e94-0236dc1500d9',
+					Stage: 'PROD',
+					'aws:cloudformation:logical-id': 'RefundLambdaDeadLetterQueueAlarm',
+					'gu:riff-raff:project': 'support-service-lambdas::product-move-api',
+					'gu:build-tool': 'unknown',
+					Stack: 'membership',
 				}),
 			'',
 		),
@@ -125,17 +125,17 @@ const testData: Array<{ alarm: MetricAlarm; tags: Lazy<Tags> }> = [
 			() =>
 				Promise.resolve({
 					App: 'soft-opt-in-consent-setter',
-					// 'aws:cloudformation:stack-name':
-					// 	'membership-PROD-soft-opt-in-consent-setter',
-					// 'gu:repo': 'guardian/support-service-lambdas',
-					// 'aws:cloudformation:stack-id':
-					// 	'arn:aws:cloudformation:eu-west-1:12345:stack/membership-PROD-soft-opt-in-consent-setter/798da790-ae52-11eb-a8b8-06f000020239',
-					// Stage: 'PROD',
-					// 'aws:cloudformation:logical-id': 'deadLetterBuildUpAlarmIAP',
-					// 'gu:riff-raff:project':
-					// 	'support-service-lambdas::soft-opt-in-consent-setter',
-					// 'gu:build-tool': 'guardian/actions-riff-raff',
-					// Stack: 'membership',
+					'aws:cloudformation:stack-name':
+						'membership-PROD-soft-opt-in-consent-setter',
+					'gu:repo': 'guardian/support-service-lambdas',
+					'aws:cloudformation:stack-id':
+						'arn:aws:cloudformation:eu-west-1:12345:stack/membership-PROD-soft-opt-in-consent-setter/798da790-ae52-11eb-a8b8-06f000020239',
+					Stage: 'PROD',
+					'aws:cloudformation:logical-id': 'deadLetterBuildUpAlarmIAP',
+					'gu:riff-raff:project':
+						'support-service-lambdas::soft-opt-in-consent-setter',
+					'gu:build-tool': 'guardian/actions-riff-raff',
+					Stack: 'membership',
 				}),
 			'',
 		),
@@ -175,15 +175,15 @@ const testData: Array<{ alarm: MetricAlarm; tags: Lazy<Tags> }> = [
 			() =>
 				Promise.resolve({
 					App: 'support-reminders',
-					// 'aws:cloudformation:stack-name': 'support-reminders-PROD',
-					// 'gu:repo': 'guardian/support-reminders',
-					// 'aws:cloudformation:stack-id':
-					// 	'arn:aws:cloudformation:eu-west-1:12345:stack/support-reminders-PROD/0f635f10-6c56-11eb-8334-0a4b355a4d25',
-					// Stage: 'PROD',
-					// 'aws:cloudformation:logical-id': 'supportremindersalarm1BE4F065',
-					// 'gu:build-tool': 'guardian/actions-riff-raff',
-					// 'gu:cdk:version': '59.3.5',
-					// Stack: 'support',
+					'aws:cloudformation:stack-name': 'support-reminders-PROD',
+					'gu:repo': 'guardian/support-reminders',
+					'aws:cloudformation:stack-id':
+						'arn:aws:cloudformation:eu-west-1:12345:stack/support-reminders-PROD/0f635f10-6c56-11eb-8334-0a4b355a4d25',
+					Stage: 'PROD',
+					'aws:cloudformation:logical-id': 'supportremindersalarm1BE4F065',
+					'gu:build-tool': 'guardian/actions-riff-raff',
+					'gu:cdk:version': '59.3.5',
+					Stack: 'support',
 				}),
 			'',
 		),

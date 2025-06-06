@@ -1,10 +1,10 @@
 import { Lazy } from '@modules/lazy';
 import type { SNSEventRecord, SQSEvent, SQSRecord } from 'aws-lambda';
 import { z } from 'zod';
-import type { AlarmMappings } from './alarmMappings';
-import { prodAlarmMappings } from './alarmMappings';
+import type { AppToTeams } from './alarmMappings';
+import { prodAppToTeams } from './alarmMappings';
 import type { Tags } from './cloudwatch';
-import { Cloudwatch } from './cloudwatch';
+import { buildCloudwatch } from './cloudwatch';
 import type { WebhookUrls } from './config';
 import { getEnv, loadConfig } from './config';
 
@@ -36,20 +36,20 @@ export const lazyConfig = new Lazy(async () => {
 
 export const handler = async (event: SQSEvent): Promise<void> => {
 	const config = await lazyConfig.get();
-	const cloudwatchClients = new Cloudwatch(config.accounts);
-	await handlerWithStage(event, config.webhookUrls, cloudwatchClients.getTags);
+	const getTags = buildCloudwatch(config.accounts).getTags;
+	await handlerWithStage(event, config.webhookUrls, getTags);
 };
 
-export async function handlerWithStage(
+export const handlerWithStage = async (
 	event: SQSEvent,
 	webhookUrls: WebhookUrls,
 	getTags: (alarmArn: string, awsAccountId: string) => Promise<Tags>,
-) {
+) => {
 	try {
 		for (const record of event.Records) {
 			const maybeChatMessages = await getChatMessages(
 				record,
-				prodAlarmMappings,
+				prodAppToTeams,
 				getTags,
 				webhookUrls,
 			);
@@ -70,11 +70,11 @@ export async function handlerWithStage(
 		console.error(error);
 		throw error;
 	}
-}
+};
 
 export async function getChatMessages(
 	record: SQSRecord,
-	getTeams: AlarmMappings,
+	appToTeams: AppToTeams,
 	getTags: (alarmArn: string, awsAccountId: string) => Promise<Tags>,
 	configuredWebhookUrls: WebhookUrls,
 ): Promise<{ webhookUrls: string[]; text: string } | undefined> {
@@ -103,7 +103,7 @@ export async function getChatMessages(
 	}
 
 	if (message) {
-		const teams = getTeams(message.app);
+		const teams = appToTeams(message.app);
 		console.log(`app ${message.app} is assigned to teams ${teams.join(', ')}`);
 		const webhookUrls = teams.map((team) => configuredWebhookUrls[team]);
 		return { webhookUrls, text: message.text };

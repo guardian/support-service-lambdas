@@ -143,11 +143,11 @@ const buildAppToTeamMappings = (
 	return mappings;
 };
 
-export type AlarmMappings = (appName?: string) => Team[];
+export type AppToTeams = (appName?: string) => Team[];
 
 export const buildAlarmMappings = (
 	mappings: Record<string, string[]>,
-): AlarmMappings => {
+): AppToTeams => {
 	const appToTeamMappings: Record<string, Team[]> =
 		buildAppToTeamMappings(mappings);
 
@@ -157,4 +157,4 @@ export const buildAlarmMappings = (
 			: ['SRE'];
 };
 
-export const prodAlarmMappings = buildAlarmMappings(teamToAppMappings);
+export const prodAppToTeams = buildAlarmMappings(teamToAppMappings);

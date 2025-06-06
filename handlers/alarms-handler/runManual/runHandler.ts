@@ -1,7 +1,7 @@
 import { handlerWithStage } from '../src/index';
 import { loadConfig } from '../src/config';
 import type { SQSEvent } from 'aws-lambda';
-import { Cloudwatch } from '../src/cloudwatch';
+import { buildCloudwatch } from '../src/cloudwatch';
 
 // to run this, get credentials for membership
 // the output will go to chat channel P&E/SR Alarms CODE
@@ -30,7 +30,7 @@ loadConfig('CODE', 'support', 'alarms-handler')
 		return handlerWithStage(
 			testEvent,
 			config.webhookUrls,
-			new Cloudwatch(config.accounts).getTags,
+			buildCloudwatch(config.accounts).getTags,
 		);
 	})
 	.then(console.log);

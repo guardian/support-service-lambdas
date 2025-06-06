@@ -6,6 +6,14 @@ import type { WebhookUrls } from '../src/config';
 jest.mock('../src/cloudwatch');
 
 describe('Handler', () => {
+	const dummyWebhookUrls: WebhookUrls = {
+		VALUE: 'value-webhook-url',
+		GROWTH: 'growth-webhook-url',
+		SRE: 'sre-webhook-url',
+		PORTFOLIO: 'portfolio-webhook-url',
+		PLATFORM: 'platform-webhook-url',
+	};
+
 	const mockCloudWatchAlarmEvent = {
 		Records: [
 			{
@@ -37,14 +45,6 @@ describe('Handler', () => {
 			},
 		],
 	} as SQSEvent;
-
-	const dummyWebhookUrls: WebhookUrls = {
-		VALUE: 'value-webhook-url',
-		GROWTH: 'growth-webhook-url',
-		SRE: 'sre-webhook-url',
-		PORTFOLIO: 'portfolio-webhook-url',
-		PLATFORM: 'platform-webhook-url',
-	};
 
 	beforeEach(() => {
 		jest.resetModules();
