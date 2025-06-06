@@ -5,7 +5,7 @@
  */
 export interface EventBatch {
     /** Array of events to be processed */
-    events: Array<{
+    events?: Array<{
         /** Custom data payload for the event */
         data: Record<string, unknown>;
 
@@ -14,29 +14,29 @@ export interface EventBatch {
     }>;
 
     /** Information about the device that generated the events */
-    deviceInfo: Record<string, unknown>;
+    deviceInfo?: Record<string, unknown>;
 
     /** Custom attributes associated with the user */
-    userAttributes: Record<string, unknown>;
+    userAttributes?: Record<string, unknown>;
 
     /** List of user attribute keys that have been deleted */
-    deletedUserAttributes: string[];
+    deletedUserAttributes?: string[];
 
     /** Identity information for the user across different platforms */
-    userIdentities: Record<string, unknown>;
+    userIdentities?: Record<string, unknown>;
 
     /** Information about the application */
-    applicationInfo: Record<string, unknown>;
+    applicationInfo?: Record<string, unknown>;
 
     /** Version of the data schema being used */
-    schemaVersion: number;
+    schemaVersion?: number;
 
     /** Environment where the events were generated (e.g., production, development) */
     environment: string;
 
     /** Additional context information */
-    context: Record<string, unknown>;
+    context?: Record<string, unknown>;
 
     /** IP address of the client */
-    ip: string;
+    ip?: string;
 }

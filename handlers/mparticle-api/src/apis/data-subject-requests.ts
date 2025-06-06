@@ -46,7 +46,7 @@ async function getWorkspaceKeyAndSecret(): Promise<{ key: string; secret: string
     }
 }
 
-async function requestDataSubjectRequestApi<T>(url: string, options: {
+async function requestDataSubjectApi<T>(url: string, options: {
     method?: 'GET' | 'POST';
     body?: unknown;
 }): Promise<HttpResponse<T>> {
@@ -79,7 +79,7 @@ async function requestDataSubjectRequestApi<T>(url: string, options: {
  * @returns https://docs.mparticle.com/developers/apis/dsr-api/v3/#example-success-response-body
  */
 export const submitDataSubjectRequest = async (form: DataSubjectRequestForm, lambdaDomainUrl: string): Promise<DataSubjectRequestSubmission> => {
-    const response = await requestDataSubjectRequestApi<{
+    const response = await requestDataSubjectApi<{
         expected_completion_time: Date;
         received_time: Date;
         encoded_request: string;
@@ -128,7 +128,7 @@ export const submitDataSubjectRequest = async (form: DataSubjectRequestForm, lam
  * @returns https://docs.mparticle.com/developers/apis/dsr-api/v3/#example-response-body
  */
 export const getStatusOfDataSubjectRequest = async (requestId: string): Promise<DataSubjectRequestState> => {
-    const response = await requestDataSubjectRequestApi<{
+    const response = await requestDataSubjectApi<{
         controller_id: string;
         expected_completion_time: Date;
         subject_request_id: string;
@@ -186,5 +186,5 @@ export const processDataSubjectRequestCallback = async (requestId: string, paylo
 };
 
 export {
-    requestDataSubjectRequestApi
+    requestDataSubjectApi
 };

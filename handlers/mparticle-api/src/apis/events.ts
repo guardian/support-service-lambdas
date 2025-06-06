@@ -88,3 +88,7 @@ export const uploadAnEventBatch = async (batch: EventBatch): Promise<object> => 
 
     return {};
 };
+
+export {
+    requestEventsApi
+};

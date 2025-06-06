@@ -43,14 +43,38 @@ const router = new Router([
 					body: 'Invalid JSON in request body',
 				};
 			}
+			const payloadData = payload as DataSubjectRequestForm;
 
+			/**
+			 * If you wish to remove users from audiences or from event forwarding during the waiting period,
+			 * set a user attribute and apply audience criteria and/or forwarding rules to exclude them.
+			 * https://docs.mparticle.com/guides/data-subject-requests/#erasure-request-waiting-period
+			 */
+			try {
+				await uploadAnEventBatch({
+					userAttributes: {
+						"dsr_erasure_requested": true,
+						"dsr_erasure_status": "requested",
+						"dsr_erasure_date": payloadData.submittedTime
+					},
+					userIdentities: {
+						"customer_id": payloadData.userId
+					},
+					environment: "production"
+				});
+			} catch (error) {
+				console.warn("It was not possible to set the User Attribute to remove user from audiences or from event forwarding during the waiting period.", error)
+			}
+
+			// Request for Erasure
 			const domain = event.headers['host']; // e.g., "abc123.lambda-url.region.on.aws" or API Gateway domain
 			const protocol = event.headers['x-forwarded-proto'] ?? 'https';
 			const lambdaDomainUrl = `${protocol}://${domain}`;
+			const requestForErasureResult = await submitDataSubjectRequest(payloadData, lambdaDomainUrl)
 
 			return {
 				statusCode: 201,
-				body: JSON.stringify(await submitDataSubjectRequest(payload as DataSubjectRequestForm, lambdaDomainUrl)),
+				body: JSON.stringify(requestForErasureResult),
 			};
 		}),
 		validation: {

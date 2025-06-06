@@ -1,7 +1,7 @@
 import * as crypto from 'crypto';
 import * as tls from 'tls';
 import { X509Certificate } from '@peculiar/x509';
-import { requestDataSubjectRequestApi } from '../apis/data-subject-requests';
+import { requestDataSubjectApi } from '../apis/data-subject-requests';
 
 const ALLOWED_PROCESSOR_DOMAINS = [
     "opendsr.mparticle.com"
@@ -28,7 +28,7 @@ async function getProcessorDomainCertificate(expirationRetry?: boolean): Promise
     pem: string;
 } | null> {
     if (!cachedProcessorCertificate) {
-        const discoveryResponse = await requestDataSubjectRequestApi<{
+        const discoveryResponse = await requestDataSubjectApi<{
             processor_certificate: string;
         }>("/discovery", {
             method: "GET"
