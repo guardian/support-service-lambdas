@@ -1,9 +1,10 @@
+import { GuApiLambda } from '@guardian/cdk';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
-import {App, Duration} from 'aws-cdk-lib';
-import {GuApiLambda} from "@guardian/cdk";
-import {nodeVersion} from "./node-version";
-import {ApiKeySourceType} from "aws-cdk-lib/aws-apigateway";
+import type { App } from 'aws-cdk-lib';
+import { Duration } from 'aws-cdk-lib';
+import { ApiKeySourceType } from 'aws-cdk-lib/aws-apigateway';
+import { nodeVersion } from './node-version';
 
 export class MParticleApi extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {
@@ -12,9 +13,9 @@ export class MParticleApi extends GuStack {
 		const app = 'mparticle-api';
 		const nameWithStage = `${app}-${this.stage}`;
 		const commonEnvironmentVariables = {
-		    App: app,
-		    Stack: this.stack,
-		    Stage: this.stage,
+			App: app,
+			Stack: this.stack,
+			Stage: this.stage,
 		};
 
 		// ---- API-triggered lambda functions ---- //
