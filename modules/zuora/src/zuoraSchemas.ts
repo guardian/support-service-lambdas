@@ -155,7 +155,6 @@ export const getInvoiceSchema = z.object({
 	id: z.string(),
 	amount: z.number(),
 	amountWithoutTax: z.number(),
-	availableToCreditAmount: z.number(),
 	balance: z.number(),
 });
 
