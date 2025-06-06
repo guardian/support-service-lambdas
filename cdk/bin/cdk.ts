@@ -7,6 +7,7 @@ import { DiscountApi } from '../lib/discount-api';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
 import { MetricPushApi } from '../lib/metric-push-api';
+import { MParticleApi } from '../lib/mparticle-api';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
 import { ObserverDataExport } from '../lib/observer-data-export';
@@ -332,5 +333,13 @@ new ObserverDataExport(app, 'observer-data-export-CODE', {
 });
 new ObserverDataExport(app, 'observer-data-export-PROD', {
 	stack: 'support',
+	stage: 'PROD',
+});
+new MParticleApi(app, 'mparticle-api-CODE', {
+	stack: 'membership',
+	stage: 'CODE',
+});
+new MParticleApi(app, 'mparticle-api-PROD', {
+	stack: 'membership',
 	stage: 'PROD',
 });
