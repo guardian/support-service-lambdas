@@ -1,5 +1,3 @@
-import { getIfDefined } from '@modules/nullAndUndefined';
-
 type Team = 'VALUE' | 'GROWTH' | 'PORTFOLIO' | 'PLATFORM' | 'SRE';
 
 const mobilePurchasesApps = [
@@ -145,10 +143,7 @@ const buildAppToTeamMappings = (
 	return mappings;
 };
 
-export type AlarmMappings = {
-	getTeams: (appName?: string) => Team[];
-	getTeamWebhookUrl: (team: Team) => string;
-};
+export type AlarmMappings = (appName?: string) => Team[];
 
 export const buildAlarmMappings = (
 	mappings: Record<string, string[]>,
@@ -156,22 +151,10 @@ export const buildAlarmMappings = (
 	const appToTeamMappings: Record<string, Team[]> =
 		buildAppToTeamMappings(mappings);
 
-	const getTeams = (appName?: string): Team[] => {
-		if (appName && appToTeamMappings[appName]) {
-			return appToTeamMappings[appName];
-		}
-
-		return ['SRE'];
-	};
-
-	const getTeamWebhookUrl = (team: Team): string => {
-		return getIfDefined<string>(
-			process.env[`${team}_WEBHOOK`],
-			`${team}_WEBHOOK environment variable not set`,
-		);
-	};
-
-	return { getTeams, getTeamWebhookUrl };
+	return (appName?: string) =>
+		appName && appToTeamMappings[appName]
+			? appToTeamMappings[appName]
+			: ['SRE'];
 };
 
 export const prodAlarmMappings = buildAlarmMappings(teamToAppMappings);

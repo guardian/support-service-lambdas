@@ -1,8 +1,12 @@
+import { Lazy } from '@modules/lazy';
 import type { SNSEventRecord, SQSEvent, SQSRecord } from 'aws-lambda';
 import { z } from 'zod';
 import type { AlarmMappings } from './alarmMappings';
 import { prodAlarmMappings } from './alarmMappings';
-import { getTags } from './cloudwatch';
+import type { Tags } from './cloudwatch';
+import { Cloudwatch } from './cloudwatch';
+import type { WebhookUrls } from './config';
+import { getEnv, loadConfig } from './config';
 
 const cloudWatchAlarmMessageSchema = z.object({
 	AlarmArn: z.string(),
@@ -22,12 +26,32 @@ const cloudWatchAlarmMessageSchema = z.object({
 
 type CloudWatchAlarmMessage = z.infer<typeof cloudWatchAlarmMessageSchema>;
 
+// only load config on a cold start
+export const lazyConfig = new Lazy(async () => {
+	const stage = getEnv('STAGE');
+	const stack = getEnv('STACK');
+	const app = getEnv('APP');
+	return await loadConfig(stage, stack, app);
+}, 'load config from SSM');
+
 export const handler = async (event: SQSEvent): Promise<void> => {
+	const config = await lazyConfig.get();
+	const cloudwatchClients = new Cloudwatch(config.accounts);
+	await handlerWithStage(event, config.webhookUrls, cloudwatchClients.getTags);
+};
+
+export async function handlerWithStage(
+	event: SQSEvent,
+	webhookUrls: WebhookUrls,
+	getTags: (alarmArn: string, awsAccountId: string) => Promise<Tags>,
+) {
 	try {
 		for (const record of event.Records) {
 			const maybeChatMessages = await getChatMessages(
 				record,
 				prodAlarmMappings,
+				getTags,
+				webhookUrls,
 			);
 
 			if (maybeChatMessages) {
@@ -46,11 +70,13 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 		console.error(error);
 		throw error;
 	}
-};
+}
 
 export async function getChatMessages(
 	record: SQSRecord,
-	alarmMappings: AlarmMappings,
+	getTeams: AlarmMappings,
+	getTags: (alarmArn: string, awsAccountId: string) => Promise<Tags>,
+	configuredWebhookUrls: WebhookUrls,
 ): Promise<{ webhookUrls: string[]; text: string } | undefined> {
 	console.log('sqsRecord', record);
 
@@ -68,7 +94,7 @@ export async function getChatMessages(
 
 	let message;
 	if (parsedMessage) {
-		message = await buildCloudWatchAlarmMessage(parsedMessage);
+		message = await buildCloudWatchAlarmMessage(parsedMessage, getTags);
 	} else {
 		message = buildSnsPublishMessage({
 			message: Message,
@@ -77,9 +103,9 @@ export async function getChatMessages(
 	}
 
 	if (message) {
-		const teams = alarmMappings.getTeams(message.app);
+		const teams = getTeams(message.app);
 		console.log(`app ${message.app} is assigned to teams ${teams.join(', ')}`);
-		const webhookUrls = teams.map(alarmMappings.getTeamWebhookUrl);
+		const webhookUrls = teams.map((team) => configuredWebhookUrls[team]);
 		return { webhookUrls, text: message.text };
 	} else {
 		return undefined;
@@ -130,16 +156,19 @@ export function buildDiagnosticLinks(
 	});
 }
 
-const buildCloudWatchAlarmMessage = async ({
-	AlarmArn,
-	AlarmName,
-	NewStateReason,
-	NewStateValue,
-	AlarmDescription,
-	AWSAccountId,
-	StateChangeTime,
-	Trigger,
-}: CloudWatchAlarmMessage) => {
+const buildCloudWatchAlarmMessage = async (
+	{
+		AlarmArn,
+		AlarmName,
+		NewStateReason,
+		NewStateValue,
+		AlarmDescription,
+		AWSAccountId,
+		StateChangeTime,
+		Trigger,
+	}: CloudWatchAlarmMessage,
+	getTags: (alarmArn: string, awsAccountId: string) => Promise<Tags>,
+) => {
 	const { App, DiagnosticLinks } = await getTags(AlarmArn, AWSAccountId);
 
 	const links = buildDiagnosticLinks(DiagnosticLinks, Trigger, StateChangeTime);

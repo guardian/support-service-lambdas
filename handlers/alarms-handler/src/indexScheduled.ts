@@ -1,31 +1,52 @@
 import type { MetricAlarm } from '@aws-sdk/client-cloudwatch';
 import { flatten, groupMap } from '@modules/arrayFunctions';
+import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type { AlarmMappings } from './alarmMappings';
 import { prodAlarmMappings } from './alarmMappings';
 import type { AlarmWithTags } from './cloudwatch';
-import { cloudwatchClients, getAllAlarmsInAlarm } from './cloudwatch';
-import { getConfig } from './config';
+import { Cloudwatch } from './cloudwatch';
+import type { Config, WebhookUrls } from './config';
+import { getEnv, loadConfig } from './config';
 import { buildDiagnosticLinks } from './index';
+
+// only load config on a cold start
+export const lazyConfig = new Lazy(async () => {
+	const stage = getEnv('STAGE');
+	const stack = getEnv('STACK');
+	const app = getEnv('APP');
+	return { stage, config: await loadConfig(stage, stack, app) };
+}, 'load config from SSM');
 
 // called by AWS
 export const handler = async (): Promise<void> => {
+	const { stage, config } = await lazyConfig.get();
+	await handlerWithStage(dayjs(), stage, config);
+};
+
+export async function handlerWithStage(
+	now: dayjs.Dayjs,
+	stage: string,
+	config: Config,
+) {
 	try {
-		const now = dayjs();
-		const alarms = await getAllAlarmsInAlarm(await cloudwatchClients.get());
+		const cloudwatchClients = new Cloudwatch(config.accounts);
+		const alarms = await cloudwatchClients.getAllAlarmsInAlarm();
 
 		const chatMessages = await getChatMessages(
 			now,
-			getConfig('STAGE'),
+			stage,
 			alarms,
 			prodAlarmMappings,
+			config.webhookUrls,
 		);
 
 		await Promise.all(
-			chatMessages.map((chatMessage) => {
-				return fetch(chatMessage.webhookUrl, {
+			chatMessages.map(async (chatMessage) => {
+				console.log('sending one chat message to', chatMessage.webhookUrl);
+				return await fetch(chatMessage.webhookUrl, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({ text: chatMessage.text }),
@@ -36,7 +57,7 @@ export const handler = async (): Promise<void> => {
 		console.error(error);
 		throw error;
 	}
-};
+}
 
 function activeOverOneDay(now: dayjs.Dayjs) {
 	return (alarm: AlarmWithTags) =>
@@ -50,24 +71,29 @@ function sentToAlarmsHandler(stage: string) {
 		) ?? -1) >= 0;
 }
 
+const actionsEnabled = (alarm: AlarmWithTags): boolean =>
+	alarm.alarm.ActionsEnabled ?? true;
+
 export async function getChatMessages(
 	now: Dayjs,
 	stage: string,
 	allAlarmData: AlarmWithTags[],
 	alarmMappings: AlarmMappings,
+	configuredWebhookUrls: WebhookUrls,
 ): Promise<Array<{ webhookUrl: string; text: string }>> {
 	const relevantAlarms = allAlarmData
 		.filter(activeOverOneDay(now))
-		.filter(sentToAlarmsHandler(stage));
+		.filter(sentToAlarmsHandler(stage))
+		.filter(actionsEnabled);
 
 	const allWebhookAndBulletPoint: Array<{ webhookUrl: string; text: string }> =
 		await Promise.all(
 			relevantAlarms.flatMap(async (alarmData) => {
 				const text = await buildCloudWatchAlarmMessage(alarmData);
 
-				const teams = alarmMappings.getTeams((await alarmData.tags.get()).App);
+				const teams = alarmMappings((await alarmData.tags.get()).App);
 
-				const webhookUrls = teams.map(alarmMappings.getTeamWebhookUrl);
+				const webhookUrls = teams.map((team) => configuredWebhookUrls[team]);
 				return webhookUrls.map((webhookUrl) => ({ webhookUrl, text }));
 			}),
 		).then(flatten);

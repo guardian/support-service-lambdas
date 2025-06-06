@@ -3,16 +3,23 @@ import { Lazy } from '@modules/lazy';
 import dayjs from 'dayjs';
 import { prodAlarmMappings } from '../src/alarmMappings';
 import type { Tags } from '../src/cloudwatch';
+import type { WebhookUrls } from '../src/config';
 import { getChatMessages } from '../src/indexScheduled';
 
 it('should convert some alarms into a chat message', async () => {
-	process.env['VALUE_WEBHOOK'] = 'http://thegulocal.com/VALUE_WEBHOOK';
-	process.env['GROWTH_WEBHOOK'] = 'http://thegulocal.com/GROWTH_WEBHOOK';
+	const webhookUrls: WebhookUrls = {
+		VALUE: 'http://thegulocal.com/VALUE_WEBHOOK',
+		GROWTH: 'http://thegulocal.com/GROWTH_WEBHOOK',
+		SRE: '',
+		PORTFOLIO: '',
+		PLATFORM: '',
+	};
 	const alarms = await getChatMessages(
 		dayjs(new Date(2025, 4, 21, 16, 16)),
 		'PROD',
 		testData,
 		prodAlarmMappings,
+		webhookUrls,
 	);
 	console.log('alarmsalarms', alarms);
 	expect(alarms).toEqual(expected);
