@@ -170,15 +170,17 @@ export const getInvoiceItemsSchema = z.object({
 			chargeAmount: z.number(),
 			productRatePlanChargeId: z.string(),
 			availableToCreditAmount: z.number(),
-			taxationItems: z.object({
-				data: z.array(
-					z.object({
-						id: z.string(),
-						taxAmount: z.number(),
-						availableToCreditAmount: z.number(),
-					}),
-				),
-			}),
+			// taxationItems: z.object({
+			// 	data: z.array(
+			// 		z.optional(
+			// 			z.object({
+			// 				id: z.string(),
+			// 				taxAmount: z.number(),
+			// 				availableToCreditAmount: z.number(),
+			// 			}),
+			// 		),
+			// 	),
+			// }),
 		}),
 	),
 });
