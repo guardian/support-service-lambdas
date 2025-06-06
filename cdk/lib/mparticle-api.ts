@@ -13,5 +13,20 @@ export class MParticleApi extends GuStack {
 		//     Stack: this.stack,
 		//     Stage: this.stage,
 		// };
+
+		// new GuApiLambda(stack, "my-lambda", {
+		// 	fileName: "my-app.zip",
+		// 	handler: "handler.ts",
+		// 	runtime: Runtime.NODEJS_14_X,
+		// 	monitoringConfiguration: {
+		// 		http5xxAlarm: { tolerated5xxPercentage: 5 },
+		// 		snsTopicName: "alerts-topic",
+		// 	},
+		// 	app: "my-app",
+		// 	api: {
+		// 		id: "my-api",
+		// 		description: "...",
+		// 	},
+		// });
 	}
 }
