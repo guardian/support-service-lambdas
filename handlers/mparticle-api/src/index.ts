@@ -113,9 +113,8 @@ const router = new Router([
 				controller_id: z.string(),
 				expected_completion_time: z.string().datetime(),
 				subject_request_id: z.string().uuid(),
-				group_id: z.string().nullable(),
 				request_status: z.enum(['pending', 'in_progress', 'completed', 'cancelled']),
-				api_version: z.string(),
+				api_version: z.string().nullable().optional(),
 				results_url: z.string().url().nullable(),
 				extensions: z.array(z.object({
 					domain: z.string(),
