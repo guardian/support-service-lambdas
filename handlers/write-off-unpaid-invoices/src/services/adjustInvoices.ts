@@ -5,16 +5,22 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 export const adjustInvoices = async (event: LambdaEvent) => {
 	const stage = stageFromEnvironment();
-	const { Items } = event;
+	// const { Items } = event;
 	const zuoraClient = await ZuoraClient.create(stage);
 
-	for (const item of Items) {
-		const invoiceId = item.invoice_id;
+	// for (const item of Items) {
+	// const invoiceId = item.invoice_id;
 
-		const invoice = await getInvoice(zuoraClient, invoiceId);
-		console.log(invoice);
+	const invoice = await getInvoice(
+		zuoraClient,
+		'8ad093179739ff4c0197439d02d77292',
+	);
+	console.log(invoice);
 
-		const invoiceItems = await getInvoiceItems(zuoraClient, invoiceId);
-		console.log(invoiceItems);
-	}
+	const invoiceItems = await getInvoiceItems(
+		zuoraClient,
+		'8ad093179739ff4c0197439d02d77292',
+	);
+	console.log(invoiceItems);
+	// }
 };
