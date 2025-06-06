@@ -8,11 +8,6 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       "GuStringParameter",
       "GuStringParameter",
       "GuStringParameter",
-      "GuStringParameter",
-      "GuStringParameter",
-      "GuStringParameter",
-      "GuStringParameter",
-      "GuStringParameter",
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
       "GuAlarm",
@@ -26,26 +21,6 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       "Default": "/account/services/artifact.bucket",
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
-    },
-    "alarmshandlerGROWTHwebhook": {
-      "Description": "GROWTH Team Google Chat webhook URL",
-      "Type": "String",
-    },
-    "alarmshandlerPLATFORMwebhook": {
-      "Description": "PLATFORM Team Google Chat webhook URL",
-      "Type": "String",
-    },
-    "alarmshandlerPORTFOLIOwebhook": {
-      "Description": "PORTFOLIO Team Google Chat webhook URL",
-      "Type": "String",
-    },
-    "alarmshandlerSREwebhook": {
-      "Description": "SRE Team Google Chat webhook URL",
-      "Type": "String",
-    },
-    "alarmshandlerVALUEwebhook": {
-      "Description": "VALUE Team Google Chat webhook URL",
-      "Type": "String",
     },
     "alarmshandlermobileaccountrolearn": {
       "Description": "ARN of role in the mobile account which allows cloudwatch:ListTagsForResource",
@@ -151,35 +126,8 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "alarms-handler",
-            "GROWTH_WEBHOOK": {
-              "Ref": "alarmshandlerGROWTHwebhook",
-            },
-            "MOBILE_AWS_ACCOUNT_ID": {
-              "Ref": "alarmshandlermobileawsaccount",
-            },
-            "MOBILE_ROLE_ARN": {
-              "Ref": "alarmshandlermobileaccountrolearn",
-            },
-            "PLATFORM_WEBHOOK": {
-              "Ref": "alarmshandlerPLATFORMwebhook",
-            },
-            "PORTFOLIO_WEBHOOK": {
-              "Ref": "alarmshandlerPORTFOLIOwebhook",
-            },
-            "SRE_WEBHOOK": {
-              "Ref": "alarmshandlerSREwebhook",
-            },
             "STACK": "membership",
             "STAGE": "CODE",
-            "TARGETING_AWS_ACCOUNT_ID": {
-              "Ref": "alarmshandlertargetingawsaccount",
-            },
-            "TARGETING_ROLE_ARN": {
-              "Ref": "alarmshandlertargetingaccountrolearn",
-            },
-            "VALUE_WEBHOOK": {
-              "Ref": "alarmshandlerVALUEwebhook",
-            },
           },
         },
         "FunctionName": "alarms-handler-CODE",
@@ -542,35 +490,8 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "alarms-handler",
-            "GROWTH_WEBHOOK": {
-              "Ref": "alarmshandlerGROWTHwebhook",
-            },
-            "MOBILE_AWS_ACCOUNT_ID": {
-              "Ref": "alarmshandlermobileawsaccount",
-            },
-            "MOBILE_ROLE_ARN": {
-              "Ref": "alarmshandlermobileaccountrolearn",
-            },
-            "PLATFORM_WEBHOOK": {
-              "Ref": "alarmshandlerPLATFORMwebhook",
-            },
-            "PORTFOLIO_WEBHOOK": {
-              "Ref": "alarmshandlerPORTFOLIOwebhook",
-            },
-            "SRE_WEBHOOK": {
-              "Ref": "alarmshandlerSREwebhook",
-            },
             "STACK": "membership",
             "STAGE": "CODE",
-            "TARGETING_AWS_ACCOUNT_ID": {
-              "Ref": "alarmshandlertargetingawsaccount",
-            },
-            "TARGETING_ROLE_ARN": {
-              "Ref": "alarmshandlertargetingaccountrolearn",
-            },
-            "VALUE_WEBHOOK": {
-              "Ref": "alarmshandlerVALUEwebhook",
-            },
           },
         },
         "FunctionName": "alarms-handler-scheduled-CODE",
@@ -1051,11 +972,6 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       "GuStringParameter",
       "GuStringParameter",
       "GuStringParameter",
-      "GuStringParameter",
-      "GuStringParameter",
-      "GuStringParameter",
-      "GuStringParameter",
-      "GuStringParameter",
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
       "GuAlarm",
@@ -1069,26 +985,6 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       "Default": "/account/services/artifact.bucket",
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
-    },
-    "alarmshandlerGROWTHwebhook": {
-      "Description": "GROWTH Team Google Chat webhook URL",
-      "Type": "String",
-    },
-    "alarmshandlerPLATFORMwebhook": {
-      "Description": "PLATFORM Team Google Chat webhook URL",
-      "Type": "String",
-    },
-    "alarmshandlerPORTFOLIOwebhook": {
-      "Description": "PORTFOLIO Team Google Chat webhook URL",
-      "Type": "String",
-    },
-    "alarmshandlerSREwebhook": {
-      "Description": "SRE Team Google Chat webhook URL",
-      "Type": "String",
-    },
-    "alarmshandlerVALUEwebhook": {
-      "Description": "VALUE Team Google Chat webhook URL",
-      "Type": "String",
     },
     "alarmshandlermobileaccountrolearn": {
       "Description": "ARN of role in the mobile account which allows cloudwatch:ListTagsForResource",
@@ -1194,35 +1090,8 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "alarms-handler",
-            "GROWTH_WEBHOOK": {
-              "Ref": "alarmshandlerGROWTHwebhook",
-            },
-            "MOBILE_AWS_ACCOUNT_ID": {
-              "Ref": "alarmshandlermobileawsaccount",
-            },
-            "MOBILE_ROLE_ARN": {
-              "Ref": "alarmshandlermobileaccountrolearn",
-            },
-            "PLATFORM_WEBHOOK": {
-              "Ref": "alarmshandlerPLATFORMwebhook",
-            },
-            "PORTFOLIO_WEBHOOK": {
-              "Ref": "alarmshandlerPORTFOLIOwebhook",
-            },
-            "SRE_WEBHOOK": {
-              "Ref": "alarmshandlerSREwebhook",
-            },
             "STACK": "membership",
             "STAGE": "PROD",
-            "TARGETING_AWS_ACCOUNT_ID": {
-              "Ref": "alarmshandlertargetingawsaccount",
-            },
-            "TARGETING_ROLE_ARN": {
-              "Ref": "alarmshandlertargetingaccountrolearn",
-            },
-            "VALUE_WEBHOOK": {
-              "Ref": "alarmshandlerVALUEwebhook",
-            },
           },
         },
         "FunctionName": "alarms-handler-PROD",
@@ -1585,35 +1454,8 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "alarms-handler",
-            "GROWTH_WEBHOOK": {
-              "Ref": "alarmshandlerGROWTHwebhook",
-            },
-            "MOBILE_AWS_ACCOUNT_ID": {
-              "Ref": "alarmshandlermobileawsaccount",
-            },
-            "MOBILE_ROLE_ARN": {
-              "Ref": "alarmshandlermobileaccountrolearn",
-            },
-            "PLATFORM_WEBHOOK": {
-              "Ref": "alarmshandlerPLATFORMwebhook",
-            },
-            "PORTFOLIO_WEBHOOK": {
-              "Ref": "alarmshandlerPORTFOLIOwebhook",
-            },
-            "SRE_WEBHOOK": {
-              "Ref": "alarmshandlerSREwebhook",
-            },
             "STACK": "membership",
             "STAGE": "PROD",
-            "TARGETING_AWS_ACCOUNT_ID": {
-              "Ref": "alarmshandlertargetingawsaccount",
-            },
-            "TARGETING_ROLE_ARN": {
-              "Ref": "alarmshandlertargetingaccountrolearn",
-            },
-            "VALUE_WEBHOOK": {
-              "Ref": "alarmshandlerVALUEwebhook",
-            },
           },
         },
         "FunctionName": "alarms-handler-scheduled-PROD",

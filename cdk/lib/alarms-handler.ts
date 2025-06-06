@@ -38,11 +38,6 @@ export class AlarmsHandler extends GuStack {
 			},
 		});
 
-		const buildWebhookParameter = (team: string): GuStringParameter =>
-			new GuStringParameter(this, `${app}-${team}-webhook`, {
-				description: `${team} Team Google Chat webhook URL`,
-			});
-
 		const mobileAccountId = new GuStringParameter(
 			this,
 			`${app}-mobile-aws-account`,
@@ -74,22 +69,6 @@ export class AlarmsHandler extends GuStack {
 			},
 		);
 
-		const lambdaEnv = {
-			APP: app,
-			STACK: this.stack,
-			STAGE: this.stage,
-			GROWTH_WEBHOOK: buildWebhookParameter('GROWTH').valueAsString,
-			PORTFOLIO_WEBHOOK: buildWebhookParameter('PORTFOLIO').valueAsString,
-			PLATFORM_WEBHOOK: buildWebhookParameter('PLATFORM').valueAsString,
-			VALUE_WEBHOOK: buildWebhookParameter('VALUE').valueAsString,
-			SRE_WEBHOOK: buildWebhookParameter('SRE').valueAsString,
-			// The lambda uses the mobile account role if it needs to fetch tags cross-account
-			MOBILE_AWS_ACCOUNT_ID: mobileAccountId.valueAsString,
-			MOBILE_ROLE_ARN: mobileAccountRoleArn.valueAsString,
-			TARGETING_AWS_ACCOUNT_ID: targetingAccountId.valueAsString,
-			TARGETING_ROLE_ARN: targetingAccountRoleArn.valueAsString,
-		};
-
 		const triggeredLambda = new GuLambdaFunction(this, `${app}-lambda`, {
 			app,
 			memorySize: 1024,
@@ -99,7 +78,11 @@ export class AlarmsHandler extends GuStack {
 			handler: 'index.handler',
 			functionName: `${app}-${this.stage}`,
 			events: [new SqsEventSource(queue)],
-			environment: lambdaEnv,
+			environment: {
+				APP: app,
+				STACK: this.stack,
+				STAGE: this.stage,
+			},
 		});
 
 		triggeredLambda.role?.attachInlinePolicy(
@@ -176,7 +159,11 @@ export class AlarmsHandler extends GuStack {
 				timeout: Duration.seconds(15),
 				handler: 'indexScheduled.handler',
 				functionName: `${app}-scheduled-${this.stage}`,
-				environment: lambdaEnv,
+				environment: {
+					APP: app,
+					STACK: this.stack,
+					STAGE: this.stage,
+				},
 				monitoringConfiguration: {
 					actionsEnabled: this.stage === 'PROD',
 					toleratedErrorPercentage: 0,
