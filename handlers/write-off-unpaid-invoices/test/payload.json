@@ -1,0 +1,25 @@
+{
+	"objects": [
+		{
+			"AdjustmentDate": "2025-06-06",
+			"Amount": 0.94,
+			"Comment": "comment",
+			"InvoiceId": "8ad0951692c418030192cc90d6530785",
+			"SourceId": "8ad0951692c418030192cc90d65b0786",
+			"SourceType": "InvoiceDetail",
+			"Type": "Charge",
+			"ReasonCode": "Write-off"
+		},
+		{
+			"AdjustmentDate": "2025-06-06",
+			"Amount": 0.19,
+			"Comment": "comment",
+			"InvoiceId": "8ad0951692c418030192cc90d6530785",
+			"SourceId": "8ad0951692c418030192cc90d65b0787",
+			"SourceType": "Tax",
+			"Type": "Charge",
+			"ReasonCode": "Write-off"
+		}
+	],
+	"type": "InvoiceItemAdjustment"
+}
