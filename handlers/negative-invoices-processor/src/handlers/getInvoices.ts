@@ -47,12 +47,17 @@ const query = (): string =>
 	`
     SELECT
         inv.id,
-        STRING_AGG(distinct inv.account_id, ',') as account_id,
-        AVG(inv.balance) as invoice_balance,
+        inv.account_id AS account_id,
+        inv.balance AS invoice_balance
     FROM 
         datatech-fivetran.zuora.invoice inv
+    INNER JOIN 
+        datatech-fivetran.zuora.subscription sub
+        ON inv.account_id = sub.account_id
     WHERE 
-        inv.amount < 0 AND inv.balance != 0
+        inv.amount < 0
+        AND inv.balance != 0
+        AND sub.status = 'Active'
     ORDER BY 
-        invoice_date
+        inv.invoice_date
 `;
