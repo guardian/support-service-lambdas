@@ -9,9 +9,12 @@ export type ActiveSubsCheckInput = z.infer<typeof BigQueryRecordSchema>;
 export const handler = async (event: ActiveSubsCheckInput) => {
 	try {
 		const parsedEvent = BigQueryRecordSchema.parse(event);
-		const accountId = parsedEvent.account_id;
+		// const accountId = parsedEvent.account_id;
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
-		const hasActiveSub = await hasActiveSubscription(zuoraClient, accountId);
+		const hasActiveSub = await hasActiveSubscription(
+			zuoraClient,
+			'8ad085589739fe21019753d2da210a9d',
+		);
 
 		return {
 			...parsedEvent,
