@@ -72,11 +72,11 @@ class GuardianWeeklyAddressValidatorTest extends AnyFlatSpec with Matchers {
     GuardianWeeklyDomesticAddressValidator(
       invalidBillingAddress,
       testDomesticSoldToAddress,
-    ) shouldBe Failed(s"Delivery address must be populated in Zuora")
+    ) shouldBe Failed(s"Billing address must be populated in Zuora")
     GuardianWeeklyROWAddressValidator(
       invalidBillingAddress,
       testROWSoldToAddress,
-    ) shouldBe Failed(s"Delivery address must be populated in Zuora")
+    ) shouldBe Failed(s"Billing address must be populated in Zuora")
   }
 
   it should "fail if bill address city is empty" in {
