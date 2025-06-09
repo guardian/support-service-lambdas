@@ -13,7 +13,7 @@ export const handler = async (event: ActiveSubsCheckInput) => {
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const hasActiveSub = await hasActiveSubscription(
 			zuoraClient,
-			'8ad085589739fe21019753d2da210a9d',
+			'8ad085589739fe21019753d2da210a9d1',
 		);
 
 		return {
