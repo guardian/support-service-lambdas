@@ -53,8 +53,6 @@ const query = (): string =>
         datatech-fivetran.zuora.invoice inv
     WHERE 
         inv.amount < 0 AND inv.balance != 0
-    GROUP BY 
-        1
     ORDER BY 
         invoice_date
 `;
