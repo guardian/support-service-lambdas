@@ -72,11 +72,11 @@ class GuardianWeeklyAddressValidatorTest extends AnyFlatSpec with Matchers {
     GuardianWeeklyDomesticAddressValidator(
       invalidBillingAddress,
       testDomesticSoldToAddress,
-    ) shouldBe Failed(s"bill to address1 must be populated")
+    ) shouldBe Failed(s"Delivery address must be populated in Zuora")
     GuardianWeeklyROWAddressValidator(
       invalidBillingAddress,
       testROWSoldToAddress,
-    ) shouldBe Failed(s"bill to address1 must be populated")
+    ) shouldBe Failed(s"Delivery address must be populated in Zuora")
   }
 
   it should "fail if bill address city is empty" in {
@@ -84,11 +84,11 @@ class GuardianWeeklyAddressValidatorTest extends AnyFlatSpec with Matchers {
     GuardianWeeklyDomesticAddressValidator(
       invalidBillingAddress,
       testDomesticSoldToAddress,
-    ) shouldBe Failed(s"bill to city must be populated")
+    ) shouldBe Failed(s"Billing address city must be populated in Zuora")
     GuardianWeeklyROWAddressValidator(
       invalidBillingAddress,
       testROWSoldToAddress,
-    ) shouldBe Failed(s"bill to city must be populated")
+    ) shouldBe Failed(s"Billing address city must be populated in Zuora")
   }
 
   it should "fail if bill address postcode is empty" in {
@@ -96,11 +96,11 @@ class GuardianWeeklyAddressValidatorTest extends AnyFlatSpec with Matchers {
     GuardianWeeklyDomesticAddressValidator(
       invalidBillingAddress,
       testDomesticSoldToAddress,
-    ) shouldBe Failed(s"bill to postcode must be populated")
+    ) shouldBe Failed(s"Billing address postcode must be populated in Zuora")
     GuardianWeeklyROWAddressValidator(
       invalidBillingAddress,
       testROWSoldToAddress,
-    ) shouldBe Failed(s"bill to postcode must be populated")
+    ) shouldBe Failed(s"Billing address postcode must be populated in Zuora")
   }
 
   it should "fail if bill address country is empty" in {
@@ -108,10 +108,10 @@ class GuardianWeeklyAddressValidatorTest extends AnyFlatSpec with Matchers {
     GuardianWeeklyDomesticAddressValidator(
       invalidBillingAddress,
       testDomesticSoldToAddress,
-    ) shouldBe Failed(s"bill to country must be populated")
+    ) shouldBe Failed(s"Billing address country must be populated in Zuora")
     GuardianWeeklyROWAddressValidator(
       invalidBillingAddress,
       testROWSoldToAddress,
-    ) shouldBe Failed(s"bill to country must be populated")
+    ) shouldBe Failed(s"Billing address country must be populated in Zuora")
   }
 }
