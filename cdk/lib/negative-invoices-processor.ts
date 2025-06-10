@@ -126,16 +126,16 @@ export class NegativeInvoicesProcessor extends GuStack {
 			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
 		});
 
-		const activeSubFetcherMap = new Map(this, 'Active Sub fetcher map', {
+		const activeSubChecksMap = new Map(this, 'Active Sub fetcher map', {
 			maxConcurrency: 10,
 			itemsPath: JsonPath.stringAt('$.invoices'),
-			resultPath: '$.output',
+			resultPath: '$.activeSubChecks',
 		});
 
-		activeSubFetcherMap.iterator(checkForActiveSubLambdaTask);
+		activeSubChecksMap.iterator(checkForActiveSubLambdaTask);
 
 		const definitionBody = DefinitionBody.fromChainable(
-			getInvoicesLambdaTask.next(activeSubFetcherMap),
+			getInvoicesLambdaTask.next(activeSubChecksMap),
 		);
 
 		new StateMachine(this, `${appName}-state-machine-${this.stage}`, {
