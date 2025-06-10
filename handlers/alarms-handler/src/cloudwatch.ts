@@ -9,7 +9,7 @@ import { flatten } from '@modules/arrayFunctions';
 import { awsConfig, getAwsConfig, isRunningLocally } from '@modules/aws/config';
 import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
-import type { Accounts } from './config';
+import type { Accounts } from './configSchema';
 
 const buildCrossAccountCloudwatchClient = (
 	roleArn: string,

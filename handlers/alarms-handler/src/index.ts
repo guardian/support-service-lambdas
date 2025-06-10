@@ -6,8 +6,8 @@ import type { AppToTeams } from './alarmMappings';
 import { prodAppToTeams } from './alarmMappings';
 import type { Tags } from './cloudwatch';
 import { buildCloudwatch } from './cloudwatch';
-import type { WebhookUrls } from './config';
-import { ConfigSchema, getEnv } from './config';
+import type { WebhookUrls } from './configSchema';
+import { ConfigSchema, getEnv } from './configSchema';
 
 const cloudWatchAlarmMessageSchema = z.object({
 	AlarmArn: z.string(),

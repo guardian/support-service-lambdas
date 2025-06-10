@@ -1,7 +1,7 @@
 import { handlerWithStage } from '../src/indexScheduled';
 import dayjs from 'dayjs';
 import { loadConfig } from '@modules/aws/appConfig';
-import { ConfigSchema } from '../src/config';
+import { ConfigSchema } from '../src/configSchema';
 
 // to run this, get credentials for membership/trageting/mobile
 // the output will go to chat channel P&E/SR Alarms CODE

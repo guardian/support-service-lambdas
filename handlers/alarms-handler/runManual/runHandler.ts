@@ -2,7 +2,7 @@ import { handlerWithStage } from '../src/index';
 import type { SQSEvent } from 'aws-lambda';
 import { buildCloudwatch } from '../src/cloudwatch';
 import { loadConfig } from '@modules/aws/appConfig';
-import { ConfigSchema } from '../src/config';
+import { ConfigSchema } from '../src/configSchema';
 
 // to run this, get credentials for membership
 // the output will go to chat channel P&E/SR Alarms CODE

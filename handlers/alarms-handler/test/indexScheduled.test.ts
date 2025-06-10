@@ -3,7 +3,7 @@ import { Lazy } from '@modules/lazy';
 import dayjs from 'dayjs';
 import { prodAppToTeams } from '../src/alarmMappings';
 import type { Tags } from '../src/cloudwatch';
-import type { WebhookUrls } from '../src/config';
+import type { WebhookUrls } from '../src/configSchema';
 import { getChatMessages } from '../src/indexScheduled';
 
 it('should convert some alarms into a chat message', async () => {

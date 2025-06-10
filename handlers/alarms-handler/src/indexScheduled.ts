@@ -9,8 +9,8 @@ import type { AppToTeams } from './alarmMappings';
 import { prodAppToTeams } from './alarmMappings';
 import type { AlarmWithTags } from './cloudwatch';
 import { buildCloudwatch } from './cloudwatch';
-import type { Config, WebhookUrls } from './config';
-import { ConfigSchema, getEnv } from './config';
+import type { WebhookUrls } from './configSchema';
+import { ConfigSchema, getEnv } from './configSchema';
 import { buildDiagnosticLinks } from './index';
 
 // only load config on a cold start
@@ -30,7 +30,7 @@ export const handler = async (): Promise<void> => {
 export const handlerWithStage = async (
 	now: dayjs.Dayjs,
 	stage: string,
-	config: Config,
+	config: ConfigSchema,
 ) => {
 	try {
 		const alarms = await buildCloudwatch(config.accounts).getAllAlarmsInAlarm();

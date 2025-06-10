@@ -1,7 +1,7 @@
 import type { SQSEvent, SQSRecord } from 'aws-lambda';
 import { getChatMessages, handlerWithStage } from '../src';
 import { buildAlarmMappings } from '../src/alarmMappings';
-import type { WebhookUrls } from '../src/config';
+import type { WebhookUrls } from '../src/configSchema';
 
 jest.mock('../src/cloudwatch');
 
