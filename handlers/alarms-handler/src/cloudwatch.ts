@@ -6,7 +6,7 @@ import {
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
 import { awsConfig, getAwsConfig, isRunningLocally } from '@modules/aws/config';
 import type { Lazy } from '@modules/lazy';
-import type { Accounts } from './config';
+import type { Accounts } from './configSchema';
 
 const buildCrossAccountCloudwatchClient = (
 	roleArn: string,

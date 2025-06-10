@@ -26,7 +26,7 @@ export const ConfigSchema = z.object({
 	webhookUrls: WebhookUrlsSchema,
 	accounts: AccountsSchema,
 });
-export type Config = z.infer<typeof ConfigSchema>;
+export type ConfigSchema = z.infer<typeof ConfigSchema>;
 
 export const getEnv = (env: string): string =>
 	getIfDefined(process.env[env], `${env} environment variable not set`);
