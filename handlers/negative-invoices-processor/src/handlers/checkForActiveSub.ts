@@ -31,6 +31,7 @@ export const handler = async (event: CheckForActiveSubInput) => {
 };
 
 const queryResponseSchema = z.object({
+	done: z.boolean(),
 	size: z.number(),
 });
 
