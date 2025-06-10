@@ -7,6 +7,7 @@ import { DiscountApi } from '../lib/discount-api';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
 import { MetricPushApi } from '../lib/metric-push-api';
+import { NegativeInvoicesProcessor } from '../lib/negative-invoices-processor';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
 import { ObserverDataExport } from '../lib/observer-data-export';
@@ -331,6 +332,14 @@ new ObserverDataExport(app, 'observer-data-export-CODE', {
 	stage: 'CODE',
 });
 new ObserverDataExport(app, 'observer-data-export-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+});
+new NegativeInvoicesProcessor(app, 'negative-invoices-processor-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+});
+new NegativeInvoicesProcessor(app, 'negative-invoices-processor-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 });
