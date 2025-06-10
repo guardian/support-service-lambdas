@@ -121,8 +121,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 
 		const activeSubFetcherMap = new Map(this, 'Active Sub fetcher map', {
 			maxConcurrency: 10,
-			// itemsPath: JsonPath.stringAt('$.recordsForEmailSend'),
-			// resultPath: '$.discountProcessingAttempts',
+			resultPath: '$.output',
 		});
 
 		activeSubFetcherMap.iterator(checkForActiveSubLambdaTask);
