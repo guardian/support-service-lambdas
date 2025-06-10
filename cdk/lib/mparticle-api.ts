@@ -19,7 +19,7 @@ export class MParticleApi extends GuStack {
 		};
 
 		// ---- API-triggered lambda functions ---- //
-		new GuApiLambda(this, `${app}-lambda`, {
+		const lambda = new GuApiLambda(this, `${app}-lambda`, {
 			fileName: 'product-switch-api.zip',
 			handler: 'index.handler',
 			runtime: nodeVersion,
@@ -45,5 +45,24 @@ export class MParticleApi extends GuStack {
 				},
 			},
 		});
+
+		const usagePlan = lambda.api.addUsagePlan('UsagePlan', {
+			name: nameWithStage,
+			description: 'REST endpoints for product-switch-api',
+			apiStages: [
+				{
+					stage: lambda.api.deploymentStage,
+					api: lambda.api,
+				},
+			],
+		});
+
+		// create api key
+		const apiKey = lambda.api.addApiKey(`${app}-key-${this.stage}`, {
+			apiKeyName: `${app}-key-${this.stage}`,
+		});
+
+		// associate api key to plan
+		usagePlan.addApiKey(apiKey);
 	}
 }
