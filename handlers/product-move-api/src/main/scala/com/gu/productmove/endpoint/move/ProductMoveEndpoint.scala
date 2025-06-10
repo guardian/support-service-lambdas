@@ -41,6 +41,8 @@ import sttp.tapir.json.zio.jsonBody
 import zio.*
 import zio.json.*
 
+import java.time.LocalDate
+
 // this is the description for just the one endpoint
 object ProductMoveEndpoint {
 
@@ -157,6 +159,7 @@ object ProductMoveEndpoint {
       postData: ExpectedInput,
       maybeIdentityId: Option[IdentityId],
   ): Task[Right[Nothing, OutputBody]] = {
+    val today = LocalDate.now()
     val stage = GuStageLive.get
     val getCatalogueLive = new GetCatalogueLive(
       AwsS3Live(AwsS3Live.impl(AwsCredentialsLive.impl)),
@@ -201,7 +204,7 @@ object ProductMoveEndpoint {
         getSubscription,
         getAccount,
       )
-      result <- productMoveEndpoint.runWithLayers(switchType, subscriptionName, postData, maybeIdentityId)
+      result <- productMoveEndpoint.runWithLayers(switchType, subscriptionName, postData, maybeIdentityId, today)
     } yield Right(result))
       .provide(
         GetSubscriptionLive.layer,

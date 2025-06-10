@@ -100,6 +100,7 @@ export type OrderRequest = {
 	description?: string;
 	subscriptions: Array<{
 		subscriptionNumber: string;
+		customFields?: { LastPlanAddedDate__c?: string };
 		orderActions: OrderAction[];
 	}>;
 };

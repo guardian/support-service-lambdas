@@ -15,6 +15,8 @@ import com.gu.productmove.zuora.model.SubscriptionName
 import com.gu.productmove.zuora.rest.ZuoraRestBody.ZuoraClientError
 import zio.{IO, Task, ZIO}
 
+import java.time.LocalDate
+
 def assertSubscriptionBelongsToIdentityUser(
     getSubscription: GetSubscription,
     getAccount: GetAccount,
@@ -48,6 +50,7 @@ class ProductMoveEndpointSteps(
       subscriptionName: SubscriptionName,
       postData: ExpectedInput,
       maybeIdentityId: Option[IdentityId],
+      today: LocalDate,
   ): Task[OutputBody] = {
     val maybeResult: IO[OutputBody | Throwable, OutputBody] = for {
       subscriptionAccount <- assertSubscriptionBelongsToIdentityUser(
@@ -60,9 +63,9 @@ class ProductMoveEndpointSteps(
       outputBody <- switchType match {
         case SwitchType.RecurringContributionToSupporterPlus =>
           recurringContributionToSupporterPlus
-            .run(subscriptionName, postData, subscription, account)
+            .run(subscriptionName, postData, subscription, account, today)
         case SwitchType.ToRecurringContribution =>
-          toRecurringContribution.run(subscriptionName, postData, subscription, account)
+          toRecurringContribution.run(subscriptionName, postData, subscription, account, today)
       }
     } yield outputBody
     maybeResult.catchAll(recoverErrors)

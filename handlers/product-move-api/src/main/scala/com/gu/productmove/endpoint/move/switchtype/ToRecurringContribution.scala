@@ -26,6 +26,7 @@ trait ToRecurringContribution {
       postData: ExpectedInput,
       subscription: GetSubscriptionResponse,
       account: GetAccountResponse,
+      today: LocalDate,
   ): Task[OutputBody]
 }
 
@@ -39,6 +40,7 @@ class ToRecurringContributionImpl(
       postData: ExpectedInput,
       subscription: GetSubscriptionResponse,
       account: GetAccountResponse,
+      today: LocalDate,
   ): Task[OutputBody] =
     for {
       _ <- ZIO.log("ToRecurringContribution PostData: " + postData.toString)
@@ -88,6 +90,7 @@ class ToRecurringContributionImpl(
           runBilling = Some(true),
           preview = Some(false),
           targetDate = None,
+          LastPlanAddedDate__c = today,
         )
       }
 
