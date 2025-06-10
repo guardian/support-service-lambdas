@@ -49,7 +49,9 @@ export const handlerWithStage = async (
 				return await fetch(chatMessage.webhookUrl, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ text: chatMessage.text }),
+					body: JSON.stringify({
+						text: chatMessage.text,
+					}),
 				});
 			}),
 		);
@@ -134,9 +136,10 @@ const buildCloudWatchAlarmMessage = async (alarmData: AlarmWithTags) => {
 	const { App, DiagnosticLinks } = await alarmData.tags.get();
 	const links = getDiagnosticLinks(DiagnosticLinks, alarmData.alarm);
 
-	const alarmUrl =
-		'https://console.aws.amazon.com/cloudwatch/home?region=eu-west-1#alarmsV2:alarm/' +
-		alarmData.alarm.AlarmName;
+	const alarmUrl = alarmData.alarm.AlarmName
+		? 'https://console.aws.amazon.com/cloudwatch/home?region=eu-west-1#alarmsV2:alarm/' +
+			encodeURIComponent(alarmData.alarm.AlarmName).replaceAll('.', '%2E') // dots break gchat url detection
+		: undefined;
 	const timestampISO =
 		alarmData.alarm.StateTransitionedTimestamp?.toISOString() ??
 		'unknown timestamp';

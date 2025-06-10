@@ -6,7 +6,7 @@ import { ConfigSchema } from '../src/config';
 
 // to run this, get credentials for membership
 // the output will go to chat channel P&E/SR Alarms CODE
-const testEvent: SQSEvent = {
+export const handlerTestEvent: SQSEvent = {
 	Records: [
 		{
 			body: JSON.stringify({
@@ -29,7 +29,7 @@ const testEvent: SQSEvent = {
 loadConfig('CODE', 'support', 'alarms-handler', ConfigSchema)
 	.then((config) => {
 		return handlerWithStage(
-			testEvent,
+			handlerTestEvent,
 			config.webhookUrls,
 			buildCloudwatch(config.accounts).getTags,
 		);
