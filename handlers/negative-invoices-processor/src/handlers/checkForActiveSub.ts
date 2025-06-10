@@ -11,12 +11,10 @@ export const handler = async (event: CheckForActiveSubInput) => {
 		const parsedEvent = BigQueryRecordSchema.parse(event);
 		const accountId = parsedEvent.account_id;
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
-		const query = `SELECT Id FROM Subscription WHERE AccountId = '${accountId}' AND Status = 'Active'`;
-		console.log('Querying Zuora for active subscription:', query);
-		const hasActiveSub = await hasActiveSubscription(zuoraClient, query);
+		const hasActiveSub = await hasActiveSubscription(zuoraClient, accountId);
 
 		return {
-			...parsedEvent,
+			account_id: parsedEvent.account_id,
 			hasActiveSub,
 		};
 	} catch (error) {
@@ -36,8 +34,9 @@ const queryResponseSchema = z.object({
 
 export const hasActiveSubscription = async (
 	zuoraClient: ZuoraClient,
-	query: string,
+	accountId: string,
 ): Promise<boolean> => {
+	const query = `SELECT Id FROM Subscription WHERE AccountId = '${accountId}' AND Status = 'Active'`;
 	const result = await doQuery(zuoraClient, query, queryResponseSchema);
 	return result.size > 0;
 };
