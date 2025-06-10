@@ -1,5 +1,6 @@
 import type { MetricAlarm } from '@aws-sdk/client-cloudwatch';
 import { flatten, groupMap } from '@modules/arrayFunctions';
+import { loadConfig } from '@modules/aws/appConfig';
 import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Dayjs } from 'dayjs';
@@ -9,7 +10,7 @@ import { prodAppToTeams } from './alarmMappings';
 import type { AlarmWithTags } from './cloudwatch';
 import { buildCloudwatch } from './cloudwatch';
 import type { Config, WebhookUrls } from './config';
-import { getEnv, loadConfig } from './config';
+import { ConfigSchema, getEnv } from './config';
 import { buildDiagnosticLinks } from './index';
 
 // only load config on a cold start
@@ -17,7 +18,7 @@ export const lazyConfig = new Lazy(async () => {
 	const stage = getEnv('STAGE');
 	const stack = getEnv('STACK');
 	const app = getEnv('APP');
-	return { stage, config: await loadConfig(stage, stack, app) };
+	return { stage, config: await loadConfig(stage, stack, app, ConfigSchema) };
 }, 'load config from SSM');
 
 // called by AWS
