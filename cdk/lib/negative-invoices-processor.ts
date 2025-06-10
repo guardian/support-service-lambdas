@@ -13,6 +13,7 @@ import { Architecture } from 'aws-cdk-lib/aws-lambda';
 // import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
 	DefinitionBody,
+	JsonPath,
 	Map,
 	StateMachine,
 } from 'aws-cdk-lib/aws-stepfunctions';
@@ -121,6 +122,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 
 		const activeSubFetcherMap = new Map(this, 'Active Sub fetcher map', {
 			maxConcurrency: 10,
+			itemsPath: JsonPath.stringAt('$.allRecordsFromBigQuery'),
 			resultPath: '$.output',
 		});
 
