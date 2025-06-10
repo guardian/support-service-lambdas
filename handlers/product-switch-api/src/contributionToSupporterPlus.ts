@@ -307,91 +307,90 @@ const buildChangePlanOrderAction = (
 	};
 };
 
-const buildPreviewRequestBody = (
-	orderDate: Dayjs,
-	productSwitchInformation: SwitchInformation,
-): PreviewOrderRequest => {
-	const { contributionAmount, catalog } = productSwitchInformation;
-	const { accountNumber, subscriptionNumber } =
-		productSwitchInformation.subscription;
-
-	const discountOrderAction = productSwitchInformation.discount
-		? buildAddDiscountOrderAction(productSwitchInformation.discount, orderDate)
-		: [];
-
-	return {
-		orderDate: zuoraDateFormat(orderDate),
-		existingAccountNumber: accountNumber,
-		previewOptions: {
-			previewThruType: 'SpecificDate',
-			previewTypes: ['BillingDocs'],
-			specificPreviewThruDate: zuoraDateFormat(orderDate),
-		},
-		subscriptions: [
-			{
-				subscriptionNumber,
-				orderActions: [
-					buildChangePlanOrderAction(orderDate, catalog, contributionAmount),
-					...discountOrderAction,
-				],
+function buildNewTermOrderActions(orderDate: dayjs.Dayjs): OrderAction[] {
+	return [
+		{
+			type: 'TermsAndConditions',
+			triggerDates: [
+				{
+					name: 'ContractEffective',
+					triggerDate: zuoraDateFormat(orderDate),
+				},
+				{
+					name: 'ServiceActivation',
+					triggerDate: zuoraDateFormat(orderDate),
+				},
+				{
+					name: 'CustomerAcceptance',
+					triggerDate: zuoraDateFormat(orderDate),
+				},
+			],
+			termsAndConditions: {
+				lastTerm: {
+					termType: 'TERMED',
+					endDate: zuoraDateFormat(orderDate),
+				},
 			},
-		],
-	};
-};
+		},
+		{
+			type: 'RenewSubscription',
+			triggerDates: [
+				{
+					name: 'ContractEffective',
+					triggerDate: zuoraDateFormat(orderDate),
+				},
+				{
+					name: 'ServiceActivation',
+					triggerDate: zuoraDateFormat(orderDate),
+				},
+				{
+					name: 'CustomerAcceptance',
+					triggerDate: zuoraDateFormat(orderDate),
+				},
+			],
+			renewSubscription: {},
+		},
+	];
+}
 
 export const buildSwitchRequestBody = (
 	orderDate: Dayjs,
 	productSwitchInformation: SwitchInformation,
 ): CreateOrderRequest => {
+	return {
+		processingOptions: {
+			runBilling: true,
+			collectPayment: false, // We will take payment separately because we don't want to charge the user if the amount payable is less than 50 pence/cents
+		},
+		...buildSwitchRequestWithoutOptions(productSwitchInformation, orderDate),
+	};
+};
+
+const buildPreviewRequestBody = (
+	orderDate: Dayjs,
+	productSwitchInformation: SwitchInformation,
+): PreviewOrderRequest => {
+	return {
+		previewOptions: {
+			previewThruType: 'SpecificDate',
+			previewTypes: ['BillingDocs'],
+			specificPreviewThruDate: zuoraDateFormat(orderDate),
+		},
+		...buildSwitchRequestWithoutOptions(productSwitchInformation, orderDate),
+	};
+};
+
+function buildSwitchRequestWithoutOptions(
+	productSwitchInformation: SwitchInformation,
+	orderDate: dayjs.Dayjs,
+): Omit<CreateOrderRequest, 'processingOptions'> {
 	const { startNewTerm, contributionAmount, catalog } =
 		productSwitchInformation;
 	const { accountNumber, subscriptionNumber } =
 		productSwitchInformation.subscription;
 
-	const newTermOrderActions: OrderAction[] = startNewTerm
-		? [
-				{
-					type: 'TermsAndConditions',
-					triggerDates: [
-						{
-							name: 'ContractEffective',
-							triggerDate: zuoraDateFormat(orderDate),
-						},
-						{
-							name: 'ServiceActivation',
-							triggerDate: zuoraDateFormat(orderDate),
-						},
-						{
-							name: 'CustomerAcceptance',
-							triggerDate: zuoraDateFormat(orderDate),
-						},
-					],
-					termsAndConditions: {
-						lastTerm: {
-							termType: 'TERMED',
-							endDate: zuoraDateFormat(orderDate),
-						},
-					},
-				},
-				{
-					type: 'RenewSubscription',
-					triggerDates: [
-						{
-							name: 'ContractEffective',
-							triggerDate: zuoraDateFormat(orderDate),
-						},
-						{
-							name: 'ServiceActivation',
-							triggerDate: zuoraDateFormat(orderDate),
-						},
-						{
-							name: 'CustomerAcceptance',
-							triggerDate: zuoraDateFormat(orderDate),
-						},
-					],
-					renewSubscription: {},
-				},
-			]
+	const maybeNewTermOrderActions: OrderAction[] = startNewTerm
+		? buildNewTermOrderActions(orderDate)
 		: [];
 
 	const discountOrderAction = productSwitchInformation.discount
@@ -401,19 +400,16 @@ export const buildSwitchRequestBody = (
 	return {
 		orderDate: zuoraDateFormat(orderDate),
 		existingAccountNumber: accountNumber,
-		processingOptions: {
-			runBilling: true,
-			collectPayment: false, // We will take payment separately because we don't want to charge the user if the amount payable is less than 50 pence/cents
-		},
 		subscriptions: [
 			{
 				subscriptionNumber,
+				customFields: { LastPlanAddedDate__c: zuoraDateFormat(orderDate) },
 				orderActions: [
 					buildChangePlanOrderAction(orderDate, catalog, contributionAmount),
 					...discountOrderAction,
-					...newTermOrderActions,
+					...maybeNewTermOrderActions,
 				],
 			},
 		],
 	};
-};
+}

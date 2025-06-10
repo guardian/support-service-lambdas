@@ -60,6 +60,7 @@ object ProductMoveEndpointSpec extends ZIOSpecDefault {
       SubscriptionName(sub),
       null,
       identityOfMMAUser.map(IdentityId.apply),
+      LocalDate.parse("2000-01-01"),
     ).as(mockRecurringContributionToSupporterPlus.wasCalled)
   }
 
@@ -106,6 +107,7 @@ object ProductMoveEndpointSpec extends ZIOSpecDefault {
         postData: ExpectedInput,
         subscription: GetSubscriptionResponse,
         account: GetAccountResponse,
+        today: LocalDate,
     ): UIO[ProductMoveEndpointTypes.OutputBody] = {
       wasCalled = true
       ZIO.succeed(null)

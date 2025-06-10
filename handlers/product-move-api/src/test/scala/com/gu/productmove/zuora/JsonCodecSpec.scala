@@ -53,10 +53,12 @@ class JsonCodecSpec extends AnyFlatSpec {
       collect = Some(true),
       runBilling = Some(true),
       preview = Some(false),
+      LastPlanAddedDate__c = LocalDate.parse("2025-06-10"),
     )
 
     println(updateRequestBody.toJson)
     println(expectedRequestBody.toJson)
+//    assertResult(updateRequestBody)(expectedRequestBody) TODO this test should assert
   }
 
   it should "JSON Decoding: null fields should convert to type None" in {
