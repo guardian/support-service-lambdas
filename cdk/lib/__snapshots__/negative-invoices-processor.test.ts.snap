@@ -182,7 +182,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
             "Value": "CODE",
           },
         ],
-        "Timeout": 300,
+        "Timeout": 30,
       },
       "Type": "AWS::Lambda::Function",
     },
@@ -244,9 +244,24 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "cloudwatch:PutMetricData",
+              "Action": "secretsmanager:GetSecretValue",
               "Effect": "Allow",
-              "Resource": "*",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:CODE/Zuora-OAuth/SupportServiceLambdas-*",
+                  ],
+                ],
+              },
             },
             {
               "Action": [
@@ -436,7 +451,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.allRecordsFromBigQuery","MaxConcurrency":10}}}",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.invoices","MaxConcurrency":10}}}",
             ],
           ],
         },
@@ -936,7 +951,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
             "Value": "PROD",
           },
         ],
-        "Timeout": 300,
+        "Timeout": 30,
       },
       "Type": "AWS::Lambda::Function",
     },
@@ -998,9 +1013,24 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "cloudwatch:PutMetricData",
+              "Action": "secretsmanager:GetSecretValue",
               "Effect": "Allow",
-              "Resource": "*",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:PROD/Zuora-OAuth/SupportServiceLambdas-*",
+                  ],
+                ],
+              },
             },
             {
               "Action": [
@@ -1190,7 +1220,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.allRecordsFromBigQuery","MaxConcurrency":10}}}",
+              "","Payload.$":"$"}}}},"ItemsPath":"$.invoices","MaxConcurrency":10}}}",
             ],
           ],
         },

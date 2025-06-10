@@ -93,8 +93,14 @@ export class NegativeInvoicesProcessor extends GuStack {
 				handler: 'checkForActiveSub.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
-				initialPolicy: [allowPutMetric],
-				timeout: Duration.seconds(300),
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['secretsmanager:GetSecretValue'],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+						],
+					}),
+				],
 			},
 		);
 
@@ -122,7 +128,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 
 		const activeSubFetcherMap = new Map(this, 'Active Sub fetcher map', {
 			maxConcurrency: 10,
-			itemsPath: JsonPath.stringAt('$.allRecordsFromBigQuery'),
+			itemsPath: JsonPath.stringAt('$.invoices'),
 			resultPath: '$.output',
 		});
 
