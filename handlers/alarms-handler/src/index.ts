@@ -1,3 +1,4 @@
+import { loadConfig } from '@modules/aws/appConfig';
 import { Lazy } from '@modules/lazy';
 import type { SNSEventRecord, SQSEvent, SQSRecord } from 'aws-lambda';
 import { z } from 'zod';
@@ -6,7 +7,7 @@ import { prodAppToTeams } from './alarmMappings';
 import type { Tags } from './cloudwatch';
 import { buildCloudwatch } from './cloudwatch';
 import type { WebhookUrls } from './config';
-import { getEnv, loadConfig } from './config';
+import { ConfigSchema, getEnv } from './config';
 
 const cloudWatchAlarmMessageSchema = z.object({
 	AlarmArn: z.string(),
@@ -31,7 +32,7 @@ export const lazyConfig = new Lazy(async () => {
 	const stage = getEnv('STAGE');
 	const stack = getEnv('STACK');
 	const app = getEnv('APP');
-	return await loadConfig(stage, stack, app);
+	return await loadConfig(stage, stack, app, ConfigSchema);
 }, 'load config from SSM');
 
 export const handler = async (event: SQSEvent): Promise<void> => {

@@ -46,10 +46,10 @@ object GuardianWeeklyAddressValidator {
 
   def validateBillingAddress(billToAddress: BillToAddress): ValidationResult[Unit] = {
     for {
-      _ <- billToAddress.address1 getOrFailWith ("bill to address1 must be populated")
-      _ <- billToAddress.city getOrFailWith ("bill to city must be populated")
-      _ <- billToAddress.postcode getOrFailWith ("bill to postcode must be populated")
-      _ <- billToAddress.country getOrFailWith ("bill to country must be populated")
+      _ <- billToAddress.address1 getOrFailWith ("Billing address must be populated in Zuora")
+      _ <- billToAddress.city getOrFailWith ("Billing address city must be populated in Zuora")
+      _ <- billToAddress.postcode getOrFailWith ("Billing address postcode must be populated in Zuora")
+      _ <- billToAddress.country getOrFailWith ("Billing address country must be populated in Zuora")
     } yield (())
   }
 }

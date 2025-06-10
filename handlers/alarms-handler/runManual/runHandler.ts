@@ -1,7 +1,8 @@
 import { handlerWithStage } from '../src/index';
-import { loadConfig } from '../src/config';
 import type { SQSEvent } from 'aws-lambda';
 import { buildCloudwatch } from '../src/cloudwatch';
+import { loadConfig } from '@modules/aws/appConfig';
+import { ConfigSchema } from '../src/config';
 
 // to run this, get credentials for membership
 // the output will go to chat channel P&E/SR Alarms CODE
@@ -25,7 +26,7 @@ const testEvent: SQSEvent = {
 	],
 } as SQSEvent;
 
-loadConfig('CODE', 'support', 'alarms-handler')
+loadConfig('CODE', 'support', 'alarms-handler', ConfigSchema)
 	.then((config) => {
 		return handlerWithStage(
 			testEvent,

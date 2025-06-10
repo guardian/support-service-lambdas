@@ -20,7 +20,7 @@ object DigipackAddressValidator {
       validatedAddress1 <- validateNotEmpty("address1", address.address1)
       validatedCity <- validateNotEmpty("city", address.city)
       validatedPostcode <- validateNotEmpty("postcode", address.postcode)
-      validatedCountry <- address.country getOrFailWith "bill to country must be populated"
+      validatedCountry <- address.country getOrFailWith "Billing country must be populated in Zuora"
     } yield ValidatedAddress(
       validatedAddress1,
       address.address2,
@@ -35,8 +35,8 @@ object DigipackAddressValidator {
       fieldName: String,
       maybeAddressField: Option[Field],
   ): ValidationResult[Field] = for {
-    addressField <- maybeAddressField getOrFailWith (s"bill to $fieldName must be populated")
-    _ <- !addressField.value.trim.isEmpty orFailWith s"bill to $fieldName must be populated"
+    addressField <- maybeAddressField getOrFailWith (s"Billing $fieldName must be populated in Zuora")
+    _ <- !addressField.value.trim.isEmpty orFailWith s"Billing $fieldName must be populated in Zuora"
   } yield addressField
 
 }

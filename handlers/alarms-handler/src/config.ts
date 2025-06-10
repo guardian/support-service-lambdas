@@ -1,38 +1,5 @@
-import { getSSMParam } from '@modules/aws/ssm';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { z } from 'zod';
-
-export const loadConfig = async (
-	stage: string,
-	stack: string,
-	app: string,
-): Promise<Config> => {
-	const getConfig = async (...name: string[]): Promise<string> => {
-		return await getSSMParam('/' + [stage, stack, app, ...name].join('/'));
-	};
-
-	const getAccount = async (accountName: string) => ({
-		id: await getConfig('accounts', accountName, 'id'),
-		roleArn: await getConfig('accounts', accountName, 'roleArn'),
-	});
-
-	const getTeamWebhookUrl = (team: string) =>
-		getConfig(`teams`, team, 'webhookUrl');
-
-	return {
-		webhookUrls: {
-			VALUE: await getTeamWebhookUrl('VALUE'),
-			GROWTH: await getTeamWebhookUrl('GROWTH'),
-			SRE: await getTeamWebhookUrl('SRE'),
-			PORTFOLIO: await getTeamWebhookUrl('PORTFOLIO'),
-			PLATFORM: await getTeamWebhookUrl('PLATFORM'),
-		},
-		accounts: {
-			TARGETING: await getAccount('TARGETING'),
-			MOBILE: await getAccount('MOBILE'),
-		},
-	};
-};
 
 export const WebhookUrlsSchema = z.object({
 	VALUE: z.string(),
