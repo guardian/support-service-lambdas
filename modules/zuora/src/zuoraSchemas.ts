@@ -243,3 +243,25 @@ export type InvoiceItemAdjustmentSourceType = 'InvoiceDetail' | 'Tax';
 export type InvoiceItemAdjustmentResult = z.infer<
 	typeof invoiceItemAdjustmentResultSchema
 >;
+
+// --------------- Payment Method ---------------
+const paymentMethodStatusSchema = z.object({
+	status: z.string(), // or z.enum(['Active', ...]) if you want to restrict
+});
+
+export const zuoraPaymentMethodQueryResponseSchema = z
+	.object({
+		success: z.boolean(),
+	})
+	.and(
+		z.object({
+			creditcardreferencetransaction: z
+				.array(paymentMethodStatusSchema)
+				.optional(),
+			banktransfer: z.array(paymentMethodStatusSchema).optional(),
+			paypal: z.array(paymentMethodStatusSchema).optional(),
+		}),
+	);
+export type ZuoraPaymentMethodQueryResponse = z.infer<
+	typeof zuoraPaymentMethodQueryResponseSchema
+>;
