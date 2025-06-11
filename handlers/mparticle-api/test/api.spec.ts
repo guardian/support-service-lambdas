@@ -1,13 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import type {
-    APIGatewayProxyEvent,
-    APIGatewayProxyEventHeaders,
-    Callback,
-    Context
-} from 'aws-lambda';
 import { faker } from '@faker-js/faker';
-import { handler } from '../src/index';
+import run from '../src/utils/run';
 
 describe('mparticle-api API tests', () => {
     const originalEnv = process.env;
@@ -32,29 +26,6 @@ describe('mparticle-api API tests', () => {
         jest.restoreAllMocks();
         process.env = originalEnv;
     });
-
-    const run = async ({
-        httpMethod,
-        path,
-        body,
-        headers
-    }: {
-        httpMethod: 'GET' | 'POST';
-        path: string;
-        body?: string;
-        headers?: APIGatewayProxyEventHeaders;
-    }): Promise<{
-        statusCode: number;
-        body: string;
-    }> => {
-        const result: unknown = await handler({
-            httpMethod,
-            path,
-            body,
-            headers: headers ?? {},
-        } as APIGatewayProxyEvent, {} as Context, (() => { }) as Callback<unknown>);
-        return result as { statusCode: number; body: string };
-    };
 
     it('Register an event', async () => {
         const mockRegisterEventResponse = {
