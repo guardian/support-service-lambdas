@@ -178,7 +178,9 @@ export class NegativeInvoicesProcessor extends GuStack {
 		);
 
 		const definitionBody = DefinitionBody.fromChainable(
-			getInvoicesLambdaTask.next(activeSubChecksMap),
+			getInvoicesLambdaTask
+				.next(activeSubChecksMap)
+				.next(activePaymentMethodChecksMap),
 		);
 
 		new StateMachine(this, `${appName}-state-machine-${this.stage}`, {
