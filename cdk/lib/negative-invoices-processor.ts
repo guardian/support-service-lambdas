@@ -104,6 +104,22 @@ export class NegativeInvoicesProcessor extends GuStack {
 			},
 		);
 
+		const checkForActivePaymentMethodLambda = new GuLambdaFunction(
+			this,
+			'check-for-active-payment-method-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-check-for-active-payment-method-${this.stage}`,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+				},
+				handler: 'checkForActivePaymentMethod.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+			},
+		);
+
 		const getInvoicesLambdaTask = new LambdaInvoke(this, 'Get invoices', {
 			lambdaFunction: getInvoicesLambda,
 			outputPath: '$.Payload',
@@ -126,6 +142,19 @@ export class NegativeInvoicesProcessor extends GuStack {
 			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
 		});
 
+		const checkForActivePaymentMethodLambdaTask = new LambdaInvoke(
+			this,
+			'Check for Active Payment Method',
+			{
+				lambdaFunction: checkForActivePaymentMethodLambda,
+				outputPath: '$.Payload',
+			},
+		).addRetry({
+			errors: ['States.ALL'],
+			interval: Duration.seconds(10),
+			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
+		});
+
 		const activeSubChecksMap = new Map(this, 'Active Sub fetcher map', {
 			maxConcurrency: 1,
 			itemsPath: JsonPath.stringAt('$.invoices'),
@@ -133,6 +162,20 @@ export class NegativeInvoicesProcessor extends GuStack {
 		});
 
 		activeSubChecksMap.iterator(checkForActiveSubLambdaTask);
+
+		const activePaymentMethodChecksMap = new Map(
+			this,
+			'Active Payment Method fetcher map',
+			{
+				maxConcurrency: 1,
+				itemsPath: JsonPath.stringAt('$.invoices'),
+				resultPath: '$.activePaymentMethodChecks',
+			},
+		);
+
+		activePaymentMethodChecksMap.iterator(
+			checkForActivePaymentMethodLambdaTask,
+		);
 
 		const definitionBody = DefinitionBody.fromChainable(
 			getInvoicesLambdaTask.next(activeSubChecksMap),
