@@ -21,4 +21,5 @@ deployments:
       prefixStack: false
       functionNames:
         - negative-invoices-processor-get-invoices-
+        - negative-invoices-processor-check-for-active-sub-
     dependencies: [negative-invoices-processor-cloudformation]
