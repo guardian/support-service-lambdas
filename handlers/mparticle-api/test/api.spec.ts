@@ -1,3 +1,5 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import type {
     APIGatewayProxyEvent,
     APIGatewayProxyEventHeaders,
@@ -176,42 +178,51 @@ describe('mparticle-api API tests', () => {
         expect(body.requestStatus).toEqual("in-progress");
     });
 
-    // it('Handle Data Subject Request state callback', async () => {
-    //     // TODO: Mock Discovery Call
-    //     // TODO: Mock Certificate Download
-    //     // TODO: Mock Queue message placement
-    //     const mockRegisterEventResponse = {
-    //         ok: true,
-    //         status: 202,
-    //         body: JSON.stringify({
-    //             message: 'Callback accepted and processed',
-    //             timestamp: new Date().toISOString()
-    //         })
-    //     };
-    //     (global.fetch as jest.Mock).mockResolvedValueOnce(mockRegisterEventResponse);
+    it('Handle Data Subject Request state callback', async () => {
+        const requestId = "475974fa-6b42-4370-bb56-b5d845686bb5"; // Do not fake it to match the header signature
+        const mockDiscoveryResponse = {
+            ok: true,
+            status: 200,
+            json: async () => ({
+                "processor_certificate": "https://static.mparticle.com/dsr/opendsr_cert.pem"
+            }),
+        };
+        console.log(__dirname);
+       const mockGetCertificateResponse = {
+            ok: true,
+            status: 200,
+            text: async () => fs.readFileSync(path.join(__dirname, "processor-certificate.pem")),
+        };
+        (global.fetch as jest.Mock)
+            .mockResolvedValueOnce(mockDiscoveryResponse)
+            .mockResolvedValueOnce(mockGetCertificateResponse);
 
-    //     const result = await run({
-    //         httpMethod: 'POST',
-    //         path: '/events',
-    //         body: JSON.stringify({
-    //             "controller_id": "1402",
-    //             "expected_completion_time": "2025-06-09T00:00:00Z",
-    //             "status_callback_url": "https://webhook.site/6dfd0447-e1f9-4a98-a391-25481898763b",
-    //             "subject_request_id": "475974fa-6b42-4370-bb56-b5d845686bb5",
-    //             "request_status": "completed",
-    //             "results_url": null,
-    //             "extensions": null
-    //         }),
-    //         headers:
-    //         {
-    //             "x-opendsr-processor-domain": "opendsr.mparticle.com",
-    //             "x-opendsr-signature": "q/zaWUW4dJYXo7Bu9NR0AkkwbS/lnab2cQ/6hxuhNw/8xnljzjXB3jJhUM7UTr5+KZZ5/delbtAKVNPXLAGZ7DoeWMnWwYeyq3Pzw4l5wugg3YtFLS5o0MRlGye6Vj0UH2c/T8vQ87/KNl5hYrhYqrZvNb+f+gL9eSZ80lQwMu27fVSrnh7yztNLHLP593kV9oq1QBXQqf8yRVGy7fcFieNHtgYAuKFJeDkCwx7e4ismhKNkfM8Xlt6TEdR8dAwB6TVbz3W7bk4dTUKQrAVX84js4V5Sphj+vUBT/NATel6HYlkSsOk10HLjbaM2BwQtd51rD6ex9VbtpP0G8mHDVw==",
-    //         }
-    //     })
+        const result = await run({
+            httpMethod: 'POST',
+            path: `/data-subject-requests/${requestId}/callback`,
+            // Do not fake it to match the header signature
+            body: JSON.stringify({
+                "controller_id": "1402",
+                "expected_completion_time": "2025-06-09T00:00:00Z",
+                "status_callback_url": "https://webhook.site/6dfd0447-e1f9-4a98-a391-25481898763b",
+                "subject_request_id": requestId,
+                "request_status": "completed",
+                "results_url": null,
+                "extensions": null
+            }),
+            headers:
+            {
+                "x-opendsr-processor-domain": "opendsr.mparticle.com",
+                "x-opendsr-signature": "q/zaWUW4dJYXo7Bu9NR0AkkwbS/lnab2cQ/6hxuhNw/8xnljzjXB3jJhUM7UTr5+KZZ5/delbtAKVNPXLAGZ7DoeWMnWwYeyq3Pzw4l5wugg3YtFLS5o0MRlGye6Vj0UH2c/T8vQ87/KNl5hYrhYqrZvNb+f+gL9eSZ80lQwMu27fVSrnh7yztNLHLP593kV9oq1QBXQqf8yRVGy7fcFieNHtgYAuKFJeDkCwx7e4ismhKNkfM8Xlt6TEdR8dAwB6TVbz3W7bk4dTUKQrAVX84js4V5Sphj+vUBT/NATel6HYlkSsOk10HLjbaM2BwQtd51rD6ex9VbtpP0G8mHDVw==",
+            }
+        })
 
-    //     expect(result).toBeDefined();
-    //     expect(result.statusCode).toBeDefined();
-    //     expect(result.statusCode).toEqual(202);
-    //     // TODO: Check match for body message
-    // });
+        expect(result).toBeDefined();
+        expect(result.statusCode).toBeDefined();
+        expect(result.statusCode).toEqual(202);
+
+        const body = JSON.parse(result.body);
+        expect(body.message).toEqual("Callback accepted and processed");
+        expect(body.timestamp).toBeDefined();
+    });
 });
