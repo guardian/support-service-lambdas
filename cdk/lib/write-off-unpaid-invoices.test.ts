@@ -10,12 +10,18 @@ describe('The WriteOffUnpaidInvoices stack', () => {
 			`write-off-unpaid-invoices-CODE`,
 			{ stack: 'support', stage: 'CODE' },
 		);
+		const csbxStack = new WriteOffUnpaidInvoices(
+			app,
+			`write-off-unpaid-invoices-CSBX`,
+			{ stack: 'support', stage: 'CSBX' },
+		);
 		const prodStack = new WriteOffUnpaidInvoices(
 			app,
 			`write-off-unpaid-invoices-PROD`,
 			{ stack: 'support', stage: 'PROD' },
 		);
 		expect(Template.fromStack(codeStack).toJSON()).toMatchSnapshot();
+		expect(Template.fromStack(csbxStack).toJSON()).toMatchSnapshot();
 		expect(Template.fromStack(prodStack).toJSON()).toMatchSnapshot();
 	});
 });
