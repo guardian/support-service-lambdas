@@ -127,7 +127,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 		});
 
 		const activeSubChecksMap = new Map(this, 'Active Sub fetcher map', {
-			maxConcurrency: 10,
+			maxConcurrency: 1,
 			itemsPath: JsonPath.stringAt('$.invoices'),
 			resultPath: '$.activeSubChecks',
 		});
