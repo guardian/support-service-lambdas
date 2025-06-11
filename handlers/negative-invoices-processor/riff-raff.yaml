@@ -22,4 +22,5 @@ deployments:
       functionNames:
         - negative-invoices-processor-get-invoices-
         - negative-invoices-processor-check-for-active-sub-
+        - negative-invoices-processor-check-for-active-payment-method-
     dependencies: [negative-invoices-processor-cloudformation]
