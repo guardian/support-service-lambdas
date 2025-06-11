@@ -55,8 +55,8 @@ const run = async ({
 //         userAttributes: {},
 //         deletedUserAttributes: [],
 //         userIdentities: {
-//             email: "andre.silva.mindera+1@theguardian.co.uk",
-//             customer_id: "mindera123+1"
+//             email: "andre.silva.mindera+2@theguardian.co.uk",
+//             customer_id: "mindera123+2"
 //         },
 //         applicationInfo: {},
 //         schemaVersion: 2,
@@ -65,22 +65,22 @@ const run = async ({
 //         ip: "172.217.12.142"
 //     })
 // })
-run({
-    httpMethod: 'POST',
-    path: '/data-subject-requests',
-    body: JSON.stringify({
-        "regulation": "gdpr",
-        "requestId": "07410e1d-88d2-4c4f-a904-843a913bd489",
-        "requestType": "erasure",
-        "submittedTime": new Date(),
-        "userId": "mindera123+1",
-        environment: "development",
+// run({
+//     httpMethod: 'POST',
+//     path: '/data-subject-requests',
+//     body: JSON.stringify({
+//         "regulation": "gdpr",
+//         "requestId": "07410e1d-88d2-4c4f-a904-843a913bd488",
+//         "requestType": "erasure",
+//         "submittedTime": new Date(),
+//         "userId": "mindera123+2",
+//         environment: "development",
+//     })
+// })
+    run({
+        httpMethod: 'GET',
+        path: '/data-subject-requests/07410e1d-88d2-4c4f-a904-843a913bd488'
     })
-})
-    // run({
-    //     httpMethod: 'GET',
-    //     path: '/data-subject-requests/38689d80-4ae9-40f8-a628-b41077e3d62c'
-    // })
     // run({
     //     httpMethod: 'POST',
     //     path: '/data-subject-requests/4d9b1dbf-6d1b-4932-a1e0-dc74d21b9092/callback',

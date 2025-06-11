@@ -12,6 +12,7 @@
     "run-local": "esbuild --bundle --platform=node --target=node18 --outfile=target/run-local.js run-local.ts && node target/run-local.js"
   },
   "devDependencies": {
+    "@faker-js/faker": "^9.8.0",
     "@types/aws-lambda": "^8.10.147"
   },
   "dependencies": {
