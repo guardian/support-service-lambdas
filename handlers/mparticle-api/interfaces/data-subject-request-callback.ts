@@ -49,7 +49,7 @@ export interface DataSubjectRequestCallback {
     /**
      * Extensions related to DSR forwarding.
      */
-    extensions: Array<{
+    extensions: Record<string, {
         /**
          * The domain of the partner.
          */

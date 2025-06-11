@@ -31,8 +31,14 @@ export interface EventBatch {
     /** Version of the data schema being used */
     schemaVersion?: number;
 
-    /** Environment where the events were generated (e.g., production, development) */
-    environment: string;
+    /**
+     * Environment where the events were generated (e.g., production, development).
+     * Since our setup has separated "development" and "production" workspaces, the
+     * environment property becomes largely redundant and has minimal practical value.
+     * Still, for some reason, currently we only have access to "Dev" events live
+     * streamings. Let's keep this open for testing users running in dev or prod.
+     */
+    environment: 'production' | 'development';
 
     /** Additional context information */
     context?: Record<string, unknown>;

@@ -79,6 +79,24 @@ async function requestDataSubjectApi<T>(url: string, options: {
  * @returns https://docs.mparticle.com/developers/apis/dsr-api/v3/#example-success-response-body
  */
 export const submitDataSubjectRequest = async (form: DataSubjectRequestForm, lambdaDomainUrl: string): Promise<DataSubjectRequestSubmission> => {
+    console.log({
+        regulation: form.regulation,
+        subject_request_id: form.requestId,
+        subject_request_type: form.requestType,
+        submitted_time: form.submittedTime,
+        skip_waiting_period: true,
+        subject_identities: {
+            "controller_customer_id": {
+                value: form.userId,
+                encoding: 'raw',
+            }
+        },
+        api_version: "3.0",
+        status_callback_urls: [
+            `${lambdaDomainUrl}/data-subject-requests/${form.requestId}/callback`
+        ],
+        group_id: form.userId, // Let's group by User Unique Id to group all requests related to that user (max 150 requests per group)
+    });
     const response = await requestDataSubjectApi<{
         expected_completion_time: Date;
         received_time: Date;
@@ -93,19 +111,17 @@ export const submitDataSubjectRequest = async (form: DataSubjectRequestForm, lam
             subject_request_type: form.requestType,
             submitted_time: form.submittedTime,
             skip_waiting_period: true,
-            subject_identities: [
-                {
-                    identity_type: 'controller_customer_id',
+            subject_identities: {
+                "controller_customer_id": {
                     value: form.userId,
                     encoding: 'raw',
                 }
-            ],
+            },
             api_version: "3.0",
             status_callback_urls: [
                 `${lambdaDomainUrl}/data-subject-requests/${form.requestId}/callback`
             ],
             group_id: form.userId, // Let's group by User Unique Id to group all requests related to that user (max 150 requests per group)
-            extensions: []
         }
     });
 
@@ -136,7 +152,7 @@ export const getStatusOfDataSubjectRequest = async (requestId: string): Promise<
         request_status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
         api_version: string;
         results_url: string | null;
-        extensions: Array<{
+        extensions: Record<string, {
             domain: string;
             name: string;
             status: 'pending' | 'skipped' | 'sent' | 'failed';

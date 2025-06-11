@@ -60,14 +60,14 @@ const router = new Router([
 					userIdentities: {
 						"customer_id": payloadData.userId
 					},
-					environment: "production"
+					environment: payloadData.environment
 				});
 			} catch (error) {
 				console.warn("It was not possible to set the User Attribute to remove user from audiences or from event forwarding during the waiting period.", error)
 			}
 
 			// Request for Erasure
-			const domain = event.headers['host']; // e.g., "abc123.lambda-url.region.on.aws" or API Gateway domain
+			const domain = event.headers['host'] ?? 'code.dev-theguardian.com'; // e.g., "abc123.lambda-url.region.on.aws" or API Gateway domain
 			const protocol = event.headers['x-forwarded-proto'] ?? 'https';
 			const lambdaDomainUrl = `${protocol}://${domain}`;
 			const requestForErasureResult = await submitDataSubjectRequest(payloadData, lambdaDomainUrl)
@@ -82,8 +82,9 @@ const router = new Router([
 				regulation: z.enum(['gdpr', 'ccpa']),
 				requestId: z.string().uuid(),
 				requestType: z.enum(['access', 'portability', 'erasure']),
-				submittedTime: z.date(),
-				userId: z.string().email(),
+				submittedTime: z.string().datetime(),
+				userId: z.string(),
+				environment: z.enum(['production', 'development']),
 			})
 		}
 	},
@@ -140,12 +141,12 @@ const router = new Router([
 				request_status: z.enum(['pending', 'in_progress', 'completed', 'cancelled']),
 				api_version: z.string().nullable().optional(),
 				results_url: z.string().url().nullable(),
-				extensions: z.array(z.object({
+				extensions: z.record(z.object({
 					domain: z.string(),
 					name: z.string(),
 					status: z.enum(['pending', 'skipped', 'sent', 'failed']),
-					status_message: z.string(),
-				})).nullable(),
+					status_message: z.string()
+				})).nullable()
 			})
 		}
 	},
@@ -183,7 +184,7 @@ const router = new Router([
 				userIdentities: z.record(z.string(), z.unknown()),
 				applicationInfo: z.record(z.string(), z.unknown()),
 				schemaVersion: z.number(),
-				environment: z.string(),
+				environment: z.enum(['production', 'development']),
 				context: z.record(z.string(), z.unknown()),
 				ip: z.string(),
 			})

@@ -27,4 +27,9 @@ export interface DataSubjectRequestForm {
      * User Id to be used as the subject identity.
      */
     userId: string;
+
+    /**
+     * Environment where the events were generated.
+     */
+    environment: 'production' | 'development';
 }
