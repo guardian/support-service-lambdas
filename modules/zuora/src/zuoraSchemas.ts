@@ -155,6 +155,7 @@ export const getInvoiceSchema = z.object({
 	id: z.string(),
 	amount: z.number(),
 	amountWithoutTax: z.number(),
+	balance: z.number(),
 });
 
 export type GetInvoiceResponse = z.infer<typeof getInvoiceSchema>;
@@ -165,6 +166,15 @@ export const getInvoiceItemsSchema = z.object({
 		z.object({
 			id: z.string(),
 			productRatePlanChargeId: z.string(),
+			availableToCreditAmount: z.number(),
+			taxationItems: z.object({
+				data: z.array(
+					z.object({
+						id: z.string(),
+						availableToCreditAmount: z.number(),
+					}),
+				),
+			}),
 		}),
 	),
 });
@@ -225,6 +235,10 @@ export const invoiceItemAdjustmentResultSchema = z.object({
 	Success: z.boolean(),
 	Id: z.string().optional(),
 });
+
+export type InvoiceItemAdjustmentType = 'Credit' | 'Charge';
+
+export type InvoiceItemAdjustmentSourceType = 'InvoiceDetail' | 'Tax';
 
 export type InvoiceItemAdjustmentResult = z.infer<
 	typeof invoiceItemAdjustmentResultSchema
