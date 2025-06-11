@@ -64,7 +64,7 @@ export const uploadAnEventBatch = async (batch: EventBatch): Promise<object> => 
     const response = await requestEventsApi(`/events`, {
         method: 'POST',
         body: {
-            events: batch.events.map((event => {
+            events: batch.events?.map((event => {
                 return {
                     data: event.data,
                     event_type: event.eventType
