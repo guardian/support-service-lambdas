@@ -384,7 +384,7 @@ export class WriteOffUnpaidInvoices extends GuStack {
 						}),
 						new PolicyStatement({
 							actions: ['states:StartExecution'],
-							resources: [stateMachine.stateMachineArn],
+							resources: [stateMachineAdHoc.stateMachineArn],
 						}),
 						new PolicyStatement({
 							actions: [
@@ -393,7 +393,7 @@ export class WriteOffUnpaidInvoices extends GuStack {
 								'states:StopExecution',
 							],
 							resources: [
-								`arn:aws:states:${this.region}:${this.account}:execution:${stateMachine.stateMachineName}/*`,
+								`arn:aws:states:${this.region}:${this.account}:execution:${stateMachineAdHoc.stateMachineName}/*`,
 							],
 						}),
 						new PolicyStatement({
