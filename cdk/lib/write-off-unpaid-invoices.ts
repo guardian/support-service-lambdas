@@ -196,6 +196,62 @@ export class WriteOffUnpaidInvoices extends GuStack {
 			},
 		);
 
+		const processInvoicesAdHoc = new CustomState(
+			this,
+			'AdHocProcessInvoicesInDistributedMap',
+			{
+				stateJson: {
+					Type: 'Map',
+					MaxConcurrency: 1,
+					ToleratedFailurePercentage: 100,
+					Comment: `ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches`,
+					ItemReader: {
+						Resource: 'arn:aws:states:::s3:getObject',
+						ReaderConfig: {
+							InputType: 'CSV',
+							CSVHeaderLocation: 'FIRST_ROW',
+						},
+						Parameters: {
+							Bucket: bucket.bucketName,
+							'Key.$': JsonPath.stringAt('$$.Execution.Input.File'),
+						},
+					},
+					ItemBatcher: {
+						MaxItemsPerBatch: 1,
+					},
+					ItemProcessor: {
+						ProcessorConfig: {
+							Mode: 'DISTRIBUTED',
+							ExecutionType: 'STANDARD',
+						},
+						StartAt: 'WriteOffInvoices',
+						States: {
+							WriteOffInvoices: {
+								Type: 'Task',
+								Resource: 'arn:aws:states:::lambda:invoke',
+								OutputPath: '$.Payload',
+								Parameters: {
+									'Payload.$': '$',
+									FunctionName: writeOffInvoicesLambda.functionArn,
+								},
+								End: true,
+							},
+						},
+					},
+					ResultWriter: {
+						Resource: 'arn:aws:states:::s3:putObject',
+						Parameters: {
+							Bucket: bucket.bucketName,
+							'Prefix.$': JsonPath.format(
+								`executions/{}`,
+								JsonPath.stringAt('$$.Execution.StartTime'),
+							),
+						},
+					},
+				},
+			},
+		);
+
 		const getMapResult = new CustomState(this, 'GetDistributedMapResult', {
 			stateJson: {
 				Type: 'Task',
@@ -260,10 +316,61 @@ export class WriteOffUnpaidInvoices extends GuStack {
 			},
 		);
 
+		const stateMachineAdHoc = new StateMachine(
+			this,
+			'AdHocWriteOffUnpaidInvoicesStateMachine',
+			{
+				stateMachineName: `ad-hoc-${app}-${this.stage}`,
+				definitionBody: DefinitionBody.fromChainable(processInvoicesAdHoc),
+			},
+		);
+
 		stateMachine.role.attachInlinePolicy(
 			new Policy(
 				this,
 				'WriteOffUnpaidInvoicesStateMachineRoleAdditionalPolicy',
+				{
+					statements: [
+						new PolicyStatement({
+							actions: [
+								's3:GetObject',
+								's3:PutObject',
+								's3:ListBucket',
+								's3:ListMultipartUploadParts',
+							],
+							resources: [bucket.arnForObjects('*')],
+						}),
+						new PolicyStatement({
+							actions: ['states:StartExecution'],
+							resources: [stateMachine.stateMachineArn],
+						}),
+						new PolicyStatement({
+							actions: [
+								'states:RedriveExecution',
+								'states:DescribeExecution',
+								'states:StopExecution',
+							],
+							resources: [
+								`arn:aws:states:${this.region}:${this.account}:execution:${stateMachine.stateMachineName}/*`,
+							],
+						}),
+						new PolicyStatement({
+							actions: ['lambda:InvokeFunction'],
+							resources: [writeOffInvoicesLambda.functionArn],
+						}),
+						new PolicyStatement({
+							actions: ['sns:Publish'],
+							resources: [snsTopicArn],
+						}),
+					],
+				},
+			),
+		);
+
+		stateMachineAdHoc.role.attachInlinePolicy(
+			new Policy(
+				this,
+				'AdHocWriteOffUnpaidInvoicesStateMachineRoleAdditionalPolicy',
 				{
 					statements: [
 						new PolicyStatement({

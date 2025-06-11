@@ -348,6 +348,11 @@ new WriteOffUnpaidInvoices(app, 'write-off-unpaid-invoices-CODE', {
 	stack: 'support',
 	stage: 'CODE',
 });
+new WriteOffUnpaidInvoices(app, 'write-off-unpaid-invoices-CSBX', {
+	stack: 'support',
+	stage: 'CSBX',
+});
+
 new WriteOffUnpaidInvoices(app, 'write-off-unpaid-invoices-PROD', {
 	stack: 'support',
 	stage: 'PROD',
