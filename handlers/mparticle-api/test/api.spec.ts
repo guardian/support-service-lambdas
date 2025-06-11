@@ -147,25 +147,34 @@ describe('mparticle-api API tests', () => {
         expect(body.requestId).toEqual(requestId);
     });
 
-    // it('Get Data Subject Request by Id', async () => {
-    //     const mockGetSubjectRequestByIdResponse = {
-    //         ok: true,
-    //         status: 200,
-    //         body: '{"expectedCompletionTime":"2025-06-30T00:00:00.000Z","requestId":"07410e1d-88d2-4c4f-a904-843a913bd488","controllerId":"1402","requestStatus":"pending","resultsUrl":null}'
-    //     };
-    //     (global.fetch as jest.Mock).mockResolvedValueOnce(mockGetSubjectRequestByIdResponse);
+    it('Get Data Subject Request by Id', async () => {
+        const requestId = faker.string.uuid();
+        const mockGetSubjectRequestByIdResponse = {
+            ok: true,
+            status: 200,
+            json: async () => ({
+                expected_completion_time: faker.date.soon(),
+                subject_request_id: requestId,
+                controller_id: faker.string.numeric(),
+                request_status: 'in_progress',
+                received_time: faker.date.recent(),
+            }),
+        };
+        (global.fetch as jest.Mock).mockResolvedValueOnce(mockGetSubjectRequestByIdResponse);
 
-    //     const result = await run({
-    //         httpMethod: 'GET',
-    //         path: '/data-subject-requests/07410e1d-88d2-4c4f-a904-843a913bd488',
-    //     })
+        const result = await run({
+            httpMethod: 'GET',
+            path: `/data-subject-requests/${requestId}`,
+        })
 
-    //     expect(result).toBeDefined();
-    //     expect(result.statusCode).toBeDefined();
-    //     expect(result.statusCode).toEqual(200);
-    //     // TODO: Check match by request Id
-    //     // TODO: Check match by request status
-    // });
+        expect(result).toBeDefined();
+        expect(result.statusCode).toBeDefined();
+        expect(result.statusCode).toEqual(200);
+
+        const body = JSON.parse(result.body);
+        expect(body.requestId).toEqual(requestId);
+        expect(body.requestStatus).toEqual("in-progress");
+    });
 
     // it('Handle Data Subject Request state callback', async () => {
     //     // TODO: Mock Discovery Call
