@@ -13,7 +13,7 @@ deployments:
     parameters:
       templateStagePaths:
         CODE: write-off-unpaid-invoices-CODE.template.json
-        CODE: write-off-unpaid-invoices-CSBX.template.json
+        CSBX: write-off-unpaid-invoices-CSBX.template.json
         PROD: write-off-unpaid-invoices-PROD.template.json
   write-off-unpaid-invoices:
     type: aws-lambda
