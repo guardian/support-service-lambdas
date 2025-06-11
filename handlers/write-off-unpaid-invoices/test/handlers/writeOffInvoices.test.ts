@@ -35,17 +35,17 @@ describe('writeOffInvoices', () => {
 	const invoiceItems = [
 		{
 			id: 'item1',
-			availableToCreditAmount: 30,
+			balance: 30,
 			taxationItems: {
 				data: [
-					{ id: 'tax1', availableToCreditAmount: 10 },
-					{ id: 'tax2', availableToCreditAmount: 0 },
+					{ id: 'tax1', balance: 10 },
+					{ id: 'tax2', balance: 0 },
 				],
 			},
 		},
 		{
 			id: 'item2',
-			availableToCreditAmount: -20,
+			balance: -20,
 			taxationItems: { data: [] },
 		},
 	];
@@ -108,12 +108,12 @@ describe('writeOffInvoices', () => {
 		const invoiceItemsNegative = [
 			{
 				id: 'item3',
-				availableToCreditAmount: -15,
+				balance: -15,
 				taxationItems: { data: [] },
 			},
 			{
 				id: 'item4',
-				availableToCreditAmount: -10,
+				balance: -10,
 				taxationItems: { data: [] },
 			},
 		];

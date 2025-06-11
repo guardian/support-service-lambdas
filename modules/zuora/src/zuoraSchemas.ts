@@ -167,11 +167,13 @@ export const getInvoiceItemsSchema = z.object({
 			id: z.string(),
 			productRatePlanChargeId: z.string(),
 			availableToCreditAmount: z.number(),
+			balance: z.number(),
 			taxationItems: z.object({
 				data: z.array(
 					z.object({
 						id: z.string(),
 						availableToCreditAmount: z.number(),
+						balance: z.number(),
 					}),
 				),
 			}),

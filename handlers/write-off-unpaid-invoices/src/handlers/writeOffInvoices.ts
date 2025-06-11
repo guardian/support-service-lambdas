@@ -19,8 +19,8 @@ export type LambdaEvent = {
 
 type AdjustableItem = {
 	id: string;
+	balance: number;
 	sourceType: InvoiceItemAdjustmentSourceType;
-	availableToCreditAmount: number;
 };
 
 export const cancelSourceToCommentMap: Record<CancelSource, string> = {
@@ -53,7 +53,7 @@ export const handler = async (event: LambdaEvent) => {
 
 		for (const item of sortedAdjustableItems) {
 			const adjustmentAmount = Math.min(
-				Math.abs(item.availableToCreditAmount),
+				Math.abs(item.balance),
 				Math.abs(currentBalance),
 			);
 
@@ -63,7 +63,7 @@ export const handler = async (event: LambdaEvent) => {
 				invoiceId,
 				item.id,
 				adjustmentAmount,
-				item.availableToCreditAmount > 0 ? 'Credit' : 'Charge',
+				item.balance > 0 ? 'Credit' : 'Charge',
 				item.sourceType,
 				cancelSourceToCommentMap[cancelSource as CancelSource],
 				'Write-off',
@@ -85,17 +85,17 @@ const getAdjustableItems = ({
 		const invoiceEntry = {
 			id: invoiceItem.id,
 			sourceType: 'InvoiceDetail' as InvoiceItemAdjustmentSourceType,
-			availableToCreditAmount: invoiceItem.availableToCreditAmount,
+			balance: invoiceItem.balance,
 		};
 
 		const taxationEntries = invoiceItem.taxationItems.data.map((taxItem) => ({
 			id: taxItem.id,
 			sourceType: 'Tax' as InvoiceItemAdjustmentSourceType,
-			availableToCreditAmount: taxItem.availableToCreditAmount,
+			balance: taxItem.balance,
 		}));
 
 		return [invoiceEntry, ...taxationEntries].filter(
-			(item) => item.availableToCreditAmount != 0,
+			(item) => item.balance != 0,
 		);
 	});
 
@@ -110,13 +110,9 @@ const sortAdjustableItems = ({
 	balance: number;
 }): AdjustableItem[] => {
 	if (balance > 0) {
-		adjustableItems.sort(
-			(a, b) => b.availableToCreditAmount - a.availableToCreditAmount,
-		);
+		adjustableItems.sort((a, b) => b.balance - a.balance);
 	} else {
-		adjustableItems.sort(
-			(a, b) => a.availableToCreditAmount - b.availableToCreditAmount,
-		);
+		adjustableItems.sort((a, b) => a.balance - b.balance);
 	}
 
 	return adjustableItems;
