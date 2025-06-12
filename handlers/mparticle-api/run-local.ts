@@ -1,31 +1,51 @@
+// test-local.ts
+import type { APIGatewayProxyEvent, Callback, Context } from 'aws-lambda';
+import { handler } from './src/index';
 
-import * as fs from 'fs';
-import run from './src/utils/run';
-
-// At the very top of your main file
-require('dotenv').config();
-
-/**
- * npm run run-local -- --file=runs/post-event.json
- */
-function main() {
-    const fileToRun = process.argv.find(arg => arg.startsWith('--file='))?.split('=')[1];
-    if (!fileToRun) {
-        console.error("Not file to run was defined");
-    }
-
-    let fileContents;
-    try {
-        fileContents = fs.readFileSync(fileToRun ?? '', 'utf-8');
-    } catch (error) {
-        console.error(`It was not possible to open the file "${fileToRun}"`, error);
-        return;
-    }
-
-    const requestConfiguration = JSON.parse(fileContents);
-    requestConfiguration.body = requestConfiguration.body ? JSON.stringify(requestConfiguration.body) : undefined;
-    run(requestConfiguration)
-        .then((response) => console.log(response))
-        .catch((err) => console.error(err));
-}
-main();
+const run = async ({
+	httpMethod,
+	path,
+	body,
+}: {
+	httpMethod: 'GET' | 'POST';
+	path: string;
+	body?: string;
+}) => {
+	const result: unknown = await handler(
+		{
+			httpMethod,
+			path,
+			body,
+		} as APIGatewayProxyEvent,
+		{} as Context,
+		(() => {}) as Callback<unknown>,
+	);
+	return result;
+};
+// run({
+//     httpMethod: 'GET',
+//     path: '/data-subject-requests/38689d80-4ae9-40f8-a628-b41077e3d62c'
+// })
+run({
+	httpMethod: 'POST',
+	path: '/events',
+	body: JSON.stringify({
+		events: [
+			{
+				data: {},
+				eventType: 'commerce_event',
+			},
+		],
+		deviceInfo: {},
+		userAttributes: {},
+		deletedUserAttributes: [],
+		userIdentities: {},
+		applicationInfo: {},
+		schemaVersion: 2,
+		environment: 'production',
+		context: {},
+		ip: '172.217.12.142',
+	}),
+})
+	.then((response) => console.log(response))
+	.catch((err) => console.error(err));
