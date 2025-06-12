@@ -19,16 +19,15 @@ export const handler = async (event: ApplyCreditToAccountBalanceInput) => {
 		console.log('event:', event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const body = JSON.stringify({
-			accountId: event.accountId,
-			reasonCode: 'Credit',
-			amount: 1,
-			type: 'Credit',
+			Amount: 1,
+			Type: 'Credit',
+			AdjustmentDate: '2025-06-10',
+			InvoiceNumber: 'INV01548159',
+			SourceType: 'InvoiceDetail',
+			SourceId: '8ad085519749e9180197583679444747',
 		});
-
-		console.log('body:', body);
-
+		// callout is working. Start with tidying up the type and figure out how to get invoice item id (from query maybe?)
 		const attempt = await applyCreditToAccountBalance(zuoraClient, body);
-		console.log('Attempt to apply credit:', attempt);
 
 		return {
 			...event,
