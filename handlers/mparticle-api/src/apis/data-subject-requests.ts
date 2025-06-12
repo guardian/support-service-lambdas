@@ -166,8 +166,12 @@ export const getStatusOfDataSubjectRequest = async (requestId: string): Promise<
  * https://docs.mparticle.com/developers/apis/dsr-api/v3/#example-response-body
  * @param {string} requestId - The ID of the request to check the status of.
  * @param {DataSubjectRequestCallback} payload - The data containing the data subject request state details.
+ * @returns Confirmation message and timestamp
  */
-export const processDataSubjectRequestCallback = async (requestId: string, payload: DataSubjectRequestCallback): Promise<object> => {
+export const processDataSubjectRequestCallback = async (requestId: string, payload: DataSubjectRequestCallback): Promise<{
+    message: string;
+    timestamp: Date;
+}> => {
     // Check the received status and:
     // - Ignore it if not completed
     // - If completed, emit a ErasureJobOutcome event to SQS
@@ -179,7 +183,7 @@ export const processDataSubjectRequestCallback = async (requestId: string, paylo
 
     return {
         message: 'Callback accepted and processed',
-        timestamp: new Date().toISOString()
+        timestamp: new Date(),
     };
 };
 

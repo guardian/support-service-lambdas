@@ -7,7 +7,7 @@ import type {
 } from 'aws-lambda';
 import { handler } from '..';
 
-const run = async ({
+export const run = async ({
     httpMethod,
     path,
     body,
@@ -32,4 +32,3 @@ const run = async ({
         body: string;
     };
 }
-export default run;

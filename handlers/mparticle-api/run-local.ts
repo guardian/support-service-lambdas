@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import run from './src/utils/run';
+import { run } from './src/utils/run';
 
 // At the very top of your main file
 require('dotenv').config();

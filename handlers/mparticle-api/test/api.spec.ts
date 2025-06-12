@@ -1,7 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { faker } from '@faker-js/faker';
-import run from '../src/utils/run';
+import type { DataSubjectRequestState } from '../interfaces/data-subject-request-state';
+import type { DataSubjectRequestSubmission } from '../interfaces/data-subject-request-submission';
+import { run } from '../src/utils/run';
 
 describe('mparticle-api API tests', () => {
     const originalEnv = process.env;
@@ -77,7 +79,7 @@ describe('mparticle-api API tests', () => {
         expect(global.fetch).toHaveBeenCalledTimes(1);
     });
 
-    it('Create Data Subject Requests', async () => {
+    it('Create Data Subject Request', async () => {
         const requestId = faker.string.uuid();
         const submittedTime = new Date();
         const mockSetUserAttributesResponse = {
@@ -87,7 +89,7 @@ describe('mparticle-api API tests', () => {
         const mockCreateDataSubjectRequestResponse = {
             ok: true,
             statusCode: 202,
-            json: async () => ({
+            json: () => ({
                 expected_completion_time: faker.date.soon(),
                 received_time: submittedTime,
                 subject_request_id: requestId,
@@ -116,7 +118,7 @@ describe('mparticle-api API tests', () => {
         expect(result.statusCode).toEqual(201);
         expect(global.fetch).toHaveBeenCalledTimes(2);
 
-        const body = JSON.parse(result.body);
+        const body = JSON.parse(result.body) as DataSubjectRequestSubmission;
         expect(body.requestId).toEqual(requestId);
     });
 
@@ -125,7 +127,7 @@ describe('mparticle-api API tests', () => {
         const mockGetSubjectRequestByIdResponse = {
             ok: true,
             status: 200,
-            json: async () => ({
+            json: () => ({
                 expected_completion_time: faker.date.soon(),
                 subject_request_id: requestId,
                 controller_id: faker.string.numeric(),
@@ -144,7 +146,7 @@ describe('mparticle-api API tests', () => {
         expect(result.statusCode).toBeDefined();
         expect(result.statusCode).toEqual(200);
 
-        const body = JSON.parse(result.body);
+        const body = JSON.parse(result.body) as DataSubjectRequestState;
         expect(body.requestId).toEqual(requestId);
         expect(body.requestStatus).toEqual("in-progress");
     });
@@ -154,15 +156,15 @@ describe('mparticle-api API tests', () => {
         const mockDiscoveryResponse = {
             ok: true,
             status: 200,
-            json: async () => ({
+            json: () => ({
                 "processor_certificate": "https://static.mparticle.com/dsr/opendsr_cert.pem"
             }),
         };
         console.log(__dirname);
-       const mockGetCertificateResponse = {
+        const mockGetCertificateResponse = {
             ok: true,
             status: 200,
-            text: async () => fs.readFileSync(path.join(__dirname, "processor-certificate.pem")),
+            text: () => fs.readFileSync(path.join(__dirname, "processor-certificate.pem")),
         };
         (global.fetch as jest.Mock)
             .mockResolvedValueOnce(mockDiscoveryResponse)
@@ -192,7 +194,10 @@ describe('mparticle-api API tests', () => {
         expect(result.statusCode).toBeDefined();
         expect(result.statusCode).toEqual(202);
 
-        const body = JSON.parse(result.body);
+        const body = JSON.parse(result.body) as {
+            message: string;
+            timestamp: Date;
+        };
         expect(body.message).toEqual("Callback accepted and processed");
         expect(body.timestamp).toBeDefined();
     });
