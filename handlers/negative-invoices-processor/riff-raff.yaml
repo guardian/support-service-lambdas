@@ -23,4 +23,5 @@ deployments:
         - negative-invoices-processor-get-invoices-
         - negative-invoices-processor-check-for-active-sub-
         - negative-invoices-processor-check-for-active-payment-method-
+        - negative-invoices-processor-apply-credit-to-account-balance-
     dependencies: [negative-invoices-processor-cloudformation]
