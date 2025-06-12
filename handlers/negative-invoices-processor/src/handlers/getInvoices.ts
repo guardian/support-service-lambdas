@@ -6,8 +6,8 @@ import { BigQueryResultDataSchema } from '../types';
 import type { BigQueryRecord } from '../types';
 
 export const handler = async (): Promise<{
-	allRecordsFromBigQueryCount: number;
-	allRecordsFromBigQuery: BigQueryRecord[];
+	invoicesCount: number;
+	invoices: BigQueryRecord[];
 }> => {
 	try {
 		const records =
@@ -15,8 +15,8 @@ export const handler = async (): Promise<{
 				? await getPRODData()
 				: await getCODEData();
 		return {
-			allRecordsFromBigQueryCount: records.length,
-			allRecordsFromBigQuery: records,
+			invoicesCount: records.length,
+			invoices: records,
 		};
 	} catch (error) {
 		console.error('Error:', error);

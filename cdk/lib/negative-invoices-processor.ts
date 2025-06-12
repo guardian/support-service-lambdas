@@ -11,7 +11,12 @@ import {
 } from 'aws-cdk-lib/aws-iam';
 import { Architecture } from 'aws-cdk-lib/aws-lambda';
 // import { Bucket } from 'aws-cdk-lib/aws-s3';
-import { DefinitionBody, StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
+import {
+	DefinitionBody,
+	JsonPath,
+	Map,
+	StateMachine,
+} from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { nodeVersion } from './node-version';
 
@@ -75,6 +80,30 @@ export class NegativeInvoicesProcessor extends GuStack {
 			},
 		);
 
+		const checkForActiveSubLambda = new GuLambdaFunction(
+			this,
+			'check-for-active-sub-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-check-for-active-sub-${this.stage}`,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+				},
+				handler: 'checkForActiveSub.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['secretsmanager:GetSecretValue'],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+						],
+					}),
+				],
+			},
+		);
+
 		const getInvoicesLambdaTask = new LambdaInvoke(this, 'Get invoices', {
 			lambdaFunction: getInvoicesLambda,
 			outputPath: '$.Payload',
@@ -83,7 +112,31 @@ export class NegativeInvoicesProcessor extends GuStack {
 			interval: Duration.seconds(10),
 			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
 		});
-		const definitionBody = DefinitionBody.fromChainable(getInvoicesLambdaTask);
+
+		const checkForActiveSubLambdaTask = new LambdaInvoke(
+			this,
+			'Check for Active Sub',
+			{
+				lambdaFunction: checkForActiveSubLambda,
+				outputPath: '$.Payload',
+			},
+		).addRetry({
+			errors: ['States.ALL'],
+			interval: Duration.seconds(10),
+			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
+		});
+
+		const activeSubChecksMap = new Map(this, 'Active Sub fetcher map', {
+			maxConcurrency: 1,
+			itemsPath: JsonPath.stringAt('$.invoices'),
+			resultPath: '$.activeSubChecks',
+		});
+
+		activeSubChecksMap.iterator(checkForActiveSubLambdaTask);
+
+		const definitionBody = DefinitionBody.fromChainable(
+			getInvoicesLambdaTask.next(activeSubChecksMap),
+		);
 
 		new StateMachine(this, `${appName}-state-machine-${this.stage}`, {
 			stateMachineName: `${appName}-${this.stage}`,
