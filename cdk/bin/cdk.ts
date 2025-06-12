@@ -359,5 +359,5 @@ new MParticleApi(app, 'mparticle-api-CODE', {
 });
 new MParticleApi(app, 'mparticle-api-PROD', {
 	stack: 'membership',
-  	stage: 'PROD',
+	stage: 'PROD',
 });
