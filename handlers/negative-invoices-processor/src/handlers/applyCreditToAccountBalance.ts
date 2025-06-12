@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 export const ApplyCreditToAccountBalanceInputSchema = z.object({
 	accountId: z.string(),
-	creditAmount: z.number(),
+	// creditAmount: z.number(),
 });
 
 export type ApplyCreditToAccountBalanceInput = z.infer<
@@ -14,24 +14,24 @@ export type ApplyCreditToAccountBalanceInput = z.infer<
 
 export const handler = async (event: ApplyCreditToAccountBalanceInput) => {
 	try {
-		const parsedEvent = ApplyCreditToAccountBalanceInputSchema.parse(event);
+		// const parsedEvent = ApplyCreditToAccountBalanceInputSchema.parse(event);
+		// console.log('Parsed event:', parsedEvent);
+		console.log('event:', event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const body = JSON.stringify({
-			accountId: parsedEvent.accountId,
+			accountId: event.accountId,
 			reasonCode: 'Credit',
-			items: [
-				{
-					amount: 1,
-					sourceType: 'External',
-					description: 'Manual credit',
-				},
-			],
+			amount: 1,
+			type: 'Credit',
 		});
+
+		console.log('body:', body);
+
 		const attempt = await applyCreditToAccountBalance(zuoraClient, body);
 		console.log('Attempt to apply credit:', attempt);
 
 		return {
-			...parsedEvent,
+			...event,
 			attempt,
 		};
 	} catch (error) {

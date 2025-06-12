@@ -6,6 +6,6 @@ export const applyCreditToAccountBalance = async (
 	zuoraClient: ZuoraClient,
 	body: string,
 ): Promise<ZuoraSuccessResponse> => {
-	const path = `/v1/credit-memos`;
+	const path = `/v1/object/invoice-item-adjustment`;
 	return zuoraClient.post(path, body, zuoraSuccessResponseSchema);
 };
