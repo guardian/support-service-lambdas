@@ -12,9 +12,12 @@ import {
 import { Architecture } from 'aws-cdk-lib/aws-lambda';
 // import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
+	Choice,
+	Condition,
 	DefinitionBody,
 	JsonPath,
 	Map,
+	Pass,
 	StateMachine,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
@@ -104,6 +107,30 @@ export class NegativeInvoicesProcessor extends GuStack {
 			},
 		);
 
+		const checkForActivePaymentMethodLambda = new GuLambdaFunction(
+			this,
+			'check-for-active-payment-method-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-check-for-active-payment-method-${this.stage}`,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+				},
+				handler: 'checkForActivePaymentMethod.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['secretsmanager:GetSecretValue'],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+						],
+					}),
+				],
+			},
+		);
+
 		const getInvoicesLambdaTask = new LambdaInvoke(this, 'Get invoices', {
 			lambdaFunction: getInvoicesLambda,
 			outputPath: '$.Payload',
@@ -126,16 +153,55 @@ export class NegativeInvoicesProcessor extends GuStack {
 			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
 		});
 
-		const activeSubChecksMap = new Map(this, 'Active Sub fetcher map', {
-			maxConcurrency: 1,
-			itemsPath: JsonPath.stringAt('$.invoices'),
-			resultPath: '$.activeSubChecks',
+		const checkForActivePaymentMethodLambdaTask = new LambdaInvoke(
+			this,
+			'Check for Active Payment Method',
+			{
+				lambdaFunction: checkForActivePaymentMethodLambda,
+				outputPath: '$.Payload',
+			},
+		).addRetry({
+			errors: ['States.ALL'],
+			interval: Duration.seconds(10),
+			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
 		});
 
-		activeSubChecksMap.iterator(checkForActiveSubLambdaTask);
+		const invoiceProcessorMap = new Map(this, 'Invoice processor map', {
+			maxConcurrency: 1,
+			itemsPath: JsonPath.stringAt('$.invoices'),
+			resultPath: '$.processedInvoices',
+		});
+
+		const hasActivePaymentMethodChoice = new Choice(
+			this,
+			'Has active payment method?',
+		)
+			.when(
+				Condition.booleanEquals('$.hasActivePaymentMethod', true),
+				new Pass(this, 'Add Credit to account balance lambda will go here'),
+			)
+			.otherwise(new Pass(this, 'check for valid email lambda will go here'));
+
+		const hasActiveSubChoice = new Choice(this, 'Has active sub?')
+			.when(
+				Condition.booleanEquals('$.hasActiveSub', true),
+				new Pass(
+					this,
+					'Add Credit to account balance lambda will go here as well',
+				),
+			)
+			.otherwise(
+				checkForActivePaymentMethodLambdaTask.next(
+					hasActivePaymentMethodChoice,
+				),
+			);
+
+		invoiceProcessorMap.iterator(
+			checkForActiveSubLambdaTask.next(hasActiveSubChoice),
+		);
 
 		const definitionBody = DefinitionBody.fromChainable(
-			getInvoicesLambdaTask.next(activeSubChecksMap),
+			getInvoicesLambdaTask.next(invoiceProcessorMap),
 		);
 
 		new StateMachine(this, `${appName}-state-machine-${this.stage}`, {

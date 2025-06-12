@@ -47,8 +47,8 @@ const query = (): string =>
 	`
 	SELECT
         inv.id,
-        STRING_AGG(distinct inv.account_id, ',') AS account_id,
-        MAX(inv.balance) AS invoice_balance
+        STRING_AGG(distinct inv.account_id, ',') AS accountId,
+        MAX(inv.balance) AS invoiceBalance
     FROM 
         datatech-fivetran.zuora.invoice inv
     INNER JOIN 
