@@ -38,7 +38,7 @@ class DigipackAddressValidatorTest extends AnyFlatSpec with Matchers {
     DigipackAddressValidator(noOptionalFieldsAddress) shouldBe Passed(validatedNoOptionalFieldsAddress)
   }
 
-  def failedResponse(fieldName: String) = Failed(s"bill to $fieldName must be populated")
+  def failedResponse(fieldName: String) = Failed(s"Billing $fieldName must be populated in Zuora")
 
   it should "fail if address1 is missing" in {
     DigipackAddressValidator(testAddress.copy(address1 = None)) shouldBe failedResponse("address1")
