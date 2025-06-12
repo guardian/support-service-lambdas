@@ -19,8 +19,8 @@ export type LambdaEvent = {
 
 type AdjustableItem = {
 	id: string;
-	balance: number;
 	sourceType: InvoiceItemAdjustmentSourceType;
+	availableToCreditAmount: number;
 };
 
 export const cancelSourceToCommentMap: Record<CancelSource, string> = {
@@ -50,10 +50,11 @@ export const handler = async (event: LambdaEvent) => {
 		});
 
 		let currentBalance = balance;
+		console.log('current balance is: ' + currentBalance);
 
 		for (const item of sortedAdjustableItems) {
 			const adjustmentAmount = Math.min(
-				Math.abs(item.balance),
+				Math.abs(item.availableToCreditAmount),
 				Math.abs(currentBalance),
 			);
 
@@ -63,7 +64,7 @@ export const handler = async (event: LambdaEvent) => {
 				invoiceId,
 				item.id,
 				adjustmentAmount,
-				item.balance > 0 ? 'Credit' : 'Charge',
+				item.availableToCreditAmount > 0 ? 'Credit' : 'Charge',
 				item.sourceType,
 				cancelSourceToCommentMap[cancelSource as CancelSource],
 				'Write-off',
@@ -71,7 +72,10 @@ export const handler = async (event: LambdaEvent) => {
 
 			currentBalance -= adjustmentAmount * (currentBalance > 0 ? 1 : -1);
 
-			if (currentBalance == 0) break;
+			if (currentBalance == 0) {
+				console.log('balance is zero');
+				break;
+			}
 		}
 	}
 };
@@ -85,17 +89,17 @@ const getAdjustableItems = ({
 		const invoiceEntry = {
 			id: invoiceItem.id,
 			sourceType: 'InvoiceDetail' as InvoiceItemAdjustmentSourceType,
-			balance: invoiceItem.balance,
+			availableToCreditAmount: invoiceItem.availableToCreditAmount,
 		};
 
 		const taxationEntries = invoiceItem.taxationItems.data.map((taxItem) => ({
 			id: taxItem.id,
 			sourceType: 'Tax' as InvoiceItemAdjustmentSourceType,
-			balance: taxItem.balance,
+			availableToCreditAmount: taxItem.availableToCreditAmount,
 		}));
 
 		return [invoiceEntry, ...taxationEntries].filter(
-			(item) => item.balance != 0,
+			(item) => item.availableToCreditAmount != 0,
 		);
 	});
 
@@ -110,9 +114,13 @@ const sortAdjustableItems = ({
 	balance: number;
 }): AdjustableItem[] => {
 	if (balance > 0) {
-		adjustableItems.sort((a, b) => b.balance - a.balance);
+		adjustableItems.sort(
+			(a, b) => b.availableToCreditAmount - a.availableToCreditAmount,
+		);
 	} else {
-		adjustableItems.sort((a, b) => a.balance - b.balance);
+		adjustableItems.sort(
+			(a, b) => a.availableToCreditAmount - b.availableToCreditAmount,
+		);
 	}
 
 	return adjustableItems;
