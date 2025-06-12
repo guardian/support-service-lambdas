@@ -258,6 +258,7 @@ export const zuoraPaymentMethodQueryResponseSchema = z
 			creditcardreferencetransaction: z
 				.array(paymentMethodStatusSchema)
 				.optional(),
+			creditcard: z.array(paymentMethodStatusSchema).optional(),
 			banktransfer: z.array(paymentMethodStatusSchema).optional(),
 			paypal: z.array(paymentMethodStatusSchema).optional(),
 		}),

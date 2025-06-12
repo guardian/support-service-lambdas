@@ -4,9 +4,14 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { z } from 'zod';
 import { BigQueryRecordSchema } from '../types';
 
-export type CheckForActiveSubInput = z.infer<typeof BigQueryRecordSchema>;
+export type CheckForActivePaymentMethodInput = z.infer<
+	typeof BigQueryRecordSchema
+>;
 
-export const handler = async (event: CheckForActiveSubInput) => {
+export const handler = async (event: {
+	account_id: string;
+	hasActiveSub: boolean;
+}) => {
 	try {
 		const parsedEvent = BigQueryRecordSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
