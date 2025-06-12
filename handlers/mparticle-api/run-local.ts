@@ -11,7 +11,7 @@ require('dotenv').config();
 function main() {
     const fileToRun = process.argv.find(arg => arg.startsWith('--file='))?.split('=')[1];
     if (!fileToRun) {
-        console.error("Not file to run was defined");
+        console.error("No file to run was defined");
     }
 
     let fileContents;
