@@ -1,8 +1,9 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { getPaymentMethods } from '@modules/zuora/getPaymentMethodsForAccountId';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { ZuoraPaymentMethodQueryResponse } from '@modules/zuora/zuoraSchemas';
 import type { z } from 'zod';
-import { BigQueryRecordSchema } from '../types';
+import type { BigQueryRecordSchema } from '../types';
 
 export type CheckForActivePaymentMethodInput = z.infer<
 	typeof BigQueryRecordSchema
@@ -13,36 +14,60 @@ export const handler = async (event: {
 	hasActiveSub: boolean;
 }) => {
 	try {
-		const parsedEvent = BigQueryRecordSchema.parse(event);
+		// const parsedEvent = BigQueryRecordSchema.parse(event);
+		console.log('event:', event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
+		const paymentMethods = await getPaymentMethods(
+			zuoraClient,
+			event.account_id,
+		);
 
+		const accountHasActivePaymentMethod =
+			hasActivePaymentMethod(paymentMethods);
+
+		console.log(
+			'accountHasActivePaymentMethod:',
+			accountHasActivePaymentMethod,
+		);
 		return {
-			account_id: parsedEvent.account_id,
-			hasActivePaymentMethod: await hasActivePaymentMethod(
-				zuoraClient,
-				parsedEvent.account_id,
-			),
+			account_id: event.account_id,
+			hasActivePaymentMethod: accountHasActivePaymentMethod,
 		};
 	} catch (error) {
 		return {
 			...event,
-			subStatus: 'Error',
+			checkPaymentMethodStatus: 'Error',
 			errorDetail:
 				error instanceof Error ? error.message : JSON.stringify(error, null, 2),
 		};
 	}
 };
 
-// const queryResponseSchema = z.object({
-// 	done: z.boolean(),
-// 	size: z.number(),
-// });
+export const hasActivePaymentMethod = (
+	paymentMethods: ZuoraPaymentMethodQueryResponse,
+): boolean => {
+	type PaymentMethodKey =
+		| 'creditcard'
+		| 'creditcardreferencetransaction'
+		| 'banktransfer'
+		| 'paypal';
 
-export const hasActivePaymentMethod = async (
-	zuoraClient: ZuoraClient,
-	accountId: string,
-): Promise<boolean> => {
-	const result = await getPaymentMethods(zuoraClient, accountId);
-	console.log('Payment methods result:', result);
-	return true;
+	const keysToCheck = [
+		'creditcard',
+		'creditcardreferencetransaction',
+		'banktransfer',
+		'paypal',
+	] as const satisfies readonly PaymentMethodKey[];
+
+	for (const key of keysToCheck) {
+		const arr = paymentMethods[key];
+		if (arr && activeStatusPresent(arr)) {
+			return true;
+		}
+	}
+	return false;
 };
+
+function activeStatusPresent(arr: Array<{ status: string }>): boolean {
+	return arr.some((pm) => pm.status.toLowerCase() === 'active');
+}
