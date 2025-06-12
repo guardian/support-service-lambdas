@@ -246,7 +246,7 @@ export type InvoiceItemAdjustmentResult = z.infer<
 
 // --------------- Payment Method ---------------
 const paymentMethodStatusSchema = z.object({
-	status: z.string(), // or z.enum(['Active', ...]) if you want to restrict
+	status: z.string(),
 });
 
 export const zuoraPaymentMethodQueryResponseSchema = z
