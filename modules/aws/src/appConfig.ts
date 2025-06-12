@@ -1,6 +1,7 @@
 import type { z } from 'zod';
 import { GetParametersByPathCommand, SSMClient } from '@aws-sdk/client-ssm';
 import { awsConfig } from '../src/config';
+import { groupMap, mapValues, partition } from '../../arrayFunctions';
 
 /**
  * App config uses the guardian-standard SSM keys to load config.  The GU CDK lambda
@@ -19,11 +20,13 @@ export const loadConfig = async <O>(
 ): Promise<O> => {
 	const configRoot = '/' + [stage, stack, app].join('/');
 	console.log('getting app config from SSM', configRoot);
-	const configFlat: ConfigFlat = await readAllRecursive(configRoot);
-	return processResults(configFlat, configRoot, schema);
+	const configFlat: SSMKeyValuePairs = await readAllRecursive(configRoot);
+	return parseSSMConfigToObject(configFlat, configRoot, schema);
 };
 
-async function readAllRecursive(configRoot: string): Promise<ConfigFlat> {
+export type SSMKeyValuePairs = Record<string, string>[];
+
+async function readAllRecursive(configRoot: string): Promise<SSMKeyValuePairs> {
 	const ssm = new SSMClient(awsConfig);
 	const command = new GetParametersByPathCommand({
 		Path: configRoot,
@@ -47,24 +50,22 @@ async function readAllRecursive(configRoot: string): Promise<ConfigFlat> {
 
 // exported for test access
 // converts a flat key/value structure into a proper type
-export function processResults<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
-	configFlat: ConfigFlat,
-	configRoot: string,
-	schema: T,
-): O {
-	const configValuesByPathFromLeaf = configFlat.flatMap(Object.entries).map(
-		([name, value]) =>
-			({
-				path: name
-					.replace(configRoot, '')
-					.replace(/^\//, '')
-					.split('/')
-					.filter((k) => k.length > 0)
-					.reverse(),
-				value,
-			}) as PathWithValue,
-	);
-	const configTree = getTreeFromPaths(configValuesByPathFromLeaf);
+export function parseSSMConfigToObject<
+	I,
+	O,
+	T extends z.ZodType<O, z.ZodTypeDef, I>,
+>(ssmKeyValuePairs: SSMKeyValuePairs, configRoot: string, schema: T): O {
+	const configValuesByPath = ssmKeyValuePairs
+		.flatMap(Object.entries)
+		.map<PathArrayWithValue>(([name, value]) => ({
+			path: name
+				.replace(configRoot, '')
+				.replace(/^\//, '')
+				.split('/')
+				.filter((k) => k.length > 0),
+			value,
+		}));
+	const configTree = getTreeFromPaths(configValuesByPath);
 	const parseResult = schema.safeParse(configTree);
 	if (!parseResult.success) {
 		throw new Error(
@@ -78,43 +79,60 @@ export function processResults<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 	}
 }
 
-export type ConfigFlat = Record<string, string>[];
 type ConfigTree = string | { [p in string]: ConfigTree };
-const getTreeFromPaths = (paths: PathWithValue[]): ConfigTree => {
-	const singleItemTreesOrStringItem = paths.map(
-		({ path, value }) =>
-			path.reduce<ConfigTree>(
-				(inside, nextLeaf) => ({ [nextLeaf]: inside }),
-				value,
-			),
-		{},
-	);
-	return merge(singleItemTreesOrStringItem);
-};
 
-function merge(singleItemTreesOrStringItem: ConfigTree[]): ConfigTree {
-	const maybeStringValue = singleItemTreesOrStringItem.find(
-		(configTree) => typeof configTree === 'string',
-	);
-	if (maybeStringValue) {
-		return maybeStringValue;
-	}
-	const singleItemTrees = singleItemTreesOrStringItem.filter(
-		(a) => typeof a !== 'string',
-	);
-	const topLevelKeys = [...new Set(singleItemTrees.flatMap(Object.keys))];
-	const topLevelGrouped = Object.fromEntries(
-		topLevelKeys.map((key) => {
-			const childTreesForKey = singleItemTrees.flatMap((obj) =>
-				obj[key] ? [obj[key]] : [],
-			);
-			return [key, merge(childTreesForKey)];
-		}),
-	);
-	return topLevelGrouped;
-}
-
-type PathWithValue = {
+export type PathArrayWithValue = {
 	path: string[];
 	value: string;
 };
+
+// exported for tests
+export const getTreeFromPaths = (paths: PathArrayWithValue[]): ConfigTree => {
+	const pathArrayToPathTree: ({
+		path,
+		value,
+	}: {
+		path: string[];
+		value: string;
+	}) => ConfigTree = ({ path, value }) =>
+		path.reduceRight<ConfigTree>(
+			(inside, nextLeaf) => ({ [nextLeaf]: inside }),
+			value,
+		);
+
+	const singleItemConfigTrees = paths.map(pathArrayToPathTree);
+	return merge(singleItemConfigTrees);
+};
+
+export const configNestingError = 'ConfigNestingError';
+export class ConfigNestingError extends Error {
+	constructor(message: string) {
+		super('config has a string value with objects below it: ' + message);
+		this.name = configNestingError;
+	}
+}
+
+function merge(singleItemTreesOrStringItem: ConfigTree[]): ConfigTree {
+	const [stringValues, singleItemTrees] = partition(
+		singleItemTreesOrStringItem,
+		(configTree) => typeof configTree === 'string',
+	);
+	if (stringValues[0]) {
+		// base case - we have reached a string value
+		if (singleItemTrees.length > 0) {
+			/*
+			this would be valid in SSM but not in a schema - throw an error
+			/qwer = "string_value"
+			/qwer/rty = "nested_value"
+			 */
+			throw new ConfigNestingError(JSON.stringify(singleItemTrees));
+		}
+		return stringValues[0];
+	}
+	const subValuesPerKey = groupMap(
+		singleItemTrees.flatMap(Object.entries),
+		(tree) => tree[0],
+		(tree) => tree[1],
+	);
+	return mapValues(subValuesPerKey, merge);
+}
