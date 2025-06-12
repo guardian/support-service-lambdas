@@ -2,35 +2,31 @@ import { stageFromEnvironment } from '@modules/stage';
 import { getPaymentMethods } from '@modules/zuora/getPaymentMethodsForAccountId';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraPaymentMethodQueryResponse } from '@modules/zuora/zuoraSchemas';
-import type { z } from 'zod';
-import type { BigQueryRecordSchema } from '../types';
+import { z } from 'zod';
+
+export const CheckForActivePaymentMethodInputSchema = z.object({
+	accountId: z.string(),
+	hasActiveSub: z.boolean(),
+});
 
 export type CheckForActivePaymentMethodInput = z.infer<
-	typeof BigQueryRecordSchema
+	typeof CheckForActivePaymentMethodInputSchema
 >;
 
-export const handler = async (event: {
-	account_id: string;
-	hasActiveSub: boolean;
-}) => {
+export const handler = async (event: CheckForActivePaymentMethodInput) => {
 	try {
-		// const parsedEvent = BigQueryRecordSchema.parse(event);
-		console.log('event:', event);
+		const parsedEvent = CheckForActivePaymentMethodInputSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const paymentMethods = await getPaymentMethods(
 			zuoraClient,
-			event.account_id,
+			parsedEvent.accountId,
 		);
 
 		const accountHasActivePaymentMethod =
 			hasActivePaymentMethod(paymentMethods);
 
-		console.log(
-			'accountHasActivePaymentMethod:',
-			accountHasActivePaymentMethod,
-		);
 		return {
-			account_id: event.account_id,
+			...parsedEvent,
 			hasActivePaymentMethod: accountHasActivePaymentMethod,
 		};
 	} catch (error) {
