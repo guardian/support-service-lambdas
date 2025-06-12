@@ -7,6 +7,7 @@ import { DiscountApi } from '../lib/discount-api';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
 import { MetricPushApi } from '../lib/metric-push-api';
+import { NegativeInvoicesProcessor } from '../lib/negative-invoices-processor';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
 import { ObserverDataExport } from '../lib/observer-data-export';
@@ -24,6 +25,7 @@ import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
 import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
 import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
 import { UserBenefits } from '../lib/user-benefits';
+import { WriteOffUnpaidInvoices } from '../lib/write-off-unpaid-invoices';
 import { ZuoraSalesforceLinkRemover } from '../lib/zuora-salesforce-link-remover';
 
 const app = new App();
@@ -331,6 +333,22 @@ new ObserverDataExport(app, 'observer-data-export-CODE', {
 	stage: 'CODE',
 });
 new ObserverDataExport(app, 'observer-data-export-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+});
+new NegativeInvoicesProcessor(app, 'negative-invoices-processor-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+});
+new NegativeInvoicesProcessor(app, 'negative-invoices-processor-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+});
+new WriteOffUnpaidInvoices(app, 'write-off-unpaid-invoices-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+});
+new WriteOffUnpaidInvoices(app, 'write-off-unpaid-invoices-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 });
