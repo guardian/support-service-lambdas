@@ -12,9 +12,12 @@ import {
 import { Architecture } from 'aws-cdk-lib/aws-lambda';
 // import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
+	Choice,
+	Condition,
 	DefinitionBody,
 	JsonPath,
 	Map,
+	Pass,
 	StateMachine,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
@@ -169,8 +172,32 @@ export class NegativeInvoicesProcessor extends GuStack {
 			resultPath: '$.processedInvoices',
 		});
 
+		const hasActivePaymentMethodChoice = new Choice(
+			this,
+			'Has active payment method?',
+		)
+			.when(
+				Condition.booleanEquals('$.hasActivePaymentMethod', true),
+				new Pass(this, 'Add Credit to account balance lambda will go here'),
+			)
+			.otherwise(new Pass(this, 'check for valid email lambda will go here'));
+
+		const hasActiveSubChoice = new Choice(this, 'Has active sub?')
+			.when(
+				Condition.booleanEquals('$.hasActiveSub', true),
+				new Pass(
+					this,
+					'Add Credit to account balance lambda will go here as well',
+				),
+			)
+			.otherwise(
+				checkForActivePaymentMethodLambdaTask.next(
+					hasActivePaymentMethodChoice,
+				),
+			);
+
 		invoiceProcessorMap.iterator(
-			checkForActiveSubLambdaTask.next(checkForActivePaymentMethodLambdaTask),
+			checkForActiveSubLambdaTask.next(hasActiveSubChoice),
 		);
 
 		const definitionBody = DefinitionBody.fromChainable(
