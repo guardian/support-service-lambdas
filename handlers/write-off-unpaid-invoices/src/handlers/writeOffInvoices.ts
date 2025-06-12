@@ -50,9 +50,9 @@ export const handler = async (event: LambdaEvent) => {
 		});
 
 		let currentBalance = balance;
-		console.log('current balance is: ' + currentBalance);
 
 		for (const item of sortedAdjustableItems) {
+			console.log('current balance is: ' + currentBalance);
 			const adjustmentAmount = Math.min(
 				Math.abs(item.availableToCreditAmount),
 				Math.abs(currentBalance),
