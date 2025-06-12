@@ -662,7 +662,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
           "Fn::Join": [
             "",
             [
-              "{"StartAt":"Get invoices","States":{"Get invoices":{"Next":"Active Sub fetcher map","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "{"StartAt":"Get invoices","States":{"Get invoices":{"Next":"Invoice processor map","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -673,7 +673,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Active Sub fetcher map":{"Type":"Map","ResultPath":"$.activeSubChecks","Next":"Active Payment Method fetcher map","Iterator":{"StartAt":"Check for Active Sub","States":{"Check for Active Sub":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Invoice processor map":{"Type":"Map","ResultPath":"$.processedInvoices","End":true,"Iterator":{"StartAt":"Check for Active Sub","States":{"Check for Active Sub":{"Next":"Check for Active Payment Method","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -684,7 +684,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.invoices","MaxConcurrency":1},"Active Payment Method fetcher map":{"Type":"Map","ResultPath":"$.activePaymentMethodChecks","End":true,"Iterator":{"StartAt":"Check for Active Payment Method","States":{"Check for Active Payment Method":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Check for Active Payment Method":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -764,7 +764,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "checkforactivepaymentmethodlambdaA80DA53A",
+                    "checkforactivesublambdaB4F70D0E",
                     "Arn",
                   ],
                 },
@@ -774,7 +774,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "checkforactivepaymentmethodlambdaA80DA53A",
+                          "checkforactivesublambdaB4F70D0E",
                           "Arn",
                         ],
                       },
@@ -790,7 +790,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "checkforactivesublambdaB4F70D0E",
+                    "checkforactivepaymentmethodlambdaA80DA53A",
                     "Arn",
                   ],
                 },
@@ -800,7 +800,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "checkforactivesublambdaB4F70D0E",
+                          "checkforactivepaymentmethodlambdaA80DA53A",
                           "Arn",
                         ],
                       },
@@ -1701,7 +1701,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
           "Fn::Join": [
             "",
             [
-              "{"StartAt":"Get invoices","States":{"Get invoices":{"Next":"Active Sub fetcher map","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "{"StartAt":"Get invoices","States":{"Get invoices":{"Next":"Invoice processor map","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1712,7 +1712,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Active Sub fetcher map":{"Type":"Map","ResultPath":"$.activeSubChecks","Next":"Active Payment Method fetcher map","Iterator":{"StartAt":"Check for Active Sub","States":{"Check for Active Sub":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Invoice processor map":{"Type":"Map","ResultPath":"$.processedInvoices","End":true,"Iterator":{"StartAt":"Check for Active Sub","States":{"Check for Active Sub":{"Next":"Check for Active Payment Method","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1723,7 +1723,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}},"ItemsPath":"$.invoices","MaxConcurrency":1},"Active Payment Method fetcher map":{"Type":"Map","ResultPath":"$.activePaymentMethodChecks","End":true,"Iterator":{"StartAt":"Check for Active Payment Method","States":{"Check for Active Payment Method":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Check for Active Payment Method":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1846,7 +1846,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "checkforactivepaymentmethodlambdaA80DA53A",
+                    "checkforactivesublambdaB4F70D0E",
                     "Arn",
                   ],
                 },
@@ -1856,7 +1856,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "checkforactivepaymentmethodlambdaA80DA53A",
+                          "checkforactivesublambdaB4F70D0E",
                           "Arn",
                         ],
                       },
@@ -1872,7 +1872,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "checkforactivesublambdaB4F70D0E",
+                    "checkforactivepaymentmethodlambdaA80DA53A",
                     "Arn",
                   ],
                 },
@@ -1882,7 +1882,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "checkforactivesublambdaB4F70D0E",
+                          "checkforactivepaymentmethodlambdaA80DA53A",
                           "Arn",
                         ],
                       },
