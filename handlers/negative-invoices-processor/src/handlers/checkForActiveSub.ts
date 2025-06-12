@@ -12,17 +12,17 @@ export const handler = async (event: CheckForActiveSubInput) => {
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const hasActiveSub = await hasActiveSubscription(
 			zuoraClient,
-			parsedEvent.account_id,
+			parsedEvent.accountId,
 		);
 
 		return {
-			account_id: parsedEvent.account_id,
+			accountId: parsedEvent.accountId,
 			hasActiveSub,
 		};
 	} catch (error) {
 		return {
 			...event,
-			subStatus: 'Error',
+			subStatus: 'Error', //rethink this name
 			errorDetail:
 				error instanceof Error ? error.message : JSON.stringify(error, null, 2),
 		};
