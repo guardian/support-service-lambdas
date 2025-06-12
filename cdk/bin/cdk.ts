@@ -354,10 +354,10 @@ new WriteOffUnpaidInvoices(app, 'write-off-unpaid-invoices-PROD', {
 	stage: 'PROD',
 });
 new MParticleApi(app, 'mparticle-api-CODE', {
-	stack: 'support',
+	stack: 'membership',
 	stage: 'CODE',
 });
 new MParticleApi(app, 'mparticle-api-PROD', {
-	stack: 'support',
-  stage: 'PROD',
+	stack: 'membership',
+  	stage: 'PROD',
 });
