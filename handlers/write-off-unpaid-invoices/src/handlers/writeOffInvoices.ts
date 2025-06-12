@@ -51,6 +51,8 @@ export const handler = async (event: LambdaEvent) => {
 
 		let currentBalance = balance;
 
+		console.log('we have ' + adjustableItems.length + 'adjustable items');
+
 		for (const item of sortedAdjustableItems) {
 			console.log('current balance is: ' + currentBalance);
 			const adjustmentAmount = Math.min(
@@ -77,6 +79,7 @@ export const handler = async (event: LambdaEvent) => {
 				break;
 			}
 		}
+		console.log('looped though every item');
 	}
 };
 
