@@ -112,7 +112,6 @@ object ConsentsMapping {
     ),
     "FeastInAppPurchase" -> Set(
       yourSupportOnboarding,
-      similarGuardianProducts,
     ),
     "Guardian Ad-Lite" -> Set(
       yourSupportOnboarding,
