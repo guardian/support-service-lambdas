@@ -6,8 +6,8 @@ import { BigQueryResultDataSchema } from '../types';
 import type { BigQueryRecord } from '../types';
 
 export const handler = async (): Promise<{
-	allRecordsFromBigQueryCount: number;
-	allRecordsFromBigQuery: BigQueryRecord[];
+	invoicesCount: number;
+	invoices: BigQueryRecord[];
 }> => {
 	try {
 		const records =
@@ -15,8 +15,8 @@ export const handler = async (): Promise<{
 				? await getPRODData()
 				: await getCODEData();
 		return {
-			allRecordsFromBigQueryCount: records.length,
-			allRecordsFromBigQuery: records,
+			invoicesCount: records.length,
+			invoices: records,
 		};
 	} catch (error) {
 		console.error('Error:', error);
@@ -47,8 +47,8 @@ const query = (): string =>
 	`
 	SELECT
         inv.id,
-        STRING_AGG(distinct inv.account_id, ',') AS account_id,
-        MAX(inv.balance) AS invoice_balance
+        STRING_AGG(distinct inv.account_id, ',') AS accountId,
+        MAX(inv.balance) AS invoiceBalance
     FROM 
         datatech-fivetran.zuora.invoice inv
     INNER JOIN 

@@ -54,6 +54,7 @@ jobs:
           - metric-push-api
           - observer-data-export
           - negative-invoices-processor
+          - write-off-unpaid-invoices
     runs-on: ubuntu-latest
     permissions:
       id-token: write
