@@ -126,6 +126,37 @@ const attemptToParseMessageString = ({
 	}
 };
 
+export function buildDiagnosticLinks(
+	DiagnosticLinks: string | undefined,
+	trigger:
+		| {
+				Period: number;
+				EvaluationPeriods: number;
+		  }
+		| undefined,
+	stateChangeTime: Date,
+) {
+	const diagnosticUrlTemplates = DiagnosticLinks
+		? DiagnosticLinks.split(',').map((link) => ({
+				prefix: link.split(':', 1)[0],
+				value: link.replace(/^[^:]+:/, ''),
+			}))
+		: [];
+
+	return diagnosticUrlTemplates.flatMap((diagnosticUrlTemplate) => {
+		if (diagnosticUrlTemplate.prefix === 'lambda') {
+			return getCloudwatchLogsLink(
+				`/aws/lambda/${diagnosticUrlTemplate.value}`,
+				trigger,
+				stateChangeTime,
+			);
+		} else {
+			console.log('unknown DiagnosticLinks tag prefix', diagnosticUrlTemplate);
+			return [];
+		}
+	});
+}
+
 const buildCloudWatchAlarmMessage = async (
 	{
 		AlarmArn,
@@ -141,27 +172,7 @@ const buildCloudWatchAlarmMessage = async (
 ) => {
 	const { App, DiagnosticLinks } = await getTags(AlarmArn, AWSAccountId);
 
-	const diagnosticUrlTemplates = DiagnosticLinks
-		? DiagnosticLinks.split(',').map((link) => ({
-				prefix: link.split(':', 1)[0],
-				value: link.replace(/^[^:]+:/, ''),
-			}))
-		: [];
-
-	const links = diagnosticUrlTemplates.flatMap((diagnosticUrlTemplate) => {
-		let result;
-		if (diagnosticUrlTemplate.prefix === 'lambda') {
-			result = getCloudwatchLogsLink(
-				`/aws/lambda/${diagnosticUrlTemplate.value}`,
-				Trigger,
-				StateChangeTime,
-			);
-		} else {
-			console.log('unknown DiagnosticLinks tag prefix', diagnosticUrlTemplate);
-			result = undefined;
-		}
-		return result;
-	});
+	const links = buildDiagnosticLinks(DiagnosticLinks, Trigger, StateChangeTime);
 
 	const title =
 		NewStateValue === 'OK'

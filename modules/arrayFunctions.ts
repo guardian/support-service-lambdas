@@ -85,3 +85,7 @@ export const arrayToObject = <T>(array: Array<Record<string, T>>) => {
 		return { ...acc, ...val };
 	}, {});
 };
+
+export function flatten<T>(nested: T[][]): T[] {
+	return nested.flatMap((a) => a);
+}

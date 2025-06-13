@@ -22,4 +22,5 @@ deployments:
       prefixStack: false
       functionNames:
         - alarms-handler-
+        - alarms-handler-scheduled-
     dependencies: [alarms-handler-cloudformation]
