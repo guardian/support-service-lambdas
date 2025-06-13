@@ -1,4 +1,10 @@
-import { groupBy, sortBy } from './arrayFunctions';
+import {
+	groupBy,
+	groupMap,
+	mapValues,
+	partition,
+	sortBy,
+} from './arrayFunctions';
 
 test('sortBy should sort by the relevant field', () => {
 	const data = [
@@ -32,4 +38,37 @@ test('groupBy should group correctly', () => {
 			{ k: 2, d: 202 },
 		],
 	});
+});
+
+test('groupMap should map correctly after grouping', () => {
+	const data = [
+		{ k: 1, d: 101 },
+		{ k: 2, d: 201 },
+		{ k: 1, d: 102 },
+		{ k: 2, d: 201 },
+	];
+	const actual = groupMap(
+		data,
+		(item) => `${item.k}`,
+		(item) => item.d,
+	);
+	expect(actual).toEqual({
+		1: [101, 102],
+		2: [201, 201],
+	});
+});
+
+test('mapValues should map correctly', () => {
+	const data = { a: 0, b: 10, c: 0 };
+	const actual = mapValues(data, (n) => n + 1);
+	expect(actual).toEqual({ a: 1, b: 11, c: 1 });
+});
+
+test('partition should separate accordingly', () => {
+	const data = ['hello', 12, 23, 'hello', 'world', 12];
+	const actual = partition(data, (item) => typeof item == 'number');
+	expect(actual).toEqual([
+		[12, 23, 12],
+		['hello', 'hello', 'world'],
+	]);
 });

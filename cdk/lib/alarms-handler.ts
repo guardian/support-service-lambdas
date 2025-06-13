@@ -36,11 +36,6 @@ export class AlarmsHandler extends GuStack {
 			},
 		});
 
-		const buildWebhookParameter = (team: string): GuStringParameter =>
-			new GuStringParameter(this, `${app}-${team}-webhook`, {
-				description: `${team} Team Google Chat webhook URL`,
-			});
-
 		const mobileAccountId = new GuStringParameter(
 			this,
 			`${app}-mobile-aws-account`,
@@ -85,16 +80,6 @@ export class AlarmsHandler extends GuStack {
 				APP: app,
 				STACK: this.stack,
 				STAGE: this.stage,
-				GROWTH_WEBHOOK: buildWebhookParameter('GROWTH').valueAsString,
-				PORTFOLIO_WEBHOOK: buildWebhookParameter('PORTFOLIO').valueAsString,
-				PLATFORM_WEBHOOK: buildWebhookParameter('PLATFORM').valueAsString,
-				VALUE_WEBHOOK: buildWebhookParameter('VALUE').valueAsString,
-				SRE_WEBHOOK: buildWebhookParameter('SRE').valueAsString,
-				// The lambda uses the mobile account role if it needs to fetch tags cross-account
-				MOBILE_AWS_ACCOUNT_ID: mobileAccountId.valueAsString,
-				MOBILE_ROLE_ARN: mobileAccountRoleArn.valueAsString,
-				TARGETING_AWS_ACCOUNT_ID: targetingAccountId.valueAsString,
-				TARGETING_ROLE_ARN: targetingAccountRoleArn.valueAsString,
 			},
 		});
 
