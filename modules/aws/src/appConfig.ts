@@ -2,6 +2,7 @@ import type { z } from 'zod';
 import { GetParametersByPathCommand, SSMClient } from '@aws-sdk/client-ssm';
 import { awsConfig } from '../src/config';
 import { groupMap, mapValues, partition } from '../../arrayFunctions';
+import { fetchAllPages } from './fetchAllPages';
 
 /**
  * App config uses the guardian-standard SSM keys to load config.  The GU CDK lambda
@@ -28,8 +29,7 @@ export type SSMKeyValuePairs = Record<string, string>[];
 
 async function readAllRecursive(configRoot: string): Promise<SSMKeyValuePairs> {
 	const ssm = new SSMClient(awsConfig);
-
-	async function readNextPage(token?: string): Promise<SSMKeyValuePairs> {
+	return fetchAllPages<Record<string, string>>(async (token) => {
 		const command = new GetParametersByPathCommand({
 			Path: configRoot,
 			Recursive: true,
@@ -44,17 +44,15 @@ async function readAllRecursive(configRoot: string): Promise<SSMKeyValuePairs> {
 			);
 		}
 
-		const res = result.Parameters.flatMap((param) =>
-			param.Value !== undefined && param.Name !== undefined
-				? [{ [param.Name]: param.Value }]
-				: [],
-		);
-		if (result.NextToken === undefined) return res;
-		console.log('need to fetch next page of config', result.NextToken);
-		return [...res, ...(await readNextPage(result.NextToken))];
-	}
-
-	return await readNextPage();
+		return {
+			nextToken: result.NextToken,
+			thisPage: result.Parameters.flatMap((param) =>
+				param.Value !== undefined && param.Name !== undefined
+					? [{ [param.Name]: param.Value }]
+					: [],
+			),
+		};
+	});
 }
 
 // exported for test access

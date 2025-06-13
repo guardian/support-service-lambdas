@@ -7,6 +7,7 @@ import {
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
 import { flatten } from '@modules/arrayFunctions';
 import { awsConfig, getAwsConfig, isRunningLocally } from '@modules/aws/config';
+import { fetchAllPages } from '@modules/aws/fetchAllPages';
 import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Accounts } from './configSchema';
@@ -97,23 +98,30 @@ export async function getAllAlarmsInAlarm(
 	).then(flatten);
 }
 
-async function getAlarmsInAlarmForClient(
+const getAlarmsInAlarmForClient = async (
 	client: CloudWatchClient,
-): Promise<AlarmWithTags[]> {
-	const request = new DescribeAlarmsCommand({ StateValue: 'ALARM' });
-	const response = await client.send(request);
-	console.log(
-		'next token should be empty to avoid missing alarms: ' + response.NextToken,
-	);
-	const metricAlarms = getIfDefined(
-		response.MetricAlarms,
-		'response didnt include MetricAlarms',
-	);
-	return metricAlarms.map((alarm) => {
-		const alarmArn = getIfDefined(alarm.AlarmArn, 'no alarm ARN');
+): Promise<AlarmWithTags[]> =>
+	fetchAllPages(async (token) => {
+		const request = new DescribeAlarmsCommand({
+			StateValue: 'ALARM',
+			NextToken: token,
+		});
+		const response = await client.send(request);
+		const metricAlarms = getIfDefined(
+			response.MetricAlarms,
+			'response didnt include MetricAlarms',
+		);
 		return {
-			alarm,
-			tags: new Lazy(() => getTags(alarmArn, client), 'tags for ' + alarmArn),
+			nextToken: response.NextToken,
+			thisPage: metricAlarms.map((alarm) => {
+				const alarmArn = getIfDefined(alarm.AlarmArn, 'no alarm ARN');
+				return {
+					alarm,
+					tags: new Lazy(
+						() => getTags(alarmArn, client),
+						'tags for ' + alarmArn,
+					),
+				};
+			}),
 		};
 	});
-}
