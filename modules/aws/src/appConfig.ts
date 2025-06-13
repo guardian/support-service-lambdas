@@ -50,11 +50,11 @@ async function readAllRecursive(configRoot: string): Promise<SSMKeyValuePairs> {
 
 // exported for test access
 // converts a flat key/value structure into a proper type
-export function parseSSMConfigToObject<
-	I,
-	O,
-	T extends z.ZodType<O, z.ZodTypeDef, I>,
->(ssmKeyValuePairs: SSMKeyValuePairs, configRoot: string, schema: T): O {
+export function parseSSMConfigToObject<O>(
+	ssmKeyValuePairs: SSMKeyValuePairs,
+	configRoot: string,
+	schema: z.ZodType<O, z.ZodTypeDef, any>,
+): O {
 	const configValuesByPath = ssmKeyValuePairs
 		.flatMap(Object.entries)
 		.map<PathArrayWithValue>(([name, value]) => ({
@@ -68,12 +68,10 @@ export function parseSSMConfigToObject<
 	const configTree = getTreeFromPaths(configValuesByPath);
 	const parseResult = schema.safeParse(configTree);
 	if (!parseResult.success) {
+		const configAsString = JSON.stringify(configTree, null, 2);
 		throw new Error(
-			'could not parse config:\n' +
-				JSON.stringify(configTree, null, 2) +
-				'\nDue to error: ' +
-				parseResult.error,
-		); // ZodError instance
+			`could not parse config:\n${configAsString}\nDue to error: ${parseResult.error}`,
+		);
 	} else {
 		return parseResult.data;
 	}
@@ -104,35 +102,24 @@ export const getTreeFromPaths = (paths: PathArrayWithValue[]): ConfigTree => {
 	return merge(singleItemConfigTrees);
 };
 
-export const configNestingError = 'ConfigNestingError';
-export class ConfigNestingError extends Error {
-	constructor(message: string) {
-		super('config has a string value with objects below it: ' + message);
-		this.name = configNestingError;
-	}
-}
-
 function merge(singleItemTreesOrStringItem: ConfigTree[]): ConfigTree {
 	const [stringValues, singleItemTrees] = partition(
 		singleItemTreesOrStringItem,
 		(configTree) => typeof configTree === 'string',
 	);
-	if (stringValues[0]) {
-		// base case - we have reached a string value
-		if (singleItemTrees.length > 0) {
-			/*
-			this would be valid in SSM but not in a schema - throw an error
-			/qwer = "string_value"
-			/qwer/rty = "nested_value"
-			 */
-			throw new ConfigNestingError(JSON.stringify(singleItemTrees));
-		}
-		return stringValues[0];
-	}
-	const subValuesPerKey = groupMap(
-		singleItemTrees.flatMap(Object.entries),
-		(tree) => tree[0],
-		(tree) => tree[1],
+	const thisNode = stringValues[0];
+	const subTree = mapValues(
+		groupMap(
+			singleItemTrees.flatMap(Object.entries),
+			(tree) => tree[0],
+			(tree) => tree[1],
+		),
+		merge,
 	);
-	return mapValues(subValuesPerKey, merge);
+	const hasTree = singleItemTrees.length > 0;
+	const hasStringValue = thisNode !== undefined;
+	if (hasTree && hasStringValue) return { ...subTree, thisNode };
+	else if (hasTree) return subTree;
+	else if (hasStringValue) return thisNode;
+	else throw new Error('no config: merge called with empty list');
 }

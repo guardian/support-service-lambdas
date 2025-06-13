@@ -6,7 +6,6 @@ import {
 	parseSSMConfigToObject,
 	getTreeFromPaths,
 	PathArrayWithValue,
-	ConfigNestingError,
 } from '../src/appConfig';
 
 jest.mock('@aws-sdk/client-ssm');
@@ -155,14 +154,18 @@ describe('parseSSMConfigToObject', () => {
 });
 
 describe('getTreeFromPaths', () => {
-	it('should throw if a value clashes with a tree', () => {
+	it("should use the special key 'thisNode' if a value clashes with a tree", () => {
+		const testValue1 = 'hi';
+		const testValue2 = 'bye';
 		const testData: PathArrayWithValue[] = [
-			{ path: ['myKey'], value: 'v1' },
-			{ path: ['myKey', 'nested'], value: 'v2' },
+			{ path: ['myKey'], value: testValue1 },
+			{ path: ['myKey', 'nested'], value: testValue2 },
 		];
 
-		// const expected = configNestingError;
-		const actual = () => getTreeFromPaths(testData);
-		expect(actual).toThrow(ConfigNestingError);
+		const expected = {
+			myKey: { nested: testValue2, thisNode: testValue1 },
+		};
+		const actual = getTreeFromPaths(testData);
+		expect(actual).toEqual(expected);
 	});
 });
