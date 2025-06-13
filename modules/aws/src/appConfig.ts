@@ -1,6 +1,7 @@
 import type { z } from 'zod';
 import { GetParametersByPathCommand, SSMClient } from '@aws-sdk/client-ssm';
 import { awsConfig } from '../src/config';
+import { groupMap, mapValues, partition } from '../../arrayFunctions';
 
 /**
  * App config uses the guardian-standard SSM keys to load config.  The GU CDK lambda
@@ -19,102 +20,115 @@ export const loadConfig = async <O>(
 ): Promise<O> => {
 	const configRoot = '/' + [stage, stack, app].join('/');
 	console.log('getting app config from SSM', configRoot);
-	const configFlat: ConfigFlat = await readAllRecursive(configRoot);
-	return processResults(configFlat, configRoot, schema);
+	const configFlat: SSMKeyValuePairs = await readAllRecursive(configRoot);
+	return parseSSMConfigToObject(configFlat, configRoot, schema);
 };
 
-async function readAllRecursive(configRoot: string): Promise<ConfigFlat> {
-	const ssm = new SSMClient(awsConfig);
-	const command = new GetParametersByPathCommand({
-		Path: configRoot,
-		Recursive: true,
-		WithDecryption: true,
-	});
-	const result = await ssm.send(command);
+export type SSMKeyValuePairs = Record<string, string>[];
 
-	if (!result.Parameters) {
-		throw new Error(
-			`Failed to retrieve config from parameter store: ${configRoot}, ${JSON.stringify(result)}`,
+async function readAllRecursive(configRoot: string): Promise<SSMKeyValuePairs> {
+	const ssm = new SSMClient(awsConfig);
+
+	async function readNextPage(token?: string): Promise<SSMKeyValuePairs> {
+		const command = new GetParametersByPathCommand({
+			Path: configRoot,
+			Recursive: true,
+			WithDecryption: true,
+			NextToken: token,
+		});
+		const result = await ssm.send(command);
+
+		if (!result.Parameters) {
+			throw new Error(
+				`Failed to retrieve config from parameter store: ${configRoot}, ${JSON.stringify(result)}`,
+			);
+		}
+
+		const res = result.Parameters.flatMap((param) =>
+			param.Value !== undefined && param.Name !== undefined
+				? [{ [param.Name]: param.Value }]
+				: [],
 		);
+		if (result.NextToken === undefined) return res;
+		console.log('need to fetch next page of config', result.NextToken);
+		return [...res, ...(await readNextPage(result.NextToken))];
 	}
 
-	return result.Parameters.flatMap((param) =>
-		param.Value !== undefined && param.Name !== undefined
-			? [{ [param.Name]: param.Value }]
-			: [],
-	);
+	return await readNextPage();
 }
 
 // exported for test access
 // converts a flat key/value structure into a proper type
-export function processResults<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
-	configFlat: ConfigFlat,
+export function parseSSMConfigToObject<O>(
+	ssmKeyValuePairs: SSMKeyValuePairs,
 	configRoot: string,
-	schema: T,
+	schema: z.ZodType<O, z.ZodTypeDef, any>,
 ): O {
-	const configValuesByPathFromLeaf = configFlat.flatMap(Object.entries).map(
-		([name, value]) =>
-			({
-				path: name
-					.replace(configRoot, '')
-					.replace(/^\//, '')
-					.split('/')
-					.filter((k) => k.length > 0)
-					.reverse(),
-				value,
-			}) as PathWithValue,
-	);
-	const configTree = getTreeFromPaths(configValuesByPathFromLeaf);
+	const configValuesByPath = ssmKeyValuePairs
+		.flatMap(Object.entries)
+		.map<PathArrayWithValue>(([name, value]) => ({
+			path: name
+				.replace(configRoot, '')
+				.replace(/^\//, '')
+				.split('/')
+				.filter((k) => k.length > 0),
+			value,
+		}));
+	const configTree = getTreeFromPaths(configValuesByPath);
 	const parseResult = schema.safeParse(configTree);
 	if (!parseResult.success) {
+		const configAsString = JSON.stringify(configTree, null, 2);
 		throw new Error(
-			'could not parse config:\n' +
-				JSON.stringify(configTree, null, 2) +
-				'\nDue to error: ' +
-				parseResult.error,
-		); // ZodError instance
+			`could not parse config:\n${configAsString}\nDue to error: ${parseResult.error}`,
+		);
 	} else {
 		return parseResult.data;
 	}
 }
 
-export type ConfigFlat = Record<string, string>[];
 type ConfigTree = string | { [p in string]: ConfigTree };
-const getTreeFromPaths = (paths: PathWithValue[]): ConfigTree => {
-	const singleItemTreesOrStringItem = paths.map(
-		({ path, value }) =>
-			path.reduce<ConfigTree>(
-				(inside, nextLeaf) => ({ [nextLeaf]: inside }),
-				value,
-			),
-		{},
-	);
-	return merge(singleItemTreesOrStringItem);
-};
 
-function merge(singleItemTreesOrStringItem: ConfigTree[]): ConfigTree {
-	const maybeStringValue = singleItemTreesOrStringItem.find(
-		(configTree) => typeof configTree === 'string',
-	);
-	if (maybeStringValue) {
-		return maybeStringValue;
-	}
-	const singleItemTrees = singleItemTreesOrStringItem.filter(
-		(a) => typeof a !== 'string',
-	);
-	const topLevelKeys = [...new Set(singleItemTrees.flatMap(Object.keys))];
-	const topLevelGrouped = Object.fromEntries(
-		topLevelKeys.map((key) => {
-			const childTreesForKey = singleItemTrees.flatMap((obj) =>
-				obj[key] ? [obj[key]] : [],
-			);
-			return [key, merge(childTreesForKey)];
-		}),
-	);
-	return topLevelGrouped;
-}
-
-type PathWithValue = {
+export type PathArrayWithValue = {
 	path: string[];
 	value: string;
 };
+
+// exported for tests
+export const getTreeFromPaths = (paths: PathArrayWithValue[]): ConfigTree => {
+	const pathArrayToPathTree: ({
+		path,
+		value,
+	}: {
+		path: string[];
+		value: string;
+	}) => ConfigTree = ({ path, value }) =>
+		path.reduceRight<ConfigTree>(
+			(inside, nextLeaf) => ({ [nextLeaf]: inside }),
+			value,
+		);
+
+	const singleItemConfigTrees = paths.map(pathArrayToPathTree);
+	return merge(singleItemConfigTrees);
+};
+
+function merge(singleItemTreesOrStringItem: ConfigTree[]): ConfigTree {
+	const [stringValues, singleItemTrees] = partition(
+		singleItemTreesOrStringItem,
+		(configTree) => typeof configTree === 'string',
+	);
+	const thisNode = stringValues[0];
+	const subTree = mapValues(
+		groupMap(
+			singleItemTrees.flatMap(Object.entries),
+			(tree) => tree[0],
+			(tree) => tree[1],
+		),
+		merge,
+	);
+	const hasTree = singleItemTrees.length > 0;
+	const hasStringValue = thisNode !== undefined;
+	if (hasTree && hasStringValue) return { ...subTree, thisNode };
+	else if (hasTree) return subTree;
+	else if (hasStringValue) return thisNode;
+	else throw new Error('no config: merge called with empty list');
+}

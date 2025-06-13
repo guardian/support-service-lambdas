@@ -155,6 +155,7 @@ export const getInvoiceSchema = z.object({
 	id: z.string(),
 	amount: z.number(),
 	amountWithoutTax: z.number(),
+	balance: z.number(),
 });
 
 export type GetInvoiceResponse = z.infer<typeof getInvoiceSchema>;
@@ -165,6 +166,15 @@ export const getInvoiceItemsSchema = z.object({
 		z.object({
 			id: z.string(),
 			productRatePlanChargeId: z.string(),
+			availableToCreditAmount: z.number(),
+			taxationItems: z.object({
+				data: z.array(
+					z.object({
+						id: z.string(),
+						availableToCreditAmount: z.number(),
+					}),
+				),
+			}),
 		}),
 	),
 });
@@ -226,6 +236,33 @@ export const invoiceItemAdjustmentResultSchema = z.object({
 	Id: z.string().optional(),
 });
 
+export type InvoiceItemAdjustmentType = 'Credit' | 'Charge';
+
+export type InvoiceItemAdjustmentSourceType = 'InvoiceDetail' | 'Tax';
+
 export type InvoiceItemAdjustmentResult = z.infer<
 	typeof invoiceItemAdjustmentResultSchema
+>;
+
+// --------------- Payment Method ---------------
+const paymentMethodStatusSchema = z.object({
+	status: z.string(),
+});
+
+export const zuoraPaymentMethodQueryResponseSchema = z
+	.object({
+		success: z.boolean(),
+	})
+	.and(
+		z.object({
+			creditcardreferencetransaction: z
+				.array(paymentMethodStatusSchema)
+				.optional(),
+			creditcard: z.array(paymentMethodStatusSchema).optional(),
+			banktransfer: z.array(paymentMethodStatusSchema).optional(),
+			paypal: z.array(paymentMethodStatusSchema).optional(),
+		}),
+	);
+export type ZuoraPaymentMethodQueryResponse = z.infer<
+	typeof zuoraPaymentMethodQueryResponseSchema
 >;

@@ -1,7 +1,12 @@
 import { SSMClient } from '@aws-sdk/client-ssm';
 import { describe } from 'node:test';
 import { z } from 'zod';
-import { ConfigFlat, processResults } from '../src/appConfig';
+import {
+	SSMKeyValuePairs,
+	parseSSMConfigToObject,
+	getTreeFromPaths,
+	PathArrayWithValue,
+} from '../src/appConfig';
 
 jest.mock('@aws-sdk/client-ssm');
 
@@ -9,7 +14,7 @@ const mockGetParameter = jest.fn();
 
 SSMClient.prototype.send = mockGetParameter;
 
-describe('processResults', () => {
+describe('parseSSMConfigToObject', () => {
 	const dummyConfigRoot = '/CODE/stack/app';
 
 	it('should handle a single string config value', () => {
@@ -23,7 +28,7 @@ describe('processResults', () => {
 		type TestType = z.infer<typeof testSchema>;
 
 		const expected: TestType = testValue;
-		const actual: TestType = processResults(
+		const actual: TestType = parseSSMConfigToObject(
 			testData,
 			dummyConfigRoot,
 			testSchema,
@@ -33,13 +38,15 @@ describe('processResults', () => {
 
 	it('should handle a single nested config value', () => {
 		const testValue = 'hi';
-		const testData: ConfigFlat = [{ [dummyConfigRoot + '/myKey']: testValue }];
+		const testData: SSMKeyValuePairs = [
+			{ [dummyConfigRoot + '/myKey']: testValue },
+		];
 		const testSchema = z.object({ myKey: z.string() });
 
 		type TestType = z.infer<typeof testSchema>;
 
 		const expected: TestType = { myKey: testValue };
-		const actual: TestType = processResults(
+		const actual: TestType = parseSSMConfigToObject(
 			testData,
 			dummyConfigRoot,
 			testSchema,
@@ -50,7 +57,7 @@ describe('processResults', () => {
 	it('should handle a single deeply config value', () => {
 		const dummyConfigRoot = '/CODE/stack/app';
 		const testValue = 'hi';
-		const testData: ConfigFlat = [
+		const testData: SSMKeyValuePairs = [
 			{ [dummyConfigRoot + '/myKey/nested']: testValue },
 		];
 		const testSchema = z.object({ myKey: z.object({ nested: z.string() }) });
@@ -58,7 +65,7 @@ describe('processResults', () => {
 		type TestType = z.infer<typeof testSchema>;
 
 		const expected: TestType = { myKey: { nested: testValue } };
-		const actual: TestType = processResults(
+		const actual: TestType = parseSSMConfigToObject(
 			testData,
 			dummyConfigRoot,
 			testSchema,
@@ -70,7 +77,7 @@ describe('processResults', () => {
 		const dummyConfigRoot = '/CODE/stack/app';
 		const testValue1 = 'hi';
 		const testValue2 = 'bye';
-		const testData: ConfigFlat = [
+		const testData: SSMKeyValuePairs = [
 			{ [dummyConfigRoot + '/myKey']: testValue1 },
 			{ [dummyConfigRoot + '/myKey2']: testValue2 },
 		];
@@ -85,7 +92,7 @@ describe('processResults', () => {
 			myKey: testValue1,
 			myKey2: testValue2,
 		};
-		const actual: TestType = processResults(
+		const actual: TestType = parseSSMConfigToObject(
 			testData,
 			dummyConfigRoot,
 			testSchema,
@@ -97,7 +104,7 @@ describe('processResults', () => {
 		const dummyConfigRoot = '/CODE/stack/app';
 		const testValue1 = 'hi';
 		const testValue2 = 'bye';
-		const testData: ConfigFlat = [
+		const testData: SSMKeyValuePairs = [
 			{ [dummyConfigRoot + '/myKey/nested']: testValue1 },
 			{ [dummyConfigRoot + '/myKey/nested2']: testValue2 },
 		];
@@ -110,7 +117,7 @@ describe('processResults', () => {
 		const expected: TestType = {
 			myKey: { nested: testValue1, nested2: testValue2 },
 		};
-		const actual: TestType = processResults(
+		const actual: TestType = parseSSMConfigToObject(
 			testData,
 			dummyConfigRoot,
 			testSchema,
@@ -122,7 +129,7 @@ describe('processResults', () => {
 		const dummyConfigRoot = '/CODE/stack/app';
 		const testValue1 = 'hi';
 		const testValue2 = 'bye';
-		const testData: ConfigFlat = [
+		const testData: SSMKeyValuePairs = [
 			{ [dummyConfigRoot + '/myKey/nested']: testValue1 },
 			{ [dummyConfigRoot + '/myKey2/nested']: testValue2 },
 		];
@@ -137,11 +144,28 @@ describe('processResults', () => {
 			myKey: { nested: testValue1 },
 			myKey2: { nested: testValue2 },
 		};
-		const actual: TestType = processResults(
+		const actual: TestType = parseSSMConfigToObject(
 			testData,
 			dummyConfigRoot,
 			testSchema,
 		);
+		expect(actual).toEqual(expected);
+	});
+});
+
+describe('getTreeFromPaths', () => {
+	it("should use the special key 'thisNode' if a value clashes with a tree", () => {
+		const testValue1 = 'hi';
+		const testValue2 = 'bye';
+		const testData: PathArrayWithValue[] = [
+			{ path: ['myKey'], value: testValue1 },
+			{ path: ['myKey', 'nested'], value: testValue2 },
+		];
+
+		const expected = {
+			myKey: { nested: testValue2, thisNode: testValue1 },
+		};
+		const actual = getTreeFromPaths(testData);
 		expect(actual).toEqual(expected);
 	});
 });
