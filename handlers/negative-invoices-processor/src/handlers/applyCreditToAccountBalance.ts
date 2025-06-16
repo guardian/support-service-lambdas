@@ -1,7 +1,6 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { applyCreditToAccountBalance } from '@modules/zuora/applyCreditToAccountBalance';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { parse } from 'path';
 import { z } from 'zod';
 
 export const ApplyCreditToAccountBalanceInputSchema = z.object({
