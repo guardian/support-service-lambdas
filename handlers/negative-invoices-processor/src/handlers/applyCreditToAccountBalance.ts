@@ -4,7 +4,10 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { z } from 'zod';
 
 export const ApplyCreditToAccountBalanceInputSchema = z.object({
+	invoiceId: z.string(),
 	accountId: z.string(),
+	invoiceNumber: z.string(),
+	invoiceBalance: z.number(),
 	hasActiveSub: z.boolean(),
 	hasActivePaymentMethod: z.boolean().optional(),
 });
