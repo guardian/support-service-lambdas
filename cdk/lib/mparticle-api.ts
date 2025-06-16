@@ -38,15 +38,15 @@ export class MParticleApi extends GuStack {
 		);
 
 		// Allow the lambda to assume the roles that allow cross-account fetching of tags
-		lambda.addToRolePolicy(
-			new PolicyStatement({
-				actions: ['sts:AssumeRole'],
-				effect: Effect.ALLOW,
-				resources: [
-					// mobileAccountRoleArn.valueAsString,
-					// targetingAccountRoleArn.valueAsString,
-				],
-			}),
-		);
+		// lambda.addToRolePolicy(
+		// 	new PolicyStatement({
+		// 		actions: ['sts:AssumeRole'],
+		// 		effect: Effect.ALLOW,
+		// 		resources: [
+		// 			// mobileAccountRoleArn.valueAsString,
+		// 			// targetingAccountRoleArn.valueAsString,
+		// 		],
+		// 	}),
+		// );
 	}
 }
