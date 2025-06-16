@@ -1,3 +1,4 @@
+import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 import { stageFromEnvironment } from '@modules/stage';
 import type { DataSubjectRequestCallback } from '../../interfaces/data-subject-request-callback';
 import type { DataSubjectRequestForm } from "../../interfaces/data-subject-request-form";
@@ -7,6 +8,7 @@ import type { DataSubjectRequestSubmission } from "../../interfaces/data-subject
 import type { HttpResponse } from "../http";
 import { makeHttpRequest } from "../http";
 import { getSecretValue } from '../secrets';
+import { awsSqsConfig } from '../config/sqs';
 
 function parseDataSubjectRequestStatus(status: 'pending' | 'in_progress' | 'completed' | 'cancelled'): DataSubjectRequestStatus {
     switch (status) {
@@ -180,6 +182,28 @@ export const processDataSubjectRequestCallback = async (requestId: string, paylo
         form: payload
     });
     await Promise.resolve();
+
+    interface ErasureJobOutcome {
+        jobRunId: string;
+        status: 'Processing' | 'Completed' | { type: 'Failed', reason: string };
+        timestamp: Date
+    }
+    const message: ErasureJobOutcome = {
+        jobRunId: "",
+        status: 'Processing',
+        timestamp: new Date(),
+    };
+    const queueName = `supporter-product-data-${stageFromEnvironment()}`;
+    const client = new SQSClient(awsSqsConfig);
+    console.log(
+        `Sending message ${JSON.stringify(message)} to queue ${queueName}`,
+    );
+    const command = new SendMessageCommand({
+        QueueUrl: queueName,
+        MessageBody: JSON.stringify(message),
+    });
+    const response = await client.send(command);
+    console.log(`Response from message send was ${JSON.stringify(response)}`);
 
     return {
         message: 'Callback accepted and processed',

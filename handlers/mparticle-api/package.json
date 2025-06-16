@@ -16,6 +16,7 @@
     "@types/aws-lambda": "^8.10.147"
   },
   "dependencies": {
+    "@aws-sdk/client-sqs": "3.787.0",
     "@peculiar/x509": "^1.12.3",
     "dotenv": "^16.5.0",
     "zod": "^3.23.8"
