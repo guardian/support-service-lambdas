@@ -19,13 +19,11 @@ export type ApplyCreditToAccountBalanceInput = z.infer<
 export const handler = async (event: ApplyCreditToAccountBalanceInput) => {
 	try {
 		const parsedEvent = ApplyCreditToAccountBalanceInputSchema.parse(event);
-		console.log('ApplyCreditToAccountBalance parsedEvent', parsedEvent);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const body = JSON.stringify({
 			Amount: Math.abs(parsedEvent.invoiceBalance), //must be a positive value
 			SourceTransactionNumber: parsedEvent.invoiceNumber,
 			Type: 'Increase',
-			Comment: 'a comment',
 		});
 
 		const attempt = await applyCreditToAccountBalance(zuoraClient, body);
