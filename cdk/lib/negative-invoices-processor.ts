@@ -215,7 +215,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 		)
 			.when(
 				Condition.booleanEquals('$.hasActivePaymentMethod', true),
-				new Pass(this, 'Add Credit to account balance lambda will go here'),
+				applyCreditToAccountBalanceLambdaTask,
 			)
 			.otherwise(new Pass(this, 'check for valid email lambda will go here'));
 
