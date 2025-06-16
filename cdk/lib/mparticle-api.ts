@@ -1,9 +1,9 @@
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
-import { Duration, type App } from 'aws-cdk-lib';
-import { nodeVersion } from './node-version';
+import { type App, Duration } from 'aws-cdk-lib';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { nodeVersion } from './node-version';
 
 export class MParticleApi extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {
