@@ -50,7 +50,6 @@ SELECT
     item.id AS invoiceItemId,
 	item.invoice_id AS invoiceId,
 	inv.invoice_number AS invoiceNumber,
-	inv.invoice_date AS invoiceDate,
     item.charge_amount AS invoiceChargeAmount,
     inv.balance AS invoiceBalance,
 FROM 

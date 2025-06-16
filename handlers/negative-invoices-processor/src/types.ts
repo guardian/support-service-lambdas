@@ -6,7 +6,6 @@ export const BigQueryRecordSchema = z
 		invoiceItemId: z.string(),
 		invoiceId: z.string(),
 		invoiceNumber: z.string(),
-		invoiceDate: z.date(),
 		invoiceChargeAmount: z.number(),
 		invoiceBalance: z.number(),
 	})
