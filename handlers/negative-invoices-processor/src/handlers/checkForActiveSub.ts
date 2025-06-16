@@ -22,7 +22,7 @@ export const handler = async (event: CheckForActiveSubInput) => {
 	} catch (error) {
 		return {
 			...event,
-			subStatus: 'Error', //rethink this name
+			subStatus: 'Errora', //rethink this name
 			errorDetail:
 				error instanceof Error ? error.message : JSON.stringify(error, null, 2),
 		};
