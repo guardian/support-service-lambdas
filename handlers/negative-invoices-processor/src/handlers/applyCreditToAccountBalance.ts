@@ -22,7 +22,7 @@ export const handler = async (event: ApplyCreditToAccountBalanceInput) => {
 		console.log('ApplyCreditToAccountBalance parsedEvent', parsedEvent);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const body = JSON.stringify({
-			Amount: parsedEvent.invoiceBalance,
+			Amount: Math.abs(parsedEvent.invoiceBalance), //must be a positive value
 			SourceTransactionNumber: parsedEvent.invoiceNumber,
 			Type: 'Increase',
 			Comment: 'a comment',
