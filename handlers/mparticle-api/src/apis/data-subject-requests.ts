@@ -5,10 +5,10 @@ import type { DataSubjectRequestForm } from "../../interfaces/data-subject-reque
 import type { DataSubjectRequestState } from "../../interfaces/data-subject-request-state";
 import { DataSubjectRequestStatus } from "../../interfaces/data-subject-request-state";
 import type { DataSubjectRequestSubmission } from "../../interfaces/data-subject-request-submission";
+import { awsSqsConfig } from '../config/sqs';
 import type { HttpResponse } from "../http";
 import { makeHttpRequest } from "../http";
 import { getSecretValue } from '../secrets';
-import { awsSqsConfig } from '../config/sqs';
 
 function parseDataSubjectRequestStatus(status: 'pending' | 'in_progress' | 'completed' | 'cancelled'): DataSubjectRequestStatus {
     switch (status) {
@@ -185,8 +185,8 @@ export const processDataSubjectRequestCallback = async (requestId: string, paylo
 
     interface ErasureJobOutcome {
         jobRunId: string;
-        status: 'Processing' | 'Completed' | { type: 'Failed', reason: string };
-        timestamp: Date
+        status: 'Processing' | 'Completed' | { type: 'Failed'; reason: string };
+        timestamp: Date;
     }
     const message: ErasureJobOutcome = {
         jobRunId: "",
