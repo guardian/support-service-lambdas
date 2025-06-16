@@ -4,6 +4,7 @@ export const BigQueryRecordSchema = z
 	.object({
 		id: z.string(),
 		accountId: z.string(),
+		invoiceNumber: z.string(),
 		invoiceBalance: z.number(),
 	})
 	.strict();
