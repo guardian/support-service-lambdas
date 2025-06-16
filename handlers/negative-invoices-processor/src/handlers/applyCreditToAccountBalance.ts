@@ -28,7 +28,7 @@ export const handler = async (event: ApplyCreditToAccountBalanceInput) => {
 			Type: 'Increase',
 			Comment: 'a comment',
 		});
-		// callout is working. Start with tidying up the type and figure out how to get invoice item id (from query maybe?)
+
 		const attempt = await applyCreditToAccountBalance(zuoraClient, body);
 
 		return {
