@@ -1,6 +1,7 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { applyCreditToAccountBalance } from '@modules/zuora/applyCreditToAccountBalance';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { parse } from 'path';
 import { z } from 'zod';
 
 export const ApplyCreditToAccountBalanceInputSchema = z.object({
@@ -22,10 +23,10 @@ export const handler = async (event: ApplyCreditToAccountBalanceInput) => {
 		console.log('ApplyCreditToAccountBalance parsedEvent', parsedEvent);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const body = JSON.stringify({
-			Amount: 67.79,
-			Comment: 'a comment',
-			SourceTransactionNumber: 'INV00124038',
+			Amount: parsedEvent.invoiceBalance,
+			SourceTransactionNumber: parsedEvent.invoiceNumber,
 			Type: 'Increase',
+			Comment: 'a comment',
 		});
 		// callout is working. Start with tidying up the type and figure out how to get invoice item id (from query maybe?)
 		const attempt = await applyCreditToAccountBalance(zuoraClient, body);
