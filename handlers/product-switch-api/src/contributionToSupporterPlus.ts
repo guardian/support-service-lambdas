@@ -6,6 +6,7 @@ import type {
 	OrderAction,
 	PreviewOrderRequest,
 } from '@modules/zuora/orders';
+import { singleTriggerDate } from '@modules/zuora/orders';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type {
 	RatePlan,
@@ -245,20 +246,7 @@ const buildAddDiscountOrderAction = (
 	return [
 		{
 			type: 'AddProduct',
-			triggerDates: [
-				{
-					name: 'ContractEffective',
-					triggerDate: zuoraDateFormat(orderDate),
-				},
-				{
-					name: 'ServiceActivation',
-					triggerDate: zuoraDateFormat(orderDate),
-				},
-				{
-					name: 'CustomerAcceptance',
-					triggerDate: zuoraDateFormat(orderDate),
-				},
-			],
+			triggerDates: singleTriggerDate(orderDate),
 			addProduct: {
 				productRatePlanId: discount.productRatePlanId,
 			},
@@ -273,20 +261,7 @@ const buildChangePlanOrderAction = (
 ): ChangePlanOrderAction => {
 	return {
 		type: 'ChangePlan',
-		triggerDates: [
-			{
-				name: 'ContractEffective',
-				triggerDate: zuoraDateFormat(orderDate),
-			},
-			{
-				name: 'ServiceActivation',
-				triggerDate: zuoraDateFormat(orderDate),
-			},
-			{
-				name: 'CustomerAcceptance',
-				triggerDate: zuoraDateFormat(orderDate),
-			},
-		],
+		triggerDates: singleTriggerDate(orderDate),
 		changePlan: {
 			productRatePlanId: catalog.contribution.productRatePlanId,
 			subType: 'Upgrade',
@@ -352,20 +327,7 @@ export const buildSwitchRequestBody = (
 		? [
 				{
 					type: 'TermsAndConditions',
-					triggerDates: [
-						{
-							name: 'ContractEffective',
-							triggerDate: zuoraDateFormat(orderDate),
-						},
-						{
-							name: 'ServiceActivation',
-							triggerDate: zuoraDateFormat(orderDate),
-						},
-						{
-							name: 'CustomerAcceptance',
-							triggerDate: zuoraDateFormat(orderDate),
-						},
-					],
+					triggerDates: singleTriggerDate(orderDate),
 					termsAndConditions: {
 						lastTerm: {
 							termType: 'TERMED',
@@ -375,20 +337,7 @@ export const buildSwitchRequestBody = (
 				},
 				{
 					type: 'RenewSubscription',
-					triggerDates: [
-						{
-							name: 'ContractEffective',
-							triggerDate: zuoraDateFormat(orderDate),
-						},
-						{
-							name: 'ServiceActivation',
-							triggerDate: zuoraDateFormat(orderDate),
-						},
-						{
-							name: 'CustomerAcceptance',
-							triggerDate: zuoraDateFormat(orderDate),
-						},
-					],
+					triggerDates: singleTriggerDate(orderDate),
 					renewSubscription: {},
 				},
 			]

@@ -1,3 +1,6 @@
+import type { Dayjs } from 'dayjs';
+import { zuoraDateFormat } from '@modules/zuora/common';
+
 export type ProcessingOptions = {
 	runBilling: boolean;
 	collectPayment: boolean;
@@ -14,22 +17,24 @@ export type OrderActionType =
 	| 'UpdateProduct'
 	| 'AddProduct';
 
+export type TriggerDates = [
+	{
+		name: 'ContractEffective';
+		triggerDate: string;
+	},
+	{
+		name: 'ServiceActivation';
+		triggerDate: string;
+	},
+	{
+		name: 'CustomerAcceptance';
+		triggerDate: string;
+	},
+];
+
 type BaseOrderAction = {
 	type: OrderActionType;
-	triggerDates: [
-		{
-			name: 'ContractEffective';
-			triggerDate: string;
-		},
-		{
-			name: 'ServiceActivation';
-			triggerDate: string;
-		},
-		{
-			name: 'CustomerAcceptance';
-			triggerDate: string;
-		},
-	];
+	triggerDates: TriggerDates;
 };
 export type ChangePlanOrderAction = BaseOrderAction & {
 	type: 'ChangePlan';
@@ -109,3 +114,20 @@ export type PreviewOrderRequest = OrderRequest & {
 export type CreateOrderRequest = OrderRequest & {
 	processingOptions: ProcessingOptions;
 };
+
+export function singleTriggerDate(applyFromDate: Dayjs): TriggerDates {
+	return [
+		{
+			name: 'ContractEffective',
+			triggerDate: zuoraDateFormat(applyFromDate),
+		},
+		{
+			name: 'ServiceActivation',
+			triggerDate: zuoraDateFormat(applyFromDate),
+		},
+		{
+			name: 'CustomerAcceptance',
+			triggerDate: zuoraDateFormat(applyFromDate),
+		},
+	];
+}

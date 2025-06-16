@@ -1,3 +1,4 @@
+import { GuScheduledLambda } from '@guardian/cdk';
 import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack, GuStringParameter } from '@guardian/cdk/lib/constructs/core';
@@ -5,6 +6,7 @@ import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import { ComparisonOperator } from 'aws-cdk-lib/aws-cloudwatch';
+import { Schedule } from 'aws-cdk-lib/aws-events';
 import {
 	AnyPrincipal,
 	Effect,
@@ -35,11 +37,6 @@ export class AlarmsHandler extends GuStack {
 				maxReceiveCount: 3,
 			},
 		});
-
-		const buildWebhookParameter = (team: string): GuStringParameter =>
-			new GuStringParameter(this, `${app}-${team}-webhook`, {
-				description: `${team} Team Google Chat webhook URL`,
-			});
 
 		const mobileAccountId = new GuStringParameter(
 			this,
@@ -72,7 +69,7 @@ export class AlarmsHandler extends GuStack {
 			},
 		);
 
-		const lambda = new GuLambdaFunction(this, `${app}-lambda`, {
+		const triggeredLambda = new GuLambdaFunction(this, `${app}-lambda`, {
 			app,
 			memorySize: 1024,
 			fileName: `${app}.zip`,
@@ -85,20 +82,10 @@ export class AlarmsHandler extends GuStack {
 				APP: app,
 				STACK: this.stack,
 				STAGE: this.stage,
-				GROWTH_WEBHOOK: buildWebhookParameter('GROWTH').valueAsString,
-				PORTFOLIO_WEBHOOK: buildWebhookParameter('PORTFOLIO').valueAsString,
-				PLATFORM_WEBHOOK: buildWebhookParameter('PLATFORM').valueAsString,
-				VALUE_WEBHOOK: buildWebhookParameter('VALUE').valueAsString,
-				SRE_WEBHOOK: buildWebhookParameter('SRE').valueAsString,
-				// The lambda uses the mobile account role if it needs to fetch tags cross-account
-				MOBILE_AWS_ACCOUNT_ID: mobileAccountId.valueAsString,
-				MOBILE_ROLE_ARN: mobileAccountRoleArn.valueAsString,
-				TARGETING_AWS_ACCOUNT_ID: targetingAccountId.valueAsString,
-				TARGETING_ROLE_ARN: targetingAccountRoleArn.valueAsString,
 			},
 		});
 
-		lambda.role?.attachInlinePolicy(
+		triggeredLambda.role?.attachInlinePolicy(
 			new Policy(this, `${app}-cloudwatch-policy`, {
 				statements: [
 					new PolicyStatement({
@@ -110,7 +97,7 @@ export class AlarmsHandler extends GuStack {
 		);
 
 		// Allow the lambda to assume the roles that allow cross-account fetching of tags
-		lambda.addToRolePolicy(
+		triggeredLambda.addToRolePolicy(
 			new PolicyStatement({
 				actions: ['sts:AssumeRole'],
 				effect: Effect.ALLOW,
@@ -160,5 +147,67 @@ export class AlarmsHandler extends GuStack {
 			evaluationPeriods: 24,
 			actionsEnabled: this.stage === 'PROD',
 		});
+
+		const scheduledLambda = new GuScheduledLambda(
+			this,
+			`${app}-scheduled-lambda`,
+			{
+				app,
+				memorySize: 1024,
+				fileName: `${app}.zip`,
+				runtime: nodeVersion,
+				timeout: Duration.seconds(15),
+				handler: 'indexScheduled.handler',
+				functionName: `${app}-scheduled-${this.stage}`,
+				environment: {
+					APP: app,
+					STACK: this.stack,
+					STAGE: this.stage,
+				},
+				monitoringConfiguration: {
+					actionsEnabled: this.stage === 'PROD',
+					toleratedErrorPercentage: 0,
+					numberOfEvaluationPeriodsAboveThresholdBeforeAlarm: 1,
+					snsTopicName: `alarms-handler-topic-${this.stage}`,
+				},
+				rules: [
+					{
+						schedule: Schedule.cron({
+							weekDay: 'MON-FRI',
+							hour: '8',
+							minute: '0',
+						}),
+						description: 'notify about alarms in Alarm state every morning',
+					},
+				],
+			},
+		);
+
+		scheduledLambda.role?.attachInlinePolicy(
+			new Policy(this, `${app}-scheduled-cloudwatch-policy`, {
+				statements: [
+					new PolicyStatement({
+						actions: ['cloudwatch:ListTagsForResource'],
+						resources: ['*'],
+					}),
+					new PolicyStatement({
+						actions: ['cloudwatch:DescribeAlarms'],
+						resources: ['*'],
+					}),
+				],
+			}),
+		);
+
+		// Allow the lambda to assume the roles that allow cross-account fetching of tags
+		scheduledLambda.addToRolePolicy(
+			new PolicyStatement({
+				actions: ['sts:AssumeRole'],
+				effect: Effect.ALLOW,
+				resources: [
+					mobileAccountRoleArn.valueAsString,
+					targetingAccountRoleArn.valueAsString,
+				],
+			}),
+		);
 	}
 }
