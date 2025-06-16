@@ -202,8 +202,8 @@ export const processDataSubjectRequestCallback = async (requestId: string, paylo
         QueueUrl: queueName,
         MessageBody: JSON.stringify(message),
     });
-    const response = await client.send(command);
-    console.log(`Response from message send was ${JSON.stringify(response)}`);
+    // const response = await client.send(command);
+    console.log(`Response from message send was ${JSON.stringify(command)}`, client.config.defaultSigningName);
 
     return {
         message: 'Callback accepted and processed',
