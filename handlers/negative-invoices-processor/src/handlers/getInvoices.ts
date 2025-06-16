@@ -45,22 +45,26 @@ export const getPRODData = async (): Promise<BigQueryRecord[]> => {
 
 const query = (): string =>
 	`
-	SELECT
-        inv.id,
-        STRING_AGG(distinct inv.account_id, ',') AS accountId,
-        MAX(inv.balance) AS invoiceBalance
-    FROM 
-        datatech-fivetran.zuora.invoice inv
-    INNER JOIN 
-        datatech-fivetran.zuora.invoice_item item 
-        ON item.invoice_id = inv.id
-    INNER JOIN
-        datatech-fivetran.zuora.subscription sub
-        ON item.subscription_id = sub.id AND sub.is_latest_version
-    WHERE 
-        inv.amount < 0
-        AND inv.balance != 0
-        AND sub.status = 'Active'
-    GROUP BY 
-        inv.id
+SELECT
+	inv.account_id AS accountId,
+    item.id AS invoiceItemId,
+	item.invoice_id AS invoiceId,
+	inv.invoice_number AS invoiceNumber,
+	inv.invoice_date AS invoiceDate,
+    item.charge_amount AS invoiceChargeAmount,
+    inv.balance AS invoiceBalance,
+FROM 
+    datatech-fivetran.zuora.invoice_item item
+INNER JOIN 
+    datatech-fivetran.zuora.invoice inv
+    ON item.invoice_id = inv.id
+INNER JOIN
+    datatech-fivetran.zuora.subscription sub
+    ON item.subscription_id = sub.id AND sub.is_latest_version
+WHERE 
+    inv.amount < 0
+    AND inv.balance != 0
+    AND sub.status = 'Active'
+    AND item.charge_amount < 0
+    AND inv.id = '8a1295db9498e8950194a0ea612a7290'
 `;
