@@ -1,10 +1,10 @@
 //Used for dev testing since there is no dev sandbox for bigquery tables
 export const CODEDataMockQueryResponse = [
 	{
-		invoiceId: '8ad0877b80d67b850180d737b68776f8',
-		accountId: '8ad09c4b80d691770180d723aa0c0eea',
-		invoiceNumber: 'INV00230860',
-		invoiceBalance: -69.99,
+		invoiceId: '8ad085298634dd38018639f544fb4b25',
+		accountId: '8ad0855183f1cbdd0183f499fc0c047e',
+		invoiceNumber: 'INV00303219',
+		invoiceBalance: -24.82,
 	},
 	{
 		invoiceId: '1c91a0ad795f6bcc017966151113650d',
