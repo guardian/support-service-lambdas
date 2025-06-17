@@ -27,6 +27,7 @@ import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
 import { UserBenefits } from '../lib/user-benefits';
 import { WriteOffUnpaidInvoices } from '../lib/write-off-unpaid-invoices';
 import { ZuoraSalesforceLinkRemover } from '../lib/zuora-salesforce-link-remover';
+import { SalesforceEventBus } from '../lib/salesforce-event-bus';
 
 const app = new App();
 const membershipHostedZoneId = 'Z1E4V12LQGXFEC';
@@ -349,6 +350,14 @@ new WriteOffUnpaidInvoices(app, 'write-off-unpaid-invoices-CODE', {
 	stage: 'CODE',
 });
 new WriteOffUnpaidInvoices(app, 'write-off-unpaid-invoices-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+});
+new SalesforceEventBus(app, 'salesforce-event-bus-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+});
+new SalesforceEventBus(app, 'salesforce-event-bus-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 });
