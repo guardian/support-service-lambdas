@@ -1,5 +1,5 @@
 import { stageFromEnvironment } from '@modules/stage';
-import { applyCreditToAccountBalance } from '@modules/zuora/applyCreditToAccountBalance';
+import { doCreditBalanceRefund } from '@modules/zuora/doCreditBalanceRefund';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { z } from 'zod';
 
@@ -19,14 +19,15 @@ export const handler = async (event: DoCreditBalanceRefund) => {
 		const parsedEvent = DoCreditBalanceRefundSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const body = JSON.stringify({
-			accountId: parsedEvent.accountId,
-			amount: 1, //Math.abs(parsedEvent.invoiceBalance),
-			comment: 'Refund from credit balance',
-			type: 'External', // or "Electronic"
-			reasonCode: 'CustomerRequest',
+			AccountId: '8ad0855183f1cbdd0183f499fc0c047e', // Replace with actual Account ID
+			TotalAmount: 1,
+			SourceType: 'CreditBalance',
+			Type: 'Electronic',
+			PaymentMethodId: '8ad0855183f1cbdd0183f499fbea047d', // Replace with actual PaymentMethodId (if electronic)
+			RefundDate: '2025-06-17', // Replace with actual date (if external)
 		});
 
-		const attempt = await applyCreditToAccountBalance(zuoraClient, body);
+		const attempt = await doCreditBalanceRefund(zuoraClient, body);
 
 		return {
 			...parsedEvent,
