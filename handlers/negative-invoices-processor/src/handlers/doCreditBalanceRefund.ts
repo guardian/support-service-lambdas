@@ -1,6 +1,7 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { doCreditBalanceRefund } from '@modules/zuora/doCreditBalanceRefund';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import dayjs from 'dayjs';
 import { z } from 'zod';
 
 export const DoCreditBalanceRefundSchema = z.object({
@@ -18,13 +19,14 @@ export const handler = async (event: DoCreditBalanceRefund) => {
 	try {
 		const parsedEvent = DoCreditBalanceRefundSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
+
 		const body = JSON.stringify({
-			AccountId: '8ad0855183f1cbdd0183f499fc0c047e', // Replace with actual Account ID
-			TotalAmount: 1,
+			AccountId: '8ad0855183f1cbdd0183f499fc0c047e',
+			Amount: 1.0,
 			SourceType: 'CreditBalance',
-			Type: 'Electronic',
-			PaymentMethodId: '8ad0855183f1cbdd0183f499fbea047d', // Replace with actual PaymentMethodId (if electronic)
-			RefundDate: '2025-06-17', // Replace with actual date (if external)
+			Type: 'External',
+			RefundDate: dayjs().format('YYYY-MM-DD'), //today
+			MethodType: 'CreditCardReferenceTransaction', //get this from the payment method
 		});
 
 		const attempt = await doCreditBalanceRefund(zuoraClient, body);
