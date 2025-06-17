@@ -246,7 +246,10 @@ export type InvoiceItemAdjustmentResult = z.infer<
 
 // --------------- Payment Method ---------------
 const paymentMethodStatusSchema = z.object({
+	id: z.string(),
 	status: z.string(),
+	type: z.string(),
+	isDefault: z.boolean(),
 });
 
 export const zuoraPaymentMethodQueryResponseSchema = z
