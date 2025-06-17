@@ -64,7 +64,7 @@ export class Router {
 					};
 
 					// Validate request
-					const validationErrors: Array<z.ZodIssue> = [];
+					const validationErrors: z.ZodIssue[] = [];
 
 					// Validate request path
 					try {
