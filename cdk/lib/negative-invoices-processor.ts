@@ -107,17 +107,17 @@ export class NegativeInvoicesProcessor extends GuStack {
 			},
 		);
 
-		const checkForActivePaymentMethodLambda = new GuLambdaFunction(
+		const getPaymentMethodsLambda = new GuLambdaFunction(
 			this,
-			'check-for-active-payment-method-lambda',
+			'get-payment-methods-lambda',
 			{
 				app: appName,
-				functionName: `${appName}-check-for-active-payment-method-${this.stage}`,
+				functionName: `${appName}-get-payment-methods-${this.stage}`,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
 				},
-				handler: 'checkForActivePaymentMethod.handler',
+				handler: 'getPaymentMethods.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
 				initialPolicy: [
@@ -205,7 +205,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 			this,
 			'Check for Active Payment Method',
 			{
-				lambdaFunction: checkForActivePaymentMethodLambda,
+				lambdaFunction: getPaymentMethodsLambda,
 				outputPath: '$.Payload',
 			},
 		).addRetry({
