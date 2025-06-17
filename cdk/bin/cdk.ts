@@ -15,6 +15,7 @@ import { PressReaderEntitlements } from '../lib/press-reader-entitlements';
 import { ProductSwitchApi } from '../lib/product-switch-api';
 import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery';
 import { SalesforceDisasterRecoveryHealthCheck } from '../lib/salesforce-disaster-recovery-health-check';
+import { SalesforceEventBus } from '../lib/salesforce-event-bus';
 import {
 	APP_NAME as SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME,
 	SingleContributionSalesforceWrites,
@@ -27,7 +28,7 @@ import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
 import { UserBenefits } from '../lib/user-benefits';
 import { WriteOffUnpaidInvoices } from '../lib/write-off-unpaid-invoices';
 import { ZuoraSalesforceLinkRemover } from '../lib/zuora-salesforce-link-remover';
-import { SalesforceEventBus } from '../lib/salesforce-event-bus';
+
 
 const app = new App();
 const membershipHostedZoneId = 'Z1E4V12LQGXFEC';
