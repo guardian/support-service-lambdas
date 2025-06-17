@@ -109,13 +109,17 @@ describe('Router', () => {
 		const benefitId = "123";
 		const response = await router.routeRequest(buildApiGatewayEvent(`/benefits/${benefitId}/users`, 'POST'));
 		expect(response.statusCode).toEqual(200);
-		const payload = JSON.parse(response.body ?? '{}');
+		const payload = JSON.parse(response.body) as {
+			benefitId: string;
+		};
 		expect(payload.benefitId).toEqual(benefitId);
 	});
 	test('it should validate the path params', async () => {
 		const response = await router.routeRequest(buildApiGatewayEvent(`/benefits/enabled/on`, 'PATCH'));
 		expect(response.statusCode).toEqual(200);
-		const payload = JSON.parse(response.body ?? '{}');
+		const payload = JSON.parse(response.body) as {
+			flag: string;
+		};
 		expect(payload.flag).toEqual("on");
 	});
 	test('it should validate the body payload', async () => {
@@ -126,7 +130,11 @@ describe('Router', () => {
 		};
 		const response = await router.routeRequest(buildApiGatewayEvent(`/benefits`, 'POST', JSON.stringify(request)));
 		expect(response.statusCode).toEqual(200);
-		const payload = JSON.parse(response.body ?? '{}');
+		const payload = JSON.parse(response.body) as {
+			name: string;
+			age: number;
+			isActive: boolean;
+		};
 		expect(payload.name).toEqual(request.name);
 		expect(payload.age).toEqual(request.age);
 		expect(payload.isActive).toEqual(request.isActive);
@@ -140,16 +148,16 @@ describe('Router', () => {
 		};
 		const response = await router.routeRequest(buildApiGatewayEvent(`/benefits/${benefitId}`, 'PUT', JSON.stringify(request)));
 		expect(response.statusCode).toEqual(400);
-		const payload: {
-			error: string,
+		const payload = JSON.parse(response.body) as {
+			error: string;
 			details: Array<{
-				code: string,
-				expected: string,
+				code: string;
+				expected: string;
 				received: string;
-				path: Array<any>,
-				message: string
-			}>
-		} = JSON.parse(response.body ?? '{}');
+				path: unknown[];
+				message: string;
+			}>;
+		};
 		expect(payload.error).toEqual("Invalid body");
 		expect(payload.details[0]?.message).toEqual("Expected string, received number");
 		expect(payload.details[1]?.message).toEqual("Expected number, received string");
