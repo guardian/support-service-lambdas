@@ -30,6 +30,7 @@ export const handler = async (event: GetPaymentMethodsInput) => {
 		return {
 			...parsedEvent,
 			activePaymentMethods,
+			hasActivePaymentMethod: activePaymentMethods.length > 0,
 		};
 	} catch (error) {
 		return {
