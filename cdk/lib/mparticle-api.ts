@@ -10,7 +10,8 @@ export class MParticleApi extends GuStack {
 		super(scope, id, props);
 
 		const app = 'mparticle-api';
-		const lambda = new GuLambdaFunction(this, `${app}-lambda`, {
+		// const lambda = new GuLambdaFunction(this, `${app}-lambda`, {
+		new GuLambdaFunction(this, `${app}-lambda`, {
 			app,
 			memorySize: 1024,
 			fileName: `${app}.zip`,
