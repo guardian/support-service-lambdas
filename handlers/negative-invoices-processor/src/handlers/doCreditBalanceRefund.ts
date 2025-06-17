@@ -1,9 +1,11 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { doCreditBalanceRefund } from '@modules/zuora/doCreditBalanceRefund';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { PaymentMethod } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
 import { z } from 'zod';
 
+// ...existing code...
 export const DoCreditBalanceRefundSchema = z.object({
 	invoiceId: z.string(),
 	accountId: z.string(),
@@ -11,6 +13,16 @@ export const DoCreditBalanceRefundSchema = z.object({
 	invoiceBalance: z.number(),
 	hasActiveSub: z.boolean(),
 	hasActivePaymentMethod: z.boolean().optional(),
+	activePaymentMethods: z
+		.array(
+			z.object({
+				id: z.string(),
+				status: z.string(),
+				type: z.string(),
+				isDefault: z.boolean(),
+			}),
+		)
+		.optional(),
 });
 
 export type DoCreditBalanceRefund = z.infer<typeof DoCreditBalanceRefundSchema>;
@@ -19,14 +31,16 @@ export const handler = async (event: DoCreditBalanceRefund) => {
 	try {
 		const parsedEvent = DoCreditBalanceRefundSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
-
+		const paymentMethodToRefundTo = getPaymentMethodToRefundTo(
+			parsedEvent.activePaymentMethods ?? [],
+		);
 		const body = JSON.stringify({
-			AccountId: '8ad0855183f1cbdd0183f499fc0c047e',
-			Amount: 1.0,
+			AccountId: '8ad0855183f1cbdd0183f499fc0c047e', //parsedEvent.accountId,
+			Amount: 1.0, //parsedEvent.invoiceBalance,
 			SourceType: 'CreditBalance',
 			Type: 'External',
 			RefundDate: dayjs().format('YYYY-MM-DD'), //today
-			MethodType: 'CreditCardReferenceTransaction', //get this from the payment method
+			MethodType: paymentMethodToRefundTo?.type,
 		});
 
 		const creditBalanceRefundAttempt = await doCreditBalanceRefund(
@@ -47,3 +61,8 @@ export const handler = async (event: DoCreditBalanceRefund) => {
 		};
 	}
 };
+
+function getPaymentMethodToRefundTo(paymentMethods: PaymentMethod[]) {
+	const defaultMethod = paymentMethods.find((pm) => pm.isDefault);
+	return defaultMethod || paymentMethods[0];
+}
