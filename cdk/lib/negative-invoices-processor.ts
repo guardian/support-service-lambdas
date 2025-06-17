@@ -155,6 +155,30 @@ export class NegativeInvoicesProcessor extends GuStack {
 			},
 		);
 
+		const doCreditBalanceRefundLambda = new GuLambdaFunction(
+			this,
+			'do-credit-balance-refund-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-do-credit-balance-refund-${this.stage}`,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+				},
+				handler: 'doCreditBalanceRefund.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['secretsmanager:GetSecretValue'],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+						],
+					}),
+				],
+			},
+		);
+
 		const getInvoicesLambdaTask = new LambdaInvoke(this, 'Get invoices', {
 			lambdaFunction: getInvoicesLambda,
 			outputPath: '$.Payload',
@@ -203,6 +227,19 @@ export class NegativeInvoicesProcessor extends GuStack {
 			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
 		});
 
+		const doCreditBalanceRefundLambdaTask = new LambdaInvoke(
+			this,
+			'Do credit balance refund',
+			{
+				lambdaFunction: doCreditBalanceRefundLambda,
+				outputPath: '$.Payload',
+			},
+		).addRetry({
+			errors: ['States.ALL'],
+			interval: Duration.seconds(10),
+			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
+		});
+
 		const invoiceProcessorMap = new Map(this, 'Invoice processor map', {
 			maxConcurrency: 1,
 			itemsPath: JsonPath.stringAt('$.invoices'),
@@ -215,7 +252,9 @@ export class NegativeInvoicesProcessor extends GuStack {
 		)
 			.when(
 				Condition.booleanEquals('$.hasActivePaymentMethod', true),
-				applyCreditToAccountBalanceLambdaTask,
+				applyCreditToAccountBalanceLambdaTask.next(
+					applyCreditToAccountBalanceLambdaTask,
+				),
 			)
 			.otherwise(new Pass(this, 'check for valid email lambda will go here'));
 
