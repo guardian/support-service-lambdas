@@ -29,7 +29,6 @@ import { UserBenefits } from '../lib/user-benefits';
 import { WriteOffUnpaidInvoices } from '../lib/write-off-unpaid-invoices';
 import { ZuoraSalesforceLinkRemover } from '../lib/zuora-salesforce-link-remover';
 
-
 const app = new App();
 const membershipHostedZoneId = 'Z1E4V12LQGXFEC';
 const membershipCertificateId = 'c1efc564-9ff8-4a03-be48-d1990a3d79d2';
