@@ -201,9 +201,9 @@ export class NegativeInvoicesProcessor extends GuStack {
 			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
 		});
 
-		const checkForActivePaymentMethodLambdaTask = new LambdaInvoke(
+		const getPaymentMethodsLambdaTask = new LambdaInvoke(
 			this,
-			'Check for Active Payment Method',
+			'Get Payment Methods',
 			{
 				lambdaFunction: getPaymentMethodsLambda,
 				outputPath: '$.Payload',
@@ -264,9 +264,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 				applyCreditToAccountBalanceLambdaTask,
 			)
 			.otherwise(
-				checkForActivePaymentMethodLambdaTask.next(
-					hasActivePaymentMethodChoice,
-				),
+				getPaymentMethodsLambdaTask.next(hasActivePaymentMethodChoice),
 			);
 
 		invoiceProcessorMap.iterator(
