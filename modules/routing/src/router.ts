@@ -1,6 +1,6 @@
 import { ValidationError } from '@modules/errors';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import z from 'zod';
+import { z } from 'zod';
 
 export type HttpMethod =
 	| 'GET'

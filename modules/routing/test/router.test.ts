@@ -1,7 +1,7 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
+import { z } from 'zod';
 import type { HttpMethod } from '@modules/routing/router';
 import { NotFoundResponse, Router } from '@modules/routing/router';
-import { z } from 'zod';
 
 const successResponse = {
 	body: 'Success',
