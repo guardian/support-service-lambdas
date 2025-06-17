@@ -19,12 +19,11 @@ export const handler = async (event: DoCreditBalanceRefund) => {
 		const parsedEvent = DoCreditBalanceRefundSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const body = JSON.stringify({
-			AccountId: '8ad0855183f1cbdd0183f499fc0c047e', // Replace with actual Account ID
-			TotalAmount: 1,
-			SourceType: 'CreditBalance',
-			Type: 'Electronic',
-			PaymentMethodId: '8ad0855183f1cbdd0183f499fbea047d', // Replace with actual PaymentMethodId (if electronic)
-			RefundDate: '2025-06-17', // Replace with actual date (if external)
+			accountId: '8ad0855183f1cbdd0183f499fc0c047e',
+			amount: 1,
+			comment: 'Refund from credit balance',
+			type: 'External',
+			reasonCode: 'CustomerRequest',
 		});
 
 		const attempt = await doCreditBalanceRefund(zuoraClient, body);
