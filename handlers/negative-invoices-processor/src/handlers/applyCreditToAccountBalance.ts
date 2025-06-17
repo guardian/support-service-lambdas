@@ -30,7 +30,7 @@ export const handler = async (event: ApplyCreditToAccountBalanceInput) => {
 
 		return {
 			...parsedEvent,
-			attempt,
+			applyCreditToAccountBalanceAttempt: attempt,
 		};
 	} catch (error) {
 		return {
