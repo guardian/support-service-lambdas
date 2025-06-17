@@ -17,6 +17,27 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
+    "mparticleapicloudwatchpolicy1B6A7573": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "cloudwatch:ListTagsForResource",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "mparticleapicloudwatchpolicy1B6A7573",
+        "Roles": [
+          {
+            "Ref": "mparticleapilambdaServiceRoleCE7702E6",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "mparticleapilambdaD503F5B2": {
       "DependsOn": [
         "mparticleapilambdaServiceRoleDefaultPolicy281AD986",
@@ -246,6 +267,27 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
+    "mparticleapicloudwatchpolicy1B6A7573": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "cloudwatch:ListTagsForResource",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "mparticleapicloudwatchpolicy1B6A7573",
+        "Roles": [
+          {
+            "Ref": "mparticleapilambdaServiceRoleCE7702E6",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "mparticleapilambdaD503F5B2": {
       "DependsOn": [
         "mparticleapilambdaServiceRoleDefaultPolicy281AD986",
