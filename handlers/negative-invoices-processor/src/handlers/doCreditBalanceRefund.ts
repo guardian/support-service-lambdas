@@ -29,11 +29,14 @@ export const handler = async (event: DoCreditBalanceRefund) => {
 			MethodType: 'CreditCardReferenceTransaction', //get this from the payment method
 		});
 
-		const attempt = await doCreditBalanceRefund(zuoraClient, body);
+		const creditBalanceRefundAttempt = await doCreditBalanceRefund(
+			zuoraClient,
+			body,
+		);
 
 		return {
 			...parsedEvent,
-			attempt,
+			creditBalanceRefundAttempt,
 		};
 	} catch (error) {
 		return {
