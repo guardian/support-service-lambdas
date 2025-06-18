@@ -65,6 +65,7 @@ const query = `
         LEFT JOIN datatech-fivetran.zuora.invoice_item item ON item.subscription_id = sub_versions.id
         LEFT JOIN datatech-fivetran.zuora.invoice inv ON item.invoice_id = inv.id
         WHERE inv.balance <> 0
+        AND inv.status = 'Posted'
         AND inv.id NOT IN (
             '2c92a0ae576f3fbf0157b1e8b1e645e4',
             '2c92a0ae576f3fbf0157b1e9013f51f6',

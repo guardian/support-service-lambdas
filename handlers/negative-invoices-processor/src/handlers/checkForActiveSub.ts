@@ -16,7 +16,7 @@ export const handler = async (event: CheckForActiveSubInput) => {
 		);
 
 		return {
-			accountId: parsedEvent.accountId,
+			...parsedEvent,
 			hasActiveSub,
 		};
 	} catch (error) {

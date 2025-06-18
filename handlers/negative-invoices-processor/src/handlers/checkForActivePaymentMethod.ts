@@ -5,7 +5,10 @@ import type { ZuoraPaymentMethodQueryResponse } from '@modules/zuora/zuoraSchema
 import { z } from 'zod';
 
 export const CheckForActivePaymentMethodInputSchema = z.object({
+	invoiceId: z.string(),
 	accountId: z.string(),
+	invoiceNumber: z.string(),
+	invoiceBalance: z.number(),
 	hasActiveSub: z.boolean(),
 });
 
