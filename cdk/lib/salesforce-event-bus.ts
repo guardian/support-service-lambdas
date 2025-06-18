@@ -2,9 +2,11 @@ import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
-import { nodeVersion } from './node-version';
-import { EventBus } from 'aws-cdk-lib/aws-events';
+import { EventBus, Rule } from 'aws-cdk-lib/aws-events';
+import * as targets from 'aws-cdk-lib/aws-events-targets';
+import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
+import { nodeVersion } from './node-version';
 
 export class SalesforceEventBus extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {
@@ -34,5 +36,47 @@ export class SalesforceEventBus extends GuStack {
 			queueName: `dead-letters-${app}-queue-${props.stage}`,
 			retentionPeriod: Duration.days(14),
 		});
+
+		const sfOutboundMessageQueue = new Queue(
+			this,
+			`salesforce-outbound-messages`,
+			{
+				queueName: `salesforce-outbound-messages-${props.stage}`,
+				retentionPeriod: Duration.days(14),
+			},
+		);
+
+		const rule = new Rule(this, 'SfBusToContactUpdateQueue', {
+			description:
+				'Send an SF Contact Update event from the SF bus to the salesforce-outbound-messages-[STAGE] SQS queue for consumption by membership-workflow',
+			eventPattern: {
+				source: ['aws.partner/salesforce.com'],
+				detailType: ['Contact_Update__e'],
+			},
+			eventBus: salesforceBus,
+		});
+
+		rule.addTarget(
+			new targets.SqsQueue(sfOutboundMessageQueue, {
+				deadLetterQueue: deadLetterQueue,
+				maxEventAge: Duration.hours(2),
+				retryAttempts: 2,
+			}),
+		);
+
+		const sendMessagePolicyStatement = new PolicyStatement({
+			sid: `Allow Salesforce Event Bus to send messages to the salesforce-outbound-messages queue`,
+			principals: [new ServicePrincipal('events.amazonaws.com')],
+			effect: Effect.ALLOW,
+			resources: [sfOutboundMessageQueue.queueArn],
+			actions: ['sqs:SendMessage'],
+			conditions: {
+				ArnEquals: {
+					'aws:SourceArn': rule.ruleArn,
+				},
+			},
+		});
+
+		sfOutboundMessageQueue.addToResourcePolicy(sendMessagePolicyStatement);
 	}
 }
