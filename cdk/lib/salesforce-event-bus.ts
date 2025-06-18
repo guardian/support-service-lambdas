@@ -37,8 +37,10 @@ export class SalesforceEventBus extends GuStack {
 			retentionPeriod: Duration.days(14),
 		});
 
-		const sfOutboundMessageQueue = Queue.fromQueueArn(this, 'ExistingOutboundQueue', 
-  			`arn:aws:sqs:eu-west-1:865473395570:salesforce-outbound-messages-${props.stage}`
+		const sfOutboundMessageQueue = Queue.fromQueueArn(
+			this,
+			'ExistingOutboundMessageQueue',
+			`arn:aws:sqs:eu-west-1:865473395570:salesforce-outbound-messages-${props.stage}`,
 		);
 
 		const rule = new Rule(this, 'SfBusToContactUpdateQueue', {
