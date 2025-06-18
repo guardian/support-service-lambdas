@@ -86,6 +86,24 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
         "Namespace": "AWS/SQS",
         "Period": 60,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
         "Threshold": 0,
       },
       "Type": "AWS::CloudWatch::Alarm",
@@ -132,6 +150,9 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
         },
         "FunctionName": "alarms-handler-CODE",
         "Handler": "index.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -358,6 +379,28 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
         "FunctionName": {
           "Ref": "alarmshandlerlambda383D2BAA",
         },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
       },
       "Type": "AWS::Lambda::EventSourceMapping",
     },
@@ -496,6 +539,9 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
         },
         "FunctionName": "alarms-handler-scheduled-CODE",
         "Handler": "indexScheduled.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -631,6 +677,24 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
               "Stat": "Sum",
             },
             "ReturnData": false,
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
           },
         ],
         "Threshold": 0,
@@ -1050,6 +1114,24 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
         "Namespace": "AWS/SQS",
         "Period": 60,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
         "Threshold": 0,
       },
       "Type": "AWS::CloudWatch::Alarm",
@@ -1096,6 +1178,9 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
         },
         "FunctionName": "alarms-handler-PROD",
         "Handler": "index.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -1322,6 +1407,28 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
         "FunctionName": {
           "Ref": "alarmshandlerlambda383D2BAA",
         },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
       },
       "Type": "AWS::Lambda::EventSourceMapping",
     },
@@ -1460,6 +1567,9 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
         },
         "FunctionName": "alarms-handler-scheduled-PROD",
         "Handler": "indexScheduled.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -1595,6 +1705,24 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
               "Stat": "Sum",
             },
             "ReturnData": false,
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
           },
         ],
         "Threshold": 0,

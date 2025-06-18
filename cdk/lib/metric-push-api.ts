@@ -10,6 +10,7 @@ import {
 	Metric,
 	TreatMissingData,
 } from 'aws-cdk-lib/aws-cloudwatch';
+import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { nodeVersion } from './node-version';
 
@@ -30,6 +31,7 @@ export class MetricPushApi extends GuStack {
 			description:
 				'API triggered lambda to push a metric to cloudwatch so we can alarm on errors',
 			functionName: nameWithStage,
+			loggingFormat: LoggingFormat.TEXT,
 			fileName: `${app}.zip`,
 			handler: 'index.handler',
 			runtime: nodeVersion,

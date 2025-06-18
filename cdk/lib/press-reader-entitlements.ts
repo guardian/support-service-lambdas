@@ -12,6 +12,7 @@ import {
 } from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { nodeVersion } from './node-version';
 
@@ -48,6 +49,7 @@ export class PressReaderEntitlements extends GuStack {
 			description:
 				'An API Gateway triggered lambda generated in the support-service-lambdas repo',
 			functionName: nameWithStage,
+			loggingFormat: LoggingFormat.TEXT,
 			fileName: `${app}.zip`,
 			handler: 'index.handler',
 			initialPolicy: [supporterProductDataTablePolicy],

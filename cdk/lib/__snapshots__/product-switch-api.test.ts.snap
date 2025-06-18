@@ -272,6 +272,9 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
         },
         "FunctionName": "product-switch-api-CODE",
         "Handler": "index.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -1044,6 +1047,24 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
         "Namespace": "AWS/ApiGateway",
         "Period": 300,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
         "Threshold": 1,
       },
       "Type": "AWS::CloudWatch::Alarm",
@@ -1157,6 +1178,24 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
         "Namespace": "AWS/Lambda",
         "Period": 300,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
         "Threshold": 1,
       },
       "Type": "AWS::CloudWatch::Alarm",
@@ -1316,6 +1355,9 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
         },
         "FunctionName": "product-switch-api-PROD",
         "Handler": "index.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [

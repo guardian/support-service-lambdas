@@ -5,6 +5,7 @@ import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import { Schedule } from 'aws-cdk-lib/aws-events';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { nodeVersion } from './node-version';
 
@@ -38,6 +39,7 @@ export class SalesforceDisasterRecoveryHealthCheck extends GuStack {
 			},
 			handler: 'salesforceDisasterRecoveryHealthCheck.handler',
 			functionName: `${app}-${this.stage}`,
+			loggingFormat: LoggingFormat.TEXT,
 			rules: [
 				{
 					schedule: Schedule.cron({

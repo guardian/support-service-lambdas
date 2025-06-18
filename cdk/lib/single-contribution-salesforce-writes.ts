@@ -7,7 +7,7 @@ import { ComparisonOperator } from 'aws-cdk-lib/aws-cloudwatch';
 import { EventBus, Match, Rule } from 'aws-cdk-lib/aws-events';
 import { SqsQueue } from 'aws-cdk-lib/aws-events-targets';
 import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { LoggingFormat, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 
@@ -74,6 +74,7 @@ export class SingleContributionSalesforceWrites extends GuStack {
 			runtime: Runtime.JAVA_11,
 			fileName: `${APP_NAME}.jar`,
 			functionName: `${APP_NAME}-${props.stage}`,
+			loggingFormat: LoggingFormat.TEXT,
 			handler:
 				'com.gu.singleContributionSalesforceWrites.handlers.CreateSalesforceSingleContributionRecordHandler::handleRequest',
 			events: [new SqsEventSource(queue)],
