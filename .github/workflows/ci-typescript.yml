@@ -55,6 +55,7 @@ jobs:
           - observer-data-export
           - negative-invoices-processor
           - write-off-unpaid-invoices
+          - mparticle-api
     runs-on: ubuntu-latest
     permissions:
       id-token: write
