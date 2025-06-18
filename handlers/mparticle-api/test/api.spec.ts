@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import type { SendMessageCommandInput } from '@aws-sdk/client-sqs';
 import { SQSClient } from '@aws-sdk/client-sqs';
 import { faker } from '@faker-js/faker';
 import type { DataSubjectRequestState } from '../interfaces/data-subject-request-state';
@@ -13,7 +14,7 @@ jest.mock('@aws-sdk/client-sqs', () => {
                 MessageId: 'mocked-message-id',
             }),
         })),
-        SendMessageCommand: jest.fn().mockImplementation((args) => args),
+        SendMessageCommand: jest.fn().mockImplementation((args: SendMessageCommandInput) => args),
     };
 });
 
@@ -213,14 +214,21 @@ describe('mparticle-api API tests', () => {
         expect(body.message).toEqual("Callback accepted and processed");
         expect(body.timestamp).toBeDefined();
 
-        // Access the mock SQSClient instance
-        const clientInstance = (SQSClient as jest.Mock).mock.results[0]?.value;
-        expect(clientInstance.send).toHaveBeenCalled();
+        // Access the mock SQSClient instance with proper typing
+        const sqsClientMock = SQSClient as unknown as jest.Mock;
+        const mockResults = sqsClientMock.mock.results as Array<{ value: { send: jest.Mock } }>;
+        const clientInstance = mockResults[0]?.value;
 
-        const sentCommandInput = clientInstance.send.mock.calls[0][0];
+        // Assert that send was called
+        expect(clientInstance?.send).toHaveBeenCalled();
+
+        // Get the argument passed to send, with explicit typing
+        const sendMock = clientInstance?.send.mock;
+        const firstCall = sendMock?.calls[0] as unknown[];
+        const sentCommandInput = firstCall[0] as { QueueUrl: string; MessageBody: string };
         expect(sentCommandInput).toMatchObject({
-            QueueUrl: expect.any(String),
-            MessageBody: expect.any(String),
+            QueueUrl: expect.any(String) as string,
+            MessageBody: expect.any(String) as string,
         });
     });
 });
