@@ -578,9 +578,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
             "STAGE": "CODE",
           },
         },
-        "FunctionName": {
-          "Ref": "alarmshandlerlambda383D2BAA",
-        },
+        "FunctionName": "alarms-handler-scheduled-CODE",
         "Handler": "indexScheduled.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
@@ -1655,9 +1653,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
             "STAGE": "PROD",
           },
         },
-        "FunctionName": {
-          "Ref": "alarmshandlerlambda383D2BAA",
-        },
+        "FunctionName": "alarms-handler-scheduled-PROD",
         "Handler": "indexScheduled.handler",
         "LoggingConfig": {
           "LogFormat": "Text",

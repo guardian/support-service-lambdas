@@ -180,7 +180,7 @@ export class AlarmsHandler extends GuStack {
 				runtime: nodeVersion,
 				timeout: Duration.seconds(15),
 				handler: 'indexScheduled.handler',
-				functionName: triggeredLambda.functionName,
+				functionName: `${app}-scheduled-${this.stage}`,
 				loggingFormat: LoggingFormat.TEXT,
 				environment: {
 					APP: app,
