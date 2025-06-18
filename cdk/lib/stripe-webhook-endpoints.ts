@@ -9,7 +9,7 @@ import { Duration } from 'aws-cdk-lib';
 import { CfnBasePathMapping, CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { LoggingFormat, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { CfnInclude } from 'aws-cdk-lib/cloudformation-include';
 
@@ -47,6 +47,7 @@ export class StripeWebhookEndpoints extends GuStack {
 				description:
 					'A lambda for handling payment intent issues (cancellation, failure, action required)',
 				functionName: `stripe-payment-intent-issues-cdk-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				fileName: `${app}.jar`,
 				handler: 'com.gu.paymentIntentIssues.Lambda::handler',
 				runtime: Runtime.JAVA_21,
@@ -67,6 +68,7 @@ export class StripeWebhookEndpoints extends GuStack {
 				app: app,
 				description: 'A lambda for handling customer updates',
 				functionName: `stripe-customer-updated-cdk-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				fileName: `${app}.jar`,
 				handler: 'com.gu.stripeCardUpdated.Lambda::apply',
 				runtime: Runtime.JAVA_21,

@@ -327,7 +327,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
         "FunctionName": "press-reader-entitlements-CODE",
         "Handler": "index.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1024,
         "Role": {
@@ -1353,7 +1353,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
         "FunctionName": "press-reader-entitlements-PROD",
         "Handler": "index.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1024,
         "Role": {

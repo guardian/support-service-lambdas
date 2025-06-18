@@ -11,6 +11,7 @@ import {
 	UsagePlan,
 } from 'aws-cdk-lib/aws-apigateway';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { allowedOriginsForStage } from '../../handlers/user-benefits/src/cors';
 import { nodeVersion } from './node-version';
@@ -58,6 +59,7 @@ export class UserBenefits extends GuStack {
 				description:
 					'An API Gateway triggered lambda to get the benefits of a user identified by a JWT',
 				functionName: `user-benefits-me-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				handler: 'index.benefitsMeHandler',
 				...commonLambdaProps,
 			},
@@ -69,6 +71,7 @@ export class UserBenefits extends GuStack {
 				description:
 					'An API Gateway triggered lambda to get the benefits of the user identified in the request path',
 				functionName: `user-benefits-identity-id-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				handler: 'index.benefitsIdentityIdHandler',
 				...commonLambdaProps,
 			},
@@ -80,6 +83,7 @@ export class UserBenefits extends GuStack {
 				description:
 					'An API Gateway triggered lambda to return the full list of benefits for each product in html or json format',
 				functionName: `user-benefits-list-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				handler: 'index.benefitsListHandler',
 				...commonLambdaProps,
 			},

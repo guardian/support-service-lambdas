@@ -273,7 +273,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
         "FunctionName": "product-switch-api-CODE",
         "Handler": "index.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1024,
         "Role": {
@@ -1356,7 +1356,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
         "FunctionName": "product-switch-api-PROD",
         "Handler": "index.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1024,
         "Role": {

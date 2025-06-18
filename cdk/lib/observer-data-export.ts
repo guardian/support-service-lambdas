@@ -18,6 +18,7 @@ import {
 	ServicePrincipal,
 	User,
 } from 'aws-cdk-lib/aws-iam';
+import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Bucket, EventType } from 'aws-cdk-lib/aws-s3';
 import { SqsDestination } from 'aws-cdk-lib/aws-s3-notifications';
@@ -182,6 +183,7 @@ export class ObserverDataExport extends GuStack {
 				},
 				handler: 'encryptAndUploadObserverData.handler',
 				functionName: `encrypt-and-upload-observer-data-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				initialPolicy: [
 					new PolicyStatement({
 						actions: ['s3:GetObject'],

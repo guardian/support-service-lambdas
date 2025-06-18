@@ -313,7 +313,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
         "FunctionName": "discount-expiry-notifier-alarm-on-failures-CODE",
         "Handler": "alarmOnFailures.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -983,7 +983,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
         "FunctionName": "discount-expiry-notifier-filter-records-CODE",
         "Handler": "filterRecords.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -1204,7 +1204,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
         "FunctionName": "discount-expiry-notifier-get-expiring-discounts-CODE",
         "Handler": "getExpiringDiscounts.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -1266,7 +1266,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
         "FunctionName": "discount-expiry-notifier-get-new-payment-amount-CODE",
         "Handler": "getNewPaymentAmount.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -1501,7 +1501,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
         "FunctionName": "discount-expiry-notifier-get-old-payment-amount-CODE",
         "Handler": "getOldPaymentAmount.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -1736,7 +1736,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
         "FunctionName": "discount-expiry-notifier-get-sub-status-CODE",
         "Handler": "getSubStatus.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -2144,7 +2144,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
         "FunctionName": "discount-expiry-notifier-save-results-CODE",
         "Handler": "saveResults.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -2388,7 +2388,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
         "FunctionName": "discount-expiry-notifier-send-email-CODE",
         "Handler": "sendEmail.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -2933,7 +2933,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
         "FunctionName": "discount-expiry-notifier-alarm-on-failures-PROD",
         "Handler": "alarmOnFailures.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -3603,7 +3603,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
         "FunctionName": "discount-expiry-notifier-filter-records-PROD",
         "Handler": "filterRecords.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -3824,7 +3824,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
         "FunctionName": "discount-expiry-notifier-get-expiring-discounts-PROD",
         "Handler": "getExpiringDiscounts.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -3886,7 +3886,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
         "FunctionName": "discount-expiry-notifier-get-new-payment-amount-PROD",
         "Handler": "getNewPaymentAmount.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -4121,7 +4121,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
         "FunctionName": "discount-expiry-notifier-get-old-payment-amount-PROD",
         "Handler": "getOldPaymentAmount.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -4356,7 +4356,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
         "FunctionName": "discount-expiry-notifier-get-sub-status-PROD",
         "Handler": "getSubStatus.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -4764,7 +4764,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
         "FunctionName": "discount-expiry-notifier-save-results-PROD",
         "Handler": "saveResults.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -5008,7 +5008,7 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
         "FunctionName": "discount-expiry-notifier-send-email-PROD",
         "Handler": "sendEmail.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {

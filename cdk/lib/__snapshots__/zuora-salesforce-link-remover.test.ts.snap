@@ -282,7 +282,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
         "FunctionName": "zuora-salesforce-link-remover-get-billing-accounts-CODE",
         "Handler": "getBillingAccounts.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -572,7 +572,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
         "FunctionName": "zuora-salesforce-link-remover-update-sf-billing-accounts-CODE",
         "Handler": "updateSfBillingAccounts.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -862,7 +862,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
         "FunctionName": "zuora-salesforce-link-remover-update-zuora-billing-account-CODE",
         "Handler": "updateZuoraBillingAccount.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -1643,7 +1643,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
         "FunctionName": "zuora-salesforce-link-remover-get-billing-accounts-PROD",
         "Handler": "getBillingAccounts.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -1933,7 +1933,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
         "FunctionName": "zuora-salesforce-link-remover-update-sf-billing-accounts-PROD",
         "Handler": "updateSfBillingAccounts.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -2223,7 +2223,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
         "FunctionName": "zuora-salesforce-link-remover-update-zuora-billing-account-PROD",
         "Handler": "updateZuoraBillingAccount.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {

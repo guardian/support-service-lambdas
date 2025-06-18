@@ -13,6 +13,7 @@ import {
 	Policy,
 	PolicyStatement,
 } from 'aws-cdk-lib/aws-iam';
+import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { SqsSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
@@ -77,6 +78,7 @@ export class AlarmsHandler extends GuStack {
 			timeout: Duration.seconds(15),
 			handler: 'index.handler',
 			functionName: `${app}-${this.stage}`,
+			loggingFormat: LoggingFormat.TEXT,
 			events: [new SqsEventSource(queue)],
 			environment: {
 				APP: app,
@@ -159,6 +161,7 @@ export class AlarmsHandler extends GuStack {
 				timeout: Duration.seconds(15),
 				handler: 'indexScheduled.handler',
 				functionName: `${app}-scheduled-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				environment: {
 					APP: app,
 					STACK: this.stack,

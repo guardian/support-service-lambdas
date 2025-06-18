@@ -78,7 +78,7 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
         "FunctionName": "salesforce-disaster-recovery-health-check-CODE",
         "Handler": "salesforceDisasterRecoveryHealthCheck.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1024,
         "Role": {
@@ -446,7 +446,7 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
         "FunctionName": "salesforce-disaster-recovery-health-check-PROD",
         "Handler": "salesforceDisasterRecoveryHealthCheck.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1024,
         "Role": {

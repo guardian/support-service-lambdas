@@ -468,7 +468,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
         "FunctionName": "ticket-tailor-webhook-CODE",
         "Handler": "index.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1024,
         "Role": {
@@ -1312,7 +1312,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
         "FunctionName": "ticket-tailor-webhook-PROD",
         "Handler": "index.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1024,
         "Role": {

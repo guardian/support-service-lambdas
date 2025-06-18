@@ -320,7 +320,7 @@ def sort_filter_rules(json_obj):
         "FunctionName": "generate-product-catalog-CODE",
         "Handler": "index.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1232,
         "Role": {
@@ -963,7 +963,7 @@ def sort_filter_rules(json_obj):
         "FunctionName": "generate-product-catalog-PROD",
         "Handler": "index.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1232,
         "Role": {

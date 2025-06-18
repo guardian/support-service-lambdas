@@ -1043,7 +1043,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
         "FunctionName": "stripe-customer-updated-cdk-CODE",
         "Handler": "com.gu.stripeCardUpdated.Lambda::apply",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1536,
         "Role": {
@@ -1258,7 +1258,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
         "FunctionName": "stripe-payment-intent-issues-cdk-CODE",
         "Handler": "com.gu.paymentIntentIssues.Lambda::handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1536,
         "Role": {
@@ -2495,7 +2495,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
         "FunctionName": "stripe-customer-updated-cdk-PROD",
         "Handler": "com.gu.stripeCardUpdated.Lambda::apply",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1536,
         "Role": {
@@ -2710,7 +2710,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
         "FunctionName": "stripe-payment-intent-issues-cdk-PROD",
         "Handler": "com.gu.paymentIntentIssues.Lambda::handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1536,
         "Role": {

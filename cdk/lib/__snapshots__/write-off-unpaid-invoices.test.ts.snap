@@ -93,7 +93,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 1`] = `
         "FunctionName": "get-unpaid-invoices-CODE",
         "Handler": "getUnpaidInvoices.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1024,
         "Role": {
@@ -340,7 +340,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 1`] = `
         "FunctionName": "write-off-invoices-CODE",
         "Handler": "writeOffInvoices.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -1033,7 +1033,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 2`] = `
         "FunctionName": "get-unpaid-invoices-PROD",
         "Handler": "getUnpaidInvoices.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1024,
         "Role": {
@@ -1280,7 +1280,7 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 2`] = `
         "FunctionName": "write-off-invoices-PROD",
         "Handler": "writeOffInvoices.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {

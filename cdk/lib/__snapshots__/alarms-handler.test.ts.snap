@@ -151,7 +151,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
         "FunctionName": "alarms-handler-CODE",
         "Handler": "index.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1024,
         "Role": {
@@ -540,7 +540,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
         "FunctionName": "alarms-handler-scheduled-CODE",
         "Handler": "indexScheduled.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1024,
         "Role": {
@@ -1179,7 +1179,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
         "FunctionName": "alarms-handler-PROD",
         "Handler": "index.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1024,
         "Role": {
@@ -1568,7 +1568,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
         "FunctionName": "alarms-handler-scheduled-PROD",
         "Handler": "indexScheduled.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1024,
         "Role": {

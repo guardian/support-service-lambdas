@@ -871,7 +871,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
         "FunctionName": "add-subscription-CODE",
         "Handler": "com.gu.newproduct.api.addsubscription.Handler::apply",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1536,
         "Role": {
@@ -1154,7 +1154,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
         "FunctionName": "product-catalog-CODE",
         "Handler": "com.gu.newproduct.api.productcatalog.Handler::apply",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1536,
         "Role": {
@@ -2328,7 +2328,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
         "FunctionName": "add-subscription-PROD",
         "Handler": "com.gu.newproduct.api.addsubscription.Handler::apply",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1536,
         "Role": {
@@ -2611,7 +2611,7 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
         "FunctionName": "product-catalog-PROD",
         "Handler": "com.gu.newproduct.api.productcatalog.Handler::apply",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1536,
         "Role": {

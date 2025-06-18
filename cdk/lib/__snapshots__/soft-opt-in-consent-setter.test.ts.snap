@@ -54,7 +54,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
         "FunctionName": "soft-opt-in-consent-setter-TEST",
         "Handler": "com.gu.soft_opt_in_consent_setter.Handler::handleRequest",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -114,7 +114,7 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
         "FunctionName": "soft-opt-in-consent-setter-IAP-TEST",
         "Handler": "com.gu.soft_opt_in_consent_setter.HandlerIAP::handleRequest",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {

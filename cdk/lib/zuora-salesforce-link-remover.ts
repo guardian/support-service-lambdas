@@ -13,7 +13,7 @@ import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Architecture } from 'aws-cdk-lib/aws-lambda';
+import { Architecture, LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import {
 	Choice,
@@ -45,6 +45,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-get-billing-accounts-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
@@ -73,6 +74,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-update-zuora-billing-account-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
@@ -99,6 +101,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-update-sf-billing-accounts-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,

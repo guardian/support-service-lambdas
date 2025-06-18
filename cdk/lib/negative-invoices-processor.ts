@@ -9,7 +9,7 @@ import {
 	Role,
 	ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
-import { Architecture } from 'aws-cdk-lib/aws-lambda';
+import { Architecture, LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 // import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
 	Choice,
@@ -70,6 +70,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-get-invoices-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
@@ -89,6 +90,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-check-for-active-sub-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
@@ -113,6 +115,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-check-for-active-payment-method-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
@@ -137,6 +140,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-apply-credit-to-account-balance-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,

@@ -46,7 +46,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
         "FunctionName": "negative-invoices-processor-apply-credit-to-account-balance-CODE",
         "Handler": "applyCreditToAccountBalance.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -281,7 +281,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
         "FunctionName": "negative-invoices-processor-check-for-active-payment-method-CODE",
         "Handler": "checkForActivePaymentMethod.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -516,7 +516,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
         "FunctionName": "negative-invoices-processor-check-for-active-sub-CODE",
         "Handler": "checkForActiveSub.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -751,7 +751,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
         "FunctionName": "negative-invoices-processor-get-invoices-CODE",
         "Handler": "getInvoices.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -1250,7 +1250,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
         "FunctionName": "negative-invoices-processor-apply-credit-to-account-balance-PROD",
         "Handler": "applyCreditToAccountBalance.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -1485,7 +1485,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
         "FunctionName": "negative-invoices-processor-check-for-active-payment-method-PROD",
         "Handler": "checkForActivePaymentMethod.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -1720,7 +1720,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
         "FunctionName": "negative-invoices-processor-check-for-active-sub-PROD",
         "Handler": "checkForActiveSub.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -1955,7 +1955,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
         "FunctionName": "negative-invoices-processor-get-invoices-PROD",
         "Handler": "getInvoices.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {

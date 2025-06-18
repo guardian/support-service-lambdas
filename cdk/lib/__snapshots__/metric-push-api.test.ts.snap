@@ -292,7 +292,7 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
         "FunctionName": "metric-push-api-CODE",
         "Handler": "index.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -1182,7 +1182,7 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
         "FunctionName": "metric-push-api-PROD",
         "Handler": "index.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {

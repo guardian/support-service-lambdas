@@ -176,7 +176,7 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 1`] =
         "FunctionName": "single-contribution-salesforce-writes-CODE",
         "Handler": "com.gu.singleContributionSalesforceWrites.handlers.CreateSalesforceSingleContributionRecordHandler::handleRequest",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1024,
         "Role": {
@@ -736,7 +736,7 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 2`] =
         "FunctionName": "single-contribution-salesforce-writes-PROD",
         "Handler": "com.gu.singleContributionSalesforceWrites.handlers.CreateSalesforceSingleContributionRecordHandler::handleRequest",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1024,
         "Role": {

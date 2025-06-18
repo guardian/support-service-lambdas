@@ -409,7 +409,7 @@ def sort_filter_rules(json_obj):
         "FunctionName": "encrypt-and-upload-observer-data-CODE",
         "Handler": "encryptAndUploadObserverData.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1024,
         "Role": {
@@ -2189,7 +2189,7 @@ def sort_filter_rules(json_obj):
         "FunctionName": "encrypt-and-upload-observer-data-PROD",
         "Handler": "encryptAndUploadObserverData.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1024,
         "Role": {

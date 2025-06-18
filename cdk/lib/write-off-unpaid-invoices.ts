@@ -15,6 +15,7 @@ import {
 	Role,
 	ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
+import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import {
@@ -108,6 +109,7 @@ export class WriteOffUnpaidInvoices extends GuStack {
 					},
 					handler: 'getUnpaidInvoices.handler',
 					functionName: `get-unpaid-invoices-${this.stage}`,
+					loggingFormat: LoggingFormat.TEXT,
 					role: lambdaRole,
 				}),
 				payload: TaskInput.fromObject({
@@ -127,6 +129,7 @@ export class WriteOffUnpaidInvoices extends GuStack {
 				memorySize: 512,
 				handler: 'writeOffInvoices.handler',
 				functionName: `write-off-invoices-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				initialPolicy: [
 					new PolicyStatement({
 						actions: ['secretsmanager:GetSecretValue'],
