@@ -1,9 +1,12 @@
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
+import {GuApiGatewayWithLambdaByPath} from '@guardian/cdk';
+import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { type App, Duration } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { nodeVersion } from './node-version';
+
 
 export class MParticleApi extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {
@@ -23,6 +26,43 @@ export class MParticleApi extends GuStack {
 				APP: app,
 				STACK: this.stack,
 				STAGE: this.stage,
+			},
+		});
+
+		// API Gateway
+		const mparticleCallbackApiGatway = new GuApiGatewayWithLambdaByPath(this, {
+			app: "example-api-gateway-instance",
+			targets: [
+				{
+			path: "/data-subject-requests/{requestId}/callback",
+			httpMethod: "POST",
+			lambda: lambda,
+				}
+			],
+		// Create an alarm
+		monitoringConfiguration: {
+			snsTopicName: `alarms-handler-topic-${this.stage}`,
+			http5xxAlarm: {
+				tolerated5xxPercentage: 1,
+				}}
+		});
+
+		// SQS Queue
+		const mparticleCallbackDeadLetterQueue = new Queue(
+			this,
+			'MparticleApiCallbackDeadLetterQueue',
+			{
+				queueName: `mparticle-api-callback-dead-letter-queue-${this.stage}`,
+				retentionPeriod: Duration.seconds(864000),
+			},
+		);
+
+		const mparticleCallbackQueue = new Queue(this, 'MparticleCallbackQueue', {
+			queueName: `mparticle-callback-queue-${this.stage}`,
+			visibilityTimeout: Duration.seconds(3000),
+			deadLetterQueue: {
+				maxReceiveCount: 3,
+				queue: mparticleCallbackDeadLetterQueue,
 			},
 		});
 
