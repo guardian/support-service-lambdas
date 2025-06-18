@@ -1,9 +1,21 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { SQSClient } from '@aws-sdk/client-sqs';
 import { faker } from '@faker-js/faker';
 import type { DataSubjectRequestState } from '../interfaces/data-subject-request-state';
 import type { DataSubjectRequestSubmission } from '../interfaces/data-subject-request-submission';
 import { run } from '../src/utils/run';
+
+jest.mock('@aws-sdk/client-sqs', () => {
+    return {
+        SQSClient: jest.fn().mockImplementation(() => ({
+            send: jest.fn().mockResolvedValue({
+                MessageId: 'mocked-message-id',
+            }),
+        })),
+        SendMessageCommand: jest.fn().mockImplementation((args) => args),
+    };
+});
 
 describe('mparticle-api API tests', () => {
     const originalEnv = process.env;
@@ -19,6 +31,7 @@ describe('mparticle-api API tests', () => {
             MPARTICLE_WORKSPACE_SECRET: faker.string.nanoid(),
             MPARTICLE_INPUT_PLATFORM_KEY: faker.string.nanoid(),
             MPARTICLE_INPUT_PLATFORM_SECRET: faker.string.nanoid(),
+            OPHAN_ERASURE_QUEUE_URL: 'ophan-data-lake-CODE-erasure-Queue-XXX.fifo'
         };
         jest.spyOn(console, 'info').mockImplementation(() => { });
     });
@@ -160,7 +173,6 @@ describe('mparticle-api API tests', () => {
                 "processor_certificate": "https://static.mparticle.com/dsr/opendsr_cert.pem"
             }),
         };
-        console.log(__dirname);
         const mockGetCertificateResponse = {
             ok: true,
             status: 200,
@@ -200,5 +212,15 @@ describe('mparticle-api API tests', () => {
         };
         expect(body.message).toEqual("Callback accepted and processed");
         expect(body.timestamp).toBeDefined();
+
+        // Access the mock SQSClient instance
+        const clientInstance = (SQSClient as jest.Mock).mock.results[0]?.value;
+        expect(clientInstance.send).toHaveBeenCalled();
+
+        const sentCommandInput = clientInstance.send.mock.calls[0][0];
+        expect(sentCommandInput).toMatchObject({
+            QueueUrl: expect.any(String),
+            MessageBody: expect.any(String),
+        });
     });
 });

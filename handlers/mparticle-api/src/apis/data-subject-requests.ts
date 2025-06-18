@@ -218,7 +218,9 @@ export const processDataSubjectRequestCallback = async (requestId: string, paylo
         MessageBody: JSON.stringify(message),
     });
     const response = await client.send(command);
-    console.debug(`Response from message send was ${JSON.stringify(response)}`);
+    console.debug(`Response from message send was ${JSON.stringify({
+        client, command, response
+    })}`);
 
     return {
         message: 'Callback accepted and processed',
