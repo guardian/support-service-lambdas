@@ -118,6 +118,24 @@ exports[`The User benefits stack matches the snapshot 1`] = `
             "ReturnData": false,
           },
         ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
         "Threshold": 5,
         "TreatMissingData": "notBreaching",
       },
@@ -1125,6 +1143,9 @@ exports[`The User benefits stack matches the snapshot 1`] = `
         },
         "FunctionName": "user-benefits-identity-id-CODE",
         "Handler": "index.benefitsIdentityIdHandler",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -1344,6 +1365,9 @@ exports[`The User benefits stack matches the snapshot 1`] = `
         },
         "FunctionName": "user-benefits-list-CODE",
         "Handler": "index.benefitsListHandler",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -1563,6 +1587,9 @@ exports[`The User benefits stack matches the snapshot 1`] = `
         },
         "FunctionName": "user-benefits-me-CODE",
         "Handler": "index.benefitsMeHandler",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -1877,6 +1904,24 @@ exports[`The User benefits stack matches the snapshot 2`] = `
               "Stat": "SampleCount",
             },
             "ReturnData": false,
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
           },
         ],
         "Threshold": 5,
@@ -2886,6 +2931,9 @@ exports[`The User benefits stack matches the snapshot 2`] = `
         },
         "FunctionName": "user-benefits-identity-id-PROD",
         "Handler": "index.benefitsIdentityIdHandler",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -3105,6 +3153,9 @@ exports[`The User benefits stack matches the snapshot 2`] = `
         },
         "FunctionName": "user-benefits-list-PROD",
         "Handler": "index.benefitsListHandler",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -3324,6 +3375,9 @@ exports[`The User benefits stack matches the snapshot 2`] = `
         },
         "FunctionName": "user-benefits-me-PROD",
         "Handler": "index.benefitsMeHandler",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [

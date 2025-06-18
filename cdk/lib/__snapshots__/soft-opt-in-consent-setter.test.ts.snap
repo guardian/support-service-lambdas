@@ -53,6 +53,9 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
         },
         "FunctionName": "soft-opt-in-consent-setter-TEST",
         "Handler": "com.gu.soft_opt_in_consent_setter.Handler::handleRequest",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
@@ -110,6 +113,9 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
         },
         "FunctionName": "soft-opt-in-consent-setter-IAP-TEST",
         "Handler": "com.gu.soft_opt_in_consent_setter.HandlerIAP::handleRequest",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
@@ -797,6 +803,24 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
         "FunctionName": {
           "Ref": "LambdaFunctionIAP",
         },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
       },
       "Type": "AWS::Lambda::EventSourceMapping",
     },
@@ -1160,6 +1184,24 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
         "Namespace": "AWS/SQS",
         "Period": 300,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
         "Threshold": 5,
         "TreatMissingData": "notBreaching",
       },
@@ -1202,6 +1244,24 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
         "Namespace": "AWS/Lambda",
         "Period": 3600,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
         "Threshold": 5,
         "TreatMissingData": "notBreaching",
       },
@@ -1242,6 +1302,24 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
         "Namespace": "soft-opt-in-consent-setter",
         "Period": 3600,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
         "Threshold": 1,
         "TreatMissingData": "notBreaching",
       },
@@ -1284,6 +1362,24 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
         "Namespace": "AWS/Lambda",
         "Period": 3600,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
         "Threshold": 5,
         "TreatMissingData": "notBreaching",
       },
@@ -1324,6 +1420,24 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
         "Namespace": "soft-opt-in-consent-setter",
         "Period": 3600,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
         "Threshold": 1,
         "TreatMissingData": "notBreaching",
       },
