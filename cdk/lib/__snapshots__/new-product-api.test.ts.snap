@@ -93,6 +93,10 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
                   {
                     "Ref": "addsubscriptionA4705116",
                   },
+                  ",lambda:",
+                  {
+                    "Ref": "productcatalog39C6E2D1",
+                  },
                 ],
               ],
             },
@@ -1579,6 +1583,10 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
                   "lambda:",
                   {
                     "Ref": "addsubscriptionA4705116",
+                  },
+                  ",lambda:",
+                  {
+                    "Ref": "productcatalog39C6E2D1",
                   },
                 ],
               ],

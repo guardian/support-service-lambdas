@@ -101,7 +101,10 @@ export class NewProductApi extends GuStack {
 			alarmDescription: 'New Product API received an invalid request',
 			evaluationPeriods: 1,
 			threshold: 6,
-			lambdaFunctionNames: addSubscriptionLambda.functionName,
+			lambdaFunctionNames: [
+				addSubscriptionLambda.functionName,
+				productCatalogLambda.functionName,
+			],
 			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 			metric: new Metric({
 				metricName: '4XXError',
