@@ -2,8 +2,9 @@ import { z } from 'zod';
 
 export const BigQueryRecordSchema = z
 	.object({
-		id: z.string(),
+		invoiceId: z.string(),
 		accountId: z.string(),
+		invoiceNumber: z.string(),
 		invoiceBalance: z.number(),
 	})
 	.strict();

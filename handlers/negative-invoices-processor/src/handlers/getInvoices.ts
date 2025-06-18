@@ -47,6 +47,7 @@ const query = (): string =>
 	`
 	SELECT
         inv.id,
+        inv.invoice_number as invoiceNumber,
         STRING_AGG(distinct inv.account_id, ',') AS accountId,
         MAX(inv.balance) AS invoiceBalance
     FROM 
@@ -62,5 +63,5 @@ const query = (): string =>
         AND inv.balance != 0
         AND sub.status = 'Active'
     GROUP BY 
-        inv.id
+        inv.id, inv.invoice_number
 `;
