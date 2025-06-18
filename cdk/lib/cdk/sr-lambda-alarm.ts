@@ -9,10 +9,6 @@ interface SRLambdaAlarmProps
 	actionsEnabled?: boolean; // defaults to PROD only
 }
 
-/**
- * Creates an alarm which is triggered whenever the percentage of requests with a 5xx response code exceeds
- * the specified threshold.
- */
 export class SrLambdaAlarm extends GuAlarm {
 	constructor(scope: GuStack, id: string, props: SRLambdaAlarmProps) {
 		super(scope, id, {
