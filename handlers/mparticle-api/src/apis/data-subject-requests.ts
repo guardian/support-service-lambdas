@@ -5,10 +5,10 @@ import type { DataSubjectRequestForm } from "../../interfaces/data-subject-reque
 import type { DataSubjectRequestState } from "../../interfaces/data-subject-request-state";
 import { DataSubjectRequestStatus } from "../../interfaces/data-subject-request-state";
 import type { DataSubjectRequestSubmission } from "../../interfaces/data-subject-request-submission";
-import { awsSqsConfig } from '../config/sqs';
 import type { HttpResponse } from "../http";
 import { makeHttpRequest } from "../http";
 import { getSecretValue } from '../secrets';
+import { defaultProvider } from '@aws-sdk/credential-provider-node';
 
 function parseDataSubjectRequestStatus(status: 'pending' | 'in_progress' | 'completed' | 'cancelled'): DataSubjectRequestStatus {
     switch (status) {
@@ -174,36 +174,51 @@ export const processDataSubjectRequestCallback = async (requestId: string, paylo
     message: string;
     timestamp: Date;
 }> => {
-    // Check the received status and:
-    // - Ignore it if not completed
-    // - If completed, emit a ErasureJobOutcome event to SQS
-    console.log("processDataSubjectRequestCallback", {
+    console.debug("Process Data Subject Request Callback from mParticle", {
         requestId,
         form: payload
     });
-    await Promise.resolve();
-
     interface ErasureJobOutcome {
         jobRunId: string;
         status: 'Processing' | 'Completed' | { type: 'Failed'; reason: string };
         timestamp: Date;
     }
     const message: ErasureJobOutcome = {
-        jobRunId: "",
-        status: 'Processing',
+        jobRunId: requestId,
+        status: ((): 'Processing' | 'Completed' | { type: 'Failed'; reason: string } => {
+            switch (payload.request_status) {
+                case "pending":
+                case "in_progress":
+                    return "Processing";
+                case "completed":
+                case "cancelled":
+                    return "Completed";
+                default:
+                    return {
+                        type: "Failed",
+                        reason: `Could not process 'request_status' '${payload.request_status}'.`
+                    };
+            };
+        })(),
         timestamp: new Date(),
     };
-    const queueName = `supporter-product-data-${stageFromEnvironment()}`;
-    const client = new SQSClient(awsSqsConfig);
-    console.log(
-        `Sending message ${JSON.stringify(message)} to queue ${queueName}`,
+    const queueName = await getSecretValue(
+        `/mparticle-api/${stageFromEnvironment()}/ophan-erasure-queue-url`,
+        'OPHAN_ERASURE_QUEUE_URL'
+    );
+    const client = new SQSClient({
+        region: 'eu-west-1',
+        credentials: defaultProvider({ profile: 'ophan' }),
+    });
+    console.debug(
+        `Sending message ${JSON.stringify(message)} to queue '${queueName}'`,
     );
     const command = new SendMessageCommand({
         QueueUrl: queueName,
         MessageBody: JSON.stringify(message),
     });
-    // const response = await client.send(command);
-    console.log(`Response from message send was ${JSON.stringify(command)}`, client.config.defaultSigningName);
+    const response = await client.send(command);
+    console.debug(`Response from message send was ${JSON.stringify(response)}`);
 
     return {
         message: 'Callback accepted and processed',
