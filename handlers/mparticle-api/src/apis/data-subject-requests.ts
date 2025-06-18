@@ -1,4 +1,5 @@
 import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
+import { defaultProvider } from '@aws-sdk/credential-provider-node';
 import { stageFromEnvironment } from '@modules/stage';
 import type { DataSubjectRequestCallback } from '../../interfaces/data-subject-request-callback';
 import type { DataSubjectRequestForm } from "../../interfaces/data-subject-request-form";
@@ -8,7 +9,6 @@ import type { DataSubjectRequestSubmission } from "../../interfaces/data-subject
 import type { HttpResponse } from "../http";
 import { makeHttpRequest } from "../http";
 import { getSecretValue } from '../secrets';
-import { defaultProvider } from '@aws-sdk/credential-provider-node';
 
 function parseDataSubjectRequestStatus(status: 'pending' | 'in_progress' | 'completed' | 'cancelled'): DataSubjectRequestStatus {
     switch (status) {
@@ -196,7 +196,7 @@ export const processDataSubjectRequestCallback = async (requestId: string, paylo
                 default:
                     return {
                         type: "Failed",
-                        reason: `Could not process 'request_status' '${payload.request_status}'.`
+                        reason: `Could not process 'request_status' '${JSON.stringify(payload)}'.`
                     };
             };
         })(),
