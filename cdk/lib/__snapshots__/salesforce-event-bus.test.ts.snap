@@ -225,6 +225,40 @@ exports[`The SalesforceEventBus stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "SfBusToContactUpdateQueue75131C06": {
+      "Properties": {
+        "Description": "Send an SF Contact Update event from the SF bus to the salesforce-outbound-messages-[STAGE] SQS queue for consumption by membership-workflow",
+        "EventBusName": "aws.partner/salesforce.com/00D9E0000004jvhUAA/0YLUD00000008Ll4AI",
+        "EventPattern": {
+          "detail-type": [
+            "Contact_Update__e",
+          ],
+          "source": [
+            "aws.partner/salesforce.com",
+          ],
+        },
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": "arn:aws:sqs:eu-west-1:865473395570:salesforce-outbound-messages-CODE",
+            "DeadLetterConfig": {
+              "Arn": {
+                "Fn::GetAtt": [
+                  "deadletterssalesforceeventbusqueue29BFA779",
+                  "Arn",
+                ],
+              },
+            },
+            "Id": "Target0",
+            "RetryPolicy": {
+              "MaximumEventAgeInSeconds": 7200,
+              "MaximumRetryAttempts": 2,
+            },
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
     "deadletterssalesforceeventbusqueue29BFA779": {
       "DeletionPolicy": "Delete",
       "Properties": {
@@ -251,6 +285,45 @@ exports[`The SalesforceEventBus stack matches the snapshot 1`] = `
       },
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
+    },
+    "deadletterssalesforceeventbusqueuePolicy0CE2F482": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "SfBusToContactUpdateQueue75131C06",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "deadletterssalesforceeventbusqueue29BFA779",
+                  "Arn",
+                ],
+              },
+              "Sid": "AllowEventRulesalesforceeventbusCODESfBusToContactUpdateQueueFE76F3CE",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "deadletterssalesforceeventbusqueue29BFA779",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
     },
   },
 }
@@ -481,6 +554,40 @@ exports[`The SalesforceEventBus stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "SfBusToContactUpdateQueue75131C06": {
+      "Properties": {
+        "Description": "Send an SF Contact Update event from the SF bus to the salesforce-outbound-messages-[STAGE] SQS queue for consumption by membership-workflow",
+        "EventBusName": "aws.partner/salesforce.com/00D20000000nq5gEAA/0YLQv00000000zJOAQ",
+        "EventPattern": {
+          "detail-type": [
+            "Contact_Update__e",
+          ],
+          "source": [
+            "aws.partner/salesforce.com",
+          ],
+        },
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": "arn:aws:sqs:eu-west-1:865473395570:salesforce-outbound-messages-PROD",
+            "DeadLetterConfig": {
+              "Arn": {
+                "Fn::GetAtt": [
+                  "deadletterssalesforceeventbusqueue29BFA779",
+                  "Arn",
+                ],
+              },
+            },
+            "Id": "Target0",
+            "RetryPolicy": {
+              "MaximumEventAgeInSeconds": 7200,
+              "MaximumRetryAttempts": 2,
+            },
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
     "deadletterssalesforceeventbusqueue29BFA779": {
       "DeletionPolicy": "Delete",
       "Properties": {
@@ -507,6 +614,45 @@ exports[`The SalesforceEventBus stack matches the snapshot 2`] = `
       },
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
+    },
+    "deadletterssalesforceeventbusqueuePolicy0CE2F482": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "SfBusToContactUpdateQueue75131C06",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "deadletterssalesforceeventbusqueue29BFA779",
+                  "Arn",
+                ],
+              },
+              "Sid": "AllowEventRulesalesforceeventbusPRODSfBusToContactUpdateQueueC08A5AB1",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "deadletterssalesforceeventbusqueue29BFA779",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
     },
   },
 }
