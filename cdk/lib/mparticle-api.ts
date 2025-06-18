@@ -1,10 +1,10 @@
+import {GuApiGatewayWithLambdaByPath} from '@guardian/cdk';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
-import {GuApiGatewayWithLambdaByPath} from '@guardian/cdk';
-import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { type App, Duration } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { nodeVersion } from './node-version';
 
 
@@ -30,7 +30,7 @@ export class MParticleApi extends GuStack {
 		});
 
 		// API Gateway
-		const mparticleCallbackApiGatway = new GuApiGatewayWithLambdaByPath(this, {
+		new GuApiGatewayWithLambdaByPath(this, {
 			app: "example-api-gateway-instance",
 			targets: [
 				{
@@ -57,7 +57,7 @@ export class MParticleApi extends GuStack {
 			},
 		);
 
-		const mparticleCallbackQueue = new Queue(this, 'MparticleCallbackQueue', {
+		new Queue(this, 'MparticleCallbackQueue', {
 			queueName: `mparticle-callback-queue-${this.stage}`,
 			visibilityTimeout: Duration.seconds(3000),
 			deadLetterQueue: {
