@@ -1,0 +1,3417 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`The ObserverDataExport stack matches the snapshot 1`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [
+      "GuStringParameter",
+      "GuDistributionBucketParameter",
+      "GuLambdaFunction",
+      "GuAlarm",
+      "GuAlarm",
+    ],
+    "gu:cdk:version": "TEST",
+  },
+  "Parameters": {
+    "DistributionBucketName": {
+      "Default": "/account/services/artifact.bucket",
+      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+    "observerdataexportairflowcloudcomposeruserarn": {
+      "Description": "Airflow cloud composer user ARN (Ophan Account)",
+      "Type": "String",
+    },
+  },
+  "Resources": {
+    "Bucket83908E77": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "BucketName": "observer-data-export-code",
+        "LifecycleConfiguration": {
+          "Rules": [
+            {
+              "ExpirationInDays": 28,
+              "Prefix": "Observer_newsletter_eligible/",
+              "Status": "Enabled",
+            },
+            {
+              "ExpirationInDays": 28,
+              "Prefix": "Observer_newsletter_subscribers/",
+              "Status": "Enabled",
+            },
+            {
+              "ExpirationInDays": 28,
+              "Prefix": "Observer_newspaper_subscribers/",
+              "Status": "Enabled",
+            },
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "BucketNotificationsHandler050a0587b7544547bf325f094a3db8347ECC3691": {
+      "DependsOn": [
+        "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleDefaultPolicy2CF63D36",
+        "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC",
+      ],
+      "Properties": {
+        "Code": {
+          "ZipFile": "import boto3  # type: ignore
+import json
+import logging
+import urllib.request
+
+s3 = boto3.client("s3")
+
+EVENTBRIDGE_CONFIGURATION = 'EventBridgeConfiguration'
+
+CONFIGURATION_TYPES = ["TopicConfigurations", "QueueConfigurations", "LambdaFunctionConfigurations"]
+
+def handler(event: dict, context):
+  response_status = "SUCCESS"
+  error_message = ""
+  try:
+    props = event["ResourceProperties"]
+    bucket = props["BucketName"]
+    notification_configuration = props["NotificationConfiguration"]
+    request_type = event["RequestType"]
+    managed = props.get('Managed', 'true').lower() == 'true'
+    stack_id = event['StackId']
+
+    if managed:
+      config = handle_managed(request_type, notification_configuration)
+    else:
+      config = handle_unmanaged(bucket, stack_id, request_type, notification_configuration)
+
+    put_bucket_notification_configuration(bucket, config)
+  except Exception as e:
+    logging.exception("Failed to put bucket notification configuration")
+    response_status = "FAILED"
+    error_message = f"Error: {str(e)}. "
+  finally:
+    submit_response(event, context, response_status, error_message)
+
+def handle_managed(request_type, notification_configuration):
+  if request_type == 'Delete':
+    return {}
+  return notification_configuration
+
+def handle_unmanaged(bucket, stack_id, request_type, notification_configuration):
+  external_notifications = find_external_notifications(bucket, stack_id)
+
+  if request_type == 'Delete':
+    return external_notifications
+
+  def with_id(notification):
+    notification['Id'] = f"{stack_id}-{hash(json.dumps(notification, sort_keys=True))}"
+    return notification
+
+  notifications = {}
+  for t in CONFIGURATION_TYPES:
+    external = external_notifications.get(t, [])
+    incoming = [with_id(n) for n in notification_configuration.get(t, [])]
+    notifications[t] = external + incoming
+
+  if EVENTBRIDGE_CONFIGURATION in notification_configuration:
+    notifications[EVENTBRIDGE_CONFIGURATION] = notification_configuration[EVENTBRIDGE_CONFIGURATION]
+  elif EVENTBRIDGE_CONFIGURATION in external_notifications:
+    notifications[EVENTBRIDGE_CONFIGURATION] = external_notifications[EVENTBRIDGE_CONFIGURATION]
+
+  return notifications
+
+def find_external_notifications(bucket, stack_id):
+  existing_notifications = get_bucket_notification_configuration(bucket)
+  external_notifications = {}
+  for t in CONFIGURATION_TYPES:
+    external_notifications[t] = [n for n in existing_notifications.get(t, []) if not n['Id'].startswith(f"{stack_id}-")]
+
+  if EVENTBRIDGE_CONFIGURATION in existing_notifications:
+    external_notifications[EVENTBRIDGE_CONFIGURATION] = existing_notifications[EVENTBRIDGE_CONFIGURATION]
+
+  return external_notifications
+
+def get_bucket_notification_configuration(bucket):
+  return s3.get_bucket_notification_configuration(Bucket=bucket)
+
+def put_bucket_notification_configuration(bucket, notification_configuration):
+  s3.put_bucket_notification_configuration(Bucket=bucket, NotificationConfiguration=notification_configuration)
+
+def submit_response(event: dict, context, response_status: str, error_message: str):
+  response_body = json.dumps(
+    {
+      "Status": response_status,
+      "Reason": f"{error_message}See the details in CloudWatch Log Stream: {context.log_stream_name}",
+      "PhysicalResourceId": event.get("PhysicalResourceId") or event["LogicalResourceId"],
+      "StackId": event["StackId"],
+      "RequestId": event["RequestId"],
+      "LogicalResourceId": event["LogicalResourceId"],
+      "NoEcho": False,
+    }
+  ).encode("utf-8")
+  headers = {"content-type": "", "content-length": str(len(response_body))}
+  try:
+    req = urllib.request.Request(url=event["ResponseURL"], headers=headers, data=response_body, method="PUT")
+    with urllib.request.urlopen(req) as response:
+      print(response.read().decode("utf-8"))
+    print("Status code: " + response.reason)
+  except Exception as e:
+      print("send(..) failed executing request.urlopen(..): " + str(e))
+",
+        },
+        "Description": "AWS CloudFormation handler for "Custom::S3BucketNotifications" resources (@aws-cdk/aws-s3)",
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC",
+            "Arn",
+          ],
+        },
+        "Runtime": "python3.9",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleDefaultPolicy2CF63D36": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:PutBucketNotification",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleDefaultPolicy2CF63D36",
+        "Roles": [
+          {
+            "Ref": "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "BucketPolicyE9A3008A": {
+      "Properties": {
+        "Bucket": {
+          "Ref": "Bucket83908E77",
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject",
+                "s3:PutObjectLegalHold",
+                "s3:PutObjectRetention",
+                "s3:PutObjectTagging",
+                "s3:PutObjectVersionTagging",
+                "s3:Abort*",
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Ref": "observerdataexportairflowcloudcomposeruserarn",
+                },
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "Bucket83908E77",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "Bucket83908E77",
+                          "Arn",
+                        ],
+                      },
+                      "/Observer_newsletter_eligible/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Ref": "observerdataexportairflowcloudcomposeruserarn",
+                },
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "Bucket83908E77",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "Bucket83908E77",
+                          "Arn",
+                        ],
+                      },
+                      "/Public_keys/unifida_public_rsa_key.pem",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
+    },
+    "EncryptAndUploadObserverDataLambda5BD6CD5A": {
+      "DependsOn": [
+        "EncryptAndUploadObserverDataLambdaServiceRoleDefaultPolicy2D30EC64",
+        "EncryptAndUploadObserverDataLambdaServiceRole76339AC2",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/CODE/observer-data-export/observer-data-export.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "APP": "observer-data-export",
+            "Md5FingerprintsBucketName": {
+              "Ref": "Md5FingerprintsBucketBFF631AE",
+            },
+            "ObserverNewspaperSubscribersFolder": "Observer_newspaper_subscribers",
+            "STACK": "support",
+            "STAGE": "CODE",
+            "Stage": "CODE",
+            "UnifidaPublicRsaKeyFilePath": "Public_keys/unifida_public_rsa_key.pem",
+            "UnifidaSharedBucketName": {
+              "Ref": "Bucket83908E77",
+            },
+          },
+        },
+        "FunctionName": "encrypt-and-upload-observer-data-CODE",
+        "Handler": "encryptAndUploadObserverData.handler",
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "EncryptAndUploadObserverDataLambdaServiceRole76339AC2",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "observer-data-export",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "EncryptAndUploadObserverDataLambdaServiceRole76339AC2": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "observer-data-export",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "EncryptAndUploadObserverDataLambdaServiceRoleDefaultPolicy2D30EC64": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "Bucket83908E77",
+                          "Arn",
+                        ],
+                      },
+                      "/Public_keys/unifida_public_rsa_key.pem",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "SalesforceObserverDataTransferBucketC46E06F4",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "s3:PutObject",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "Bucket83908E77",
+                        "Arn",
+                      ],
+                    },
+                    "/Observer_newspaper_subscribers/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "s3:PutObject",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "Md5FingerprintsBucketBFF631AE",
+                        "Arn",
+                      ],
+                    },
+                    "/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "observerdataexportqueue1702C41A",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/CODE/observer-data-export/observer-data-export.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/observer-data-export",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/observer-data-export/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "EncryptAndUploadObserverDataLambdaServiceRoleDefaultPolicy2D30EC64",
+        "Roles": [
+          {
+            "Ref": "EncryptAndUploadObserverDataLambdaServiceRole76339AC2",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "EncryptAndUploadObserverDataLambdaSqsEventSourceobserverdataexportCODEobserverdataexportqueue86DD0A567926042F": {
+      "Properties": {
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "observerdataexportqueue1702C41A",
+            "Arn",
+          ],
+        },
+        "FunctionName": {
+          "Ref": "EncryptAndUploadObserverDataLambda5BD6CD5A",
+        },
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "Md5FingerprintsBucketBFF631AE": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "BucketName": "observer-data-export-md5-fingerprints-code",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "SalesforceObserverDataTransferBucketC46E06F4": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "BucketName": "salesforce-observer-data-transfer-code",
+        "LifecycleConfiguration": {
+          "Rules": [
+            {
+              "ExpirationInDays": 1,
+              "Status": "Enabled",
+            },
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "SalesforceObserverDataTransferBucketNotificationsEA3FF4F9": {
+      "DependsOn": [
+        "observerdataexportqueuePolicyD50F4A3C",
+        "observerdataexportqueue1702C41A",
+      ],
+      "Properties": {
+        "BucketName": {
+          "Ref": "SalesforceObserverDataTransferBucketC46E06F4",
+        },
+        "Managed": true,
+        "NotificationConfiguration": {
+          "QueueConfigurations": [
+            {
+              "Events": [
+                "s3:ObjectCreated:*",
+              ],
+              "QueueArn": {
+                "Fn::GetAtt": [
+                  "observerdataexportqueue1702C41A",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+        },
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "BucketNotificationsHandler050a0587b7544547bf325f094a3db8347ECC3691",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "Custom::S3BucketNotifications",
+    },
+    "SalesforceObserverDataTransferBucketPolicyED868008": {
+      "Properties": {
+        "Bucket": {
+          "Ref": "SalesforceObserverDataTransferBucketC46E06F4",
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:PutObject",
+                "s3:AbortMultipartUpload",
+                "s3:ListMultipartUploadParts",
+                "s3:ListBucketMultipartUploads",
+                "s3:GetBucketAcl",
+                "s3:PutObjectAcl",
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "appflow.amazonaws.com",
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "SalesforceObserverDataTransferBucketC46E06F4",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "SalesforceObserverDataTransferBucketC46E06F4",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
+    },
+    "SalesforceObserverDataTransferFlow": {
+      "Properties": {
+        "Description": "Observer-only data is extracted from Salesforce on a weekly schedule and transferred to a designated S3 bucket in AWS. When a new file is created in this bucket, an S3 event notification sends a message to an SQS queue, which triggers a Lambda function. The function encrypts the file and uploads it to another S3 bucket shared with Tortoise Media.",
+        "DestinationFlowConfigList": [
+          {
+            "ConnectorType": "S3",
+            "DestinationConnectorProperties": {
+              "S3": {
+                "BucketName": {
+                  "Ref": "SalesforceObserverDataTransferBucketC46E06F4",
+                },
+                "S3OutputFormatConfig": {
+                  "FileType": "CSV",
+                },
+              },
+            },
+          },
+        ],
+        "FlowName": "salesforce-observer-data-transfer-CODE",
+        "FlowStatus": "Active",
+        "SourceFlowConfig": {
+          "ConnectorProfileName": "salesforce-observer-data-transfer-CODE",
+          "ConnectorType": "Salesforce",
+          "SourceConnectorProperties": {
+            "Salesforce": {
+              "Object": "Observer_Subscriber_Data__c",
+            },
+          },
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Tasks": [
+          {
+            "ConnectorOperator": {
+              "Salesforce": "PROJECTION",
+            },
+            "SourceFields": [
+              "Subscription_ID__c",
+              "Subscriber_ID__c",
+              "Status__c",
+              "Product__c",
+              "Product_Delivery_SKU__c",
+              "Frequency__c",
+              "Regular_Price__c",
+              "Initial_Offer_Price__c",
+              "Initial_Offer_Duration_Months__c",
+              "In_Life_Discount_Applied_To_Invoice__c",
+              "In_Life_Discount_Remaining_Months__c",
+              "Acquired_Timestamp__c",
+              "First_Delivery_Date__c",
+              "Latest_Recorded_Delivery_Date__c",
+              "Last_Invoice_Number__c",
+              "Last_Invoice_Date__c",
+              "Last_Invoice_Net_Amount__c",
+              "Last_Payment_Date__c",
+              "Last_Payment_Amount__c",
+              "Payment_Method__c",
+              "Next_Invoice_Date__c",
+              "Next_Invoice_Holiday_Credits_Applied__c",
+              "Next_Invoice_Preview_Amount__c",
+              "Cancellation_Notification_Date__c",
+              "Cancellation_Reason__c",
+              "Cancellation_Effective_Date__c",
+              "Cancellation_Refund_Date__c",
+              "Cancellation_Refund_Amount__c",
+              "Customer_Account_Created_Timestamp__c",
+              "Billing_Title__c",
+              "Billing_First_Name__c",
+              "Billing_Last_Name__c",
+              "Billing_Email_Address__c",
+              "Billing_Phone_Number__c",
+              "Billing_Street__c",
+              "Billing_City__c",
+              "Billing_County__c",
+              "Billing_Postcode__c",
+              "Delivery_Title__c",
+              "Delivery_First_Name__c",
+              "Delivery_Last_Name__c",
+              "Delivery_Street__c",
+              "Delivery_City__c",
+              "Delivery_County__c",
+              "Delivery_Postcode__c",
+              "Delivery_Phone_Number__c",
+              "Delivery_Instructions__c",
+            ],
+            "TaskType": "Filter",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "subscription_id",
+            "SourceFields": [
+              "Subscription_ID__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "subscriber_id",
+            "SourceFields": [
+              "Subscriber_ID__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "status",
+            "SourceFields": [
+              "Status__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "product",
+            "SourceFields": [
+              "Product__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "product_delivery_sku",
+            "SourceFields": [
+              "Product_Delivery_SKU__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "frequency",
+            "SourceFields": [
+              "Frequency__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "regular_price",
+            "SourceFields": [
+              "Regular_Price__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "initial_offer_price",
+            "SourceFields": [
+              "Initial_Offer_Price__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "initial_offer_duration_months",
+            "SourceFields": [
+              "Initial_Offer_Duration_Months__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "in_life_discount_applied_to_invoice",
+            "SourceFields": [
+              "In_Life_Discount_Applied_To_Invoice__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "in_life_discount_remaining_months",
+            "SourceFields": [
+              "In_Life_Discount_Remaining_Months__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "acquired_timestamp",
+            "SourceFields": [
+              "Acquired_Timestamp__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "first_delivery_date",
+            "SourceFields": [
+              "First_Delivery_Date__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "latest_recorded_delivery_date",
+            "SourceFields": [
+              "Latest_Recorded_Delivery_Date__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "last_invoice_number",
+            "SourceFields": [
+              "Last_Invoice_Number__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "last_invoice_date",
+            "SourceFields": [
+              "Last_Invoice_Date__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "last_invoice_net_amount",
+            "SourceFields": [
+              "Last_Invoice_Net_Amount__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "last_payment_date",
+            "SourceFields": [
+              "Last_Payment_Date__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "last_payment_amount",
+            "SourceFields": [
+              "Last_Payment_Amount__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "payment_method",
+            "SourceFields": [
+              "Payment_Method__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "next_invoice_date",
+            "SourceFields": [
+              "Next_Invoice_Date__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "next_invoice_holiday_credits_applied",
+            "SourceFields": [
+              "Next_Invoice_Holiday_Credits_Applied__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "next_invoice_preview_amount",
+            "SourceFields": [
+              "Next_Invoice_Preview_Amount__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "cancellation_notification_date",
+            "SourceFields": [
+              "Cancellation_Notification_Date__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "cancellation_reason",
+            "SourceFields": [
+              "Cancellation_Reason__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "cancellation_effective_date",
+            "SourceFields": [
+              "Cancellation_Effective_Date__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "cancellation_refund_date",
+            "SourceFields": [
+              "Cancellation_Refund_Date__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "cancellation_refund_amount",
+            "SourceFields": [
+              "Cancellation_Refund_Amount__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "customer_account_created_timestamp",
+            "SourceFields": [
+              "Customer_Account_Created_Timestamp__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "billing_title",
+            "SourceFields": [
+              "Billing_Title__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "billing_first_name",
+            "SourceFields": [
+              "Billing_First_Name__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "billing_last_name",
+            "SourceFields": [
+              "Billing_Last_Name__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "billing_email_address",
+            "SourceFields": [
+              "Billing_Email_Address__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "billing_phone_number",
+            "SourceFields": [
+              "Billing_Phone_Number__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "billing_street",
+            "SourceFields": [
+              "Billing_Street__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "billing_city",
+            "SourceFields": [
+              "Billing_City__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "billing_county",
+            "SourceFields": [
+              "Billing_County__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "billing_postcode",
+            "SourceFields": [
+              "Billing_Postcode__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "delivery_title",
+            "SourceFields": [
+              "Delivery_Title__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "delivery_first_name",
+            "SourceFields": [
+              "Delivery_First_Name__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "delivery_last_name",
+            "SourceFields": [
+              "Delivery_Last_Name__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "delivery_street",
+            "SourceFields": [
+              "Delivery_Street__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "delivery_city",
+            "SourceFields": [
+              "Delivery_City__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "delivery_county",
+            "SourceFields": [
+              "Delivery_County__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "delivery_postcode",
+            "SourceFields": [
+              "Delivery_Postcode__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "delivery_phone_number",
+            "SourceFields": [
+              "Delivery_Phone_Number__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "delivery_instructions",
+            "SourceFields": [
+              "Delivery_Instructions__c",
+            ],
+            "TaskType": "Map",
+          },
+        ],
+        "TriggerConfig": {
+          "TriggerProperties": {
+            "DataPullMode": "Complete",
+            "ScheduleExpression": "cron(0 7 ? * TUE *)",
+          },
+          "TriggerType": "Scheduled",
+        },
+      },
+      "Type": "AWS::AppFlow::Flow",
+    },
+    "UnifidaUserA0A8377C": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "UserName": "unifida-code",
+      },
+      "Type": "AWS::IAM::User",
+    },
+    "UnifidaUserDefaultPolicy85929A11": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "Bucket83908E77",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "Bucket83908E77",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "UnifidaUserDefaultPolicy85929A11",
+        "Users": [
+          {
+            "Ref": "UnifidaUserA0A8377C",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "deadlettersobserverdataexportqueueC5FC0315": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 86400,
+        "QueueName": "dead-letters-observer-data-export-queue-CODE",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "encryptanduploadobserverdataCODElambdaalarmA1B7D79A": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "Fix: check logs for lambda ",
+              {
+                "Ref": "EncryptAndUploadObserverDataLambda5BD6CD5A",
+              },
+              " and redrive event from dead letter queue ",
+              {
+                "Fn::GetAtt": [
+                  "deadlettersobserverdataexportqueueC5FC0315",
+                  "QueueName",
+                ],
+              },
+              ".",
+            ],
+          ],
+        },
+        "AlarmName": "CODE: Failed to encrypt & upload Observer-only data to S3 bucket shared with Unifida (Tortoise's dev team)",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "deadlettersobserverdataexportqueueC5FC0315",
+                "QueueName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "observerdataexportqueue1702C41A": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "QueueName": "observer-data-export-queue-CODE",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "deadlettersobserverdataexportqueueC5FC0315",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 2,
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "VisibilityTimeout": 300,
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "observerdataexportqueuePolicyD50F4A3C": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Condition": {
+                "ArnLike": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "SalesforceObserverDataTransferBucketC46E06F4",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "s3.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "observerdataexportqueue1702C41A",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "observerdataexportqueue1702C41A",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
+    "salesforceobserverdatatransferCODEflowalarmDEC9DDC2": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "Debug: view "Run history" in the dashboard for flow salesforce-observer-data-transfer-CODE. Manual fix: upload today's unencrypted CSV file anywhere inside the ",
+              {
+                "Ref": "SalesforceObserverDataTransferBucketC46E06F4",
+              },
+              " bucket.",
+            ],
+          ],
+        },
+        "AlarmName": "CODE: Failed to transfer Observer-only data from Salesforce to AWS (via AppFlow)",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "FlowName",
+            "Value": "salesforce-observer-data-transfer-CODE",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "FlowExecutionsFailed",
+        "Namespace": "AWS/AppFlow",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+  },
+}
+`;
+
+exports[`The ObserverDataExport stack matches the snapshot 2`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [
+      "GuStringParameter",
+      "GuDistributionBucketParameter",
+      "GuLambdaFunction",
+      "GuAlarm",
+      "GuAlarm",
+    ],
+    "gu:cdk:version": "TEST",
+  },
+  "Parameters": {
+    "DistributionBucketName": {
+      "Default": "/account/services/artifact.bucket",
+      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+    "observerdataexportairflowcloudcomposeruserarn": {
+      "Description": "Airflow cloud composer user ARN (Ophan Account)",
+      "Type": "String",
+    },
+  },
+  "Resources": {
+    "Bucket83908E77": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "BucketName": "observer-data-export-prod",
+        "LifecycleConfiguration": {
+          "Rules": [
+            {
+              "ExpirationInDays": 28,
+              "Prefix": "Observer_newsletter_eligible/",
+              "Status": "Enabled",
+            },
+            {
+              "ExpirationInDays": 28,
+              "Prefix": "Observer_newsletter_subscribers/",
+              "Status": "Enabled",
+            },
+            {
+              "ExpirationInDays": 28,
+              "Prefix": "Observer_newspaper_subscribers/",
+              "Status": "Enabled",
+            },
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "BucketNotificationsHandler050a0587b7544547bf325f094a3db8347ECC3691": {
+      "DependsOn": [
+        "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleDefaultPolicy2CF63D36",
+        "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC",
+      ],
+      "Properties": {
+        "Code": {
+          "ZipFile": "import boto3  # type: ignore
+import json
+import logging
+import urllib.request
+
+s3 = boto3.client("s3")
+
+EVENTBRIDGE_CONFIGURATION = 'EventBridgeConfiguration'
+
+CONFIGURATION_TYPES = ["TopicConfigurations", "QueueConfigurations", "LambdaFunctionConfigurations"]
+
+def handler(event: dict, context):
+  response_status = "SUCCESS"
+  error_message = ""
+  try:
+    props = event["ResourceProperties"]
+    bucket = props["BucketName"]
+    notification_configuration = props["NotificationConfiguration"]
+    request_type = event["RequestType"]
+    managed = props.get('Managed', 'true').lower() == 'true'
+    stack_id = event['StackId']
+
+    if managed:
+      config = handle_managed(request_type, notification_configuration)
+    else:
+      config = handle_unmanaged(bucket, stack_id, request_type, notification_configuration)
+
+    put_bucket_notification_configuration(bucket, config)
+  except Exception as e:
+    logging.exception("Failed to put bucket notification configuration")
+    response_status = "FAILED"
+    error_message = f"Error: {str(e)}. "
+  finally:
+    submit_response(event, context, response_status, error_message)
+
+def handle_managed(request_type, notification_configuration):
+  if request_type == 'Delete':
+    return {}
+  return notification_configuration
+
+def handle_unmanaged(bucket, stack_id, request_type, notification_configuration):
+  external_notifications = find_external_notifications(bucket, stack_id)
+
+  if request_type == 'Delete':
+    return external_notifications
+
+  def with_id(notification):
+    notification['Id'] = f"{stack_id}-{hash(json.dumps(notification, sort_keys=True))}"
+    return notification
+
+  notifications = {}
+  for t in CONFIGURATION_TYPES:
+    external = external_notifications.get(t, [])
+    incoming = [with_id(n) for n in notification_configuration.get(t, [])]
+    notifications[t] = external + incoming
+
+  if EVENTBRIDGE_CONFIGURATION in notification_configuration:
+    notifications[EVENTBRIDGE_CONFIGURATION] = notification_configuration[EVENTBRIDGE_CONFIGURATION]
+  elif EVENTBRIDGE_CONFIGURATION in external_notifications:
+    notifications[EVENTBRIDGE_CONFIGURATION] = external_notifications[EVENTBRIDGE_CONFIGURATION]
+
+  return notifications
+
+def find_external_notifications(bucket, stack_id):
+  existing_notifications = get_bucket_notification_configuration(bucket)
+  external_notifications = {}
+  for t in CONFIGURATION_TYPES:
+    external_notifications[t] = [n for n in existing_notifications.get(t, []) if not n['Id'].startswith(f"{stack_id}-")]
+
+  if EVENTBRIDGE_CONFIGURATION in existing_notifications:
+    external_notifications[EVENTBRIDGE_CONFIGURATION] = existing_notifications[EVENTBRIDGE_CONFIGURATION]
+
+  return external_notifications
+
+def get_bucket_notification_configuration(bucket):
+  return s3.get_bucket_notification_configuration(Bucket=bucket)
+
+def put_bucket_notification_configuration(bucket, notification_configuration):
+  s3.put_bucket_notification_configuration(Bucket=bucket, NotificationConfiguration=notification_configuration)
+
+def submit_response(event: dict, context, response_status: str, error_message: str):
+  response_body = json.dumps(
+    {
+      "Status": response_status,
+      "Reason": f"{error_message}See the details in CloudWatch Log Stream: {context.log_stream_name}",
+      "PhysicalResourceId": event.get("PhysicalResourceId") or event["LogicalResourceId"],
+      "StackId": event["StackId"],
+      "RequestId": event["RequestId"],
+      "LogicalResourceId": event["LogicalResourceId"],
+      "NoEcho": False,
+    }
+  ).encode("utf-8")
+  headers = {"content-type": "", "content-length": str(len(response_body))}
+  try:
+    req = urllib.request.Request(url=event["ResponseURL"], headers=headers, data=response_body, method="PUT")
+    with urllib.request.urlopen(req) as response:
+      print(response.read().decode("utf-8"))
+    print("Status code: " + response.reason)
+  except Exception as e:
+      print("send(..) failed executing request.urlopen(..): " + str(e))
+",
+        },
+        "Description": "AWS CloudFormation handler for "Custom::S3BucketNotifications" resources (@aws-cdk/aws-s3)",
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC",
+            "Arn",
+          ],
+        },
+        "Runtime": "python3.9",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleDefaultPolicy2CF63D36": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:PutBucketNotification",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleDefaultPolicy2CF63D36",
+        "Roles": [
+          {
+            "Ref": "BucketNotificationsHandler050a0587b7544547bf325f094a3db834RoleB6FB88EC",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "BucketPolicyE9A3008A": {
+      "Properties": {
+        "Bucket": {
+          "Ref": "Bucket83908E77",
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject",
+                "s3:PutObjectLegalHold",
+                "s3:PutObjectRetention",
+                "s3:PutObjectTagging",
+                "s3:PutObjectVersionTagging",
+                "s3:Abort*",
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Ref": "observerdataexportairflowcloudcomposeruserarn",
+                },
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "Bucket83908E77",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "Bucket83908E77",
+                          "Arn",
+                        ],
+                      },
+                      "/Observer_newsletter_eligible/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Ref": "observerdataexportairflowcloudcomposeruserarn",
+                },
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "Bucket83908E77",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "Bucket83908E77",
+                          "Arn",
+                        ],
+                      },
+                      "/Public_keys/unifida_public_rsa_key.pem",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
+    },
+    "EncryptAndUploadObserverDataLambda5BD6CD5A": {
+      "DependsOn": [
+        "EncryptAndUploadObserverDataLambdaServiceRoleDefaultPolicy2D30EC64",
+        "EncryptAndUploadObserverDataLambdaServiceRole76339AC2",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/PROD/observer-data-export/observer-data-export.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "APP": "observer-data-export",
+            "Md5FingerprintsBucketName": {
+              "Ref": "Md5FingerprintsBucketBFF631AE",
+            },
+            "ObserverNewspaperSubscribersFolder": "Observer_newspaper_subscribers",
+            "STACK": "support",
+            "STAGE": "PROD",
+            "Stage": "PROD",
+            "UnifidaPublicRsaKeyFilePath": "Public_keys/unifida_public_rsa_key.pem",
+            "UnifidaSharedBucketName": {
+              "Ref": "Bucket83908E77",
+            },
+          },
+        },
+        "FunctionName": "encrypt-and-upload-observer-data-PROD",
+        "Handler": "encryptAndUploadObserverData.handler",
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "EncryptAndUploadObserverDataLambdaServiceRole76339AC2",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "observer-data-export",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "EncryptAndUploadObserverDataLambdaServiceRole76339AC2": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "observer-data-export",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "EncryptAndUploadObserverDataLambdaServiceRoleDefaultPolicy2D30EC64": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "Bucket83908E77",
+                          "Arn",
+                        ],
+                      },
+                      "/Public_keys/unifida_public_rsa_key.pem",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "SalesforceObserverDataTransferBucketC46E06F4",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "s3:PutObject",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "Bucket83908E77",
+                        "Arn",
+                      ],
+                    },
+                    "/Observer_newspaper_subscribers/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "s3:PutObject",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "Md5FingerprintsBucketBFF631AE",
+                        "Arn",
+                      ],
+                    },
+                    "/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "observerdataexportqueue1702C41A",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/PROD/observer-data-export/observer-data-export.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/observer-data-export",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/observer-data-export/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "EncryptAndUploadObserverDataLambdaServiceRoleDefaultPolicy2D30EC64",
+        "Roles": [
+          {
+            "Ref": "EncryptAndUploadObserverDataLambdaServiceRole76339AC2",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "EncryptAndUploadObserverDataLambdaSqsEventSourceobserverdataexportPRODobserverdataexportqueue790AC07724767970": {
+      "Properties": {
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "observerdataexportqueue1702C41A",
+            "Arn",
+          ],
+        },
+        "FunctionName": {
+          "Ref": "EncryptAndUploadObserverDataLambda5BD6CD5A",
+        },
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "Md5FingerprintsBucketBFF631AE": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "BucketName": "observer-data-export-md5-fingerprints-prod",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "SalesforceObserverDataTransferBucketC46E06F4": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "BucketName": "salesforce-observer-data-transfer-prod",
+        "LifecycleConfiguration": {
+          "Rules": [
+            {
+              "ExpirationInDays": 1,
+              "Status": "Enabled",
+            },
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "SalesforceObserverDataTransferBucketNotificationsEA3FF4F9": {
+      "DependsOn": [
+        "observerdataexportqueuePolicyD50F4A3C",
+        "observerdataexportqueue1702C41A",
+      ],
+      "Properties": {
+        "BucketName": {
+          "Ref": "SalesforceObserverDataTransferBucketC46E06F4",
+        },
+        "Managed": true,
+        "NotificationConfiguration": {
+          "QueueConfigurations": [
+            {
+              "Events": [
+                "s3:ObjectCreated:*",
+              ],
+              "QueueArn": {
+                "Fn::GetAtt": [
+                  "observerdataexportqueue1702C41A",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+        },
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "BucketNotificationsHandler050a0587b7544547bf325f094a3db8347ECC3691",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "Custom::S3BucketNotifications",
+    },
+    "SalesforceObserverDataTransferBucketPolicyED868008": {
+      "Properties": {
+        "Bucket": {
+          "Ref": "SalesforceObserverDataTransferBucketC46E06F4",
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:PutObject",
+                "s3:AbortMultipartUpload",
+                "s3:ListMultipartUploadParts",
+                "s3:ListBucketMultipartUploads",
+                "s3:GetBucketAcl",
+                "s3:PutObjectAcl",
+              ],
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "appflow.amazonaws.com",
+              },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "SalesforceObserverDataTransferBucketC46E06F4",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "SalesforceObserverDataTransferBucketC46E06F4",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
+    },
+    "SalesforceObserverDataTransferFlow": {
+      "Properties": {
+        "Description": "Observer-only data is extracted from Salesforce on a weekly schedule and transferred to a designated S3 bucket in AWS. When a new file is created in this bucket, an S3 event notification sends a message to an SQS queue, which triggers a Lambda function. The function encrypts the file and uploads it to another S3 bucket shared with Tortoise Media.",
+        "DestinationFlowConfigList": [
+          {
+            "ConnectorType": "S3",
+            "DestinationConnectorProperties": {
+              "S3": {
+                "BucketName": {
+                  "Ref": "SalesforceObserverDataTransferBucketC46E06F4",
+                },
+                "S3OutputFormatConfig": {
+                  "FileType": "CSV",
+                },
+              },
+            },
+          },
+        ],
+        "FlowName": "salesforce-observer-data-transfer-PROD",
+        "FlowStatus": "Active",
+        "SourceFlowConfig": {
+          "ConnectorProfileName": "salesforce-observer-data-transfer-PROD",
+          "ConnectorType": "Salesforce",
+          "SourceConnectorProperties": {
+            "Salesforce": {
+              "Object": "Observer_Subscriber_Data__c",
+            },
+          },
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Tasks": [
+          {
+            "ConnectorOperator": {
+              "Salesforce": "PROJECTION",
+            },
+            "SourceFields": [
+              "Subscription_ID__c",
+              "Subscriber_ID__c",
+              "Status__c",
+              "Product__c",
+              "Product_Delivery_SKU__c",
+              "Frequency__c",
+              "Regular_Price__c",
+              "Initial_Offer_Price__c",
+              "Initial_Offer_Duration_Months__c",
+              "In_Life_Discount_Applied_To_Invoice__c",
+              "In_Life_Discount_Remaining_Months__c",
+              "Acquired_Timestamp__c",
+              "First_Delivery_Date__c",
+              "Latest_Recorded_Delivery_Date__c",
+              "Last_Invoice_Number__c",
+              "Last_Invoice_Date__c",
+              "Last_Invoice_Net_Amount__c",
+              "Last_Payment_Date__c",
+              "Last_Payment_Amount__c",
+              "Payment_Method__c",
+              "Next_Invoice_Date__c",
+              "Next_Invoice_Holiday_Credits_Applied__c",
+              "Next_Invoice_Preview_Amount__c",
+              "Cancellation_Notification_Date__c",
+              "Cancellation_Reason__c",
+              "Cancellation_Effective_Date__c",
+              "Cancellation_Refund_Date__c",
+              "Cancellation_Refund_Amount__c",
+              "Customer_Account_Created_Timestamp__c",
+              "Billing_Title__c",
+              "Billing_First_Name__c",
+              "Billing_Last_Name__c",
+              "Billing_Email_Address__c",
+              "Billing_Phone_Number__c",
+              "Billing_Street__c",
+              "Billing_City__c",
+              "Billing_County__c",
+              "Billing_Postcode__c",
+              "Delivery_Title__c",
+              "Delivery_First_Name__c",
+              "Delivery_Last_Name__c",
+              "Delivery_Street__c",
+              "Delivery_City__c",
+              "Delivery_County__c",
+              "Delivery_Postcode__c",
+              "Delivery_Phone_Number__c",
+              "Delivery_Instructions__c",
+            ],
+            "TaskType": "Filter",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "subscription_id",
+            "SourceFields": [
+              "Subscription_ID__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "subscriber_id",
+            "SourceFields": [
+              "Subscriber_ID__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "status",
+            "SourceFields": [
+              "Status__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "product",
+            "SourceFields": [
+              "Product__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "product_delivery_sku",
+            "SourceFields": [
+              "Product_Delivery_SKU__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "frequency",
+            "SourceFields": [
+              "Frequency__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "regular_price",
+            "SourceFields": [
+              "Regular_Price__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "initial_offer_price",
+            "SourceFields": [
+              "Initial_Offer_Price__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "initial_offer_duration_months",
+            "SourceFields": [
+              "Initial_Offer_Duration_Months__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "in_life_discount_applied_to_invoice",
+            "SourceFields": [
+              "In_Life_Discount_Applied_To_Invoice__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "in_life_discount_remaining_months",
+            "SourceFields": [
+              "In_Life_Discount_Remaining_Months__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "acquired_timestamp",
+            "SourceFields": [
+              "Acquired_Timestamp__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "first_delivery_date",
+            "SourceFields": [
+              "First_Delivery_Date__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "latest_recorded_delivery_date",
+            "SourceFields": [
+              "Latest_Recorded_Delivery_Date__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "last_invoice_number",
+            "SourceFields": [
+              "Last_Invoice_Number__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "last_invoice_date",
+            "SourceFields": [
+              "Last_Invoice_Date__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "last_invoice_net_amount",
+            "SourceFields": [
+              "Last_Invoice_Net_Amount__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "last_payment_date",
+            "SourceFields": [
+              "Last_Payment_Date__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "last_payment_amount",
+            "SourceFields": [
+              "Last_Payment_Amount__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "payment_method",
+            "SourceFields": [
+              "Payment_Method__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "next_invoice_date",
+            "SourceFields": [
+              "Next_Invoice_Date__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "next_invoice_holiday_credits_applied",
+            "SourceFields": [
+              "Next_Invoice_Holiday_Credits_Applied__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "next_invoice_preview_amount",
+            "SourceFields": [
+              "Next_Invoice_Preview_Amount__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "cancellation_notification_date",
+            "SourceFields": [
+              "Cancellation_Notification_Date__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "cancellation_reason",
+            "SourceFields": [
+              "Cancellation_Reason__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "cancellation_effective_date",
+            "SourceFields": [
+              "Cancellation_Effective_Date__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "cancellation_refund_date",
+            "SourceFields": [
+              "Cancellation_Refund_Date__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "cancellation_refund_amount",
+            "SourceFields": [
+              "Cancellation_Refund_Amount__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "customer_account_created_timestamp",
+            "SourceFields": [
+              "Customer_Account_Created_Timestamp__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "billing_title",
+            "SourceFields": [
+              "Billing_Title__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "billing_first_name",
+            "SourceFields": [
+              "Billing_First_Name__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "billing_last_name",
+            "SourceFields": [
+              "Billing_Last_Name__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "billing_email_address",
+            "SourceFields": [
+              "Billing_Email_Address__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "billing_phone_number",
+            "SourceFields": [
+              "Billing_Phone_Number__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "billing_street",
+            "SourceFields": [
+              "Billing_Street__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "billing_city",
+            "SourceFields": [
+              "Billing_City__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "billing_county",
+            "SourceFields": [
+              "Billing_County__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "billing_postcode",
+            "SourceFields": [
+              "Billing_Postcode__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "delivery_title",
+            "SourceFields": [
+              "Delivery_Title__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "delivery_first_name",
+            "SourceFields": [
+              "Delivery_First_Name__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "delivery_last_name",
+            "SourceFields": [
+              "Delivery_Last_Name__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "delivery_street",
+            "SourceFields": [
+              "Delivery_Street__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "delivery_city",
+            "SourceFields": [
+              "Delivery_City__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "delivery_county",
+            "SourceFields": [
+              "Delivery_County__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "delivery_postcode",
+            "SourceFields": [
+              "Delivery_Postcode__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "delivery_phone_number",
+            "SourceFields": [
+              "Delivery_Phone_Number__c",
+            ],
+            "TaskType": "Map",
+          },
+          {
+            "ConnectorOperator": {
+              "Salesforce": "NO_OP",
+            },
+            "DestinationField": "delivery_instructions",
+            "SourceFields": [
+              "Delivery_Instructions__c",
+            ],
+            "TaskType": "Map",
+          },
+        ],
+        "TriggerConfig": {
+          "TriggerProperties": {
+            "DataPullMode": "Complete",
+            "ScheduleExpression": "cron(0 7 ? * TUE *)",
+          },
+          "TriggerType": "Scheduled",
+        },
+      },
+      "Type": "AWS::AppFlow::Flow",
+    },
+    "UnifidaUserA0A8377C": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "UserName": "unifida-prod",
+      },
+      "Type": "AWS::IAM::User",
+    },
+    "UnifidaUserDefaultPolicy85929A11": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "Bucket83908E77",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "Bucket83908E77",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "UnifidaUserDefaultPolicy85929A11",
+        "Users": [
+          {
+            "Ref": "UnifidaUserA0A8377C",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "deadlettersobserverdataexportqueueC5FC0315": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 86400,
+        "QueueName": "dead-letters-observer-data-export-queue-PROD",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "encryptanduploadobserverdataPRODlambdaalarmEC9F195F": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "Fix: check logs for lambda ",
+              {
+                "Ref": "EncryptAndUploadObserverDataLambda5BD6CD5A",
+              },
+              " and redrive event from dead letter queue ",
+              {
+                "Fn::GetAtt": [
+                  "deadlettersobserverdataexportqueueC5FC0315",
+                  "QueueName",
+                ],
+              },
+              ".",
+            ],
+          ],
+        },
+        "AlarmName": "PROD: Failed to encrypt & upload Observer-only data to S3 bucket shared with Unifida (Tortoise's dev team)",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "deadlettersobserverdataexportqueueC5FC0315",
+                "QueueName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "observerdataexportqueue1702C41A": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "QueueName": "observer-data-export-queue-PROD",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "deadlettersobserverdataexportqueueC5FC0315",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 2,
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "VisibilityTimeout": 300,
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "observerdataexportqueuePolicyD50F4A3C": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Condition": {
+                "ArnLike": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "SalesforceObserverDataTransferBucketC46E06F4",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "s3.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "observerdataexportqueue1702C41A",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "observerdataexportqueue1702C41A",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
+    "salesforceobserverdatatransferPRODflowalarm35F816EA": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "Debug: view "Run history" in the dashboard for flow salesforce-observer-data-transfer-PROD. Manual fix: upload today's unencrypted CSV file anywhere inside the ",
+              {
+                "Ref": "SalesforceObserverDataTransferBucketC46E06F4",
+              },
+              " bucket.",
+            ],
+          ],
+        },
+        "AlarmName": "PROD: Failed to transfer Observer-only data from Salesforce to AWS (via AppFlow)",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "FlowName",
+            "Value": "salesforce-observer-data-transfer-PROD",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "FlowExecutionsFailed",
+        "Namespace": "AWS/AppFlow",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+  },
+}
+`;

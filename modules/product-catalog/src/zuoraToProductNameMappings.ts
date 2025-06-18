@@ -42,6 +42,7 @@ const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 	// Digital Pack rate plans
 	'Digital Pack Monthly': 'Monthly',
 	'Digital Pack Annual': 'Annual',
+	'Digital Pack Quarterly': 'Quarterly',
 	'Digital Subscription One Year Fixed - One Time Charge': 'OneYearGift',
 	'Digital Subscription Three Month Fixed - One Time Charge': 'ThreeMonthGift',
 	// Supporter Plus rate plans
@@ -92,11 +93,11 @@ const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 	Weekend: 'Weekend',
 	Sixday: 'Sixday',
 	// Paper+ rate plans
-	'Everyday+': 'Everyday+',
-	'Saturday+': 'Saturday+',
-	'Sunday+': 'Sunday+',
-	'Weekend+': 'Weekend+',
-	'Sixday+': 'Sixday+',
+	'Everyday+': 'EverydayPlus',
+	'Saturday+': 'SaturdayPlus',
+	'Sunday+': 'SundayPlus',
+	'Weekend+': 'WeekendPlus',
+	'Sixday+': 'SixdayPlus',
 	'Guardian Ad-Lite Monthly': 'Monthly',
 	// Membership rate plans
 	'Supporter - monthly': 'V1DeprecatedMonthly',
@@ -120,6 +121,7 @@ const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 const zuoraCatalogToProductRatePlanChargeKey: Record<string, string> = {
 	'Digital Pack Monthly': 'Subscription',
 	'Digital Pack Annual': 'Subscription',
+	'Digital Pack Quarterly': 'Subscription',
 	'Digital Subscription One Year Fixed - One Time Charge': 'Subscription',
 	'Digital Subscription Three Month Fixed - One Time Charge': 'Subscription',
 	'Digital Subscription Three Month Fixed - One Time': 'Subscription',

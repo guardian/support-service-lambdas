@@ -31,8 +31,7 @@ import com.gu.productmove.zuora.{
   GetAccountLive,
   GetInvoice,
   GetInvoiceLive,
-  GetRefundInvoiceDetails,
-  GetRefundInvoiceDetailsLive,
+  InvoiceItemQueryLive,
   GetSubscription,
   GetSubscriptionLive,
   InvoiceItemAdjustment,
@@ -65,7 +64,7 @@ object SubscriptionCancelEndpoint {
 
   // run this to test locally via console with some hard coded data
   def main(args: Array[String]): Unit = LambdaEndpoint.runTest(
-    run(
+    run(() => LocalDate.now)(
       "A-S00878246",
       ExpectedInput(
         "mma_value_for_money", // valid pick list value
@@ -128,10 +127,10 @@ object SubscriptionCancelEndpoint {
           """Cancels the existing subscription at the default/soonest date.
             |Also manages all the service comms associated with the cancellation.""".stripMargin,
         )
-    endpointDescription.serverLogic[Task](run)
+    endpointDescription.serverLogic[Task](run(() => LocalDate.now()))
   }
 
-  private def run(
+  private def run(today: () => LocalDate)(
       subscriptionName: String,
       postData: ExpectedInput,
       identityId: IdentityId,
@@ -152,6 +151,7 @@ object SubscriptionCancelEndpoint {
       sqs,
       stage,
       zuoraSetCancellationReason,
+      today(),
     ).subscriptionCancel(SubscriptionName(subscriptionName), postData, identityId)
       .tapEither(result => ZIO.log(s"OUTPUT: $subscriptionName: " + result))
   } yield Right(res))

@@ -2,16 +2,30 @@ import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
-import { PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import { aws_cloudwatch, Duration } from 'aws-cdk-lib';
+import {
+	Alarm,
+	Metric,
+	Stats,
+	TreatMissingData,
+} from 'aws-cdk-lib/aws-cloudwatch';
+import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
+import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
+import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
+import {
+	Effect,
+	Policy,
+	PolicyStatement,
+	Role,
+	ServicePrincipal,
+} from 'aws-cdk-lib/aws-iam';
 import { Architecture } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
+import { Topic } from 'aws-cdk-lib/aws-sns';
 import {
-	Choice,
-	Condition,
 	DefinitionBody,
 	JsonPath,
 	Map,
-	Pass,
 	StateMachine,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
@@ -37,33 +51,76 @@ export class DiscountExpiryNotifier extends GuStack {
 				],
 			}),
 		);
+		role.addToPolicy(
+			new PolicyStatement({
+				actions: [
+					'logs:CreateLogGroup',
+					'logs:CreateLogStream',
+					'logs:PutLogEvents',
+				],
+				resources: ['*'],
+			}),
+		);
+
+		const allowPutMetric = new PolicyStatement({
+			effect: Effect.ALLOW,
+			actions: ['cloudwatch:PutMetricData'],
+			resources: ['*'],
+		});
 
 		const bucket = new Bucket(this, 'Bucket', {
 			bucketName: `${appName}-${this.stage.toLowerCase()}`,
 		});
 
-		const getSubsWithExpiringDiscountsLambda = new GuLambdaFunction(
+		const getExpiringDiscountsLambda = new GuLambdaFunction(
 			this,
-			'get-subs-with-expiring-discounts-lambda',
+			'get-expiring-discounts-lambda',
 			{
 				app: appName,
-				functionName: `${appName}-get-subs-with-expiring-discounts-${this.stage}`,
+				functionName: `${appName}-get-expiring-discounts-${this.stage}`,
 				runtime: nodeVersion,
-				handler: 'getSubsWithExpiringDiscounts.handler',
+				environment: {
+					Stage: this.stage,
+					DAYS_UNTIL_DISCOUNT_EXPIRY_DATE: '32',
+				},
+				handler: 'getExpiringDiscounts.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
+				initialPolicy: [allowPutMetric],
+				timeout: Duration.seconds(300),
 				role,
 			},
 		);
 
-		const subIsActiveLambda = new GuLambdaFunction(
+		const filterRecordsLambda = new GuLambdaFunction(
 			this,
-			'sub-is-active-lambda',
+			'filter-records-lambda',
 			{
 				app: appName,
-				functionName: `${appName}-sub-is-active-${this.stage}`,
+				functionName: `${appName}-filter-records-${this.stage}`,
 				runtime: nodeVersion,
-				handler: 'subIsActive.handler',
+				environment: {
+					Stage: this.stage,
+					FILTER_BY_REGIONS: 'US,USA,United States,United States of America',
+				},
+				handler: 'filterRecords.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+				initialPolicy: [allowPutMetric],
+			},
+		);
+
+		const getSubStatusLambda = new GuLambdaFunction(
+			this,
+			'get-sub-status-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-get-sub-status-${this.stage}`,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+				},
+				handler: 'getSubStatus.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
 				initialPolicy: [
@@ -77,31 +134,65 @@ export class DiscountExpiryNotifier extends GuStack {
 			},
 		);
 
-		const buildEmailPayloadLambda = new GuLambdaFunction(
+		const getOldPaymentAmountLambda = new GuLambdaFunction(
 			this,
-			'build-email-payload-lambda',
+			'get-old-payment-amount-lambda',
 			{
 				app: appName,
-				functionName: `${appName}-build-email-payload-${this.stage}`,
+				functionName: `${appName}-get-old-payment-amount-${this.stage}`,
 				runtime: nodeVersion,
-				handler: 'buildEmailPayload.handler',
+				environment: {
+					Stage: this.stage,
+				},
+				handler: 'getOldPaymentAmount.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['secretsmanager:GetSecretValue'],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+						],
+					}),
+				],
+			},
+		);
+		const getNewPaymentAmountLambda = new GuLambdaFunction(
+			this,
+			'get-new-payment-amount-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-get-new-payment-amount-${this.stage}`,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+				},
+				handler: 'getNewPaymentAmount.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['secretsmanager:GetSecretValue'],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+						],
+					}),
+				],
 			},
 		);
 
-		const initiateEmailSendLambda = new GuLambdaFunction(
-			this,
-			'initiate-email-send-lambda',
-			{
-				app: appName,
-				functionName: `${appName}-initiate-email-send-${this.stage}`,
-				runtime: nodeVersion,
-				handler: 'initiateEmailSend.handler',
-				fileName: `${appName}.zip`,
-				architecture: Architecture.ARM_64,
+		const sendEmailLambda = new GuLambdaFunction(this, 'send-email-lambda', {
+			app: appName,
+			functionName: `${appName}-send-email-${this.stage}`,
+			runtime: nodeVersion,
+			environment: {
+				Stage: this.stage,
+				S3_BUCKET: bucket.bucketName,
 			},
-		);
+			handler: 'sendEmail.handler',
+			fileName: `${appName}.zip`,
+			architecture: Architecture.ARM_64,
+		});
 
 		const saveResultsLambda = new GuLambdaFunction(
 			this,
@@ -111,6 +202,7 @@ export class DiscountExpiryNotifier extends GuStack {
 				functionName: `${appName}-save-results-${this.stage}`,
 				runtime: nodeVersion,
 				environment: {
+					Stage: this.stage,
 					S3_BUCKET: bucket.bucketName,
 				},
 				handler: 'saveResults.handler',
@@ -121,33 +213,69 @@ export class DiscountExpiryNotifier extends GuStack {
 						actions: ['s3:GetObject', 's3:PutObject'],
 						resources: [bucket.arnForObjects('*')],
 					}),
+					allowPutMetric,
 				],
 			},
 		);
 
-		const getSubsWithExpiringDiscountsLambdaTask = new LambdaInvoke(
+		const alarmOnFailuresLambda = new GuLambdaFunction(
 			this,
-			'Get subs with expiring discounts',
+			'alarm-on-failures-lambda',
 			{
-				lambdaFunction: getSubsWithExpiringDiscountsLambda,
+				app: appName,
+				functionName: `${appName}-alarm-on-failures-${this.stage}`,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+				},
+				handler: 'alarmOnFailures.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+				initialPolicy: [allowPutMetric],
+			},
+		);
+
+		const getExpiringDiscountsLambdaTask = new LambdaInvoke(
+			this,
+			'Get expiring discounts',
+			{
+				lambdaFunction: getExpiringDiscountsLambda,
+				outputPath: '$.Payload',
+			},
+		).addRetry({
+			errors: ['States.ALL'],
+			interval: Duration.seconds(10),
+			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
+		});
+
+		const filterRecordsLambdaTask = new LambdaInvoke(
+			this,
+			'Filter records by region',
+			{
+				lambdaFunction: filterRecordsLambda,
 				outputPath: '$.Payload',
 			},
 		);
 
-		const subIsActiveLambdaTask = new LambdaInvoke(
+		const getSubStatusLambdaTask = new LambdaInvoke(this, 'Get sub status', {
+			lambdaFunction: getSubStatusLambda,
+			outputPath: '$.Payload',
+		});
+
+		const getOldPaymentAmountLambdaTask = new LambdaInvoke(
 			this,
-			'Check sub is active',
+			'Get old payment amount',
 			{
-				lambdaFunction: subIsActiveLambda,
+				lambdaFunction: getOldPaymentAmountLambda,
 				outputPath: '$.Payload',
 			},
 		);
 
-		const buildEmailPayloadLambdaTask = new LambdaInvoke(
+		const getNewPaymentAmountLambdaTask = new LambdaInvoke(
 			this,
-			'Build email payload',
+			'Get new payment amount',
 			{
-				lambdaFunction: buildEmailPayloadLambda,
+				lambdaFunction: getNewPaymentAmountLambda,
 				outputPath: '$.Payload',
 			},
 		);
@@ -157,48 +285,122 @@ export class DiscountExpiryNotifier extends GuStack {
 			outputPath: '$.Payload',
 		});
 
-		const initiateEmailSendLambdaTask = new LambdaInvoke(
+		const alarmOnFailuresLambdaTask = new LambdaInvoke(
 			this,
-			'Initiate email send',
+			'Alarm on errors',
 			{
-				lambdaFunction: initiateEmailSendLambda,
+				lambdaFunction: alarmOnFailuresLambda,
 				outputPath: '$.Payload',
 			},
 		);
 
-		const emailSendsProcessingMap = new Map(this, 'Email sends processor map', {
+		const sendEmailLambdaTask = new LambdaInvoke(this, 'Send email', {
+			lambdaFunction: sendEmailLambda,
+			outputPath: '$.Payload',
+		});
+
+		const subStatusFetcherMap = new Map(this, 'Sub status fetcher map', {
 			maxConcurrency: 10,
-			itemsPath: JsonPath.stringAt('$.expiringDiscountsToProcess'),
-			parameters: {
-				item: JsonPath.stringAt('$$.Map.Item.Value'),
-			},
+			itemsPath: JsonPath.stringAt('$.recordsForEmailSend'),
 			resultPath: '$.discountProcessingAttempts',
 		});
 
-		const isSubActiveChoice = new Choice(this, 'Is Subscription Active?');
-
-		emailSendsProcessingMap.iterator(
-			subIsActiveLambdaTask.next(
-				isSubActiveChoice
-					.when(
-						Condition.stringEquals('$.status', 'Active'),
-						buildEmailPayloadLambdaTask.next(initiateEmailSendLambdaTask),
-					)
-					.otherwise(
-						new Pass(this, 'Skip Processing', { resultPath: JsonPath.DISCARD }),
-					),
-			),
+		const expiringDiscountProcessorMap = new Map(
+			this,
+			'Expiring discount processor map',
+			{
+				maxConcurrency: 10,
+				itemsPath: JsonPath.stringAt('$.discountProcessingAttempts'),
+				resultPath: '$.discountProcessingAttempts',
+			},
 		);
+
+		subStatusFetcherMap.iterator(
+			getSubStatusLambdaTask
+				.next(getOldPaymentAmountLambdaTask)
+				.next(getNewPaymentAmountLambdaTask),
+		);
+		expiringDiscountProcessorMap.iterator(sendEmailLambdaTask);
 
 		const definitionBody = DefinitionBody.fromChainable(
-			getSubsWithExpiringDiscountsLambdaTask
-				.next(emailSendsProcessingMap)
-				.next(saveResultsLambdaTask),
+			getExpiringDiscountsLambdaTask
+				.next(filterRecordsLambdaTask)
+				.next(subStatusFetcherMap)
+				.next(expiringDiscountProcessorMap)
+				.next(saveResultsLambdaTask)
+				.next(alarmOnFailuresLambdaTask),
 		);
 
-		new StateMachine(this, `${appName}-state-machine-${this.stage}`, {
-			stateMachineName: `${appName}-${this.stage}`,
-			definitionBody: definitionBody,
+		const sqsInlinePolicy: Policy = new Policy(this, 'sqs-inline-policy', {
+			statements: [
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: ['sqs:GetQueueUrl', 'sqs:SendMessage'],
+					resources: [
+						`arn:aws:sqs:${this.region}:${this.account}:braze-emails-${this.stage}`,
+					],
+				}),
+			],
+		});
+
+		sendEmailLambda.role?.attachInlinePolicy(sqsInlinePolicy);
+
+		const stateMachine = new StateMachine(
+			this,
+			`${appName}-state-machine-${this.stage}`,
+			{
+				stateMachineName: `${appName}-${this.stage}`,
+				definitionBody: definitionBody,
+			},
+		);
+
+		const cronEveryDayAtNoon = { minute: '0', hour: '12' };
+		const cronOncePerYear = { minute: '0', hour: '0', day: '1', month: '1' };
+
+		const executionFrequency =
+			this.stage === 'PROD' ? cronEveryDayAtNoon : cronOncePerYear;
+
+		new Rule(this, 'ScheduleStateMachineRule', {
+			schedule: Schedule.cron(executionFrequency),
+			targets: [new SfnStateMachine(stateMachine)],
+			enabled: true,
+		});
+
+		const topic = Topic.fromTopicArn(
+			this,
+			'Topic',
+			`arn:aws:sns:${this.region}:${this.account}:alarms-handler-topic-${this.stage}`,
+		);
+
+		const lambdaFunctionsToAlarmOn = [
+			getExpiringDiscountsLambda,
+			filterRecordsLambda,
+			alarmOnFailuresLambda,
+		];
+
+		lambdaFunctionsToAlarmOn.forEach((lambdaFunction, index) => {
+			const alarm = new Alarm(this, `alarm-${index}`, {
+				alarmName: `Discount Expiry Notifier - ${lambdaFunction.functionName} - something went wrong - ${this.stage}`,
+				alarmDescription:
+					'Something went wrong when executing the Discount Expiry Notifier. See Cloudwatch logs for more information on the error.',
+				datapointsToAlarm: 1,
+				evaluationPeriods: 1,
+				actionsEnabled: true,
+				comparisonOperator:
+					aws_cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+				metric: new Metric({
+					metricName: 'Errors',
+					namespace: 'AWS/Lambda',
+					statistic: Stats.SUM,
+					period: Duration.seconds(60),
+					dimensionsMap: {
+						FunctionName: lambdaFunction.functionName,
+					},
+				}),
+				threshold: 0,
+				treatMissingData: TreatMissingData.MISSING,
+			});
+			alarm.addAlarmAction(new SnsAction(topic));
 		});
 	}
 }

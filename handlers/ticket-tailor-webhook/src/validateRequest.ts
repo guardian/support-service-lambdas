@@ -1,5 +1,5 @@
 import { createHmac, timingSafeEqual } from 'crypto';
-import { getSecretValue } from '@modules/secrets-manager/src/getSecret';
+import { getSecretValue } from '@modules/secrets-manager/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
 import type { SQSRecord } from 'aws-lambda';
 

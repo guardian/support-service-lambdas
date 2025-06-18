@@ -1,16 +1,17 @@
 import type { SQSEvent, SQSRecord } from 'aws-lambda';
-import { getChatMessages, handler } from '../src';
+import { getChatMessages, handlerWithStage } from '../src';
 import { buildAlarmMappings } from '../src/alarmMappings';
-import { getTags } from '../src/cloudwatch';
+import type { WebhookUrls } from '../src/configSchema';
 
 jest.mock('../src/cloudwatch');
 
 describe('Handler', () => {
-	const mockEnv = {
-		VALUE_WEBHOOK: 'value-webhook-url',
-		GROWTH_WEBHOOK: 'growth-webhook-url',
-		PP_WEBHOOK: 'pp-webhook-url',
-		SRE_WEBHOOK: 'sre-webhook-url',
+	const dummyWebhookUrls: WebhookUrls = {
+		VALUE: 'value-webhook-url',
+		GROWTH: 'growth-webhook-url',
+		SRE: 'sre-webhook-url',
+		PORTFOLIO: 'portfolio-webhook-url',
+		PLATFORM: 'platform-webhook-url',
 	};
 
 	const mockCloudWatchAlarmEvent = {
@@ -49,24 +50,30 @@ describe('Handler', () => {
 		jest.resetModules();
 		jest.resetAllMocks();
 		console.error = jest.fn();
-		process.env = { ...mockEnv };
 	});
 
+	const getTags = jest.fn();
+
 	it('should handle CloudWatch alarm message', async () => {
-		(getTags as jest.Mock).mockResolvedValueOnce({ App: 'mock-app' });
+		getTags.mockResolvedValueOnce({
+			App: 'mock-app',
+		});
 
 		jest
 			.spyOn(global, 'fetch')
 			.mockResolvedValue(Promise.resolve(new Response(JSON.stringify({}))));
 
-		await handler(mockCloudWatchAlarmEvent);
+		await handlerWithStage(mockCloudWatchAlarmEvent, dummyWebhookUrls, getTags);
 
 		expect(getTags).toHaveBeenCalledWith('mock-arn', '111111');
-		expect(fetch).toHaveBeenCalledWith(mockEnv.SRE_WEBHOOK, expect.any(Object));
+		expect(fetch).toHaveBeenCalledWith(
+			dummyWebhookUrls.SRE,
+			expect.any(Object),
+		);
 	});
 
 	it('should handle captured CloudWatch alarm message', async () => {
-		(getTags as jest.Mock).mockResolvedValueOnce({
+		getTags.mockResolvedValueOnce({
 			App: 'mock-app',
 			DiagnosticLinks: 'lambda:mock-app-CODE',
 		});
@@ -74,6 +81,8 @@ describe('Handler', () => {
 		const result = await getChatMessages(
 			fullCloudWatchAlarmEvent,
 			buildAlarmMappings({ SRE: ['mock-app'] }),
+			getTags,
+			dummyWebhookUrls,
 		);
 
 		expect(getTags).toHaveBeenCalledWith(
@@ -84,17 +93,19 @@ describe('Handler', () => {
 			'🚨 *ALARM:* DISCOUNT-API-CODE Discount-api 5XX response has triggered!\n\n' +
 			'*Description:* Impact - Discount api returned a 5XX response check the logs for more information: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fdiscount-api-CODE. Follow the process in https://docs.google.com/document/d/sdkjfhskjdfhksjdhf/edit\n\n' +
 			'*Reason:* Threshold Crossed: 1 datapoint [2.0 (09/10/24 07:18:00)] was greater than or equal to the threshold (1.0).\n\n' +
-			'*LogLink*: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fmock-app-CODE/log-events$3Fstart$3D1728458296236$26filterPattern$3D$26end$3D1728458596236';
-		expect(result?.webhookUrls).toEqual([mockEnv.SRE_WEBHOOK]);
+			'*LogLink*: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fmock-app-CODE/log-events$3Fstart$3D1728458220000$26filterPattern$3D$26end$3D1728458580000';
+		expect(result?.webhookUrls).toEqual([dummyWebhookUrls.SRE]);
 		expect(result?.text).toEqual(expectedText);
 	});
 
 	it('should not insert if the DiagnosticUrls are empty', async () => {
-		(getTags as jest.Mock).mockResolvedValueOnce({ App: 'mock-app' });
+		getTags.mockResolvedValueOnce({ App: 'mock-app' });
 
 		const result = await getChatMessages(
 			fullCloudWatchAlarmEvent,
 			buildAlarmMappings({ SRE: ['mock-app'] }),
+			getTags,
+			dummyWebhookUrls,
 		);
 
 		expect(getTags).toHaveBeenCalledWith(
@@ -105,12 +116,12 @@ describe('Handler', () => {
 			'🚨 *ALARM:* DISCOUNT-API-CODE Discount-api 5XX response has triggered!\n\n' +
 			'*Description:* Impact - Discount api returned a 5XX response check the logs for more information: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fdiscount-api-CODE. Follow the process in https://docs.google.com/document/d/sdkjfhskjdfhksjdhf/edit\n\n' +
 			'*Reason:* Threshold Crossed: 1 datapoint [2.0 (09/10/24 07:18:00)] was greater than or equal to the threshold (1.0).';
-		expect(result?.webhookUrls).toEqual([mockEnv.SRE_WEBHOOK]);
+		expect(result?.webhookUrls).toEqual([dummyWebhookUrls.SRE]);
 		expect(result?.text).toEqual(expectedText);
 	});
 
 	it('should add multiple urls where specified', async () => {
-		(getTags as jest.Mock).mockResolvedValueOnce({
+		getTags.mockResolvedValueOnce({
 			App: 'mock-app',
 			DiagnosticLinks: ['lambda:mock-app-CODE', 'lambda:another-app-CODE'].join(
 				',',
@@ -120,6 +131,8 @@ describe('Handler', () => {
 		const result = await getChatMessages(
 			fullCloudWatchAlarmEvent,
 			buildAlarmMappings({ SRE: ['mock-app'] }),
+			getTags,
+			dummyWebhookUrls,
 		);
 
 		expect(getTags).toHaveBeenCalledWith(
@@ -130,9 +143,9 @@ describe('Handler', () => {
 			'🚨 *ALARM:* DISCOUNT-API-CODE Discount-api 5XX response has triggered!\n\n' +
 			'*Description:* Impact - Discount api returned a 5XX response check the logs for more information: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fdiscount-api-CODE. Follow the process in https://docs.google.com/document/d/sdkjfhskjdfhksjdhf/edit\n\n' +
 			'*Reason:* Threshold Crossed: 1 datapoint [2.0 (09/10/24 07:18:00)] was greater than or equal to the threshold (1.0).\n\n' +
-			'*LogLink*: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fmock-app-CODE/log-events$3Fstart$3D1728458296236$26filterPattern$3D$26end$3D1728458596236\n\n' +
-			'*LogLink*: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fanother-app-CODE/log-events$3Fstart$3D1728458296236$26filterPattern$3D$26end$3D1728458596236';
-		expect(result?.webhookUrls).toEqual([mockEnv.SRE_WEBHOOK]);
+			'*LogLink*: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fmock-app-CODE/log-events$3Fstart$3D1728458220000$26filterPattern$3D$26end$3D1728458580000\n\n' +
+			'*LogLink*: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fanother-app-CODE/log-events$3Fstart$3D1728458220000$26filterPattern$3D$26end$3D1728458580000';
+		expect(result?.webhookUrls).toEqual([dummyWebhookUrls.SRE]);
 		expect(result?.text).toEqual(expectedText);
 	});
 
@@ -141,24 +154,31 @@ describe('Handler', () => {
 			.spyOn(global, 'fetch')
 			.mockResolvedValue(Promise.resolve(new Response(JSON.stringify({}))));
 
-		await handler(mockSnsPublishMessageEvent);
+		await handlerWithStage(
+			mockSnsPublishMessageEvent,
+			dummyWebhookUrls,
+			getTags,
+		);
 
-		expect(fetch).toHaveBeenCalledWith(mockEnv.SRE_WEBHOOK, expect.any(Object));
+		expect(fetch).toHaveBeenCalledWith(
+			dummyWebhookUrls.SRE,
+			expect.any(Object),
+		);
 	});
 
 	it('should throw error if the fetch HTTP call fails', async () => {
-		(getTags as jest.Mock).mockResolvedValueOnce({ App: 'mock-app' });
+		getTags.mockResolvedValueOnce({ App: 'mock-app' });
 		jest
 			.spyOn(global, 'fetch')
 			.mockResolvedValue(Promise.reject(new Error('Fetch error')));
 
-		await expect(handler(mockCloudWatchAlarmEvent)).rejects.toThrow(
-			'Fetch error',
-		);
+		await expect(
+			handlerWithStage(mockCloudWatchAlarmEvent, dummyWebhookUrls, getTags),
+		).rejects.toThrow('Fetch error');
 	});
 
 	it('calls the webhook with the correct data for an OK action', async () => {
-		(getTags as jest.Mock).mockResolvedValueOnce({ App: 'mock-app' });
+		getTags.mockResolvedValueOnce({ App: 'mock-app' });
 		jest
 			.spyOn(global, 'fetch')
 			.mockResolvedValue(Promise.resolve(new Response(JSON.stringify({}))));
@@ -180,10 +200,10 @@ describe('Handler', () => {
 			],
 		} as SQSEvent;
 
-		await handler(mockCloudWatchOkEvent);
+		await handlerWithStage(mockCloudWatchOkEvent, dummyWebhookUrls, getTags);
 
 		expect(fetch).toHaveBeenCalledWith(
-			mockEnv.SRE_WEBHOOK,
+			dummyWebhookUrls.SRE,
 			expect.objectContaining({
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- eslint is unhappy with any, not sure how to fix
 				body: expect.stringContaining('*ALARM OK:* mock-alarm has recovered!'),

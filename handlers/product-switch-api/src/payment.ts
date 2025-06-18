@@ -30,6 +30,8 @@ export const adjustNonCollectedInvoice = async (
 		invoiceId,
 		supporterPlusInvoiceItem.id,
 		paymentAmount,
+		'Credit',
+		'InvoiceDetail',
 		'Created by the product-switch-api to zero out an amount of less than 50 pence/cents as this is less than the minimum Stripe charge amount',
 	);
 	if (!adjustmentResult.Success) {
@@ -45,14 +47,13 @@ export const takePaymentOrAdjustInvoice = async (
 	accountId: string,
 	paymentMethodId: string,
 ): Promise<number> => {
-	const invoiceNumber = getIfDefined(
-		switchResponse.invoiceNumbers?.at(0),
+	const invoiceId = getIfDefined(
+		switchResponse.invoiceIds?.at(0),
 		'No invoice number found in the switch response',
 	);
 
-	const invoice = await getInvoice(zuoraClient, invoiceNumber);
+	const invoice = await getInvoice(zuoraClient, invoiceId);
 	const amountPayableToday = invoice.amount;
-	const invoiceId = invoice.id;
 
 	if (amountPayableToday === 0) {
 		// Nothing to do, we don't need to take a payment and the account balance will be correct

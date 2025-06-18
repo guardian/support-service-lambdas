@@ -149,24 +149,66 @@ export type ZuoraSuccessResponse = z.infer<typeof zuoraSuccessResponseSchema>;
 export type ZuoraUpperCaseSuccessResponse = z.infer<
 	typeof zuoraUpperCaseSuccessResponseSchema
 >;
+// --------------- Invoice Items ---------------
+export const getInvoiceSchema = z.object({
+	success: z.boolean(),
+	id: z.string(),
+	amount: z.number(),
+	amountWithoutTax: z.number(),
+	balance: z.number(),
+});
 
-// --------------- Billing preview ---------------
-export const billingPreviewSchema = z.object({
-	accountId: z.string(),
+export type GetInvoiceResponse = z.infer<typeof getInvoiceSchema>;
+
+export const getInvoiceItemsSchema = z.object({
+	success: z.boolean(),
 	invoiceItems: z.array(
 		z.object({
-			id: z.optional(z.string()),
-			serviceStartDate: z.coerce.date(),
-			serviceEndDate: z.coerce.date(),
-			chargeAmount: z.number(),
-			chargeName: z.string(),
-			taxAmount: z.number(),
+			id: z.string(),
+			productRatePlanChargeId: z.string(),
+			availableToCreditAmount: z.number(),
+			taxationItems: z.object({
+				data: z.array(
+					z.object({
+						id: z.string(),
+						availableToCreditAmount: z.number(),
+					}),
+				),
+			}),
 		}),
 	),
 });
 
+export type GetInvoiceItemsResponse = z.infer<typeof getInvoiceItemsSchema>;
+
+export const invoiceItemSchema = z.object({
+	id: z.optional(z.string()),
+	subscriptionNumber: z.string(),
+	serviceStartDate: z.coerce.date(),
+	serviceEndDate: z.coerce.date(),
+	chargeAmount: z.number(),
+	chargeName: z.string(),
+	taxAmount: z.number(),
+});
+// --------------- Billing preview ---------------
+export const billingPreviewInvoiceItemSchema = z.object({
+	id: z.optional(z.string()),
+	subscriptionNumber: z.string(),
+	serviceStartDate: z.coerce.date(),
+	chargeName: z.string(),
+	chargeAmount: z.number(),
+	taxAmount: z.number(),
+});
+
+export const billingPreviewSchema = z.object({
+	accountId: z.string(),
+	invoiceItems: z.array(billingPreviewInvoiceItemSchema),
+});
+
 export type BillingPreview = z.infer<typeof billingPreviewSchema>;
-export type InvoiceItem = BillingPreview['invoiceItems'][number];
+export type BillingPreviewInvoiceItem = z.infer<
+	typeof billingPreviewInvoiceItemSchema
+>;
 
 // --------------- Add discount preview ---------------
 export const addDiscountPreviewSchema = z.object({
@@ -188,34 +230,39 @@ export const addDiscountPreviewSchema = z.object({
 
 export type AddDiscountPreview = z.infer<typeof addDiscountPreviewSchema>;
 
-// --------------- Invoice Items ---------------
-export const getInvoiceSchema = z.object({
-	success: z.boolean(),
-	id: z.string(),
-	amount: z.number(),
-	amountWithoutTax: z.number(),
-});
-
-export type GetInvoiceResponse = z.infer<typeof getInvoiceSchema>;
-
-export const getInvoiceItemsSchema = z.object({
-	success: z.boolean(),
-	invoiceItems: z.array(
-		z.object({
-			id: z.string(),
-			productRatePlanChargeId: z.string(),
-		}),
-	),
-});
-
-export type GetInvoiceItemsResponse = z.infer<typeof getInvoiceItemsSchema>;
-
 // --------------- Invoice Item Adjustment ---------------
 export const invoiceItemAdjustmentResultSchema = z.object({
 	Success: z.boolean(),
 	Id: z.string().optional(),
 });
 
+export type InvoiceItemAdjustmentType = 'Credit' | 'Charge';
+
+export type InvoiceItemAdjustmentSourceType = 'InvoiceDetail' | 'Tax';
+
 export type InvoiceItemAdjustmentResult = z.infer<
 	typeof invoiceItemAdjustmentResultSchema
+>;
+
+// --------------- Payment Method ---------------
+const paymentMethodStatusSchema = z.object({
+	status: z.string(),
+});
+
+export const zuoraPaymentMethodQueryResponseSchema = z
+	.object({
+		success: z.boolean(),
+	})
+	.and(
+		z.object({
+			creditcardreferencetransaction: z
+				.array(paymentMethodStatusSchema)
+				.optional(),
+			creditcard: z.array(paymentMethodStatusSchema).optional(),
+			banktransfer: z.array(paymentMethodStatusSchema).optional(),
+			paypal: z.array(paymentMethodStatusSchema).optional(),
+		}),
+	);
+export type ZuoraPaymentMethodQueryResponse = z.infer<
+	typeof zuoraPaymentMethodQueryResponseSchema
 >;

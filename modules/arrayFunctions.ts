@@ -17,6 +17,40 @@ export const groupBy = <T>(
 	}, {});
 };
 
+export const groupMap = <T, R>(
+	array: T[],
+	group: (item: T) => string,
+	map: (item: T) => R,
+): Record<string, R[]> => {
+	return Object.fromEntries(
+		Object.entries(groupBy(array, group)).map(([key, values]) => [
+			key,
+			values.map(map),
+		]),
+	);
+};
+
+export const mapValues = <V, O>(
+	obj: Record<string, V>,
+	fn: (v: V) => O,
+): Record<string, O> =>
+	Object.fromEntries(
+		Object.entries(obj).map(([key, value]) => [key, fn(value)]),
+	);
+
+export const partition = <T, U extends T>(
+	arr: T[],
+	fn: (t: T) => t is U,
+): [U[], Exclude<T, U>[]] =>
+	arr.reduce<[U[], Exclude<T, U>[]]>(
+		(acc, val) => {
+			if (fn(val)) acc[0].push(val);
+			else acc[1].push(val as Exclude<T, U>);
+			return acc;
+		},
+		[[], []],
+	);
+
 export const sortBy = <T>(array: T[], fn: (item: T) => string): T[] => {
 	return array.sort((posGT, negGT) => {
 		const posGTKey = fn(posGT);
@@ -51,3 +85,7 @@ export const arrayToObject = <T>(array: Array<Record<string, T>>) => {
 		return { ...acc, ...val };
 	}, {});
 };
+
+export function flatten<T>(nested: T[][]): T[] {
+	return nested.flatMap((a) => a);
+}

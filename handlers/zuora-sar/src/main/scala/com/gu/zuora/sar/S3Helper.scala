@@ -111,14 +111,16 @@ object S3Helper extends S3Service with LazyLogging {
             pendingKeys.traverse { pendingKey =>
               val completedKey = pendingKey.value.replace("pending", "completed")
               CopyS3Objects
-                .copyStringWithAcl(
+                .copyString(
                   S3Location(config.resultsBucket, pendingKey.value),
                   S3Location(config.resultsBucket, completedKey),
-                  ObjectCannedACL.BUCKET_OWNER_READ,
                 )
                 .toEither
                 .left
-                .map(err => S3Error(err.getMessage))
+                .map { err =>
+                  logger.info(s"Error copying S3 object: ${err}")
+                  S3Error(err.toString)
+                }
             }
             createCompletedObject("ResultsCompleted", initiationReference, config)
           }.map(_ => S3WriteSuccess())

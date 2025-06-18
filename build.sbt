@@ -1,7 +1,7 @@
 import Dependencies.*
 
 val scala2Settings = Seq(
-  ThisBuild / scalaVersion := "2.13.15",
+  ThisBuild / scalaVersion := "2.13.16",
   version := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
@@ -25,7 +25,7 @@ val scala2Settings = Seq(
 )
 
 val scala3Settings = Seq(
-  scalaVersion := "3.3.4",
+  scalaVersion := "3.7.0",
   version := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
@@ -400,7 +400,7 @@ lazy val `identity-backfill` = lambdaProject(
 lazy val `digital-subscription-expiry` = lambdaProject(
   "digital-subscription-expiry",
   "check digital subscription expiration for authorisation purposes",
-  Seq(contentAuthCommon),
+  Seq(jodaTime, commonsIO, typesafeConfig),
   Seq(zuora, handler, effectsDepIncludingTestFolder, testDep),
 )
 
@@ -682,9 +682,6 @@ lazy val `product-move-api` = lambdaProject(
       s"aws lambda update-function-code --function-name product-switch-salesforce-tracking-$stage --s3-bucket $s3Bucket --s3-key $s3Path --profile membership --region eu-west-1".!!
     }
   }
-
-lazy val `metric-push-api` =
-  lambdaProject("metric-push-api", "HTTP API to push a metric to cloudwatch so we can alarm on errors")
 
 lazy val `sf-move-subscriptions-api` = lambdaProject(
   "sf-move-subscriptions-api",

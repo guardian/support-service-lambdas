@@ -1,0 +1,17 @@
+export const mockEvent = {
+	billingAccountId: 'A-S001',
+	firstName: 'David',
+	firstPaymentDateAfterDiscountExpiry: '2025-03-22',
+	paymentCurrency: 'GBP',
+	paymentFrequency: 'Month',
+	productName: 'GW',
+	sfContactId: '0039E00001HiIGlQAN',
+	zuoraSubName: 'A-S00424163',
+	workEmail: 'david.pepper@guardian.co.uk',
+	contactCountry: 'united states of america',
+	sfBuyerContactMailingCountry: 'united states of america',
+	sfBuyerContactOtherCountry: 'united states of america',
+	sfRecipientContactMailingCountry: 'united states of america',
+	sfRecipientContactOtherCountry: 'united states of america',
+	subStatus: 'Active',
+};

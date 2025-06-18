@@ -22,6 +22,12 @@ export const getBillingPreview = async (
 	return zuoraClient.post(path, body, billingPreviewSchema);
 };
 
+export const itemsForSubscription =
+	(subscriptionNumber: string) => (billingPreview: BillingPreview) =>
+		billingPreview.invoiceItems.filter(
+			(item) => item.subscriptionNumber === subscriptionNumber,
+		);
+
 export type SimpleInvoiceItem = { date: Date; amount: number };
 
 export function getNextInvoiceTotal(invoiceItems: SimpleInvoiceItem[]) {
@@ -88,10 +94,10 @@ const convertItemsToTotal = ({
 	total: sumNumbers(items.map((item) => item.amount)),
 });
 
-export const billingPreviewToSimpleInvoiceItems = (
-	billingPreviewAfter: BillingPreview,
+export const toSimpleInvoiceItems = (
+	billingPreviewAfter: BillingPreview['invoiceItems'],
 ): SimpleInvoiceItem[] =>
-	billingPreviewAfter.invoiceItems.map((entry) => ({
+	billingPreviewAfter.map((entry) => ({
 		date: entry.serviceStartDate,
 		amount: entry.chargeAmount + entry.taxAmount,
 	}));

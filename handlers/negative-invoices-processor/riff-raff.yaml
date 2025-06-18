@@ -1,0 +1,27 @@
+stacks:
+  - support
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  negative-invoices-processor-cloudformation:
+    type: cloud-formation
+    app: negative-invoices-processor
+    parameters:
+      templateStagePaths:
+        CODE: negative-invoices-processor-CODE.template.json
+        PROD: negative-invoices-processor-PROD.template.json
+  negative-invoices-processor:
+    type: aws-lambda
+    parameters:
+      fileName: negative-invoices-processor.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - negative-invoices-processor-get-invoices-
+        - negative-invoices-processor-check-for-active-sub-
+        - negative-invoices-processor-check-for-active-payment-method-
+        - negative-invoices-processor-apply-credit-to-account-balance-
+    dependencies: [negative-invoices-processor-cloudformation]

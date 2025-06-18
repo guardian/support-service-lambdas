@@ -1,47 +1,64 @@
+import { uploadFileToS3 } from '@modules/aws/s3';
 import { getIfDefined } from '@modules/nullAndUndefined';
-import { uploadFileToS3 } from '../s3';
+import { z } from 'zod';
+import {
+	BigQueryRecordSchema,
+	DiscountProcessingAttemptSchema,
+} from '../types';
 
-type ExpiringDiscountToProcess = {
-	subName: string;
-	firstName: string;
-	paymentAmount: number;
-	paymentFrequency: string;
-	nextPaymentDate: string;
-};
+export const SaveResultsInputSchema = z
+	.object({
+		discountExpiresOnDate: z.string(),
+		allRecordsFromBigQueryCount: z.number(),
+		allRecordsFromBigQuery: z.array(BigQueryRecordSchema),
+		recordsForEmailSendCount: z.number(),
+		recordsForEmailSend: z.array(BigQueryRecordSchema),
+		discountProcessingAttempts: z.array(DiscountProcessingAttemptSchema),
+	})
+	.strict();
+export type SaveResultsInput = z.infer<typeof SaveResultsInputSchema>;
 
-type ExpiringDiscountProcessingAttempt = {
-	status: string;
-};
+export const handler = async (event: SaveResultsInput) => {
+	try {
+		const parsedEventResult = SaveResultsInputSchema.safeParse(event);
+		if (!parsedEventResult.success) {
+			throw new Error('Invalid event data');
+		}
+		const parsedEvent = parsedEventResult.data;
+		const bucketName = getIfDefined<string>(
+			process.env.S3_BUCKET,
+			'S3_BUCKET environment variable not set',
+		);
 
-type LambdaInput = {
-	expiringDiscountsToProcess: ExpiringDiscountToProcess[];
-	expiringDiscountProcessingAttempts: ExpiringDiscountProcessingAttempt[];
-};
+		const discountExpiresOnDate = getIfDefined<string>(
+			parsedEvent.discountExpiresOnDate,
+			'parsedEvent.discountExpiresOnDate variable not set',
+		);
 
-export const handler = async (event: LambdaInput) => {
-	const bucketName = getIfDefined<string>(
-		process.env.S3_BUCKET,
-		'S3_BUCKET environment variable not set',
-	);
+		const executionDateTime = new Date().toISOString();
 
-	const getCurrentDateString = (): string => {
-		const now = new Date();
-		const year = now.getFullYear();
-		const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-		const day = String(now.getDate()).padStart(2, '0');
-		return `${year}-${month}-${day}`;
-	};
+		const filePath = `${discountExpiresOnDate}/${executionDateTime}`;
 
-	const filePath = getCurrentDateString();
+		const s3UploadAttempt = await uploadFileToS3({
+			bucketName,
+			filePath,
+			content: JSON.stringify(parsedEvent, null, 2),
+		});
 
-	//TODO add a precheck to find out if the file exists already and either append or create a separate file
-	await uploadFileToS3({
-		bucketName,
-		filePath,
-		content: JSON.stringify(event),
-	});
-
-	return {
-		filePath,
-	};
+		if (s3UploadAttempt.$metadata.httpStatusCode !== 200) {
+			throw new Error('Failed to upload to S3');
+		}
+		return {
+			...parsedEvent,
+			s3UploadAttemptStatus: 'success',
+			filePath,
+		};
+	} catch (error) {
+		return {
+			...event,
+			s3UploadAttemptStatus: 'error',
+			errorDetail:
+				error instanceof Error ? error.message : JSON.stringify(error, null, 2),
+		};
+	}
 };

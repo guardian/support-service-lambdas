@@ -5,7 +5,7 @@ import sbtassembly.AssemblyPlugin.autoImport.{MergeStrategy, assemblyMergeStrate
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsSdkVersion = "2.27.24"
+  val awsSdkVersion = "2.31.3"
   val circeVersion = "0.14.10"
   val sttpVersion = "3.10.1"
   val http4sVersion = "0.22.15" // keep version 0.22.15, later versions pull in cats effect 3 which is not compatible
@@ -25,7 +25,7 @@ object Dependencies {
   val awsDynamo = "software.amazon.awssdk" % "dynamodb" % awsSdkVersion
 
   val awsLambda = "com.amazonaws" % "aws-lambda-java-core" % "1.2.3"
-  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.11.6"
+  val awsEvents = "com.amazonaws" % "aws-lambda-java-events" % "3.15.0"
 
   // scalaLambda depends on the old version of circe, until this PR is merged
   // https://github.com/mkotsur/aws-lambda-scala/pull/30
@@ -75,10 +75,9 @@ object Dependencies {
   val http4sCore = "org.http4s" %% "http4s-core" % http4sVersion
 
   // Guardian
-  val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "2.0.0"
+  val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "5.0.1"
   val supportInternationalisation =
-    "com.gu" %% "support-internationalisation" % "0.13"
-  val contentAuthCommon = "com.gu" %% "content-authorisation-common" % "0.6"
+    "com.gu" %% "support-internationalisation" % "0.16"
 
   // Other
   val zio = "dev.zio" %% "zio" % "1.0.17"
@@ -89,6 +88,9 @@ object Dependencies {
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.3.0"
   val stripe = "com.stripe" % "stripe-java" % "22.31.0"
   val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4"
+  val commonsIO = "commons-io" % "commons-io" % "2.18.0"
+  val jodaTime = "joda-time" % "joda-time" % "2.13.1"
+  val typesafeConfig = "com.typesafe" % "config" % "1.4.3"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest-should" % "0.9.0" % Test
@@ -128,8 +130,8 @@ object Dependencies {
      * So it's redundant in a binary artefact.
      */
     case PathList("codegen-resources", _*) => MergeStrategy.discard
-    case PathList("META-INF", "FastDoubleParser-LICENSE") => MergeStrategy.discard
-    case PathList("META-INF", "FastDoubleParser-NOTICE") => MergeStrategy.discard
+    case PathList("META-INF", "FastDoubleParser-LICENSE") => MergeStrategy.concat
+    case PathList("META-INF", "FastDoubleParser-NOTICE") => MergeStrategy.concat
     case PathList("META-INF", "okio.kotlin_module") => MergeStrategy.discard
     case x =>
       val oldStrategy = (assembly / assemblyMergeStrategy).value

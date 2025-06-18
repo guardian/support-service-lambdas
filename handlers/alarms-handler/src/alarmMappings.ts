@@ -1,5 +1,3 @@
-import { getIfDefined } from '@modules/nullAndUndefined';
-
 type Team = 'VALUE' | 'GROWTH' | 'PORTFOLIO' | 'PLATFORM' | 'SRE';
 
 const mobilePurchasesApps = [
@@ -43,6 +41,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 	VALUE: [
 		'apps-metering-events',
 		'cancellation-sf-cases-api',
+		'comms-sqs', // membership-workflow queues
 		'contact-us-api',
 		'delivery-records-api',
 		'delivery-problem-credit-processor',
@@ -60,14 +59,12 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'update-supporter-plus-amount',
 		'product-move-api',
 		'workflow',
+		'consent-autolapse',
 	],
 	SRE: ['alarms-handler', 'gchat-test-app'],
 	PORTFOLIO: [
 		// contributions-platform
 		'fixation',
-
-		// members-data-api
-		'membership-attribute-service',
 
 		// zuora-finance
 		'zuora-creditor',
@@ -111,6 +108,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'invoicing-api',
 		'zuora-callout-apis',
 		'zuora-oracle-fusion',
+		'write-off-unpaid-invoices',
 
 		// stripe
 		'stripe-patrons-data',
@@ -120,6 +118,13 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'identity-retention',
 		'zuora-retention', //https://github.com/guardian/zuora-retention
 		'zuora-salesforce-link-remover',
+
+		// members-data-api
+		'membership-attribute-service',
+
+		// misc
+		'discount-expiry-notifier',
+		'observer-data-export',
 	],
 };
 
@@ -139,33 +144,18 @@ const buildAppToTeamMappings = (
 	return mappings;
 };
 
-export type AlarmMappings = {
-	getTeams: (appName?: string) => Team[];
-	getTeamWebhookUrl: (team: Team) => string;
-};
+export type AppToTeams = (appName?: string) => Team[];
 
 export const buildAlarmMappings = (
 	mappings: Record<string, string[]>,
-): AlarmMappings => {
+): AppToTeams => {
 	const appToTeamMappings: Record<string, Team[]> =
 		buildAppToTeamMappings(mappings);
 
-	const getTeams = (appName?: string): Team[] => {
-		if (appName && appToTeamMappings[appName]) {
-			return appToTeamMappings[appName];
-		}
-
-		return ['SRE'];
-	};
-
-	const getTeamWebhookUrl = (team: Team): string => {
-		return getIfDefined<string>(
-			process.env[`${team}_WEBHOOK`],
-			`${team}_WEBHOOK environment variable not set`,
-		);
-	};
-
-	return { getTeams, getTeamWebhookUrl };
+	return (appName?: string) =>
+		appName && appToTeamMappings[appName]
+			? appToTeamMappings[appName]
+			: ['SRE'];
 };
 
-export const prodAlarmMappings = buildAlarmMappings(teamToAppMappings);
+export const prodAppToTeams = buildAlarmMappings(teamToAppMappings);

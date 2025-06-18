@@ -22,6 +22,7 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
+      - run: npm install --global corepack@0.31.0
       - run: corepack enable
         shell: bash
       - uses: actions/setup-node@v4
@@ -50,6 +51,10 @@ jobs:
           - salesforce-disaster-recovery
           - salesforce-disaster-recovery-health-check
           - zuora-salesforce-link-remover
+          - metric-push-api
+          - observer-data-export
+          - negative-invoices-processor
+          - write-off-unpaid-invoices
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -57,6 +62,7 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
+      - run: npm install --global corepack@0.31.0
       - run: corepack enable
         shell: bash
       - uses: actions/setup-node@v4

@@ -79,7 +79,7 @@ class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String) e
       errorDesc: String = "Decode error",
   ): Either[SoftOptInError, T] = {
     response.left
-      .map(error => SoftOptInError(s"SalesforceConnector: Salesforce query request failed: $error"))
+      .map(error => SoftOptInError(s"SalesforceConnector: Salesforce query request failed: $error", error))
       .flatMap { result =>
         decode[T](result.body).left.map(decodeError =>
           SoftOptInError(s"SalesforceConnector: $errorDesc:$decodeError. String to decode ${result.body}"),
@@ -92,7 +92,7 @@ class SalesforceConnector(sfAuthDetails: SalesforceAuth, sfApiVersion: String) e
       putMetric: (String, Double) => Unit,
   ): Either[SoftOptInError, Unit] = {
     response.left
-      .map(i => SoftOptInError(s"SalesforceConnector: Salesforce composite request failed: $i"))
+      .map(i => SoftOptInError(s"SalesforceConnector: Salesforce composite request failed: $i", i))
       .flatMap { result =>
         decode[List[SFResponse]](result.body) match {
           case Right(compositeResponse) =>
@@ -146,7 +146,7 @@ object SalesforceConnector {
 
   def handleAuthResp(response: Either[Throwable, HttpResponse[String]]): Either[SoftOptInError, SalesforceAuth] = {
     response.left
-      .map(i => SoftOptInError(s"SalesforceConnector: Salesforce authentication failed: $i"))
+      .map(i => SoftOptInError(s"SalesforceConnector: Salesforce authentication failed: $i", i))
       .flatMap { result =>
         decode[SalesforceAuth](result.body).left
           .map(i =>

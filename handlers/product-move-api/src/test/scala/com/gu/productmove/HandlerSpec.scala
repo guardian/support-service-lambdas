@@ -1,17 +1,15 @@
 package com.gu.productmove
 
+import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
+import com.gu.newproduct.api.productcatalog.{BillingPeriod, Monthly}
 import com.gu.productmove.*
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.GuStageLive.Stage.{CODE, PROD}
-import com.gu.productmove.endpoint.available.{
-  AvailableProductMovesEndpoint,
-  Billing,
-  Currency,
-  MoveToProduct,
-  Offer,
-  TimePeriod,
-  TimeUnit,
-  Trial,
+import com.gu.productmove.endpoint.available.*
+import com.gu.productmove.endpoint.cancel.{
+  SubscriptionCancelEndpoint,
+  SubscriptionCancelEndpointSteps,
+  SubscriptionCancelEndpointTypes,
 }
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{
@@ -20,70 +18,18 @@ import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{
   OutputBody,
   PreviewResult,
 }
-import com.gu.productmove.endpoint.available.AvailableProductMovesEndpointTypes
-import com.gu.productmove.endpoint.cancel.{
-  SubscriptionCancelEndpoint,
-  SubscriptionCancelEndpointSteps,
-  SubscriptionCancelEndpointTypes,
-}
+import com.gu.productmove.endpoint.move.switchtype.*
 import com.gu.productmove.invoicingapi.InvoicingApiRefund
 import com.gu.productmove.invoicingapi.InvoicingApiRefund.RefundResponse
 import com.gu.productmove.mocks.MockInvoicingApiRefund
 import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
-import com.gu.productmove.zuora.GetAccount.{
-  AccountSubscription,
-  BasicInfo,
-  BillToContact,
-  GetAccountResponse,
-  PaymentMethodResponse,
-  ZuoraSubscription,
-}
-import com.gu.productmove.zuora.{
-  AddRatePlan,
-  CancellationResponse,
-  ChargeOverrides,
-  CreatePaymentResponse,
-  CreateSubscriptionResponse,
-  DefaultPaymentMethod,
-  GetAccount,
-  GetCatalogue,
-  GetSubscription,
-  MockCatalogue,
-  MockCreatePayment,
-  MockDynamo,
-  MockGetAccount,
-  MockGetInvoice,
-  MockGetInvoiceItems,
-  MockGetSubscription,
-  MockGetSubscriptionToCancel,
-  MockInvoiceItemAdjustment,
-  MockSQS,
-  MockSubscribe,
-  MockSubscriptionUpdate,
-  MockTermRenewal,
-  MockZuoraCancel,
-  MockZuoraSetCancellationReason,
-  RemoveRatePlan,
-  RenewalResponse,
-  SubscriptionUpdatePreviewResponse,
-  SubscriptionUpdateRequest,
-  SubscriptionUpdateResponse,
-  UpdateResponse,
-}
+import com.gu.productmove.zuora.GetAccount.*
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
 import com.gu.productmove.zuora.InvoiceItemAdjustment.InvoiceItemAdjustmentResult
-import com.gu.productmove.zuora.model.{AccountNumber, SubscriptionId, SubscriptionName}
+import com.gu.productmove.zuora.model.{AccountNumber, InvoiceId, SubscriptionId, SubscriptionName}
+import com.gu.productmove.zuora.*
 import com.gu.supporterdata.model.SupporterRatePlanItem
-import com.gu.newproduct.api.productcatalog.ZuoraIds.ProductRatePlanId
-import com.gu.newproduct.api.productcatalog.{BillingPeriod, Monthly}
-import com.gu.productmove.endpoint.move.switchtype.{
-  GetRatePlans,
-  RecurringContributionToSupporterPlus,
-  RecurringContributionToSupporterPlusImpl,
-  ToRecurringContribution,
-  ToRecurringContributionImpl,
-}
 import zio.*
 import zio.test.*
 import zio.test.Assertion.*
@@ -94,9 +40,10 @@ import scala.language.postfixOps
 object HandlerSpec extends ZIOSpecDefault {
 
   def spec = {
-    val time = OffsetDateTime.of(LocalDateTime.of(2022, 5, 10, 10, 2), ZoneOffset.ofHours(0)).toInstant
-    val time2 = OffsetDateTime.of(LocalDateTime.of(2023, 2, 6, 10, 2), ZoneOffset.ofHours(0)).toInstant
-    val time3 = OffsetDateTime.of(LocalDateTime.of(2021, 2, 15, 5, 2), ZoneOffset.ofHours(0)).toInstant
+    val zoneOffset = ZoneOffset.ofHours(0)
+    val time = OffsetDateTime.of(LocalDateTime.of(2022, 5, 10, 10, 2), zoneOffset).toInstant
+    val time2 = OffsetDateTime.of(LocalDateTime.of(2023, 2, 6, 10, 2), zoneOffset).toInstant
+    val time3 = OffsetDateTime.of(LocalDateTime.of(2021, 2, 15, 5, 2), zoneOffset).toInstant
     val subscriptionName = SubscriptionName("A-S00339056")
 
     def getSubscriptionStubs(subscriptionResponse: GetSubscriptionResponse = getSubscriptionResponse) = {
@@ -111,7 +58,7 @@ object HandlerSpec extends ZIOSpecDefault {
     val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
     val termRenewalInputsShouldBe: SubscriptionName =
       SubscriptionName("subscription_name")
-    val termRenewalResponse = RenewalResponse(Some(true), Some("invoiceId"))
+    val termRenewalResponse = RenewalResponse(Some(true), Some(InvoiceId("invoiceId")))
     val termRenewalStubs = Map(termRenewalInputsShouldBe -> termRenewalResponse)
     val getAccountStubs = Map(AccountNumber("accountNumber") -> getAccountResponse)
     val getAccountStubs2 = Map(AccountNumber("accountNumber") -> getAccountResponse2)
@@ -571,7 +518,7 @@ object HandlerSpec extends ZIOSpecDefault {
         val mockZuoraCancel = new MockZuoraCancel(
           Map(
             (subscriptionName, LocalDate.of(2022, 9, 29)) ->
-              CancellationResponse(subscriptionName.value, LocalDate.of(2022, 9, 29), None),
+              CancellationResponse(subscriptionName.value, LocalDate.of(2022, 9, 29)),
           ),
         )
         val mockSQS = new MockSQS(Map(emailMessage -> ()))
@@ -588,6 +535,7 @@ object HandlerSpec extends ZIOSpecDefault {
             zuoraSetCancellationReason = new MockZuoraSetCancellationReason(
               Map((SubscriptionName("A-S00339056"), 2, "mma_other") -> UpdateResponse(true)),
             ),
+            LocalDate.ofInstant(time, zoneOffset),
           ).subscriptionCancel(subscriptionName, input, someIdentityId.get)
         } yield {
           assert(output)(

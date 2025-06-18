@@ -20,9 +20,12 @@ deployments:
       bucketSsmLookup: true
       prefixStack: false
       functionNames:
-        - discount-expiry-notifier-get-subs-with-expiring-discounts-
-        - discount-expiry-notifier-sub-is-active-
-        - discount-expiry-notifier-build-email-payload-
-        - discount-expiry-notifier-initiate-email-send-
+        - discount-expiry-notifier-get-expiring-discounts-
+        - discount-expiry-notifier-filter-records-
+        - discount-expiry-notifier-get-sub-status-
+        - discount-expiry-notifier-get-old-payment-amount-
+        - discount-expiry-notifier-get-new-payment-amount-
+        - discount-expiry-notifier-send-email-
         - discount-expiry-notifier-save-results-
+        - discount-expiry-notifier-alarm-on-failures-
     dependencies: [discount-expiry-notifier-cloudformation]

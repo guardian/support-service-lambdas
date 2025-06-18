@@ -1,15 +1,7 @@
 package com.gu.soft_opt_in_consent_setter
 
-import com.gu.soft_opt_in_consent_setter.models.{
-  ConsentsMapping,
-  EnhancedSub,
-  SFAssociatedSubResponse,
-  SFSubRecord,
-  SFSubRecordUpdate,
-  SFSubRecordUpdateRequest,
-  SoftOptInConfig,
-  SoftOptInError,
-}
+import com.gu.soft_opt_in_consent_setter.models.ConsentsMapping.similarGuardianProducts
+import com.gu.soft_opt_in_consent_setter.models.{ConsentsMapping, EnhancedSub, SFAssociatedSubResponse, SFSubRecord, SFSubRecordUpdate, SFSubRecordUpdateRequest, SoftOptInConfig, SoftOptInError}
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.generic.auto._
 import io.circe.syntax._
@@ -26,7 +18,7 @@ object Handler extends LazyLogging {
 
   def handleRequest(): Unit = {
     (for {
-      config <- SoftOptInConfig()
+      config <- SoftOptInConfig(sys.env.get("Stage"), sys.env.get("sfApiVersion"))
     } yield for {
       sfConnector <- SalesforceConnector(config.sfConfig, config.sfApiVersion)
 
@@ -40,7 +32,7 @@ object Handler extends LazyLogging {
       consentsCalculator = new ConsentsCalculator(ConsentsMapping.consentsMapping)
 
       acqSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessAcquisitionStatus))
-      _ <- processAcquiredSubs(acqSubs, identityConnector.sendConsentsReq, sfConnector.updateSubs, consentsCalculator)
+      _ <- markAcquiredSubsProcessed(acqSubs, sfConnector.updateSubs)
 
       cancelledSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessCancellationStatus))
       cancelledSubsIdentityIds = cancelledSubs.map(sub => sub.Buyer__r.IdentityID__c)
@@ -76,32 +68,21 @@ object Handler extends LazyLogging {
       })
   }
 
-  def processAcquiredSubs(
+  def markAcquiredSubsProcessed(
       acquiredSubs: Seq[SFSubRecord],
-      sendConsentsReq: (String, String) => Either[SoftOptInError, Unit],
       updateSubs: String => Either[SoftOptInError, Unit],
-      consentsCalculator: ConsentsCalculator,
   ): Either[SoftOptInError, Unit] = {
     Metrics.put(event = "acquisitions_to_process", acquiredSubs.size)
 
     val recordsToUpdate = acquiredSubs
       .map(sub => {
-        val updateResult =
-          for {
-            consents <- consentsCalculator.getSoftOptInsByProduct(sub.Product__c)
-            consentsBody = consentsCalculator.buildConsentsBody(consents, state = true)
-            _ = logger.info(
-              s"Sending consents request - sub ${sub.Name}, Identity id ${sub.Buyer__r.IdentityID__c}, product ${sub.Product__c} with body $consentsBody",
-            )
-            _ <- sendConsentsReq(sub.Buyer__r.IdentityID__c, consentsBody)
-          } yield ()
-
-        logErrors(updateResult)
-
-        SFSubRecordUpdate(
+        // as cleanup, we could stop salesforce making these available in the first place
+        logger.info(
+          s"acquisition consents are set via event bus/queue, marking as processed: ${sub.Name} on ${sub.Buyer__r.IdentityID__c}",
+        )
+        SFSubRecordUpdate.successfulUpdate(
           sub,
           "Acquisition",
-          updateResult,
         )
       })
 
@@ -130,6 +111,7 @@ object Handler extends LazyLogging {
       toRemove = oldProductSoftOptIns.diff(currentProductSoftOptIns).map(ConsentsObject(_, false))
       toAdd = newProductSoftOptIns
         .filter(option => !oldProductSoftOptIns.contains(option) && !allOtherProductSoftOptIns.contains(option))
+        .filterNot(_ == similarGuardianProducts)
         .map(ConsentsObject(_, true))
 
       consentsBody = (toRemove ++ toAdd).asJson.toString()
@@ -194,7 +176,7 @@ object Handler extends LazyLogging {
       if (consents.nonEmpty) {
         sendConsentsReq(
           identityId,
-          consentsCalculator.buildConsentsBody(consents, state = false),
+          consentsCalculator.buildConsentsBody(consents.map(_ -> false).toMap),
         )
       } else {
         Right(())

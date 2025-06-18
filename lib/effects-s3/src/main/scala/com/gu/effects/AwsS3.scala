@@ -107,17 +107,15 @@ object CopyS3Objects extends LazyLogging {
     copyRequest
   }
 
-  def copyStringWithAcl(
+  def copyString(
       originS3Location: S3Location,
       destinationS3Location: S3Location,
-      cannedAcl: ObjectCannedACL,
   ): Try[CopyObjectResponse] = {
     copyObject(
       CopyObjectRequest.builder
         .copySource(s"${originS3Location.bucket}/${originS3Location.key}")
         .destinationBucket(destinationS3Location.bucket)
         .destinationKey(destinationS3Location.key)
-        .acl(cannedAcl)
         .build(),
     )
   }
