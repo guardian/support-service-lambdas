@@ -3,12 +3,7 @@ import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
 import { aws_cloudwatch, Duration } from 'aws-cdk-lib';
-import {
-	Alarm,
-	Metric,
-	Stats,
-	TreatMissingData,
-} from 'aws-cdk-lib/aws-cloudwatch';
+import { Metric, Stats, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
@@ -25,6 +20,7 @@ import {
 	StateMachine,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
+import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { nodeVersion } from './node-version';
 
 export class ZuoraSalesforceLinkRemover extends GuStack {
@@ -215,13 +211,14 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 		];
 
 		lambdaFunctions.forEach((lambdaFunction, index) => {
-			const alarm = new Alarm(this, `alarm-${index}`, {
+			const alarm = new SrLambdaAlarm(this, `alarm-${index}`, {
+				app: appName,
 				alarmName: `Zuora <-> Salesforce link remover - ${lambdaFunction.functionName} - something went wrong - ${this.stage}`,
 				alarmDescription:
 					'Something went wrong when executing the zuora <-> salesforce link remover. See Cloudwatch logs for more information on the error.',
 				datapointsToAlarm: 1,
 				evaluationPeriods: 1,
-				actionsEnabled: true,
+				lambdaFunctionNames: lambdaFunction.functionName,
 				comparisonOperator:
 					aws_cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
 				metric: new Metric({

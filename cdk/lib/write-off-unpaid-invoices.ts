@@ -5,7 +5,7 @@ import {
 	GuLambdaFunction,
 } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
-import { Alarm, ComparisonOperator } from 'aws-cdk-lib/aws-cloudwatch';
+import { ComparisonOperator } from 'aws-cdk-lib/aws-cloudwatch';
 import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
@@ -29,6 +29,7 @@ import {
 	TaskInput,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
+import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { nodeVersion } from './node-version';
 
 export class WriteOffUnpaidInvoices extends GuStack {
@@ -318,10 +319,11 @@ export class WriteOffUnpaidInvoices extends GuStack {
 
 		rule.addTarget(new SfnStateMachine(stateMachine));
 
-		const failureAlarm = new Alarm(
+		const failureAlarm = new SrLambdaAlarm(
 			this,
 			'WriteOffUnpaidInvoicesStepFunctionFailureAlarm',
 			{
+				app,
 				metric: stateMachine.metricFailed({
 					period: Duration.minutes(5),
 					statistic: 'Sum',
@@ -333,7 +335,7 @@ export class WriteOffUnpaidInvoices extends GuStack {
 				alarmName: `${this.stage}: WriteOffUnpaidInvoicesStepFunctionExecutionFailure`,
 				comparisonOperator:
 					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-				actionsEnabled: this.stage == 'PROD',
+				lambdaFunctionNames: writeOffInvoicesLambda.functionName,
 			},
 		);
 

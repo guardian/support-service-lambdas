@@ -3,12 +3,7 @@ import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
 import { aws_cloudwatch, Duration } from 'aws-cdk-lib';
-import {
-	Alarm,
-	Metric,
-	Stats,
-	TreatMissingData,
-} from 'aws-cdk-lib/aws-cloudwatch';
+import { Metric, Stats, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
@@ -29,6 +24,7 @@ import {
 	StateMachine,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
+import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { nodeVersion } from './node-version';
 
 export class DiscountExpiryNotifier extends GuStack {
@@ -387,13 +383,13 @@ export class DiscountExpiryNotifier extends GuStack {
 		];
 
 		lambdaFunctionsToAlarmOn.forEach((lambdaFunction, index) => {
-			const alarm = new Alarm(this, `alarm-${index}`, {
+			const alarm = new SrLambdaAlarm(this, `alarm-${index}`, {
 				alarmName: `Discount Expiry Notifier - ${lambdaFunction.functionName} - something went wrong - ${this.stage}`,
 				alarmDescription:
 					'Something went wrong when executing the Discount Expiry Notifier. See Cloudwatch logs for more information on the error.',
 				datapointsToAlarm: 1,
 				evaluationPeriods: 1,
-				actionsEnabled: true,
+				lambdaFunctionNames: lambdaFunction.functionName,
 				comparisonOperator:
 					aws_cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
 				metric: new Metric({
@@ -407,6 +403,7 @@ export class DiscountExpiryNotifier extends GuStack {
 				}),
 				threshold: 0,
 				treatMissingData: TreatMissingData.MISSING,
+				app: appName,
 			});
 			alarm.addAlarmAction(new SnsAction(topic));
 		});

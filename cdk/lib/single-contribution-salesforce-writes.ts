@@ -1,4 +1,3 @@
-import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
@@ -10,6 +9,7 @@ import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { LoggingFormat, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
+import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 
 export const APP_NAME = 'single-contribution-salesforce-writes';
 
@@ -91,9 +91,8 @@ export class SingleContributionSalesforceWrites extends GuStack {
 
 		lambda.addToRolePolicy(getSecretValuePolicyStatement);
 
-		new GuAlarm(this, `${APP_NAME}-alarm`, {
+		new SrLambdaAlarm(this, `${APP_NAME}-alarm`, {
 			app: APP_NAME,
-			snsTopicName: `alarms-handler-topic-${this.stage}`,
 			alarmName: `${this.stage}: Failed to sync single contribution to Salesforce`,
 			alarmDescription: `Impact: A Single Contribution record has not been added to Salesforce. Fix: check logs for lambda ${lambda.functionName} and redrive from dead letter queue or, if Salesforce is preventing record creation due to a data quality issue, fix and add record manually to Salesforce`,
 			metric: deadLetterQueue
@@ -102,7 +101,7 @@ export class SingleContributionSalesforceWrites extends GuStack {
 			comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
 			threshold: 0,
 			evaluationPeriods: 24,
-			actionsEnabled: this.stage === 'PROD',
+			lambdaFunctionNames: lambda.functionName,
 		});
 	}
 }
