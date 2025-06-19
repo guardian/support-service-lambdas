@@ -7,6 +7,7 @@ import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { Bucket, EventType } from 'aws-cdk-lib/aws-s3';
 import { LambdaDestination } from 'aws-cdk-lib/aws-s3-notifications';
 import { nodeVersion } from './node-version';
@@ -34,6 +35,7 @@ export class GenerateProductCatalog extends GuStack {
 			description:
 				'A lambda to generate the Guardian product catalog from the Zuora catalog',
 			functionName: nameWithStage,
+			loggingFormat: LoggingFormat.TEXT,
 			fileName: `${app}.zip`,
 			handler: 'index.handler',
 			runtime: nodeVersion,

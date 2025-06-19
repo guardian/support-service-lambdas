@@ -19,7 +19,7 @@ import {
 	Role,
 	ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
-import { Architecture } from 'aws-cdk-lib/aws-lambda';
+import { Architecture, LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import {
@@ -78,6 +78,7 @@ export class DiscountExpiryNotifier extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-get-expiring-discounts-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
@@ -98,6 +99,7 @@ export class DiscountExpiryNotifier extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-filter-records-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
@@ -116,6 +118,7 @@ export class DiscountExpiryNotifier extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-get-sub-status-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
@@ -140,6 +143,7 @@ export class DiscountExpiryNotifier extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-get-old-payment-amount-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
@@ -163,6 +167,7 @@ export class DiscountExpiryNotifier extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-get-new-payment-amount-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
@@ -184,6 +189,7 @@ export class DiscountExpiryNotifier extends GuStack {
 		const sendEmailLambda = new GuLambdaFunction(this, 'send-email-lambda', {
 			app: appName,
 			functionName: `${appName}-send-email-${this.stage}`,
+			loggingFormat: LoggingFormat.TEXT,
 			runtime: nodeVersion,
 			environment: {
 				Stage: this.stage,
@@ -200,6 +206,7 @@ export class DiscountExpiryNotifier extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-save-results-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
@@ -224,6 +231,7 @@ export class DiscountExpiryNotifier extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-alarm-on-failures-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,

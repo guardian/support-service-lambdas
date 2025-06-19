@@ -15,7 +15,7 @@ import {
 } from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { LoggingFormat, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 
 export interface BatchEmailSenderProps extends GuStackProps {
@@ -41,6 +41,7 @@ export class BatchEmailSender extends GuStack {
 				app,
 				handler: 'com.gu.batchemailsender.api.batchemail.Handler::apply',
 				functionName: `batch-email-sender-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: Runtime.JAVA_21,
 				fileName: 'batch-email-sender.jar',
 				memorySize: 1536,

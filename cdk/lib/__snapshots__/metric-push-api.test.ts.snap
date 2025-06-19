@@ -82,6 +82,24 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
         "Namespace": "AWS/ApiGateway",
         "Period": 60,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
         "Threshold": 2,
         "TreatMissingData": "notBreaching",
       },
@@ -148,6 +166,24 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
         "Namespace": "support-service-lambdas",
         "Period": 60,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
         "Threshold": 2,
         "TreatMissingData": "notBreaching",
       },
@@ -255,6 +291,9 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
         },
         "FunctionName": "metric-push-api-CODE",
         "Handler": "index.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
@@ -933,6 +972,24 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
         "Namespace": "AWS/ApiGateway",
         "Period": 60,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
         "Threshold": 2,
         "TreatMissingData": "notBreaching",
       },
@@ -999,6 +1056,24 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
         "Namespace": "support-service-lambdas",
         "Period": 60,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
         "Threshold": 2,
         "TreatMissingData": "notBreaching",
       },
@@ -1106,6 +1181,9 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
         },
         "FunctionName": "metric-push-api-PROD",
         "Handler": "index.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [

@@ -15,7 +15,7 @@ import {
 } from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { LoggingFormat, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 
 export interface NewProductApiProps extends GuStackProps {
@@ -59,6 +59,7 @@ export class NewProductApi extends GuStack {
 			{
 				handler: 'com.gu.newproduct.api.addsubscription.Handler::apply',
 				functionName: `add-subscription-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				...sharedLambdaProps,
 			},
 		);
@@ -66,6 +67,7 @@ export class NewProductApi extends GuStack {
 		const productCatalogLambda = new GuLambdaFunction(this, 'product-catalog', {
 			handler: 'com.gu.newproduct.api.productcatalog.Handler::apply',
 			functionName: `product-catalog-${this.stage}`,
+			loggingFormat: LoggingFormat.TEXT,
 			...sharedLambdaProps,
 		});
 
