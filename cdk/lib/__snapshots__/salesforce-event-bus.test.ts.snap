@@ -255,6 +255,12 @@ exports[`The SalesforceEventBus stack matches the snapshot 1`] = `
               },
             },
             "Id": "Target0",
+            "InputTransformer": {
+              "InputPathsMap": {
+                "detail-payload-Contact_ID__c": "$.detail.payload.Contact_ID__c",
+              },
+              "InputTemplate": "{"contactId":<detail-payload-Contact_ID__c>}",
+            },
             "RetryPolicy": {
               "MaximumEventAgeInSeconds": 7200,
               "MaximumRetryAttempts": 2,
@@ -589,6 +595,12 @@ exports[`The SalesforceEventBus stack matches the snapshot 2`] = `
               },
             },
             "Id": "Target0",
+            "InputTransformer": {
+              "InputPathsMap": {
+                "detail-payload-Contact_ID__c": "$.detail.payload.Contact_ID__c",
+              },
+              "InputTemplate": "{"contactId":<detail-payload-Contact_ID__c>}",
+            },
             "RetryPolicy": {
               "MaximumEventAgeInSeconds": 7200,
               "MaximumRetryAttempts": 2,

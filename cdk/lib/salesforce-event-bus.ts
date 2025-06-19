@@ -2,7 +2,7 @@ import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
-import { EventBus, Match, Rule } from 'aws-cdk-lib/aws-events';
+import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
 import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
@@ -24,7 +24,7 @@ export class SalesforceEventBus extends GuStack {
 			functionName: `${app}-placeholder-${this.stage}`,
 		});
 
-		const salesforceBus = EventBus.fromEventBusArn(
+		const salesforceBus = events.EventBus.fromEventBusArn(
 			this,
 			'SalesforceBus',
 			this.stage === 'PROD'
@@ -43,21 +43,32 @@ export class SalesforceEventBus extends GuStack {
 			`arn:aws:sqs:eu-west-1:865473395570:salesforce-outbound-messages-${props.stage}`,
 		);
 
-		const contactUpdateToSqsRule = new Rule(this, 'SfBusToContactUpdateQueue', {
-			description:
-				'Send an SF Contact Update event from the SF bus to the salesforce-outbound-messages-[STAGE] SQS queue for consumption by membership-workflow',
-			eventPattern: {
-				source: Match.prefix('aws.partner/salesforce.com'),
-				detailType: ['Contact_Update__e'],
+		const contactUpdateToSqsRule = new events.Rule(
+			this,
+			'SfBusToContactUpdateQueue',
+			{
+				description:
+					'Send an SF Contact Update event from the SF bus to the salesforce-outbound-messages-[STAGE] SQS queue for consumption by membership-workflow',
+				eventPattern: {
+					source: events.Match.prefix('aws.partner/salesforce.com'),
+					detailType: ['Contact_Update__e'],
+				},
+				eventBus: salesforceBus,
 			},
-			eventBus: salesforceBus,
-		});
+		);
 
 		contactUpdateToSqsRule.addTarget(
 			new targets.SqsQueue(sfOutboundMessageQueue, {
 				deadLetterQueue: deadLetterQueue,
 				maxEventAge: Duration.hours(2),
 				retryAttempts: 2,
+				message: events.RuleTargetInput.fromObject({
+					//   "InputPathsMap": { "contactId": "$.detail.payload.Contact_ID__c" }
+					//   "InputTemplate": "{\"contactId\": <contactId>}"
+					contactId: events.EventField.fromPath(
+						'$.detail.payload.Contact_ID__c',
+					),
+				}),
 			}),
 		);
 
