@@ -9,6 +9,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
       "GuLambdaFunction",
       "GuLambdaFunction",
       "GuLambdaFunction",
+      "GuLambdaFunction",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -255,241 +256,6 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "checkforactivepaymentmethodlambdaA80DA53A": {
-      "DependsOn": [
-        "checkforactivepaymentmethodlambdaServiceRoleDefaultPolicyBCD9A5EF",
-        "checkforactivepaymentmethodlambdaServiceRole57C29B81",
-      ],
-      "Properties": {
-        "Architectures": [
-          "arm64",
-        ],
-        "Code": {
-          "S3Bucket": {
-            "Ref": "DistributionBucketName",
-          },
-          "S3Key": "support/CODE/negative-invoices-processor/negative-invoices-processor.zip",
-        },
-        "Environment": {
-          "Variables": {
-            "APP": "negative-invoices-processor",
-            "STACK": "support",
-            "STAGE": "CODE",
-            "Stage": "CODE",
-          },
-        },
-        "FunctionName": "negative-invoices-processor-check-for-active-payment-method-CODE",
-        "Handler": "checkForActivePaymentMethod.handler",
-        "LoggingConfig": {
-          "LogFormat": "Text",
-        },
-        "MemorySize": 512,
-        "Role": {
-          "Fn::GetAtt": [
-            "checkforactivepaymentmethodlambdaServiceRole57C29B81",
-            "Arn",
-          ],
-        },
-        "Runtime": "nodejs20.x",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "negative-invoices-processor",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "Timeout": 30,
-      },
-      "Type": "AWS::Lambda::Function",
-    },
-    "checkforactivepaymentmethodlambdaServiceRole57C29B81": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "negative-invoices-processor",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "checkforactivepaymentmethodlambdaServiceRoleDefaultPolicyBCD9A5EF": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "secretsmanager:GetSecretValue",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:secretsmanager:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":secret:CODE/Zuora-OAuth/SupportServiceLambdas-*",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "s3:GetObject*",
-                "s3:GetBucket*",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                      "/support/CODE/negative-invoices-processor/negative-invoices-processor.zip",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": "ssm:GetParametersByPath",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/CODE/support/negative-invoices-processor",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "ssm:GetParameters",
-                "ssm:GetParameter",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/CODE/support/negative-invoices-processor/*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "checkforactivepaymentmethodlambdaServiceRoleDefaultPolicyBCD9A5EF",
-        "Roles": [
-          {
-            "Ref": "checkforactivepaymentmethodlambdaServiceRole57C29B81",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
     "checkforactivesublambdaB4F70D0E": {
       "DependsOn": [
         "checkforactivesublambdaServiceRoleDefaultPolicy8B3E106B",
@@ -725,6 +491,241 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "docreditbalancerefundlambda2AAB1C48": {
+      "DependsOn": [
+        "docreditbalancerefundlambdaServiceRoleDefaultPolicy1367E5E9",
+        "docreditbalancerefundlambdaServiceRoleE63DB3B7",
+      ],
+      "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/CODE/negative-invoices-processor/negative-invoices-processor.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "APP": "negative-invoices-processor",
+            "STACK": "support",
+            "STAGE": "CODE",
+            "Stage": "CODE",
+          },
+        },
+        "FunctionName": "negative-invoices-processor-do-credit-balance-refund-CODE",
+        "Handler": "doCreditBalanceRefund.handler",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
+        "MemorySize": 512,
+        "Role": {
+          "Fn::GetAtt": [
+            "docreditbalancerefundlambdaServiceRoleE63DB3B7",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "negative-invoices-processor",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 30,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "docreditbalancerefundlambdaServiceRoleDefaultPolicy1367E5E9": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:CODE/Zuora-OAuth/SupportServiceLambdas-*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/CODE/negative-invoices-processor/negative-invoices-processor.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/negative-invoices-processor",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/negative-invoices-processor/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "docreditbalancerefundlambdaServiceRoleDefaultPolicy1367E5E9",
+        "Roles": [
+          {
+            "Ref": "docreditbalancerefundlambdaServiceRoleE63DB3B7",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "docreditbalancerefundlambdaServiceRoleE63DB3B7": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "negative-invoices-processor",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
     "getinvoiceslambdaBD92FECC": {
       "DependsOn": [
         "querylambdaroleDefaultPolicy929B9FB7",
@@ -787,6 +788,241 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
+    "getpaymentmethodslambda870A5F3C": {
+      "DependsOn": [
+        "getpaymentmethodslambdaServiceRoleDefaultPolicy61DF09D4",
+        "getpaymentmethodslambdaServiceRoleCC0EA259",
+      ],
+      "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/CODE/negative-invoices-processor/negative-invoices-processor.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "APP": "negative-invoices-processor",
+            "STACK": "support",
+            "STAGE": "CODE",
+            "Stage": "CODE",
+          },
+        },
+        "FunctionName": "negative-invoices-processor-get-payment-methods-CODE",
+        "Handler": "getPaymentMethods.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 512,
+        "Role": {
+          "Fn::GetAtt": [
+            "getpaymentmethodslambdaServiceRoleCC0EA259",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "negative-invoices-processor",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 30,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "getpaymentmethodslambdaServiceRoleCC0EA259": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "negative-invoices-processor",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "getpaymentmethodslambdaServiceRoleDefaultPolicy61DF09D4": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:CODE/Zuora-OAuth/SupportServiceLambdas-*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/CODE/negative-invoices-processor/negative-invoices-processor.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/negative-invoices-processor",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/negative-invoices-processor/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "getpaymentmethodslambdaServiceRoleDefaultPolicy61DF09D4",
+        "Roles": [
+          {
+            "Ref": "getpaymentmethodslambdaServiceRoleCC0EA259",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "negativeinvoicesprocessorstatemachineCODE3A72431E": {
       "DeletionPolicy": "Delete",
       "DependsOn": [
@@ -809,7 +1045,18 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Invoice processor map":{"Type":"Map","ResultPath":"$.processedInvoices","End":true,"ItemsPath":"$.invoices","MaxConcurrency":1,"Iterator":{"StartAt":"Check for Active Sub","States":{"Check for Active Sub":{"Next":"Has active sub?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Invoice processor map":{"Type":"Map","ResultPath":"$.processedInvoices","End":true,"ItemsPath":"$.invoices","MaxConcurrency":1,"Iterator":{"StartAt":"Apply credit to account balance","States":{"Apply credit to account balance":{"Next":"Check for Active Sub","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
+              {
+                "Fn::GetAtt": [
+                  "applycredittoaccountbalancelambda254CBA80",
+                  "Arn",
+                ],
+              },
+              "","Payload.$":"$"}},"Check for Active Sub":{"Next":"Has active sub?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -820,25 +1067,25 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Has active sub?":{"Type":"Choice","Choices":[{"Variable":"$.hasActiveSub","BooleanEquals":true,"Next":"Apply credit to account balance"}],"Default":"Check for Active Payment Method"},"Check for Active Payment Method":{"Next":"Has active payment method?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Has active sub?":{"Type":"Choice","Choices":[{"Variable":"$.hasActiveSub","BooleanEquals":false,"Next":"Get Payment Methods"}],"Default":"End"},"End":{"Type":"Pass","End":true},"Get Payment Methods":{"Next":"Has active payment method?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
               ":states:::lambda:invoke","Parameters":{"FunctionName":"",
               {
                 "Fn::GetAtt": [
-                  "checkforactivepaymentmethodlambdaA80DA53A",
+                  "getpaymentmethodslambda870A5F3C",
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Has active payment method?":{"Type":"Choice","Choices":[{"Variable":"$.hasActivePaymentMethod","BooleanEquals":true,"Next":"Apply credit to account balance"}],"Default":"check for valid email lambda will go here"},"check for valid email lambda will go here":{"Type":"Pass","End":true},"Apply credit to account balance":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Has active payment method?":{"Type":"Choice","Choices":[{"Variable":"$.hasActivePaymentMethod","BooleanEquals":true,"Next":"Do credit balance refund"}],"Default":"check for valid email lambda will go here"},"check for valid email lambda will go here":{"Type":"Pass","End":true},"Do credit balance refund":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
               ":states:::lambda:invoke","Parameters":{"FunctionName":"",
               {
                 "Fn::GetAtt": [
-                  "applycredittoaccountbalancelambda254CBA80",
+                  "docreditbalancerefundlambda2AAB1C48",
                   "Arn",
                 ],
               },
@@ -911,6 +1158,32 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
+                    "applycredittoaccountbalancelambda254CBA80",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "applycredittoaccountbalancelambda254CBA80",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
                     "checkforactivesublambdaB4F70D0E",
                     "Arn",
                   ],
@@ -937,7 +1210,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "checkforactivepaymentmethodlambdaA80DA53A",
+                    "getpaymentmethodslambda870A5F3C",
                     "Arn",
                   ],
                 },
@@ -947,7 +1220,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "checkforactivepaymentmethodlambdaA80DA53A",
+                          "getpaymentmethodslambda870A5F3C",
                           "Arn",
                         ],
                       },
@@ -963,7 +1236,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "applycredittoaccountbalancelambda254CBA80",
+                    "docreditbalancerefundlambda2AAB1C48",
                     "Arn",
                   ],
                 },
@@ -973,7 +1246,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "applycredittoaccountbalancelambda254CBA80",
+                          "docreditbalancerefundlambda2AAB1C48",
                           "Arn",
                         ],
                       },
@@ -1209,6 +1482,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
+      "GuLambdaFunction",
       "GuLambdaFunction",
       "GuLambdaFunction",
       "GuLambdaFunction",
@@ -1459,241 +1733,6 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "checkforactivepaymentmethodlambdaA80DA53A": {
-      "DependsOn": [
-        "checkforactivepaymentmethodlambdaServiceRoleDefaultPolicyBCD9A5EF",
-        "checkforactivepaymentmethodlambdaServiceRole57C29B81",
-      ],
-      "Properties": {
-        "Architectures": [
-          "arm64",
-        ],
-        "Code": {
-          "S3Bucket": {
-            "Ref": "DistributionBucketName",
-          },
-          "S3Key": "support/PROD/negative-invoices-processor/negative-invoices-processor.zip",
-        },
-        "Environment": {
-          "Variables": {
-            "APP": "negative-invoices-processor",
-            "STACK": "support",
-            "STAGE": "PROD",
-            "Stage": "PROD",
-          },
-        },
-        "FunctionName": "negative-invoices-processor-check-for-active-payment-method-PROD",
-        "Handler": "checkForActivePaymentMethod.handler",
-        "LoggingConfig": {
-          "LogFormat": "Text",
-        },
-        "MemorySize": 512,
-        "Role": {
-          "Fn::GetAtt": [
-            "checkforactivepaymentmethodlambdaServiceRole57C29B81",
-            "Arn",
-          ],
-        },
-        "Runtime": "nodejs20.x",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "negative-invoices-processor",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "Timeout": 30,
-      },
-      "Type": "AWS::Lambda::Function",
-    },
-    "checkforactivepaymentmethodlambdaServiceRole57C29B81": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "negative-invoices-processor",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "checkforactivepaymentmethodlambdaServiceRoleDefaultPolicyBCD9A5EF": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "secretsmanager:GetSecretValue",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:secretsmanager:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":secret:PROD/Zuora-OAuth/SupportServiceLambdas-*",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "s3:GetObject*",
-                "s3:GetBucket*",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                      "/support/PROD/negative-invoices-processor/negative-invoices-processor.zip",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": "ssm:GetParametersByPath",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/PROD/support/negative-invoices-processor",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "ssm:GetParameters",
-                "ssm:GetParameter",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/PROD/support/negative-invoices-processor/*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "checkforactivepaymentmethodlambdaServiceRoleDefaultPolicyBCD9A5EF",
-        "Roles": [
-          {
-            "Ref": "checkforactivepaymentmethodlambdaServiceRole57C29B81",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
     "checkforactivesublambdaB4F70D0E": {
       "DependsOn": [
         "checkforactivesublambdaServiceRoleDefaultPolicy8B3E106B",
@@ -1929,6 +1968,241 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "docreditbalancerefundlambda2AAB1C48": {
+      "DependsOn": [
+        "docreditbalancerefundlambdaServiceRoleDefaultPolicy1367E5E9",
+        "docreditbalancerefundlambdaServiceRoleE63DB3B7",
+      ],
+      "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/PROD/negative-invoices-processor/negative-invoices-processor.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "APP": "negative-invoices-processor",
+            "STACK": "support",
+            "STAGE": "PROD",
+            "Stage": "PROD",
+          },
+        },
+        "FunctionName": "negative-invoices-processor-do-credit-balance-refund-PROD",
+        "Handler": "doCreditBalanceRefund.handler",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
+        "MemorySize": 512,
+        "Role": {
+          "Fn::GetAtt": [
+            "docreditbalancerefundlambdaServiceRoleE63DB3B7",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "negative-invoices-processor",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 30,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "docreditbalancerefundlambdaServiceRoleDefaultPolicy1367E5E9": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:PROD/Zuora-OAuth/SupportServiceLambdas-*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/PROD/negative-invoices-processor/negative-invoices-processor.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/negative-invoices-processor",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/negative-invoices-processor/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "docreditbalancerefundlambdaServiceRoleDefaultPolicy1367E5E9",
+        "Roles": [
+          {
+            "Ref": "docreditbalancerefundlambdaServiceRoleE63DB3B7",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "docreditbalancerefundlambdaServiceRoleE63DB3B7": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "negative-invoices-processor",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
     "getinvoiceslambdaBD92FECC": {
       "DependsOn": [
         "querylambdaroleDefaultPolicy929B9FB7",
@@ -1991,6 +2265,241 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
+    "getpaymentmethodslambda870A5F3C": {
+      "DependsOn": [
+        "getpaymentmethodslambdaServiceRoleDefaultPolicy61DF09D4",
+        "getpaymentmethodslambdaServiceRoleCC0EA259",
+      ],
+      "Properties": {
+        "Architectures": [
+          "arm64",
+        ],
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/PROD/negative-invoices-processor/negative-invoices-processor.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "APP": "negative-invoices-processor",
+            "STACK": "support",
+            "STAGE": "PROD",
+            "Stage": "PROD",
+          },
+        },
+        "FunctionName": "negative-invoices-processor-get-payment-methods-PROD",
+        "Handler": "getPaymentMethods.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 512,
+        "Role": {
+          "Fn::GetAtt": [
+            "getpaymentmethodslambdaServiceRoleCC0EA259",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "negative-invoices-processor",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 30,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "getpaymentmethodslambdaServiceRoleCC0EA259": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "negative-invoices-processor",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "getpaymentmethodslambdaServiceRoleDefaultPolicy61DF09D4": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:PROD/Zuora-OAuth/SupportServiceLambdas-*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/PROD/negative-invoices-processor/negative-invoices-processor.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/negative-invoices-processor",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/negative-invoices-processor/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "getpaymentmethodslambdaServiceRoleDefaultPolicy61DF09D4",
+        "Roles": [
+          {
+            "Ref": "getpaymentmethodslambdaServiceRoleCC0EA259",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "negativeinvoicesprocessorstatemachinePROD17CC3EA7": {
       "DeletionPolicy": "Delete",
       "DependsOn": [
@@ -2013,7 +2522,18 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Invoice processor map":{"Type":"Map","ResultPath":"$.processedInvoices","End":true,"ItemsPath":"$.invoices","MaxConcurrency":1,"Iterator":{"StartAt":"Check for Active Sub","States":{"Check for Active Sub":{"Next":"Has active sub?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Invoice processor map":{"Type":"Map","ResultPath":"$.processedInvoices","End":true,"ItemsPath":"$.invoices","MaxConcurrency":1,"Iterator":{"StartAt":"Apply credit to account balance","States":{"Apply credit to account balance":{"Next":"Check for Active Sub","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
+              {
+                "Fn::GetAtt": [
+                  "applycredittoaccountbalancelambda254CBA80",
+                  "Arn",
+                ],
+              },
+              "","Payload.$":"$"}},"Check for Active Sub":{"Next":"Has active sub?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -2024,25 +2544,25 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Has active sub?":{"Type":"Choice","Choices":[{"Variable":"$.hasActiveSub","BooleanEquals":true,"Next":"Apply credit to account balance"}],"Default":"Check for Active Payment Method"},"Check for Active Payment Method":{"Next":"Has active payment method?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Has active sub?":{"Type":"Choice","Choices":[{"Variable":"$.hasActiveSub","BooleanEquals":false,"Next":"Get Payment Methods"}],"Default":"End"},"End":{"Type":"Pass","End":true},"Get Payment Methods":{"Next":"Has active payment method?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
               ":states:::lambda:invoke","Parameters":{"FunctionName":"",
               {
                 "Fn::GetAtt": [
-                  "checkforactivepaymentmethodlambdaA80DA53A",
+                  "getpaymentmethodslambda870A5F3C",
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Has active payment method?":{"Type":"Choice","Choices":[{"Variable":"$.hasActivePaymentMethod","BooleanEquals":true,"Next":"Apply credit to account balance"}],"Default":"check for valid email lambda will go here"},"check for valid email lambda will go here":{"Type":"Pass","End":true},"Apply credit to account balance":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Has active payment method?":{"Type":"Choice","Choices":[{"Variable":"$.hasActivePaymentMethod","BooleanEquals":true,"Next":"Do credit balance refund"}],"Default":"check for valid email lambda will go here"},"check for valid email lambda will go here":{"Type":"Pass","End":true},"Do credit balance refund":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
               ":states:::lambda:invoke","Parameters":{"FunctionName":"",
               {
                 "Fn::GetAtt": [
-                  "applycredittoaccountbalancelambda254CBA80",
+                  "docreditbalancerefundlambda2AAB1C48",
                   "Arn",
                 ],
               },
@@ -2150,6 +2670,32 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
+                    "applycredittoaccountbalancelambda254CBA80",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "applycredittoaccountbalancelambda254CBA80",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
                     "checkforactivesublambdaB4F70D0E",
                     "Arn",
                   ],
@@ -2176,7 +2722,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "checkforactivepaymentmethodlambdaA80DA53A",
+                    "getpaymentmethodslambda870A5F3C",
                     "Arn",
                   ],
                 },
@@ -2186,7 +2732,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "checkforactivepaymentmethodlambdaA80DA53A",
+                          "getpaymentmethodslambda870A5F3C",
                           "Arn",
                         ],
                       },
@@ -2202,7 +2748,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
               "Resource": [
                 {
                   "Fn::GetAtt": [
-                    "applycredittoaccountbalancelambda254CBA80",
+                    "docreditbalancerefundlambda2AAB1C48",
                     "Arn",
                   ],
                 },
@@ -2212,7 +2758,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
                     [
                       {
                         "Fn::GetAtt": [
-                          "applycredittoaccountbalancelambda254CBA80",
+                          "docreditbalancerefundlambda2AAB1C48",
                           "Arn",
                         ],
                       },
