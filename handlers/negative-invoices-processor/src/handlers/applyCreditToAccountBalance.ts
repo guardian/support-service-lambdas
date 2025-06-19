@@ -9,27 +9,28 @@ export type ApplyCreditToAccountBalanceInput = z.infer<
 >;
 
 export const handler = async (event: ApplyCreditToAccountBalanceInput) => {
-	try {
-		const parsedEvent = BigQueryRecordSchema.parse(event);
-		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
-		const body = JSON.stringify({
-			Amount: Math.abs(parsedEvent.invoiceBalance), //must be a positive value
-			SourceTransactionNumber: parsedEvent.invoiceNumber,
-			Type: 'Increase',
-		});
+	// try {
+	const parsedEvent = BigQueryRecordSchema.parse(event);
+	const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
+	const body = JSON.stringify({
+		Amount: Math.abs(parsedEvent.invoiceBalance), //must be a positive value
+		SourceTransactionNumber: parsedEvent.invoiceNumber,
+		Type: 'Increase',
+	});
 
-		const attempt = await applyCreditToAccountBalance(zuoraClient, body);
+	const attempt = await applyCreditToAccountBalance(zuoraClient, body);
 
-		return {
-			...parsedEvent,
-			applyCreditToAccountBalanceAttempt: attempt,
-		};
-	} catch (error) {
-		return {
-			...event,
-			applyCreditToAccountBalanceStatus: 'Error',
-			errorDetail:
-				error instanceof Error ? error.message : JSON.stringify(error, null, 2),
-		};
-	}
+	return {
+		...parsedEvent,
+		applyCreditToAccountBalanceAttempt: attempt,
+	};
+	// } catch (error) {
+	// 	console.error('Error applying credit to account balance:', error);
+	// 	return {
+	// 		...event,
+	// 		applyCreditToAccountBalanceStatus: 'Error',
+	// 		errorDetail:
+	// 			error instanceof Error ? error.message : JSON.stringify(error, null, 2),
+	// 	};
+	// }
 };
