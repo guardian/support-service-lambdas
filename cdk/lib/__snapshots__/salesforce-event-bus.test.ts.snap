@@ -10,6 +10,18 @@ exports[`The SalesforceEventBus stack matches the snapshot 1`] = `
     "gu:cdk:version": "TEST",
   },
   "Parameters": {
+    "AssetParameters17c16a3854838fd3ff4bda08146122a6701f33b9c86ae17f415ad0dc47a97544ArtifactHash1ACF4C00": {
+      "Description": "Artifact hash for asset "17c16a3854838fd3ff4bda08146122a6701f33b9c86ae17f415ad0dc47a97544"",
+      "Type": "String",
+    },
+    "AssetParameters17c16a3854838fd3ff4bda08146122a6701f33b9c86ae17f415ad0dc47a97544S3Bucket7FAD8E80": {
+      "Description": "S3 bucket for asset "17c16a3854838fd3ff4bda08146122a6701f33b9c86ae17f415ad0dc47a97544"",
+      "Type": "String",
+    },
+    "AssetParameters17c16a3854838fd3ff4bda08146122a6701f33b9c86ae17f415ad0dc47a97544S3VersionKey8FD4EFA1": {
+      "Description": "S3 key for asset version "17c16a3854838fd3ff4bda08146122a6701f33b9c86ae17f415ad0dc47a97544"",
+      "Type": "String",
+    },
     "DistributionBucketName": {
       "Default": "/account/services/artifact.bucket",
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
@@ -17,6 +29,245 @@ exports[`The SalesforceEventBus stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
+    "AWS679f53fac002430cb0da5b7982bd22872D164C4C": {
+      "DependsOn": [
+        "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "AssetParameters17c16a3854838fd3ff4bda08146122a6701f33b9c86ae17f415ad0dc47a97544S3Bucket7FAD8E80",
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters17c16a3854838fd3ff4bda08146122a6701f33b9c86ae17f415ad0dc47a97544S3VersionKey8FD4EFA1",
+                        },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  "Fn::Select": [
+                    1,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters17c16a3854838fd3ff4bda08146122a6701f33b9c86ae17f415ad0dc47a97544S3VersionKey8FD4EFA1",
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            ],
+          },
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs18.x",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 120,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "EventToCloudWatch1DE653E1": {
+      "Properties": {
+        "Description": "Send an event received by the SF bus to a Cloudwatch log group",
+        "EventBusName": "aws.partner/salesforce.com/00D9E0000004jvhUAA/0YLUD00000008Ll4AI",
+        "EventPattern": {
+          "source": [
+            {
+              "prefix": "aws.partner/salesforce.com",
+            },
+          ],
+        },
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:",
+                  {
+                    "Ref": "AWS::Partition",
+                  },
+                  ":logs:",
+                  {
+                    "Ref": "AWS::Region",
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId",
+                  },
+                  ":log-group:",
+                  {
+                    "Ref": "awseventssfeventbusCODE38C60A96",
+                  },
+                ],
+              ],
+            },
+            "Id": "Target0",
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "EventsLogGroupPolicysalesforceeventbusCODEEventToCloudWatch14597BE0CustomResourcePolicy591DE430": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "logs:PutResourcePolicy",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": "logs:DeleteResourcePolicy",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "EventsLogGroupPolicysalesforceeventbusCODEEventToCloudWatch14597BE0CustomResourcePolicy591DE430",
+        "Roles": [
+          {
+            "Ref": "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "EventsLogGroupPolicysalesforceeventbusCODEEventToCloudWatch14597BE0E44AC921": {
+      "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "EventsLogGroupPolicysalesforceeventbusCODEEventToCloudWatch14597BE0CustomResourcePolicy591DE430",
+      ],
+      "Properties": {
+        "Create": {
+          "Fn::Join": [
+            "",
+            [
+              "{"service":"CloudWatchLogs","action":"putResourcePolicy","parameters":{"policyName":"salesforceeventbusCODEEventsLogGroupPolicysalesforceeventbusCODEEventToCloudWatch14597BE0BF9CAAFD","policyDocument":"{\\"Statement\\":[{\\"Action\\":[\\"logs:PutLogEvents\\",\\"logs:CreateLogStream\\"],\\"Effect\\":\\"Allow\\",\\"Principal\\":{\\"Service\\":\\"events.amazonaws.com\\"},\\"Resource\\":\\"",
+              {
+                "Fn::GetAtt": [
+                  "awseventssfeventbusCODE38C60A96",
+                  "Arn",
+                ],
+              },
+              "\\"}],\\"Version\\":\\"2012-10-17\\"}"},"physicalResourceId":{"id":"EventsLogGroupPolicysalesforceeventbusCODEEventToCloudWatch14597BE0"}}",
+            ],
+          ],
+        },
+        "Delete": "{"service":"CloudWatchLogs","action":"deleteResourcePolicy","parameters":{"policyName":"salesforceeventbusCODEEventsLogGroupPolicysalesforceeventbusCODEEventToCloudWatch14597BE0BF9CAAFD"},"ignoreErrorCodesMatching":"ResourceNotFoundException"}",
+        "InstallLatestAwsSdk": true,
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "AWS679f53fac002430cb0da5b7982bd22872D164C4C",
+            "Arn",
+          ],
+        },
+        "Update": {
+          "Fn::Join": [
+            "",
+            [
+              "{"service":"CloudWatchLogs","action":"putResourcePolicy","parameters":{"policyName":"salesforceeventbusCODEEventsLogGroupPolicysalesforceeventbusCODEEventToCloudWatch14597BE0BF9CAAFD","policyDocument":"{\\"Statement\\":[{\\"Action\\":[\\"logs:PutLogEvents\\",\\"logs:CreateLogStream\\"],\\"Effect\\":\\"Allow\\",\\"Principal\\":{\\"Service\\":\\"events.amazonaws.com\\"},\\"Resource\\":\\"",
+              {
+                "Fn::GetAtt": [
+                  "awseventssfeventbusCODE38C60A96",
+                  "Arn",
+                ],
+              },
+              "\\"}],\\"Version\\":\\"2012-10-17\\"}"},"physicalResourceId":{"id":"EventsLogGroupPolicysalesforceeventbusCODEEventToCloudWatch14597BE0"}}",
+            ],
+          ],
+        },
+      },
+      "Type": "Custom::CloudwatchLogResourcePolicy",
+      "UpdateReplacePolicy": "Delete",
+    },
     "SalesforceEventBusPlaceholder69393C1F": {
       "DependsOn": [
         "SalesforceEventBusPlaceholderServiceRoleDefaultPolicy699BD152",
@@ -234,7 +485,9 @@ exports[`The SalesforceEventBus stack matches the snapshot 1`] = `
             "Contact_Update__e",
           ],
           "source": [
-            "aws.partner/salesforce.com",
+            {
+              "prefix": "aws.partner/salesforce.com",
+            },
           ],
         },
         "State": "ENABLED",
@@ -258,6 +511,32 @@ exports[`The SalesforceEventBus stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::Events::Rule",
+    },
+    "awseventssfeventbusCODE38C60A96": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "RetentionInDays": 731,
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Retain",
     },
     "deadletterssalesforceeventbusqueue29BFA779": {
       "DeletionPolicy": "Delete",
@@ -339,6 +618,18 @@ exports[`The SalesforceEventBus stack matches the snapshot 2`] = `
     "gu:cdk:version": "TEST",
   },
   "Parameters": {
+    "AssetParameters17c16a3854838fd3ff4bda08146122a6701f33b9c86ae17f415ad0dc47a97544ArtifactHash1ACF4C00": {
+      "Description": "Artifact hash for asset "17c16a3854838fd3ff4bda08146122a6701f33b9c86ae17f415ad0dc47a97544"",
+      "Type": "String",
+    },
+    "AssetParameters17c16a3854838fd3ff4bda08146122a6701f33b9c86ae17f415ad0dc47a97544S3Bucket7FAD8E80": {
+      "Description": "S3 bucket for asset "17c16a3854838fd3ff4bda08146122a6701f33b9c86ae17f415ad0dc47a97544"",
+      "Type": "String",
+    },
+    "AssetParameters17c16a3854838fd3ff4bda08146122a6701f33b9c86ae17f415ad0dc47a97544S3VersionKey8FD4EFA1": {
+      "Description": "S3 key for asset version "17c16a3854838fd3ff4bda08146122a6701f33b9c86ae17f415ad0dc47a97544"",
+      "Type": "String",
+    },
     "DistributionBucketName": {
       "Default": "/account/services/artifact.bucket",
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
@@ -346,6 +637,245 @@ exports[`The SalesforceEventBus stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
+    "AWS679f53fac002430cb0da5b7982bd22872D164C4C": {
+      "DependsOn": [
+        "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "AssetParameters17c16a3854838fd3ff4bda08146122a6701f33b9c86ae17f415ad0dc47a97544S3Bucket7FAD8E80",
+          },
+          "S3Key": {
+            "Fn::Join": [
+              "",
+              [
+                {
+                  "Fn::Select": [
+                    0,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters17c16a3854838fd3ff4bda08146122a6701f33b9c86ae17f415ad0dc47a97544S3VersionKey8FD4EFA1",
+                        },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  "Fn::Select": [
+                    1,
+                    {
+                      "Fn::Split": [
+                        "||",
+                        {
+                          "Ref": "AssetParameters17c16a3854838fd3ff4bda08146122a6701f33b9c86ae17f415ad0dc47a97544S3VersionKey8FD4EFA1",
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            ],
+          },
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs18.x",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 120,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "EventToCloudWatch1DE653E1": {
+      "Properties": {
+        "Description": "Send an event received by the SF bus to a Cloudwatch log group",
+        "EventBusName": "aws.partner/salesforce.com/00D20000000nq5gEAA/0YLQv00000000zJOAQ",
+        "EventPattern": {
+          "source": [
+            {
+              "prefix": "aws.partner/salesforce.com",
+            },
+          ],
+        },
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:",
+                  {
+                    "Ref": "AWS::Partition",
+                  },
+                  ":logs:",
+                  {
+                    "Ref": "AWS::Region",
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId",
+                  },
+                  ":log-group:",
+                  {
+                    "Ref": "awseventssfeventbusPROD8CE9C041",
+                  },
+                ],
+              ],
+            },
+            "Id": "Target0",
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "EventsLogGroupPolicysalesforceeventbusPRODEventToCloudWatch316871FECustomResourcePolicy02004ECC": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "logs:PutResourcePolicy",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": "logs:DeleteResourcePolicy",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "EventsLogGroupPolicysalesforceeventbusPRODEventToCloudWatch316871FECustomResourcePolicy02004ECC",
+        "Roles": [
+          {
+            "Ref": "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "EventsLogGroupPolicysalesforceeventbusPRODEventToCloudWatch316871FEDECAB8BC": {
+      "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "EventsLogGroupPolicysalesforceeventbusPRODEventToCloudWatch316871FECustomResourcePolicy02004ECC",
+      ],
+      "Properties": {
+        "Create": {
+          "Fn::Join": [
+            "",
+            [
+              "{"service":"CloudWatchLogs","action":"putResourcePolicy","parameters":{"policyName":"salesforceeventbusPRODEventsLogGroupPolicysalesforceeventbusPRODEventToCloudWatch316871FE9969CC03","policyDocument":"{\\"Statement\\":[{\\"Action\\":[\\"logs:PutLogEvents\\",\\"logs:CreateLogStream\\"],\\"Effect\\":\\"Allow\\",\\"Principal\\":{\\"Service\\":\\"events.amazonaws.com\\"},\\"Resource\\":\\"",
+              {
+                "Fn::GetAtt": [
+                  "awseventssfeventbusPROD8CE9C041",
+                  "Arn",
+                ],
+              },
+              "\\"}],\\"Version\\":\\"2012-10-17\\"}"},"physicalResourceId":{"id":"EventsLogGroupPolicysalesforceeventbusPRODEventToCloudWatch316871FE"}}",
+            ],
+          ],
+        },
+        "Delete": "{"service":"CloudWatchLogs","action":"deleteResourcePolicy","parameters":{"policyName":"salesforceeventbusPRODEventsLogGroupPolicysalesforceeventbusPRODEventToCloudWatch316871FE9969CC03"},"ignoreErrorCodesMatching":"ResourceNotFoundException"}",
+        "InstallLatestAwsSdk": true,
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "AWS679f53fac002430cb0da5b7982bd22872D164C4C",
+            "Arn",
+          ],
+        },
+        "Update": {
+          "Fn::Join": [
+            "",
+            [
+              "{"service":"CloudWatchLogs","action":"putResourcePolicy","parameters":{"policyName":"salesforceeventbusPRODEventsLogGroupPolicysalesforceeventbusPRODEventToCloudWatch316871FE9969CC03","policyDocument":"{\\"Statement\\":[{\\"Action\\":[\\"logs:PutLogEvents\\",\\"logs:CreateLogStream\\"],\\"Effect\\":\\"Allow\\",\\"Principal\\":{\\"Service\\":\\"events.amazonaws.com\\"},\\"Resource\\":\\"",
+              {
+                "Fn::GetAtt": [
+                  "awseventssfeventbusPROD8CE9C041",
+                  "Arn",
+                ],
+              },
+              "\\"}],\\"Version\\":\\"2012-10-17\\"}"},"physicalResourceId":{"id":"EventsLogGroupPolicysalesforceeventbusPRODEventToCloudWatch316871FE"}}",
+            ],
+          ],
+        },
+      },
+      "Type": "Custom::CloudwatchLogResourcePolicy",
+      "UpdateReplacePolicy": "Delete",
+    },
     "SalesforceEventBusPlaceholder69393C1F": {
       "DependsOn": [
         "SalesforceEventBusPlaceholderServiceRoleDefaultPolicy699BD152",
@@ -563,7 +1093,9 @@ exports[`The SalesforceEventBus stack matches the snapshot 2`] = `
             "Contact_Update__e",
           ],
           "source": [
-            "aws.partner/salesforce.com",
+            {
+              "prefix": "aws.partner/salesforce.com",
+            },
           ],
         },
         "State": "ENABLED",
@@ -587,6 +1119,32 @@ exports[`The SalesforceEventBus stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::Events::Rule",
+    },
+    "awseventssfeventbusPROD8CE9C041": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "RetentionInDays": 731,
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::Logs::LogGroup",
+      "UpdateReplacePolicy": "Retain",
     },
     "deadletterssalesforceeventbusqueue29BFA779": {
       "DeletionPolicy": "Delete",
