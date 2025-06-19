@@ -218,9 +218,9 @@ export class NegativeInvoicesProcessor extends GuStack {
 			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
 		});
 
-		const applyCreditToAccountBalanceLambdaTask = new LambdaInvoke(
+		const applyCreditToAccountBalanceWhenActiveSubLambdaTask = new LambdaInvoke(
 			this,
-			'Apply credit to account balance',
+			'Apply credit to account balance when active sub',
 			{
 				lambdaFunction: applyCreditToAccountBalanceLambda,
 				outputPath: '$.Payload',
@@ -230,6 +230,20 @@ export class NegativeInvoicesProcessor extends GuStack {
 			interval: Duration.seconds(10),
 			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
 		});
+
+		const applyCreditToAccountBalanceWhenNoActiveSubLambdaTask =
+			new LambdaInvoke(
+				this,
+				'Apply credit to account balance when no active sub',
+				{
+					lambdaFunction: applyCreditToAccountBalanceLambda,
+					outputPath: '$.Payload',
+				},
+			).addRetry({
+				errors: ['States.ALL'],
+				interval: Duration.seconds(10),
+				maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
+			});
 
 		const doCreditBalanceRefundLambdaTask = new LambdaInvoke(
 			this,
@@ -256,7 +270,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 		)
 			.when(
 				Condition.booleanEquals('$.hasActivePaymentMethod', true),
-				applyCreditToAccountBalanceLambdaTask.next(
+				applyCreditToAccountBalanceWhenNoActiveSubLambdaTask.next(
 					doCreditBalanceRefundLambdaTask,
 				),
 			)
@@ -265,7 +279,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 		const hasActiveSubChoice = new Choice(this, 'Has active sub?')
 			.when(
 				Condition.booleanEquals('$.hasActiveSub', true),
-				applyCreditToAccountBalanceLambdaTask,
+				applyCreditToAccountBalanceWhenActiveSubLambdaTask,
 			)
 			.otherwise(
 				getPaymentMethodsLambdaTask.next(hasActivePaymentMethodChoice),

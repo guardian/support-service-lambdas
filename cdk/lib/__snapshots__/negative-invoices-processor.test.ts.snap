@@ -1056,7 +1056,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Has active sub?":{"Type":"Choice","Choices":[{"Variable":"$.hasActiveSub","BooleanEquals":true,"Next":"Apply credit to account balance"}],"Default":"Get Payment Methods"},"Get Payment Methods":{"Next":"Has active payment method?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Has active sub?":{"Type":"Choice","Choices":[{"Variable":"$.hasActiveSub","BooleanEquals":true,"Next":"Apply credit to account balance when active sub"}],"Default":"Get Payment Methods"},"Get Payment Methods":{"Next":"Has active payment method?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1067,7 +1067,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Has active payment method?":{"Type":"Choice","Choices":[{"Variable":"$.hasActivePaymentMethod","BooleanEquals":true,"Next":"Apply credit to account balance"}],"Default":"check for valid email lambda will go here"},"check for valid email lambda will go here":{"Type":"Pass","End":true},"Apply credit to account balance":{"Next":"Do credit balance refund","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Has active payment method?":{"Type":"Choice","Choices":[{"Variable":"$.hasActivePaymentMethod","BooleanEquals":true,"Next":"Apply credit to account balance when no active sub"}],"Default":"check for valid email lambda will go here"},"check for valid email lambda will go here":{"Type":"Pass","End":true},"Apply credit to account balance when no active sub":{"Next":"Do credit balance refund","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1086,6 +1086,17 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
               {
                 "Fn::GetAtt": [
                   "docreditbalancerefundlambda2AAB1C48",
+                  "Arn",
+                ],
+              },
+              "","Payload.$":"$"}},"Apply credit to account balance when active sub":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
+              {
+                "Fn::GetAtt": [
+                  "applycredittoaccountbalancelambda254CBA80",
                   "Arn",
                 ],
               },
@@ -2533,7 +2544,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Has active sub?":{"Type":"Choice","Choices":[{"Variable":"$.hasActiveSub","BooleanEquals":true,"Next":"Apply credit to account balance"}],"Default":"Get Payment Methods"},"Get Payment Methods":{"Next":"Has active payment method?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Has active sub?":{"Type":"Choice","Choices":[{"Variable":"$.hasActiveSub","BooleanEquals":true,"Next":"Apply credit to account balance when active sub"}],"Default":"Get Payment Methods"},"Get Payment Methods":{"Next":"Has active payment method?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -2544,7 +2555,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Has active payment method?":{"Type":"Choice","Choices":[{"Variable":"$.hasActivePaymentMethod","BooleanEquals":true,"Next":"Apply credit to account balance"}],"Default":"check for valid email lambda will go here"},"check for valid email lambda will go here":{"Type":"Pass","End":true},"Apply credit to account balance":{"Next":"Do credit balance refund","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Has active payment method?":{"Type":"Choice","Choices":[{"Variable":"$.hasActivePaymentMethod","BooleanEquals":true,"Next":"Apply credit to account balance when no active sub"}],"Default":"check for valid email lambda will go here"},"check for valid email lambda will go here":{"Type":"Pass","End":true},"Apply credit to account balance when no active sub":{"Next":"Do credit balance refund","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -2563,6 +2574,17 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
               {
                 "Fn::GetAtt": [
                   "docreditbalancerefundlambda2AAB1C48",
+                  "Arn",
+                ],
+              },
+              "","Payload.$":"$"}},"Apply credit to account balance when active sub":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
+              {
+                "Fn::GetAtt": [
+                  "applycredittoaccountbalancelambda254CBA80",
                   "Arn",
                 ],
               },
