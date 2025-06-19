@@ -1,7 +1,7 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { applyCreditToAccountBalance } from '@modules/zuora/applyCreditToAccountBalance';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { z } from 'zod';
+import type { z } from 'zod';
 import { BigQueryRecordSchema } from '../types';
 
 export type ApplyCreditToAccountBalanceInput = z.infer<
