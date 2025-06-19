@@ -1,24 +1,16 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { applyCreditToAccountBalance } from '@modules/zuora/applyCreditToAccountBalance';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { z } from 'zod';
-
-export const ApplyCreditToAccountBalanceInputSchema = z.object({
-	invoiceId: z.string(),
-	accountId: z.string(),
-	invoiceNumber: z.string(),
-	invoiceBalance: z.number(),
-	hasActiveSub: z.boolean(),
-	hasActivePaymentMethod: z.boolean().optional(),
-});
+import type { z } from 'zod';
+import { BigQueryRecordSchema } from '../types';
 
 export type ApplyCreditToAccountBalanceInput = z.infer<
-	typeof ApplyCreditToAccountBalanceInputSchema
+	typeof BigQueryRecordSchema
 >;
 
 export const handler = async (event: ApplyCreditToAccountBalanceInput) => {
 	try {
-		const parsedEvent = ApplyCreditToAccountBalanceInputSchema.parse(event);
+		const parsedEvent = BigQueryRecordSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const body = JSON.stringify({
 			Amount: Math.abs(parsedEvent.invoiceBalance), //must be a positive value
