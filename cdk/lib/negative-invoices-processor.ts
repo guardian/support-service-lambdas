@@ -219,14 +219,16 @@ export class NegativeInvoicesProcessor extends GuStack {
 		)
 			.when(
 				Condition.booleanEquals('$.hasActivePaymentMethod', true),
-				new Pass(this, 'do refund lambda will go here'),
+				applyCreditToAccountBalanceLambdaTask,
 			)
 			.otherwise(new Pass(this, 'check for valid email lambda will go here'));
 
 		const hasActiveSubChoice = new Choice(this, 'Has active sub?')
 			.when(
 				Condition.booleanEquals('$.hasActiveSub', false),
-				getPaymentMethodsLambdaTask.next(hasActivePaymentMethodChoice),
+				checkForActivePaymentMethodLambdaTask.next(
+					hasActivePaymentMethodChoice,
+				),
 			)
 			.otherwise(new Pass(this, 'End'));
 
