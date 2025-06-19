@@ -235,7 +235,9 @@ export class NegativeInvoicesProcessor extends GuStack {
 			);
 
 		invoiceProcessorMap.iterator(
-			checkForActiveSubLambdaTask.next(hasActiveSubChoice),
+			applyCreditToAccountBalanceLambdaTask
+				.next(checkForActiveSubLambdaTask)
+				.next(hasActiveSubChoice),
 		);
 
 		const definitionBody = DefinitionBody.fromChainable(
