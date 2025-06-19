@@ -41,7 +41,7 @@ export const handler = async (event: DoCreditBalanceRefund) => {
 		}
 		const body = JSON.stringify({
 			AccountId: parsedEvent.accountId,
-			Amount: 1.0, //parsedEvent.invoiceBalance,
+			Amount: parsedEvent.invoiceBalance,
 			SourceType: 'CreditBalance',
 			Type: 'External',
 			RefundDate: dayjs().format('YYYY-MM-DD'), //today
@@ -55,7 +55,10 @@ export const handler = async (event: DoCreditBalanceRefund) => {
 
 		return {
 			...parsedEvent,
-			creditBalanceRefundAttempt,
+			creditBalanceRefundAttempt: {
+				...creditBalanceRefundAttempt,
+				paymentMethod: paymentMethodToRefundTo,
+			},
 		};
 	} catch (error) {
 		return {
