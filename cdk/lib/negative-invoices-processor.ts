@@ -218,9 +218,9 @@ export class NegativeInvoicesProcessor extends GuStack {
 			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
 		});
 
-		const applyCreditToAccountBalanceWhenActiveSubLambdaTask = new LambdaInvoke(
+		const applyCreditToAccountBalanceLambdaTask = new LambdaInvoke(
 			this,
-			'Apply credit to account balance when active sub',
+			'Apply credit to account balance',
 			{
 				lambdaFunction: applyCreditToAccountBalanceLambda,
 				outputPath: '$.Payload',
@@ -230,20 +230,6 @@ export class NegativeInvoicesProcessor extends GuStack {
 			interval: Duration.seconds(10),
 			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
 		});
-
-		const applyCreditToAccountBalanceWhenNoActiveSubLambdaTask =
-			new LambdaInvoke(
-				this,
-				'Apply credit to account balance when no active sub',
-				{
-					lambdaFunction: applyCreditToAccountBalanceLambda,
-					outputPath: '$.Payload',
-				},
-			).addRetry({
-				errors: ['States.ALL'],
-				interval: Duration.seconds(10),
-				maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
-			});
 
 		const doCreditBalanceRefundLambdaTask = new LambdaInvoke(
 			this,
@@ -270,23 +256,21 @@ export class NegativeInvoicesProcessor extends GuStack {
 		)
 			.when(
 				Condition.booleanEquals('$.hasActivePaymentMethod', true),
-				applyCreditToAccountBalanceWhenNoActiveSubLambdaTask.next(
-					doCreditBalanceRefundLambdaTask,
-				),
+				doCreditBalanceRefundLambdaTask,
 			)
 			.otherwise(new Pass(this, 'check for valid email lambda will go here'));
 
 		const hasActiveSubChoice = new Choice(this, 'Has active sub?')
 			.when(
-				Condition.booleanEquals('$.hasActiveSub', true),
-				applyCreditToAccountBalanceWhenActiveSubLambdaTask,
-			)
-			.otherwise(
+				Condition.booleanEquals('$.hasActiveSub', false),
 				getPaymentMethodsLambdaTask.next(hasActivePaymentMethodChoice),
-			);
+			)
+			.otherwise(new Pass(this, 'End'));
 
 		invoiceProcessorMap.iterator(
-			checkForActiveSubLambdaTask.next(hasActiveSubChoice),
+			applyCreditToAccountBalanceLambdaTask
+				.next(checkForActiveSubLambdaTask)
+				.next(hasActiveSubChoice),
 		);
 
 		const definitionBody = DefinitionBody.fromChainable(
