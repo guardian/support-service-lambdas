@@ -256,7 +256,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 		)
 			.when(
 				Condition.booleanEquals('$.hasActivePaymentMethod', true),
-				new Pass(this, 'do refund lambda will go here'),
+				doCreditBalanceRefundLambdaTask,
 			)
 			.otherwise(new Pass(this, 'check for valid email lambda will go here'));
 
@@ -280,7 +280,11 @@ export class NegativeInvoicesProcessor extends GuStack {
 			)
 			.otherwise(new Pass(this, 'End 1'));
 
-		invoiceProcessorMap.iterator(applyCreditToAccountBalanceLambdaTask);
+		invoiceProcessorMap.iterator(
+			applyCreditToAccountBalanceLambdaTask.next(
+				CreditAppliedSuccessfullyChoice,
+			),
+		);
 
 		const definitionBody = DefinitionBody.fromChainable(
 			getInvoicesLambdaTask.next(invoiceProcessorMap),
