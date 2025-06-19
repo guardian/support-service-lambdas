@@ -11,6 +11,9 @@ export const DoCreditBalanceRefundSchema = z.object({
 	invoiceNumber: z.string(),
 	invoiceBalance: z.number(),
 	hasActiveSub: z.boolean(),
+	applyCreditToAccountBalanceAttempt: z.object({
+		Success: z.boolean(),
+	}),
 	hasActivePaymentMethod: z.boolean().optional(),
 	activePaymentMethods: z
 		.array(

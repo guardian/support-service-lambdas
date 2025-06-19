@@ -12,6 +12,9 @@ export const GetPaymentMethodsInputSchema = z.object({
 	invoiceNumber: z.string(),
 	invoiceBalance: z.number(),
 	hasActiveSub: z.boolean(),
+	applyCreditToAccountBalanceAttempt: z.object({
+		Success: z.boolean(),
+	}),
 });
 
 export type GetPaymentMethodsInput = z.infer<

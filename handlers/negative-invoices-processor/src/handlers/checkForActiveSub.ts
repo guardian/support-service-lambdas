@@ -8,6 +8,9 @@ export const CheckForActiveSubSchema = z.object({
 	accountId: z.string(),
 	invoiceNumber: z.string(),
 	invoiceBalance: z.number(),
+	applyCreditToAccountBalanceAttempt: z.object({
+		Success: z.boolean(),
+	}),
 });
 export type CheckForActiveSubInput = z.infer<typeof CheckForActiveSubSchema>;
 
