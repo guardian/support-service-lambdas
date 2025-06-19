@@ -41,7 +41,7 @@ export const handler = async (event: DoCreditBalanceRefund) => {
 		}
 		const body = JSON.stringify({
 			AccountId: parsedEvent.accountId,
-			Amount: parsedEvent.invoiceBalance,
+			Amount: Math.abs(parsedEvent.invoiceBalance),
 			SourceType: 'CreditBalance',
 			Type: 'External',
 			RefundDate: dayjs().format('YYYY-MM-DD'), //today
