@@ -18,7 +18,8 @@ export const handler = async (event: ApplyCreditToAccountBalanceInput) => {
 			Type: 'Increase',
 		});
 
-		const applyCreditToAccountBalanceAttempt = await applyCreditToAccountBalance(zuoraClient, body);
+		const applyCreditToAccountBalanceAttempt =
+			await applyCreditToAccountBalance(zuoraClient, body);
 
 		return {
 			...parsedEvent,
@@ -27,9 +28,9 @@ export const handler = async (event: ApplyCreditToAccountBalanceInput) => {
 	} catch (error) {
 		return {
 			...event,
-			applyCreditToAccountBalanceAttempt:{
+			applyCreditToAccountBalanceAttempt: {
 				Success: false,
-			}
+			},
 			errorDetail:
 				error instanceof Error ? error.message : JSON.stringify(error, null, 2),
 		};
