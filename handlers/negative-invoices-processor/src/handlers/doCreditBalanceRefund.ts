@@ -1,7 +1,7 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { doCreditBalanceRefund } from '@modules/zuora/doCreditBalanceRefund';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { PaymentMethod } from '@modules/zuora/zuoraSchemas';
+import type { PaymentMethod } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
 import { z } from 'zod';
 
@@ -42,7 +42,7 @@ export const handler = async (event: DoCreditBalanceRefund) => {
 			SourceType: 'CreditBalance',
 			Type: 'External',
 			RefundDate: dayjs().format('YYYY-MM-DD'), //today
-			MethodType: paymentMethodToRefundTo?.type,
+			MethodType: paymentMethodToRefundTo.type,
 		});
 
 		const creditBalanceRefundAttempt = await doCreditBalanceRefund(
@@ -66,5 +66,5 @@ export const handler = async (event: DoCreditBalanceRefund) => {
 
 function getPaymentMethodToRefundTo(paymentMethods: PaymentMethod[]) {
 	const defaultMethod = paymentMethods.find((pm) => pm.isDefault);
-	return defaultMethod || paymentMethods[0];
+	return defaultMethod ?? paymentMethods[0];
 }
