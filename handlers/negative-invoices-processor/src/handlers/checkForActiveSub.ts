@@ -4,11 +4,17 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { z } from 'zod';
 import { BigQueryRecordSchema } from '../types';
 
-export type CheckForActiveSubInput = z.infer<typeof BigQueryRecordSchema>;
+export const CheckForActiveSubSchema = z.object({
+	invoiceId: z.string(),
+	accountId: z.string(),
+	invoiceNumber: z.string(),
+	invoiceBalance: z.number(),
+});
+export type CheckForActiveSubInput = z.infer<typeof CheckForActiveSubSchema>;
 
 export const handler = async (event: CheckForActiveSubInput) => {
 	try {
-		const parsedEvent = BigQueryRecordSchema.parse(event);
+		const parsedEvent = CheckForActiveSubSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const hasActiveSub = await hasActiveSubscription(
 			zuoraClient,
