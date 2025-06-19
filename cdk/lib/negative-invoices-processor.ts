@@ -237,13 +237,13 @@ export class NegativeInvoicesProcessor extends GuStack {
 				'$.applyCreditToAccountBalanceAttempt.Success',
 				true,
 			),
-			hasActiveSubChoice,
+			checkForActiveSubLambdaTask.next(hasActiveSubChoice),
 		);
 		// .otherwise(new Pass(this, 'End1'));
-		invoiceProcessorMap.iterator(
-			applyCreditToAccountBalanceLambdaTask
-				.next(checkForActiveSubLambdaTask)
-				.next(hasActiveSubChoice),
+		invoiceProcessorMap.itemProcessor(
+			applyCreditToAccountBalanceLambdaTask.next(
+				CreditAppliedSuccessfullyChoice,
+			),
 		);
 
 		const definitionBody = DefinitionBody.fromChainable(
