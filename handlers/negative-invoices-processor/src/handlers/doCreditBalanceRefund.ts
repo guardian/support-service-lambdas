@@ -5,7 +5,6 @@ import { PaymentMethod } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
 import { z } from 'zod';
 
-// ...existing code...
 export const DoCreditBalanceRefundSchema = z.object({
 	invoiceId: z.string(),
 	accountId: z.string(),
@@ -34,8 +33,11 @@ export const handler = async (event: DoCreditBalanceRefund) => {
 		const paymentMethodToRefundTo = getPaymentMethodToRefundTo(
 			parsedEvent.activePaymentMethods ?? [],
 		);
+		if (!paymentMethodToRefundTo) {
+			throw new Error('No active payment method found to refund to.');
+		}
 		const body = JSON.stringify({
-			AccountId: '8ad0855183f1cbdd0183f499fc0c047e', //parsedEvent.accountId,
+			AccountId: parsedEvent.accountId,
 			Amount: 1.0, //parsedEvent.invoiceBalance,
 			SourceType: 'CreditBalance',
 			Type: 'External',
