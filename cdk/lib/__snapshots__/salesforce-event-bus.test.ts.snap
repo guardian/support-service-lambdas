@@ -321,7 +321,7 @@ exports[`The SalesforceEventBus stack matches the snapshot 1`] = `
                   },
                   ":log-group:",
                   {
-                    "Ref": "awseventssfeventbusCODE38C60A96",
+                    "Ref": "SfEventBusLogGroup7FB36119",
                   },
                 ],
               ],
@@ -371,7 +371,7 @@ exports[`The SalesforceEventBus stack matches the snapshot 1`] = `
               "{"service":"CloudWatchLogs","action":"putResourcePolicy","parameters":{"policyName":"salesforceeventbusCODEEventsLogGroupPolicysalesforceeventbusCODEEventToCloudWatch14597BE0BF9CAAFD","policyDocument":"{\\"Statement\\":[{\\"Action\\":[\\"logs:PutLogEvents\\",\\"logs:CreateLogStream\\"],\\"Effect\\":\\"Allow\\",\\"Principal\\":{\\"Service\\":\\"events.amazonaws.com\\"},\\"Resource\\":\\"",
               {
                 "Fn::GetAtt": [
-                  "awseventssfeventbusCODE38C60A96",
+                  "SfEventBusLogGroup7FB36119",
                   "Arn",
                 ],
               },
@@ -394,7 +394,7 @@ exports[`The SalesforceEventBus stack matches the snapshot 1`] = `
               "{"service":"CloudWatchLogs","action":"putResourcePolicy","parameters":{"policyName":"salesforceeventbusCODEEventsLogGroupPolicysalesforceeventbusCODEEventToCloudWatch14597BE0BF9CAAFD","policyDocument":"{\\"Statement\\":[{\\"Action\\":[\\"logs:PutLogEvents\\",\\"logs:CreateLogStream\\"],\\"Effect\\":\\"Allow\\",\\"Principal\\":{\\"Service\\":\\"events.amazonaws.com\\"},\\"Resource\\":\\"",
               {
                 "Fn::GetAtt": [
-                  "awseventssfeventbusCODE38C60A96",
+                  "SfEventBusLogGroup7FB36119",
                   "Arn",
                 ],
               },
@@ -653,10 +653,11 @@ exports[`The SalesforceEventBus stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Events::Rule",
     },
-    "awseventssfeventbusCODE38C60A96": {
+    "SfEventBusLogGroup7FB36119": {
       "DeletionPolicy": "Retain",
       "Properties": {
-        "RetentionInDays": 731,
+        "LogGroupName": "/aws/events/sf-event-bus-CODE",
+        "RetentionInDays": 14,
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -1070,7 +1071,7 @@ exports[`The SalesforceEventBus stack matches the snapshot 2`] = `
                   },
                   ":log-group:",
                   {
-                    "Ref": "awseventssfeventbusPROD8CE9C041",
+                    "Ref": "SfEventBusLogGroup7FB36119",
                   },
                 ],
               ],
@@ -1120,7 +1121,7 @@ exports[`The SalesforceEventBus stack matches the snapshot 2`] = `
               "{"service":"CloudWatchLogs","action":"putResourcePolicy","parameters":{"policyName":"salesforceeventbusPRODEventsLogGroupPolicysalesforceeventbusPRODEventToCloudWatch316871FE9969CC03","policyDocument":"{\\"Statement\\":[{\\"Action\\":[\\"logs:PutLogEvents\\",\\"logs:CreateLogStream\\"],\\"Effect\\":\\"Allow\\",\\"Principal\\":{\\"Service\\":\\"events.amazonaws.com\\"},\\"Resource\\":\\"",
               {
                 "Fn::GetAtt": [
-                  "awseventssfeventbusPROD8CE9C041",
+                  "SfEventBusLogGroup7FB36119",
                   "Arn",
                 ],
               },
@@ -1143,7 +1144,7 @@ exports[`The SalesforceEventBus stack matches the snapshot 2`] = `
               "{"service":"CloudWatchLogs","action":"putResourcePolicy","parameters":{"policyName":"salesforceeventbusPRODEventsLogGroupPolicysalesforceeventbusPRODEventToCloudWatch316871FE9969CC03","policyDocument":"{\\"Statement\\":[{\\"Action\\":[\\"logs:PutLogEvents\\",\\"logs:CreateLogStream\\"],\\"Effect\\":\\"Allow\\",\\"Principal\\":{\\"Service\\":\\"events.amazonaws.com\\"},\\"Resource\\":\\"",
               {
                 "Fn::GetAtt": [
-                  "awseventssfeventbusPROD8CE9C041",
+                  "SfEventBusLogGroup7FB36119",
                   "Arn",
                 ],
               },
@@ -1402,10 +1403,11 @@ exports[`The SalesforceEventBus stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Events::Rule",
     },
-    "awseventssfeventbusPROD8CE9C041": {
+    "SfEventBusLogGroup7FB36119": {
       "DeletionPolicy": "Retain",
       "Properties": {
-        "RetentionInDays": 731,
+        "LogGroupName": "/aws/events/sf-event-bus-PROD",
+        "RetentionInDays": 14,
         "Tags": [
           {
             "Key": "gu:cdk:version",

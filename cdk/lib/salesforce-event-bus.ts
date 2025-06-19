@@ -5,7 +5,7 @@ import { type App, Duration } from 'aws-cdk-lib';
 import { EventBus, Match, Rule } from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
 import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { LogGroup } from 'aws-cdk-lib/aws-logs';
+import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { nodeVersion } from './node-version';
 
@@ -33,10 +33,10 @@ export class SalesforceEventBus extends GuStack {
 				: `arn:aws:events:${this.region}::event-source/aws.partner/salesforce.com/00D9E0000004jvhUAA/0YLUD00000008Ll4AI`,
 		);
 
-		const logGroup = new LogGroup(
-			this,
-			`/aws/events/sf-event-bus-${props.stage}`,
-		);
+		const logGroup = new LogGroup(this, 'SfEventBusLogGroup', {
+			logGroupName: `/aws/events/sf-event-bus-${props.stage}`,
+			retention: RetentionDays.TWO_WEEKS,
+		});
 
 		new Rule(this, 'EventToCloudWatch', {
 			description:
