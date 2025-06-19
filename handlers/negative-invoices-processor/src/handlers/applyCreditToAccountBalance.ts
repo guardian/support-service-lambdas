@@ -27,6 +27,7 @@ export const handler = async (event: ApplyCreditToAccountBalanceInput) => {
 	} catch (error) {
 		return {
 			...event,
+			attempt,
 			applyCreditToAccountBalanceStatus: 'Error',
 			errorDetail:
 				error instanceof Error ? error.message : JSON.stringify(error, null, 2),
