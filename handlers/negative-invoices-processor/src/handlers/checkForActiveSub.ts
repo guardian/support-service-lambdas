@@ -2,7 +2,6 @@ import { stageFromEnvironment } from '@modules/stage';
 import { doQuery } from '@modules/zuora/query';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { z } from 'zod';
-import { BigQueryRecordSchema } from '../types';
 
 export const CheckForActiveSubSchema = z.object({
 	invoiceId: z.string(),
