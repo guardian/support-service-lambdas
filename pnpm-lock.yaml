@@ -438,6 +438,10 @@ importers:
         version: 3.25.48
 
   modules/routing:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.48
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
