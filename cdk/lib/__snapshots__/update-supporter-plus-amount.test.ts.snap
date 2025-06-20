@@ -955,7 +955,6 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
       "GuApiLambda",
-      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -1031,6 +1030,20 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
         "Period": 300,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "updatesupporterplusamountlambda0DA9A4CB",
+                  },
+                ],
+              ],
+            },
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",

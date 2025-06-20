@@ -7,8 +7,6 @@ exports[`The ObserverDataExport stack matches the snapshot 1`] = `
       "GuStringParameter",
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
-      "GuAlarm",
-      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -1548,7 +1546,7 @@ def sort_filter_rules(json_obj):
     },
     "encryptanduploadobserverdataCODElambdaalarmA1B7D79A": {
       "Properties": {
-        "ActionsEnabled": true,
+        "ActionsEnabled": false,
         "AlarmActions": [
           {
             "Fn::Join": [
@@ -1606,6 +1604,20 @@ def sort_filter_rules(json_obj):
         "Period": 60,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "EncryptAndUploadObserverDataLambda5BD6CD5A",
+                  },
+                ],
+              ],
+            },
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -1708,7 +1720,7 @@ def sort_filter_rules(json_obj):
     },
     "salesforceobserverdatatransferCODEflowalarmDEC9DDC2": {
       "Properties": {
-        "ActionsEnabled": true,
+        "ActionsEnabled": false,
         "AlarmActions": [
           {
             "Fn::Join": [
@@ -1755,6 +1767,20 @@ def sort_filter_rules(json_obj):
         "Statistic": "Sum",
         "Tags": [
           {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "EncryptAndUploadObserverDataLambda5BD6CD5A",
+                  },
+                ],
+              ],
+            },
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1787,8 +1813,6 @@ exports[`The ObserverDataExport stack matches the snapshot 2`] = `
       "GuStringParameter",
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
-      "GuAlarm",
-      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -3387,6 +3411,20 @@ def sort_filter_rules(json_obj):
         "Statistic": "Sum",
         "Tags": [
           {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "EncryptAndUploadObserverDataLambda5BD6CD5A",
+                  },
+                ],
+              ],
+            },
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -3534,6 +3572,20 @@ def sort_filter_rules(json_obj):
         "Period": 60,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "EncryptAndUploadObserverDataLambda5BD6CD5A",
+                  },
+                ],
+              ],
+            },
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",

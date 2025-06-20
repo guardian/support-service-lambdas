@@ -21,8 +21,6 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
       "GuLambdaFunction",
       "GuApiGatewayWithLambdaByPath",
       "GuApiGateway5xxPercentageAlarm",
-      "GuAlarm",
-      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -101,7 +99,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
                 {
                   "Ref": "AWS::AccountId",
                 },
-                ":conversion-dev",
+                ":alarms-handler-topic-CODE",
               ],
             ],
           },
@@ -121,6 +119,24 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
         "Period": 300,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "paymentintentissuescdklambdaD549B87A",
+                  },
+                  ",lambda:",
+                  {
+                    "Ref": "customerupdatedcdklambda94E6ED36",
+                  },
+                ],
+              ],
+            },
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -158,7 +174,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
                 {
                   "Ref": "AWS::AccountId",
                 },
-                ":conversion-dev",
+                ":alarms-handler-topic-CODE",
               ],
             ],
           },
@@ -178,6 +194,24 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
         "Period": 60,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "paymentintentissuescdklambdaD549B87A",
+                  },
+                  ",lambda:",
+                  {
+                    "Ref": "customerupdatedcdklambda94E6ED36",
+                  },
+                ],
+              ],
+            },
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -1473,8 +1507,6 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
       "GuLambdaFunction",
       "GuApiGatewayWithLambdaByPath",
       "GuApiGateway5xxPercentageAlarm",
-      "GuAlarm",
-      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -1553,7 +1585,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
                 {
                   "Ref": "AWS::AccountId",
                 },
-                ":conversion-dev",
+                ":alarms-handler-topic-PROD",
               ],
             ],
           },
@@ -1573,6 +1605,24 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
         "Period": 300,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "paymentintentissuescdklambdaD549B87A",
+                  },
+                  ",lambda:",
+                  {
+                    "Ref": "customerupdatedcdklambda94E6ED36",
+                  },
+                ],
+              ],
+            },
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -1610,7 +1660,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
                 {
                   "Ref": "AWS::AccountId",
                 },
-                ":conversion-dev",
+                ":alarms-handler-topic-PROD",
               ],
             ],
           },
@@ -1630,6 +1680,24 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
         "Period": 60,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "paymentintentissuescdklambdaD549B87A",
+                  },
+                  ",lambda:",
+                  {
+                    "Ref": "customerupdatedcdklambda94E6ED36",
+                  },
+                ],
+              ],
+            },
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",

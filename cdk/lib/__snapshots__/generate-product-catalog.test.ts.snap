@@ -590,7 +590,6 @@ exports[`The generate product catalog stack matches the snapshot 2`] = `
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
       "GuCname",
-      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -864,6 +863,20 @@ def sort_filter_rules(json_obj):
         "Period": 300,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "generateproductcataloglambda1E6192C7",
+                  },
+                ],
+              ],
+            },
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",

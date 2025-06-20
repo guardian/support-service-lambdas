@@ -7,7 +7,6 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
       "GuDistributionBucketParameter",
       "GuApiLambda",
       "GuApiGateway5xxPercentageAlarm",
-      "GuAlarm",
       "GuCname",
     ],
     "gu:cdk:version": "TEST",
@@ -84,6 +83,20 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
         "Period": 300,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "pressreaderentitlementslambda849A2923",
+                  },
+                ],
+              ],
+            },
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -1033,7 +1046,6 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
       "GuDistributionBucketParameter",
       "GuApiLambda",
       "GuApiGateway5xxPercentageAlarm",
-      "GuAlarm",
       "GuCname",
     ],
     "gu:cdk:version": "TEST",
@@ -1110,6 +1122,20 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
         "Period": 300,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "pressreaderentitlementslambda849A2923",
+                  },
+                ],
+              ],
+            },
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
