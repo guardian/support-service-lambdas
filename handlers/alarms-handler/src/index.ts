@@ -137,7 +137,7 @@ export function buildDiagnosticLinks(
 	stateChangeTime: Date,
 ) {
 	const diagnosticUrlTemplates = DiagnosticLinks
-		? DiagnosticLinks.split(',').map((link) => ({
+		? DiagnosticLinks.split(' ').map((link) => ({
 				prefix: link.split(':', 1)[0],
 				value: link.replace(/^[^:]+:/, ''),
 			}))

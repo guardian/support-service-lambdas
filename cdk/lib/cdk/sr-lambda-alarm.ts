@@ -22,7 +22,7 @@ export class SrLambdaAlarm extends GuAlarm {
 				: props.lambdaFunctionNames;
 		const diagnosticLinksValue = lambdaFunctionNames
 			.map((lambdaFunctionName) => `lambda:${lambdaFunctionName}`)
-			.join(',');
+			.join(' ');
 		Tags.of(this).add('DiagnosticLinks', diagnosticLinksValue);
 	}
 }
