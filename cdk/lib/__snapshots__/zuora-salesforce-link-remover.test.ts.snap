@@ -60,22 +60,6 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
               ],
             ],
           },
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-CODE",
-              ],
-            ],
-          },
         ],
         "AlarmDescription": "Something went wrong when executing the zuora <-> salesforce link remover. See Cloudwatch logs for more information on the error.",
         "AlarmName": {
@@ -162,22 +146,6 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
               ],
             ],
           },
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-CODE",
-              ],
-            ],
-          },
         ],
         "AlarmDescription": "Something went wrong when executing the zuora <-> salesforce link remover. See Cloudwatch logs for more information on the error.",
         "AlarmName": {
@@ -248,22 +216,6 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
       "Properties": {
         "ActionsEnabled": false,
         "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-CODE",
-              ],
-            ],
-          },
           {
             "Fn::Join": [
               "",
@@ -1511,22 +1463,6 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
               ],
             ],
           },
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-PROD",
-              ],
-            ],
-          },
         ],
         "AlarmDescription": "Something went wrong when executing the zuora <-> salesforce link remover. See Cloudwatch logs for more information on the error.",
         "AlarmName": {
@@ -1613,22 +1549,6 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
               ],
             ],
           },
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-PROD",
-              ],
-            ],
-          },
         ],
         "AlarmDescription": "Something went wrong when executing the zuora <-> salesforce link remover. See Cloudwatch logs for more information on the error.",
         "AlarmName": {
@@ -1699,22 +1619,6 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
       "Properties": {
         "ActionsEnabled": true,
         "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-PROD",
-              ],
-            ],
-          },
           {
             "Fn::Join": [
               "",

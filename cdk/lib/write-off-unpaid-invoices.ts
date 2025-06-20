@@ -6,7 +6,6 @@ import {
 } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
 import { ComparisonOperator } from 'aws-cdk-lib/aws-cloudwatch';
-import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import {
@@ -17,7 +16,6 @@ import {
 } from 'aws-cdk-lib/aws-iam';
 import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
-import { Topic } from 'aws-cdk-lib/aws-sns';
 import {
 	Choice,
 	Condition,
@@ -43,7 +41,6 @@ export class WriteOffUnpaidInvoices extends GuStack {
 		});
 
 		const snsTopicArn = `arn:aws:sns:${this.region}:${this.account}:alarms-handler-topic-${this.stage}`;
-		const alarmTopic = Topic.fromTopicArn(this, 'AlarmTopic', snsTopicArn);
 
 		const unpaidInvoicesFileName = 'unpaid-invoices.json';
 
@@ -319,26 +316,19 @@ export class WriteOffUnpaidInvoices extends GuStack {
 
 		rule.addTarget(new SfnStateMachine(stateMachine));
 
-		const failureAlarm = new SrLambdaAlarm(
-			this,
-			'WriteOffUnpaidInvoicesStepFunctionFailureAlarm',
-			{
-				app,
-				metric: stateMachine.metricFailed({
-					period: Duration.minutes(5),
-					statistic: 'Sum',
-				}),
-				threshold: 1,
-				evaluationPeriods: 1,
-				alarmDescription:
-					'The scheduled job that writes off unpaid invoices has failed. Login to the AWS console and debug the last execution.',
-				alarmName: `${this.stage}: WriteOffUnpaidInvoicesStepFunctionExecutionFailure`,
-				comparisonOperator:
-					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-				lambdaFunctionNames: writeOffInvoicesLambda.functionName,
-			},
-		);
-
-		failureAlarm.addAlarmAction(new SnsAction(alarmTopic));
+		new SrLambdaAlarm(this, 'WriteOffUnpaidInvoicesStepFunctionFailureAlarm', {
+			app,
+			metric: stateMachine.metricFailed({
+				period: Duration.minutes(5),
+				statistic: 'Sum',
+			}),
+			threshold: 1,
+			evaluationPeriods: 1,
+			alarmDescription:
+				'The scheduled job that writes off unpaid invoices has failed. Login to the AWS console and debug the last execution.',
+			alarmName: `${this.stage}: WriteOffUnpaidInvoicesStepFunctionExecutionFailure`,
+			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+			lambdaFunctionNames: writeOffInvoicesLambda.functionName,
+		});
 	}
 }

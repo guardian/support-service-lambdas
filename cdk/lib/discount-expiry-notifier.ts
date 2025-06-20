@@ -4,7 +4,6 @@ import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
 import { aws_cloudwatch, Duration } from 'aws-cdk-lib';
 import { Metric, Stats, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
-import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import {
@@ -16,7 +15,6 @@ import {
 } from 'aws-cdk-lib/aws-iam';
 import { Architecture, LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
-import { Topic } from 'aws-cdk-lib/aws-sns';
 import {
 	DefinitionBody,
 	JsonPath,
@@ -370,12 +368,6 @@ export class DiscountExpiryNotifier extends GuStack {
 			enabled: true,
 		});
 
-		const topic = Topic.fromTopicArn(
-			this,
-			'Topic',
-			`arn:aws:sns:${this.region}:${this.account}:alarms-handler-topic-${this.stage}`,
-		);
-
 		const lambdaFunctionsToAlarmOn = [
 			getExpiringDiscountsLambda,
 			filterRecordsLambda,
@@ -383,7 +375,7 @@ export class DiscountExpiryNotifier extends GuStack {
 		];
 
 		lambdaFunctionsToAlarmOn.forEach((lambdaFunction, index) => {
-			const alarm = new SrLambdaAlarm(this, `alarm-${index}`, {
+			new SrLambdaAlarm(this, `alarm-${index}`, {
 				alarmName: `Discount Expiry Notifier - ${lambdaFunction.functionName} - something went wrong - ${this.stage}`,
 				alarmDescription:
 					'Something went wrong when executing the Discount Expiry Notifier. See Cloudwatch logs for more information on the error.',
@@ -405,7 +397,6 @@ export class DiscountExpiryNotifier extends GuStack {
 				treatMissingData: TreatMissingData.MISSING,
 				app: appName,
 			});
-			alarm.addAlarmAction(new SnsAction(topic));
 		});
 	}
 }

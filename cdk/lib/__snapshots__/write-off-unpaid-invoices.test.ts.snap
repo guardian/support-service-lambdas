@@ -897,22 +897,6 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 1`] = `
               ],
             ],
           },
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-CODE",
-              ],
-            ],
-          },
         ],
         "AlarmDescription": "The scheduled job that writes off unpaid invoices has failed. Login to the AWS console and debug the last execution.",
         "AlarmName": "CODE: WriteOffUnpaidInvoicesStepFunctionExecutionFailure",
@@ -1851,22 +1835,6 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 2`] = `
       "Properties": {
         "ActionsEnabled": true,
         "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-PROD",
-              ],
-            ],
-          },
           {
             "Fn::Join": [
               "",

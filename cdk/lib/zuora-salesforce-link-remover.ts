@@ -4,12 +4,10 @@ import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
 import { aws_cloudwatch, Duration } from 'aws-cdk-lib';
 import { Metric, Stats, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
-import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Architecture, LoggingFormat } from 'aws-cdk-lib/aws-lambda';
-import { Topic } from 'aws-cdk-lib/aws-sns';
 import {
 	Choice,
 	Condition,
@@ -198,12 +196,6 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 			enabled: true,
 		});
 
-		const topic = Topic.fromTopicArn(
-			this,
-			'Topic',
-			`arn:aws:sns:${this.region}:${this.account}:alarms-handler-topic-${this.stage}`,
-		);
-
 		const lambdaFunctions = [
 			getSalesforceBillingAccountsLambda,
 			updateZuoraBillingAccountLambda,
@@ -211,7 +203,7 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 		];
 
 		lambdaFunctions.forEach((lambdaFunction, index) => {
-			const alarm = new SrLambdaAlarm(this, `alarm-${index}`, {
+			new SrLambdaAlarm(this, `alarm-${index}`, {
 				app: appName,
 				alarmName: `Zuora <-> Salesforce link remover - ${lambdaFunction.functionName} - something went wrong - ${this.stage}`,
 				alarmDescription:
@@ -233,7 +225,6 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 				threshold: 0,
 				treatMissingData: TreatMissingData.MISSING,
 			});
-			alarm.addAlarmAction(new SnsAction(topic));
 		});
 	}
 }

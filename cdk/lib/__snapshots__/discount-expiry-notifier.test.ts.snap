@@ -91,22 +91,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
               ],
             ],
           },
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-CODE",
-              ],
-            ],
-          },
         ],
         "AlarmDescription": "Something went wrong when executing the Discount Expiry Notifier. See Cloudwatch logs for more information on the error.",
         "AlarmName": {
@@ -193,22 +177,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
               ],
             ],
           },
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-CODE",
-              ],
-            ],
-          },
         ],
         "AlarmDescription": "Something went wrong when executing the Discount Expiry Notifier. See Cloudwatch logs for more information on the error.",
         "AlarmName": {
@@ -279,22 +247,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 1`] = `
       "Properties": {
         "ActionsEnabled": false,
         "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-CODE",
-              ],
-            ],
-          },
           {
             "Fn::Join": [
               "",
@@ -2801,22 +2753,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
               ],
             ],
           },
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-PROD",
-              ],
-            ],
-          },
         ],
         "AlarmDescription": "Something went wrong when executing the Discount Expiry Notifier. See Cloudwatch logs for more information on the error.",
         "AlarmName": {
@@ -2903,22 +2839,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
               ],
             ],
           },
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-PROD",
-              ],
-            ],
-          },
         ],
         "AlarmDescription": "Something went wrong when executing the Discount Expiry Notifier. See Cloudwatch logs for more information on the error.",
         "AlarmName": {
@@ -2989,22 +2909,6 @@ exports[`The discount-expiry-notifier stack matches the snapshot 2`] = `
       "Properties": {
         "ActionsEnabled": true,
         "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-PROD",
-              ],
-            ],
-          },
           {
             "Fn::Join": [
               "",
