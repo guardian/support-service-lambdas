@@ -129,7 +129,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
                   {
                     "Ref": "paymentintentissuescdklambdaD549B87A",
                   },
-                  ",lambda:",
+                  " lambda:",
                   {
                     "Ref": "customerupdatedcdklambda94E6ED36",
                   },
@@ -204,7 +204,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
                   {
                     "Ref": "paymentintentissuescdklambdaD549B87A",
                   },
-                  ",lambda:",
+                  " lambda:",
                   {
                     "Ref": "customerupdatedcdklambda94E6ED36",
                   },
@@ -1615,7 +1615,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
                   {
                     "Ref": "paymentintentissuescdklambdaD549B87A",
                   },
-                  ",lambda:",
+                  " lambda:",
                   {
                     "Ref": "customerupdatedcdklambda94E6ED36",
                   },
@@ -1690,7 +1690,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
                   {
                     "Ref": "paymentintentissuescdklambdaD549B87A",
                   },
-                  ",lambda:",
+                  " lambda:",
                   {
                     "Ref": "customerupdatedcdklambda94E6ED36",
                   },
