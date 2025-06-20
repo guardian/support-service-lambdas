@@ -19,7 +19,7 @@ case class CreateSingleContributionRecordRequestData(
     Email__c: String,
     Identity_ID__c: Option[String],
     Payment_Date__c: String,
-    Payment_ID__c: String,
+    Payment_ID__c: Option[String],
     Payment_Provider__c: String,
     Payment_Status__c: String,
     Postal_Code__c: Option[String],
@@ -62,6 +62,11 @@ object Salesforce extends Logging {
   private def getContribution(
       messageBodyDetail: PaymentApiMessageDetail,
   ): CreateSingleContributionRecordRequestData = {
+    val paymentId = messageBodyDetail.paymentProvider match {
+      case "PAYPAL" => messageBodyDetail.paypalTransactionId
+      case _ => Some(messageBodyDetail.paymentId)
+    }
+
     CreateSingleContributionRecordRequestData(
       Amount__c = messageBodyDetail.amount,
       Country_Code__c = messageBodyDetail.country,
@@ -70,7 +75,7 @@ object Salesforce extends Logging {
       Email__c = messageBodyDetail.email,
       Identity_ID__c = messageBodyDetail.identityId,
       Payment_Date__c = messageBodyDetail.eventTimeStamp,
-      Payment_ID__c = messageBodyDetail.paymentId,
+      Payment_ID__c = paymentId,
       Payment_Provider__c = messageBodyDetail.paymentProvider,
       Payment_Status__c = "Paid",
       Postal_Code__c = messageBodyDetail.postalCode,
