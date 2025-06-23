@@ -104,7 +104,7 @@ export class SalesforceEventBus extends GuStack {
 				},
 			},
 		});
-		
+
 		eventBridgeTosfOutboundMessageSqsRole.addToPolicy(
 			sendMessagePolicyStatement,
 		);
