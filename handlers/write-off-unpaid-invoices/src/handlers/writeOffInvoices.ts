@@ -49,6 +49,8 @@ export const handler = async (event: LambdaEvent) => {
 			balance,
 		});
 
+		console.log(sortedAdjustableItems, null, 2);
+
 		let currentBalance = balance;
 
 		for (const item of sortedAdjustableItems) {
