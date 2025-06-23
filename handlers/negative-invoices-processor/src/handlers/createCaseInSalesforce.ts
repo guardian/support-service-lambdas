@@ -1,18 +1,15 @@
-import { z } from 'zod';
-import { PaymentMethodSchema } from '../types';
-// import { sfApiVersion } from '@modules/salesforce/src/config';
+import { doSfAuth } from '@modules/salesforce/src/auth';
+import type {
+	SfApiUserAuth,
+	SfConnectedAppAuth,
+} from '@modules/salesforce/src/auth';
 import { getSecretValue } from '@modules/secrets-manager/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
-import {
-	getSalesforceSecretNames,
-	ConnectedAppSecret,
-	ApiUserSecret,
-} from '../secrets';
-import {
-	type SfConnectedAppAuth,
-	type SfApiUserAuth,
-	doSfAuth,
-} from '@modules/salesforce/src/auth';
+import { z } from 'zod';
+import { getSalesforceSecretNames } from '../secrets';
+import type { ApiUserSecret, ConnectedAppSecret } from '../secrets';
+import { PaymentMethodSchema } from '../types';
+// import { sfApiVersion } from '@modules/salesforce/src/config';
 
 export const CreateCaseInSalesforceSchema = z.object({
 	invoiceId: z.string(),
