@@ -15,13 +15,7 @@ import {
 	RuleTargetInput,
 } from 'aws-cdk-lib/aws-events';
 import { SqsQueue } from 'aws-cdk-lib/aws-events-targets';
-import {
-	Effect,
-	PolicyStatement,
-	Role,
-	ServicePrincipal,
-} from 'aws-cdk-lib/aws-iam';
-import { Queue } from 'aws-cdk-lib/aws-sqs';
+import { CfnQueuePolicy, Queue } from 'aws-cdk-lib/aws-sqs';
 import { nodeVersion } from './node-version';
 
 export class SalesforceEventBus extends GuStack {
@@ -75,22 +69,6 @@ export class SalesforceEventBus extends GuStack {
 			`arn:aws:sqs:eu-west-1:865473395570:salesforce-outbound-messages-${props.stage}`,
 		);
 
-		const eventBridgeTosfOutboundMessageSqsRole = new Role(
-			this,
-			'EventBridgeToSqsRole',
-			{
-				assumedBy: new ServicePrincipal('events.amazonaws.com'),
-			},
-		);
-
-		eventBridgeTosfOutboundMessageSqsRole.addToPolicy(
-			new PolicyStatement({
-				effect: Effect.ALLOW,
-				resources: [sfOutboundMessageQueue.queueArn],
-				actions: ['sqs:SendMessage'],
-			}),
-		);
-
 		const contactUpdateToSqsRule = new Rule(this, 'SfBusToContactUpdateQueue', {
 			description:
 				'Send an SF Contact Update event from the SF bus to the salesforce-outbound-messages-[STAGE] SQS queue for consumption by membership-workflow',
@@ -99,7 +77,6 @@ export class SalesforceEventBus extends GuStack {
 				detailType: ['Contact_Update__e'],
 			},
 			eventBus: salesforceBus,
-			role: eventBridgeTosfOutboundMessageSqsRole,
 		});
 
 		contactUpdateToSqsRule.addTarget(
@@ -115,19 +92,26 @@ export class SalesforceEventBus extends GuStack {
 			}),
 		);
 
-		const sendMessagePolicyStatement = new PolicyStatement({
-			effect: Effect.ALLOW,
-			resources: [sfOutboundMessageQueue.queueArn],
-			actions: ['sqs:SendMessage'],
-			conditions: {
-				ArnEquals: {
-					'aws:SourceArn': contactUpdateToSqsRule.ruleArn,
-				},
+		new CfnQueuePolicy(this, 'SalesforceOutboundQueuePolicy', {
+			policyDocument: {
+				Version: '2012-10-17',
+				Statement: [
+					{
+						Effect: 'Allow',
+						Principal: {
+							Service: 'events.amazonaws.com',
+						},
+						Action: 'sqs:SendMessage',
+						Resource: sfOutboundMessageQueue.queueArn,
+						Condition: {
+							ArnEquals: {
+								'aws:SourceArn': contactUpdateToSqsRule.ruleArn,
+							},
+						},
+					},
+				],
 			},
+			queues: [sfOutboundMessageQueue.queueUrl], // Must use queueUrl here
 		});
-
-		eventBridgeTosfOutboundMessageSqsRole.addToPolicy(
-			sendMessagePolicyStatement,
-		);
 	}
 }

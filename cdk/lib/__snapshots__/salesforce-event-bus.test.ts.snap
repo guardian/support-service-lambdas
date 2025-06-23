@@ -95,77 +95,6 @@ DLQ: https://eu-west-1.console.aws.amazon.com/sqs/v2/home?region=eu-west-1#/queu
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
-    "EventBridgeToSqsRoleD2A2E4F3": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "events.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "EventBridgeToSqsRoleDefaultPolicy64F2002E": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sqs:SendMessage",
-              "Effect": "Allow",
-              "Resource": "arn:aws:sqs:eu-west-1:865473395570:salesforce-outbound-messages-CODE",
-            },
-            {
-              "Action": "sqs:SendMessage",
-              "Condition": {
-                "ArnEquals": {
-                  "aws:SourceArn": {
-                    "Fn::GetAtt": [
-                      "SfBusToContactUpdateQueue75131C06",
-                      "Arn",
-                    ],
-                  },
-                },
-              },
-              "Effect": "Allow",
-              "Resource": "arn:aws:sqs:eu-west-1:865473395570:salesforce-outbound-messages-CODE",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "EventBridgeToSqsRoleDefaultPolicy64F2002E",
-        "Roles": [
-          {
-            "Ref": "EventBridgeToSqsRoleD2A2E4F3",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
     "SalesforceEventBusPlaceholder69393C1F": {
       "DependsOn": [
         "SalesforceEventBusPlaceholderServiceRoleDefaultPolicy699BD152",
@@ -377,6 +306,48 @@ DLQ: https://eu-west-1.console.aws.amazon.com/sqs/v2/home?region=eu-west-1#/queu
       },
       "Type": "AWS::IAM::Policy",
     },
+    "SalesforceOutboundQueuePolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "SfBusToContactUpdateQueue75131C06",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": "arn:aws:sqs:eu-west-1:865473395570:salesforce-outbound-messages-CODE",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "https://sqs.eu-west-1.",
+                {
+                  "Ref": "AWS::URLSuffix",
+                },
+                "/865473395570/salesforce-outbound-messages-CODE",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
     "SfBusToContactUpdateQueue75131C06": {
       "Properties": {
         "Description": "Send an SF Contact Update event from the SF bus to the salesforce-outbound-messages-[STAGE] SQS queue for consumption by membership-workflow",
@@ -389,12 +360,6 @@ DLQ: https://eu-west-1.console.aws.amazon.com/sqs/v2/home?region=eu-west-1#/queu
             {
               "prefix": "aws.partner/salesforce.com",
             },
-          ],
-        },
-        "RoleArn": {
-          "Fn::GetAtt": [
-            "EventBridgeToSqsRoleD2A2E4F3",
-            "Arn",
           ],
         },
         "State": "ENABLED",
@@ -589,77 +554,6 @@ DLQ: https://eu-west-1.console.aws.amazon.com/sqs/v2/home?region=eu-west-1#/queu
         "TreatMissingData": "ignore",
       },
       "Type": "AWS::CloudWatch::Alarm",
-    },
-    "EventBridgeToSqsRoleD2A2E4F3": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "events.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-    },
-    "EventBridgeToSqsRoleDefaultPolicy64F2002E": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sqs:SendMessage",
-              "Effect": "Allow",
-              "Resource": "arn:aws:sqs:eu-west-1:865473395570:salesforce-outbound-messages-PROD",
-            },
-            {
-              "Action": "sqs:SendMessage",
-              "Condition": {
-                "ArnEquals": {
-                  "aws:SourceArn": {
-                    "Fn::GetAtt": [
-                      "SfBusToContactUpdateQueue75131C06",
-                      "Arn",
-                    ],
-                  },
-                },
-              },
-              "Effect": "Allow",
-              "Resource": "arn:aws:sqs:eu-west-1:865473395570:salesforce-outbound-messages-PROD",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "EventBridgeToSqsRoleDefaultPolicy64F2002E",
-        "Roles": [
-          {
-            "Ref": "EventBridgeToSqsRoleD2A2E4F3",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
     },
     "SalesforceEventBusPlaceholder69393C1F": {
       "DependsOn": [
@@ -872,6 +766,48 @@ DLQ: https://eu-west-1.console.aws.amazon.com/sqs/v2/home?region=eu-west-1#/queu
       },
       "Type": "AWS::IAM::Policy",
     },
+    "SalesforceOutboundQueuePolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "SfBusToContactUpdateQueue75131C06",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": "arn:aws:sqs:eu-west-1:865473395570:salesforce-outbound-messages-PROD",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "https://sqs.eu-west-1.",
+                {
+                  "Ref": "AWS::URLSuffix",
+                },
+                "/865473395570/salesforce-outbound-messages-PROD",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
     "SfBusToContactUpdateQueue75131C06": {
       "Properties": {
         "Description": "Send an SF Contact Update event from the SF bus to the salesforce-outbound-messages-[STAGE] SQS queue for consumption by membership-workflow",
@@ -884,12 +820,6 @@ DLQ: https://eu-west-1.console.aws.amazon.com/sqs/v2/home?region=eu-west-1#/queu
             {
               "prefix": "aws.partner/salesforce.com",
             },
-          ],
-        },
-        "RoleArn": {
-          "Fn::GetAtt": [
-            "EventBridgeToSqsRoleD2A2E4F3",
-            "Arn",
           ],
         },
         "State": "ENABLED",
