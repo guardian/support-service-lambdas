@@ -6,6 +6,7 @@ exports[`The SalesforceEventBus stack matches the snapshot 1`] = `
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
+      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -17,6 +18,83 @@ exports[`The SalesforceEventBus stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
+    "DeadLetterQueueAlarm48D9D867": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "There is one or more event in the salesforce-event-bus dead letter queue (DLQ). Check that the rule corresponding to the failed message is correctly configured.
+DLQ: https://eu-west-1.console.aws.amazon.com/sqs/v2/home?region=eu-west-1#/queues/https%3A%2F%2Fsqs.eu-west-1.amazonaws.com%2F865473395570%2F",
+              {
+                "Fn::GetAtt": [
+                  "deadletterssalesforceeventbusqueue29BFA779",
+                  "QueueName",
+                ],
+              },
+            ],
+          ],
+        },
+        "AlarmName": "An event for CODE salesforce-event-bus was not processed",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "deadletterssalesforceeventbusqueue29BFA779",
+                "QueueName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 300,
+        "Statistic": "Maximum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "ignore",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
     "EventBridgeToSqsRoleD2A2E4F3": {
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -423,6 +501,7 @@ exports[`The SalesforceEventBus stack matches the snapshot 2`] = `
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
+      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -434,6 +513,83 @@ exports[`The SalesforceEventBus stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
+    "DeadLetterQueueAlarm48D9D867": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "There is one or more event in the salesforce-event-bus dead letter queue (DLQ). Check that the rule corresponding to the failed message is correctly configured.
+DLQ: https://eu-west-1.console.aws.amazon.com/sqs/v2/home?region=eu-west-1#/queues/https%3A%2F%2Fsqs.eu-west-1.amazonaws.com%2F865473395570%2F",
+              {
+                "Fn::GetAtt": [
+                  "deadletterssalesforceeventbusqueue29BFA779",
+                  "QueueName",
+                ],
+              },
+            ],
+          ],
+        },
+        "AlarmName": "An event for PROD salesforce-event-bus was not processed",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "deadletterssalesforceeventbusqueue29BFA779",
+                "QueueName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 300,
+        "Statistic": "Maximum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "ignore",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
     "EventBridgeToSqsRoleD2A2E4F3": {
       "Properties": {
         "AssumeRolePolicyDocument": {

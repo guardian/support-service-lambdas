@@ -1,7 +1,12 @@
+import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
+import {
+	ComparisonOperator,
+	TreatMissingData,
+} from 'aws-cdk-lib/aws-cloudwatch';
 import {
 	EventBus,
 	EventField,
@@ -46,6 +51,22 @@ export class SalesforceEventBus extends GuStack {
 		const deadLetterQueue = new Queue(this, `dead-letters-${app}-queue`, {
 			queueName: `dead-letters-${app}-queue-${props.stage}`,
 			retentionPeriod: Duration.days(14),
+		});
+
+		new GuAlarm(this, 'DeadLetterQueueAlarm', {
+			app: app,
+			alarmName: `An event for ${props.stage} ${app} was not processed`,
+			alarmDescription:
+				`There is one or more event in the ${app} dead letter queue (DLQ). ` +
+				'Check that the rule corresponding to the failed message is correctly configured.\n' +
+				`DLQ: https://eu-west-1.console.aws.amazon.com/sqs/v2/home?region=eu-west-1#/queues/https%3A%2F%2Fsqs.eu-west-1.amazonaws.com%2F865473395570%2F${deadLetterQueue.queueName}`,
+			metric: deadLetterQueue.metricApproximateNumberOfMessagesVisible(),
+			threshold: 1,
+			evaluationPeriods: 1,
+			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+			treatMissingData: TreatMissingData.IGNORE,
+			snsTopicName: `alarms-handler-topic-${this.stage}`,
+			actionsEnabled: this.stage === 'PROD',
 		});
 
 		const sfOutboundMessageQueue = Queue.fromQueueArn(
