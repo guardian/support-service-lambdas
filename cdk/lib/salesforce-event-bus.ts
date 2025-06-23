@@ -2,9 +2,20 @@ import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
-import * as events from 'aws-cdk-lib/aws-events';
-import * as targets from 'aws-cdk-lib/aws-events-targets';
-import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import {
+	EventBus,
+	EventField,
+	Match,
+	Rule,
+	RuleTargetInput,
+} from 'aws-cdk-lib/aws-events';
+import { SqsQueue } from 'aws-cdk-lib/aws-events-targets';
+import {
+	Effect,
+	PolicyStatement,
+	Role,
+	ServicePrincipal,
+} from 'aws-cdk-lib/aws-iam';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { nodeVersion } from './node-version';
 
@@ -24,7 +35,7 @@ export class SalesforceEventBus extends GuStack {
 			functionName: `${app}-placeholder-${this.stage}`,
 		});
 
-		const salesforceBus = events.EventBus.fromEventBusArn(
+		const salesforceBus = EventBus.fromEventBusArn(
 			this,
 			'SalesforceBus',
 			this.stage === 'PROD'
@@ -39,35 +50,46 @@ export class SalesforceEventBus extends GuStack {
 
 		const sfOutboundMessageQueue = Queue.fromQueueArn(
 			this,
-			'ExistingOutboundMessageQueue',
+			'SalesforceOutboundMessageQueue',
 			`arn:aws:sqs:eu-west-1:865473395570:salesforce-outbound-messages-${props.stage}`,
 		);
 
-		const contactUpdateToSqsRule = new events.Rule(
+		const eventBridgeTosfOutboundMessageSqsRole = new Role(
 			this,
-			'SfBusToContactUpdateQueue',
+			'EventBridgeToSqsRole',
 			{
-				description:
-					'Send an SF Contact Update event from the SF bus to the salesforce-outbound-messages-[STAGE] SQS queue for consumption by membership-workflow',
-				eventPattern: {
-					source: events.Match.prefix('aws.partner/salesforce.com'),
-					detailType: ['Contact_Update__e'],
-				},
-				eventBus: salesforceBus,
+				assumedBy: new ServicePrincipal('events.amazonaws.com'),
 			},
 		);
 
+		eventBridgeTosfOutboundMessageSqsRole.addToPolicy(
+			new PolicyStatement({
+				effect: Effect.ALLOW,
+				resources: [sfOutboundMessageQueue.queueArn],
+				actions: ['sqs:SendMessage'],
+			}),
+		);
+
+		const contactUpdateToSqsRule = new Rule(this, 'SfBusToContactUpdateQueue', {
+			description:
+				'Send an SF Contact Update event from the SF bus to the salesforce-outbound-messages-[STAGE] SQS queue for consumption by membership-workflow',
+			eventPattern: {
+				source: Match.prefix('aws.partner/salesforce.com'),
+				detailType: ['Contact_Update__e'],
+			},
+			eventBus: salesforceBus,
+			role: eventBridgeTosfOutboundMessageSqsRole,
+		});
+
 		contactUpdateToSqsRule.addTarget(
-			new targets.SqsQueue(sfOutboundMessageQueue, {
+			new SqsQueue(sfOutboundMessageQueue, {
 				deadLetterQueue: deadLetterQueue,
 				maxEventAge: Duration.hours(2),
 				retryAttempts: 2,
-				message: events.RuleTargetInput.fromObject({
-					//   "InputPathsMap": { "contactId": "$.detail.payload.Contact_ID__c" }
-					//   "InputTemplate": "{\"contactId\": <contactId>}"
-					contactId: events.EventField.fromPath(
-						'$.detail.payload.Contact_ID__c',
-					),
+				message: RuleTargetInput.fromObject({
+					//   "InputPathsMap": { "detail-payload-Contact_ID__c": "$.detail.payload.Contact_ID__c" }
+					//   "InputTemplate": "{\"contactId\": <detail-payload-Contact_ID__c>}"
+					contactId: EventField.fromPath('$.detail.payload.Contact_ID__c'),
 				}),
 			}),
 		);

@@ -17,6 +17,62 @@ exports[`The SalesforceEventBus stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
+    "EventBridgeToSqsRoleD2A2E4F3": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "EventBridgeToSqsRoleDefaultPolicy64F2002E": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:SendMessage",
+              "Effect": "Allow",
+              "Resource": "arn:aws:sqs:eu-west-1:865473395570:salesforce-outbound-messages-CODE",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "EventBridgeToSqsRoleDefaultPolicy64F2002E",
+        "Roles": [
+          {
+            "Ref": "EventBridgeToSqsRoleD2A2E4F3",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "SalesforceEventBusPlaceholder69393C1F": {
       "DependsOn": [
         "SalesforceEventBusPlaceholderServiceRoleDefaultPolicy699BD152",
@@ -242,6 +298,12 @@ exports[`The SalesforceEventBus stack matches the snapshot 1`] = `
             },
           ],
         },
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "EventBridgeToSqsRoleD2A2E4F3",
+            "Arn",
+          ],
+        },
         "State": "ENABLED",
         "Targets": [
           {
@@ -357,6 +419,62 @@ exports[`The SalesforceEventBus stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
+    "EventBridgeToSqsRoleD2A2E4F3": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "EventBridgeToSqsRoleDefaultPolicy64F2002E": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:SendMessage",
+              "Effect": "Allow",
+              "Resource": "arn:aws:sqs:eu-west-1:865473395570:salesforce-outbound-messages-PROD",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "EventBridgeToSqsRoleDefaultPolicy64F2002E",
+        "Roles": [
+          {
+            "Ref": "EventBridgeToSqsRoleD2A2E4F3",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "SalesforceEventBusPlaceholder69393C1F": {
       "DependsOn": [
         "SalesforceEventBusPlaceholderServiceRoleDefaultPolicy699BD152",
@@ -580,6 +698,12 @@ exports[`The SalesforceEventBus stack matches the snapshot 2`] = `
             {
               "prefix": "aws.partner/salesforce.com",
             },
+          ],
+        },
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "EventBridgeToSqsRoleD2A2E4F3",
+            "Arn",
           ],
         },
         "State": "ENABLED",
