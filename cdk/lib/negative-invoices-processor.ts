@@ -183,6 +183,33 @@ export class NegativeInvoicesProcessor extends GuStack {
 			},
 		);
 
+		const createCaseInSalesforceLambda = new GuLambdaFunction(
+			this,
+			'create-case-in-salesforce-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-create-case-in-salesforce-${this.stage}`,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+				},
+				handler: 'createCaseInSalesforce.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['secretsmanager:GetSecretValue'],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:DEV/Salesforce/ConnectedApp/AwsConnectorSandbox-oO8Phf`,
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:DEV/Salesforce/User/integrationapiuser-rvxxrG`,
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:PROD/Salesforce/ConnectedApp/NegativeInvoicesProcessor-WUdrKa`,
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:PROD/Salesforce/User/NegativeInvoicesProcessorAPIUser-UJ1SwZ`,
+						],
+					}),
+				],
+			},
+		);
+
 		const getInvoicesLambdaTask = new LambdaInvoke(this, 'Get invoices', {
 			lambdaFunction: getInvoicesLambda,
 			outputPath: '$.Payload',
