@@ -916,6 +916,20 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 1`] = `
         "Statistic": "Sum",
         "Tags": [
           {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "WriteOffInvoicesLambdaED9D09A3",
+                  },
+                ],
+              ],
+            },
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1855,6 +1869,20 @@ exports[`The WriteOffUnpaidInvoices stack matches the snapshot 2`] = `
         "Period": 300,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "WriteOffInvoicesLambdaED9D09A3",
+                  },
+                ],
+              ],
+            },
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",

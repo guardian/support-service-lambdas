@@ -8,6 +8,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       "GuStringParameter",
       "GuStringParameter",
       "GuStringParameter",
+      "GuStringParameter",
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
       "GuAlarm",
@@ -21,6 +22,10 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       "Default": "/account/services/artifact.bucket",
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+    "alarmshandlerbackupemailaddress": {
+      "Description": "Alarm email address to use if the alarms handler itself fails",
+      "Type": "String",
     },
     "alarmshandlermobileaccountrolearn": {
       "Description": "ARN of role in the mobile account which allows cloudwatch:ListTagsForResource",
@@ -59,7 +64,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
                 ":",
                 {
                   "Fn::GetAtt": [
-                    "alarmshandlertopic003C974E",
+                    "alarmshandleremailtopic52F6F612",
                     "TopicName",
                   ],
                 },
@@ -128,6 +133,42 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "alarmshandleremailtopic52F6F612": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "TopicName": "alarms-handler-email-topic-CODE",
+      },
+      "Type": "AWS::SNS::Topic",
+    },
+    "alarmshandleremailtopicTokenSubscription191C59777": {
+      "Properties": {
+        "Endpoint": {
+          "Ref": "alarmshandlerbackupemailaddress",
+        },
+        "Protocol": "email",
+        "TopicArn": {
+          "Ref": "alarmshandleremailtopic52F6F612",
+        },
+      },
+      "Type": "AWS::SNS::Subscription",
     },
     "alarmshandlerlambda383D2BAA": {
       "DependsOn": [
@@ -592,7 +633,13 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
                 {
                   "Ref": "AWS::AccountId",
                 },
-                ":alarms-handler-topic-CODE",
+                ":",
+                {
+                  "Fn::GetAtt": [
+                    "alarmshandleremailtopic52F6F612",
+                    "TopicName",
+                  ],
+                },
               ],
             ],
           },
@@ -1036,6 +1083,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       "GuStringParameter",
       "GuStringParameter",
       "GuStringParameter",
+      "GuStringParameter",
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
       "GuAlarm",
@@ -1049,6 +1097,10 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       "Default": "/account/services/artifact.bucket",
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+    "alarmshandlerbackupemailaddress": {
+      "Description": "Alarm email address to use if the alarms handler itself fails",
+      "Type": "String",
     },
     "alarmshandlermobileaccountrolearn": {
       "Description": "ARN of role in the mobile account which allows cloudwatch:ListTagsForResource",
@@ -1087,7 +1139,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
                 ":",
                 {
                   "Fn::GetAtt": [
-                    "alarmshandlertopic003C974E",
+                    "alarmshandleremailtopic52F6F612",
                     "TopicName",
                   ],
                 },
@@ -1156,6 +1208,42 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "alarmshandleremailtopic52F6F612": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "TopicName": "alarms-handler-email-topic-PROD",
+      },
+      "Type": "AWS::SNS::Topic",
+    },
+    "alarmshandleremailtopicTokenSubscription191C59777": {
+      "Properties": {
+        "Endpoint": {
+          "Ref": "alarmshandlerbackupemailaddress",
+        },
+        "Protocol": "email",
+        "TopicArn": {
+          "Ref": "alarmshandleremailtopic52F6F612",
+        },
+      },
+      "Type": "AWS::SNS::Subscription",
     },
     "alarmshandlerlambda383D2BAA": {
       "DependsOn": [
@@ -1620,7 +1708,13 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
                 {
                   "Ref": "AWS::AccountId",
                 },
-                ":alarms-handler-topic-PROD",
+                ":",
+                {
+                  "Fn::GetAtt": [
+                    "alarmshandleremailtopic52F6F612",
+                    "TopicName",
+                  ],
+                },
               ],
             ],
           },

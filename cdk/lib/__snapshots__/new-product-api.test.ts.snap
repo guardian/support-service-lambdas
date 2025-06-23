@@ -8,8 +8,6 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
       "GuLambdaFunction",
       "GuLambdaFunction",
       "GuApiGatewayWithLambdaByPath",
-      "GuAlarm",
-      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -65,7 +63,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
                 {
                   "Ref": "AWS::AccountId",
                 },
-                ":alarms-handler-topic-PROD",
+                ":alarms-handler-topic-CODE",
               ],
             ],
           },
@@ -85,6 +83,24 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
         "Period": 900,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "addsubscriptionA4705116",
+                  },
+                  " lambda:",
+                  {
+                    "Ref": "productcatalog39C6E2D1",
+                  },
+                ],
+              ],
+            },
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -122,7 +138,7 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
                 {
                   "Ref": "AWS::AccountId",
                 },
-                ":alarms-handler-topic-PROD",
+                ":alarms-handler-topic-CODE",
               ],
             ],
           },
@@ -142,6 +158,24 @@ exports[`The NewProductApi stack matches the snapshot 1`] = `
         "Period": 60,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "addsubscriptionA4705116",
+                  },
+                  " lambda:",
+                  {
+                    "Ref": "productcatalog39C6E2D1",
+                  },
+                ],
+              ],
+            },
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -1465,8 +1499,6 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
       "GuLambdaFunction",
       "GuLambdaFunction",
       "GuApiGatewayWithLambdaByPath",
-      "GuAlarm",
-      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -1543,6 +1575,24 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
         "Statistic": "Sum",
         "Tags": [
           {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "addsubscriptionA4705116",
+                  },
+                  " lambda:",
+                  {
+                    "Ref": "productcatalog39C6E2D1",
+                  },
+                ],
+              ],
+            },
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1599,6 +1649,24 @@ exports[`The NewProductApi stack matches the snapshot 2`] = `
         "Period": 60,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "addsubscriptionA4705116",
+                  },
+                  " lambda:",
+                  {
+                    "Ref": "productcatalog39C6E2D1",
+                  },
+                ],
+              ],
+            },
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
