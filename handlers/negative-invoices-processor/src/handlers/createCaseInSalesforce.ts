@@ -1,10 +1,18 @@
-import { stageFromEnvironment } from '@modules/stage';
-import { doCreditBalanceRefund } from '@modules/zuora/doCreditBalanceRefund';
-import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { PaymentMethod } from '@modules/zuora/zuoraSchemas';
-import dayjs from 'dayjs';
 import { z } from 'zod';
 import { PaymentMethodSchema } from '../types';
+// import { sfApiVersion } from '@modules/salesforce/src/config';
+import { getSecretValue } from '@modules/secrets-manager/getSecret';
+import { stageFromEnvironment } from '@modules/stage';
+import {
+	getSalesforceSecretNames,
+	ConnectedAppSecret,
+	ApiUserSecret,
+} from '../secrets';
+import {
+	type SfConnectedAppAuth,
+	type SfApiUserAuth,
+	doSfAuth,
+} from '@modules/salesforce/src/auth';
 
 export const CreateCaseInSalesforceSchema = z.object({
 	invoiceId: z.string(),
@@ -32,33 +40,33 @@ export type CreateCaseInSalesforce = z.infer<
 export const handler = async (event: CreateCaseInSalesforce) => {
 	try {
 		const parsedEvent = CreateCaseInSalesforceSchema.parse(event);
-		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
-		const paymentMethodToRefundTo = getPaymentMethodToRefundTo(
-			parsedEvent.activePaymentMethods ?? [],
-		);
-		if (!paymentMethodToRefundTo) {
-			throw new Error('No active payment method found to refund to.');
-		}
-		const body = JSON.stringify({
-			AccountId: parsedEvent.accountId,
-			Amount: Math.abs(parsedEvent.invoiceBalance),
-			SourceType: 'CreditBalance',
-			Type: 'External',
-			RefundDate: dayjs().format('YYYY-MM-DD'), //today
-			MethodType: paymentMethodToRefundTo.type,
-		});
 
-		const creditBalanceRefundAttempt = await doCreditBalanceRefund(
-			zuoraClient,
-			body,
+		const secretNames = getSalesforceSecretNames(stageFromEnvironment());
+
+		const { authUrl, clientId, clientSecret } =
+			await getSecretValue<ConnectedAppSecret>(
+				secretNames.connectedAppSecretName,
+			);
+
+		const { username, password, token } = await getSecretValue<ApiUserSecret>(
+			secretNames.apiUserSecretName,
 		);
+
+		const sfConnectedAppAuth: SfConnectedAppAuth = { clientId, clientSecret };
+		const sfApiUserAuth: SfApiUserAuth = {
+			url: authUrl,
+			grant_type: 'password',
+			username,
+			password,
+			token,
+		};
+
+		const sfAuthResponse = await doSfAuth(sfApiUserAuth, sfConnectedAppAuth);
+
+		console.log('Salesforce Auth Response:', sfAuthResponse);
 
 		return {
 			...parsedEvent,
-			creditBalanceRefundAttempt: {
-				...creditBalanceRefundAttempt,
-				paymentMethod: paymentMethodToRefundTo,
-			},
 		};
 	} catch (error) {
 		return {
@@ -70,7 +78,35 @@ export const handler = async (event: CreateCaseInSalesforce) => {
 	}
 };
 
-function getPaymentMethodToRefundTo(paymentMethods: PaymentMethod[]) {
-	const defaultMethod = paymentMethods.find((pm) => pm.isDefault);
-	return defaultMethod ?? paymentMethods[0];
-}
+// interface SalesforceCaseInput {
+// 	Subject: string;
+// 	Description?: string;
+// 	Origin?: string;
+// 	Status?: string;
+// }
+
+// export async function createSalesforceCase(
+// 	caseData: SalesforceCaseInput,
+// 	accessToken: string,
+// 	instanceUrl: string,
+// ): Promise<any> {
+// 	const url = `${instanceUrl}/services/data/${sfApiVersion()}/sobjects/Case`;
+
+// 	const response = await fetch(url, {
+// 		method: 'POST',
+// 		headers: {
+// 			Authorization: `Bearer ${accessToken}`,
+// 			'Content-Type': 'application/json',
+// 		},
+// 		body: JSON.stringify(caseData),
+// 	});
+
+// 	if (!response.ok) {
+// 		const errorBody = await response.json();
+// 		throw new Error(
+// 			`Error updating billing account in Salesforce: ${JSON.stringify(errorBody)}`,
+// 		);
+// 	}
+
+// 	return response.json();
+// }
