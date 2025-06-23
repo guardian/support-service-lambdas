@@ -216,7 +216,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 		}).addRetry({
 			errors: ['States.ALL'],
 			interval: Duration.seconds(10),
-			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
+			maxAttempts: 2,
 		});
 
 		const checkForActiveSubLambdaTask = new LambdaInvoke(
@@ -229,7 +229,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 		).addRetry({
 			errors: ['States.ALL'],
 			interval: Duration.seconds(10),
-			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
+			maxAttempts: 2,
 		});
 
 		const getPaymentMethodsLambdaTask = new LambdaInvoke(
@@ -242,7 +242,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 		).addRetry({
 			errors: ['States.ALL'],
 			interval: Duration.seconds(10),
-			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
+			maxAttempts: 2,
 		});
 
 		const applyCreditToAccountBalanceLambdaTask = new LambdaInvoke(
@@ -255,7 +255,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 		).addRetry({
 			errors: ['States.ALL'],
 			interval: Duration.seconds(10),
-			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
+			maxAttempts: 2,
 		});
 
 		const doCreditBalanceRefundLambdaTask = new LambdaInvoke(
@@ -268,7 +268,20 @@ export class NegativeInvoicesProcessor extends GuStack {
 		).addRetry({
 			errors: ['States.ALL'],
 			interval: Duration.seconds(10),
-			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
+			maxAttempts: 2,
+		});
+
+		const createCaseInSalesforceLambdaTask = new LambdaInvoke(
+			this,
+			'Create case in Salesforce',
+			{
+				lambdaFunction: createCaseInSalesforceLambda,
+				outputPath: '$.Payload',
+			},
+		).addRetry({
+			errors: ['States.ALL'],
+			interval: Duration.seconds(10),
+			maxAttempts: 2,
 		});
 
 		const invoiceProcessorMap = new Map(this, 'Invoice processor map', {
@@ -308,9 +321,9 @@ export class NegativeInvoicesProcessor extends GuStack {
 			.otherwise(new Pass(this, 'End 1'));
 
 		invoiceProcessorMap.iterator(
-			applyCreditToAccountBalanceLambdaTask.next(
-				CreditAppliedSuccessfullyChoice,
-			),
+			createCaseInSalesforceLambdaTask
+				.next(applyCreditToAccountBalanceLambdaTask)
+				.next(CreditAppliedSuccessfullyChoice),
 		);
 
 		const definitionBody = DefinitionBody.fromChainable(
