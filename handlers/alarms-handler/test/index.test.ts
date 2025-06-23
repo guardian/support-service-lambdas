@@ -124,7 +124,7 @@ describe('Handler', () => {
 		getTags.mockResolvedValueOnce({
 			App: 'mock-app',
 			DiagnosticLinks: ['lambda:mock-app-CODE', 'lambda:another-app-CODE'].join(
-				',',
+				' ',
 			),
 		});
 

@@ -42,7 +42,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
     },
     "alarm05E1DB6A1": {
       "Properties": {
-        "ActionsEnabled": true,
+        "ActionsEnabled": false,
         "AlarmActions": [
           {
             "Fn::Join": [
@@ -91,6 +91,20 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
         "Statistic": "Sum",
         "Tags": [
           {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "getbillingaccountslambdaEDDA46BF",
+                  },
+                ],
+              ],
+            },
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -114,7 +128,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
     },
     "alarm11F7E5553": {
       "Properties": {
-        "ActionsEnabled": true,
+        "ActionsEnabled": false,
         "AlarmActions": [
           {
             "Fn::Join": [
@@ -163,6 +177,20 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
         "Statistic": "Sum",
         "Tags": [
           {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "updatezuorabillingaccountlambda6EF8BCFE",
+                  },
+                ],
+              ],
+            },
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -186,7 +214,7 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
     },
     "alarm2999D08C3": {
       "Properties": {
-        "ActionsEnabled": true,
+        "ActionsEnabled": false,
         "AlarmActions": [
           {
             "Fn::Join": [
@@ -234,6 +262,20 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 1`] = `
         "Period": 60,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "updatesfbillingaccountslambda98285844",
+                  },
+                ],
+              ],
+            },
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -1452,6 +1494,20 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
         "Statistic": "Sum",
         "Tags": [
           {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "getbillingaccountslambdaEDDA46BF",
+                  },
+                ],
+              ],
+            },
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1524,6 +1580,20 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
         "Statistic": "Sum",
         "Tags": [
           {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "updatezuorabillingaccountlambda6EF8BCFE",
+                  },
+                ],
+              ],
+            },
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1595,6 +1665,20 @@ exports[`The zuora-salesforce-link-remover stack matches the snapshot 2`] = `
         "Period": 60,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "updatesfbillingaccountslambda98285844",
+                  },
+                ],
+              ],
+            },
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",

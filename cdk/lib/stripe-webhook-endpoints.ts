@@ -1,6 +1,5 @@
 import path from 'path';
 import { GuApiGatewayWithLambdaByPath } from '@guardian/cdk';
-import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
@@ -12,6 +11,7 @@ import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { LoggingFormat, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { CfnInclude } from 'aws-cdk-lib/cloudformation-include';
+import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 
 export interface StripeWebhookEndpointsProps extends GuStackProps {
 	stack: string;
@@ -114,7 +114,7 @@ export class StripeWebhookEndpoints extends GuStack {
 		const alarmDescription = (description: string) =>
 			`Impact - ${description}. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit`;
 
-		new GuAlarm(this, 'ApiGateway4XXAlarmCDK', {
+		new SrLambdaAlarm(this, 'ApiGateway4XXAlarmCDK', {
 			app,
 			alarmName: alarmName('API gateway 4XX response'),
 			alarmDescription: alarmDescription(
@@ -122,8 +122,10 @@ export class StripeWebhookEndpoints extends GuStack {
 			),
 			evaluationPeriods: 1,
 			threshold: 1,
-			snsTopicName: 'conversion-dev',
-			actionsEnabled: this.stage === 'PROD',
+			lambdaFunctionNames: [
+				paymentIntentIssuesLambda.functionName,
+				customerUpdatedLambda.functionName,
+			],
 			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 			metric: new Metric({
 				metricName: '4XXError',
@@ -136,14 +138,16 @@ export class StripeWebhookEndpoints extends GuStack {
 			}),
 		});
 
-		new GuAlarm(this, 'ApiGateway5XXAlarmCDK', {
+		new SrLambdaAlarm(this, 'ApiGateway5XXAlarmCDK', {
 			app,
 			alarmName: alarmName('API gateway 5XX error'),
 			alarmDescription: `stripe-webhook-endpoints-${this.stage} exceeded 1% 5XX error rate`,
 			evaluationPeriods: 1,
 			threshold: 1,
-			actionsEnabled: this.stage === 'PROD',
-			snsTopicName: 'conversion-dev',
+			lambdaFunctionNames: [
+				paymentIntentIssuesLambda.functionName,
+				customerUpdatedLambda.functionName,
+			],
 			comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
 			metric: new Metric({
 				metricName: '5XXError',

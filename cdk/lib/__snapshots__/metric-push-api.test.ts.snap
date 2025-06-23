@@ -8,7 +8,6 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
       "GuApiLambda",
       "GuPutCloudwatchMetricsPolicy",
       "GuAlarm",
-      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -83,6 +82,20 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
         "Period": 60,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "metricpushapilambda0761BDD0",
+                  },
+                ],
+              ],
+            },
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -898,7 +911,6 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
       "GuApiLambda",
       "GuPutCloudwatchMetricsPolicy",
       "GuAlarm",
-      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -973,6 +985,20 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
         "Period": 60,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "metricpushapilambda0761BDD0",
+                  },
+                ],
+              ],
+            },
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",

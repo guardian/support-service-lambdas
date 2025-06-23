@@ -6,7 +6,6 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 1`] =
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
-      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -133,6 +132,20 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 1`] =
         "Period": 3600,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "singlecontributionsalesforcewriteslambda1B9830FE",
+                  },
+                ],
+              ],
+            },
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -566,7 +579,6 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 2`] =
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
-      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -693,6 +705,20 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 2`] =
         "Period": 3600,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "singlecontributionsalesforcewriteslambda1B9830FE",
+                  },
+                ],
+              ],
+            },
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
