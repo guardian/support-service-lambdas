@@ -46,8 +46,6 @@ const query = `
         LEFT JOIN datatech-fivetran.zuora.subscription new_sub ON (new_sub.name = orig_sub.name AND new_sub.version = orig_sub.version + 1)
         WHERE
             ame.type = "Cancellation"
-            AND DATE(ame.created_date) >= DATE_SUB(CURRENT_DATE, INTERVAL 5 DAY)
-            AND DATE(ame.created_date) <= DATE_SUB(CURRENT_DATE, INTERVAL 1 DAY)
         )
     ,
 
