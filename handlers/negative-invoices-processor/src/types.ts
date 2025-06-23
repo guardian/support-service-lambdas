@@ -11,3 +11,10 @@ export const BigQueryRecordSchema = z
 export type BigQueryRecord = z.infer<typeof BigQueryRecordSchema>;
 
 export const BigQueryResultDataSchema = z.array(BigQueryRecordSchema);
+
+export const PaymentMethodSchema = z.object({
+	id: z.string(),
+	status: z.string(),
+	type: z.string(),
+	isDefault: z.boolean(),
+});

@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 import { z } from 'zod';
 import { PaymentMethodSchema } from '../types';
 
-export const DoCreditBalanceRefundSchema = z.object({
+export const CreateCaseInSalesforceSchema = z.object({
 	invoiceId: z.string(),
 	accountId: z.string(),
 	invoiceNumber: z.string(),
@@ -17,13 +17,21 @@ export const DoCreditBalanceRefundSchema = z.object({
 	}),
 	hasActivePaymentMethod: z.boolean().optional(),
 	activePaymentMethods: z.array(PaymentMethodSchema).optional(),
+	creditBalanceRefundAttempt: z
+		.object({
+			Success: z.boolean(),
+			paymentMethod: PaymentMethodSchema,
+		})
+		.optional(),
 });
 
-export type DoCreditBalanceRefund = z.infer<typeof DoCreditBalanceRefundSchema>;
+export type CreateCaseInSalesforce = z.infer<
+	typeof CreateCaseInSalesforceSchema
+>;
 
-export const handler = async (event: DoCreditBalanceRefund) => {
+export const handler = async (event: CreateCaseInSalesforce) => {
 	try {
-		const parsedEvent = DoCreditBalanceRefundSchema.parse(event);
+		const parsedEvent = CreateCaseInSalesforceSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const paymentMethodToRefundTo = getPaymentMethodToRefundTo(
 			parsedEvent.activePaymentMethods ?? [],
