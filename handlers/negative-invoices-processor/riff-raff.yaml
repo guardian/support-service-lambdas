@@ -25,4 +25,5 @@ deployments:
         - negative-invoices-processor-get-payment-methods-
         - negative-invoices-processor-apply-credit-to-account-balance-
         - negative-invoices-processor-do-credit-balance-refund-
+        - negative-invoices-processor-create-case-in-salesforce-
     dependencies: [negative-invoices-processor-cloudformation]
