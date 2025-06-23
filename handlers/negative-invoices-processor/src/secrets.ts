@@ -11,9 +11,9 @@ export function getSalesforceSecretNames(stage: Stage): SecretNames {
 		case 'PROD':
 			return {
 				apiUserSecretName:
-					'PROD/Salesforce/User/NegativeInvoiceProcessorAPIUser',
+					'PROD/Salesforce/User/NegativeInvoicesProcessorAPIUser',
 				connectedAppSecretName:
-					'PROD/Salesforce/ConnectedApp/NegativeInvoiceProcessor',
+					'PROD/Salesforce/ConnectedApp/NegativeInvoicesProcessor',
 			};
 		default:
 			return {
