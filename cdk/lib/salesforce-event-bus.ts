@@ -95,8 +95,6 @@ export class SalesforceEventBus extends GuStack {
 		);
 
 		const sendMessagePolicyStatement = new PolicyStatement({
-			sid: `Allow Salesforce Event Bus to send messages to the salesforce-outbound-messages queue`,
-			principals: [new ServicePrincipal('events.amazonaws.com')],
 			effect: Effect.ALLOW,
 			resources: [sfOutboundMessageQueue.queueArn],
 			actions: ['sqs:SendMessage'],
@@ -106,7 +104,9 @@ export class SalesforceEventBus extends GuStack {
 				},
 			},
 		});
-
-		sfOutboundMessageQueue.addToResourcePolicy(sendMessagePolicyStatement);
+		
+		eventBridgeTosfOutboundMessageSqsRole.addToPolicy(
+			sendMessagePolicyStatement,
+		);
 	}
 }

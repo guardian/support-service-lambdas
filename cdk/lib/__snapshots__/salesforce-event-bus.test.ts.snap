@@ -61,6 +61,21 @@ exports[`The SalesforceEventBus stack matches the snapshot 1`] = `
               "Effect": "Allow",
               "Resource": "arn:aws:sqs:eu-west-1:865473395570:salesforce-outbound-messages-CODE",
             },
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "SfBusToContactUpdateQueue75131C06",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Resource": "arn:aws:sqs:eu-west-1:865473395570:salesforce-outbound-messages-CODE",
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -460,6 +475,21 @@ exports[`The SalesforceEventBus stack matches the snapshot 2`] = `
           "Statement": [
             {
               "Action": "sqs:SendMessage",
+              "Effect": "Allow",
+              "Resource": "arn:aws:sqs:eu-west-1:865473395570:salesforce-outbound-messages-PROD",
+            },
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "SfBusToContactUpdateQueue75131C06",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
               "Effect": "Allow",
               "Resource": "arn:aws:sqs:eu-west-1:865473395570:salesforce-outbound-messages-PROD",
             },
