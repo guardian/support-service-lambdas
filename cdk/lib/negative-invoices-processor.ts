@@ -109,18 +109,18 @@ export class NegativeInvoicesProcessor extends GuStack {
 			},
 		);
 
-		const checkForActivePaymentMethodLambda = new GuLambdaFunction(
+		const getPaymentMethodsLambda = new GuLambdaFunction(
 			this,
-			'check-for-active-payment-method-lambda',
+			'get-payment-methods-lambda',
 			{
 				app: appName,
-				functionName: `${appName}-check-for-active-payment-method-${this.stage}`,
+				functionName: `${appName}-get-payment-methods-${this.stage}`,
 				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
 				},
-				handler: 'checkForActivePaymentMethod.handler',
+				handler: 'getPaymentMethods.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
 				initialPolicy: [
@@ -159,6 +159,30 @@ export class NegativeInvoicesProcessor extends GuStack {
 			},
 		);
 
+		const doCreditBalanceRefundLambda = new GuLambdaFunction(
+			this,
+			'do-credit-balance-refund-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-do-credit-balance-refund-${this.stage}`,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+				},
+				handler: 'doCreditBalanceRefund.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['secretsmanager:GetSecretValue'],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+						],
+					}),
+				],
+			},
+		);
+
 		const getInvoicesLambdaTask = new LambdaInvoke(this, 'Get invoices', {
 			lambdaFunction: getInvoicesLambda,
 			outputPath: '$.Payload',
@@ -181,11 +205,11 @@ export class NegativeInvoicesProcessor extends GuStack {
 			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
 		});
 
-		const checkForActivePaymentMethodLambdaTask = new LambdaInvoke(
+		const getPaymentMethodsLambdaTask = new LambdaInvoke(
 			this,
-			'Check for Active Payment Method',
+			'Get Payment Methods',
 			{
-				lambdaFunction: checkForActivePaymentMethodLambda,
+				lambdaFunction: getPaymentMethodsLambda,
 				outputPath: '$.Payload',
 			},
 		).addRetry({
@@ -207,6 +231,19 @@ export class NegativeInvoicesProcessor extends GuStack {
 			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
 		});
 
+		const doCreditBalanceRefundLambdaTask = new LambdaInvoke(
+			this,
+			'Do credit balance refund',
+			{
+				lambdaFunction: doCreditBalanceRefundLambda,
+				outputPath: '$.Payload',
+			},
+		).addRetry({
+			errors: ['States.ALL'],
+			interval: Duration.seconds(10),
+			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
+		});
+
 		const invoiceProcessorMap = new Map(this, 'Invoice processor map', {
 			maxConcurrency: 1,
 			itemsPath: JsonPath.stringAt('$.invoices'),
@@ -219,16 +256,14 @@ export class NegativeInvoicesProcessor extends GuStack {
 		)
 			.when(
 				Condition.booleanEquals('$.hasActivePaymentMethod', true),
-				new Pass(this, 'do refund lambda will go here'),
+				doCreditBalanceRefundLambdaTask,
 			)
 			.otherwise(new Pass(this, 'check for valid email lambda will go here'));
 
 		const hasActiveSubChoice = new Choice(this, 'Has active sub?')
 			.when(
 				Condition.booleanEquals('$.hasActiveSub', false),
-				checkForActivePaymentMethodLambdaTask.next(
-					hasActivePaymentMethodChoice,
-				),
+				getPaymentMethodsLambdaTask.next(hasActivePaymentMethodChoice),
 			)
 			.otherwise(new Pass(this, 'End 2'));
 
@@ -245,7 +280,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 			)
 			.otherwise(new Pass(this, 'End 1'));
 
-		invoiceProcessorMap.itemProcessor(
+		invoiceProcessorMap.iterator(
 			applyCreditToAccountBalanceLambdaTask.next(
 				CreditAppliedSuccessfullyChoice,
 			),
