@@ -12,6 +12,8 @@ A generic dead letter queue `dead-letters-salesforce-event-bus-queue-<STAGE>` is
 
 When Eventbridge sends events to this DLQ the attributes will include the error code and message, which can be used to determine the cause of the failure.
 
+<img width="739" alt="Screenshot 2025-06-23 at 17 28 27" src="https://github.com/user-attachments/assets/0dac6e6a-8fc1-4ccc-93da-8cd505cc0103" />
+
 An alarm is activated when there is at least one item in the DLQ.
 
 ### Implementation Steps
