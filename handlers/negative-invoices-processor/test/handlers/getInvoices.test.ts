@@ -1,4 +1,6 @@
 import { getCODEData } from '../../src/handlers/getInvoices';
+import { getPRODData } from '../../src/handlers/getInvoices';
+import { InvoiceRecordsArraySchema, InvoiceSchema } from '../../src/types';
 import { CODEDataMockQueryResponse } from './data/CODEDataMockQueryResponse';
 
 describe('getCODEData', () => {
@@ -20,10 +22,43 @@ describe('getCODEData', () => {
 	it('should return records with expected fields', async () => {
 		const data = await getCODEData();
 		if (data.length > 0) {
-			expect(data[0]).toHaveProperty('id');
-			expect(data[0]).toHaveProperty('invoiceNumber');
-			expect(data[0]).toHaveProperty('accountId');
-			expect(data[0]).toHaveProperty('invoiceBalance');
+			const keys = InvoiceSchema.keyof().options;
+			for (const key of keys) {
+				expect(data[0]).toHaveProperty(key);
+			}
 		}
+	});
+});
+
+jest.mock('@modules/aws/ssm', () => ({
+	getSSMParam: jest.fn().mockResolvedValue('mock-gcp-config'),
+}));
+jest.mock('@modules/bigquery/src/bigquery', () => ({
+	buildAuthClient: jest.fn().mockResolvedValue('mock-auth-client'),
+	runQuery: jest.fn().mockResolvedValue([
+		[
+			{
+				invoiceId: '1',
+				invoiceNumber: 'INV-001',
+				accountId: 'ACC-001',
+				invoiceBalance: 100,
+			},
+		],
+	]),
+}));
+jest.mock('@modules/stage', () => ({
+	stageFromEnvironment: jest.fn().mockReturnValue('PROD'),
+}));
+
+describe('getPRODData', () => {
+	it('should return parsed invoice records from BigQuery', async () => {
+		const data = await getPRODData();
+		expect(Array.isArray(data)).toBe(true);
+		const keys = InvoiceSchema.keyof().options;
+		for (const key of keys) {
+			expect(data[0]).toHaveProperty(key);
+		}
+
+		expect(() => InvoiceRecordsArraySchema.parse(data)).not.toThrow();
 	});
 });
