@@ -111,7 +111,7 @@ export class SalesforceEventBus extends GuStack {
 					},
 				],
 			},
-			queues: [sfOutboundMessageQueue.queueUrl], // Must use queueUrl here
+			queues: [sfOutboundMessageQueue.queueUrl],
 		});
 	}
 }
