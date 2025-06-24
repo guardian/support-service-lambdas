@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const BigQueryRecordSchema = z
+export const InvoiceSchema = z
 	.object({
 		invoiceId: z.string(),
 		accountId: z.string(),
@@ -8,6 +8,6 @@ export const BigQueryRecordSchema = z
 		invoiceBalance: z.number(),
 	})
 	.strict();
-export type BigQueryRecord = z.infer<typeof BigQueryRecordSchema>;
+export type InvoiceRecord = z.infer<typeof InvoiceSchema>;
 
-export const BigQueryResultDataSchema = z.array(BigQueryRecordSchema);
+export const InvoiceRecordsArraySchema = z.array(InvoiceSchema);
