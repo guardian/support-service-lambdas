@@ -6,7 +6,6 @@ exports[`The Discount API stack matches the snapshot 1`] = `
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
       "GuApiLambda",
-      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -62,7 +61,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
                 {
                   "Ref": "AWS::AccountId",
                 },
-                ":alarms-handler-topic-PROD",
+                ":alarms-handler-topic-CODE",
               ],
             ],
           },
@@ -82,6 +81,20 @@ exports[`The Discount API stack matches the snapshot 1`] = `
         "Period": 300,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "discountapilambda972ABED6",
+                  },
+                ],
+              ],
+            },
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -995,7 +1008,6 @@ exports[`The Discount API stack matches the snapshot 2`] = `
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
       "GuApiLambda",
-      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -1071,6 +1083,20 @@ exports[`The Discount API stack matches the snapshot 2`] = `
         "Period": 300,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "discountapilambda972ABED6",
+                  },
+                ],
+              ],
+            },
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",

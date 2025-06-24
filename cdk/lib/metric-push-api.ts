@@ -12,6 +12,7 @@ import {
 } from 'aws-cdk-lib/aws-cloudwatch';
 import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
+import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { nodeVersion } from './node-version';
 
 export class MetricPushApi extends GuStack {
@@ -83,13 +84,12 @@ export class MetricPushApi extends GuStack {
 		dnsRecord.overrideLogicalId('MetricPushDNSRecord');
 
 		// Alarms
-		new GuAlarm(this, '5xxApiAlarm', {
+		new SrLambdaAlarm(this, '5xxApiAlarm', {
 			app,
 			alarmName: `URGENT 9-5 - ${this.stage} ${nameWithStage} API Gateway is returning 5XX errors`,
 			threshold: 2,
 			evaluationPeriods: 1,
-			snsTopicName: `alarms-handler-topic-${this.stage}`,
-			actionsEnabled: this.stage === 'PROD',
+			lambdaFunctionNames: lambda.functionName,
 			treatMissingData: TreatMissingData.NOT_BREACHING,
 			comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
 			metric: new Metric({
