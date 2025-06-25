@@ -2,7 +2,7 @@ import type { ZuoraClient } from './zuoraClient';
 import type { ZuoraUpperCaseSuccessResponse } from './zuoraSchemas';
 import { zuoraUpperCaseSuccessResponseSchema } from './zuoraSchemas';
 
-export const doCreditBalanceRefund = async (
+export const doRefund = async (
 	zuoraClient: ZuoraClient,
 	body: string,
 ): Promise<ZuoraUpperCaseSuccessResponse> => {
