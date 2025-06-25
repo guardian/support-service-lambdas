@@ -1072,7 +1072,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Invoice processor map":{"Type":"Map","ResultPath":"$.processedInvoices","End":true,"ItemsPath":"$.invoices","MaxConcurrency":1,"Iterator":{"StartAt":"Apply credit to account balance","States":{"Apply credit to account balance":{"Next":"Credit applied successfully?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Invoice processor map":{"Type":"Map","ResultPath":"$.processedInvoices","Next":"Save results to S3","ItemsPath":"$.invoices","MaxConcurrency":1,"Iterator":{"StartAt":"Apply credit to account balance","States":{"Apply credit to account balance":{"Next":"Credit applied successfully?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -1116,7 +1116,18 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}}}}}",
+              "","Payload.$":"$"}}}}},"Save results to S3":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
+              {
+                "Fn::GetAtt": [
+                  "saveresultslambda2CAFC532",
+                  "Arn",
+                ],
+              },
+              "","Payload.$":"$"}}}}",
             ],
           ],
         },
@@ -1170,6 +1181,32 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
                       {
                         "Fn::GetAtt": [
                           "getinvoiceslambdaBD92FECC",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "saveresultslambda2CAFC532",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "saveresultslambda2CAFC532",
                           "Arn",
                         ],
                       },
@@ -2820,7 +2857,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Invoice processor map":{"Type":"Map","ResultPath":"$.processedInvoices","End":true,"ItemsPath":"$.invoices","MaxConcurrency":1,"Iterator":{"StartAt":"Apply credit to account balance","States":{"Apply credit to account balance":{"Next":"Credit applied successfully?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Invoice processor map":{"Type":"Map","ResultPath":"$.processedInvoices","Next":"Save results to S3","ItemsPath":"$.invoices","MaxConcurrency":1,"Iterator":{"StartAt":"Apply credit to account balance","States":{"Apply credit to account balance":{"Next":"Credit applied successfully?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -2864,7 +2901,18 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}}}}}}}",
+              "","Payload.$":"$"}}}}},"Save results to S3":{"End":true,"Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
+              {
+                "Fn::GetAtt": [
+                  "saveresultslambda2CAFC532",
+                  "Arn",
+                ],
+              },
+              "","Payload.$":"$"}}}}",
             ],
           ],
         },
@@ -2953,6 +3001,32 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
                       {
                         "Fn::GetAtt": [
                           "getinvoiceslambdaBD92FECC",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "saveresultslambda2CAFC532",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "saveresultslambda2CAFC532",
                           "Arn",
                         ],
                       },
