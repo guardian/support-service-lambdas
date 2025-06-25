@@ -1,0 +1,1909 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`The WriteOffUnpaidInvoices stack matches the snapshot 1`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [
+      "GuDistributionBucketParameter",
+      "GuLambdaFunction",
+      "GuLambdaFunction",
+    ],
+    "gu:cdk:version": "TEST",
+  },
+  "Parameters": {
+    "DistributionBucketName": {
+      "Default": "/account/services/artifact.bucket",
+      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "Bucket83908E77": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "BucketName": "write-off-unpaid-invoices-code",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "Daily5AMRule2CA837B3": {
+      "Properties": {
+        "ScheduleExpression": "cron(0 5 ? * * *)",
+        "State": "DISABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Ref": "WriteOffUnpaidInvoicesStateMachineCEC62060",
+            },
+            "Id": "Target0",
+            "RoleArn": {
+              "Fn::GetAtt": [
+                "WriteOffUnpaidInvoicesStateMachineEventsRole61EC3339",
+                "Arn",
+              ],
+            },
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "GetUnpaidInvoicesLambdaED48FF78": {
+      "DependsOn": [
+        "LambdaRoleDefaultPolicy75625A82",
+        "LambdaRole3A44B857",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/CODE/write-off-unpaid-invoices/write-off-unpaid-invoices.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "APP": "write-off-unpaid-invoices",
+            "BUCKET_NAME": {
+              "Ref": "Bucket83908E77",
+            },
+            "GCP_CREDENTIALS_CONFIG_PARAMETER_NAME": "/write-off-unpaid-invoices/CODE/gcp-credentials-config",
+            "GCP_PROJECT_ID": "datatech-platform-code",
+            "STACK": "support",
+            "STAGE": "CODE",
+            "Stage": "CODE",
+          },
+        },
+        "FunctionName": "get-unpaid-invoices-CODE",
+        "Handler": "getUnpaidInvoices.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaRole3A44B857",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "write-off-unpaid-invoices",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 180,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "LambdaRole3A44B857": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "RoleName": "wrtoff-unpaid-CODE",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "LambdaRoleDefaultPolicy75625A82": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "ssm:GetParameter",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/write-off-unpaid-invoices/CODE/gcp-credentials-config",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:ListBucket",
+                "s3:ListMultipartUploadParts",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "Bucket83908E77",
+                        "Arn",
+                      ],
+                    },
+                    "/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/CODE/write-off-unpaid-invoices/write-off-unpaid-invoices.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/write-off-unpaid-invoices",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/write-off-unpaid-invoices/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "LambdaRoleDefaultPolicy75625A82",
+        "Roles": [
+          {
+            "Ref": "LambdaRole3A44B857",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "WriteOffInvoicesLambdaED9D09A3": {
+      "DependsOn": [
+        "WriteOffInvoicesLambdaServiceRoleDefaultPolicyB07187D3",
+        "WriteOffInvoicesLambdaServiceRole5E30C2D7",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/CODE/write-off-unpaid-invoices/write-off-unpaid-invoices.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "APP": "write-off-unpaid-invoices",
+            "STACK": "support",
+            "STAGE": "CODE",
+            "Stage": "CODE",
+          },
+        },
+        "FunctionName": "write-off-invoices-CODE",
+        "Handler": "writeOffInvoices.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 512,
+        "Role": {
+          "Fn::GetAtt": [
+            "WriteOffInvoicesLambdaServiceRole5E30C2D7",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "write-off-unpaid-invoices",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 180,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "WriteOffInvoicesLambdaServiceRole5E30C2D7": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "write-off-unpaid-invoices",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "WriteOffInvoicesLambdaServiceRoleDefaultPolicyB07187D3": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:CODE/Zuora-OAuth/SupportServiceLambdas-*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/CODE/write-off-unpaid-invoices/write-off-unpaid-invoices.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/write-off-unpaid-invoices",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/write-off-unpaid-invoices/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "WriteOffInvoicesLambdaServiceRoleDefaultPolicyB07187D3",
+        "Roles": [
+          {
+            "Ref": "WriteOffInvoicesLambdaServiceRole5E30C2D7",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "WriteOffUnpaidInvoicesStateMachineCEC62060": {
+      "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "WriteOffUnpaidInvoicesStateMachineRoleDefaultPolicyC727B628",
+        "WriteOffUnpaidInvoicesStateMachineRole1A9BCC49",
+      ],
+      "Properties": {
+        "DefinitionString": {
+          "Fn::Join": [
+            "",
+            [
+              "{"StartAt":"GetUnpaidInvoicesLast5DaysCancellations","States":{"GetUnpaidInvoicesLast5DaysCancellations":{"Next":"ProcessInvoicesInDistributedMap","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
+              {
+                "Fn::GetAtt": [
+                  "GetUnpaidInvoicesLambdaED48FF78",
+                  "Arn",
+                ],
+              },
+              "","Payload":{"filePath.$":"States.Format('executions/{}/unpaid-invoices.json', $$.Execution.StartTime)"}}},"ProcessInvoicesInDistributedMap":{"Next":"GetDistributedMapResult","Type":"Map","MaxConcurrency":1,"ToleratedFailurePercentage":100,"Comment":"ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches","ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"JSON"},"Parameters":{"Bucket":"",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "","Key.$":"States.Format('executions/{}/unpaid-invoices.json', $$.Execution.StartTime)"}},"ItemBatcher":{"MaxItemsPerBatch":1},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"WriteOffInvoices","States":{"WriteOffInvoices":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
+              {
+                "Fn::GetAtt": [
+                  "WriteOffInvoicesLambdaED9D09A3",
+                  "Arn",
+                ],
+              },
+              ""},"End":true}}},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "","Prefix.$":"States.Format('executions/{}', $$.Execution.StartTime)"}}},"GetDistributedMapResult":{"Next":"CheckForFailures","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"CheckForFailures":{"Type":"Choice","Choices":[{"Variable":"$.ResultFiles.FAILED[0]","IsPresent":false,"Next":"AllInvoicesWrittenOffSuccessfully"}],"Default":"NotifyTeamSomeInvoicesFailed"},"NotifyTeamSomeInvoicesFailed":{"End":true,"Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"TopicArn":"arn:aws:sns:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":alarms-handler-topic-CODE","Message.$":"States.Format('{} - Some invoices left over after cancellations failed to be written off.\\nYou can review the failed invoices here:\\nhttps://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', 'CODE', '",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "', '",
+              {
+                "Ref": "AWS::Region",
+              },
+              "', $.ResultFiles.FAILED[0].Key)","MessageAttributes":{"app":{"DataType":"String","StringValue":"write-off-unpaid-invoices"},"stage":{"DataType":"String","StringValue":"CODE"}}},"ResultPath":"$.TaskResult"},"AllInvoicesWrittenOffSuccessfully":{"Type":"Succeed"}}}",
+            ],
+          ],
+        },
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "WriteOffUnpaidInvoicesStateMachineRole1A9BCC49",
+            "Arn",
+          ],
+        },
+        "StateMachineName": "write-off-unpaid-invoices-CODE",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::StepFunctions::StateMachine",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "WriteOffUnpaidInvoicesStateMachineEventsRole61EC3339": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "WriteOffUnpaidInvoicesStateMachineEventsRoleDefaultPolicy0CFA3559": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "WriteOffUnpaidInvoicesStateMachineCEC62060",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "WriteOffUnpaidInvoicesStateMachineEventsRoleDefaultPolicy0CFA3559",
+        "Roles": [
+          {
+            "Ref": "WriteOffUnpaidInvoicesStateMachineEventsRole61EC3339",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "WriteOffUnpaidInvoicesStateMachineRole1A9BCC49": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "states.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "WriteOffUnpaidInvoicesStateMachineRoleAdditionalPolicyA380DAB4": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:ListBucket",
+                "s3:ListMultipartUploadParts",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "Bucket83908E77",
+                        "Arn",
+                      ],
+                    },
+                    "/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "WriteOffUnpaidInvoicesStateMachineCEC62060",
+              },
+            },
+            {
+              "Action": [
+                "states:RedriveExecution",
+                "states:DescribeExecution",
+                "states:StopExecution",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:states:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":execution:",
+                    {
+                      "Fn::GetAtt": [
+                        "WriteOffUnpaidInvoicesStateMachineCEC62060",
+                        "Name",
+                      ],
+                    },
+                    "/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "WriteOffInvoicesLambdaED9D09A3",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": "sns:Publish",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sns:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":alarms-handler-topic-CODE",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "WriteOffUnpaidInvoicesStateMachineRoleAdditionalPolicyA380DAB4",
+        "Roles": [
+          {
+            "Ref": "WriteOffUnpaidInvoicesStateMachineRole1A9BCC49",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "WriteOffUnpaidInvoicesStateMachineRoleDefaultPolicyC727B628": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "GetUnpaidInvoicesLambdaED48FF78",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "GetUnpaidInvoicesLambdaED48FF78",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "WriteOffUnpaidInvoicesStateMachineRoleDefaultPolicyC727B628",
+        "Roles": [
+          {
+            "Ref": "WriteOffUnpaidInvoicesStateMachineRole1A9BCC49",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "WriteOffUnpaidInvoicesStepFunctionFailureAlarm082A9590": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "The scheduled job that writes off unpaid invoices has failed. Login to the AWS console and debug the last execution.",
+        "AlarmName": "CODE: WriteOffUnpaidInvoicesStepFunctionExecutionFailure",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "StateMachineArn",
+            "Value": {
+              "Ref": "WriteOffUnpaidInvoicesStateMachineCEC62060",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ExecutionsFailed",
+        "Namespace": "AWS/States",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "WriteOffInvoicesLambdaED9D09A3",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Threshold": 1,
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+  },
+}
+`;
+
+exports[`The WriteOffUnpaidInvoices stack matches the snapshot 2`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [
+      "GuDistributionBucketParameter",
+      "GuLambdaFunction",
+      "GuLambdaFunction",
+    ],
+    "gu:cdk:version": "TEST",
+  },
+  "Parameters": {
+    "DistributionBucketName": {
+      "Default": "/account/services/artifact.bucket",
+      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "Bucket83908E77": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "BucketName": "write-off-unpaid-invoices-prod",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "Daily5AMRule2CA837B3": {
+      "Properties": {
+        "ScheduleExpression": "cron(0 5 ? * * *)",
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Ref": "WriteOffUnpaidInvoicesStateMachineCEC62060",
+            },
+            "Id": "Target0",
+            "RoleArn": {
+              "Fn::GetAtt": [
+                "WriteOffUnpaidInvoicesStateMachineEventsRole61EC3339",
+                "Arn",
+              ],
+            },
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "GetUnpaidInvoicesLambdaED48FF78": {
+      "DependsOn": [
+        "LambdaRoleDefaultPolicy75625A82",
+        "LambdaRole3A44B857",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/PROD/write-off-unpaid-invoices/write-off-unpaid-invoices.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "APP": "write-off-unpaid-invoices",
+            "BUCKET_NAME": {
+              "Ref": "Bucket83908E77",
+            },
+            "GCP_CREDENTIALS_CONFIG_PARAMETER_NAME": "/write-off-unpaid-invoices/PROD/gcp-credentials-config",
+            "GCP_PROJECT_ID": "datatech-platform-prod",
+            "STACK": "support",
+            "STAGE": "PROD",
+            "Stage": "PROD",
+          },
+        },
+        "FunctionName": "get-unpaid-invoices-PROD",
+        "Handler": "getUnpaidInvoices.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaRole3A44B857",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "write-off-unpaid-invoices",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 180,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "LambdaRole3A44B857": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "RoleName": "wrtoff-unpaid-PROD",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "LambdaRoleDefaultPolicy75625A82": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "ssm:GetParameter",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/write-off-unpaid-invoices/PROD/gcp-credentials-config",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:ListBucket",
+                "s3:ListMultipartUploadParts",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "Bucket83908E77",
+                        "Arn",
+                      ],
+                    },
+                    "/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/PROD/write-off-unpaid-invoices/write-off-unpaid-invoices.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/write-off-unpaid-invoices",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/write-off-unpaid-invoices/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "LambdaRoleDefaultPolicy75625A82",
+        "Roles": [
+          {
+            "Ref": "LambdaRole3A44B857",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "WriteOffInvoicesLambdaED9D09A3": {
+      "DependsOn": [
+        "WriteOffInvoicesLambdaServiceRoleDefaultPolicyB07187D3",
+        "WriteOffInvoicesLambdaServiceRole5E30C2D7",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/PROD/write-off-unpaid-invoices/write-off-unpaid-invoices.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "APP": "write-off-unpaid-invoices",
+            "STACK": "support",
+            "STAGE": "PROD",
+            "Stage": "PROD",
+          },
+        },
+        "FunctionName": "write-off-invoices-PROD",
+        "Handler": "writeOffInvoices.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 512,
+        "Role": {
+          "Fn::GetAtt": [
+            "WriteOffInvoicesLambdaServiceRole5E30C2D7",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "write-off-unpaid-invoices",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 180,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "WriteOffInvoicesLambdaServiceRole5E30C2D7": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "write-off-unpaid-invoices",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "WriteOffInvoicesLambdaServiceRoleDefaultPolicyB07187D3": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:PROD/Zuora-OAuth/SupportServiceLambdas-*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/PROD/write-off-unpaid-invoices/write-off-unpaid-invoices.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/write-off-unpaid-invoices",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/write-off-unpaid-invoices/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "WriteOffInvoicesLambdaServiceRoleDefaultPolicyB07187D3",
+        "Roles": [
+          {
+            "Ref": "WriteOffInvoicesLambdaServiceRole5E30C2D7",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "WriteOffUnpaidInvoicesStateMachineCEC62060": {
+      "DeletionPolicy": "Delete",
+      "DependsOn": [
+        "WriteOffUnpaidInvoicesStateMachineRoleDefaultPolicyC727B628",
+        "WriteOffUnpaidInvoicesStateMachineRole1A9BCC49",
+      ],
+      "Properties": {
+        "DefinitionString": {
+          "Fn::Join": [
+            "",
+            [
+              "{"StartAt":"GetUnpaidInvoicesLast5DaysCancellations","States":{"GetUnpaidInvoicesLast5DaysCancellations":{"Next":"ProcessInvoicesInDistributedMap","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2}],"Type":"Task","Resource":"arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":states:::lambda:invoke","Parameters":{"FunctionName":"",
+              {
+                "Fn::GetAtt": [
+                  "GetUnpaidInvoicesLambdaED48FF78",
+                  "Arn",
+                ],
+              },
+              "","Payload":{"filePath.$":"States.Format('executions/{}/unpaid-invoices.json', $$.Execution.StartTime)"}}},"ProcessInvoicesInDistributedMap":{"Next":"GetDistributedMapResult","Type":"Map","MaxConcurrency":1,"ToleratedFailurePercentage":100,"Comment":"ToleratedFailurePercentage is set to 100% because we want the distributed map state to complete processing all batches","ItemReader":{"Resource":"arn:aws:states:::s3:getObject","ReaderConfig":{"InputType":"JSON"},"Parameters":{"Bucket":"",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "","Key.$":"States.Format('executions/{}/unpaid-invoices.json', $$.Execution.StartTime)"}},"ItemBatcher":{"MaxItemsPerBatch":1},"ItemProcessor":{"ProcessorConfig":{"Mode":"DISTRIBUTED","ExecutionType":"STANDARD"},"StartAt":"WriteOffInvoices","States":{"WriteOffInvoices":{"Type":"Task","Resource":"arn:aws:states:::lambda:invoke","OutputPath":"$.Payload","Parameters":{"Payload.$":"$","FunctionName":"",
+              {
+                "Fn::GetAtt": [
+                  "WriteOffInvoicesLambdaED9D09A3",
+                  "Arn",
+                ],
+              },
+              ""},"End":true}}},"ResultWriter":{"Resource":"arn:aws:states:::s3:putObject","Parameters":{"Bucket":"",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "","Prefix.$":"States.Format('executions/{}', $$.Execution.StartTime)"}}},"GetDistributedMapResult":{"Next":"CheckForFailures","Type":"Task","Resource":"arn:aws:states:::aws-sdk:s3:getObject","Parameters":{"Bucket.$":"$.ResultWriterDetails.Bucket","Key.$":"$.ResultWriterDetails.Key"},"ResultSelector":{"Payload.$":"States.StringToJson($.Body)"},"OutputPath":"$.Payload"},"CheckForFailures":{"Type":"Choice","Choices":[{"Variable":"$.ResultFiles.FAILED[0]","IsPresent":false,"Next":"AllInvoicesWrittenOffSuccessfully"}],"Default":"NotifyTeamSomeInvoicesFailed"},"NotifyTeamSomeInvoicesFailed":{"End":true,"Type":"Task","Resource":"arn:aws:states:::sns:publish","Parameters":{"TopicArn":"arn:aws:sns:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":alarms-handler-topic-PROD","Message.$":"States.Format('{} - Some invoices left over after cancellations failed to be written off.\\nYou can review the failed invoices here:\\nhttps://s3.console.aws.amazon.com/s3/object/{}?region={}&prefix={}', 'PROD', '",
+              {
+                "Ref": "Bucket83908E77",
+              },
+              "', '",
+              {
+                "Ref": "AWS::Region",
+              },
+              "', $.ResultFiles.FAILED[0].Key)","MessageAttributes":{"app":{"DataType":"String","StringValue":"write-off-unpaid-invoices"},"stage":{"DataType":"String","StringValue":"PROD"}}},"ResultPath":"$.TaskResult"},"AllInvoicesWrittenOffSuccessfully":{"Type":"Succeed"}}}",
+            ],
+          ],
+        },
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "WriteOffUnpaidInvoicesStateMachineRole1A9BCC49",
+            "Arn",
+          ],
+        },
+        "StateMachineName": "write-off-unpaid-invoices-PROD",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::StepFunctions::StateMachine",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "WriteOffUnpaidInvoicesStateMachineEventsRole61EC3339": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "WriteOffUnpaidInvoicesStateMachineEventsRoleDefaultPolicy0CFA3559": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "WriteOffUnpaidInvoicesStateMachineCEC62060",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "WriteOffUnpaidInvoicesStateMachineEventsRoleDefaultPolicy0CFA3559",
+        "Roles": [
+          {
+            "Ref": "WriteOffUnpaidInvoicesStateMachineEventsRole61EC3339",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "WriteOffUnpaidInvoicesStateMachineRole1A9BCC49": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "states.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "WriteOffUnpaidInvoicesStateMachineRoleAdditionalPolicyA380DAB4": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:ListBucket",
+                "s3:ListMultipartUploadParts",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "Bucket83908E77",
+                        "Arn",
+                      ],
+                    },
+                    "/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "WriteOffUnpaidInvoicesStateMachineCEC62060",
+              },
+            },
+            {
+              "Action": [
+                "states:RedriveExecution",
+                "states:DescribeExecution",
+                "states:StopExecution",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:states:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":execution:",
+                    {
+                      "Fn::GetAtt": [
+                        "WriteOffUnpaidInvoicesStateMachineCEC62060",
+                        "Name",
+                      ],
+                    },
+                    "/*",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "WriteOffInvoicesLambdaED9D09A3",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": "sns:Publish",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sns:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":alarms-handler-topic-PROD",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "WriteOffUnpaidInvoicesStateMachineRoleAdditionalPolicyA380DAB4",
+        "Roles": [
+          {
+            "Ref": "WriteOffUnpaidInvoicesStateMachineRole1A9BCC49",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "WriteOffUnpaidInvoicesStateMachineRoleDefaultPolicyC727B628": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "GetUnpaidInvoicesLambdaED48FF78",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "GetUnpaidInvoicesLambdaED48FF78",
+                          "Arn",
+                        ],
+                      },
+                      ":*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "WriteOffUnpaidInvoicesStateMachineRoleDefaultPolicyC727B628",
+        "Roles": [
+          {
+            "Ref": "WriteOffUnpaidInvoicesStateMachineRole1A9BCC49",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "WriteOffUnpaidInvoicesStepFunctionFailureAlarm082A9590": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "The scheduled job that writes off unpaid invoices has failed. Login to the AWS console and debug the last execution.",
+        "AlarmName": "PROD: WriteOffUnpaidInvoicesStepFunctionExecutionFailure",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "StateMachineArn",
+            "Value": {
+              "Ref": "WriteOffUnpaidInvoicesStateMachineCEC62060",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ExecutionsFailed",
+        "Namespace": "AWS/States",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "WriteOffInvoicesLambdaED9D09A3",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+  },
+}
+`;

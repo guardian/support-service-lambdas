@@ -22,7 +22,7 @@ object ZuoraClientLive {
     given JsonDecoder[ZuoraRestConfig] = DeriveJsonDecoder.gen[ZuoraRestConfig]
   }
 
-  val layer: ZLayer[SttpBackend[Task, Any] with Secrets, Throwable, ZuoraClient] =
+  val layer: ZLayer[SttpBackend[Task, Any] & Secrets, Throwable, ZuoraClient] =
     ZLayer {
       for {
         secrets <- ZIO.service[Secrets]

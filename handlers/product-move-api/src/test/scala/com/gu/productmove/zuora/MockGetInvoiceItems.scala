@@ -3,7 +3,7 @@ package com.gu.productmove.zuora
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
 import com.gu.productmove.zuora.GetAccount.PaymentMethodResponse
 import com.gu.productmove.zuora.GetInvoiceItems.GetInvoiceItemsResponse
-import com.gu.productmove.zuora.model.AccountNumber
+import com.gu.productmove.zuora.model.{AccountNumber, InvoiceId}
 import zio.*
 
 class MockGetInvoiceItems(
@@ -14,10 +14,10 @@ class MockGetInvoiceItems(
 
   def requests = mutableStore.reverse
 
-  override def get(invoiceId: String): Task[GetInvoiceItemsResponse] = {
-    mutableStore = invoiceId :: mutableStore
+  override def get(invoiceId: InvoiceId): Task[GetInvoiceItemsResponse] = {
+    mutableStore = invoiceId.id :: mutableStore
 
-    response.get(invoiceId) match {
+    response.get(invoiceId.id) match {
       case Some(stubbedResponse) => ZIO.succeed(stubbedResponse)
       case None => ZIO.fail(new Throwable(s"mock: success = false: getInvoiceItems: " + invoiceId))
     }

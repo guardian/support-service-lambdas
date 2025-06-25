@@ -5,13 +5,12 @@ import com.gu.soft_opt_in_consent_setter.models.SoftOptInError
 import com.typesafe.scalalogging.LazyLogging
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.dynamodb.model.{AttributeValue, PutItemRequest, PutItemResponse}
+import software.amazon.awssdk.services.dynamodb.model.{AttributeValue, PutItemRequest}
 
 import scala.jdk.CollectionConverters._
 import scala.util.{Failure, Success, Try}
 
-class DynamoConnector(dynamoDbClient: DynamoDbClient) extends LazyLogging {
-  private val stage = sys.env.getOrElse("Stage", "DEV")
+class DynamoConnector(dynamoDbClient: DynamoDbClient, stage: String) extends LazyLogging {
   private val tableName = s"soft-opt-in-consent-setter-$stage-logging"
 
   def putItem(putReq: PutItemRequest): Try[Unit] = Try(dynamoDbClient.putItem(putReq)).map(_ => ())
@@ -47,7 +46,7 @@ class DynamoConnector(dynamoDbClient: DynamoDbClient) extends LazyLogging {
 }
 
 object DynamoConnector extends LazyLogging {
-  def apply(): Either[SoftOptInError, DynamoConnector] =
+  def apply(stage: String): Either[SoftOptInError, DynamoConnector] =
     AwsCredentialsBuilder.buildCredentials.flatMap { credentialsProvider =>
       Try(
         DynamoDbClient
@@ -56,10 +55,10 @@ object DynamoConnector extends LazyLogging {
           .credentialsProvider(credentialsProvider)
           .build(),
       ) match {
-        case Success(dynamoDbClient) => Right(new DynamoConnector(dynamoDbClient))
+        case Success(dynamoDbClient) => Right(new DynamoConnector(dynamoDbClient, stage))
         case Failure(e) =>
           logger.error("Failed to build DynamoDB client", e)
-          Left(SoftOptInError("Failed to build DynamoDB client"))
+          Left(SoftOptInError("Failed to build DynamoDB client", e))
       }
     }
 }

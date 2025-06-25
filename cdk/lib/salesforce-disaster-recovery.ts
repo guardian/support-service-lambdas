@@ -6,6 +6,7 @@ import {
 } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
 	Choice,
@@ -134,6 +135,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 						...lambdaDefaultConfig,
 						handler: 'saveSalesforceQueryResultToS3.handler',
 						functionName: `save-salesforce-query-result-to-s3-${this.stage}`,
+						loggingFormat: LoggingFormat.TEXT,
 						environment: {
 							...lambdaDefaultConfig.environment,
 							SALESFORCE_API_DOMAIN: props.salesforceApiDomain,
@@ -176,6 +178,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 				memorySize: 10240,
 				handler: 'updateZuoraAccounts.handler',
 				functionName: `update-zuora-accounts-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				initialPolicy: [
 					new PolicyStatement({
 						actions: ['secretsmanager:GetSecretValue'],
@@ -283,6 +286,7 @@ export class SalesforceDisasterRecovery extends GuStack {
 				memorySize: 10240,
 				handler: 'saveFailedRowsToS3.handler',
 				functionName: `save-failed-rows-to-s3-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				environment: {
 					...lambdaDefaultConfig.environment,
 					S3_BUCKET: bucket.bucketName,

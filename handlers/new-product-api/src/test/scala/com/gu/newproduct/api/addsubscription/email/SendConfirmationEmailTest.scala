@@ -4,7 +4,7 @@ import com.gu.i18n.Currency.GBP
 import com.gu.newproduct.TestData
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
-import com.gu.newproduct.api.productcatalog.PlanId.VoucherSaturday
+import com.gu.newproduct.api.productcatalog.PlanId.VoucherSunday
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
 import com.gu.newproduct.api.productcatalog.{Plan, PlanDescription}
 import com.gu.util.apigateway.ApiGatewayResponse
@@ -21,7 +21,7 @@ class SendConfirmationEmailTest extends AsyncFlatSpec with Matchers {
       payload shouldBe ETPayload(
         "billToEmail@mail.com",
         testVoucherData,
-        DataExtensionName("paper-voucher"),
+        DataExtensionName("sunday-paper-voucher"),
         Some("sfContactId"),
       )
       ()
@@ -59,7 +59,7 @@ class SendConfirmationEmailTest extends AsyncFlatSpec with Matchers {
   }
 
   val testVoucherData = PaperEmailData(
-    plan = Plan(VoucherSaturday, PlanDescription("Saturday"), testStartDateRules),
+    plan = Plan(VoucherSunday, PlanDescription("Sunday"), testStartDateRules),
     firstPaymentDate = LocalDate.of(2018, 9, 24),
     firstPaperDate = LocalDate.of(2018, 9, 23),
     subscriptionName = SubscriptionName("subName"),

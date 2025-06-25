@@ -13,6 +13,6 @@ export class Lazy<T> {
 	}
 
 	public then<B>(f: (t: T) => B): Lazy<B> {
-		return new Lazy(() => this.getValue().then(f), this.message);
+		return new Lazy(() => this.get().then(f), this.message);
 	}
 }

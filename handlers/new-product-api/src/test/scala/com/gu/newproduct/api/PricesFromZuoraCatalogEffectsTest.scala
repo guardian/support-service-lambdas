@@ -47,6 +47,7 @@ object ProductsData {
     VoucherWeekendPlus,
     VoucherSixDayPlus,
     VoucherEveryDayPlus,
+    VoucherSunday,
     VoucherWeekend,
     VoucherSixDay,
     VoucherEveryDay,
@@ -54,6 +55,7 @@ object ProductsData {
   )
   val hd = Set(
     HomeDeliveryWeekend,
+    HomeDeliverySunday,
     HomeDeliveryEveryDay,
     HomeDeliverySixDay,
     HomeDeliveryWeekendPlus,
@@ -64,6 +66,7 @@ object ProductsData {
     HomeDeliverySaturdayPlus,
   )
   val subsCard = Set(
+    DigitalVoucherSunday,
     DigitalVoucherWeekendPlus,
     DigitalVoucherSaturdayPlus,
     DigitalVoucherSixdayPlus,

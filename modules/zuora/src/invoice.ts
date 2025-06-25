@@ -5,6 +5,8 @@ import type {
 	GetInvoiceItemsResponse,
 	GetInvoiceResponse,
 	InvoiceItemAdjustmentResult,
+	InvoiceItemAdjustmentSourceType,
+	InvoiceItemAdjustmentType,
 } from '@modules/zuora/zuoraSchemas';
 import {
 	getInvoiceItemsSchema,
@@ -35,9 +37,12 @@ export const creditInvoice = async (
 	adjustmentDate: Dayjs,
 	zuoraClient: ZuoraClient,
 	invoiceId: string,
-	invoiceItemId: string,
+	sourceId: string,
 	amount: number,
-	comments?: string,
+	type: InvoiceItemAdjustmentType,
+	sourceType: InvoiceItemAdjustmentSourceType,
+	comment?: string,
+	reasonCode?: string,
 ): Promise<InvoiceItemAdjustmentResult> => {
 	console.log(`Adjusting invoice ${invoiceId} by ${amount}`);
 	return await zuoraClient.post(
@@ -46,10 +51,11 @@ export const creditInvoice = async (
 			AdjustmentDate: zuoraDateFormat(adjustmentDate),
 			Amount: amount,
 			InvoiceId: invoiceId,
-			SourceId: invoiceItemId,
-			SourceType: 'InvoiceDetail',
-			Type: 'Credit',
-			Comments: comments ?? 'Created by support-service-lambdas',
+			SourceId: sourceId,
+			SourceType: sourceType,
+			Type: type,
+			Comment: comment ?? 'Created by support-service-lambdas',
+			ReasonCode: reasonCode,
 		}),
 		invoiceItemAdjustmentResultSchema,
 	);

@@ -29,12 +29,18 @@ class IdentityConnector(config: IdentityConfig) {
       errorDesc: String = "",
   ): Either[SoftOptInError, Unit] = {
     response.left
-      .map(i => SoftOptInError(s"IdentityConnector: Identity request failed: $i"))
+      .map(i => SoftOptInError(s"IdentityConnector: Identity request failed: $i", i))
       .flatMap { response =>
         if (response.isSuccess)
           Right(())
         else
-          Left(SoftOptInError(s"IdentityConnector $errorDesc. Status code: ${response.code}"))
+          Left(
+            SoftOptInError(
+              s"IdentityConnector $errorDesc. Status code: ${response.code}",
+              cause = new Exception(response.body),
+              statusCode = Some(response.code),
+            ),
+          )
       }
   }
 

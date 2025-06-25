@@ -80,7 +80,7 @@ class HolidayStopProcessTest extends AnyFlatSpec with Matchers with EitherValues
       request: HolidayStopRequestsDetail,
   ) =
     SubscriptionUpdate(
-      creditProduct(subscription),
+      creditProduct.forSubscription(subscription),
       subscription,
       account,
       request.Stopped_Publication_Date__c,

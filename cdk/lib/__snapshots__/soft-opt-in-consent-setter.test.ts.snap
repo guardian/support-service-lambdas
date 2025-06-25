@@ -53,6 +53,9 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
         },
         "FunctionName": "soft-opt-in-consent-setter-TEST",
         "Handler": "com.gu.soft_opt_in_consent_setter.Handler::handleRequest",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
@@ -110,6 +113,9 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
         },
         "FunctionName": "soft-opt-in-consent-setter-IAP-TEST",
         "Handler": "com.gu.soft_opt_in_consent_setter.HandlerIAP::handleRequest",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
         "MemorySize": 512,
         "Role": {
           "Fn::GetAtt": [
@@ -748,6 +754,42 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "PaymentApiSoftOptInToSQSRule769CA5B4": {
+      "Properties": {
+        "Description": "Send all events received via payment-api onto soft opt-in SQS queue",
+        "EventBusName": "acquisitions-bus-CODE",
+        "EventPattern": {
+          "region": [
+            "eu-west-1",
+          ],
+          "source": [
+            "payment-api.1",
+          ],
+        },
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "SoftOptInsQueue",
+                "Arn",
+              ],
+            },
+            "Id": "Target0",
+            "InputTransformer": {
+              "InputPathsMap": {
+                "detail-contributionId": "$.detail.contributionId",
+                "detail-identityId": "$.detail.identityId",
+                "detail-product": "$.detail.product",
+                "detail-similarProductsConsent": "$.detail.similarProductsConsent",
+              },
+              "InputTemplate": "{"subscriptionId":<detail-contributionId>,"identityId":<detail-identityId>,"eventType":"Acquisition","productName":<detail-product>,"previousProductName":null,"userConsentsOverrides":{"similarGuardianProducts":<detail-similarProductsConsent>}}",
+            },
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
     "SQSTrigger": {
       "Properties": {
         "BatchSize": 1,
@@ -761,8 +803,63 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
         "FunctionName": {
           "Ref": "LambdaFunctionIAP",
         },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
       },
       "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "SoftOptInToSQSRuleA7A6FB25": {
+      "Properties": {
+        "Description": "Send all events received via support-workers onto soft opt-in SQS queue",
+        "EventBusName": "acquisitions-bus-CODE",
+        "EventPattern": {
+          "region": [
+            "eu-west-1",
+          ],
+          "source": [
+            "support-workers.1",
+          ],
+        },
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "SoftOptInsQueue",
+                "Arn",
+              ],
+            },
+            "Id": "Target0",
+            "InputTransformer": {
+              "InputPathsMap": {
+                "detail-identityId": "$.detail.identityId",
+                "detail-printOptions-product": "$.detail.printOptions.product",
+                "detail-product": "$.detail.product",
+                "detail-similarProductsConsent": "$.detail.similarProductsConsent",
+                "detail-zuoraSubscriptionNumber": "$.detail.zuoraSubscriptionNumber",
+              },
+              "InputTemplate": "{"subscriptionId":<detail-zuoraSubscriptionNumber>,"identityId":<detail-identityId>,"eventType":"Acquisition","productName":<detail-product>,"printProduct":<detail-printOptions-product>,"previousProductName":null,"userConsentsOverrides":{"similarGuardianProducts":<detail-similarProductsConsent>}}",
+            },
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
     },
     "SoftOptInsDeadLetterQueue": {
       "DeletionPolicy": "Delete",
@@ -978,6 +1075,75 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
+    "SoftOptInsQueuePolicy3349F3C5": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "SoftOptInToSQSRuleA7A6FB25",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SoftOptInsQueue",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "PaymentApiSoftOptInToSQSRule769CA5B4",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SoftOptInsQueue",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "SoftOptInsQueue",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
     "deadLetterBuildUpAlarmIAP": {
       "Condition": "IsProd",
       "Properties": {
@@ -1018,6 +1184,24 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
         "Namespace": "AWS/SQS",
         "Period": 300,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
         "Threshold": 5,
         "TreatMissingData": "notBreaching",
       },
@@ -1060,6 +1244,24 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
         "Namespace": "AWS/Lambda",
         "Period": 3600,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
         "Threshold": 5,
         "TreatMissingData": "notBreaching",
       },
@@ -1100,6 +1302,24 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
         "Namespace": "soft-opt-in-consent-setter",
         "Period": 3600,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
         "Threshold": 1,
         "TreatMissingData": "notBreaching",
       },
@@ -1142,6 +1362,24 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
         "Namespace": "AWS/Lambda",
         "Period": 3600,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
         "Threshold": 5,
         "TreatMissingData": "notBreaching",
       },
@@ -1182,6 +1420,24 @@ exports[`The SoftOptInConsentSetter stack matches the snapshot 1`] = `
         "Namespace": "soft-opt-in-consent-setter",
         "Period": 3600,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "TEST",
+          },
+        ],
         "Threshold": 1,
         "TreatMissingData": "notBreaching",
       },
