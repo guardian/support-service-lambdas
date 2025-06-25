@@ -13,6 +13,7 @@ import {
 	Role,
 	ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
+import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { nodeVersion } from './node-version';
@@ -100,6 +101,7 @@ export class TicketTailorWebhook extends GuStack {
 			description:
 				'An API Gateway triggered lambda generated in the support-service-lambdas repo',
 			functionName: nameWithStage,
+			loggingFormat: LoggingFormat.TEXT,
 			fileName: `${app}.zip`,
 			handler: 'index.handler',
 			runtime: nodeVersion,

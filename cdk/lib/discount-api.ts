@@ -1,5 +1,4 @@
 import { GuApiLambda } from '@guardian/cdk';
-import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import type { App } from 'aws-cdk-lib';
@@ -11,7 +10,9 @@ import {
 } from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
+import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { nodeVersion } from './node-version';
 
 export interface DiscountApiProps extends GuStackProps {
@@ -40,6 +41,7 @@ export class DiscountApi extends GuStack {
 			description:
 				'A lambda that enables the addition of discounts to existing subscriptions',
 			functionName: nameWithStage,
+			loggingFormat: LoggingFormat.TEXT,
 			fileName: `${app}.zip`,
 			handler: 'index.handler',
 			runtime: nodeVersion,
@@ -136,7 +138,7 @@ export class DiscountApi extends GuStack {
 		const alarmDescription = (description: string) =>
 			`Impact - ${description}. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit`;
 
-		new GuAlarm(this, 'ApiGateway5XXAlarmCDK', {
+		new SrLambdaAlarm(this, 'ApiGateway5XXAlarmCDK', {
 			app,
 			alarmName: alarmName('Discount-api 5XX response'),
 			alarmDescription: alarmDescription(
@@ -144,8 +146,7 @@ export class DiscountApi extends GuStack {
 			),
 			evaluationPeriods: 1,
 			threshold: 1,
-			snsTopicName: 'alarms-handler-topic-PROD',
-			actionsEnabled: this.stage === 'PROD',
+			lambdaFunctionNames: lambda.functionName,
 			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 			metric: new Metric({
 				metricName: '5XXError',

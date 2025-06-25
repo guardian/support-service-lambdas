@@ -141,7 +141,7 @@ export const zuoraSuccessResponseSchema = z.object({
 });
 
 export const zuoraUpperCaseSuccessResponseSchema = z.object({
-	Success: z.boolean(),
+	Success: z.boolean(), //to do add reasons in case of failure
 });
 
 export type ZuoraSuccessResponse = z.infer<typeof zuoraSuccessResponseSchema>;
@@ -245,9 +245,13 @@ export type InvoiceItemAdjustmentResult = z.infer<
 >;
 
 // --------------- Payment Method ---------------
-const paymentMethodStatusSchema = z.object({
+const paymentMethodSchema = z.object({
+	id: z.string(),
 	status: z.string(),
+	type: z.string(),
+	isDefault: z.boolean(),
 });
+export type PaymentMethod = z.infer<typeof paymentMethodSchema>;
 
 export const zuoraPaymentMethodQueryResponseSchema = z
 	.object({
@@ -255,12 +259,10 @@ export const zuoraPaymentMethodQueryResponseSchema = z
 	})
 	.and(
 		z.object({
-			creditcardreferencetransaction: z
-				.array(paymentMethodStatusSchema)
-				.optional(),
-			creditcard: z.array(paymentMethodStatusSchema).optional(),
-			banktransfer: z.array(paymentMethodStatusSchema).optional(),
-			paypal: z.array(paymentMethodStatusSchema).optional(),
+			creditcardreferencetransaction: z.array(paymentMethodSchema).optional(),
+			creditcard: z.array(paymentMethodSchema).optional(),
+			banktransfer: z.array(paymentMethodSchema).optional(),
+			paypal: z.array(paymentMethodSchema).optional(),
 		}),
 	);
 export type ZuoraPaymentMethodQueryResponse = z.infer<
