@@ -11,3 +11,28 @@ export const InvoiceSchema = z
 export type InvoiceRecord = z.infer<typeof InvoiceSchema>;
 
 export const InvoiceRecordsArraySchema = z.array(InvoiceSchema);
+
+export const PaymentMethodSchema = z.object({
+	id: z.string(),
+	status: z.string(),
+	type: z.string(),
+	isDefault: z.boolean(),
+});
+
+export const ApplyCreditToAccountBalanceAttemptSchema = z.object({
+	Success: z.boolean(),
+});
+
+export const RefundAttemptSchema = z.object({
+	Success: z.boolean(),
+	paymentMethod: PaymentMethodSchema.optional(),
+});
+
+export const ProcessedInvoiceSchema = InvoiceSchema.extend({
+	hasActiveSub: z.boolean().optional(),
+	applyCreditToAccountBalanceAttempt: ApplyCreditToAccountBalanceAttemptSchema,
+	hasActivePaymentMethod: z.boolean().optional(),
+	activePaymentMethods: z.array(PaymentMethodSchema).optional(),
+	refundAttempt: RefundAttemptSchema.optional(),
+	errorDetail: z.string().optional(),
+});
