@@ -1,5 +1,5 @@
 import { stageFromEnvironment } from '@modules/stage';
-import { doCreditBalanceRefund } from '@modules/zuora/doCreditBalanceRefund';
+import { doRefund } from '@modules/zuora/refund';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { PaymentMethod } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
@@ -52,22 +52,19 @@ export const handler = async (event: DoCreditBalanceRefundInput) => {
 			MethodType: paymentMethodToRefundTo.type,
 		});
 
-		const creditBalanceRefundAttempt = await doCreditBalanceRefund(
-			zuoraClient,
-			body,
-		);
+		const refundAttempt = await doRefund(zuoraClient, body);
 
 		return {
 			...parsedEvent,
-			creditBalanceRefundAttempt: {
-				...creditBalanceRefundAttempt,
+			refundAttempt: {
+				...refundAttempt,
 				paymentMethod: paymentMethodToRefundTo,
 			},
 		};
 	} catch (error) {
 		return {
 			...event,
-			creditBalanceRefundAttempt: {
+			refundAttempt: {
 				Success: false,
 				paymentMethod: paymentMethodToRefundTo,
 				error:
@@ -85,7 +82,7 @@ function getPaymentMethodToRefundTo(paymentMethods: PaymentMethod[]) {
 }
 
 export const HandlerReturnSchema = DoCreditBalanceRefundInputSchema.extend({
-	creditBalanceRefundAttempt: z
+	refundAttempt: z
 		.object({
 			Success: z.boolean(),
 			error: z.string().optional(),
