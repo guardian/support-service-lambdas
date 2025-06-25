@@ -28,7 +28,11 @@ export const RefundAttemptSchema = z.object({
 	paymentMethod: PaymentMethodSchema.optional(),
 });
 
-export const ProcessedInvoiceSchema = InvoiceSchema.extend({
+export const ProcessedInvoiceSchema = z.object({
+	accountId: z.string(),
+	invoiceId: z.string(),
+	invoiceNumber: z.string(),
+	invoiceBalance: z.number(),
 	hasActiveSub: z.boolean().optional(),
 	applyCreditToAccountBalanceAttempt: ApplyCreditToAccountBalanceAttemptSchema,
 	hasActivePaymentMethod: z.boolean().optional(),
