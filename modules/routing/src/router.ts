@@ -26,12 +26,15 @@ export const NotFoundResponse = {
 	statusCode: 404,
 };
 
-function matchPath(routePath: string, eventPath: string): { matched: boolean; params: Record<string, string> } {
+function matchPath(
+	routePath: string,
+	eventPath: string,
+): Record<string, string> | undefined {
 	const routeParts = routePath.split('/').filter(Boolean);
 	const eventParts = eventPath.split('/').filter(Boolean);
 
 	if (routeParts.length !== eventParts.length) {
-		return { matched: false, params: {} };
+		return undefined;
 	}
 
 	const params: Record<string, string> = {};
@@ -42,21 +45,21 @@ function matchPath(routePath: string, eventPath: string): { matched: boolean; pa
 			const paramName = routePart.slice(1, -1);
 			params[paramName] = eventPart as string;
 		} else if (routePart !== eventPart) {
-			return { matched: false, params: {} };
+			return undefined;
 		}
 	}
-	return { matched: true, params };
+	return params;
 }
 
 export class Router {
-	constructor(private routes: Route[]) { }
+	constructor(private routes: Route[]) {}
 	async routeRequest(
 		event: APIGatewayProxyEvent,
 	): Promise<APIGatewayProxyResult> {
 		try {
 			for (const route of this.routes) {
-				const { matched, params } = matchPath(route.path, event.path);
-				if (matched && route.httpMethod === event.httpMethod.toUpperCase()) {
+				const params = matchPath(route.path, event.path);
+				if (params && route.httpMethod === event.httpMethod.toUpperCase()) {
 					// Attach pathParameters to event
 					const eventWithParams = {
 						...event,
@@ -82,7 +85,9 @@ export class Router {
 					// Validate request body
 					try {
 						if (route.validation?.body) {
-							const parsedBody: unknown = eventWithParams.body ? JSON.parse(eventWithParams.body) : undefined;
+							const parsedBody: unknown = eventWithParams.body
+								? JSON.parse(eventWithParams.body)
+								: undefined;
 							route.validation.body.parse(parsedBody);
 						}
 					} catch (error) {
@@ -98,8 +103,8 @@ export class Router {
 							statusCode: 400,
 							body: JSON.stringify({
 								error: 'Invalid request',
-								details: validationErrors
-							})
+								details: validationErrors,
+							}),
 						};
 					}
 
