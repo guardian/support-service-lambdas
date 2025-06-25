@@ -31,7 +31,7 @@ export class MParticleApi extends GuStack {
 
 		// API Gateway
 		new GuApiGatewayWithLambdaByPath(this, {
-			app: "example-api-gateway-instance",
+			app: app,
 			targets: [
 				{
 			path: "/data-subject-requests/{requestId}/callback",
