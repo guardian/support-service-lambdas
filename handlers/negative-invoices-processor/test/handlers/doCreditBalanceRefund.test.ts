@@ -1,9 +1,7 @@
-import {
-	handler,
-	DoCreditBalanceRefundInput,
-} from '../../src/handlers/doCreditBalanceRefund';
-import * as zuoraClientModule from '@modules/zuora/zuoraClient';
 import * as doCreditBalanceRefundModule from '@modules/zuora/doCreditBalanceRefund';
+import * as zuoraClientModule from '@modules/zuora/zuoraClient';
+import { handler } from '../../src/handlers/doCreditBalanceRefund';
+import type { DoCreditBalanceRefundInput } from '../../src/handlers/doCreditBalanceRefund';
 
 jest.mock('@modules/zuora/zuoraClient');
 jest.mock('@modules/zuora/doCreditBalanceRefund');

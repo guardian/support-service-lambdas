@@ -1,5 +1,4 @@
-import { getCODEData } from '../../src/handlers/getInvoices';
-import { getPRODData } from '../../src/handlers/getInvoices';
+import { getCODEData, getPRODData } from '../../src/handlers/getInvoices';
 import { InvoiceRecordsArraySchema, InvoiceSchema } from '../../src/types';
 import { CODEDataMockQueryResponse } from './data/CODEDataMockQueryResponse';
 
