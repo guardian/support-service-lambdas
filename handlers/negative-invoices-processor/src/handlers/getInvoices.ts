@@ -5,10 +5,7 @@ import { CODEDataMockQueryResponse } from '../../test/handlers/data/CODEDataMock
 import { InvoiceRecordsArraySchema } from '../types';
 import type { InvoiceRecord } from '../types';
 
-export const handler = async (): Promise<{
-	invoicesCount: number;
-	invoices: InvoiceRecord[];
-}> => {
+export const handler = async () => {
 	try {
 		const records =
 			stageFromEnvironment() === 'PROD'
