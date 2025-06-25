@@ -321,9 +321,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 		);
 
 		const definitionBody = DefinitionBody.fromChainable(
-			getInvoicesLambdaTask
-				.next(invoiceProcessorMap)
-				.next(saveResultsLambdaTask),
+			getInvoicesLambdaTask.next(invoiceProcessorMap),
 		);
 
 		new StateMachine(this, `${appName}-state-machine-${this.stage}`, {
