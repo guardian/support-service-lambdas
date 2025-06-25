@@ -47,7 +47,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
-    "ApiGatewayHigh5xxPercentageAlarmExampleapigatewayinstance0B776A32": {
+    "ApiGatewayHigh5xxPercentageAlarmMparticleapi50549F1E": {
       "Properties": {
         "ActionsEnabled": true,
         "AlarmActions": [
@@ -68,15 +68,15 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
             ],
           },
         ],
-        "AlarmDescription": "example-api-gateway-instance exceeded 1% error rate",
-        "AlarmName": "High 5XX error percentage from example-api-gateway-instance (ApiGateway) in CODE",
+        "AlarmDescription": "mparticle-api exceeded 1% error rate",
+        "AlarmName": "High 5XX error percentage from mparticle-api (ApiGateway) in CODE",
         "ComparisonOperator": "GreaterThanThreshold",
         "EvaluationPeriods": 1,
         "Metrics": [
           {
             "Expression": "100*m1/m2",
             "Id": "expr_1",
-            "Label": "% of 5XX responses served for example-api-gateway-instance",
+            "Label": "% of 5XX responses served for mparticle-api",
           },
           {
             "Id": "m1",
@@ -85,7 +85,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": "membership-CODE-example-api-gateway-instance",
+                    "Value": "membership-CODE-mparticle-api",
                   },
                 ],
                 "MetricName": "5XXError",
@@ -103,7 +103,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": "membership-CODE-example-api-gateway-instance",
+                    "Value": "membership-CODE-mparticle-api",
                   },
                 ],
                 "MetricName": "Count",
@@ -185,7 +185,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
     },
     "RestApi0C43BF4B": {
       "Properties": {
-        "Name": "membership-CODE-example-api-gateway-instance",
+        "Name": "membership-CODE-mparticle-api",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -274,7 +274,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC5037648e86c6c588fcd7d6d036b55ec7d65": {
+    "RestApiDeployment180EC5036c821d4f4e0e40d947572b1ff5f7f643": {
       "DependsOn": [
         "RestApidatasubjectrequestsrequestIdcallbackPOST2BF76B7C",
         "RestApidatasubjectrequestsrequestIdcallback3E3A4143",
@@ -295,7 +295,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC5037648e86c6c588fcd7d6d036b55ec7d65",
+          "Ref": "RestApiDeployment180EC5036c821d4f4e0e40d947572b1ff5f7f643",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -759,7 +759,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
-    "ApiGatewayHigh5xxPercentageAlarmExampleapigatewayinstance0B776A32": {
+    "ApiGatewayHigh5xxPercentageAlarmMparticleapi50549F1E": {
       "Properties": {
         "ActionsEnabled": true,
         "AlarmActions": [
@@ -780,15 +780,15 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "example-api-gateway-instance exceeded 1% error rate",
-        "AlarmName": "High 5XX error percentage from example-api-gateway-instance (ApiGateway) in PROD",
+        "AlarmDescription": "mparticle-api exceeded 1% error rate",
+        "AlarmName": "High 5XX error percentage from mparticle-api (ApiGateway) in PROD",
         "ComparisonOperator": "GreaterThanThreshold",
         "EvaluationPeriods": 1,
         "Metrics": [
           {
             "Expression": "100*m1/m2",
             "Id": "expr_1",
-            "Label": "% of 5XX responses served for example-api-gateway-instance",
+            "Label": "% of 5XX responses served for mparticle-api",
           },
           {
             "Id": "m1",
@@ -797,7 +797,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": "membership-PROD-example-api-gateway-instance",
+                    "Value": "membership-PROD-mparticle-api",
                   },
                 ],
                 "MetricName": "5XXError",
@@ -815,7 +815,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": "membership-PROD-example-api-gateway-instance",
+                    "Value": "membership-PROD-mparticle-api",
                   },
                 ],
                 "MetricName": "Count",
@@ -897,7 +897,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
     },
     "RestApi0C43BF4B": {
       "Properties": {
-        "Name": "membership-PROD-example-api-gateway-instance",
+        "Name": "membership-PROD-mparticle-api",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -986,7 +986,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC50314d038cb4e966fdfb4c20b8d896025e0": {
+    "RestApiDeployment180EC50345abd92429a59a7a83941d3e0ce20b53": {
       "DependsOn": [
         "RestApidatasubjectrequestsrequestIdcallbackPOST2BF76B7C",
         "RestApidatasubjectrequestsrequestIdcallback3E3A4143",
@@ -1007,7 +1007,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC50314d038cb4e966fdfb4c20b8d896025e0",
+          "Ref": "RestApiDeployment180EC50345abd92429a59a7a83941d3e0ce20b53",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
