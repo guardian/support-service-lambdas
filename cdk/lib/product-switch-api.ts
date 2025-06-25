@@ -1,5 +1,4 @@
 import { GuApiLambda } from '@guardian/cdk';
-import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import type { App } from 'aws-cdk-lib';
@@ -11,7 +10,9 @@ import {
 } from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
+import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { nodeVersion } from './node-version';
 
 export interface ProductSwitchApiProps extends GuStackProps {
@@ -40,6 +41,7 @@ export class ProductSwitchApi extends GuStack {
 			description:
 				'An API Gateway triggered lambda for carrying out product switches. Code is in the support-service-lambdas repo',
 			functionName: nameWithStage,
+			loggingFormat: LoggingFormat.TEXT,
 			fileName: `${app}.zip`,
 			handler: 'index.handler',
 			runtime: nodeVersion,
@@ -164,9 +166,7 @@ export class ProductSwitchApi extends GuStack {
 			`Impact - ${description}. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit`;
 
 		if (this.stage === 'PROD') {
-			const snsTopicName = 'alarms-handler-topic-PROD';
-
-			new GuAlarm(this, 'ApiGateway5XXAlarmCDK', {
+			new SrLambdaAlarm(this, 'ApiGateway5XXAlarmCDK', {
 				app,
 				alarmName: alarmName('API gateway 5XX response'),
 				alarmDescription: alarmDescription(
@@ -174,7 +174,6 @@ export class ProductSwitchApi extends GuStack {
 				),
 				evaluationPeriods: 1,
 				threshold: 1,
-				snsTopicName,
 				comparisonOperator:
 					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 				metric: new Metric({
@@ -186,14 +185,14 @@ export class ProductSwitchApi extends GuStack {
 						ApiName: nameWithStage,
 					},
 				}),
+				lambdaFunctionNames: lambda.functionName,
 			});
-			new GuAlarm(this, 'ProductSwitchFailureAlarm', {
+			new SrLambdaAlarm(this, 'ProductSwitchFailureAlarm', {
 				app,
 				alarmName: alarmName('An error occurred in the Product Switch lambda'),
 				alarmDescription: alarmDescription(
 					'Product switch lambda failed, please check the logs to diagnose the issue.',
 				),
-				snsTopicName,
 				comparisonOperator:
 					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 				metric: new Metric({
@@ -207,6 +206,7 @@ export class ProductSwitchApi extends GuStack {
 				}),
 				threshold: 1,
 				evaluationPeriods: 1,
+				lambdaFunctionNames: lambda.functionName,
 			});
 		}
 	}

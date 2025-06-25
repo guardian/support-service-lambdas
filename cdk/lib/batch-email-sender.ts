@@ -1,5 +1,4 @@
 import { GuApiGatewayWithLambdaByPath } from '@guardian/cdk';
-import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
@@ -15,8 +14,9 @@ import {
 } from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { LoggingFormat, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
+import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 
 export interface BatchEmailSenderProps extends GuStackProps {
 	certificateId: string;
@@ -29,9 +29,7 @@ export class BatchEmailSender extends GuStack {
 		super(scope, id, props);
 
 		// ---- Miscellaneous constants ---- //
-		const isProd = this.stage === 'PROD';
 		const app = 'batch-email-sender';
-		const alarmTopic = 'alarms-handler-topic-PROD';
 
 		// ---- API-triggered lambda functions ---- //
 		const batchEmailSenderLambda = new GuLambdaFunction(
@@ -41,6 +39,7 @@ export class BatchEmailSender extends GuStack {
 				app,
 				handler: 'com.gu.batchemailsender.api.batchemail.Handler::apply',
 				functionName: `batch-email-sender-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: Runtime.JAVA_21,
 				fileName: 'batch-email-sender.jar',
 				memorySize: 1536,
@@ -95,14 +94,13 @@ export class BatchEmailSender extends GuStack {
 		});
 
 		// ---- Alarms ---- //
-		new GuAlarm(this, 'FailedEmailApiAlarm', {
+		new SrLambdaAlarm(this, 'FailedEmailApiAlarm', {
 			app,
 			alarmName: `URGENT 9-5 - ${this.stage}: Failed to send email triggered by Salesforce - 5XXError (CDK)`,
 			alarmDescription: `API responded with 5xx to Salesforce meaning some emails failed to send. Logs at /aws/lambda/batch-email-sender-${this.stage} repo at https://github.com/guardian/support-service-lambdas/blob/main/handlers/batch-email-sender/`,
 			evaluationPeriods: 1,
 			threshold: 1,
-			actionsEnabled: isProd,
-			snsTopicName: alarmTopic,
+			lambdaFunctionNames: batchEmailSenderLambda.functionName,
 			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 			metric: new Metric({
 				metricName: '5XXError',
@@ -115,14 +113,13 @@ export class BatchEmailSender extends GuStack {
 			}),
 		});
 
-		new GuAlarm(this, 'FailedEmailLambdaAlarm', {
+		new SrLambdaAlarm(this, 'FailedEmailLambdaAlarm', {
 			app,
 			alarmName: `URGENT 9-5 - ${this.stage}: Failed to send email triggered by Salesforce - Lambda crash (CDK)`,
 			alarmDescription: `Lambda crashed unexpectedely meaning email message sent from Salesforce to the Service Layer could not be processed. Logs at /aws/lambda/batch-email-sender-${this.stage} repo at https://github.com/guardian/support-service-lambdas/blob/main/handlers/batch-email-sender/`,
 			evaluationPeriods: 1,
 			threshold: 1,
-			actionsEnabled: isProd,
-			snsTopicName: alarmTopic,
+			lambdaFunctionNames: batchEmailSenderLambda.functionName,
 			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 			metric: new Metric({
 				metricName: 'Errors',
