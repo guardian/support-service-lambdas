@@ -4,7 +4,6 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { PaymentMethod } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
 import { z } from 'zod';
-import { PaymentMethodSchema } from '../types';
 
 export const DoCreditBalanceRefundInputSchema = z.object({
 	invoiceId: z.string(),
@@ -16,7 +15,16 @@ export const DoCreditBalanceRefundInputSchema = z.object({
 		Success: z.boolean(),
 	}),
 	hasActivePaymentMethod: z.boolean().optional(),
-	activePaymentMethods: z.array(PaymentMethodSchema).optional(),
+	activePaymentMethods: z
+		.array(
+			z.object({
+				id: z.string(),
+				status: z.string(),
+				type: z.string(),
+				isDefault: z.boolean(),
+			}),
+		)
+		.optional(),
 });
 
 export type DoCreditBalanceRefundInput = z.infer<
