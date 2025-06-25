@@ -3,7 +3,6 @@ import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 import { applyCreditToAccountBalance } from '@modules/zuora/applyCreditToAccountBalance';
 
 jest.mock('@modules/zuora/zuoraClient');
-jest.mock('@modules/zuora/doCreditBalanceRefund');
 
 jest.mock('@modules/stage', () => ({
 	stageFromEnvironment: jest.fn().mockReturnValue('PROD'),
