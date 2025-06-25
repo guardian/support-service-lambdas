@@ -5,7 +5,7 @@ import type { PaymentMethod } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
 import { z } from 'zod';
 
-export const DoCreditBalanceRefundSchema = z.object({
+export const DoCreditBalanceRefundInputSchema = z.object({
 	invoiceId: z.string(),
 	accountId: z.string(),
 	invoiceNumber: z.string(),
@@ -27,13 +27,17 @@ export const DoCreditBalanceRefundSchema = z.object({
 		.optional(),
 });
 
-export type DoCreditBalanceRefund = z.infer<typeof DoCreditBalanceRefundSchema>;
+export type DoCreditBalanceRefundInput = z.infer<
+	typeof DoCreditBalanceRefundInputSchema
+>;
 
-export const handler = async (event: DoCreditBalanceRefund) => {
+export const handler = async (event: DoCreditBalanceRefundInput) => {
+	let paymentMethodToRefundTo: PaymentMethod | undefined;
+
 	try {
-		const parsedEvent = DoCreditBalanceRefundSchema.parse(event);
+		const parsedEvent = DoCreditBalanceRefundInputSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
-		const paymentMethodToRefundTo = getPaymentMethodToRefundTo(
+		paymentMethodToRefundTo = getPaymentMethodToRefundTo(
 			parsedEvent.activePaymentMethods ?? [],
 		);
 		if (!paymentMethodToRefundTo) {
@@ -63,9 +67,14 @@ export const handler = async (event: DoCreditBalanceRefund) => {
 	} catch (error) {
 		return {
 			...event,
-			applyCreditToAccountBalanceStatus: 'Error',
-			errorDetail:
-				error instanceof Error ? error.message : JSON.stringify(error, null, 2),
+			creditBalanceRefundAttempt: {
+				Success: false,
+				paymentMethod: paymentMethodToRefundTo,
+				error:
+					error instanceof Error
+						? error.message
+						: JSON.stringify(error, null, 2),
+			},
 		};
 	}
 };
@@ -74,3 +83,20 @@ function getPaymentMethodToRefundTo(paymentMethods: PaymentMethod[]) {
 	const defaultMethod = paymentMethods.find((pm) => pm.isDefault);
 	return defaultMethod ?? paymentMethods[0];
 }
+
+export const HandlerReturnSchema = DoCreditBalanceRefundInputSchema.extend({
+	creditBalanceRefundAttempt: z
+		.object({
+			Success: z.boolean(),
+			error: z.string().optional(),
+			paymentMethod: z
+				.object({
+					id: z.string(),
+					status: z.string(),
+					type: z.string(),
+					isDefault: z.boolean(),
+				})
+				.optional(),
+		})
+		.optional(),
+});
