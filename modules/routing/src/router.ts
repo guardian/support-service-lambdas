@@ -1,3 +1,4 @@
+import { mapPartition, zipAll } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
@@ -37,18 +38,20 @@ function matchPath(
 		return undefined;
 	}
 
-	const params: Record<string, string> = {};
-	for (let i = 0; i < routeParts.length; i++) {
-		const routePart = routeParts[i];
-		const eventPart = eventParts[i];
-		if (routePart?.startsWith('{') && routePart.endsWith('}')) {
-			const paramName = routePart.slice(1, -1);
-			params[paramName] = eventPart as string;
-		} else if (routePart !== eventPart) {
-			return undefined;
-		}
+	const routeEventPairs = zipAll(routeParts, eventParts, '', '');
+	const [matchers, literals] = mapPartition(
+		routeEventPairs,
+		([routePart, eventPart]) => {
+			const maybeParamName = routePart.match(/^\{(.*)}$/)?.[1];
+			return maybeParamName
+				? ([maybeParamName, eventPart] as const)
+				: undefined;
+		},
+	);
+	if (literals.some(([routePart, eventPart]) => routePart !== eventPart)) {
+		return undefined;
 	}
-	return params;
+	return Object.fromEntries(matchers);
 }
 
 export class Router {
