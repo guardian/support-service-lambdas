@@ -19,7 +19,7 @@ export type Route<TPath, TBody> = {
 		event: APIGatewayProxyEvent,
 		parsed: { path: TPath; body: TBody }
 	) => Promise<APIGatewayProxyResult>;
-	validation?: {
+	parser?: {
 		path?: z.Schema<TPath>;
 		body?: z.Schema<TBody>;
 	};
@@ -79,8 +79,8 @@ export class Router {
 
 					let parsedPath, parsedBody;
 					try {
-						parsedPath = route.validation?.path?.parse(eventWithParams.pathParameters);
-						parsedBody = route.validation?.body?.parse(
+						parsedPath = route.parser?.path?.parse(eventWithParams.pathParameters);
+						parsedBody = route.parser?.body?.parse(
 							eventWithParams.body ? JSON.parse(eventWithParams.body) : undefined,
 						);
 					} catch (error) {

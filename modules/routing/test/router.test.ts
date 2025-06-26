@@ -19,7 +19,7 @@ const router = new Router([
 	createRoute({
 		httpMethod: 'POST',
 		path: '/benefits/{benefitId}/users',
-		validation: {
+		parser: {
 			path: z.object({
 				benefitId: z.string(),
 			}),
@@ -40,7 +40,7 @@ const router = new Router([
 				body: JSON.stringify(parsed)
 			});
 		},
-		validation: {
+		parser: {
 			path: z.object({
 				flag: z.enum(["on", "off"])
 			})
@@ -55,7 +55,7 @@ const router = new Router([
 				body: JSON.stringify(parsed)
 			});
 		},
-		validation: {
+		parser: {
 			body: z.object({
 				name: z.string(),
 				age: z.number(),
@@ -72,7 +72,7 @@ const router = new Router([
 				body: JSON.stringify(parsed)
 			})
 		},
-		validation: {
+		parser: {
 			path: z.object({
 				benefitId: z.string()
 			}),
