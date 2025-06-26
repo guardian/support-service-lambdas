@@ -22,18 +22,16 @@ export const handler = async (event: SaveResultsInput) => {
 			'S3_BUCKET environment variable not set',
 		);
 
-		const discountExpiresOnDate = '2025-06-24';
-
 		const executionDateTime = new Date().toISOString();
 
-		const filePath = `${discountExpiresOnDate}/${executionDateTime}`;
+		const filePath = executionDateTime;
 
 		const s3UploadAttempt = await uploadFileToS3({
 			bucketName,
 			filePath,
 			content: JSON.stringify(parsedEvent, null, 2),
 		});
-
+		console.log('S3 upload attempt:', s3UploadAttempt);
 		if (s3UploadAttempt.$metadata.httpStatusCode !== 200) {
 			throw new Error('Failed to upload to S3');
 		}
