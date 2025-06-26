@@ -1,8 +1,6 @@
 package com.gu.productmove.zuora
 
-import com.gu.productmove.GuStageLive.Stage
-import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
-import com.gu.productmove.zuora.GetInvoice.GetInvoiceResponse
+import com.gu.productmove.zuora.model.InvoiceId
 import zio.*
 
 import java.time.LocalDate
@@ -16,13 +14,13 @@ class MockCreatePayment(
   def requests = mutableStore.reverse
 
   override def create(
-      accountId: String,
-      invoiceId: String,
+      accountId: ZuoraAccountId,
+      invoiceId: InvoiceId,
       paymentMethodId: String,
       amount: BigDecimal,
       today: LocalDate,
   ): Task[CreatePaymentResponse] = {
-    mutableStore = invoiceId :: mutableStore
+    mutableStore = invoiceId.id :: mutableStore
     ZIO.succeed(response)
   }
 }

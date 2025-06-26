@@ -6,7 +6,6 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 1`] =
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
-      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -132,6 +131,38 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 1`] =
         "Namespace": "AWS/SQS",
         "Period": 3600,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "singlecontributionsalesforcewriteslambda1B9830FE",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
         "Threshold": 0,
       },
       "Type": "AWS::CloudWatch::Alarm",
@@ -157,6 +188,9 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 1`] =
         },
         "FunctionName": "single-contribution-salesforce-writes-CODE",
         "Handler": "com.gu.singleContributionSalesforceWrites.handlers.CreateSalesforceSingleContributionRecordHandler::handleRequest",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -409,6 +443,28 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 1`] =
         "FunctionName": {
           "Ref": "singlecontributionsalesforcewriteslambda1B9830FE",
         },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "single-contribution-salesforce-writes",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
       },
       "Type": "AWS::Lambda::EventSourceMapping",
     },
@@ -523,7 +579,6 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 2`] =
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
-      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -649,6 +704,38 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 2`] =
         "Namespace": "AWS/SQS",
         "Period": 3600,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "singlecontributionsalesforcewriteslambda1B9830FE",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
         "Threshold": 0,
       },
       "Type": "AWS::CloudWatch::Alarm",
@@ -674,6 +761,9 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 2`] =
         },
         "FunctionName": "single-contribution-salesforce-writes-PROD",
         "Handler": "com.gu.singleContributionSalesforceWrites.handlers.CreateSalesforceSingleContributionRecordHandler::handleRequest",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -926,6 +1016,28 @@ exports[`The SingleContributionSalesforceWrites stack matches the snapshot 2`] =
         "FunctionName": {
           "Ref": "singlecontributionsalesforcewriteslambda1B9830FE",
         },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "single-contribution-salesforce-writes",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
       },
       "Type": "AWS::Lambda::EventSourceMapping",
     },

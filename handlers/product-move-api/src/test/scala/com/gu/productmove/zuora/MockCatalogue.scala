@@ -3,8 +3,8 @@ package com.gu.productmove.zuora
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ErrorResponse, InternalServerError}
 import com.gu.productmove.zuora.GetSubscription
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
-import zio.json.*
 import zio.*
+import zio.json.*
 
 import scala.io.Source
 

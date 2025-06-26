@@ -256,6 +256,9 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
         },
         "FunctionName": "update-supporter-plus-amount-CODE",
         "Handler": "index.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -952,7 +955,6 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
       "GuApiLambda",
-      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -1027,6 +1029,38 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
         "Namespace": "AWS/ApiGateway",
         "Period": 300,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "updatesupporterplusamountlambda0DA9A4CB",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
         "Threshold": 1,
       },
       "Type": "AWS::CloudWatch::Alarm",
@@ -1242,6 +1276,9 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
         },
         "FunctionName": "update-supporter-plus-amount-PROD",
         "Handler": "index.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [

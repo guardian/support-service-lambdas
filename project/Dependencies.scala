@@ -5,12 +5,14 @@ import sbtassembly.AssemblyPlugin.autoImport.{MergeStrategy, assemblyMergeStrate
 import sbtassembly.PathList
 
 object Dependencies {
-  val awsSdkVersion = "2.31.3"
+  
+  val awsSdkVersion = "2.31.24"
   val circeVersion = "0.14.13"
   val sttpVersion = "3.10.3"
-  val http4sVersion = "0.23.30" // keep version 0.23.30, later versions pull in cats effect 3 which is not compatible
+  val http4sVersion = "0.22.15" // keep version 0.22.15, later versions pull in cats effect 3 which is not compatible
   val catsVersion = "2.13.0"
-  val catsEffectVersion = "3.6.1"
+  val catsEffectVersion = "2.5.5"
+  
   val logging: Seq[ModuleID] = Seq(
     "ch.qos.logback" % "logback-classic" % "1.5.18",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",

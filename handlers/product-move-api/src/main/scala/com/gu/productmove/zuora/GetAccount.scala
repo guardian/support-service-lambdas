@@ -60,7 +60,7 @@ object GetAccount {
   )
 
   case class BasicInfo(
-      id: String,
+      id: ZuoraAccountId,
       defaultPaymentMethod: DefaultPaymentMethod,
       IdentityId__c: Option[IdentityId],
       sfContactId__c: String,
@@ -87,7 +87,7 @@ object GetAccount {
     given JsonDecoder[BasicInfo] = DeriveJsonDecoder.gen[BasicInfoWire].map {
       case BasicInfoWire(id, defaultPaymentMethod, identityId, sfContactId__c, balance, currency) =>
         BasicInfo(
-          id = id,
+          id = ZuoraAccountId(id),
           defaultPaymentMethod = defaultPaymentMethod,
           IdentityId__c = identityId.filter(_ != "").map(IdentityId.apply),
           sfContactId__c = sfContactId__c,
