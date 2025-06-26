@@ -50,6 +50,6 @@ export const handler = async (event: SaveResultsInput) => {
 
 function generateFilePath(): string {
 	const executionDateTime = new Date().toISOString();
-	const [date, time] = executionDateTime.split('T');
-	return `${date}/${(time ?? '00:00:00.000').replace('Z', '')}.json`; //e.g. 2025-10-01/12:56:12.111.json
+	const date = executionDateTime.split('T')[0];
+	return `${date}/${executionDateTime}.json`; //e.g. 2025-10-01/2025-10-01T12:56:12.111Z.json
 }
