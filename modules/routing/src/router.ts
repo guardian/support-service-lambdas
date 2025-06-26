@@ -35,12 +35,15 @@ export const NotFoundResponse = {
 	statusCode: 404,
 };
 
-function matchPath(routePath: string, eventPath: string): { matched: boolean; params: Record<string, string> } {
+function matchPath(
+	routePath: string,
+	eventPath: string
+): { params: Record<string, string> } | undefined {
 	const routeParts = routePath.split('/').filter(Boolean);
 	const eventParts = eventPath.split('/').filter(Boolean);
 
 	if (routeParts.length !== eventParts.length) {
-		return { matched: false, params: {} };
+		return undefined;
 	}
 
 	const params: Record<string, string> = {};
@@ -51,10 +54,10 @@ function matchPath(routePath: string, eventPath: string): { matched: boolean; pa
 			const paramName = routePart.slice(1, -1);
 			params[paramName] = eventPart as string;
 		} else if (routePart !== eventPart) {
-			return { matched: false, params: {} };
+			return undefined;
 		}
 	}
-	return { matched: true, params };
+	return { params };
 }
 
 export class Router {
@@ -64,12 +67,12 @@ export class Router {
 	): Promise<APIGatewayProxyResult> {
 		try {
 			for (const route of this.routes) {
-				const { matched, params } = matchPath(route.path, event.path);
-				if (matched && route.httpMethod.toUpperCase() === event.httpMethod.toUpperCase()) {
+				const matchResult = matchPath(route.path, event.path);
+				if (route.httpMethod.toUpperCase() === event.httpMethod.toUpperCase() && matchResult) {
 					// Attach pathParameters to event
 					const eventWithParams = {
 						...event,
-						pathParameters: { ...(event.pathParameters ?? {}), ...params },
+						pathParameters: { ...(event.pathParameters ?? {}), ...matchResult.params },
 					};
 
 					try {
