@@ -24,6 +24,12 @@ type Route<TPath = unknown, TBody = unknown> = {
 	};
 };
 
+export function createRoute<TPath, TBody>(
+	route: Route<TPath, TBody>
+): Route<TPath, TBody> {
+	return route;
+}
+
 export const NotFoundResponse = {
 	body: 'Not Found',
 	statusCode: 404,
@@ -52,7 +58,7 @@ function matchPath(routePath: string, eventPath: string): { matched: boolean; pa
 }
 
 export class Router {
-	constructor(private routes: Route[]) { }
+	constructor(private routes: readonly Route<any, any>[]) { }
 	async routeRequest(
 		event: APIGatewayProxyEvent,
 	): Promise<APIGatewayProxyResult> {
