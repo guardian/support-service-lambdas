@@ -75,7 +75,7 @@ object Dependencies {
   val http4sCore = "org.http4s" %% "http4s-core" % http4sVersion
 
   // Guardian
-  val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "5.0.2"
+  val simpleConfig = "com.gu" %% "simple-configuration-ssm" % "5.1.2"
   val supportInternationalisation =
     "com.gu" %% "support-internationalisation" % "0.16"
 
