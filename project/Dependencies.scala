@@ -5,17 +5,14 @@ import sbtassembly.AssemblyPlugin.autoImport.{MergeStrategy, assemblyMergeStrate
 import sbtassembly.PathList
 
 object Dependencies {
-  
-  val awsSdkVersion = "2.31.71"
-
-  val circeVersion = "0.14.13"
-  val sttpVersion = "3.10.3"
+  val awsSdkVersion = "2.31.24"
+  val circeVersion = "0.14.10"
+  val sttpVersion = "3.10.1"
   val http4sVersion = "0.22.15" // keep version 0.22.15, later versions pull in cats effect 3 which is not compatible
-  val catsVersion = "2.13.0"
+  val catsVersion = "2.12.0"
   val catsEffectVersion = "2.5.5"
-  
   val logging: Seq[ModuleID] = Seq(
-    "ch.qos.logback" % "logback-classic" % "1.5.18",
+    "ch.qos.logback" % "logback-classic" % "1.5.11",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
   )
 
@@ -41,7 +38,7 @@ object Dependencies {
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
   // GCP
-  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.43.3"
+  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.43.1"
 
   // Cats
   val catsCore = "org.typelevel" %% "cats-core" % catsVersion
@@ -62,7 +59,7 @@ object Dependencies {
 
   // Override to fix this vulnerability https://github.com/guardian/support-service-lambdas/security/dependabot/24
   // This is a transitive dependency of async-http-client-backend-cats-ce2 so when we upgrade that we can remove this
-  val asyncHttpClientOverride = "org.asynchttpclient" % "async-http-client" % "3.0.2"
+  val asyncHttpClientOverride = "org.asynchttpclient" % "async-http-client" % "2.12.4"
   val sttpAsyncHttpClientBackendCats =
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats-ce2" % sttpVersion
 
@@ -83,26 +80,26 @@ object Dependencies {
     "com.gu" %% "support-internationalisation" % "0.16"
 
   // Other
-  val zio = "dev.zio" %% "zio" % "1.0.18"
-  val zio2Version = "2.1.18"
+  val zio = "dev.zio" %% "zio" % "1.0.17"
+  val zio2Version = "2.0.22"
   val zio2 = "dev.zio" %% "zio" % zio2Version
-  val tapirVersion = "1.11.33"// stick with 1.11.33 for now as later versions indirectly pull in netty-codec-base which duplicates netty-codec content
-  val enumeratum = "com.beachape" %% "enumeratum" % "1.7.6"
-  val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.4.0"
-  val stripe = "com.stripe" % "stripe-java" % "29.1.0"
-  val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0"
-  val commonsIO = "commons-io" % "commons-io" % "2.19.0"
-  val jodaTime = "joda-time" % "joda-time" % "2.14.0"
+  val tapirVersion = "1.9.11"
+  val enumeratum = "com.beachape" %% "enumeratum" % "1.7.5"
+  val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.3.0"
+  val stripe = "com.stripe" % "stripe-java" % "22.31.0"
+  val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4"
+  val commonsIO = "commons-io" % "commons-io" % "2.18.0"
+  val jodaTime = "joda-time" % "joda-time" % "2.13.1"
   val typesafeConfig = "com.typesafe" % "config" % "1.4.3"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest-should" % "0.9.0" % Test
   val scalatest = "org.scalatest" %% "scalatest" % "3.2.19" % Test
-  val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.18.1" % Test
-  val scalaMock = "org.scalamock" %% "scalamock" % "7.3.2" % Test
-  val mockito = "org.mockito" % "mockito-core" % "5.14.2" % Test
+  val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.17.1" % Test
+  val scalaMock = "org.scalamock" %% "scalamock" % "5.2.0" % Test
+  val mockito = "org.mockito" % "mockito-core" % "5.14.1" % Test
   // play-json still uses an old version of jackson-core which has a vulnerability - https://security.snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-7569538
-  val jacksonVersion = "2.17.3"
+  val jacksonVersion = "2.17.2"
 
   val jacksonDependencies: Seq[ModuleID] = Seq(
     "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,
@@ -117,27 +114,28 @@ object Dependencies {
 
   val sbtDependencyGraph = "net.virtual-void" % "sbt-dependency-graph" % "0.9.2"
 
-  val assemblyMergeStrategyDiscardModuleInfo =
-    assembly / assemblyMergeStrategy := {
-      case PathList("META-INF", "maven", "org.webjars", "swagger-ui", "pom.properties") =>
-        MergeStrategy.singleOrError
-      case PathList(ps @ _*) if ps.last == "module-info.class" => MergeStrategy.discard
-      case PathList(ps @ _*) if ps.last == "deriving.conf" => MergeStrategy.filterDistinctLines
-      case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.discard
-      case PathList("mime.types") => MergeStrategy.filterDistinctLines
-      case PathList("logback.xml") => MergeStrategy.preferProject
-      /*
-       * AWS SDK v2 includes a codegen-resources directory in each jar, with conflicting names.
-       * This appears to be for generating clients from HTTP services.
-       * So it's redundant in a binary artefact.
-       */
-      case PathList("codegen-resources", _*) => MergeStrategy.discard
-      case PathList("META-INF", "FastDoubleParser-LICENSE") => MergeStrategy.concat
-      case PathList("META-INF", "FastDoubleParser-NOTICE") => MergeStrategy.concat
-      case PathList("META-INF", "okio.kotlin_module") => MergeStrategy.discard
-      case x =>
-        val oldStrategy = (assembly / assemblyMergeStrategy).value
-        oldStrategy(x)
-    }
+  // to resolve merge clash of 'module-info.class'
+  // see https://stackoverflow.com/questions/54834125/sbt-assembly-deduplicate-module-info-class
+  val assemblyMergeStrategyDiscardModuleInfo = assembly / assemblyMergeStrategy := {
+    case PathList("META-INF", "maven", "org.webjars", "swagger-ui", "pom.properties") =>
+      MergeStrategy.singleOrError
+    case PathList(ps @ _*) if ps.last == "module-info.class" => MergeStrategy.discard
+    case PathList(ps @ _*) if ps.last == "deriving.conf" => MergeStrategy.filterDistinctLines
+    case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.discard
+    case PathList("mime.types") => MergeStrategy.filterDistinctLines
+    case PathList("logback.xml") => MergeStrategy.preferProject
+    /*
+     * AWS SDK v2 includes a codegen-resources directory in each jar, with conflicting names.
+     * This appears to be for generating clients from HTTP services.
+     * So it's redundant in a binary artefact.
+     */
+    case PathList("codegen-resources", _*) => MergeStrategy.discard
+    case PathList("META-INF", "FastDoubleParser-LICENSE") => MergeStrategy.concat
+    case PathList("META-INF", "FastDoubleParser-NOTICE") => MergeStrategy.concat
+    case PathList("META-INF", "okio.kotlin_module") => MergeStrategy.discard
+    case x =>
+      val oldStrategy = (assembly / assemblyMergeStrategy).value
+      oldStrategy(x)
+  }
 
 }

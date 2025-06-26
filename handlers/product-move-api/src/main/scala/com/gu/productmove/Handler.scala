@@ -6,7 +6,6 @@ import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpoint
 import com.gu.productmove.endpoint.move.{ProductMoveEndpoint, ProductMoveEndpointTypes}
 import com.gu.productmove.endpoint.updateamount.UpdateSupporterPlusAmountEndpoint
 import com.gu.productmove.framework.ZIOApiGatewayRequestHandler
-import io.circe.Encoder
 import io.circe.generic.semiauto.*
 import io.circe.syntax.*
 import sttp.apispec.openapi.Info
@@ -83,8 +82,6 @@ object HandlerManualTests {
   // for testing
   def runTest(method: String, path: String, testInput: Option[String]): Unit = {
     val inputValue = makeTestRequest(method, path, testInput)
-    given Encoder[AwsHttp] = deriveEncoder
-    given Encoder[AwsRequestContext] = deriveEncoder
     val inputJson = inputValue.asJson(using deriveEncoder).spaces2
     runStringTest(inputJson)
   }
