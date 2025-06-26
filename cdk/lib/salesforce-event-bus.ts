@@ -34,16 +34,16 @@ export class SalesforceEventBus extends GuStack {
 			functionName: `${app}-placeholder-${this.stage}`,
 		});
 
+		const busId = `arn:aws:events:${this.region}::event-source/aws.partner/salesforce.com/${this.stage === 'PROD' ? '00D20000000nq5gEAA/0YLQv00000000zJOAQ' : '00D9E0000004jvhUAA/0YLUD00000008Ll4AI'}`;
+
 		const salesforceBus = EventBus.fromEventBusArn(
 			this,
 			'SalesforceBus',
-			this.stage === 'PROD'
-				? `arn:aws:events:${this.region}::event-source/aws.partner/salesforce.com/00D20000000nq5gEAA/0YLQv00000000zJOAQ`
-				: `arn:aws:events:${this.region}::event-source/aws.partner/salesforce.com/00D9E0000004jvhUAA/0YLUD00000008Ll4AI`,
+			busId,
 		);
 
 		const deadLetterQueue = new Queue(this, `dead-letters-${app}-queue`, {
-			queueName: `dead-letters-${app}-queue-${props.stage}`,
+			queueName: `${app}-dead-letters-${this.stage}`,
 			retentionPeriod: Duration.days(14),
 		});
 
@@ -53,7 +53,7 @@ export class SalesforceEventBus extends GuStack {
 			alarmDescription:
 				`There is one or more event in the ${app} dead letter queue (DLQ). ` +
 				'Check that the rule corresponding to the failed message is correctly configured.\n' +
-				`DLQ: https://eu-west-1.console.aws.amazon.com/sqs/v2/home?region=eu-west-1#/queues/https%3A%2F%2Fsqs.eu-west-1.amazonaws.com%2F865473395570%2F${deadLetterQueue.queueName}`,
+				`DLQ: https://${this.region}.console.aws.amazon.com/sqs/v2/home?region=${this.region}#/queues/https%3A%2F%2Fsqs.${this.region}.amazonaws.com%2F${this.account}%2F${deadLetterQueue.queueName}`,
 			metric: deadLetterQueue.metricApproximateNumberOfMessagesVisible(),
 			threshold: 1,
 			evaluationPeriods: 1,
@@ -66,7 +66,7 @@ export class SalesforceEventBus extends GuStack {
 		const sfOutboundMessageQueue = Queue.fromQueueArn(
 			this,
 			'SalesforceOutboundMessageQueue',
-			`arn:aws:sqs:eu-west-1:865473395570:salesforce-outbound-messages-${props.stage}`,
+			`arn:aws:sqs:${this.region}:${this.account}:salesforce-outbound-messages-${this.stage}`,
 		);
 
 		const contactUpdateToSqsRule = new Rule(this, 'SfBusToContactUpdateQueue', {
@@ -82,12 +82,14 @@ export class SalesforceEventBus extends GuStack {
 		contactUpdateToSqsRule.addTarget(
 			new SqsQueue(sfOutboundMessageQueue, {
 				deadLetterQueue: deadLetterQueue,
-				maxEventAge: Duration.hours(2),
-				retryAttempts: 2,
 				message: RuleTargetInput.fromObject({
-					//   "InputPathsMap": { "detail-payload-Contact_ID__c": "$.detail.payload.Contact_ID__c" }
-					//   "InputTemplate": "{\"contactId\": <detail-payload-Contact_ID__c>}"
 					contactId: EventField.fromPath('$.detail.payload.Contact_ID__c'),
+					/*   The Input Transformer in the CloudFormation template becomes:
+					 *       InputTransformer:
+					 *			InputPathsMap:
+					 *				detail-payload-Contact_ID__c: $.detail.payload.Contact_ID__c
+					 *			InputTemplate: '{"contactId":<detail-payload-Contact_ID__c>}'
+					 */
 				}),
 			}),
 		);

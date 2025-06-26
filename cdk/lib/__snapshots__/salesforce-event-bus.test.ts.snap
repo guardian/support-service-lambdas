@@ -44,7 +44,23 @@ exports[`The SalesforceEventBus stack matches the snapshot 1`] = `
             "",
             [
               "There is one or more event in the salesforce-event-bus dead letter queue (DLQ). Check that the rule corresponding to the failed message is correctly configured.
-DLQ: https://eu-west-1.console.aws.amazon.com/sqs/v2/home?region=eu-west-1#/queues/https%3A%2F%2Fsqs.eu-west-1.amazonaws.com%2F865473395570%2F",
+DLQ: https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/sqs/v2/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#/queues/https%3A%2F%2Fsqs.",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".amazonaws.com%2F",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              "%2F",
               {
                 "Fn::GetAtt": [
                   "deadletterssalesforceeventbusqueue29BFA779",
@@ -326,7 +342,22 @@ DLQ: https://eu-west-1.console.aws.amazon.com/sqs/v2/home?region=eu-west-1#/queu
               "Principal": {
                 "Service": "events.amazonaws.com",
               },
-              "Resource": "arn:aws:sqs:eu-west-1:865473395570:salesforce-outbound-messages-CODE",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":salesforce-outbound-messages-CODE",
+                  ],
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
@@ -336,11 +367,19 @@ DLQ: https://eu-west-1.console.aws.amazon.com/sqs/v2/home?region=eu-west-1#/queu
             "Fn::Join": [
               "",
               [
-                "https://sqs.eu-west-1.",
+                "https://sqs.",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ".",
                 {
                   "Ref": "AWS::URLSuffix",
                 },
-                "/865473395570/salesforce-outbound-messages-CODE",
+                "/",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                "/salesforce-outbound-messages-CODE",
               ],
             ],
           },
@@ -365,7 +404,22 @@ DLQ: https://eu-west-1.console.aws.amazon.com/sqs/v2/home?region=eu-west-1#/queu
         "State": "ENABLED",
         "Targets": [
           {
-            "Arn": "arn:aws:sqs:eu-west-1:865473395570:salesforce-outbound-messages-CODE",
+            "Arn": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:sqs:",
+                  {
+                    "Ref": "AWS::Region",
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId",
+                  },
+                  ":salesforce-outbound-messages-CODE",
+                ],
+              ],
+            },
             "DeadLetterConfig": {
               "Arn": {
                 "Fn::GetAtt": [
@@ -381,10 +435,6 @@ DLQ: https://eu-west-1.console.aws.amazon.com/sqs/v2/home?region=eu-west-1#/queu
               },
               "InputTemplate": "{"contactId":<detail-payload-Contact_ID__c>}",
             },
-            "RetryPolicy": {
-              "MaximumEventAgeInSeconds": 7200,
-              "MaximumRetryAttempts": 2,
-            },
           },
         ],
       },
@@ -394,7 +444,7 @@ DLQ: https://eu-west-1.console.aws.amazon.com/sqs/v2/home?region=eu-west-1#/queu
       "DeletionPolicy": "Delete",
       "Properties": {
         "MessageRetentionPeriod": 1209600,
-        "QueueName": "dead-letters-salesforce-event-bus-queue-CODE",
+        "QueueName": "salesforce-event-bus-dead-letters-CODE",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -504,7 +554,23 @@ exports[`The SalesforceEventBus stack matches the snapshot 2`] = `
             "",
             [
               "There is one or more event in the salesforce-event-bus dead letter queue (DLQ). Check that the rule corresponding to the failed message is correctly configured.
-DLQ: https://eu-west-1.console.aws.amazon.com/sqs/v2/home?region=eu-west-1#/queues/https%3A%2F%2Fsqs.eu-west-1.amazonaws.com%2F865473395570%2F",
+DLQ: https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/sqs/v2/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#/queues/https%3A%2F%2Fsqs.",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".amazonaws.com%2F",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              "%2F",
               {
                 "Fn::GetAtt": [
                   "deadletterssalesforceeventbusqueue29BFA779",
@@ -786,7 +852,22 @@ DLQ: https://eu-west-1.console.aws.amazon.com/sqs/v2/home?region=eu-west-1#/queu
               "Principal": {
                 "Service": "events.amazonaws.com",
               },
-              "Resource": "arn:aws:sqs:eu-west-1:865473395570:salesforce-outbound-messages-PROD",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":salesforce-outbound-messages-PROD",
+                  ],
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
@@ -796,11 +877,19 @@ DLQ: https://eu-west-1.console.aws.amazon.com/sqs/v2/home?region=eu-west-1#/queu
             "Fn::Join": [
               "",
               [
-                "https://sqs.eu-west-1.",
+                "https://sqs.",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ".",
                 {
                   "Ref": "AWS::URLSuffix",
                 },
-                "/865473395570/salesforce-outbound-messages-PROD",
+                "/",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                "/salesforce-outbound-messages-PROD",
               ],
             ],
           },
@@ -825,7 +914,22 @@ DLQ: https://eu-west-1.console.aws.amazon.com/sqs/v2/home?region=eu-west-1#/queu
         "State": "ENABLED",
         "Targets": [
           {
-            "Arn": "arn:aws:sqs:eu-west-1:865473395570:salesforce-outbound-messages-PROD",
+            "Arn": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:sqs:",
+                  {
+                    "Ref": "AWS::Region",
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId",
+                  },
+                  ":salesforce-outbound-messages-PROD",
+                ],
+              ],
+            },
             "DeadLetterConfig": {
               "Arn": {
                 "Fn::GetAtt": [
@@ -841,10 +945,6 @@ DLQ: https://eu-west-1.console.aws.amazon.com/sqs/v2/home?region=eu-west-1#/queu
               },
               "InputTemplate": "{"contactId":<detail-payload-Contact_ID__c>}",
             },
-            "RetryPolicy": {
-              "MaximumEventAgeInSeconds": 7200,
-              "MaximumRetryAttempts": 2,
-            },
           },
         ],
       },
@@ -854,7 +954,7 @@ DLQ: https://eu-west-1.console.aws.amazon.com/sqs/v2/home?region=eu-west-1#/queu
       "DeletionPolicy": "Delete",
       "Properties": {
         "MessageRetentionPeriod": 1209600,
-        "QueueName": "dead-letters-salesforce-event-bus-queue-PROD",
+        "QueueName": "salesforce-event-bus-dead-letters-PROD",
         "Tags": [
           {
             "Key": "gu:cdk:version",
