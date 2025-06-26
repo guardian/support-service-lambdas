@@ -12,7 +12,7 @@ export type HttpMethod =
 	| 'OPTIONS'
 	| 'HEAD';
 
-type Route<TPath = unknown, TBody = unknown> = {
+export type Route<TPath, TBody> = {
 	httpMethod: HttpMethod;
 	path: string;
 	handler: (
@@ -27,8 +27,8 @@ type Route<TPath = unknown, TBody = unknown> = {
 
 export function createRoute<TPath, TBody>(
 	route: Route<TPath, TBody>
-): Route<TPath, TBody> {
-	return route;
+): Route<unknown, unknown> {
+	return route as Route<unknown, unknown>;
 }
 
 export const NotFoundResponse = {
@@ -64,7 +64,7 @@ function matchPath(
 }
 
 export class Router {
-	constructor(private routes: ReadonlyArray<Route<any, any>>) { }
+	constructor(private routes: ReadonlyArray<Route<unknown, unknown>>) { }
 	async routeRequest(
 		event: APIGatewayProxyEvent,
 	): Promise<APIGatewayProxyResult> {
@@ -72,7 +72,6 @@ export class Router {
 			for (const route of this.routes) {
 				const matchResult = matchPath(route.path, event.path);
 				if (route.httpMethod.toUpperCase() === event.httpMethod.toUpperCase() && matchResult) {
-					// Attach pathParameters to event
 					const eventWithParams = {
 						...event,
 						pathParameters: { ...(event.pathParameters ?? {}), ...matchResult.params },
