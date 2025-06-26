@@ -110,6 +110,33 @@ importers:
         specifier: ^1.11.13
         version: 1.11.13
 
+  handlers/alarms-handler/cdk:
+    devDependencies:
+      '@guardian/cdk':
+        specifier: 61.8.2
+        version: 61.8.2(aws-cdk-lib@2.195.0(constructs@10.4.2))(aws-cdk@2.1014.0)(constructs@10.4.2)
+      '@types/jest':
+        specifier: ^29.5.14
+        version: 29.5.14
+      '@types/node':
+        specifier: ^22.15.14
+        version: 22.15.17
+      aws-cdk:
+        specifier: 2.1014.0
+        version: 2.1014.0
+      aws-cdk-lib:
+        specifier: 2.195.0
+        version: 2.195.0(constructs@10.4.2)
+      constructs:
+        specifier: 10.4.2
+        version: 10.4.2
+      source-map-support:
+        specifier: ^0.5.21
+        version: 0.5.21
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@22.15.17)(typescript@5.8.2)
+
   handlers/discount-api:
     dependencies:
       dayjs:
