@@ -33,7 +33,7 @@ export const handler = async (event: SaveResultsInput) => {
 			filePath,
 			content: JSON.stringify(parsedEvent, null, 2),
 		});
-
+		console.log('S3 upload attempt:', s3UploadAttempt);
 		if (s3UploadAttempt.$metadata.httpStatusCode !== 200) {
 			throw new Error('Failed to upload to S3');
 		}

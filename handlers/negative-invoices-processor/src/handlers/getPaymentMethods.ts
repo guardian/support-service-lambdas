@@ -40,9 +40,14 @@ export const handler = async (event: GetPaymentMethodsInput) => {
 	} catch (error) {
 		return {
 			...event,
-			checkPaymentMethodStatus: 'Error',
-			errorDetail:
-				error instanceof Error ? error.message : JSON.stringify(error, null, 2),
+			getPaymentMethodsAttempt: {
+				Success: false,
+				hasActivePaymentMethod: undefined,
+				error:
+					error instanceof Error
+						? error.message
+						: JSON.stringify(error, null, 2),
+			},
 		};
 	}
 };
