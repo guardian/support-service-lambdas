@@ -40,7 +40,8 @@ export class SalesforceEventBus extends GuStack {
 			alarmName: `An event for ${this.stage} ${app} was not processed`,
 			alarmDescription:
 				`There is one or more event in the ${app} dead letter queue (DLQ). ` +
-				'Check that the rule corresponding to the failed message is correctly configured.\n' +
+				`Check the attributes of the failed message(s) for details of the error and ` +
+				'check that the rule corresponding to the failed message is correctly configured.\n' +
 				`DLQ: https://${this.region}.console.aws.amazon.com/sqs/v2/home?region=${this.region}#/queues/https%3A%2F%2Fsqs.${this.region}.amazonaws.com%2F${this.account}%2F${deadLetterQueue.queueName}`,
 			metric: deadLetterQueue.metricApproximateNumberOfMessagesVisible(),
 			threshold: 1,

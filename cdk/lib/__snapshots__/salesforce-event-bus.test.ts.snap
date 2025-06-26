@@ -34,7 +34,7 @@ exports[`The SalesforceEventBus stack matches the snapshot 1`] = `
           "Fn::Join": [
             "",
             [
-              "There is one or more event in the salesforce-event-bus dead letter queue (DLQ). Check that the rule corresponding to the failed message is correctly configured.
+              "There is one or more event in the salesforce-event-bus dead letter queue (DLQ). Check the attributes of the failed message(s) for details of the error and check that the rule corresponding to the failed message is correctly configured.
 DLQ: https://",
               {
                 "Ref": "AWS::Region",
@@ -324,7 +324,7 @@ exports[`The SalesforceEventBus stack matches the snapshot 2`] = `
           "Fn::Join": [
             "",
             [
-              "There is one or more event in the salesforce-event-bus dead letter queue (DLQ). Check that the rule corresponding to the failed message is correctly configured.
+              "There is one or more event in the salesforce-event-bus dead letter queue (DLQ). Check the attributes of the failed message(s) for details of the error and check that the rule corresponding to the failed message is correctly configured.
 DLQ: https://",
               {
                 "Ref": "AWS::Region",
