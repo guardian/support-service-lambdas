@@ -12,7 +12,7 @@ export const getPaymentMethods = async (
 
 export const filterActivePaymentMethods = (
 	paymentMethods: ZuoraPaymentMethodQueryResponse,
-): Array<{ type: string; status: string; isDefault: boolean }> => {
+): Array<{ id: string; type: string; status: string; isDefault: boolean }> => {
 	type PaymentMethodKey =
 		| 'creditcard'
 		| 'creditcardreferencetransaction'
@@ -27,6 +27,7 @@ export const filterActivePaymentMethods = (
 	] as const satisfies readonly PaymentMethodKey[];
 
 	const activeMethods: Array<{
+		id: string;
 		type: string;
 		status: string;
 		isDefault: boolean;
