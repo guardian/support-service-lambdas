@@ -1,16 +1,13 @@
 package com.gu.productmove.zuora
 
-import com.gu.productmove.endpoint.available.Currency
-import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlan, RatePlanCharge}
-import com.gu.productmove.zuora.GetAccount.BasicInfo
 import com.gu.productmove.*
+import com.gu.productmove.endpoint.available.Currency
 import com.gu.productmove.endpoint.zuora.GetSubscriptionToCancel.GetSubscriptionToCancelResponse
-
-import collection.mutable.Stack
+import com.gu.productmove.zuora.GetAccount.BasicInfo
+import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import org.scalatest.*
+import org.scalatest.flatspec.*
 import zio.json.*
-import flatspec.*
-import matchers.*
 
 import java.time.LocalDate
 import scala.io.Source
@@ -65,7 +62,7 @@ class JsonCodecSpec extends AnyFlatSpec {
   it should "JSON Decoding: null fields should convert to type None" in {
     val json = Source.fromResource("AccountBasicInfo2.json").mkString
     val expectedBasicInfo = BasicInfo(
-      "2c92a0ff58bjkleb0158ff0351370sdf",
+      ZuoraAccountId("2c92a0ff58bjkleb0158ff0351370sdf"),
       DefaultPaymentMethod("2c92a0fd590128e4015902ad34001c1f", None),
       None,
       "0030J00001tCDhGAMKL",
@@ -81,7 +78,7 @@ class JsonCodecSpec extends AnyFlatSpec {
   it should "JSON Decoding: empty strings should convert to type None" in {
     val json = Source.fromResource("AccountBasicInfo.json").mkString
     val expectedBasicInfo = BasicInfo(
-      "2c92a0ff58bjkleb0158ff0351370sdf",
+      ZuoraAccountId("2c92a0ff58bjkleb0158ff0351370sdf"),
       DefaultPaymentMethod("2c92a0fd590128e4015902ad34001c1f", None),
       None,
       "0030J00001tCDhGAMKL",
@@ -98,12 +95,6 @@ class JsonCodecSpec extends AnyFlatSpec {
     val json = Source.fromResource("zuoraResponses/GetSubscriptionResponse.json").mkString
 
     assert(json.fromJson[GetSubscriptionResponse].getOrElse("") == getSubscriptionResponse2)
-  }
-
-  it should "Correctly decode PUT (/v1/subscriptions/$subscriptionNumber/cancel) response with a negative invoice attached" in {
-    val json = Source.fromResource("zuoraResponses/CancellationResponse1.json").mkString
-
-    assert(json.fromJson[CancellationResponse].getOrElse("") == cancellationResponse1)
   }
 
   it should "Correctly decode PUT (/v1/subscriptions/$subscriptionNumber/cancel) response without a negative invoice attached" in {

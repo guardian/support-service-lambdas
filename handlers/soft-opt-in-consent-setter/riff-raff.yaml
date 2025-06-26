@@ -6,19 +6,21 @@ allowedStages:
   - CODE
   - PROD
 deployments:
-  cfn:
+  soft-opt-in-consent-setter-cloudformation:
     type: cloud-formation
     app: soft-opt-in-consent-setter
     parameters:
-      templatePath: cfn.yaml
+      templateStagePaths:
+        CODE: soft-opt-in-consent-setter-CODE.template.json
+        PROD: soft-opt-in-consent-setter-PROD.template.json
 
   soft-opt-in-consent-setter:
     type: aws-lambda
     parameters:
       fileName: soft-opt-in-consent-setter.jar
-      bucket: support-service-lambdas-dist
+      bucketSsmLookup: true
       prefixStack: false
       functionNames:
         - soft-opt-in-consent-setter-
         - soft-opt-in-consent-setter-IAP-
-    dependencies: [ cfn ]
+    dependencies: [soft-opt-in-consent-setter-cloudformation]

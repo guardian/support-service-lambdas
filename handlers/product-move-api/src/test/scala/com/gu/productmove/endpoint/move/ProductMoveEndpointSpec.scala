@@ -2,28 +2,16 @@ package com.gu.productmove.endpoint.move
 
 import com.gu.productmove.GuStageLive.Stage.CODE
 import com.gu.productmove.endpoint.available.Currency.GBP
-import com.gu.productmove.{Dynamo, IdentityId, SQS}
 import com.gu.productmove.endpoint.move.ProductMoveEndpoint.SwitchType.RecurringContributionToSupporterPlus
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{ExpectedInput, Success}
 import com.gu.productmove.endpoint.move.switchtype.RecurringContributionToSupporterPlus
 import com.gu.productmove.zuora.GetAccount.{BasicInfo, GetAccountResponse}
 import com.gu.productmove.zuora.GetSubscription.GetSubscriptionResponse
 import com.gu.productmove.zuora.model.{AccountNumber, SubscriptionName}
-import com.gu.productmove.zuora.{
-  CreatePayment,
-  DefaultPaymentMethod,
-  GetAccount,
-  GetCatalogue,
-  GetInvoice,
-  GetInvoiceItems,
-  GetSubscription,
-  InvoiceItemAdjustment,
-  SubscriptionUpdate,
-  TermRenewal,
-  ZuoraProductCatalogue,
-}
-import zio.{Task, UIO, URIO, ZIO}
+import com.gu.productmove.zuora.*
+import com.gu.productmove.{Dynamo, IdentityId, SQS}
 import zio.test.{ZIOSpecDefault, assertTrue}
+import zio.{Task, UIO, URIO, ZIO}
 
 import java.time.LocalDate
 
@@ -81,7 +69,14 @@ object ProductMoveEndpointSpec extends ZIOSpecDefault {
         if (subscriptionNumber.value == expectedAccountNumber)
           ZIO.succeed(
             GetAccountResponse(
-              BasicInfo("", DefaultPaymentMethod("", None), identityIdToReturn.map(IdentityId.apply), "", 0, GBP),
+              BasicInfo(
+                ZuoraAccountId(""),
+                DefaultPaymentMethod("", None),
+                identityIdToReturn.map(IdentityId.apply),
+                "",
+                0,
+                GBP,
+              ),
               null,
               null,
             ),

@@ -1,31 +1,23 @@
 package com.gu.productmove.zuora
 
-import com.gu.productmove.{AwsCredentialsLive, GuStageLive, SQSLive, SecretsLive, SttpClientLive}
-import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpoint
-import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes.ExpectedInput
-import com.gu.productmove.refund.RefundSupporterPlus
-import com.gu.productmove.zuora.TaxDetails
+import com.gu.productmove.*
+import com.gu.productmove.refund.{GetRefundInvoiceDetails, RefundSupporterPlus, TaxDetails}
 import com.gu.productmove.zuora.model.SubscriptionName
-import com.gu.productmove.zuora.rest.{ZuoraClientLive, ZuoraGetLive}
+import com.gu.productmove.zuora.rest.ZuoraGetLive
 import zio.*
-import zio.test.Assertion.{equalTo, isSome}
-import zio.test.{Spec, TestAspect, TestEnvironment, ZIOSpecDefault, assertTrue, assert}
+import zio.test.{Spec, TestEnvironment, ZIOSpecDefault, assertTrue}
 
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import scala.collection.immutable.{ListMap, SortedMap}
 import scala.collection.mutable
-import scala.collection.mutable.Stack
 
 object GetRefundInvoiceDetailsLiveSpec extends ZIOSpecDefault {
-  override def spec: Spec[TestEnvironment with Scope, Any] =
+  override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("GetInvoiceItemsForSubscriptionLive")(
       test("finds taxation details for a subscription") {
         for {
           result <- GetRefundInvoiceDetails
             .get(SubscriptionName("A-S00631534"))
             .provide(
-              GetRefundInvoiceDetailsLive.layer,
+              InvoiceItemQueryLive.layer,
               ZLayer.succeed(
                 new MockStackedGetInvoicesZuoraClient(
                   mutable.Stack(
@@ -50,7 +42,7 @@ object GetRefundInvoiceDetailsLiveSpec extends ZIOSpecDefault {
           result <- GetRefundInvoiceDetails
             .get(SubscriptionName("A-S00631534"))
             .provide(
-              GetRefundInvoiceDetailsLive.layer,
+              InvoiceItemQueryLive.layer,
               ZLayer.succeed(
                 new MockStackedGetInvoicesZuoraClient(
                   mutable.Stack(
@@ -73,7 +65,7 @@ object GetRefundInvoiceDetailsLiveSpec extends ZIOSpecDefault {
           result <- GetRefundInvoiceDetails
             .get(SubscriptionName("A-S00637582"))
             .provide(
-              GetRefundInvoiceDetailsLive.layer,
+              InvoiceItemQueryLive.layer,
               ZLayer.succeed(
                 new MockStackedGetInvoicesZuoraClient(
                   mutable.Stack(

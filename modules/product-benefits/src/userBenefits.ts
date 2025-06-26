@@ -7,6 +7,7 @@ import type {
 import type { Stage } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import { getSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
+import dayjs from 'dayjs';
 import {
 	allProductBenefits,
 	itemIsValidForProduct,
@@ -35,6 +36,7 @@ export const getValidUserProducts = (
 	supporterProductDataItems: SupporterRatePlanItem[],
 ): ProductKey[] =>
 	supporterProductDataItems
+		.filter((item) => dayjs(item.termEndDate) >= dayjs().startOf('day'))
 		.flatMap((item) => {
 			const product = productCatalogHelper.findProductDetails(
 				item.productRatePlanId,

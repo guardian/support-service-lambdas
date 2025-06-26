@@ -18,7 +18,7 @@ import zio.{IO, RIO, Task, URLayer, ZIO, ZLayer}
 import java.time.LocalDate
 
 object GetCatalogueLive {
-  val layer: URLayer[AwsS3 with Stage, GetCatalogue] = ZLayer.fromFunction(GetCatalogueLive(_, _))
+  val layer: URLayer[AwsS3 & Stage, GetCatalogue] = ZLayer.fromFunction(GetCatalogueLive(_, _))
 }
 
 class GetCatalogueLive(awsS3: AwsS3, stage: Stage) extends GetCatalogue {

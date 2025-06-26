@@ -1,5 +1,5 @@
 import type { Currency } from '@modules/internationalisation/currency';
-import type { ProductBillingPeriod } from '@modules/product-catalog/productCatalog';
+import type { ProductBillingPeriod } from '@modules/product-catalog/productBillingPeriods';
 
 export const supporterPlusAmountBands: {
 	[C in Currency]: {
@@ -32,4 +32,4 @@ export const supporterPlusAmountBands: {
 		Month: { min: 10, max: 166 },
 		Annual: { min: 95, max: 2000 },
 	},
-};
+} as const;

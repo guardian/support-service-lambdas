@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/require-await -- this is required to ensure the lambda returns a value*/
-import { DataExtensionNames } from '@modules/email/email';
+import { DataExtensionNames, sendEmail } from '@modules/email/email';
+import { stageFromEnvironment } from '@modules/stage';
 import type { z } from 'zod';
 import { BaseRecordForEmailSendSchema } from '../types';
 
@@ -61,6 +61,11 @@ export const handler = async (event: SendEmailInput) => {
 	};
 
 	try {
+		const response = await sendEmail(stageFromEnvironment(), request);
+
+		if (response.$metadata.httpStatusCode !== 200) {
+			throw new Error('Failed to send email');
+		}
 		return {
 			record: parsedEvent,
 			emailSendEligibility,
@@ -86,7 +91,7 @@ export const handler = async (event: SendEmailInput) => {
 	}
 };
 
-function getIneligibilityReason(
+export function getIneligibilityReason(
 	subStatus: string,
 	workEmail: string | null | undefined,
 	oldPaymentAmount: number,
@@ -106,7 +111,8 @@ function getIneligibilityReason(
 	}
 	return '';
 }
-function getEmailSendEligibility(
+
+export function getEmailSendEligibility(
 	subStatus: string,
 	workEmail: string | null | undefined,
 	oldPaymentAmount: number,
@@ -126,7 +132,10 @@ function getEmailSendEligibility(
 	};
 }
 
-function formatDate(inputDate: string): string {
+export function formatDate(inputDate: string): string {
+	if (isNaN(new Date(inputDate).getTime())) {
+		throw new Error(`Invalid date string: ${inputDate}`);
+	}
 	return new Date(inputDate).toLocaleDateString('en-GB', {
 		day: '2-digit',
 		month: 'long',
@@ -134,7 +143,7 @@ function formatDate(inputDate: string): string {
 	});
 }
 
-function getCurrencySymbol(currencyCode: string): string {
+export function getCurrencySymbol(currencyCode: string): string {
 	const symbols: Record<string, string> = {
 		GBP: '£',
 		AUD: '$',

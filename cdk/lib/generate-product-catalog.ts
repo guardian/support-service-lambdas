@@ -1,4 +1,3 @@
-import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuCname } from '@guardian/cdk/lib/constructs/dns';
@@ -7,8 +6,10 @@ import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { Bucket, EventType } from 'aws-cdk-lib/aws-s3';
 import { LambdaDestination } from 'aws-cdk-lib/aws-s3-notifications';
+import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { nodeVersion } from './node-version';
 
 export interface GenerateProductCatalogProps extends GuStackProps {
@@ -34,10 +35,11 @@ export class GenerateProductCatalog extends GuStack {
 			description:
 				'A lambda to generate the Guardian product catalog from the Zuora catalog',
 			functionName: nameWithStage,
+			loggingFormat: LoggingFormat.TEXT,
 			fileName: `${app}.zip`,
 			handler: 'index.handler',
 			runtime: nodeVersion,
-			memorySize: 1024,
+			memorySize: 1232,
 			timeout: Duration.seconds(300),
 			environment: commonEnvironmentVariables,
 			app: app,
@@ -94,14 +96,13 @@ export class GenerateProductCatalog extends GuStack {
 		});
 
 		if (this.stage === 'PROD') {
-			new GuAlarm(this, `FailedProductCatalogLambdaAlarm`, {
+			new SrLambdaAlarm(this, `FailedProductCatalogLambdaAlarm`, {
 				app,
 				alarmName: `The ${app} Lambda has failed`,
 				alarmDescription:
 					'This means the product catalog may not be up to date in S3. This lambda runs on a regular schedule so action will only be necessary if the alarm is triggered continuously',
 				evaluationPeriods: 1,
 				threshold: 1,
-				snsTopicName: `alarms-handler-topic-${this.stage}`,
 				comparisonOperator:
 					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 				metric: new Metric({
@@ -113,6 +114,7 @@ export class GenerateProductCatalog extends GuStack {
 						FunctionName: lambda.functionName,
 					},
 				}),
+				lambdaFunctionNames: lambda.functionName,
 			});
 		}
 	}

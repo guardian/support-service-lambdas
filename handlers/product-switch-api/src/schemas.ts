@@ -1,10 +1,10 @@
 import { z } from 'zod';
 
 export const productSwitchRequestSchema = z.object({
-	price: z.number(),
 	preview: z.boolean(),
 	csrUserId: z.optional(z.string()),
 	caseId: z.optional(z.string()),
+	applyDiscountIfAvailable: z.optional(z.boolean()),
 });
 
 export type ProductSwitchRequestBody = z.infer<
@@ -54,7 +54,7 @@ export type ZuoraPreviewResponse = z.infer<typeof zuoraPreviewResponseSchema>;
 
 export const zuoraSwitchResponseSchema = z.object({
 	success: z.boolean(),
-	invoiceNumbers: z.optional(z.array(z.string())),
+	invoiceIds: z.optional(z.array(z.string())),
 	reasons: z.optional(z.array(z.object({ message: z.string() }))),
 });
 

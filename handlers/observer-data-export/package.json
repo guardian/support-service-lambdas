@@ -1,0 +1,17 @@
+{
+	"name": "observer-data-export",
+	"description": "Application in charge of exporting Observer data.",
+	"scripts": {
+		"test": "jest --group=-integration",
+		"it-test": "jest --group=integration",
+		"build": "esbuild --bundle --platform=node --target=node20 --outdir=target src/handlers/*.ts",
+		"lint": "eslint src/**/*.ts test/**/*.ts",
+		"package": "pnpm type-check && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr observer-data-export.zip ./*.js",
+		"type-check": "tsc --noEmit",
+		"check-formatting": "prettier --check **.ts",
+		"fix-formatting": "prettier --write **.ts"
+	},
+	"dependencies": {
+		"@types/aws-lambda": "^8.10.147"
+	}
+}

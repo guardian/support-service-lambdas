@@ -1,5 +1,6 @@
 package com.gu.productmove.endpoint.move.switchtype
 
+import com.gu.i18n.Currency
 import com.gu.newproduct.api.productcatalog.ZuoraIds.zuoraIdsForStage
 import com.gu.newproduct.api.productcatalog.{Annual, BillingPeriod, Monthly}
 import com.gu.productmove.*
@@ -71,9 +72,12 @@ class ToRecurringContributionImpl(
         .fromOption(activeRatePlanCharge.billingPeriod)
         .orElseFail(new Throwable(s"billingPeriod is null for rate plan charge $activeRatePlanCharge"))
 
+      // Make sure that price is valid and acceptable
+      _ <- validateOldMembershipPrice(currency, billingPeriod, price)
+
       updateRequestBody <- getRatePlans(
         billingPeriod,
-        previousAmount,
+        price,
         subscription.ratePlans,
         activeRatePlanCharge.chargedThroughDate.get,
       ).map { case (addRatePlan, removeRatePlan) =>
@@ -167,7 +171,7 @@ class ToRecurringContributionImpl(
 
   private def getRatePlans(
       billingPeriod: BillingPeriod,
-      previousAmount: Double,
+      price: BigDecimal,
       ratePlanAmendments: Seq[GetSubscription.RatePlan],
       chargedThroughDate: LocalDate,
   ): Task[(List[AddRatePlan], List[RemoveRatePlan])] =
@@ -176,7 +180,7 @@ class ToRecurringContributionImpl(
         getRecurringContributionRatePlanId(stage, billingPeriod),
       )
 
-      overrideAmount = previousAmount
+      overrideAmount = price
 
       chargeOverride = ChargeOverrides(
         price = Some(overrideAmount),
@@ -187,19 +191,57 @@ class ToRecurringContributionImpl(
         contributionRatePlanIds.ratePlanId,
         chargeOverrides = List(chargeOverride),
       )
-      removeRatePlans = ratePlanAmendments.map(ratePlan => {
-        val effectiveStartDate = ratePlan.ratePlanCharges.headOption.map(_.effectiveStartDate)
-        val removeDate = effectiveStartDate.filter(_.isAfter(chargedThroughDate)).getOrElse(chargedThroughDate)
-        RemoveRatePlan(removeDate, ratePlan.id)
-      })
+      removeRatePlans = ratePlanAmendments
+        .filterNot(_.lastChangeType.contains("Remove"))
+        .map { ratePlan =>
+          val effectiveStartDate = ratePlan.ratePlanCharges.headOption.map(_.effectiveStartDate)
+          val removeDate = effectiveStartDate.filter(_.isAfter(chargedThroughDate)).getOrElse(chargedThroughDate)
+          RemoveRatePlan(removeDate, ratePlan.id)
+        }
     } yield (List(addRatePlan), removeRatePlans.toList)
 
   private def getActiveRatePlanAndCharge(
       ratePlanAmendments: List[GetSubscription.RatePlan],
   ): Option[(GetSubscription.RatePlan, GetSubscription.RatePlanCharge)] = (for {
     ratePlan <- ratePlanAmendments
+    if !ratePlan.lastChangeType.contains("Remove")
     ratePlanCharge <- ratePlan.ratePlanCharges
     if ratePlanCharge.chargedThroughDate.isDefined
   } yield (ratePlan, ratePlanCharge)).headOption
+
+  private def validateOldMembershipPrice(
+      currency: Currency,
+      billingPeriod: BillingPeriod,
+      price: BigDecimal,
+  ): Task[Unit] = {
+    val expectedPrices = Map(
+      "GBP" -> Map("month" -> 5, "year" -> 49),
+      "USD" -> Map("month" -> 6.99, "year" -> 69),
+      "EUR" -> Map("month" -> 4.99, "year" -> 49),
+      "AUD" -> Map("month" -> 10, "year" -> 100),
+      "CAD" -> Map("month" -> 6.99, "year" -> 69),
+    )
+
+    val periodKey = billingPeriod match {
+      case Monthly => "month"
+      case Annual => "year"
+      case _ => throw new IllegalArgumentException(s"Unsupported billing period: $billingPeriod")
+    }
+
+    val currencyCode = currency.iso
+
+    expectedPrices.get(currencyCode) match {
+      case Some(prices) if prices.get(periodKey).contains(price.toDouble) =>
+        ZIO.unit
+      case _ =>
+        ZIO.fail(
+          new Throwable(
+            s"Invalid price $price for currency $currencyCode and billing period $billingPeriod. Expected: ${expectedPrices
+                .get(currencyCode)
+                .flatMap(_.get(periodKey))}",
+          ),
+        )
+    }
+  }
 
 }

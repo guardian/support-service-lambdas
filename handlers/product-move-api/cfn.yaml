@@ -263,6 +263,74 @@ Resources:
           Value: SAM
       Architectures:
         - arm64
+
+
+  SalesforceTrackingLambdaErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    DependsOn:
+      - SalesforceTrackingLambda
+    Properties:
+      AlarmActions:
+        - Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-${Stage}
+      AlarmName:
+        Fn::Sub: ${Stage} Salesforce tracking of a product switch has failed
+      AlarmDescription: Impact - tracking of product switches is not going to salesforce/bigquery/braze
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      Dimensions:
+        - Name: FunctionName
+          Value:
+            Fn::Sub: product-switch-salesforce-tracking-${Stage}
+      EvaluationPeriods: 1
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      TreatMissingData: notBreaching
+      Tags:
+        - Key: DiagnosticLinks
+          Value:
+            Fn::Sub: lambda:product-switch-salesforce-tracking-${Stage}
+
+  NoSalesforceTrackingAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Condition: IsProd
+    DependsOn:
+      - SalesforceTrackingLambda
+    Properties:
+      AlarmActions:
+        - Fn::Sub: arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-${Stage}
+      AlarmName:
+        Fn::Sub: ${Stage} No Salesforce tracking of a product switch has been queued for 8 hours
+      AlarmDescription: Impact - tracking of product switches may not be going to salesforce/bigquery/braze
+      Metrics:
+        - Id: e1
+          Expression: "FILL(m1,0)"
+          Label: TrackingEvents
+        - Id: m1
+          Label: Metric1
+          MetricStat:
+            Metric:
+              MetricName: Invocations
+              Namespace: AWS/Lambda
+              Dimensions:
+                - Name: FunctionName
+                  Value:
+                    Fn::Sub: product-switch-salesforce-tracking-${Stage}
+            Period: 28800
+            Stat: Sum
+            Unit: Count
+          ReturnData: false
+      ComparisonOperator: LessThanOrEqualToThreshold
+      Threshold: 0
+      EvaluationPeriods: 1
+      TreatMissingData: breaching
+      Tags:
+        - Key: DiagnosticLinks
+          Value:
+            Fn::Sub: lambda:product-switch-salesforce-tracking-${Stage}
+
   ProductMoveApiGateway:
     Type: AWS::ApiGateway::RestApi
     Properties:

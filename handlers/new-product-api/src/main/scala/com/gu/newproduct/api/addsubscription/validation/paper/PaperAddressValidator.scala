@@ -22,7 +22,7 @@ object PaperAddressValidator {
   }
 
   private def validatePostCodeForHomeDelivery(postcode: Option[Postcode]): ValidationResult[Postcode] = for {
-    deliveryPostcode <- postcode getOrFailWith ("delivery postcode is required")
+    deliveryPostcode <- postcode getOrFailWith ("Delivery postcode is missing in Zuora, check mailing address")
     _ <- isWithinM25(
       deliveryPostcode,
     ) orFailWith (s"Invalid postcode ${deliveryPostcode.value}: postcode must be within M25")

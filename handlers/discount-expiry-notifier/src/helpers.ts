@@ -19,6 +19,16 @@ export const filterRecords = (
 			dayjs(item.serviceStartDate).isSame(
 				dayjs(firstPaymentDateAfterDiscountExpiry),
 				'day',
-			),
+			) &&
+			!invoiceItemIsHolidayCredit(item) &&
+			!invoiceItemIsDeliveryProblemCredit(item),
 	);
 };
+
+export const invoiceItemIsHolidayCredit = (
+	invoiceItem: BillingPreviewInvoiceItem,
+) => invoiceItem.chargeName === 'Holiday Credit';
+
+export const invoiceItemIsDeliveryProblemCredit = (
+	invoiceItem: BillingPreviewInvoiceItem,
+) => invoiceItem.chargeName === 'Delivery-problem credit';

@@ -19,12 +19,12 @@ export const handler = async (event: GetNewPaymentAmountInput) => {
 			dayjs(parsedEvent.firstPaymentDateAfterDiscountExpiry),
 			parsedEvent.billingAccountId,
 		);
-		const invoiceItemsForSubscription = filterRecords(
+		const invoiceItems = filterRecords(
 			getBillingPreviewResponse.invoiceItems,
 			parsedEvent.zuoraSubName,
 			parsedEvent.firstPaymentDateAfterDiscountExpiry,
 		);
-		const newPaymentAmount = calculateTotalAmount(invoiceItemsForSubscription);
+		const newPaymentAmount = calculateTotalAmount(invoiceItems);
 
 		return {
 			...parsedEvent,

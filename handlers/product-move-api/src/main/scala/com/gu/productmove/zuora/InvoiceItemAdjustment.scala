@@ -5,6 +5,7 @@ import com.gu.productmove.AwsS3
 import com.gu.productmove.GuStageLive.Stage
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.ErrorResponse
 import com.gu.productmove.zuora.InvoiceItemAdjustment.*
+import com.gu.productmove.zuora.model.InvoiceId
 import com.gu.productmove.zuora.rest.ZuoraRestBody.ZuoraSuccessCheck.None
 import com.gu.productmove.zuora.rest.{ZuoraGet, ZuoraRestBody}
 import sttp.capabilities.zio.ZioStreams
@@ -27,7 +28,7 @@ object InvoiceItemAdjustmentLive {
 
 private class InvoiceItemAdjustmentLive(zuoraGet: ZuoraGet) extends InvoiceItemAdjustment {
   override def update(
-      invoiceId: String,
+      invoiceId: InvoiceId,
       amount: BigDecimal,
       invoiceItemId: String,
       adjustmentType: String,
@@ -57,7 +58,7 @@ private class InvoiceItemAdjustmentLive(zuoraGet: ZuoraGet) extends InvoiceItemA
 
 trait InvoiceItemAdjustment {
   def update(
-      invoiceId: String,
+      invoiceId: InvoiceId,
       amount: BigDecimal,
       invoiceItemId: String,
       adjustmentType: String,
@@ -74,11 +75,11 @@ object InvoiceItemAdjustment {
   case class PostBody(
       AdjustmentDate: LocalDate,
       Amount: BigDecimal,
-      InvoiceId: String,
+      InvoiceId: InvoiceId,
       SourceId: String, // The invoice item id
       Type: String = "Charge",
       SourceType: String,
-      Comments: String = "Created by the product-move-api refund process to balance a cancelled invoice",
+      Comment: String = "Created by the product-move-api refund process to balance a cancelled invoice",
   )
 
   case class InvoiceItemAdjustmentResult(Success: Boolean, Id: String)
@@ -93,7 +94,7 @@ object InvoiceItemAdjustment {
   given JsonEncoder[InvoiceItemAdjustmentsWriteRequest] = DeriveJsonEncoder.gen[InvoiceItemAdjustmentsWriteRequest]
 
   def update(
-      invoiceId: String,
+      invoiceId: InvoiceId,
       amount: BigDecimal,
       invoiceItemId: String,
       adjustmentType: String,
