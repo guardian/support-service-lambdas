@@ -2,9 +2,9 @@
 export const CODEDataMockQueryResponse = [
 	{
 		//actual records from the Zuora dev sandbox. Update as needed.
-		accountId: '8ad08aef83d5d6330183d6b24bd46138',
-		invoiceId: '8ad085298634dd3801863a16a1cd3024',
-		invoiceNumber: 'INV00316069',
+		accountId: '8ad0887e83926a3001839dfa2fbe0598',
+		invoiceId: '8ad085298634dd3801863a1f166144d0',
+		invoiceNumber: 'INV00319365',
 		invoiceBalance: -30.0,
 	},
 	{
