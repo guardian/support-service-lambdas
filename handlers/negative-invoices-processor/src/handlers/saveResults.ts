@@ -22,11 +22,9 @@ export const handler = async (event: SaveResultsInput) => {
 			'S3_BUCKET environment variable not set',
 		);
 
-		const discountExpiresOnDate = '2025-06-24';
-
 		const executionDateTime = new Date().toISOString();
 
-		const filePath = `${discountExpiresOnDate}/${executionDateTime}`;
+		const filePath = executionDateTime;
 
 		const s3UploadAttempt = await uploadFileToS3({
 			bucketName,
