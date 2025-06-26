@@ -37,7 +37,7 @@ export class SalesforceEventBus extends GuStack {
 
 		new GuAlarm(this, 'DeadLetterQueueAlarm', {
 			app: app,
-			alarmName: `An event for ${props.stage} ${app} was not processed`,
+			alarmName: `An event for ${this.stage} ${app} was not processed`,
 			alarmDescription:
 				`There is one or more event in the ${app} dead letter queue (DLQ). ` +
 				'Check that the rule corresponding to the failed message is correctly configured.\n' +
