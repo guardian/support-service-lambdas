@@ -23,8 +23,8 @@ export const handler = async (event: SaveResultsInput) => {
 		);
 
 		const executionDateTime = new Date().toISOString();
-
-		const filePath = executionDateTime;
+		const [date, time] = executionDateTime.split('T');
+		const filePath = `${date}/${(time ?? '00:00:00.000').replace('Z', '')}`;
 
 		const s3UploadAttempt = await uploadFileToS3({
 			bucketName,
