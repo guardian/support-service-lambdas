@@ -10,7 +10,7 @@ import {
 	ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
 import { Architecture, LoggingFormat } from 'aws-cdk-lib/aws-lambda';
-// import { Bucket } from 'aws-cdk-lib/aws-s3';
+import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
 	Choice,
 	Condition,
@@ -60,9 +60,9 @@ export class NegativeInvoicesProcessor extends GuStack {
 			resources: ['*'],
 		});
 
-		// new Bucket(this, 'Bucket', {
-		// 	bucketName: `${appName}-${this.stage.toLowerCase()}`,
-		// });
+		const bucket = new Bucket(this, 'Bucket', {
+			bucketName: `${appName}-${this.stage.toLowerCase()}`,
+		});
 
 		const getInvoicesLambda = new GuLambdaFunction(
 			this,
@@ -183,13 +183,38 @@ export class NegativeInvoicesProcessor extends GuStack {
 			},
 		);
 
+		const saveResultsLambda = new GuLambdaFunction(
+			this,
+			'save-results-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-save-results-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+					S3_BUCKET: bucket.bucketName,
+				},
+				handler: 'saveResults.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['s3:GetObject', 's3:PutObject'],
+						resources: [bucket.arnForObjects('*')],
+					}),
+					allowPutMetric,
+				],
+			},
+		);
+
 		const getInvoicesLambdaTask = new LambdaInvoke(this, 'Get invoices', {
 			lambdaFunction: getInvoicesLambda,
 			outputPath: '$.Payload',
 		}).addRetry({
 			errors: ['States.ALL'],
 			interval: Duration.seconds(10),
-			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
+			maxAttempts: 2,
 		});
 
 		const checkForActiveSubLambdaTask = new LambdaInvoke(
@@ -202,7 +227,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 		).addRetry({
 			errors: ['States.ALL'],
 			interval: Duration.seconds(10),
-			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
+			maxAttempts: 2,
 		});
 
 		const getPaymentMethodsLambdaTask = new LambdaInvoke(
@@ -215,7 +240,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 		).addRetry({
 			errors: ['States.ALL'],
 			interval: Duration.seconds(10),
-			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
+			maxAttempts: 2,
 		});
 
 		const applyCreditToAccountBalanceLambdaTask = new LambdaInvoke(
@@ -228,7 +253,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 		).addRetry({
 			errors: ['States.ALL'],
 			interval: Duration.seconds(10),
-			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
+			maxAttempts: 2,
 		});
 
 		const doCreditBalanceRefundLambdaTask = new LambdaInvoke(
@@ -241,7 +266,16 @@ export class NegativeInvoicesProcessor extends GuStack {
 		).addRetry({
 			errors: ['States.ALL'],
 			interval: Duration.seconds(10),
-			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
+			maxAttempts: 2,
+		});
+
+		const saveResultsLambdaTask = new LambdaInvoke(this, 'Save results to S3', {
+			lambdaFunction: saveResultsLambda,
+			outputPath: '$.Payload',
+		}).addRetry({
+			errors: ['States.ALL'],
+			interval: Duration.seconds(10),
+			maxAttempts: 2,
 		});
 
 		const invoiceProcessorMap = new Map(this, 'Invoice processor map', {
@@ -287,7 +321,9 @@ export class NegativeInvoicesProcessor extends GuStack {
 		);
 
 		const definitionBody = DefinitionBody.fromChainable(
-			getInvoicesLambdaTask.next(invoiceProcessorMap),
+			getInvoicesLambdaTask
+				.next(invoiceProcessorMap)
+				.next(saveResultsLambdaTask),
 		);
 
 		new StateMachine(this, `${appName}-state-machine-${this.stage}`, {

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const BigQueryRecordSchema = z
+export const InvoiceSchema = z
 	.object({
 		invoiceId: z.string(),
 		accountId: z.string(),
@@ -8,6 +8,31 @@ export const BigQueryRecordSchema = z
 		invoiceBalance: z.number(),
 	})
 	.strict();
-export type BigQueryRecord = z.infer<typeof BigQueryRecordSchema>;
+export type InvoiceRecord = z.infer<typeof InvoiceSchema>;
 
-export const BigQueryResultDataSchema = z.array(BigQueryRecordSchema);
+export const InvoiceRecordsArraySchema = z.array(InvoiceSchema);
+
+export const PaymentMethodSchema = z.object({
+	id: z.string(),
+	status: z.string(),
+	type: z.string(),
+	isDefault: z.boolean(),
+});
+
+export const ApplyCreditToAccountBalanceAttemptSchema = z.object({
+	Success: z.boolean(),
+});
+
+export const RefundAttemptSchema = z.object({
+	Success: z.boolean(),
+	paymentMethod: PaymentMethodSchema.optional(),
+});
+
+export const ProcessedInvoiceSchema = InvoiceSchema.extend({
+	hasActiveSub: z.boolean().optional(),
+	applyCreditToAccountBalanceAttempt: ApplyCreditToAccountBalanceAttemptSchema,
+	hasActivePaymentMethod: z.boolean().optional(),
+	activePaymentMethods: z.array(PaymentMethodSchema).optional(),
+	refundAttempt: RefundAttemptSchema.optional(),
+	errorDetail: z.string().optional(),
+});
