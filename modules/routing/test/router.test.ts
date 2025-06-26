@@ -1,7 +1,7 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { z } from 'zod';
 import type { HttpMethod } from '@modules/routing/router';
-import { NotFoundResponse, Router, createRoute } from '@modules/routing/router';
+import { createRoute, NotFoundResponse, Router } from '@modules/routing/router';
 
 const successResponse = {
 	body: 'Success',
@@ -24,11 +24,11 @@ const router = new Router([
 				benefitId: z.string(),
 			}),
 		},
-		handler: async (event, parsed) => {
-			return {
+		handler: (event, parsed) => {
+			return Promise.resolve({
 				statusCode: 200,
 				body: JSON.stringify(parsed),
-			};
+			});
 		},
 	}),
 	createRoute({
@@ -108,7 +108,7 @@ describe('Router', () => {
 		const payload = JSON.parse(response.body) as {
 			path: {
 				benefitId: string;
-			}
+			};
 		};
 		expect(payload.path.benefitId).toEqual(benefitId);
 	});
@@ -118,7 +118,7 @@ describe('Router', () => {
 		const payload = JSON.parse(response.body) as {
 			path: {
 				flag: string;
-			}
+			};
 		};
 		expect(payload.path.flag).toEqual("on");
 	});
@@ -135,7 +135,7 @@ describe('Router', () => {
 				name: string;
 				age: number;
 				isActive: boolean;
-			}
+			};
 		};
 		expect(payload.body.name).toEqual(request.name);
 		expect(payload.body.age).toEqual(request.age);

@@ -64,7 +64,7 @@ function matchPath(
 }
 
 export class Router {
-	constructor(private routes: readonly Route<any, any>[]) { }
+	constructor(private routes: ReadonlyArray<Route<any, any>>) { }
 	async routeRequest(
 		event: APIGatewayProxyEvent,
 	): Promise<APIGatewayProxyResult> {
