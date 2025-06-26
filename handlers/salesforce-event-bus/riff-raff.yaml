@@ -13,12 +13,3 @@ deployments:
       templateStagePaths:
         CODE: salesforce-event-bus-CODE.template.json
         PROD: salesforce-event-bus-PROD.template.json
-  salesforce-event-bus:
-    type: aws-lambda
-    parameters:
-      fileName: salesforce-event-bus.zip
-      bucketSsmLookup: true
-      prefixStack: false
-      functionNames:
-        - salesforce-event-bus-placeholder-
-    dependencies: [salesforce-event-bus-cloudformation]
