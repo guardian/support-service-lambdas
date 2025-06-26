@@ -77,16 +77,12 @@ export class Router {
 						pathParameters: { ...(event.pathParameters ?? {}), ...matchResult.params },
 					};
 
+					let parsedPath, parsedBody;
 					try {
-						const parsedPath = route.validation?.path?.parse(eventWithParams.pathParameters);
-						const parsedBody = route.validation?.body?.parse(
+						parsedPath = route.validation?.path?.parse(eventWithParams.pathParameters);
+						parsedBody = route.validation?.body?.parse(
 							eventWithParams.body ? JSON.parse(eventWithParams.body) : undefined,
 						);
-
-						return await route.handler(eventWithParams, {
-							path: parsedPath,
-							body: parsedBody,
-						});
 					} catch (error) {
 						if (error instanceof z.ZodError) {
 							return {
@@ -99,6 +95,11 @@ export class Router {
 						}
 						throw error;
 					}
+
+					return await route.handler(eventWithParams, {
+						path: parsedPath,
+						body: parsedBody,
+					});
 				}
 			}
 			return NotFoundResponse;
