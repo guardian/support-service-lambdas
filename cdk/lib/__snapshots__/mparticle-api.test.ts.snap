@@ -59,6 +59,9 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
         },
         "FunctionName": "mparticle-api-CODE",
         "Handler": "index.handler",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -309,6 +312,9 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
         },
         "FunctionName": "mparticle-api-PROD",
         "Handler": "index.handler",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
