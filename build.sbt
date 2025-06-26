@@ -25,7 +25,7 @@ val scala2Settings = Seq(
 )
 
 val scala3Settings = Seq(
-  scalaVersion := "3.7.0",
+  scalaVersion := "3.7.1",
   version := "0.0.1",
   organization := "com.gu",
   scalacOptions ++= Seq(
@@ -641,7 +641,7 @@ lazy val `product-move-api` = lambdaProject(
     "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
     "com.softwaremill.sttp.tapir" %% "tapir-json-zio" % tapirVersion,
     "com.softwaremill.sttp.tapir" %% "tapir-aws-lambda" % tapirVersion,
-    "com.softwaremill.sttp.tapir" %% "tapir-aws-lambda-zio" % tapirVersion,
+    "com.softwaremill.sttp.tapir" %% "tapir-aws-lambda-zio" % tapirVersion exclude("com.lihaoyi", "unroll-annotation_3"),// unroll built into scala 3.7+ https://github.com/scala/scala3/pull/21693
     "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapirVersion,
     awsSecretsManager,
     upickle,

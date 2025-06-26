@@ -6,7 +6,8 @@ import sbtassembly.PathList
 
 object Dependencies {
   
-  val awsSdkVersion = "2.31.24"
+  val awsSdkVersion = "2.31.71"
+
   val circeVersion = "0.14.13"
   val sttpVersion = "3.10.3"
   val http4sVersion = "0.22.15" // keep version 0.22.15, later versions pull in cats effect 3 which is not compatible
@@ -85,7 +86,7 @@ object Dependencies {
   val zio = "dev.zio" %% "zio" % "1.0.18"
   val zio2Version = "2.1.18"
   val zio2 = "dev.zio" %% "zio" % zio2Version
-  val tapirVersion = "1.11.32"
+  val tapirVersion = "1.11.33"// stick with 1.11.33 for now as later versions indirectly pull in netty-codec-base which duplicates netty-codec content
   val enumeratum = "com.beachape" %% "enumeratum" % "1.7.6"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.4.0"
   val stripe = "com.stripe" % "stripe-java" % "29.1.0"
@@ -116,28 +117,27 @@ object Dependencies {
 
   val sbtDependencyGraph = "net.virtual-void" % "sbt-dependency-graph" % "0.9.2"
 
-  // to resolve merge clash of 'module-info.class'
-  // see https://stackoverflow.com/questions/54834125/sbt-assembly-deduplicate-module-info-class
-  val assemblyMergeStrategyDiscardModuleInfo = assembly / assemblyMergeStrategy := {
-    case PathList("META-INF", "maven", "org.webjars", "swagger-ui", "pom.properties") =>
-      MergeStrategy.singleOrError
-    case PathList(ps @ _*) if ps.last == "module-info.class" => MergeStrategy.discard
-    case PathList(ps @ _*) if ps.last == "deriving.conf" => MergeStrategy.filterDistinctLines
-    case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.discard
-    case PathList("mime.types") => MergeStrategy.filterDistinctLines
-    case PathList("logback.xml") => MergeStrategy.preferProject
-    /*
-     * AWS SDK v2 includes a codegen-resources directory in each jar, with conflicting names.
-     * This appears to be for generating clients from HTTP services.
-     * So it's redundant in a binary artefact.
-     */
-    case PathList("codegen-resources", _*) => MergeStrategy.discard
-    case PathList("META-INF", "FastDoubleParser-LICENSE") => MergeStrategy.concat
-    case PathList("META-INF", "FastDoubleParser-NOTICE") => MergeStrategy.concat
-    case PathList("META-INF", "okio.kotlin_module") => MergeStrategy.discard
-    case x =>
-      val oldStrategy = (assembly / assemblyMergeStrategy).value
-      oldStrategy(x)
-  }
+  val assemblyMergeStrategyDiscardModuleInfo =
+    assembly / assemblyMergeStrategy := {
+      case PathList("META-INF", "maven", "org.webjars", "swagger-ui", "pom.properties") =>
+        MergeStrategy.singleOrError
+      case PathList(ps @ _*) if ps.last == "module-info.class" => MergeStrategy.discard
+      case PathList(ps @ _*) if ps.last == "deriving.conf" => MergeStrategy.filterDistinctLines
+      case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.discard
+      case PathList("mime.types") => MergeStrategy.filterDistinctLines
+      case PathList("logback.xml") => MergeStrategy.preferProject
+      /*
+       * AWS SDK v2 includes a codegen-resources directory in each jar, with conflicting names.
+       * This appears to be for generating clients from HTTP services.
+       * So it's redundant in a binary artefact.
+       */
+      case PathList("codegen-resources", _*) => MergeStrategy.discard
+      case PathList("META-INF", "FastDoubleParser-LICENSE") => MergeStrategy.concat
+      case PathList("META-INF", "FastDoubleParser-NOTICE") => MergeStrategy.concat
+      case PathList("META-INF", "okio.kotlin_module") => MergeStrategy.discard
+      case x =>
+        val oldStrategy = (assembly / assemblyMergeStrategy).value
+        oldStrategy(x)
+    }
 
 }
