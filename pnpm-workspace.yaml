@@ -1,6 +1,8 @@
 packages:
   # lambdas
   - 'handlers/*'
+  # lambdas
+  - 'handlers/*/cdk'
   # shared code
   - 'modules/*'
   # cdk directory
