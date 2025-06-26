@@ -22,16 +22,14 @@ export const handler = async (event: SaveResultsInput) => {
 			'S3_BUCKET environment variable not set',
 		);
 
-		const executionDateTime = new Date().toISOString();
-		const [date, time] = executionDateTime.split('T');
-		const filePath = `${date}/${(time ?? '00:00:00.000').replace('Z', '')}`;
+		const filePath = generateFilePath();
 
 		const s3UploadAttempt = await uploadFileToS3({
 			bucketName,
 			filePath,
 			content: JSON.stringify(parsedEvent, null, 2),
 		});
-		console.log('S3 upload attempt:', s3UploadAttempt);
+
 		if (s3UploadAttempt.$metadata.httpStatusCode !== 200) {
 			throw new Error('Failed to upload to S3');
 		}
@@ -49,3 +47,9 @@ export const handler = async (event: SaveResultsInput) => {
 		};
 	}
 };
+
+function generateFilePath(): string {
+	const executionDateTime = new Date().toISOString();
+	const [date, time] = executionDateTime.split('T');
+	return `${date}/${(time ?? '00:00:00.000').replace('Z', '')}.json`; //e.g. 2025-10-01/12:56:12.111.json
+}
