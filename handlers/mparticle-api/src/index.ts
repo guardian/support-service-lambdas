@@ -77,7 +77,7 @@ const router = new Router([
 				body: JSON.stringify(requestForErasureResult),
 			};
 		}),
-		validation: {
+		parser: {
 			body: z.object({
 				regulation: z.enum(['gdpr', 'ccpa']),
 				requestId: z.string().uuid(),
@@ -97,7 +97,7 @@ const router = new Router([
 				body: JSON.stringify(await getStatusOfDataSubjectRequest(event.pathParameters?.requestId ?? ''))
 			};
 		}),
-		validation: {
+		parser: {
 			path: z.object({
 				requestId: z.string().uuid(),
 			})
@@ -130,7 +130,7 @@ const router = new Router([
 				body: JSON.stringify(await processDataSubjectRequestCallback(event.pathParameters?.requestId ?? '', payload as DataSubjectRequestCallback))
 			};
 		}),
-		validation: {
+		parser: {
 			path: z.object({
 				requestId: z.string().uuid(),
 			}),
@@ -169,7 +169,7 @@ const router = new Router([
 				body: JSON.stringify(await uploadAnEventBatch(payload as EventBatch)),
 			};
 		}),
-		validation: {
+		parser: {
 			body: z.object({
 				events: z.array(z.object({
 					/** Custom data payload for the event */
