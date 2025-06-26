@@ -25,14 +25,22 @@ export const handler = async (event: CheckForActiveSubInput) => {
 
 		return {
 			...parsedEvent,
-			hasActiveSub,
+			checkForActiveSubAttempt: {
+				Success: true,
+				hasActiveSub,
+			},
 		};
 	} catch (error) {
 		return {
 			...event,
-			subStatus: 'Error', //rethink this name
-			errorDetail:
-				error instanceof Error ? error.message : JSON.stringify(error, null, 2),
+			checkForActiveSubAttempt: {
+				Success: false,
+				hasActiveSub: undefined,
+				error:
+					error instanceof Error
+						? error.message
+						: JSON.stringify(error, null, 2),
+			},
 		};
 	}
 };
