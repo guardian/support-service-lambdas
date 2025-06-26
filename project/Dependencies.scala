@@ -9,7 +9,7 @@ object Dependencies {
   val awsSdkVersion = "2.31.71"
 
   val circeVersion = "0.14.13"
-  val sttpVersion = "3.10.3"
+  val sttpVersion = "3.11.0"
   val http4sVersion = "0.22.15" // keep version 0.22.15, later versions pull in cats effect 3 which is not compatible
   val catsVersion = "2.13.0"
   val catsEffectVersion = "2.5.5"
@@ -60,9 +60,6 @@ object Dependencies {
   val sttp = "com.softwaremill.sttp.client3" %% "core" % sttpVersion
   val sttpCirce = "com.softwaremill.sttp.client3" %% "circe" % sttpVersion
 
-  // Override to fix this vulnerability https://github.com/guardian/support-service-lambdas/security/dependabot/24
-  // This is a transitive dependency of async-http-client-backend-cats-ce2 so when we upgrade that we can remove this
-  val asyncHttpClientOverride = "org.asynchttpclient" % "async-http-client" % "3.0.2"
   val sttpAsyncHttpClientBackendCats =
     "com.softwaremill.sttp.client3" %% "async-http-client-backend-cats-ce2" % sttpVersion
 

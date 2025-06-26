@@ -140,7 +140,7 @@ lazy val `salesforce-sttp-client` = library(
   .settings(
     libraryDependencies ++=
       Seq(sttp, sttpCirce, sttpAsyncHttpClientBackendCats % Test, scalatest, catsCore, catsEffect, circe) ++ logging,
-    dependencyOverrides ++= jacksonDependencies :+ asyncHttpClientOverride,
+    dependencyOverrides ++= jacksonDependencies,
   )
 
 lazy val `salesforce-sttp-test-stub` = library(
@@ -328,7 +328,6 @@ lazy val `imovo-sttp-client` = library(project in file("lib/imovo/imovo-sttp-cli
   .settings(
     libraryDependencies ++=
       Seq(sttp, sttpCirce, sttpAsyncHttpClientBackendCats % Test, scalatest, catsCore, catsEffect, circe) ++ logging,
-    dependencyOverrides ++= Seq(asyncHttpClientOverride),
   )
 
 lazy val `imovo-sttp-test-stub` = library(
@@ -363,7 +362,7 @@ def lambdaProject(
       riffRaffUploadManifestBucket := Option("riffraff-builds"),
       riffRaffManifestProjectName := s"support-service-lambdas::$projectName",
       riffRaffArtifactResources += (file(s"handlers/$projectName/$cfName"), s"cfn/$cfName"),
-      dependencyOverrides ++= jacksonDependencies :+ asyncHttpClientOverride,
+      dependencyOverrides ++= jacksonDependencies,
       libraryDependencies ++= externalDependencies ++ logging,
       Test / test := ((Test / test) dependsOn (projectDependencies.map(_.project / Test / test) *)).value,
       Test / testOnly := ((Test / testOnly) dependsOn (projectDependencies.map(_.project / Test / test) *)).evaluated,
