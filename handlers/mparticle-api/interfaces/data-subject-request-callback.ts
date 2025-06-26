@@ -24,7 +24,7 @@ export interface DataSubjectRequestCallback {
      * The maximum number of requests that can be associated to a group_id is 150. 
      * Groups are scoped to the workspace.
      */
-    group_id: string | null;
+    group_id?: string | null;
 
     /** 
      * The status of the request. 
@@ -35,7 +35,7 @@ export interface DataSubjectRequestCallback {
     /**
      * The API version for this request. The current version is '3.0'.
      */
-    api_version: string;
+    api_version?: string | null;
 
     /** 
      * For Access/Portability requests, a download link to the request results data. 

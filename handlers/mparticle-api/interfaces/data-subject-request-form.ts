@@ -21,7 +21,7 @@ export interface DataSubjectRequestForm {
     /**
      * The time the Data Subject originally submitted the request.
      */
-    submittedTime: Date;
+    submittedTime: string;
 
     /**
      * User Id to be used as the subject identity.
