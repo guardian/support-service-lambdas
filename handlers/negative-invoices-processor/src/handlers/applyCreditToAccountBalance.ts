@@ -1,12 +1,14 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { applyCreditToAccountBalance } from '@modules/zuora/applyCreditToAccountBalance';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { z } from 'zod';
+import { z } from 'zod';
 import { InvoiceSchema } from '../types';
 
 export type ApplyCreditToAccountBalanceInput = z.infer<typeof InvoiceSchema>;
 
-export const handler = async (event: ApplyCreditToAccountBalanceInput) => {
+export const handler = async (
+	event: ApplyCreditToAccountBalanceInput,
+): Promise<ApplyCreditToAccountBalanceOutput> => {
 	try {
 		const parsedEvent = InvoiceSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
@@ -36,3 +38,13 @@ export const handler = async (event: ApplyCreditToAccountBalanceInput) => {
 		};
 	}
 };
+export const ApplyCreditToAccountBalanceOutputSchema = InvoiceSchema.extend({
+	applyCreditToAccountBalanceAttempt: z.object({
+		Success: z.boolean(),
+		error: z.string().optional(),
+	}),
+});
+
+export type ApplyCreditToAccountBalanceOutput = z.infer<
+	typeof ApplyCreditToAccountBalanceOutputSchema
+>;
