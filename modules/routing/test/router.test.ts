@@ -1,7 +1,7 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { z } from 'zod';
 import type { HttpMethod } from '@modules/routing/router';
-import { NotFoundResponse, Router } from '@modules/routing/router';
+import { createRoute, NotFoundResponse, Router } from '@modules/routing/router';
 
 const successResponse = {
 	body: 'Success',
@@ -16,67 +16,63 @@ const router = new Router([
 			return Promise.resolve(successResponse);
 		},
 	},
-	{
+	createRoute({
 		httpMethod: 'POST',
 		path: '/benefits/{benefitId}/users',
-		handler: (event: APIGatewayProxyEvent) => {
+		parser: {
+			path: z.object({
+				benefitId: z.string(),
+			}),
+		},
+		handler: (event, parsed) => {
 			return Promise.resolve({
 				statusCode: 200,
-				body: JSON.stringify({
-					benefitId: event.pathParameters?.benefitId
-				})
+				body: JSON.stringify(parsed),
 			});
 		},
-	},
-	{
+	}),
+	createRoute({
 		httpMethod: 'PATCH',
 		path: '/benefits/enabled/{flag}',
-		handler: (event: APIGatewayProxyEvent) => {
+		handler: (event, parsed) => {
 			return Promise.resolve({
 				statusCode: 200,
-				body: JSON.stringify({
-					flag: event.pathParameters?.flag
-				})
+				body: JSON.stringify(parsed)
 			});
 		},
-		validation: {
+		parser: {
 			path: z.object({
 				flag: z.enum(["on", "off"])
 			})
 		}
-	},
-	{
+	}),
+	createRoute({
 		httpMethod: 'POST',
 		path: '/benefits',
-		handler: (event: APIGatewayProxyEvent) => {
+		handler: (event, parsed) => {
 			return Promise.resolve({
 				statusCode: 200,
-				body: event.body ?? ''
+				body: JSON.stringify(parsed)
 			});
 		},
-		validation: {
+		parser: {
 			body: z.object({
 				name: z.string(),
 				age: z.number(),
 				isActive: z.boolean()
 			})
 		}
-	},
-	{
+	}),
+	createRoute({
 		httpMethod: 'PUT',
 		path: '/benefits/{benefitId}',
-		handler: (event: APIGatewayProxyEvent) => {
+		handler: (event, parsed) => {
 			return Promise.resolve({
 				statusCode: 200,
-				body: JSON.stringify({
-					path: {
-						benefitId: event.pathParameters?.benefitId
-					},
-					body: event.body ?? ''
-				})
+				body: JSON.stringify(parsed)
 			})
 		},
-		validation: {
+		parser: {
 			path: z.object({
 				benefitId: z.string()
 			}),
@@ -86,7 +82,7 @@ const router = new Router([
 				isActive: z.boolean()
 			})
 		}
-	},
+	})
 ]);
 
 describe('Router', () => {
@@ -110,17 +106,21 @@ describe('Router', () => {
 		const response = await router.routeRequest(buildApiGatewayEvent(`/benefits/${benefitId}/users`, 'POST'));
 		expect(response.statusCode).toEqual(200);
 		const payload = JSON.parse(response.body) as {
-			benefitId: string;
+			path: {
+				benefitId: string;
+			};
 		};
-		expect(payload.benefitId).toEqual(benefitId);
+		expect(payload.path.benefitId).toEqual(benefitId);
 	});
 	test('it should validate the path params', async () => {
 		const response = await router.routeRequest(buildApiGatewayEvent(`/benefits/enabled/on`, 'PATCH'));
 		expect(response.statusCode).toEqual(200);
 		const payload = JSON.parse(response.body) as {
-			flag: string;
+			path: {
+				flag: string;
+			};
 		};
-		expect(payload.flag).toEqual("on");
+		expect(payload.path.flag).toEqual("on");
 	});
 	test('it should validate the body payload', async () => {
 		const request = {
@@ -131,13 +131,15 @@ describe('Router', () => {
 		const response = await router.routeRequest(buildApiGatewayEvent(`/benefits`, 'POST', JSON.stringify(request)));
 		expect(response.statusCode).toEqual(200);
 		const payload = JSON.parse(response.body) as {
-			name: string;
-			age: number;
-			isActive: boolean;
+			body: {
+				name: string;
+				age: number;
+				isActive: boolean;
+			};
 		};
-		expect(payload.name).toEqual(request.name);
-		expect(payload.age).toEqual(request.age);
-		expect(payload.isActive).toEqual(request.isActive);
+		expect(payload.body.name).toEqual(request.name);
+		expect(payload.body.age).toEqual(request.age);
+		expect(payload.body.isActive).toEqual(request.isActive);
 	});
 	test('it should validate invalid path params and body payload', async () => {
 		const benefitId = "123";
@@ -158,7 +160,7 @@ describe('Router', () => {
 				message: string;
 			}>;
 		};
-		expect(payload.error).toEqual("Invalid body");
+		expect(payload.error).toEqual("Invalid request");
 		expect(payload.details[0]?.message).toEqual("Expected string, received number");
 		expect(payload.details[1]?.message).toEqual("Expected number, received string");
 		expect(payload.details[2]?.message).toEqual("Expected boolean, received string");

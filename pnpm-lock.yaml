@@ -465,7 +465,7 @@ importers:
   modules/routing:
     dependencies:
       zod:
-        specifier: ^3.23.8
+        specifier: 'catalog:'
         version: 3.25.48
     devDependencies:
       '@types/aws-lambda':

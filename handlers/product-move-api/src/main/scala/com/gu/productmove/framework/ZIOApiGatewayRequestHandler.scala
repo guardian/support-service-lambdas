@@ -25,6 +25,8 @@ abstract class ZIOApiGatewayRequestHandler(val server: List[ServerEndpoint[Any, 
 
   private val handler = ZioLambdaHandler.default[Any](allEndpoints)
 
+  given Decoder[Identity] = deriveDecoder
+  given Decoder[RequestContext] = deriveDecoder
   given Decoder[AwsRequestV1] = deriveDecoder
   given Encoder[AwsResponse] = deriveEncoder
 
