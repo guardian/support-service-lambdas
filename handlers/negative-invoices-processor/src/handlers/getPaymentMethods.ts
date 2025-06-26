@@ -31,18 +31,22 @@ export const handler = async (event: GetPaymentMethodsInput) => {
 		);
 
 		const activePaymentMethods = filterActivePaymentMethods(paymentMethods);
-
+		const hasActivePaymentMethod = activePaymentMethods.length > 0;
 		return {
 			...parsedEvent,
-			activePaymentMethods,
-			hasActivePaymentMethod: activePaymentMethods.length > 0,
+			checkForActivePaymentMethodAttempt: {
+				Success: true,
+				hasActivePaymentMethod,
+				activePaymentMethods,
+			},
 		};
 	} catch (error) {
 		return {
 			...event,
-			getPaymentMethodsAttempt: {
+			checkForActivePaymentMethodAttempt: {
 				Success: false,
 				hasActivePaymentMethod: undefined,
+				activePaymentMethods: undefined,
 				error:
 					error instanceof Error
 						? error.message
