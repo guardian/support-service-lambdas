@@ -11,13 +11,16 @@ export type HttpMethod =
 	| 'OPTIONS'
 	| 'HEAD';
 
-type Route = {
+type Route<TPath = unknown, TBody = unknown> = {
 	httpMethod: HttpMethod;
 	path: string;
-	handler: (event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult>;
+	handler: (
+		event: APIGatewayProxyEvent,
+		parsed: { path: TPath; body: TBody }
+	) => Promise<APIGatewayProxyResult>;
 	validation?: {
-		path?: z.Schema;
-		body?: z.Schema;
+		path?: z.Schema<TPath>;
+		body?: z.Schema<TBody>;
 	};
 };
 
@@ -56,54 +59,35 @@ export class Router {
 		try {
 			for (const route of this.routes) {
 				const { matched, params } = matchPath(route.path, event.path);
-				if (matched && route.httpMethod === event.httpMethod.toUpperCase()) {
+				if (matched && route.httpMethod.toUpperCase() === event.httpMethod.toUpperCase()) {
 					// Attach pathParameters to event
 					const eventWithParams = {
 						...event,
 						pathParameters: { ...(event.pathParameters ?? {}), ...params },
 					};
 
-					// Validate request
-					const validationErrors: z.ZodIssue[] = [];
-
-					// Validate request path
 					try {
-						if (route.validation?.path) {
-							route.validation.path.parse(eventWithParams.pathParameters);
-						}
+						const parsedPath = route.validation?.path?.parse(eventWithParams.pathParameters);
+						const parsedBody = route.validation?.body?.parse(
+							eventWithParams.body ? JSON.parse(eventWithParams.body) : undefined,
+						);
+
+						return await route.handler(eventWithParams, {
+							path: parsedPath,
+							body: parsedBody,
+						});
 					} catch (error) {
 						if (error instanceof z.ZodError) {
-							validationErrors.push(...error.errors);
-						} else {
-							throw error;
+							return {
+								statusCode: 400,
+								body: JSON.stringify({
+									error: 'Invalid request',
+									details: error.errors,
+								}),
+							};
 						}
+						throw error;
 					}
-
-					// Validate request body
-					try {
-						if (route.validation?.body) {
-							const parsedBody: unknown = eventWithParams.body ? JSON.parse(eventWithParams.body) : undefined;
-							route.validation.body.parse(parsedBody);
-						}
-					} catch (error) {
-						if (error instanceof z.ZodError) {
-							validationErrors.push(...error.errors);
-						} else {
-							throw error;
-						}
-					}
-
-					if (validationErrors.length > 0) {
-						return {
-							statusCode: 400,
-							body: JSON.stringify({
-								error: 'Invalid request',
-								details: validationErrors
-							})
-						};
-					}
-
-					return await route.handler(eventWithParams);
 				}
 			}
 			return NotFoundResponse;
