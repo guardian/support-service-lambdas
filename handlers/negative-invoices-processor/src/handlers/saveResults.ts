@@ -44,7 +44,7 @@ export const handler = async (event: SaveResultsInput) => {
 		return {
 			...event,
 			s3UploadAttemptStatus: 'error',
-			errorDetail:
+			error:
 				error instanceof Error ? error.message : JSON.stringify(error, null, 2),
 		};
 	}
