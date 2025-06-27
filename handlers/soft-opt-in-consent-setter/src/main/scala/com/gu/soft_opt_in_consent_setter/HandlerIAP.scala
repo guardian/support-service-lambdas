@@ -6,7 +6,7 @@ import com.gu.soft_opt_in_consent_setter.HandlerIAP.{Acquisition, MessageBody, U
 import com.gu.soft_opt_in_consent_setter.models._
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.{Decoder, ParsingFailure}
-import io.circe.generic.auto._
+import io.circe.generic.semiauto._
 import io.circe.parser.{decode => circeDecode}
 
 import scala.jdk.CollectionConverters._
@@ -52,6 +52,20 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       similarGuardianProducts: Option[Boolean],
   )
 
+  case class WireMessageBody(
+      subscriptionId: String,
+      identityId: Option[String],
+      eventType: EventType,
+      productName: String,
+      printProduct: Option[String],
+      previousProductName: Option[String],
+      userConsentsOverrides: Option[UserConsentsOverrides],
+  )
+  object WireMessageBody {
+    implicit val decoderUserConsentsOverrides: Decoder[UserConsentsOverrides] = deriveDecoder[UserConsentsOverrides]
+    implicit val decoder: Decoder[WireMessageBody] = deriveDecoder[WireMessageBody]
+  }
+
   case class MessageBody(
       subscriptionId: String,
       identityId: String,
@@ -61,6 +75,23 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       previousProductName: Option[String],
       userConsentsOverrides: Option[UserConsentsOverrides],
   )
+  object MessageBody {
+    implicit val decoder: Decoder[Option[MessageBody]] =
+      WireMessageBody.decoder.map { wireMessageBody =>
+        wireMessageBody.identityId.map { identityId =>
+          import wireMessageBody.{identityId => _, _}
+          MessageBody(
+            subscriptionId,
+            identityId,
+            eventType,
+            productName,
+            printProduct,
+            previousProductName,
+            userConsentsOverrides,
+          )
+        }
+      }
+  }
 
   def handleError[T <: Exception](exception: T) = {
     Metrics.put(event = "failed_run")
@@ -71,24 +102,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
   override def handleRequest(input: SQSEvent, context: Context): Unit = {
     logger.info("Handling request")
 
-    val messages =
-      input.getRecords.asScala.toList.map(message =>
-        circeDecode[MessageBody](message.getBody) match {
-          case Left(pf: ParsingFailure) =>
-            val exception = SoftOptInError(
-              s"Error '${pf.message}' when decoding JSON to MessageBody with cause :${pf.getCause} with body: ${message.getBody}",
-              pf,
-            )
-            handleError(exception)
-          case Left(ex) =>
-            val exception =
-              SoftOptInError(s"Unknown error when decoding JSON to MessageBody with body: ${message.getBody}", ex)
-            handleError(exception)
-          case Right(result) =>
-            logger.info(s"Decoded message body: $result")
-            result
-        },
-      )
+    val messages: List[MessageBody] = parseMessages(input.getRecords.asScala.toList.map(_.getBody))
 
     val messageProcessor = IAPMessageProcessor.create(sys.env.get("Stage"), sys.env.get("sfApiVersion"))
 
@@ -98,4 +112,26 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
     Metrics.put(event = "successful_run")
   }
 
+  def parseMessages(inputRecords: List[String]): List[MessageBody] =
+    for {
+      body <- inputRecords
+      result <- circeDecode[Option[MessageBody]](body) match {
+        case Left(pf: ParsingFailure) =>
+          val exception = SoftOptInError(
+            s"Error '${pf.message}' when decoding JSON to MessageBody with cause :${pf.getCause} with body: $body",
+            pf,
+          )
+          handleError(exception)
+        case Left(ex) =>
+          val exception =
+            SoftOptInError(s"Unknown error when decoding JSON to MessageBody with body: $body", ex)
+          handleError(exception)
+        case Right(maybeResult) =>
+          logger.info(maybeResult match {
+            case Some(identityId) => s"Decoded message body: $identityId"
+            case None => "identity id was undefined, skipping message"
+          })
+          maybeResult
+      }
+    } yield result
 }

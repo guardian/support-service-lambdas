@@ -5,7 +5,6 @@ import com.gu.soft_opt_in_consent_setter.models.SFSubRecordResponse
 import com.gu.soft_opt_in_consent_setter.testData.SFSubscriptionTestData.{subRecord2, subRecord3}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
-import io.circe.generic.auto._
 import io.circe.parser.decode
 import org.scalatest.Inside
 
@@ -50,7 +49,7 @@ class JsonCodecSpec extends AnyFlatSpec with should.Matchers with Inside {
       previousProductName = None,
       userConsentsOverrides = Some(UserConsentsOverrides(None)),
     )
-    inside(decode[MessageBody](testData)) { case Right(actual) =>
+    inside(decode[Option[MessageBody]](testData)) { case Right(Some(actual)) =>
       actual should be(expected)
     }
   }
@@ -76,8 +75,39 @@ class JsonCodecSpec extends AnyFlatSpec with should.Matchers with Inside {
       previousProductName = None,
       userConsentsOverrides = Some(UserConsentsOverrides(Some(true))),
     )
-    inside(decode[MessageBody](testData)) { case Right(actual) =>
+    inside(decode[Option[MessageBody]](testData)) { case Right(Some(actual)) =>
       actual should be(expected)
+    }
+  }
+
+  "parseMessages" should "drop messages with no identityId" in {
+    val testDataNoIdentityId =
+      """{
+        |    "subscriptionId": "A-S000",
+        |    "identityId": null,
+        |    "eventType": "Acquisition",
+        |    "productName": "SUPPORTER_PLUS",
+        |    "previousProductName": null,
+        |    "userConsentsOverrides": {
+        |        "similarGuardianProducts": true
+        |    }
+        |}""".stripMargin
+    val testDataWithIdentityId =
+      """{
+        |    "subscriptionId": "A-S000",
+        |    "identityId": "1234",
+        |    "eventType": "Acquisition",
+        |    "productName": "SUPPORTER_PLUS",
+        |    "previousProductName": null,
+        |    "userConsentsOverrides": {
+        |        "similarGuardianProducts": true
+        |    }
+        |}""".stripMargin
+    val expected = "1234"
+    inside(HandlerIAP.parseMessages(List(testDataNoIdentityId, testDataWithIdentityId))) { case List(actual) =>
+      inside(actual) { case messageBody: MessageBody =>
+        messageBody.identityId should be(expected)
+      }
     }
   }
 

@@ -13,7 +13,7 @@ import com.gu.soft_opt_in_consent_setter.testData.SalesforceTestData.{
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
-import io.circe.generic.auto._
+import io.circe.generic.semiauto._
 
 class SalesforceConnectorTests extends AnyFlatSpec with should.Matchers with EitherValues {
 
