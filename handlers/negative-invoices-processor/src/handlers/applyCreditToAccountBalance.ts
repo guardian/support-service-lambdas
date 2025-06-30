@@ -7,7 +7,10 @@ import type {
 	ApplyCreditToAccountBalanceOutput,
 } from '../types';
 
-export const handler = async (
+// export const handler = async (
+// 	event: ApplyCreditToAccountBalanceInput,
+// ): Promise<ApplyCreditToAccountBalanceOutput> => {
+export const handler = (
 	event: ApplyCreditToAccountBalanceInput,
 ): Promise<ApplyCreditToAccountBalanceOutput> => {
 	try {
