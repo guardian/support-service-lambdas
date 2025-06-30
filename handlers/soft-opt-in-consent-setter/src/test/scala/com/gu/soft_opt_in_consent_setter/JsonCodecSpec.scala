@@ -1,6 +1,12 @@
 package com.gu.soft_opt_in_consent_setter
 
-import com.gu.soft_opt_in_consent_setter.HandlerIAP.{Acquisition, Cancellation, MessageBody, UserConsentsOverrides}
+import com.gu.soft_opt_in_consent_setter.HandlerIAP.{
+  Acquisition,
+  Cancellation,
+  MessageBody,
+  UserConsentsOverrides,
+  WireMessageBody,
+}
 import com.gu.soft_opt_in_consent_setter.models.SFSubRecordResponse
 import com.gu.soft_opt_in_consent_setter.testData.SFSubscriptionTestData.{subRecord2, subRecord3}
 import org.scalatest.flatspec.AnyFlatSpec
@@ -40,16 +46,16 @@ class JsonCodecSpec extends AnyFlatSpec with should.Matchers with Inside {
         |        "similarGuardianProducts": null
         |    }
         |}""".stripMargin
-    val expected = MessageBody(
+    val expected = WireMessageBody(
       subscriptionId = "A-S000",
-      identityId = "1234",
+      identityId = Some("1234"),
       eventType = Acquisition,
       productName = "PRINT_SUBSCRIPTION",
       printProduct = Some("GUARDIAN_WEEKLY"),
       previousProductName = None,
       userConsentsOverrides = Some(UserConsentsOverrides(None)),
     )
-    inside(decode[Option[MessageBody]](testData)) { case Right(Some(actual)) =>
+    inside(decode[WireMessageBody](testData)) { case Right(actual) =>
       actual should be(expected)
     }
   }
@@ -66,16 +72,16 @@ class JsonCodecSpec extends AnyFlatSpec with should.Matchers with Inside {
         |        "similarGuardianProducts": true
         |    }
         |}""".stripMargin
-    val expected = MessageBody(
+    val expected = WireMessageBody(
       subscriptionId = "A-S000",
-      identityId = "1234",
+      identityId = Some("1234"),
       eventType = Acquisition,
       productName = "SUPPORTER_PLUS",
       printProduct = None,
       previousProductName = None,
       userConsentsOverrides = Some(UserConsentsOverrides(Some(true))),
     )
-    inside(decode[Option[MessageBody]](testData)) { case Right(Some(actual)) =>
+    inside(decode[WireMessageBody](testData)) { case Right(actual) =>
       actual should be(expected)
     }
   }

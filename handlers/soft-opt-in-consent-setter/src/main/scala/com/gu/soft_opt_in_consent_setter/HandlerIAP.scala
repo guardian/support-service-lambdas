@@ -76,21 +76,21 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       userConsentsOverrides: Option[UserConsentsOverrides],
   )
   object MessageBody {
-    implicit val decoder: Decoder[Option[MessageBody]] =
-      WireMessageBody.decoder.map { wireMessageBody =>
-        wireMessageBody.identityId.map { identityId =>
-          import wireMessageBody.{identityId => _, _}
-          MessageBody(
-            subscriptionId,
-            identityId,
-            eventType,
-            productName,
-            printProduct,
-            previousProductName,
-            userConsentsOverrides,
-          )
-        }
+
+    def fromWireMessageBody(wireMessageBody: WireMessageBody) =
+      wireMessageBody.identityId.map { identityId =>
+        import wireMessageBody.{identityId => _, _}
+        MessageBody(
+          subscriptionId,
+          identityId,
+          eventType,
+          productName,
+          printProduct,
+          previousProductName,
+          userConsentsOverrides,
+        )
       }
+
   }
 
   def handleError[T <: Exception](exception: T) = {
@@ -115,7 +115,7 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
   def parseMessages(inputRecords: List[String]): List[MessageBody] =
     for {
       body <- inputRecords
-      result <- circeDecode[Option[MessageBody]](body) match {
+      result <- circeDecode[WireMessageBody](body) match {
         case Left(pf: ParsingFailure) =>
           val exception = SoftOptInError(
             s"Error '${pf.message}' when decoding JSON to MessageBody with cause :${pf.getCause} with body: $body",
@@ -126,12 +126,14 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
           val exception =
             SoftOptInError(s"Unknown error when decoding JSON to MessageBody with body: $body", ex)
           handleError(exception)
-        case Right(maybeResult) =>
-          logger.info(maybeResult match {
-            case Some(identityId) => s"Decoded message body: $identityId"
+        case Right(wireMessageBody) =>
+          val maybeMessageBody: Option[MessageBody] = MessageBody.fromWireMessageBody(wireMessageBody)
+          logger.info(maybeMessageBody match {
+            case Some(messageBody) => s"Decoded message body: $messageBody"
             case None => "identity id was undefined, skipping message"
           })
-          maybeResult
+          maybeMessageBody
       }
     } yield result
+
 }
