@@ -1,6 +1,6 @@
-// import { stageFromEnvironment } from '@modules/stage';
-// import { applyCreditToAccountBalance } from '@modules/zuora/applyCreditToAccountBalance';
-// import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { stageFromEnvironment } from '@modules/stage';
+import { applyCreditToAccountBalance } from '@modules/zuora/applyCreditToAccountBalance';
+import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { InvoiceSchema } from '../types';
 import type {
 	ApplyCreditToAccountBalanceInput,
@@ -12,31 +12,22 @@ export const handler = async (
 ): Promise<ApplyCreditToAccountBalanceOutput> => {
 	try {
 		const parsedEvent = InvoiceSchema.parse(event);
-		// const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
-		// const body = JSON.stringify({
-		// 	Amount: Math.abs(parsedEvent.invoiceBalance), //must be a positive value
-		// 	SourceTransactionNumber: parsedEvent.invoiceNumber,
-		// 	Type: 'Increase',
-		// });
+		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
+		const body = JSON.stringify({
+			Amount: Math.abs(parsedEvent.invoiceBalance), //must be a positive value
+			SourceTransactionNumber: parsedEvent.invoiceNumber,
+			Type: 'Increase',
+		});
 
-		// const applyCreditToAccountBalanceAttempt =
-		// 	await applyCreditToAccountBalance(zuoraClient, body);
-		console.log('returning: ', {
+		const applyCreditToAccountBalanceAttempt =
+			await applyCreditToAccountBalance(zuoraClient, body);
+
+		return {
 			...parsedEvent,
-			// applyCreditToAccountBalanceAttempt,
-			applyCreditToAccountBalanceAttempt: {
-				Success: true,
-			},
-		});
-		return Promise.resolve({
-			...parsedEvent,
-			// applyCreditToAccountBalanceAttempt,
-			applyCreditToAccountBalanceAttempt: {
-				Success: true,
-			},
-		});
+			applyCreditToAccountBalanceAttempt,
+		};
 	} catch (error) {
-		return Promise.resolve({
+		return {
 			...event,
 			applyCreditToAccountBalanceAttempt: {
 				Success: false,
@@ -45,6 +36,6 @@ export const handler = async (
 						? error.message
 						: JSON.stringify(error, null, 2),
 			},
-		});
+		};
 	}
 };
