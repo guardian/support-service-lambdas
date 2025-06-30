@@ -25,17 +25,20 @@ object SubscriptionDataIntegrationTest extends Matchers {
       datesToTest.foreach { testDate =>
         expectedIssueData.find(_.issueDate == testDate) match {
           case Some(expectedIssueData) =>
-            Inside.inside(subscriptionData.issueDataForDate(testDate)) { case Right(actualIssueData) =>
-              actualIssueData should equal(expectedIssueData)
+            Inside.inside(subscriptionData.subscriptionIssueData.issueDataForDate(testDate)) {
+              case Right(actualIssueData) =>
+                actualIssueData should equal(expectedIssueData)
             }
           case None =>
-            Inside.inside(subscriptionData.issueDataForDate(testDate)) { case Left(_) => // pass
+            Inside.inside(subscriptionData.subscriptionIssueData.issueDataForDate(testDate)) { case Left(_) => // pass
             }
         }
       }
 
       val (startTestDate, endTestDate) = getTestPeriod(startDate, expectedIssueData)
-      subscriptionData.issueDataForPeriod(startTestDate, endTestDate) should equal(expectedIssueData)
+      subscriptionData.subscriptionIssueData.issueDataForPeriod(startTestDate, endTestDate) should equal(
+        expectedIssueData,
+      )
       subscriptionData.subscriptionAnnualIssueLimit should equal(expectedTotalAnnualIssueLimitPerSubscription)
       subscriptionData.productType should equal(expectedProductType)
       subscriptionData.editionDaysOfWeek should contain only (expectedEditionDaysOfWeek: _*)
