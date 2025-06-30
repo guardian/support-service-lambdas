@@ -67,7 +67,7 @@ export type GetPaymentMethodsOutput = z.infer<
 	typeof GetPaymentMethodsOutputSchema
 >;
 
-//doCreditBalanceRefund lambda
+//DoCreditBalanceRefund lambda
 export const DoCreditBalanceRefundInputSchema = GetPaymentMethodsOutputSchema;
 export type DoCreditBalanceRefundInput = z.infer<
 	typeof DoCreditBalanceRefundInputSchema
