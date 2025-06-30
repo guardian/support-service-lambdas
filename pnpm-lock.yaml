@@ -292,8 +292,6 @@ importers:
         specifier: ^8.10.147
         version: 8.10.147
 
-  handlers/salesforce-event-bus: {}
-
   handlers/ticket-tailor-webhook:
     dependencies:
       '@aws-sdk/client-cloudwatch':
