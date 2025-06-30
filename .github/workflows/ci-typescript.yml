@@ -50,6 +50,7 @@ jobs:
           - discount-expiry-notifier
           - salesforce-disaster-recovery
           - salesforce-disaster-recovery-health-check
+          - salesforce-event-bus
           - zuora-salesforce-link-remover
           - metric-push-api
           - observer-data-export
