@@ -12,7 +12,7 @@ import type {
 // ): Promise<ApplyCreditToAccountBalanceOutput> => {
 export const handler = (
 	event: ApplyCreditToAccountBalanceInput,
-): Promise<ApplyCreditToAccountBalanceOutput> => {
+): ApplyCreditToAccountBalanceOutput => {
 	try {
 		const parsedEvent = InvoiceSchema.parse(event);
 		// const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
