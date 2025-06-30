@@ -33,7 +33,7 @@ export const CheckForActiveSubInputSchema =
 	ApplyCreditToAccountBalanceOutputSchema;
 export type CheckForActiveSubInput = ApplyCreditToAccountBalanceOutput;
 
-export const checkForActiveSubAttemptSchema = z.object({
+export const CheckForActiveSubAttemptSchema = z.object({
 	Success: z.boolean(),
 	hasActiveSub: z.boolean().optional(),
 	error: z.string().optional(),
@@ -41,7 +41,7 @@ export const checkForActiveSubAttemptSchema = z.object({
 
 export const CheckForActiveSubOutputSchema =
 	CheckForActiveSubInputSchema.extend({
-		checkForActiveSubAttempt: checkForActiveSubAttemptSchema,
+		checkForActiveSubAttempt: CheckForActiveSubAttemptSchema,
 	});
 
 export type CheckForActiveSubOutput = z.infer<
@@ -59,7 +59,7 @@ export const PaymentMethodSchema = z.object({
 	isDefault: z.boolean(),
 });
 
-const checkForActivePaymentMethodAttemptSchema = z.object({
+export const CheckForActivePaymentMethodAttemptSchema = z.object({
 	Success: z.boolean(),
 	hasActivePaymentMethod: z.boolean().optional(),
 	activePaymentMethods: z.array(PaymentMethodSchema).optional(),
@@ -68,7 +68,7 @@ const checkForActivePaymentMethodAttemptSchema = z.object({
 export const GetPaymentMethodsOutputSchema =
 	GetPaymentMethodsInputSchema.extend({
 		checkForActivePaymentMethodAttempt:
-			checkForActivePaymentMethodAttemptSchema,
+			CheckForActivePaymentMethodAttemptSchema,
 	});
 export type GetPaymentMethodsOutput = z.infer<
 	typeof GetPaymentMethodsOutputSchema
@@ -97,19 +97,19 @@ export type DoCreditBalanceRefundOutput = z.infer<
 // saveResults lambda
 export const ProcessedInvoiceSchema = InvoiceSchema.extend({
 	applyCreditToAccountBalanceAttempt: ApplyCreditToAccountBalanceAttemptSchema,
-	checkForActiveSubAttempt: checkForActiveSubAttemptSchema.optional(),
+	checkForActiveSubAttempt: CheckForActiveSubAttemptSchema.optional(),
 	checkForActivePaymentMethodAttempt:
-		checkForActivePaymentMethodAttemptSchema.optional(),
+		CheckForActivePaymentMethodAttemptSchema.optional(),
 	refundAttempt: RefundAttemptSchema.optional(),
 });
 
-export const saveResultsInputSchema = z.object({
+export const SaveResultsInputSchema = z.object({
 	invoicesCount: z.number(),
 	invoices: z.array(InvoiceSchema),
 	processedInvoices: z.array(ProcessedInvoiceSchema),
 });
-export type SaveResultsInput = z.infer<typeof saveResultsInputSchema>;
-export const SaveResultsOutputSchema = saveResultsInputSchema.extend({
+export type SaveResultsInput = z.infer<typeof SaveResultsInputSchema>;
+export const SaveResultsOutputSchema = SaveResultsInputSchema.extend({
 	s3UploadAttemptStatus: z.string(),
 	filePath: z.string().optional(),
 	error: z.string().optional(),
