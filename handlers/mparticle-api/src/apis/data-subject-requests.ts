@@ -77,10 +77,9 @@ async function requestDataSubjectApi<T>(url: string, options: {
  * The OpenDSR Request takes a JSON request body and requires a Content-Type: application/json header.
  * https://docs.mparticle.com/developers/apis/dsr-api/v3/#submit-a-data-subject-request-dsr
  * @param {DataSubjectRequestForm} form - The form containing the data subject request details.
- * @param {string} lambdaDomainUrl - Current running lambda domain url
  * @returns https://docs.mparticle.com/developers/apis/dsr-api/v3/#example-success-response-body
  */
-export const submitDataSubjectRequest = async (form: DataSubjectRequestForm, lambdaDomainUrl: string): Promise<DataSubjectRequestSubmission> => {
+export const submitDataSubjectRequest = async (form: DataSubjectRequestForm): Promise<DataSubjectRequestSubmission> => {
     const response = await requestDataSubjectApi<{
         expected_completion_time: Date;
         received_time: Date;
@@ -103,7 +102,10 @@ export const submitDataSubjectRequest = async (form: DataSubjectRequestForm, lam
             },
             api_version: "3.0",
             status_callback_urls: [
-                `${lambdaDomainUrl}/data-subject-requests/${form.requestId}/callback`
+                `${getSecretValue(
+                    `/mparticle-api/${stageFromEnvironment()}/api-gateway-url`,
+                    'MPARTICLE_API_GATEWAY_URL'
+                )}/data-subject-requests/${form.requestId}/callback`
             ],
             group_id: form.userId, // Let's group by User Unique Id to group all requests related to that user (max 150 requests per group)
         }
