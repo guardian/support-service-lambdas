@@ -23,9 +23,11 @@ export const handler = async (
 		if (!paymentMethodToRefundTo) {
 			throw new Error('No active payment method found to refund to.');
 		}
+
+		const refundAmount = Math.abs(parsedEvent.invoiceBalance);
 		const body = JSON.stringify({
 			AccountId: parsedEvent.accountId,
-			Amount: Math.abs(parsedEvent.invoiceBalance),
+			Amount: refundAmount,
 			SourceType: 'CreditBalance',
 			Type: 'External',
 			RefundDate: dayjs().format('YYYY-MM-DD'), //today
@@ -39,6 +41,7 @@ export const handler = async (
 			refundAttempt: {
 				...refundAttempt,
 				paymentMethod: paymentMethodToRefundTo,
+				refundAmount,
 			},
 		};
 	} catch (error) {

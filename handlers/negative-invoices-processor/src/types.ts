@@ -83,6 +83,7 @@ export type DoCreditBalanceRefundInput = z.infer<
 export const RefundAttemptSchema = z.object({
 	Success: z.boolean(),
 	paymentMethod: PaymentMethodSchema.optional(),
+	refundAmount: z.number().optional(),
 	error: z.string().optional(),
 });
 
