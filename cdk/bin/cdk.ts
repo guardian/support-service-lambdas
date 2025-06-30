@@ -7,6 +7,7 @@ import { DiscountApi } from '../lib/discount-api';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
 import { MetricPushApi } from '../lib/metric-push-api';
+import { MParticleApi } from '../lib/mparticle-api';
 import { NegativeInvoicesProcessor } from '../lib/negative-invoices-processor';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
@@ -15,6 +16,7 @@ import { PressReaderEntitlements } from '../lib/press-reader-entitlements';
 import { ProductSwitchApi } from '../lib/product-switch-api';
 import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery';
 import { SalesforceDisasterRecoveryHealthCheck } from '../lib/salesforce-disaster-recovery-health-check';
+import { SalesforceEventBus } from '../lib/salesforce-event-bus';
 import {
 	APP_NAME as SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME,
 	SingleContributionSalesforceWrites,
@@ -350,5 +352,21 @@ new WriteOffUnpaidInvoices(app, 'write-off-unpaid-invoices-CODE', {
 });
 new WriteOffUnpaidInvoices(app, 'write-off-unpaid-invoices-PROD', {
 	stack: 'support',
+	stage: 'PROD',
+});
+new SalesforceEventBus(app, 'salesforce-event-bus-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+});
+new SalesforceEventBus(app, 'salesforce-event-bus-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+});
+new MParticleApi(app, 'mparticle-api-CODE', {
+	stack: 'membership',
+	stage: 'CODE',
+});
+new MParticleApi(app, 'mparticle-api-PROD', {
+	stack: 'membership',
 	stage: 'PROD',
 });
