@@ -24,7 +24,13 @@ export const handler = (
 
 		// const applyCreditToAccountBalanceAttempt =
 		// 	await applyCreditToAccountBalance(zuoraClient, body);
-
+		console.log('returning: ', {
+			...parsedEvent,
+			// applyCreditToAccountBalanceAttempt,
+			applyCreditToAccountBalanceAttempt: {
+				Success: true,
+			},
+		});
 		return {
 			...parsedEvent,
 			// applyCreditToAccountBalanceAttempt,
