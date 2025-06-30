@@ -7,12 +7,9 @@ import type {
 	ApplyCreditToAccountBalanceOutput,
 } from '../types';
 
-// export const handler = async (
-// 	event: ApplyCreditToAccountBalanceInput,
-// ): Promise<ApplyCreditToAccountBalanceOutput> => {
-export const handler = (
+export const handler = async (
 	event: ApplyCreditToAccountBalanceInput,
-): ApplyCreditToAccountBalanceOutput => {
+): Promise<ApplyCreditToAccountBalanceOutput> => {
 	try {
 		const parsedEvent = InvoiceSchema.parse(event);
 		// const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
@@ -31,15 +28,15 @@ export const handler = (
 				Success: true,
 			},
 		});
-		return {
+		return Promise.resolve({
 			...parsedEvent,
 			// applyCreditToAccountBalanceAttempt,
 			applyCreditToAccountBalanceAttempt: {
 				Success: true,
 			},
-		};
+		});
 	} catch (error) {
-		return {
+		return Promise.resolve({
 			...event,
 			applyCreditToAccountBalanceAttempt: {
 				Success: false,
@@ -48,6 +45,6 @@ export const handler = (
 						? error.message
 						: JSON.stringify(error, null, 2),
 			},
-		};
+		});
 	}
 };

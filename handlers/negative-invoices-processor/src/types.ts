@@ -14,11 +14,14 @@ export const InvoiceRecordsArraySchema = z.array(InvoiceSchema);
 
 //ApplyCreditToAccountBalance lambda
 export type ApplyCreditToAccountBalanceInput = InvoiceRecord;
+
+export const ApplyCreditToAccountBalanceAttemptSchema = z.object({
+	Success: z.boolean(),
+	error: z.string().optional(),
+});
+
 export const ApplyCreditToAccountBalanceOutputSchema = InvoiceSchema.extend({
-	applyCreditToAccountBalanceAttempt: z.object({
-		Success: z.boolean(),
-		error: z.string().optional(),
-	}),
+	applyCreditToAccountBalanceAttempt: ApplyCreditToAccountBalanceAttemptSchema,
 });
 
 export type ApplyCreditToAccountBalanceOutput = z.infer<
@@ -73,27 +76,19 @@ export type DoCreditBalanceRefundInput = z.infer<
 	typeof DoCreditBalanceRefundInputSchema
 >;
 
+export const RefundAttemptSchema = z.object({
+	Success: z.boolean(),
+	paymentMethod: PaymentMethodSchema.optional(),
+	error: z.string().optional(),
+});
+
 export const DoCreditBalanceRefundOutputSchema =
 	DoCreditBalanceRefundInputSchema.extend({
-		refundAttempt: z.object({
-			Success: z.boolean(),
-			paymentMethod: PaymentMethodSchema.optional(),
-			error: z.string().optional(),
-		}),
+		refundAttempt: RefundAttemptSchema,
 	});
 export type DoCreditBalanceRefundOutput = z.infer<
 	typeof DoCreditBalanceRefundOutputSchema
 >;
-
-//to do reconcile this with the other types that have been built up so far
-export const ApplyCreditToAccountBalanceAttemptSchema = z.object({
-	Success: z.boolean(),
-});
-
-export const RefundAttemptSchema = z.object({
-	Success: z.boolean(),
-	paymentMethod: PaymentMethodSchema.optional(),
-});
 
 export const ProcessedInvoiceSchema = InvoiceSchema.extend({
 	hasActiveSub: z.boolean().optional(),
