@@ -1,0 +1,581 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`The SalesforceEventBus stack matches the snapshot 1`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [
+      "GuAlarm",
+    ],
+    "gu:cdk:version": "TEST",
+  },
+  "Resources": {
+    "DeadLetterQueueAlarm48D9D867": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "There is one or more event in the salesforce-event-bus dead letter queue (DLQ). Check the attributes of the failed message(s) for details of the error and check that the rule corresponding to the failed message is correctly configured.
+DLQ: https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/sqs/v2/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#/queues/https%3A%2F%2Fsqs.",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".amazonaws.com%2F",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              "%2F",
+              {
+                "Fn::GetAtt": [
+                  "deadletterssalesforceeventbusqueue29BFA779",
+                  "QueueName",
+                ],
+              },
+            ],
+          ],
+        },
+        "AlarmName": "An event for CODE salesforce-event-bus was not processed",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "deadletterssalesforceeventbusqueue29BFA779",
+                "QueueName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 300,
+        "Statistic": "Maximum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "ignore",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "SalesforceOutboundQueuePolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "SfBusToContactUpdateQueue75131C06",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":salesforce-outbound-messages-CODE",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "https://sqs.",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ".",
+                {
+                  "Ref": "AWS::URLSuffix",
+                },
+                "/",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                "/salesforce-outbound-messages-CODE",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
+    "SfBusToContactUpdateQueue75131C06": {
+      "Properties": {
+        "Description": "Send an SF Contact Update event from the SF bus to the salesforce-outbound-messages-[STAGE] SQS queue for consumption by membership-workflow",
+        "EventBusName": "aws.partner/salesforce.com/00D9E0000004jvhUAA/0YLUD00000008Ll4AI",
+        "EventPattern": {
+          "detail-type": [
+            "Contact_Update__e",
+          ],
+          "source": [
+            {
+              "prefix": "aws.partner/salesforce.com",
+            },
+          ],
+        },
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:sqs:",
+                  {
+                    "Ref": "AWS::Region",
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId",
+                  },
+                  ":salesforce-outbound-messages-CODE",
+                ],
+              ],
+            },
+            "DeadLetterConfig": {
+              "Arn": {
+                "Fn::GetAtt": [
+                  "deadletterssalesforceeventbusqueue29BFA779",
+                  "Arn",
+                ],
+              },
+            },
+            "Id": "Target0",
+            "InputTransformer": {
+              "InputPathsMap": {
+                "detail-payload-Contact_ID__c": "$.detail.payload.Contact_ID__c",
+              },
+              "InputTemplate": "{"contactId":<detail-payload-Contact_ID__c>}",
+            },
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "deadletterssalesforceeventbusqueue29BFA779": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "salesforce-event-bus-dead-letters-CODE",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "deadletterssalesforceeventbusqueuePolicy0CE2F482": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "SfBusToContactUpdateQueue75131C06",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "deadletterssalesforceeventbusqueue29BFA779",
+                  "Arn",
+                ],
+              },
+              "Sid": "AllowEventRulesalesforceeventbusCODESfBusToContactUpdateQueueFE76F3CE",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "deadletterssalesforceeventbusqueue29BFA779",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
+  },
+}
+`;
+
+exports[`The SalesforceEventBus stack matches the snapshot 2`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [
+      "GuAlarm",
+    ],
+    "gu:cdk:version": "TEST",
+  },
+  "Resources": {
+    "DeadLetterQueueAlarm48D9D867": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "There is one or more event in the salesforce-event-bus dead letter queue (DLQ). Check the attributes of the failed message(s) for details of the error and check that the rule corresponding to the failed message is correctly configured.
+DLQ: https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/sqs/v2/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#/queues/https%3A%2F%2Fsqs.",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".amazonaws.com%2F",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              "%2F",
+              {
+                "Fn::GetAtt": [
+                  "deadletterssalesforceeventbusqueue29BFA779",
+                  "QueueName",
+                ],
+              },
+            ],
+          ],
+        },
+        "AlarmName": "An event for PROD salesforce-event-bus was not processed",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "deadletterssalesforceeventbusqueue29BFA779",
+                "QueueName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 300,
+        "Statistic": "Maximum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "ignore",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "SalesforceOutboundQueuePolicy": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "SfBusToContactUpdateQueue75131C06",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":salesforce-outbound-messages-PROD",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "https://sqs.",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ".",
+                {
+                  "Ref": "AWS::URLSuffix",
+                },
+                "/",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                "/salesforce-outbound-messages-PROD",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
+    "SfBusToContactUpdateQueue75131C06": {
+      "Properties": {
+        "Description": "Send an SF Contact Update event from the SF bus to the salesforce-outbound-messages-[STAGE] SQS queue for consumption by membership-workflow",
+        "EventBusName": "aws.partner/salesforce.com/00D20000000nq5gEAA/0YLQv00000000zJOAQ",
+        "EventPattern": {
+          "detail-type": [
+            "Contact_Update__e",
+          ],
+          "source": [
+            {
+              "prefix": "aws.partner/salesforce.com",
+            },
+          ],
+        },
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:sqs:",
+                  {
+                    "Ref": "AWS::Region",
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId",
+                  },
+                  ":salesforce-outbound-messages-PROD",
+                ],
+              ],
+            },
+            "DeadLetterConfig": {
+              "Arn": {
+                "Fn::GetAtt": [
+                  "deadletterssalesforceeventbusqueue29BFA779",
+                  "Arn",
+                ],
+              },
+            },
+            "Id": "Target0",
+            "InputTransformer": {
+              "InputPathsMap": {
+                "detail-payload-Contact_ID__c": "$.detail.payload.Contact_ID__c",
+              },
+              "InputTemplate": "{"contactId":<detail-payload-Contact_ID__c>}",
+            },
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "deadletterssalesforceeventbusqueue29BFA779": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "salesforce-event-bus-dead-letters-PROD",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "deadletterssalesforceeventbusqueuePolicy0CE2F482": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "SfBusToContactUpdateQueue75131C06",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "deadletterssalesforceeventbusqueue29BFA779",
+                  "Arn",
+                ],
+              },
+              "Sid": "AllowEventRulesalesforceeventbusPRODSfBusToContactUpdateQueueC08A5AB1",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "deadletterssalesforceeventbusqueue29BFA779",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
+  },
+}
+`;

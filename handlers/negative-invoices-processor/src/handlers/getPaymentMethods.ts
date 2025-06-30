@@ -11,9 +11,12 @@ export const GetPaymentMethodsInputSchema = z.object({
 	accountId: z.string(),
 	invoiceNumber: z.string(),
 	invoiceBalance: z.number(),
-	hasActiveSub: z.boolean(),
 	applyCreditToAccountBalanceAttempt: z.object({
 		Success: z.boolean(),
+	}),
+	checkForActiveSubAttempt: z.object({
+		Success: z.boolean(),
+		hasActiveSub: z.boolean(),
 	}),
 });
 
@@ -31,18 +34,27 @@ export const handler = async (event: GetPaymentMethodsInput) => {
 		);
 
 		const activePaymentMethods = filterActivePaymentMethods(paymentMethods);
-
+		const hasActivePaymentMethod = activePaymentMethods.length > 0;
 		return {
 			...parsedEvent,
-			activePaymentMethods,
-			hasActivePaymentMethod: activePaymentMethods.length > 0,
+			checkForActivePaymentMethodAttempt: {
+				Success: true,
+				hasActivePaymentMethod,
+				activePaymentMethods,
+			},
 		};
 	} catch (error) {
 		return {
 			...event,
-			checkPaymentMethodStatus: 'Error',
-			errorDetail:
-				error instanceof Error ? error.message : JSON.stringify(error, null, 2),
+			checkForActivePaymentMethodAttempt: {
+				Success: false,
+				hasActivePaymentMethod: undefined,
+				activePaymentMethods: undefined,
+				error:
+					error instanceof Error
+						? error.message
+						: JSON.stringify(error, null, 2),
+			},
 		};
 	}
 };
