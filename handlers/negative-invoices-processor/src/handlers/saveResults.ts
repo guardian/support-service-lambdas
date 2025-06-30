@@ -1,9 +1,11 @@
 import { uploadFileToS3 } from '@modules/aws/s3';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { saveResultsInputSchema } from '../types';
-import type { SaveResultsInput } from '../types';
+import type { SaveResultsInput, SaveResultsOutput } from '../types';
 
-export const handler = async (event: SaveResultsInput) => {
+export const handler = async (
+	event: SaveResultsInput,
+): Promise<SaveResultsOutput> => {
 	try {
 		const parsedEventResult = saveResultsInputSchema.safeParse(event);
 		if (!parsedEventResult.success) {

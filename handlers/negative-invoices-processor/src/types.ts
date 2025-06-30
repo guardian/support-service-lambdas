@@ -109,3 +109,9 @@ export const saveResultsInputSchema = z.object({
 	processedInvoices: z.array(ProcessedInvoiceSchema),
 });
 export type SaveResultsInput = z.infer<typeof saveResultsInputSchema>;
+export const SaveResultsOutputSchema = saveResultsInputSchema.extend({
+	s3UploadAttemptStatus: z.string(),
+	filePath: z.string().optional(),
+	error: z.string().optional(),
+});
+export type SaveResultsOutput = z.infer<typeof SaveResultsOutputSchema>;
