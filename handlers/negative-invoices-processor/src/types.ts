@@ -33,13 +33,15 @@ export const CheckForActiveSubInputSchema =
 	ApplyCreditToAccountBalanceOutputSchema;
 export type CheckForActiveSubInput = ApplyCreditToAccountBalanceOutput;
 
+export const checkForActiveSubAttemptSchema = z.object({
+	Success: z.boolean(),
+	hasActiveSub: z.boolean().optional(),
+	error: z.string().optional(),
+});
+
 export const CheckForActiveSubOutputSchema =
 	CheckForActiveSubInputSchema.extend({
-		checkForActiveSubAttempt: z.object({
-			Success: z.boolean(),
-			hasActiveSub: z.boolean().optional(),
-			error: z.string().optional(),
-		}),
+		checkForActiveSubAttempt: checkForActiveSubAttemptSchema,
 	});
 
 export type CheckForActiveSubOutput = z.infer<
@@ -57,14 +59,16 @@ export const PaymentMethodSchema = z.object({
 	isDefault: z.boolean(),
 });
 
+const checkForActivePaymentMethodAttemptSchema = z.object({
+	Success: z.boolean(),
+	hasActivePaymentMethod: z.boolean().optional(),
+	activePaymentMethods: z.array(PaymentMethodSchema).optional(),
+	error: z.string().optional(),
+});
 export const GetPaymentMethodsOutputSchema =
 	GetPaymentMethodsInputSchema.extend({
-		checkForActivePaymentMethodAttempt: z.object({
-			Success: z.boolean(),
-			hasActivePaymentMethod: z.boolean().optional(),
-			activePaymentMethods: z.array(PaymentMethodSchema).optional(),
-			error: z.string().optional(),
-		}),
+		checkForActivePaymentMethodAttempt:
+			checkForActivePaymentMethodAttemptSchema,
 	});
 export type GetPaymentMethodsOutput = z.infer<
 	typeof GetPaymentMethodsOutputSchema
@@ -90,11 +94,18 @@ export type DoCreditBalanceRefundOutput = z.infer<
 	typeof DoCreditBalanceRefundOutputSchema
 >;
 
+// saveResults lambda
 export const ProcessedInvoiceSchema = InvoiceSchema.extend({
-	hasActiveSub: z.boolean().optional(),
 	applyCreditToAccountBalanceAttempt: ApplyCreditToAccountBalanceAttemptSchema,
-	hasActivePaymentMethod: z.boolean().optional(),
-	activePaymentMethods: z.array(PaymentMethodSchema).optional(),
+	checkForActiveSubAttempt: checkForActiveSubAttemptSchema.optional(),
+	checkForActivePaymentMethodAttempt:
+		checkForActivePaymentMethodAttemptSchema.optional(),
 	refundAttempt: RefundAttemptSchema.optional(),
-	errorDetail: z.string().optional(),
 });
+
+export const saveResultsInputSchema = z.object({
+	invoicesCount: z.number(),
+	invoices: z.array(InvoiceSchema),
+	processedInvoices: z.array(ProcessedInvoiceSchema),
+});
+export type SaveResultsInput = z.infer<typeof saveResultsInputSchema>;

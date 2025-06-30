@@ -1,14 +1,7 @@
 import { uploadFileToS3 } from '@modules/aws/s3';
 import { getIfDefined } from '@modules/nullAndUndefined';
-import { z } from 'zod';
-import { InvoiceSchema, ProcessedInvoiceSchema } from '../types';
-
-export const saveResultsInputSchema = z.object({
-	invoicesCount: z.number(),
-	invoices: z.array(InvoiceSchema),
-	processedInvoices: z.array(ProcessedInvoiceSchema),
-});
-export type SaveResultsInput = z.infer<typeof saveResultsInputSchema>;
+import { saveResultsInputSchema } from '../types';
+import type { SaveResultsInput } from '../types';
 
 export const handler = async (event: SaveResultsInput) => {
 	try {
