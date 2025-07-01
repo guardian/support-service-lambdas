@@ -1,7 +1,8 @@
-import { Construct } from 'constructs';
-import { CfnDomainName, CfnBasePathMapping, IRestApi } from 'aws-cdk-lib/aws-apigateway';
-import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import type { GuStack } from '@guardian/cdk/lib/constructs/core';
+import type { IRestApi } from 'aws-cdk-lib/aws-apigateway';
+import { CfnBasePathMapping, CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
+import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
+import { Construct } from 'constructs';
 
 interface GuCustomDomainProps {
     subdomain: string; // e.g. "metric-push-api", "mparticle-api"
@@ -12,7 +13,7 @@ interface GuCustomDomainProps {
 function generateSafeId(input: string): string {
   return input
     .split('-')
-    .map((word, index) => 
+    .map((word) => 
       word.charAt(0).toUpperCase() + word.slice(1).toLocaleLowerCase()
     )
     .join('');
@@ -30,7 +31,7 @@ export class SrLambdaDomain extends Construct {
             endpointConfiguration: { types: ['REGIONAL'] },
         });
 
-        const basePathMapping = new CfnBasePathMapping(this, `${safeId}BasePathMapping`, {
+        new CfnBasePathMapping(this, `${safeId}BasePathMapping`, {
             restApiId: props.restApi.restApiId,
             domainName: domainName.ref,
             stage: props.restApi.deploymentStage.stageName,
