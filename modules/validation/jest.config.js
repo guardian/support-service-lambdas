@@ -8,10 +8,7 @@ module.exports = {
 		'@modules/(.*)/(.*)$': '<rootDir>/../../modules/$1/src/$2',
 		'@modules/(.*)$': '<rootDir>/../../modules/$1',
 	},
-	collectCoverageFrom: [
-		'src/**/*.ts',
-		'!src/**/*.d.ts',
-	],
+	collectCoverageFrom: ['src/**/*.ts', '!src/**/*.d.ts'],
 	coverageReporters: ['text', 'lcov', 'html'],
 	coverageDirectory: 'coverage',
 };

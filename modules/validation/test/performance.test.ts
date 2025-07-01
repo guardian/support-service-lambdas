@@ -20,10 +20,12 @@ describe('Validation Module Performance', () => {
 				language: z.string().default('en'),
 			}),
 		}),
-		metadata: z.array(z.object({
-			key: z.string(),
-			value: z.union([z.string(), z.number(), z.boolean()]),
-		})),
+		metadata: z.array(
+			z.object({
+				key: z.string(),
+				value: z.union([z.string(), z.number(), z.boolean()]),
+			}),
+		),
 		timestamps: z.object({
 			createdAt: z.string().datetime(),
 			updatedAt: z.string().datetime(),
@@ -69,7 +71,7 @@ describe('Validation Module Performance', () => {
 
 		const endTime = Date.now();
 		const duration = endTime - startTime;
-		
+
 		// Should complete 1000 validations in under 100ms
 		expect(duration).toBeLessThan(100);
 	});
@@ -84,7 +86,7 @@ describe('Validation Module Performance', () => {
 
 		const endTime = Date.now();
 		const duration = endTime - startTime;
-		
+
 		// Should complete 1000 validations in under 100ms
 		expect(duration).toBeLessThan(100);
 	});
@@ -99,7 +101,7 @@ describe('Validation Module Performance', () => {
 
 		const endTime = Date.now();
 		const duration = endTime - startTime;
-		
+
 		// Should complete 100 complex validations in under 100ms
 		expect(duration).toBeLessThan(100);
 	});
@@ -114,7 +116,7 @@ describe('Validation Module Performance', () => {
 
 		const endTime = Date.now();
 		const duration = endTime - startTime;
-		
+
 		// Should complete 100 complex validations in under 100ms
 		expect(duration).toBeLessThan(100);
 	});
@@ -131,7 +133,7 @@ describe('Validation Module Performance', () => {
 
 		const endTime = Date.now();
 		const duration = endTime - startTime;
-		
+
 		// Should complete 500 error validations in under 100ms
 		expect(duration).toBeLessThan(100);
 	});
@@ -149,7 +151,7 @@ describe('Validation Module Performance', () => {
 		}
 
 		// Verify that all sampled results are valid
-		results.forEach(result => {
+		results.forEach((result) => {
 			expect(result.success).toBe(true);
 		});
 

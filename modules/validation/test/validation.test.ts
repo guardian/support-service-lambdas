@@ -141,9 +141,10 @@ describe('Validation Module', () => {
 			expect(result.id).toBe(validComplexData.id);
 			expect(result.email).toBe(validComplexData.email);
 			expect(result.settings.theme).toBe('dark');
-		});		test('should validate complex object with optional field missing', () => {
+		});
+		test('should validate complex object with optional field missing', () => {
 			const { tags, ...dataWithoutOptional } = validComplexData;
-			
+
 			const result = validateInput(dataWithoutOptional, ComplexSchema);
 			expect(result.tags).toBeUndefined();
 		});
@@ -181,7 +182,7 @@ describe('Validation Module', () => {
 			z.object({
 				name: z.string(),
 				value: z.number(),
-			})
+			}),
 		);
 
 		test('should validate array of objects', () => {

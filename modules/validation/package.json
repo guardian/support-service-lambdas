@@ -1,22 +1,14 @@
 {
-  "name": "validation",
-  "version": "1.0.0",
-  "scripts": {
-    "build": "tsc --noEmit",
-    "test": "jest",
-    "test:coverage": "jest --coverage",
-    "test:watch": "jest --watch",
-    "lint": "eslint src/**/*.ts test/**/*.ts",
-    "check-formatting": "prettier --check **.ts",
-    "fix-formatting": "prettier --write **.ts"
-  },
-  "dependencies": {
-    "zod": "catalog:"
-  },
-  "devDependencies": {
-    "@types/jest": "catalog:",
-    "jest": "catalog:",
-    "ts-jest": "catalog:",
-    "typescript": "catalog:"
-  }
+	"name": "validation",
+	"version": "1.0.0",
+	"scripts": {
+		"test": "jest --group=-integration",
+		"it-test": "jest --group=integration",
+		"check-formatting": "prettier --check **.ts",
+		"fix-formatting": "prettier --write **.ts",
+		"lint": "eslint src/**/*.ts test/**/*.ts"
+	},
+	"dependencies": {
+		"zod": "catalog:"
+	}
 }
