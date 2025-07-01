@@ -1,7 +1,7 @@
 import { stageFromEnvironment } from '@modules/stage';
+import { validateInput } from '@modules/validation/index';
 import { applyCreditToAccountBalance } from '@modules/zuora/applyCreditToAccountBalance';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { validateInput } from '@modules/validation/index';
 import { ApplyCreditToAccountBalanceInputSchema } from '../types';
 import type {
 	ApplyCreditToAccountBalanceInput,
