@@ -116,3 +116,7 @@ export const SaveResultsOutputSchema = SaveResultsInputSchema.extend({
 	error: z.string().optional(),
 });
 export type SaveResultsOutput = z.infer<typeof SaveResultsOutputSchema>;
+
+//alarmOnFailures lambda
+export const AlarmOnFailuresInputSchema = GetPaymentMethodsOutputSchema;
+export type AlarmOnFailuresInput = z.infer<typeof AlarmOnFailuresInputSchema>;
