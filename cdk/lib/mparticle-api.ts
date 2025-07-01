@@ -103,6 +103,7 @@ export class MParticleApi extends GuStack {
 			subdomain: 'mparticle-api',
 			stage: this.stage,
 			restApi: apiGateway.api,
+			apiDomain: 'membership'
 		});
 
 		// Allow the lambda to assume the roles that allow cross-account fetching of tags
