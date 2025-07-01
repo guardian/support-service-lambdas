@@ -4,7 +4,7 @@ import { CfnBasePathMapping, CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { Construct } from 'constructs';
 
-interface GuCustomDomainProps {
+interface GuDomainProps {
     subdomain: string; // e.g. "metric-push-api", "mparticle-api"
     stage: string;
     restApi: IRestApi;
@@ -20,7 +20,7 @@ function generateSafeId(input: string): string {
 }
 
 export class SrLambdaDomain extends Construct {
-    constructor(scope: GuStack, props: GuCustomDomainProps) {
+    constructor(scope: GuStack, props: GuDomainProps) {
         const safeId = generateSafeId(props.subdomain);
         super(scope, `${safeId}Domain`);
         const domainNameString = `${props.subdomain}-${props.stage.toLowerCase()}.support.guardianapis.com`;
