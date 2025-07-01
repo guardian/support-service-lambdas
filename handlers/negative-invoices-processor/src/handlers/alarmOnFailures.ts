@@ -1,9 +1,6 @@
 /* eslint-disable @typescript-eslint/require-await -- this is required to ensure the lambda returns a value*/
 import { AlarmOnFailuresInputSchema } from '../types';
-import type {
-	AlarmOnFailuresInput,
-	ApplyCreditToAccountBalanceOutput,
-} from '../types';
+import type { AlarmOnFailuresInput, ProcessedInvoice } from '../types';
 
 export const handler = async (event: AlarmOnFailuresInput) => {
 	try {
@@ -14,6 +11,11 @@ export const handler = async (event: AlarmOnFailuresInput) => {
 		}
 		const parsedEvent = parsedEventResult.data;
 		console.log('Parsed event:', parsedEvent);
+
+		const failuresDetected = shouldSendErrorNotification(
+			parsedEvent.processedInvoices,
+			parsedEvent.s3UploadAttemptStatus,
+		);
 		// if (
 		// 	await shouldSendErrorNotification(
 		// 		parsedEvent..applyCreditToAccountBalanceAttempts,
@@ -32,12 +34,12 @@ export const handler = async (event: AlarmOnFailuresInput) => {
 };
 
 export const shouldSendErrorNotification = async (
-	applyCreditToAccountBalanceAttempts: ApplyCreditToAccountBalanceOutput[],
+	processedInvoices: ProcessedInvoice[],
 	s3UploadAttemptStatus: string,
 ): Promise<boolean> => {
 	return (
 		s3UploadAttemptStatus === 'error' ||
-		applyCreditToAccountBalanceAttempts.some(
+		processedInvoices.some(
 			(attempt) => !attempt.applyCreditToAccountBalanceAttempt.Success,
 		)
 	);
