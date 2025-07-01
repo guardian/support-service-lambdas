@@ -1,5 +1,4 @@
 import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
-import { defaultProvider } from '@aws-sdk/credential-provider-node';
 import type { DataSubjectRequestCallback } from '../../interfaces/data-subject-request-callback';
 import type { DataSubjectRequestForm } from "../../interfaces/data-subject-request-form";
 import type { DataSubjectRequestState } from "../../interfaces/data-subject-request-state";
@@ -177,7 +176,6 @@ export const processDataSubjectRequestCallback = async (requestId: string, paylo
     };
     const client = new SQSClient({
         region: 'eu-west-1',
-        credentials: defaultProvider({ profile: 'ophan' }),
     });
     console.debug(
         `Sending message ${JSON.stringify(message)} to Ophan queue`,
