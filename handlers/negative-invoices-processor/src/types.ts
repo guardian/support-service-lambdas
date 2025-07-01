@@ -14,6 +14,7 @@ export const InvoiceRecordsArraySchema = z.array(InvoiceSchema);
 
 //ApplyCreditToAccountBalance lambda
 export type ApplyCreditToAccountBalanceInput = InvoiceRecord;
+export const ApplyCreditToAccountBalanceInputSchema = InvoiceSchema;
 
 export const ApplyCreditToAccountBalanceAttemptSchema = z.object({
 	Success: z.boolean(),

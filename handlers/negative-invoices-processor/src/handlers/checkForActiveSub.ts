@@ -28,7 +28,6 @@ export const handler = async (
 			...event,
 			checkForActiveSubAttempt: {
 				Success: false,
-				hasActiveSub: undefined,
 				error:
 					error instanceof Error
 						? error.message
