@@ -49,8 +49,8 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
     "MparticleApiDnsRecord": {
       "Properties": {
         "Comment": "CNAME for mparticle-api API CODE",
-        "HostedZoneName": "support.guardianapis.com",
-        "Name": "mparticle-api-code.support.guardianapis.com",
+        "HostedZoneName": "membership.guardianapis.com.",
+        "Name": "mparticle-api-code.membership.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -80,7 +80,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
     },
     "MparticleApiDomainMparticleApiDomainName3EAD2748": {
       "Properties": {
-        "DomainName": "mparticle-api-code.support.guardianapis.com",
+        "DomainName": "mparticle-api-code.membership.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -98,7 +98,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
+              ":certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2",
             ],
           ],
         },
@@ -848,8 +848,8 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
     "MparticleApiDnsRecord": {
       "Properties": {
         "Comment": "CNAME for mparticle-api API PROD",
-        "HostedZoneName": "support.guardianapis.com",
-        "Name": "mparticle-api-prod.support.guardianapis.com",
+        "HostedZoneName": "membership.guardianapis.com.",
+        "Name": "mparticle-api-prod.membership.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -879,7 +879,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
     },
     "MparticleApiDomainMparticleApiDomainName3EAD2748": {
       "Properties": {
-        "DomainName": "mparticle-api-prod.support.guardianapis.com",
+        "DomainName": "mparticle-api-prod.membership.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -897,7 +897,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
+              ":certificate/c1efc564-9ff8-4a03-be48-d1990a3d79d2",
             ],
           ],
         },
