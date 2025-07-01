@@ -102,7 +102,7 @@ export class MParticleApi extends GuStack {
 		new SrLambdaDomain(this, {
 			subdomain: 'mparticle-api',
 			stage: this.stage,
-			restApi: apiGateway.api
+			restApi: apiGateway.api,
 		});
 
 		// Allow the lambda to assume the roles that allow cross-account fetching of tags
