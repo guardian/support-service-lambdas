@@ -8,11 +8,11 @@ import { z } from 'zod';
  * @returns The parsed and validated data
  * @throws Error if validation fails
  */
-export function validateInput<TInput, TOutput>(
-	event: TInput,
-	schema: z.ZodType<TOutput, z.ZodTypeDef, TInput>,
+export function validateInput<T>(
+	event: unknown,
+	schema: z.ZodType<T>,
 	errorMessage?: string,
-): TOutput {
+): T {
 	const parsedEventResult = schema.safeParse(event);
 
 	if (!parsedEventResult.success) {
@@ -29,10 +29,10 @@ export function validateInput<TInput, TOutput>(
  * @param schema - The Zod schema to validate against
  * @returns An object with success flag and either data or error
  */
-export function validateInputSafe<TInput, TOutput>(
-	event: TInput,
-	schema: z.ZodType<TOutput, z.ZodTypeDef, TInput>,
-): { success: true; data: TOutput } | { success: false; error: string } {
+export function validateInputSafe<T>(
+	event: unknown,
+	schema: z.ZodType<T>,
+): { success: true; data: T } | { success: false; error: string } {
 	const parsedEventResult = schema.safeParse(event);
 
 	if (!parsedEventResult.success) {
