@@ -5,8 +5,8 @@ import { SQSClient } from '@aws-sdk/client-sqs';
 import { faker } from '@faker-js/faker';
 import type { DataSubjectRequestState } from '../interfaces/data-subject-request-state';
 import type { DataSubjectRequestSubmission } from '../interfaces/data-subject-request-submission';
+import type { AppConfig } from '../src/config';
 import { run } from '../src/utils/run';
-import { AppConfig } from '../src/config';
 
 jest.mock('@aws-sdk/client-sqs', () => {
     return {
