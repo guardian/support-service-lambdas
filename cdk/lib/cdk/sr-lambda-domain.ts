@@ -3,7 +3,6 @@ import type { IRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { CfnBasePathMapping, CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { Construct } from 'constructs';
-import { membershipApisDomain, membershipCertificateId, supportApisDomain, supportCertificateId } from '../../bin/cdk';
 
 interface GuDomainProps {
     subdomain: string; // e.g. "metric-push-api", "mparticle-api"
@@ -30,12 +29,12 @@ export class SrLambdaDomain extends Construct {
         let apiDomain, certificateId;
         switch (props.apiDomain) {
             case "support":
-                apiDomain = supportApisDomain;
-                certificateId = supportCertificateId;
+                apiDomain = "support.guardianapis.com";
+                certificateId = "b384a6a0-2f54-4874-b99b-96eeff96c009";
                 break;
             case "membership":
-                apiDomain = membershipApisDomain;
-                certificateId = membershipCertificateId;
+                apiDomain = "membership.guardianapis.com";
+                certificateId = "c1efc564-9ff8-4a03-be48-d1990a3d79d2";
                 break;
         }
 
