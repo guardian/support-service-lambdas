@@ -8,7 +8,7 @@ import { DataSubjectRequestStatus } from "../../interfaces/data-subject-request-
 import type { DataSubjectRequestSubmission } from "../../interfaces/data-subject-request-submission";
 import type { HttpResponse } from "../http";
 import { makeHttpRequest } from "../http";
-import { getSecretValue } from '../secrets';
+import { getAppConfig } from '../config';
 
 function parseDataSubjectRequestStatus(status: 'pending' | 'in_progress' | 'completed' | 'cancelled'): DataSubjectRequestStatus {
     switch (status) {
@@ -23,36 +23,11 @@ function parseDataSubjectRequestStatus(status: 'pending' | 'in_progress' | 'comp
     }
 }
 
-let _workspaceKey: string | undefined;
-let _workspaceSecret: string | undefined;
-async function getWorkspaceKeyAndSecret(): Promise<{ key: string; secret: string }> {
-    if (!_workspaceKey || !_workspaceSecret) {
-        // Load them from AWS Systems Manager Parameter Store
-        const [workspaceKey, workspaceSecret] = await Promise.all([
-            getSecretValue(
-                `/mparticle-api/${stageFromEnvironment()}/workspace-key`,
-                'MPARTICLE_WORKSPACE_KEY'
-            ),
-            getSecretValue(
-                `/mparticle-api/${stageFromEnvironment()}/workspace-secret`,
-                'MPARTICLE_WORKSPACE_SECRET'
-            ),
-        ]);
-        _workspaceKey = workspaceKey;
-        _workspaceSecret = workspaceSecret;
-    }
-
-    return {
-        key: _workspaceKey,
-        secret: _workspaceSecret
-    }
-}
-
 async function requestDataSubjectApi<T>(url: string, options: {
     method?: 'GET' | 'POST';
     body?: unknown;
 }): Promise<HttpResponse<T>> {
-    const workspaceKeyAndSecret: { key: string; secret: string } = await getWorkspaceKeyAndSecret();
+    const appConfig = await getAppConfig();
     return makeHttpRequest<T>(url, {
         method: options.method,
         baseURL: `https://opendsr.mparticle.com/v3`,
@@ -65,7 +40,7 @@ async function requestDataSubjectApi<T>(url: string, options: {
              * is for a single workspace and scopes the DSR to this workspace only.
              * https://docs.mparticle.com/developers/apis/dsr-api/v3/#authentication
              */
-            'Authorization': `Basic ${Buffer.from(`${workspaceKeyAndSecret.key}:${workspaceKeyAndSecret.secret}`).toString('base64')}`,
+            'Authorization': `Basic ${Buffer.from(`${appConfig.workspace.key}:${appConfig.workspace.secret}`).toString('base64')}`,
         },
         body: options.body
     });
@@ -80,6 +55,7 @@ async function requestDataSubjectApi<T>(url: string, options: {
  * @returns https://docs.mparticle.com/developers/apis/dsr-api/v3/#example-success-response-body
  */
 export const submitDataSubjectRequest = async (form: DataSubjectRequestForm): Promise<DataSubjectRequestSubmission> => {
+    const appConfig = await getAppConfig();
     const response = await requestDataSubjectApi<{
         expected_completion_time: Date;
         received_time: Date;
@@ -102,10 +78,7 @@ export const submitDataSubjectRequest = async (form: DataSubjectRequestForm): Pr
             },
             api_version: "3.0",
             status_callback_urls: [
-                `${getSecretValue(
-                    `/mparticle-api/${stageFromEnvironment()}/api-gateway-url`,
-                    'MPARTICLE_API_GATEWAY_URL'
-                )}/data-subject-requests/${form.requestId}/callback`
+                `${appConfig.apiGatewayUrl}/data-subject-requests/${form.requestId}/callback`
             ],
             group_id: form.userId, // Let's group by User Unique Id to group all requests related to that user (max 150 requests per group)
         }
@@ -204,19 +177,17 @@ export const processDataSubjectRequestCallback = async (requestId: string, paylo
         })(),
         timestamp: new Date(),
     };
-    const queueName = await getSecretValue(
-        `/mparticle-api/${stageFromEnvironment()}/ophan-erasure-queue-url`,
-        'OPHAN_ERASURE_QUEUE_URL'
-    );
     const client = new SQSClient({
         region: 'eu-west-1',
         credentials: defaultProvider({ profile: 'ophan' }),
     });
     console.debug(
-        `Sending message ${JSON.stringify(message)} to queue '${queueName}'`,
+        `Sending message ${JSON.stringify(message)} to Ophan queue`,
     );
+
+    const appConfig = await getAppConfig();
     const command = new SendMessageCommand({
-        QueueUrl: queueName,
+        QueueUrl: appConfig.ophanErasureQueueUrl,
         MessageBody: JSON.stringify(message),
     });
     const response = await client.send(command);
