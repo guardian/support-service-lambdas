@@ -4,12 +4,14 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { InvoiceSchema } from '../types';
 import type {
 	ApplyCreditToAccountBalanceInput,
-	ApplyCreditToAccountBalanceOutput,
+	// ApplyCreditToAccountBalanceOutput,
 } from '../types';
 
-export const handler = async (
-	event: ApplyCreditToAccountBalanceInput,
-): Promise<ApplyCreditToAccountBalanceOutput> => {
+// export const handler = async (
+// 	event: ApplyCreditToAccountBalanceInput,
+// ): Promise<ApplyCreditToAccountBalanceOutput> => {
+
+export const handler = async (event: ApplyCreditToAccountBalanceInput) => {
 	try {
 		const parsedEvent = InvoiceSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
