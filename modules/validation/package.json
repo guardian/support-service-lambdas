@@ -2,7 +2,10 @@
 	"name": "validation",
 	"version": "1.0.0",
 	"scripts": {
-		"test": "jest --group=-integration",
+		"build": "tsc --noEmit",
+		"test": "jest",
+		"test:coverage": "jest --coverage",
+		"test:watch": "jest --watch",
 		"it-test": "jest --group=integration",
 		"check-formatting": "prettier --check **.ts",
 		"fix-formatting": "prettier --write **.ts",

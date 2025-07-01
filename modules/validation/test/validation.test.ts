@@ -168,7 +168,10 @@ describe('Validation Module', () => {
 		test('should fail validation for invalid enum value', () => {
 			const invalidData = {
 				...validComplexData,
-				settings: { ...validComplexData.settings, theme: 'blue' as any },
+				settings: {
+					...validComplexData.settings,
+					theme: 'blue' as 'light' | 'dark',
+				},
 			};
 
 			expect(() => {

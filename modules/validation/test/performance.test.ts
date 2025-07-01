@@ -141,7 +141,8 @@ describe('Validation Module Performance', () => {
 	test('memory usage should be stable across many validations', () => {
 		// Test for memory leaks by running many validations
 		const iterations = 10000;
-		const results: any[] = [];
+		const results: Array<{ success: boolean; data?: unknown; error?: string }> =
+			[];
 
 		for (let i = 0; i < iterations; i++) {
 			const result = validateInputSafe(validData, SimpleSchema);

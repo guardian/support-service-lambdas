@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import type { z } from 'zod';
 
 /**
  * Generic validation function that validates input against a Zod schema
@@ -17,7 +17,7 @@ export function validateInput<T>(
 
 	if (!parsedEventResult.success) {
 		const defaultMessage = `Input validation failed: ${parsedEventResult.error.message}`;
-		throw new Error(errorMessage || defaultMessage);
+		throw new Error(errorMessage ?? defaultMessage);
 	}
 
 	return parsedEventResult.data;
