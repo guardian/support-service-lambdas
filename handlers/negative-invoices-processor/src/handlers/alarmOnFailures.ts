@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/require-await -- this is required to ensure the lambda returns a value*/
 import { AlarmOnFailuresInputSchema } from '../types';
+import { validateInput } from '@modules/validation/index';
 import type { AlarmOnFailuresInput, ProcessedInvoice } from '../types';
 
 export const handler = async (event: AlarmOnFailuresInput) => {
 	try {
-		const parsedEventResult = AlarmOnFailuresInputSchema.safeParse(event);
-
-		if (!parsedEventResult.success) {
-			throw new Error('Error parsing event to type: AlarmOnFailuresInput');
-		}
-		const parsedEvent = parsedEventResult.data;
+		const parsedEvent = validateInput(
+			event,
+			AlarmOnFailuresInputSchema,
+			'Error parsing event to type: AlarmOnFailuresInput',
+		);
 		console.log('Parsed event:', parsedEvent);
 
 		const failuresDetected = shouldSendErrorNotification(

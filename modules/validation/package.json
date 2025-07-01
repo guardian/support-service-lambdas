@@ -1,9 +1,10 @@
 {
-  "name": "modules",
+  "name": "validation",
   "version": "1.0.0",
   "scripts": {
+    "build": "tsc --noEmit",
     "test": "jest --group=-integration",
-    "it-test": "jest --group=integration",
+    "lint": "eslint src/**/*.ts test/**/*.ts",
     "check-formatting": "prettier --check **.ts",
     "fix-formatting": "prettier --write **.ts"
   },
