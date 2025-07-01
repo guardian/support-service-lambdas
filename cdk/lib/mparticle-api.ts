@@ -7,6 +7,7 @@ import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { nodeVersion } from './node-version';
+import { SrLambdaDomain } from './cdk/sr-lambda-domain';
 
 export class MParticleApi extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {
@@ -29,7 +30,7 @@ export class MParticleApi extends GuStack {
 			},
 		});
 
-		new GuApiGatewayWithLambdaByPath(this, {
+		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {
 			app: app,
 			targets: [
 				{
@@ -97,6 +98,12 @@ export class MParticleApi extends GuStack {
 				],
 			}),
 		);
+
+		new SrLambdaDomain(this, {
+			subdomain: 'mparticle-api',
+			stage: this.stage,
+			restApi: apiGateway.api
+		});
 
 		// Allow the lambda to assume the roles that allow cross-account fetching of tags
 		// lambda.addToRolePolicy(
