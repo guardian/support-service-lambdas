@@ -13,8 +13,9 @@ const appConfigSchema = z.object({
     }),
     ophanErasureQueueUrl: z.string(),
     apiGatewayUrl: z.string(),
+    pod: z.string(),
 });
-type AppConfig = z.infer<typeof appConfigSchema>;
+export type AppConfig = z.infer<typeof appConfigSchema>;
 
 const getEnv = (env: string): string =>
     getIfDefined(process.env[env], `${env} environment variable not set`);

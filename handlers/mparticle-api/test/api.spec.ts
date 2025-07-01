@@ -6,6 +6,7 @@ import { faker } from '@faker-js/faker';
 import type { DataSubjectRequestState } from '../interfaces/data-subject-request-state';
 import type { DataSubjectRequestSubmission } from '../interfaces/data-subject-request-submission';
 import { run } from '../src/utils/run';
+import { AppConfig } from '../src/config';
 
 jest.mock('@aws-sdk/client-sqs', () => {
     return {
@@ -18,29 +19,32 @@ jest.mock('@aws-sdk/client-sqs', () => {
     };
 });
 
-describe('mparticle-api API tests', () => {
-    const originalEnv = process.env;
+jest.mock('../src/config', () => ({
+    getAppConfig: jest.fn().mockResolvedValue({
+        inputPlatform: {
+            key: faker.string.nanoid(),
+            secret: faker.string.nanoid(),
+        },
+        workspace: {
+            key: faker.string.nanoid(),
+            secret: faker.string.nanoid(),
+        },
+        ophanErasureQueueUrl: 'ophan-data-lake-CODE-erasure-Queue-XXX.fifo',
+        apiGatewayUrl: 'https://mparticle-api.support.guardianapis.com',
+        pod: 'EU1'
+    } as AppConfig)
+}));
 
+describe('mparticle-api API tests', () => {
     // Mock fetch before each test
     beforeEach(() => {
         jest.resetModules();
         global.fetch = jest.fn();
-        process.env = {
-            ...originalEnv,
-            Stage: "CODE",
-            MPARTICLE_WORKSPACE_KEY: faker.string.nanoid(),
-            MPARTICLE_WORKSPACE_SECRET: faker.string.nanoid(),
-            MPARTICLE_INPUT_PLATFORM_KEY: faker.string.nanoid(),
-            MPARTICLE_INPUT_PLATFORM_SECRET: faker.string.nanoid(),
-            OPHAN_ERASURE_QUEUE_URL: 'ophan-data-lake-CODE-erasure-Queue-XXX.fifo'
-        };
-        jest.spyOn(console, 'info').mockImplementation(() => { });
     });
 
     // Clean up after each test
     afterEach(() => {
         jest.restoreAllMocks();
-        process.env = originalEnv;
     });
 
     it('Register an event', async () => {

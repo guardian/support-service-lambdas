@@ -1,6 +1,5 @@
 import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 import { defaultProvider } from '@aws-sdk/credential-provider-node';
-import { stageFromEnvironment } from '@modules/stage';
 import type { DataSubjectRequestCallback } from '../../interfaces/data-subject-request-callback';
 import type { DataSubjectRequestForm } from "../../interfaces/data-subject-request-form";
 import type { DataSubjectRequestState } from "../../interfaces/data-subject-request-state";

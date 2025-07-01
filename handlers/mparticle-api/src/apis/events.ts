@@ -3,7 +3,6 @@ import { getAppConfig } from '../config';
 import type { HttpResponse } from "../http";
 import { makeHttpRequest } from "../http";
 
-const pod = process.env.MPARTICLE_POD ?? 'EU1';
 async function requestEventsApi<T>(url: string, options: {
     method?: 'POST';
     body?: unknown;
@@ -11,7 +10,7 @@ async function requestEventsApi<T>(url: string, options: {
     const appConfig = await getAppConfig();
     return makeHttpRequest<T>(url, {
         method: options.method,
-        baseURL: `https://s2s.${pod}.mparticle.com/v2`,
+        baseURL: `https://s2s.${appConfig.pod}.mparticle.com/v2`,
         headers: {
             'Content-Type': 'application/json',
             /**
