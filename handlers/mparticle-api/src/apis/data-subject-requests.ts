@@ -5,7 +5,7 @@ import type { DataSubjectRequestForm } from "../../interfaces/data-subject-reque
 import type { DataSubjectRequestState } from "../../interfaces/data-subject-request-state";
 import { DataSubjectRequestStatus } from "../../interfaces/data-subject-request-state";
 import type { DataSubjectRequestSubmission } from "../../interfaces/data-subject-request-submission";
-import { getAppConfig } from '../config';
+import { getAppConfig, getEnv } from '../config';
 import { makeHttpRequest } from "../http";
 import type { HttpResponse } from "../http";
 
@@ -54,7 +54,6 @@ async function requestDataSubjectApi<T>(url: string, options: {
  * @returns https://docs.mparticle.com/developers/apis/dsr-api/v3/#example-success-response-body
  */
 export const submitDataSubjectRequest = async (form: DataSubjectRequestForm): Promise<DataSubjectRequestSubmission> => {
-    const appConfig = await getAppConfig();
     const response = await requestDataSubjectApi<{
         expected_completion_time: Date;
         received_time: Date;
@@ -77,7 +76,7 @@ export const submitDataSubjectRequest = async (form: DataSubjectRequestForm): Pr
             },
             api_version: "3.0",
             status_callback_urls: [
-                `${appConfig.apiGatewayUrl}/data-subject-requests/${form.requestId}/callback`
+                `https://mparticle-api-${getEnv('STAGE').toLowerCase()}.support.guardianapis.com/data-subject-requests/${form.requestId}/callback`
             ],
             group_id: form.userId, // Let's group by User Unique Id to group all requests related to that user (max 150 requests per group)
         }

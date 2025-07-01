@@ -30,9 +30,9 @@ jest.mock('../src/config', () => ({
             secret: faker.string.nanoid(),
         },
         ophanErasureQueueUrl: 'ophan-data-lake-CODE-erasure-Queue-XXX.fifo',
-        apiGatewayUrl: 'https://mparticle-api.support.guardianapis.com',
         pod: 'EU1'
-    } as AppConfig)
+    } as AppConfig),
+    getEnv: jest.fn(()=> "CODE")
 }));
 
 describe('mparticle-api API tests', () => {

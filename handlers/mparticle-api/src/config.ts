@@ -12,12 +12,11 @@ const appConfigSchema = z.object({
         secret: z.string(),
     }),
     ophanErasureQueueUrl: z.string(),
-    apiGatewayUrl: z.string(),
     pod: z.string(),
 });
 export type AppConfig = z.infer<typeof appConfigSchema>;
 
-const getEnv = (env: string): string =>
+export const getEnv = (env: string): string =>
     getIfDefined(process.env[env], `${env} environment variable not set`);
 
 let appConfig: AppConfig | undefined = undefined;
