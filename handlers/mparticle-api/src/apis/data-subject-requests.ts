@@ -185,6 +185,7 @@ export const processDataSubjectRequestCallback = async (requestId: string, paylo
     const command = new SendMessageCommand({
         QueueUrl: appConfig.ophanErasureQueueUrl,
         MessageBody: JSON.stringify(message),
+        MessageGroupId: "erasure"
     });
     const response = await client.send(command);
     console.debug(`Response from message send was ${JSON.stringify({
