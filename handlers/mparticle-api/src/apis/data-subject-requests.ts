@@ -66,7 +66,6 @@ export const submitDataSubjectRequest = async (form: DataSubjectRequestForm): Pr
             subject_request_id: form.requestId,
             subject_request_type: form.requestType,
             submitted_time: form.submittedTime,
-            skip_waiting_period: true,
             subject_identities: {
                 "controller_customer_id": {
                     value: form.userId,
@@ -78,6 +77,11 @@ export const submitDataSubjectRequest = async (form: DataSubjectRequestForm): Pr
                 `https://mparticle-api-${getEnv('STAGE').toLowerCase()}.membership.guardianapis.com/data-subject-requests/${form.requestId}/callback`
             ],
             group_id: form.userId, // Let's group by User Unique Id to group all requests related to that user (max 150 requests per group)
+            extensions: {
+                "opendsr.mparticle.com": {
+                    skip_waiting_period: true
+                }
+            }
         }
     });
 
