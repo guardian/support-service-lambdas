@@ -16,6 +16,7 @@ export const handler = async (event: AlarmOnFailuresInput) => {
 			parsedEvent.processedInvoices,
 			parsedEvent.s3UploadAttemptStatus,
 		);
+		console.log('Failures detected:', failuresDetected);
 		// if (
 		// 	await shouldSendErrorNotification(
 		// 		parsedEvent..applyCreditToAccountBalanceAttempts,
