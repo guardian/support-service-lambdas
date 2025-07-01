@@ -90,7 +90,8 @@ const router = new Router([
         httpMethod: 'POST',
         path: '/data-subject-requests/{requestId}/callback',
         handler: routerHandler(async (event, parsed) => {
-            const callbackValidationResult = await validateDataSubjectRequestCallback(event.headers['x-opendsr-processor-domain'], event.headers['x-opendsr-signature'], event.body);
+            const getHeader = (key: string) => Object.entries(event.headers).find(([k]) => k.toLowerCase() === key.toLowerCase())?.[1];
+            const callbackValidationResult = await validateDataSubjectRequestCallback(getHeader('x-opendsr-processor-domain'), getHeader('x-opendsr-signature'), event.body);
             if (!callbackValidationResult) {
                 return {
                     statusCode: 401,
