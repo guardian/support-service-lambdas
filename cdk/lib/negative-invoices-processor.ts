@@ -208,6 +208,24 @@ export class NegativeInvoicesProcessor extends GuStack {
 			},
 		);
 
+		const alarmOnFailuresLambda = new GuLambdaFunction(
+			this,
+			'alarm-on-failures-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-alarm-on-failures-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+				},
+				handler: 'alarmOnFailures.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+				initialPolicy: [allowPutMetric],
+			},
+		);
+
 		const getInvoicesLambdaTask = new LambdaInvoke(this, 'Get invoices', {
 			lambdaFunction: getInvoicesLambda,
 			outputPath: '$.Payload',
@@ -278,6 +296,19 @@ export class NegativeInvoicesProcessor extends GuStack {
 			maxAttempts: 2,
 		});
 
+		const alarmOnFailuresLambdaTask = new LambdaInvoke(
+			this,
+			'Alarm on failures',
+			{
+				lambdaFunction: alarmOnFailuresLambda,
+				outputPath: '$.Payload',
+			},
+		).addRetry({
+			errors: ['States.ALL'],
+			interval: Duration.seconds(10),
+			maxAttempts: 2,
+		});
+
 		const invoiceProcessorMap = new Map(this, 'Invoice processor map', {
 			maxConcurrency: 1,
 			itemsPath: JsonPath.stringAt('$.invoices'),
@@ -329,7 +360,8 @@ export class NegativeInvoicesProcessor extends GuStack {
 		const definitionBody = DefinitionBody.fromChainable(
 			getInvoicesLambdaTask
 				.next(invoiceProcessorMap)
-				.next(saveResultsLambdaTask),
+				.next(saveResultsLambdaTask)
+				.next(alarmOnFailuresLambdaTask),
 		);
 
 		new StateMachine(this, `${appName}-state-machine-${this.stage}`, {
