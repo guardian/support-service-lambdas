@@ -1,13 +1,5 @@
 import type { z } from 'zod';
 
-/**
- * Generic validation function that validates input against a Zod schema
- * @param event - The input event data to validate
- * @param schema - The Zod schema to validate against
- * @param errorMessage - Optional custom error message (defaults to generic validation error)
- * @returns The parsed and validated data
- * @throws Error if validation fails
- */
 export function validateInput<T>(
 	event: unknown,
 	schema: z.ZodType<T>,
@@ -23,12 +15,6 @@ export function validateInput<T>(
 	return parsedEventResult.data;
 }
 
-/**
- * Validates input and returns a result object instead of throwing an error
- * @param event - The input event data to validate
- * @param schema - The Zod schema to validate against
- * @returns An object with success flag and either data or error
- */
 export function validateInputSafe<T>(
 	event: unknown,
 	schema: z.ZodType<T>,
