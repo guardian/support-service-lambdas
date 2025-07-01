@@ -103,6 +103,7 @@ export const ProcessedInvoiceSchema = InvoiceSchema.extend({
 		CheckForActivePaymentMethodAttemptSchema.optional(),
 	refundAttempt: RefundAttemptSchema.optional(),
 });
+export type ProcessedInvoice = z.infer<typeof ProcessedInvoiceSchema>;
 
 export const SaveResultsInputSchema = z.object({
 	invoicesCount: z.number(),
