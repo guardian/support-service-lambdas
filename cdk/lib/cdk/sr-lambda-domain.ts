@@ -20,6 +20,9 @@ function generateSafeId(input: string): string {
 		.join('');
 }
 
+/**
+ * Attaches a url of the form metric-push-api.support.guardianapis.com 
+ */
 export class SrLambdaDomain extends Construct {
 	constructor(scope: GuStack, props: GuDomainProps) {
 		const safeId = generateSafeId(props.subdomain);
