@@ -120,7 +120,6 @@ export class MParticleApi extends GuStack {
 		new SrLambdaDomain(this, {
 			subdomain: 'mparticle-api',
 			restApi: apiGateway.api,
-			apiDomain: 'membership',
 		});
 
 		new CfnOutput(this, 'MParticleLambdaRoleArn', {

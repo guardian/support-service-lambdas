@@ -7,7 +7,6 @@ import { Construct } from 'constructs';
 interface GuDomainProps {
 	subdomain: string; // e.g. "metric-push-api", "mparticle-api"
 	restApi: IRestApi;
-	apiDomain: 'support' | 'membership';
 }
 
 function generateSafeId(input: string): string {
@@ -28,25 +27,14 @@ export class SrLambdaDomain extends Construct {
 		const safeId = generateSafeId(props.subdomain);
 		super(scope, `${safeId}Domain`);
 
-		let apiDomain, certificateId;
-		switch (props.apiDomain) {
-			case 'support':
-				apiDomain = 'support.guardianapis.com';
-				certificateId = 'b384a6a0-2f54-4874-b99b-96eeff96c009';
-				break;
-			case 'membership':
-				apiDomain = 'membership.guardianapis.com';
-				certificateId = 'c1efc564-9ff8-4a03-be48-d1990a3d79d2';
-				break;
-		}
-
+		const apiDomain = "support.guardianapis.com";
 		const domainNameString =
 			scope.stage.toLowerCase() === 'code'
-				? `${props.subdomain}.code.${apiDomain}`
+				? `${props.subdomain}-code.${apiDomain}`
 				: `${props.subdomain}.${apiDomain}`;
 
 		const domainName = new CfnDomainName(this, `${safeId}DomainName`, {
-			regionalCertificateArn: `arn:aws:acm:${scope.region}:${scope.account}:certificate/${certificateId}`,
+			regionalCertificateArn: `arn:aws:acm:${scope.region}:${scope.account}:certificate/b384a6a0-2f54-4874-b99b-96eeff96c009`,
 			domainName: domainNameString,
 			endpointConfiguration: { types: ['REGIONAL'] },
 		});
