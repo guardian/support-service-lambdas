@@ -2,9 +2,9 @@ import { GuApiGatewayWithLambdaByPath } from '@guardian/cdk';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
-import { type App, Duration } from 'aws-cdk-lib';
+import { type App, CfnOutput, Duration } from 'aws-cdk-lib';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
-import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { ManagedPolicy, Policy, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { SrLambdaDomain } from './cdk/sr-lambda-domain';
 import { nodeVersion } from './node-version';
@@ -14,6 +14,15 @@ export class MParticleApi extends GuStack {
 		super(scope, id, props);
 
 		const app = 'mparticle-api';
+
+		const mparticleLambdaRole = new Role(this, 'MParticleLambdaExecutionRole', {
+			roleName: `${app}-${this.stage}-execution-role`,
+			assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
+			managedPolicies: [
+				ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'),
+			],
+		});
+
 		const lambda = new GuLambdaFunction(this, `${app}-lambda`, {
 			app,
 			memorySize: 1024,
@@ -22,6 +31,7 @@ export class MParticleApi extends GuStack {
 			timeout: Duration.seconds(15),
 			handler: 'index.handler',
 			functionName: `${app}-${this.stage}`,
+			role: mparticleLambdaRole,
 			events: [],
 			environment: {
 				APP: app,
@@ -106,16 +116,10 @@ export class MParticleApi extends GuStack {
 			apiDomain: 'membership',
 		});
 
-		// Allow the lambda to assume the roles that allow cross-account fetching of tags
-		// lambda.addToRolePolicy(
-		// 	new PolicyStatement({
-		// 		actions: ['sts:AssumeRole'],
-		// 		effect: Effect.ALLOW,
-		// 		resources: [
-		// 			// mobileAccountRoleArn.valueAsString,
-		// 			// targetingAccountRoleArn.valueAsString,
-		// 		],
-		// 	}),
-		// );
+		new CfnOutput(this, 'MParticleLambdaRoleArn', {
+			value: mparticleLambdaRole.roleArn,
+			description: 'ARN of the mParticle Lambda execution role',
+			exportName: `${app}-${this.stage}-lambda-role-arn`,
+		});
 	}
 }
