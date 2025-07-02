@@ -187,9 +187,10 @@ export const processDataSubjectRequestCallback = async (requestId: string, paylo
         `Sending message ${JSON.stringify(message)} to Ophan queue`,
     );
 
-    const appConfig = await getAppConfig();
     const command = new SendMessageCommand({
-        QueueUrl: appConfig.ophanErasureQueueUrl,
+        QueueUrl: getEnv('STAGE') === "PROD" ?
+            "https://sqs.eu-west-1.amazonaws.com/021353022223/ophan-data-lake-PROD-erasure-Queue-1H020S409D2OY.fifo" :
+            "https://sqs.eu-west-1.amazonaws.com/021353022223/ophan-data-lake-CODE-erasure-Queue-GRLOB6EAD0O9.fifo",
         MessageBody: JSON.stringify(message),
         MessageGroupId: "erasure"
     });
