@@ -212,7 +212,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
       "Properties": {
         "Comment": "CNAME for mparticle-api API CODE",
         "HostedZoneName": "membership.guardianapis.com.",
-        "Name": "mparticle-api-code.membership.guardianapis.com",
+        "Name": "mparticle-api.code.membership.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -242,7 +242,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
     },
     "MparticleApiDomainMparticleApiDomainName3EAD2748": {
       "Properties": {
-        "DomainName": "mparticle-api-code.membership.guardianapis.com",
+        "DomainName": "mparticle-api.code.membership.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -1020,7 +1020,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
       "Properties": {
         "Comment": "CNAME for mparticle-api API PROD",
         "HostedZoneName": "membership.guardianapis.com.",
-        "Name": "mparticle-api-prod.membership.guardianapis.com",
+        "Name": "mparticle-api.prod.membership.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -1050,7 +1050,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
     },
     "MparticleApiDomainMparticleApiDomainName3EAD2748": {
       "Properties": {
-        "DomainName": "mparticle-api-prod.membership.guardianapis.com",
+        "DomainName": "mparticle-api.prod.membership.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
