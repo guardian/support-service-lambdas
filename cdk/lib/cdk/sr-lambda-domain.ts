@@ -27,7 +27,7 @@ export class SrLambdaDomain extends Construct {
 		const safeId = generateSafeId(props.subdomain);
 		super(scope, `${safeId}Domain`);
 
-		const apiDomain = "support.guardianapis.com";
+		const apiDomain = 'support.guardianapis.com';
 		const domainNameString =
 			scope.stage.toLowerCase() === 'code'
 				? `${props.subdomain}-code.${apiDomain}`
