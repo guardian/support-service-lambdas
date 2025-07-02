@@ -11,7 +11,6 @@ export const ConfigSchema = z.object({
         key: z.string(),
         secret: z.string(),
     }),
-    ophanErasureQueueUrl: z.string(),
     pod: z.string(),
 });
 export type AppConfig = z.infer<typeof ConfigSchema>;

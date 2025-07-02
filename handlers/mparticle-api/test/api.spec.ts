@@ -29,7 +29,6 @@ jest.mock('../src/config', () => ({
             key: faker.string.nanoid(),
             secret: faker.string.nanoid(),
         },
-        ophanErasureQueueUrl: 'ophan-data-lake-CODE-erasure-Queue-XXX.fifo',
         pod: 'EU1'
     } as AppConfig),
     getEnv: jest.fn(()=> "CODE")
