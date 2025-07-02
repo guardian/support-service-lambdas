@@ -10,21 +10,15 @@ export const handler = async (event: AlarmOnFailuresInput) => {
 			AlarmOnFailuresInputSchema,
 			'Error parsing event to type: AlarmOnFailuresInput',
 		);
-		console.log('Parsed event:', parsedEvent);
 
-		const failuresDetected = shouldSendErrorNotification(
+		const failureDetected = await shouldSendErrorNotification(
 			parsedEvent.processedInvoices,
 			parsedEvent.s3UploadAttemptStatus,
 		);
-		console.log('Failures detected:', failuresDetected);
-		// if (
-		// 	await shouldSendErrorNotification(
-		// 		parsedEvent..applyCreditToAccountBalanceAttempts,
-		// 		parsedEvent.s3UploadAttemptStatus,
-		// 	)
-		// ) {
-		// 	throw new Error('Failure occurred. Check logs. ');
-		// }
+
+		if (failureDetected) {
+			throw new Error('Failure occurred. Check logs.');
+		}
 	} catch (error) {
 		console.log('Error occurred:', error);
 		throw new Error(
@@ -38,10 +32,21 @@ export const shouldSendErrorNotification = async (
 	processedInvoices: ProcessedInvoice[],
 	s3UploadAttemptStatus: string,
 ): Promise<boolean> => {
-	return (
-		s3UploadAttemptStatus === 'error' ||
-		processedInvoices.some(
-			(attempt) => !attempt.applyCreditToAccountBalanceAttempt.Success,
-		)
-	);
+	if (s3UploadAttemptStatus === 'error') {
+		return true;
+	}
+
+	return processedInvoices.some((invoice) => {
+		const {
+			applyCreditToAccountBalanceAttempt,
+			checkForActiveSubAttempt,
+			checkForActivePaymentMethodAttempt,
+		} = invoice;
+
+		return (
+			!applyCreditToAccountBalanceAttempt.Success ||
+			!checkForActiveSubAttempt?.Success ||
+			!checkForActivePaymentMethodAttempt?.Success
+		);
+	});
 };
