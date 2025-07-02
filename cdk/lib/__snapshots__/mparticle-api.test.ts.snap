@@ -125,7 +125,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -137,7 +137,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
     },
     "RestApi0C43BF4B": {
       "Properties": {
-        "Name": "membership-CODE-mparticle-api",
+        "Name": "support-CODE-mparticle-api",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -149,7 +149,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -215,7 +215,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -226,7 +226,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC5036c821d4f4e0e40d947572b1ff5f7f643": {
+    "RestApiDeployment180EC5032b39c17a8efcc4b16588acc42fa8181e": {
       "DependsOn": [
         "RestApidatasubjectrequestsrequestIdcallbackPOST2BF76B7C",
         "RestApidatasubjectrequestsrequestIdcallback3E3A4143",
@@ -247,7 +247,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC5036c821d4f4e0e40d947572b1ff5f7f643",
+          "Ref": "RestApiDeployment180EC5032b39c17a8efcc4b16588acc42fa8181e",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -264,7 +264,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -462,12 +462,12 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/CODE/mparticle-api/mparticle-api.zip",
+          "S3Key": "support/CODE/mparticle-api/mparticle-api.zip",
         },
         "Environment": {
           "Variables": {
             "APP": "mparticle-api",
-            "STACK": "membership",
+            "STACK": "support",
             "STAGE": "CODE",
           },
         },
@@ -499,7 +499,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -553,7 +553,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -602,7 +602,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/CODE/mparticle-api/mparticle-api.zip",
+                      "/support/CODE/mparticle-api/mparticle-api.zip",
                     ],
                   ],
                 },
@@ -623,7 +623,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/mparticle-api",
+                    ":parameter/CODE/support/mparticle-api",
                   ],
                 ],
               },
@@ -646,7 +646,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/mparticle-api/*",
+                    ":parameter/CODE/support/mparticle-api/*",
                   ],
                 ],
               },
@@ -785,7 +785,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -858,7 +858,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -936,7 +936,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -948,7 +948,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
     },
     "RestApi0C43BF4B": {
       "Properties": {
-        "Name": "membership-PROD-mparticle-api",
+        "Name": "support-PROD-mparticle-api",
         "Tags": [
           {
             "Key": "gu:cdk:version",
@@ -960,7 +960,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1026,7 +1026,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1037,7 +1037,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC50345abd92429a59a7a83941d3e0ce20b53": {
+    "RestApiDeployment180EC503230ad4ec27acc67429a58e181dd5bab0": {
       "DependsOn": [
         "RestApidatasubjectrequestsrequestIdcallbackPOST2BF76B7C",
         "RestApidatasubjectrequestsrequestIdcallback3E3A4143",
@@ -1058,7 +1058,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC50345abd92429a59a7a83941d3e0ce20b53",
+          "Ref": "RestApiDeployment180EC503230ad4ec27acc67429a58e181dd5bab0",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -1075,7 +1075,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1273,12 +1273,12 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/PROD/mparticle-api/mparticle-api.zip",
+          "S3Key": "support/PROD/mparticle-api/mparticle-api.zip",
         },
         "Environment": {
           "Variables": {
             "APP": "mparticle-api",
-            "STACK": "membership",
+            "STACK": "support",
             "STAGE": "PROD",
           },
         },
@@ -1310,7 +1310,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1364,7 +1364,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1413,7 +1413,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/PROD/mparticle-api/mparticle-api.zip",
+                      "/support/PROD/mparticle-api/mparticle-api.zip",
                     ],
                   ],
                 },
@@ -1434,7 +1434,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/mparticle-api",
+                    ":parameter/PROD/support/mparticle-api",
                   ],
                 ],
               },
@@ -1457,7 +1457,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/mparticle-api/*",
+                    ":parameter/PROD/support/mparticle-api/*",
                   ],
                 ],
               },
