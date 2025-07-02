@@ -2,7 +2,7 @@ import { getIfDefined } from '@modules/nullAndUndefined';
 import { loadConfig } from '@modules/aws/appConfig';
 import { z } from 'zod';
 
-const appConfigSchema = z.object({
+export const ConfigSchema = z.object({
     workspace: z.object({
         key: z.string(),
         secret: z.string(),
@@ -14,7 +14,7 @@ const appConfigSchema = z.object({
     ophanErasureQueueUrl: z.string(),
     pod: z.string(),
 });
-export type AppConfig = z.infer<typeof appConfigSchema>;
+export type AppConfig = z.infer<typeof ConfigSchema>;
 
 export const getEnv = (env: string): string =>
     getIfDefined(process.env[env], `${env} environment variable not set`);
@@ -25,7 +25,7 @@ export async function getAppConfig(): Promise<AppConfig> {
         const stage = getEnv('STAGE');
         const stack = getEnv('STACK');
         const app = getEnv('APP');
-        appConfig = await loadConfig(stage, stack, app, appConfigSchema);
+        appConfig = await loadConfig(stage, stack, app, ConfigSchema);
     }
     return appConfig;
 }
