@@ -3,6 +3,6 @@ import { ConfigSchema } from '../src/config';
 
 // run this to check the CODE and PROD config are readable and look right
 
-loadConfig('CODE', 'membership', 'mparticle-api', ConfigSchema).then(console.log);
+loadConfig('CODE', 'support', 'mparticle-api', ConfigSchema).then(console.log);
 
-loadConfig('PROD', 'membership', 'mparticle-api', ConfigSchema).then(console.log);
+loadConfig('PROD', 'support', 'mparticle-api', ConfigSchema).then(console.log);
