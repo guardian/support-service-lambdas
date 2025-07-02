@@ -119,7 +119,6 @@ export class MParticleApi extends GuStack {
 
 		new SrLambdaDomain(this, {
 			subdomain: 'mparticle-api',
-			stage: this.stage,
 			restApi: apiGateway.api,
 			apiDomain: 'membership',
 		});

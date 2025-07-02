@@ -6,7 +6,6 @@ import { Construct } from 'constructs';
 
 interface GuDomainProps {
 	subdomain: string; // e.g. "metric-push-api", "mparticle-api"
-	stage: string;
 	restApi: IRestApi;
 	apiDomain: 'support' | 'membership';
 }
@@ -38,7 +37,7 @@ export class SrLambdaDomain extends Construct {
 				break;
 		}
 
-		const domainNameString = `${props.subdomain}-${props.stage.toLowerCase()}.${apiDomain}`;
+		const domainNameString = `${props.subdomain}-${scope.stage.toLowerCase()}.${apiDomain}`;
 
 		const domainName = new CfnDomainName(this, `${safeId}DomainName`, {
 			regionalCertificateArn: `arn:aws:acm:${scope.region}:${scope.account}:certificate/${certificateId}`,
@@ -55,7 +54,7 @@ export class SrLambdaDomain extends Construct {
 		const dnsRecord = new CfnRecordSet(this, `${safeId}DnsRecord`, {
 			name: domainNameString,
 			type: 'CNAME',
-			comment: `CNAME for ${props.subdomain} API ${props.stage}`,
+			comment: `CNAME for ${props.subdomain} API ${scope.stage}`,
 			hostedZoneName: `${apiDomain}.`,
 			ttl: '120',
 			resourceRecords: [domainName.attrRegionalDomainName],
