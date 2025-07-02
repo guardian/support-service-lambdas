@@ -29,9 +29,9 @@ export class SrLambdaDomain extends Construct {
 
 		const apiDomain = 'support.guardianapis.com';
 		const domainNameString =
-			scope.stage.toLowerCase() === 'code'
-				? `${props.subdomain}-code.${apiDomain}`
-				: `${props.subdomain}.${apiDomain}`;
+			scope.stage === 'PROD'
+				? `${props.subdomain}.${apiDomain}`
+				: `${props.subdomain}-code.${apiDomain}`;
 
 		const domainName = new CfnDomainName(this, `${safeId}DomainName`, {
 			regionalCertificateArn: `arn:aws:acm:${scope.region}:${scope.account}:certificate/b384a6a0-2f54-4874-b99b-96eeff96c009`,
