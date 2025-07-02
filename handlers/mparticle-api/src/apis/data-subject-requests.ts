@@ -73,8 +73,10 @@ export const submitDataSubjectRequest = async (form: DataSubjectRequestForm): Pr
                 }
             },
             api_version: "3.0",
-            status_callback_urls: [
-                `https://mparticle-api.${getEnv('STAGE').toLowerCase()}.membership.guardianapis.com/data-subject-requests/${form.requestId}/callback`
+            status_callback_urls: getEnv('STAGE').toLowerCase() === "code" ? [
+                `https://mparticle-api.code.membership.guardianapis.com/data-subject-requests/${form.requestId}/callback`
+            ] : [
+                `https://mparticle-api.membership.guardianapis.com/data-subject-requests/${form.requestId}/callback`
             ],
             group_id: form.userId, // Let's group by User Unique Id to group all requests related to that user (max 150 requests per group)
             extensions: {

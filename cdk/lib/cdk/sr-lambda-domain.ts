@@ -40,7 +40,7 @@ export class SrLambdaDomain extends Construct {
 				break;
 		}
 
-		const domainNameString = `${props.subdomain}.${scope.stage.toLowerCase()}.${apiDomain}`;
+		const domainNameString = scope.stage.toLowerCase() === "code" ? `${props.subdomain}.code.${apiDomain}` : `${props.subdomain}.${apiDomain}`;
 
 		const domainName = new CfnDomainName(this, `${safeId}DomainName`, {
 			regionalCertificateArn: `arn:aws:acm:${scope.region}:${scope.account}:certificate/${certificateId}`,
