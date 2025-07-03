@@ -2,7 +2,7 @@ import {
 	failureExistsOnInvoiceProcessingAttempt,
 	invoiceHasAtLeastOneProcessingFailure,
 	handler,
-} from '../../src/handlers/alarmOnFailures';
+} from '../../src/handlers/detectFailures';
 import type { ProcessedInvoice, AlarmOnFailuresInput } from '../../src/types';
 
 // Mock the validation module
