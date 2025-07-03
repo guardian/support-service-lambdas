@@ -84,7 +84,7 @@ object Dependencies {
   val zio2Version = "2.1.18"
   val zio2 = "dev.zio" %% "zio" % zio2Version
   val tapirVersion =
-    "1.11.33" // stick with 1.11.33 for now as later versions indirectly pull in netty-codec-base which duplicates netty-codec content
+    "1.11.35" // stick with 1.11.33 for now as later versions indirectly pull in netty-codec-base which duplicates netty-codec content
   val enumeratum = "com.beachape" %% "enumeratum" % "1.9.0"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.4.0"
   val stripe = "com.stripe" % "stripe-java" % "29.1.0"
