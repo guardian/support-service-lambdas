@@ -41,7 +41,7 @@ export const failureExistsOnInvoiceProcessingAttempt = async (
 	);
 };
 
-function invoiceHasAtLeastOneProcessingFailure(
+export function invoiceHasAtLeastOneProcessingFailure(
 	invoice: ProcessedInvoice,
 ): boolean {
 	const {

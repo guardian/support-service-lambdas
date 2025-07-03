@@ -208,18 +208,18 @@ export class NegativeInvoicesProcessor extends GuStack {
 			},
 		);
 
-		const alarmOnFailuresLambda = new GuLambdaFunction(
+		const detectFailuresLambda = new GuLambdaFunction(
 			this,
-			'alarm-on-failures-lambda',
+			'detect-failures-lambda',
 			{
 				app: appName,
-				functionName: `${appName}-alarm-on-failures-${this.stage}`,
+				functionName: `${appName}-detect-failures-${this.stage}`,
 				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
 				},
-				handler: 'alarmOnFailures.handler',
+				handler: 'detectFailures.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
 				initialPolicy: [allowPutMetric],
@@ -296,11 +296,11 @@ export class NegativeInvoicesProcessor extends GuStack {
 			maxAttempts: 2,
 		});
 
-		const alarmOnFailuresLambdaTask = new LambdaInvoke(
+		const detectFailuresLambdaTask = new LambdaInvoke(
 			this,
 			'Alarm on failures',
 			{
-				lambdaFunction: alarmOnFailuresLambda,
+				lambdaFunction: detectFailuresLambda,
 				outputPath: '$.Payload',
 			},
 		).addRetry({
@@ -361,7 +361,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 			getInvoicesLambdaTask
 				.next(invoiceProcessorMap)
 				.next(saveResultsLambdaTask)
-				.next(alarmOnFailuresLambdaTask),
+				.next(detectFailuresLambdaTask),
 		);
 
 		new StateMachine(this, `${appName}-state-machine-${this.stage}`, {
