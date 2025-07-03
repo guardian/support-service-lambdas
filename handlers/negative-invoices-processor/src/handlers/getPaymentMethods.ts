@@ -4,27 +4,12 @@ import {
 	getPaymentMethods,
 } from '@modules/zuora/paymentMethod';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { z } from 'zod';
+import { GetPaymentMethodsInputSchema } from '../types';
+import type { GetPaymentMethodsInput, GetPaymentMethodsOutput } from '../types';
 
-export const GetPaymentMethodsInputSchema = z.object({
-	invoiceId: z.string(),
-	accountId: z.string(),
-	invoiceNumber: z.string(),
-	invoiceBalance: z.number(),
-	applyCreditToAccountBalanceAttempt: z.object({
-		Success: z.boolean(),
-	}),
-	checkForActiveSubAttempt: z.object({
-		Success: z.boolean(),
-		hasActiveSub: z.boolean(),
-	}),
-});
-
-export type GetPaymentMethodsInput = z.infer<
-	typeof GetPaymentMethodsInputSchema
->;
-
-export const handler = async (event: GetPaymentMethodsInput) => {
+export const handler = async (
+	event: GetPaymentMethodsInput,
+): Promise<GetPaymentMethodsOutput> => {
 	try {
 		const parsedEvent = GetPaymentMethodsInputSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());

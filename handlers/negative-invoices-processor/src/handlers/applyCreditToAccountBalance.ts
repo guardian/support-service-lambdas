@@ -1,14 +1,23 @@
 import { stageFromEnvironment } from '@modules/stage';
+import { validateInput } from '@modules/validation/index';
 import { applyCreditToAccountBalance } from '@modules/zuora/applyCreditToAccountBalance';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { z } from 'zod';
-import { InvoiceSchema } from '../types';
+import { ApplyCreditToAccountBalanceInputSchema } from '../types';
+import type {
+	ApplyCreditToAccountBalanceInput,
+	ApplyCreditToAccountBalanceOutput,
+} from '../types';
 
-export type ApplyCreditToAccountBalanceInput = z.infer<typeof InvoiceSchema>;
-
-export const handler = async (event: ApplyCreditToAccountBalanceInput) => {
+export const handler = async (
+	event: ApplyCreditToAccountBalanceInput,
+): Promise<ApplyCreditToAccountBalanceOutput> => {
 	try {
-		const parsedEvent = InvoiceSchema.parse(event);
+		const parsedEvent = validateInput(
+			event,
+			ApplyCreditToAccountBalanceInputSchema,
+			'Error parsing event to type: ApplyCreditToAccountBalanceInput',
+		);
+
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const body = JSON.stringify({
 			Amount: Math.abs(parsedEvent.invoiceBalance), //must be a positive value
