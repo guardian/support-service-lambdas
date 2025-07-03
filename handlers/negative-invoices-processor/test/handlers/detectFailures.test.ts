@@ -1,9 +1,9 @@
 import {
 	failureExistsOnInvoiceProcessingAttempt,
-	invoiceHasAtLeastOneProcessingFailure,
 	handler,
+	invoiceHasAtLeastOneProcessingFailure,
 } from '../../src/handlers/detectFailures';
-import type { ProcessedInvoice, DetectFailuresInput } from '../../src/types';
+import type { DetectFailuresInput, ProcessedInvoice } from '../../src/types';
 
 jest.mock('@modules/validation/index', () => ({
 	validateInput: jest.fn((input) => input),
