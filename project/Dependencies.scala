@@ -80,7 +80,7 @@ object Dependencies {
     "com.gu" %% "support-internationalisation" % "0.16"
 
   // Other
-  val zio = "dev.zio" %% "zio" % "1.0.18"
+  val zio = "dev.zio" %% "zio" % "2.1.19"
   val zio2Version = "2.1.18"
   val zio2 = "dev.zio" %% "zio" % zio2Version
   val tapirVersion =
