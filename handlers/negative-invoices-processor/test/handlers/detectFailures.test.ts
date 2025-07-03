@@ -6,7 +6,7 @@ import {
 import type { DetectFailuresInput, ProcessedInvoice } from '../../src/types';
 
 jest.mock('@modules/validation/index', () => ({
-	validateInput: jest.fn((input) => input),
+	validateInput: jest.fn(<T>(input: T): T => input),
 }));
 
 describe('detectFailures handler', () => {
