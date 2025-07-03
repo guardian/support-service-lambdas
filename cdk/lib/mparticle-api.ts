@@ -4,7 +4,7 @@ import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, CfnOutput, Duration } from 'aws-cdk-lib';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
-import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { AccountPrincipal, Effect, Policy, PolicyStatement, Role } from 'aws-cdk-lib/aws-iam';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { SrLambdaDomain } from './cdk/sr-lambda-domain';
 import { nodeVersion } from './node-version';
@@ -104,5 +104,22 @@ export class MParticleApi extends GuStack {
 			subdomain: 'mparticle-api',
 			restApi: apiGateway.api,
 		});
+
+		// Add Baton invoke role
+		const batonInvokeRole = new Role(this, 'BatonInvokeRole', {
+			roleName: `baton-mparticle-lambda-role-${this.stage}`,
+			assumedBy: new AccountPrincipal('029312801662'),
+		});
+		batonInvokeRole.attachInlinePolicy(
+			new Policy(this, 'BatonRunLambdaPolicy', {
+				statements: [
+					new PolicyStatement({
+						effect: Effect.ALLOW,
+						actions: ['lambda:InvokeFunction'],
+						resources: [lambda.functionArn],
+					}),
+				],
+			})
+		);
 	}
 }
