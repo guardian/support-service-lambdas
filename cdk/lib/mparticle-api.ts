@@ -104,16 +104,5 @@ export class MParticleApi extends GuStack {
 			subdomain: 'mparticle-api',
 			restApi: apiGateway.api,
 		});
-
-		/**
-		 * Export Lambda role ARN for cross-account queue access.
-		 * The SQS queue policy in account "Ophan" imports this ARN
-		 * to grant this Lambda sqs:SendMessage permissions to the erasure queue
-		 */
-		new CfnOutput(this, 'MParticleLambdaRoleArn', {
-			value: lambda.role!.roleArn,
-			description: 'ARN of the mParticle Lambda execution role',
-			exportName: `${app}-${this.stage}-lambda-role-arn`,
-		});
 	}
 }
