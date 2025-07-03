@@ -11,7 +11,7 @@ export const handler = async (event: AlarmOnFailuresInput) => {
 			'Error parsing event to type: AlarmOnFailuresInput',
 		);
 
-		const failureDetected = await shouldSendErrorNotification(
+		const failureDetected = await failuresExist(
 			parsedEvent.processedInvoices,
 			parsedEvent.s3UploadAttemptStatus,
 		);
@@ -28,7 +28,7 @@ export const handler = async (event: AlarmOnFailuresInput) => {
 	return {};
 };
 
-export const shouldSendErrorNotification = async (
+export const failuresExist = async (
 	processedInvoices: ProcessedInvoice[],
 	s3UploadAttemptStatus: string,
 ): Promise<boolean> => {
