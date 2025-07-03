@@ -9,17 +9,14 @@
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr mparticle-api.zip ./*.js",
     "check-formatting": "prettier --check **.ts",
     "fix-formatting": "prettier --write **.ts",
-    "run-local": "esbuild --bundle --platform=node --target=node18 --outfile=target/run-local.js run-local.ts && node target/run-local.js"
+    "check-config": "ts-node runManual/runLoadConfig.ts"
   },
   "devDependencies": {
     "@faker-js/faker": "^9.8.0",
     "@types/aws-lambda": "^8.10.147"
   },
   "dependencies": {
-    "@aws-sdk/client-sqs": "3.787.0",
-    "@aws-sdk/credential-provider-node": "3.782.0",
     "@peculiar/x509": "^1.12.3",
-    "dotenv": "^16.5.0",
     "zod": "^3.23.8"
   }
 }
