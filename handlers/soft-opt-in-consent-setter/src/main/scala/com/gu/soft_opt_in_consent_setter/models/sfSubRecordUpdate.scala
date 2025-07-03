@@ -1,5 +1,8 @@
 package com.gu.soft_opt_in_consent_setter.models
 
+import io.circe.Encoder
+import io.circe.generic.semiauto.deriveEncoder
+
 case class SFSubRecordUpdate(
     Id: String,
     Soft_Opt_in_Last_Stage_Processed__c: Option[String] = None,
@@ -11,6 +14,11 @@ case class Attributes(`type`: String)
 
 case class SFSubRecordUpdateRequest(records: Seq[SFSubRecordUpdate]) {
   def allOrNone = false
+}
+object SFSubRecordUpdateRequest {
+  implicit val encoderAttributes: Encoder[Attributes] = deriveEncoder[Attributes]
+  implicit val encoderSFSubRecordUpdate: Encoder[SFSubRecordUpdate] = deriveEncoder[SFSubRecordUpdate]
+  implicit val encoder: Encoder[SFSubRecordUpdateRequest] = deriveEncoder[SFSubRecordUpdateRequest]
 }
 
 object SFSubRecordUpdate {

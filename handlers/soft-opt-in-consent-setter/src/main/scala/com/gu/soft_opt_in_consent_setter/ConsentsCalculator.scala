@@ -1,12 +1,16 @@
 package com.gu.soft_opt_in_consent_setter
 
 import com.gu.soft_opt_in_consent_setter.models.SoftOptInError
-import io.circe.generic.auto._
+import io.circe.Encoder
+import io.circe.generic.semiauto._
 import io.circe.syntax.EncoderOps
 
 class ConsentsCalculator(consentsMappings: Map[String, Set[String]]) {
 
   case class ConsentsObject(id: String, consented: Boolean)
+  object ConsentsObject {
+    implicit val encoder: Encoder[ConsentsObject] = deriveEncoder[ConsentsObject]
+  }
 
   def getSoftOptInsByProduct(productName: String): Either[SoftOptInError, Set[String]] = {
     consentsMappings
