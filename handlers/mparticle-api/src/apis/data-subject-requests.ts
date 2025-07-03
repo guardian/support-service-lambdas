@@ -1,14 +1,12 @@
 import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
-import { defaultProvider } from '@aws-sdk/credential-provider-node';
-import { stageFromEnvironment } from '@modules/stage';
 import type { DataSubjectRequestCallback } from '../../interfaces/data-subject-request-callback';
 import type { DataSubjectRequestForm } from "../../interfaces/data-subject-request-form";
 import type { DataSubjectRequestState } from "../../interfaces/data-subject-request-state";
 import { DataSubjectRequestStatus } from "../../interfaces/data-subject-request-state";
 import type { DataSubjectRequestSubmission } from "../../interfaces/data-subject-request-submission";
-import type { HttpResponse } from "../http";
+import { getAppConfig, getEnv } from '../config';
 import { makeHttpRequest } from "../http";
-import { getSecretValue } from '../secrets';
+import type { HttpResponse } from "../http";
 
 function parseDataSubjectRequestStatus(status: 'pending' | 'in_progress' | 'completed' | 'cancelled'): DataSubjectRequestStatus {
     switch (status) {
@@ -23,36 +21,11 @@ function parseDataSubjectRequestStatus(status: 'pending' | 'in_progress' | 'comp
     }
 }
 
-let _workspaceKey: string | undefined;
-let _workspaceSecret: string | undefined;
-async function getWorkspaceKeyAndSecret(): Promise<{ key: string; secret: string }> {
-    if (!_workspaceKey || !_workspaceSecret) {
-        // Load them from AWS Systems Manager Parameter Store
-        const [workspaceKey, workspaceSecret] = await Promise.all([
-            getSecretValue(
-                `/mparticle-api/${stageFromEnvironment()}/workspace-key`,
-                'MPARTICLE_WORKSPACE_KEY'
-            ),
-            getSecretValue(
-                `/mparticle-api/${stageFromEnvironment()}/workspace-secret`,
-                'MPARTICLE_WORKSPACE_SECRET'
-            ),
-        ]);
-        _workspaceKey = workspaceKey;
-        _workspaceSecret = workspaceSecret;
-    }
-
-    return {
-        key: _workspaceKey,
-        secret: _workspaceSecret
-    }
-}
-
 async function requestDataSubjectApi<T>(url: string, options: {
     method?: 'GET' | 'POST';
     body?: unknown;
 }): Promise<HttpResponse<T>> {
-    const workspaceKeyAndSecret: { key: string; secret: string } = await getWorkspaceKeyAndSecret();
+    const appConfig = await getAppConfig();
     return makeHttpRequest<T>(url, {
         method: options.method,
         baseURL: `https://opendsr.mparticle.com/v3`,
@@ -65,7 +38,7 @@ async function requestDataSubjectApi<T>(url: string, options: {
              * is for a single workspace and scopes the DSR to this workspace only.
              * https://docs.mparticle.com/developers/apis/dsr-api/v3/#authentication
              */
-            'Authorization': `Basic ${Buffer.from(`${workspaceKeyAndSecret.key}:${workspaceKeyAndSecret.secret}`).toString('base64')}`,
+            'Authorization': `Basic ${Buffer.from(`${appConfig.workspace.key}:${appConfig.workspace.secret}`).toString('base64')}`,
         },
         body: options.body
     });
@@ -77,10 +50,9 @@ async function requestDataSubjectApi<T>(url: string, options: {
  * The OpenDSR Request takes a JSON request body and requires a Content-Type: application/json header.
  * https://docs.mparticle.com/developers/apis/dsr-api/v3/#submit-a-data-subject-request-dsr
  * @param {DataSubjectRequestForm} form - The form containing the data subject request details.
- * @param {string} lambdaDomainUrl - Current running lambda domain url
  * @returns https://docs.mparticle.com/developers/apis/dsr-api/v3/#example-success-response-body
  */
-export const submitDataSubjectRequest = async (form: DataSubjectRequestForm, lambdaDomainUrl: string): Promise<DataSubjectRequestSubmission> => {
+export const submitDataSubjectRequest = async (form: DataSubjectRequestForm): Promise<DataSubjectRequestSubmission> => {
     const response = await requestDataSubjectApi<{
         expected_completion_time: Date;
         received_time: Date;
@@ -94,7 +66,6 @@ export const submitDataSubjectRequest = async (form: DataSubjectRequestForm, lam
             subject_request_id: form.requestId,
             subject_request_type: form.requestType,
             submitted_time: form.submittedTime,
-            skip_waiting_period: true,
             subject_identities: {
                 "controller_customer_id": {
                     value: form.userId,
@@ -102,10 +73,17 @@ export const submitDataSubjectRequest = async (form: DataSubjectRequestForm, lam
                 }
             },
             api_version: "3.0",
-            status_callback_urls: [
-                `${lambdaDomainUrl}/data-subject-requests/${form.requestId}/callback`
+            status_callback_urls: getEnv('STAGE') === "PROD" ? [
+                `https://mparticle-api.support.guardianapis.com/data-subject-requests/${form.requestId}/callback`
+            ] : [
+                `https://mparticle-api-code.support.guardianapis.com/data-subject-requests/${form.requestId}/callback`
             ],
             group_id: form.userId, // Let's group by User Unique Id to group all requests related to that user (max 150 requests per group)
+            extensions: {
+                "opendsr.mparticle.com": {
+                    skip_waiting_period: true
+                }
+            }
         }
     });
 
@@ -202,20 +180,19 @@ export const processDataSubjectRequestCallback = async (requestId: string, paylo
         })(),
         timestamp: new Date(),
     };
-    const queueName = await getSecretValue(
-        `/mparticle-api/${stageFromEnvironment()}/ophan-erasure-queue-url`,
-        'OPHAN_ERASURE_QUEUE_URL'
-    );
     const client = new SQSClient({
         region: 'eu-west-1',
-        credentials: defaultProvider({ profile: 'ophan' }),
     });
     console.debug(
-        `Sending message ${JSON.stringify(message)} to queue '${queueName}'`,
+        `Sending message ${JSON.stringify(message)} to Ophan queue`,
     );
+
     const command = new SendMessageCommand({
-        QueueUrl: queueName,
+        QueueUrl: getEnv('STAGE') === "PROD" ?
+            "https://sqs.eu-west-1.amazonaws.com/021353022223/ophan-data-lake-PROD-erasure-Queue-1H020S409D2OY.fifo" :
+            "https://sqs.eu-west-1.amazonaws.com/021353022223/ophan-data-lake-CODE-erasure-Queue-GRLOB6EAD0O9.fifo",
         MessageBody: JSON.stringify(message),
+        MessageGroupId: "erasure"
     });
     const response = await client.send(command);
     console.debug(`Response from message send was ${JSON.stringify({
