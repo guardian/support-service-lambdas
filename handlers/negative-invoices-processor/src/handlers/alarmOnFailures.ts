@@ -11,7 +11,7 @@ export const handler = async (event: AlarmOnFailuresInput) => {
 			'Error parsing event to type: AlarmOnFailuresInput',
 		);
 
-		const failureDetected = await failuresExist(
+		const failureDetected = await failureExistsOnInvoiceProcessingAttempt(
 			parsedEvent.processedInvoices,
 			parsedEvent.s3UploadAttemptStatus,
 		);
@@ -28,7 +28,7 @@ export const handler = async (event: AlarmOnFailuresInput) => {
 	return {};
 };
 
-export const failuresExist = async (
+export const failureExistsOnInvoiceProcessingAttempt = async (
 	processedInvoices: ProcessedInvoice[],
 	s3UploadAttemptStatus: string,
 ): Promise<boolean> => {
@@ -36,17 +36,23 @@ export const failuresExist = async (
 		return true;
 	}
 
-	return processedInvoices.some((invoice) => {
-		const {
-			applyCreditToAccountBalanceAttempt,
-			checkForActiveSubAttempt,
-			checkForActivePaymentMethodAttempt,
-		} = invoice;
-
-		return (
-			!applyCreditToAccountBalanceAttempt.Success ||
-			!checkForActiveSubAttempt?.Success ||
-			!checkForActivePaymentMethodAttempt?.Success
-		);
-	});
+	return processedInvoices.some((invoice) =>
+		invoiceHasAtLeastOneProcessingFailure(invoice),
+	);
 };
+
+function invoiceHasAtLeastOneProcessingFailure(
+	invoice: ProcessedInvoice,
+): boolean {
+	const {
+		applyCreditToAccountBalanceAttempt,
+		checkForActiveSubAttempt,
+		checkForActivePaymentMethodAttempt,
+	} = invoice;
+
+	return (
+		!applyCreditToAccountBalanceAttempt.Success ||
+		!checkForActiveSubAttempt?.Success ||
+		!checkForActivePaymentMethodAttempt?.Success
+	);
+}
