@@ -28,9 +28,3 @@ deployments:
         - negative-invoices-processor-save-results-
         - negative-invoices-processor-detect-failures-
     dependencies: [negative-invoices-processor-cloudformation]
-continuousDeployment:
-  enabled: true
-  stages: [CODE]
-  filters:
-    - branch: main
-    - buildStatus: success
