@@ -3,14 +3,13 @@ import {
 	invoiceHasAtLeastOneProcessingFailure,
 	handler,
 } from '../../src/handlers/detectFailures';
-import type { ProcessedInvoice, AlarmOnFailuresInput } from '../../src/types';
+import type { ProcessedInvoice, DetectFailuresInput } from '../../src/types';
 
-// Mock the validation module
 jest.mock('@modules/validation/index', () => ({
 	validateInput: jest.fn((input) => input),
 }));
 
-describe('alarmOnFailures handler', () => {
+describe('detectFailures handler', () => {
 	describe('invoiceHasAtLeastOneProcessingFailure', () => {
 		it('should return true when applyCreditToAccountBalanceAttempt fails', () => {
 			const invoice: ProcessedInvoice = {
@@ -334,7 +333,7 @@ describe('alarmOnFailures handler', () => {
 
 	describe('handler', () => {
 		it('should not throw when no failures are detected', async () => {
-			const event: AlarmOnFailuresInput = {
+			const event: DetectFailuresInput = {
 				invoicesCount: 1,
 				invoices: [
 					{
@@ -373,7 +372,7 @@ describe('alarmOnFailures handler', () => {
 		});
 
 		it('should throw error when failures are detected', async () => {
-			const event: AlarmOnFailuresInput = {
+			const event: DetectFailuresInput = {
 				invoicesCount: 1,
 				invoices: [
 					{
@@ -414,7 +413,7 @@ describe('alarmOnFailures handler', () => {
 		});
 
 		it('should throw error when s3UploadAttemptStatus is error', async () => {
-			const event: AlarmOnFailuresInput = {
+			const event: DetectFailuresInput = {
 				invoicesCount: 1,
 				invoices: [
 					{
