@@ -6,7 +6,7 @@ import type {
 } from 'aws-lambda';
 import { handler } from '..';
 
-export const invokeHttpRequest = async ({
+export const invokeHttpHandler = async ({
     httpMethod,
     path,
     body,
