@@ -4,7 +4,13 @@ import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
-import { AccountPrincipal, Effect, Policy, PolicyStatement, Role } from 'aws-cdk-lib/aws-iam';
+import {
+	AccountPrincipal,
+	Effect,
+	Policy,
+	PolicyStatement,
+	Role,
+} from 'aws-cdk-lib/aws-iam';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { SrLambdaDomain } from './cdk/sr-lambda-domain';
 import { nodeVersion } from './node-version';
@@ -119,7 +125,7 @@ export class MParticleApi extends GuStack {
 						resources: [lambda.functionArn],
 					}),
 				],
-			})
+			}),
 		);
 	}
 }
