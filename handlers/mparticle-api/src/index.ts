@@ -72,7 +72,7 @@ export const handler: Handler = async (
 
 		// If it might be an HTTP event without proper structure, try to handle gracefully
 		if (event.httpMethod || event.path) {
-			console.log('Attempting to process as malformed API Gateway event');
+			console.log('Attempted to process as malformed API Gateway event');
 			return {
 				statusCode: 400,
 				body: JSON.stringify({ error: 'Malformed API Gateway event' }),
