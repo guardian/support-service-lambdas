@@ -1,8 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
-import type {
-	DataSubjectRequestState,
-	DataSubjectRequestStatus,
-} from '../../interfaces/data-subject-request-state';
+import type { DataSubjectRequestState } from '../../interfaces/data-subject-request-state';
+import { DataSubjectRequestStatus } from '../../interfaces/data-subject-request-state';
 import type { DataSubjectRequestSubmission } from '../../interfaces/data-subject-request-submission';
 import {
 	getStatusOfDataSubjectRequest,
