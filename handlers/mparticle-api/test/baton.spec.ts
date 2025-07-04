@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
+import type { BatonRerEventInitiateResponse } from '../src/routers/baton';
 import type { AppConfig } from '../src/utils/config';
 import { invokeBatonRerHandler } from '../src/utils/invoke-baton-rer-handler';
-import { BatonRerEventInitiateResponse } from '../src/routers/baton';
 
 jest.mock('../src/utils/config', () => ({
     getAppConfig: jest.fn().mockResolvedValue({

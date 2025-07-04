@@ -3,7 +3,7 @@ import type {
     Context
 } from 'aws-lambda';
 import { handler } from '..';
-import { BatonRerEventRequest, BatonRerEventResponse } from '../routers/baton';
+import type { BatonRerEventRequest, BatonRerEventResponse } from '../routers/baton';
 
 export const invokeBatonRerHandler = async (event: BatonRerEventRequest): Promise<BatonRerEventResponse> => {
     const result: unknown = await handler(event, {} as Context, (() => { }) as Callback<unknown>);

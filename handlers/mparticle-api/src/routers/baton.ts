@@ -1,9 +1,9 @@
-import { DataSubjectRequestState, DataSubjectRequestStatus } from "../../interfaces/data-subject-request-state";
-import { DataSubjectRequestSubmission } from "../../interfaces/data-subject-request-submission";
+import { v4 as uuidv4 } from 'uuid';
+import type { DataSubjectRequestState, DataSubjectRequestStatus } from "../../interfaces/data-subject-request-state";
+import type { DataSubjectRequestSubmission } from "../../interfaces/data-subject-request-submission";
 import { getStatusOfDataSubjectRequest, submitDataSubjectRequest } from "../apis/data-subject-requests";
 import { setUserAttributesForRightToErasureRequest } from "../apis/events";
 import { getEnv } from "../utils/config";
-import { v4 as uuidv4 } from 'uuid';
 
 // https://github.com/guardian/baton/blob/1037c63c9bd782aed514bf6aaa38a54dabf699eb/README.md
 interface BatonRerEventRequestBase {
