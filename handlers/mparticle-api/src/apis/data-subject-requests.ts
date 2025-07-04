@@ -147,10 +147,10 @@ export const getStatusOfDataSubjectRequest = async (requestId: string): Promise<
  * @param {DataSubjectRequestCallback} payload - The data containing the data subject request state details.
  * @returns Confirmation message and timestamp
  */
-export const processDataSubjectRequestCallback = async (requestId: string, payload: DataSubjectRequestCallback): Promise<{
+export const processDataSubjectRequestCallback = (requestId: string, payload: DataSubjectRequestCallback): {
     message: string;
     timestamp: Date;
-}> => {
+} => {
     // Just log this information so we can have track of it on Cloud Watch
     console.info("Process Data Subject Request Callback from mParticle", {
         requestId,

@@ -32,7 +32,7 @@ describe('mparticle-api Baton tests', () => {
     });
 
 
-    it('Create Data Subject Request', async () => {
+    it('Initiate Right to Erasure Request', async () => {
         const requestId = faker.string.uuid();
         const submittedTime = new Date();
         const mockSetUserAttributesResponse = {
@@ -75,7 +75,7 @@ describe('mparticle-api Baton tests', () => {
         expect(body.requestId).toEqual(requestId);
     });
 
-    it('Get Data Subject Request by Id', async () => {
+    it('Get Right to Erasure Request Status', async () => {
         const requestId = faker.string.uuid();
         const mockGetSubjectRequestByIdResponse = {
             ok: true,

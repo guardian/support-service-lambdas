@@ -1,5 +1,5 @@
-import { getIfDefined } from '@modules/nullAndUndefined';
 import { loadConfig } from '@modules/aws/appConfig';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import { z } from 'zod';
 
 export const ConfigSchema = z.object({

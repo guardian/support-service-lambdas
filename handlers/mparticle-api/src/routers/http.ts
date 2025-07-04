@@ -70,7 +70,7 @@ export const httpRouter = new Router([
             })
         }
     }),
-    createRoute<{ requestId: string; }, unknown>({
+    createRoute<{ requestId: string }, unknown>({
         httpMethod: 'GET',
         path: '/data-subject-requests/{requestId}',
         handler: routerHandler(async (event, parsed) => {
@@ -85,7 +85,7 @@ export const httpRouter = new Router([
             })
         }
     }),
-    createRoute<{ requestId: string; }, DataSubjectRequestCallback>({
+    createRoute<{ requestId: string }, DataSubjectRequestCallback>({
         httpMethod: 'POST',
         path: '/data-subject-requests/{requestId}/callback',
         handler: routerHandler(async (event, parsed) => {
@@ -100,7 +100,7 @@ export const httpRouter = new Router([
 
             return {
                 statusCode: 202,
-                body: JSON.stringify(await processDataSubjectRequestCallback(parsed.path.requestId, parsed.body))
+                body: JSON.stringify(processDataSubjectRequestCallback(parsed.path.requestId, parsed.body))
             };
         }),
         parser: {

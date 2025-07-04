@@ -5,7 +5,7 @@ import type {
     Handler,
 } from 'aws-lambda';
 import { httpRouter } from './routers/http';
-import { BatonRerEventRequest } from './routers/baton';
+import { BatonRerEventRequest, BatonRerEventResponse, batonRerRouter } from './routers/baton';
 
 // Type guard to check if event is API Gateway
 function isAPIGatewayEvent(event: any): event is APIGatewayProxyEvent {
@@ -27,7 +27,6 @@ async function handleHttpRequest(
     context: Context
 ): Promise<APIGatewayProxyResult> {
     try {
-        // Your HTTP routing logic here
         return httpRouter.routeRequest(event);
     } catch (error) {
         console.error('HTTP handler error:', error);
@@ -42,10 +41,9 @@ async function handleHttpRequest(
 async function handleBatonRerEvent(
     event: BatonRerEventRequest,
     context: Context
-): Promise<void> {
+): Promise<BatonRerEventResponse> {
     try {
-        console.log(`Processing Baton RER event`, event);
-
+        return batonRerRouter.routeRequest(event);
     } catch (error) {
         console.error('Baton RER handler error:', error);
         throw error; // Re-throw to trigger Lambda retry mechanism
@@ -55,7 +53,7 @@ async function handleBatonRerEvent(
 export const handler: Handler = async (
     event: APIGatewayProxyEvent | BatonRerEventRequest | any,
     context: Context
-): Promise<APIGatewayProxyResult | void> => {
+): Promise<APIGatewayProxyResult | BatonRerEventResponse> => {
     if (isAPIGatewayEvent(event)) {
         console.debug('Processing as API Gateway event');
         return handleHttpRequest(event, context);

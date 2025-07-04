@@ -30,3 +30,16 @@ export type BatonRerEventResponse =
         status: "pending" | "completed" | "failed";
         message?: string;
     };
+
+export const batonRerRouter = {
+    routeRequest: async (event: BatonRerEventRequest): Promise<BatonRerEventResponse> => {
+        await Promise.resolve(true);
+        console.log(event);
+        return {
+            requestType: "RER",
+            action: "initiate",
+            status: 'pending',
+            initiationReference: '123'
+        };
+    }
+}
