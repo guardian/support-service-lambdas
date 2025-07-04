@@ -186,6 +186,11 @@ describe('mparticle-api API tests', () => {
 			body: JSON.stringify({
 				controller_id: '1402',
 				expected_completion_time: '2025-06-09T00:00:00Z',
+				/**
+				 * This url is meaningful url since the whole request has
+				 * to match the header signature on 'x-opendsr-signature'
+				 * for proper validation.
+				 */
 				status_callback_url:
 					'https://webhook.site/6dfd0447-e1f9-4a98-a391-25481898763b',
 				subject_request_id: requestId,
