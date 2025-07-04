@@ -1,7 +1,7 @@
 {
   "name": "mparticle-api",
   "scripts": {
-    "test": "jest --group=-integration",
+    "test": "jest --group=-integration --silent",
     "it-test": "jest --group=integration",
     "type-check": "tsc --noEmit",
     "build": "esbuild --bundle --platform=node --target=node18 --outfile=target/index.js src/index.ts",

@@ -14,7 +14,7 @@ function isAPIGatewayEvent(event: any): event is APIGatewayProxyEvent {
         typeof event.path === 'string';
 }
 
-// Type guard to check if event is S3
+// Type guard to check if event is Baton RER
 function isBatonRerEvent(event: any): event is BatonRerEventRequest {
     return event &&
         event.requestType &&
@@ -38,7 +38,7 @@ async function handleHttpRequest(
     }
 }
 
-// S3 event handler function
+// Baton RER event handler function
 async function handleBatonRerEvent(
     event: BatonRerEventRequest,
     context: Context
@@ -56,14 +56,12 @@ export const handler: Handler = async (
     event: APIGatewayProxyEvent | BatonRerEventRequest | any,
     context: Context
 ): Promise<APIGatewayProxyResult | void> => {
-    console.log('Event received:', JSON.stringify(event, null, 2));
-
     if (isAPIGatewayEvent(event)) {
-        console.log('Processing as API Gateway event');
+        console.debug('Processing as API Gateway event');
         return handleHttpRequest(event, context);
     }
     else if (isBatonRerEvent(event)) {
-        console.log('Processing as Baton RER event');
+        console.debug('Processing as Baton RER event');
         return handleBatonRerEvent(event, context);
     }
     else {
