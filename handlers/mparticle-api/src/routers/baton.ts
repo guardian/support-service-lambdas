@@ -1,5 +1,6 @@
+import { DataSubjectRequestState, DataSubjectRequestStatus } from "../../interfaces/data-subject-request-state";
 import { DataSubjectRequestSubmission } from "../../interfaces/data-subject-request-submission";
-import { submitDataSubjectRequest } from "../apis/data-subject-requests";
+import { getStatusOfDataSubjectRequest, submitDataSubjectRequest } from "../apis/data-subject-requests";
 import { setUserAttributesForRightToErasureRequest } from "../apis/events";
 import { getEnv } from "../utils/config";
 import { v4 as uuidv4 } from 'uuid';
@@ -74,10 +75,24 @@ async function handleInitiateRequest(request: BatonRerEventInitiateRequest): Pro
 }
 
 async function handleStatusRequest(request: BatonRerEventStatusRequest): Promise<BatonRerEventStatusResponse> {
+    const mapStatus = (requestStatus: DataSubjectRequestStatus): "pending" | "completed" | "failed" => {
+        switch (requestStatus) {
+            case DataSubjectRequestStatus.Pending:
+            case DataSubjectRequestStatus.InProgress:
+                return "pending";
+            case DataSubjectRequestStatus.Completed:
+            case DataSubjectRequestStatus.Cancelled:
+                return "completed";
+            default:
+                return "failed";
+        };
+    }
+
+    const dataSubjectRequestState: DataSubjectRequestState = await getStatusOfDataSubjectRequest(request.initiationReference);
     return {
         requestType: "RER",
         action: "status",
-        status: 'pending',
+        status: mapStatus(dataSubjectRequestState.requestStatus)
     };
 }
 

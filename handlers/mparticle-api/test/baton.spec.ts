@@ -1,7 +1,5 @@
 import { faker } from '@faker-js/faker';
-import type { DataSubjectRequestState } from '../interfaces/data-subject-request-state';
 import type { AppConfig } from '../src/utils/config';
-import { invokeHttpHandler } from '../src/utils/invoke-http-handler';
 import { invokeBatonRerHandler } from '../src/utils/invoke-baton-rer-handler';
 import { BatonRerEventInitiateResponse } from '../src/routers/baton';
 
@@ -17,7 +15,7 @@ jest.mock('../src/utils/config', () => ({
         },
         pod: 'EU1'
     } as AppConfig),
-    getEnv: jest.fn(()=> "CODE")
+    getEnv: jest.fn(() => "CODE")
 }));
 
 describe('mparticle-api Baton tests', () => {
@@ -86,17 +84,16 @@ describe('mparticle-api Baton tests', () => {
         };
         (global.fetch as jest.Mock).mockResolvedValueOnce(mockGetSubjectRequestByIdResponse);
 
-        const result = await invokeHttpHandler({
-            httpMethod: 'GET',
-            path: `/data-subject-requests/${requestId}`,
-        })
+        const result = await invokeBatonRerHandler({
+            requestType: 'RER',
+            action: "status",
+            initiationReference: requestId
+        });
 
         expect(result).toBeDefined();
-        expect(result.statusCode).toBeDefined();
-        expect(result.statusCode).toEqual(200);
-
-        const body = JSON.parse(result.body) as DataSubjectRequestState;
-        expect(body.requestId).toEqual(requestId);
-        expect(body.requestStatus).toEqual("in-progress");
+        expect(result.requestType).toEqual("RER");
+        expect(result.action).toEqual("status");
+        expect(result.status).toEqual("pending");
+        expect(global.fetch).toHaveBeenCalledTimes(1);
     });
 });
