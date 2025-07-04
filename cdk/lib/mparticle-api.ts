@@ -2,9 +2,15 @@ import { GuApiGatewayWithLambdaByPath } from '@guardian/cdk';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
-import { type App, CfnOutput, Duration } from 'aws-cdk-lib';
+import { type App, Duration } from 'aws-cdk-lib';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
-import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import {
+	AccountPrincipal,
+	Effect,
+	Policy,
+	PolicyStatement,
+	Role,
+} from 'aws-cdk-lib/aws-iam';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { SrLambdaDomain } from './cdk/sr-lambda-domain';
 import { nodeVersion } from './node-version';
@@ -105,15 +111,21 @@ export class MParticleApi extends GuStack {
 			restApi: apiGateway.api,
 		});
 
-		/**
-		 * Export Lambda role ARN for cross-account queue access.
-		 * The SQS queue policy in account "Ophan" imports this ARN
-		 * to grant this Lambda sqs:SendMessage permissions to the erasure queue
-		 */
-		new CfnOutput(this, 'MParticleLambdaRoleArn', {
-			value: lambda.role!.roleArn,
-			description: 'ARN of the mParticle Lambda execution role',
-			exportName: `${app}-${this.stage}-lambda-role-arn`,
+		// Add Baton invoke role
+		const batonInvokeRole = new Role(this, 'BatonInvokeRole', {
+			roleName: `baton-mparticle-lambda-role-${this.stage}`,
+			assumedBy: new AccountPrincipal('029312801662'),
 		});
+		batonInvokeRole.attachInlinePolicy(
+			new Policy(this, 'BatonRunLambdaPolicy', {
+				statements: [
+					new PolicyStatement({
+						effect: Effect.ALLOW,
+						actions: ['lambda:InvokeFunction'],
+						resources: [lambda.functionArn],
+					}),
+				],
+			}),
+		);
 	}
 }

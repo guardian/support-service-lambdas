@@ -11,18 +11,6 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
     "gu:cdk:version": "TEST",
   },
   "Outputs": {
-    "MParticleLambdaRoleArn": {
-      "Description": "ARN of the mParticle Lambda execution role",
-      "Export": {
-        "Name": "mparticle-api-CODE-lambda-role-arn",
-      },
-      "Value": {
-        "Fn::GetAtt": [
-          "mparticleapilambdaServiceRoleCE7702E6",
-          "Arn",
-        ],
-      },
-    },
     "RestApiEndpoint0551178A": {
       "Value": {
         "Fn::Join": [
@@ -58,6 +46,79 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
+    "BatonInvokeRoleF250FA62": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":iam::029312801662:root",
+                    ],
+                  ],
+                },
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "RoleName": "baton-mparticle-lambda-role-CODE",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "BatonRunLambdaPolicy3DD40598": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "mparticleapilambdaD503F5B2",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "BatonRunLambdaPolicy3DD40598",
+        "Roles": [
+          {
+            "Ref": "BatonInvokeRoleF250FA62",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "MparticleApiDnsRecord": {
       "Properties": {
         "Comment": "CNAME for mparticle-api API CODE",
@@ -678,18 +739,6 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
     "gu:cdk:version": "TEST",
   },
   "Outputs": {
-    "MParticleLambdaRoleArn": {
-      "Description": "ARN of the mParticle Lambda execution role",
-      "Export": {
-        "Name": "mparticle-api-PROD-lambda-role-arn",
-      },
-      "Value": {
-        "Fn::GetAtt": [
-          "mparticleapilambdaServiceRoleCE7702E6",
-          "Arn",
-        ],
-      },
-    },
     "RestApiEndpoint0551178A": {
       "Value": {
         "Fn::Join": [
@@ -725,6 +774,79 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
+    "BatonInvokeRoleF250FA62": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":iam::029312801662:root",
+                    ],
+                  ],
+                },
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "RoleName": "baton-mparticle-lambda-role-PROD",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "BatonRunLambdaPolicy3DD40598": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "mparticleapilambdaD503F5B2",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "BatonRunLambdaPolicy3DD40598",
+        "Roles": [
+          {
+            "Ref": "BatonInvokeRoleF250FA62",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "MParticleApiGateway5XXAlarmB411067F": {
       "Properties": {
         "ActionsEnabled": true,

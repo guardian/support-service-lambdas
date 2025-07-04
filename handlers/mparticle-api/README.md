@@ -46,9 +46,6 @@ This project implements an AWS Lambda function (written in TypeScript) that inte
 - **Build:**  
   `pnpm --filter mparticle-api build`
 
-- **Run locally:**  
-  Use `npm run run-local -- --file=path/to/request.json` to invoke the lambda locally with a test event.
-
 - **Unit tests:**  
   Run `pnpm --filter mparticle-api test` to execute all tests for this lambda.
 
