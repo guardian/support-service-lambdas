@@ -20,14 +20,13 @@ export type BatonRerEventResponse =
         requestType: "RER";
         action: "initiate";
         status: "pending" | "completed" | "failed";
+        message?: string;
         // Initiate properties
         initiationReference: string;
-        message?: string;
     }
     | {
         requestType: "RER";
         action: "status";
         status: "pending" | "completed" | "failed";
-        // Status properties
         message?: string;
     };
