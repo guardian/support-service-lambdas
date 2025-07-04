@@ -3,9 +3,9 @@ import type {
     APIGatewayProxyResult,
     Context,
     Handler,
-    S3Event,
 } from 'aws-lambda';
 import { httpRouter } from './routers/http';
+import { BatonRerEventRequest } from './routers/baton';
 
 // Type guard to check if event is API Gateway
 function isAPIGatewayEvent(event: any): event is APIGatewayProxyEvent {
@@ -15,12 +15,10 @@ function isAPIGatewayEvent(event: any): event is APIGatewayProxyEvent {
 }
 
 // Type guard to check if event is S3
-function isS3Event(event: any): event is S3Event {
+function isBatonRerEvent(event: any): event is BatonRerEventRequest {
     return event &&
-        event.Records &&
-        Array.isArray(event.Records) &&
-        event.Records.length > 0 &&
-        event.Records[0].eventSource === 'aws:s3';
+        event.requestType &&
+        event.requestType.toUpperCase() === "RER"
 }
 
 // HTTP handler function
@@ -41,29 +39,21 @@ async function handleHttpRequest(
 }
 
 // S3 event handler function
-async function handleS3Event(
-    event: S3Event,
+async function handleBatonRerEvent(
+    event: BatonRerEventRequest,
     context: Context
 ): Promise<void> {
     try {
-        // Your S3 event processing logic here
-        for (const record of event.Records) {
-            const bucketName = record.s3.bucket.name;
-            const objectKey = record.s3.object.key;
+        console.log(`Processing Baton RER event`, event);
 
-            console.log(`Processing S3 object: ${objectKey} from bucket: ${bucketName}`);
-
-            // Add your S3 processing logic here
-            // Example: process file, trigger other services, etc.
-        }
     } catch (error) {
-        console.error('S3 handler error:', error);
+        console.error('Baton RER handler error:', error);
         throw error; // Re-throw to trigger Lambda retry mechanism
     }
 }
 
 export const handler: Handler = async (
-    event: APIGatewayProxyEvent | S3Event | any,
+    event: APIGatewayProxyEvent | BatonRerEventRequest | any,
     context: Context
 ): Promise<APIGatewayProxyResult | void> => {
     console.log('Event received:', JSON.stringify(event, null, 2));
@@ -72,9 +62,9 @@ export const handler: Handler = async (
         console.log('Processing as API Gateway event');
         return handleHttpRequest(event, context);
     }
-    else if (isS3Event(event)) {
-        console.log('Processing as S3 event');
-        return handleS3Event(event, context);
+    else if (isBatonRerEvent(event)) {
+        console.log('Processing as Baton RER event');
+        return handleBatonRerEvent(event, context);
     }
     else {
         // Handle other event types or unknown events
