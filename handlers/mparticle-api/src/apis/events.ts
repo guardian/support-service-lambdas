@@ -62,6 +62,20 @@ export const uploadAnEventBatch = async (batch: EventBatch): Promise<object> => 
     return {};
 };
 
+export const setUserAttributesForRightToErasureRequest = async (environment: 'production' | 'development', userId: string, submittedTime: string): Promise<object> => {
+    return uploadAnEventBatch({
+        userAttributes: {
+            "dsr_erasure_requested": true,
+            "dsr_erasure_status": "requested",
+            "dsr_erasure_date": submittedTime
+        },
+        userIdentities: {
+            "customer_id": userId
+        },
+        environment: environment
+    });
+};
+
 export {
     requestEventsApi
 };

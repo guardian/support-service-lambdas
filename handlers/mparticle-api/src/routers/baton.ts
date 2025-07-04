@@ -1,45 +1,93 @@
-// https://github.com/guardian/baton/blob/1037c63c9bd782aed514bf6aaa38a54dabf699eb/README.md
-export type BatonRerEventRequest =
-    | {
-        requestType: "RER";
-        action: "initiate";
-        // Initiate properties
-        subjectId: string;
-        subjectEmail?: string;
-        dataProvider: "mparticlerer";
-    }
-    | {
-        requestType: "RER";
-        action: "status";
-        // Status properties
-        initiationReference: string;
-    };
+import { DataSubjectRequestSubmission } from "../../interfaces/data-subject-request-submission";
+import { submitDataSubjectRequest } from "../apis/data-subject-requests";
+import { setUserAttributesForRightToErasureRequest } from "../apis/events";
+import { getEnv } from "../utils/config";
+import { v4 as uuidv4 } from 'uuid';
 
-export type BatonRerEventResponse =
-    | {
-        requestType: "RER";
-        action: "initiate";
-        status: "pending" | "completed" | "failed";
-        message?: string;
-        // Initiate properties
-        initiationReference: string;
+// https://github.com/guardian/baton/blob/1037c63c9bd782aed514bf6aaa38a54dabf699eb/README.md
+interface BatonRerEventRequestBase {
+    requestType: "RER";
+}
+
+interface BatonRerEventInitiateRequest extends BatonRerEventRequestBase {
+    action: "initiate";
+    subjectId: string;
+    subjectEmail?: string;
+    dataProvider: "mparticlerer";
+}
+
+interface BatonRerEventStatusRequest extends BatonRerEventRequestBase {
+    action: "status";
+    initiationReference: string;
+}
+
+export type BatonRerEventRequest = BatonRerEventInitiateRequest | BatonRerEventStatusRequest;
+
+interface BatonRerEventResponseBase {
+    requestType: "RER";
+    status: "pending" | "completed" | "failed";
+    message?: string;
+}
+
+export interface BatonRerEventInitiateResponse extends BatonRerEventResponseBase {
+    action: "initiate";
+    initiationReference: string;
+}
+
+export interface BatonRerEventStatusResponse extends BatonRerEventResponseBase {
+    action: "status";
+}
+
+export type BatonRerEventResponse = BatonRerEventInitiateResponse | BatonRerEventStatusResponse;
+
+async function handleInitiateRequest(request: BatonRerEventInitiateRequest): Promise<BatonRerEventInitiateResponse> {
+    const submittedTime = new Date().toISOString();
+    const environment = getEnv('STAGE') === "PROD" ? 'production' : 'development';
+
+    /**
+     * If you wish to remove users from audiences or from event forwarding during the waiting period,
+     * set a user attribute and apply audience criteria and/or forwarding rules to exclude them.
+     * https://docs.mparticle.com/guides/data-subject-requests/#erasure-request-waiting-period
+     */
+    try {
+        await setUserAttributesForRightToErasureRequest(environment, request.subjectId, submittedTime);
+    } catch (error) {
+        console.warn("It was not possible to set the User Attribute to remove user from audiences or from event forwarding during the waiting period.", error)
     }
-    | {
-        requestType: "RER";
-        action: "status";
-        status: "pending" | "completed" | "failed";
-        message?: string;
+
+    // Submit
+    const dataSubjectRequestSubmission: DataSubjectRequestSubmission = await submitDataSubjectRequest({
+        regulation: 'gdpr',
+        requestId: uuidv4(),
+        requestType: 'erasure',
+        submittedTime,
+        userId: request.subjectId,
+        environment
+    })
+    return {
+        requestType: "RER",
+        action: "initiate",
+        status: 'pending',
+        initiationReference: dataSubjectRequestSubmission.requestId,
+        message: `Expected completion time: ${dataSubjectRequestSubmission.expectedCompletionTime.toISOString()}`
     };
+}
+
+async function handleStatusRequest(request: BatonRerEventStatusRequest): Promise<BatonRerEventStatusResponse> {
+    return {
+        requestType: "RER",
+        action: "status",
+        status: 'pending',
+    };
+}
 
 export const batonRerRouter = {
     routeRequest: async (event: BatonRerEventRequest): Promise<BatonRerEventResponse> => {
-        await Promise.resolve(true);
-        console.log(event);
-        return {
-            requestType: "RER",
-            action: "initiate",
-            status: 'pending',
-            initiationReference: '123'
-        };
+        switch (event.action) {
+            case "initiate":
+                return handleInitiateRequest(event);
+            case "status":
+                return handleStatusRequest(event);
+        }
     }
 }

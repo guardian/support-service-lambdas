@@ -1,8 +1,9 @@
 import { faker } from '@faker-js/faker';
 import type { DataSubjectRequestState } from '../interfaces/data-subject-request-state';
-import type { DataSubjectRequestSubmission } from '../interfaces/data-subject-request-submission';
 import type { AppConfig } from '../src/utils/config';
 import { invokeHttpHandler } from '../src/utils/invoke-http-handler';
+import { invokeBatonRerHandler } from '../src/utils/invoke-baton-rer-handler';
+import { BatonRerEventInitiateResponse } from '../src/routers/baton';
 
 jest.mock('../src/utils/config', () => ({
     getAppConfig: jest.fn().mockResolvedValue({
@@ -53,26 +54,21 @@ describe('mparticle-api Baton tests', () => {
             .mockResolvedValueOnce(mockSetUserAttributesResponse)
             .mockResolvedValueOnce(mockCreateDataSubjectRequestResponse);
 
-        const result = await invokeHttpHandler({
-            httpMethod: 'POST',
-            path: '/data-subject-requests',
-            body: JSON.stringify({
-                regulation: "gdpr",
-                requestId,
-                requestType: "erasure",
-                submittedTime,
-                userId: faker.string.alphanumeric(),
-                environment: "development",
-            })
+        const userId = faker.string.alphanumeric();
+        const result = await invokeBatonRerHandler({
+            requestType: 'RER',
+            action: 'initiate',
+            subjectId: userId,
+            dataProvider: 'mparticlerer'
         })
 
         expect(result).toBeDefined();
-        expect(result.statusCode).toBeDefined();
-        expect(result.statusCode).toEqual(201);
+        expect(result.requestType).toEqual("RER");
+        expect(result.action).toEqual("initiate");
+        expect(result.status).toEqual("pending");
+        expect((result as BatonRerEventInitiateResponse).initiationReference).toEqual(requestId);
+        expect(result.message).toBeDefined()
         expect(global.fetch).toHaveBeenCalledTimes(2);
-
-        const body = JSON.parse(result.body) as DataSubjectRequestSubmission;
-        expect(body.requestId).toEqual(requestId);
     });
 
     it('Get Right to Erasure Request Status', async () => {

@@ -8,7 +8,7 @@ import type { DataSubjectRequestCallback } from '../../interfaces/data-subject-r
 import type { DataSubjectRequestForm } from '../../interfaces/data-subject-request-form';
 import type { EventBatch } from '../../interfaces/event-batch';
 import { getStatusOfDataSubjectRequest, processDataSubjectRequestCallback, submitDataSubjectRequest } from '../apis/data-subject-requests';
-import { uploadAnEventBatch } from '../apis/events';
+import { setUserAttributesForRightToErasureRequest, uploadAnEventBatch } from '../apis/events';
 import { HttpError } from '../utils/make-http-request';
 import { validateDataSubjectRequestCallback } from '../utils/validate-data-subject-request-callback';
 
@@ -39,17 +39,7 @@ export const httpRouter = new Router([
              * https://docs.mparticle.com/guides/data-subject-requests/#erasure-request-waiting-period
              */
             try {
-                await uploadAnEventBatch({
-                    userAttributes: {
-                        "dsr_erasure_requested": true,
-                        "dsr_erasure_status": "requested",
-                        "dsr_erasure_date": parsed.body.submittedTime
-                    },
-                    userIdentities: {
-                        "customer_id": parsed.body.userId
-                    },
-                    environment: parsed.body.environment
-                });
+                await setUserAttributesForRightToErasureRequest(parsed.body.environment, parsed.body.userId, parsed.body.submittedTime);
             } catch (error) {
                 console.warn("It was not possible to set the User Attribute to remove user from audiences or from event forwarding during the waiting period.", error)
             }
