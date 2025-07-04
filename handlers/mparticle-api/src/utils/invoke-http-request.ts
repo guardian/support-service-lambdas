@@ -1,4 +1,3 @@
-// test-local.ts
 import type {
     APIGatewayProxyEvent,
     APIGatewayProxyEventHeaders,
@@ -7,7 +6,7 @@ import type {
 } from 'aws-lambda';
 import { handler } from '..';
 
-export const run = async ({
+export const invokeHttpRequest = async ({
     httpMethod,
     path,
     body,

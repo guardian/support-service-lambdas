@@ -3,9 +3,9 @@ import type { DataSubjectRequestForm } from "../../interfaces/data-subject-reque
 import type { DataSubjectRequestState } from "../../interfaces/data-subject-request-state";
 import { DataSubjectRequestStatus } from "../../interfaces/data-subject-request-state";
 import type { DataSubjectRequestSubmission } from "../../interfaces/data-subject-request-submission";
-import { getAppConfig, getEnv } from '../config';
-import { makeHttpRequest } from "../http";
-import type { HttpResponse } from "../http";
+import { getAppConfig, getEnv } from '../utils/config';
+import { makeHttpRequest } from "../utils/make-http-request";
+import type { HttpResponse } from "../utils/make-http-request";
 
 function parseDataSubjectRequestStatus(status: 'pending' | 'in_progress' | 'completed' | 'cancelled'): DataSubjectRequestStatus {
     switch (status) {

@@ -1,7 +1,7 @@
 import type { EventBatch } from '../../interfaces/event-batch';
-import { getAppConfig } from '../config';
-import type { HttpResponse } from "../http";
-import { makeHttpRequest } from "../http";
+import { getAppConfig } from '../utils/config';
+import type { HttpResponse } from "../utils/make-http-request";
+import { makeHttpRequest } from "../utils/make-http-request";
 
 async function requestEventsApi<T>(url: string, options: {
     method?: 'POST';

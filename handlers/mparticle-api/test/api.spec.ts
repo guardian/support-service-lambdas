@@ -3,10 +3,10 @@ import * as path from 'path';
 import { faker } from '@faker-js/faker';
 import type { DataSubjectRequestState } from '../interfaces/data-subject-request-state';
 import type { DataSubjectRequestSubmission } from '../interfaces/data-subject-request-submission';
-import type { AppConfig } from '../src/config';
-import { run } from '../src/utils/run';
+import type { AppConfig } from '../src/utils/config';
+import { invokeHttpRequest } from '../src/utils/invoke-http-request';
 
-jest.mock('../src/config', () => ({
+jest.mock('../src/utils/config', () => ({
     getAppConfig: jest.fn().mockResolvedValue({
         inputPlatform: {
             key: faker.string.nanoid(),
@@ -40,7 +40,7 @@ describe('mparticle-api API tests', () => {
         };
         (global.fetch as jest.Mock).mockResolvedValueOnce(mockRegisterEventResponse);
 
-        const result = await run({
+        const result = await invokeHttpRequest({
             httpMethod: 'POST',
             path: '/events',
             body: JSON.stringify({
@@ -104,7 +104,7 @@ describe('mparticle-api API tests', () => {
             .mockResolvedValueOnce(mockSetUserAttributesResponse)
             .mockResolvedValueOnce(mockCreateDataSubjectRequestResponse);
 
-        const result = await run({
+        const result = await invokeHttpRequest({
             httpMethod: 'POST',
             path: '/data-subject-requests',
             body: JSON.stringify({
@@ -141,7 +141,7 @@ describe('mparticle-api API tests', () => {
         };
         (global.fetch as jest.Mock).mockResolvedValueOnce(mockGetSubjectRequestByIdResponse);
 
-        const result = await run({
+        const result = await invokeHttpRequest({
             httpMethod: 'GET',
             path: `/data-subject-requests/${requestId}`,
         })
@@ -173,7 +173,7 @@ describe('mparticle-api API tests', () => {
             .mockResolvedValueOnce(mockDiscoveryResponse)
             .mockResolvedValueOnce(mockGetCertificateResponse);
 
-        const result = await run({
+        const result = await invokeHttpRequest({
             httpMethod: 'POST',
             path: `/data-subject-requests/${requestId}/callback`,
             // Do not fake it to match the header signature
