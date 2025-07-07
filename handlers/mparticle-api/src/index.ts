@@ -55,15 +55,9 @@ const router = new Router([
                 console.warn("It was not possible to set the User Attribute to remove user from audiences or from event forwarding during the waiting period.", error)
             }
 
-            // Request for Erasure
-            const domain = event.headers['host'] ?? 'code.dev-theguardian.com'; // e.g., "abc123.lambda-url.region.on.aws" or API Gateway domain
-            const protocol = event.headers['x-forwarded-proto'] ?? 'https';
-            const lambdaDomainUrl = `${protocol}://${domain}`;
-            const requestForErasureResult = await submitDataSubjectRequest(parsed.body, lambdaDomainUrl)
-
             return {
                 statusCode: 201,
-                body: JSON.stringify(requestForErasureResult),
+                body: JSON.stringify(await submitDataSubjectRequest(parsed.body)),
             };
         }),
         parser: {
@@ -96,7 +90,8 @@ const router = new Router([
         httpMethod: 'POST',
         path: '/data-subject-requests/{requestId}/callback',
         handler: routerHandler(async (event, parsed) => {
-            const callbackValidationResult = await validateDataSubjectRequestCallback(event.headers['x-opendsr-processor-domain'], event.headers['x-opendsr-signature'], event.body);
+            const getHeader = (key: string) => Object.entries(event.headers).find(([k]) => k.toLowerCase() === key.toLowerCase())?.[1];
+            const callbackValidationResult = await validateDataSubjectRequestCallback(getHeader('x-opendsr-processor-domain'), getHeader('x-opendsr-signature'), event.body);
             if (!callbackValidationResult) {
                 return {
                     statusCode: 401,

@@ -6,11 +6,11 @@ describe('The mParticle API stack', () => {
 	it('matches the snapshot', () => {
 		const app = new App();
 		const codeStack = new MParticleApi(app, 'mparticle-api-CODE', {
-			stack: 'membership',
+			stack: 'support',
 			stage: 'CODE',
 		});
 		const prodStack = new MParticleApi(app, 'mparticle-api-PROD', {
-			stack: 'membership',
+			stack: 'support',
 			stage: 'PROD',
 		});
 

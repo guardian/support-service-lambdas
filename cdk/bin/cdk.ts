@@ -363,10 +363,10 @@ new SalesforceEventBus(app, 'salesforce-event-bus-PROD', {
 	stage: 'PROD',
 });
 new MParticleApi(app, 'mparticle-api-CODE', {
-	stack: 'membership',
+	stack: 'support',
 	stage: 'CODE',
 });
 new MParticleApi(app, 'mparticle-api-PROD', {
-	stack: 'membership',
+	stack: 'support',
 	stage: 'PROD',
 });
