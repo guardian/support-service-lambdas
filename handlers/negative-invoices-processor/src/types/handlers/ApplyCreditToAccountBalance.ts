@@ -1,13 +1,12 @@
 import { z } from 'zod';
-import { InvoiceSchema, type InvoiceRecord } from '../shared';
+import {
+	InvoiceSchema,
+	type InvoiceRecord,
+	ApplyCreditToAccountBalanceAttemptSchema,
+} from '../shared';
 
 export const ApplyCreditToAccountBalanceInputSchema = InvoiceSchema;
 export type ApplyCreditToAccountBalanceInput = InvoiceRecord;
-
-export const ApplyCreditToAccountBalanceAttemptSchema = z.object({
-	Success: z.boolean(),
-	error: z.string().optional(),
-});
 
 export const ApplyCreditToAccountBalanceOutputSchema =
 	ApplyCreditToAccountBalanceInputSchema.extend({

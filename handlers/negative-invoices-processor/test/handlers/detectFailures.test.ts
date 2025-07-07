@@ -3,7 +3,8 @@ import {
 	handler,
 	invoiceHasAtLeastOneProcessingFailure,
 } from '../../src/handlers/detectFailures';
-import type { DetectFailuresInput, ProcessedInvoice } from '../../src/types';
+import type { DetectFailuresInput } from '../../src/types';
+import type { ProcessedInvoice } from '../../src/types/shared';
 
 jest.mock('@modules/validation/index', () => ({
 	validateInput: jest.fn(<T>(input: T): T => input),

@@ -1,5 +1,9 @@
 import { z } from 'zod';
 import {
+	PaymentMethodSchema,
+	CheckForActivePaymentMethodAttemptSchema,
+} from '../shared';
+import {
 	CheckForActiveSubOutput,
 	CheckForActiveSubOutputSchema,
 } from './CheckForActiveSub';
@@ -7,19 +11,9 @@ import {
 export const GetPaymentMethodsInputSchema = CheckForActiveSubOutputSchema;
 export type GetPaymentMethodsInput = CheckForActiveSubOutput;
 
-export const PaymentMethodSchema = z.object({
-	id: z.string(),
-	status: z.string(),
-	type: z.string(),
-	isDefault: z.boolean(),
-});
+// Re-export PaymentMethodSchema for compatibility
+export { PaymentMethodSchema };
 
-export const CheckForActivePaymentMethodAttemptSchema = z.object({
-	Success: z.boolean(),
-	hasActivePaymentMethod: z.boolean().optional(),
-	activePaymentMethods: z.array(PaymentMethodSchema).optional(),
-	error: z.string().optional(),
-});
 export const GetPaymentMethodsOutputSchema =
 	GetPaymentMethodsInputSchema.extend({
 		checkForActivePaymentMethodAttempt:

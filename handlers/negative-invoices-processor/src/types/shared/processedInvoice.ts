@@ -1,9 +1,10 @@
+import { z } from 'zod';
 import {
 	ApplyCreditToAccountBalanceAttemptSchema,
 	CheckForActiveSubAttemptSchema,
 	CheckForActivePaymentMethodAttemptSchema,
 	RefundAttemptSchema,
-} from '../handlers';
+} from './attemptSchemas';
 import { InvoiceSchema } from './invoiceSchemas';
 
 export const ProcessedInvoiceSchema = InvoiceSchema.extend({
@@ -13,3 +14,5 @@ export const ProcessedInvoiceSchema = InvoiceSchema.extend({
 		CheckForActivePaymentMethodAttemptSchema.optional(),
 	refundAttempt: RefundAttemptSchema.optional(),
 });
+
+export type ProcessedInvoice = z.infer<typeof ProcessedInvoiceSchema>;
