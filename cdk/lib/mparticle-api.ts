@@ -111,7 +111,6 @@ export class MParticleApi extends GuStack {
 			restApi: apiGateway.api,
 		});
 
-		// Add Baton invoke role
 		const batonInvokeRole = new Role(this, 'BatonInvokeRole', {
 			roleName: `baton-mparticle-lambda-role-${this.stage}`,
 			assumedBy: new AccountPrincipal('029312801662'),
