@@ -16,10 +16,13 @@ PACKAGE_NAMES=(
 
 for PACKAGE_NAME in "${PACKAGE_NAMES[@]}"; do
   DEST_DIR="${REPO_ROOT}/handlers/${PACKAGE_NAME}/cdk"
+  echo "⚙️ Generating standard files in: ${DEST_DIR}/"
   mkdir -p "$DEST_DIR"
 
-  sed "s/{{PACKAGE_NAME}}/$PACKAGE_NAME-cdk/g" template.package.json > "${DEST_DIR}/package.json"
-  cp template.gitignore ${DEST_DIR}/.gitignore
-
-  echo "✅ Generated: ${DEST_DIR}/package.json"
+  for FILE in template.*; do
+    BARE_NAME="${FILE#template.}"
+    sed "s/{{PACKAGE_NAME}}/$PACKAGE_NAME-cdk/g" "$FILE" > "${DEST_DIR}/$BARE_NAME"
+    echo "  ✅ Generated ${DEST_DIR}/$BARE_NAME"
+  done
+  echo "✅ Generated standard files in: ${DEST_DIR}/"
 done
