@@ -1,5 +1,8 @@
 import type { ZuoraClient } from './zuoraClient';
-import type { ZuoraPaymentMethodQueryResponse } from './zuoraSchemas';
+import type {
+	PaymentMethod,
+	ZuoraPaymentMethodQueryResponse,
+} from './zuoraSchemas';
 import { zuoraPaymentMethodQueryResponseSchema } from './zuoraSchemas';
 
 export const getPaymentMethods = async (
@@ -12,7 +15,7 @@ export const getPaymentMethods = async (
 
 export const filterActivePaymentMethods = (
 	paymentMethods: ZuoraPaymentMethodQueryResponse,
-): Array<{ id: string; type: string; status: string; isDefault: boolean }> => {
+): PaymentMethod[] => {
 	type PaymentMethodKey =
 		| 'creditcard'
 		| 'creditcardreferencetransaction'
@@ -26,12 +29,7 @@ export const filterActivePaymentMethods = (
 		'paypal',
 	] as const satisfies readonly PaymentMethodKey[];
 
-	const activeMethods: Array<{
-		id: string;
-		type: string;
-		status: string;
-		isDefault: boolean;
-	}> = [];
+	const activeMethods: PaymentMethod[] = [];
 
 	for (const key of keysToCheck) {
 		const methods = paymentMethods[key];
