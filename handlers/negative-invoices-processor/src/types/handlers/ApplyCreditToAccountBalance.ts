@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { InvoiceSchema, type InvoiceRecord } from '../shared';
 
-const ApplyCreditToAccountBalanceInputSchema = InvoiceSchema;
+export const ApplyCreditToAccountBalanceInputSchema = InvoiceSchema;
 export type ApplyCreditToAccountBalanceInput = InvoiceRecord;
 
 export const ApplyCreditToAccountBalanceAttemptSchema = z.object({

@@ -4,6 +4,7 @@ export { GetInvoicesOutputSchema, type GetInvoicesOutput } from './GetInvoices';
 // ApplyCreditToAccountBalance exports
 export {
 	ApplyCreditToAccountBalanceAttemptSchema,
+	ApplyCreditToAccountBalanceInputSchema,
 	ApplyCreditToAccountBalanceOutputSchema,
 	type ApplyCreditToAccountBalanceInput,
 	type ApplyCreditToAccountBalanceOutput,
