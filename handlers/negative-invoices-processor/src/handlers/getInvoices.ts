@@ -2,8 +2,8 @@ import { getSSMParam } from '@modules/aws/ssm';
 import { buildAuthClient, runQuery } from '@modules/bigquery/src/bigquery';
 import { stageFromEnvironment } from '@modules/stage';
 import { CODEDataMockQueryResponse } from '../../test/handlers/data/CODEDataMockQueryResponse';
-import { InvoiceRecordsArraySchema } from '../types/handlerInputsAndOutputs/ApplyCreditToAccountBalance';
-import type { InvoiceRecord } from '../types/handlerInputsAndOutputs/ApplyCreditToAccountBalance';
+import { InvoiceRecordsArraySchema } from '../types/handlerInputsAndOutputs';
+import type { InvoiceRecord } from '../types/handlerInputsAndOutputs';
 
 export const handler = async (): Promise<{
 	invoicesCount: number;
