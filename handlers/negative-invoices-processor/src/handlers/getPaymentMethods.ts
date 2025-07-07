@@ -4,11 +4,11 @@ import {
 	getPaymentMethods,
 } from '@modules/zuora/paymentMethod';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { GetPaymentMethodsInputSchema } from '../types/handlerInputsAndOutputs';
+import { GetPaymentMethodsInputSchema } from '../types/handlers';
 import type {
 	GetPaymentMethodsInput,
 	GetPaymentMethodsOutput,
-} from '../types/handlerInputsAndOutputs';
+} from '../types/handlers';
 
 export const handler = async (
 	event: GetPaymentMethodsInput,

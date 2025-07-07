@@ -2,11 +2,11 @@ import { stageFromEnvironment } from '@modules/stage';
 import { doQuery } from '@modules/zuora/query';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { z } from 'zod';
-import { CheckForActiveSubInputSchema } from '../types/handlerInputsAndOutputs';
+import { CheckForActiveSubInputSchema } from '../types/handlers';
 import type {
 	CheckForActiveSubInput,
 	CheckForActiveSubOutput,
-} from '../types/handlerInputsAndOutputs';
+} from '../types/handlers';
 
 export const handler = async (
 	event: CheckForActiveSubInput,

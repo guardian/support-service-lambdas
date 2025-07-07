@@ -3,11 +3,11 @@ import { doRefund } from '@modules/zuora/refund';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { PaymentMethod } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
-import { DoCreditBalanceRefundInputSchema } from '../types/handlerInputsAndOutputs';
+import { DoCreditBalanceRefundInputSchema } from '../types/handlers';
 import type {
 	DoCreditBalanceRefundInput,
 	DoCreditBalanceRefundOutput,
-} from '../types/handlerInputsAndOutputs';
+} from '../types/handlers';
 
 export const handler = async (
 	event: DoCreditBalanceRefundInput,
