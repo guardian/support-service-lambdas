@@ -3,12 +3,12 @@ import { buildAuthClient, runQuery } from '@modules/bigquery/src/bigquery';
 import { stageFromEnvironment } from '@modules/stage';
 import { CODEDataMockQueryResponse } from '../../test/handlers/data/CODEDataMockQueryResponse';
 import { InvoiceRecordsArraySchema } from '../types/handlerInputsAndOutputs';
-import type { InvoiceRecord } from '../types/handlerInputsAndOutputs';
+import {
+	type InvoiceRecord,
+	GetInvoicesOutput,
+} from '../types/handlerInputsAndOutputs';
 
-export const handler = async (): Promise<{
-	invoicesCount: number;
-	invoices: InvoiceRecord[];
-}> => {
+export const handler = async (): Promise<GetInvoicesOutput> => {
 	try {
 		const records =
 			stageFromEnvironment() === 'PROD'

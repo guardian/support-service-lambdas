@@ -2,7 +2,7 @@ import { getCODEData, getPRODData } from '../../src/handlers/getInvoices';
 import {
 	InvoiceRecordsArraySchema,
 	InvoiceSchema,
-} from '../../src/types/handlerInputsAndOutputs/ApplyCreditToAccountBalance';
+} from '../../src/types/handlerInputsAndOutputs';
 import { CODEDataMockQueryResponse } from './data/CODEDataMockQueryResponse';
 
 describe('getCODEData', () => {

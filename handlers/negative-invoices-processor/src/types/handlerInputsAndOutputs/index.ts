@@ -1,10 +1,17 @@
+// Shared schemas
+export * from '../shared';
+
+// GetInvoices exports
+export {
+	GetInvoicesOutputSchema,
+	type GetInvoicesInput,
+	type GetInvoicesOutput,
+} from './GetInvoices';
+
 // ApplyCreditToAccountBalance exports
 export {
-	InvoiceSchema,
-	InvoiceRecordsArraySchema,
 	ApplyCreditToAccountBalanceAttemptSchema,
 	ApplyCreditToAccountBalanceOutputSchema,
-	type InvoiceRecord,
 	type ApplyCreditToAccountBalanceInput,
 	type ApplyCreditToAccountBalanceOutput,
 } from './ApplyCreditToAccountBalance';

@@ -1,8 +1,6 @@
 import { z } from 'zod';
-import {
-	ApplyCreditToAccountBalanceAttemptSchema,
-	InvoiceSchema,
-} from './ApplyCreditToAccountBalance';
+import { InvoiceSchema } from '../shared';
+import { ApplyCreditToAccountBalanceAttemptSchema } from './ApplyCreditToAccountBalance';
 import { CheckForActiveSubAttemptSchema } from './CheckForActiveSub';
 import { RefundAttemptSchema } from './DoCreditBalanceRefund';
 import { CheckForActivePaymentMethodAttemptSchema } from './GetPaymentMethods';
