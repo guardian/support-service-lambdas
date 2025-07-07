@@ -5,7 +5,6 @@ import com.gu.soft_opt_in_consent_setter.models.SFSubRecordResponse
 import com.gu.soft_opt_in_consent_setter.testData.SFSubscriptionTestData.{subRecord2, subRecord3}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
-import io.circe.generic.auto._
 import io.circe.parser.decode
 import org.scalatest.Inside
 
