@@ -1,8 +1,5 @@
 import { z } from 'zod';
-import {
-	PaymentMethodSchema,
-	CheckForActivePaymentMethodAttemptSchema,
-} from '../shared';
+import { CheckForActivePaymentMethodAttemptSchema } from '../shared';
 import {
 	CheckForActiveSubOutput,
 	CheckForActiveSubOutputSchema,
@@ -10,9 +7,6 @@ import {
 
 export const GetPaymentMethodsInputSchema = CheckForActiveSubOutputSchema;
 export type GetPaymentMethodsInput = CheckForActiveSubOutput;
-
-// Re-export PaymentMethodSchema for compatibility
-export { PaymentMethodSchema };
 
 export const GetPaymentMethodsOutputSchema =
 	GetPaymentMethodsInputSchema.extend({

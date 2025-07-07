@@ -28,7 +28,6 @@ export {
 // GetPaymentMethods exports
 export {
 	GetPaymentMethodsInputSchema,
-	PaymentMethodSchema,
 	GetPaymentMethodsOutputSchema,
 	type GetPaymentMethodsInput,
 	type GetPaymentMethodsOutput,
