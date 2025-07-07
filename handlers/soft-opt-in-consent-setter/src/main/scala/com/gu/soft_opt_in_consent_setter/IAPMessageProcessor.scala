@@ -1,6 +1,6 @@
 package com.gu.soft_opt_in_consent_setter
 
-import com.gu.soft_opt_in_consent_setter.HandlerIAP.{Acquisition, Cancellation, MessageBody, Switch, handleError}
+import com.gu.soft_opt_in_consent_setter.HandlerIAP.{Acquisition, Cancellation, MessageBody, Switch, rethrowError}
 import com.gu.soft_opt_in_consent_setter.models.ConsentsMapping.similarGuardianProducts
 import com.gu.soft_opt_in_consent_setter.models.{ConsentsMapping, SoftOptInConfig, SoftOptInError}
 import com.typesafe.scalalogging.StrictLogging
@@ -56,7 +56,7 @@ class IAPMessageProcessor(
     emitIdentityMetric(result)
 
     result match {
-      case Left(e) => handleError(e)
+      case Left(e) => rethrowError(e)
       case Right(_) =>
         dynamoConnector.updateLoggingTable(message.subscriptionId, message.identityId, message.eventType) match {
           case Success(_) =>
@@ -86,7 +86,7 @@ object IAPMessageProcessor extends StrictLogging {
     } yield new IAPMessageProcessor(sfConnector, identityConnector, consentsCalculator, mpapiConnector, dynamoConnector)
 
     clients match {
-      case Left(error) => handleError(error)
+      case Left(error) => rethrowError(error)
       case Right(x) =>
         logger.info("Setup successful")
         x

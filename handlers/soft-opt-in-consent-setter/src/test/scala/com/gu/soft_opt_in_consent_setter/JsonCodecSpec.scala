@@ -1,20 +1,15 @@
 package com.gu.soft_opt_in_consent_setter
 
-import com.gu.soft_opt_in_consent_setter.HandlerIAP.{
-  Acquisition,
-  Cancellation,
-  MessageBody,
-  UserConsentsOverrides,
-  WireMessageBody,
-}
+import com.gu.soft_opt_in_consent_setter.HandlerIAP.{Acquisition, UserConsentsOverrides, WireMessageBody}
 import com.gu.soft_opt_in_consent_setter.models.SFSubRecordResponse
 import com.gu.soft_opt_in_consent_setter.testData.SFSubscriptionTestData.{subRecord2, subRecord3}
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should
 import io.circe.parser.decode
 import org.scalatest.Inside
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should
 
 import scala.io.Source
+import scala.util.{Failure, Success}
 
 class JsonCodecSpec extends AnyFlatSpec with should.Matchers with Inside {
   it should "JSON Decoding: decodes SF_Subscription__c correctly" in {
@@ -86,32 +81,34 @@ class JsonCodecSpec extends AnyFlatSpec with should.Matchers with Inside {
     }
   }
 
-  "parseMessages" should "drop messages with no identityId" in {
-    val testDataNoIdentityId =
-      """{
-        |    "subscriptionId": "A-S000",
-        |    "identityId": null,
-        |    "eventType": "Acquisition",
-        |    "productName": "SUPPORTER_PLUS",
-        |    "previousProductName": null,
-        |    "userConsentsOverrides": {
-        |        "similarGuardianProducts": true
-        |    }
-        |}""".stripMargin
-    val testDataWithIdentityId =
-      """{
-        |    "subscriptionId": "A-S000",
-        |    "identityId": "1234",
-        |    "eventType": "Acquisition",
-        |    "productName": "SUPPORTER_PLUS",
-        |    "previousProductName": null,
-        |    "userConsentsOverrides": {
-        |        "similarGuardianProducts": true
-        |    }
-        |}""".stripMargin
+  def makeTestData(identityId: String = "null", productName: String) =
+    s"""{
+      |    "subscriptionId": "A-S000",
+      |    "identityId": $identityId,
+      |    "eventType": "Acquisition",
+      |    "productName": "$productName",
+      |    "previousProductName": null,
+      |    "userConsentsOverrides": {
+      |        "similarGuardianProducts": true
+      |    }
+      |}""".stripMargin
+
+  "parseMessages" should "fail on non-single-contribution messages with no identityId" in {
+    val testDataNoIdentityId = makeTestData("null", "SUPPORTER_PLUS")
+    val expectedError = "identityId is required to set consents"
+    inside(HandlerIAP.parseMessages(List(testDataNoIdentityId))) { case List(actual) =>
+      inside(actual) { case Failure(t) =>
+        t.getMessage should be(expectedError)
+      }
+    }
+  }
+
+  it should "drop single contribution messages with no identityId" in {
+    val testDataNoIdentityId = makeTestData("null", "CONTRIBUTION")
+    val testDataWithIdentityId = makeTestData(""""1234"""", "CONTRIBUTION")
     val expected = "1234"
     inside(HandlerIAP.parseMessages(List(testDataNoIdentityId, testDataWithIdentityId))) { case List(actual) =>
-      inside(actual) { case messageBody: MessageBody =>
+      inside(actual) { case Success(messageBody) =>
         messageBody.identityId should be(expected)
       }
     }

@@ -1,15 +1,17 @@
 package com.gu.soft_opt_in_consent_setter
 
+import cats.implicits._
 import com.amazonaws.services.lambda.runtime.events.SQSEvent
 import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
 import com.gu.soft_opt_in_consent_setter.HandlerIAP.{Acquisition, MessageBody, UserConsentsOverrides}
 import com.gu.soft_opt_in_consent_setter.models._
 import com.typesafe.scalalogging.LazyLogging
-import io.circe.{Decoder, ParsingFailure}
 import io.circe.generic.semiauto._
 import io.circe.parser.{decode => circeDecode}
+import io.circe.{Decoder, ParsingFailure}
 
 import scala.jdk.CollectionConverters._
+import scala.util.{Failure, Success, Try}
 
 object RunLocalManualTest extends App {
   // If you get an inaccessible method error running locally, make sure you run it on an older JRE (java 11)
@@ -77,32 +79,51 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
   )
   object MessageBody {
 
-    def fromWireMessageBody(wireMessageBody: WireMessageBody) =
-      wireMessageBody.identityId.map { identityId =>
-        import wireMessageBody.{identityId => _, _}
-        MessageBody(
-          subscriptionId,
-          identityId,
-          eventType,
-          productName,
-          printProduct,
-          previousProductName,
-          userConsentsOverrides,
-        )
+    def parseWireMessageBody(wireMessageBody: WireMessageBody): Try[Option[MessageBody]] =
+      wireMessageBody.identityId match {
+        case Some(identityId) =>
+          val messageBody = fromIdentityIdOverride(wireMessageBody, identityId)
+          logger.info(s"Decoded message body: $messageBody")
+          Success(Some(messageBody))
+        case None if wireMessageBody.productName == "CONTRIBUTION" =>
+          // payment api processes contributions from guests before creating identity account
+          // if creation fails, it's written to the acquisition bus without identityId
+          // it's tricky to filter messages in CDK so they are filtered here
+          // We skip it as there's no such thing as consents if there's no identity id.
+          logger.info("identity id was undefined, skipping message")
+          Success(None)
+        case None =>
+          logger.info("identity id was undefined, returning failure")
+          Failure(SoftOptInError("identityId is required to set consents"))
       }
+
+    private def fromIdentityIdOverride(wireMessageBody: WireMessageBody, identityIdOverride: String): MessageBody =
+      MessageBody(
+        wireMessageBody.subscriptionId,
+        identityIdOverride,
+        wireMessageBody.eventType,
+        wireMessageBody.productName,
+        wireMessageBody.printProduct,
+        wireMessageBody.previousProductName,
+        wireMessageBody.userConsentsOverrides,
+      )
 
   }
 
-  def handleError[T <: Exception](exception: T) = {
+  def rethrowError(throwable: Throwable): Nothing = {
     Metrics.put(event = "failed_run")
-    logger.error(s"${exception.getMessage}")
-    throw exception
+    logger.error(s"${throwable.getMessage}")
+    throw throwable
   }
 
   override def handleRequest(input: SQSEvent, context: Context): Unit = {
     logger.info("Handling request")
 
     val messages: List[MessageBody] = parseMessages(input.getRecords.asScala.toList.map(_.getBody))
+      .collect {
+        case Failure(exception) => rethrowError(exception)
+        case Success(value) => value
+      }
 
     val messageProcessor = IAPMessageProcessor.create(sys.env.get("Stage"), sys.env.get("sfApiVersion"))
 
@@ -112,28 +133,26 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
     Metrics.put(event = "successful_run")
   }
 
-  def parseMessages(inputRecords: List[String]): List[MessageBody] =
+  def parseMessages(inputRecords: List[String]): List[Try[MessageBody]] =
     for {
       body <- inputRecords
-      result <- circeDecode[WireMessageBody](body) match {
-        case Left(pf: ParsingFailure) =>
-          val exception = SoftOptInError(
-            s"Error '${pf.message}' when decoding JSON to MessageBody with cause :${pf.getCause} with body: $body",
-            pf,
-          )
-          handleError(exception)
-        case Left(ex) =>
-          val exception =
-            SoftOptInError(s"Unknown error when decoding JSON to MessageBody with body: $body", ex)
-          handleError(exception)
-        case Right(wireMessageBody) =>
-          val maybeMessageBody: Option[MessageBody] = MessageBody.fromWireMessageBody(wireMessageBody)
-          logger.info(maybeMessageBody match {
-            case Some(messageBody) => s"Decoded message body: $messageBody"
-            case None => "identity id was undefined, skipping message"
-          })
-          maybeMessageBody
-      }
-    } yield result
+      _ = logger.info(s"Raw SQS body:\n$body")
+      failableMaybeMessageBody = for {
+        wireMessageBody <- circeDecode[WireMessageBody](body).left.map(wrapParserError(_, body)).toTry
+        maybeMessageBody <- MessageBody.parseWireMessageBody(wireMessageBody)
+      } yield maybeMessageBody
+      failableMessageBody <- failableMaybeMessageBody.sequence // sequence does Try[Option[A]] => Option[Try[A]]
+    } yield failableMessageBody
+
+  private def wrapParserError(exception: Exception, body: String) =
+    exception match {
+      case pf: ParsingFailure =>
+        SoftOptInError(
+          s"Error '${pf.message}' when decoding JSON to MessageBody with cause :${pf.getCause} with body: $body",
+          pf,
+        )
+      case ex =>
+        SoftOptInError(s"Unknown error when decoding JSON to MessageBody with body: $body", ex)
+    }
 
 }
