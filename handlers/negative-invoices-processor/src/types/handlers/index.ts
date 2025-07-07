@@ -1,6 +1,3 @@
-// Shared schemas
-export * from '../shared';
-
 // GetInvoices exports
 export { GetInvoicesOutputSchema, type GetInvoicesOutput } from './GetInvoices';
 
