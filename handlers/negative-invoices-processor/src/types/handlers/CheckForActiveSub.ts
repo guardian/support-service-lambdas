@@ -2,7 +2,7 @@ import { z } from 'zod';
 import {
 	ApplyCreditToAccountBalanceOutput,
 	ApplyCreditToAccountBalanceOutputSchema,
-} from './index';
+} from './ApplyCreditToAccountBalance';
 
 export const CheckForActiveSubInputSchema =
 	ApplyCreditToAccountBalanceOutputSchema;

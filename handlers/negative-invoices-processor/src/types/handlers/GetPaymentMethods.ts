@@ -2,7 +2,7 @@ import { z } from 'zod';
 import {
 	CheckForActiveSubOutput,
 	CheckForActiveSubOutputSchema,
-} from './index';
+} from './CheckForActiveSub';
 
 export const GetPaymentMethodsInputSchema = CheckForActiveSubOutputSchema;
 export type GetPaymentMethodsInput = CheckForActiveSubOutput;
