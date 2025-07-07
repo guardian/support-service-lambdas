@@ -1,11 +1,11 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { applyCreditToAccountBalance } from '@modules/zuora/applyCreditToAccountBalance';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { InvoiceSchema } from '../types/handlers';
+import { InvoiceSchema } from '../types';
 import type {
 	ApplyCreditToAccountBalanceInput,
 	ApplyCreditToAccountBalanceOutput,
-} from '../types/handlers';
+} from '../types';
 
 export const handler = async (
 	event: ApplyCreditToAccountBalanceInput,
