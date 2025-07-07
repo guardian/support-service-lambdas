@@ -1,7 +1,10 @@
 import { uploadFileToS3 } from '@modules/aws/s3';
 import { getIfDefined } from '@modules/nullAndUndefined';
-import { SaveResultsInputSchema } from '../types';
-import type { SaveResultsInput, SaveResultsOutput } from '../types';
+import { SaveResultsInputSchema } from '../types/handlerInputsAndOutputs/SaveResults';
+import type {
+	SaveResultsInput,
+	SaveResultsOutput,
+} from '../types/handlerInputsAndOutputs/SaveResults';
 
 export const handler = async (
 	event: SaveResultsInput,

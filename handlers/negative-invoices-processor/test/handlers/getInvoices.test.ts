@@ -1,5 +1,8 @@
 import { getCODEData, getPRODData } from '../../src/handlers/getInvoices';
-import { InvoiceRecordsArraySchema, InvoiceSchema } from '../../src/types';
+import {
+	InvoiceRecordsArraySchema,
+	InvoiceSchema,
+} from '../../src/types/handlerInputsAndOutputs/ApplyCreditToAccountBalance';
 import { CODEDataMockQueryResponse } from './data/CODEDataMockQueryResponse';
 
 describe('getCODEData', () => {
