@@ -1,11 +1,13 @@
 import { z } from 'zod';
-import { InvoiceSchema } from '../shared';
-import { ApplyCreditToAccountBalanceAttemptSchema } from './ApplyCreditToAccountBalance';
-import { CheckForActiveSubAttemptSchema } from './CheckForActiveSub';
-import { RefundAttemptSchema } from './DoCreditBalanceRefund';
-import { CheckForActivePaymentMethodAttemptSchema } from './GetPaymentMethods';
+import {
+	InvoiceSchema,
+	ApplyCreditToAccountBalanceAttemptSchema,
+	CheckForActiveSubAttemptSchema,
+	RefundAttemptSchema,
+	CheckForActivePaymentMethodAttemptSchema,
+} from './index';
 
-export const ProcessedInvoiceSchema = InvoiceSchema.extend({
+const ProcessedInvoiceSchema = InvoiceSchema.extend({
 	applyCreditToAccountBalanceAttempt: ApplyCreditToAccountBalanceAttemptSchema,
 	checkForActiveSubAttempt: CheckForActiveSubAttemptSchema.optional(),
 	checkForActivePaymentMethodAttempt:

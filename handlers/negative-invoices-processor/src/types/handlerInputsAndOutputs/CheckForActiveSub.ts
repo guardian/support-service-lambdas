@@ -2,9 +2,8 @@ import { z } from 'zod';
 import {
 	ApplyCreditToAccountBalanceOutput,
 	ApplyCreditToAccountBalanceOutputSchema,
-} from './ApplyCreditToAccountBalance';
+} from './index';
 
-// CheckForActiveSub lambda
 export const CheckForActiveSubInputSchema =
 	ApplyCreditToAccountBalanceOutputSchema;
 export type CheckForActiveSubInput = ApplyCreditToAccountBalanceOutput;

@@ -1,8 +1,5 @@
 import { z } from 'zod';
-import {
-	GetPaymentMethodsOutputSchema,
-	PaymentMethodSchema,
-} from './GetPaymentMethods';
+import { GetPaymentMethodsOutputSchema, PaymentMethodSchema } from './index';
 
 export const DoCreditBalanceRefundInputSchema = GetPaymentMethodsOutputSchema;
 export type DoCreditBalanceRefundInput = z.infer<

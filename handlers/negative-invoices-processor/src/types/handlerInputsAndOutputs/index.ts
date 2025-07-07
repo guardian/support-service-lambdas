@@ -2,11 +2,7 @@
 export * from '../shared';
 
 // GetInvoices exports
-export {
-	GetInvoicesOutputSchema,
-	type GetInvoicesInput,
-	type GetInvoicesOutput,
-} from './GetInvoices';
+export { GetInvoicesOutputSchema, type GetInvoicesOutput } from './GetInvoices';
 
 // ApplyCreditToAccountBalance exports
 export {
@@ -46,7 +42,6 @@ export {
 
 // SaveResults exports
 export {
-	ProcessedInvoiceSchema,
 	SaveResultsInputSchema,
 	SaveResultsOutputSchema,
 	type SaveResultsInput,
