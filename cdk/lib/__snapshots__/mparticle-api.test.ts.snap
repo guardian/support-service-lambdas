@@ -6,8 +6,49 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
+      "GuApiGatewayWithLambdaByPath",
     ],
     "gu:cdk:version": "TEST",
+  },
+  "Outputs": {
+    "MParticleLambdaRoleArn": {
+      "Description": "ARN of the mParticle Lambda execution role",
+      "Export": {
+        "Name": "mparticle-api-CODE-lambda-role-arn",
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "mparticleapilambdaServiceRoleCE7702E6",
+          "Arn",
+        ],
+      },
+    },
+    "RestApiEndpoint0551178A": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "RestApi0C43BF4B",
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region",
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "RestApiDeploymentStageprod3855DE66",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
   },
   "Parameters": {
     "DistributionBucketName": {
@@ -17,6 +58,379 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
+    "MparticleApiDnsRecord": {
+      "Properties": {
+        "Comment": "CNAME for mparticle-api API CODE",
+        "HostedZoneName": "support.guardianapis.com.",
+        "Name": "mparticle-api-code.support.guardianapis.com",
+        "ResourceRecords": [
+          {
+            "Fn::GetAtt": [
+              "MparticleApiDomainMparticleApiDomainName3EAD2748",
+              "RegionalDomainName",
+            ],
+          },
+        ],
+        "TTL": "120",
+        "Type": "CNAME",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "MparticleApiDomainMparticleApiBasePathMappingA467773E": {
+      "Properties": {
+        "DomainName": {
+          "Ref": "MparticleApiDomainMparticleApiDomainName3EAD2748",
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+        "Stage": {
+          "Ref": "RestApiDeploymentStageprod3855DE66",
+        },
+      },
+      "Type": "AWS::ApiGateway::BasePathMapping",
+    },
+    "MparticleApiDomainMparticleApiDomainName3EAD2748": {
+      "Properties": {
+        "DomainName": "mparticle-api-code.support.guardianapis.com",
+        "EndpointConfiguration": {
+          "Types": [
+            "REGIONAL",
+          ],
+        },
+        "RegionalCertificateArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:acm:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
+            ],
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::DomainName",
+    },
+    "RestApi0C43BF4B": {
+      "Properties": {
+        "Name": "support-CODE-mparticle-api",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "RestApiAccount7C83CF5A": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "RestApi0C43BF4B",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "RestApiCloudWatchRoleE3ED6605",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "RestApiCloudWatchRoleE3ED6605": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "RestApiDeployment180EC5032b39c17a8efcc4b16588acc42fa8181e": {
+      "DependsOn": [
+        "RestApidatasubjectrequestsrequestIdcallbackPOST2BF76B7C",
+        "RestApidatasubjectrequestsrequestIdcallback3E3A4143",
+        "RestApidatasubjectrequestsrequestId1EC01CA2",
+        "RestApidatasubjectrequests6F9B1B02",
+      ],
+      "Properties": {
+        "Description": "Automatically created by the RestApi construct",
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "RestApiDeploymentStageprod3855DE66": {
+      "DependsOn": [
+        "RestApiAccount7C83CF5A",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "RestApiDeployment180EC5032b39c17a8efcc4b16588acc42fa8181e",
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+        "StageName": "prod",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "RestApidatasubjectrequests6F9B1B02": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "RestApi0C43BF4B",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "data-subject-requests",
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "RestApidatasubjectrequestsrequestId1EC01CA2": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "RestApidatasubjectrequests6F9B1B02",
+        },
+        "PathPart": "{requestId}",
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "RestApidatasubjectrequestsrequestIdcallback3E3A4143": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "RestApidatasubjectrequestsrequestId1EC01CA2",
+        },
+        "PathPart": "callback",
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "RestApidatasubjectrequestsrequestIdcallbackPOST2BF76B7C": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "POST",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "mparticleapilambdaD503F5B2",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "RestApidatasubjectrequestsrequestIdcallback3E3A4143",
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "RestApidatasubjectrequestsrequestIdcallbackPOSTApiPermissionTestmparticleapiCODERestApi21B2EC7DPOSTdatasubjectrequestsrequestIdcallbackC8C3F328": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "mparticleapilambdaD503F5B2",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "RestApi0C43BF4B",
+              },
+              "/test-invoke-stage/POST/data-subject-requests/*/callback",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "RestApidatasubjectrequestsrequestIdcallbackPOSTApiPermissionmparticleapiCODERestApi21B2EC7DPOSTdatasubjectrequestsrequestIdcallback1F28B3F3": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "mparticleapilambdaD503F5B2",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "RestApi0C43BF4B",
+              },
+              "/",
+              {
+                "Ref": "RestApiDeploymentStageprod3855DE66",
+              },
+              "/POST/data-subject-requests/*/callback",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
     "mparticleapicloudwatchpolicy1B6A7573": {
       "Properties": {
         "PolicyDocument": {
@@ -48,12 +462,12 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/CODE/mparticle-api/mparticle-api.zip",
+          "S3Key": "support/CODE/mparticle-api/mparticle-api.zip",
         },
         "Environment": {
           "Variables": {
             "APP": "mparticle-api",
-            "STACK": "membership",
+            "STACK": "support",
             "STAGE": "CODE",
           },
         },
@@ -85,7 +499,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -139,7 +553,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -188,7 +602,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/CODE/mparticle-api/mparticle-api.zip",
+                      "/support/CODE/mparticle-api/mparticle-api.zip",
                     ],
                   ],
                 },
@@ -209,7 +623,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/mparticle-api",
+                    ":parameter/CODE/support/mparticle-api",
                   ],
                 ],
               },
@@ -232,7 +646,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/mparticle-api/*",
+                    ":parameter/CODE/support/mparticle-api/*",
                   ],
                 ],
               },
@@ -259,8 +673,49 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
+      "GuApiGatewayWithLambdaByPath",
     ],
     "gu:cdk:version": "TEST",
+  },
+  "Outputs": {
+    "MParticleLambdaRoleArn": {
+      "Description": "ARN of the mParticle Lambda execution role",
+      "Export": {
+        "Name": "mparticle-api-PROD-lambda-role-arn",
+      },
+      "Value": {
+        "Fn::GetAtt": [
+          "mparticleapilambdaServiceRoleCE7702E6",
+          "Arn",
+        ],
+      },
+    },
+    "RestApiEndpoint0551178A": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "RestApi0C43BF4B",
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region",
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "RestApiDeploymentStageprod3855DE66",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
   },
   "Parameters": {
     "DistributionBucketName": {
@@ -270,6 +725,523 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
+    "MParticleApiGateway5XXAlarmB411067F": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "mParticle API callback returned a 500 response, please check the logs.",
+        "AlarmName": "API gateway 5XX response",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "ApiName",
+            "Value": "mparticle-api-apiGateway",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "5XXError",
+        "Namespace": "AWS/ApiGateway",
+        "Period": 86400,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "mparticleapilambdaD503F5B2",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "MParticleLambdaErrorAlarmD72BAB2E": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "mParticle API Lambda failed, please check the logs to diagnose the issue.",
+        "AlarmName": "An error occurred in the mParticle API Lambda",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "mparticleapilambdaD503F5B2",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 86400,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "mparticleapilambdaD503F5B2",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "MparticleApiDnsRecord": {
+      "Properties": {
+        "Comment": "CNAME for mparticle-api API PROD",
+        "HostedZoneName": "support.guardianapis.com.",
+        "Name": "mparticle-api.support.guardianapis.com",
+        "ResourceRecords": [
+          {
+            "Fn::GetAtt": [
+              "MparticleApiDomainMparticleApiDomainName3EAD2748",
+              "RegionalDomainName",
+            ],
+          },
+        ],
+        "TTL": "120",
+        "Type": "CNAME",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "MparticleApiDomainMparticleApiBasePathMappingA467773E": {
+      "Properties": {
+        "DomainName": {
+          "Ref": "MparticleApiDomainMparticleApiDomainName3EAD2748",
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+        "Stage": {
+          "Ref": "RestApiDeploymentStageprod3855DE66",
+        },
+      },
+      "Type": "AWS::ApiGateway::BasePathMapping",
+    },
+    "MparticleApiDomainMparticleApiDomainName3EAD2748": {
+      "Properties": {
+        "DomainName": "mparticle-api.support.guardianapis.com",
+        "EndpointConfiguration": {
+          "Types": [
+            "REGIONAL",
+          ],
+        },
+        "RegionalCertificateArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:acm:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
+            ],
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::DomainName",
+    },
+    "RestApi0C43BF4B": {
+      "Properties": {
+        "Name": "support-PROD-mparticle-api",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "RestApiAccount7C83CF5A": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "RestApi0C43BF4B",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "RestApiCloudWatchRoleE3ED6605",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "RestApiCloudWatchRoleE3ED6605": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "RestApiDeployment180EC503230ad4ec27acc67429a58e181dd5bab0": {
+      "DependsOn": [
+        "RestApidatasubjectrequestsrequestIdcallbackPOST2BF76B7C",
+        "RestApidatasubjectrequestsrequestIdcallback3E3A4143",
+        "RestApidatasubjectrequestsrequestId1EC01CA2",
+        "RestApidatasubjectrequests6F9B1B02",
+      ],
+      "Properties": {
+        "Description": "Automatically created by the RestApi construct",
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "RestApiDeploymentStageprod3855DE66": {
+      "DependsOn": [
+        "RestApiAccount7C83CF5A",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "RestApiDeployment180EC503230ad4ec27acc67429a58e181dd5bab0",
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+        "StageName": "prod",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "RestApidatasubjectrequests6F9B1B02": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "RestApi0C43BF4B",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "data-subject-requests",
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "RestApidatasubjectrequestsrequestId1EC01CA2": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "RestApidatasubjectrequests6F9B1B02",
+        },
+        "PathPart": "{requestId}",
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "RestApidatasubjectrequestsrequestIdcallback3E3A4143": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "RestApidatasubjectrequestsrequestId1EC01CA2",
+        },
+        "PathPart": "callback",
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "RestApidatasubjectrequestsrequestIdcallbackPOST2BF76B7C": {
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "POST",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "mparticleapilambdaD503F5B2",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "RestApidatasubjectrequestsrequestIdcallback3E3A4143",
+        },
+        "RestApiId": {
+          "Ref": "RestApi0C43BF4B",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "RestApidatasubjectrequestsrequestIdcallbackPOSTApiPermissionTestmparticleapiPRODRestApi381B330APOSTdatasubjectrequestsrequestIdcallback7E07506F": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "mparticleapilambdaD503F5B2",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "RestApi0C43BF4B",
+              },
+              "/test-invoke-stage/POST/data-subject-requests/*/callback",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "RestApidatasubjectrequestsrequestIdcallbackPOSTApiPermissionmparticleapiPRODRestApi381B330APOSTdatasubjectrequestsrequestIdcallback82222DDA": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "mparticleapilambdaD503F5B2",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "RestApi0C43BF4B",
+              },
+              "/",
+              {
+                "Ref": "RestApiDeploymentStageprod3855DE66",
+              },
+              "/POST/data-subject-requests/*/callback",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
     "mparticleapicloudwatchpolicy1B6A7573": {
       "Properties": {
         "PolicyDocument": {
@@ -301,12 +1273,12 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/PROD/mparticle-api/mparticle-api.zip",
+          "S3Key": "support/PROD/mparticle-api/mparticle-api.zip",
         },
         "Environment": {
           "Variables": {
             "APP": "mparticle-api",
-            "STACK": "membership",
+            "STACK": "support",
             "STAGE": "PROD",
           },
         },
@@ -338,7 +1310,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -392,7 +1364,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -441,7 +1413,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/PROD/mparticle-api/mparticle-api.zip",
+                      "/support/PROD/mparticle-api/mparticle-api.zip",
                     ],
                   ],
                 },
@@ -462,7 +1434,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/mparticle-api",
+                    ":parameter/PROD/support/mparticle-api",
                   ],
                 ],
               },
@@ -485,7 +1457,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/mparticle-api/*",
+                    ":parameter/PROD/support/mparticle-api/*",
                   ],
                 ],
               },

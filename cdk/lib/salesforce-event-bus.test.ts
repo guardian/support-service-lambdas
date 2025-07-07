@@ -1,19 +1,18 @@
 import { App } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
-import { MParticleApi } from './mparticle-api';
+import { SalesforceEventBus } from './salesforce-event-bus';
 
-describe('The mParticle API stack', () => {
+describe('The SalesforceEventBus stack', () => {
 	it('matches the snapshot', () => {
 		const app = new App();
-		const codeStack = new MParticleApi(app, 'mparticle-api-CODE', {
-			stack: 'support',
+		const codeStack = new SalesforceEventBus(app, `salesforce-event-bus-CODE`, {
+			stack: 'membership',
 			stage: 'CODE',
 		});
-		const prodStack = new MParticleApi(app, 'mparticle-api-PROD', {
-			stack: 'support',
+		const prodStack = new SalesforceEventBus(app, `salesforce-event-bus-PROD`, {
+			stack: 'membership',
 			stage: 'PROD',
 		});
-
 		expect(Template.fromStack(codeStack).toJSON()).toMatchSnapshot();
 		expect(Template.fromStack(prodStack).toJSON()).toMatchSnapshot();
 	});
