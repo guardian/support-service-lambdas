@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import type { BatonRerEventInitiateResponse, GUID, InitiationReference } from '../src/routers/baton';
+import type { GUID, InitiationReference } from '../src/routers/baton';
 import type { AppConfig } from '../src/utils/config';
 import { invokeBatonRerHandler } from '../src/utils/invoke-baton-rer-handler';
 
