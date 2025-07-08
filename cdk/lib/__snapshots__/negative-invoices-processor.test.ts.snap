@@ -49,6 +49,178 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
     },
+    "alarm05E1DB6A1": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "Something went wrong when executing the Negative Invoices Processor. See Cloudwatch logs for more information on the error.",
+        "AlarmName": {
+          "Fn::Join": [
+            "",
+            [
+              "Negative Invoices Processor - ",
+              {
+                "Ref": "getinvoiceslambdaBD92FECC",
+              },
+              " - something went wrong - CODE",
+            ],
+          ],
+        },
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "getinvoiceslambdaBD92FECC",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "getinvoiceslambdaBD92FECC",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Threshold": 0,
+        "TreatMissingData": "missing",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "alarm11F7E5553": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "Something went wrong when executing the Negative Invoices Processor. See Cloudwatch logs for more information on the error.",
+        "AlarmName": {
+          "Fn::Join": [
+            "",
+            [
+              "Negative Invoices Processor - ",
+              {
+                "Ref": "detectfailureslambdaC74342D4",
+              },
+              " - something went wrong - CODE",
+            ],
+          ],
+        },
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "detectfailureslambdaC74342D4",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "detectfailureslambdaC74342D4",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Threshold": 0,
+        "TreatMissingData": "missing",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
     "applycredittoaccountbalancelambda254CBA80": {
       "DependsOn": [
         "applycredittoaccountbalancelambdaServiceRoleDefaultPolicy322F837F",
@@ -2091,6 +2263,178 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
+    },
+    "alarm05E1DB6A1": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "Something went wrong when executing the Negative Invoices Processor. See Cloudwatch logs for more information on the error.",
+        "AlarmName": {
+          "Fn::Join": [
+            "",
+            [
+              "Negative Invoices Processor - ",
+              {
+                "Ref": "getinvoiceslambdaBD92FECC",
+              },
+              " - something went wrong - PROD",
+            ],
+          ],
+        },
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "getinvoiceslambdaBD92FECC",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "getinvoiceslambdaBD92FECC",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 0,
+        "TreatMissingData": "missing",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "alarm11F7E5553": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "Something went wrong when executing the Negative Invoices Processor. See Cloudwatch logs for more information on the error.",
+        "AlarmName": {
+          "Fn::Join": [
+            "",
+            [
+              "Negative Invoices Processor - ",
+              {
+                "Ref": "detectfailureslambdaC74342D4",
+              },
+              " - something went wrong - PROD",
+            ],
+          ],
+        },
+        "ComparisonOperator": "GreaterThanThreshold",
+        "DatapointsToAlarm": 1,
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "detectfailureslambdaC74342D4",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "detectfailureslambdaC74342D4",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 0,
+        "TreatMissingData": "missing",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
     },
     "applycredittoaccountbalancelambda254CBA80": {
       "DependsOn": [
