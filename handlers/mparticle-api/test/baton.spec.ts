@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import type { BatonRerEventInitiateResponse } from '../src/routers/baton';
+import type { BatonRerEventInitiateResponse, GUID, InitiationReference } from '../src/routers/baton';
 import type { AppConfig } from '../src/utils/config';
 import { invokeBatonRerHandler } from '../src/utils/invoke-baton-rer-handler';
 
@@ -69,7 +69,7 @@ describe('mparticle-api Baton tests', () => {
 	});
 
 	it('Get Right to Erasure Request Status', async () => {
-		const requestId = faker.string.uuid();
+		const requestId: InitiationReference = faker.string.uuid() as GUID;
 		const mockGetSubjectRequestByIdResponse = {
 			ok: true,
 			status: 200,

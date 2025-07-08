@@ -10,6 +10,43 @@ import { setUserAttributesForRightToErasureRequest } from '../apis/events';
 import { getEnv } from '../utils/config';
 
 /**
+ * A branded string type that represents a GUID (Globally Unique Identifier).
+ * 
+ * This uses TypeScript's branded type pattern to create a nominal type that is
+ * structurally a string but distinct from regular strings at compile time.
+ * 
+ * Benefits:
+ * - Prevents accidentally passing regular strings where GUIDs are expected
+ * - Provides type safety between different kinds of identifiers
+ * - Self-documenting code that makes GUID usage explicit
+ * - No runtime overhead - compiles to regular strings
+ * 
+ * @example
+ * ```typescript
+ * // Must explicitly cast or create GUID values
+ * const guid = "550e8400-e29b-41d4-a716-446655440000" as GUID;
+ * 
+ * // Or use a helper function
+ * function createGUID(value: string): GUID {
+ *   return value as GUID;
+ * }
+ * 
+ * // This would cause a compile error:
+ * const regularString = "hello world";
+ * const ref: InitiationReference = regularString; // ❌ Type error
+ * ```
+ */
+export type GUID = string & { readonly __brand: unique symbol };
+
+/**
+ * A GUID that uniquely identifies an initiation reference.
+ * 
+ * This branded type ensures that only proper GUID values can be assigned
+ * to initiation references, preventing mix-ups with other string values.
+ */
+export type InitiationReference = GUID;
+
+/**
  * Baton data structures are described here:
  * https://github.com/guardian/baton/blob/1037c63c9bd782aed514bf6aaa38a54dabf699eb/README.md
  */
@@ -30,7 +67,7 @@ interface BatonRerEventInitiateRequest extends BatonRerEventRequestBase {
 
 interface BatonRerEventStatusRequest extends BatonRerEventRequestBase {
 	action: 'status';
-	initiationReference: string;
+	initiationReference: InitiationReference;
 }
 
 export type BatonRerEventRequest =
@@ -50,7 +87,7 @@ interface BatonRerEventResponseBase {
 export interface BatonRerEventInitiateResponse
 	extends BatonRerEventResponseBase {
 	action: 'initiate';
-	initiationReference: string;
+	initiationReference: InitiationReference;
 }
 
 export interface BatonRerEventStatusResponse extends BatonRerEventResponseBase {
@@ -98,7 +135,7 @@ async function handleInitiateRequest(
 		requestType: 'RER',
 		action: 'initiate',
 		status: 'pending',
-		initiationReference: dataSubjectRequestSubmission.requestId,
+		initiationReference: dataSubjectRequestSubmission.requestId as InitiationReference,
 		message: `Expected completion time: ${dataSubjectRequestSubmission.expectedCompletionTime.toISOString()}`,
 	};
 }
