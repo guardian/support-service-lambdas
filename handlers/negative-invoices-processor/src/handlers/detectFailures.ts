@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/require-await -- this is required to ensure the lambda returns a value*/
-
 import { DetectFailuresInputSchema } from '../types';
 import type { DetectFailuresInput } from '../types';
 import { ProcessedInvoice } from '../types/shared';
