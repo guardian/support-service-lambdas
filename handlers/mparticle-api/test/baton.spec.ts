@@ -61,9 +61,8 @@ describe('mparticle-api Baton tests', () => {
 		expect(result.requestType).toEqual('RER');
 		expect(result.action).toEqual('initiate');
 		expect(result.status).toEqual('pending');
-		if (result.action == "initiate") {
-			expect(result.initiationReference,
-			).toEqual(requestId);
+		if (result.action == 'initiate') {
+			expect(result.initiationReference).toEqual(requestId);
 		}
 		expect(result.message).toBeDefined();
 		expect(global.fetch).toHaveBeenCalledTimes(2);

@@ -19,9 +19,7 @@ function isAPIGatewayEvent(event: any): event is APIGatewayProxyEvent {
 }
 
 function isBatonRerEvent(event: any): event is BatonRerEventRequest {
-	return (
-		event && event.requestType && event.requestType === 'RER'
-	);
+	return event && event.requestType && event.requestType === 'RER';
 }
 
 async function handleHttpRequest(

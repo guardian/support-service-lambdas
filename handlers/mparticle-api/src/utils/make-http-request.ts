@@ -51,7 +51,9 @@ export async function makeHttpRequest<T>(
 			} catch {
 				try {
 					errorBody = await response.text();
-				} catch { }
+				} catch {
+					/* empty */
+				}
 			}
 
 			return {

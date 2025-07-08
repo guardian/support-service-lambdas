@@ -11,26 +11,26 @@ import { getEnv } from '../utils/config';
 
 /**
  * A branded string type that represents a GUID (Globally Unique Identifier).
- * 
+ *
  * This uses TypeScript's branded type pattern to create a nominal type that is
  * structurally a string but distinct from regular strings at compile time.
- * 
+ *
  * Benefits:
  * - Prevents accidentally passing regular strings where GUIDs are expected
  * - Provides type safety between different kinds of identifiers
  * - Self-documenting code that makes GUID usage explicit
  * - No runtime overhead - compiles to regular strings
- * 
+ *
  * @example
  * ```typescript
  * // Must explicitly cast or create GUID values
  * const guid = "550e8400-e29b-41d4-a716-446655440000" as GUID;
- * 
+ *
  * // Or use a helper function
  * function createGUID(value: string): GUID {
  *   return value as GUID;
  * }
- * 
+ *
  * // This would cause a compile error:
  * const regularString = "hello world";
  * const ref: InitiationReference = regularString; // ❌ Type error
@@ -40,7 +40,7 @@ export type GUID = string & { readonly __brand: unique symbol };
 
 /**
  * A GUID that uniquely identifies an initiation reference.
- * 
+ *
  * This branded type ensures that only proper GUID values can be assigned
  * to initiation references, preventing mix-ups with other string values.
  */
@@ -55,7 +55,7 @@ interface BatonRerEventRequestBase {
 }
 
 /**
- * Initiate RER data request structure 
+ * Initiate RER data request structure
  * https://github.com/guardian/baton/blob/1037c63c9bd782aed514bf6aaa38a54dabf699eb/README.md#rer-initiate-call
  */
 interface BatonRerEventInitiateRequest extends BatonRerEventRequestBase {
@@ -81,7 +81,7 @@ interface BatonRerEventResponseBase {
 }
 
 /**
- * Initiate RER data response structure 
+ * Initiate RER data response structure
  * https://github.com/guardian/baton/blob/1037c63c9bd782aed514bf6aaa38a54dabf699eb/README.md#rer-response
  */
 export interface BatonRerEventInitiateResponse
@@ -135,7 +135,8 @@ async function handleInitiateRequest(
 		requestType: 'RER',
 		action: 'initiate',
 		status: 'pending',
-		initiationReference: dataSubjectRequestSubmissionResponse.requestId as InitiationReference,
+		initiationReference:
+			dataSubjectRequestSubmissionResponse.requestId as InitiationReference,
 		message: `Expected completion time: ${dataSubjectRequestSubmissionResponse.expectedCompletionTime.toISOString()}`,
 	};
 }
