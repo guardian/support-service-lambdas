@@ -9,7 +9,10 @@ import {
 import { setUserAttributesForRightToErasureRequest } from '../apis/events';
 import { getEnv } from '../utils/config';
 
-// https://github.com/guardian/baton/blob/1037c63c9bd782aed514bf6aaa38a54dabf699eb/README.md
+/**
+ * Baton data structures are described here:
+ * https://github.com/guardian/baton/blob/1037c63c9bd782aed514bf6aaa38a54dabf699eb/README.md
+ */
 interface BatonRerEventRequestBase {
 	requestType: 'RER';
 }
