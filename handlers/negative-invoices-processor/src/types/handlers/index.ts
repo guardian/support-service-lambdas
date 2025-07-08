@@ -44,3 +44,9 @@ export {
 	type SaveResultsInput,
 	type SaveResultsOutput,
 } from './SaveResults';
+
+// DetectFailures exports
+export {
+	DetectFailuresInputSchema,
+	type DetectFailuresInput,
+} from './DetectFailures';
