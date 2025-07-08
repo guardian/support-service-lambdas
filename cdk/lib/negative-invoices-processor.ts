@@ -391,6 +391,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 				threshold: 0,
 				treatMissingData: TreatMissingData.MISSING,
 				app: appName,
+				actionsEnabled: true,
 			});
 		});
 	}

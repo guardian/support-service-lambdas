@@ -167,7 +167,7 @@ export class AlarmsHandler extends GuStack {
 			comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
 			threshold: 0,
 			evaluationPeriods: 24,
-			actionsEnabled: this.stage === 'PROD' || this.stage === 'CODE',
+			actionsEnabled: this.stage === 'PROD',
 		});
 
 		const scheduledLambda = new GuScheduledLambda(
