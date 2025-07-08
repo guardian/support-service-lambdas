@@ -68,17 +68,6 @@ export const handler: Handler = async (
 		return handleBatonRerEvent(event, context);
 	} else {
 		// Handle other event types or unknown events
-		console.error('Unknown event type:', event);
-
-		// If it might be an HTTP event without proper structure, try to handle gracefully
-		if (event.httpMethod || event.path) {
-			console.log('Attempted to process as malformed API Gateway event');
-			return {
-				statusCode: 400,
-				body: JSON.stringify({ error: 'Malformed API Gateway event' }),
-			};
-		}
-
 		throw new Error(`Unsupported event type: ${typeof event}`);
 	}
 };
