@@ -23,7 +23,7 @@ interface BatonRerEventRequestBase {
  */
 interface BatonRerEventInitiateRequest extends BatonRerEventRequestBase {
 	action: 'initiate';
-	subjectId: string;
+	subjectId: string; // always the identity id
 	subjectEmail?: string;
 	dataProvider: string;
 }
