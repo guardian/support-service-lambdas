@@ -6,10 +6,6 @@ import {
 import type { DetectFailuresInput } from '../../src/types';
 import type { ProcessedInvoice } from '../../src/types/shared';
 
-jest.mock('@modules/validation/index', () => ({
-	validateInput: jest.fn(<T>(input: T): T => input),
-}));
-
 describe('detectFailures handler', () => {
 	describe('invoiceHasAtLeastOneProcessingFailure', () => {
 		it('should return true when applyCreditToAccountBalanceAttempt fails', () => {
