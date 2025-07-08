@@ -17,6 +17,10 @@ interface BatonRerEventRequestBase {
 	requestType: 'RER';
 }
 
+/**
+ * Initiate RER data request structure 
+ * https://github.com/guardian/baton/blob/1037c63c9bd782aed514bf6aaa38a54dabf699eb/README.md#rer-initiate-call
+ */
 interface BatonRerEventInitiateRequest extends BatonRerEventRequestBase {
 	action: 'initiate';
 	subjectId: string;
@@ -39,6 +43,10 @@ interface BatonRerEventResponseBase {
 	message?: string;
 }
 
+/**
+ * Initiate RER data response structure 
+ * https://github.com/guardian/baton/blob/1037c63c9bd782aed514bf6aaa38a54dabf699eb/README.md#rer-response
+ */
 export interface BatonRerEventInitiateResponse
 	extends BatonRerEventResponseBase {
 	action: 'initiate';
