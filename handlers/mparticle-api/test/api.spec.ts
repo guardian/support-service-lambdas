@@ -22,13 +22,11 @@ jest.mock('../src/utils/config', () => ({
 }));
 
 describe('mparticle-api API tests', () => {
-	// Mock fetch before each test
 	beforeEach(() => {
 		jest.resetModules();
 		global.fetch = jest.fn();
 	});
 
-	// Clean up after each test
 	afterEach(() => {
 		jest.restoreAllMocks();
 	});

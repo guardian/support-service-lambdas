@@ -74,7 +74,6 @@ async function handleInitiateRequest(
 		);
 	}
 
-	// Submit
 	const dataSubjectRequestSubmission: DataSubjectRequestSubmission =
 		await submitDataSubjectRequest({
 			regulation: 'gdpr',

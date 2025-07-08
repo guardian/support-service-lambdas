@@ -11,7 +11,6 @@ import {
 	batonRerRouter,
 } from './routers/baton';
 
-// Type guard to check if event is API Gateway
 function isAPIGatewayEvent(event: any): event is APIGatewayProxyEvent {
 	return (
 		event &&
@@ -20,14 +19,12 @@ function isAPIGatewayEvent(event: any): event is APIGatewayProxyEvent {
 	);
 }
 
-// Type guard to check if event is Baton RER
 function isBatonRerEvent(event: any): event is BatonRerEventRequest {
 	return (
 		event && event.requestType && event.requestType === 'RER'
 	);
 }
 
-// HTTP handler function
 async function handleHttpRequest(
 	event: APIGatewayProxyEvent,
 	context: Context,
@@ -43,7 +40,6 @@ async function handleHttpRequest(
 	}
 }
 
-// Baton RER event handler function
 async function handleBatonRerEvent(
 	event: BatonRerEventRequest,
 	context: Context,
@@ -67,7 +63,6 @@ export const handler: Handler = async (
 		console.debug('Processing as Baton RER event');
 		return handleBatonRerEvent(event, context);
 	} else {
-		// Handle other event types or unknown events
 		throw new Error(`Unsupported event type: ${typeof event}`);
 	}
 };
