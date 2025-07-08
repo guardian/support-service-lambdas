@@ -122,7 +122,7 @@ async function handleInitiateRequest(
 		);
 	}
 
-	const dataSubjectRequestSubmission: DataSubjectRequestSubmission =
+	const dataSubjectRequestSubmissionResponse: DataSubjectRequestSubmission =
 		await submitDataSubjectRequest({
 			regulation: 'gdpr',
 			requestId: uuidv4(),
@@ -135,8 +135,8 @@ async function handleInitiateRequest(
 		requestType: 'RER',
 		action: 'initiate',
 		status: 'pending',
-		initiationReference: dataSubjectRequestSubmission.requestId as InitiationReference,
-		message: `Expected completion time: ${dataSubjectRequestSubmission.expectedCompletionTime.toISOString()}`,
+		initiationReference: dataSubjectRequestSubmissionResponse.requestId as InitiationReference,
+		message: `Expected completion time: ${dataSubjectRequestSubmissionResponse.expectedCompletionTime.toISOString()}`,
 	};
 }
 
