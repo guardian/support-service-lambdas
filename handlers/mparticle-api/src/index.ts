@@ -1,7 +1,6 @@
 import type {
 	APIGatewayProxyEvent,
 	APIGatewayProxyResult,
-	Context,
 	Handler,
 } from 'aws-lambda';
 import { httpRouter } from './routers/http';
@@ -27,7 +26,6 @@ function isBatonRerEvent(event: any): event is BatonRerEventRequest {
 
 async function handleHttpRequest(
 	event: APIGatewayProxyEvent,
-	context: Context,
 ): Promise<APIGatewayProxyResult> {
 	try {
 		return httpRouter.routeRequest(event);
@@ -42,7 +40,6 @@ async function handleHttpRequest(
 
 async function handleBatonRerEvent(
 	event: BatonRerEventRequest,
-	context: Context,
 ): Promise<BatonRerEventResponse> {
 	try {
 		return batonRerRouter.routeRequest(event);
@@ -54,14 +51,13 @@ async function handleBatonRerEvent(
 
 export const handler: Handler = async (
 	event: APIGatewayProxyEvent | BatonRerEventRequest | any,
-	context: Context,
 ): Promise<APIGatewayProxyResult | BatonRerEventResponse> => {
 	if (isAPIGatewayEvent(event)) {
 		console.debug('Processing as API Gateway event');
-		return handleHttpRequest(event, context);
+		return handleHttpRequest(event);
 	} else if (isBatonRerEvent(event)) {
 		console.debug('Processing as Baton RER event');
-		return handleBatonRerEvent(event, context);
+		return handleBatonRerEvent(event);
 	} else {
 		throw new Error(`Unsupported event type: ${typeof event}`);
 	}
