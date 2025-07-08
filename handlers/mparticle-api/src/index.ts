@@ -23,7 +23,7 @@ function isAPIGatewayEvent(event: any): event is APIGatewayProxyEvent {
 // Type guard to check if event is Baton RER
 function isBatonRerEvent(event: any): event is BatonRerEventRequest {
 	return (
-		event && event.requestType && event.requestType.toUpperCase() === 'RER'
+		event && event.requestType && event.requestType === 'RER'
 	);
 }
 
