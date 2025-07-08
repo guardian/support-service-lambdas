@@ -305,11 +305,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 				lambdaFunction: detectFailuresLambda,
 				outputPath: '$.Payload',
 			},
-		).addRetry({
-			errors: ['States.ALL'],
-			interval: Duration.seconds(10),
-			maxAttempts: 2,
-		});
+		);
 
 		const invoiceProcessorMap = new Map(this, 'Invoice processor map', {
 			maxConcurrency: 1,
