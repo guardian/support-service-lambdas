@@ -51,7 +51,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
     },
     "alarm05E1DB6A1": {
       "Properties": {
-        "ActionsEnabled": false,
+        "ActionsEnabled": true,
         "AlarmActions": [
           {
             "Fn::Join": [
@@ -137,7 +137,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
     },
     "alarm11F7E5553": {
       "Properties": {
-        "ActionsEnabled": false,
+        "ActionsEnabled": true,
         "AlarmActions": [
           {
             "Fn::Join": [
