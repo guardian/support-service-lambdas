@@ -4,3 +4,8 @@ export {
 	InvoiceRecordsArraySchema,
 	type InvoiceRecord,
 } from './invoiceSchemas';
+
+export {
+	ProcessedInvoiceSchema,
+	type ProcessedInvoice,
+} from './processedInvoice';
