@@ -368,85 +368,85 @@ describe('detectFailures handler', () => {
 			expect(result).toEqual({});
 		});
 
-		// it('should throw error when failures are detected', async () => {
-		// 	const event: DetectFailuresInput = {
-		// 		invoicesCount: 1,
-		// 		invoices: [
-		// 			{
-		// 				invoiceId: 'INV-001',
-		// 				accountId: 'ACC-001',
-		// 				invoiceNumber: 'INV-001',
-		// 				invoiceBalance: 100,
-		// 			},
-		// 		],
-		// 		processedInvoices: [
-		// 			{
-		// 				invoiceId: 'INV-001',
-		// 				accountId: 'ACC-001',
-		// 				invoiceNumber: 'INV-001',
-		// 				invoiceBalance: 100,
-		// 				applyCreditToAccountBalanceAttempt: {
-		// 					Success: false,
-		// 					error: 'Credit application failed',
-		// 				},
-		// 				checkForActiveSubAttempt: {
-		// 					Success: true,
-		// 					hasActiveSub: true,
-		// 				},
-		// 				checkForActivePaymentMethodAttempt: {
-		// 					Success: true,
-		// 					hasActivePaymentMethod: true,
-		// 					activePaymentMethods: [],
-		// 				},
-		// 			},
-		// 		],
-		// 		s3UploadAttemptStatus: 'success',
-		// 		filePath: 'test-file-path',
-		// 	};
+		it('should throw error when failures are detected', async () => {
+			const event: DetectFailuresInput = {
+				invoicesCount: 1,
+				invoices: [
+					{
+						invoiceId: 'INV-001',
+						accountId: 'ACC-001',
+						invoiceNumber: 'INV-001',
+						invoiceBalance: 100,
+					},
+				],
+				processedInvoices: [
+					{
+						invoiceId: 'INV-001',
+						accountId: 'ACC-001',
+						invoiceNumber: 'INV-001',
+						invoiceBalance: 100,
+						applyCreditToAccountBalanceAttempt: {
+							Success: false,
+							error: 'Credit application failed',
+						},
+						checkForActiveSubAttempt: {
+							Success: true,
+							hasActiveSub: true,
+						},
+						checkForActivePaymentMethodAttempt: {
+							Success: true,
+							hasActivePaymentMethod: true,
+							activePaymentMethods: [],
+						},
+					},
+				],
+				s3UploadAttemptStatus: 'success',
+				filePath: 'test-file-path',
+			};
 
-		// 	await expect(handler(event)).rejects.toThrow(
-		// 		'Failure occurred. Check logs.',
-		// 	);
-		// });
+			await expect(handler(event)).rejects.toThrow(
+				'Something went wrong during invoice processing. Inspect payload for details:',
+			);
+		});
 
-		// it('should throw error when s3UploadAttemptStatus is error', async () => {
-		// 	const event: DetectFailuresInput = {
-		// 		invoicesCount: 1,
-		// 		invoices: [
-		// 			{
-		// 				invoiceId: 'INV-001',
-		// 				accountId: 'ACC-001',
-		// 				invoiceNumber: 'INV-001',
-		// 				invoiceBalance: 100,
-		// 			},
-		// 		],
-		// 		processedInvoices: [
-		// 			{
-		// 				invoiceId: 'INV-001',
-		// 				accountId: 'ACC-001',
-		// 				invoiceNumber: 'INV-001',
-		// 				invoiceBalance: 100,
-		// 				applyCreditToAccountBalanceAttempt: {
-		// 					Success: true,
-		// 				},
-		// 				checkForActiveSubAttempt: {
-		// 					Success: true,
-		// 					hasActiveSub: true,
-		// 				},
-		// 				checkForActivePaymentMethodAttempt: {
-		// 					Success: true,
-		// 					hasActivePaymentMethod: true,
-		// 					activePaymentMethods: [],
-		// 				},
-		// 			},
-		// 		],
-		// 		s3UploadAttemptStatus: 'error',
-		// 		filePath: 'test-file-path',
-		// 	};
+		it('should throw error when s3UploadAttemptStatus is error', async () => {
+			const event: DetectFailuresInput = {
+				invoicesCount: 1,
+				invoices: [
+					{
+						invoiceId: 'INV-001',
+						accountId: 'ACC-001',
+						invoiceNumber: 'INV-001',
+						invoiceBalance: 100,
+					},
+				],
+				processedInvoices: [
+					{
+						invoiceId: 'INV-001',
+						accountId: 'ACC-001',
+						invoiceNumber: 'INV-001',
+						invoiceBalance: 100,
+						applyCreditToAccountBalanceAttempt: {
+							Success: true,
+						},
+						checkForActiveSubAttempt: {
+							Success: true,
+							hasActiveSub: true,
+						},
+						checkForActivePaymentMethodAttempt: {
+							Success: true,
+							hasActivePaymentMethod: true,
+							activePaymentMethods: [],
+						},
+					},
+				],
+				s3UploadAttemptStatus: 'error',
+				filePath: 'test-file-path',
+			};
 
-		// 	await expect(handler(event)).rejects.toThrow(
-		// 		'Failure occurred. Check logs.',
-		// 	);
-		// });
+			await expect(handler(event)).rejects.toThrow(
+				'Something went wrong during invoice processing. Inspect payload for details:',
+			);
+		});
 	});
 });
