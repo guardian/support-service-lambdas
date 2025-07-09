@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import { z } from 'zod';
 import type { DataSubjectRequestState } from '../../interfaces/data-subject-request-state';
 import { DataSubjectRequestStatus } from '../../interfaces/data-subject-request-state';
 import type { DataSubjectRequestSubmission } from '../../interfaces/data-subject-request-submission';
@@ -11,92 +12,103 @@ import { getEnv } from '../utils/config';
 
 /**
  * A branded string type that represents a GUID (Globally Unique Identifier).
- *
- * This uses TypeScript's branded type pattern to create a nominal type that is
- * structurally a string but distinct from regular strings at compile time.
- *
- * Benefits:
- * - Prevents accidentally passing regular strings where GUIDs are expected
- * - Provides type safety between different kinds of identifiers
- * - Self-documenting code that makes GUID usage explicit
- * - No runtime overhead - compiles to regular strings
- *
- * @example
- * ```typescript
- * // Must explicitly cast or create GUID values
- * const guid = "550e8400-e29b-41d4-a716-446655440000" as GUID;
- *
- * // Or use a helper function
- * function createGUID(value: string): GUID {
- *   return value as GUID;
- * }
- *
- * // This would cause a compile error:
- * const regularString = "hello world";
- * const ref: InitiationReference = regularString; // ❌ Type error
- * ```
  */
 export type GUID = string & { readonly __brand: unique symbol };
 
 /**
  * A GUID that uniquely identifies an initiation reference.
- *
- * This branded type ensures that only proper GUID values can be assigned
- * to initiation references, preventing mix-ups with other string values.
  */
 export type InitiationReference = GUID;
 
-/**
- * Baton data structures are described here:
- * https://github.com/guardian/baton/blob/1037c63c9bd782aed514bf6aaa38a54dabf699eb/README.md#general-request--response-fields
- */
-interface BatonRerEventRequestBase {
-	requestType: 'RER';
+// Zod schemas for validation
+const InitiationReferenceSchema = z.string().uuid().transform((val) => val as InitiationReference);
+
+const BatonRerEventRequestBaseSchema = z.object({
+	requestType: z.literal('RER'),
+});
+
+const BatonRerEventInitiateRequestSchema = BatonRerEventRequestBaseSchema.extend({
+	action: z.literal('initiate'),
+	subjectId: z.string().min(1, 'Subject Id is required'),
+	subjectEmail: z.string().email().optional(),
+	dataProvider: z.literal('mparticlerer'),
+});
+
+const BatonRerEventStatusRequestSchema = BatonRerEventRequestBaseSchema.extend({
+	action: z.literal('status'),
+	initiationReference: InitiationReferenceSchema,
+});
+
+export const BatonRerEventRequestSchema = z.discriminatedUnion('action', [
+	BatonRerEventInitiateRequestSchema,
+	BatonRerEventStatusRequestSchema,
+]);
+
+const BatonRerEventResponseBaseSchema = z.object({
+	requestType: z.literal('RER'),
+	status: z.enum(['pending', 'completed', 'failed']),
+	message: z.string().optional(),
+});
+
+const BatonRerEventInitiateResponseSchema = BatonRerEventResponseBaseSchema.extend({
+	action: z.literal('initiate'),
+	initiationReference: InitiationReferenceSchema,
+});
+
+const BatonRerEventStatusResponseSchema = BatonRerEventResponseBaseSchema.extend({
+	action: z.literal('status'),
+});
+
+export const BatonRerEventResponseSchema = z.discriminatedUnion('action', [
+	BatonRerEventInitiateResponseSchema,
+	BatonRerEventStatusResponseSchema,
+]);
+
+// Infer types from schemas
+export type BatonRerEventInitiateRequest = z.infer<typeof BatonRerEventInitiateRequestSchema>;
+export type BatonRerEventStatusRequest = z.infer<typeof BatonRerEventStatusRequestSchema>;
+export type BatonRerEventRequest = z.infer<typeof BatonRerEventRequestSchema>;
+
+export type BatonRerEventInitiateResponse = z.infer<typeof BatonRerEventInitiateResponseSchema>;
+export type BatonRerEventStatusResponse = z.infer<typeof BatonRerEventStatusResponseSchema>;
+export type BatonRerEventResponse = z.infer<typeof BatonRerEventResponseSchema>;
+
+// Custom validation error class
+export class ValidationError extends Error {
+	constructor(
+		message: string,
+		public readonly errors: z.ZodError,
+	) {
+		super(message);
+		this.name = 'ValidationError';
+	}
 }
 
-/**
- * Initiate RER data request structure
- * https://github.com/guardian/baton/blob/1037c63c9bd782aed514bf6aaa38a54dabf699eb/README.md#rer-initiate-call
- */
-interface BatonRerEventInitiateRequest extends BatonRerEventRequestBase {
-	action: 'initiate';
-	subjectId: string; // always the identity id
-	subjectEmail?: string;
-	dataProvider: 'mparticlerer';
+// Helper function to validate and parse requests
+function validateRequest(data: BatonRerEventRequest): BatonRerEventRequest {
+	const result = BatonRerEventRequestSchema.safeParse(data);
+	if (!result.success) {
+		console.error('Request validation failed:', result.error);
+		throw new ValidationError(
+			'Invalid request format',
+			result.error,
+		);
+	}
+	return result.data;
 }
 
-interface BatonRerEventStatusRequest extends BatonRerEventRequestBase {
-	action: 'status';
-	initiationReference: InitiationReference;
+// Helper function to validate responses before returning
+function validateResponse<T extends BatonRerEventResponse>(data: T): T {
+	const result = BatonRerEventResponseSchema.safeParse(data);
+	if (!result.success) {
+		console.error('Response validation failed:', result.error);
+		throw new ValidationError(
+			'Invalid response format',
+			result.error,
+		);
+	}
+	return data;
 }
-
-export type BatonRerEventRequest =
-	| BatonRerEventInitiateRequest
-	| BatonRerEventStatusRequest;
-
-interface BatonRerEventResponseBase {
-	requestType: 'RER';
-	status: 'pending' | 'completed' | 'failed';
-	message?: string;
-}
-
-/**
- * Initiate RER data response structure
- * https://github.com/guardian/baton/blob/1037c63c9bd782aed514bf6aaa38a54dabf699eb/README.md#rer-response
- */
-export interface BatonRerEventInitiateResponse
-	extends BatonRerEventResponseBase {
-	action: 'initiate';
-	initiationReference: InitiationReference;
-}
-
-export interface BatonRerEventStatusResponse extends BatonRerEventResponseBase {
-	action: 'status';
-}
-
-export type BatonRerEventResponse =
-	| BatonRerEventInitiateResponse
-	| BatonRerEventStatusResponse;
 
 async function handleInitiateRequest(
 	request: BatonRerEventInitiateRequest,
@@ -131,14 +143,17 @@ async function handleInitiateRequest(
 			userId: request.subjectId,
 			environment,
 		});
-	return {
-		requestType: 'RER',
-		action: 'initiate',
-		status: 'pending',
+
+	const response: BatonRerEventInitiateResponse = {
+		requestType: 'RER' as const,
+		action: 'initiate' as const,
+		status: 'pending' as const,
 		initiationReference:
 			dataSubjectRequestSubmissionResponse.requestId as InitiationReference,
 		message: `Expected completion time: ${dataSubjectRequestSubmissionResponse.expectedCompletionTime.toISOString()}`,
 	};
+
+	return validateResponse(response);
 }
 
 async function handleStatusRequest(
@@ -161,22 +176,26 @@ async function handleStatusRequest(
 
 	const dataSubjectRequestState: DataSubjectRequestState =
 		await getStatusOfDataSubjectRequest(request.initiationReference);
-	return {
-		requestType: 'RER',
-		action: 'status',
+
+	const response: BatonRerEventStatusResponse = {
+		requestType: 'RER' as const,
+		action: 'status' as const,
 		status: mapStatus(dataSubjectRequestState.requestStatus),
 	};
+
+	return validateResponse(response);
 }
 
 export const batonRerRouter = {
 	routeRequest: async (
 		event: BatonRerEventRequest,
 	): Promise<BatonRerEventResponse> => {
-		switch (event.action) {
+		const validatedEvent = validateRequest(event);
+		switch (validatedEvent.action) {
 			case 'initiate':
-				return handleInitiateRequest(event);
+				return handleInitiateRequest(validatedEvent);
 			case 'status':
-				return handleStatusRequest(event);
+				return handleStatusRequest(validatedEvent);
 		}
 	},
 };
