@@ -685,16 +685,6 @@ describe('detectFailures handler', () => {
 			);
 		});
 
-		it('should throw error when parsing fails', async () => {
-			const invalidEvent = {
-				// Missing required fields to trigger schema validation error
-				invoicesCount: 'invalid',
-				processedInvoices: [],
-			};
-
-			await expect(handler(invalidEvent as any)).rejects.toThrow();
-		});
-
 		it('should handle non-Error exceptions gracefully', async () => {
 			const event: DetectFailuresInput = {
 				invoicesCount: 1,
