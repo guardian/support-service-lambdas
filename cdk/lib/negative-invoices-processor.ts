@@ -326,6 +326,20 @@ export class NegativeInvoicesProcessor extends GuStack {
 			)
 			.otherwise(new Pass(this, 'check for valid email lambda will go here'));
 
+		const activePaymentMethodCalloutWasSuccessful = new Choice(
+			this,
+			'Successful active payment method callout?',
+		)
+			.when(
+				Condition.booleanEquals(
+					'$.checkForActivePaymentMethodAttempt.Success',
+					true,
+				),
+
+				hasActivePaymentMethodChoice,
+			)
+			.otherwise(new Pass(this, 'End 4'));
+
 		const hasActiveSubChoice = new Choice(this, 'Has active sub?')
 			.when(
 				Condition.and(
@@ -334,7 +348,9 @@ export class NegativeInvoicesProcessor extends GuStack {
 						false,
 					),
 				),
-				getPaymentMethodsLambdaTask.next(hasActivePaymentMethodChoice),
+				getPaymentMethodsLambdaTask.next(
+					activePaymentMethodCalloutWasSuccessful,
+				),
 			)
 			.otherwise(new Pass(this, 'End 3'));
 
