@@ -329,14 +329,23 @@ export class NegativeInvoicesProcessor extends GuStack {
 		const hasActiveSubChoice = new Choice(this, 'Has active sub?')
 			.when(
 				Condition.and(
-					// Add your second condition here, for example:
-					Condition.booleanEquals('$.checkForActiveSubAttempt.Success', true),
 					Condition.booleanEquals(
 						'$.checkForActiveSubAttempt.hasActiveSub',
 						false,
 					),
 				),
 				getPaymentMethodsLambdaTask.next(hasActivePaymentMethodChoice),
+			)
+			.otherwise(new Pass(this, 'End 3'));
+
+		const activeSubCalloutWasSuccessful = new Choice(
+			this,
+			'Successful active sub callout?',
+		)
+			.when(
+				Condition.booleanEquals('$.checkForActiveSubAttempt.Success', true),
+
+				hasActiveSubChoice,
 			)
 			.otherwise(new Pass(this, 'End 2'));
 
@@ -349,7 +358,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 					'$.applyCreditToAccountBalanceAttempt.Success',
 					true,
 				),
-				checkForActiveSubLambdaTask.next(hasActiveSubChoice),
+				checkForActiveSubLambdaTask.next(activeSubCalloutWasSuccessful),
 			)
 			.otherwise(new Pass(this, 'End 1'));
 
