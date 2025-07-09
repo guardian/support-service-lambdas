@@ -62,7 +62,7 @@ interface BatonRerEventInitiateRequest extends BatonRerEventRequestBase {
 	action: 'initiate';
 	subjectId: string; // always the identity id
 	subjectEmail?: string;
-	dataProvider: string;
+	dataProvider: 'mparticlerer';
 }
 
 interface BatonRerEventStatusRequest extends BatonRerEventRequestBase {
