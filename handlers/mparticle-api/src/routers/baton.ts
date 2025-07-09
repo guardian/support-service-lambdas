@@ -48,7 +48,7 @@ export type InitiationReference = GUID;
 
 /**
  * Baton data structures are described here:
- * https://github.com/guardian/baton/blob/1037c63c9bd782aed514bf6aaa38a54dabf699eb/README.md
+ * https://github.com/guardian/baton/blob/1037c63c9bd782aed514bf6aaa38a54dabf699eb/README.md#general-request--response-fields
  */
 interface BatonRerEventRequestBase {
 	requestType: 'RER';
