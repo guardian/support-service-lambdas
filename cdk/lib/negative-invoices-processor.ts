@@ -324,7 +324,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 				),
 				doCreditBalanceRefundLambdaTask,
 			)
-			.otherwise(new Pass(this, 'check for valid email lambda will go here'));
+			.otherwise(new Pass(this, 'No active payment method found'));
 
 		const activePaymentMethodCalloutWasSuccessful = new Choice(
 			this,
