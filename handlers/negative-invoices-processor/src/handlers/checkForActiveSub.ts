@@ -15,7 +15,9 @@ export const handler = async (
 			zuoraClient,
 			parsedEvent.accountId,
 		);
-
+		throw new Error(
+			`This is a test error to check if the error handling works correctly. Account ID: ${parsedEvent.accountId}`,
+		);
 		return {
 			...parsedEvent,
 			checkForActiveSubAttempt: {
