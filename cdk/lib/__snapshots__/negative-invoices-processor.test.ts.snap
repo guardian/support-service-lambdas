@@ -1487,7 +1487,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Has active sub?":{"Type":"Choice","Choices":[{"Variable":"$.checkForActiveSubAttempt.hasActiveSub","BooleanEquals":false,"Next":"Get Payment Methods"}],"Default":"End 2"},"End 2":{"Type":"Pass","End":true},"Get Payment Methods":{"Next":"Has active payment method?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Has active sub?":{"Type":"Choice","Choices":[{"And":[{"Variable":"$.checkForActiveSubAttempt.Success","BooleanEquals":true},{"Variable":"$.checkForActiveSubAttempt.hasActiveSub","BooleanEquals":false}],"Next":"Get Payment Methods"}],"Default":"End 2"},"End 2":{"Type":"Pass","End":true},"Get Payment Methods":{"Next":"Has active payment method?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -3702,7 +3702,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Has active sub?":{"Type":"Choice","Choices":[{"Variable":"$.checkForActiveSubAttempt.hasActiveSub","BooleanEquals":false,"Next":"Get Payment Methods"}],"Default":"End 2"},"End 2":{"Type":"Pass","End":true},"Get Payment Methods":{"Next":"Has active payment method?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Has active sub?":{"Type":"Choice","Choices":[{"And":[{"Variable":"$.checkForActiveSubAttempt.Success","BooleanEquals":true},{"Variable":"$.checkForActiveSubAttempt.hasActiveSub","BooleanEquals":false}],"Next":"Get Payment Methods"}],"Default":"End 2"},"End 2":{"Type":"Pass","End":true},"Get Payment Methods":{"Next":"Has active payment method?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
