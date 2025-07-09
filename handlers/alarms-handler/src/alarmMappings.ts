@@ -110,6 +110,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'zuora-callout-apis',
 		'zuora-oracle-fusion',
 		'write-off-unpaid-invoices',
+		'negative-invoices-processor',
 
 		// stripe
 		'stripe-patrons-data',

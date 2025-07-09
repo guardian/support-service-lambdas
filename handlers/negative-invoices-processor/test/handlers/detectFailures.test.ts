@@ -405,7 +405,7 @@ describe('detectFailures handler', () => {
 			};
 
 			await expect(handler(event)).rejects.toThrow(
-				'Failure occurred. Check logs.',
+				'Something went wrong during invoice processing. Inspect payload for details:',
 			);
 		});
 
@@ -445,7 +445,7 @@ describe('detectFailures handler', () => {
 			};
 
 			await expect(handler(event)).rejects.toThrow(
-				'Failure occurred. Check logs.',
+				'Something went wrong during invoice processing. Inspect payload for details:',
 			);
 		});
 	});

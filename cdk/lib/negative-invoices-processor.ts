@@ -2,7 +2,8 @@ import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
-import { Duration } from 'aws-cdk-lib';
+import { aws_cloudwatch, Duration } from 'aws-cdk-lib';
+import { Metric, Stats, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import {
 	Effect,
 	PolicyStatement,
@@ -21,6 +22,7 @@ import {
 	StateMachine,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
+import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { nodeVersion } from './node-version';
 
 export class NegativeInvoicesProcessor extends GuStack {
@@ -303,11 +305,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 				lambdaFunction: detectFailuresLambda,
 				outputPath: '$.Payload',
 			},
-		).addRetry({
-			errors: ['States.ALL'],
-			interval: Duration.seconds(10),
-			maxAttempts: 2,
-		});
+		);
 
 		const invoiceProcessorMap = new Map(this, 'Invoice processor map', {
 			maxConcurrency: 1,
@@ -367,6 +365,34 @@ export class NegativeInvoicesProcessor extends GuStack {
 		new StateMachine(this, `${appName}-state-machine-${this.stage}`, {
 			stateMachineName: `${appName}-${this.stage}`,
 			definitionBody: definitionBody,
+		});
+
+		const lambdaFunctionsToAlarmOn = [getInvoicesLambda, detectFailuresLambda];
+
+		lambdaFunctionsToAlarmOn.forEach((lambdaFunction, index) => {
+			new SrLambdaAlarm(this, `alarm-${index}`, {
+				alarmName: `Negative Invoices Processor - ${lambdaFunction.functionName} - something went wrong - ${this.stage}`,
+				alarmDescription:
+					'Something went wrong when executing the Negative Invoices Processor. See Cloudwatch logs for more information on the error.',
+				datapointsToAlarm: 1,
+				evaluationPeriods: 1,
+				lambdaFunctionNames: lambdaFunction.functionName,
+				comparisonOperator:
+					aws_cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+				metric: new Metric({
+					metricName: 'Errors',
+					namespace: 'AWS/Lambda',
+					statistic: Stats.SUM,
+					period: Duration.seconds(60),
+					dimensionsMap: {
+						FunctionName: lambdaFunction.functionName,
+					},
+				}),
+				threshold: 0,
+				treatMissingData: TreatMissingData.MISSING,
+				app: appName,
+				actionsEnabled: this.stage === 'PROD',
+			});
 		});
 	}
 }

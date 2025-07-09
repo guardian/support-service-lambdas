@@ -12,10 +12,11 @@ export const handler = async (event: DetectFailuresInput) => {
 		);
 
 		if (failureDetected) {
-			throw new Error('Failure occurred. Check logs.');
+			throw new Error(
+				`Something went wrong during invoice processing. Inspect payload for details: ${JSON.stringify(parsedEvent, null, 2)}`,
+			);
 		}
 	} catch (error) {
-		console.log('Error occurred:', error);
 		throw new Error(
 			error instanceof Error ? error.message : JSON.stringify(error, null, 2),
 		);
