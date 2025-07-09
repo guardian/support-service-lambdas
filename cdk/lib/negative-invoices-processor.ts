@@ -338,7 +338,9 @@ export class NegativeInvoicesProcessor extends GuStack {
 
 				hasActivePaymentMethodChoice,
 			)
-			.otherwise(new Pass(this, 'End 4'));
+			.otherwise(
+				new Pass(this, 'Error: active payment method check unsuccessful'),
+			);
 
 		const hasActiveSubChoice = new Choice(this, 'Has active sub?')
 			.when(
@@ -352,7 +354,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 					activePaymentMethodCalloutWasSuccessful,
 				),
 			)
-			.otherwise(new Pass(this, 'End 3'));
+			.otherwise(new Pass(this, 'Has active sub: true'));
 
 		const activeSubCalloutWasSuccessful = new Choice(
 			this,
@@ -363,7 +365,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 
 				hasActiveSubChoice,
 			)
-			.otherwise(new Pass(this, 'End 2'));
+			.otherwise(new Pass(this, 'Error: active sub check unsuccessful'));
 
 		const CreditAppliedSuccessfullyChoice = new Choice(
 			this,
@@ -376,7 +378,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 				),
 				checkForActiveSubLambdaTask.next(activeSubCalloutWasSuccessful),
 			)
-			.otherwise(new Pass(this, 'End 1'));
+			.otherwise(new Pass(this, 'Error: apply credit unsuccessful'));
 
 		invoiceProcessorMap.iterator(
 			applyCreditToAccountBalanceLambdaTask.next(
