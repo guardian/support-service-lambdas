@@ -175,6 +175,124 @@ describe('detectFailures handler', () => {
 
 			expect(result).toBe(true);
 		});
+
+		it('should return true when invoice has no active subscription and no active payment method (even if all API calls succeed)', () => {
+			const invoice: ProcessedInvoice = {
+				invoiceId: 'INV-001',
+				accountId: 'ACC-001',
+				invoiceNumber: 'INV-001',
+				invoiceBalance: 100,
+				applyCreditToAccountBalanceAttempt: {
+					Success: true,
+				},
+				checkForActiveSubAttempt: {
+					Success: true,
+					hasActiveSub: false,
+				},
+				checkForActivePaymentMethodAttempt: {
+					Success: true,
+					hasActivePaymentMethod: false,
+					activePaymentMethods: [],
+				},
+			};
+
+			const result = invoiceHasAtLeastOneProcessingFailure(invoice);
+
+			expect(result).toBe(true);
+		});
+
+		it('should return false when invoice has no active subscription but has active payment method', () => {
+			const invoice: ProcessedInvoice = {
+				invoiceId: 'INV-001',
+				accountId: 'ACC-001',
+				invoiceNumber: 'INV-001',
+				invoiceBalance: 100,
+				applyCreditToAccountBalanceAttempt: {
+					Success: true,
+				},
+				checkForActiveSubAttempt: {
+					Success: true,
+					hasActiveSub: false,
+				},
+				checkForActivePaymentMethodAttempt: {
+					Success: true,
+					hasActivePaymentMethod: true,
+					activePaymentMethods: [],
+				},
+			};
+
+			const result = invoiceHasAtLeastOneProcessingFailure(invoice);
+
+			expect(result).toBe(false);
+		});
+
+		it('should return false when invoice has active subscription but no active payment method', () => {
+			const invoice: ProcessedInvoice = {
+				invoiceId: 'INV-001',
+				accountId: 'ACC-001',
+				invoiceNumber: 'INV-001',
+				invoiceBalance: 100,
+				applyCreditToAccountBalanceAttempt: {
+					Success: true,
+				},
+				checkForActiveSubAttempt: {
+					Success: true,
+					hasActiveSub: true,
+				},
+				checkForActivePaymentMethodAttempt: {
+					Success: true,
+					hasActivePaymentMethod: false,
+					activePaymentMethods: [],
+				},
+			};
+
+			const result = invoiceHasAtLeastOneProcessingFailure(invoice);
+
+			expect(result).toBe(false);
+		});
+
+		it('should return true when checkForActiveSubAttempt has no active sub and checkForActivePaymentMethodAttempt is undefined', () => {
+			const invoice: ProcessedInvoice = {
+				invoiceId: 'INV-001',
+				accountId: 'ACC-001',
+				invoiceNumber: 'INV-001',
+				invoiceBalance: 100,
+				applyCreditToAccountBalanceAttempt: {
+					Success: true,
+				},
+				checkForActiveSubAttempt: {
+					Success: true,
+					hasActiveSub: false,
+				},
+				// checkForActivePaymentMethodAttempt is undefined
+			};
+
+			const result = invoiceHasAtLeastOneProcessingFailure(invoice);
+
+			expect(result).toBe(true);
+		});
+
+		it('should return true when checkForActiveSubAttempt is undefined and checkForActivePaymentMethodAttempt has no active payment method', () => {
+			const invoice: ProcessedInvoice = {
+				invoiceId: 'INV-001',
+				accountId: 'ACC-001',
+				invoiceNumber: 'INV-001',
+				invoiceBalance: 100,
+				applyCreditToAccountBalanceAttempt: {
+					Success: true,
+				},
+				// checkForActiveSubAttempt is undefined
+				checkForActivePaymentMethodAttempt: {
+					Success: true,
+					hasActivePaymentMethod: false,
+					activePaymentMethods: [],
+				},
+			};
+
+			const result = invoiceHasAtLeastOneProcessingFailure(invoice);
+
+			expect(result).toBe(true);
+		});
 	});
 
 	describe('failureExistsOnInvoiceProcessingAttempt', () => {
@@ -326,6 +444,84 @@ describe('detectFailures handler', () => {
 
 			expect(result).toBe(true);
 		});
+
+		it('should return true when s3UploadAttemptStatus is success but invoice has no active sub and no active payment method', async () => {
+			const processedInvoices: ProcessedInvoice[] = [
+				{
+					invoiceId: 'INV-001',
+					accountId: 'ACC-001',
+					invoiceNumber: 'INV-001',
+					invoiceBalance: 100,
+					applyCreditToAccountBalanceAttempt: {
+						Success: true,
+					},
+					checkForActiveSubAttempt: {
+						Success: true,
+						hasActiveSub: false,
+					},
+					checkForActivePaymentMethodAttempt: {
+						Success: true,
+						hasActivePaymentMethod: false,
+						activePaymentMethods: [],
+					},
+				},
+			];
+
+			const result = await failureExistsOnInvoiceProcessingAttempt(
+				processedInvoices,
+				'success',
+			);
+
+			expect(result).toBe(true);
+		});
+
+		it('should return true when some invoices succeed but one has no active sub and no active payment method', async () => {
+			const processedInvoices: ProcessedInvoice[] = [
+				{
+					invoiceId: 'INV-001',
+					accountId: 'ACC-001',
+					invoiceNumber: 'INV-001',
+					invoiceBalance: 100,
+					applyCreditToAccountBalanceAttempt: {
+						Success: true,
+					},
+					checkForActiveSubAttempt: {
+						Success: true,
+						hasActiveSub: true,
+					},
+					checkForActivePaymentMethodAttempt: {
+						Success: true,
+						hasActivePaymentMethod: true,
+						activePaymentMethods: [],
+					},
+				},
+				{
+					invoiceId: 'INV-002',
+					accountId: 'ACC-002',
+					invoiceNumber: 'INV-002',
+					invoiceBalance: 200,
+					applyCreditToAccountBalanceAttempt: {
+						Success: true,
+					},
+					checkForActiveSubAttempt: {
+						Success: true,
+						hasActiveSub: false,
+					},
+					checkForActivePaymentMethodAttempt: {
+						Success: true,
+						hasActivePaymentMethod: false,
+						activePaymentMethods: [],
+					},
+				},
+			];
+
+			const result = await failureExistsOnInvoiceProcessingAttempt(
+				processedInvoices,
+				'success',
+			);
+
+			expect(result).toBe(true);
+		});
 	});
 
 	describe('handler', () => {
@@ -441,6 +637,97 @@ describe('detectFailures handler', () => {
 					},
 				],
 				s3UploadAttemptStatus: 'error',
+				filePath: 'test-file-path',
+			};
+
+			await expect(handler(event)).rejects.toThrow(
+				'Something went wrong during invoice processing. Inspect payload for details:',
+			);
+		});
+
+		it('should throw error when invoice has no active subscription and no active payment method', async () => {
+			const event: DetectFailuresInput = {
+				invoicesCount: 1,
+				invoices: [
+					{
+						invoiceId: 'INV-001',
+						accountId: 'ACC-001',
+						invoiceNumber: 'INV-001',
+						invoiceBalance: 100,
+					},
+				],
+				processedInvoices: [
+					{
+						invoiceId: 'INV-001',
+						accountId: 'ACC-001',
+						invoiceNumber: 'INV-001',
+						invoiceBalance: 100,
+						applyCreditToAccountBalanceAttempt: {
+							Success: true,
+						},
+						checkForActiveSubAttempt: {
+							Success: true,
+							hasActiveSub: false,
+						},
+						checkForActivePaymentMethodAttempt: {
+							Success: true,
+							hasActivePaymentMethod: false,
+							activePaymentMethods: [],
+						},
+					},
+				],
+				s3UploadAttemptStatus: 'success',
+				filePath: 'test-file-path',
+			};
+
+			await expect(handler(event)).rejects.toThrow(
+				'Something went wrong during invoice processing. Inspect payload for details:',
+			);
+		});
+
+		it('should throw error when parsing fails', async () => {
+			const invalidEvent = {
+				// Missing required fields to trigger schema validation error
+				invoicesCount: 'invalid',
+				processedInvoices: [],
+			};
+
+			await expect(handler(invalidEvent as any)).rejects.toThrow();
+		});
+
+		it('should handle non-Error exceptions gracefully', async () => {
+			const event: DetectFailuresInput = {
+				invoicesCount: 1,
+				invoices: [
+					{
+						invoiceId: 'INV-001',
+						accountId: 'ACC-001',
+						invoiceNumber: 'INV-001',
+						invoiceBalance: 100,
+					},
+				],
+				processedInvoices: [
+					{
+						invoiceId: 'INV-001',
+						accountId: 'ACC-001',
+						invoiceNumber: 'INV-001',
+						invoiceBalance: 100,
+						applyCreditToAccountBalanceAttempt: {
+							Success: false,
+							error: 'Credit application failed',
+						},
+						checkForActiveSubAttempt: {
+							Success: true,
+							hasActiveSub: true,
+						},
+						checkForActivePaymentMethodAttempt: {
+							Success: true,
+							hasActivePaymentMethod: true,
+							activePaymentMethods: [],
+						},
+					},
+				],
+				s3UploadAttemptStatus: 'success',
 				filePath: 'test-file-path',
 			};
 

@@ -40,6 +40,13 @@ export const failureExistsOnInvoiceProcessingAttempt = async (
 export function invoiceHasAtLeastOneProcessingFailure(
 	invoice: ProcessedInvoice,
 ): boolean {
+	return (
+		atLeastOneCalloutFailed(invoice) ||
+		invoiceHasNoActiveSubAndNoActivePaymentMethod(invoice)
+	);
+}
+
+function atLeastOneCalloutFailed(invoice: ProcessedInvoice): boolean {
 	const {
 		applyCreditToAccountBalanceAttempt,
 		checkForActiveSubAttempt,
@@ -50,5 +57,17 @@ export function invoiceHasAtLeastOneProcessingFailure(
 		!applyCreditToAccountBalanceAttempt.Success ||
 		!checkForActiveSubAttempt?.Success ||
 		!checkForActivePaymentMethodAttempt?.Success
+	);
+}
+
+function invoiceHasNoActiveSubAndNoActivePaymentMethod(
+	invoice: ProcessedInvoice,
+): boolean {
+	const { checkForActiveSubAttempt, checkForActivePaymentMethodAttempt } =
+		invoice;
+
+	return (
+		checkForActiveSubAttempt?.hasActiveSub === false &&
+		checkForActivePaymentMethodAttempt?.hasActivePaymentMethod === false
 	);
 }
