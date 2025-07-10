@@ -11,7 +11,7 @@ import com.gu.productmove.endpoint.move.stringFor
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.GetAccount.GetAccountResponse
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlanCharge}
-import com.gu.productmove.zuora.model.SubscriptionName
+import com.gu.productmove.zuora.model.{InvoiceId, SubscriptionName}
 import com.gu.productmove.zuora.*
 import com.gu.util.config
 import sttp.tapir.*
@@ -19,6 +19,7 @@ import zio.{Clock, Task, ZIO}
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 trait ToRecurringContribution {
   def run(
@@ -31,6 +32,7 @@ trait ToRecurringContribution {
 
 class ToRecurringContributionImpl(
     subscriptionUpdate: SubscriptionUpdate,
+    termRenewal: TermRenewal,
     sqs: SQS,
     stage: Stage,
 ) extends ToRecurringContribution {
@@ -75,11 +77,24 @@ class ToRecurringContributionImpl(
       // Make sure that price is valid and acceptable
       _ <- validateOldMembershipPrice(currency, billingPeriod, price)
 
+      // Check if we need term renewal to avoid "cancellation date cannot be later than term end date" error
+      // We need to perform term renewal if the chargedThroughDate (which will be used as the remove date)
+      // extends beyond the current subscription term end date.
+      chargedThroughDate = activeRatePlanCharge.chargedThroughDate.get
+      needsTermRenewal = activeRatePlanCharge.chargedThroughDate.exists(_.isAfter(subscription.termEndDate))
+      _ <- ZIO.when(needsTermRenewal) {
+        ZIO.log(
+          s"Performing term renewal because chargedThroughDate $chargedThroughDate is after termEndDate ${subscription.termEndDate}",
+        ) *>
+          termRenewal.renewSubscription(subscriptionName, runBilling = false) *>
+          ZIO.log(s"Term renewal completed for subscription $subscriptionName")
+      }
+
       updateRequestBody <- getRatePlans(
         billingPeriod,
         price,
         subscription.ratePlans,
-        activeRatePlanCharge.chargedThroughDate.get,
+        chargedThroughDate,
       ).map { case (addRatePlan, removeRatePlan) =>
         SwitchProductUpdateRequest(
           add = addRatePlan,
