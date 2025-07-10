@@ -54,12 +54,27 @@ function atLeastOneCalloutFailed(invoice: ProcessedInvoice): boolean {
 		refundAttempt,
 	} = invoice;
 
-	return (
+	// Check basic API call failures that always happen
+	if (
 		!applyCreditToAccountBalanceAttempt.Success ||
-		!checkForActiveSubAttempt?.Success ||
-		!checkForActivePaymentMethodAttempt?.Success ||
-		!refundAttempt?.Success
-	);
+		!checkForActiveSubAttempt?.Success
+	) {
+		return true;
+	}
+
+	// Only check payment method and refund attempts if hasActiveSub is false
+	if (checkForActiveSubAttempt?.hasActiveSub === false) {
+		if (!checkForActivePaymentMethodAttempt?.Success) {
+			return true;
+		}
+
+		// Only check refundAttempt if hasActivePaymentMethod is true
+		if (checkForActivePaymentMethodAttempt?.hasActivePaymentMethod === true) {
+			return !refundAttempt?.Success;
+		}
+	}
+
+	return false;
 }
 
 function invoiceHasNoActiveSubAndNoActivePaymentMethod(
