@@ -77,12 +77,10 @@ class ToRecurringContributionImpl(
       // Make sure that price is valid and acceptable
       _ <- validateOldMembershipPrice(currency, billingPeriod, price)
 
-      today <- Clock.currentDateTime.map(_.toLocalDate)
-      chargedThroughDate = activeRatePlanCharge.chargedThroughDate.get
-
       // Check if we need term renewal to avoid "cancellation date cannot be later than term end date" error
       // We need to perform term renewal if the chargedThroughDate (which will be used as the remove date)
       // extends beyond the current subscription term end date.
+      chargedThroughDate = activeRatePlanCharge.chargedThroughDate.get
       needsTermRenewal = activeRatePlanCharge.chargedThroughDate.exists(_.isAfter(subscription.termEndDate))
       _ <- ZIO.when(needsTermRenewal) {
         ZIO.log(
@@ -111,7 +109,7 @@ class ToRecurringContributionImpl(
       _ <- subscriptionUpdate
         .update[SubscriptionUpdateResponse](SubscriptionName(subscription.id), updateRequestBody)
 
-      todaysDate = today
+      todaysDate <- Clock.currentDateTime.map(_.toLocalDate)
 
       paidAmount = BigDecimal(0)
 
