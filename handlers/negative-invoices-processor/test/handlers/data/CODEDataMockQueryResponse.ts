@@ -7,11 +7,11 @@ export const CODEDataMockQueryResponse = [
 		invoiceNumber: 'INV00359242',
 		invoiceBalance: -1,
 	},
-	{
-		//records that do not exist in Zuora dev sandbox. Used for error testing.
-		accountId: '3c93a0ff5bec3ec3015c0ca913e7415b',
-		invoiceId: '1c91a0ad795f6bcc017966151113650d',
-		invoiceNumber: 'XXX',
-		invoiceBalance: -2,
-	},
+	// {
+	// 	//records that do not exist in Zuora dev sandbox. Used for error testing.
+	// 	accountId: '3c93a0ff5bec3ec3015c0ca913e7415b',
+	// 	invoiceId: '1c91a0ad795f6bcc017966151113650d',
+	// 	invoiceNumber: 'XXX',
+	// 	invoiceBalance: -2,
+	// },
 ];
