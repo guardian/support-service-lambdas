@@ -268,6 +268,7 @@ object HandlerSpec extends ZIOSpecDefault {
           Map(emailMessageBody2 -> (), salesforceRecordInput1 -> ())
 
         val mockSubscriptionUpdate = new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)
+        val mockTermRenewal = new MockTermRenewal(Map.empty)
         val mockSQS = new MockSQS(sqsStubs)
 
         (for {
@@ -275,6 +276,7 @@ object HandlerSpec extends ZIOSpecDefault {
 
           output <- new ToRecurringContributionImpl(
             mockSubscriptionUpdate,
+            mockTermRenewal,
             mockSQS,
             PROD,
           ).run(

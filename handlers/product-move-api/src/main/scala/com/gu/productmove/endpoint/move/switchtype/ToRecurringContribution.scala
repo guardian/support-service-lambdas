@@ -11,7 +11,7 @@ import com.gu.productmove.endpoint.move.stringFor
 import com.gu.productmove.salesforce.Salesforce.SalesforceRecordInput
 import com.gu.productmove.zuora.GetAccount.GetAccountResponse
 import com.gu.productmove.zuora.GetSubscription.{GetSubscriptionResponse, RatePlanCharge}
-import com.gu.productmove.zuora.model.SubscriptionName
+import com.gu.productmove.zuora.model.{InvoiceId, SubscriptionName}
 import com.gu.productmove.zuora.*
 import com.gu.util.config
 import sttp.tapir.*
@@ -19,6 +19,7 @@ import zio.{Clock, Task, ZIO}
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 trait ToRecurringContribution {
   def run(
@@ -31,6 +32,7 @@ trait ToRecurringContribution {
 
 class ToRecurringContributionImpl(
     subscriptionUpdate: SubscriptionUpdate,
+    termRenewal: TermRenewal,
     sqs: SQS,
     stage: Stage,
 ) extends ToRecurringContribution {
@@ -75,11 +77,25 @@ class ToRecurringContributionImpl(
       // Make sure that price is valid and acceptable
       _ <- validateOldMembershipPrice(currency, billingPeriod, price)
 
+      today <- Clock.currentDateTime.map(_.toLocalDate)
+      chargedThroughDate = activeRatePlanCharge.chargedThroughDate.get
+
+      // Check if we need term renewal to avoid "cancellation date cannot be later than term end date" error
+      // We need to perform term renewal if the chargedThroughDate (which will be used as the remove date)
+      // extends beyond the current subscription term. Since we don't have access to termEndDate in the
+      // GetSubscriptionResponse, we'll conservatively always do a term renewal for this operation
+      // to ensure the subscription term covers the required dates.
+      _ <- ZIO.log(
+        s"Performing term renewal to ensure subscription term covers chargedThroughDate: $chargedThroughDate",
+      )
+      _ <- termRenewal.renewSubscription(subscriptionName, runBilling = false)
+      _ <- ZIO.log(s"Term renewal completed for subscription $subscriptionName")
+
       updateRequestBody <- getRatePlans(
         billingPeriod,
         price,
         subscription.ratePlans,
-        activeRatePlanCharge.chargedThroughDate.get,
+        chargedThroughDate,
       ).map { case (addRatePlan, removeRatePlan) =>
         SwitchProductUpdateRequest(
           add = addRatePlan,
@@ -94,7 +110,7 @@ class ToRecurringContributionImpl(
       _ <- subscriptionUpdate
         .update[SubscriptionUpdateResponse](SubscriptionName(subscription.id), updateRequestBody)
 
-      todaysDate <- Clock.currentDateTime.map(_.toLocalDate)
+      todaysDate = today
 
       paidAmount = BigDecimal(0)
 
