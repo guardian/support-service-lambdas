@@ -6,7 +6,7 @@ import com.gu.soft_opt_in_consent_setter.HandlerIAP.{Acquisition, MessageBody, U
 import com.gu.soft_opt_in_consent_setter.models._
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.{Decoder, ParsingFailure}
-import io.circe.generic.auto._
+import io.circe.generic.semiauto._
 import io.circe.parser.{decode => circeDecode}
 
 import scala.jdk.CollectionConverters._
@@ -61,6 +61,10 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
       previousProductName: Option[String],
       userConsentsOverrides: Option[UserConsentsOverrides],
   )
+  object MessageBody {
+    implicit val decoderUserConsentsOverrides: Decoder[UserConsentsOverrides] = deriveDecoder[UserConsentsOverrides]
+    implicit val decoder: Decoder[MessageBody] = deriveDecoder[MessageBody]
+  }
 
   def handleError[T <: Exception](exception: T) = {
     Metrics.put(event = "failed_run")
