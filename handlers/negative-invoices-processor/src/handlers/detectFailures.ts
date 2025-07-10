@@ -51,12 +51,14 @@ function atLeastOneCalloutFailed(invoice: ProcessedInvoice): boolean {
 		applyCreditToAccountBalanceAttempt,
 		checkForActiveSubAttempt,
 		checkForActivePaymentMethodAttempt,
+		refundAttempt,
 	} = invoice;
 
 	return (
 		!applyCreditToAccountBalanceAttempt.Success ||
 		!checkForActiveSubAttempt?.Success ||
-		!checkForActivePaymentMethodAttempt?.Success
+		!checkForActivePaymentMethodAttempt?.Success ||
+		!refundAttempt?.Success
 	);
 }
 
