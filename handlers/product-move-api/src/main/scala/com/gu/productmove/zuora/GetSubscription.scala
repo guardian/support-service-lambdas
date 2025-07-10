@@ -39,6 +39,7 @@ object GetSubscription {
       accountId: String,
       accountNumber: AccountNumber,
       termStartDate: LocalDate,
+      termEndDate: LocalDate,
       ratePlans: List[RatePlan],
   )
 

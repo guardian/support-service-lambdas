@@ -82,14 +82,19 @@ class ToRecurringContributionImpl(
 
       // Check if we need term renewal to avoid "cancellation date cannot be later than term end date" error
       // We need to perform term renewal if the chargedThroughDate (which will be used as the remove date)
-      // extends beyond the current subscription term. Since we don't have access to termEndDate in the
-      // GetSubscriptionResponse, we'll conservatively always do a term renewal for this operation
-      // to ensure the subscription term covers the required dates.
-      _ <- ZIO.log(
-        s"Performing term renewal to ensure subscription term covers chargedThroughDate: $chargedThroughDate",
-      )
-      _ <- termRenewal.renewSubscription(subscriptionName, runBilling = false)
-      _ <- ZIO.log(s"Term renewal completed for subscription $subscriptionName")
+      // extends beyond the current subscription term end date.
+      needsTermRenewal = activeRatePlanCharge.chargedThroughDate.exists(_.isAfter(subscription.termEndDate))
+      _ <- if (needsTermRenewal) {
+        ZIO.log(
+          s"Performing term renewal because chargedThroughDate $chargedThroughDate is after termEndDate ${subscription.termEndDate}",
+        ) *>
+        termRenewal.renewSubscription(subscriptionName, runBilling = false) *>
+        ZIO.log(s"Term renewal completed for subscription $subscriptionName")
+      } else {
+        ZIO.log(
+          s"No term renewal needed: chargedThroughDate $chargedThroughDate is within termEndDate ${subscription.termEndDate}",
+        )
+      }
 
       updateRequestBody <- getRatePlans(
         billingPeriod,
