@@ -84,12 +84,12 @@ class ToRecurringContributionImpl(
       // We need to perform term renewal if the chargedThroughDate (which will be used as the remove date)
       // extends beyond the current subscription term end date.
       needsTermRenewal = activeRatePlanCharge.chargedThroughDate.exists(_.isAfter(subscription.termEndDate))
-      _ <- if (needsTermRenewal) {
+      _ <- ZIO.when(needsTermRenewal) {
         ZIO.log(
           s"Performing term renewal because chargedThroughDate $chargedThroughDate is after termEndDate ${subscription.termEndDate}",
         ) *>
-        termRenewal.renewSubscription(subscriptionName, runBilling = false) *>
-        ZIO.log(s"Term renewal completed for subscription $subscriptionName")
+          termRenewal.renewSubscription(subscriptionName, runBilling = false) *>
+          ZIO.log(s"Term renewal completed for subscription $subscriptionName")
       }
 
       updateRequestBody <- getRatePlans(
