@@ -83,9 +83,13 @@ export class ZuoraClient {
 		const json = await response.json();
 		this.logger.log('Response from Zuora was: ', JSON.stringify(json, null, 2));
 
+		console.log('response.ok:', response.ok);
 		if (response.ok) {
+			console.error('Returning:', schema.parse(json));
+
 			return schema.parse(json);
 		} else {
+			console.error('Logging error:', response.text);
 			this.logger.error(response.text);
 
 			if (response.status === 429) {
