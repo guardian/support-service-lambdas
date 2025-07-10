@@ -90,10 +90,6 @@ class ToRecurringContributionImpl(
         ) *>
         termRenewal.renewSubscription(subscriptionName, runBilling = false) *>
         ZIO.log(s"Term renewal completed for subscription $subscriptionName")
-      } else {
-        ZIO.log(
-          s"No term renewal needed: chargedThroughDate $chargedThroughDate is within termEndDate ${subscription.termEndDate}",
-        )
       }
 
       updateRequestBody <- getRatePlans(
