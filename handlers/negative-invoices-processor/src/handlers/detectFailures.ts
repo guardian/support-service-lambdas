@@ -54,7 +54,6 @@ function atLeastOneCalloutFailed(invoice: ProcessedInvoice): boolean {
 		refundAttempt,
 	} = invoice;
 
-	// Check basic API call failures that always happen
 	if (
 		!applyCreditToAccountBalanceAttempt.Success ||
 		!checkForActiveSubAttempt?.Success
