@@ -11,15 +11,26 @@ import {
 	PolicyStatement,
 	Role,
 } from 'aws-cdk-lib/aws-iam';
+import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { SrLambdaDomain } from './cdk/sr-lambda-domain';
 import { nodeVersion } from './node-version';
 
+export interface MParticleApiProps extends GuStackProps {
+	batonAccountIdSSMParam: string;
+}
+
 export class MParticleApi extends GuStack {
-	constructor(scope: App, id: string, props: GuStackProps) {
+	constructor(scope: App, id: string, props: MParticleApiProps) {
 		super(scope, id, props);
 
 		const app = 'mparticle-api';
+
+		const batonAccountId = StringParameter.fromStringParameterName(
+			this,
+			'BatonAccountId',
+			props.batonAccountIdSSMParam,
+		).stringValue;
 
 		const lambda = new GuLambdaFunction(this, `${app}-lambda`, {
 			app,
@@ -111,7 +122,6 @@ export class MParticleApi extends GuStack {
 			restApi: apiGateway.api,
 		});
 
-		const batonAccountId = '029312801662';
 		const batonInvokeRole = new Role(this, 'BatonInvokeRole', {
 			roleName: `baton-mparticle-lambda-role-${this.stage}`,
 			assumedBy: new AccountPrincipal(batonAccountId),
