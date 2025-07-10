@@ -1,5 +1,5 @@
 import { getPaymentMethods } from '@modules/zuora/paymentMethod';
-import { zuoraPaymentMethodQueryResponseSchema } from '@modules/zuora/zuoraSchemas';
+// import { zuoraPaymentMethodQueryResponseSchema } from '@modules/zuora/zuoraSchemas';
 
 describe('getPaymentMethods', () => {
 	const mockGet = jest.fn();
