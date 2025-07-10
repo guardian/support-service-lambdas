@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import { z } from 'zod';
 import type { DataSubjectRequestState } from '../../interfaces/data-subject-request-state';
 import { DataSubjectRequestStatus } from '../../interfaces/data-subject-request-state';
@@ -137,7 +137,7 @@ async function handleInitiateRequest(
 	const dataSubjectRequestSubmissionResponse: DataSubjectRequestSubmission =
 		await submitDataSubjectRequest({
 			regulation: 'gdpr',
-			requestId: uuidv4(),
+			requestId: randomUUID(),
 			requestType: 'erasure',
 			submittedTime,
 			userId: request.subjectId,
