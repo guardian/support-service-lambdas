@@ -6,6 +6,6 @@ export const doRefund = async (
 	zuoraClient: ZuoraClient,
 	body: string,
 ): Promise<ZuoraUpperCaseSuccessResponse> => {
-	const path = `/v1/object/refund1`;
+	const path = `/v1/object/refund`;
 	return zuoraClient.post(path, body, zuoraUpperCaseSuccessResponseSchema);
 };
