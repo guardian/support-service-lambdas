@@ -1,12 +1,11 @@
-import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 import type { DataSubjectRequestCallback } from '../../interfaces/data-subject-request-callback';
 import type { DataSubjectRequestForm } from '../../interfaces/data-subject-request-form';
 import type { DataSubjectRequestState } from '../../interfaces/data-subject-request-state';
 import { DataSubjectRequestStatus } from '../../interfaces/data-subject-request-state';
 import type { DataSubjectRequestSubmission } from '../../interfaces/data-subject-request-submission';
-import { getAppConfig, getEnv } from '../config';
-import { makeHttpRequest } from '../http';
-import type { HttpResponse } from '../http';
+import { getAppConfig, getEnv } from '../utils/config';
+import { makeHttpRequest } from '../utils/make-http-request';
+import type { HttpResponse } from '../utils/make-http-request';
 
 function parseDataSubjectRequestStatus(
 	status: 'pending' | 'in_progress' | 'completed' | 'cancelled',
@@ -163,65 +162,18 @@ export const getStatusOfDataSubjectRequest = async (
  * @param {DataSubjectRequestCallback} payload - The data containing the data subject request state details.
  * @returns Confirmation message and timestamp
  */
-export const processDataSubjectRequestCallback = async (
+export const processDataSubjectRequestCallback = (
 	requestId: string,
 	payload: DataSubjectRequestCallback,
-): Promise<{
+): {
 	message: string;
 	timestamp: Date;
-}> => {
-	console.debug('Process Data Subject Request Callback from mParticle', {
+} => {
+	// Just log this information so we can have track of it on Cloud Watch
+	console.info('Process Data Subject Request Callback from mParticle', {
 		requestId,
 		form: payload,
 	});
-	interface ErasureJobOutcome {
-		jobRunId: string;
-		status: 'Processing' | 'Completed' | { type: 'Failed'; reason: string };
-		timestamp: Date;
-	}
-	const message: ErasureJobOutcome = {
-		jobRunId: requestId,
-		status: (():
-			| 'Processing'
-			| 'Completed'
-			| { type: 'Failed'; reason: string } => {
-			switch (payload.request_status) {
-				case 'pending':
-				case 'in_progress':
-					return 'Processing';
-				case 'completed':
-				case 'cancelled':
-					return 'Completed';
-				default:
-					return {
-						type: 'Failed',
-						reason: `Could not process 'request_status' '${JSON.stringify(payload)}'.`,
-					};
-			}
-		})(),
-		timestamp: new Date(),
-	};
-	const client = new SQSClient({
-		region: 'eu-west-1',
-	});
-	console.debug(`Sending message ${JSON.stringify(message)} to Ophan queue`);
-
-	const command = new SendMessageCommand({
-		QueueUrl:
-			getEnv('STAGE') === 'PROD'
-				? 'https://sqs.eu-west-1.amazonaws.com/021353022223/ophan-data-lake-PROD-erasure-Queue-1H020S409D2OY.fifo'
-				: 'https://sqs.eu-west-1.amazonaws.com/021353022223/ophan-data-lake-CODE-erasure-Queue-GRLOB6EAD0O9.fifo',
-		MessageBody: JSON.stringify(message),
-		MessageGroupId: 'erasure',
-	});
-	const response = await client.send(command);
-	console.debug(
-		`Response from message send was ${JSON.stringify({
-			client,
-			command,
-			response,
-		})}`,
-	);
 
 	return {
 		message: 'Callback accepted and processed',

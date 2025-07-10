@@ -168,18 +168,9 @@ importers:
 
   handlers/mparticle-api:
     dependencies:
-      '@aws-sdk/client-sqs':
-        specifier: 3.787.0
-        version: 3.787.0
-      '@aws-sdk/credential-provider-node':
-        specifier: 3.782.0
-        version: 3.782.0
       '@peculiar/x509':
         specifier: ^1.12.3
         version: 1.12.4
-      dotenv:
-        specifier: ^16.5.0
-        version: 16.5.0
       zod:
         specifier: ^3.23.8
         version: 3.25.48
@@ -291,6 +282,8 @@ importers:
       '@types/aws-lambda':
         specifier: ^8.10.147
         version: 8.10.147
+
+  handlers/salesforce-event-bus: {}
 
   handlers/ticket-tailor-webhook:
     dependencies:
@@ -3286,10 +3279,6 @@ packages:
 
   dot-case@2.1.1:
     resolution: {integrity: sha512-HnM6ZlFqcajLsyudHq7LeeLDr2rFAVYtDv/hV5qchQEidSck8j9OPUsXY9KwJv/lHMtYlX4DjRQqwFYa+0r8Ug==}
-
-  dotenv@16.5.0:
-    resolution: {integrity: sha512-m/C+AwOAr9/W1UOIZUo232ejMNnJAJtYQjUbHoNTBNTJSvqzzDh7vnrei3o3r3m9blf6ZoDkvcw0VmozNRFJxg==}
-    engines: {node: '>=12'}
 
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
@@ -10698,8 +10687,6 @@ snapshots:
   dot-case@2.1.1:
     dependencies:
       no-case: 2.3.2
-
-  dotenv@16.5.0: {}
 
   dunder-proto@1.0.1:
     dependencies:
