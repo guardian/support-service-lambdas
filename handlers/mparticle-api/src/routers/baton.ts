@@ -21,18 +21,22 @@ export type GUID = string & { readonly __brand: unique symbol };
 export type InitiationReference = GUID;
 
 // Zod schemas for validation
-const InitiationReferenceSchema = z.string().uuid().transform((val) => val as InitiationReference);
+const InitiationReferenceSchema = z
+	.string()
+	.uuid()
+	.transform((val) => val as InitiationReference);
 
 const BatonRerEventRequestBaseSchema = z.object({
 	requestType: z.literal('RER'),
 });
 
-const BatonRerEventInitiateRequestSchema = BatonRerEventRequestBaseSchema.extend({
-	action: z.literal('initiate'),
-	subjectId: z.string().min(1, 'Subject Id is required'),
-	subjectEmail: z.string().email().optional(),
-	dataProvider: z.literal('mparticlerer'),
-});
+const BatonRerEventInitiateRequestSchema =
+	BatonRerEventRequestBaseSchema.extend({
+		action: z.literal('initiate'),
+		subjectId: z.string().min(1, 'Subject Id is required'),
+		subjectEmail: z.string().email().optional(),
+		dataProvider: z.literal('mparticlerer'),
+	});
 
 const BatonRerEventStatusRequestSchema = BatonRerEventRequestBaseSchema.extend({
 	action: z.literal('status'),
@@ -50,14 +54,16 @@ const BatonRerEventResponseBaseSchema = z.object({
 	message: z.string().optional(),
 });
 
-const BatonRerEventInitiateResponseSchema = BatonRerEventResponseBaseSchema.extend({
-	action: z.literal('initiate'),
-	initiationReference: InitiationReferenceSchema,
-});
+const BatonRerEventInitiateResponseSchema =
+	BatonRerEventResponseBaseSchema.extend({
+		action: z.literal('initiate'),
+		initiationReference: InitiationReferenceSchema,
+	});
 
-const BatonRerEventStatusResponseSchema = BatonRerEventResponseBaseSchema.extend({
-	action: z.literal('status'),
-});
+const BatonRerEventStatusResponseSchema =
+	BatonRerEventResponseBaseSchema.extend({
+		action: z.literal('status'),
+	});
 
 export const BatonRerEventResponseSchema = z.discriminatedUnion('action', [
 	BatonRerEventInitiateResponseSchema,
@@ -65,12 +71,20 @@ export const BatonRerEventResponseSchema = z.discriminatedUnion('action', [
 ]);
 
 // Infer types from schemas
-export type BatonRerEventInitiateRequest = z.infer<typeof BatonRerEventInitiateRequestSchema>;
-export type BatonRerEventStatusRequest = z.infer<typeof BatonRerEventStatusRequestSchema>;
+export type BatonRerEventInitiateRequest = z.infer<
+	typeof BatonRerEventInitiateRequestSchema
+>;
+export type BatonRerEventStatusRequest = z.infer<
+	typeof BatonRerEventStatusRequestSchema
+>;
 export type BatonRerEventRequest = z.infer<typeof BatonRerEventRequestSchema>;
 
-export type BatonRerEventInitiateResponse = z.infer<typeof BatonRerEventInitiateResponseSchema>;
-export type BatonRerEventStatusResponse = z.infer<typeof BatonRerEventStatusResponseSchema>;
+export type BatonRerEventInitiateResponse = z.infer<
+	typeof BatonRerEventInitiateResponseSchema
+>;
+export type BatonRerEventStatusResponse = z.infer<
+	typeof BatonRerEventStatusResponseSchema
+>;
 export type BatonRerEventResponse = z.infer<typeof BatonRerEventResponseSchema>;
 
 // Custom validation error class
@@ -89,10 +103,7 @@ function validateRequest(data: BatonRerEventRequest): BatonRerEventRequest {
 	const result = BatonRerEventRequestSchema.safeParse(data);
 	if (!result.success) {
 		console.error('Request validation failed:', result.error);
-		throw new ValidationError(
-			'Invalid request format',
-			result.error,
-		);
+		throw new ValidationError('Invalid request format', result.error);
 	}
 	return result.data;
 }
@@ -102,10 +113,7 @@ function validateResponse<T extends BatonRerEventResponse>(data: T): T {
 	const result = BatonRerEventResponseSchema.safeParse(data);
 	if (!result.success) {
 		console.error('Response validation failed:', result.error);
-		throw new ValidationError(
-			'Invalid response format',
-			result.error,
-		);
+		throw new ValidationError('Invalid response format', result.error);
 	}
 	return data;
 }
