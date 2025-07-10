@@ -9,7 +9,7 @@ export const getPaymentMethods = async (
 	zuoraClient: ZuoraClient,
 	accountId: string,
 ): Promise<ZuoraPaymentMethodQueryResponse> => {
-	const path = `/v1/accounts/${accountId}/payment-methods`;
+	const path = `/v1/accounts/${accountId}/payment-methods1`;
 	return zuoraClient.get(path, zuoraPaymentMethodQueryResponseSchema);
 };
 
