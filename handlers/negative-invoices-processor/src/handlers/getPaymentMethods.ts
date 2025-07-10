@@ -17,7 +17,6 @@ export const handler = async (
 			zuoraClient,
 			parsedEvent.accountId,
 		);
-		console.log('Payment methods retrieved:', paymentMethods);
 		const activePaymentMethods = filterActivePaymentMethods(paymentMethods);
 		const hasActivePaymentMethod = activePaymentMethods.length > 0;
 		return {
