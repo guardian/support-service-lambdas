@@ -17,13 +17,12 @@ export const handler = async (
 			zuoraClient,
 			parsedEvent.accountId,
 		);
-
 		const activePaymentMethods = filterActivePaymentMethods(paymentMethods);
 		const hasActivePaymentMethod = activePaymentMethods.length > 0;
 		return {
 			...parsedEvent,
 			checkForActivePaymentMethodAttempt: {
-				Success: true,
+				Success: paymentMethods.success,
 				hasActivePaymentMethod,
 				activePaymentMethods,
 			},

@@ -15,7 +15,6 @@ export const handler = async (
 			zuoraClient,
 			parsedEvent.accountId,
 		);
-
 		return {
 			...parsedEvent,
 			checkForActiveSubAttempt: {

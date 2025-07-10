@@ -40,15 +40,50 @@ export const failureExistsOnInvoiceProcessingAttempt = async (
 export function invoiceHasAtLeastOneProcessingFailure(
 	invoice: ProcessedInvoice,
 ): boolean {
+	return (
+		atLeastOneCalloutFailed(invoice) ||
+		invoiceHasNoActiveSubAndNoActivePaymentMethod(invoice)
+	);
+}
+
+function atLeastOneCalloutFailed(invoice: ProcessedInvoice): boolean {
 	const {
 		applyCreditToAccountBalanceAttempt,
 		checkForActiveSubAttempt,
 		checkForActivePaymentMethodAttempt,
+		refundAttempt,
 	} = invoice;
 
-	return (
+	if (
 		!applyCreditToAccountBalanceAttempt.Success ||
-		!checkForActiveSubAttempt?.Success ||
-		!checkForActivePaymentMethodAttempt?.Success
+		!checkForActiveSubAttempt?.Success
+	) {
+		return true;
+	}
+
+	// Only check payment method and refund attempts if hasActiveSub is false
+	if (checkForActiveSubAttempt.hasActiveSub === false) {
+		if (!checkForActivePaymentMethodAttempt?.Success) {
+			return true;
+		}
+
+		// Only check refundAttempt if hasActivePaymentMethod is true
+		if (checkForActivePaymentMethodAttempt.hasActivePaymentMethod === true) {
+			return !refundAttempt?.Success;
+		}
+	}
+
+	return false;
+}
+
+function invoiceHasNoActiveSubAndNoActivePaymentMethod(
+	invoice: ProcessedInvoice,
+): boolean {
+	const { checkForActiveSubAttempt, checkForActivePaymentMethodAttempt } =
+		invoice;
+
+	return (
+		checkForActiveSubAttempt?.hasActiveSub === false &&
+		checkForActivePaymentMethodAttempt?.hasActivePaymentMethod === false
 	);
 }

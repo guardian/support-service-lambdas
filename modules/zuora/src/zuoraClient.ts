@@ -83,6 +83,8 @@ export class ZuoraClient {
 		const json = await response.json();
 		this.logger.log('Response from Zuora was: ', JSON.stringify(json, null, 2));
 
+		// Inspecting response.ok works for /v1/object/* but not for /v1/accounts/*.
+		// TODO find a way to handle this more for both scenarios.
 		if (response.ok) {
 			return schema.parse(json);
 		} else {
