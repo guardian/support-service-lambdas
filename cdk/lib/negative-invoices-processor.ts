@@ -167,6 +167,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-do-credit-balance-refund-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,

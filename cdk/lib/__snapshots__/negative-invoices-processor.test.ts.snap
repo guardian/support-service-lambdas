@@ -937,7 +937,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
         "FunctionName": "negative-invoices-processor-do-credit-balance-refund-CODE",
         "Handler": "doCreditBalanceRefund.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
@@ -3152,7 +3152,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
         "FunctionName": "negative-invoices-processor-do-credit-balance-refund-PROD",
         "Handler": "doCreditBalanceRefund.handler",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 512,
         "Role": {
