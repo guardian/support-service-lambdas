@@ -76,6 +76,8 @@ export const sendSalesforceTracking = async (
 		MessageBody: messageBody,
 	});
 
+	console.log(`checking queue URL ${QueueUrl}`);
+
 	const response = await client.send(command);
 	console.log(
 		`Response from Salesforce tracking send was ${prettyPrint(response)}`,
