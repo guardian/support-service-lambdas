@@ -1,7 +1,7 @@
 import {
+	GetQueueUrlCommand,
 	SendMessageCommand,
 	SQSClient,
-	GetQueueUrlCommand,
 } from '@aws-sdk/client-sqs';
 import { awsConfig } from '@modules/aws/config';
 import { prettyPrint } from '@modules/prettyPrint';
