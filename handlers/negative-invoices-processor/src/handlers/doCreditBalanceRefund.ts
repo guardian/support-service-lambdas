@@ -9,12 +9,10 @@ import type {
 	DoCreditBalanceRefundOutput,
 } from '../types';
 
-// export const handler = async (
-// 	event: DoCreditBalanceRefundInput,
-// ): Promise<DoCreditBalanceRefundOutput> => {
-export const handler = (
+// eslint-disable-next-line @typescript-eslint/require-await
+export const handler = async (
 	event: DoCreditBalanceRefundInput,
-): DoCreditBalanceRefundOutput => {
+): Promise<DoCreditBalanceRefundOutput> => {
 	let paymentMethodToRefundTo: PaymentMethod | undefined;
 
 	try {
