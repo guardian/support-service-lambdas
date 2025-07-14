@@ -5,7 +5,7 @@ import sbtassembly.AssemblyPlugin.autoImport.{MergeStrategy, assemblyMergeStrate
 import sbtassembly.PathList
 
 object Dependencies {
-  
+
   val awsSdkVersion = "2.31.71"
 
   val circeVersion = "0.14.13"
@@ -13,7 +13,7 @@ object Dependencies {
   val http4sVersion = "0.22.15" // keep version 0.22.15, later versions pull in cats effect 3 which is not compatible
   val catsVersion = "2.13.0"
   val catsEffectVersion = "2.5.5"
-  
+
   val logging: Seq[ModuleID] = Seq(
     "ch.qos.logback" % "logback-classic" % "1.5.18",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
@@ -83,8 +83,9 @@ object Dependencies {
   val zio = "dev.zio" %% "zio" % "1.0.18"
   val zio2Version = "2.1.18"
   val zio2 = "dev.zio" %% "zio" % zio2Version
-  val tapirVersion = "1.11.33"// stick with 1.11.33 for now as later versions indirectly pull in netty-codec-base which duplicates netty-codec content
-  val enumeratum = "com.beachape" %% "enumeratum" % "1.7.6"
+  val tapirVersion =
+    "1.11.33" // stick with 1.11.33 for now as later versions indirectly pull in netty-codec-base which duplicates netty-codec content
+  val enumeratum = "com.beachape" %% "enumeratum" % "1.9.0"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.4.0"
   val stripe = "com.stripe" % "stripe-java" % "29.1.0"
   val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0"
