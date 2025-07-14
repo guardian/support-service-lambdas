@@ -43,7 +43,7 @@ export const getPRODData = async (): Promise<InvoiceRecord[]> => {
 const query = (): string =>
 	`
 	SELECT
-        inv.id,
+        inv.id as invoiceId,
         inv.invoice_number as invoiceNumber,
         STRING_AGG(distinct inv.account_id, ',') AS accountId,
         MAX(inv.balance) AS invoiceBalance
