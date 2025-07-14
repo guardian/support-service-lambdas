@@ -59,7 +59,6 @@ const query = (): string =>
         inv.amount < 0
         AND inv.balance != 0
         AND sub.status = 'Active'
-        AND inv.id = '8a12916d97bec37d0197d38fbf507fd5'
     GROUP BY 
         inv.id, inv.invoice_number
 `;
