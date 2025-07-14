@@ -61,4 +61,5 @@ const query = (): string =>
         AND sub.status = 'Active'
     GROUP BY 
         inv.id, inv.invoice_number
+  	LIMIT 1
 `;
