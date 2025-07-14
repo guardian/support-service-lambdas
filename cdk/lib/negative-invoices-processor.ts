@@ -167,6 +167,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-do-credit-balance-refund-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
@@ -324,17 +325,48 @@ export class NegativeInvoicesProcessor extends GuStack {
 				),
 				doCreditBalanceRefundLambdaTask,
 			)
-			.otherwise(new Pass(this, 'check for valid email lambda will go here'));
+			.otherwise(new Pass(this, 'No active payment method found'));
+
+		const activePaymentMethodCalloutWasSuccessful = new Choice(
+			this,
+			'Successful active payment method callout?',
+		)
+			.when(
+				Condition.booleanEquals(
+					'$.checkForActivePaymentMethodAttempt.Success',
+					true,
+				),
+
+				hasActivePaymentMethodChoice,
+			)
+			.otherwise(
+				new Pass(this, 'Error: active payment method check unsuccessful'),
+			);
 
 		const hasActiveSubChoice = new Choice(this, 'Has active sub?')
 			.when(
-				Condition.booleanEquals(
-					'$.checkForActiveSubAttempt.hasActiveSub',
-					false,
+				Condition.and(
+					Condition.booleanEquals(
+						'$.checkForActiveSubAttempt.hasActiveSub',
+						false,
+					),
 				),
-				getPaymentMethodsLambdaTask.next(hasActivePaymentMethodChoice),
+				getPaymentMethodsLambdaTask.next(
+					activePaymentMethodCalloutWasSuccessful,
+				),
 			)
-			.otherwise(new Pass(this, 'End 2'));
+			.otherwise(new Pass(this, 'Has active sub: true'));
+
+		const activeSubCalloutWasSuccessful = new Choice(
+			this,
+			'Successful active sub callout?',
+		)
+			.when(
+				Condition.booleanEquals('$.checkForActiveSubAttempt.Success', true),
+
+				hasActiveSubChoice,
+			)
+			.otherwise(new Pass(this, 'Error: active sub check unsuccessful'));
 
 		const CreditAppliedSuccessfullyChoice = new Choice(
 			this,
@@ -345,9 +377,9 @@ export class NegativeInvoicesProcessor extends GuStack {
 					'$.applyCreditToAccountBalanceAttempt.Success',
 					true,
 				),
-				checkForActiveSubLambdaTask.next(hasActiveSubChoice),
+				checkForActiveSubLambdaTask.next(activeSubCalloutWasSuccessful),
 			)
-			.otherwise(new Pass(this, 'End 1'));
+			.otherwise(new Pass(this, 'Error: apply credit unsuccessful'));
 
 		invoiceProcessorMap.iterator(
 			applyCreditToAccountBalanceLambdaTask.next(
