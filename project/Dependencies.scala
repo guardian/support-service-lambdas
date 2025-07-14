@@ -98,7 +98,7 @@ object Dependencies {
   val scalatest = "org.scalatest" %% "scalatest" % "3.2.19" % Test
   val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.18.1" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "7.3.2" % Test
-  val mockito = "org.mockito" % "mockito-core" % "5.14.2" % Test
+  val mockito = "org.mockito" % "mockito-core" % "5.18.0" % Test
   // play-json still uses an old version of jackson-core which has a vulnerability - https://security.snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-7569538
   val jacksonVersion = "2.19.1"
 
