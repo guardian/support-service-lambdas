@@ -80,6 +80,7 @@ object ProductMoveSpec {
       ),
       new ToRecurringContributionImpl(
         subscriptionUpdate,
+        TermRenewalLive(zuoraGet),
         SQSLive.impl(stage, AwsCredentialsLive.impl).get,
         stage,
       ),
