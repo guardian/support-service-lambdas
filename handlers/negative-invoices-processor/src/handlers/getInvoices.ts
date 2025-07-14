@@ -43,7 +43,7 @@ export const getPRODData = async (): Promise<InvoiceRecord[]> => {
 const query = (): string =>
 	`
 	SELECT
-        inv.id,
+        inv.id as invoiceId,
         inv.invoice_number as invoiceNumber,
         STRING_AGG(distinct inv.account_id, ',') AS accountId,
         MAX(inv.balance) AS invoiceBalance
@@ -59,7 +59,7 @@ const query = (): string =>
         inv.amount < 0
         AND inv.balance != 0
         AND sub.status = 'Active'
-        AND inv.id = '8a12916d97bec37d0197d8cfcb4d180f'
+        AND inv.id = '8a12916d97bec37d0197d38fbf507fd5'
     GROUP BY 
         inv.id, inv.invoice_number
 `;
