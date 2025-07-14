@@ -363,12 +363,10 @@ new SalesforceEventBus(app, 'salesforce-event-bus-PROD', {
 	stage: 'PROD',
 });
 new MParticleApi(app, 'mparticle-api-CODE', {
-	batonAccountIdSSMParam: 'batonAccountId',
 	stack: 'support',
 	stage: 'CODE',
 });
 new MParticleApi(app, 'mparticle-api-PROD', {
-	batonAccountIdSSMParam: 'batonAccountId',
 	stack: 'support',
 	stage: 'PROD',
 });

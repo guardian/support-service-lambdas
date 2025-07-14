@@ -40,7 +40,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
   },
   "Parameters": {
     "BatonAccountIdParameter": {
-      "Default": "batonAccountId",
+      "Default": "/accountIds/baton",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
     "DistributionBucketName": {
@@ -776,7 +776,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
   },
   "Parameters": {
     "BatonAccountIdParameter": {
-      "Default": "batonAccountId",
+      "Default": "/accountIds/baton",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
     "DistributionBucketName": {

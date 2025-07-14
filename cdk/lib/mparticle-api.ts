@@ -16,12 +16,8 @@ import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { SrLambdaDomain } from './cdk/sr-lambda-domain';
 import { nodeVersion } from './node-version';
 
-export interface MParticleApiProps extends GuStackProps {
-	batonAccountIdSSMParam: string;
-}
-
 export class MParticleApi extends GuStack {
-	constructor(scope: App, id: string, props: MParticleApiProps) {
+	constructor(scope: App, id: string, props: GuStackProps) {
 		super(scope, id, props);
 
 		const app = 'mparticle-api';
@@ -29,7 +25,7 @@ export class MParticleApi extends GuStack {
 		const batonAccountId = StringParameter.fromStringParameterName(
 			this,
 			'BatonAccountId',
-			props.batonAccountIdSSMParam,
+			'/accountIds/baton',
 		).stringValue;
 
 		const lambda = new GuLambdaFunction(this, `${app}-lambda`, {
