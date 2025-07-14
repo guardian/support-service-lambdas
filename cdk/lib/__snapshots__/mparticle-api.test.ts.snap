@@ -6,6 +6,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
       "GuLambdaFunction",
+      "GuLambdaFunction",
       "GuApiGatewayWithLambdaByPath",
     ],
     "gu:cdk:version": "TEST",
@@ -110,7 +111,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
               "Effect": "Allow",
               "Resource": {
                 "Fn::GetAtt": [
-                  "mparticleapilambdaD503F5B2",
+                  "mparticleapibatonlambdaF08957A4",
                   "Arn",
                 ],
               },
@@ -295,7 +296,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC5032b39c17a8efcc4b16588acc42fa8181e": {
+    "RestApiDeployment180EC50315be72cc8949bc76f0e24a5cca409cbf": {
       "DependsOn": [
         "RestApidatasubjectrequestsrequestIdcallbackPOST2BF76B7C",
         "RestApidatasubjectrequestsrequestIdcallback3E3A4143",
@@ -316,7 +317,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC5032b39c17a8efcc4b16588acc42fa8181e",
+          "Ref": "RestApiDeployment180EC50315be72cc8949bc76f0e24a5cca409cbf",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -404,7 +405,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
                 ":lambda:path/2015-03-31/functions/",
                 {
                   "Fn::GetAtt": [
-                    "mparticleapilambdaD503F5B2",
+                    "mparticleapihttplambdaF78B60DB",
                     "Arn",
                   ],
                 },
@@ -427,7 +428,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
           "Fn::GetAtt": [
-            "mparticleapilambdaD503F5B2",
+            "mparticleapihttplambdaF78B60DB",
             "Arn",
           ],
         },
@@ -464,7 +465,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
           "Fn::GetAtt": [
-            "mparticleapilambdaD503F5B2",
+            "mparticleapihttplambdaF78B60DB",
             "Arn",
           ],
         },
@@ -500,31 +501,10 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "mparticleapicloudwatchpolicy1B6A7573": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "cloudwatch:ListTagsForResource",
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "mparticleapicloudwatchpolicy1B6A7573",
-        "Roles": [
-          {
-            "Ref": "mparticleapilambdaServiceRoleCE7702E6",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "mparticleapilambdaD503F5B2": {
+    "mparticleapibatonlambdaF08957A4": {
       "DependsOn": [
-        "mparticleapilambdaServiceRoleDefaultPolicy281AD986",
-        "mparticleapilambdaServiceRoleCE7702E6",
+        "mparticleapibatonlambdaServiceRoleDefaultPolicy13E705CD",
+        "mparticleapibatonlambdaServiceRole63F748A4",
       ],
       "Properties": {
         "Code": {
@@ -540,15 +520,15 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
             "STAGE": "CODE",
           },
         },
-        "FunctionName": "mparticle-api-CODE",
-        "Handler": "index.handler",
+        "FunctionName": "mparticle-api-baton-CODE",
+        "Handler": "baton-handler.handler",
         "LoggingConfig": {
           "LogFormat": "JSON",
         },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "mparticleapilambdaServiceRoleCE7702E6",
+            "mparticleapibatonlambdaServiceRole63F748A4",
             "Arn",
           ],
         },
@@ -575,11 +555,11 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
             "Value": "CODE",
           },
         ],
-        "Timeout": 15,
+        "Timeout": 30,
       },
       "Type": "AWS::Lambda::Function",
     },
-    "mparticleapilambdaServiceRoleCE7702E6": {
+    "mparticleapibatonlambdaServiceRole63F748A4": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -632,7 +612,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "mparticleapilambdaServiceRoleDefaultPolicy281AD986": {
+    "mparticleapibatonlambdaServiceRoleDefaultPolicy13E705CD": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -723,10 +703,245 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "mparticleapilambdaServiceRoleDefaultPolicy281AD986",
+        "PolicyName": "mparticleapibatonlambdaServiceRoleDefaultPolicy13E705CD",
         "Roles": [
           {
-            "Ref": "mparticleapilambdaServiceRoleCE7702E6",
+            "Ref": "mparticleapibatonlambdaServiceRole63F748A4",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "mparticleapicloudwatchpolicy1B6A7573": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "cloudwatch:ListTagsForResource",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "mparticleapicloudwatchpolicy1B6A7573",
+        "Roles": [
+          {
+            "Ref": "mparticleapihttplambdaServiceRole4214266D",
+          },
+          {
+            "Ref": "mparticleapibatonlambdaServiceRole63F748A4",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "mparticleapihttplambdaF78B60DB": {
+      "DependsOn": [
+        "mparticleapihttplambdaServiceRoleDefaultPolicy70050791",
+        "mparticleapihttplambdaServiceRole4214266D",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/CODE/mparticle-api/mparticle-api.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "APP": "mparticle-api",
+            "STACK": "support",
+            "STAGE": "CODE",
+          },
+        },
+        "FunctionName": "mparticle-api-http-CODE",
+        "Handler": "http-handler.handler",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "mparticleapihttplambdaServiceRole4214266D",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 15,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "mparticleapihttplambdaServiceRole4214266D": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "mparticleapihttplambdaServiceRoleDefaultPolicy70050791": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/CODE/mparticle-api/mparticle-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/mparticle-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/mparticle-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "mparticleapihttplambdaServiceRoleDefaultPolicy70050791",
+        "Roles": [
+          {
+            "Ref": "mparticleapihttplambdaServiceRole4214266D",
           },
         ],
       },
@@ -741,6 +956,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
+      "GuLambdaFunction",
       "GuLambdaFunction",
       "GuApiGatewayWithLambdaByPath",
     ],
@@ -846,7 +1062,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
               "Effect": "Allow",
               "Resource": {
                 "Fn::GetAtt": [
-                  "mparticleapilambdaD503F5B2",
+                  "mparticleapibatonlambdaF08957A4",
                   "Arn",
                 ],
               },
@@ -907,7 +1123,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
                 [
                   "lambda:",
                   {
-                    "Ref": "mparticleapilambdaD503F5B2",
+                    "Ref": "mparticleapihttplambdaF78B60DB",
                   },
                 ],
               ],
@@ -934,7 +1150,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
-    "MParticleLambdaErrorAlarmD72BAB2E": {
+    "MParticleBatonLambdaErrorAlarmE4905206": {
       "Properties": {
         "ActionsEnabled": true,
         "AlarmActions": [
@@ -955,14 +1171,14 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "mParticle API Lambda failed, please check the logs to diagnose the issue.",
-        "AlarmName": "An error occurred in the mParticle API Lambda",
+        "AlarmDescription": "mParticle Baton Lambda failed, please check the logs to diagnose the issue.",
+        "AlarmName": "An error occurred in the mParticle Baton Lambda",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
             "Name": "FunctionName",
             "Value": {
-              "Ref": "mparticleapilambdaD503F5B2",
+              "Ref": "mparticleapibatonlambdaF08957A4",
             },
           },
         ],
@@ -980,7 +1196,80 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
                 [
                   "lambda:",
                   {
-                    "Ref": "mparticleapilambdaD503F5B2",
+                    "Ref": "mparticleapibatonlambdaF08957A4",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "MParticleHttpLambdaErrorAlarmB6017CA4": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "mParticle HTTP Lambda failed, please check the logs to diagnose the issue.",
+        "AlarmName": "An error occurred in the mParticle HTTP Lambda",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "mparticleapihttplambdaF78B60DB",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 86400,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "mparticleapihttplambdaF78B60DB",
                   },
                 ],
               ],
@@ -1175,7 +1464,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC503230ad4ec27acc67429a58e181dd5bab0": {
+    "RestApiDeployment180EC503badbaf31ab9b6a932e24974d7bac16a2": {
       "DependsOn": [
         "RestApidatasubjectrequestsrequestIdcallbackPOST2BF76B7C",
         "RestApidatasubjectrequestsrequestIdcallback3E3A4143",
@@ -1196,7 +1485,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC503230ad4ec27acc67429a58e181dd5bab0",
+          "Ref": "RestApiDeployment180EC503badbaf31ab9b6a932e24974d7bac16a2",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
@@ -1284,7 +1573,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
                 ":lambda:path/2015-03-31/functions/",
                 {
                   "Fn::GetAtt": [
-                    "mparticleapilambdaD503F5B2",
+                    "mparticleapihttplambdaF78B60DB",
                     "Arn",
                   ],
                 },
@@ -1307,7 +1596,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
           "Fn::GetAtt": [
-            "mparticleapilambdaD503F5B2",
+            "mparticleapihttplambdaF78B60DB",
             "Arn",
           ],
         },
@@ -1344,7 +1633,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
           "Fn::GetAtt": [
-            "mparticleapilambdaD503F5B2",
+            "mparticleapihttplambdaF78B60DB",
             "Arn",
           ],
         },
@@ -1380,31 +1669,10 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "mparticleapicloudwatchpolicy1B6A7573": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "cloudwatch:ListTagsForResource",
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "mparticleapicloudwatchpolicy1B6A7573",
-        "Roles": [
-          {
-            "Ref": "mparticleapilambdaServiceRoleCE7702E6",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "mparticleapilambdaD503F5B2": {
+    "mparticleapibatonlambdaF08957A4": {
       "DependsOn": [
-        "mparticleapilambdaServiceRoleDefaultPolicy281AD986",
-        "mparticleapilambdaServiceRoleCE7702E6",
+        "mparticleapibatonlambdaServiceRoleDefaultPolicy13E705CD",
+        "mparticleapibatonlambdaServiceRole63F748A4",
       ],
       "Properties": {
         "Code": {
@@ -1420,15 +1688,15 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
             "STAGE": "PROD",
           },
         },
-        "FunctionName": "mparticle-api-PROD",
-        "Handler": "index.handler",
+        "FunctionName": "mparticle-api-baton-PROD",
+        "Handler": "baton-handler.handler",
         "LoggingConfig": {
           "LogFormat": "JSON",
         },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "mparticleapilambdaServiceRoleCE7702E6",
+            "mparticleapibatonlambdaServiceRole63F748A4",
             "Arn",
           ],
         },
@@ -1455,11 +1723,11 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
             "Value": "PROD",
           },
         ],
-        "Timeout": 15,
+        "Timeout": 30,
       },
       "Type": "AWS::Lambda::Function",
     },
-    "mparticleapilambdaServiceRoleCE7702E6": {
+    "mparticleapibatonlambdaServiceRole63F748A4": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -1512,7 +1780,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "mparticleapilambdaServiceRoleDefaultPolicy281AD986": {
+    "mparticleapibatonlambdaServiceRoleDefaultPolicy13E705CD": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -1603,10 +1871,245 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "mparticleapilambdaServiceRoleDefaultPolicy281AD986",
+        "PolicyName": "mparticleapibatonlambdaServiceRoleDefaultPolicy13E705CD",
         "Roles": [
           {
-            "Ref": "mparticleapilambdaServiceRoleCE7702E6",
+            "Ref": "mparticleapibatonlambdaServiceRole63F748A4",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "mparticleapicloudwatchpolicy1B6A7573": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "cloudwatch:ListTagsForResource",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "mparticleapicloudwatchpolicy1B6A7573",
+        "Roles": [
+          {
+            "Ref": "mparticleapihttplambdaServiceRole4214266D",
+          },
+          {
+            "Ref": "mparticleapibatonlambdaServiceRole63F748A4",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "mparticleapihttplambdaF78B60DB": {
+      "DependsOn": [
+        "mparticleapihttplambdaServiceRoleDefaultPolicy70050791",
+        "mparticleapihttplambdaServiceRole4214266D",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/PROD/mparticle-api/mparticle-api.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "APP": "mparticle-api",
+            "STACK": "support",
+            "STAGE": "PROD",
+          },
+        },
+        "FunctionName": "mparticle-api-http-PROD",
+        "Handler": "http-handler.handler",
+        "LoggingConfig": {
+          "LogFormat": "JSON",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "mparticleapihttplambdaServiceRole4214266D",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 15,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "mparticleapihttplambdaServiceRole4214266D": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "mparticleapihttplambdaServiceRoleDefaultPolicy70050791": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/PROD/mparticle-api/mparticle-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/mparticle-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/mparticle-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "mparticleapihttplambdaServiceRoleDefaultPolicy70050791",
+        "Roles": [
+          {
+            "Ref": "mparticleapihttplambdaServiceRole4214266D",
           },
         ],
       },
