@@ -292,6 +292,46 @@ object HandlerSpec extends ZIOSpecDefault {
         })
       } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
 
+      test(
+        "(MembershipToRecurringContribution) productMove endpoint performs term renewal when needed",
+      ) {
+        val endpointJsonInputBody = ExpectedInput(5.00, false, None, None)
+        val subscriptionUpdateInputsShouldBe: (SubscriptionName, SubscriptionUpdateRequest) =
+          (subscriptionName, expectedRequestBody2)
+        val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse3)
+        val termRenewalStubs = Map(subscriptionName -> RenewalResponse(Some(true), Some(InvoiceId("renewalInvoiceId"))))
+        val expectedOutput = ProductMoveEndpointTypes.Success(
+          "Product move completed successfully with subscription number A-S00339056 and switch type to-recurring-contribution",
+        )
+        val sqsStubs: Map[EmailMessage | RefundInput | SalesforceRecordInput, Unit] =
+          Map(emailMessageBody2 -> (), salesforceRecordInput1 -> ())
+
+        val mockSubscriptionUpdate = new MockSubscriptionUpdate(subscriptionUpdatePreviewStubs, subscriptionUpdateStubs)
+        val mockTermRenewal = new MockTermRenewal(termRenewalStubs)
+        val mockSQS = new MockSQS(sqsStubs)
+
+        (for {
+          _ <- TestClock.setTime(time)
+
+          output <- new ToRecurringContributionImpl(
+            mockSubscriptionUpdate,
+            mockTermRenewal,
+            mockSQS,
+            PROD,
+          ).run(
+            subscriptionName,
+            endpointJsonInputBody,
+            getSubscriptionResponseNeedingTermRenewal, // Using the term renewal scenario
+            getAccountResponse,
+          )
+        } yield {
+          assert(output)(equalTo(expectedOutput)) &&
+          assert(mockSubscriptionUpdate.requests)(equalTo(List(subscriptionUpdateInputsShouldBe))) &&
+          assert(mockTermRenewal.requests)(equalTo(List(subscriptionName))) && // Verify term renewal was called
+          assert(mockSQS.requests)(hasSameElements(List(emailMessageBody2, salesforceRecordInput1)))
+        })
+      } @@ TestAspect.ignore, // TODO: make the code which fetches the catalog price a dependency so it can be mocked
+
       test("productMove endpoint returns 500 error if identityId does not exist") {
         val endpointJsonInputBody = ExpectedInput(15.00, false, None, None)
         val subscriptionUpdateStubs = Map(subscriptionUpdateInputsShouldBe -> subscriptionUpdateResponse)
