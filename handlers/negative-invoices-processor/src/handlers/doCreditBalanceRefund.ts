@@ -9,7 +9,7 @@ import type {
 	DoCreditBalanceRefundOutput,
 } from '../types';
 
-// eslint-disable-next-line @typescript-eslint/require-await
+/* eslint-disable @typescript-eslint/require-await -- await function is temporarily disabled for testing */
 export const handler = async (
 	event: DoCreditBalanceRefundInput,
 ): Promise<DoCreditBalanceRefundOutput> => {
@@ -67,6 +67,7 @@ export const handler = async (
 		};
 	}
 };
+/* eslint-enable @typescript-eslint/require-await */
 
 function getPaymentMethodToRefundTo(paymentMethods: PaymentMethod[]) {
 	const defaultMethod = paymentMethods.find((pm) => pm.isDefault);
