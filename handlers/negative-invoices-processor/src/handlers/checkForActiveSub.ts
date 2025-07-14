@@ -15,13 +15,21 @@ export const handler = async (
 			zuoraClient,
 			parsedEvent.accountId,
 		);
+		console.log('checkForActiveSub hasActiveSub:', hasActiveSub);
 		return {
 			...parsedEvent,
 			checkForActiveSubAttempt: {
 				Success: true,
-				hasActiveSub,
+				hasActiveSub: false,
 			},
 		};
+		// return {
+		// 	...parsedEvent,
+		// 	checkForActiveSubAttempt: {
+		// 		Success: true,
+		// 		hasActiveSub,
+		// 	},
+		// };
 	} catch (error) {
 		return {
 			...event,
