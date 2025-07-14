@@ -28,17 +28,35 @@ export class MParticleApi extends GuStack {
 			'/accountIds/baton',
 		).stringValue;
 
-		const lambda = new GuLambdaFunction(this, `${app}-lambda`, {
+		// HTTP API Lambda
+		const httpLambda = new GuLambdaFunction(this, `${app}-http-lambda`, {
 			app,
 			memorySize: 1024,
 			fileName: `${app}.zip`,
 			runtime: nodeVersion,
 			timeout: Duration.seconds(15),
-			handler: 'index.handler',
-			functionName: `${app}-${this.stage}`,
+			handler: 'http-handler.handler',
+			functionName: `${app}-http-${this.stage}`,
 			events: [],
 			environment: {
-				APP: app,
+				APP: `${app}-http`,
+				STACK: this.stack,
+				STAGE: this.stage,
+			},
+		});
+
+		// Baton RER Lambda
+		const batonLambda = new GuLambdaFunction(this, `${app}-baton-lambda`, {
+			app,
+			memorySize: 1024,
+			fileName: `${app}.zip`,
+			runtime: nodeVersion,
+			timeout: Duration.seconds(30), // Longer timeout for Baton processing
+			handler: 'baton-handler.handler',
+			functionName: `${app}-baton-${this.stage}`,
+			events: [],
+			environment: {
+				APP: `${app}-baton`,
 				STACK: this.stack,
 				STAGE: this.stage,
 			},
@@ -50,7 +68,7 @@ export class MParticleApi extends GuStack {
 				{
 					path: '/data-subject-requests/{requestId}/callback',
 					httpMethod: 'POST',
-					lambda: lambda,
+					lambda: httpLambda, // Use HTTP lambda for API Gateway
 				},
 			],
 			monitoringConfiguration: {
@@ -59,6 +77,7 @@ export class MParticleApi extends GuStack {
 		});
 
 		if (this.stage === 'PROD') {
+			// API Gateway 5XX alarm
 			new SrLambdaAlarm(this, 'MParticleApiGateway5XXAlarm', {
 				app,
 				alarmName: 'API gateway 5XX response',
@@ -77,14 +96,15 @@ export class MParticleApi extends GuStack {
 						ApiName: `${app}-apiGateway`,
 					},
 				}),
-				lambdaFunctionNames: lambda.functionName,
+				lambdaFunctionNames: httpLambda.functionName,
 			});
 
-			new SrLambdaAlarm(this, 'MParticleLambdaErrorAlarm', {
+			// HTTP Lambda error alarm
+			new SrLambdaAlarm(this, 'MParticleHttpLambdaErrorAlarm', {
 				app,
-				alarmName: 'An error occurred in the mParticle API Lambda',
+				alarmName: 'An error occurred in the mParticle HTTP Lambda',
 				alarmDescription:
-					'mParticle API Lambda failed, please check the logs to diagnose the issue.',
+					'mParticle HTTP Lambda failed, please check the logs to diagnose the issue.',
 				comparisonOperator:
 					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 				metric: new Metric({
@@ -93,25 +113,49 @@ export class MParticleApi extends GuStack {
 					statistic: 'Sum',
 					period: Duration.hours(24),
 					dimensionsMap: {
-						FunctionName: lambda.functionName,
+						FunctionName: httpLambda.functionName,
 					},
 				}),
 				threshold: 1,
 				evaluationPeriods: 1,
-				lambdaFunctionNames: lambda.functionName,
+				lambdaFunctionNames: httpLambda.functionName,
+			});
+
+			// Baton Lambda error alarm
+			new SrLambdaAlarm(this, 'MParticleBatonLambdaErrorAlarm', {
+				app,
+				alarmName: 'An error occurred in the mParticle Baton Lambda',
+				alarmDescription:
+					'mParticle Baton Lambda failed, please check the logs to diagnose the issue.',
+				comparisonOperator:
+					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+				metric: new Metric({
+					metricName: 'Errors',
+					namespace: 'AWS/Lambda',
+					statistic: 'Sum',
+					period: Duration.hours(24),
+					dimensionsMap: {
+						FunctionName: batonLambda.functionName,
+					},
+				}),
+				threshold: 1,
+				evaluationPeriods: 1,
+				lambdaFunctionNames: batonLambda.functionName,
 			});
 		}
 
-		lambda.role?.attachInlinePolicy(
-			new Policy(this, `${app}-cloudwatch-policy`, {
-				statements: [
-					new PolicyStatement({
-						actions: ['cloudwatch:ListTagsForResource'],
-						resources: ['*'],
-					}),
-				],
-			}),
-		);
+		// CloudWatch permissions for both lambdas
+		const cloudWatchPolicy = new Policy(this, `${app}-cloudwatch-policy`, {
+			statements: [
+				new PolicyStatement({
+					actions: ['cloudwatch:ListTagsForResource'],
+					resources: ['*'],
+				}),
+			],
+		});
+
+		httpLambda.role?.attachInlinePolicy(cloudWatchPolicy);
+		batonLambda.role?.attachInlinePolicy(cloudWatchPolicy);
 
 		new SrLambdaDomain(this, {
 			subdomain: 'mparticle-api',
@@ -128,7 +172,7 @@ export class MParticleApi extends GuStack {
 					new PolicyStatement({
 						effect: Effect.ALLOW,
 						actions: ['lambda:InvokeFunction'],
-						resources: [lambda.functionArn],
+						resources: [batonLambda.functionArn], // Only Baton Lambda needs to be invokable
 					}),
 				],
 			}),
