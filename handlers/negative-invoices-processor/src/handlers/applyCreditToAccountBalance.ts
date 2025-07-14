@@ -1,6 +1,6 @@
-import { stageFromEnvironment } from '@modules/stage';
-import { applyCreditToAccountBalance } from '@modules/zuora/applyCreditToAccountBalance';
-import { ZuoraClient } from '@modules/zuora/zuoraClient';
+// import { stageFromEnvironment } from '@modules/stage';
+// import { applyCreditToAccountBalance } from '@modules/zuora/applyCreditToAccountBalance';
+// import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { InvoiceSchema } from '../types';
 import type {
 	ApplyCreditToAccountBalanceInput,
@@ -12,20 +12,27 @@ export const handler = async (
 ): Promise<ApplyCreditToAccountBalanceOutput> => {
 	try {
 		const parsedEvent = InvoiceSchema.parse(event);
-		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
+		// const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const body = JSON.stringify({
 			Amount: Math.abs(parsedEvent.invoiceBalance), //must be a positive value
 			SourceTransactionNumber: parsedEvent.invoiceNumber,
 			Type: 'Increase',
 		});
+		console.log('applyCreditToAccountBalance body:', body);
 
-		const applyCreditToAccountBalanceAttempt =
-			await applyCreditToAccountBalance(zuoraClient, body);
+		// const applyCreditToAccountBalanceAttempt =
+		// 	await applyCreditToAccountBalance(zuoraClient, body);
 
 		return {
 			...parsedEvent,
-			applyCreditToAccountBalanceAttempt,
+			applyCreditToAccountBalanceAttempt: {
+				Success: true,
+			},
 		};
+		// return {
+		// 	...parsedEvent,
+		// 	applyCreditToAccountBalanceAttempt,
+		// };
 	} catch (error) {
 		return {
 			...event,
