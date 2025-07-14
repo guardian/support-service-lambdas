@@ -9,9 +9,12 @@ import type {
 	DoCreditBalanceRefundOutput,
 } from '../types';
 
-export const handler = async (
+// export const handler = async (
+// 	event: DoCreditBalanceRefundInput,
+// ): Promise<DoCreditBalanceRefundOutput> => {
+export const handler = (
 	event: DoCreditBalanceRefundInput,
-): Promise<DoCreditBalanceRefundOutput> => {
+): DoCreditBalanceRefundOutput => {
 	let paymentMethodToRefundTo: PaymentMethod | undefined;
 
 	try {
