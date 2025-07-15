@@ -147,7 +147,11 @@ export class MParticleApi extends GuStack {
 		const cloudWatchPolicy = new Policy(this, `${app}-cloudwatch-policy`, {
 			statements: [
 				new PolicyStatement({
-					actions: ['cloudwatch:ListTagsForResource'],
+					actions: [
+						'logs:CreateLogGroup',
+						'logs:CreateLogStream',
+						'logs:PutLogEvents',
+					],
 					resources: ['*'],
 				}),
 			],
