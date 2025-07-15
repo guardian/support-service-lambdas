@@ -51,7 +51,6 @@ export class MParticleApi extends GuStack {
 			memorySize: 1024,
 			fileName: `${app}.zip`,
 			runtime: nodeVersion,
-			timeout: Duration.seconds(30), // Longer timeout for Baton processing
 			handler: 'baton-handler.handler',
 			functionName: `${app}-baton-${this.stage}`,
 			events: [],
@@ -68,7 +67,7 @@ export class MParticleApi extends GuStack {
 				{
 					path: '/data-subject-requests/{requestId}/callback',
 					httpMethod: 'POST',
-					lambda: httpLambda, // Use HTTP lambda for API Gateway
+					lambda: httpLambda,
 				},
 			],
 			monitoringConfiguration: {
