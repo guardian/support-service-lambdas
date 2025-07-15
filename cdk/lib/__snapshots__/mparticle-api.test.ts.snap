@@ -521,7 +521,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
           },
         },
         "FunctionName": "mparticle-api-baton-CODE",
-        "Handler": "baton-handler.handler",
+        "Handler": "index.handlerBaton",
         "LoggingConfig": {
           "LogFormat": "JSON",
         },
@@ -732,7 +732,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
           },
         },
         "FunctionName": "mparticle-api-http-CODE",
-        "Handler": "http-handler.handler",
+        "Handler": "index.handlerHttp",
         "LoggingConfig": {
           "LogFormat": "JSON",
         },
@@ -1665,7 +1665,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
           },
         },
         "FunctionName": "mparticle-api-baton-PROD",
-        "Handler": "baton-handler.handler",
+        "Handler": "index.handlerBaton",
         "LoggingConfig": {
           "LogFormat": "JSON",
         },
@@ -1876,7 +1876,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
           },
         },
         "FunctionName": "mparticle-api-http-PROD",
-        "Handler": "http-handler.handler",
+        "Handler": "index.handlerHttp",
         "LoggingConfig": {
           "LogFormat": "JSON",
         },

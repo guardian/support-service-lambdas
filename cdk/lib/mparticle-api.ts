@@ -35,7 +35,7 @@ export class MParticleApi extends GuStack {
 			fileName: `${app}.zip`,
 			runtime: nodeVersion,
 			timeout: Duration.seconds(15),
-			handler: 'http-handler.handler',
+			handler: 'index.handlerHttp',
 			functionName: `${app}-http-${this.stage}`,
 			events: [],
 			environment: {
@@ -51,7 +51,7 @@ export class MParticleApi extends GuStack {
 			memorySize: 1024,
 			fileName: `${app}.zip`,
 			runtime: nodeVersion,
-			handler: 'baton-handler.handler',
+			handler: 'index.handlerBaton',
 			functionName: `${app}-baton-${this.stage}`,
 			events: [],
 			environment: {
