@@ -1,5 +1,5 @@
 import type { Callback, Context } from 'aws-lambda';
-import { handler } from '..';
+import { handler } from '../baton-handler';
 import type {
 	BatonRerEventRequest,
 	BatonRerEventResponse,
