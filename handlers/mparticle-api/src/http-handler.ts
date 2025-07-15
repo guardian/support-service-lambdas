@@ -5,9 +5,10 @@ import type {
 } from 'aws-lambda';
 import { httpRouter } from './routers/http';
 
-export const handler: Handler<APIGatewayProxyEvent, APIGatewayProxyResult> = async (
-	event: APIGatewayProxyEvent,
-): Promise<APIGatewayProxyResult> => {
+export const handler: Handler<
+	APIGatewayProxyEvent,
+	APIGatewayProxyResult
+> = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
 	try {
 		console.debug('Processing HTTP request');
 		return httpRouter.routeRequest(event);

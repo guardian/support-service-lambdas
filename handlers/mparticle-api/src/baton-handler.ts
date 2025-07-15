@@ -5,9 +5,10 @@ import {
 	batonRerRouter,
 } from './routers/baton';
 
-export const handler: Handler<BatonRerEventRequest, BatonRerEventResponse> = async (
-	event: BatonRerEventRequest,
-): Promise<BatonRerEventResponse> => {
+export const handler: Handler<
+	BatonRerEventRequest,
+	BatonRerEventResponse
+> = async (event: BatonRerEventRequest): Promise<BatonRerEventResponse> => {
 	try {
 		console.debug('Processing Baton RER event');
 		return batonRerRouter.routeRequest(event);
