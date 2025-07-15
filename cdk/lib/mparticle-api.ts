@@ -125,7 +125,7 @@ export class MParticleApi extends GuStack {
 				app,
 				alarmName: 'An error occurred in the mParticle Baton Lambda',
 				alarmDescription:
-					'mParticle Baton Lambda failed, please check the logs to diagnose the issue. Impact: a user may not be deleted from mParticle+Braze after an erasure request, and Baton would display an error.',
+					'Impact: a user may not be deleted from mParticle+Braze after an erasure request, and Baton would display an error.',
 				comparisonOperator:
 					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 				metric: new Metric({
