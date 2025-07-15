@@ -108,16 +108,6 @@ function validateRequest(data: BatonRerEventRequest): BatonRerEventRequest {
 	return result.data;
 }
 
-// Helper function to validate responses before returning
-function validateResponse<T extends BatonRerEventResponse>(data: T): T {
-	const result = BatonRerEventResponseSchema.safeParse(data);
-	if (!result.success) {
-		console.error('Response validation failed:', result.error);
-		throw new ValidationError('Invalid response format', result.error);
-	}
-	return data;
-}
-
 async function handleInitiateRequest(
 	request: BatonRerEventInitiateRequest,
 ): Promise<BatonRerEventInitiateResponse> {
@@ -161,7 +151,7 @@ async function handleInitiateRequest(
 		message: `Expected completion time: ${dataSubjectRequestSubmissionResponse.expectedCompletionTime.toISOString()}`,
 	};
 
-	return validateResponse(response);
+	return response;
 }
 
 async function handleStatusRequest(
@@ -191,7 +181,7 @@ async function handleStatusRequest(
 		status: mapStatus(dataSubjectRequestState.requestStatus),
 	};
 
-	return validateResponse(response);
+	return response;
 }
 
 export const batonRerRouter = {
