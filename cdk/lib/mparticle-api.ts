@@ -153,7 +153,7 @@ export class MParticleApi extends GuStack {
 		 * The SQS queue policy in account "Ophan" imports this ARN
 		 * to grant this Lambda sqs:SendMessage permissions to the erasure queue.
 		 * We grant the permission so baton can call the lambdas directly as per:
-		 * https://github.com/guardian/baton?tab=readme-ov-file#adding-data-sources-to-baton 
+		 * https://github.com/guardian/baton?tab=readme-ov-file#adding-data-sources-to-baton
 		 * https://github.com/guardian/baton-lambda-template/blob/61ebdec91bd53e218d5f5a2aa90494db69adfa0a/src/main/g8/cfn.yaml#L44-L46
 		 */
 		const batonInvokeRole = new Role(this, 'BatonInvokeRole', {
