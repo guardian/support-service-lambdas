@@ -1171,7 +1171,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "mParticle Baton Lambda failed, please check the logs to diagnose the issue.",
+        "AlarmDescription": "mParticle Baton Lambda failed, please check the logs to diagnose the issue. Impact: a user may not be deleted from mParticle+Braze after an erasure request, and Baton would display an error.",
         "AlarmName": "An error occurred in the mParticle Baton Lambda",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
