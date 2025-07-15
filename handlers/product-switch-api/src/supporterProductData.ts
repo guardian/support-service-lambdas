@@ -1,4 +1,8 @@
-import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
+import {
+	GetQueueUrlCommand,
+	SendMessageCommand,
+	SQSClient,
+} from '@aws-sdk/client-sqs';
 import { awsConfig } from '@modules/aws/config';
 import { prettyPrint } from '@modules/prettyPrint';
 import { zuoraDateFormat } from '@modules/zuora/common';
@@ -48,10 +52,17 @@ export const sendToSupporterProductData = async (
 		`Sending supporter product data message ${messageBody} to queue ${queueName}`,
 	);
 
+	const getQueueUrlCommand = new GetQueueUrlCommand({
+		QueueName: queueName,
+	});
+	const { QueueUrl } = await client.send(getQueueUrlCommand);
+
 	const command = new SendMessageCommand({
-		QueueUrl: queueName,
+		QueueUrl: QueueUrl,
 		MessageBody: messageBody,
 	});
+
+	console.log(`checking queue URL ${QueueUrl}`);
 
 	const response = await client.send(command);
 	console.log(
