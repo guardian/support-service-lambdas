@@ -712,34 +712,6 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "mparticleapicloudwatchpolicy1B6A7573": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "logs:CreateLogGroup",
-                "logs:CreateLogStream",
-                "logs:PutLogEvents",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "mparticleapicloudwatchpolicy1B6A7573",
-        "Roles": [
-          {
-            "Ref": "mparticleapihttplambdaServiceRole4214266D",
-          },
-          {
-            "Ref": "mparticleapibatonlambdaServiceRole63F748A4",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
     "mparticleapihttplambdaF78B60DB": {
       "DependsOn": [
         "mparticleapihttplambdaServiceRoleDefaultPolicy70050791",
@@ -1877,34 +1849,6 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
         },
         "PolicyName": "mparticleapibatonlambdaServiceRoleDefaultPolicy13E705CD",
         "Roles": [
-          {
-            "Ref": "mparticleapibatonlambdaServiceRole63F748A4",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "mparticleapicloudwatchpolicy1B6A7573": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "logs:CreateLogGroup",
-                "logs:CreateLogStream",
-                "logs:PutLogEvents",
-              ],
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "mparticleapicloudwatchpolicy1B6A7573",
-        "Roles": [
-          {
-            "Ref": "mparticleapihttplambdaServiceRole4214266D",
-          },
           {
             "Ref": "mparticleapibatonlambdaServiceRole63F748A4",
           },

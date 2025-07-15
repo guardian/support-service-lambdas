@@ -143,23 +143,6 @@ export class MParticleApi extends GuStack {
 			});
 		}
 
-		// CloudWatch permissions for both lambdas
-		const cloudWatchPolicy = new Policy(this, `${app}-cloudwatch-policy`, {
-			statements: [
-				new PolicyStatement({
-					actions: [
-						'logs:CreateLogGroup',
-						'logs:CreateLogStream',
-						'logs:PutLogEvents',
-					],
-					resources: ['*'],
-				}),
-			],
-		});
-
-		httpLambda.role?.attachInlinePolicy(cloudWatchPolicy);
-		batonLambda.role?.attachInlinePolicy(cloudWatchPolicy);
-
 		new SrLambdaDomain(this, {
 			subdomain: 'mparticle-api',
 			restApi: apiGateway.api,
