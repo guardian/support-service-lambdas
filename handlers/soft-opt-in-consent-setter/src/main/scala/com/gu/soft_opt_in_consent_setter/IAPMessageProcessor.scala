@@ -4,7 +4,6 @@ import com.gu.soft_opt_in_consent_setter.HandlerIAP.{Acquisition, Cancellation, 
 import com.gu.soft_opt_in_consent_setter.models.ConsentsMapping.similarGuardianProducts
 import com.gu.soft_opt_in_consent_setter.models.{ConsentsMapping, SoftOptInConfig, SoftOptInError}
 import com.typesafe.scalalogging.StrictLogging
-import io.circe.generic.semiauto._
 import io.circe.syntax._
 
 import scala.util.{Failure, Success}

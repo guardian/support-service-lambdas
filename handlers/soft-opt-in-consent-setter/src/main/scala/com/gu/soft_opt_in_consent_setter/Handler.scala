@@ -12,7 +12,6 @@ import com.gu.soft_opt_in_consent_setter.models.{
   SoftOptInError,
 }
 import com.typesafe.scalalogging.LazyLogging
-import io.circe.generic.semiauto._
 import io.circe.syntax._
 
 object Handler extends LazyLogging {
