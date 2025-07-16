@@ -2,7 +2,10 @@ import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
-import { Duration } from 'aws-cdk-lib';
+import { aws_cloudwatch, Duration } from 'aws-cdk-lib';
+import { Metric, Stats, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
+import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
+import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import {
 	Effect,
 	PolicyStatement,
@@ -10,7 +13,7 @@ import {
 	ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
 import { Architecture, LoggingFormat } from 'aws-cdk-lib/aws-lambda';
-// import { Bucket } from 'aws-cdk-lib/aws-s3';
+import { Bucket } from 'aws-cdk-lib/aws-s3';
 import {
 	Choice,
 	Condition,
@@ -21,6 +24,7 @@ import {
 	StateMachine,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
+import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { nodeVersion } from './node-version';
 
 export class NegativeInvoicesProcessor extends GuStack {
@@ -60,9 +64,9 @@ export class NegativeInvoicesProcessor extends GuStack {
 			resources: ['*'],
 		});
 
-		// new Bucket(this, 'Bucket', {
-		// 	bucketName: `${appName}-${this.stage.toLowerCase()}`,
-		// });
+		const bucket = new Bucket(this, 'Bucket', {
+			bucketName: `${appName}-${this.stage.toLowerCase()}`,
+		});
 
 		const getInvoicesLambda = new GuLambdaFunction(
 			this,
@@ -165,6 +169,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-do-credit-balance-refund-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
@@ -183,13 +188,56 @@ export class NegativeInvoicesProcessor extends GuStack {
 			},
 		);
 
+		const saveResultsLambda = new GuLambdaFunction(
+			this,
+			'save-results-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-save-results-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+					S3_BUCKET: bucket.bucketName,
+				},
+				handler: 'saveResults.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['s3:GetObject', 's3:PutObject'],
+						resources: [bucket.arnForObjects('*')],
+					}),
+					allowPutMetric,
+				],
+			},
+		);
+
+		const detectFailuresLambda = new GuLambdaFunction(
+			this,
+			'detect-failures-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-detect-failures-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+				},
+				handler: 'detectFailures.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+				initialPolicy: [allowPutMetric],
+			},
+		);
+
 		const getInvoicesLambdaTask = new LambdaInvoke(this, 'Get invoices', {
 			lambdaFunction: getInvoicesLambda,
 			outputPath: '$.Payload',
 		}).addRetry({
 			errors: ['States.ALL'],
 			interval: Duration.seconds(10),
-			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
+			maxAttempts: 2,
 		});
 
 		const checkForActiveSubLambdaTask = new LambdaInvoke(
@@ -202,7 +250,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 		).addRetry({
 			errors: ['States.ALL'],
 			interval: Duration.seconds(10),
-			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
+			maxAttempts: 2,
 		});
 
 		const getPaymentMethodsLambdaTask = new LambdaInvoke(
@@ -215,7 +263,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 		).addRetry({
 			errors: ['States.ALL'],
 			interval: Duration.seconds(10),
-			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
+			maxAttempts: 2,
 		});
 
 		const applyCreditToAccountBalanceLambdaTask = new LambdaInvoke(
@@ -228,7 +276,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 		).addRetry({
 			errors: ['States.ALL'],
 			interval: Duration.seconds(10),
-			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
+			maxAttempts: 2,
 		});
 
 		const doCreditBalanceRefundLambdaTask = new LambdaInvoke(
@@ -241,8 +289,26 @@ export class NegativeInvoicesProcessor extends GuStack {
 		).addRetry({
 			errors: ['States.ALL'],
 			interval: Duration.seconds(10),
-			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
+			maxAttempts: 2,
 		});
+
+		const saveResultsLambdaTask = new LambdaInvoke(this, 'Save results to S3', {
+			lambdaFunction: saveResultsLambda,
+			outputPath: '$.Payload',
+		}).addRetry({
+			errors: ['States.ALL'],
+			interval: Duration.seconds(10),
+			maxAttempts: 2,
+		});
+
+		const detectFailuresLambdaTask = new LambdaInvoke(
+			this,
+			'Alarm on failures',
+			{
+				lambdaFunction: detectFailuresLambda,
+				outputPath: '$.Payload',
+			},
+		);
 
 		const invoiceProcessorMap = new Map(this, 'Invoice processor map', {
 			maxConcurrency: 1,
@@ -255,17 +321,54 @@ export class NegativeInvoicesProcessor extends GuStack {
 			'Has active payment method?',
 		)
 			.when(
-				Condition.booleanEquals('$.hasActivePaymentMethod', true),
+				Condition.booleanEquals(
+					'$.checkForActivePaymentMethodAttempt.hasActivePaymentMethod',
+					true,
+				),
 				doCreditBalanceRefundLambdaTask,
 			)
-			.otherwise(new Pass(this, 'check for valid email lambda will go here'));
+			.otherwise(new Pass(this, 'No active payment method found'));
+
+		const activePaymentMethodCalloutWasSuccessful = new Choice(
+			this,
+			'Successful active payment method callout?',
+		)
+			.when(
+				Condition.booleanEquals(
+					'$.checkForActivePaymentMethodAttempt.Success',
+					true,
+				),
+
+				hasActivePaymentMethodChoice,
+			)
+			.otherwise(
+				new Pass(this, 'Error: active payment method check unsuccessful'),
+			);
 
 		const hasActiveSubChoice = new Choice(this, 'Has active sub?')
 			.when(
-				Condition.booleanEquals('$.hasActiveSub', false),
-				getPaymentMethodsLambdaTask.next(hasActivePaymentMethodChoice),
+				Condition.and(
+					Condition.booleanEquals(
+						'$.checkForActiveSubAttempt.hasActiveSub',
+						false,
+					),
+				),
+				getPaymentMethodsLambdaTask.next(
+					activePaymentMethodCalloutWasSuccessful,
+				),
 			)
-			.otherwise(new Pass(this, 'End 2'));
+			.otherwise(new Pass(this, 'Has active sub: true'));
+
+		const activeSubCalloutWasSuccessful = new Choice(
+			this,
+			'Successful active sub callout?',
+		)
+			.when(
+				Condition.booleanEquals('$.checkForActiveSubAttempt.Success', true),
+
+				hasActiveSubChoice,
+			)
+			.otherwise(new Pass(this, 'Error: active sub check unsuccessful'));
 
 		const CreditAppliedSuccessfullyChoice = new Choice(
 			this,
@@ -276,9 +379,9 @@ export class NegativeInvoicesProcessor extends GuStack {
 					'$.applyCreditToAccountBalanceAttempt.Success',
 					true,
 				),
-				checkForActiveSubLambdaTask.next(hasActiveSubChoice),
+				checkForActiveSubLambdaTask.next(activeSubCalloutWasSuccessful),
 			)
-			.otherwise(new Pass(this, 'End 1'));
+			.otherwise(new Pass(this, 'Error: apply credit unsuccessful'));
 
 		invoiceProcessorMap.iterator(
 			applyCreditToAccountBalanceLambdaTask.next(
@@ -287,12 +390,59 @@ export class NegativeInvoicesProcessor extends GuStack {
 		);
 
 		const definitionBody = DefinitionBody.fromChainable(
-			getInvoicesLambdaTask.next(invoiceProcessorMap),
+			getInvoicesLambdaTask
+				.next(invoiceProcessorMap)
+				.next(saveResultsLambdaTask)
+				.next(detectFailuresLambdaTask),
 		);
 
-		new StateMachine(this, `${appName}-state-machine-${this.stage}`, {
-			stateMachineName: `${appName}-${this.stage}`,
-			definitionBody: definitionBody,
+		const stateMachine = new StateMachine(
+			this,
+			`${appName}-state-machine-${this.stage}`,
+			{
+				stateMachineName: `${appName}-${this.stage}`,
+				definitionBody: definitionBody,
+			},
+		);
+
+		const lambdaFunctionsToAlarmOn = [getInvoicesLambda, detectFailuresLambda];
+
+		lambdaFunctionsToAlarmOn.forEach((lambdaFunction, index) => {
+			new SrLambdaAlarm(this, `alarm-${index}`, {
+				alarmName: `Negative Invoices Processor - ${lambdaFunction.functionName} - something went wrong - ${this.stage}`,
+				alarmDescription:
+					'Something went wrong when executing the Negative Invoices Processor. See Cloudwatch logs for more information on the error.',
+				datapointsToAlarm: 1,
+				evaluationPeriods: 1,
+				lambdaFunctionNames: lambdaFunction.functionName,
+				comparisonOperator:
+					aws_cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+				metric: new Metric({
+					metricName: 'Errors',
+					namespace: 'AWS/Lambda',
+					statistic: Stats.SUM,
+					period: Duration.seconds(60),
+					dimensionsMap: {
+						FunctionName: lambdaFunction.functionName,
+					},
+				}),
+				threshold: 0,
+				treatMissingData: TreatMissingData.MISSING,
+				app: appName,
+				actionsEnabled: this.stage === 'PROD',
+			});
+		});
+
+		const cronEveryDayAtNoon = { minute: '0', hour: '11' };
+		const cronOncePerYear = { minute: '0', hour: '0', day: '1', month: '1' };
+
+		const executionFrequency =
+			this.stage === 'PROD' ? cronEveryDayAtNoon : cronOncePerYear;
+
+		new Rule(this, 'ScheduleStateMachineRule', {
+			schedule: Schedule.cron(executionFrequency),
+			targets: [new SfnStateMachine(stateMachine)],
+			enabled: true,
 		});
 	}
 }

@@ -2,37 +2,37 @@ import { stageFromEnvironment } from '@modules/stage';
 import { doQuery } from '@modules/zuora/query';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { z } from 'zod';
+import { CheckForActiveSubInputSchema } from '../types';
+import type { CheckForActiveSubInput, CheckForActiveSubOutput } from '../types';
 
-export const CheckForActiveSubSchema = z.object({
-	invoiceId: z.string(),
-	accountId: z.string(),
-	invoiceNumber: z.string(),
-	invoiceBalance: z.number(),
-	applyCreditToAccountBalanceAttempt: z.object({
-		Success: z.boolean(),
-	}),
-});
-export type CheckForActiveSubInput = z.infer<typeof CheckForActiveSubSchema>;
-
-export const handler = async (event: CheckForActiveSubInput) => {
+export const handler = async (
+	event: CheckForActiveSubInput,
+): Promise<CheckForActiveSubOutput> => {
 	try {
-		const parsedEvent = CheckForActiveSubSchema.parse(event);
+		const parsedEvent = CheckForActiveSubInputSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const hasActiveSub = await hasActiveSubscription(
 			zuoraClient,
 			parsedEvent.accountId,
 		);
-
 		return {
 			...parsedEvent,
-			hasActiveSub,
+			checkForActiveSubAttempt: {
+				Success: true,
+				hasActiveSub,
+			},
 		};
 	} catch (error) {
 		return {
 			...event,
-			subStatus: 'Error', //rethink this name
-			errorDetail:
-				error instanceof Error ? error.message : JSON.stringify(error, null, 2),
+			checkForActiveSubAttempt: {
+				Success: false,
+				hasActiveSub: undefined,
+				error:
+					error instanceof Error
+						? error.message
+						: JSON.stringify(error, null, 2),
+			},
 		};
 	}
 };

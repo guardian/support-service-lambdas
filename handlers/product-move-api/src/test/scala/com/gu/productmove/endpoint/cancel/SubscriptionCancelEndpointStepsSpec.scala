@@ -99,7 +99,7 @@ object SubscriptionCancelEndpointStepsSpec extends ZIOSpecDefault {
     new GetSubscription {
       override def get(subscriptionName: SubscriptionName): Task[GetSubscriptionResponse] =
         if (subscriptionName.value == expectedSubName)
-          ZIO.succeed(GetSubscriptionResponse("", "", AccountNumber(accountNumberToReturn), LocalDate.EPOCH, Nil))
+          ZIO.succeed(GetSubscriptionResponse("", "", AccountNumber(accountNumberToReturn), LocalDate.EPOCH, LocalDate.EPOCH.plusYears(1), Nil))
         else
           ZIO.fail(new Throwable("subscriptionName: " + subscriptionName))
     }

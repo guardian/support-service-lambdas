@@ -11,7 +11,7 @@ import com.gu.soft_opt_in_consent_setter.models.{
 }
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.Decoder
-import io.circe.generic.auto._
+import io.circe.generic.semiauto._
 import io.circe.parser.decode
 import scalaj.http.{Http, HttpOptions, HttpRequest, HttpResponse}
 
@@ -148,7 +148,7 @@ object SalesforceConnector {
     response.left
       .map(i => SoftOptInError(s"SalesforceConnector: Salesforce authentication failed: $i", i))
       .flatMap { result =>
-        decode[SalesforceAuth](result.body).left
+        decode[SalesforceAuth](result.body)(deriveDecoder[SalesforceAuth]).left
           .map(i =>
             SoftOptInError(
               s"SalesforceConnector: Could not decode SfAuthDetails: $i. String to decode: ${result.body}",

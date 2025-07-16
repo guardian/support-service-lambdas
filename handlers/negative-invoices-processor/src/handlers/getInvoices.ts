@@ -3,12 +3,9 @@ import { buildAuthClient, runQuery } from '@modules/bigquery/src/bigquery';
 import { stageFromEnvironment } from '@modules/stage';
 import { CODEDataMockQueryResponse } from '../../test/handlers/data/CODEDataMockQueryResponse';
 import { InvoiceRecordsArraySchema } from '../types';
-import type { InvoiceRecord } from '../types';
+import type { GetInvoicesOutput, InvoiceRecord } from '../types';
 
-export const handler = async (): Promise<{
-	invoicesCount: number;
-	invoices: InvoiceRecord[];
-}> => {
+export const handler = async (): Promise<GetInvoicesOutput> => {
 	try {
 		const records =
 			stageFromEnvironment() === 'PROD'
@@ -46,7 +43,7 @@ export const getPRODData = async (): Promise<InvoiceRecord[]> => {
 const query = (): string =>
 	`
 	SELECT
-        inv.id,
+        inv.id as invoiceId,
         inv.invoice_number as invoiceNumber,
         STRING_AGG(distinct inv.account_id, ',') AS accountId,
         MAX(inv.balance) AS invoiceBalance
@@ -62,6 +59,7 @@ const query = (): string =>
         inv.amount < 0
         AND inv.balance != 0
         AND sub.status = 'Active'
+		AND inv.Status = 'Posted'
     GROUP BY 
         inv.id, inv.invoice_number
 `;

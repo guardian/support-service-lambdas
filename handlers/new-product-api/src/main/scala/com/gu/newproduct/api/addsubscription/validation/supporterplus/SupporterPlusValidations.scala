@@ -17,7 +17,7 @@ object SupporterPlusValidations {
       currency: Currency,
   ): ValidationResult[AmountMinorUnits] =
     for {
-      amount <- validatableFields.amountMinorUnits getOrFailWith s"amountMinorUnits is missing"
+      amount <- validatableFields.amountMinorUnits getOrFailWith s"amount must be specified"
       _ <- isValidStartDate(validatableFields.startDate)
       limits = limitsFor(planId, currency)
       _ <- (amount.value <= limits.max) orFailWith s"amount must not be more than $currency ${AmountLimits

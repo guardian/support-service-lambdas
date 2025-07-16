@@ -4,24 +4,12 @@ import {
 	getPaymentMethods,
 } from '@modules/zuora/paymentMethod';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { z } from 'zod';
+import { GetPaymentMethodsInputSchema } from '../types';
+import type { GetPaymentMethodsInput, GetPaymentMethodsOutput } from '../types';
 
-export const GetPaymentMethodsInputSchema = z.object({
-	invoiceId: z.string(),
-	accountId: z.string(),
-	invoiceNumber: z.string(),
-	invoiceBalance: z.number(),
-	hasActiveSub: z.boolean(),
-	applyCreditToAccountBalanceAttempt: z.object({
-		Success: z.boolean(),
-	}),
-});
-
-export type GetPaymentMethodsInput = z.infer<
-	typeof GetPaymentMethodsInputSchema
->;
-
-export const handler = async (event: GetPaymentMethodsInput) => {
+export const handler = async (
+	event: GetPaymentMethodsInput,
+): Promise<GetPaymentMethodsOutput> => {
 	try {
 		const parsedEvent = GetPaymentMethodsInputSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
@@ -29,20 +17,28 @@ export const handler = async (event: GetPaymentMethodsInput) => {
 			zuoraClient,
 			parsedEvent.accountId,
 		);
-
 		const activePaymentMethods = filterActivePaymentMethods(paymentMethods);
-
+		const hasActivePaymentMethod = activePaymentMethods.length > 0;
 		return {
 			...parsedEvent,
-			activePaymentMethods,
-			hasActivePaymentMethod: activePaymentMethods.length > 0,
+			checkForActivePaymentMethodAttempt: {
+				Success: paymentMethods.success,
+				hasActivePaymentMethod,
+				activePaymentMethods,
+			},
 		};
 	} catch (error) {
 		return {
 			...event,
-			checkPaymentMethodStatus: 'Error',
-			errorDetail:
-				error instanceof Error ? error.message : JSON.stringify(error, null, 2),
+			checkForActivePaymentMethodAttempt: {
+				Success: false,
+				hasActivePaymentMethod: undefined,
+				activePaymentMethods: undefined,
+				error:
+					error instanceof Error
+						? error.message
+						: JSON.stringify(error, null, 2),
+			},
 		};
 	}
 };

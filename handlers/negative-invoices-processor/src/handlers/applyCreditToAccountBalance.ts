@@ -1,12 +1,15 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { applyCreditToAccountBalance } from '@modules/zuora/applyCreditToAccountBalance';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { z } from 'zod';
 import { InvoiceSchema } from '../types';
+import type {
+	ApplyCreditToAccountBalanceInput,
+	ApplyCreditToAccountBalanceOutput,
+} from '../types';
 
-export type ApplyCreditToAccountBalanceInput = z.infer<typeof InvoiceSchema>;
-
-export const handler = async (event: ApplyCreditToAccountBalanceInput) => {
+export const handler = async (
+	event: ApplyCreditToAccountBalanceInput,
+): Promise<ApplyCreditToAccountBalanceOutput> => {
 	try {
 		const parsedEvent = InvoiceSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
@@ -28,9 +31,11 @@ export const handler = async (event: ApplyCreditToAccountBalanceInput) => {
 			...event,
 			applyCreditToAccountBalanceAttempt: {
 				Success: false,
+				error:
+					error instanceof Error
+						? error.message
+						: JSON.stringify(error, null, 2),
 			},
-			errorDetail:
-				error instanceof Error ? error.message : JSON.stringify(error, null, 2),
 		};
 	}
 };

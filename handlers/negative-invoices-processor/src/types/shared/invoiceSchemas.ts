@@ -1,5 +1,6 @@
 import { z } from 'zod';
 
+// Base invoice schema used across multiple handlers
 export const InvoiceSchema = z
 	.object({
 		invoiceId: z.string(),
@@ -8,6 +9,7 @@ export const InvoiceSchema = z
 		invoiceBalance: z.number(),
 	})
 	.strict();
+
 export type InvoiceRecord = z.infer<typeof InvoiceSchema>;
 
 export const InvoiceRecordsArraySchema = z.array(InvoiceSchema);
