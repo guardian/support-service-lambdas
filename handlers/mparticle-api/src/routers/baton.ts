@@ -51,7 +51,7 @@ export const BatonRerEventRequestSchema = z.discriminatedUnion('action', [
 const BatonRerEventResponseBaseSchema = z.object({
 	requestType: z.literal('RER'),
 	status: z.enum(['pending', 'completed', 'failed']),
-	message: z.string()
+	message: z.string(),
 });
 
 const BatonRerEventInitiateResponseSchema =
