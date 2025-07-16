@@ -71,12 +71,21 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
-      - run: |
-          cdk/generator/generate.sh "${{ matrix.subproject }}"
-          pnpm install
-      - run: |
-          module=${{ matrix.subproject == 'alarms-handler' && format('{0}-cdk', matrix.subproject) || 'cdk' }}
-          pnpm --filter $module package
+
+      - name: locate and prepare CDK package for handler
+        id: cdk-path
+        run: |
+          if [ -d "./handlers/${{ matrix.subproject }}/cdk" ]; then
+            cdk/generator/generate.sh "${{ matrix.subproject }}"
+            echo "path=./handlers/${{ matrix.subproject }}/cdk" >> $GITHUB_OUTPUT
+            echo "module=${{ matrix.subproject }}-cdk" >> $GITHUB_OUTPUT
+          else
+            echo "path=./cdk" >> $GITHUB_OUTPUT
+            echo "module=cdk" >> $GITHUB_OUTPUT
+          fi
+
+      - run: pnpm install
+      - run: pnpm --filter ${{ steps.cdk-path.outputs.module }} package
       - run: pnpm --filter ${{ matrix.subproject }} package
 
       - name: Configure AWS credentials
@@ -96,6 +105,6 @@ jobs:
           commentingEnabled: 'false'
           contentDirectories: |
             ${{ matrix.subproject }}-cloudformation:
-              - ./cdk/cdk.out
+              - ${{ format('{0}/cdk.out', steps.cdk-path.outputs.path) }}
             ${{ matrix.subproject }}:
               - ./handlers/${{ matrix.subproject }}/target/${{ matrix.subproject }}.zip

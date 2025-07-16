@@ -1,7 +1,7 @@
 packages:
   # lambdas
   - 'handlers/*'
-  # lambdas
+  # per lambda cdk
   - 'handlers/*/cdk'
   # shared code
   - 'modules/*'
