@@ -1,5 +1,7 @@
 #!/bin/bash -e
 
+echo "generating boilerplate files for handler cdk packages..."
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"  # assuming script is in ./scripts/
 echo repo root is $REPO_ROOT
@@ -18,8 +20,12 @@ generate_package_files() {
   local PACKAGE_NAME=$1
   local DEST_DIR="${REPO_ROOT}/handlers/${PACKAGE_NAME}/cdk"
 
-  echo "⚙️ Generating standard files in: ${DEST_DIR}/"
-  mkdir -p "$DEST_DIR"
+  if [ ! -d "$DEST_DIR" ]; then
+    echo "package ${PACKAGE_NAME} doesn't have a cdk folder - skipping"
+    return 0
+  fi
+
+  echo "⚙️ ${PACKAGE_NAME} Generating standard files in: ${DEST_DIR}/"
 
   echo cdk.out > "${DEST_DIR}/.gitignore"
   SORTED_TEMPLATE_FILES=$(ls -1 template.*)
@@ -30,6 +36,7 @@ generate_package_files() {
     echo "  ✅ Generated ${DEST_DIR}/$BARE_NAME"
   done
   echo "✅ Generated all standard files in: ${DEST_DIR}/"
+  echo ""
 }
 
 if [ $# -gt 0 ]; then

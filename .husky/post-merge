@@ -1,3 +1,3 @@
 #!/bin/sh -e
-echo "running post-merge hook"
+echo "running post-merge hook to copy common files to handlers' cdk packages"
 bash cdk/template/generate.sh
