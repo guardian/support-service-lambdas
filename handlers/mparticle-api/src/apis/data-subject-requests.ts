@@ -105,7 +105,8 @@ export const submitDataSubjectRequest = async (
 			await getStatusOfDataSubjectRequestByUserId(form.userId);
 		if (getDataSubjectRequestResponse) {
 			return {
-				expectedCompletionTime: getDataSubjectRequestResponse.expectedCompletionTime,
+				expectedCompletionTime:
+					getDataSubjectRequestResponse.expectedCompletionTime,
 				receivedTime: new Date(),
 				requestId: getDataSubjectRequestResponse.requestId,
 				controllerId: getDataSubjectRequestResponse.controllerId,
