@@ -4,6 +4,8 @@ import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
 import { aws_cloudwatch, Duration } from 'aws-cdk-lib';
 import { Metric, Stats, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
+import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
+import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import {
 	Effect,
 	PolicyStatement,
@@ -394,10 +396,14 @@ export class NegativeInvoicesProcessor extends GuStack {
 				.next(detectFailuresLambdaTask),
 		);
 
-		new StateMachine(this, `${appName}-state-machine-${this.stage}`, {
-			stateMachineName: `${appName}-${this.stage}`,
-			definitionBody: definitionBody,
-		});
+		const stateMachine = new StateMachine(
+			this,
+			`${appName}-state-machine-${this.stage}`,
+			{
+				stateMachineName: `${appName}-${this.stage}`,
+				definitionBody: definitionBody,
+			},
+		);
 
 		const lambdaFunctionsToAlarmOn = [getInvoicesLambda, detectFailuresLambda];
 
@@ -425,6 +431,18 @@ export class NegativeInvoicesProcessor extends GuStack {
 				app: appName,
 				actionsEnabled: this.stage === 'PROD',
 			});
+		});
+
+		const cronEveryDayAtNoon = { minute: '0', hour: '11' };
+		const cronOncePerYear = { minute: '0', hour: '0', day: '1', month: '1' };
+
+		const executionFrequency =
+			this.stage === 'PROD' ? cronEveryDayAtNoon : cronOncePerYear;
+
+		new Rule(this, 'ScheduleStateMachineRule', {
+			schedule: Schedule.cron(executionFrequency),
+			targets: [new SfnStateMachine(stateMachine)],
+			enabled: true,
 		});
 	}
 }

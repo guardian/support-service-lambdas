@@ -49,6 +49,27 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
     },
+    "ScheduleStateMachineRule91756851": {
+      "Properties": {
+        "ScheduleExpression": "cron(0 0 1 1 ? *)",
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Ref": "negativeinvoicesprocessorstatemachineCODE3A72431E",
+            },
+            "Id": "Target0",
+            "RoleArn": {
+              "Fn::GetAtt": [
+                "negativeinvoicesprocessorstatemachineCODEEventsRoleCEB56B26",
+                "Arn",
+              ],
+            },
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
     "alarm05E1DB6A1": {
       "Properties": {
         "ActionsEnabled": false,
@@ -1564,6 +1585,64 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
       "Type": "AWS::StepFunctions::StateMachine",
       "UpdateReplacePolicy": "Delete",
     },
+    "negativeinvoicesprocessorstatemachineCODEEventsRoleCEB56B26": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "negativeinvoicesprocessorstatemachineCODEEventsRoleDefaultPolicyC52DE77C": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "negativeinvoicesprocessorstatemachineCODE3A72431E",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "negativeinvoicesprocessorstatemachineCODEEventsRoleDefaultPolicyC52DE77C",
+        "Roles": [
+          {
+            "Ref": "negativeinvoicesprocessorstatemachineCODEEventsRoleCEB56B26",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "negativeinvoicesprocessorstatemachineCODERoleDefaultPolicyED7F55DA": {
       "Properties": {
         "PolicyDocument": {
@@ -2263,6 +2342,27 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
       },
       "Type": "AWS::S3::Bucket",
       "UpdateReplacePolicy": "Retain",
+    },
+    "ScheduleStateMachineRule91756851": {
+      "Properties": {
+        "ScheduleExpression": "cron(0 11 * * ? *)",
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Ref": "negativeinvoicesprocessorstatemachinePROD17CC3EA7",
+            },
+            "Id": "Target0",
+            "RoleArn": {
+              "Fn::GetAtt": [
+                "negativeinvoicesprocessorstatemachinePRODEventsRoleFEB042B3",
+                "Arn",
+              ],
+            },
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
     },
     "alarm05E1DB6A1": {
       "Properties": {
@@ -3778,6 +3878,64 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
       },
       "Type": "AWS::StepFunctions::StateMachine",
       "UpdateReplacePolicy": "Delete",
+    },
+    "negativeinvoicesprocessorstatemachinePRODEventsRoleDefaultPolicy0080B839": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "negativeinvoicesprocessorstatemachinePROD17CC3EA7",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "negativeinvoicesprocessorstatemachinePRODEventsRoleDefaultPolicy0080B839",
+        "Roles": [
+          {
+            "Ref": "negativeinvoicesprocessorstatemachinePRODEventsRoleFEB042B3",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "negativeinvoicesprocessorstatemachinePRODEventsRoleFEB042B3": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
     },
     "negativeinvoicesprocessorstatemachinePRODRole64CCDA25": {
       "Properties": {
