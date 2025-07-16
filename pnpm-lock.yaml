@@ -91,6 +91,8 @@ importers:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@22.15.17)(typescript@5.8.2)
 
+  cdk/module: {}
+
   handlers/alarms-handler:
     dependencies:
       '@aws-sdk/client-cloudwatch':
@@ -111,6 +113,10 @@ importers:
         version: 1.11.13
 
   handlers/alarms-handler/cdk:
+    dependencies:
+      '@modules/cdk':
+        specifier: workspace:*
+        version: link:../../../cdk/module
     devDependencies:
       '@guardian/cdk':
         specifier: 61.8.2

@@ -70,7 +70,9 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - run: pnpm install
-      - run: pnpm --filter cdk package
+      - run: |
+          module=${{ matrix.subproject == 'alarms-handler' && format('{0}-cdk', matrix.subproject) || 'cdk' }}
+          pnpm --filter $module package
       - run: pnpm --filter ${{ matrix.subproject }} package
 
       - name: Configure AWS credentials

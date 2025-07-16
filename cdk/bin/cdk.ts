@@ -1,6 +1,5 @@
 import 'source-map-support/register';
 import { App } from 'aws-cdk-lib';
-import { AlarmsHandler } from '../lib/alarms-handler';
 import { BatchEmailSender } from '../lib/batch-email-sender';
 import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
 import { DiscountApi } from '../lib/discount-api';
@@ -216,14 +215,6 @@ new ProductSwitchApi(app, 'product-switch-api-PROD', {
 	certificateId: supportCertificateId,
 });
 
-new AlarmsHandler(app, 'alarms-handler-CODE', {
-	stack: 'support',
-	stage: 'CODE',
-});
-new AlarmsHandler(app, 'alarms-handler-PROD', {
-	stack: 'support',
-	stage: 'PROD',
-});
 new SalesforceDisasterRecoveryHealthCheck(
 	app,
 	'salesforce-disaster-recovery-health-check-CODE',

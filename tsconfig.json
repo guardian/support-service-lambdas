@@ -41,6 +41,7 @@
       "@modules/identity/*": ["./modules/identity/src/*"],
       "@modules/routing/*": ["./modules/routing/src/*"],
       "@modules/secrets-manager/*": ["./modules/secrets-manager/src/*"],
+      "@modules/cdk/*": ["./cdk/module/*"],
       "@modules/*": ["./modules/*"]
     },
     // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */

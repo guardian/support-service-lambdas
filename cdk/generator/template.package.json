@@ -14,6 +14,9 @@
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm synth",
     "fix-formatting": "prettier --write **.ts"
   },
+  "dependencies": {
+    "@modules/cdk": "workspace:*"
+  },
   "devDependencies": {
     "@guardian/cdk": "61.8.2",
     "@types/jest": "^29.5.14",

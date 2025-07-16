@@ -19,10 +19,13 @@ for PACKAGE_NAME in "${PACKAGE_NAMES[@]}"; do
   echo "⚙️ Generating standard files in: ${DEST_DIR}/"
   mkdir -p "$DEST_DIR"
 
-  for FILE in template.*; do
+  echo cdk.out > "${DEST_DIR}/.gitignore"
+  SORTED_TEMPLATE_FILES=$(ls -1 template.*)
+  for FILE in $SORTED_TEMPLATE_FILES; do
     BARE_NAME="${FILE#template.}"
     sed "s/{{PACKAGE_NAME}}/$PACKAGE_NAME-cdk/g" "$FILE" > "${DEST_DIR}/$BARE_NAME"
+    echo $BARE_NAME >> "${DEST_DIR}/.gitignore"
     echo "  ✅ Generated ${DEST_DIR}/$BARE_NAME"
   done
-  echo "✅ Generated standard files in: ${DEST_DIR}/"
+  echo "✅ Generated all standard files in: ${DEST_DIR}/"
 done

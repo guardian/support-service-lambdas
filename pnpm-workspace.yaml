@@ -7,6 +7,7 @@ packages:
   - 'modules/*'
   # cdk directory
   - 'cdk'
+  - 'cdk/module'
 
 catalog:
   zod: ^3.23.8
