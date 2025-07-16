@@ -7,15 +7,17 @@ echo repo root is $REPO_ROOT
 cd "${SCRIPT_DIR}"
 echo `pwd`
 
-PACKAGE_NAMES=(
-  "alarms-handler"
-#  "discount-api"
-#  "update-supporter-plus-amount"
-#  "product-switch-api"
+ALL_PACKAGE_NAMES=(
+    "alarms-handler"
+  #  "discount-api"
+  #  "update-supporter-plus-amount"
+  #  "product-switch-api"
 )
 
-for PACKAGE_NAME in "${PACKAGE_NAMES[@]}"; do
-  DEST_DIR="${REPO_ROOT}/handlers/${PACKAGE_NAME}/cdk"
+generate_package_files() {
+  local PACKAGE_NAME=$1
+  local DEST_DIR="${REPO_ROOT}/handlers/${PACKAGE_NAME}/cdk"
+
   echo "⚙️ Generating standard files in: ${DEST_DIR}/"
   mkdir -p "$DEST_DIR"
 
@@ -28,4 +30,12 @@ for PACKAGE_NAME in "${PACKAGE_NAMES[@]}"; do
     echo "  ✅ Generated ${DEST_DIR}/$BARE_NAME"
   done
   echo "✅ Generated all standard files in: ${DEST_DIR}/"
-done
+}
+
+if [ $# -gt 0 ]; then
+  generate_package_files "$1"
+else
+  for PACKAGE_NAME in "${ALL_PACKAGE_NAMES[@]}"; do
+    generate_package_files "$PACKAGE_NAME"
+  done
+fi

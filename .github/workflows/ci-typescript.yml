@@ -73,6 +73,7 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install
       - run: |
+          cdk/generator/generate.sh "${{ matrix.subproject }}"
           module=${{ matrix.subproject == 'alarms-handler' && format('{0}-cdk', matrix.subproject) || 'cdk' }}
           pnpm --filter $module package
       - run: pnpm --filter ${{ matrix.subproject }} package
