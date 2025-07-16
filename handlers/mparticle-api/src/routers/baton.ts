@@ -148,7 +148,7 @@ async function handleInitiateRequest(
 		status: 'pending' as const,
 		initiationReference:
 			dataSubjectRequestSubmissionResponse.requestId as InitiationReference,
-		message: `mParticle Request Id: "${dataSubjectRequestSubmissionResponse.requestId}". Expected completion time: ${dataSubjectRequestSubmissionResponse.expectedCompletionTime.toISOString()}`,
+		message: `mParticle Request Id: "${dataSubjectRequestSubmissionResponse.requestId}". Expected completion time: ${dataSubjectRequestSubmissionResponse.expectedCompletionTime.toISOString()}.`,
 	};
 
 	return response;
@@ -179,7 +179,7 @@ async function handleStatusRequest(
 		requestType: 'RER' as const,
 		action: 'status' as const,
 		status: mapStatus(dataSubjectRequestState.requestStatus),
-		message: `mParticle Request Id: "${dataSubjectRequestState.requestId}". Expected completion time: ${dataSubjectRequestState.expectedCompletionTime.toISOString()}`,
+		message: `mParticle Request Id: "${dataSubjectRequestState.requestId}". Expected completion time: ${dataSubjectRequestState.expectedCompletionTime.toISOString()}.`,
 	};
 
 	return response;
