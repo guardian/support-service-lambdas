@@ -71,9 +71,10 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
-      - run: pnpm install
       - run: |
           cdk/generator/generate.sh "${{ matrix.subproject }}"
+          pnpm install
+      - run: |
           module=${{ matrix.subproject == 'alarms-handler' && format('{0}-cdk', matrix.subproject) || 'cdk' }}
           pnpm --filter $module package
       - run: pnpm --filter ${{ matrix.subproject }} package
