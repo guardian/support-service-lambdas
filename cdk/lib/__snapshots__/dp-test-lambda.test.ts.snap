@@ -89,6 +89,26 @@ exports[`The dp-test-lambda stack matches the snapshot 1`] = `
               "Resource": "*",
             },
             {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:CODE/Zuora-OAuth/SupportServiceLambdas-*",
+                  ],
+                ],
+              },
+            },
+            {
               "Action": [
                 "s3:GetObject*",
                 "s3:GetBucket*",

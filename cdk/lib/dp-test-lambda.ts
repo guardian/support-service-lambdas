@@ -29,7 +29,15 @@ export class DpTestLambda extends GuStack {
 			handler: 'invokeZuora.handler',
 			fileName: `${appName}.zip`,
 			architecture: Architecture.ARM_64,
-			initialPolicy: [allowPutMetric],
+			initialPolicy: [
+				allowPutMetric,
+				new PolicyStatement({
+					actions: ['secretsmanager:GetSecretValue'],
+					resources: [
+						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+					],
+				}),
+			],
 		});
 	}
 }
