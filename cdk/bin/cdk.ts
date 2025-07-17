@@ -9,6 +9,7 @@ import { GenerateProductCatalog } from '../lib/generate-product-catalog';
 import { MetricPushApi } from '../lib/metric-push-api';
 import { MParticleApi } from '../lib/mparticle-api';
 import { NegativeInvoicesProcessor } from '../lib/negative-invoices-processor';
+import { DpTestLambda } from '../lib/dp-test-lambda';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
 import { ObserverDataExport } from '../lib/observer-data-export';
@@ -337,6 +338,10 @@ new ObserverDataExport(app, 'observer-data-export-CODE', {
 new ObserverDataExport(app, 'observer-data-export-PROD', {
 	stack: 'support',
 	stage: 'PROD',
+});
+new DpTestLambda(app, 'dp-test-lambda-CODE', {
+	stack: 'support',
+	stage: 'CODE',
 });
 new NegativeInvoicesProcessor(app, 'negative-invoices-processor-CODE', {
 	stack: 'support',
