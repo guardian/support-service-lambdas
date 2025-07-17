@@ -1500,6 +1500,26 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "USD": 150,
         },
       },
+      "GuardianWeeklyDomesticMonthly": {
+        "billingPeriod": "Month",
+        "charges": {
+          "GuardianWeekly": {
+            "id": "8ad097b48f006681018f0598097f0059",
+          },
+          "SupporterPlus": {
+            "id": "8ad081dd8ef57784018ef6e159894bfc",
+          },
+        },
+        "id": "8ad081dd8ef57784018ef6e159224bfa",
+        "pricing": {
+          "AUD": 50,
+          "CAD": 39.5,
+          "EUR": 60,
+          "GBP": 25,
+          "NZD": 57,
+          "USD": 43,
+        },
+      },
       "Monthly": {
         "billingPeriod": "Month",
         "charges": {
