@@ -191,11 +191,11 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92c0f965d280590165f16b1b9946c2",
         "pricing": {
-          "AUD": 480,
-          "CAD": 396,
-          "EUR": 318,
-          "GBP": 180,
-          "NZD": 600,
+          "AUD": 528,
+          "CAD": 432,
+          "EUR": 348,
+          "GBP": 198,
+          "NZD": 660,
           "USD": 360,
         },
       },
@@ -208,11 +208,11 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92c0f878ac40300178acaa04bb401d",
         "pricing": {
-          "AUD": 40,
-          "CAD": 33,
-          "EUR": 26.5,
-          "GBP": 15,
-          "NZD": 50,
+          "AUD": 44,
+          "CAD": 36,
+          "EUR": 29,
+          "GBP": 16.5,
+          "NZD": 55,
           "USD": 30,
         },
       },
@@ -225,11 +225,11 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92c0f867cae0700167eff921734f7b",
         "pricing": {
-          "AUD": 480,
-          "CAD": 396,
-          "EUR": 318,
-          "GBP": 180,
-          "NZD": 600,
+          "AUD": 528,
+          "CAD": 432,
+          "EUR": 348,
+          "GBP": 198,
+          "NZD": 660,
           "USD": 360,
         },
       },
@@ -242,11 +242,11 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92c0f965dc30640165f150c0956859",
         "pricing": {
-          "AUD": 120,
-          "CAD": 99,
-          "EUR": 79.5,
-          "GBP": 45,
-          "NZD": 150,
+          "AUD": 132,
+          "CAD": 108,
+          "EUR": 87,
+          "GBP": 49.5,
+          "NZD": 165,
           "USD": 90,
         },
       },
@@ -259,11 +259,11 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92c0f96ded216a016df491134d4091",
         "pricing": {
-          "AUD": 120,
-          "CAD": 99,
-          "EUR": 79.5,
-          "GBP": 45,
-          "NZD": 150,
+          "AUD": 132,
+          "CAD": 108,
+          "EUR": 87,
+          "GBP": 49.5,
+          "NZD": 165,
           "USD": 90,
         },
       },
@@ -282,8 +282,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92c0f965f2122101660fb33ed24a45",
         "pricing": {
-          "GBP": 297.6,
-          "USD": 396,
+          "GBP": 336,
+          "USD": 432,
         },
       },
       "Monthly": {
@@ -295,8 +295,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92c0f878ac402c0178acb3a90a3620",
         "pricing": {
-          "GBP": 24.8,
-          "USD": 33,
+          "GBP": 28,
+          "USD": 36,
         },
       },
       "OneYearGift": {
@@ -308,8 +308,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92c0f967caee410167eff78e7b5244",
         "pricing": {
-          "GBP": 297.6,
-          "USD": 396,
+          "GBP": 336,
+          "USD": 432,
         },
       },
       "Quarterly": {
@@ -321,8 +321,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92c0f965f2122101660fb81b745a06",
         "pricing": {
-          "GBP": 74.4,
-          "USD": 99,
+          "GBP": 83.9,
+          "USD": 108,
         },
       },
       "ThreeMonthGift": {
@@ -334,8 +334,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92c0f96df75b5a016df81ba1c62609",
         "pricing": {
-          "GBP": 74.4,
-          "USD": 99,
+          "GBP": 83.9,
+          "USD": 108,
         },
       },
     },
@@ -518,7 +518,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92c0f85aff3453015b10496b5e3d17",
         "pricing": {
-          "GBP": 80.99,
+          "GBP": 83.99,
         },
       },
       "Saturday": {
@@ -545,7 +545,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92c0f961f9cf300161fc4f71473a34",
         "pricing": {
-          "GBP": 30.99,
+          "GBP": 20.99,
         },
       },
       "Sixday": {
@@ -602,7 +602,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92c0f85aff33ff015b1042d4ba0a05",
         "pricing": {
-          "GBP": 70.99,
+          "GBP": 73.99,
         },
       },
       "Sunday": {
@@ -629,7 +629,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92c0f955c3cf0f0155c5d9e83a3cb7",
         "pricing": {
-          "GBP": 30.99,
+          "GBP": 20.99,
         },
       },
       "Weekend": {
@@ -662,7 +662,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92c0f95aff3b56015b104aa9a13ea5",
         "pricing": {
-          "GBP": 40.99,
+          "GBP": 34.99,
         },
       },
     },
@@ -731,7 +731,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "71a116628be96ab11606b51ec6060555",
         "pricing": {
-          "GBP": 85.99,
+          "GBP": 83.99,
         },
       },
       "Sixday": {
@@ -788,7 +788,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "71a1383e2a796aafcb16b527842001ca",
         "pricing": {
-          "GBP": 75.99,
+          "GBP": 73.99,
         },
       },
       "Weekend": {
@@ -821,7 +821,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "71a1166283a96ab11606b50ebbb50381",
         "pricing": {
-          "GBP": 42.99,
+          "GBP": 34.99,
         },
       },
     },
@@ -890,7 +890,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92c0f95aff3b53015b10469bbf5f5f",
         "pricing": {
-          "GBP": 66.99,
+          "GBP": 69.99,
         },
       },
       "Saturday": {
@@ -917,7 +917,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92c0f961f9cf300161fc44f2661258",
         "pricing": {
-          "GBP": 25.99,
+          "GBP": 15.99,
         },
       },
       "Sixday": {
@@ -977,7 +977,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92c0f855c3b8190155c585a95e6f5a",
         "pricing": {
-          "GBP": 58.99,
+          "GBP": 61.99,
         },
       },
       "Sunday": {
@@ -1004,7 +1004,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92c0f955a0b5bf0155b62623846fc8",
         "pricing": {
-          "GBP": 25.99,
+          "GBP": 15.99,
         },
       },
       "Weekend": {
@@ -1037,7 +1037,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92c0f95aff3b54015b1047efaa2ac3",
         "pricing": {
-          "GBP": 34.99,
+          "GBP": 27.99,
         },
       },
     },
@@ -1230,7 +1230,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92c0f86fa49142016fa49eaa492988",
         "pricing": {
-          "GBP": 66.99,
+          "GBP": 69.99,
         },
       },
       "Saturday": {
@@ -1257,7 +1257,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92c0f86fa49142016fa49eb1732a39",
         "pricing": {
-          "GBP": 25.99,
+          "GBP": 15.99,
         },
       },
       "Sixday": {
@@ -1317,7 +1317,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92c0f86fa49142016fa49ea1af28c8",
         "pricing": {
-          "GBP": 58.99,
+          "GBP": 61.99,
         },
       },
       "Sunday": {
@@ -1344,7 +1344,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92c0f86fa49142016fa49ea90e2976",
         "pricing": {
-          "GBP": 25.99,
+          "GBP": 15.99,
         },
       },
       "Weekend": {
@@ -1377,7 +1377,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92c0f86fa49142016fa49eaecb29dd",
         "pricing": {
-          "GBP": 34.99,
+          "GBP": 27.99,
         },
       },
     },
@@ -1500,86 +1500,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "USD": 150,
         },
       },
-      "GuardianWeeklyDomesticAnnual": {
-        "billingPeriod": "Annual",
-        "charges": {
-          "GuardianWeekly": {
-            "id": "8ad097b48f006681018f059b7613014a",
-          },
-          "SupporterPlus": {
-            "id": "8ad097b48f006681018f059b75b90142",
-          },
-        },
-        "id": "8ad097b48f006681018f059b755e0140",
-        "pricing": {
-          "AUD": 640,
-          "CAD": 516,
-          "EUR": 413,
-          "GBP": 275,
-          "NZD": 760,
-          "USD": 480,
-        },
-      },
-      "GuardianWeeklyDomesticMonthly": {
-        "billingPeriod": "Month",
-        "charges": {
-          "GuardianWeekly": {
-            "id": "8ad097b48f006681018f0598097f0059",
-          },
-          "SupporterPlus": {
-            "id": "8ad081dd8ef57784018ef6e159894bfc",
-          },
-        },
-        "id": "8ad081dd8ef57784018ef6e159224bfa",
-        "pricing": {
-          "AUD": 50,
-          "CAD": 39.5,
-          "EUR": 60,
-          "GBP": 25,
-          "NZD": 57,
-          "USD": 43,
-        },
-      },
-      "GuardianWeeklyRestOfWorldAnnual": {
-        "billingPeriod": "Annual",
-        "charges": {
-          "GuardianWeekly": {
-            "id": "8ad097b48f006681018f05a049f301fe",
-          },
-          "SupporterPlus": {
-            "id": "8ad097b48f006681018f05a049a101f6",
-          },
-        },
-        "id": "8ad097b48f006681018f05a0496e01f4",
-        "pricing": {
-          "AUD": 584,
-          "CAD": 465,
-          "EUR": 365,
-          "GBP": 392.6,
-          "NZD": 690,
-          "USD": 516,
-        },
-      },
-      "GuardianWeeklyRestOfWorldMonthly": {
-        "billingPeriod": "Month",
-        "charges": {
-          "GuardianWeekly": {
-            "id": "8ad097b48f006681018f05a2c17e0231",
-          },
-          "SupporterPlus": {
-            "id": "8ad097b48f006681018f05a2c12f0229",
-          },
-        },
-        "id": "8ad097b48f006681018f05a2c0fb0227",
-        "pricing": {
-          "AUD": 17,
-          "CAD": 13,
-          "EUR": 10,
-          "GBP": 34.8,
-          "NZD": 17,
-          "USD": 46,
-        },
-      },
       "Monthly": {
         "billingPeriod": "Month",
         "charges": {
@@ -1598,6 +1518,26 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 12,
           "NZD": 20,
           "USD": 15,
+        },
+      },
+      "OneYearStudent": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Contribution": {
+            "id": "71a10c6269b981784c9817e189270008",
+          },
+          "Subscription": {
+            "id": "71a10c6269b981784c9817e188d60001",
+          },
+        },
+        "id": "71a10c6269b981784c9817e1887c0000",
+        "pricing": {
+          "AUD": 200,
+          "CAD": 150,
+          "EUR": 120,
+          "GBP": 9,
+          "NZD": 200,
+          "USD": 150,
         },
       },
       "V1DeprecatedAnnual": {
@@ -1808,7 +1748,7 @@ exports[`prod Generated product billing types match snapshot 1`] = `
 import type { ProductKey } from '@modules/product-catalog/productCatalog';
 	
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- we are using this for type generation
-	const productBillingPeriods = {"GuardianWeeklyRestOfWorld":["Month","Annual","Quarter"],"GuardianAdLite":["Month"],"TierThree":["Annual","Month"],"DigitalSubscription":["Quarter","Month","Annual"],"NationalDelivery":["Month"],"SupporterMembership":["Annual","Month"],"SupporterPlus":["Month","Annual"],"GuardianWeeklyDomestic":["Annual","Quarter","Month"],"SubscriptionCard":["Month"],"Contribution":["Annual","Month"],"GuardianWeeklyZoneA":["Annual","Three_Years","Semi_Annual","Two_Years","Quarter"],"GuardianWeeklyZoneB":["Annual","Three_Years","Two_Years","Semi_Annual","Quarter"],"GuardianWeeklyZoneC":["Semi_Annual","Annual","Quarter"],"NewspaperVoucher":["Month"],"HomeDelivery":["Month"],"PatronMembership":["Month","Annual"],"PartnerMembership":["Annual","Month"],"GuardianPatron":["Month"],"OneTimeContribution":["OneTime"]} as const;
+	const productBillingPeriods = {"Contribution":["Annual","Month"],"GuardianWeeklyRestOfWorld":["Month","Annual","Quarter"],"GuardianAdLite":["Month"],"TierThree":["Annual","Month"],"DigitalSubscription":["Quarter","Month","Annual"],"NationalDelivery":["Month"],"SupporterMembership":["Annual","Month"],"SupporterPlus":["Annual","Month"],"GuardianWeeklyDomestic":["Annual","Quarter","Month"],"SubscriptionCard":["Month"],"GuardianWeeklyZoneA":["Annual","Three_Years","Semi_Annual","Two_Years","Quarter"],"GuardianWeeklyZoneB":["Annual","Three_Years","Two_Years","Semi_Annual","Quarter"],"GuardianWeeklyZoneC":["Semi_Annual","Annual","Quarter"],"NewspaperVoucher":["Month"],"HomeDelivery":["Month"],"PatronMembership":["Month","Annual"],"PartnerMembership":["Annual","Month"],"GuardianPatron":["Month"],"OneTimeContribution":["OneTime"]} as const;
 	
 	export type ProductBillingPeriod<P extends ProductKey> = (typeof productBillingPeriods)[P][number];
 	"
@@ -1829,11 +1769,11 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0fc5e1dc084015e37f58c200eea",
         "pricing": {
-          "AUD": 100,
-          "CAD": 5,
-          "EUR": 60,
-          "GBP": 60,
-          "NZD": 60,
+          "AUD": 80,
+          "CAD": 60,
+          "EUR": 50,
+          "GBP": 50,
+          "NZD": 80,
           "USD": 60,
         },
       },
@@ -1847,10 +1787,10 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "id": "2c92a0fc5aacfadd015ad24db4ff5e97",
         "pricing": {
           "AUD": 10,
-          "CAD": 5,
-          "EUR": 5,
-          "GBP": 5,
-          "NZD": 5,
+          "CAD": 10,
+          "EUR": 4,
+          "GBP": 4,
+          "NZD": 10,
           "USD": 5,
         },
       },
@@ -1992,11 +1932,11 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0fe6619b4b901661aa8e66c1692",
         "pricing": {
-          "AUD": 480,
-          "CAD": 396,
-          "EUR": 318,
-          "GBP": 180,
-          "NZD": 600,
+          "AUD": 528,
+          "CAD": 432,
+          "EUR": 348,
+          "GBP": 198,
+          "NZD": 660,
           "USD": 360,
         },
       },
@@ -2009,11 +1949,11 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0fd79ac64b00179ae3f9d474960",
         "pricing": {
-          "AUD": 40,
-          "CAD": 33,
-          "EUR": 26.5,
-          "GBP": 15,
-          "NZD": 50,
+          "AUD": 44,
+          "CAD": 36,
+          "EUR": 29,
+          "GBP": 16.5,
+          "NZD": 55,
           "USD": 30,
         },
       },
@@ -2026,11 +1966,11 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0ff67cebd0d0167f0a1a834234e",
         "pricing": {
-          "AUD": 480,
-          "CAD": 396,
-          "EUR": 318,
-          "GBP": 180,
-          "NZD": 600,
+          "AUD": 528,
+          "CAD": 432,
+          "EUR": 348,
+          "GBP": 198,
+          "NZD": 660,
           "USD": 360,
         },
       },
@@ -2043,11 +1983,11 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0fe6619b4b301661aa494392ee2",
         "pricing": {
-          "AUD": 120,
-          "CAD": 99,
-          "EUR": 79.5,
-          "GBP": 45,
-          "NZD": 150,
+          "AUD": 132,
+          "CAD": 108,
+          "EUR": 87,
+          "GBP": 49.5,
+          "NZD": 165,
           "USD": 90,
         },
       },
@@ -2060,11 +2000,11 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a00e6dd988e2016df85387417498",
         "pricing": {
-          "AUD": 120,
-          "CAD": 99,
-          "EUR": 79.5,
-          "GBP": 45,
-          "NZD": 150,
+          "AUD": 132,
+          "CAD": 108,
+          "EUR": 87,
+          "GBP": 49.5,
+          "NZD": 165,
           "USD": 90,
         },
       },
@@ -2083,8 +2023,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0fe6619b4b601661ab300222651",
         "pricing": {
-          "GBP": 297.6,
-          "USD": 396,
+          "GBP": 336,
+          "USD": 432,
         },
       },
       "Monthly": {
@@ -2096,8 +2036,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0ff79ac64e30179ae45669b3a83",
         "pricing": {
-          "GBP": 24.8,
-          "USD": 33,
+          "GBP": 28,
+          "USD": 36,
         },
       },
       "OneYearGift": {
@@ -2109,8 +2049,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0ff67cebd140167f0a2f66a12eb",
         "pricing": {
-          "GBP": 297.6,
-          "USD": 396,
+          "GBP": 336,
+          "USD": 432,
         },
       },
       "Quarterly": {
@@ -2122,8 +2062,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0086619bf8901661ab02752722f",
         "pricing": {
-          "GBP": 74.4,
-          "USD": 99,
+          "GBP": 83.9,
+          "USD": 108,
         },
       },
       "ThreeMonthGift": {
@@ -2135,8 +2075,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0076dd9892e016df8503e7c6c48",
         "pricing": {
-          "GBP": 74.4,
-          "USD": 99,
+          "GBP": 83.9,
+          "USD": 108,
         },
       },
     },
@@ -2317,7 +2257,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0fd560d132301560e43cf041a3c",
         "pricing": {
-          "GBP": 80.99,
+          "GBP": 83.99,
         },
       },
       "Saturday": {
@@ -2344,7 +2284,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0ff6205708e01622484bb2c4613",
         "pricing": {
-          "GBP": 30.99,
+          "GBP": 20.99,
         },
       },
       "Sixday": {
@@ -2401,7 +2341,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0ff560d311b0156136b697438a9",
         "pricing": {
-          "GBP": 70.99,
+          "GBP": 73.99,
         },
       },
       "Sunday": {
@@ -2428,7 +2368,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0fd560d13880156136b8e490f8b",
         "pricing": {
-          "GBP": 30.99,
+          "GBP": 20.99,
         },
       },
       "Weekend": {
@@ -2461,7 +2401,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0ff560d311b0156136b9f5c3968",
         "pricing": {
-          "GBP": 40.99,
+          "GBP": 34.99,
         },
       },
     },
@@ -2530,7 +2470,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "8a1280be96d33dbf0196d48a632616f4",
         "pricing": {
-          "GBP": 85.99,
+          "GBP": 83.99,
         },
       },
       "Sixday": {
@@ -2587,7 +2527,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "8a12994696d3587b0196d484491e3beb",
         "pricing": {
-          "GBP": 75.99,
+          "GBP": 73.99,
         },
       },
       "Weekend": {
@@ -2620,7 +2560,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "8a1280be96d33dbf0196d487b55c1283",
         "pricing": {
-          "GBP": 42.99,
+          "GBP": 34.99,
         },
       },
     },
@@ -2689,7 +2629,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0ff56fe33f50157040bbdcf3ae4",
         "pricing": {
-          "GBP": 66.99,
+          "GBP": 69.99,
         },
       },
       "Saturday": {
@@ -2716,7 +2656,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0fd6205707201621fa1350710e3",
         "pricing": {
-          "GBP": 25.99,
+          "GBP": 15.99,
         },
       },
       "Sixday": {
@@ -2773,7 +2713,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0fc56fe26ba0157040c5ea17f6a",
         "pricing": {
-          "GBP": 58.99,
+          "GBP": 61.99,
         },
       },
       "Sunday": {
@@ -2800,7 +2740,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0fe56fe33ff0157040d4b824168",
         "pricing": {
-          "GBP": 25.99,
+          "GBP": 15.99,
         },
       },
       "Weekend": {
@@ -2833,7 +2773,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a0fd56fe26b60157040cdd323f76",
         "pricing": {
-          "GBP": 34.99,
+          "GBP": 27.99,
         },
       },
     },
@@ -3026,7 +2966,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a00870ec598001710740d3d03035",
         "pricing": {
-          "GBP": 66.99,
+          "GBP": 69.99,
         },
       },
       "Saturday": {
@@ -3053,7 +2993,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a00870ec598001710740ce702ff0",
         "pricing": {
-          "GBP": 25.99,
+          "GBP": 15.99,
         },
       },
       "Sixday": {
@@ -3110,7 +3050,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a00870ec598001710740c4582ead",
         "pricing": {
-          "GBP": 58.99,
+          "GBP": 61.99,
         },
       },
       "Sunday": {
@@ -3137,7 +3077,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a00870ec598001710740cf9e3004",
         "pricing": {
-          "GBP": 25.99,
+          "GBP": 15.99,
         },
       },
       "Weekend": {
@@ -3170,7 +3110,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "2c92a00870ec598001710740c6672ee7",
         "pricing": {
-          "GBP": 34.99,
+          "GBP": 27.99,
         },
       },
     },
@@ -3311,6 +3251,26 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 12,
           "NZD": 20,
           "USD": 15,
+        },
+      },
+      "OneYearStudent": {
+        "billingPeriod": "Annual",
+        "charges": {
+          "Contribution": {
+            "id": "8a129797980d634c019818808aa0766a",
+          },
+          "Subscription": {
+            "id": "8a129797980d634c019818808aef7672",
+          },
+        },
+        "id": "8a129797980d634c019818808a4c7668",
+        "pricing": {
+          "AUD": 200,
+          "CAD": 150,
+          "EUR": 120,
+          "GBP": 9,
+          "NZD": 200,
+          "USD": 150,
         },
       },
       "V1DeprecatedAnnual": {
