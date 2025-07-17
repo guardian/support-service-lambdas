@@ -1385,6 +1385,26 @@ export const productCatalogSchema = z.object({
 					USD: z.number(),
 				}),
 			}),
+			OneYearStudent: z.object({
+				billingPeriod: z.literal('Annual'),
+				charges: z.object({
+					Contribution: z.object({
+						id: z.string(),
+					}),
+					Subscription: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({
+					AUD: z.number(),
+					CAD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					NZD: z.number(),
+					USD: z.number(),
+				}),
+			}),
 			V1DeprecatedAnnual: z.object({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
