@@ -74,7 +74,7 @@ export class ZuoraClient {
 		const response = await fetch(url, {
 			method,
 			headers: {
-				Authorization: `Bearer ${bearerToken.access_token}1`,
+				Authorization: `Bearer ${bearerToken.access_token}`,
 				'Content-Type': 'application/json',
 				...headers,
 			},
@@ -83,18 +83,48 @@ export class ZuoraClient {
 		const json = await response.json();
 		this.logger.log('Response from Zuora was: ', JSON.stringify(json, null, 2));
 
-		// Inspecting response.ok works for /v1/object/* but not for /v1/accounts/*.
-		// TODO find a way to handle this more for both scenarios.
-		if (response.ok) {
+		// Check both HTTP status and logical success
+		// Some Zuora endpoints return HTTP 200 with success: false for logical errors
+		const isHttpSuccess = response.ok;
+		const isLogicalSuccess = (json as any).success === true; // Only explicit true is considered success
+
+		if (isHttpSuccess && isLogicalSuccess) {
 			return schema.parse(json);
 		} else {
-			this.logger.error(response.text);
+			this.logger.error('Error response body:', JSON.stringify(json, null, 2));
+
+			// Extract detailed error information from different Zuora response formats
+			let errorMessage = response.statusText || 'Zuora API Error';
+			const errorBody = json as any;
+
+			// Format 1: reasons array (authentication, account errors)
+			if (errorBody.reasons && Array.isArray(errorBody.reasons)) {
+				const reasons = errorBody.reasons
+					.map((reason: any) => `${reason.code}: ${reason.message}`)
+					.join('; ');
+				errorMessage = reasons;
+			}
+			// Format 2: Errors array (object API errors)
+			else if (errorBody.Errors && Array.isArray(errorBody.Errors)) {
+				const errors = errorBody.Errors.map(
+					(error: any) => `${error.Code}: ${error.Message}`,
+				).join('; ');
+				errorMessage = errors;
+			}
+			// Format 3: FaultCode/FaultMessage (query errors)
+			else if (errorBody.FaultCode && errorBody.FaultMessage) {
+				errorMessage = `${errorBody.FaultCode}: ${errorBody.FaultMessage}`;
+			}
+			// Format 4: Simple code/message
+			else if (errorBody.code && errorBody.message) {
+				errorMessage = `${errorBody.code}: ${errorBody.message}`;
+			}
 
 			if (response.status === 429) {
 				this.logger.log(response.headers);
 			}
 
-			throw new ZuoraError(response.statusText, response.status);
+			throw new ZuoraError(errorMessage, response.status);
 		}
 	}
 }
