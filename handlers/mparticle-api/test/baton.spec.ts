@@ -95,6 +95,7 @@ describe('mparticle-api Baton tests', () => {
 		expect(result.requestType).toEqual('RER');
 		expect(result.action).toEqual('status');
 		expect(result.status).toEqual('pending');
+		expect(result.message).toBeDefined();
 		expect(global.fetch).toHaveBeenCalledTimes(1);
 	});
 });
