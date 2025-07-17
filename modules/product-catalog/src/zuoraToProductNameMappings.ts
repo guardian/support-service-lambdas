@@ -50,6 +50,7 @@ const zuoraCatalogToProductRatePlanKey: Record<string, string> = {
 	'Supporter Plus Annual': 'V1DeprecatedAnnual',
 	'Supporter Plus V2 - Monthly': 'Monthly',
 	'Supporter Plus V2 - Annual': 'Annual',
+	'Supporter Plus - One Year Student': 'OneYearStudent',
 	// Tier Three rate plans
 	'Supporter Plus & Guardian Weekly ROW - Monthly': 'RestOfWorldMonthly',
 	'Supporter Plus & Guardian Weekly Domestic - Monthly': 'DomesticMonthly',
