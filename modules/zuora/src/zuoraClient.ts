@@ -74,7 +74,7 @@ export class ZuoraClient {
 		const response = await fetch(url, {
 			method,
 			headers: {
-				Authorization: `Bearer ${bearerToken.access_token}`,
+				Authorization: `Bearer ${bearerToken.access_token}1`,
 				'Content-Type': 'application/json',
 				...headers,
 			},
