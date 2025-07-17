@@ -21,7 +21,13 @@ export const handler = async (
 
 		const applyCreditToAccountBalanceAttempt =
 			await applyCreditToAccountBalance(zuoraClient, body);
-
+		console.log(
+			`applyCreditToAccountBalanceAttempt: ${JSON.stringify(
+				applyCreditToAccountBalanceAttempt,
+				null,
+				2,
+			)}`,
+		);
 		return {
 			...parsedEvent,
 			applyCreditToAccountBalanceAttempt,
