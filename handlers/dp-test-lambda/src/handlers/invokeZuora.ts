@@ -18,6 +18,7 @@ export const handler = async () => {
 		);
 		return true;
 	} catch (error) {
+		console.error('Error applying credit to account balance:', error);
 		return false;
 	}
 };
