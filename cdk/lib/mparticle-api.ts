@@ -38,11 +38,6 @@ export class MParticleApi extends GuStack {
 			handler: 'index.handlerHttp',
 			functionName: `${app}-http-${this.stage}`,
 			events: [],
-			environment: {
-				APP: `${app}-http`,
-				STACK: this.stack,
-				STAGE: this.stage,
-			},
 		});
 
 		// Baton RER Lambda
@@ -54,11 +49,6 @@ export class MParticleApi extends GuStack {
 			handler: 'index.handlerBaton',
 			functionName: `${app}-baton-${this.stage}`,
 			events: [],
-			environment: {
-				APP: `${app}-baton`,
-				STACK: this.stack,
-				STAGE: this.stage,
-			},
 		});
 
 		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {
