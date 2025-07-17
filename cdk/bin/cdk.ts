@@ -5,7 +5,6 @@ import { BatchEmailSender } from '../lib/batch-email-sender';
 import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
 import { DiscountApi } from '../lib/discount-api';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
-import { DpTestLambda } from '../lib/dp-test-lambda';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
 import { MetricPushApi } from '../lib/metric-push-api';
 import { MParticleApi } from '../lib/mparticle-api';
@@ -338,10 +337,6 @@ new ObserverDataExport(app, 'observer-data-export-CODE', {
 new ObserverDataExport(app, 'observer-data-export-PROD', {
 	stack: 'support',
 	stage: 'PROD',
-});
-new DpTestLambda(app, 'dp-test-lambda-CODE', {
-	stack: 'support',
-	stage: 'CODE',
 });
 new NegativeInvoicesProcessor(app, 'negative-invoices-processor-CODE', {
 	stack: 'support',

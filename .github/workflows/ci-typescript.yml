@@ -57,7 +57,6 @@ jobs:
           - negative-invoices-processor
           - write-off-unpaid-invoices
           - mparticle-api
-          - dp-test-lambda
     runs-on: ubuntu-latest
     permissions:
       id-token: write
