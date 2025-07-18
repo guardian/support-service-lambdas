@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { buildUpdateAmountRequestBody } from '../src/zuoraApi';
 
-describe('Supporter Plus Amount Update - Edge Cases', () => {
+describe('Supporter Plus Amount Update - term renewal variations', () => {
 	describe('Auto-renewed subscription scenarios', () => {
 		test('Should handle subscription with charge effective date before current term start (the original bug)', () => {
 			// Test data representing the problematic scenario:
