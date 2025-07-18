@@ -160,7 +160,7 @@ await lambdaClient.send(new InvokeCommand({
 
 ### Processing Flow
 1. **Request Validation**: Validate request ID format
-2. **Database Query**: Look up current status in DynamoDB
+2. **Status Query**: Query mParticle API for current status
 3. **Status Resolution**: Determine current processing state
 4. **Response**: Return status with any available data URLs
 
@@ -247,7 +247,6 @@ The Baton integration uses IAM role-based authentication for secure cross-accoun
 
 ### AWS Parameter Store
 Required parameters for Baton integration:
-- `/mparticle-api/{stage}/baton-correlation-table`: DynamoDB table for correlation tracking
 - `/mparticle-api/{stage}/baton-allowed-accounts`: Whitelisted AWS account IDs
 
 ### Environment Variables

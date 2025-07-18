@@ -9,7 +9,6 @@ This guide will help you set up, configure, and run the mParticle API Lambda for
 - **pnpm**: Package manager (installed globally)
 - **AWS CLI**: Configured with appropriate credentials
 - **AWS CDK**: For infrastructure deployment (optional for development)
-- **Docker**: For local DynamoDB testing (optional)
 
 ### Installation
 ```bash
@@ -85,7 +84,6 @@ src/
 │   └── index.ts         # Main entry point
 ├── services/          # Business logic services
 │   ├── mparticle.ts     # mParticle API client
-│   ├── database.ts      # DynamoDB operations
 │   └── validation.ts    # Certificate validation
 ├── schemas/           # Zod validation schemas
 ├── types/            # TypeScript type definitions
@@ -124,8 +122,6 @@ pnpm type-check     # TypeScript type checking
 - [mParticle DSR API Documentation](https://docs.mparticle.com/developers/dsr-api/)
 - [AWS Lambda Developer Guide](https://docs.aws.amazon.com/lambda/latest/dg/)
 - [API Gateway Developer Guide](https://docs.aws.amazon.com/apigateway/latest/developerguide/)
-- [DynamoDB Developer Guide](https://docs.aws.amazon.com/dynamodb/latest/developerguide/)
-
 ### Internal Guardian Resources
 - [Baton Privacy Orchestration](../../zuora-baton/README.md)
 - [Support Services Architecture](../../README.md)

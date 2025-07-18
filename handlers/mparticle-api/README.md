@@ -65,7 +65,6 @@ All configuration is managed through AWS Parameter Store. Ensure these parameter
 
 - `/mparticle-api/{stage}/mparticle-api-key`
 - `/mparticle-api/{stage}/mparticle-workspace-id`  
-- `/mparticle-api/{stage}/dynamodb-table-name`
 - `/mparticle-api/{stage}/callback-certificate-path`
 
 See [Getting Started Guide](./docs/guides/getting-started.md) for detailed setup instructions.
@@ -179,7 +178,6 @@ Managed through AWS CDK with environment-specific configurations. See [Getting S
 ### AWS Resources
 - **Lambda Function**: `mparticle-api-{stage}`
 - **API Gateway**: `mparticle-api-{stage}`
-- **DynamoDB Table**: `mparticle-dsr-requests-{stage}`
 - **Parameter Store**: `/mparticle-api/{stage}/*`
 
 ### External Dependencies

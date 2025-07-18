@@ -70,8 +70,7 @@ curl -X POST https://mparticle-api.support.guardianapis.com/data-subject-request
 ### Processing Flow
 1. **Input Validation**: Zod schema validation
 2. **mParticle Submission**: Forward request to mParticle DSR API
-3. **Database Storage**: Store request metadata in DynamoDB
-4. **Response**: Return request ID and initial status
+3. **Response**: Return request ID and initial status
 
 ---
 
@@ -161,7 +160,7 @@ X-MP-Certificate: <X.509 certificate chain>
 ### Processing Flow
 1. **Certificate Validation**: Verify mParticle's X.509 certificate
 2. **Signature Verification**: Validate RSA-SHA256 signature
-3. **Database Update**: Update DynamoDB with new status
+3. **Status Processing**: Update internal tracking systems
 4. **Downstream Notification**: Trigger any configured webhooks
 
 ### Response
@@ -254,7 +253,6 @@ All HTTP endpoints rely on AWS Parameter Store for configuration:
 - `/mparticle-api/{stage}/mparticle-api-key`: mParticle API authentication
 - `/mparticle-api/{stage}/mparticle-workspace-id`: Target workspace identifier
 - `/mparticle-api/{stage}/callback-certificate-path`: X.509 certificate for validation
-- `/mparticle-api/{stage}/dynamodb-table-name`: Storage table name
 
 ### Environment Variables
 - `STAGE`: Deployment environment (CODE/PROD)

@@ -174,11 +174,9 @@ const EventSchema = z.object({
 - **HSTS Headers**: HTTP Strict Transport Security enforcement
 
 ### Encryption at Rest
-- **DynamoDB**: Server-side encryption with AWS KMS
 - **Parameter Store**: Encrypted parameters using AWS KMS
 - **CloudWatch Logs**: Encrypted log storage
 
 ### Data Retention
-- **Request Metadata**: Retained for 90 days in DynamoDB
 - **Processing Logs**: Retained for 30 days in CloudWatch
 - **Callback Data**: Not persistently stored
