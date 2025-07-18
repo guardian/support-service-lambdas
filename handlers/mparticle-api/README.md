@@ -34,12 +34,10 @@ The mParticle API Lambda enables Guardian to fulfill GDPR and CCPA compliance re
 
 ### 🔧 Operations & Security
 - **[Security & Compliance](./docs/operations/security-compliance.md)** - Certificate validation, input sanitization, and compliance measures
-- **[Monitoring & Operations](./docs/operations/monitoring.md)** - CloudWatch metrics, alerting, and troubleshooting
 
 ### 👨‍💻 Development  
 - **[Getting Started](./docs/guides/getting-started.md)** - Setup, configuration, and local development
-- **[Testing Strategy](./docs/development/testing.md)** - Unit, integration, and end-to-end testing approaches
-- **[Advanced Topics](./docs/development/advanced-topics.md)** - Performance optimization, error handling, and future enhancements
+- **[Testing Strategy](./docs/development/testing.md)** - Unit testing strategy and examples
 
 ---
 
@@ -107,23 +105,6 @@ See [API Documentation](./docs/api/README.md) for complete endpoint details.
 - **Audit Logging**: Complete request and processing trails
 
 See [Security & Compliance](./docs/operations/security-compliance.md) for implementation details.
-
----
-
-## 📊 Monitoring & Operations
-
-### Key Metrics
-- Request volume and error rates
-- DSR processing times and completion rates
-- Certificate validation success rates
-- mParticle API integration health
-
-### Alerting
-- **Critical**: >5% error rate, certificate validation failures
-- **Warning**: High latency, unusual traffic patterns
-- **Info**: Service health checks, capacity monitoring
-
-See [Monitoring & Operations](./docs/operations/monitoring.md) for operational procedures.
 
 ---
 

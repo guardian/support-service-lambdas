@@ -1,16 +1,14 @@
 # Testing Strategy
 
-This document outlines the comprehensive testing approach for the mParticle API Lambda, including unit tests, integration tests, end-to-end tests, and continuous integration practices.
+This document outlines the testing approach for the mParticle API Lambda, focusing on unit testing to ensure code quality and reliability.
 
 ## 🧪 Testing Philosophy
 
-The mParticle API Lambda follows a multi-layered testing strategy to ensure reliability, security, and compliance:
-
-1. **Unit Tests**: Fast, isolated tests for individual functions
-2. **Integration Tests**: Tests with AWS services and external APIs
-3. **End-to-End Tests**: Complete workflow validation
-4. **Security Tests**: Certificate validation and input sanitization
-5. **Performance Tests**: Load testing and latency validation
+The mParticle API Lambda follows a unit testing strategy to ensure:
+- Individual function reliability
+- Type safety and validation
+- Error handling correctness
+- Business logic accuracy
 
 ---
 
@@ -24,19 +22,6 @@ tests/
 │   ├── services/           # Service layer tests
 │   ├── utils/              # Utility function tests
 │   └── schemas/            # Validation schema tests
-├── integration/            # Integration tests
-│   ├── aws/               # AWS service integration
-│   ├── mparticle/         # mParticle API integration
-│   └── database/          # DynamoDB integration
-├── e2e/                   # End-to-end tests
-│   ├── api/               # API Gateway endpoint tests
-│   ├── workflows/         # Complete workflow tests
-│   └── baton/             # Baton integration tests
-├── security/              # Security-focused tests
-│   ├── certificates/      # Certificate validation tests
-│   ├── input-validation/  # Input sanitization tests
-│   └── authentication/    # Auth mechanism tests
-├── performance/           # Performance and load tests
 ├── fixtures/              # Test data and mocks
 └── helpers/               # Test utility functions
 ```

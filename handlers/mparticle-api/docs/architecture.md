@@ -6,12 +6,11 @@
 graph TB
     subgraph "Guardian Privacy Ecosystem"
         BATON[🎭 Baton<br/>Privacy Orchestrator]
-        CSR[👤 CSR Team]
         READER[📱 Guardian Reader]
     end
     
     subgraph "mParticle API Lambda"
-        HTTP[🌐 HTTP Handler<br/>API Gateway Routes]
+        HTTP[🌐 HTTP Handler<br/>Callback Endpoint]
         BATON_H[🔄 Baton Handler<br/>RER Integration]
         VALIDATOR[🛡️ Security Validator<br/>Certificate & Signature]
     end
@@ -28,17 +27,16 @@ graph TB
     end
 
     %% Request Flows
-    READER -->|Data Subject Request| CSR
-    CSR -->|Manual Request| HTTP
+    READER -->|Data Subject Request| BATON
     BATON -->|Automated RER| BATON_H
     
     %% Processing
-    HTTP --> VALIDATOR
     BATON_H --> VALIDATOR
     VALIDATOR --> MPARTICLE
     
     %% Data Flow
-    MPARTICLE -->|Status Callbacks| VALIDATOR
+    MPARTICLE -->|Status Callbacks| HTTP
+    HTTP --> VALIDATOR
     MPARTICLE -->|DSR Forwarding| BRAZE
     
     %% Configuration
@@ -55,7 +53,7 @@ graph TB
     classDef external fill:#4CAF50,stroke:#ffffff,stroke-width:2px,color:#ffffff
     classDef aws fill:#232F3E,stroke:#ffffff,stroke-width:2px,color:#ffffff
     
-    class BATON,CSR,READER guardian
+    class BATON,READER guardian
     class HTTP,BATON_H,VALIDATOR lambda
     class MPARTICLE,BRAZE external
     class PARAMS,CW,ALARMS aws
@@ -89,9 +87,9 @@ sequenceDiagram
 ### 🔧 Core Features
 
 #### 🎯 Data Subject Request Management
-- **Submit DSRs**: Accept access, portability, and erasure requests in OpenDSR format
-- **Status Tracking**: Real-time monitoring of request progress through mParticle
-- **Automated Callbacks**: Secure webhook processing for status updates
+- **Callback Processing**: Secure webhook processing for status updates from mParticle
+- **Status Tracking**: Real-time monitoring of request progress through callbacks
+- **Future Endpoints**: Test endpoints for DSR submission and status queries (not yet in production)
 
 #### 🛡️ Enterprise Security
 - **Certificate Validation**: X.509 certificate chain verification for callbacks
@@ -99,12 +97,12 @@ sequenceDiagram
 - **Input Sanitization**: [Zod](https://zod.dev/) schema validation for all endpoints
 
 #### 📊 Event Processing
-- **Batch Upload**: Efficient event forwarding to mParticle
+- **Future Feature**: Event forwarding capabilities for mParticle integration
 - **User Attribution**: Audience control during erasure waiting periods
 - **Environment Isolation**: Separate development and production workspaces
 
 #### 🔄 Baton Integration
-- **Automated RER**: Seamless integration with Guardian's privacy orchestration platform
+- **Automated RER**: Primary integration with Guardian's privacy orchestration platform
 - **Cross-Account Access**: Secure Lambda invocation from Baton AWS account
 - **Standardized Interface**: Implements Baton's DSR processing contract
 
