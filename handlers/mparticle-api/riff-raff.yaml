@@ -21,5 +21,6 @@ deployments:
       bucketSsmLookup: true
       prefixStack: false
       functionNames:
-      - mparticle-api-
+      - mparticle-api-http-
+      - mparticle-api-baton-
     dependencies: [mparticle-api-cloudformation]
