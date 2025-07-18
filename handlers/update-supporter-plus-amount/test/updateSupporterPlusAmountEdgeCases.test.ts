@@ -3,7 +3,7 @@ import { buildUpdateAmountRequestBody } from '../src/zuoraApi';
 
 describe('Supporter Plus Amount Update - term renewal variations', () => {
 	describe('Auto-renewed subscription scenarios', () => {
-		test('Should handle subscription with charge effective date before current term start (the original bug)', () => {
+		test('Should order valid term dates where the charge effective start date is before the current term start', () => {
 			// Test data representing the problematic scenario:
 			// - Original subscription: 2023-10-26
 			// - Auto-renewed: 2024-04-10 (current term start)
