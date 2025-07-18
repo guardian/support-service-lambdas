@@ -1,6 +1,1 @@
-cdk.out
-.prettierignore
-cdk.json
-jest.setup.js
-package.json
-tsconfig.json
+/cdk.out

@@ -1,0 +1,22 @@
+{
+  "name": "buildgen",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Build file generator for handlers",
+  "scripts": {
+    "generate": "bash scripts/generate-template-list.sh && REPO_ROOT=\"$(pwd | sed 's|/buildgen.*||')\" && ts-node src/generate.ts \"$REPO_ROOT\"",
+    "check": "bash scripts/generate-template-list.sh && tsc --noEmit",
+    "clean": "rm -rf src/data/generated.ts dist",
+    "test": "bash scripts/generate-template-list.sh && jest"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@jest/globals": "^30.0.4",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.15.14",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.0.0"
+  }
+}

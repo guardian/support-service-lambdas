@@ -1,4 +1,4 @@
-/** @type {import('ts-jest').JestConfigWithTsJest} */
+export default `/** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
 	preset: 'ts-jest',
 	testEnvironment: 'node',
@@ -9,3 +9,4 @@ module.exports = {
 	},
 	testPathIgnorePatterns: ['<rootDir>/cdk/'],
 };
+`;

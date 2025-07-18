@@ -12,7 +12,9 @@
 		"new-lambda": "pnpm hygen new-lambda api-gateway && pnpm install && pnpm --filter cdk lint --fix && pnpm fix-formatting && pnpm --filter cdk test -- -u && git add ./cdk/lib/__snapshots__/*.test.ts.snap",
 		"prepare": "husky",
 		"fix-formatting": "pnpm -r run fix-formatting",
-		"check-formatting": "pnpm -r run check-formatting"
+		"check-formatting": "pnpm -r run check-formatting",
+        "preinstall": "if [ ! -d buildgen/node_modules ]; then cd buildgen && pnpm install --frozen-lockfile --ignore-scripts; cd ..; fi && pnpm run buildgen && pnpm install --ignore-scripts",
+        "buildgen": "cd buildgen && pnpm run generate"
 	},
 	"devDependencies": {
 		"@guardian/eslint-config-typescript": "12.0.0",
