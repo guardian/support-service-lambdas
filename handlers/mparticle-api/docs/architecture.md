@@ -31,12 +31,12 @@ graph TB
     BATON -->|Automated RER| BATON_H
     
     %% Processing
-    BATON_H --> VALIDATOR
-    VALIDATOR --> MPARTICLE
+    BATON_H -->|Submit DSR| MPARTICLE
     
     %% Data Flow
     MPARTICLE -->|Status Callbacks| HTTP
     HTTP --> VALIDATOR
+    VALIDATOR -->|Validated Callback| HTTP
     MPARTICLE -->|DSR Forwarding| BRAZE
     
     %% Configuration
@@ -75,7 +75,7 @@ sequenceDiagram
     B->>MP: Initiate RER (Baton Handler)
     MP->>MP: Set user attributes<br/>(remove from audiences)
     MP->>M: Submit OpenDSR request
-    M->>M: Process erasure<br/>(28-day compliance)
+    M->>M: Process erasure<br/>(Up to 14 days)
     M->>BR: Forward DSR to Braze
     M->>MP: Status callback
     MP->>B: Return completion status
