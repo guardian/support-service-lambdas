@@ -13,42 +13,16 @@ import {
 	setUserAttributesForRightToErasureRequest,
 	uploadAnEventBatch,
 } from '../apis/events';
-import { HttpError } from '../utils/make-http-request';
 import { validateDataSubjectRequestCallback } from '../utils/validate-data-subject-request-callback';
-
-const routerHandler =
-	<TPath, TBody>(
-		fn: (
-			event: APIGatewayProxyEvent,
-			parsed: { path: TPath; body: TBody },
-		) => Promise<APIGatewayProxyResult>,
-	) =>
-	async (
-		event: APIGatewayProxyEvent,
-		parsed: { path: TPath; body: TBody },
-	): Promise<APIGatewayProxyResult> => {
-		try {
-			return await fn(event, parsed);
-		} catch (err) {
-			if (err instanceof HttpError) {
-				console.error(
-					`Http Error: ${err.statusCode} ${err.statusText}`,
-					err.body,
-				);
-				return {
-					statusCode: err.statusCode,
-					body: JSON.stringify(err.body),
-				};
-			}
-			throw err;
-		}
-	};
 
 export const httpRouter = new Router([
 	createRoute<unknown, DataSubjectRequestForm>({
 		httpMethod: 'POST',
 		path: '/data-subject-requests',
-		handler: routerHandler(async (event, parsed) => {
+		handler: async (
+			event: APIGatewayProxyEvent,
+			parsed: { path: unknown; body: DataSubjectRequestForm },
+		): Promise<APIGatewayProxyResult> => {
 			/**
 			 * If you wish to remove users from audiences or from event forwarding during the waiting period,
 			 * set a user attribute and apply audience criteria and/or forwarding rules to exclude them.
@@ -71,7 +45,7 @@ export const httpRouter = new Router([
 				statusCode: 201,
 				body: JSON.stringify(await submitDataSubjectRequest(parsed.body)),
 			};
-		}),
+		},
 		parser: {
 			body: z.object({
 				regulation: z.enum(['gdpr', 'ccpa']),
@@ -86,14 +60,17 @@ export const httpRouter = new Router([
 	createRoute<{ requestId: string }, unknown>({
 		httpMethod: 'GET',
 		path: '/data-subject-requests/{requestId}',
-		handler: routerHandler(async (event, parsed) => {
+		handler: async (
+			event: APIGatewayProxyEvent,
+			parsed: { path: { requestId: string }; body: unknown },
+		): Promise<APIGatewayProxyResult> => {
 			return {
 				statusCode: 200,
 				body: JSON.stringify(
 					await getStatusOfDataSubjectRequest(parsed.path.requestId),
 				),
 			};
-		}),
+		},
 		parser: {
 			path: z.object({
 				requestId: z.string().uuid(),
@@ -103,8 +80,11 @@ export const httpRouter = new Router([
 	createRoute<{ requestId: string }, DataSubjectRequestCallback>({
 		httpMethod: 'POST',
 		path: '/data-subject-requests/{requestId}/callback',
-		handler: routerHandler(async (event, parsed) => {
-			const getHeader = (key: string) =>
+		handler: async (
+			event: APIGatewayProxyEvent,
+			parsed: { path: { requestId: string }; body: DataSubjectRequestCallback },
+		): Promise<APIGatewayProxyResult> => {
+			const getHeader = (key: string): string | undefined =>
 				Object.entries(event.headers).find(
 					([k]) => k.toLowerCase() === key.toLowerCase(),
 				)?.[1];
@@ -126,7 +106,7 @@ export const httpRouter = new Router([
 					processDataSubjectRequestCallback(parsed.path.requestId, parsed.body),
 				),
 			};
-		}),
+		},
 		parser: {
 			path: z.object({
 				requestId: z.string().uuid(),
@@ -160,12 +140,15 @@ export const httpRouter = new Router([
 	createRoute<unknown, EventBatch>({
 		httpMethod: 'POST',
 		path: '/events',
-		handler: routerHandler(async (event, parsed) => {
+		handler: async (
+			event: APIGatewayProxyEvent,
+			parsed: { path: unknown; body: EventBatch },
+		): Promise<APIGatewayProxyResult> => {
 			return {
 				statusCode: 201,
 				body: JSON.stringify(await uploadAnEventBatch(parsed.body)),
 			};
-		}),
+		},
 		parser: {
 			body: z.object({
 				events: z.array(
