@@ -7,8 +7,8 @@ import { httpRouter } from './routers/http';
 import {
 	BatonRerEventRequest,
 	BatonRerEventResponse,
-	batonRerRouter,
-} from './routers/baton';
+} from './routers/baton/types-and-schemas';
+import { batonRerRouter } from './routers/baton';
 
 export const handlerHttp: Handler<
 	APIGatewayProxyEvent,

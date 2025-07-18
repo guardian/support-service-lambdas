@@ -3,7 +3,7 @@ import { handlerBaton } from '../index';
 import type {
 	BatonRerEventRequest,
 	BatonRerEventResponse,
-} from '../routers/baton';
+} from '../routers/baton/types-and-schemas';
 
 export const invokeBatonRerHandler = async (
 	event: BatonRerEventRequest,
