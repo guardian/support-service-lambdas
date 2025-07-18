@@ -15,9 +15,8 @@ describe('generate function', () => {
 
 	const testTemplates: Template[] = [
 		{
+			name: 'dynamic/template.ts',
 			template: (data) => `// This is dynamic content for ${data.name}`,
-			template: (packageName, data) =>
-				`// This is dynamic content for ${packageName}`,
 		},
 		{
 			name: 'static/text.md',
@@ -42,7 +41,7 @@ describe('generate function', () => {
 		const expectedGitignoreContent =
 			'# Auto generated .gitignore by buildgen ' +
 			expect.any(String) +
-			'\n.gitignore\ndynamic/template.ts\nstatic/text.md\nstatic/config.json\nstatic/config.yaml\n';
+			'\n/.gitignore\n/dynamic/template.ts\n/static/text.md\n/static/config.json\n/static/config.yaml\n';
 
 		// Compare with exact equality
 		expect(result).toEqual([
@@ -104,13 +103,11 @@ describe('generate function', () => {
 	it('should generate files for a single package when package name is specified', () => {
 		const result = generateSteps(mockConfig, 'package1', testTemplates);
 
-		// Expected gitignore content
-		const gitignoreContent =
+		const expectedGitignoreContent =
 			'# Auto generated .gitignore by buildgen ' +
 			expect.any(String) +
-			'\n.gitignore\ndynamic/template.ts\nstatic/text.md\nstatic/config.json\nstatic/config.yaml\n';
+			'\n/.gitignore\n/dynamic/template.ts\n/static/text.md\n/static/config.json\n/static/config.yaml\n';
 
-		// Compare with exact equality
 		expect(result).toEqual([
 			{
 				relativePath: 'handlers/package1/dynamic/template.ts',
@@ -132,7 +129,7 @@ describe('generate function', () => {
 				relativePath: 'handlers/package1/.gitignore',
 				content: expect.stringMatching(
 					new RegExp(
-						gitignoreContent
+						expectedGitignoreContent
 							.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 							.replace(expect.any(String).toString(), '.*'),
 					),
@@ -164,9 +161,8 @@ describe('generate function', () => {
 		const expectedGitignoreContent =
 			'# Auto generated .gitignore by buildgen ' +
 			expect.any(String) +
-			'\n.gitignore\nnested/dir/file.ts\nroot-level.ts\n';
+			'\n/.gitignore\n/nested/dir/file.ts\n/root-level.ts\n';
 
-		// Test with exact equality
 		expect(result).toEqual([
 			{
 				relativePath: 'handlers/package1/nested/dir/file.ts',

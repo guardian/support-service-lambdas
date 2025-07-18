@@ -32,7 +32,7 @@ jobs:
       - run: pnpm install
       - run: pnpm --filter "./modules/**" check-formatting
       - run: pnpm --filter "./modules/**" lint
-      - run: pnpm --filter "./modules/**" test
+      - run: pnpm --filter "./modules/**" --filter "./buildgen" test
 
   gu-cdk-build:
     needs: common

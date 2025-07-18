@@ -1,7 +1,5 @@
 {
   "name": "@modules/cdk",
   "version": "0.0.0",
-  "private": true,
-  "main": "index.js",
-  "types": "index.d.ts"
+  "private": true
 }

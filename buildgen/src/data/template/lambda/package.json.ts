@@ -15,8 +15,8 @@ export default (pkg: HandlerConfig) => ({
 		'fix-formatting': 'prettier --write **.ts',
 	},
 	dependencies: {
-		'@aws-sdk/client-cloudwatch': '3.777.0',
-		'@aws-sdk/credential-providers': '3.806.0',
+		'@aws-sdk/client-cloudwatch': '^3.848.0',
+		'@aws-sdk/credential-providers': '^3.848.0',
 		zod: 'catalog:',
 	},
 	devDependencies: {
