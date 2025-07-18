@@ -17,7 +17,7 @@
 		"@types/aws-sdk": "^2.7.4"
 	},
 	"dependencies": {
-		"@aws-sdk/client-s3": "3.777.0",
+		"@aws-sdk/client-s3": "^3.848.0",
 		"@google-cloud/bigquery": "^7.9.3",
 		"aws-sdk": "^2.1692.0",
 		"dayjs": "^1.11.13",
