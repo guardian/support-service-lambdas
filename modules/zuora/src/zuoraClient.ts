@@ -80,7 +80,7 @@ export class ZuoraClient {
 		// Some Zuora endpoints return HTTP 200 with success: false for logical errors
 		const isHttpSuccess = response.ok;
 
-		if (isHttpSuccess && isLogicalSuccess(json)) {
+		if (isHttpSuccess && isLogicalSuccess(json, path)) {
 			return schema.parse(json);
 		} else {
 			this.logger.error('Error response body:', JSON.stringify(json, null, 2));
@@ -95,8 +95,23 @@ export class ZuoraClient {
 	}
 }
 
-const isLogicalSuccess = (json: ZuoraResponse): boolean => {
+const isLogicalSuccess = (json: ZuoraResponse, path: string): Boolean => {
 	const hasLowercaseSuccess = 'success' in json && Boolean(json.success);
 	const hasUppercaseSuccess = 'Success' in json && Boolean(json.Success);
-	return hasLowercaseSuccess || hasUppercaseSuccess;
+
+	// For endpoints that explicitly include success fields
+	if (hasLowercaseSuccess || hasUppercaseSuccess) {
+		return true;
+	}
+
+	// For query endpoints - HTTP 200 + presence of 'records' and 'done' = success
+	// (regardless of whether done is true or false)
+	if (path.includes('/query')) {
+		return 'records' in json && 'done' in json;
+	}
+
+	// For other endpoints, check for absence of error indicators
+	const hasErrorIndicators =
+		json.reasons || json.Errors || json.FaultCode || json.code;
+	return !hasErrorIndicators;
 };
