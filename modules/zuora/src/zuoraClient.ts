@@ -4,39 +4,12 @@ import { Logger } from '@modules/zuora/logger';
 import { BearerTokenProvider } from './bearerTokenProvider';
 import { zuoraServerUrl } from './common';
 import { getOAuthClientCredentials } from './oAuthCredentials';
-
-// Type definitions for Zuora response formats
-type ZuoraReason = {
-	code: string;
-	message: string;
-};
-
-type ZuoraErrorItem = {
-	Code: string;
-	Message: string;
-};
-
-type ZuoraResponse = {
-	// Success indicators (some endpoints use different casing)
-	success?: boolean;
-	Success?: boolean;
-	// Error details in various formats
-	reasons?: ZuoraReason[];
-	Errors?: ZuoraErrorItem[];
-	FaultCode?: string;
-	FaultMessage?: string;
-	code?: string;
-	message?: string;
-};
-
-export class ZuoraError extends Error {
-	constructor(
-		message: string,
-		public code: number,
-	) {
-		super(message);
-	}
-}
+import { ZuoraError } from './zuoraError';
+import type {
+	ZuoraResponse,
+	ZuoraReason,
+	ZuoraErrorItem,
+} from './types/zuoraClient';
 
 export class ZuoraClient {
 	static async create(stage: Stage, logger: Logger = new Logger()) {
