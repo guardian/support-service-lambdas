@@ -1,6 +1,7 @@
 import { actionUpdate } from '@modules/zuora/actionUpdate';
 import { updateAccount } from '@modules/zuora/updateAccount';
-import { type ZuoraClient, ZuoraError } from '@modules/zuora/zuoraClient';
+import { type ZuoraClient } from '@modules/zuora/zuoraClient';
+import { ZuoraError } from '@modules/zuora/zuoraError';
 
 export type AccountRow = {
 	Id: string;
