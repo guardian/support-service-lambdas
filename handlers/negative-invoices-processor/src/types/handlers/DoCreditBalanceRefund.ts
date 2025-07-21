@@ -1,8 +1,6 @@
 import { z } from 'zod';
 import { GetPaymentMethodsOutputSchema } from './GetPaymentMethods';
 import { RefundResultSchema } from '../shared/refund';
-// import { PaymentMethodSchema } from './GetPaymentMethods';
-// import { RefundResponseSchema } from '../shared/refund';
 
 export const DoCreditBalanceRefundInputSchema =
 	GetPaymentMethodsOutputSchema.strict();
