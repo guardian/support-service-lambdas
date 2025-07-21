@@ -6,10 +6,8 @@ import type { ProcessedInvoice } from '../types/shared';
 export const handler = async (event: DetectFailuresInput) => {
 	try {
 		const parsedEvent = DetectFailuresInputSchema.parse(event);
-		const processedInvoices =
-			parsedEvent.processedInvoices as ProcessedInvoice[];
 		const failureDetected = await failureExistsOnInvoiceProcessingAttempt(
-			processedInvoices,
+			parsedEvent.processedInvoices,
 			parsedEvent.s3UploadAttemptStatus,
 		);
 
