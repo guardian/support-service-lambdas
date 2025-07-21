@@ -9,3 +9,5 @@ export {
 	ProcessedInvoiceSchema,
 	type ProcessedInvoice,
 } from './processedInvoice';
+
+export { RefundResponseSchema, type RefundResponse } from './refund';

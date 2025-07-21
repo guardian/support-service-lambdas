@@ -8,7 +8,7 @@ import type {
 	DoCreditBalanceRefundInput,
 	DoCreditBalanceRefundOutput,
 } from '../types';
-import { RefundResponseSchema } from '../types/handlers/DoCreditBalanceRefund';
+import { RefundResponseSchema } from '../types/shared/refund';
 
 export const handler = async (
 	event: DoCreditBalanceRefundInput,

@@ -1,8 +1,7 @@
 import { z } from 'zod';
-import { InvoiceSchema } from '../shared';
+import { InvoiceSchema, RefundResponseSchema } from '../shared';
 import { ApplyCreditToAccountBalanceAttemptSchema } from './ApplyCreditToAccountBalance';
 import { CheckForActiveSubAttemptSchema } from './CheckForActiveSub';
-import { RefundAttemptSchema } from './DoCreditBalanceRefund';
 import { CheckForActivePaymentMethodAttemptSchema } from './GetPaymentMethods';
 
 const ProcessedInvoiceSchema = InvoiceSchema.extend({
@@ -10,7 +9,7 @@ const ProcessedInvoiceSchema = InvoiceSchema.extend({
 	checkForActiveSubAttempt: CheckForActiveSubAttemptSchema.optional(),
 	checkForActivePaymentMethodAttempt:
 		CheckForActivePaymentMethodAttemptSchema.optional(),
-	refundAttempt: RefundAttemptSchema.optional(),
+	refundAttempt: RefundResponseSchema.optional(),
 });
 
 export const SaveResultsInputSchema = z.object({

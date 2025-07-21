@@ -1,18 +1,12 @@
 import { z } from 'zod';
 import { GetPaymentMethodsOutputSchema } from './GetPaymentMethods';
-import { zuoraResponseSchema } from '@modules/zuora/types/zuoraClient';
 import { PaymentMethodSchema } from './GetPaymentMethods';
+import { RefundResponseSchema } from '../shared/refund';
 
 export const DoCreditBalanceRefundInputSchema = GetPaymentMethodsOutputSchema;
 export type DoCreditBalanceRefundInput = z.infer<
 	typeof DoCreditBalanceRefundInputSchema
 >;
-
-export const RefundResponseSchema = zuoraResponseSchema.extend({
-	Id: z.string().optional(),
-});
-
-export type RefundResponse = z.infer<typeof RefundResponseSchema>;
 
 export const DoCreditBalanceRefundOutputSchema =
 	DoCreditBalanceRefundInputSchema.extend({

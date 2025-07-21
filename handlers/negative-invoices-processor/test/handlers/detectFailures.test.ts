@@ -187,7 +187,7 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 			},
 			refundAttempt: {
 				Success: false,
-				error: 'Refund failed',
+				// error: 'Refund failed',
 			},
 		};
 
