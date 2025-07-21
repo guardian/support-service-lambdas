@@ -30,6 +30,7 @@ export const handler = async (
 			},
 		};
 	} catch (error) {
+		console.error('Error in GetPaymentMethods handler:', error);
 		return {
 			...event,
 			activePaymentMethodResult: {
