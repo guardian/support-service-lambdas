@@ -6,6 +6,13 @@ test('validProductAndRatePlanCombinationsSchema works', () => {
 			product: 'Contribution',
 			ratePlan: 'Monthly',
 		}).success,
+	).toBe(false);
+	expect(
+		validProductAndRatePlanCombinationsSchema.safeParse({
+			product: 'Contribution',
+			ratePlan: 'Monthly',
+			amount: 10,
+		}).success,
 	).toBe(true);
 	expect(
 		validProductAndRatePlanCombinationsSchema.safeParse({

@@ -50,8 +50,8 @@ const generateProductsSchema = (product: CatalogProduct) => {
 		generateRatePlanLiteral(productRatePlan),
 	);
 	const ratePlanUnion =
-		ratePlanLiterals.length <= 1
-			? ratePlanLiterals
+		ratePlanLiterals.length == 1
+			? ratePlanLiterals[0]
 			: `z.union([
 					${ratePlanLiterals.join(',\n')},
 				])`;
