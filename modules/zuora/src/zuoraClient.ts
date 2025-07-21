@@ -5,6 +5,30 @@ import { BearerTokenProvider } from './bearerTokenProvider';
 import { zuoraServerUrl } from './common';
 import { getOAuthClientCredentials } from './oAuthCredentials';
 
+// Type definitions for Zuora response formats
+type ZuoraReason = {
+	code: string;
+	message: string;
+};
+
+type ZuoraErrorItem = {
+	Code: string;
+	Message: string;
+};
+
+type ZuoraResponse = {
+	// Success indicators (some endpoints use different casing)
+	success?: boolean;
+	Success?: boolean;
+	// Error details in various formats
+	reasons?: ZuoraReason[];
+	Errors?: ZuoraErrorItem[];
+	FaultCode?: string;
+	FaultMessage?: string;
+	code?: string;
+	message?: string;
+};
+
 export class ZuoraError extends Error {
 	constructor(
 		message: string,
@@ -80,13 +104,15 @@ export class ZuoraClient {
 			},
 			body,
 		});
-		const json = await response.json();
+		const json = (await response.json()) as ZuoraResponse;
 		this.logger.log('Response from Zuora was: ', JSON.stringify(json, null, 2));
 
 		// Check both HTTP status and logical success
 		// Some Zuora endpoints return HTTP 200 with success: false for logical errors
 		const isHttpSuccess = response.ok;
-		const isLogicalSuccess = (json as any).success === true; // Only explicit true is considered success
+		const hasLowercaseSuccess = 'success' in json && Boolean(json.success);
+		const hasUppercaseSuccess = 'Success' in json && Boolean(json.Success);
+		const isLogicalSuccess = hasLowercaseSuccess || hasUppercaseSuccess;
 
 		if (isHttpSuccess && isLogicalSuccess) {
 			return schema.parse(json);
@@ -95,19 +121,19 @@ export class ZuoraClient {
 
 			// Extract detailed error information from different Zuora response formats
 			let errorMessage = response.statusText || 'Zuora API Error';
-			const errorBody = json as any;
+			const errorBody = json;
 
 			// Format 1: reasons array (authentication, account errors)
 			if (errorBody.reasons && Array.isArray(errorBody.reasons)) {
 				const reasons = errorBody.reasons
-					.map((reason: any) => `${reason.code}: ${reason.message}`)
+					.map((reason: ZuoraReason) => `${reason.code}: ${reason.message}`)
 					.join('; ');
 				errorMessage = reasons;
 			}
 			// Format 2: Errors array (object API errors)
 			else if (errorBody.Errors && Array.isArray(errorBody.Errors)) {
 				const errors = errorBody.Errors.map(
-					(error: any) => `${error.Code}: ${error.Message}`,
+					(error: ZuoraErrorItem) => `${error.Code}: ${error.Message}`,
 				).join('; ');
 				errorMessage = errors;
 			}
