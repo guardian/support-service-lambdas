@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { InvoiceSchema, RefundResponseSchema } from '../shared';
 import { ApplyCreditToAccountBalanceAttemptSchema } from './ApplyCreditToAccountBalance';
 import { CheckForActiveSubAttemptSchema } from './CheckForActiveSub';
-import { CheckForActivePaymentMethodAttemptSchema } from './GetPaymentMethods';
+import { CheckForActivePaymentMethodAttemptSchema } from '../shared/paymentMethod';
 
 const ProcessedInvoiceSchema = InvoiceSchema.extend({
 	applyCreditToAccountBalanceAttempt: ApplyCreditToAccountBalanceAttemptSchema,
