@@ -11,6 +11,7 @@ export const validProductAndRatePlanCombinationsSchema = z.discriminatedUnion(
 		z.object({
 			product: z.literal('Contribution'),
 			ratePlan: z.union([z.literal('Annual'), z.literal('Monthly')]),
+			amount: z.number(),
 		}),
 		z.object({
 			product: z.literal('GuardianWeeklyRestOfWorld'),
@@ -80,6 +81,7 @@ export const validProductAndRatePlanCombinationsSchema = z.discriminatedUnion(
 				z.literal('Monthly'),
 				z.literal('Annual'),
 			]),
+			amount: z.number(),
 		}),
 		z.object({
 			product: z.literal('GuardianWeeklyDomestic'),

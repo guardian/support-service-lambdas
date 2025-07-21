@@ -37,6 +37,10 @@ export const generateValidProductAndRatePlanCombinationsSchema = (
 	`;
 };
 
+const productAllowsAmountOverride = (product: string): boolean => {
+	return product === 'Contribution' || product === 'SupporterPlus';
+};
+
 const generateProductsSchema = (product: CatalogProduct) => {
 	const productName = getZuoraProductKey(product.name);
 	const supportedRatePlans = product.productRatePlans.filter(
@@ -55,6 +59,7 @@ const generateProductsSchema = (product: CatalogProduct) => {
 	return `z.object({
 		product: z.literal('${productName}'),
 		ratePlan: ${ratePlanUnion},
+		${productAllowsAmountOverride(productName) ? 'amount: z.number(),' : ''}
 	})`;
 };
 
