@@ -128,22 +128,22 @@ export class ZuoraClient {
 				const reasons = errorBody.reasons
 					.map((reason: ZuoraReason) => `${reason.code}: ${reason.message}`)
 					.join('; ');
-				errorMessage = reasons;
+				errorMessage += `|${reasons}`;
 			}
 			// Format 2: Errors array (object API errors)
 			else if (errorBody.Errors && Array.isArray(errorBody.Errors)) {
 				const errors = errorBody.Errors.map(
 					(error: ZuoraErrorItem) => `${error.Code}: ${error.Message}`,
 				).join('; ');
-				errorMessage = errors;
+				errorMessage += `|${errors}`;
 			}
 			// Format 3: FaultCode/FaultMessage (query errors)
 			else if (errorBody.FaultCode && errorBody.FaultMessage) {
-				errorMessage = `${errorBody.FaultCode}: ${errorBody.FaultMessage}`;
+				errorMessage += `|${errorBody.FaultCode}: ${errorBody.FaultMessage}`;
 			}
 			// Format 4: Simple code/message
 			else if (errorBody.code && errorBody.message) {
-				errorMessage = `${errorBody.code}: ${errorBody.message}`;
+				errorMessage += `|${errorBody.code}: ${errorBody.message}`;
 			}
 
 			if (response.status === 429) {
