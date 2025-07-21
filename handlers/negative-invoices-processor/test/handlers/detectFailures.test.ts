@@ -57,7 +57,7 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 			},
 			checkForActivePaymentMethodAttempt: {
 				Success: false,
-				error: 'Payment method check failed',
+				// error: 'Payment method check failed',
 			},
 		};
 
