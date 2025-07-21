@@ -119,39 +119,46 @@ export class ZuoraClient {
 		} else {
 			this.logger.error('Error response body:', JSON.stringify(json, null, 2));
 
-			// Extract detailed error information from different Zuora response formats
-			let errorMessage = response.statusText || 'Zuora API Error';
-			const errorBody = json;
-
 			// When Zuora returns a 429 status, the response headers typically contain important rate limiting information
 			if (response.status === 429) {
 				this.logger.log(response.headers);
 			}
+
+			// Extract detailed error information from different Zuora response formats
+			const errorBody = json;
+			const statusText = response.statusText || 'Zuora API Error';
 
 			// Format 1: reasons array (authentication, account errors)
 			if (errorBody.reasons && Array.isArray(errorBody.reasons)) {
 				const reasons = errorBody.reasons
 					.map((reason: ZuoraReason) => `${reason.code}: ${reason.message}`)
 					.join('; ');
-				errorMessage += `|${reasons}`;
+				throw new ZuoraError(`${statusText}: ${reasons}`, response.status);
 			}
 			// Format 2: Errors array (object API errors)
-			else if (errorBody.Errors && Array.isArray(errorBody.Errors)) {
+			if (errorBody.Errors && Array.isArray(errorBody.Errors)) {
 				const errors = errorBody.Errors.map(
 					(error: ZuoraErrorItem) => `${error.Code}: ${error.Message}`,
 				).join('; ');
-				errorMessage += `|${errors}`;
+				throw new ZuoraError(`${statusText}: ${errors}`, response.status);
 			}
 			// Format 3: FaultCode/FaultMessage (query errors)
-			else if (errorBody.FaultCode && errorBody.FaultMessage) {
-				errorMessage += `|${errorBody.FaultCode}: ${errorBody.FaultMessage}`;
+			if (errorBody.FaultCode && errorBody.FaultMessage) {
+				throw new ZuoraError(
+					`${statusText}: ${errorBody.FaultCode}: ${errorBody.FaultMessage}`,
+					response.status,
+				);
 			}
 			// Format 4: Simple code/message
-			else if (errorBody.code && errorBody.message) {
-				errorMessage += `|${errorBody.code}: ${errorBody.message}`;
+			if (errorBody.code && errorBody.message) {
+				throw new ZuoraError(
+					`${statusText}: ${errorBody.code}: ${errorBody.message}`,
+					response.status,
+				);
 			}
 
-			throw new ZuoraError(errorMessage, response.status);
+			// Fallback if no specific error format is found
+			throw new ZuoraError(statusText, response.status);
 		}
 	}
 }
