@@ -21,7 +21,6 @@ export {
 // DoCreditBalanceRefund exports
 export {
 	DoCreditBalanceRefundInputSchema,
-	RefundAttemptSchema,
 	DoCreditBalanceRefundOutputSchema,
 	type DoCreditBalanceRefundInput,
 	type DoCreditBalanceRefundOutput,
