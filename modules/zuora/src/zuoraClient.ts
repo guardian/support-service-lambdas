@@ -110,11 +110,8 @@ export class ZuoraClient {
 		// Check both HTTP status and logical success
 		// Some Zuora endpoints return HTTP 200 with success: false for logical errors
 		const isHttpSuccess = response.ok;
-		const hasLowercaseSuccess = 'success' in json && Boolean(json.success);
-		const hasUppercaseSuccess = 'Success' in json && Boolean(json.Success);
-		const isLogicalSuccess = hasLowercaseSuccess || hasUppercaseSuccess;
 
-		if (isHttpSuccess && isLogicalSuccess) {
+		if (isHttpSuccess && isLogicalSuccess(json)) {
 			return schema.parse(json);
 		} else {
 			this.logger.error('Error response body:', JSON.stringify(json, null, 2));
@@ -124,13 +121,16 @@ export class ZuoraClient {
 				this.logger.log(response.headers);
 			}
 
-			// Extract detailed error information from different Zuora response formats
-
-			const error = generateError(json, response);
-			throw error;
+			throw generateError(json, response);
 		}
 	}
 }
+
+const isLogicalSuccess = (json: ZuoraResponse): boolean => {
+	const hasLowercaseSuccess = 'success' in json && Boolean(json.success);
+	const hasUppercaseSuccess = 'Success' in json && Boolean(json.Success);
+	return hasLowercaseSuccess || hasUppercaseSuccess;
+};
 
 function generateError(json: ZuoraResponse, response: Response): ZuoraError {
 	const statusText = response.statusText || 'Zuora API Error';
