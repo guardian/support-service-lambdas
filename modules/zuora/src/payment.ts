@@ -1,8 +1,8 @@
 import type { Dayjs } from 'dayjs';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { ZuoraUpperCaseSuccessResponse } from '@modules/zuora/zuoraSchemas';
-import { zuoraUpperCaseSuccessResponseSchema } from '@modules/zuora/zuoraSchemas';
+import { zuoraResponseSchema } from './types/zuoraClient';
+import type { ZuoraResponse } from './types/zuoraClient';
 
 export const createPayment = async (
 	zuoraClient: ZuoraClient,
@@ -15,7 +15,7 @@ export const createPayment = async (
 	console.log(
 		`Creating payment of ${paymentAmount} for invoice ${invoiceId}, on account ${accountId} with payment method ${paymentMethodId}`,
 	);
-	const result: ZuoraUpperCaseSuccessResponse = await zuoraClient.post(
+	const result: ZuoraResponse = await zuoraClient.post(
 		'/v1/object/payment',
 		JSON.stringify({
 			AccountId: accountId,
@@ -28,7 +28,7 @@ export const createPayment = async (
 			Type: 'Electronic',
 			Status: 'Processed',
 		}),
-		zuoraUpperCaseSuccessResponseSchema,
+		zuoraResponseSchema,
 	);
 
 	if (!result.Success) {
