@@ -52,6 +52,7 @@ export const handler = async (
 			},
 		};
 	} catch (error) {
+		console.error('Error processing credit balance refund:', error);
 		return {
 			...event,
 			refundAttempt: {
