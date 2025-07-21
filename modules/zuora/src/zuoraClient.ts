@@ -125,34 +125,33 @@ export class ZuoraClient {
 			}
 
 			// Extract detailed error information from different Zuora response formats
-			const errorBody = json;
 			const statusText = response.statusText || 'Zuora API Error';
 
 			// Format 1: reasons array (authentication, account errors)
-			if (errorBody.reasons && Array.isArray(errorBody.reasons)) {
-				const reasons = errorBody.reasons
+			if (json.reasons && Array.isArray(json.reasons)) {
+				const reasons = json.reasons
 					.map((reason: ZuoraReason) => `${reason.code}: ${reason.message}`)
 					.join('; ');
 				throw new ZuoraError(`${statusText}: ${reasons}`, response.status);
 			}
 			// Format 2: Errors array (object API errors)
-			if (errorBody.Errors && Array.isArray(errorBody.Errors)) {
-				const errors = errorBody.Errors.map(
+			if (json.Errors && Array.isArray(json.Errors)) {
+				const errors = json.Errors.map(
 					(error: ZuoraErrorItem) => `${error.Code}: ${error.Message}`,
 				).join('; ');
 				throw new ZuoraError(`${statusText}: ${errors}`, response.status);
 			}
 			// Format 3: FaultCode/FaultMessage (query errors)
-			if (errorBody.FaultCode && errorBody.FaultMessage) {
+			if (json.FaultCode && json.FaultMessage) {
 				throw new ZuoraError(
-					`${statusText}: ${errorBody.FaultCode}: ${errorBody.FaultMessage}`,
+					`${statusText}: ${json.FaultCode}: ${json.FaultMessage}`,
 					response.status,
 				);
 			}
 			// Format 4: Simple code/message
-			if (errorBody.code && errorBody.message) {
+			if (json.code && json.message) {
 				throw new ZuoraError(
-					`${statusText}: ${errorBody.code}: ${errorBody.message}`,
+					`${statusText}: ${json.code}: ${json.message}`,
 					response.status,
 				);
 			}
