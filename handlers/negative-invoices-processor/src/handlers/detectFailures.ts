@@ -6,8 +6,10 @@ import type { ProcessedInvoice } from '../types/shared';
 export const handler = async (event: DetectFailuresInput) => {
 	try {
 		const parsedEvent = DetectFailuresInputSchema.parse(event);
+		const processedInvoices =
+			parsedEvent.processedInvoices as ProcessedInvoice[];
 		const failureDetected = await failureExistsOnInvoiceProcessingAttempt(
-			parsedEvent.processedInvoices,
+			processedInvoices,
 			parsedEvent.s3UploadAttemptStatus,
 		);
 
@@ -51,7 +53,7 @@ function atLeastOneCalloutFailed(invoice: ProcessedInvoice): boolean {
 		applyCreditToAccountBalanceAttempt,
 		checkForActiveSubAttempt,
 		checkForActivePaymentMethodAttempt,
-		refundAttempt,
+		refundResult,
 	} = invoice;
 
 	if (
@@ -67,9 +69,9 @@ function atLeastOneCalloutFailed(invoice: ProcessedInvoice): boolean {
 			return true;
 		}
 
-		// Only check refundAttempt if hasActivePaymentMethod is true
+		// Only check refundResult if hasActivePaymentMethod is true
 		if (checkForActivePaymentMethodAttempt.hasActivePaymentMethod === true) {
-			return !refundAttempt?.Success;
+			return !refundResult?.Success;
 		}
 	}
 

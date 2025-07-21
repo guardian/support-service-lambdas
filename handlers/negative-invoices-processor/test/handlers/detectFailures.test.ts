@@ -84,7 +84,7 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				hasActivePaymentMethod: true,
 				activePaymentMethods: [],
 			},
-			refundAttempt: {
+			refundResult: {
 				Success: true,
 			},
 		};
@@ -137,7 +137,7 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				hasActivePaymentMethod: true,
 				activePaymentMethods: [],
 			},
-			refundAttempt: {
+			refundResult: {
 				Success: true,
 			},
 		};
@@ -167,7 +167,7 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 		expect(result).toBe(false);
 	});
 
-	it('should return true when refundAttempt fails', () => {
+	it('should return true when refundResult fails', () => {
 		const invoice: ProcessedInvoice = {
 			invoiceId: 'INV-001',
 			accountId: 'ACC-001',
@@ -185,7 +185,7 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				hasActivePaymentMethod: true,
 				activePaymentMethods: [],
 			},
-			refundAttempt: {
+			refundResult: {
 				Success: false,
 				// error: 'Refund failed',
 			},

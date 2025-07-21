@@ -1,18 +1,18 @@
 import { z } from 'zod';
 import { GetPaymentMethodsOutputSchema } from './GetPaymentMethods';
-import { PaymentMethodSchema } from './GetPaymentMethods';
-import { RefundResponseSchema } from '../shared/refund';
+import { RefundResultSchema } from '../shared/refund';
+// import { PaymentMethodSchema } from './GetPaymentMethods';
+// import { RefundResponseSchema } from '../shared/refund';
 
-export const DoCreditBalanceRefundInputSchema = GetPaymentMethodsOutputSchema;
+export const DoCreditBalanceRefundInputSchema =
+	GetPaymentMethodsOutputSchema.strict();
 export type DoCreditBalanceRefundInput = z.infer<
 	typeof DoCreditBalanceRefundInputSchema
 >;
 
 export const DoCreditBalanceRefundOutputSchema =
 	DoCreditBalanceRefundInputSchema.extend({
-		refundAttempt: RefundResponseSchema,
-		paymentMethod: PaymentMethodSchema.optional(),
-		refundAmount: z.number().optional(),
+		refundResult: RefundResultSchema,
 	});
 export type DoCreditBalanceRefundOutput = z.infer<
 	typeof DoCreditBalanceRefundOutputSchema

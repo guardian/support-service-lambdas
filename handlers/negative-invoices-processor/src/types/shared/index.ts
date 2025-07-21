@@ -11,3 +11,5 @@ export {
 } from './processedInvoice';
 
 export { RefundResponseSchema, type RefundResponse } from './refund';
+
+export { PaymentMethodSchema } from './paymentMethod';

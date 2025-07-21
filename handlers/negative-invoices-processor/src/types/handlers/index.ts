@@ -29,8 +29,6 @@ export {
 // GetPaymentMethods exports
 export {
 	GetPaymentMethodsInputSchema,
-	PaymentMethodSchema,
-	CheckForActivePaymentMethodAttemptSchema,
 	GetPaymentMethodsOutputSchema,
 	type GetPaymentMethodsInput,
 	type GetPaymentMethodsOutput,

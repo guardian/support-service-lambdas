@@ -35,33 +35,37 @@ export const handler = async (
 			MethodType: paymentMethodToRefundTo.type,
 		});
 
-		const response = await doRefund(zuoraClient, body, RefundResponseSchema);
+		const refundAttempt = await doRefund(
+			zuoraClient,
+			body,
+			RefundResponseSchema,
+		);
 
 		return {
 			...parsedEvent,
-			refundAttempt: {
-				...response,
-				// paymentMethod: paymentMethodToRefundTo,
-				// paymentMethod: {
-				// 	id: 'aaa',
-				// 	status: 'active',
-				// 	type: 'credit_card',
-				// 	isDefault: true,
-				// },
-				// refundAmount,
+			refundResult: {
+				...refundAttempt,
+				paymentMethod: paymentMethodToRefundTo,
+				refundAmount,
 			},
+			// {
+			// paymentMethod: {
+			// 	id: 'aaa',
+			// 	status: 'active',
+			// 	type: 'credit_card',
+			// 	isDefault: true,
+			// },
+			// refundAmount,
+			// },
+			// paymentMethod: paymentMethodToRefundTo,
+			// refundAmount,
 		};
 	} catch (error) {
 		console.error('Error processing credit balance refund:', error);
 		return {
 			...event,
-			refundAttempt: {
+			refundResult: {
 				Success: false,
-				// paymentMethod: paymentMethodToRefundTo,
-				// error:
-				// 	error instanceof Error
-				// 		? error.message
-				// 		: JSON.stringify(error, null, 2),
 			},
 		};
 	}
