@@ -1,20 +1,34 @@
+import z from 'zod';
 import type { ZuoraClient } from './zuoraClient';
-import type {
-	PaymentMethod,
-	ZuoraPaymentMethodQueryResponse,
-} from './zuoraSchemas';
-import { zuoraPaymentMethodQueryResponseSchema } from './zuoraSchemas';
+import { zuoraResponseSchema } from './types';
+
+export const PaymentMethodSchema = z.object({
+	id: z.string(),
+	status: z.string(),
+	type: z.string(),
+	isDefault: z.boolean(),
+});
+export type PaymentMethod = z.infer<typeof PaymentMethodSchema>;
+
+export const PaymentMethodResponseSchema = zuoraResponseSchema.extend({
+	creditcardreferencetransaction: z.array(PaymentMethodSchema).optional(),
+	creditcard: z.array(PaymentMethodSchema).optional(),
+	banktransfer: z.array(PaymentMethodSchema).optional(),
+	paypal: z.array(PaymentMethodSchema).optional(),
+});
+export type PaymentMethodResponse = z.infer<typeof PaymentMethodResponseSchema>;
 
 export const getPaymentMethods = async (
 	zuoraClient: ZuoraClient,
 	accountId: string,
-): Promise<ZuoraPaymentMethodQueryResponse> => {
+	schema: z.ZodType<any, z.ZodTypeDef, any>,
+): Promise<PaymentMethodResponse> => {
 	const path = `/v1/accounts/${accountId}/payment-methods`;
-	return zuoraClient.get(path, zuoraPaymentMethodQueryResponseSchema);
+	return zuoraClient.get(path, schema);
 };
 
 export const filterActivePaymentMethods = (
-	paymentMethods: ZuoraPaymentMethodQueryResponse,
+	paymentMethods: PaymentMethodResponse,
 ): PaymentMethod[] => {
 	type PaymentMethodKey =
 		| 'creditcard'

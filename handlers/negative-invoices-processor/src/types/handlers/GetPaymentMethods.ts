@@ -3,15 +3,14 @@ import {
 	CheckForActiveSubOutput,
 	CheckForActiveSubOutputSchema,
 } from './CheckForActiveSub';
-import { CheckForActivePaymentMethodAttemptSchema } from '../shared/paymentMethod';
+import { PaymentMethodResultSchema } from '../shared/paymentMethod';
 
 export const GetPaymentMethodsInputSchema = CheckForActiveSubOutputSchema;
 export type GetPaymentMethodsInput = CheckForActiveSubOutput;
 
 export const GetPaymentMethodsOutputSchema =
 	GetPaymentMethodsInputSchema.extend({
-		checkForActivePaymentMethodAttempt:
-			CheckForActivePaymentMethodAttemptSchema,
+		activePaymentMethodResult: PaymentMethodResultSchema,
 	});
 export type GetPaymentMethodsOutput = z.infer<
 	typeof GetPaymentMethodsOutputSchema

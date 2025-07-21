@@ -6,6 +6,7 @@ import {
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { GetPaymentMethodsInputSchema } from '../types';
 import type { GetPaymentMethodsInput, GetPaymentMethodsOutput } from '../types';
+import { PaymentMethodResponseSchema } from '../types/shared/paymentMethod';
 
 export const handler = async (
 	event: GetPaymentMethodsInput,
@@ -16,6 +17,7 @@ export const handler = async (
 		const paymentMethods = await getPaymentMethods(
 			zuoraClient,
 			parsedEvent.accountId,
+			PaymentMethodResponseSchema,
 		);
 		const activePaymentMethods = filterActivePaymentMethods(paymentMethods);
 		const hasActivePaymentMethod = activePaymentMethods.length > 0;
