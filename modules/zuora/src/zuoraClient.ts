@@ -123,6 +123,11 @@ export class ZuoraClient {
 			let errorMessage = response.statusText || 'Zuora API Error';
 			const errorBody = json;
 
+			// When Zuora returns a 429 status, the response headers typically contain important rate limiting information
+			if (response.status === 429) {
+				this.logger.log(response.headers);
+			}
+
 			// Format 1: reasons array (authentication, account errors)
 			if (errorBody.reasons && Array.isArray(errorBody.reasons)) {
 				const reasons = errorBody.reasons
@@ -144,10 +149,6 @@ export class ZuoraClient {
 			// Format 4: Simple code/message
 			else if (errorBody.code && errorBody.message) {
 				errorMessage += `|${errorBody.code}: ${errorBody.message}`;
-			}
-
-			if (response.status === 429) {
-				this.logger.log(response.headers);
 			}
 
 			throw new ZuoraError(errorMessage, response.status);
