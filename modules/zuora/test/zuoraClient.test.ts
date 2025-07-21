@@ -1,6 +1,7 @@
 import { Logger } from '@modules/zuora/logger';
+import { ZuoraError } from '@modules/zuora/zuoraError';
 import { BearerTokenProvider } from '../src/bearerTokenProvider';
-import { ZuoraClient, ZuoraError } from '../src/zuoraClient';
+import { ZuoraClient } from '../src/zuoraClient';
 import { z } from 'zod';
 
 // Mock fetch globally
