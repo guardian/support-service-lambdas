@@ -8,6 +8,7 @@ import type {
 	DoCreditBalanceRefundInput,
 	DoCreditBalanceRefundOutput,
 } from '../types';
+import { RefundResponseSchema } from '../types/handlers/DoCreditBalanceRefund';
 
 export const handler = async (
 	event: DoCreditBalanceRefundInput,
@@ -34,14 +35,20 @@ export const handler = async (
 			MethodType: paymentMethodToRefundTo.type,
 		});
 
-		const refundAttempt = await doRefund(zuoraClient, body);
+		const response = await doRefund(zuoraClient, body, RefundResponseSchema);
 
 		return {
 			...parsedEvent,
 			refundAttempt: {
-				...refundAttempt,
-				paymentMethod: paymentMethodToRefundTo,
-				refundAmount,
+				...response,
+				// paymentMethod: paymentMethodToRefundTo,
+				// paymentMethod: {
+				// 	id: 'aaa',
+				// 	status: 'active',
+				// 	type: 'credit_card',
+				// 	isDefault: true,
+				// },
+				// refundAmount,
 			},
 		};
 	} catch (error) {
@@ -49,11 +56,11 @@ export const handler = async (
 			...event,
 			refundAttempt: {
 				Success: false,
-				paymentMethod: paymentMethodToRefundTo,
-				error:
-					error instanceof Error
-						? error.message
-						: JSON.stringify(error, null, 2),
+				// paymentMethod: paymentMethodToRefundTo,
+				// error:
+				// 	error instanceof Error
+				// 		? error.message
+				// 		: JSON.stringify(error, null, 2),
 			},
 		};
 	}
