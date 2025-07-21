@@ -11,19 +11,6 @@ export type ZuoraErrorItem = {
 	Message: string;
 };
 
-export type ZuoraResponse = {
-	// Success indicators (some endpoints use different casing)
-	success?: boolean;
-	Success?: boolean;
-	// Error details in various formats
-	reasons?: ZuoraReason[];
-	Errors?: ZuoraErrorItem[];
-	FaultCode?: string;
-	FaultMessage?: string;
-	code?: string;
-	message?: string;
-};
-
 // Zod schema definitions
 export const zuoraReasonSchema = z.object({
 	code: z.string(),
@@ -47,3 +34,4 @@ export const zuoraResponseSchema = z.object({
 	code: z.string().optional(),
 	message: z.string().optional(),
 });
+export type ZuoraResponse = z.infer<typeof zuoraResponseSchema>;
