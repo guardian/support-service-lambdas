@@ -1,5 +1,7 @@
-import { getPaymentMethods } from '@modules/zuora/paymentMethod';
-import { zuoraPaymentMethodQueryResponseSchema } from '@modules/zuora/zuoraSchemas';
+import {
+	getPaymentMethods,
+	PaymentMethodResponseSchema,
+} from '@modules/zuora/paymentMethod';
 
 describe('getPaymentMethods', () => {
 	const mockGet = jest.fn();
@@ -15,18 +17,26 @@ describe('getPaymentMethods', () => {
 	it('calls zuoraClient.get with correct path and schema', async () => {
 		mockGet.mockResolvedValue(mockResponse);
 
-		await getPaymentMethods(mockZuoraClient, accountId);
+		await getPaymentMethods(
+			mockZuoraClient,
+			accountId,
+			PaymentMethodResponseSchema,
+		);
 
 		expect(mockGet).toHaveBeenCalledWith(
 			`/v1/accounts/${accountId}/payment-methods`,
-			zuoraPaymentMethodQueryResponseSchema,
+			PaymentMethodResponseSchema,
 		);
 	});
 
 	it('returns the response from zuoraClient.get', async () => {
 		mockGet.mockResolvedValue(mockResponse);
 
-		const result = await getPaymentMethods(mockZuoraClient, accountId);
+		const result = await getPaymentMethods(
+			mockZuoraClient,
+			accountId,
+			PaymentMethodResponseSchema,
+		);
 
 		expect(result).toBe(mockResponse);
 	});
@@ -35,8 +45,12 @@ describe('getPaymentMethods', () => {
 		const error = new Error('fail');
 		mockGet.mockRejectedValue(error);
 
-		await expect(getPaymentMethods(mockZuoraClient, accountId)).rejects.toThrow(
-			'fail',
-		);
+		await expect(
+			getPaymentMethods(
+				mockZuoraClient,
+				accountId,
+				PaymentMethodResponseSchema,
+			),
+		).rejects.toThrow('fail');
 	});
 });

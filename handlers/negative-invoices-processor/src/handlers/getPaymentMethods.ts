@@ -23,7 +23,7 @@ export const handler = async (
 		const hasActivePaymentMethod = activePaymentMethods.length > 0;
 		return {
 			...parsedEvent,
-			checkForActivePaymentMethodAttempt: {
+			activePaymentMethodResult: {
 				Success: paymentMethods.success,
 				hasActivePaymentMethod,
 				activePaymentMethods,
@@ -32,14 +32,14 @@ export const handler = async (
 	} catch (error) {
 		return {
 			...event,
-			checkForActivePaymentMethodAttempt: {
+			activePaymentMethodResult: {
 				Success: false,
 				hasActivePaymentMethod: undefined,
 				activePaymentMethods: undefined,
-				error:
-					error instanceof Error
-						? error.message
-						: JSON.stringify(error, null, 2),
+				// error:
+				// 	error instanceof Error
+				// 		? error.message
+				// 		: JSON.stringify(error, null, 2),
 			},
 		};
 	}
