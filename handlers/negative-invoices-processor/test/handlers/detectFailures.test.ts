@@ -85,7 +85,9 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				activePaymentMethods: [],
 			},
 			refundResult: {
-				Success: true,
+				refundAttempt: {
+					Success: true,
+				},
 			},
 		};
 
@@ -138,7 +140,9 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				activePaymentMethods: [],
 			},
 			refundResult: {
-				Success: true,
+				refundAttempt: {
+					Success: true,
+				},
 			},
 		};
 
@@ -186,8 +190,10 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				activePaymentMethods: [],
 			},
 			refundResult: {
-				Success: false,
-				// error: 'Refund failed',
+				refundAttempt: {
+					Success: false,
+					// error: 'Refund failed',
+				},
 			},
 		};
 
