@@ -436,9 +436,6 @@ pnpm check-config       # Check configuration files
 # Set environment
 export STAGE=CODE
 export AWS_REGION=eu-west-1
-
-# Start development server
-pnpm dev
 ```
 
 ### Deployment
@@ -489,11 +486,3 @@ Direct integration with mParticle's DSR API:
 |-------------|-----|
 | **CODE** | `https://mparticle-api-code.support.guardianapis.com` |
 | **PROD** | `https://mparticle-api.support.guardianapis.com` |
-
-### Key Commands
-```bash
-pnpm install       # Install dependencies
-pnpm build         # Build the project
-pnpm test          # Run all tests
-pnpm dev           # Start development server
-```
