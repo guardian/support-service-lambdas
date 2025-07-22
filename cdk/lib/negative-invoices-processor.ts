@@ -322,7 +322,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 		)
 			.when(
 				Condition.booleanEquals(
-					'$.checkForActivePaymentMethodAttempt.hasActivePaymentMethod',
+					'$.activePaymentMethodResult.hasActivePaymentMethod',
 					true,
 				),
 				doCreditBalanceRefundLambdaTask,
