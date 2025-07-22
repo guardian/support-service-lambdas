@@ -334,7 +334,10 @@ export class NegativeInvoicesProcessor extends GuStack {
 			'Successful active payment method callout?',
 		)
 			.when(
-				Condition.booleanEquals('$.activePaymentMethodResult.Success', true),
+				Condition.booleanEquals(
+					'$.activePaymentMethodResult.checkForActivePaymentMethod.Success',
+					true,
+				),
 				hasActivePaymentMethodChoice,
 			)
 			.otherwise(
