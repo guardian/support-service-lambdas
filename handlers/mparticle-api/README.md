@@ -384,12 +384,6 @@ pnpm test --watch
 
 ## 🚨 Business Context & Compliance
 
-### Legal Requirements
-- **GDPR Article 17**: Right to Erasure ("right to be forgotten")
-- **CCPA Section 1798.105**: Consumer right to delete personal information
-- **28-day response deadline** for privacy requests. mParticle processes requests within 14 days
-- **Complete audit trail** for regulatory compliance
-
 ### The Guardian's Data Ecosystem
 The Guardian collects comprehensive reader data including:
 - 📖 **Content Engagement**: Article views, reading time, interaction patterns
@@ -508,9 +502,10 @@ Direct integration with mParticle's DSR API:
 - `AWS_REGION`: AWS region for Parameter Store access
 
 ### AWS Resources
-- **Lambda Function**: `mparticle-api-{stage}`
+- **Lambda Functions**: `mparticle-api-http-{stage}`, `mparticle-api-baton-{stage}`
 - **API Gateway**: `mparticle-api-{stage}`
 - **Parameter Store**: `/mparticle-api/{stage}/*`
+- **Cross-Account Role**: `baton-mparticle-lambda-role-{stage}`
 
 ### Base URLs
 | Environment | URL |
