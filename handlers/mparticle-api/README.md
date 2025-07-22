@@ -206,9 +206,11 @@ pnpm test
 ### Configuration
 All configuration is managed through AWS Parameter Store. Ensure these parameters are set for your environment:
 
-- `/mparticle-api/{stage}/mparticle-api-key`
-- `/mparticle-api/{stage}/mparticle-workspace-id`  
-- `/mparticle-api/{stage}/callback-certificate-path`
+- `/{stage}/support/mparticle-api/workspace/key`
+- `/{stage}/support/mparticle-api/workspace/secret`
+- `/{stage}/support/mparticle-api/inputPlatform/key`
+- `/{stage}/support/mparticle-api/inputPlatform/secret`
+- `/{stage}/support/mparticle-api/pod`
 
 ---
 
@@ -406,11 +408,6 @@ This data flows through **mParticle** for analytics and audience segmentation, t
 - `STAGE`: Deployment environment (CODE/PROD)
 - `AWS_REGION`: AWS region for Parameter Store access
 
-### AWS Parameter Store Configuration
-- `/mparticle-api/{stage}/mparticle-api-key`: mParticle API authentication
-- `/mparticle-api/{stage}/mparticle-workspace-id`: Target workspace identifier
-- `/mparticle-api/{stage}/callback-certificate-path`: X.509 certificate for validation
-
 ### Code Structure
 ```
 src/
@@ -426,13 +423,12 @@ src/
 
 ### Development Scripts
 ```bash
-pnpm build          # Compile TypeScript
-pnpm dev            # Start development server
-pnpm test           # Run all tests
-pnpm test:unit      # Run unit tests
-pnpm test:integration # Run integration tests
-pnpm lint           # Run ESLint
-pnpm format         # Format code with Prettier
+pnpm build              # Compile TypeScript
+pnpm test               # Run all tests
+pnpm lint               # Run ESLint
+pnpm check-formatting   # Format code with Prettier
+pnpm fix-formatting     # Format code with Prettier
+pnpm check-config       # Check configuration files
 ```
 
 ### Local Development
@@ -452,24 +448,9 @@ Managed through AWS CDK with environment-specific configurations.
 
 ## 📞 Support & Monitoring
 
-### CloudWatch Metrics
-- `BatonRequestsReceived`: Number of Baton-initiated requests
-- `BatonRequestsCompleted`: Successfully completed Baton requests
-- `BatonRequestsFailed`: Failed Baton requests requiring attention
-
 ### Team Information
 - **Primary Owner**: Value Team
 - **Slack Channel**: [@P&E/Value](https://chat.google.com/room/AAAAuotUxTg?cls=7)
-
-### Documentation Issues
-- Create PR against this repository for documentation updates
-- Use GitHub Issues for bug reports and feature requests
-- Email security@guardian.co.uk for security-related concerns
-
-### Compliance Questions
-- **Privacy Team**: #privacy-compliance (Slack)
-- **Legal Team**: For regulatory interpretation and guidance
-- **DPO Contact**: Via privacy team for data protection matters
 
 ### External Dependencies
 - **mParticle DSR API**: Data subject request processing
@@ -497,14 +478,10 @@ Direct integration with mParticle's DSR API:
 
 ## 📋 Quick Reference
 
-### Environment Variables
-- `STAGE`: Deployment environment (CODE/PROD)
-- `AWS_REGION`: AWS region for Parameter Store access
-
 ### AWS Resources
 - **Lambda Functions**: `mparticle-api-http-{stage}`, `mparticle-api-baton-{stage}`
 - **API Gateway**: `mparticle-api-{stage}`
-- **Parameter Store**: `/mparticle-api/{stage}/*`
+- **Parameter Store**: `/{stage}/support/mparticle-api/*`
 - **Cross-Account Role**: `baton-mparticle-lambda-role-{stage}`
 
 ### Base URLs
