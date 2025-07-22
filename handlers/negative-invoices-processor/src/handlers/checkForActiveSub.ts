@@ -26,7 +26,6 @@ export const handler = async (
 			},
 		};
 	} catch (error) {
-		console.error('Error in CheckForActiveSub handler:', error);
 		return {
 			...event,
 			activeSubResult: {
@@ -34,10 +33,10 @@ export const handler = async (
 					Success: false,
 				},
 				hasActiveSubscription: undefined,
-				// error:
-				// 	error instanceof Error
-				// 		? error.message
-				// 		: JSON.stringify(error, null, 2),
+				error:
+					error instanceof Error
+						? error.message
+						: JSON.stringify(error, null, 2),
 			},
 		};
 	}

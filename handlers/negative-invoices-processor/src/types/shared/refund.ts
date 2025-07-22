@@ -12,6 +12,7 @@ export const RefundResultSchema = RefundResponseSchema.extend({
 	refundAttempt: RefundResponseSchema,
 	paymentMethod: PaymentMethodSchema.optional(),
 	refundAmount: z.number().optional(),
+	error: z.string().optional(),
 });
 
 export type RefundResult = z.infer<typeof RefundResultSchema>;

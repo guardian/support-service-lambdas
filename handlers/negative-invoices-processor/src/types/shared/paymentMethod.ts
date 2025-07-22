@@ -20,5 +20,6 @@ export type PaymentMethodResponse = z.infer<typeof PaymentMethodResponseSchema>;
 export const PaymentMethodResultSchema = PaymentMethodResponseSchema.extend({
 	hasActivePaymentMethod: z.boolean().optional(),
 	activePaymentMethods: z.array(PaymentMethodSchema).optional(),
+	error: z.string().optional(),
 });
 export type PaymentMethodResult = z.infer<typeof PaymentMethodResultSchema>;

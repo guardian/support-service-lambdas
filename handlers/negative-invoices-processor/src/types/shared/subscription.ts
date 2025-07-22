@@ -8,6 +8,7 @@ export const ActiveSubscriptionResultSchema = SubscriptionResponseSchema.extend(
 	{
 		checkForActiveSubAttempt: SubscriptionResponseSchema,
 		hasActiveSubscription: z.boolean().optional(),
+		error: z.string().optional(),
 	},
 );
 

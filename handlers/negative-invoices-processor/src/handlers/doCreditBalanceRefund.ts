@@ -44,26 +44,18 @@ export const handler = async (
 				paymentMethod: paymentMethodToRefundTo,
 				refundAmount,
 			},
-			// {
-			// paymentMethod: {
-			// 	id: 'aaa',
-			// 	status: 'active',
-			// 	type: 'credit_card',
-			// 	isDefault: true,
-			// },
-			// refundAmount,
-			// },
-			// paymentMethod: paymentMethodToRefundTo,
-			// refundAmount,
 		};
 	} catch (error) {
-		console.error('Error processing credit balance refund:', error);
 		return {
 			...event,
 			refundResult: {
 				refundAttempt: {
 					Success: false,
 				},
+				error:
+					error instanceof Error
+						? error.message
+						: JSON.stringify(error, null, 2),
 			},
 		};
 	}

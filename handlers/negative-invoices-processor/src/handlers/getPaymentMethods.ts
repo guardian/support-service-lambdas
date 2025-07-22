@@ -30,17 +30,16 @@ export const handler = async (
 			},
 		};
 	} catch (error) {
-		console.error('Error in GetPaymentMethods handler:', error);
 		return {
 			...event,
 			activePaymentMethodResult: {
 				Success: false,
 				hasActivePaymentMethod: undefined,
 				activePaymentMethods: undefined,
-				// error:
-				// 	error instanceof Error
-				// 		? error.message
-				// 		: JSON.stringify(error, null, 2),
+				error:
+					error instanceof Error
+						? error.message
+						: JSON.stringify(error, null, 2),
 			},
 		};
 	}

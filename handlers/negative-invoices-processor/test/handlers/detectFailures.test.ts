@@ -31,24 +31,12 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 			applyCreditToAccountBalanceAttempt: {
 				Success: true,
 			},
-			// activeSubResult: {
-			// 	checkForActiveSubAttempt: {
-			// 		Success: false,
-			// 		// error: 'Active sub check failed',
-			// 	},
-			// 	hasActiveSub: undefined,
-			// },
 			activeSubResult: {
 				checkForActiveSubAttempt: {
 					Success: false,
-					// error: 'Active sub check failed',
 				},
 				hasActiveSubscription: undefined,
-				//todo add checkForActiveSubAttempt
-				// checkForActiveSubAttempt: {
-
-				// },
-				// hasActiveSub,
+				error: 'Active sub check failed',
 			},
 		};
 
@@ -73,8 +61,9 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				hasActiveSubscription: undefined,
 			},
 			activePaymentMethodResult: {
+				//to match the structure of the type like above with activeSubResult
 				Success: false,
-				// error: 'Payment method check failed',
+				error: 'Payment method check failed',
 			},
 		};
 
@@ -219,8 +208,8 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 			refundResult: {
 				refundAttempt: {
 					Success: false,
-					// error: 'Refund failed',
 				},
+				error: 'Refund failed',
 			},
 		};
 
