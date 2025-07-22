@@ -1,12 +1,14 @@
 import { stageFromEnvironment } from '@modules/stage';
-import {
-	filterActivePaymentMethods,
-	getPaymentMethods,
-} from '@modules/zuora/paymentMethod';
+import { getPaymentMethods } from '@modules/zuora/paymentMethod';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { GetPaymentMethodsInputSchema } from '../types';
-import type { GetPaymentMethodsInput, GetPaymentMethodsOutput } from '../types';
+import type {
+	GetPaymentMethodsInput,
+	GetPaymentMethodsOutput,
+	PaymentMethod,
+} from '../types';
 import { PaymentMethodResponseSchema } from '../types/shared';
+import { PaymentMethodResponse } from '../types/shared/paymentMethod';
 
 export const handler = async (
 	event: GetPaymentMethodsInput,
@@ -14,13 +16,18 @@ export const handler = async (
 	try {
 		const parsedEvent = GetPaymentMethodsInputSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
-		const paymentMethods = await getPaymentMethods(
-			zuoraClient,
-			parsedEvent.accountId,
-			PaymentMethodResponseSchema,
-		);
+		const paymentMethods = await (<PaymentMethodResponse>(
+			getPaymentMethods(
+				zuoraClient,
+				parsedEvent.accountId,
+				PaymentMethodResponseSchema,
+			)
+		));
+
 		const activePaymentMethods = filterActivePaymentMethods(paymentMethods);
+
 		const hasActivePaymentMethod = activePaymentMethods.length > 0;
+
 		return {
 			...parsedEvent,
 			activePaymentMethodResult: {
@@ -47,4 +54,34 @@ export const handler = async (
 			},
 		};
 	}
+};
+
+const filterActivePaymentMethods = (
+	paymentMethods: PaymentMethodResponse,
+): PaymentMethod[] => {
+	type PaymentMethodKey =
+		| 'creditcard'
+		| 'creditcardreferencetransaction'
+		| 'banktransfer'
+		| 'paypal';
+
+	const keysToCheck = [
+		'creditcard',
+		'creditcardreferencetransaction',
+		'banktransfer',
+		'paypal',
+	] as const satisfies readonly PaymentMethodKey[];
+
+	const activeMethods: PaymentMethod[] = [];
+
+	for (const key of keysToCheck) {
+		const methods = paymentMethods[key];
+		if (Array.isArray(methods)) {
+			activeMethods.push(
+				...methods.filter((pm) => pm.status.toLowerCase() === 'active'),
+			);
+		}
+	}
+
+	return activeMethods;
 };
