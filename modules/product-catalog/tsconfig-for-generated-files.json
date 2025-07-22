@@ -18,6 +18,6 @@
     "include": [
         "src/productCatalogSchema.ts",
         "src/productBillingPeriods.ts",
-        "src/validProductAndRatePlanCombinationsSchema.ts"
+        "src/validProductAndRatePlanCombinations.ts"
     ],
 }
