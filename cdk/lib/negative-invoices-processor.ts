@@ -345,7 +345,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 			.when(
 				Condition.and(
 					Condition.booleanEquals(
-						'$.checkForActiveSubAttempt.hasActiveSub',
+						'$.activeSubResult.hasActiveSubscription',
 						false,
 					),
 				),
@@ -360,7 +360,10 @@ export class NegativeInvoicesProcessor extends GuStack {
 			'Successful active sub callout?',
 		)
 			.when(
-				Condition.booleanEquals('$.checkForActiveSubAttempt.Success', true),
+				Condition.booleanEquals(
+					'$.activeSubResult.checkForActiveSubAttempt.Success',
+					true,
+				),
 
 				hasActiveSubChoice,
 			)
