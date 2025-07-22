@@ -2,12 +2,12 @@ import { z } from 'zod';
 import { InvoiceSchema } from './invoiceSchemas';
 import { RefundResultSchema } from './refund';
 import { ApplyCreditToAccountBalanceAttemptSchema } from '../handlers/ApplyCreditToAccountBalance';
-import { CheckForActiveSubAttemptSchema } from '../handlers/CheckForActiveSub';
 import { PaymentMethodResultSchema } from './paymentMethod';
+import { ActiveSubscriptionResultSchema } from './subscription';
 
 export const ProcessedInvoiceSchema = InvoiceSchema.extend({
 	applyCreditToAccountBalanceAttempt: ApplyCreditToAccountBalanceAttemptSchema,
-	checkForActiveSubAttempt: CheckForActiveSubAttemptSchema.optional(),
+	activeSubResult: ActiveSubscriptionResultSchema.optional(),
 	activePaymentMethodResult: PaymentMethodResultSchema.optional(),
 	refundResult: RefundResultSchema.optional(),
 });

@@ -2,6 +2,7 @@ import z from 'zod';
 import type { ZuoraClient } from './zuoraClient';
 import { zuoraResponseSchema } from './types';
 
+//TODO this all needs to be refactored to use the new schemas and types
 export const PaymentMethodSchema = z.object({
 	id: z.string(),
 	status: z.string(),

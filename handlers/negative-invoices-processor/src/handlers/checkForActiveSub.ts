@@ -11,27 +11,33 @@ export const handler = async (
 	try {
 		const parsedEvent = CheckForActiveSubInputSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
+
 		const hasActiveSub = await hasActiveSubscription(
 			zuoraClient,
 			parsedEvent.accountId,
 		);
 		return {
 			...parsedEvent,
-			checkForActiveSubAttempt: {
+			activeSubResult: {
 				Success: true,
-				hasActiveSub,
+				hasActiveSubscription: hasActiveSub,
+				//todo add checkForActiveSubAttempt
+				// checkForActiveSubAttempt: {
+
+				// },
+				// hasActiveSub,
 			},
 		};
 	} catch (error) {
 		return {
 			...event,
-			checkForActiveSubAttempt: {
+			activeSubResult: {
 				Success: false,
-				hasActiveSub: undefined,
-				error:
-					error instanceof Error
-						? error.message
-						: JSON.stringify(error, null, 2),
+				hasActiveSubscription: undefined,
+				// error:
+				// 	error instanceof Error
+				// 		? error.message
+				// 		: JSON.stringify(error, null, 2),
 			},
 		};
 	}

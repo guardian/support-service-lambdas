@@ -12,7 +12,6 @@ export {
 // CheckForActiveSub exports
 export {
 	CheckForActiveSubInputSchema,
-	CheckForActiveSubAttemptSchema,
 	CheckForActiveSubOutputSchema,
 	type CheckForActiveSubInput,
 	type CheckForActiveSubOutput,
