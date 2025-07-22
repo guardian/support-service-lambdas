@@ -55,7 +55,7 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				Success: false,
 				hasActiveSub: undefined,
 			},
-			checkForActivePaymentMethodAttempt: {
+			activePaymentMethodResult: {
 				Success: false,
 				// error: 'Payment method check failed',
 			},
@@ -79,7 +79,7 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				Success: true,
 				hasActiveSub: true,
 			},
-			checkForActivePaymentMethodAttempt: {
+			activePaymentMethodResult: {
 				Success: true,
 				hasActivePaymentMethod: true,
 				activePaymentMethods: [],
@@ -109,7 +109,7 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				Success: true,
 				hasActiveSub: false,
 			},
-			checkForActivePaymentMethodAttempt: {
+			activePaymentMethodResult: {
 				Success: true,
 				hasActivePaymentMethod: false,
 				activePaymentMethods: [],
@@ -134,7 +134,7 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				Success: true,
 				hasActiveSub: false,
 			},
-			checkForActivePaymentMethodAttempt: {
+			activePaymentMethodResult: {
 				Success: true,
 				hasActivePaymentMethod: true,
 				activePaymentMethods: [],
@@ -184,7 +184,7 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				Success: true,
 				hasActiveSub: false,
 			},
-			checkForActivePaymentMethodAttempt: {
+			activePaymentMethodResult: {
 				Success: true,
 				hasActivePaymentMethod: true,
 				activePaymentMethods: [],
@@ -218,7 +218,7 @@ describe('failureExistsOnInvoiceProcessingAttempt', () => {
 					Success: true,
 					hasActiveSub: true,
 				},
-				checkForActivePaymentMethodAttempt: {
+				activePaymentMethodResult: {
 					Success: true,
 					hasActivePaymentMethod: true,
 					activePaymentMethods: [],
