@@ -24,7 +24,9 @@ export const handler = async (
 		return {
 			...parsedEvent,
 			activePaymentMethodResult: {
-				Success: paymentMethods.success,
+				checkForActivePaymentMethod: {
+					Success: paymentMethods.success,
+				},
 				hasActivePaymentMethod,
 				activePaymentMethods,
 			},
@@ -33,7 +35,9 @@ export const handler = async (
 		return {
 			...event,
 			activePaymentMethodResult: {
-				Success: false,
+				checkForActivePaymentMethod: {
+					Success: false,
+				},
 				hasActivePaymentMethod: undefined,
 				activePaymentMethods: undefined,
 				error:

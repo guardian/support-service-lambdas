@@ -17,7 +17,8 @@ export const PaymentMethodResponseSchema = zuoraResponseSchema.extend({
 });
 export type PaymentMethodResponse = z.infer<typeof PaymentMethodResponseSchema>;
 
-export const PaymentMethodResultSchema = PaymentMethodResponseSchema.extend({
+export const PaymentMethodResultSchema = z.object({
+	checkForActivePaymentMethod: PaymentMethodResponseSchema,
 	hasActivePaymentMethod: z.boolean().optional(),
 	activePaymentMethods: z.array(PaymentMethodSchema).optional(),
 	error: z.string().optional(),

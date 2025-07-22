@@ -61,8 +61,9 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				hasActiveSubscription: undefined,
 			},
 			activePaymentMethodResult: {
-				//to match the structure of the type like above with activeSubResult
-				Success: false,
+				checkForActivePaymentMethod: {
+					Success: false,
+				},
 				error: 'Payment method check failed',
 			},
 		};
@@ -88,7 +89,9 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				hasActiveSubscription: true,
 			},
 			activePaymentMethodResult: {
-				Success: true,
+				checkForActivePaymentMethod: {
+					Success: true,
+				},
 				hasActivePaymentMethod: true,
 				activePaymentMethods: [],
 			},
@@ -120,7 +123,9 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				hasActiveSubscription: false,
 			},
 			activePaymentMethodResult: {
-				Success: true,
+				checkForActivePaymentMethod: {
+					Success: true,
+				},
 				hasActivePaymentMethod: false,
 				activePaymentMethods: [],
 			},
@@ -147,7 +152,9 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				hasActiveSubscription: false,
 			},
 			activePaymentMethodResult: {
-				Success: true,
+				checkForActivePaymentMethod: {
+					Success: true,
+				},
 				hasActivePaymentMethod: true,
 				activePaymentMethods: [],
 			},
@@ -201,7 +208,9 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				hasActiveSubscription: false,
 			},
 			activePaymentMethodResult: {
-				Success: true,
+				checkForActivePaymentMethod: {
+					Success: true,
+				},
 				hasActivePaymentMethod: true,
 				activePaymentMethods: [],
 			},
@@ -237,7 +246,9 @@ describe('failureExistsOnInvoiceProcessingAttempt', () => {
 					hasActiveSubscription: true,
 				},
 				activePaymentMethodResult: {
-					Success: true,
+					checkForActivePaymentMethod: {
+						Success: true,
+					},
 					hasActivePaymentMethod: true,
 					activePaymentMethods: [],
 				},
