@@ -35,16 +35,12 @@ export const handler = async (
 			MethodType: paymentMethodToRefundTo.type,
 		});
 
-		const refundAttempt = await doRefund(
-			zuoraClient,
-			body,
-			RefundResponseSchema,
-		);
+		const response = await doRefund(zuoraClient, body, RefundResponseSchema);
 
 		return {
 			...parsedEvent,
 			refundResult: {
-				...refundAttempt,
+				refundAttempt: response,
 				paymentMethod: paymentMethodToRefundTo,
 				refundAmount,
 			},
@@ -65,7 +61,9 @@ export const handler = async (
 		return {
 			...event,
 			refundResult: {
-				Success: false,
+				refundAttempt: {
+					Success: false,
+				},
 			},
 		};
 	}

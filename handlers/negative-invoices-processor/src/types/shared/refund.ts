@@ -9,6 +9,7 @@ export const RefundResponseSchema = zuoraResponseSchema.extend({
 export type RefundResponse = z.infer<typeof RefundResponseSchema>;
 
 export const RefundResultSchema = RefundResponseSchema.extend({
+	refundAttempt: RefundResponseSchema,
 	paymentMethod: PaymentMethodSchema.optional(),
 	refundAmount: z.number().optional(),
 });
