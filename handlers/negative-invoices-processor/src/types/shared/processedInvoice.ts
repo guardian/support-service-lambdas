@@ -8,7 +8,7 @@ import { PaymentMethodResultSchema } from './paymentMethod';
 export const ProcessedInvoiceSchema = InvoiceSchema.extend({
 	applyCreditToAccountBalanceAttempt: ApplyCreditToAccountBalanceAttemptSchema,
 	checkForActiveSubAttempt: CheckForActiveSubAttemptSchema.optional(),
-	checkForActivePaymentMethodAttempt: PaymentMethodResultSchema.optional(),
+	activePaymentMethodResult: PaymentMethodResultSchema.optional(),
 	refundResult: RefundResultSchema.optional(),
 });
 
