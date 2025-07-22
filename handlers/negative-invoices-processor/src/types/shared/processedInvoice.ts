@@ -1,12 +1,12 @@
 import { z } from 'zod';
-import { InvoiceSchema } from './invoiceSchemas';
-import { RefundResultSchema } from './refund';
-import { ApplyCreditToAccountBalanceAttemptSchema } from '../handlers/ApplyCreditToAccountBalance';
+import { ApplyCreditToAccountBalanceResultSchema } from '.';
+import { InvoiceSchema } from '.';
 import { PaymentMethodResultSchema } from './paymentMethod';
+import { RefundResultSchema } from './refund';
 import { ActiveSubscriptionResultSchema } from './subscription';
 
 export const ProcessedInvoiceSchema = InvoiceSchema.extend({
-	applyCreditToAccountBalanceAttempt: ApplyCreditToAccountBalanceAttemptSchema,
+	applyCreditToAccountBalanceResult: ApplyCreditToAccountBalanceResultSchema,
 	activeSubResult: ActiveSubscriptionResultSchema.optional(),
 	activePaymentMethodResult: PaymentMethodResultSchema.optional(),
 	refundResult: RefundResultSchema.optional(),

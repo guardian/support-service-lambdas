@@ -3,7 +3,7 @@ import {
 	ApplyCreditToAccountBalanceOutput,
 	ApplyCreditToAccountBalanceOutputSchema,
 } from './ApplyCreditToAccountBalance';
-import { ActiveSubscriptionResultSchema } from '../shared/subscription';
+import { ActiveSubscriptionResultSchema } from '../shared';
 
 export const CheckForActiveSubInputSchema =
 	ApplyCreditToAccountBalanceOutputSchema;

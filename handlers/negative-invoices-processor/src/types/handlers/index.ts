@@ -3,7 +3,6 @@ export { GetInvoicesOutputSchema, type GetInvoicesOutput } from './GetInvoices';
 
 // ApplyCreditToAccountBalance exports
 export {
-	ApplyCreditToAccountBalanceAttemptSchema,
 	ApplyCreditToAccountBalanceOutputSchema,
 	type ApplyCreditToAccountBalanceInput,
 	type ApplyCreditToAccountBalanceOutput,

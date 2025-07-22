@@ -3,7 +3,7 @@ import {
 	CheckForActiveSubOutput,
 	CheckForActiveSubOutputSchema,
 } from './CheckForActiveSub';
-import { PaymentMethodResultSchema } from '../shared/paymentMethod';
+import { PaymentMethodResultSchema } from '../shared';
 
 export const GetPaymentMethodsInputSchema = CheckForActiveSubOutputSchema;
 export type GetPaymentMethodsInput = CheckForActiveSubOutput;

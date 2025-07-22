@@ -6,6 +6,7 @@ import type {
 	ApplyCreditToAccountBalanceInput,
 	ApplyCreditToAccountBalanceOutput,
 } from '../types';
+import { ApplyCreditToAccountBalanceResponseSchema } from '../types/shared';
 
 export const handler = async (
 	event: ApplyCreditToAccountBalanceInput,
@@ -20,23 +21,25 @@ export const handler = async (
 		});
 
 		const applyCreditToAccountBalanceAttempt =
-			await applyCreditToAccountBalance(zuoraClient, body);
-		console.log(
-			`applyCreditToAccountBalanceAttempt: ${JSON.stringify(
-				applyCreditToAccountBalanceAttempt,
-				null,
-				2,
-			)}`,
-		);
+			await applyCreditToAccountBalance(
+				zuoraClient,
+				body,
+				ApplyCreditToAccountBalanceResponseSchema,
+			);
+
 		return {
 			...parsedEvent,
-			applyCreditToAccountBalanceAttempt,
+			applyCreditToAccountBalanceResult: {
+				applyCreditToAccountBalanceAttempt,
+			},
 		};
 	} catch (error) {
 		return {
 			...event,
-			applyCreditToAccountBalanceAttempt: {
-				Success: false,
+			applyCreditToAccountBalanceResult: {
+				applyCreditToAccountBalanceAttempt: {
+					Success: false,
+				},
 				error:
 					error instanceof Error
 						? error.message

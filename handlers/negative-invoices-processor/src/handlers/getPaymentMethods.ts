@@ -6,7 +6,7 @@ import {
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { GetPaymentMethodsInputSchema } from '../types';
 import type { GetPaymentMethodsInput, GetPaymentMethodsOutput } from '../types';
-import { PaymentMethodResponseSchema } from '../types/shared/paymentMethod';
+import { PaymentMethodResponseSchema } from '../types/shared';
 
 export const handler = async (
 	event: GetPaymentMethodsInput,

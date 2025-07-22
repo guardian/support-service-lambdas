@@ -1,5 +1,5 @@
 import { zuoraResponseSchema } from '@modules/zuora/types';
-import z from 'zod';
+import { z } from 'zod';
 
 export const PaymentMethodSchema = z.object({
 	id: z.string(),
@@ -23,4 +23,3 @@ export const PaymentMethodResultSchema = z.object({
 	activePaymentMethods: z.array(PaymentMethodSchema).optional(),
 	error: z.string().optional(),
 });
-export type PaymentMethodResult = z.infer<typeof PaymentMethodResultSchema>;

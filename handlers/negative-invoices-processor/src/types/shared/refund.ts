@@ -1,6 +1,6 @@
 import { zuoraResponseSchema } from '@modules/zuora/types';
-import z from 'zod';
-import { PaymentMethodSchema } from './paymentMethod';
+import { z } from 'zod';
+import { PaymentMethodSchema } from '.';
 
 export const RefundResponseSchema = zuoraResponseSchema.extend({
 	Id: z.string().optional(),
@@ -14,5 +14,3 @@ export const RefundResultSchema = RefundResponseSchema.extend({
 	refundAmount: z.number().optional(),
 	error: z.string().optional(),
 });
-
-export type RefundResult = z.infer<typeof RefundResultSchema>;
