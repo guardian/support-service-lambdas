@@ -29,6 +29,7 @@ export const handler = async (
 			},
 		};
 	} catch (error) {
+		console.error('Error in CheckForActiveSub handler:', error);
 		return {
 			...event,
 			activeSubResult: {

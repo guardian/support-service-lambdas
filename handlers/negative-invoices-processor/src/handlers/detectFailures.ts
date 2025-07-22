@@ -64,7 +64,7 @@ function atLeastOneCalloutFailed(invoice: ProcessedInvoice): boolean {
 
 	// Only check payment method and refund attempts if hasActiveSub is false
 	// if (activeSubResult.checkForActiveSubAttempt.hasActiveSub === false) {
-	if (activeSubResult?.hasActiveSubscription === false) {
+	if (activeSubResult.hasActiveSubscription === false) {
 		if (!activePaymentMethodResult?.Success) {
 			return true;
 		}
