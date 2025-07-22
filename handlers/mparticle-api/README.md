@@ -206,11 +206,28 @@ pnpm test
 ### Configuration
 All configuration is managed through AWS Parameter Store. Ensure these parameters are set for your environment:
 
-- `/{stage}/support/mparticle-api/workspace/key`
-- `/{stage}/support/mparticle-api/workspace/secret`
-- `/{stage}/support/mparticle-api/inputPlatform/key`
-- `/{stage}/support/mparticle-api/inputPlatform/secret`
-- `/{stage}/support/mparticle-api/pod`
+#### Workspace Credentials
+- **`/{stage}/support/mparticle-api/workspace/key`**
+  - *Description*: mParticle workspace API key for Data Subject Request operations
+  - *mParticle Reference*: [Managing Workspaces](https://docs.mparticle.com/guides/platform-guide/introduction/#managing-workspaces)
+
+- **`/{stage}/support/mparticle-api/workspace/secret`**
+  - *Description*: mParticle workspace API secret for Data Subject Request operations
+  - *mParticle Reference*: [Managing Workspaces](https://docs.mparticle.com/guides/platform-guide/introduction/#managing-workspaces)
+
+#### Input Platform Credentials
+- **`/{stage}/support/mparticle-api/inputPlatform/key`**
+  - *Description*: mParticle input platform API key for event ingestion and data collection
+  - *mParticle Reference*: [HTTP APIs Authentication](https://docs.mparticle.com/developers/apis/http/#authentication)
+
+- **`/{stage}/support/mparticle-api/inputPlatform/secret`**
+  - *Description*: mParticle input platform API secret for event ingestion and data collection
+  - *mParticle Reference*: [HTTP APIs Authentication](https://docs.mparticle.com/developers/apis/http/#authentication)
+
+#### Environment Configuration
+- **`/{stage}/support/mparticle-api/pod`**
+  - *Description*: mParticle pod/cluster identifier (e.g., "us1", "us2", "eu1") for regional API endpoints
+  - *mParticle Reference*: [Data Hosting Locations](https://docs.mparticle.com/developers/guides/data-localization/)
 
 ---
 
