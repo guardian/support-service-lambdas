@@ -1,6 +1,6 @@
 # mParticle API Lambda
 
-**A privacy-compliant data processing bridge between Guardian and mParticle's Data Subject Request API.**
+**A privacy-compliant data processing bridge between Guardian and mParticle's APIs.**
 
 ## 🌟 Overview
 
@@ -11,7 +11,7 @@ The mParticle API Lambda enables Guardian to fulfill GDPR and CCPA compliance re
 - 📊 **Real-time Status Tracking**: Monitor DSR progress with callback integration  
 - 🤖 **Automated Workflows**: Integrate with Baton for orchestrated privacy operations
 - 📈 **Analytics Forwarding**: Route event data to mParticle and downstream systems
-- 🛡️ **Enterprise Security**: Certificate validation and signature verification
+- 🛡️ **Enterprise Security**: Certificate validation and signature verification on callbacks from mParticle
 
 ### Compliance & Standards
 - **GDPR Article 17**: Right to Erasure implementation
@@ -21,23 +21,166 @@ The mParticle API Lambda enables Guardian to fulfill GDPR and CCPA compliance re
 
 ---
 
-## 📚 Documentation
+## � What is mParticle?
 
-### 🎯 Understanding the Service
-- **[Business Context](./docs/business-context.md)** - Legal requirements, compliance landscape, and data ecosystem
-- **[Architecture Overview](./docs/architecture.md)** - System design, data flows, and technical stack
+[mParticle](https://www.mparticle.com/) is a customer data platform that helps organizations collect, manage, and activate customer data across multiple touchpoints. It serves as a central hub for data collection and distribution.
 
-### 🌐 API Reference  
-- **[API Overview](./docs/api/README.md)** - Complete endpoint reference and authentication
-- **[HTTP Endpoints](./docs/api/http-endpoints.md)** - REST API for DSR submission and status queries
-- **[Baton Integration](./docs/api/baton-endpoints.md)** - Lambda-to-Lambda privacy orchestration
+### Core Features
+- **Data Collection**: Unified SDK for collecting customer data from web, mobile, and server-side sources
+- **Data Orchestration**: Real-time data routing to 300+ marketing, analytics, and data warehouse integrations
+- **Identity Resolution**: Cross-platform customer identity management and unification
+- **Audience Management**: Dynamic audience creation and real-time segmentation
+- **Privacy Controls**: Built-in data governance and privacy compliance tools
 
-### 🔧 Operations & Security
-- **[Security & Compliance](./docs/operations/security-compliance.md)** - Certificate validation, input sanitization, and compliance measures
+### Official Resources
+- [mParticle Documentation](https://docs.mparticle.com/)
+- [Data Subject Request API](https://docs.mparticle.com/developers/dsr-api/)
+- [Privacy Controls Overview](https://docs.mparticle.com/guides/data-privacy-controls/)
 
-### 👨‍💻 Development  
-- **[Getting Started](./docs/guides/getting-started.md)** - Setup, configuration, and local development
-- **[Testing Strategy](./docs/development/testing.md)** - Unit testing strategy and examples
+---
+
+## 📧 What is Braze?
+
+[Braze](https://www.braze.com/) is a customer engagement platform that enables personalized messaging across email, push notifications, in-app messages, SMS, and web push.
+
+### Core Features
+- **Multi-Channel Messaging**: Email, push, SMS, in-app, and web messaging
+- **Personalization Engine**: AI-powered content personalization and optimization
+- **Journey Orchestration**: Automated, cross-channel customer journey campaigns
+- **Real-Time Analytics**: Campaign performance tracking and user behavior analytics
+- **A/B Testing**: Comprehensive testing framework for message optimization
+
+### Official Resources
+- [Braze Documentation](https://www.braze.com/docs/)
+- [Data Privacy & Protection](https://www.braze.com/docs/developer_guide/disclosures/security_qualifications/)
+- [GDPR Compliance Guide](https://www.braze.com/docs/help/gdpr_compliance/)
+
+---
+
+## 🔗 mParticle and Braze Integration
+
+mParticle and Braze work together to create a comprehensive data and engagement ecosystem for The Guardian's digital audience.
+
+### Data Flow Architecture
+```
+Guardian Apps/Website → mParticle → Braze → Personalized Communications
+```
+
+### How They Work Together
+
+#### 1. **Data Collection & Unification**
+- **mParticle Role**: Collects user interaction data from Guardian's websites and mobile apps
+- **Data Types**: Page views, article reads, subscription events, user preferences
+- **Identity Resolution**: Creates unified user profiles across devices and platforms
+
+#### 2. **Audience Segmentation**
+- **mParticle Role**: Creates dynamic audience segments based on behavior patterns
+- **Examples**: "Regular readers", "Subscription likely", "Weekend browsers"
+- **Real-Time Updates**: Segments update as user behavior changes
+
+#### 3. **Engagement Activation**
+- **Braze Role**: Receives audience data from mParticle for targeted messaging
+- **Message Types**: Newsletter subscriptions, breaking news alerts, subscription offers
+- **Personalization**: Content tailored based on reading history and preferences
+
+#### 4. **Privacy Compliance**
+- **Data Subject Requests**: When users request data deletion, both platforms must be coordinated
+- **mParticle**: Removes user data and audience memberships
+- **Braze**: Deletes user profiles and message history via mParticle's DSR forwarding
+
+### Why This Integration Matters
+- **Unified Experience**: Consistent messaging across all Guardian touchpoints
+- **Privacy Compliance**: Coordinated data handling ensures GDPR/CCPA compliance
+- **Personalization**: Reader engagement improves through data-driven content delivery
+- **Operational Efficiency**: Single data pipeline reduces complexity and maintenance
+
+### Official Integration Resources
+- [mParticle + Braze Integration Guide](https://docs.mparticle.com/integrations/braze/audience/)
+- [Braze mParticle Partnership](https://www.braze.com/partners/technology-partners/mparticle/)
+
+---
+
+## 🏗️ System Architecture
+
+```mermaid
+graph TB
+    subgraph "Guardian Privacy Ecosystem"
+        BATON[🎭 Baton<br/>Privacy Orchestrator]
+        READER[📱 Guardian Reader]
+    end
+    
+    subgraph "mParticle API Lambda"
+        HTTP[🌐 HTTP Handler<br/>Callback Endpoint]
+        BATON_H[� Baton Handler<br/>RER Integration]
+        VALIDATOR[🛡️ Security Validator<br/>Certificate & Signature]
+    end
+    
+    subgraph "External Services"
+        MPARTICLE[📊 mParticle<br/>Analytics Platform]
+        BRAZE[📧 Braze<br/>Marketing Platform]
+        PARAMS[🔧 AWS Parameter Store]
+    end
+    
+    subgraph "Infrastructure"
+        CW[📈 CloudWatch<br/>Logging & Monitoring]
+        ALARMS[🚨 CloudWatch Alarms<br/>Error Detection]
+    end
+
+    %% Request Flows
+    READER -->|Data Subject Request| BATON
+    BATON -->|Automated RER| BATON_H
+    
+    %% Processing
+    BATON_H -->|Submit DSR| MPARTICLE
+    
+    %% Data Flow
+    MPARTICLE -->|Status Callbacks| HTTP
+    HTTP --> VALIDATOR
+    VALIDATOR -->|Validated Callback| HTTP
+    MPARTICLE -->|DSR Forwarding| BRAZE
+    
+    %% Configuration
+    HTTP --> PARAMS
+    BATON_H --> PARAMS
+    
+    %% Monitoring
+    HTTP --> CW
+    BATON_H --> CW
+    CW --> ALARMS
+
+    classDef guardian fill:#052962,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef lambda fill:#ff9900,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef external fill:#4CAF50,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    classDef aws fill:#232F3E,stroke:#ffffff,stroke-width:2px,color:#ffffff
+    
+    class BATON,READER guardian
+    class HTTP,BATON_H,VALIDATOR lambda
+    class MPARTICLE,BRAZE external
+    class PARAMS,CW,ALARMS aws
+```
+
+## Service Integration Flow
+
+```mermaid
+sequenceDiagram
+    participant R as Reader
+    participant B as Baton
+    participant MP as mParticle API
+    participant M as mParticle
+    participant BR as Braze
+
+    Note over R,BR: Right to Erasure Request (RER) Flow
+    
+    R->>B: Request data erasure
+    B->>MP: Initiate RER (Baton Handler)
+    MP->>MP: Set user attributes<br/>(remove from audiences)
+    MP->>M: Submit OpenDSR request
+    M->>M: Process erasure<br/>(Up to 14 days)
+    M->>BR: Forward DSR to Braze
+    M->>MP: Status callback
+    MP->>B: Return completion status
+    B->>R: Confirm erasure complete
+```
 
 ---
 
@@ -67,11 +210,9 @@ All configuration is managed through AWS Parameter Store. Ensure these parameter
 - `/mparticle-api/{stage}/mparticle-workspace-id`  
 - `/mparticle-api/{stage}/callback-certificate-path`
 
-See [Getting Started Guide](./docs/guides/getting-started.md) for detailed setup instructions.
-
 ---
 
-## 🌐 API Endpoints
+## 🌐 HTTP API Endpoints
 
 ### Base URLs
 | Environment | URL |
@@ -79,13 +220,97 @@ See [Getting Started Guide](./docs/guides/getting-started.md) for detailed setup
 | **CODE** | `https://mparticle-api-code.support.guardianapis.com` |
 | **PROD** | `https://mparticle-api.support.guardianapis.com` |
 
-### Primary Endpoints
-- `POST /data-subject-requests` - Submit new DSR
-- `GET /data-subject-requests/{id}` - Query DSR status  
-- `POST /data-subject-requests/{id}/callback` - mParticle status updates
-- `POST /events` - Forward analytics events
+### HTTP Router Endpoints
 
-See [API Documentation](./docs/api/README.md) for complete endpoint details.
+| Method | Path | Handler | Purpose |
+|--------|------|---------|---------|
+| `POST` | `/data-subject-requests` | `submitDataSubjectRequestHandler` | Submit new DSR |
+| `GET` | `/data-subject-requests/{requestId}` | `getDataSubjectRequestStatusHandler` | Query DSR status |
+| `POST` | `/data-subject-requests/{requestId}/callback` | `dataSubjectRequestCallbackHandler` | mParticle status updates |
+| `POST` | `/events` | `uploadEventBatchHandler` | Upload event batches |
+
+#### Submit Data Subject Request
+- **Purpose**: Submit a new Data Subject Request to mParticle
+- **Security**: Zod schema validation
+- **Request Schema**: `{ email: string, type: "delete" | "ccpa_delete" | "gdpr_delete" | "export", regulation?: string }`
+- **Response**: Request ID and initial status
+
+#### Query Request Status  
+- **Purpose**: Retrieve current status of submitted DSR
+- **Path Parameter**: `requestId` - unique DSR identifier
+- **Response**: Status, timestamps, and download URLs (for exports)
+
+#### Status Callback Handler
+- **Purpose**: Receive status updates from mParticle
+- **Security**: X.509 certificate + RSA-SHA256 signature validation
+- **Public Access**: Secured through certificate validation
+- **Headers**: `X-MP-Signature`, `X-MP-Certificate`
+
+#### Upload Event Batch
+- **Purpose**: Forward analytics events to mParticle
+- **Request Schema**: `{ events: Array<{ event_type: string, data: Record<string, any>, timestamp?: number, user_id?: string, session_id?: string }> }`
+- **Processing**: Event transformation and batch forwarding
+
+---
+
+## 🤖 Baton Integration Events
+
+### Baton Router Events
+
+| Action | Handler | Purpose |
+|--------|---------|---------|
+| `initiate` | `handleInitiateRequest` | Initiate RER via Baton |
+| `status` | `handleStatusRequest` | Check DSR status for Baton |
+
+#### Initiate RER Request Event
+- **Action**: `initiate`
+- **Request Schema**:
+  ```typescript
+  {
+    requestType: "RER",
+    action: "initiate", 
+    subjectId: string,
+    subjectEmail?: string,
+    dataProvider: "mparticlerer"
+  }
+  ```
+- **Response Schema**:
+  ```typescript
+  {
+    requestType: "RER",
+    action: "initiate",
+    status: "pending" | "completed" | "failed",
+    message: string,
+    initiationReference: GUID
+  }
+  ```
+- **Flow**: Identity resolution → DSR submission → correlation tracking
+
+#### Status Check Event
+- **Action**: `status`
+- **Request Schema**:
+  ```typescript
+  {
+    requestType: "RER",
+    action: "status",
+    initiationReference: GUID
+  }
+  ```
+- **Response Schema**:
+  ```typescript
+  {
+    requestType: "RER", 
+    action: "status",
+    status: "pending" | "completed" | "failed",
+    message: string
+  }
+  ```
+- **Flow**: Request validation → mParticle API query → status resolution
+
+### Cross-Account Security
+- **Method**: IAM role-based Lambda invocation
+- **Trust Relationship**: Baton account → mParticle API account
+- **Authentication**: Cross-account role assumption
 
 ---
 
@@ -97,13 +322,143 @@ See [API Documentation](./docs/api/README.md) for complete endpoint details.
 - **Signature Verification**: RSA-SHA256 signature validation
 - **Cross-Account Security**: IAM role-based Baton integration
 
-### Compliance Coverage
+### Compliance Framework
+
+#### GDPR (General Data Protection Regulation)
+- **Article 17**: Right to Erasure implementation
+- **Article 20**: Data Portability through export functionality
+- **28-day response deadline**: Mandatory timeline for processing requests
+
+#### CCPA (California Consumer Privacy Act)
+- **Section 1798.105**: Consumer data deletion requests
+- **Business day response**: Confirmation of request receipt
+- **Verification process**: Identity confirmation before processing
+
+### Certificate Validation Process
+1. **Certificate Extraction**: Extract certificate from `X-MP-Certificate` header
+2. **Chain Validation**: Verify complete certificate chain to trusted root
+3. **Expiry Check**: Ensure certificate is within validity period
+4. **Domain Validation**: Confirm certificate matches mParticle domain
+
+### Signature Verification Process
+1. **Signature Extraction**: Get RSA-SHA256 signature from `X-MP-Signature` header
+2. **Public Key Extraction**: Extract public key from validated certificate
+3. **Signature Verification**: Cryptographic verification of message integrity
+
+---
+
+## 🧪 Testing
+
+### Test Structure
+```
+tests/
+├── unit/
+│   ├── handlers/
+│   │   ├── httpRouter.test.ts       # HTTP endpoint tests
+│   │   └── batonRouter.test.ts      # Baton integration tests
+│   ├── services/
+│   │   ├── mparticle.test.ts        # mParticle API client tests
+│   │   └── validation.test.ts       # Certificate validation tests
+│   └── schemas/
+│       └── validation.test.ts       # Zod schema validation tests
+├── fixtures/                        # Test data and mock responses
+└── helpers/                         # Test utility functions
+```
+
+### Running Tests
+```bash
+# Run all tests
+pnpm test
+
+# Run with coverage
+pnpm test --coverage
+
+# Run specific tests
+pnpm test httpRouter.test.ts
+
+# Development mode
+pnpm test --watch
+```
+
+---
+
+## 🚨 Business Context & Compliance
+
+### Legal Requirements
+- **GDPR Article 17**: Right to Erasure ("right to be forgotten");
+- **CCPA Section 1798.105**: Consumer right to delete personal information;
+- **28-day response deadline** for privacy requests. mParticle processes requests within 14 days;
+- **Complete audit trail** for regulatory compliance;
+
+### The Guardian's Data Ecosystem
+The Guardian collects comprehensive reader data including:
+- 📖 **Content Engagement**: Article views, reading time, interaction patterns
+- 🎯 **Subscription Data**: Payment information, subscription preferences
+- 📧 **Marketing Analytics**: Email engagement, campaign performance
+- 📱 **Cross-Platform Behavior**: Mobile app usage, web interactions
+
+This data flows through **mParticle** for analytics and audience segmentation, then forwards to **Braze** for marketing automation.
+
+### Risk Mitigation
+- **Automated processing** reduces manual errors
+- **Centralized orchestration** via Baton ensures no system is missed
+- **Real-time monitoring** detects and alerts on failures immediately
+
+---
+
+## 🔧 Development & Configuration
+
+### Environment Variables
+- `STAGE`: Deployment environment (CODE/PROD)
+- `AWS_REGION`: AWS region for Parameter Store access
+
+### AWS Parameter Store Configuration
+- `/mparticle-api/{stage}/mparticle-api-key`: mParticle API authentication
+- `/mparticle-api/{stage}/mparticle-workspace-id`: Target workspace identifier
+- `/mparticle-api/{stage}/callback-certificate-path`: X.509 certificate for validation
+
+### Code Structure
+```
+src/
+├── routers/              # Request routing logic
+│   ├── http.ts            # HTTP API Gateway router
+│   ├── baton.ts           # Baton integration router
+│   ├── http/              # HTTP endpoint handlers
+│   └── baton/             # Baton event handlers
+├── apis/                 # External API clients
+├── utils/                # Utility functions
+└── index.ts              # Main entry point
+```
+
+### Development Scripts
+```bash
+pnpm build          # Compile TypeScript
+pnpm dev            # Start development server
+pnpm test           # Run all tests
+pnpm lint           # Run ESLint
+pnpm format         # Format code with Prettier
+```
+
+---
+
+## 📞 Support & Monitoring
+
+### CloudWatch Metrics
+- `BatonRequestsReceived`: Number of Baton-initiated requests
+- `BatonRequestsCompleted`: Successfully completed Baton requests
+- `BatonRequestsFailed`: Failed Baton requests requiring attention
+
+### Team Information
+- **Primary Owner**: Value Team
+- **Slack Channel**: [@P&E/Value](https://chat.google.com/room/AAAAuotUxTg?cls=7)
+
+### External Dependencies
+- **mParticle DSR API**: Data subject request processing
+- **AWS Parameter Store**: Configuration management
+- **CloudWatch**: Logging and monitoring
+- **Baton**: Privacy workflow orchestration
 - **GDPR**: Right to Erasure and Data Portability
 - **CCPA**: Consumer deletion and access rights
-- **Data Encryption**: TLS in transit, KMS at rest
-- **Audit Logging**: Complete request and processing trails
-
-See [Security & Compliance](./docs/operations/security-compliance.md) for implementation details.
 
 ---
 
@@ -152,11 +507,6 @@ Managed through AWS CDK with environment-specific configurations. See [Getting S
 
 ## 📞 Support & Contact
 
-### Team Information
-- **Primary Owner**: Support Platform Team
-- **Slack Channel**: #support-platform  
-- **Escalation**: PagerDuty rotation for P0/P1 issues
-
 ### Documentation Issues
 - Create PR against this repository for documentation updates
 - Use GitHub Issues for bug reports and feature requests
@@ -185,5 +535,3 @@ Managed through AWS CDK with environment-specific configurations. See [Getting S
 - **AWS Parameter Store**: Configuration management
 - **CloudWatch**: Logging and monitoring
 - **Baton**: Privacy workflow orchestration
-
-For detailed information on any aspect of this service, please refer to the comprehensive documentation in the [docs](./docs/) directory.
