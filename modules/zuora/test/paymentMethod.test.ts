@@ -1,7 +1,4 @@
-import {
-	getPaymentMethods,
-	PaymentMethodResponseSchema,
-} from '@modules/zuora/paymentMethod';
+import { getPaymentMethods } from '@modules/zuora/paymentMethod';
 
 describe('getPaymentMethods', () => {
 	const mockGet = jest.fn();
