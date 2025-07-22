@@ -19,13 +19,10 @@ export const handler = async (
 		return {
 			...parsedEvent,
 			activeSubResult: {
-				Success: true,
+				checkForActiveSubAttempt: {
+					Success: true,
+				},
 				hasActiveSubscription: hasActiveSub,
-				//todo add checkForActiveSubAttempt
-				// checkForActiveSubAttempt: {
-
-				// },
-				// hasActiveSub,
 			},
 		};
 	} catch (error) {
@@ -33,7 +30,9 @@ export const handler = async (
 		return {
 			...event,
 			activeSubResult: {
-				Success: false,
+				checkForActiveSubAttempt: {
+					Success: false,
+				},
 				hasActiveSubscription: undefined,
 				// error:
 				// 	error instanceof Error

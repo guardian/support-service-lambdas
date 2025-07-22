@@ -6,6 +6,7 @@ export type SubscriptionResponse = z.infer<typeof SubscriptionResponseSchema>;
 
 export const ActiveSubscriptionResultSchema = SubscriptionResponseSchema.extend(
 	{
+		checkForActiveSubAttempt: SubscriptionResponseSchema,
 		hasActiveSubscription: z.boolean().optional(),
 	},
 );

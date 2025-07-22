@@ -39,7 +39,10 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 			// 	hasActiveSub: undefined,
 			// },
 			activeSubResult: {
-				Success: false,
+				checkForActiveSubAttempt: {
+					Success: false,
+					// error: 'Active sub check failed',
+				},
 				hasActiveSubscription: undefined,
 				//todo add checkForActiveSubAttempt
 				// checkForActiveSubAttempt: {
@@ -63,21 +66,11 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 			applyCreditToAccountBalanceAttempt: {
 				Success: true,
 			},
-			// activeSubResult: {
-			// 	checkForActiveSubAttempt: {
-			// 		Success: false,
-			// 		hasActiveSub: undefined,
-			// 	},
-			// 	hasActiveSub: undefined,
-			// },
 			activeSubResult: {
-				Success: false,
+				checkForActiveSubAttempt: {
+					Success: false,
+				},
 				hasActiveSubscription: undefined,
-				//todo add checkForActiveSubAttempt
-				// checkForActiveSubAttempt: {
-
-				// },
-				// hasActiveSub,
 			},
 			activePaymentMethodResult: {
 				Success: false,
@@ -100,13 +93,10 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				Success: true,
 			},
 			activeSubResult: {
-				Success: true,
+				checkForActiveSubAttempt: {
+					Success: true,
+				},
 				hasActiveSubscription: true,
-				//todo add checkForActiveSubAttempt
-				// checkForActiveSubAttempt: {
-
-				// },
-				// hasActiveSub,
 			},
 			activePaymentMethodResult: {
 				Success: true,
@@ -135,13 +125,10 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				Success: true,
 			},
 			activeSubResult: {
-				Success: true,
+				checkForActiveSubAttempt: {
+					Success: true,
+				},
 				hasActiveSubscription: false,
-				//todo add checkForActiveSubAttempt
-				// checkForActiveSubAttempt: {
-
-				// },
-				// hasActiveSub,
 			},
 			activePaymentMethodResult: {
 				Success: true,
@@ -165,13 +152,10 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				Success: true,
 			},
 			activeSubResult: {
-				Success: true,
+				checkForActiveSubAttempt: {
+					Success: true,
+				},
 				hasActiveSubscription: false,
-				//todo add checkForActiveSubAttempt
-				// checkForActiveSubAttempt: {
-
-				// },
-				// hasActiveSub,
 			},
 			activePaymentMethodResult: {
 				Success: true,
@@ -200,13 +184,10 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				Success: true,
 			},
 			activeSubResult: {
-				Success: true,
+				checkForActiveSubAttempt: {
+					Success: true,
+				},
 				hasActiveSubscription: true,
-				//todo add checkForActiveSubAttempt
-				// checkForActiveSubAttempt: {
-
-				// },
-				// hasActiveSub,
 			},
 		};
 
@@ -225,13 +206,10 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				Success: true,
 			},
 			activeSubResult: {
-				Success: true,
+				checkForActiveSubAttempt: {
+					Success: true,
+				},
 				hasActiveSubscription: false,
-				//todo add checkForActiveSubAttempt
-				// checkForActiveSubAttempt: {
-
-				// },
-				// hasActiveSub,
 			},
 			activePaymentMethodResult: {
 				Success: true,
@@ -264,13 +242,10 @@ describe('failureExistsOnInvoiceProcessingAttempt', () => {
 					Success: true,
 				},
 				activeSubResult: {
-					Success: true,
+					checkForActiveSubAttempt: {
+						Success: true,
+					},
 					hasActiveSubscription: true,
-					//todo add checkForActiveSubAttempt
-					// checkForActiveSubAttempt: {
-
-					// },
-					// hasActiveSub,
 				},
 				activePaymentMethodResult: {
 					Success: true,

@@ -56,14 +56,12 @@ function atLeastOneCalloutFailed(invoice: ProcessedInvoice): boolean {
 
 	if (
 		!applyCreditToAccountBalanceAttempt.Success ||
-		// !activeSubResult..checkForActiveSubAttempt?.Success
-		!activeSubResult?.Success
+		!activeSubResult?.checkForActiveSubAttempt.Success
 	) {
 		return true;
 	}
 
 	// Only check payment method and refund attempts if hasActiveSub is false
-	// if (activeSubResult.checkForActiveSubAttempt.hasActiveSub === false) {
 	if (activeSubResult.hasActiveSubscription === false) {
 		if (!activePaymentMethodResult?.Success) {
 			return true;
