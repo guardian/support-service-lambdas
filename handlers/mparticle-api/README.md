@@ -188,7 +188,7 @@ sequenceDiagram
 
 ### Prerequisites
 - Node.js 18+ and pnpm
-- AWS CLI configured with Parameter Store access
+- AWS CLI configured with Parameter Store access (using Janus)
 - Basic understanding of Lambda and API Gateway
 
 ### Installation
@@ -385,10 +385,10 @@ pnpm test --watch
 ## 🚨 Business Context & Compliance
 
 ### Legal Requirements
-- **GDPR Article 17**: Right to Erasure ("right to be forgotten");
-- **CCPA Section 1798.105**: Consumer right to delete personal information;
-- **28-day response deadline** for privacy requests. mParticle processes requests within 14 days;
-- **Complete audit trail** for regulatory compliance;
+- **GDPR Article 17**: Right to Erasure ("right to be forgotten")
+- **CCPA Section 1798.105**: Consumer right to delete personal information
+- **28-day response deadline** for privacy requests. mParticle processes requests within 14 days
+- **Complete audit trail** for regulatory compliance
 
 ### The Guardian's Data Ecosystem
 The Guardian collects comprehensive reader data including:
@@ -435,9 +435,24 @@ src/
 pnpm build          # Compile TypeScript
 pnpm dev            # Start development server
 pnpm test           # Run all tests
+pnpm test:unit      # Run unit tests
+pnpm test:integration # Run integration tests
 pnpm lint           # Run ESLint
 pnpm format         # Format code with Prettier
 ```
+
+### Local Development
+```bash
+# Set environment
+export STAGE=CODE
+export AWS_REGION=eu-west-1
+
+# Start development server
+pnpm dev
+```
+
+### Deployment
+Managed through AWS CDK with environment-specific configurations.
 
 ---
 
@@ -452,13 +467,21 @@ pnpm format         # Format code with Prettier
 - **Primary Owner**: Value Team
 - **Slack Channel**: [@P&E/Value](https://chat.google.com/room/AAAAuotUxTg?cls=7)
 
+### Documentation Issues
+- Create PR against this repository for documentation updates
+- Use GitHub Issues for bug reports and feature requests
+- Email security@guardian.co.uk for security-related concerns
+
+### Compliance Questions
+- **Privacy Team**: #privacy-compliance (Slack)
+- **Legal Team**: For regulatory interpretation and guidance
+- **DPO Contact**: Via privacy team for data protection matters
+
 ### External Dependencies
 - **mParticle DSR API**: Data subject request processing
 - **AWS Parameter Store**: Configuration management
 - **CloudWatch**: Logging and monitoring
 - **Baton**: Privacy workflow orchestration
-- **GDPR**: Right to Erasure and Data Portability
-- **CCPA**: Consumer deletion and access rights
 
 ---
 
@@ -476,47 +499,6 @@ Direct integration with mParticle's DSR API:
 - Secure callback handling with certificate validation
 - Status polling and update processing
 
-### Guardian Analytics Pipeline
-Event forwarding to mParticle for analytics:
-- Real-time event batching and forwarding
-- Error handling and retry logic
-- Performance monitoring and optimization
-
----
-
-## 🔧 Development & Testing
-
-### Local Development
-```bash
-# Set environment
-export STAGE=CODE
-export AWS_REGION=eu-west-1
-
-# Start development server
-pnpm dev
-
-# Run specific tests
-pnpm test:unit
-pnpm test:integration
-```
-
-### Deployment
-Managed through AWS CDK with environment-specific configurations. See [Getting Started](./docs/guides/getting-started.md) for deployment procedures.
-
----
-
-## 📞 Support & Contact
-
-### Documentation Issues
-- Create PR against this repository for documentation updates
-- Use GitHub Issues for bug reports and feature requests
-- Email security@guardian.co.uk for security-related concerns
-
-### Compliance Questions
-- **Privacy Team**: #privacy-compliance (Slack)
-- **Legal Team**: For regulatory interpretation and guidance
-- **DPO Contact**: Via privacy team for data protection matters
-
 ---
 
 ## 📋 Quick Reference
@@ -530,8 +512,16 @@ Managed through AWS CDK with environment-specific configurations. See [Getting S
 - **API Gateway**: `mparticle-api-{stage}`
 - **Parameter Store**: `/mparticle-api/{stage}/*`
 
-### External Dependencies
-- **mParticle DSR API**: Data subject request processing
-- **AWS Parameter Store**: Configuration management
-- **CloudWatch**: Logging and monitoring
-- **Baton**: Privacy workflow orchestration
+### Base URLs
+| Environment | URL |
+|-------------|-----|
+| **CODE** | `https://mparticle-api-code.support.guardianapis.com` |
+| **PROD** | `https://mparticle-api.support.guardianapis.com` |
+
+### Key Commands
+```bash
+pnpm install       # Install dependencies
+pnpm build         # Build the project
+pnpm test          # Run all tests
+pnpm dev           # Start development server
+```
