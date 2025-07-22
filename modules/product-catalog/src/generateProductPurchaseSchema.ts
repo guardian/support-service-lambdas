@@ -19,7 +19,7 @@ const header = `
 import { z } from 'zod';
 `;
 
-export const generateValidProductAndRatePlanCombinationsSchema = (
+export const generateProductPurchaseSchema = (
 	catalog: ZuoraCatalog,
 ): string => {
 	const supportedZuoraProducts = catalog.products.filter((product) =>
@@ -31,7 +31,7 @@ export const generateValidProductAndRatePlanCombinationsSchema = (
 		.join(',\n');
 
 	return `${header}
-	export const validProductAndRatePlanCombinationsSchema = z.discriminatedUnion('product', [
+	export const productPurchaseSchema = z.discriminatedUnion('product', [
 		${zuoraProductsSchema}
 		]);
 	`;
