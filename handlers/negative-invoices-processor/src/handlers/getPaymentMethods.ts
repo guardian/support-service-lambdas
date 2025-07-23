@@ -1,5 +1,6 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { getPaymentMethods } from '@modules/zuora/paymentMethod';
+import { BasePaymentMethodSchema } from '@modules/zuora/types';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { GetPaymentMethodsInputSchema } from '../types';
 import type {
@@ -8,8 +9,7 @@ import type {
 	PaymentMethod,
 } from '../types';
 // import { PaymentMethodResponseSchema } from '../types/shared';
-import { PaymentMethodResponse } from '../types/shared/paymentMethod';
-import { BasePaymentMethodSchema } from '@modules/zuora/types';
+import type { PaymentMethodResponse } from '../types/shared/paymentMethod';
 
 export const handler = async (
 	event: GetPaymentMethodsInput,
@@ -17,12 +17,12 @@ export const handler = async (
 	try {
 		const parsedEvent = GetPaymentMethodsInputSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
-		const paymentMethods = await (<PaymentMethodResponse>getPaymentMethods(
+		const paymentMethods = await ((<PaymentMethodResponse>getPaymentMethods(
 			zuoraClient,
 			parsedEvent.accountId,
 			// PaymentMethodResponseSchema,
 			BasePaymentMethodSchema,
-		));
+		)) as PaymentMethodResponse);
 
 		const activePaymentMethods = filterActivePaymentMethods(paymentMethods);
 
