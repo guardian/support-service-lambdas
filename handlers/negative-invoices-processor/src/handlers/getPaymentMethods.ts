@@ -16,7 +16,7 @@ export const handler = async (
 	try {
 		const parsedEvent = GetPaymentMethodsInputSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
-		const paymentMethods = await getPaymentMethods<PaymentMethodResponse>(
+		const paymentMethods = await getPaymentMethods(
 			zuoraClient,
 			parsedEvent.accountId,
 			PaymentMethodResponseSchema,
