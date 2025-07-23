@@ -21,9 +21,13 @@ export const handler = async (
 			parsedEvent.accountId,
 			PaymentMethodResponseSchema,
 		);
-
+		console.log('paymentMethods:', JSON.stringify(paymentMethods, null, 2));
 		const parsedPaymentMethods =
 			PaymentMethodResponseSchema.parse(paymentMethods);
+		console.log(
+			'parsedPaymentMethods:',
+			JSON.stringify(parsedPaymentMethods, null, 2),
+		);
 
 		const activePaymentMethods =
 			filterActivePaymentMethods(parsedPaymentMethods);

@@ -5,14 +5,16 @@ import {
 } from '@modules/zuora/types';
 import { z } from 'zod';
 
-export const PaymentMethodSchema = z.object({
-	...BasePaymentMethodSchema.pick({
-		id: true,
-		status: true,
-		type: true,
-		isDefault: true,
-	}).shape,
-});
+export const PaymentMethodSchema = z
+	.object({
+		...BasePaymentMethodSchema.pick({
+			id: true,
+			status: true,
+			type: true,
+			isDefault: true,
+		}).shape,
+	})
+	.strict();
 
 export type PaymentMethod = z.infer<typeof PaymentMethodSchema>;
 
