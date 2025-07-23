@@ -102,7 +102,7 @@ const BankTransferPaymentMethodSchema = BasePaymentMethodSchema.extend({
 });
 
 // Main payment method response schema
-export const DetailedPaymentMethodResponseSchema = z.object({
+export const DefaultPaymentMethodResponseSchema = z.object({
 	defaultPaymentMethodId: z.string(),
 	paymentGateway: z.string(),
 	creditcard: z.array(CreditCardPaymentMethodSchema).optional(),
@@ -114,6 +114,6 @@ export const DetailedPaymentMethodResponseSchema = z.object({
 	success: z.boolean(),
 });
 
-export type DetailedPaymentMethodResponse = z.infer<
-	typeof DetailedPaymentMethodResponseSchema
+export type DefaultPaymentMethodResponse = z.infer<
+	typeof DefaultPaymentMethodResponseSchema
 >;
