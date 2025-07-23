@@ -1,7 +1,5 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { getPaymentMethods } from '@modules/zuora/paymentMethod';
-import { DetailedPaymentMethodResponseSchema } from '@modules/zuora/types';
-import { type DetailedPaymentMethodResponse } from '@modules/zuora/types';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { GetPaymentMethodsInputSchema } from '../types';
 import type {
@@ -9,8 +7,8 @@ import type {
 	GetPaymentMethodsOutput,
 	PaymentMethod,
 } from '../types';
-// import { PaymentMethodResponseSchema } from '../types/shared';
-// import type { PaymentMethodResponse } from '../types/shared/paymentMethod';
+import { PaymentMethodResponseSchema } from '../types/shared';
+import type { PaymentMethodResponse } from '../types/shared/paymentMethod';
 
 export const handler = async (
 	event: GetPaymentMethodsInput,
@@ -18,14 +16,13 @@ export const handler = async (
 	try {
 		const parsedEvent = GetPaymentMethodsInputSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
-		const paymentMethods = await getPaymentMethods(
+		const paymentMethods = await getPaymentMethods<PaymentMethodResponse>(
 			zuoraClient,
 			parsedEvent.accountId,
-			// PaymentMethodResponseSchema,
-			DetailedPaymentMethodResponseSchema,
+			PaymentMethodResponseSchema,
 		);
 		const parsedPaymentMethods =
-			DetailedPaymentMethodResponseSchema.parse(paymentMethods);
+			PaymentMethodResponseSchema.parse(paymentMethods);
 
 		const activePaymentMethods =
 			filterActivePaymentMethods(parsedPaymentMethods);
@@ -61,7 +58,7 @@ export const handler = async (
 };
 
 const filterActivePaymentMethods = (
-	paymentMethods: DetailedPaymentMethodResponse,
+	paymentMethods: PaymentMethodResponse,
 ): PaymentMethod[] => {
 	type PaymentMethodKey =
 		| 'creditcard'
