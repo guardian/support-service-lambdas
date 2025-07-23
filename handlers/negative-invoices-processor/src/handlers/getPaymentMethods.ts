@@ -61,29 +61,16 @@ export const handler = async (
 const filterActivePaymentMethods = (
 	paymentMethods: PaymentMethodResponse,
 ): PaymentMethod[] => {
-	type PaymentMethodKey =
-		| 'creditcard'
-		| 'creditcardreferencetransaction'
-		| 'banktransfer'
-		| 'paypal';
+	const { creditcard, creditcardreferencetransaction, banktransfer, paypal } =
+		paymentMethods;
 
-	const keysToCheck = [
-		'creditcard',
-		'creditcardreferencetransaction',
-		'banktransfer',
-		'paypal',
-	] as const satisfies readonly PaymentMethodKey[];
-
-	const activeMethods: PaymentMethod[] = [];
-
-	for (const key of keysToCheck) {
-		const methods = paymentMethods[key];
-		if (Array.isArray(methods)) {
-			activeMethods.push(
-				...methods.filter((pm) => pm.status.toLowerCase() === 'active'),
-			);
-		}
-	}
-
-	return activeMethods;
+	const flattenedPaymentMethods = [
+		...(creditcard ?? []),
+		...(creditcardreferencetransaction ?? []),
+		...(banktransfer ?? []),
+		...(paypal ?? []),
+	];
+	return flattenedPaymentMethods.filter(
+		(pm) => pm.status.toLowerCase() === 'active',
+	);
 };
