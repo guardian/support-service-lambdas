@@ -1,8 +1,8 @@
 import {
+	BasePaymentMethodSchema,
 	DefaultPaymentMethodResponseSchema,
 	zuoraResponseSchema,
 } from '@modules/zuora/types';
-import { BasePaymentMethodSchema } from '@modules/zuora/types/paymentMethod';
 import { z } from 'zod';
 
 export const PaymentMethodSchema = z.object({
