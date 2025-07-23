@@ -1,20 +1,29 @@
-import { zuoraResponseSchema } from '@modules/zuora/types';
+import {
+	DefaultPaymentMethodResponseSchema,
+	zuoraResponseSchema,
+} from '@modules/zuora/types';
+import { BasePaymentMethodSchema } from '@modules/zuora/types/paymentMethod';
 import { z } from 'zod';
 
 export const PaymentMethodSchema = z.object({
-	id: z.string(),
-	status: z.string(),
-	type: z.string(),
-	isDefault: z.boolean(),
+	...BasePaymentMethodSchema.pick({
+		id: true,
+		status: true,
+		type: true,
+		isDefault: true,
+	}).shape,
 });
+
 export type PaymentMethod = z.infer<typeof PaymentMethodSchema>;
 
-export const PaymentMethodResponseSchema = zuoraResponseSchema.extend({
-	creditcardreferencetransaction: z.array(PaymentMethodSchema).optional(),
-	creditcard: z.array(PaymentMethodSchema).optional(),
-	banktransfer: z.array(PaymentMethodSchema).optional(),
-	paypal: z.array(PaymentMethodSchema).optional(),
-});
+export const PaymentMethodResponseSchema = zuoraResponseSchema.extend(
+	DefaultPaymentMethodResponseSchema.pick({
+		creditcard: true,
+		creditcardreferencetransaction: true,
+		banktransfer: true,
+		paypal: true,
+	}).shape,
+);
 export type PaymentMethodResponse = z.infer<typeof PaymentMethodResponseSchema>;
 
 export const PaymentMethodResultSchema = z.object({
