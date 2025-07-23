@@ -167,3 +167,5 @@ export const productPurchaseSchema = z.discriminatedUnion('product', [
 		]),
 	}),
 ]);
+
+export type ProductPurchase = z.infer<typeof productPurchaseSchema>;
