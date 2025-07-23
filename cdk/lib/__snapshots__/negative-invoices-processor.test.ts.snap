@@ -1497,7 +1497,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 1`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Credit applied successfully?":{"Type":"Choice","Choices":[{"Variable":"$.applyCreditToAccountBalanceAttempt.Success","BooleanEquals":true,"Next":"Check for Active Sub"}],"Default":"Error: apply credit unsuccessful"},"Error: apply credit unsuccessful":{"Type":"Pass","End":true},"Check for Active Sub":{"Next":"Successful active sub callout?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Credit applied successfully?":{"Type":"Choice","Choices":[{"Variable":"$.applyCreditToAccountBalanceResult.applyCreditToAccountBalanceAttempt.Success","BooleanEquals":true,"Next":"Check for Active Sub"}],"Default":"Error: apply credit unsuccessful"},"Error: apply credit unsuccessful":{"Type":"Pass","End":true},"Check for Active Sub":{"Next":"Successful active sub callout?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },
@@ -3791,7 +3791,7 @@ exports[`The negative-invoices-processor stack matches the snapshot 2`] = `
                   "Arn",
                 ],
               },
-              "","Payload.$":"$"}},"Credit applied successfully?":{"Type":"Choice","Choices":[{"Variable":"$.applyCreditToAccountBalanceAttempt.Success","BooleanEquals":true,"Next":"Check for Active Sub"}],"Default":"Error: apply credit unsuccessful"},"Error: apply credit unsuccessful":{"Type":"Pass","End":true},"Check for Active Sub":{"Next":"Successful active sub callout?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
+              "","Payload.$":"$"}},"Credit applied successfully?":{"Type":"Choice","Choices":[{"Variable":"$.applyCreditToAccountBalanceResult.applyCreditToAccountBalanceAttempt.Success","BooleanEquals":true,"Next":"Check for Active Sub"}],"Default":"Error: apply credit unsuccessful"},"Error: apply credit unsuccessful":{"Type":"Pass","End":true},"Check for Active Sub":{"Next":"Successful active sub callout?","Retry":[{"ErrorEquals":["Lambda.ClientExecutionTimeoutException","Lambda.ServiceException","Lambda.AWSLambdaException","Lambda.SdkClientException"],"IntervalSeconds":2,"MaxAttempts":6,"BackoffRate":2},{"ErrorEquals":["States.ALL"],"IntervalSeconds":10,"MaxAttempts":2}],"Type":"Task","OutputPath":"$.Payload","Resource":"arn:",
               {
                 "Ref": "AWS::Partition",
               },

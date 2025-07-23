@@ -378,7 +378,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 		)
 			.when(
 				Condition.booleanEquals(
-					'$.applyCreditToAccountBalanceAttempt.Success',
+					'$.applyCreditToAccountBalanceResult.applyCreditToAccountBalanceAttempt.Success',
 					true,
 				),
 				checkForActiveSubLambdaTask.next(activeSubCalloutWasSuccessful),
