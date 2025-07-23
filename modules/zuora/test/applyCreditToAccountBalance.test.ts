@@ -1,6 +1,6 @@
-import { zuoraUpperCaseSuccessResponseSchema } from '@modules/zuora/zuoraSchemas';
 import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 import { applyCreditToAccountBalance } from '@modules/zuora/applyCreditToAccountBalance';
+import { zuoraResponseSchema } from '@modules/zuora/types';
 
 jest.mock('@modules/zuora/zuoraClient');
 
@@ -19,12 +19,16 @@ describe('applyCreditToAccountBalance', () => {
 			Type: 'Increase',
 		});
 
-		const result = await applyCreditToAccountBalance(mockZuoraClient, body);
+		const result = await applyCreditToAccountBalance(
+			mockZuoraClient,
+			body,
+			zuoraResponseSchema,
+		);
 
 		expect(mockZuoraClient.post).toHaveBeenCalledWith(
 			'/v1/object/credit-balance-adjustment',
 			body,
-			zuoraUpperCaseSuccessResponseSchema,
+			zuoraResponseSchema,
 		);
 		expect(result).toEqual(mockResponse);
 	});
@@ -40,7 +44,7 @@ describe('applyCreditToAccountBalance', () => {
 		});
 
 		await expect(
-			applyCreditToAccountBalance(mockZuoraClient, body),
+			applyCreditToAccountBalance(mockZuoraClient, body, zuoraResponseSchema),
 		).rejects.toThrow('Network error');
 	});
 
@@ -55,7 +59,7 @@ describe('applyCreditToAccountBalance', () => {
 		});
 
 		await expect(
-			applyCreditToAccountBalance(mockZuoraClient, body),
+			applyCreditToAccountBalance(mockZuoraClient, body, zuoraResponseSchema),
 		).resolves.toEqual(invalidResponse);
 	});
 });
