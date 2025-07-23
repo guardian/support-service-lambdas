@@ -113,7 +113,3 @@ export const DefaultPaymentMethodResponseSchema = zuoraResponseSchema.extend({
 	paypal: z.array(PayPalPaymentMethodSchema).optional(),
 	banktransfer: z.array(BankTransferPaymentMethodSchema).optional(),
 });
-
-export type DefaultPaymentMethodResponse = z.infer<
-	typeof DefaultPaymentMethodResponseSchema
->;

@@ -1,5 +1,2 @@
 export { zuoraResponseSchema } from './zuoraClient';
-export {
-	type DefaultPaymentMethodResponse,
-	DefaultPaymentMethodResponseSchema,
-} from './paymentMethod';
+export { DefaultPaymentMethodResponseSchema } from './paymentMethod';
