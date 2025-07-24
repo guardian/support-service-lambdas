@@ -7,8 +7,7 @@ export const doQuery = async <T>(
 	queryResponseSchema: z.Schema<T>,
 ): Promise<T> => {
 	try {
-		console.log('Querying zuora...');
-		console.log('Query:', query);
+		console.log('Querying Zuora:', query);
 
 		const result = await zuoraClient.post(
 			'/v1/action/query',
@@ -17,14 +16,7 @@ export const doQuery = async <T>(
 			}),
 			queryResponseSchema,
 		);
-		const parsedResult = queryResponseSchema.parse(result) as { done: boolean };
 
-		if (!parsedResult.done) {
-			throw new Error(
-				'Query did not complete successfully. Result: ' +
-					JSON.stringify(result),
-			);
-		}
 		return result as T;
 	} catch (error) {
 		const errorMessage =

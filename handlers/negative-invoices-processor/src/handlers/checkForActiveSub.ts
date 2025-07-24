@@ -1,9 +1,9 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { doQuery } from '@modules/zuora/query';
+import { queryBaseResponseSchema } from '@modules/zuora/types/httpResponse';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { CheckForActiveSubInputSchema } from '../types';
 import type { CheckForActiveSubInput, CheckForActiveSubOutput } from '../types';
-import { queryBaseResponseSchema } from '@modules/zuora/types/httpResponse';
 
 export const handler = async (
 	event: CheckForActiveSubInput,
