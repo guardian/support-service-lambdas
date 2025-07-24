@@ -1,44 +1,15 @@
+import z from 'zod';
+import { DefaultPaymentMethodResponseSchema } from './types';
 import type { ZuoraClient } from './zuoraClient';
-import type {
-	PaymentMethod,
-	ZuoraPaymentMethodQueryResponse,
-} from './zuoraSchemas';
-import { zuoraPaymentMethodQueryResponseSchema } from './zuoraSchemas';
 
-export const getPaymentMethods = async (
+export const getPaymentMethods = async <
+	T extends z.ZodType = typeof DefaultPaymentMethodResponseSchema,
+>(
 	zuoraClient: ZuoraClient,
 	accountId: string,
-): Promise<ZuoraPaymentMethodQueryResponse> => {
+	schema?: T,
+): Promise<z.infer<T>> => {
 	const path = `/v1/accounts/${accountId}/payment-methods`;
-	return zuoraClient.get(path, zuoraPaymentMethodQueryResponseSchema);
-};
-
-export const filterActivePaymentMethods = (
-	paymentMethods: ZuoraPaymentMethodQueryResponse,
-): PaymentMethod[] => {
-	type PaymentMethodKey =
-		| 'creditcard'
-		| 'creditcardreferencetransaction'
-		| 'banktransfer'
-		| 'paypal';
-
-	const keysToCheck = [
-		'creditcard',
-		'creditcardreferencetransaction',
-		'banktransfer',
-		'paypal',
-	] as const satisfies readonly PaymentMethodKey[];
-
-	const activeMethods: PaymentMethod[] = [];
-
-	for (const key of keysToCheck) {
-		const methods = paymentMethods[key];
-		if (Array.isArray(methods)) {
-			activeMethods.push(
-				...methods.filter((pm) => pm.status.toLowerCase() === 'active'),
-			);
-		}
-	}
-
-	return activeMethods;
+	const finalSchema = (schema ?? DefaultPaymentMethodResponseSchema) as T;
+	return zuoraClient.get(path, finalSchema);
 };

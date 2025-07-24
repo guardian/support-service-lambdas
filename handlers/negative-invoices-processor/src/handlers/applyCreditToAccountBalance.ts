@@ -24,13 +24,17 @@ export const handler = async (
 
 		return {
 			...parsedEvent,
-			applyCreditToAccountBalanceAttempt,
+			applyCreditToAccountBalanceResult: {
+				applyCreditToAccountBalanceAttempt,
+			},
 		};
 	} catch (error) {
 		return {
 			...event,
-			applyCreditToAccountBalanceAttempt: {
-				Success: false,
+			applyCreditToAccountBalanceResult: {
+				applyCreditToAccountBalanceAttempt: {
+					Success: false,
+				},
 				error:
 					error instanceof Error
 						? error.message
