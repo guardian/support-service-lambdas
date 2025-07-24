@@ -33,7 +33,7 @@ const productBillingPeriods = {
 	PatronMembership: ['Month', 'Annual'],
 	SubscriptionCard: ['Month'],
 	SupporterMembership: ['Annual', 'Month'],
-	SupporterPlus: ['Month', 'Annual'],
+	SupporterPlus: ['Annual', 'Month'],
 	TierThree: ['Annual', 'Month'],
 } as const;
 

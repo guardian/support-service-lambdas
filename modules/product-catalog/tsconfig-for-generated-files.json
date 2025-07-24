@@ -17,6 +17,7 @@
   },
     "include": [
         "src/productCatalogSchema.ts",
-        "src/productBillingPeriods.ts"
+        "src/productBillingPeriods.ts",
+      "src/productPurchaseSchema.ts"
     ],
 }
