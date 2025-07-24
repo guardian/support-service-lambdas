@@ -14,12 +14,7 @@ import { getAccount } from '@modules/zuora/getAccount';
 import { getSubscription } from '@modules/zuora/getSubscription';
 import type { Logger } from '@modules/zuora/logger';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type {
-	RatePlan,
-	RatePlanCharge,
-	ZuoraSubscription,
-} from '@modules/zuora/zuoraSchemas';
-import type { Dayjs } from 'dayjs';
+import type { RatePlan, RatePlanCharge } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
 import type { EmailFields } from './sendEmail';
 import { supporterPlusAmountBands } from './supporterPlusAmountBands';
@@ -148,31 +143,6 @@ const validateNewAmount = (
 	}
 };
 
-const getNewTermStartDate = (
-	subscription: ZuoraSubscription,
-	contributionCharge: RatePlanCharge,
-	applyFromDate: Dayjs,
-): Dayjs | undefined => {
-	if (applyFromDate.isAfter(dayjs(subscription.termEndDate))) {
-		// This will cause an error in Zuora "The Contract effective date should not be later than the term end date of the basic subscription."
-		// because you can't add an update after the current term end date.
-		// This has probably happened because the subscription was updated without a new term being started,
-		// so the charge is no longer aligned with the term. To fix this we can start a new term from
-		// the point at which the current term started.
-		const potentialNewTermStartDate = dayjs(
-			contributionCharge.effectiveStartDate,
-		);
-		const today = dayjs().startOf('day');
-		if (potentialNewTermStartDate.isBefore(today)) {
-			// Only start a new term if the charge we are dealing with started in the past, I'm not sure what
-			// will happen otherwise! We can investigate when/if we get a "The Contract effective date..." error from a
-			// subscription in that state
-			return potentialNewTermStartDate;
-		}
-	}
-	return undefined;
-};
-
 export const updateSupporterPlusAmount = async (
 	logger: Logger,
 	zuoraClient: ZuoraClient,
@@ -216,20 +186,19 @@ export const updateSupporterPlusAmount = async (
 			chargeToUpdate.effectiveStartDate, // If there is a pending amendment
 	);
 
-	const newTermStartDate = getNewTermStartDate(
-		subscription,
-		chargeToUpdate,
-		applyFromDate,
+	const shouldExtendTerm = applyFromDate.isAfter(
+		dayjs(subscription.termEndDate),
 	);
 
 	logger.log(
-		`new term date: ${newTermStartDate ? zuoraDateFormat(newTermStartDate) : undefined} and apply from: ${zuoraDateFormat(applyFromDate)}`,
+		`apply change from: ${zuoraDateFormat(applyFromDate)}` +
+			(shouldExtendTerm ? ' (term extension needed)' : ''),
 	);
 
 	await doUpdate({
 		zuoraClient,
 		applyFromDate,
-		newTermStartDate,
+		shouldExtendTerm,
 		subscriptionNumber,
 		accountNumber: subscription.accountNumber,
 		ratePlanId: supporterPlusData.ratePlan.id,
