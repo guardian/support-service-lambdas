@@ -5,7 +5,7 @@ import { BearerTokenProvider } from './bearerTokenProvider';
 import { zuoraServerUrl } from './common';
 import { getOAuthClientCredentials } from './oAuthCredentials';
 import { generateZuoraError } from './zuoraErrorHandler';
-import type { ZuoraResponse } from './types/zuoraClient';
+import type { ZuoraResponse } from './types/httpResponse';
 
 export class ZuoraClient {
 	static async create(stage: Stage, logger: Logger = new Logger()) {

@@ -1,5 +1,5 @@
 import { doRefund } from '@modules/zuora/refund';
-import { zuoraResponseSchema } from '../src/types/zuoraClient';
+import { zuoraResponseSchema } from '../src/types/httpResponse';
 import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 
 jest.mock('@modules/zuora/zuoraClient');

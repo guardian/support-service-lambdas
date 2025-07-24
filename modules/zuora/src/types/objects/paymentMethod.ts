@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { zuoraResponseSchema } from './zuoraClient';
+import { zuoraResponseSchema } from '../httpResponse';
 
 // Common fields for all payment methods
 export const BasePaymentMethodSchema = z.object({

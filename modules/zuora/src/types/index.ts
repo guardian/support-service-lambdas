@@ -1,5 +1,5 @@
-export { zuoraResponseSchema } from './zuoraClient';
+export { zuoraResponseSchema } from './httpResponse';
 export {
 	BasePaymentMethodSchema,
 	DefaultPaymentMethodResponseSchema,
-} from './paymentMethod';
+} from './objects/paymentMethod';
