@@ -21,8 +21,10 @@ export const handler = async (
 		const hasActivePaymentMethod = activePaymentMethods.length > 0;
 		return {
 			...parsedEvent,
-			checkForActivePaymentMethodAttempt: {
-				Success: paymentMethods.success,
+			activePaymentMethodResult: {
+				checkForActivePaymentMethodAttempt: {
+					Success: paymentMethods.success,
+				},
 				hasActivePaymentMethod,
 				activePaymentMethods,
 			},
@@ -30,8 +32,10 @@ export const handler = async (
 	} catch (error) {
 		return {
 			...event,
-			checkForActivePaymentMethodAttempt: {
-				Success: false,
+			activePaymentMethodResult: {
+				checkForActivePaymentMethodAttempt: {
+					Success: false,
+				},
 				hasActivePaymentMethod: undefined,
 				activePaymentMethods: undefined,
 				error:
