@@ -47,29 +47,26 @@ export function invoiceHasAtLeastOneProcessingFailure(
 }
 
 function atLeastOneCalloutFailed(invoice: ProcessedInvoice): boolean {
-	const {
-		applyCreditToAccountBalanceAttempt,
-		checkForActiveSubAttempt,
-		checkForActivePaymentMethodAttempt,
-		refundAttempt,
-	} = invoice;
-
 	if (
-		!applyCreditToAccountBalanceAttempt.Success ||
-		!checkForActiveSubAttempt?.Success
+		!invoice.applyCreditToAccountBalanceResult
+			.applyCreditToAccountBalanceAttempt.Success ||
+		!invoice.activeSubResult?.checkForActiveSubAttempt.Success
 	) {
 		return true;
 	}
 
 	// Only check payment method and refund attempts if hasActiveSub is false
-	if (checkForActiveSubAttempt.hasActiveSub === false) {
-		if (!checkForActivePaymentMethodAttempt?.Success) {
+	if (invoice.activeSubResult.hasActiveSubscription === false) {
+		if (
+			!invoice.activePaymentMethodResult?.checkForActivePaymentMethodAttempt
+				.Success
+		) {
 			return true;
 		}
 
-		// Only check refundAttempt if hasActivePaymentMethod is true
-		if (checkForActivePaymentMethodAttempt.hasActivePaymentMethod === true) {
-			return !refundAttempt?.Success;
+		// Only check refundResult if hasActivePaymentMethod is true
+		if (invoice.activePaymentMethodResult.hasActivePaymentMethod === true) {
+			return !invoice.refundResult?.refundAttempt.Success;
 		}
 	}
 
@@ -79,11 +76,8 @@ function atLeastOneCalloutFailed(invoice: ProcessedInvoice): boolean {
 function invoiceHasNoActiveSubAndNoActivePaymentMethod(
 	invoice: ProcessedInvoice,
 ): boolean {
-	const { checkForActiveSubAttempt, checkForActivePaymentMethodAttempt } =
-		invoice;
-
 	return (
-		checkForActiveSubAttempt?.hasActiveSub === false &&
-		checkForActivePaymentMethodAttempt?.hasActivePaymentMethod === false
+		invoice.activeSubResult?.hasActiveSubscription === false &&
+		invoice.activePaymentMethodResult?.hasActivePaymentMethod === false
 	);
 }

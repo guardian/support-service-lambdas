@@ -1,16 +1,15 @@
 import { z } from 'zod';
-import { InvoiceSchema } from './invoiceSchemas';
-import { ApplyCreditToAccountBalanceAttemptSchema } from '../handlers/ApplyCreditToAccountBalance';
-import { CheckForActiveSubAttemptSchema } from '../handlers/CheckForActiveSub';
-import { CheckForActivePaymentMethodAttemptSchema } from '../handlers/GetPaymentMethods';
-import { RefundAttemptSchema } from '../handlers/DoCreditBalanceRefund';
+import { ApplyCreditToAccountBalanceResultSchema } from '.';
+import { InvoiceSchema } from '.';
+import { PaymentMethodResultSchema } from './paymentMethod';
+import { RefundResultSchema } from './refund';
+import { ActiveSubscriptionResultSchema } from './subscription';
 
 export const ProcessedInvoiceSchema = InvoiceSchema.extend({
-	applyCreditToAccountBalanceAttempt: ApplyCreditToAccountBalanceAttemptSchema,
-	checkForActiveSubAttempt: CheckForActiveSubAttemptSchema.optional(),
-	checkForActivePaymentMethodAttempt:
-		CheckForActivePaymentMethodAttemptSchema.optional(),
-	refundAttempt: RefundAttemptSchema.optional(),
+	applyCreditToAccountBalanceResult: ApplyCreditToAccountBalanceResultSchema,
+	activeSubResult: ActiveSubscriptionResultSchema.optional(),
+	activePaymentMethodResult: PaymentMethodResultSchema.optional(),
+	refundResult: RefundResultSchema.optional(),
 });
 
 export type ProcessedInvoice = z.infer<typeof ProcessedInvoiceSchema>;

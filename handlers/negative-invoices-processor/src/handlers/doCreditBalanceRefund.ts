@@ -1,13 +1,14 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { doRefund } from '@modules/zuora/refund';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { PaymentMethod } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
 import { DoCreditBalanceRefundInputSchema } from '../types';
 import type {
 	DoCreditBalanceRefundInput,
 	DoCreditBalanceRefundOutput,
 } from '../types';
+import type { PaymentMethod } from '../types/shared';
+import { RefundResponseSchema } from '../types/shared';
 
 export const handler = async (
 	event: DoCreditBalanceRefundInput,
@@ -18,7 +19,7 @@ export const handler = async (
 		const parsedEvent = DoCreditBalanceRefundInputSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		paymentMethodToRefundTo = getPaymentMethodToRefundTo(
-			parsedEvent.checkForActivePaymentMethodAttempt.activePaymentMethods ?? [],
+			parsedEvent.activePaymentMethodResult.activePaymentMethods ?? [],
 		);
 		if (!paymentMethodToRefundTo) {
 			throw new Error('No active payment method found to refund to.');
@@ -34,12 +35,12 @@ export const handler = async (
 			MethodType: paymentMethodToRefundTo.type,
 		});
 
-		const refundAttempt = await doRefund(zuoraClient, body);
+		const response = await doRefund(zuoraClient, body, RefundResponseSchema);
 
 		return {
 			...parsedEvent,
-			refundAttempt: {
-				...refundAttempt,
+			refundResult: {
+				refundAttempt: response,
 				paymentMethod: paymentMethodToRefundTo,
 				refundAmount,
 			},
@@ -47,9 +48,10 @@ export const handler = async (
 	} catch (error) {
 		return {
 			...event,
-			refundAttempt: {
-				Success: false,
-				paymentMethod: paymentMethodToRefundTo,
+			refundResult: {
+				refundAttempt: {
+					Success: false,
+				},
 				error:
 					error instanceof Error
 						? error.message

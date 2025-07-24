@@ -1,11 +1,14 @@
+// import { zuoraResponseSchema } from './types/zuoraClient';
+import z from 'zod';
+import type { ZuoraResponse } from './types/httpResponse';
 import type { ZuoraClient } from './zuoraClient';
-import type { ZuoraUpperCaseSuccessResponse } from './zuoraSchemas';
-import { zuoraUpperCaseSuccessResponseSchema } from './zuoraSchemas';
 
 export const doRefund = async (
 	zuoraClient: ZuoraClient,
 	body: string,
-): Promise<ZuoraUpperCaseSuccessResponse> => {
+	schema: z.ZodType<any, z.ZodTypeDef, any>,
+): Promise<ZuoraResponse> => {
+	//might also want to make return type generic
 	const path = `/v1/object/refund`;
-	return zuoraClient.post(path, body, zuoraUpperCaseSuccessResponseSchema);
+	return zuoraClient.post(path, body, schema);
 };

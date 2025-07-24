@@ -1,11 +1,14 @@
 import { stageFromEnvironment } from '@modules/stage';
-import {
-	filterActivePaymentMethods,
-	getPaymentMethods,
-} from '@modules/zuora/paymentMethod';
+import { getPaymentMethods } from '@modules/zuora/paymentMethod';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { GetPaymentMethodsInputSchema } from '../types';
-import type { GetPaymentMethodsInput, GetPaymentMethodsOutput } from '../types';
+import type {
+	GetPaymentMethodsInput,
+	GetPaymentMethodsOutput,
+	PaymentMethod,
+} from '../types';
+import { PaymentMethodResponseSchema } from '../types/shared';
+import type { PaymentMethodResponse } from '../types/shared/paymentMethod';
 
 export const handler = async (
 	event: GetPaymentMethodsInput,
@@ -16,13 +19,19 @@ export const handler = async (
 		const paymentMethods = await getPaymentMethods(
 			zuoraClient,
 			parsedEvent.accountId,
+			PaymentMethodResponseSchema,
 		);
+
 		const activePaymentMethods = filterActivePaymentMethods(paymentMethods);
+
 		const hasActivePaymentMethod = activePaymentMethods.length > 0;
+
 		return {
 			...parsedEvent,
-			checkForActivePaymentMethodAttempt: {
-				Success: paymentMethods.success,
+			activePaymentMethodResult: {
+				checkForActivePaymentMethodAttempt: {
+					Success: paymentMethods.success,
+				},
 				hasActivePaymentMethod,
 				activePaymentMethods,
 			},
@@ -30,8 +39,10 @@ export const handler = async (
 	} catch (error) {
 		return {
 			...event,
-			checkForActivePaymentMethodAttempt: {
-				Success: false,
+			activePaymentMethodResult: {
+				checkForActivePaymentMethodAttempt: {
+					Success: false,
+				},
 				hasActivePaymentMethod: undefined,
 				activePaymentMethods: undefined,
 				error:
@@ -41,4 +52,21 @@ export const handler = async (
 			},
 		};
 	}
+};
+
+const filterActivePaymentMethods = (
+	paymentMethods: PaymentMethodResponse,
+): PaymentMethod[] => {
+	const { creditcard, creditcardreferencetransaction, banktransfer, paypal } =
+		paymentMethods;
+
+	const flattenedPaymentMethods = [
+		...(creditcard ?? []),
+		...(creditcardreferencetransaction ?? []),
+		...(banktransfer ?? []),
+		...(paypal ?? []),
+	];
+	return flattenedPaymentMethods.filter(
+		(pm) => pm.status.toLowerCase() === 'active',
+	);
 };
