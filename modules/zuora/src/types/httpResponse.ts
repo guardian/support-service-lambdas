@@ -39,9 +39,11 @@ export type ZuoraResponse = z.infer<typeof zuoraResponseSchema>;
 export const createQueryResponseSchema = <T extends z.ZodRawShape>(
 	recordShape: T,
 ) => {
-	return z.object({
-		done: z.boolean(),
-		size: z.number(),
-		records: z.array(z.object(recordShape)).optional(),
-	});
+	return z
+		.object({
+			done: z.boolean(),
+			size: z.number(),
+			records: z.array(z.object(recordShape)).optional(),
+		})
+		.strict();
 };
