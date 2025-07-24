@@ -1,11 +1,13 @@
 import { stageFromEnvironment } from '@modules/stage';
-import {
-	filterActivePaymentMethods,
-	getPaymentMethods,
-} from '@modules/zuora/paymentMethod';
+import { getPaymentMethods } from '@modules/zuora/paymentMethod';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { GetPaymentMethodsInputSchema } from '../types';
-import type { GetPaymentMethodsInput, GetPaymentMethodsOutput } from '../types';
+import type {
+	GetPaymentMethodsInput,
+	GetPaymentMethodsOutput,
+	PaymentMethod,
+	PaymentMethodResponse,
+} from '../types';
 
 export const handler = async (
 	event: GetPaymentMethodsInput,
@@ -45,4 +47,21 @@ export const handler = async (
 			},
 		};
 	}
+};
+
+const filterActivePaymentMethods = (
+	paymentMethods: PaymentMethodResponse,
+): PaymentMethod[] => {
+	const { creditcard, creditcardreferencetransaction, banktransfer, paypal } =
+		paymentMethods;
+
+	const flattenedPaymentMethods = [
+		...(creditcard ?? []),
+		...(creditcardreferencetransaction ?? []),
+		...(banktransfer ?? []),
+		...(paypal ?? []),
+	];
+	return flattenedPaymentMethods.filter(
+		(pm) => pm.status.toLowerCase() === 'active',
+	);
 };

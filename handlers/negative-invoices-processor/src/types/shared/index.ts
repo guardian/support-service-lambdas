@@ -15,6 +15,7 @@ export {
 	PaymentMethodResultSchema,
 	NewPaymentMethodSchema,
 	type PaymentMethod,
+	type PaymentMethodResponse,
 } from './paymentMethod';
 
 export {
