@@ -1,12 +1,12 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { doRefund } from '@modules/zuora/refund';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { PaymentMethod } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
 import { DoCreditBalanceRefundInputSchema } from '../types';
 import type {
 	DoCreditBalanceRefundInput,
 	DoCreditBalanceRefundOutput,
+	PaymentMethod,
 } from '../types';
 
 export const handler = async (
