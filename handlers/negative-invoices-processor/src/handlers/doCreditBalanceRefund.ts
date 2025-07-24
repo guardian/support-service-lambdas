@@ -6,8 +6,9 @@ import { DoCreditBalanceRefundInputSchema } from '../types';
 import type {
 	DoCreditBalanceRefundInput,
 	DoCreditBalanceRefundOutput,
-	PaymentMethod,
 } from '../types';
+import type { PaymentMethod } from '../types/shared';
+import { RefundResponseSchema } from '../types/shared';
 
 export const handler = async (
 	event: DoCreditBalanceRefundInput,
@@ -34,8 +35,8 @@ export const handler = async (
 			MethodType: paymentMethodToRefundTo.type,
 		});
 
-		const response = await doRefund(zuoraClient, body);
-
+		const response = await doRefund(zuoraClient, body, RefundResponseSchema);
+		console.log(`Refund response: ${JSON.stringify(response, null, 2)}`);
 		return {
 			...parsedEvent,
 			refundResult: {
