@@ -17,17 +17,21 @@ export const handler = async (
 		);
 		return {
 			...parsedEvent,
-			checkForActiveSubAttempt: {
-				Success: true,
-				hasActiveSub,
+			activeSubResult: {
+				checkForActiveSubAttempt: {
+					Success: true,
+				},
+				hasActiveSubscription: hasActiveSub,
 			},
 		};
 	} catch (error) {
 		return {
 			...event,
-			checkForActiveSubAttempt: {
-				Success: false,
-				hasActiveSub: undefined,
+			activeSubResult: {
+				checkForActiveSubAttempt: {
+					Success: false,
+				},
+				hasActiveSubscription: undefined,
 				error:
 					error instanceof Error
 						? error.message
