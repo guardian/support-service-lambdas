@@ -7,15 +7,6 @@ import { getOAuthClientCredentials } from './oAuthCredentials';
 import { generateZuoraError } from './zuoraErrorHandler';
 import type { ZuoraResponse } from './types/httpResponse';
 
-export class ZuoraError extends Error {
-	constructor(
-		message: string,
-		public code: number,
-	) {
-		super(message);
-	}
-}
-
 export class ZuoraClient {
 	static async create(stage: Stage, logger: Logger = new Logger()) {
 		const credentials = await getOAuthClientCredentials(stage);
