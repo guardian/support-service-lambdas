@@ -1,5 +1,5 @@
 import { getPaymentMethods } from '@modules/zuora/paymentMethod';
-import { zuoraPaymentMethodQueryResponseSchema } from '@modules/zuora/zuoraSchemas';
+import { zuoraResponseSchema } from '@modules/zuora/types';
 
 describe('getPaymentMethods', () => {
 	const mockGet = jest.fn();
@@ -19,7 +19,7 @@ describe('getPaymentMethods', () => {
 
 		expect(mockGet).toHaveBeenCalledWith(
 			`/v1/accounts/${accountId}/payment-methods`,
-			zuoraPaymentMethodQueryResponseSchema,
+			zuoraResponseSchema,
 		);
 	});
 
