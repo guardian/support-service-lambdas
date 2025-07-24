@@ -1,9 +1,9 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { doQuery } from '@modules/zuora/query';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { z } from 'zod';
 import { CheckForActiveSubInputSchema } from '../types';
 import type { CheckForActiveSubInput, CheckForActiveSubOutput } from '../types';
+import { queryBaseResponseSchema } from '@modules/zuora/types/httpResponse';
 
 export const handler = async (
 	event: CheckForActiveSubInput,
@@ -42,16 +42,11 @@ export const handler = async (
 	}
 };
 
-const queryResponseSchema = z.object({
-	done: z.boolean(),
-	size: z.number(),
-});
-
 export const hasActiveSubscription = async (
 	zuoraClient: ZuoraClient,
 	accountId: string,
 ): Promise<boolean> => {
 	const query = `SELECT Id FROM Subscription WHERE AccountId = '${accountId}' AND Status = 'Active'`;
-	const result = await doQuery(zuoraClient, query, queryResponseSchema);
+	const result = await doQuery(zuoraClient, query, queryBaseResponseSchema);
 	return result.size > 0;
 };

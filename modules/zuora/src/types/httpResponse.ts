@@ -35,3 +35,8 @@ export const zuoraResponseSchema = z.object({
 	message: z.string().optional(),
 });
 export type ZuoraResponse = z.infer<typeof zuoraResponseSchema>;
+
+export const queryBaseResponseSchema = z.object({
+	done: z.boolean(),
+	size: z.number(),
+});
