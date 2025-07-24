@@ -36,7 +36,12 @@ export const zuoraResponseSchema = z.object({
 });
 export type ZuoraResponse = z.infer<typeof zuoraResponseSchema>;
 
-export const queryBaseResponseSchema = z.object({
-	done: z.boolean(),
-	size: z.number(),
-});
+export const createQueryResponseSchema = <T extends z.ZodRawShape>(
+	recordShape: T,
+) => {
+	return z.object({
+		done: z.boolean(),
+		size: z.number(),
+		records: z.array(z.object(recordShape)).optional(),
+	});
+};
