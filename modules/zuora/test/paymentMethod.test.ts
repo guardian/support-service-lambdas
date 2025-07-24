@@ -15,7 +15,7 @@ describe('getPaymentMethods', () => {
 	it('calls zuoraClient.get with correct path and schema', async () => {
 		mockGet.mockResolvedValue(mockResponse);
 
-		await getPaymentMethods(mockZuoraClient, accountId);
+		await getPaymentMethods(mockZuoraClient, accountId, zuoraResponseSchema);
 
 		expect(mockGet).toHaveBeenCalledWith(
 			`/v1/accounts/${accountId}/payment-methods`,
