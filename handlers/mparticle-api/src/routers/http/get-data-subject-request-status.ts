@@ -1,6 +1,9 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
-import { getStatusOfDataSubjectRequest } from '../../apis/data-subject-requests';
+import {
+	getStatusOfDataSubjectRequest,
+	MParticleDataSubjectClient,
+} from '../../apis/data-subject-requests';
 
 export const requestIdPathParser = {
 	path: z.object({
@@ -8,7 +11,9 @@ export const requestIdPathParser = {
 	}),
 };
 
-export function getDataSubjectRequestStatusHandler() {
+export function getDataSubjectRequestStatusHandler(
+	mParticleDataSubjectClient: MParticleDataSubjectClient,
+) {
 	return async (
 		event: APIGatewayProxyEvent,
 		parsed: { path: { requestId: string }; body: unknown },
@@ -16,7 +21,10 @@ export function getDataSubjectRequestStatusHandler() {
 		return {
 			statusCode: 200,
 			body: JSON.stringify(
-				await getStatusOfDataSubjectRequest(parsed.path.requestId),
+				await getStatusOfDataSubjectRequest(
+					mParticleDataSubjectClient,
+					parsed.path.requestId,
+				),
 			),
 		};
 	};

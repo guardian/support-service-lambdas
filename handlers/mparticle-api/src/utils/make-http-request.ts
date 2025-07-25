@@ -1,3 +1,5 @@
+import type { z } from 'zod';
+
 export class HttpError extends Error {
 	public statusCode: number;
 	public statusText: string;
@@ -32,6 +34,7 @@ export async function makeHttpRequest<T>(
 	url: string,
 	options: {
 		method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+		schema: z.ZodType<T, z.ZodTypeDef, unknown>;
 		baseURL?: string;
 		headers?: Record<string, string>;
 		body?: unknown;
@@ -68,7 +71,7 @@ export async function makeHttpRequest<T>(
 		}
 
 		try {
-			const data = (await response.json()) as T;
+			const data = options.schema.parse(await response.json());
 			return { success: true, data };
 		} catch {
 			return {

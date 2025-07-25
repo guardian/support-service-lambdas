@@ -1,7 +1,10 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
 import type { DataSubjectRequestForm } from '../../../interfaces/data-subject-request-form';
-import { submitDataSubjectRequest } from '../../apis/data-subject-requests';
+import {
+	MParticleDataSubjectClient,
+	submitDataSubjectRequest,
+} from '../../apis/data-subject-requests';
 import { setUserAttributesForRightToErasureRequest } from '../../apis/events';
 
 export const dataSubjectRequestFormParser = {
@@ -15,7 +18,10 @@ export const dataSubjectRequestFormParser = {
 	}),
 };
 
-export function submitDataSubjectRequestHandler() {
+export function submitDataSubjectRequestHandler(
+	mParticleDataSubjectClient: MParticleDataSubjectClient,
+	httpRouterBaseUrl: string,
+) {
 	return async (
 		event: APIGatewayProxyEvent,
 		parsed: { path: unknown; body: DataSubjectRequestForm },
@@ -40,7 +46,13 @@ export function submitDataSubjectRequestHandler() {
 
 		return {
 			statusCode: 201,
-			body: JSON.stringify(await submitDataSubjectRequest(parsed.body)),
+			body: JSON.stringify(
+				await submitDataSubjectRequest(
+					mParticleDataSubjectClient,
+					httpRouterBaseUrl,
+					parsed.body,
+				),
+			),
 		};
 	};
 }

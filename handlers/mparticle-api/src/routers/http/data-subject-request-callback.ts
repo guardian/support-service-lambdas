@@ -1,7 +1,10 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
 import type { DataSubjectRequestCallback } from '../../../interfaces/data-subject-request-callback';
-import { processDataSubjectRequestCallback } from '../../apis/data-subject-requests';
+import {
+	MParticleDataSubjectClient,
+	processDataSubjectRequestCallback,
+} from '../../apis/data-subject-requests';
 import { validateDataSubjectRequestCallback } from '../../utils/validate-data-subject-request-callback';
 
 export const dataSubjectRequestCallbackParser = {
@@ -34,7 +37,9 @@ export const dataSubjectRequestCallbackParser = {
 	}),
 };
 
-export function dataSubjectRequestCallbackHandler() {
+export function dataSubjectRequestCallbackHandler(
+	mParticleDataSubjectClient: MParticleDataSubjectClient,
+) {
 	return async (
 		event: APIGatewayProxyEvent,
 		parsed: { path: { requestId: string }; body: DataSubjectRequestCallback },
@@ -44,6 +49,7 @@ export function dataSubjectRequestCallbackHandler() {
 				([k]) => k.toLowerCase() === key.toLowerCase(),
 			)?.[1];
 		const callbackValidationResult = await validateDataSubjectRequestCallback(
+			mParticleDataSubjectClient,
 			getHeader('x-opendsr-processor-domain'),
 			getHeader('x-opendsr-signature'),
 			event.body,
