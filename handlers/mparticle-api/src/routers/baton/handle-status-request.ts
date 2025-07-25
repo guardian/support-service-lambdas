@@ -1,12 +1,16 @@
 import type { DataSubjectRequestState } from '../../../interfaces/data-subject-request-state';
 import { DataSubjectRequestStatus } from '../../../interfaces/data-subject-request-state';
-import { getStatusOfDataSubjectRequest } from '../../apis/data-subject-requests';
+import {
+	getStatusOfDataSubjectRequest,
+	MParticleDataSubjectClient,
+} from '../../apis/data-subject-requests';
 import type {
 	BatonRerEventStatusRequest,
 	BatonRerEventStatusResponse,
 } from './types-and-schemas';
 
 export async function handleStatusRequest(
+	mParticleDataSubjectClient: MParticleDataSubjectClient,
 	request: BatonRerEventStatusRequest,
 ): Promise<BatonRerEventStatusResponse> {
 	const mapStatus = (
@@ -25,7 +29,10 @@ export async function handleStatusRequest(
 	};
 
 	const dataSubjectRequestState: DataSubjectRequestState =
-		await getStatusOfDataSubjectRequest(request.initiationReference);
+		await getStatusOfDataSubjectRequest(
+			mParticleDataSubjectClient,
+			request.initiationReference,
+		);
 
 	const response: BatonRerEventStatusResponse = {
 		requestType: 'RER' as const,

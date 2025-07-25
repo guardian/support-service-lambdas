@@ -1,8 +1,13 @@
 import { randomUUID } from 'crypto';
 import type { DataSubjectRequestSubmission } from '../../../interfaces/data-subject-request-submission';
-import { submitDataSubjectRequest } from '../../apis/data-subject-requests';
-import { setUserAttributesForRightToErasureRequest } from '../../apis/events';
-import { getEnv } from '../../utils/config';
+import {
+	MParticleDataSubjectClient,
+	submitDataSubjectRequest,
+} from '../../apis/data-subject-requests';
+import {
+	MParticleEventsClient,
+	setUserAttributesForRightToErasureRequest,
+} from '../../apis/events';
 import type {
 	BatonRerEventInitiateRequest,
 	BatonRerEventInitiateResponse,
@@ -10,10 +15,14 @@ import type {
 } from './types-and-schemas';
 
 export async function handleInitiateRequest(
+	mParticleDataSubjectClient: MParticleDataSubjectClient,
+	mParticleEventsClient: MParticleEventsClient,
+	httpRouterBaseUrl: string,
 	request: BatonRerEventInitiateRequest,
+	isProd: boolean,
 ): Promise<BatonRerEventInitiateResponse> {
 	const submittedTime = new Date().toISOString();
-	const environment = getEnv('STAGE') === 'PROD' ? 'production' : 'development';
+	const environment = isProd ? 'production' : 'development';
 
 	/**
 	 * If you wish to remove users from audiences or from event forwarding during the waiting period,
@@ -22,6 +31,7 @@ export async function handleInitiateRequest(
 	 */
 	try {
 		await setUserAttributesForRightToErasureRequest(
+			mParticleEventsClient,
 			environment,
 			request.subjectId,
 			submittedTime,
@@ -34,14 +44,18 @@ export async function handleInitiateRequest(
 	}
 
 	const dataSubjectRequestSubmissionResponse: DataSubjectRequestSubmission =
-		await submitDataSubjectRequest({
-			regulation: 'gdpr',
-			requestId: randomUUID(),
-			requestType: 'erasure',
-			submittedTime,
-			userId: request.subjectId,
-			environment,
-		});
+		await submitDataSubjectRequest(
+			mParticleDataSubjectClient,
+			httpRouterBaseUrl,
+			{
+				regulation: 'gdpr',
+				requestId: randomUUID(),
+				requestType: 'erasure',
+				submittedTime,
+				userId: request.subjectId,
+				environment,
+			},
+		);
 
 	const response: BatonRerEventInitiateResponse = {
 		requestType: 'RER' as const,

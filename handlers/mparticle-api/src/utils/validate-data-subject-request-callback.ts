@@ -1,7 +1,8 @@
 import * as crypto from 'crypto';
 import * as tls from 'tls';
 import { X509Certificate } from '@peculiar/x509';
-import { requestDataSubjectApi } from '../apis/data-subject-requests';
+import { MParticleDataSubjectClient } from '../apis/data-subject-requests';
+import { z } from 'zod';
 
 const ALLOWED_PROCESSOR_DOMAINS = [
 	'opendsr.mparticle.com',
@@ -26,17 +27,19 @@ let cachedProcessorCertificate:
  * @returns https://docs.mparticle.com/developers/apis/dsr-api/v3/#example-response-body
  */
 async function getProcessorDomainCertificate(
+	mParticleDataSubjectClient: MParticleDataSubjectClient,
 	expirationRetry?: boolean,
 ): Promise<{
 	parsed: X509Certificate;
 	pem: string;
 } | null> {
 	if (!cachedProcessorCertificate) {
-		const discoveryResponse = await requestDataSubjectApi<{
-			processor_certificate: string;
-		}>('/discovery', {
-			method: 'GET',
+		const schema = z.object({
+			processor_certificate: z.string(),
 		});
+		const discoveryResponse = await mParticleDataSubjectClient.get<{
+			processor_certificate: string;
+		}>('/discovery', schema);
 
 		if (!discoveryResponse.success) {
 			console.error('Could not Discover Processor Certificate.');
@@ -73,7 +76,7 @@ async function getProcessorDomainCertificate(
 				'Certificate has expired. Attempting to refresh certificate...',
 			);
 			cachedProcessorCertificate = undefined;
-			return getProcessorDomainCertificate(true);
+			return getProcessorDomainCertificate(mParticleDataSubjectClient, true);
 		}
 
 		console.error(
@@ -121,6 +124,7 @@ async function validateCertificateChain(
  * @param {string} signature - The value of the 'x-opendsr-signature' header
  */
 export const validateDataSubjectRequestCallback = async (
+	mParticleDataSubjectClient: MParticleDataSubjectClient,
 	processorDomain: string | undefined,
 	signature: string | undefined,
 	payload: string | null,
@@ -143,7 +147,7 @@ export const validateDataSubjectRequestCallback = async (
 	const processorCertificate: {
 		parsed: X509Certificate;
 		pem: string;
-	} | null = await getProcessorDomainCertificate();
+	} | null = await getProcessorDomainCertificate(mParticleDataSubjectClient);
 	if (!processorCertificate) {
 		console.error(
 			'Could not obtain Processor Certificate to perform Data Subject Request Callback validation.',
