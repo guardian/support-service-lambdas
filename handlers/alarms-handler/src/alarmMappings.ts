@@ -78,6 +78,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'stripe-intent',
 		'workers',
 		'payment-api',
+		'supporter-product-data',
 
 		// support-service-lambdas
 		'catalog-service',
