@@ -1,12 +1,11 @@
-import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 import type { DataSubjectRequestCallback } from '../../interfaces/data-subject-request-callback';
 import type { DataSubjectRequestForm } from '../../interfaces/data-subject-request-form';
 import type { DataSubjectRequestState } from '../../interfaces/data-subject-request-state';
 import { DataSubjectRequestStatus } from '../../interfaces/data-subject-request-state';
 import type { DataSubjectRequestSubmission } from '../../interfaces/data-subject-request-submission';
-import { getAppConfig, getEnv } from '../config';
-import { makeHttpRequest } from '../http';
-import type { HttpResponse } from '../http';
+import { getAppConfig, getEnv } from '../utils/config';
+import { makeHttpRequest } from '../utils/make-http-request';
+import type { HttpResponse } from '../utils/make-http-request';
 
 function parseDataSubjectRequestStatus(
 	status: 'pending' | 'in_progress' | 'completed' | 'cancelled',
@@ -98,6 +97,22 @@ export const submitDataSubjectRequest = async (
 	});
 
 	if (!response.success) {
+		/**
+		 * This can happen when the user retries to submit a request for erasure for the same id.
+		 * Let's try to search for an existent request on mParticle before throwing an error.
+		 */
+		const getDataSubjectRequestResponse =
+			await getStatusOfDataSubjectRequestByUserId(form.userId);
+		if (getDataSubjectRequestResponse) {
+			return {
+				expectedCompletionTime:
+					getDataSubjectRequestResponse.expectedCompletionTime,
+				receivedTime: new Date(),
+				requestId: getDataSubjectRequestResponse.requestId,
+				controllerId: getDataSubjectRequestResponse.controllerId,
+			};
+		}
+
 		throw response.error;
 	}
 
@@ -153,6 +168,66 @@ export const getStatusOfDataSubjectRequest = async (
 };
 
 /**
+ * Get the status of an OpenDSR request by User Id
+ * https://docs.mparticle.com/developers/apis/dsr-api/v3/#get-the-status-of-an-opendsr-request
+ * @param {string} userId - The ID of the user to get requests to check the status of.
+ * @returns https://docs.mparticle.com/developers/apis/dsr-api/v3/#example-response-body-1
+ */
+export const getStatusOfDataSubjectRequestByUserId = async (
+	userId: string,
+): Promise<DataSubjectRequestState | null> => {
+	const response = await requestDataSubjectApi<
+		Array<{
+			controller_id: string;
+			expected_completion_time: Date;
+			subject_request_id: string;
+			group_id: string | null;
+			request_status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+			api_version: string;
+			results_url: string | null;
+			extensions: Record<
+				string,
+				{
+					domain: string;
+					name: string;
+					status: 'pending' | 'skipped' | 'sent' | 'failed';
+					status_message: string;
+				}
+			> | null;
+		}>
+	>(`/requests?group_id=${userId}`, {
+		method: 'GET',
+	});
+
+	if (!response.success) {
+		throw response.error;
+	}
+
+	const data = response.data[0];
+	if (!data) {
+		return null;
+	}
+
+	if (response.data.length > 1) {
+		console.warn(
+			'Found more than 1 request on Get Status of Data Subject Request by UserId. Only the first one will be used.',
+			{
+				userId,
+				data,
+			},
+		);
+	}
+
+	return {
+		expectedCompletionTime: new Date(data.expected_completion_time),
+		requestId: data.subject_request_id,
+		controllerId: data.controller_id,
+		requestStatus: parseDataSubjectRequestStatus(data.request_status),
+		resultsUrl: data.results_url,
+	};
+};
+
+/**
  * Callback post made on completion of the Data Subject Request (DSR) by mParticle
  * When a request changes status, including when a request is first created, mParticle sends a callback
  * POST to all URLs specified in the status_callback_urls array of the request. Callbacks are queued
@@ -163,65 +238,18 @@ export const getStatusOfDataSubjectRequest = async (
  * @param {DataSubjectRequestCallback} payload - The data containing the data subject request state details.
  * @returns Confirmation message and timestamp
  */
-export const processDataSubjectRequestCallback = async (
+export const processDataSubjectRequestCallback = (
 	requestId: string,
 	payload: DataSubjectRequestCallback,
-): Promise<{
+): {
 	message: string;
 	timestamp: Date;
-}> => {
-	console.debug('Process Data Subject Request Callback from mParticle', {
+} => {
+	// Just log this information so we can have track of it on Cloud Watch
+	console.info('Process Data Subject Request Callback from mParticle', {
 		requestId,
 		form: payload,
 	});
-	interface ErasureJobOutcome {
-		jobRunId: string;
-		status: 'Processing' | 'Completed' | { type: 'Failed'; reason: string };
-		timestamp: Date;
-	}
-	const message: ErasureJobOutcome = {
-		jobRunId: requestId,
-		status: (():
-			| 'Processing'
-			| 'Completed'
-			| { type: 'Failed'; reason: string } => {
-			switch (payload.request_status) {
-				case 'pending':
-				case 'in_progress':
-					return 'Processing';
-				case 'completed':
-				case 'cancelled':
-					return 'Completed';
-				default:
-					return {
-						type: 'Failed',
-						reason: `Could not process 'request_status' '${JSON.stringify(payload)}'.`,
-					};
-			}
-		})(),
-		timestamp: new Date(),
-	};
-	const client = new SQSClient({
-		region: 'eu-west-1',
-	});
-	console.debug(`Sending message ${JSON.stringify(message)} to Ophan queue`);
-
-	const command = new SendMessageCommand({
-		QueueUrl:
-			getEnv('STAGE') === 'PROD'
-				? 'https://sqs.eu-west-1.amazonaws.com/021353022223/ophan-data-lake-PROD-erasure-Queue-1H020S409D2OY.fifo'
-				: 'https://sqs.eu-west-1.amazonaws.com/021353022223/ophan-data-lake-CODE-erasure-Queue-GRLOB6EAD0O9.fifo',
-		MessageBody: JSON.stringify(message),
-		MessageGroupId: 'erasure',
-	});
-	const response = await client.send(command);
-	console.debug(
-		`Response from message send was ${JSON.stringify({
-			client,
-			command,
-			response,
-		})}`,
-	);
 
 	return {
 		message: 'Callback accepted and processed',

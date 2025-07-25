@@ -2,9 +2,16 @@ import { GuApiGatewayWithLambdaByPath } from '@guardian/cdk';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
-import { type App, CfnOutput, Duration } from 'aws-cdk-lib';
+import { type App, Duration } from 'aws-cdk-lib';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
-import { Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import {
+	AccountPrincipal,
+	Effect,
+	Policy,
+	PolicyStatement,
+	Role,
+} from 'aws-cdk-lib/aws-iam';
+import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { SrLambdaDomain } from './cdk/sr-lambda-domain';
 import { nodeVersion } from './node-version';
@@ -15,20 +22,33 @@ export class MParticleApi extends GuStack {
 
 		const app = 'mparticle-api';
 
-		const lambda = new GuLambdaFunction(this, `${app}-lambda`, {
+		const batonAccountId = StringParameter.fromStringParameterName(
+			this,
+			'BatonAccountId',
+			'/accountIds/baton',
+		).stringValue;
+
+		// HTTP API Lambda
+		const httpLambda = new GuLambdaFunction(this, `${app}-http-lambda`, {
 			app,
 			memorySize: 1024,
 			fileName: `${app}.zip`,
 			runtime: nodeVersion,
 			timeout: Duration.seconds(15),
-			handler: 'index.handler',
-			functionName: `${app}-${this.stage}`,
+			handler: 'index.handlerHttp',
+			functionName: `${app}-http-${this.stage}`,
 			events: [],
-			environment: {
-				APP: app,
-				STACK: this.stack,
-				STAGE: this.stage,
-			},
+		});
+
+		// Baton RER Lambda
+		const batonLambda = new GuLambdaFunction(this, `${app}-baton-lambda`, {
+			app,
+			memorySize: 1024,
+			fileName: `${app}.zip`,
+			runtime: nodeVersion,
+			handler: 'index.handlerBaton',
+			functionName: `${app}-baton-${this.stage}`,
+			events: [],
 		});
 
 		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {
@@ -37,7 +57,7 @@ export class MParticleApi extends GuStack {
 				{
 					path: '/data-subject-requests/{requestId}/callback',
 					httpMethod: 'POST',
-					lambda: lambda,
+					lambda: httpLambda,
 				},
 			],
 			monitoringConfiguration: {
@@ -46,6 +66,7 @@ export class MParticleApi extends GuStack {
 		});
 
 		if (this.stage === 'PROD') {
+			// API Gateway 5XX alarm
 			new SrLambdaAlarm(this, 'MParticleApiGateway5XXAlarm', {
 				app,
 				alarmName: 'API gateway 5XX response',
@@ -64,14 +85,15 @@ export class MParticleApi extends GuStack {
 						ApiName: `${app}-apiGateway`,
 					},
 				}),
-				lambdaFunctionNames: lambda.functionName,
+				lambdaFunctionNames: httpLambda.functionName,
 			});
 
-			new SrLambdaAlarm(this, 'MParticleLambdaErrorAlarm', {
+			// HTTP Lambda error alarm
+			new SrLambdaAlarm(this, 'MParticleHttpLambdaErrorAlarm', {
 				app,
-				alarmName: 'An error occurred in the mParticle API Lambda',
+				alarmName: 'An error occurred in the mParticle HTTP Lambda',
 				alarmDescription:
-					'mParticle API Lambda failed, please check the logs to diagnose the issue.',
+					'mParticle HTTP Lambda failed, please check the logs to diagnose the issue.',
 				comparisonOperator:
 					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 				metric: new Metric({
@@ -80,25 +102,36 @@ export class MParticleApi extends GuStack {
 					statistic: 'Sum',
 					period: Duration.hours(24),
 					dimensionsMap: {
-						FunctionName: lambda.functionName,
+						FunctionName: httpLambda.functionName,
 					},
 				}),
 				threshold: 1,
 				evaluationPeriods: 1,
-				lambdaFunctionNames: lambda.functionName,
+				lambdaFunctionNames: httpLambda.functionName,
+			});
+
+			// Baton Lambda error alarm
+			new SrLambdaAlarm(this, 'MParticleBatonLambdaErrorAlarm', {
+				app,
+				alarmName: 'An error occurred in the mParticle Baton Lambda',
+				alarmDescription:
+					'Impact: a user may not be deleted from mParticle+Braze after an erasure request, and Baton would display an error.',
+				comparisonOperator:
+					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+				metric: new Metric({
+					metricName: 'Errors',
+					namespace: 'AWS/Lambda',
+					statistic: 'Sum',
+					period: Duration.hours(24),
+					dimensionsMap: {
+						FunctionName: batonLambda.functionName,
+					},
+				}),
+				threshold: 1,
+				evaluationPeriods: 1,
+				lambdaFunctionNames: batonLambda.functionName,
 			});
 		}
-
-		lambda.role?.attachInlinePolicy(
-			new Policy(this, `${app}-cloudwatch-policy`, {
-				statements: [
-					new PolicyStatement({
-						actions: ['cloudwatch:ListTagsForResource'],
-						resources: ['*'],
-					}),
-				],
-			}),
-		);
 
 		new SrLambdaDomain(this, {
 			subdomain: 'mparticle-api',
@@ -108,12 +141,25 @@ export class MParticleApi extends GuStack {
 		/**
 		 * Export Lambda role ARN for cross-account queue access.
 		 * The SQS queue policy in account "Ophan" imports this ARN
-		 * to grant this Lambda sqs:SendMessage permissions to the erasure queue
+		 * to grant this Lambda sqs:SendMessage permissions to the erasure queue.
+		 * We grant the permission so baton can call the lambdas directly as per:
+		 * https://github.com/guardian/baton?tab=readme-ov-file#adding-data-sources-to-baton
+		 * https://github.com/guardian/baton-lambda-template/blob/61ebdec91bd53e218d5f5a2aa90494db69adfa0a/src/main/g8/cfn.yaml#L44-L46
 		 */
-		new CfnOutput(this, 'MParticleLambdaRoleArn', {
-			value: lambda.role!.roleArn,
-			description: 'ARN of the mParticle Lambda execution role',
-			exportName: `${app}-${this.stage}-lambda-role-arn`,
+		const batonInvokeRole = new Role(this, 'BatonInvokeRole', {
+			roleName: `baton-mparticle-lambda-role-${this.stage}`,
+			assumedBy: new AccountPrincipal(batonAccountId),
 		});
+		batonInvokeRole.attachInlinePolicy(
+			new Policy(this, 'BatonRunLambdaPolicy', {
+				statements: [
+					new PolicyStatement({
+						effect: Effect.ALLOW,
+						actions: ['lambda:InvokeFunction'],
+						resources: [batonLambda.functionArn], // Only Baton Lambda needs to be invokable
+					}),
+				],
+			}),
+		);
 	}
 }

@@ -1,13 +1,12 @@
-// test-local.ts
 import type {
 	APIGatewayProxyEvent,
 	APIGatewayProxyEventHeaders,
 	Callback,
 	Context,
 } from 'aws-lambda';
-import { handler } from '..';
+import { handlerHttp } from '../index';
 
-export const run = async ({
+export const invokeHttpHandler = async ({
 	httpMethod,
 	path,
 	body,
@@ -21,7 +20,7 @@ export const run = async ({
 	statusCode: number;
 	body: string;
 }> => {
-	const result: unknown = await handler(
+	const result: unknown = await handlerHttp(
 		{
 			httpMethod,
 			path,
