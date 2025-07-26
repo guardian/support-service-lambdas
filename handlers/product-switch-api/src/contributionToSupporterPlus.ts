@@ -1,20 +1,17 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type {
-	ChangePlanOrderAction,
 	CreateOrderRequest,
-	OrderAction,
 	PreviewOrderRequest,
-} from '@modules/zuora/orders';
-import { singleTriggerDate } from '@modules/zuora/orders';
+} from '@modules/zuora/orders/orders';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import type {
 	RatePlan,
 	RatePlanCharge,
 	ZuoraSubscription,
-} from '@modules/zuora/types';
-import { zuoraDateFormat } from '@modules/zuora/utils';
-import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { Dayjs } from 'dayjs';
-import dayjs from 'dayjs';
+} from '../../../modules/zuora/src/types/objects/subscription';
+import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
 import { removePendingUpdateAmendments } from './amendments';
 import type { CatalogInformation } from './catalogInformation';
 import type { Discount } from './discounts';
@@ -33,6 +30,11 @@ import {
 } from './schemas';
 import { sendToSupporterProductData } from './supporterProductData';
 import type { SwitchInformation } from './switchInformation';
+import {
+	ChangePlanOrderAction,
+	OrderAction,
+	singleTriggerDate,
+} from '@modules/zuora/orders/orderActions';
 
 export interface SwitchDiscountResponse {
 	discountedPrice: number;

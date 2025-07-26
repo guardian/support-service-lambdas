@@ -1,21 +1,6 @@
+import { BillingPeriod } from '@modules/billingPeriod';
 import type { Dayjs } from 'dayjs';
-import { zuoraDateFormat } from './utils';
-
-export type ProcessingOptions = {
-	runBilling: boolean;
-	collectPayment: boolean;
-};
-export type PreviewOptions = {
-	previewThruType: 'SpecificDate';
-	previewTypes: ['BillingDocs'];
-	specificPreviewThruDate: string;
-};
-export type OrderActionType =
-	| 'ChangePlan'
-	| 'TermsAndConditions'
-	| 'RenewSubscription'
-	| 'UpdateProduct'
-	| 'AddProduct';
+import { zuoraDateFormat } from '../utils/common';
 
 export type TriggerDates = [
 	{
@@ -32,10 +17,19 @@ export type TriggerDates = [
 	},
 ];
 
+export type OrderActionType =
+	| 'ChangePlan'
+	| 'TermsAndConditions'
+	| 'RenewSubscription'
+	| 'UpdateProduct'
+	| 'CreateSubscription'
+	| 'AddProduct';
+
 type BaseOrderAction = {
 	type: OrderActionType;
 	triggerDates: TriggerDates;
 };
+
 export type ChangePlanOrderAction = BaseOrderAction & {
 	type: 'ChangePlan';
 	changePlan: {
@@ -62,7 +56,6 @@ export type DiscountOrderAction = BaseOrderAction & {
 		productRatePlanId: string;
 	};
 };
-
 export type UpdateProductOrderAction = BaseOrderAction & {
 	type: 'UpdateProduct';
 	updateProduct: {
@@ -92,28 +85,45 @@ export type TermsAndConditionsOrderAction = BaseOrderAction & {
 		};
 	};
 };
+export type CreateSubscriptionOrderAction = BaseOrderAction & {
+	type: 'CreateSubscription';
+	createSubscription: {
+		terms: {
+			initialTerm: {
+				period: number;
+				periodType: BillingPeriod;
+				termType: 'TERMED';
+			};
+			renewalSetting: 'RENEW_WITH_SPECIFIC_TERM';
+			renewalTerms: [
+				{
+					period: 12;
+					periodType: 'Month';
+				},
+			];
+		};
+		subscribeToRatePlans: [
+			{
+				productRatePlanId: string;
+				chargeOverrides?: Array<{
+					productRatePlanChargeId: string;
+					pricing: {
+						recurringFlatFee: {
+							listPrice: number;
+						};
+					};
+				}>;
+			},
+		];
+	};
+};
 export type OrderAction =
 	| ChangePlanOrderAction
 	| RenewSubscriptionOrderAction
 	| TermsAndConditionsOrderAction
 	| UpdateProductOrderAction
-	| DiscountOrderAction;
-
-export type OrderRequest = {
-	orderDate: string;
-	existingAccountNumber: string;
-	description?: string;
-	subscriptions: Array<{
-		subscriptionNumber: string;
-		orderActions: OrderAction[];
-	}>;
-};
-export type PreviewOrderRequest = OrderRequest & {
-	previewOptions: PreviewOptions;
-};
-export type CreateOrderRequest = OrderRequest & {
-	processingOptions: ProcessingOptions;
-};
+	| DiscountOrderAction
+	| CreateSubscriptionOrderAction;
 
 export function singleTriggerDate(applyFromDate: Dayjs): TriggerDates {
 	return [
