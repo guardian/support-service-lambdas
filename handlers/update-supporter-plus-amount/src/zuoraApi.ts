@@ -1,5 +1,5 @@
-import type { OrderRequest } from '@modules/zuora/orders';
-import { singleTriggerDate } from '@modules/zuora/orders';
+import type { OrderRequest } from '@modules/zuora/orders/orders';
+import { singleTriggerDate } from '@modules/zuora/orders/orderActions';
 import type { ZuoraResponse } from '@modules/zuora/types';
 import { zuoraResponseSchema } from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils';
