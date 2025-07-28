@@ -3,6 +3,7 @@ import { App } from 'aws-cdk-lib';
 import { AlarmsHandler } from '../lib/alarms-handler';
 import { BatchEmailSender } from '../lib/batch-email-sender';
 import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
+import { DeliveryProblemCreditProcessor } from '../lib/delivery-problem-credit-processor';
 import { DiscountApi } from '../lib/discount-api';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
@@ -367,6 +368,15 @@ new MParticleApi(app, 'mparticle-api-CODE', {
 	stage: 'CODE',
 });
 new MParticleApi(app, 'mparticle-api-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+});
+
+new DeliveryProblemCreditProcessor(app, 'delivery-problem-credit-processor-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+});
+new DeliveryProblemCreditProcessor(app, 'delivery-problem-credit-processor-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 });
