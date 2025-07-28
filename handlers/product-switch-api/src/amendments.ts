@@ -1,4 +1,5 @@
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { ZuoraError } from '@modules/zuora/zuoraError';
 import { zuoraSuccessResponseSchema } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
 import type { ZuoraGetAmendmentResponse } from './schemas';
@@ -8,20 +9,20 @@ const getLastAmendment = async (
 	zuoraClient: ZuoraClient,
 	subscriptionNumber: string,
 ): Promise<ZuoraGetAmendmentResponse | undefined> => {
-	const response: ZuoraGetAmendmentResponse = await zuoraClient.get(
-		`v1/amendments/subscriptions/${subscriptionNumber}`,
-		zuoraGetAmendmentResponseSchema,
-	);
-	if (!response.success && response.reasons?.find((r) => r.code === 50000040)) {
-		console.log(`No amendments found for subscription ${subscriptionNumber}`);
-		return undefined;
-	}
-	if (!response.success) {
-		throw new Error(
-			`Failed to get amendment for subscription ${subscriptionNumber}`,
+	try {
+		const response: ZuoraGetAmendmentResponse = await zuoraClient.get(
+			`v1/amendments/subscriptions/${subscriptionNumber}`,
+			zuoraGetAmendmentResponseSchema,
 		);
+		return response;
+	} catch (error) {
+		if (error.instanceof ZuoraError && error.code === 50000040) {
+			console.log(`No amendments found for subscription ${subscriptionNumber}`);
+			return undefined;
+		}
+		console.log(`Failed to get amendment for subscription ${subscriptionNumber}`);
+		throw error;
 	}
-	return response;
 };
 const amendmentIsPending = (amendment: ZuoraGetAmendmentResponse) =>
 	dayjs(amendment.customerAcceptanceDate).isAfter(dayjs());
