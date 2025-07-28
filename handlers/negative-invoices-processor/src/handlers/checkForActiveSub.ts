@@ -41,6 +41,7 @@ export const handler = async (
 	}
 };
 
+//TODO: In next PR move this to a shared module and add records property.
 const queryResponseSchema = z.object({
 	done: z.boolean(),
 	size: z.number(),
