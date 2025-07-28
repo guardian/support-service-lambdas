@@ -1,5 +1,5 @@
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { ZuoraError } from '@modules/zuora/zuoraError';
+import { ZuoraError } from '@modules/zuora/zuoraError';
 import { zuoraSuccessResponseSchema } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
 import type { ZuoraGetAmendmentResponse } from './schemas';
