@@ -13,7 +13,7 @@ export type ZuoraErrorItem = {
 
 // Zod schema definitions
 export const zuoraReasonSchema = z.object({
-	code: z.string(),
+	code: z.string().or(z.number()),
 	message: z.string(),
 });
 
