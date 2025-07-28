@@ -14,9 +14,9 @@ import {
 	Metric,
 	TreatMissingData,
 } from 'aws-cdk-lib/aws-cloudwatch';
-import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { LoggingFormat, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
