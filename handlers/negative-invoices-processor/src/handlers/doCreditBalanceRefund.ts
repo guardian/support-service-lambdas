@@ -6,9 +6,10 @@ import { DoCreditBalanceRefundInputSchema } from '../types';
 import type {
 	DoCreditBalanceRefundInput,
 	DoCreditBalanceRefundOutput,
-	PaymentMethod,
 } from '../types';
-
+import type { PaymentMethod } from '../types/shared';
+import { RefundResponseSchema } from '../types/shared';
+//comment another comment
 export const handler = async (
 	event: DoCreditBalanceRefundInput,
 ): Promise<DoCreditBalanceRefundOutput> => {
@@ -34,7 +35,7 @@ export const handler = async (
 			MethodType: paymentMethodToRefundTo.type,
 		});
 
-		const response = await doRefund(zuoraClient, body);
+		const response = await doRefund(zuoraClient, body, RefundResponseSchema);
 
 		return {
 			...parsedEvent,

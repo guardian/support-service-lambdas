@@ -1,11 +1,15 @@
+import { z } from 'zod';
 import type { ZuoraClient } from './zuoraClient';
-import type { ZuoraUpperCaseSuccessResponse } from './zuoraSchemas';
-import { zuoraUpperCaseSuccessResponseSchema } from './zuoraSchemas';
+import { zuoraResponseSchema } from './types';
 
-export const applyCreditToAccountBalance = async (
+export const applyCreditToAccountBalance = async <
+	T extends z.ZodType = typeof zuoraResponseSchema,
+>(
 	zuoraClient: ZuoraClient,
 	body: string,
-): Promise<ZuoraUpperCaseSuccessResponse> => {
+	schema?: T,
+): Promise<z.infer<T>> => {
 	const path = `/v1/object/credit-balance-adjustment`;
-	return zuoraClient.post(path, body, zuoraUpperCaseSuccessResponseSchema);
+	const finalSchema = (schema ?? zuoraResponseSchema) as T;
+	return zuoraClient.post(path, body, finalSchema);
 };
