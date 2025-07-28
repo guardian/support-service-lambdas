@@ -1,8 +1,9 @@
+import type { BearerTokenProvider } from '@modules/zuora/bearerTokenProvider';
+import type { Logger } from '@modules/zuora/logger';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getLastAmendment } from '../src/amendments';
-import { BearerTokenProvider } from '@modules/zuora/bearerTokenProvider';
-import { Logger } from '@modules/zuora/logger';
 
+// jest.mock('../src/bearerTokenProvider');
 test('should return undefined when subscription has no amendment (code 50000040)', async () => {
 	let zuoraClient: ZuoraClient;
 	let mockTokenProvider: jest.Mocked<BearerTokenProvider>;
@@ -24,7 +25,7 @@ test('should return undefined when subscription has no amendment (code 50000040)
 			}),
 	});
 
-	global.fetch = mockFetch;
+	(globalThis as any).fetch = mockFetch;
 
 	mockTokenProvider = {
 		getBearerToken: jest.fn().mockResolvedValue({ access_token: 'test_token' }),
