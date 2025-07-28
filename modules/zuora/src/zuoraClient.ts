@@ -102,12 +102,6 @@ const isLogicalSuccess = (json: ZuoraResponse, path: string): Boolean => {
 		return true;
 	}
 
-	// For query endpoints - HTTP 200 + presence of 'records' and 'done' = success
-	// (regardless of whether done is true or false)
-	if (path.includes('/query')) {
-		return 'records' in json && 'done' in json;
-	}
-
 	// For other endpoints, check for absence of error indicators
 	const hasErrorIndicators =
 		json.reasons || json.Errors || json.FaultCode || json.code;
