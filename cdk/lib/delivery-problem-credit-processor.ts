@@ -61,9 +61,7 @@ export class DeliveryProblemCreditProcessor extends GuStack {
 						schedule: Schedule.cron({
 							minute: '0/20', // Every 20 minutes
 							hour: '*',
-							day: '?',
 							month: '*',
-							weekDay: '*',
 							year: '*',
 						}),
 						description: 'Trigger processing of delivery-problem credits every 20 mins',

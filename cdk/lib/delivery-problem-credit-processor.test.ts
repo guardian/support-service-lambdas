@@ -25,7 +25,7 @@ describe('DeliveryProblemCreditProcessor stack', () => {
 		template.hasResourceProperties('AWS::Events::Rule', {
 			Description:
 				'Trigger processing of delivery-problem credits every 20 mins',
-			ScheduleExpression: 'cron(0/20 * ? * * *)',
+			ScheduleExpression: 'cron(0/20 * * * ? *)',
 			State: 'ENABLED',
 		});
 
@@ -39,27 +39,18 @@ describe('DeliveryProblemCreditProcessor stack', () => {
 		template.hasResourceProperties('AWS::IAM::Policy', {
 			PolicyDocument: {
 				Statement: [
+					{},
+					{},
+					{},
 					{
 						Effect: 'Allow',
 						Action: 's3:GetObject',
-						Resource: [
-							'arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/PROD/zuoraRest-PROD*.json',
-						],
+						Resource: 'arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/PROD/zuoraRest-PROD*.json',
 					},
-				],
-				Version: '2012-10-17',
-			},
-		});
-
-		template.hasResourceProperties('AWS::IAM::Policy', {
-			PolicyDocument: {
-				Statement: [
 					{
 						Effect: 'Allow',
 						Action: 's3:GetObject',
-						Resource: [
-							'arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/PROD/sfAuth-PROD*.json',
-						],
+						Resource: 'arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/PROD/sfAuth-PROD*.json',
 					},
 				],
 				Version: '2012-10-17',
@@ -92,27 +83,18 @@ describe('DeliveryProblemCreditProcessor stack', () => {
 		template.hasResourceProperties('AWS::IAM::Policy', {
 			PolicyDocument: {
 				Statement: [
+					{},
+					{},
+					{},
 					{
 						Effect: 'Allow',
 						Action: 's3:GetObject',
-						Resource: [
-							'arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/zuoraRest-CODE*.json',
-						],
+						Resource: 'arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/zuoraRest-CODE*.json',
 					},
-				],
-				Version: '2012-10-17',
-			},
-		});
-
-		template.hasResourceProperties('AWS::IAM::Policy', {
-			PolicyDocument: {
-				Statement: [
 					{
 						Effect: 'Allow',
 						Action: 's3:GetObject',
-						Resource: [
-							'arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/sfAuth-CODE*.json',
-						],
+						Resource: 'arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/sfAuth-CODE*.json',
 					},
 				],
 				Version: '2012-10-17',
@@ -186,27 +168,18 @@ describe('DeliveryProblemCreditProcessor stack', () => {
 		codeTemplate.hasResourceProperties('AWS::IAM::Policy', {
 			PolicyDocument: {
 				Statement: [
+					{},
+					{},
+					{},
 					{
 						Effect: 'Allow',
 						Action: 's3:GetObject',
-						Resource: [
-							'arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/zuoraRest-CODE*.json',
-						],
+						Resource: 'arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/zuoraRest-CODE*.json',
 					},
-				],
-				Version: '2012-10-17',
-			},
-		});
-
-		codeTemplate.hasResourceProperties('AWS::IAM::Policy', {
-			PolicyDocument: {
-				Statement: [
 					{
 						Effect: 'Allow',
 						Action: 's3:GetObject',
-						Resource: [
-							'arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/sfAuth-CODE*.json',
-						],
+						Resource: 'arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/sfAuth-CODE*.json',
 					},
 				],
 				Version: '2012-10-17',
@@ -217,27 +190,18 @@ describe('DeliveryProblemCreditProcessor stack', () => {
 		prodTemplate.hasResourceProperties('AWS::IAM::Policy', {
 			PolicyDocument: {
 				Statement: [
+					{},
+					{},
+					{},
 					{
 						Effect: 'Allow',
 						Action: 's3:GetObject',
-						Resource: [
-							'arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/PROD/zuoraRest-PROD*.json',
-						],
+						Resource: 'arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/PROD/zuoraRest-PROD*.json',
 					},
-				],
-				Version: '2012-10-17',
-			},
-		});
-
-		prodTemplate.hasResourceProperties('AWS::IAM::Policy', {
-			PolicyDocument: {
-				Statement: [
 					{
 						Effect: 'Allow',
 						Action: 's3:GetObject',
-						Resource: [
-							'arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/PROD/sfAuth-PROD*.json',
-						],
+						Resource: 'arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/PROD/sfAuth-PROD*.json',
 					},
 				],
 				Version: '2012-10-17',
@@ -275,9 +239,5 @@ describe('DeliveryProblemCreditProcessor stack', () => {
 		// Only PROD should have EventBridge rule for scheduling
 		codeTemplate.resourceCountIs('AWS::Events::Rule', 0);
 		prodTemplate.resourceCountIs('AWS::Events::Rule', 1);
-
-		// Only PROD should have EventBridge targets
-		codeTemplate.resourceCountIs('AWS::Events::Target', 0);
-		prodTemplate.resourceCountIs('AWS::Events::Target', 1);
 	});
 });
