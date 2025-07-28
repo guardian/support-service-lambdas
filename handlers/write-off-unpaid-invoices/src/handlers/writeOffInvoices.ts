@@ -156,7 +156,7 @@ export const handler = async (event: LambdaEvent) => {
 				console.warn(`- Invoice was deleted or archived`);
 				console.warn(`- Insufficient API permissions`);
 				console.warn(`- Recent invoice not yet synchronized`);
-				console.warn(`Skipping this invoice and continuing with others...`);
+				console.warn(`Skipping this invoice and continuing with others ...`);
 				continue; // Skip this invoice but continue with others
 			}
 
