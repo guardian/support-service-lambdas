@@ -43,7 +43,7 @@ export class HolidayStopApi extends GuStack {
 				fulfilmentDatesBucketUrn:
 					'arn:aws:s3:::fulfilment-date-calculator-prod/*',
 			},
-		}[this.stage] || {
+		}[this.stage] ?? {
 			domainName: 'holiday-stop-api-code.support.guardianapis.com',
 			fulfilmentDatesBucketUrn:
 				'arn:aws:s3:::fulfilment-date-calculator-code/*',

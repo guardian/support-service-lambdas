@@ -6,6 +6,7 @@ import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
 import { DiscountApi } from '../lib/discount-api';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
+import { HolidayStopApi } from '../lib/holiday-stop-api';
 import { MetricPushApi } from '../lib/metric-push-api';
 import { MParticleApi } from '../lib/mparticle-api';
 import { NegativeInvoicesProcessor } from '../lib/negative-invoices-processor';
@@ -29,7 +30,6 @@ import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
 import { UserBenefits } from '../lib/user-benefits';
 import { WriteOffUnpaidInvoices } from '../lib/write-off-unpaid-invoices';
 import { ZuoraSalesforceLinkRemover } from '../lib/zuora-salesforce-link-remover';
-import { HolidayStopApi } from '../lib/holiday-stop-api';
 
 const app = new App();
 const membershipHostedZoneId = 'Z1E4V12LQGXFEC';
