@@ -1,4 +1,5 @@
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { ZuoraResponse } from '@modules/zuora/types/httpResponse';
 import { zuoraSuccessResponseSchema } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
 import type { ZuoraGetAmendmentResponse } from './schemas';
@@ -15,8 +16,7 @@ export const getLastAmendment = async (
 		);
 	} catch (error) {
 		if (error && typeof error === 'object' && 'jsonBody' in error) {
-			const zuoraError = error as any;
-			const jsonBody = zuoraError.jsonBody;
+			const jsonBody = error.jsonBody as ZuoraResponse;
 
 			if (
 				!jsonBody.success &&
