@@ -1,7 +1,13 @@
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getLastAmendment } from '../src/amendments';
+import { BearerTokenProvider } from '@modules/zuora/bearerTokenProvider';
+import { Logger } from '@modules/zuora/logger';
 
 test('should return undefined when subscription has no amendment (code 50000040)', async () => {
+	let zuoraClient: ZuoraClient;
+	let mockTokenProvider: jest.Mocked<BearerTokenProvider>;
+	let mockLogger: jest.Mocked<Logger>;
+
 	const mockFetch = jest.fn().mockResolvedValue({
 		ok: true,
 		json: () =>
@@ -20,16 +26,16 @@ test('should return undefined when subscription has no amendment (code 50000040)
 
 	global.fetch = mockFetch;
 
-	const mockTokenProvider = {
+	mockTokenProvider = {
 		getBearerToken: jest.fn().mockResolvedValue({ access_token: 'test_token' }),
 	} as any;
 
-	const mockLogger = {
+	mockLogger = {
 		log: jest.fn(),
 		error: jest.fn(),
 	} as any;
 
-	const zuoraClient = new ZuoraClient('CODE', mockTokenProvider, mockLogger);
+	zuoraClient = new ZuoraClient('CODE', mockTokenProvider, mockLogger);
 
 	const result = await getLastAmendment(zuoraClient, 'A-S12345');
 	expect(result).toBeUndefined();
