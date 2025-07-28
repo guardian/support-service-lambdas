@@ -29,6 +29,7 @@ import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
 import { UserBenefits } from '../lib/user-benefits';
 import { WriteOffUnpaidInvoices } from '../lib/write-off-unpaid-invoices';
 import { ZuoraSalesforceLinkRemover } from '../lib/zuora-salesforce-link-remover';
+import { HolidayStopApi } from '../lib/holiday-stop-api';
 
 const app = new App();
 const membershipHostedZoneId = 'Z1E4V12LQGXFEC';
@@ -367,6 +368,14 @@ new MParticleApi(app, 'mparticle-api-CODE', {
 	stage: 'CODE',
 });
 new MParticleApi(app, 'mparticle-api-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+});
+new HolidayStopApi(app, 'holiday-stop-api-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+});
+new HolidayStopApi(app, 'holiday-stop-api-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 });
