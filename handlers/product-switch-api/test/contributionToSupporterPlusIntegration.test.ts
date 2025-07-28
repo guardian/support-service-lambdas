@@ -14,8 +14,8 @@ import {
 } from '@modules/zuora/billingPreview';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import { getAccount } from '@modules/zuora/getAccount';
-import { getSubscription } from '@modules/zuora/getSubscription';
 import { createPayment } from '@modules/zuora/payment';
+import { getSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
