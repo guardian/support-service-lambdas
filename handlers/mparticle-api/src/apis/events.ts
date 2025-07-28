@@ -1,7 +1,7 @@
 import type { EventBatch } from '../../interfaces/event-batch';
-import { getAppConfig } from '../config';
-import type { HttpResponse } from '../http';
-import { makeHttpRequest } from '../http';
+import { getAppConfig } from '../utils/config';
+import type { HttpResponse } from '../utils/make-http-request';
+import { makeHttpRequest } from '../utils/make-http-request';
 
 async function requestEventsApi<T>(
 	url: string,
@@ -65,6 +65,24 @@ export const uploadAnEventBatch = async (
 	}
 
 	return {};
+};
+
+export const setUserAttributesForRightToErasureRequest = async (
+	environment: 'production' | 'development',
+	userId: string,
+	submittedTime: string,
+): Promise<object> => {
+	return uploadAnEventBatch({
+		userAttributes: {
+			dsr_erasure_requested: true,
+			dsr_erasure_status: 'requested',
+			dsr_erasure_date: submittedTime,
+		},
+		userIdentities: {
+			customer_id: userId,
+		},
+		environment: environment,
+	});
 };
 
 export { requestEventsApi };

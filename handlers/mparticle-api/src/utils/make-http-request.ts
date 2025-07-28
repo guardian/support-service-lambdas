@@ -45,12 +45,10 @@ export async function makeHttpRequest<T>(
 		});
 
 		if (!response.ok) {
-			// Handle HTTP error status codes (4xx, 5xx)
 			let errorBody;
 			try {
 				errorBody = await response.json();
 			} catch {
-				// If response body isn't JSON, get it as text
 				try {
 					errorBody = await response.text();
 				} catch {
@@ -79,7 +77,6 @@ export async function makeHttpRequest<T>(
 			};
 		}
 	} catch (err) {
-		// Handle network errors, parsing errors, etc.
 		return {
 			success: false,
 			error: new HttpError(
