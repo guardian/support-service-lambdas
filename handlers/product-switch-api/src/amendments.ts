@@ -20,7 +20,9 @@ const getLastAmendment = async (
 			console.log(`No amendments found for subscription ${subscriptionNumber}`);
 			return undefined;
 		}
-		console.log(`Failed to get amendment for subscription ${subscriptionNumber}`);
+		console.log(
+			`Failed to get amendment for subscription ${subscriptionNumber}`,
+		);
 		throw error;
 	}
 };
