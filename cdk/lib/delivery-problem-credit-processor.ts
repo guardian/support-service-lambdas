@@ -34,7 +34,7 @@ export class DeliveryProblemCreditProcessor extends GuStack {
 				scheduleName: 'delivery-problem-credit-processor-schedule-prod',
 				shouldSchedule: true,
 			},
-		}[this.stage] || {
+		}[this.stage] ?? {
 			scheduleName: 'delivery-problem-credit-processor-schedule-code',
 			shouldSchedule: false,
 		};
