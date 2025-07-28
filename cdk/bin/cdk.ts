@@ -3,6 +3,7 @@ import { App } from 'aws-cdk-lib';
 import { AlarmsHandler } from '../lib/alarms-handler';
 import { BatchEmailSender } from '../lib/batch-email-sender';
 import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
+import { DeliveryRecordsApi } from '../lib/delivery-records-api';
 import { DiscountApi } from '../lib/discount-api';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
@@ -367,6 +368,15 @@ new MParticleApi(app, 'mparticle-api-CODE', {
 	stage: 'CODE',
 });
 new MParticleApi(app, 'mparticle-api-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+});
+
+new DeliveryRecordsApi(app, 'delivery-records-api-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+});
+new DeliveryRecordsApi(app, 'delivery-records-api-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 });
