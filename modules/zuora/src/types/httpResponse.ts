@@ -1,10 +1,6 @@
 import { z } from 'zod';
 
 // Type definitions for Zuora response formats
-export type ZuoraReason = {
-	code: string;
-	message: string;
-};
 
 export type ZuoraErrorItem = {
 	Code: string;
@@ -16,6 +12,7 @@ export const zuoraReasonSchema = z.object({
 	code: z.string().or(z.number()),
 	message: z.string(),
 });
+export type ZuoraReason = z.infer<typeof zuoraReasonSchema>;
 
 export const zuoraErrorItemSchema = z.object({
 	Code: z.string(),
