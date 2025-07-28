@@ -9,7 +9,11 @@ import {
 	CfnBasePathMapping,
 	CfnDomainName,
 } from 'aws-cdk-lib/aws-apigateway';
-import { ComparisonOperator, Metric, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
+import {
+	ComparisonOperator,
+	Metric,
+	TreatMissingData,
+} from 'aws-cdk-lib/aws-cloudwatch';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { LoggingFormat, Runtime } from 'aws-cdk-lib/aws-lambda';
@@ -103,7 +107,8 @@ export class ProductMoveApi extends GuStack {
 		// ---- Refund Lambda ---- //
 		const refundLambda = new GuLambdaFunction(this, 'RefundLambda', {
 			app,
-			description: 'An SQS-triggered lambda that refunds customer\'s going through product-switching',
+			description:
+				"An SQS-triggered lambda that refunds customer's going through product-switching",
 			functionName: `product-switch-refund-${this.stage}`,
 			loggingFormat: LoggingFormat.TEXT,
 			fileName: fileName,
@@ -116,19 +121,25 @@ export class ProductMoveApi extends GuStack {
 		});
 
 		// ---- Salesforce Tracking Lambda ---- //
-		const salesforceTrackingLambda = new GuLambdaFunction(this, 'SalesforceTrackingLambda', {
-			app,
-			description: 'An SQS-triggered lambda that tracks product switches in Salesforce',
-			functionName: `product-switch-salesforce-tracking-${this.stage}`,
-			loggingFormat: LoggingFormat.TEXT,
-			fileName: fileName,
-			handler: 'com.gu.productmove.salesforce.SalesforceHandler::handleRequest',
-			runtime: runtime,
-			memorySize: 1024,
-			timeout: timeout,
-			environment: commonEnvironmentVariables,
-			events: [new SqsEventSource(salesforceTrackingQueue, { batchSize: 1 })],
-		});
+		const salesforceTrackingLambda = new GuLambdaFunction(
+			this,
+			'SalesforceTrackingLambda',
+			{
+				app,
+				description:
+					'An SQS-triggered lambda that tracks product switches in Salesforce',
+				functionName: `product-switch-salesforce-tracking-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
+				fileName: fileName,
+				handler:
+					'com.gu.productmove.salesforce.SalesforceHandler::handleRequest',
+				runtime: runtime,
+				memorySize: 1024,
+				timeout: timeout,
+				environment: commonEnvironmentVariables,
+				events: [new SqsEventSource(salesforceTrackingQueue, { batchSize: 1 })],
+			},
+		);
 
 		// ---- Usage Plan and API Key ---- //
 		const usagePlan = lambda.api.addUsagePlan('UsagePlan', {
@@ -204,32 +215,45 @@ export class ProductMoveApi extends GuStack {
 			],
 		});
 
-		const mainLambdaDynamoDbPolicy = new Policy(this, 'MainLambdaDynamoDbPolicy', {
-			statements: [
-				new PolicyStatement({
-					effect: Effect.ALLOW,
-					actions: ['dynamodb:PutItem', 'dynamodb:UpdateItem'],
-					resources: [
-						Fn.importValue(`supporter-product-data-tables-${this.stage}-SupporterProductDataTable`),
-					],
-				}),
-			],
-		});
+		const mainLambdaDynamoDbPolicy = new Policy(
+			this,
+			'MainLambdaDynamoDbPolicy',
+			{
+				statements: [
+					new PolicyStatement({
+						effect: Effect.ALLOW,
+						actions: ['dynamodb:PutItem', 'dynamodb:UpdateItem'],
+						resources: [
+							Fn.importValue(
+								`supporter-product-data-tables-${this.stage}-SupporterProductDataTable`,
+							),
+						],
+					}),
+				],
+			},
+		);
 
-		const mainLambdaSecretsPolicy = new Policy(this, 'MainLambdaSecretsPolicy', {
-			statements: [
-				new PolicyStatement({
-					effect: Effect.ALLOW,
-					actions: ['secretsmanager:DescribeSecret', 'secretsmanager:GetSecretValue'],
-					resources: [
-						'arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/InvoicingApi-qNhLQS',
-						'arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/InvoicingApi-JBxYpW',
-						'arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Zuora/User/ZuoraApiUser-zmOGho',
-						'arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Zuora/User/ZuoraApiUser-oq5ISm',
-					],
-				}),
-			],
-		});
+		const mainLambdaSecretsPolicy = new Policy(
+			this,
+			'MainLambdaSecretsPolicy',
+			{
+				statements: [
+					new PolicyStatement({
+						effect: Effect.ALLOW,
+						actions: [
+							'secretsmanager:DescribeSecret',
+							'secretsmanager:GetSecretValue',
+						],
+						resources: [
+							'arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/InvoicingApi-qNhLQS',
+							'arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/InvoicingApi-JBxYpW',
+							'arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Zuora/User/ZuoraApiUser-zmOGho',
+							'arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Zuora/User/ZuoraApiUser-oq5ISm',
+						],
+					}),
+				],
+			},
+		);
 
 		// Refund Lambda Policies
 		const refundLambdaS3Policy = new Policy(this, 'RefundLambdaS3Policy', {
@@ -250,62 +274,92 @@ export class ProductMoveApi extends GuStack {
 			statements: [
 				new PolicyStatement({
 					effect: Effect.ALLOW,
-					actions: ['sqs:DeleteMessage', 'sqs:GetQueueAttributes', 'sqs:ReceiveMessage'],
+					actions: [
+						'sqs:DeleteMessage',
+						'sqs:GetQueueAttributes',
+						'sqs:ReceiveMessage',
+					],
 					resources: ['*'],
 				}),
 			],
 		});
 
-		const refundLambdaSecretsPolicy = new Policy(this, 'RefundLambdaSecretsPolicy', {
-			statements: [
-				new PolicyStatement({
-					effect: Effect.ALLOW,
-					actions: ['secretsmanager:DescribeSecret', 'secretsmanager:GetSecretValue'],
-					resources: [
-						'arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/InvoicingApi-qNhLQS',
-						'arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/InvoicingApi-JBxYpW',
-						'arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Zuora/User/ZuoraApiUser-zmOGho',
-						'arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Zuora/User/ZuoraApiUser-oq5ISm',
-					],
-				}),
-			],
-		});
+		const refundLambdaSecretsPolicy = new Policy(
+			this,
+			'RefundLambdaSecretsPolicy',
+			{
+				statements: [
+					new PolicyStatement({
+						effect: Effect.ALLOW,
+						actions: [
+							'secretsmanager:DescribeSecret',
+							'secretsmanager:GetSecretValue',
+						],
+						resources: [
+							'arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/InvoicingApi-qNhLQS',
+							'arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/InvoicingApi-JBxYpW',
+							'arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Zuora/User/ZuoraApiUser-zmOGho',
+							'arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Zuora/User/ZuoraApiUser-oq5ISm',
+						],
+					}),
+				],
+			},
+		);
 
 		// Salesforce Tracking Lambda Policies
-		const salesforceTrackingLambdaS3Policy = new Policy(this, 'SalesforceTrackingLambdaS3Policy', {
-			statements: [
-				new PolicyStatement({
-					effect: Effect.ALLOW,
-					actions: ['s3:GetObject'],
-					resources: ['arn:aws:s3::*:membership-dist/*'],
-				}),
-			],
-		});
+		const salesforceTrackingLambdaS3Policy = new Policy(
+			this,
+			'SalesforceTrackingLambdaS3Policy',
+			{
+				statements: [
+					new PolicyStatement({
+						effect: Effect.ALLOW,
+						actions: ['s3:GetObject'],
+						resources: ['arn:aws:s3::*:membership-dist/*'],
+					}),
+				],
+			},
+		);
 
-		const salesforceTrackingLambdaSqsPolicy = new Policy(this, 'SalesforceTrackingLambdaSqsPolicy', {
-			statements: [
-				new PolicyStatement({
-					effect: Effect.ALLOW,
-					actions: ['sqs:DeleteMessage', 'sqs:GetQueueAttributes', 'sqs:ReceiveMessage'],
-					resources: ['*'],
-				}),
-			],
-		});
+		const salesforceTrackingLambdaSqsPolicy = new Policy(
+			this,
+			'SalesforceTrackingLambdaSqsPolicy',
+			{
+				statements: [
+					new PolicyStatement({
+						effect: Effect.ALLOW,
+						actions: [
+							'sqs:DeleteMessage',
+							'sqs:GetQueueAttributes',
+							'sqs:ReceiveMessage',
+						],
+						resources: ['*'],
+					}),
+				],
+			},
+		);
 
-		const salesforceTrackingLambdaSecretsPolicy = new Policy(this, 'SalesforceTrackingLambdaSecretsPolicy', {
-			statements: [
-				new PolicyStatement({
-					effect: Effect.ALLOW,
-					actions: ['secretsmanager:DescribeSecret', 'secretsmanager:GetSecretValue'],
-					resources: [
-						'arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/SupportServiceLambdas-729iA5',
-						'arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/SupportServiceLambdas-417yMt',
-						'arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Zuora/User/ZuoraApiUser-zmOGho',
-						'arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Zuora/User/ZuoraApiUser-oq5ISm',
-					],
-				}),
-			],
-		});
+		const salesforceTrackingLambdaSecretsPolicy = new Policy(
+			this,
+			'SalesforceTrackingLambdaSecretsPolicy',
+			{
+				statements: [
+					new PolicyStatement({
+						effect: Effect.ALLOW,
+						actions: [
+							'secretsmanager:DescribeSecret',
+							'secretsmanager:GetSecretValue',
+						],
+						resources: [
+							'arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Salesforce/User/SupportServiceLambdas-729iA5',
+							'arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Salesforce/User/SupportServiceLambdas-417yMt',
+							'arn:aws:secretsmanager:eu-west-1:865473395570:secret:CODE/Zuora/User/ZuoraApiUser-zmOGho',
+							'arn:aws:secretsmanager:eu-west-1:865473395570:secret:PROD/Zuora/User/ZuoraApiUser-oq5ISm',
+						],
+					}),
+				],
+			},
+		);
 
 		// Attach policies to lambda roles
 		lambda.role?.attachInlinePolicy(mainLambdaS3Policy);
@@ -317,9 +371,15 @@ export class ProductMoveApi extends GuStack {
 		refundLambda.role?.attachInlinePolicy(refundLambdaSqsPolicy);
 		refundLambda.role?.attachInlinePolicy(refundLambdaSecretsPolicy);
 
-		salesforceTrackingLambda.role?.attachInlinePolicy(salesforceTrackingLambdaS3Policy);
-		salesforceTrackingLambda.role?.attachInlinePolicy(salesforceTrackingLambdaSqsPolicy);
-		salesforceTrackingLambda.role?.attachInlinePolicy(salesforceTrackingLambdaSecretsPolicy);
+		salesforceTrackingLambda.role?.attachInlinePolicy(
+			salesforceTrackingLambdaS3Policy,
+		);
+		salesforceTrackingLambda.role?.attachInlinePolicy(
+			salesforceTrackingLambdaSqsPolicy,
+		);
+		salesforceTrackingLambda.role?.attachInlinePolicy(
+			salesforceTrackingLambdaSecretsPolicy,
+		);
 
 		// ---- CloudWatch Alarms ---- //
 		if (this.stage === 'PROD') {
@@ -327,8 +387,10 @@ export class ProductMoveApi extends GuStack {
 			new SrLambdaAlarm(this, 'ProductMovementFailureAlarm', {
 				app,
 				alarmName: `${this.stage} An error in the Product Move lambda. Please check the logs to diagnose`,
-				alarmDescription: 'Impact - Product move lambda failed, please check the logs to diagnose the issue.',
-				comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+				alarmDescription:
+					'Impact - Product move lambda failed, please check the logs to diagnose the issue.',
+				comparisonOperator:
+					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 				metric: new Metric({
 					metricName: 'Errors',
 					namespace: 'AWS/Lambda',
@@ -349,7 +411,8 @@ export class ProductMoveApi extends GuStack {
 				app,
 				alarmName: `${this.stage} The product-move-api returned a 500 response`,
 				alarmDescription: 'Check the logs for details',
-				comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+				comparisonOperator:
+					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 				metric: new Metric({
 					metricName: '5XXError',
 					namespace: 'AWS/ApiGateway',
@@ -370,8 +433,10 @@ export class ProductMoveApi extends GuStack {
 			new SrLambdaAlarm(this, 'SalesforceTrackingLambdaErrorsAlarm', {
 				app,
 				alarmName: `${this.stage} Salesforce tracking of a product switch has failed`,
-				alarmDescription: 'Impact - tracking of product switches is not going to salesforce/bigquery/braze',
-				comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+				alarmDescription:
+					'Impact - tracking of product switches is not going to salesforce/bigquery/braze',
+				comparisonOperator:
+					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 				metric: new Metric({
 					metricName: 'Errors',
 					namespace: 'AWS/Lambda',
@@ -391,7 +456,8 @@ export class ProductMoveApi extends GuStack {
 			new SrLambdaAlarm(this, 'NoSalesforceTrackingAlarm', {
 				app,
 				alarmName: `${this.stage} No Salesforce tracking of a product switch has been queued for 8 hours`,
-				alarmDescription: 'Impact - tracking of product switches may not be going to salesforce/bigquery/braze',
+				alarmDescription:
+					'Impact - tracking of product switches may not be going to salesforce/bigquery/braze',
 				comparisonOperator: ComparisonOperator.LESS_THAN_OR_EQUAL_TO_THRESHOLD,
 				metric: new Metric({
 					metricName: 'Invocations',
