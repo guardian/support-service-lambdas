@@ -2,8 +2,12 @@ import { GuScheduledLambda } from '@guardian/cdk';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import type { App } from 'aws-cdk-lib';
-import { CfnCondition, Duration, Fn } from 'aws-cdk-lib';
-import { ComparisonOperator, Metric, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
+import { Duration } from 'aws-cdk-lib';
+import {
+	ComparisonOperator,
+	Metric,
+	TreatMissingData,
+} from 'aws-cdk-lib/aws-cloudwatch';
 import { Schedule } from 'aws-cdk-lib/aws-events';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { LoggingFormat, Runtime } from 'aws-cdk-lib/aws-lambda';
@@ -19,11 +23,13 @@ export class HolidayStopProcessor extends GuStack {
 		// Map stage-specific configurations
 		const stageConfig = {
 			CODE: {
-				fulfilmentDatesBucketUrn: 'arn:aws:s3:::fulfilment-date-calculator-code/*',
+				fulfilmentDatesBucketUrn:
+					'arn:aws:s3:::fulfilment-date-calculator-code/*',
 				scheduleName: 'holiday-stop-processor-schedule-code',
 			},
 			PROD: {
-				fulfilmentDatesBucketUrn: 'arn:aws:s3:::fulfilment-date-calculator-prod/*',
+				fulfilmentDatesBucketUrn:
+					'arn:aws:s3:::fulfilment-date-calculator-prod/*',
 				scheduleName: 'holiday-stop-processor-schedule',
 			},
 		};
@@ -31,29 +37,35 @@ export class HolidayStopProcessor extends GuStack {
 		const config = stageConfig[this.stage as keyof typeof stageConfig];
 
 		// Create the scheduled lambda
-		const holidayStopProcessorLambda = new GuScheduledLambda(this, 'HolidayStopProcessor', {
-			app,
-			fileName: `${app}.jar`,
-			functionName,
-			description: 'Updates subscriptions with outstanding holiday stops. Source - https://github.com/guardian/support-service-lambdas/tree/main/handlers/holiday-stop-processor',
-			handler: 'com.gu.holidaystopprocessor.Handler::handle',
-			runtime: Runtime.JAVA_21,
-			memorySize: 1232,
-			timeout: Duration.seconds(900),
-			loggingFormat: LoggingFormat.TEXT,
-			environment: {
-				Stage: this.stage,
-			},
-			monitoringConfiguration: {
-				noMonitoring: true, // We'll create custom alarms
-			},
-			rules: [
-				{
-					schedule: Schedule.expression('cron(0/20 * ? * * *)'), // Every 20 minutes
-					description: 'Trigger processing of holiday stops every 20 mins (to ensure successful processing of all batches within 24 hours)',
+		const holidayStopProcessorLambda = new GuScheduledLambda(
+			this,
+			'HolidayStopProcessor',
+			{
+				app,
+				fileName: `${app}.jar`,
+				functionName,
+				description:
+					'Updates subscriptions with outstanding holiday stops. Source - https://github.com/guardian/support-service-lambdas/tree/main/handlers/holiday-stop-processor',
+				handler: 'com.gu.holidaystopprocessor.Handler::handle',
+				runtime: Runtime.JAVA_21,
+				memorySize: 1232,
+				timeout: Duration.seconds(900),
+				loggingFormat: LoggingFormat.TEXT,
+				environment: {
+					Stage: this.stage,
 				},
-			],
-		});
+				monitoringConfiguration: {
+					noMonitoring: true, // We'll create custom alarms
+				},
+				rules: [
+					{
+						schedule: Schedule.expression('cron(0/20 * ? * * *)'), // Every 20 minutes
+						description:
+							'Trigger processing of holiday stops every 20 mins (to ensure successful processing of all batches within 24 hours)',
+					},
+				],
+			},
+		);
 
 		// Set maximum retry attempts to 0 (as processor runs every 20 mins anyway, there's no need to retry)
 		holidayStopProcessorLambda.configureAsyncInvoke({
@@ -80,16 +92,13 @@ export class HolidayStopProcessor extends GuStack {
 		holidayStopProcessorLambda.role?.attachInlinePolicy(s3Policy);
 
 		// ---- CloudWatch Alarm (PROD only) ---- //
-		const isProd = new CfnCondition(this, 'IsProd', {
-			expression: Fn.conditionEquals(this.stage, 'PROD'),
-		});
-
 		if (this.stage === 'PROD') {
 			new SrLambdaAlarm(this, 'HolidayStopProcessorFailureAlarm', {
 				app,
 				alarmName: 'URGENT 9-5 - PROD: Failed to process holiday stops',
 				alarmDescription: `IMPACT: If this goes unaddressed at least one subscription that was supposed to be suspended will be fulfilled. Until we document how to deal with likely problems please alert the Value team. For general advice, see https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk`,
-				comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+				comparisonOperator:
+					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 				metric: new Metric({
 					metricName: 'Errors',
 					namespace: 'AWS/Lambda',

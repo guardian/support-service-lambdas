@@ -23,7 +23,8 @@ describe('HolidayStopProcessor stack', () => {
 
 		// Check that EventBridge rule is created
 		template.hasResourceProperties('AWS::Events::Rule', {
-			Description: 'Trigger processing of holiday stops every 20 mins (to ensure successful processing of all batches within 24 hours)',
+			Description:
+				'Trigger processing of holiday stops every 20 mins (to ensure successful processing of all batches within 24 hours)',
 			ScheduleExpression: 'cron(0/20 * ? * * *)',
 			State: 'ENABLED',
 		});
@@ -60,15 +61,23 @@ describe('HolidayStopProcessor stack', () => {
 
 	it('creates alarms only for PROD stage', () => {
 		const app = new App();
-		const codeStack = new HolidayStopProcessor(app, 'HolidayStopProcessorCode', {
-			stack: 'support',
-			stage: 'CODE',
-		});
+		const codeStack = new HolidayStopProcessor(
+			app,
+			'HolidayStopProcessorCode',
+			{
+				stack: 'support',
+				stage: 'CODE',
+			},
+		);
 
-		const prodStack = new HolidayStopProcessor(app, 'HolidayStopProcessorProd', {
-			stack: 'support',
-			stage: 'PROD',
-		});
+		const prodStack = new HolidayStopProcessor(
+			app,
+			'HolidayStopProcessorProd',
+			{
+				stack: 'support',
+				stage: 'PROD',
+			},
+		);
 
 		const codeTemplate = Template.fromStack(codeStack);
 		const prodTemplate = Template.fromStack(prodStack);
@@ -78,7 +87,7 @@ describe('HolidayStopProcessor stack', () => {
 
 		// PROD should have alarms
 		prodTemplate.resourcePropertiesCountIs('AWS::CloudWatch::Alarm', {}, 1);
-		
+
 		// Verify the alarm configuration for PROD
 		prodTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
 			AlarmName: 'URGENT 9-5 - PROD: Failed to process holiday stops',
@@ -92,15 +101,23 @@ describe('HolidayStopProcessor stack', () => {
 
 	it('uses correct S3 bucket URNs for different stages', () => {
 		const app = new App();
-		const codeStack = new HolidayStopProcessor(app, 'HolidayStopProcessorCode', {
-			stack: 'support',
-			stage: 'CODE',
-		});
+		const codeStack = new HolidayStopProcessor(
+			app,
+			'HolidayStopProcessorCode',
+			{
+				stack: 'support',
+				stage: 'CODE',
+			},
+		);
 
-		const prodStack = new HolidayStopProcessor(app, 'HolidayStopProcessorProd', {
-			stack: 'support',
-			stage: 'PROD',
-		});
+		const prodStack = new HolidayStopProcessor(
+			app,
+			'HolidayStopProcessorProd',
+			{
+				stack: 'support',
+				stage: 'PROD',
+			},
+		);
 
 		const codeTemplate = Template.fromStack(codeStack);
 		const prodTemplate = Template.fromStack(prodStack);
