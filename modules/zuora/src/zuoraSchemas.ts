@@ -112,7 +112,7 @@ export type ZuoraAccount = z.infer<typeof zuoraAccountSchema>;
 
 export const zuoraSubscriptionsFromAccountSchema = z.object({
 	success: z.boolean(),
-	subscriptions: z.array(zuoraSubscriptionSchema),
+	subscriptions: z.array(zuoraSubscriptionSchema).optional(),
 });
 
 export type ZuoraSubscriptionsFromAccountResponse = z.infer<
