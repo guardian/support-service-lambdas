@@ -16,6 +16,7 @@ export function generateZuoraError(
 		return new ZuoraError(
 			`${statusText}: ${formatReasons(json.reasons)}`,
 			response.status,
+			json,
 		);
 	}
 
