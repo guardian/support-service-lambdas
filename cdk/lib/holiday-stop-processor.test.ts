@@ -38,6 +38,7 @@ describe('HolidayStopProcessor stack', () => {
 		// Check that EventInvokeConfig is created with no retries
 		template.hasResourceProperties('AWS::Lambda::EventInvokeConfig', {
 			MaximumRetryAttempts: 0,
+			MaximumEventAgeInSeconds: 3600,
 			Qualifier: '$LATEST',
 		});
 
@@ -55,6 +56,7 @@ describe('HolidayStopProcessor stack', () => {
 						],
 					},
 				],
+				Version: '2012-10-17',
 			},
 		});
 	});
@@ -127,6 +129,8 @@ describe('HolidayStopProcessor stack', () => {
 			PolicyDocument: {
 				Statement: [
 					{
+						Effect: 'Allow',
+						Action: 's3:GetObject',
 						Resource: [
 							'arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/zuoraRest-CODE*.json',
 							'arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/sfAuth-CODE*.json',
@@ -134,6 +138,7 @@ describe('HolidayStopProcessor stack', () => {
 						],
 					},
 				],
+				Version: '2012-10-17',
 			},
 		});
 
@@ -142,6 +147,8 @@ describe('HolidayStopProcessor stack', () => {
 			PolicyDocument: {
 				Statement: [
 					{
+						Effect: 'Allow',
+						Action: 's3:GetObject',
 						Resource: [
 							'arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/PROD/zuoraRest-PROD*.json',
 							'arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/PROD/sfAuth-PROD*.json',
@@ -149,6 +156,7 @@ describe('HolidayStopProcessor stack', () => {
 						],
 					},
 				],
+				Version: '2012-10-17',
 			},
 		});
 	});

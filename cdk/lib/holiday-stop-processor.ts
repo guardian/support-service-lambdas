@@ -32,6 +32,11 @@ export class HolidayStopProcessor extends GuStack {
 					'arn:aws:s3:::fulfilment-date-calculator-prod/*',
 				scheduleName: 'holiday-stop-processor-schedule',
 			},
+			TEST: {
+				fulfilmentDatesBucketUrn:
+					'arn:aws:s3:::fulfilment-date-calculator-code/*', // TEST uses CODE config
+				scheduleName: 'holiday-stop-processor-schedule-test',
+			},
 		};
 
 		const config = stageConfig[this.stage as keyof typeof stageConfig];
