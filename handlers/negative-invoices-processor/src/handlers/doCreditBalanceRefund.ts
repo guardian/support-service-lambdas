@@ -36,7 +36,7 @@ export const handler = async (
 		});
 
 		const response = await doRefund(zuoraClient, body, RefundResponseSchema);
-		console.log(`Refund response: ${JSON.stringify(response, null, 2)}`);
+
 		return {
 			...parsedEvent,
 			refundResult: {
