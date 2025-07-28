@@ -41,7 +41,7 @@ export class DeliveryRecordsApi extends GuStack {
 				domainName: 'delivery-records-api.support.guardianapis.com',
 				apiName: 'delivery-records-api-PROD',
 			},
-		}[this.stage] || {
+		}[this.stage] ?? {
 			domainName: 'delivery-records-api-code.support.guardianapis.com',
 			apiName: 'delivery-records-api-CODE',
 		};
