@@ -15,9 +15,9 @@ import {
 } from '@modules/zuora/billingPreview';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import { getAccount } from '@modules/zuora/getAccount';
-import { getSubscription } from '@modules/zuora/subscription';
 import type { Logger } from '@modules/zuora/logger';
 import { isNotRemovedOrDiscount } from '@modules/zuora/rateplan';
+import { getSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type {
 	ZuoraAccount,
