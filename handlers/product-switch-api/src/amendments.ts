@@ -1,4 +1,7 @@
-import type { ZuoraResponse } from '@modules/zuora/types/httpResponse';
+import type {
+	ZuoraReason,
+	ZuoraResponse,
+} from '@modules/zuora/types/httpResponse';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { zuoraSuccessResponseSchema } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
@@ -20,7 +23,7 @@ export const getLastAmendment = async (
 
 			if (
 				!jsonBody.success &&
-				jsonBody.reasons?.find((r: any) => r.code === 50000040)
+				jsonBody.reasons?.find((r: ZuoraReason) => r.code === 50000040)
 			) {
 				console.log(
 					`No amendments found for subscription ${subscriptionNumber}`,
