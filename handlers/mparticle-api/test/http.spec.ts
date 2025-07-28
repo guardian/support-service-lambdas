@@ -1,27 +1,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import type { SendMessageCommandInput } from '@aws-sdk/client-sqs';
-import { SQSClient } from '@aws-sdk/client-sqs';
 import { faker } from '@faker-js/faker';
 import type { DataSubjectRequestState } from '../interfaces/data-subject-request-state';
 import type { DataSubjectRequestSubmission } from '../interfaces/data-subject-request-submission';
-import type { AppConfig } from '../src/config';
-import { run } from '../src/utils/run';
+import type { AppConfig } from '../src/utils/config';
+import { invokeHttpHandler } from '../src/utils/invoke-http-handler';
 
-jest.mock('@aws-sdk/client-sqs', () => {
-	return {
-		SQSClient: jest.fn().mockImplementation(() => ({
-			send: jest.fn().mockResolvedValue({
-				MessageId: 'mocked-message-id',
-			}),
-		})),
-		SendMessageCommand: jest
-			.fn()
-			.mockImplementation((args: SendMessageCommandInput) => args),
-	};
-});
-
-jest.mock('../src/config', () => ({
+jest.mock('../src/utils/config', () => ({
 	getAppConfig: jest.fn().mockResolvedValue({
 		inputPlatform: {
 			key: faker.string.nanoid(),
@@ -36,14 +21,12 @@ jest.mock('../src/config', () => ({
 	getEnv: jest.fn(() => 'CODE'),
 }));
 
-describe('mparticle-api API tests', () => {
-	// Mock fetch before each test
+describe('mparticle-api HTTP tests', () => {
 	beforeEach(() => {
 		jest.resetModules();
 		global.fetch = jest.fn();
 	});
 
-	// Clean up after each test
 	afterEach(() => {
 		jest.restoreAllMocks();
 	});
@@ -57,7 +40,7 @@ describe('mparticle-api API tests', () => {
 			mockRegisterEventResponse,
 		);
 
-		const result = await run({
+		const result = await invokeHttpHandler({
 			httpMethod: 'POST',
 			path: '/events',
 			body: JSON.stringify({
@@ -121,7 +104,7 @@ describe('mparticle-api API tests', () => {
 			.mockResolvedValueOnce(mockSetUserAttributesResponse)
 			.mockResolvedValueOnce(mockCreateDataSubjectRequestResponse);
 
-		const result = await run({
+		const result = await invokeHttpHandler({
 			httpMethod: 'POST',
 			path: '/data-subject-requests',
 			body: JSON.stringify({
@@ -160,7 +143,7 @@ describe('mparticle-api API tests', () => {
 			mockGetSubjectRequestByIdResponse,
 		);
 
-		const result = await run({
+		const result = await invokeHttpHandler({
 			httpMethod: 'GET',
 			path: `/data-subject-requests/${requestId}`,
 		});
@@ -194,13 +177,18 @@ describe('mparticle-api API tests', () => {
 			.mockResolvedValueOnce(mockDiscoveryResponse)
 			.mockResolvedValueOnce(mockGetCertificateResponse);
 
-		const result = await run({
+		const result = await invokeHttpHandler({
 			httpMethod: 'POST',
 			path: `/data-subject-requests/${requestId}/callback`,
 			// Do not fake it to match the header signature
 			body: JSON.stringify({
 				controller_id: '1402',
 				expected_completion_time: '2025-06-09T00:00:00Z',
+				/**
+				 * This url is meaningful url since the whole request has
+				 * to match the header signature on 'x-opendsr-signature'
+				 * for proper validation.
+				 */
 				status_callback_url:
 					'https://webhook.site/6dfd0447-e1f9-4a98-a391-25481898763b',
 				subject_request_id: requestId,
@@ -225,27 +213,5 @@ describe('mparticle-api API tests', () => {
 		};
 		expect(body.message).toEqual('Callback accepted and processed');
 		expect(body.timestamp).toBeDefined();
-
-		// Access the mock SQSClient instance with proper typing
-		const sqsClientMock = SQSClient as unknown as jest.Mock;
-		const mockResults = sqsClientMock.mock.results as Array<{
-			value: { send: jest.Mock };
-		}>;
-		const clientInstance = mockResults[0]?.value;
-
-		// Assert that send was called
-		expect(clientInstance?.send).toHaveBeenCalled();
-
-		// Get the argument passed to send, with explicit typing
-		const sendMock = clientInstance?.send.mock;
-		const firstCall = sendMock?.calls[0] as unknown[];
-		const sentCommandInput = firstCall[0] as {
-			QueueUrl: string;
-			MessageBody: string;
-		};
-		expect(sentCommandInput).toMatchObject({
-			QueueUrl: expect.any(String) as string,
-			MessageBody: expect.any(String) as string,
-		});
 	});
 });
