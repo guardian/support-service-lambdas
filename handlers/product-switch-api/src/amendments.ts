@@ -16,7 +16,7 @@ const getLastAmendment = async (
 		);
 		return response;
 	} catch (error) {
-		if (error.instanceof ZuoraError && error.code === 50000040) {
+		if (error instanceof ZuoraError && error.code === 50000040) {
 			console.log(`No amendments found for subscription ${subscriptionNumber}`);
 			return undefined;
 		}
