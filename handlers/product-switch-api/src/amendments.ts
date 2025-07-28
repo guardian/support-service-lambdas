@@ -1,5 +1,5 @@
-import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraResponse } from '@modules/zuora/types/httpResponse';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { zuoraSuccessResponseSchema } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
 import type { ZuoraGetAmendmentResponse } from './schemas';
@@ -28,9 +28,7 @@ export const getLastAmendment = async (
 				return undefined;
 			}
 		}
-		throw new Error(
-			`Failed to get amendment for subscription ${subscriptionNumber}`,
-		);
+		throw error;
 	}
 };
 const amendmentIsPending = (amendment: ZuoraGetAmendmentResponse) =>
