@@ -1,9 +1,9 @@
-import { ZuoraError } from './zuoraError';
 import type {
 	ZuoraResponse,
 	ZuoraReason,
 	ZuoraErrorItem,
 } from '../types/httpResponse';
+import { ZuoraError } from './zuoraError';
 
 export function generateZuoraError(
 	json: ZuoraResponse,
