@@ -1,6 +1,6 @@
 import type {
-	ZuoraResponse,
 	ZuoraReason,
+	ZuoraResponse,
 	ZuoraErrorItem,
 } from '../types/httpResponse';
 import { ZuoraError } from './zuoraError';
