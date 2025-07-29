@@ -4,15 +4,17 @@ import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type {
 	GetInvoiceItemsResponse,
 	GetInvoiceResponse,
-	InvoiceItemAdjustmentResult,
-	InvoiceItemAdjustmentSourceType,
-	InvoiceItemAdjustmentType,
 } from '@modules/zuora/zuoraSchemas';
 import {
 	getInvoiceItemsSchema,
 	getInvoiceSchema,
-	invoiceItemAdjustmentResultSchema,
 } from '@modules/zuora/zuoraSchemas';
+import {
+	InvoiceItemAdjustmentResult,
+	invoiceItemAdjustmentResultSchema,
+	InvoiceItemAdjustmentSourceType,
+	InvoiceItemAdjustmentType,
+} from './types/objects/invoiceItemAdjustment';
 
 export const getInvoice = async (
 	zuoraClient: ZuoraClient,
