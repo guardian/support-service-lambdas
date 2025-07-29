@@ -1,5 +1,5 @@
 import type { Stage } from '@modules/stage';
-import { BearerTokenProvider } from '@modules/zuora/bearerTokenProvider';
+import { BearerTokenProvider } from '@modules/zuora/auth/bearerTokenProvider';
 import { Logger } from '@modules/zuora/logger';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 

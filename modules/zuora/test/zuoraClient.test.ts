@@ -1,6 +1,6 @@
 import { Logger } from '@modules/zuora/logger';
 import { ZuoraError } from '@modules/zuora/zuoraError';
-import { BearerTokenProvider } from '../src/bearerTokenProvider';
+import { BearerTokenProvider } from '../src/auth/bearerTokenProvider';
 import { ZuoraClient } from '../src/zuoraClient';
 import { z } from 'zod';
 
