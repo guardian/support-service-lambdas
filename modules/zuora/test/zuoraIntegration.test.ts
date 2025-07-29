@@ -4,8 +4,8 @@
  * @group integration
  */
 
-import { BearerTokenProvider } from '../src/bearerTokenProvider';
-import { getOAuthClientCredentials } from '../src/oAuthCredentials';
+import { BearerTokenProvider } from '../src/auth/bearerTokenProvider';
+import { getOAuthClientCredentials } from '../src/auth/oAuthCredentials';
 import { getSubscription } from '../src/subscription';
 import { ZuoraClient } from '../src/zuoraClient';
 
