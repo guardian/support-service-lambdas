@@ -4,7 +4,6 @@ import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import { getAccount } from '@modules/zuora/account';
-import { addDiscount, previewDiscount } from '@modules/zuora/addDiscount';
 import {
 	getBillingPreview,
 	getNextInvoice,
@@ -15,6 +14,7 @@ import {
 	toSimpleInvoiceItems,
 } from '@modules/zuora/billingPreview';
 import { zuoraDateFormat } from '@modules/zuora/common';
+import { addDiscount, previewDiscount } from '@modules/zuora/discount';
 import type { Logger } from '@modules/logger';
 import { isNotRemovedOrDiscount } from '@modules/zuora/rateplan';
 import { getSubscription } from '@modules/zuora/subscription';
