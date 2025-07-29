@@ -6,13 +6,10 @@ import {
 	getInvoiceItems,
 } from '@modules/zuora/invoice';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import {
-	type GetInvoiceItemsResponse,
-	type InvoiceItemAdjustmentSourceType,
-} from '@modules/zuora/zuoraSchemas';
+import { type GetInvoiceItemsResponse } from '@modules/zuora/zuoraSchemas';
 
+export type InvoiceItemAdjustmentSourceType = 'InvoiceDetail' | 'Tax';
 export type CancelSource = 'MMA' | 'Autocancel' | 'Salesforce';
-
 export type LambdaEvent = {
 	Items: { invoice_id: string; cancel_source: CancelSource }[];
 };
@@ -57,17 +54,18 @@ export const handler = async (event: LambdaEvent) => {
 				Math.abs(currentBalance),
 			);
 
-			await creditInvoice(
-				dayjs(),
-				zuoraClient,
-				invoiceId,
-				item.id,
-				adjustmentAmount,
-				item.availableToCreditAmount > 0 ? 'Credit' : 'Charge',
-				item.sourceType,
-				cancelSourceToCommentMap[cancelSource as CancelSource],
-				'Write-off',
-			);
+			const body = JSON.stringify({
+				AdjustmentDate: dayjs(),
+				Amount: adjustmentAmount,
+				InvoiceId: invoiceId,
+				SourceId: item.id,
+				SourceType: item.sourceType,
+				Type: item.availableToCreditAmount > 0 ? 'Credit' : 'Charge',
+				Comment: cancelSourceToCommentMap[cancelSource as CancelSource],
+				ReasonCode: 'Write-off',
+			});
+
+			await creditInvoice(zuoraClient, body);
 
 			currentBalance -= adjustmentAmount * (currentBalance > 0 ? 1 : -1);
 

@@ -24,19 +24,18 @@ export const adjustNonCollectedInvoice = async (
 		),
 		`No supporter plus invoice item found in the invoice ${invoiceId}`,
 	);
-	const adjustmentResult = await creditInvoice(
-		dayjs(),
-		zuoraClient,
-		invoiceId,
-		supporterPlusInvoiceItem.id,
-		paymentAmount,
-		'Credit',
-		'InvoiceDetail',
-		'Created by the product-switch-api to zero out an amount of less than 50 pence/cents as this is less than the minimum Stripe charge amount',
-	);
-	if (!adjustmentResult.Success) {
-		throw new Error('An error occurred while adjusting the invoice');
-	}
+	const body = JSON.stringify({
+		AdjustmentDate: dayjs(),
+		Amount: paymentAmount,
+		InvoiceId: invoiceId,
+		SourceId: supporterPlusInvoiceItem.id,
+		SourceType: 'InvoiceDetail',
+		Type: 'Credit',
+		Comment:
+			'Created by the product-switch-api to zero out an amount of less than 50 pence/cents as this is less than the minimum Stripe charge amount',
+	});
+	const adjustmentResult = await creditInvoice(zuoraClient, body);
+
 	return adjustmentResult;
 };
 
