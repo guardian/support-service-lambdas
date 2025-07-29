@@ -1,6 +1,7 @@
 import { sum } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import { Lazy } from '@modules/lazy';
+import type { Logger } from '@modules/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import { getAccount } from '@modules/zuora/account';
@@ -14,7 +15,6 @@ import {
 	toSimpleInvoiceItems,
 } from '@modules/zuora/billingPreview';
 import { addDiscount, previewDiscount } from '@modules/zuora/discount';
-import type { Logger } from '@modules/logger';
 import { isNotRemovedOrDiscount } from '@modules/zuora/rateplan';
 import { getSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
@@ -25,10 +25,10 @@ import type {
 import { getZuoraCatalog } from '@modules/zuora-catalog/S3';
 import type { APIGatewayProxyEventHeaders } from 'aws-lambda';
 import dayjs from 'dayjs';
+import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
 import { EligibilityChecker } from './eligibilityChecker';
 import { generateCancellationDiscountConfirmationEmail } from './generateCancellationDiscountConfirmationEmail';
 import { getDiscountFromSubscription } from './productToDiscountMapping';
-import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
 
 export const previewDiscountEndpoint = async (
 	logger: Logger,

@@ -2,8 +2,8 @@
  * @group integration
  */
 import type { EmailMessageWithUserId } from '@modules/email/email';
-import type { Stage } from '@modules/stage';
 import { Logger } from '@modules/logger';
+import type { Stage } from '@modules/stage';
 import { cancelSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
