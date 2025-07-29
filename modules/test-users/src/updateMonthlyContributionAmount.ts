@@ -3,7 +3,7 @@ import { prettyPrint } from '@modules/prettyPrint';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { zuoraDateFormat } from '@modules/zuora/common';
-import { getSubscription } from '@modules/zuora/getSubscription';
+import { getSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 import { zuoraSuccessResponseSchema } from '@modules/zuora/zuoraSchemas';

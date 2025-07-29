@@ -16,5 +16,6 @@ test('ZuoraSubscriptionsFromAccountResponse schema is correct', () => {
 	const result = zuoraSubscriptionsFromAccountSchema.parse(
 		subscriptionsFromAccountJson,
 	);
-	expect(result.subscriptions.length).toBe(1);
+	expect(result.subscriptions).toBeDefined();
+	expect(result.subscriptions?.length).toBe(1);
 });

@@ -5,8 +5,8 @@
  */
 
 import { BearerTokenProvider } from '../src/bearerTokenProvider';
-import { getSubscription } from '../src/getSubscription';
 import { getOAuthClientCredentials } from '../src/oAuthCredentials';
+import { getSubscription } from '../src/subscription';
 import { ZuoraClient } from '../src/zuoraClient';
 
 test('getZuoraCredentials', async () => {

@@ -6,9 +6,9 @@ import {
 	createDigitalSubscription,
 	createSupporterPlusSubscription,
 } from '@modules/zuora/../test/it-helpers/createGuardianSubscription';
-import { cancelSubscription } from '@modules/zuora/cancelSubscription';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import { Logger } from '@modules/zuora/logger';
+import { cancelSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { previewDiscountEndpoint } from '../src/discountEndpoint';
