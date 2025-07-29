@@ -3,7 +3,7 @@ import { ValidationError } from '@modules/errors';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { Stage } from '@modules/stage';
-import { Logger } from '@modules/zuora/logger';
+import { Logger } from '@modules/logger';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type {
 	APIGatewayProxyEvent,

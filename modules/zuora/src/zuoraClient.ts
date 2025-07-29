@@ -1,6 +1,6 @@
 import type { Stage } from '@modules/stage';
 import type { z } from 'zod';
-import { Logger } from '@modules/zuora/logger';
+import { Logger } from '@modules/logger';
 import { BearerTokenProvider } from './bearerTokenProvider';
 import { zuoraServerUrl } from './common';
 import { getOAuthClientCredentials } from './oAuthCredentials';

@@ -1,4 +1,4 @@
-import { Logger } from '@modules/zuora/logger';
+import { Logger } from '@modules/logger';
 import { ZuoraError } from '@modules/zuora/zuoraError';
 import { BearerTokenProvider } from '../src/bearerTokenProvider';
 import { ZuoraClient } from '../src/zuoraClient';

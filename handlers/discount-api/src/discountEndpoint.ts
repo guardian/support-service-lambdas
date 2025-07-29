@@ -15,7 +15,7 @@ import {
 	toSimpleInvoiceItems,
 } from '@modules/zuora/billingPreview';
 import { zuoraDateFormat } from '@modules/zuora/common';
-import type { Logger } from '@modules/zuora/logger';
+import type { Logger } from '@modules/logger';
 import { isNotRemovedOrDiscount } from '@modules/zuora/rateplan';
 import { getSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';

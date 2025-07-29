@@ -1,6 +1,6 @@
 import type { Stage } from '@modules/stage';
 import { BearerTokenProvider } from '@modules/zuora/bearerTokenProvider';
-import { Logger } from '@modules/zuora/logger';
+import { Logger } from '@modules/logger';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 class MockZuoraClient extends ZuoraClient {

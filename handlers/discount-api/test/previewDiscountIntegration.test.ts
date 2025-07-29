@@ -7,7 +7,7 @@ import {
 	createSupporterPlusSubscription,
 } from '@modules/zuora/../test/it-helpers/createGuardianSubscription';
 import { zuoraDateFormat } from '@modules/zuora/common';
-import { Logger } from '@modules/zuora/logger';
+import { Logger } from '@modules/logger';
 import { cancelSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';

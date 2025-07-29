@@ -2,7 +2,7 @@ import { sendEmail } from '@modules/email/email';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { Router } from '@modules/routing/router';
 import type { Stage } from '@modules/stage';
-import { Logger } from '@modules/zuora/logger';
+import { Logger } from '@modules/logger';
 import type {
 	APIGatewayProxyEvent,
 	APIGatewayProxyResult,

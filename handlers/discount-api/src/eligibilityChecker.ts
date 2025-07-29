@@ -2,7 +2,7 @@ import { ValidationError } from '@modules/errors';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { SimpleInvoiceItem } from '@modules/zuora/billingPreview';
 import { getNextInvoiceTotal } from '@modules/zuora/billingPreview';
-import type { Logger } from '@modules/zuora/logger';
+import type { Logger } from '@modules/logger';
 import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 import type { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
 import type { Dayjs } from 'dayjs';

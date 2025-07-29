@@ -3,7 +3,7 @@ import {
 	itemsForSubscription,
 	toSimpleInvoiceItems,
 } from '@modules/zuora/billingPreview';
-import { Logger } from '@modules/zuora/logger';
+import { Logger } from '@modules/logger';
 import {
 	billingPreviewSchema,
 	zuoraSubscriptionResponseSchema,

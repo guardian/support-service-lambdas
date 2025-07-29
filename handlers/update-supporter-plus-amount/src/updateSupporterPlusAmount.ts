@@ -11,7 +11,7 @@ import type {
 } from '@modules/product-catalog/productCatalog';
 import { getAccount } from '@modules/zuora/account';
 import { zuoraDateFormat } from '@modules/zuora/common';
-import type { Logger } from '@modules/zuora/logger';
+import type { Logger } from '@modules/logger';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type {
