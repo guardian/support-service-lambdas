@@ -1,5 +1,5 @@
+import { updateAccount } from '@modules/zuora/account';
 import { actionUpdate } from '@modules/zuora/actionUpdate';
-import { updateAccount } from '@modules/zuora/updateAccount';
 import { type ZuoraClient } from '@modules/zuora/zuoraClient';
 import { ZuoraError } from '@modules/zuora/zuoraError';
 
