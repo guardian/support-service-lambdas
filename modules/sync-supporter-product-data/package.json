@@ -9,5 +9,8 @@
     "@aws-sdk/client-sqs": "3.787.0",
     "dayjs": "^1.11.13",
     "ts-node": "10.9.2"
+  },
+  "dependencies": {
+    "zod": "catalog:"
   }
 }
