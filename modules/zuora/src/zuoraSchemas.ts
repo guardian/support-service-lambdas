@@ -1,5 +1,6 @@
 import { BillingPeriodValues } from '@modules/billingPeriod';
 import { z } from 'zod';
+import { zuoraResponseSchema } from './types';
 
 // --------------- Auth ---------------
 export type OAuthClientCredentials = z.infer<
@@ -110,8 +111,7 @@ export const zuoraAccountSchema = z.object({
 
 export type ZuoraAccount = z.infer<typeof zuoraAccountSchema>;
 
-export const zuoraSubscriptionsFromAccountSchema = z.object({
-	success: z.boolean(),
+export const zuoraSubscriptionsFromAccountSchema = zuoraResponseSchema.extend({
 	subscriptions: z.array(zuoraSubscriptionSchema).optional(),
 });
 

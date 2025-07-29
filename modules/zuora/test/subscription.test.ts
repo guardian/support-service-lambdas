@@ -1,20 +1,20 @@
-// import dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 import {
-	// cancelSubscription,
-	// getSubscription,
+	cancelSubscription,
+	getSubscription,
 	getSubscriptionsByAccountNumber,
 } from '@modules/zuora/subscription';
 
 import type {
 	ZuoraSubscription,
 	ZuoraSubscriptionsFromAccountResponse,
-	// ZuoraSuccessResponse,
+	ZuoraSuccessResponse,
 } from '@modules/zuora/zuoraSchemas';
 import {
-	// zuoraSubscriptionResponseSchema,
+	zuoraSubscriptionResponseSchema,
 	zuoraSubscriptionsFromAccountSchema,
-	// zuoraSuccessResponseSchema,
+	zuoraSuccessResponseSchema,
 } from '@modules/zuora/zuoraSchemas';
 
 jest.mock('@modules/zuora/zuoraClient');
@@ -24,119 +24,119 @@ describe('subscription', () => {
 		jest.clearAllMocks();
 	});
 
-	// describe('cancelSubscription', () => {
-	// 	it('should cancel subscription with correct parameters', async () => {
-	// 		const mockResponse: ZuoraSuccessResponse = {
-	// 			success: true,
-	// 		};
+	describe('cancelSubscription', () => {
+		it('should cancel subscription with correct parameters', async () => {
+			const mockResponse: ZuoraSuccessResponse = {
+				success: true,
+			};
 
-	// 		mockZuoraClient.put = jest.fn().mockResolvedValue(mockResponse);
+			mockZuoraClient.put = jest.fn().mockResolvedValue(mockResponse);
 
-	// 		const contractEffectiveDate = dayjs('2025-08-01');
-	// 		const result = await cancelSubscription(
-	// 			mockZuoraClient,
-	// 			'SUB-12345',
-	// 			contractEffectiveDate,
-	// 			true,
-	// 			false,
-	// 		);
+			const contractEffectiveDate = dayjs('2025-08-01');
+			const result = await cancelSubscription(
+				mockZuoraClient,
+				'SUB-12345',
+				contractEffectiveDate,
+				true,
+				false,
+			);
 
-	// 		expect(mockZuoraClient.put).toHaveBeenCalledWith(
-	// 			'/v1/subscriptions/SUB-12345/cancel',
-	// 			JSON.stringify({
-	// 				cancellationEffectiveDate: '2025-08-01',
-	// 				cancellationPolicy: 'SpecificDate',
-	// 				runBilling: true,
-	// 				collect: false,
-	// 			}),
-	// 			zuoraSuccessResponseSchema,
-	// 			{ 'zuora-version': '211.0' },
-	// 		);
-	// 		expect(result).toEqual(mockResponse);
-	// 	});
+			expect(mockZuoraClient.put).toHaveBeenCalledWith(
+				'/v1/subscriptions/SUB-12345/cancel',
+				JSON.stringify({
+					cancellationEffectiveDate: '2025-08-01',
+					cancellationPolicy: 'SpecificDate',
+					runBilling: true,
+					collect: false,
+				}),
+				zuoraSuccessResponseSchema,
+				{ 'zuora-version': '211.0' },
+			);
+			expect(result).toEqual(mockResponse);
+		});
 
-	// 	it('should handle undefined collect parameter', async () => {
-	// 		const mockResponse: ZuoraSuccessResponse = {
-	// 			success: true,
-	// 		};
+		it('should handle undefined collect parameter', async () => {
+			const mockResponse: ZuoraSuccessResponse = {
+				success: true,
+			};
 
-	// 		mockZuoraClient.put = jest.fn().mockResolvedValue(mockResponse);
+			mockZuoraClient.put = jest.fn().mockResolvedValue(mockResponse);
 
-	// 		const contractEffectiveDate = dayjs('2025-08-01');
-	// 		await cancelSubscription(
-	// 			mockZuoraClient,
-	// 			'SUB-12345',
-	// 			contractEffectiveDate,
-	// 			false,
-	// 		);
+			const contractEffectiveDate = dayjs('2025-08-01');
+			await cancelSubscription(
+				mockZuoraClient,
+				'SUB-12345',
+				contractEffectiveDate,
+				false,
+			);
 
-	// 		expect(mockZuoraClient.put).toHaveBeenCalledWith(
-	// 			'/v1/subscriptions/SUB-12345/cancel',
-	// 			JSON.stringify({
-	// 				cancellationEffectiveDate: '2025-08-01',
-	// 				cancellationPolicy: 'SpecificDate',
-	// 				runBilling: false,
-	// 				collect: undefined,
-	// 			}),
-	// 			zuoraSuccessResponseSchema,
-	// 			{ 'zuora-version': '211.0' },
-	// 		);
-	// 	});
+			expect(mockZuoraClient.put).toHaveBeenCalledWith(
+				'/v1/subscriptions/SUB-12345/cancel',
+				JSON.stringify({
+					cancellationEffectiveDate: '2025-08-01',
+					cancellationPolicy: 'SpecificDate',
+					runBilling: false,
+					collect: undefined,
+				}),
+				zuoraSuccessResponseSchema,
+				{ 'zuora-version': '211.0' },
+			);
+		});
 
-	// 	it('should throw if zuoraClient.put rejects', async () => {
-	// 		const error = new Error('Cancellation failed');
-	// 		mockZuoraClient.put = jest.fn().mockRejectedValue(error);
+		it('should throw if zuoraClient.put rejects', async () => {
+			const error = new Error('Cancellation failed');
+			mockZuoraClient.put = jest.fn().mockRejectedValue(error);
 
-	// 		const contractEffectiveDate = dayjs('2025-08-01');
+			const contractEffectiveDate = dayjs('2025-08-01');
 
-	// 		await expect(
-	// 			cancelSubscription(
-	// 				mockZuoraClient,
-	// 				'SUB-12345',
-	// 				contractEffectiveDate,
-	// 				true,
-	// 			),
-	// 		).rejects.toThrow('Cancellation failed');
-	// 	});
-	// });
+			await expect(
+				cancelSubscription(
+					mockZuoraClient,
+					'SUB-12345',
+					contractEffectiveDate,
+					true,
+				),
+			).rejects.toThrow('Cancellation failed');
+		});
+	});
 
-	// describe('getSubscription', () => {
-	// 	it('should get subscription by subscription number', async () => {
-	// 		const mockSubscription: ZuoraSubscription = {
-	// 			id: 'abc123',
-	// 			accountNumber: 'ACC-67890',
-	// 			status: 'Active',
-	// 			termStartDate: new Date('2025-01-01'),
-	// 			termEndDate: new Date('2026-01-01'),
-	// 			ratePlans: [],
-	// 			subscriptionNumber: 'SUB-12345',
-	// 			contractEffectiveDate: new Date('2023-07-03'),
-	// 			serviceActivationDate: new Date('2023-07-03'),
-	// 			customerAcceptanceDate: new Date('2023-07-03'),
-	// 			subscriptionStartDate: new Date('2023-07-03'),
-	// 			subscriptionEndDate: new Date('2024-07-03'),
-	// 			lastBookingDate: new Date('2024-07-03'),
-	// 		};
-	// 		mockZuoraClient.get = jest.fn().mockResolvedValue(mockSubscription);
+	describe('getSubscription', () => {
+		it('should get subscription by subscription number', async () => {
+			const mockSubscription: ZuoraSubscription = {
+				id: 'abc123',
+				accountNumber: 'ACC-67890',
+				status: 'Active',
+				termStartDate: new Date('2025-01-01'),
+				termEndDate: new Date('2026-01-01'),
+				ratePlans: [],
+				subscriptionNumber: 'SUB-12345',
+				contractEffectiveDate: new Date('2023-07-03'),
+				serviceActivationDate: new Date('2023-07-03'),
+				customerAcceptanceDate: new Date('2023-07-03'),
+				subscriptionStartDate: new Date('2023-07-03'),
+				subscriptionEndDate: new Date('2024-07-03'),
+				lastBookingDate: new Date('2024-07-03'),
+			};
+			mockZuoraClient.get = jest.fn().mockResolvedValue(mockSubscription);
 
-	// 		const result = await getSubscription(mockZuoraClient, 'SUB-12345');
+			const result = await getSubscription(mockZuoraClient, 'SUB-12345');
 
-	// 		expect(mockZuoraClient.get).toHaveBeenCalledWith(
-	// 			'v1/subscriptions/SUB-12345',
-	// 			zuoraSubscriptionResponseSchema,
-	// 		);
-	// 		expect(result).toEqual(mockSubscription);
-	// 	});
+			expect(mockZuoraClient.get).toHaveBeenCalledWith(
+				'v1/subscriptions/SUB-12345',
+				zuoraSubscriptionResponseSchema,
+			);
+			expect(result).toEqual(mockSubscription);
+		});
 
-	// 	it('should throw if zuoraClient.get rejects', async () => {
-	// 		const error = new Error('Subscription not found');
-	// 		mockZuoraClient.get = jest.fn().mockRejectedValue(error);
+		it('should throw if zuoraClient.get rejects', async () => {
+			const error = new Error('Subscription not found');
+			mockZuoraClient.get = jest.fn().mockRejectedValue(error);
 
-	// 		await expect(
-	// 			getSubscription(mockZuoraClient, 'SUB-INVALID'),
-	// 		).rejects.toThrow('Subscription not found');
-	// 	});
-	// });
+			await expect(
+				getSubscription(mockZuoraClient, 'SUB-INVALID'),
+			).rejects.toThrow('Subscription not found');
+		});
+	});
 
 	describe('getSubscriptionsByAccountNumber', () => {
 		it('should get subscriptions by account number', async () => {
@@ -192,47 +192,84 @@ describe('subscription', () => {
 			expect(result).toEqual(mockSubscriptions);
 		});
 
-		// it('should return empty array when no subscriptions found', async () => {
-		// 	const mockResponse: ZuoraSubscriptionsFromAccountResponse = {
-		// 		success: false,
-		// 	};
-		// 	//does the endpoint return false?
-		// 	mockZuoraClient.get = jest.fn().mockResolvedValue(mockResponse);
-
-		// 	const result = await getSubscriptionsByAccountNumber(
-		// 		mockZuoraClient,
-		// 		'ACC-EMPTY',
-		// 	);
-
-		// 	expect(result).toEqual([]);
-		// });
-
-		it('returns the response from zuoraClient.get', async () => {
+		it('should return empty array when no subscriptions in response', async () => {
 			const mockResponse: ZuoraSubscriptionsFromAccountResponse = {
 				success: false,
 				reasons: [
 					{
 						code: 50000040,
-						message: "Cannot find entity by key: 'A-S009327871'.",
+						message:
+							"Cannot find entity by key: '8ad09b7d83a313110183a8769afd1bf31'.",
 					},
 				],
-				requestId: '610ddeec-c9dc-405e-88d1-1ba9ed912af5',
 			};
+			mockZuoraClient.get = jest.fn().mockResolvedValue(mockResponse);
 
-			mockGet.mockResolvedValue(mockResponse);
+			const result = await getSubscriptionsByAccountNumber(
+				mockZuoraClient,
+				'ACC-EMPTY',
+			);
 
-			const result = await getPaymentMethods(mockZuoraClient, accountId);
-
-			expect(result).toBe(mockResponse);
+			expect(result).toEqual([]);
 		});
 
-		it('propagates errors from zuoraClient.get', async () => {
-			const error = new Error('fail');
-			mockGet.mockRejectedValue(error);
+		it('returns the response from zuoraClient.get', async () => {
+			const mockResponse: ZuoraSubscriptionsFromAccountResponse = {
+				subscriptions: [
+					{
+						id: '8ad0887183a3024f0183a899d0434b41',
+						accountNumber: 'A00422866',
+						subscriptionNumber: 'A-S00430438',
+						contractEffectiveDate: new Date('2022-10-01'),
+						serviceActivationDate: new Date('2022-10-01'),
+						customerAcceptanceDate: new Date('2022-10-01'),
+						subscriptionStartDate: new Date('2022-10-01'),
+						subscriptionEndDate: new Date('2022-10-07'),
+						lastBookingDate: new Date('2022-10-05'),
+						termStartDate: new Date('2022-10-01'),
+						termEndDate: new Date('2022-10-07'),
+						status: 'Cancelled',
+						ratePlans: [
+							{
+								id: '8ad0887183a3024f0183a899d0464b43',
+								productId: '2c92c0f955c3cf0f0155c5d9ddc53bc3',
+								productName: 'Newspaper Delivery',
+								productRatePlanId: '2c92c0f955c3cf0f0155c5d9e2493c43',
+								ratePlanName: 'Everyday',
+								ratePlanCharges: [
+									{
+										id: '8ad0887183a3024f0183a899d0504b52',
+										productRatePlanChargeId: '2c92c0f955c3cf0f0155c5d9e4993c75',
+										number: 'C-00715453',
+										name: 'Sunday',
+										type: 'Recurring',
+										model: 'FlatFee',
+										billingPeriod: 'Month',
+										currency: 'GBP',
+										effectiveStartDate: new Date('2022-10-01'),
+										effectiveEndDate: new Date('2022-10-07'),
+										processedThroughDate: new Date('2022-10-07'),
+										chargedThroughDate: new Date('2022-10-07'),
+										upToPeriodsType: null,
+										upToPeriods: null,
+										price: 12.57,
+										discountPercentage: null,
+									},
+								],
+							},
+						],
+					},
+				],
+			};
 
-			await expect(
-				getPaymentMethods(mockZuoraClient, accountId),
-			).rejects.toThrow('fail');
+			mockZuoraClient.get = jest.fn().mockResolvedValue(mockResponse);
+
+			const result = await getSubscriptionsByAccountNumber(
+				mockZuoraClient,
+				'ACC-67890',
+			);
+
+			expect(result).toBe(mockResponse.subscriptions);
 		});
 
 		it('should throw if zuoraClient.get rejects', async () => {
