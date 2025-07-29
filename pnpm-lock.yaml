@@ -510,6 +510,10 @@ importers:
         version: 3.758.0(@aws-sdk/client-dynamodb@3.758.0)
 
   modules/sync-supporter-product-data:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.48
     devDependencies:
       '@aws-sdk/client-sqs':
         specifier: 3.787.0

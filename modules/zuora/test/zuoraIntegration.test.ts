@@ -4,7 +4,6 @@
  * @group integration
  */
 
-import { getActiveAccountNumbersForIdentityId } from '@modules/zuora/getAccountsForIdentityId';
 import { BearerTokenProvider } from '../src/bearerTokenProvider';
 import { getOAuthClientCredentials } from '../src/oAuthCredentials';
 import { getSubscription } from '../src/subscription';
@@ -32,15 +31,4 @@ test('GetSubscription', async () => {
 	expect(response.id.length).toBeGreaterThan(0);
 	const expectedDate = new Date('2023-09-08');
 	expect(response.contractEffectiveDate).toEqual(expectedDate);
-});
-
-test('getActiveAccountsForIdentityId', async () => {
-	const stage = 'CODE';
-	const client = await ZuoraClient.create(stage);
-	const accountIds = await getActiveAccountNumbersForIdentityId(
-		client,
-		'200264404',
-	);
-	console.log(accountIds);
-	expect(accountIds.length).toBeGreaterThan(0);
 });
