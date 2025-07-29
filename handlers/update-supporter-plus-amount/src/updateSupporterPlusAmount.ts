@@ -9,8 +9,8 @@ import type {
 	ProductCatalog,
 	ProductRatePlan,
 } from '@modules/product-catalog/productCatalog';
+import { getAccount } from '@modules/zuora/account';
 import { zuoraDateFormat } from '@modules/zuora/common';
-import { getAccount } from '@modules/zuora/getAccount';
 import type { Logger } from '@modules/zuora/logger';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';

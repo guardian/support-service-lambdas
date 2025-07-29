@@ -7,13 +7,13 @@ import console from 'console';
 import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
+import { getAccount } from '@modules/zuora/account';
 import {
 	getBillingPreview,
 	itemsForSubscription,
 	toSimpleInvoiceItems,
 } from '@modules/zuora/billingPreview';
 import { zuoraDateFormat } from '@modules/zuora/common';
-import { getAccount } from '@modules/zuora/getAccount';
 import { createPayment } from '@modules/zuora/payment';
 import { getSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';

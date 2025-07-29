@@ -3,6 +3,7 @@ import { ValidationError } from '@modules/errors';
 import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
+import { getAccount } from '@modules/zuora/account';
 import { addDiscount, previewDiscount } from '@modules/zuora/addDiscount';
 import {
 	getBillingPreview,
@@ -14,7 +15,6 @@ import {
 	toSimpleInvoiceItems,
 } from '@modules/zuora/billingPreview';
 import { zuoraDateFormat } from '@modules/zuora/common';
-import { getAccount } from '@modules/zuora/getAccount';
 import type { Logger } from '@modules/zuora/logger';
 import { isNotRemovedOrDiscount } from '@modules/zuora/rateplan';
 import { getSubscription } from '@modules/zuora/subscription';
