@@ -62,7 +62,7 @@ describe('subscription', () => {
 
 			mockZuoraClient.put = jest.fn().mockResolvedValue(mockResponse);
 
-			const contractEffectiveDate = dayjs('2025-08-01');
+			const contractEffectiveDate = dayjs('2025-08-02');
 			await cancelSubscription(
 				mockZuoraClient,
 				'SUB-12345',
@@ -73,7 +73,7 @@ describe('subscription', () => {
 			expect(mockZuoraClient.put).toHaveBeenCalledWith(
 				'/v1/subscriptions/SUB-12345/cancel',
 				JSON.stringify({
-					cancellationEffectiveDate: '2025-08-01',
+					cancellationEffectiveDate: '2025-08-02',
 					cancellationPolicy: 'SpecificDate',
 					runBilling: false,
 					collect: undefined,
