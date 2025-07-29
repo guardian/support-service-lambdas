@@ -46,7 +46,6 @@ export const handler = async (event: LambdaEvent) => {
 
 	for (const invoice of event.Items) {
 		const { invoice_id: invoiceId, cancel_source: cancelSource } = invoice;
-		invoice.invoice_number;
 		try {
 			console.log(`Processing invoice ${invoiceId} from ${cancelSource}`);
 			const invoiceData: GetInvoiceResponse = await getInvoice(
@@ -86,7 +85,7 @@ export const handler = async (event: LambdaEvent) => {
 						AdjustmentDate: dayjs().format('YYYY-MM-DD'),
 						Amount: adjustmentAmount,
 						Type: 'Decrease',
-						SourceTransactionNumber: invoice.invoice_id,
+						SourceTransactionNumber: invoice.invoice_number,
 						Comment: `${cancelSourceToCommentMap[cancelSource as CancelSource]} - Credit balance applied to invoice.`,
 					}),
 				);
