@@ -5,7 +5,7 @@ import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import { getActiveAccountNumbersForIdentityId } from '@modules/zuora/getAccountsForIdentityId';
-import { getSubscriptionsByAccountNumber } from '@modules/zuora/getSubscription';
+import { getSubscriptionsByAccountNumber } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { RatePlan, ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
