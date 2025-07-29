@@ -1,4 +1,4 @@
-export { zuoraResponseSchema } from './httpResponse';
+export { createQueryResponseSchema, zuoraResponseSchema } from './httpResponse';
 export {
 	BasePaymentMethodSchema,
 	DefaultPaymentMethodResponseSchema,
