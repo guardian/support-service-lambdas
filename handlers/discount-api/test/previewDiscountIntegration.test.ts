@@ -6,7 +6,6 @@ import {
 	createDigitalSubscription,
 	createSupporterPlusSubscription,
 } from '@modules/zuora/../test/it-helpers/createGuardianSubscription';
-import { zuoraDateFormat } from '@modules/zuora/common';
 import { Logger } from '@modules/logger';
 import { cancelSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
@@ -14,6 +13,7 @@ import dayjs from 'dayjs';
 import { previewDiscountEndpoint } from '../src/discountEndpoint';
 import { validationRequirements } from '../src/eligibilityChecker';
 import type { EligibilityCheckResponseBody } from '../src/responseSchema';
+import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
 
 const stage: Stage = 'CODE';
 const validIdentityId = '200175946';

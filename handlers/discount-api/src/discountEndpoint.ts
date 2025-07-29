@@ -13,7 +13,6 @@ import {
 	itemsForSubscription,
 	toSimpleInvoiceItems,
 } from '@modules/zuora/billingPreview';
-import { zuoraDateFormat } from '@modules/zuora/common';
 import { addDiscount, previewDiscount } from '@modules/zuora/discount';
 import type { Logger } from '@modules/logger';
 import { isNotRemovedOrDiscount } from '@modules/zuora/rateplan';
@@ -29,6 +28,7 @@ import dayjs from 'dayjs';
 import { EligibilityChecker } from './eligibilityChecker';
 import { generateCancellationDiscountConfirmationEmail } from './generateCancellationDiscountConfirmationEmail';
 import { getDiscountFromSubscription } from './productToDiscountMapping';
+import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
 
 export const previewDiscountEndpoint = async (
 	logger: Logger,

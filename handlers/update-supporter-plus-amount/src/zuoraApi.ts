@@ -1,6 +1,6 @@
-import { zuoraDateFormat } from '@modules/zuora/common';
 import type { OrderRequest } from '@modules/zuora/orders';
 import { singleTriggerDate } from '@modules/zuora/orders';
+import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraSuccessResponse } from '@modules/zuora/zuoraSchemas';
 import { zuoraSuccessResponseSchema } from '@modules/zuora/zuoraSchemas';
