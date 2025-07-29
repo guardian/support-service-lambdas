@@ -5,10 +5,24 @@ import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import { zuoraDateFormat } from '@modules/zuora/common';
 import { getSubscriptionsByAccountNumber } from '@modules/zuora/getSubscription';
+import { createQueryResponseSchema } from '@modules/zuora/types';
+import { doQuery } from '@modules/zuora/query';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { RatePlan, ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
 import { z } from 'zod';
+
+export const getActiveAccountNumbersForIdentityId = async (
+	zuoraClient: ZuoraClient,
+	identityId: string,
+) => {
+	const query = `select accountNumber from account where status = 'Active' and IdentityId__c = '${identityId}'`;
+	const queryResponseSchema = createQueryResponseSchema({
+		AccountNumber: z.string(),
+	});
+	const result = await doQuery(zuoraClient, query, queryResponseSchema);
+	return result.records?.map((record) => record.AccountNumber);
+};
 
 type MessageBody = {
 	subscriptionName: string;
@@ -44,7 +58,7 @@ void (async () => {
 	);
 	const subscriptions = (
 		await Promise.all(
-			accountNumbers.map((accountNumber) =>
+			(accountNumbers ?? []).map((accountNumber) =>
 				getSubscriptionsByAccountNumber(client, accountNumber),
 			),
 		)
@@ -107,28 +121,4 @@ const sendToQueue = async (stage: Stage, message: MessageBody) => {
 	const response = await client.send(command);
 	console.log(`Response from message send was ${JSON.stringify(response)}`);
 	return response;
-};
-
-const responseSchema = z.object({
-	records: z.array(z.object({ AccountNumber: z.string() })),
-});
-
-type Response = z.infer<typeof responseSchema>;
-
-export const getActiveAccountNumbersForIdentityId = async (
-	zuoraClient: ZuoraClient,
-	identityId: string,
-) => {
-	const path = `/v1/action/query`;
-
-	const body = {
-		queryString: `select accountNumber from account where status = 'Active' and IdentityId__c = '${identityId}'`,
-	};
-	const response: Response = await zuoraClient.post(
-		path,
-		JSON.stringify(body),
-		responseSchema,
-	);
-
-	return response.records.map((record) => record.AccountNumber);
 };
