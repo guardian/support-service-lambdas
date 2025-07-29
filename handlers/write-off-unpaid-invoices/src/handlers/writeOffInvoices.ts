@@ -16,7 +16,11 @@ import { applyCreditToAccountBalance } from '@modules/zuora/creditBalanceAdjustm
 export type CancelSource = 'MMA' | 'Autocancel' | 'Salesforce';
 
 export type LambdaEvent = {
-	Items: { invoice_id: string; cancel_source: CancelSource, invoice_number: string }[];
+	Items: {
+		invoice_id: string;
+		cancel_source: CancelSource;
+		invoice_number: string;
+	}[];
 };
 
 type AdjustableItem = {
@@ -40,7 +44,7 @@ export const handler = async (event: LambdaEvent) => {
 
 	for (const invoice of event.Items) {
 		const { invoice_id: invoiceId, cancel_source: cancelSource } = invoice;
-		invoice.invoice_number
+		invoice.invoice_number;
 		try {
 			console.log(`Processing invoice ${invoiceId} from ${cancelSource}`);
 			const invoiceData: GetInvoiceResponse = await getInvoice(
@@ -81,7 +85,7 @@ export const handler = async (event: LambdaEvent) => {
 						Amount: adjustmentAmount,
 						Type: 'Decrease',
 						SourceTransactionNumber: invoiceData.id,
-						Comment: `${cancelSourceToCommentMap[cancelSource as CancelSource]} - Credit balance applied to invoice.`
+						Comment: `${cancelSourceToCommentMap[cancelSource as CancelSource]} - Credit balance applied to invoice.`,
 					}),
 				);
 
