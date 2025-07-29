@@ -48,5 +48,5 @@ export const getSubscriptionsByAccountNumber = async (
 		path,
 		zuoraSubscriptionsFromAccountSchema,
 	);
-	return response.subscriptions;
+	return response.subscriptions ?? [];
 };
