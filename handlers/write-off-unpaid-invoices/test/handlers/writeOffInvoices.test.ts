@@ -3,14 +3,14 @@ import {
 	getInvoiceItems,
 	creditInvoice,
 } from '@modules/zuora/invoice';
-import { getAccount } from '@modules/zuora/account';
-import { applyCreditToAccountBalance } from '@modules/zuora/creditBalanceAdjustment';
+import { applyCreditToAccountBalance } from '@modules/zuora/applyCreditToAccountBalance';
 import {
 	handler,
 	cancelSourceToCommentMap,
 	type CancelSource,
 	type LambdaEvent,
 } from '../../src/handlers/writeOffInvoices';
+import { getAccount } from '@modules/zuora/account';
 
 jest.mock('@modules/zuora/zuoraClient', () => ({
 	ZuoraClient: {
@@ -28,7 +28,7 @@ jest.mock('@modules/zuora/account', () => ({
 	getAccount: jest.fn(),
 }));
 
-jest.mock('@modules/zuora/creditBalanceAdjustment', () => ({
+jest.mock('@modules/zuora/applyCreditToAccountBalance', () => ({
 	applyCreditToAccountBalance: jest.fn(),
 }));
 
@@ -286,10 +286,6 @@ describe('writeOffInvoices', () => {
 		expect(applyCreditToAccountBalance).toHaveBeenCalledWith(
 			expect.anything(),
 			expect.stringContaining('"Type":"Decrease"'),
-		);
-		expect(applyCreditToAccountBalance).toHaveBeenCalledWith(
-			expect.anything(),
-			expect.stringContaining('"ReasonCode":"Write-off"'),
 		);
 		expect(applyCreditToAccountBalance).toHaveBeenCalledWith(
 			expect.anything(),

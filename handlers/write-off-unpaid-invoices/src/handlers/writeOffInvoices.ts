@@ -5,13 +5,15 @@ import {
 	getInvoice,
 	getInvoiceItems,
 } from '@modules/zuora/invoice';
+import { applyCreditToAccountBalance } from '@modules/zuora/applyCreditToAccountBalance';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { InvoiceItemAdjustmentSourceType } from '@modules/zuora/types/objects/invoiceItemAdjustment';
-import type { GetInvoiceItemsResponse } from '@modules/zuora/types/objects/invoiceItem';
-import { GetInvoiceResponse } from '@modules/zuora/types/objects/invoice';
-import { ZuoraAccount } from '@modules/zuora/types/objects/account';
+import {
+	type GetInvoiceItemsResponse,
+	type GetInvoiceResponse,
+	type InvoiceItemAdjustmentSourceType,
+	type ZuoraAccount,
+} from '@modules/zuora/zuoraSchemas';
 import { getAccount } from '@modules/zuora/account';
-import { applyCreditToAccountBalance } from '@modules/zuora/creditBalanceAdjustment';
 
 export type CancelSource = 'MMA' | 'Autocancel' | 'Salesforce';
 
