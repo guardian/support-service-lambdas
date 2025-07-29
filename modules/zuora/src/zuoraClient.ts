@@ -3,7 +3,7 @@ import type { z } from 'zod';
 import { Logger } from '@modules/zuora/logger';
 import { BearerTokenProvider } from './auth/bearerTokenProvider';
 import { zuoraServerUrl } from './common';
-import { getOAuthClientCredentials } from './oAuthCredentials';
+import { getOAuthClientCredentials } from './auth/oAuthCredentials';
 import { generateZuoraError } from './zuoraErrorHandler';
 import type { ZuoraResponse } from './types/httpResponse';
 
