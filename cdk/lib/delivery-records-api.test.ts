@@ -1,5 +1,5 @@
 import { App } from 'aws-cdk-lib';
-import { Template, Match } from 'aws-cdk-lib/assertions';
+import { Match, Template } from 'aws-cdk-lib/assertions';
 import { DeliveryRecordsApi } from './delivery-records-api';
 
 describe('DeliveryRecordsApi stack', () => {
