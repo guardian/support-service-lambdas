@@ -4,8 +4,8 @@ import {
 } from '@aws-sdk/client-secrets-manager';
 import { awsConfig } from '@modules/aws/config';
 import type { Stage } from '@modules/stage';
-import type { OAuthClientCredentials } from '../zuoraSchemas';
-import { oAuthClientCredentialsSchema } from '../zuoraSchemas';
+import { oAuthClientCredentialsSchema } from '../types/auth/auth';
+import type { OAuthClientCredentials } from '../types/auth/auth';
 
 export const getOAuthClientCredentials = async (
 	stage: Stage,
