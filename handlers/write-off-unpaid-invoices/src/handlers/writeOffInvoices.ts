@@ -86,7 +86,7 @@ export const handler = async (event: LambdaEvent) => {
 						AdjustmentDate: dayjs().format('YYYY-MM-DD'),
 						Amount: adjustmentAmount,
 						Type: 'Decrease',
-						SourceTransactionNumber: invoiceData.id,
+						SourceTransactionNumber: invoice.invoice_id,
 						Comment: `${cancelSourceToCommentMap[cancelSource as CancelSource]} - Credit balance applied to invoice.`,
 					}),
 				);
