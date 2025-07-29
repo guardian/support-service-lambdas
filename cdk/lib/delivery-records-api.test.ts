@@ -76,7 +76,8 @@ describe('DeliveryRecordsApi stack', () => {
 					{
 						Effect: 'Allow',
 						Action: 's3:GetObject',
-						Resource: 'arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/TEST/*',
+						Resource:
+							'arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/TEST/*',
 					},
 				]),
 				Version: '2012-10-17',
@@ -86,23 +87,15 @@ describe('DeliveryRecordsApi stack', () => {
 
 	it('creates alarms only for PROD stage', () => {
 		const app = new App();
-		const codeStack = new DeliveryRecordsApi(
-			app,
-			'DeliveryRecordsApiCode',
-			{
-				stack: 'support',
-				stage: 'CODE',
-			},
-		);
+		const codeStack = new DeliveryRecordsApi(app, 'DeliveryRecordsApiCode', {
+			stack: 'support',
+			stage: 'CODE',
+		});
 
-		const prodStack = new DeliveryRecordsApi(
-			app,
-			'DeliveryRecordsApiProd',
-			{
-				stack: 'support',
-				stage: 'PROD',
-			},
-		);
+		const prodStack = new DeliveryRecordsApi(app, 'DeliveryRecordsApiProd', {
+			stack: 'support',
+			stage: 'PROD',
+		});
 
 		const codeTemplate = Template.fromStack(codeStack);
 		const prodTemplate = Template.fromStack(prodStack);
@@ -127,23 +120,15 @@ describe('DeliveryRecordsApi stack', () => {
 
 	it('uses correct domain names and API names for different stages', () => {
 		const app = new App();
-		const codeStack = new DeliveryRecordsApi(
-			app,
-			'DeliveryRecordsApiCode',
-			{
-				stack: 'support',
-				stage: 'CODE',
-			},
-		);
+		const codeStack = new DeliveryRecordsApi(app, 'DeliveryRecordsApiCode', {
+			stack: 'support',
+			stage: 'CODE',
+		});
 
-		const prodStack = new DeliveryRecordsApi(
-			app,
-			'DeliveryRecordsApiProd',
-			{
-				stack: 'support',
-				stage: 'PROD',
-			},
-		);
+		const prodStack = new DeliveryRecordsApi(app, 'DeliveryRecordsApiProd', {
+			stack: 'support',
+			stage: 'PROD',
+		});
 
 		const codeTemplate = Template.fromStack(codeStack);
 		const prodTemplate = Template.fromStack(prodStack);
@@ -177,23 +162,15 @@ describe('DeliveryRecordsApi stack', () => {
 
 	it('uses correct S3 bucket URNs for different stages', () => {
 		const app = new App();
-		const codeStack = new DeliveryRecordsApi(
-			app,
-			'DeliveryRecordsApiCode',
-			{
-				stack: 'support',
-				stage: 'CODE',
-			},
-		);
+		const codeStack = new DeliveryRecordsApi(app, 'DeliveryRecordsApiCode', {
+			stack: 'support',
+			stage: 'CODE',
+		});
 
-		const prodStack = new DeliveryRecordsApi(
-			app,
-			'DeliveryRecordsApiProd',
-			{
-				stack: 'support',
-				stage: 'PROD',
-			},
-		);
+		const prodStack = new DeliveryRecordsApi(app, 'DeliveryRecordsApiProd', {
+			stack: 'support',
+			stage: 'PROD',
+		});
 
 		const codeTemplate = Template.fromStack(codeStack);
 		const prodTemplate = Template.fromStack(prodStack);
@@ -205,7 +182,8 @@ describe('DeliveryRecordsApi stack', () => {
 					{
 						Effect: 'Allow',
 						Action: 's3:GetObject',
-						Resource: 'arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/*',
+						Resource:
+							'arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/CODE/*',
 					},
 				]),
 				Version: '2012-10-17',
@@ -219,7 +197,8 @@ describe('DeliveryRecordsApi stack', () => {
 					{
 						Effect: 'Allow',
 						Action: 's3:GetObject',
-						Resource: 'arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/PROD/*',
+						Resource:
+							'arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/PROD/*',
 					},
 				]),
 				Version: '2012-10-17',
