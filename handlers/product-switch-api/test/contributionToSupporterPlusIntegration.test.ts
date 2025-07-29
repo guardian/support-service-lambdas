@@ -3,6 +3,7 @@
  *
  * @group integration
  */
+import console from 'console';
 import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
@@ -17,7 +18,6 @@ import { createPayment } from '@modules/zuora/payment';
 import { getSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
-import console from 'console';
 import dayjs from 'dayjs';
 import type { ContributionTestAdditionalOptions } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import { createContribution } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
