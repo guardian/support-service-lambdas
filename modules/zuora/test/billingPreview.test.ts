@@ -4,7 +4,7 @@ import {
 	getNextNonFreePaymentDate,
 	itemsForSubscription,
 } from '../src/billingPreview';
-import { billingPreviewSchema } from '../src/zuoraSchemas';
+import { billingPreviewSchema } from '../src/types/objects/billingPreview';
 import billingPreview from './fixtures/billing-preview-with-discount.json';
 import multiSubBillingPreview from './fixtures/multi-sub-billing-preview.json';
 
