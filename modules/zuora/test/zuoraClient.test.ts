@@ -1,5 +1,5 @@
 import { Logger } from '@modules/logger';
-import { ZuoraError } from '@modules/zuora/zuoraError';
+import { ZuoraError } from '@modules/zuora/errors/zuoraError';
 import { BearerTokenProvider } from '../src/auth/bearerTokenProvider';
 import { ZuoraClient } from '../src/zuoraClient';
 import { z } from 'zod';

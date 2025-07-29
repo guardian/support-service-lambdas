@@ -4,7 +4,7 @@ import { Logger } from '@modules/logger';
 import { BearerTokenProvider } from './auth/bearerTokenProvider';
 import { getOAuthClientCredentials } from './auth/oAuthCredentials';
 import { zuoraServerUrl } from './common';
-import { generateZuoraError } from './zuoraErrorHandler';
+import { generateZuoraError } from './errors/zuoraErrorHandler';
 import type { ZuoraResponse } from './types/httpResponse';
 
 export class ZuoraClient {

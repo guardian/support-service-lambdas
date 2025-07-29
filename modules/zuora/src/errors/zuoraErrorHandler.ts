@@ -3,7 +3,7 @@ import type {
 	ZuoraResponse,
 	ZuoraReason,
 	ZuoraErrorItem,
-} from './types/httpResponse';
+} from '../types/httpResponse';
 
 export function generateZuoraError(
 	json: ZuoraResponse,
