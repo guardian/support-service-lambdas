@@ -16,7 +16,7 @@ import { applyCreditToAccountBalance } from '@modules/zuora/creditBalanceAdjustm
 export type CancelSource = 'MMA' | 'Autocancel' | 'Salesforce';
 
 export type LambdaEvent = {
-	Items: { invoice_id: string; cancel_source: CancelSource }[];
+	Items: { invoice_id: string; cancel_source: CancelSource, invoice_number: string }[];
 };
 
 type AdjustableItem = {
@@ -40,7 +40,7 @@ export const handler = async (event: LambdaEvent) => {
 
 	for (const invoice of event.Items) {
 		const { invoice_id: invoiceId, cancel_source: cancelSource } = invoice;
-
+		invoice.invoice_number
 		try {
 			console.log(`Processing invoice ${invoiceId} from ${cancelSource}`);
 			const invoiceData: GetInvoiceResponse = await getInvoice(
@@ -60,7 +60,7 @@ export const handler = async (event: LambdaEvent) => {
 			// Step 2: Get account and check credit balance
 			const account: ZuoraAccount = await getAccount(
 				zuoraClient,
-				invoiceData.accountNumber,
+				invoiceData.accountId,
 			);
 			const { creditBalance } = account.metrics;
 			console.log(`Account has credit balance: ${creditBalance}`);
@@ -80,9 +80,8 @@ export const handler = async (event: LambdaEvent) => {
 						AdjustmentDate: dayjs().format('YYYY-MM-DD'),
 						Amount: adjustmentAmount,
 						Type: 'Decrease',
-						SourceTransactionNumber: invoiceId,
-						Comment: `${cancelSourceToCommentMap[cancelSource as CancelSource]} - Credit balance applied to invoice.`,
-						ReasonCode: 'Write-off',
+						SourceTransactionNumber: invoiceData.id,
+						Comment: `${cancelSourceToCommentMap[cancelSource as CancelSource]} - Credit balance applied to invoice.`
 					}),
 				);
 
