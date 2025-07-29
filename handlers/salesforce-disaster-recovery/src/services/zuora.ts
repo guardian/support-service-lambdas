@@ -1,5 +1,5 @@
 import { updateAccount } from '@modules/zuora/account';
-import { actionUpdate } from '@modules/zuora/actionUpdate';
+import { update } from '@modules/zuora/action/update';
 import { type ZuoraClient } from '@modules/zuora/zuoraClient';
 import { ZuoraError } from '@modules/zuora/zuoraError';
 
@@ -25,7 +25,7 @@ export const batchUpdateZuoraAccounts = async ({
 	accountRows: AccountRow[];
 }): Promise<AccountRowWithResult[]> => {
 	try {
-		const response = await actionUpdate(
+		const response = await update(
 			zuoraClient,
 			JSON.stringify({
 				objects: accountRows.map((row) => ({
