@@ -1,18 +1,14 @@
-import type { Dayjs } from 'dayjs';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type {
 	GetInvoiceItemsResponse,
 	GetInvoiceResponse,
-	InvoiceItemAdjustmentResult,
-	InvoiceItemAdjustmentSourceType,
-	InvoiceItemAdjustmentType,
 } from '@modules/zuora/zuoraSchemas';
 import {
 	getInvoiceItemsSchema,
 	getInvoiceSchema,
-	invoiceItemAdjustmentResultSchema,
 } from '@modules/zuora/zuoraSchemas';
-import { zuoraDateFormat } from './utils/common';
+import { z } from 'zod';
+import { createRecordResultSchema } from './types/actions/createRecordResponse';
 
 export const getInvoice = async (
 	zuoraClient: ZuoraClient,
@@ -33,30 +29,17 @@ export const getInvoiceItems = async (
 	);
 };
 
-export const creditInvoice = async (
-	adjustmentDate: Dayjs,
+export const creditInvoice = async <
+	T extends z.ZodType = typeof createRecordResultSchema,
+>(
 	zuoraClient: ZuoraClient,
-	invoiceId: string,
-	sourceId: string,
-	amount: number,
-	type: InvoiceItemAdjustmentType,
-	sourceType: InvoiceItemAdjustmentSourceType,
-	comment?: string,
-	reasonCode?: string,
-): Promise<InvoiceItemAdjustmentResult> => {
-	console.log(`Adjusting invoice ${invoiceId} by ${amount}`);
-	return await zuoraClient.post(
+	body: string,
+	schema?: T,
+): Promise<z.infer<T>> => {
+	const finalSchema = (schema ?? createRecordResultSchema) as T;
+	return zuoraClient.post(
 		'/v1/object/invoice-item-adjustment',
-		JSON.stringify({
-			AdjustmentDate: zuoraDateFormat(adjustmentDate),
-			Amount: amount,
-			InvoiceId: invoiceId,
-			SourceId: sourceId,
-			SourceType: sourceType,
-			Type: type,
-			Comment: comment ?? 'Created by support-service-lambdas',
-			ReasonCode: reasonCode,
-		}),
-		invoiceItemAdjustmentResultSchema,
+		body,
+		finalSchema,
 	);
 };
