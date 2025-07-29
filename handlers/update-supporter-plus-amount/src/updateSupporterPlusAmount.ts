@@ -12,7 +12,6 @@ import type {
 import { getAccount } from '@modules/zuora/account';
 import type { Logger } from '@modules/logger';
 import { getSubscription } from '@modules/zuora/subscription';
-import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type {
 	RatePlan,
@@ -24,6 +23,7 @@ import dayjs from 'dayjs';
 import type { EmailFields } from './sendEmail';
 import { supporterPlusAmountBands } from './supporterPlusAmountBands';
 import { doUpdate } from './zuoraApi';
+import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
 
 type UpdatablePlans =
 	| 'Annual'

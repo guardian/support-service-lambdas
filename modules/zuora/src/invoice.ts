@@ -1,5 +1,4 @@
 import type { Dayjs } from 'dayjs';
-import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type {
 	GetInvoiceItemsResponse,
@@ -13,6 +12,7 @@ import {
 	getInvoiceSchema,
 	invoiceItemAdjustmentResultSchema,
 } from '@modules/zuora/zuoraSchemas';
+import { zuoraDateFormat } from './utils/common';
 
 export const getInvoice = async (
 	zuoraClient: ZuoraClient,

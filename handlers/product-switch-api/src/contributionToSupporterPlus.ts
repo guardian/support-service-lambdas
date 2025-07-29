@@ -1,5 +1,4 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
-import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import type {
 	ChangePlanOrderAction,
 	CreateOrderRequest,
@@ -33,6 +32,7 @@ import {
 } from './schemas';
 import { sendToSupporterProductData } from './supporterProductData';
 import type { SwitchInformation } from './switchInformation';
+import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
 
 export interface SwitchDiscountResponse {
 	discountedPrice: number;
