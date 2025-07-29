@@ -1,7 +1,7 @@
 import type {
+	ZuoraErrorItem,
 	ZuoraReason,
 	ZuoraResponse,
-	ZuoraErrorItem,
 } from '../types/httpResponse';
 import { ZuoraError } from './zuoraError';
 
