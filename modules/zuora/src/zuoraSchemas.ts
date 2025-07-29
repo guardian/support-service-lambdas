@@ -149,17 +149,7 @@ export type ZuoraSuccessResponse = z.infer<typeof zuoraSuccessResponseSchema>;
 export type ZuoraUpperCaseSuccessResponse = z.infer<
 	typeof zuoraUpperCaseSuccessResponseSchema
 >;
-// --------------- Invoice Items ---------------
-export const getInvoiceSchema = z.object({
-	success: z.boolean(),
-	id: z.string(),
-	amount: z.number(),
-	amountWithoutTax: z.number(),
-	balance: z.number(),
-});
-
-export type GetInvoiceResponse = z.infer<typeof getInvoiceSchema>;
-
+// --------------- Invoice Items --------------
 export const getInvoiceItemsSchema = z.object({
 	success: z.boolean(),
 	invoiceItems: z.array(
