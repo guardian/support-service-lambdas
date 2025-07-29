@@ -1,6 +1,5 @@
 import type { ZuoraClient } from './zuoraClient';
-import type { ZuoraAccount } from './zuoraSchemas';
-import { zuoraAccountSchema } from './zuoraSchemas';
+import { type ZuoraAccount, zuoraAccountSchema } from './zuoraSchemas';
 
 export const getAccount = async (
 	zuoraClient: ZuoraClient,
