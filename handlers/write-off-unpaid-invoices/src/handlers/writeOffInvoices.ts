@@ -6,10 +6,8 @@ import {
 	getInvoiceItems,
 } from '@modules/zuora/invoice';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import {
-	type GetInvoiceItemsResponse,
-	type InvoiceItemAdjustmentSourceType,
-} from '@modules/zuora/zuoraSchemas';
+import { type InvoiceItemAdjustmentSourceType } from '@modules/zuora/zuoraSchemas';
+import type { GetInvoiceItemsResponse } from '../../../../modules/zuora/src/types/objects/invoiceItem';
 
 export type CancelSource = 'MMA' | 'Autocancel' | 'Salesforce';
 
