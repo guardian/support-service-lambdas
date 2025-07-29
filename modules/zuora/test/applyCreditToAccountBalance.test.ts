@@ -1,5 +1,5 @@
 import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
-import { applyCreditToAccountBalance } from '@modules/zuora/applyCreditToAccountBalance';
+import { applyCreditToAccountBalance } from '@modules/zuora/creditBalanceAdjustment';
 import { zuoraResponseSchema } from '@modules/zuora/types';
 import { z } from 'zod';
 
