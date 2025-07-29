@@ -159,37 +159,6 @@ export const getInvoiceSchema = z.object({
 });
 
 export type GetInvoiceResponse = z.infer<typeof getInvoiceSchema>;
-
-export const getInvoiceItemsSchema = z.object({
-	success: z.boolean(),
-	invoiceItems: z.array(
-		z.object({
-			id: z.string(),
-			productRatePlanChargeId: z.string(),
-			availableToCreditAmount: z.number(),
-			taxationItems: z.object({
-				data: z.array(
-					z.object({
-						id: z.string(),
-						availableToCreditAmount: z.number(),
-					}),
-				),
-			}),
-		}),
-	),
-});
-
-export type GetInvoiceItemsResponse = z.infer<typeof getInvoiceItemsSchema>;
-
-export const invoiceItemSchema = z.object({
-	id: z.optional(z.string()),
-	subscriptionNumber: z.string(),
-	serviceStartDate: z.coerce.date(),
-	serviceEndDate: z.coerce.date(),
-	chargeAmount: z.number(),
-	chargeName: z.string(),
-	taxAmount: z.number(),
-});
 // --------------- Billing preview ---------------
 export const billingPreviewInvoiceItemSchema = z.object({
 	id: z.optional(z.string()),
