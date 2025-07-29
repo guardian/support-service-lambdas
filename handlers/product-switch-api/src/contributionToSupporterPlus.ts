@@ -14,6 +14,7 @@ import type {
 } from '@modules/zuora/zuoraSchemas';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
+import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
 import { removePendingUpdateAmendments } from './amendments';
 import type { CatalogInformation } from './catalogInformation';
 import type { Discount } from './discounts';
@@ -32,7 +33,6 @@ import {
 } from './schemas';
 import { sendToSupporterProductData } from './supporterProductData';
 import type { SwitchInformation } from './switchInformation';
-import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
 
 export interface SwitchDiscountResponse {
 	discountedPrice: number;

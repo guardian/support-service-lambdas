@@ -2,8 +2,8 @@ import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 import { awsConfig } from '@modules/aws/config';
 import { prettyPrint } from '@modules/prettyPrint';
 import dayjs from 'dayjs';
-import type { SwitchInformation } from './switchInformation';
 import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
+import type { SwitchInformation } from './switchInformation';
 
 export type SupporterRatePlanItem = {
 	subscriptionName: string; // Unique identifier for the subscription

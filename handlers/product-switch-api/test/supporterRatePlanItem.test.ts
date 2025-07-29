@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
+import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
 import { supporterRatePlanItemFromSwitchInformation } from '../src/supporterProductData';
 import type { SwitchInformation } from '../src/switchInformation';
-import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
 
 const getSwitchInformation = (
 	contributionAmount: number,
