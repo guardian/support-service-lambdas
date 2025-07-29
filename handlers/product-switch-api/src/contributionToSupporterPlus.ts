@@ -1,5 +1,5 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
-import { zuoraDateFormat } from '@modules/zuora/common';
+import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import type {
 	ChangePlanOrderAction,
 	CreateOrderRequest,

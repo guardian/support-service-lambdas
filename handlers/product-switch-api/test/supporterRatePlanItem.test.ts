@@ -1,4 +1,4 @@
-import { zuoraDateFormat } from '@modules/zuora/common';
+import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import dayjs from 'dayjs';
 import { supporterRatePlanItemFromSwitchInformation } from '../src/supporterProductData';
 import type { SwitchInformation } from '../src/switchInformation';

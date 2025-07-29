@@ -13,7 +13,7 @@ import {
 	itemsForSubscription,
 	toSimpleInvoiceItems,
 } from '@modules/zuora/billingPreview';
-import { zuoraDateFormat } from '@modules/zuora/common';
+import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import { createPayment } from '@modules/zuora/payment';
 import { getSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';

@@ -1,4 +1,4 @@
-import { zuoraServerUrl } from '../common';
+import { zuoraServerUrl } from '../utils/common';
 import type { OAuthClientCredentials, ZuoraBearerToken } from '../zuoraSchemas';
 import { zuoraBearerTokenSchema } from '../zuoraSchemas';
 
