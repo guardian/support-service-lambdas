@@ -1,9 +1,9 @@
 import { sendEmail } from '@modules/email/email';
 import { ValidationError } from '@modules/errors';
+import { Logger } from '@modules/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { Stage } from '@modules/stage';
-import { Logger } from '@modules/zuora/logger';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type {
 	APIGatewayProxyEvent,

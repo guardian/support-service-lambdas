@@ -1,9 +1,9 @@
+import { Logger } from '@modules/logger';
 import {
 	getNextInvoiceItems,
 	itemsForSubscription,
 	toSimpleInvoiceItems,
 } from '@modules/zuora/billingPreview';
-import { Logger } from '@modules/zuora/logger';
 import {
 	billingPreviewSchema,
 	zuoraSubscriptionResponseSchema,

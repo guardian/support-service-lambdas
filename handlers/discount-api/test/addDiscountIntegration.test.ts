@@ -5,7 +5,7 @@
  */
 
 import type { Stage } from '@modules/stage';
-import { addDiscount } from '@modules/zuora/addDiscount';
+import { addDiscount } from '@modules/zuora/discount';
 import { getSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';

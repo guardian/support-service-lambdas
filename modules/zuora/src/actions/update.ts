@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { ZuoraClient } from './zuoraClient';
+import type { ZuoraClient } from '../zuoraClient';
 
 const responseSchema = z.array(
 	z.object({
@@ -18,7 +18,7 @@ const responseSchema = z.array(
 
 export type ActionUpdateResponse = z.infer<typeof responseSchema>;
 
-export const actionUpdate = async (
+export const update = async (
 	zuoraClient: ZuoraClient,
 	body: string,
 ): Promise<ActionUpdateResponse> => {

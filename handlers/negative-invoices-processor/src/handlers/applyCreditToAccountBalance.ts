@@ -1,5 +1,5 @@
 import { stageFromEnvironment } from '@modules/stage';
-import { applyCreditToAccountBalance } from '@modules/zuora/applyCreditToAccountBalance';
+import { applyCreditToAccountBalance } from '@modules/zuora/creditBalanceAdjustment';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import {
 	ApplyCreditToAccountBalanceResponseSchema,

@@ -1,5 +1,5 @@
 import type { Dayjs } from 'dayjs';
-import { zuoraDateFormat } from '@modules/zuora/common';
+import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import {
 	catalog,
 	sandboxProductRatePlanChargeIds,

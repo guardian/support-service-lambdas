@@ -1,5 +1,5 @@
 import type { Dayjs } from 'dayjs';
-import { zuoraDateFormat } from './common';
+import { zuoraDateFormat } from './utils/common';
 import type { ZuoraClient } from './zuoraClient';
 import type {
 	ZuoraSubscription,

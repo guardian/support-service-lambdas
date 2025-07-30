@@ -1,8 +1,8 @@
 import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 import { awsConfig } from '@modules/aws/config';
 import { prettyPrint } from '@modules/prettyPrint';
-import { zuoraDateFormat } from '@modules/zuora/common';
 import dayjs from 'dayjs';
+import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
 import type { SwitchInformation } from './switchInformation';
 
 export type SupporterRatePlanItem = {

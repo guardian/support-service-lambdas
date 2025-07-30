@@ -4,7 +4,7 @@
  * @group integration
  */
 
-import { Logger } from '@modules/zuora/logger';
+import { Logger } from '@modules/logger';
 import { BearerTokenProvider } from '../src/auth/bearerTokenProvider';
 import { getOAuthClientCredentials } from '../src/auth/oAuthCredentials';
 import { ZuoraClient } from '../src/zuoraClient';

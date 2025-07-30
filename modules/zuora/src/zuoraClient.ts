@@ -1,10 +1,10 @@
-import type { Stage } from '@modules/stage';
 import type { z } from 'zod';
-import { Logger } from '@modules/zuora/logger';
+import type { Stage } from '@modules/stage';
+import { Logger } from '@modules/logger';
 import { BearerTokenProvider } from './auth/bearerTokenProvider';
-import { zuoraServerUrl } from './common';
 import { getOAuthClientCredentials } from './auth/oAuthCredentials';
-import { generateZuoraError } from './zuoraErrorHandler';
+import { zuoraServerUrl } from './utils/common';
+import { generateZuoraError } from './errors/zuoraErrorHandler';
 import type { ZuoraResponse } from './types/httpResponse';
 
 export class ZuoraClient {

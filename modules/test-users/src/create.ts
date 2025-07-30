@@ -1,4 +1,4 @@
-import { zuoraDateFormat } from '@modules/zuora/common';
+import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraSubscribeResponse } from '@modules/zuora/zuoraSchemas';
 import { zuoraSubscribeResponseSchema } from '@modules/zuora/zuoraSchemas';
