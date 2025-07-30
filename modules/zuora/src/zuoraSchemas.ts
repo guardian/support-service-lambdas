@@ -133,47 +133,6 @@ export type ZuoraSuccessResponse = z.infer<typeof zuoraSuccessResponseSchema>;
 export type ZuoraUpperCaseSuccessResponse = z.infer<
 	typeof zuoraUpperCaseSuccessResponseSchema
 >;
-// --------------- Invoice Items ---------------
-export const getInvoiceSchema = z.object({
-	success: z.boolean(),
-	id: z.string(),
-	amount: z.number(),
-	amountWithoutTax: z.number(),
-	balance: z.number(),
-});
-
-export type GetInvoiceResponse = z.infer<typeof getInvoiceSchema>;
-
-export const getInvoiceItemsSchema = z.object({
-	success: z.boolean(),
-	invoiceItems: z.array(
-		z.object({
-			id: z.string(),
-			productRatePlanChargeId: z.string(),
-			availableToCreditAmount: z.number(),
-			taxationItems: z.object({
-				data: z.array(
-					z.object({
-						id: z.string(),
-						availableToCreditAmount: z.number(),
-					}),
-				),
-			}),
-		}),
-	),
-});
-
-export type GetInvoiceItemsResponse = z.infer<typeof getInvoiceItemsSchema>;
-
-export const invoiceItemSchema = z.object({
-	id: z.optional(z.string()),
-	subscriptionNumber: z.string(),
-	serviceStartDate: z.coerce.date(),
-	serviceEndDate: z.coerce.date(),
-	chargeAmount: z.number(),
-	chargeName: z.string(),
-	taxAmount: z.number(),
-});
 
 // --------------- Add discount preview ---------------
 export const addDiscountPreviewSchema = z.object({
