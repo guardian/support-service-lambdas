@@ -1,8 +1,8 @@
-import type { ZuoraSubscription } from '../../../modules/zuora/src/types/objects/subscription';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraSuccessResponse } from '@modules/zuora/zuoraSchemas';
 import { zuoraSuccessResponseSchema } from '@modules/zuora/zuoraSchemas';
 import type { Dayjs } from 'dayjs';
+import type { ZuoraSubscription } from '../../../modules/zuora/src/types/objects/subscription';
 import { updateSubscriptionBody } from './fixtures/request-bodies/update-subscription-body';
 
 export const doPriceRise = async (
