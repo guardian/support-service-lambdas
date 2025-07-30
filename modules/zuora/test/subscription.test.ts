@@ -9,13 +9,13 @@ import {
 import type {
 	ZuoraSubscription,
 	ZuoraSubscriptionsFromAccountResponse,
-	ZuoraSuccessResponse,
 } from '@modules/zuora/zuoraSchemas';
 import {
 	zuoraSubscriptionResponseSchema,
 	zuoraSubscriptionsFromAccountSchema,
-	zuoraSuccessResponseSchema,
 } from '@modules/zuora/zuoraSchemas';
+import { zuoraResponseSchema } from '../../../modules/zuora/src/types/httpResponse';
+import type { ZuoraResponse } from '../../../modules/zuora/src/types/httpResponse';
 
 jest.mock('@modules/zuora/zuoraClient');
 
@@ -26,7 +26,7 @@ describe('subscription', () => {
 
 	describe('cancelSubscription', () => {
 		it('should cancel subscription with correct parameters', async () => {
-			const mockResponse: ZuoraSuccessResponse = {
+			const mockResponse: ZuoraResponse = {
 				success: true,
 			};
 
@@ -49,14 +49,14 @@ describe('subscription', () => {
 					runBilling: true,
 					collect: false,
 				}),
-				zuoraSuccessResponseSchema,
+				zuoraResponseSchema,
 				{ 'zuora-version': '211.0' },
 			);
 			expect(result).toEqual(mockResponse);
 		});
 
 		it('should handle undefined collect parameter', async () => {
-			const mockResponse: ZuoraSuccessResponse = {
+			const mockResponse: ZuoraResponse = {
 				success: true,
 			};
 
@@ -78,7 +78,7 @@ describe('subscription', () => {
 					runBilling: false,
 					collect: undefined,
 				}),
-				zuoraSuccessResponseSchema,
+				zuoraResponseSchema,
 				{ 'zuora-version': '211.0' },
 			);
 		});

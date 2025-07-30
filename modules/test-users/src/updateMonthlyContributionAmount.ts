@@ -6,7 +6,7 @@ import { getSubscription } from '@modules/zuora/subscription';
 import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
-import { zuoraSuccessResponseSchema } from '@modules/zuora/zuoraSchemas';
+import { zuoraResponseSchema } from '../../../modules/zuora/src/types/httpResponse';
 import dayjs from 'dayjs';
 
 const getFirstContributionRatePlan = (
@@ -81,7 +81,7 @@ void (async () => {
 		runBilling: true,
 		notes: 'Updated amount from support-service-lambdas test-users project',
 	});
-	return zuoraClient.put(path, body, zuoraSuccessResponseSchema, {
+	return zuoraClient.put(path, body, zuoraResponseSchema, {
 		'zuora-version': '211.0',
 	});
 })();
