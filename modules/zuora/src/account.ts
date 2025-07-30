@@ -1,11 +1,11 @@
 import { z } from 'zod';
 import type { ZuoraClient } from './zuoraClient';
 import {
-	zuoraAccountSchema,
 	ZuoraSuccessResponse,
 	zuoraSuccessResponseSchema,
 } from './zuoraSchemas';
-import type { ZuoraAccount } from './zuoraSchemas';
+import { zuoraAccountSchema } from './types/objects/account';
+import type { ZuoraAccount } from './types/objects/account';
 
 export const getAccount = async (
 	zuoraClient: ZuoraClient,
