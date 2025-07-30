@@ -4,6 +4,12 @@ import type { GetInvoiceResponse } from '@modules/zuora/zuoraSchemas';
 import { getInvoiceSchema } from '@modules/zuora/zuoraSchemas';
 import { getInvoiceItemsSchema } from './types/objects/invoiceItem';
 import type { GetInvoiceItemsResponse } from './types/objects/invoiceItem';
+import {
+	InvoiceItemAdjustmentResult,
+	invoiceItemAdjustmentResultSchema,
+	InvoiceItemAdjustmentSourceType,
+	InvoiceItemAdjustmentType,
+} from './types/objects/invoiceItemAdjustment';
 import { zuoraDateFormat } from './utils/common';
 
 export const getInvoice = async (
