@@ -18,10 +18,8 @@ import { addDiscount, previewDiscount } from '@modules/zuora/discount';
 import { isNotRemovedOrDiscount } from '@modules/zuora/rateplan';
 import { getSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type {
-	ZuoraAccount,
-	ZuoraSubscription,
-} from '@modules/zuora/zuoraSchemas';
+import type { ZuoraAccount } from '@modules/zuora/zuoraSchemas';
+import type { ZuoraSubscription } from '../../../modules/zuora/src/types/objects/subscription';
 import { getZuoraCatalog } from '@modules/zuora-catalog/S3';
 import type { APIGatewayProxyEventHeaders } from 'aws-lambda';
 import dayjs from 'dayjs';
