@@ -7,6 +7,7 @@ export const getInvoiceSchema = zuoraResponseSchema.extend({
 	accountNumber: z.string(),
 	amountWithoutTax: z.number(),
 	balance: z.number(),
+	accountId: z.string(),
 });
 
 export type GetInvoiceResponse = z.infer<typeof getInvoiceSchema>;

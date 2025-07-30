@@ -3,7 +3,7 @@ import {
 	getInvoiceItems,
 	creditInvoice,
 } from '@modules/zuora/invoice';
-import { applyCreditToAccountBalance } from '@modules/zuora/applyCreditToAccountBalance';
+import { applyCreditToAccountBalance } from '@modules/zuora/creditBalanceAdjustment';
 import {
 	handler,
 	cancelSourceToCommentMap,
@@ -28,7 +28,7 @@ jest.mock('@modules/zuora/account', () => ({
 	getAccount: jest.fn(),
 }));
 
-jest.mock('@modules/zuora/applyCreditToAccountBalance', () => ({
+jest.mock('@modules/zuora/creditBalanceAdjustment', () => ({
 	applyCreditToAccountBalance: jest.fn(),
 }));
 
