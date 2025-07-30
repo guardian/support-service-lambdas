@@ -132,16 +132,6 @@ export type ZuoraSubscribeResponse = z.infer<
 	typeof zuoraSubscribeResponseSchema
 >;
 
-// --------------- Basic success response ---------------
-export const zuoraSuccessResponseSchema = z.object({
-	success: z.boolean(),
-	reasons: z.optional(
-		z.array(z.object({ code: z.number(), message: z.string() })),
-	),
-});
-
-export type ZuoraSuccessResponse = z.infer<typeof zuoraSuccessResponseSchema>;
-
 // --------------- Invoice Items ---------------
 export const getInvoiceSchema = z.object({
 	success: z.boolean(),
