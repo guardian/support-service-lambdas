@@ -16,7 +16,7 @@ import { getCatalogInformation } from './catalogInformation';
 import type { Discount } from './discounts';
 import { getDiscount } from './discounts';
 import type { ProductSwitchRequestBody } from './schemas';
-import { ZuoraAccount } from '../../../modules/zuora/src/types/objects/account';
+import type { ZuoraAccount } from '../../../modules/zuora/src/types/objects/account';
 
 export type AccountInformation = {
 	id: string;

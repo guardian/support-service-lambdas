@@ -22,11 +22,11 @@ import { getZuoraCatalog } from '@modules/zuora-catalog/S3';
 import type { APIGatewayProxyEventHeaders } from 'aws-lambda';
 import dayjs from 'dayjs';
 import { getAccount } from '../../../modules/zuora/src/account';
+import type { ZuoraAccount } from '../../../modules/zuora/src/types/objects/account';
 import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
 import { EligibilityChecker } from './eligibilityChecker';
 import { generateCancellationDiscountConfirmationEmail } from './generateCancellationDiscountConfirmationEmail';
 import { getDiscountFromSubscription } from './productToDiscountMapping';
-import { ZuoraAccount } from '../../../modules/zuora/src/types/objects/account';
 
 export const previewDiscountEndpoint = async (
 	logger: Logger,
