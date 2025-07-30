@@ -6,13 +6,13 @@ import {
 	getSubscriptionsByAccountNumber,
 } from '@modules/zuora/subscription';
 
+import type { ZuoraSubscription } from '../../../modules/zuora/src/types/objects/subscription';
 import type {
-	ZuoraSubscription,
 	ZuoraSubscriptionsFromAccountResponse,
 	ZuoraSuccessResponse,
 } from '@modules/zuora/zuoraSchemas';
+import { zuoraSubscriptionResponseSchema } from '../../../modules/zuora/src/types/objects/subscription';
 import {
-	zuoraSubscriptionResponseSchema,
 	zuoraSubscriptionsFromAccountSchema,
 	zuoraSuccessResponseSchema,
 } from '@modules/zuora/zuoraSchemas';

@@ -7,11 +7,9 @@ import { ValidationError } from '@modules/errors';
 import { Lazy } from '@modules/lazy';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
-import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
-import {
-	zuoraAccountSchema,
-	zuoraSubscriptionResponseSchema,
-} from '@modules/zuora/zuoraSchemas';
+import type { ZuoraSubscription } from '../../../modules/zuora/src/types/objects/subscription';
+import { zuoraAccountSchema } from '@modules/zuora/zuoraSchemas';
+import { zuoraSubscriptionResponseSchema } from '../../../modules/zuora/src/types/objects/subscription';
 import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import {

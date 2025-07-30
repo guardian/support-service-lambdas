@@ -4,10 +4,8 @@ import {
 	itemsForSubscription,
 	toSimpleInvoiceItems,
 } from '@modules/zuora/billingPreview';
-import {
-	billingPreviewSchema,
-	zuoraSubscriptionResponseSchema,
-} from '@modules/zuora/zuoraSchemas';
+import { billingPreviewSchema } from '@modules/zuora/zuoraSchemas';
+import { zuoraSubscriptionResponseSchema } from '../../../modules/zuora/src/types/objects/subscription';
 import { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
