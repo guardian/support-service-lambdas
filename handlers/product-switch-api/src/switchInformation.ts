@@ -11,12 +11,12 @@ import type { SimpleInvoiceItem } from '@modules/zuora/billingPreview';
 import type { RatePlan, ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
+import type { ZuoraAccount } from '../../../modules/zuora/src/types/objects/account';
 import type { CatalogInformation } from './catalogInformation';
 import { getCatalogInformation } from './catalogInformation';
 import type { Discount } from './discounts';
 import { getDiscount } from './discounts';
 import type { ProductSwitchRequestBody } from './schemas';
-import type { ZuoraAccount } from '../../../modules/zuora/src/types/objects/account';
 
 export type AccountInformation = {
 	id: string;

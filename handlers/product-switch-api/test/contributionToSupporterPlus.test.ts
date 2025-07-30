@@ -7,10 +7,10 @@ import { ValidationError } from '@modules/errors';
 import { Lazy } from '@modules/lazy';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
-import { zuoraAccountSchema } from '../../../modules/zuora/src/types/objects/account';
 import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 import { zuoraSubscriptionResponseSchema } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
+import { zuoraAccountSchema } from '../../../modules/zuora/src/types/objects/account';
 import zuoraCatalogFixture from '../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import {
 	previewResponseFromZuoraResponse,
