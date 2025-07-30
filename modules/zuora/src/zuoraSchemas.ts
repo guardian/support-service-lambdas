@@ -1,6 +1,7 @@
 import { BillingPeriodValues } from '@modules/billingPeriod';
 import { z } from 'zod';
 import { zuoraResponseSchema } from './types';
+import { zuoraSubscriptionSchema } from './types/objects/subscription';
 
 // --------------- Auth ---------------
 export type OAuthClientCredentials = z.infer<
