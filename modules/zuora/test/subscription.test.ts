@@ -8,14 +8,16 @@ import {
 
 import type {
 	ZuoraSubscription,
-	ZuoraSubscriptionsFromAccountResponse,
 	ZuoraSuccessResponse,
 } from '@modules/zuora/zuoraSchemas';
 import {
 	zuoraSubscriptionResponseSchema,
-	zuoraSubscriptionsFromAccountSchema,
 	zuoraSuccessResponseSchema,
 } from '@modules/zuora/zuoraSchemas';
+import {
+	ZuoraSubscriptionsFromAccountResponse,
+	zuoraSubscriptionsFromAccountSchema,
+} from '../../../modules/zuora/src/types/objects/account';
 
 jest.mock('@modules/zuora/zuoraClient');
 
