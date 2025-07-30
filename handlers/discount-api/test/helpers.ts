@@ -1,4 +1,4 @@
-import { ZuoraSubscription } from '../../../modules/zuora/src/types/objects/subscription';
+import type { ZuoraSubscription } from '../../../modules/zuora/src/types/objects/subscription';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ZuoraSuccessResponse } from '@modules/zuora/zuoraSchemas';
 import { zuoraSuccessResponseSchema } from '@modules/zuora/zuoraSchemas';
