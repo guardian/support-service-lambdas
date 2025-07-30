@@ -9,6 +9,8 @@ import { generateProductCatalog } from '@modules/product-catalog/generateProduct
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import dayjs from 'dayjs';
 import { zuoraAccountSchema } from '../../../modules/zuora/src/types/objects/account';
+import { zuoraSubscriptionResponseSchema } from '../../../modules/zuora/src/types/objects/subscription';
+import type { ZuoraSubscription } from '../../../modules/zuora/src/types/objects/subscription';
 import zuoraCatalogFixture from '../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import {
 	previewResponseFromZuoraResponse,
