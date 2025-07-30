@@ -277,8 +277,11 @@ object SupportedProduct {
       annualIssueLimitPerEdition = 5,
       ratePlans = List(
         SupportedRatePlan("Weekend", weekendCharges),
+        SupportedRatePlan("Weekend+", weekendCharges),
         SupportedRatePlan("Everyday", everyDayCharges),
+        SupportedRatePlan("Everyday+", everyDayCharges),
         SupportedRatePlan("Sixday", sixDayCharges),
+        SupportedRatePlan("Sixday+", sixDayCharges),
       ),
     ),
   )
