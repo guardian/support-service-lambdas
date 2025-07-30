@@ -1,7 +1,6 @@
+import dayjs from 'dayjs';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
-import { zuoraDateFormat } from '@modules/zuora/common';
-import dayjs from 'dayjs';
 import {
 	digitalSubscriptionBenefits,
 	supporterPlusBenefits,
@@ -12,6 +11,7 @@ import {
 	getValidUserProducts,
 } from '@modules/product-benefits/userBenefits';
 import codeZuoraCatalog from '../../zuora-catalog/test/fixtures/catalog-code.json';
+import { zuoraDateFormat } from '../../zuora/src/utils/common';
 
 const codeProductCatalog = generateProductCatalog(codeZuoraCatalog);
 const codeCatalogHelper = new ProductCatalogHelper(codeProductCatalog);

@@ -1,4 +1,4 @@
-import { zuoraDateFormat } from '@modules/zuora/common';
+import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import type { Dayjs } from 'dayjs';
 import { catalog } from '../../../../../handlers/discount-api/src/productToDiscountMapping';
 

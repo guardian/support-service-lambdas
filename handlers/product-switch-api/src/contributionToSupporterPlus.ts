@@ -1,5 +1,4 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
-import { zuoraDateFormat } from '@modules/zuora/common';
 import type {
 	ChangePlanOrderAction,
 	CreateOrderRequest,
@@ -15,6 +14,7 @@ import type {
 } from '@modules/zuora/zuoraSchemas';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
+import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
 import { removePendingUpdateAmendments } from './amendments';
 import type { CatalogInformation } from './catalogInformation';
 import type { Discount } from './discounts';

@@ -2,12 +2,12 @@
  * @group integration
  */
 import type { EmailMessageWithUserId } from '@modules/email/email';
+import { Logger } from '@modules/logger';
 import type { Stage } from '@modules/stage';
-import { zuoraDateFormat } from '@modules/zuora/common';
-import { Logger } from '@modules/zuora/logger';
 import { cancelSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
+import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
 import {
 	createDigitalSubscription,
 	createSupporterPlusSubscription,

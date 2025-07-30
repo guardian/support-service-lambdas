@@ -1,16 +1,14 @@
+import { Logger } from '@modules/logger';
 import {
 	getNextInvoiceItems,
 	itemsForSubscription,
 	toSimpleInvoiceItems,
 } from '@modules/zuora/billingPreview';
-import { Logger } from '@modules/zuora/logger';
-import {
-	billingPreviewSchema,
-	zuoraSubscriptionResponseSchema,
-} from '@modules/zuora/zuoraSchemas';
+import { zuoraSubscriptionResponseSchema } from '@modules/zuora/zuoraSchemas';
 import { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
+import { billingPreviewSchema } from '../../../modules/zuora/src/types/objects/billingPreview';
 import catalogJsonProd from '../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import {
 	EligibilityChecker,

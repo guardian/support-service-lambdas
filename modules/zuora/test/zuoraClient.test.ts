@@ -1,6 +1,6 @@
-import { Logger } from '@modules/zuora/logger';
-import { ZuoraError } from '@modules/zuora/zuoraError';
-import { BearerTokenProvider } from '../src/bearerTokenProvider';
+import { Logger } from '@modules/logger';
+import { BearerTokenProvider } from '../src/auth/bearerTokenProvider';
+import { ZuoraError } from '../src/errors/zuoraError';
 import { ZuoraClient } from '../src/zuoraClient';
 import { z } from 'zod';
 
@@ -8,15 +8,15 @@ import { z } from 'zod';
 global.fetch = jest.fn();
 
 // Mock the dependencies
-jest.mock('../src/oAuthCredentials', () => ({
+jest.mock('../src/auth/oAuthCredentials', () => ({
 	getOAuthClientCredentials: jest.fn().mockResolvedValue({
 		client_id: 'test_client',
 		client_secret: 'test_secret',
 	}),
 }));
 
-jest.mock('../src/bearerTokenProvider');
-jest.mock('../src/common', () => ({
+jest.mock('../src/auth/bearerTokenProvider');
+jest.mock('../src/utils/common', () => ({
 	zuoraServerUrl: jest.fn(() => 'https://rest.apisandbox.zuora.com'),
 }));
 

@@ -2,6 +2,7 @@ import { getSingleOrThrow } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import type { Currency } from '@modules/internationalisation/currency';
 import { isSupportedCurrency } from '@modules/internationalisation/currency';
+import type { Logger } from '@modules/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
 import type { ProductBillingPeriod } from '@modules/product-catalog/productBillingPeriods';
@@ -10,8 +11,6 @@ import type {
 	ProductRatePlan,
 } from '@modules/product-catalog/productCatalog';
 import { getAccount } from '@modules/zuora/account';
-import { zuoraDateFormat } from '@modules/zuora/common';
-import type { Logger } from '@modules/zuora/logger';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type {
@@ -21,6 +20,7 @@ import type {
 } from '@modules/zuora/zuoraSchemas';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
+import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
 import type { EmailFields } from './sendEmail';
 import { supporterPlusAmountBands } from './supporterPlusAmountBands';
 import { doUpdate } from './zuoraApi';

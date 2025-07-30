@@ -1,4 +1,4 @@
-import { Logger } from '@modules/zuora/logger';
+import { Logger } from '@modules/logger';
 
 test('it should be a no-op if theres no context', () => {
 	const logger = new Logger();
