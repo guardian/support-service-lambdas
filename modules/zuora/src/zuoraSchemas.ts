@@ -2,22 +2,6 @@ import { BillingPeriodValues } from '@modules/billingPeriod';
 import { z } from 'zod';
 import { zuoraResponseSchema } from './types';
 
-// --------------- Auth ---------------
-export type OAuthClientCredentials = z.infer<
-	typeof oAuthClientCredentialsSchema
->;
-export const oAuthClientCredentialsSchema = z.object({
-	clientId: z.string(),
-	clientSecret: z.string(),
-});
-
-export type ZuoraBearerToken = z.infer<typeof zuoraBearerTokenSchema>;
-
-export const zuoraBearerTokenSchema = z.object({
-	access_token: z.string(),
-	expires_in: z.number(),
-});
-
 // --------------- Subscription ---------------
 export const zuoraSubscriptionSchema = z.object({
 	id: z.string(),
@@ -159,25 +143,37 @@ export const getInvoiceSchema = z.object({
 });
 
 export type GetInvoiceResponse = z.infer<typeof getInvoiceSchema>;
-// --------------- Billing preview ---------------
-export const billingPreviewInvoiceItemSchema = z.object({
+
+export const getInvoiceItemsSchema = z.object({
+	success: z.boolean(),
+	invoiceItems: z.array(
+		z.object({
+			id: z.string(),
+			productRatePlanChargeId: z.string(),
+			availableToCreditAmount: z.number(),
+			taxationItems: z.object({
+				data: z.array(
+					z.object({
+						id: z.string(),
+						availableToCreditAmount: z.number(),
+					}),
+				),
+			}),
+		}),
+	),
+});
+
+export type GetInvoiceItemsResponse = z.infer<typeof getInvoiceItemsSchema>;
+
+export const invoiceItemSchema = z.object({
 	id: z.optional(z.string()),
 	subscriptionNumber: z.string(),
 	serviceStartDate: z.coerce.date(),
-	chargeName: z.string(),
+	serviceEndDate: z.coerce.date(),
 	chargeAmount: z.number(),
+	chargeName: z.string(),
 	taxAmount: z.number(),
 });
-
-export const billingPreviewSchema = z.object({
-	accountId: z.string(),
-	invoiceItems: z.array(billingPreviewInvoiceItemSchema),
-});
-
-export type BillingPreview = z.infer<typeof billingPreviewSchema>;
-export type BillingPreviewInvoiceItem = z.infer<
-	typeof billingPreviewInvoiceItemSchema
->;
 
 // --------------- Add discount preview ---------------
 export const addDiscountPreviewSchema = z.object({
