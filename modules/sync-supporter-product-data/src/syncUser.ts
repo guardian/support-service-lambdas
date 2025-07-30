@@ -8,7 +8,10 @@ import { getSubscriptionsByAccountNumber } from '@modules/zuora/subscription';
 import { createQueryResponseSchema } from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { RatePlan, ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
+import type {
+	RatePlan,
+	ZuoraSubscription,
+} from '../../../modules/zuora/src/types/objects/subscription';
 import dayjs from 'dayjs';
 import { z } from 'zod';
 
