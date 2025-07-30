@@ -7,7 +7,11 @@ import {
 } from '@modules/zuora/invoice';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { InvoiceItemAdjustmentSourceType } from '@modules/zuora/types/objects/invoiceItemAdjustment';
-import type { GetInvoiceItemsResponse } from '../../../../modules/zuora/src/types/objects/invoiceItem';
+import type { GetInvoiceItemsResponse } from '@modules/zuora/types/objects/invoiceItem';
+import { GetInvoiceResponse } from '@modules/zuora/types/objects/invoice';
+import { ZuoraAccount } from '@modules/zuora/types/objects/account';
+import { getAccount } from '@modules/zuora/account';
+import { applyCreditToAccountBalance } from '@modules/zuora/creditBalanceAdjustment';
 
 export type CancelSource = 'MMA' | 'Autocancel' | 'Salesforce';
 
@@ -36,10 +40,51 @@ export const handler = async (event: LambdaEvent) => {
 
 	for (const invoice of event.Items) {
 		const { invoice_id: invoiceId, cancel_source: cancelSource } = invoice;
-		const { balance } = await getInvoice(zuoraClient, invoiceId);
+		const invoiceData: GetInvoiceResponse = await getInvoice(
+			zuoraClient,
+			invoiceId,
+		);
+		let { balance } = invoiceData;
 
+		// Step 1: Exit if invoice balance is already zero
 		if (balance == 0) continue;
 
+		// Step 2: Get account and check credit balance
+		const account: ZuoraAccount = await getAccount(
+			zuoraClient,
+			invoiceData.accountNumber,
+		);
+		const { creditBalance } = account.metrics;
+
+		// Step 3: If invoice is positive AND account has credit balance, apply credit adjustment
+		if (balance > 0 && creditBalance > 0) {
+			const adjustmentAmount = Math.min(balance, creditBalance);
+
+			console.log(
+				`Applying credit balance adjustment of ${adjustmentAmount} to invoice ${invoiceId}`,
+			);
+
+			// Create credit balance adjustment (decrease type)
+			await applyCreditToAccountBalance(
+				zuoraClient,
+				JSON.stringify({
+					AdjustmentDate: dayjs().format('YYYY-MM-DD'),
+					Amount: adjustmentAmount,
+					Type: 'Decrease',
+					SourceTransactionNumber: invoiceId,
+					Comment: `${cancelSourceToCommentMap[cancelSource as CancelSource]} - Credit balance applied to invoice.`,
+					ReasonCode: 'Write-off',
+				}),
+			);
+
+			// Update current balance after credit adjustment
+			balance -= adjustmentAmount;
+
+			// Step 3a: Exit if invoice balance is now zero after credit adjustment
+			if (balance == 0) continue;
+		}
+
+		// Step 4: Get invoice items for remaining balance adjustment
 		const { invoiceItems } = await getInvoiceItems(zuoraClient, invoiceId);
 		const adjustableItems = getAdjustableItems({ invoiceItems });
 		const sortedAdjustableItems = sortAdjustableItems({
@@ -47,6 +92,7 @@ export const handler = async (event: LambdaEvent) => {
 			balance,
 		});
 
+		// Step 5: Adjust invoice items until balance is zero
 		let currentBalance = balance;
 
 		for (const item of sortedAdjustableItems) {
