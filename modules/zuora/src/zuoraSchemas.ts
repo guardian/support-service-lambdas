@@ -194,17 +194,3 @@ export const addDiscountPreviewSchema = z.object({
 });
 
 export type AddDiscountPreview = z.infer<typeof addDiscountPreviewSchema>;
-
-// --------------- Invoice Item Adjustment ---------------
-export const invoiceItemAdjustmentResultSchema = z.object({
-	Success: z.boolean(),
-	Id: z.string().optional(),
-});
-
-export type InvoiceItemAdjustmentType = 'Credit' | 'Charge';
-
-export type InvoiceItemAdjustmentSourceType = 'InvoiceDetail' | 'Tax';
-
-export type InvoiceItemAdjustmentResult = z.infer<
-	typeof invoiceItemAdjustmentResultSchema
->;
