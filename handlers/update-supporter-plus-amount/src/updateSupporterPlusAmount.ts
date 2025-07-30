@@ -17,7 +17,7 @@ import type {
 	RatePlan,
 	RatePlanCharge,
 	ZuoraSubscription,
-} from '@modules/zuora/zuoraSchemas';
+} from '../../../modules/zuora/src/types/objects/subscription';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
