@@ -3,7 +3,7 @@ import type {
 	ZuoraResponse,
 } from '@modules/zuora/types/httpResponse';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { zuoraSuccessResponseSchema } from '@modules/zuora/zuoraSchemas';
+import { zuoraResponseSchema } from '../../../modules/zuora/src/types/httpResponse';
 import dayjs from 'dayjs';
 import type { ZuoraGetAmendmentResponse } from './schemas';
 import { zuoraGetAmendmentResponseSchema } from './schemas';
@@ -57,7 +57,7 @@ export const removePendingUpdateAmendments = async (
 		);
 		await zuoraClient.delete(
 			`v1/object/amendment/${lastAmendment?.id}`,
-			zuoraSuccessResponseSchema,
+			zuoraResponseSchema,
 		);
 		return await removePendingUpdateAmendments(zuoraClient, subscriptionNumber);
 	} else {
