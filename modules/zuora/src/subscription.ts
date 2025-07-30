@@ -2,15 +2,11 @@ import type { Dayjs } from 'dayjs';
 import { zuoraDateFormat } from './utils/common';
 import type { ZuoraClient } from './zuoraClient';
 import type { ZuoraSubscription } from './types/objects/subscription';
-import type {
-	ZuoraSubscriptionsFromAccountResponse,
-	ZuoraSuccessResponse,
-} from './zuoraSchemas';
 import { zuoraSubscriptionResponseSchema } from './types/objects/subscription';
-import {
-	zuoraSubscriptionsFromAccountSchema,
-	zuoraSuccessResponseSchema,
-} from './zuoraSchemas';
+import type { ZuoraSuccessResponse } from './zuoraSchemas';
+import { zuoraSuccessResponseSchema } from './zuoraSchemas';
+import { zuoraSubscriptionsFromAccountSchema } from './types/objects/account';
+import type { ZuoraSubscriptionsFromAccountResponse } from './types/objects/account';
 
 export const cancelSubscription = async (
 	zuoraClient: ZuoraClient,
