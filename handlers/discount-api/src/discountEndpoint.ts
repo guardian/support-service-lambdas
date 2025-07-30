@@ -26,7 +26,7 @@ import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
 import { EligibilityChecker } from './eligibilityChecker';
 import { generateCancellationDiscountConfirmationEmail } from './generateCancellationDiscountConfirmationEmail';
 import { getDiscountFromSubscription } from './productToDiscountMapping';
-import { ZuoraAccount } from '@modules/zuora/types/objects/account';
+import { ZuoraAccount } from '../../../modules/zuora/src/types/objects/account';
 
 export const previewDiscountEndpoint = async (
 	logger: Logger,
