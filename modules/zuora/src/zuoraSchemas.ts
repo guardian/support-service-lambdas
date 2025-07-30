@@ -140,15 +140,8 @@ export const zuoraSuccessResponseSchema = z.object({
 	),
 });
 
-export const zuoraUpperCaseSuccessResponseSchema = z.object({
-	Success: z.boolean(), //to do add reasons in case of failure
-});
-
 export type ZuoraSuccessResponse = z.infer<typeof zuoraSuccessResponseSchema>;
 
-export type ZuoraUpperCaseSuccessResponse = z.infer<
-	typeof zuoraUpperCaseSuccessResponseSchema
->;
 // --------------- Invoice Items ---------------
 export const getInvoiceSchema = z.object({
 	success: z.boolean(),
