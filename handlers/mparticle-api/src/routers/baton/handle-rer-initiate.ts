@@ -9,7 +9,7 @@ import type {
 	InitiationReference,
 } from './types-and-schemas';
 
-export async function handleInitiateRequest(
+export async function handleRerInitiate(
 	request: BatonRerEventInitiateRequest,
 ): Promise<BatonRerEventInitiateResponse> {
 	const submittedTime = new Date().toISOString();

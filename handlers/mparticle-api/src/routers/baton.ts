@@ -1,18 +1,17 @@
-import { handleInitiateRequest } from './baton/handle-initiate-request';
-import { handleStatusRequest } from './baton/handle-status-request';
+import { handleRerInitiate } from './baton/handle-rer-initiate';
+import { handleRerStatus } from './baton/handle-rer-status';
+import { handleSarInitiate } from './baton/handle-sar-initiate';
 import type {
-	BatonRerEventRequest,
-	BatonRerEventResponse,
+	BatonEventRequest,
+	BatonEventResponse,
 } from './baton/types-and-schemas';
 import {
-	BatonRerEventRequestSchema,
+	BatonEventRequestSchema,
 	ValidationError,
 } from './baton/types-and-schemas';
 
-export function validateRequest(
-	data: BatonRerEventRequest,
-): BatonRerEventRequest {
-	const result = BatonRerEventRequestSchema.safeParse(data);
+export function validateRequest(data: BatonEventRequest): BatonEventRequest {
+	const result = BatonEventRequestSchema.safeParse(data);
 	if (!result.success) {
 		console.error('Request validation failed:', result.error);
 		throw new ValidationError('Invalid request format', result.error);
@@ -22,14 +21,21 @@ export function validateRequest(
 
 export const batonRerRouter = {
 	routeRequest: async (
-		event: BatonRerEventRequest,
-	): Promise<BatonRerEventResponse> => {
+		event: BatonEventRequest,
+	): Promise<BatonEventResponse> => {
 		const validatedEvent = validateRequest(event);
-		switch (validatedEvent.action) {
-			case 'initiate':
-				return handleInitiateRequest(validatedEvent);
-			case 'status':
-				return handleStatusRequest(validatedEvent);
+		if (validatedEvent.requestType === 'SAR') {
+			switch (validatedEvent.action) {
+				case 'initiate':
+					return handleSarInitiate(validatedEvent);
+			}
+		} else {
+			switch (validatedEvent.action) {
+				case 'initiate':
+					return handleRerInitiate(validatedEvent);
+				case 'status':
+					return handleRerStatus(validatedEvent);
+			}
 		}
 	},
 };

@@ -1,17 +1,17 @@
 import type { Callback, Context } from 'aws-lambda';
 import { handlerBaton } from '../index';
 import type {
-	BatonRerEventRequest,
-	BatonRerEventResponse,
+	BatonEventRequest,
+	BatonEventResponse,
 } from '../routers/baton/types-and-schemas';
 
 export const invokeBatonRerHandler = async (
-	event: BatonRerEventRequest,
-): Promise<BatonRerEventResponse> => {
+	event: BatonEventRequest,
+): Promise<BatonEventResponse> => {
 	const result: unknown = await handlerBaton(
 		event,
 		{} as Context,
 		(() => {}) as Callback<unknown>,
 	);
-	return result as BatonRerEventResponse;
+	return result as BatonEventResponse;
 };

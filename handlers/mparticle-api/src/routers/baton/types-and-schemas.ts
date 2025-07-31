@@ -14,6 +14,10 @@ const BatonRerEventRequestBaseSchema = z.object({
 	requestType: z.literal('RER'),
 });
 
+const BatonSarEventRequestBaseSchema = z.object({
+	requestType: z.literal('SAR'),
+});
+
 export const BatonRerEventInitiateRequestSchema =
 	BatonRerEventRequestBaseSchema.extend({
 		action: z.literal('initiate'),
@@ -28,13 +32,28 @@ export const BatonRerEventStatusRequestSchema =
 		initiationReference: InitiationReferenceSchema,
 	});
 
-export const BatonRerEventRequestSchema = z.discriminatedUnion('action', [
+export const BatonSarEventInitiateRequestSchema =
+	BatonSarEventRequestBaseSchema.extend({
+		action: z.literal('initiate'),
+		subjectId: z.string().min(1, 'Subject Id is required'),
+		subjectEmail: z.string().email().optional(),
+		dataProvider: z.literal('mparticlesar'),
+	});
+
+export const BatonEventRequestSchema = z.discriminatedUnion('action', [
 	BatonRerEventInitiateRequestSchema,
 	BatonRerEventStatusRequestSchema,
+	BatonSarEventInitiateRequestSchema,
 ]);
 
 const BatonRerEventResponseBaseSchema = z.object({
 	requestType: z.literal('RER'),
+	status: z.enum(['pending', 'completed', 'failed']),
+	message: z.string(),
+});
+
+const BatonSarEventResponseBaseSchema = z.object({
+	requestType: z.literal('SAR'),
 	status: z.enum(['pending', 'completed', 'failed']),
 	message: z.string(),
 });
@@ -50,9 +69,16 @@ export const BatonRerEventStatusResponseSchema =
 		action: z.literal('status'),
 	});
 
-export const BatonRerEventResponseSchema = z.discriminatedUnion('action', [
+export const BatonSarEventInitiateResponseSchema =
+	BatonSarEventResponseBaseSchema.extend({
+		action: z.literal('initiate'),
+		initiationReference: InitiationReferenceSchema,
+	});
+
+export const BatonEventResponseSchema = z.discriminatedUnion('action', [
 	BatonRerEventInitiateResponseSchema,
 	BatonRerEventStatusResponseSchema,
+	BatonSarEventInitiateResponseSchema,
 ]);
 
 // Infer types from schemas
@@ -62,7 +88,10 @@ export type BatonRerEventInitiateRequest = z.infer<
 export type BatonRerEventStatusRequest = z.infer<
 	typeof BatonRerEventStatusRequestSchema
 >;
-export type BatonRerEventRequest = z.infer<typeof BatonRerEventRequestSchema>;
+export type BatonSarEventInitiateRequest = z.infer<
+	typeof BatonSarEventInitiateRequestSchema
+>;
+export type BatonEventRequest = z.infer<typeof BatonEventRequestSchema>;
 
 export type BatonRerEventInitiateResponse = z.infer<
 	typeof BatonRerEventInitiateResponseSchema
@@ -70,7 +99,10 @@ export type BatonRerEventInitiateResponse = z.infer<
 export type BatonRerEventStatusResponse = z.infer<
 	typeof BatonRerEventStatusResponseSchema
 >;
-export type BatonRerEventResponse = z.infer<typeof BatonRerEventResponseSchema>;
+export type BatonSarEventInitiateResponse = z.infer<
+	typeof BatonSarEventInitiateResponseSchema
+>;
+export type BatonEventResponse = z.infer<typeof BatonEventResponseSchema>;
 
 // Custom validation error class
 export class ValidationError extends Error {

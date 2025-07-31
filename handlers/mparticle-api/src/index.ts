@@ -5,8 +5,8 @@ import type {
 } from 'aws-lambda';
 import { httpRouter } from './routers/http';
 import {
-	BatonRerEventRequest,
-	BatonRerEventResponse,
+	BatonEventRequest,
+	BatonEventResponse,
 } from './routers/baton/types-and-schemas';
 import { batonRerRouter } from './routers/baton';
 
@@ -27,9 +27,9 @@ export const handlerHttp: Handler<
 };
 
 export const handlerBaton: Handler<
-	BatonRerEventRequest,
-	BatonRerEventResponse
-> = async (event: BatonRerEventRequest): Promise<BatonRerEventResponse> => {
+	BatonEventRequest,
+	BatonEventResponse
+> = async (event: BatonEventRequest): Promise<BatonEventResponse> => {
 	try {
 		console.debug('Processing Baton RER event');
 		return batonRerRouter.routeRequest(event);
