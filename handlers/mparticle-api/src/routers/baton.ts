@@ -8,6 +8,8 @@ import {
 	BatonRerEventRequestSchema,
 	ValidationError,
 } from './baton/types-and-schemas';
+import { MParticleDataSubjectClient } from '../apis/data-subject-requests';
+import { MParticleEventsClient } from '../apis/events';
 
 export function validateRequest(
 	data: BatonRerEventRequest,
@@ -20,16 +22,27 @@ export function validateRequest(
 	return result.data;
 }
 
-export const batonRerRouter = {
+export const batonRerRouter = (
+	mParticleDataSubjectClient: MParticleDataSubjectClient,
+	mParticleEventsClient: MParticleEventsClient,
+	httpRouterBaseUrl: string,
+	isProd: boolean,
+) => ({
 	routeRequest: async (
 		event: BatonRerEventRequest,
 	): Promise<BatonRerEventResponse> => {
 		const validatedEvent = validateRequest(event);
 		switch (validatedEvent.action) {
 			case 'initiate':
-				return handleInitiateRequest(validatedEvent);
+				return handleInitiateRequest(
+					mParticleDataSubjectClient,
+					mParticleEventsClient,
+					httpRouterBaseUrl,
+					validatedEvent,
+					isProd,
+				);
 			case 'status':
-				return handleStatusRequest(validatedEvent);
+				return handleStatusRequest(mParticleDataSubjectClient, validatedEvent);
 		}
 	},
-};
+});

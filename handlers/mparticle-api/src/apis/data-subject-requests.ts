@@ -3,9 +3,11 @@ import type { DataSubjectRequestForm } from '../../interfaces/data-subject-reque
 import type { DataSubjectRequestState } from '../../interfaces/data-subject-request-state';
 import { DataSubjectRequestStatus } from '../../interfaces/data-subject-request-state';
 import type { DataSubjectRequestSubmission } from '../../interfaces/data-subject-request-submission';
-import { getAppConfig, getEnv } from '../utils/config';
+import { AppConfig } from '../utils/config';
 import { makeHttpRequest } from '../utils/make-http-request';
 import type { HttpResponse } from '../utils/make-http-request';
+import { z } from 'zod';
+import { callbackPath, placeholder } from '../routers/http';
 
 function parseDataSubjectRequestStatus(
 	status: 'pending' | 'in_progress' | 'completed' | 'cancelled',
@@ -22,30 +24,54 @@ function parseDataSubjectRequestStatus(
 	}
 }
 
-async function requestDataSubjectApi<T>(
-	url: string,
-	options: {
-		method?: 'GET' | 'POST';
-		body?: unknown;
-	},
-): Promise<HttpResponse<T>> {
-	const appConfig = await getAppConfig();
-	return makeHttpRequest<T>(url, {
-		method: options.method,
-		baseURL: `https://opendsr.mparticle.com/v3`,
-		headers: {
-			'Content-Type': 'application/json',
-			/**
-			 * Authentication
-			 * The DSR API is secured via basic authentication. Credentials are issued at the level of an mParticle workspace.
-			 * You can obtain credentials for your workspace from the Workspace Settings screen. Note that this authentication
-			 * is for a single workspace and scopes the DSR to this workspace only.
-			 * https://docs.mparticle.com/developers/apis/dsr-api/v3/#authentication
-			 */
-			Authorization: `Basic ${Buffer.from(`${appConfig.workspace.key}:${appConfig.workspace.secret}`).toString('base64')}`,
-		},
-		body: options.body,
-	});
+export class MParticleDataSubjectClient {
+	static create(
+		workspaceConfig: AppConfig['workspace'],
+	): MParticleDataSubjectClient {
+		/**
+		 * Authentication
+		 * The DSR API is secured via basic authentication. Credentials are issued at the level of an mParticle workspace.
+		 * You can obtain credentials for your workspace from the Workspace Settings screen. Note that this authentication
+		 * is for a single workspace and scopes the DSR to this workspace only.
+		 * https://docs.mparticle.com/developers/apis/dsr-api/v3/#authentication
+		 */
+		const authHeader = `Basic ${Buffer.from(`${workspaceConfig.key}:${workspaceConfig.secret}`).toString('base64')}`;
+		return new MParticleDataSubjectClient(authHeader);
+	}
+	constructor(private authHeader: string) {}
+
+	public async get<RESP>(
+		path: string,
+		schema: z.ZodType<RESP, z.ZodTypeDef, unknown>,
+	): Promise<HttpResponse<RESP>> {
+		return await this.fetch(path, 'GET', schema);
+	}
+
+	public async post<REQ, RESP>(
+		path: string,
+		body: REQ,
+		schema: z.ZodType<RESP, z.ZodTypeDef, unknown>,
+	): Promise<HttpResponse<RESP>> {
+		return await this.fetch(path, 'POST', schema, body);
+	}
+
+	public async fetch<REQ, RESP>(
+		path: string,
+		method: 'GET' | 'POST',
+		schema: z.ZodType<RESP, z.ZodTypeDef, unknown>,
+		body?: REQ,
+	): Promise<HttpResponse<RESP>> {
+		return makeHttpRequest<RESP>(path, {
+			method,
+			schema,
+			baseURL: `https://opendsr.mparticle.com/v3`,
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: this.authHeader,
+			},
+			body: body,
+		});
+	}
 }
 
 /**
@@ -53,48 +79,52 @@ async function requestDataSubjectApi<T>(
  * A request in the OpenDSR format communicates a Data Subject’s wish to access or erase their data.
  * The OpenDSR Request takes a JSON request body and requires a Content-Type: application/json header.
  * https://docs.mparticle.com/developers/apis/dsr-api/v3/#submit-a-data-subject-request-dsr
+ * @param mParticleDataSubjectClient
+ * @param httpRouterBaseUrl the base url to the http router in this lambda for callbacks
  * @param {DataSubjectRequestForm} form - The form containing the data subject request details.
  * @returns https://docs.mparticle.com/developers/apis/dsr-api/v3/#example-success-response-body
  */
 export const submitDataSubjectRequest = async (
+	mParticleDataSubjectClient: MParticleDataSubjectClient,
+	httpRouterBaseUrl: string,
 	form: DataSubjectRequestForm,
 ): Promise<DataSubjectRequestSubmission> => {
-	const response = await requestDataSubjectApi<{
-		expected_completion_time: Date;
-		received_time: Date;
-		encoded_request: string;
-		subject_request_id: string;
-		controller_id: string;
-	}>(`/requests`, {
-		method: 'POST',
-		body: {
-			regulation: form.regulation,
-			subject_request_id: form.requestId,
-			subject_request_type: form.requestType,
-			submitted_time: form.submittedTime,
-			subject_identities: {
-				controller_customer_id: {
-					value: form.userId,
-					encoding: 'raw',
-				},
-			},
-			api_version: '3.0',
-			status_callback_urls:
-				getEnv('STAGE') === 'PROD'
-					? [
-							`https://mparticle-api.support.guardianapis.com/data-subject-requests/${form.requestId}/callback`,
-						]
-					: [
-							`https://mparticle-api-code.support.guardianapis.com/data-subject-requests/${form.requestId}/callback`,
-						],
-			group_id: form.userId, // Let's group by User Unique Id to group all requests related to that user (max 150 requests per group)
-			extensions: {
-				'opendsr.mparticle.com': {
-					skip_waiting_period: true,
-				},
+	const requestBody = {
+		regulation: form.regulation,
+		subject_request_id: form.requestId,
+		subject_request_type: form.requestType,
+		submitted_time: form.submittedTime,
+		subject_identities: {
+			controller_customer_id: {
+				value: form.userId,
+				encoding: 'raw',
 			},
 		},
+		api_version: '3.0',
+		status_callback_urls: [
+			httpRouterBaseUrl + callbackPath.replace(placeholder, form.requestId),
+		],
+		group_id: form.userId, // Let's group by User Unique Id to group all requests related to that user (max 150 requests per group)
+		extensions: {
+			'opendsr.mparticle.com': {
+				skip_waiting_period: true,
+			},
+		},
+	};
+
+	const schema = z.object({
+		expected_completion_time: z.string().transform((val) => new Date(val)),
+		received_time: z.string().transform((val) => new Date(val)),
+		encoded_request: z.string(),
+		subject_request_id: z.string(),
+		controller_id: z.string(),
 	});
+
+	const response = await mParticleDataSubjectClient.post(
+		`/requests`,
+		requestBody,
+		schema,
+	);
 
 	if (!response.success) {
 		/**
@@ -102,7 +132,10 @@ export const submitDataSubjectRequest = async (
 		 * Let's try to search for an existent request on mParticle before throwing an error.
 		 */
 		const getDataSubjectRequestResponse =
-			await getStatusOfDataSubjectRequestByUserId(form.userId);
+			await getStatusOfDataSubjectRequestByUserId(
+				mParticleDataSubjectClient,
+				form.userId,
+			);
 		if (getDataSubjectRequestResponse) {
 			return {
 				expectedCompletionTime:
@@ -124,6 +157,26 @@ export const submitDataSubjectRequest = async (
 	};
 };
 
+const getRequestsResponseSchema = z.object({
+	controller_id: z.string(),
+	expected_completion_time: z.string().transform((val) => new Date(val)),
+	subject_request_id: z.string(),
+	group_id: z.string().nullable(),
+	request_status: z.enum(['pending', 'in_progress', 'completed', 'cancelled']),
+	api_version: z.string(),
+	results_url: z.string().nullable(),
+	extensions: z
+		.record(
+			z.object({
+				domain: z.string(),
+				name: z.string(),
+				status: z.enum(['pending', 'skipped', 'sent', 'failed']),
+				status_message: z.string(),
+			}),
+		)
+		.nullable(),
+});
+
 /**
  * Get the status of an OpenDSR request
  * https://docs.mparticle.com/developers/apis/dsr-api/v3/#get-the-status-of-an-opendsr-request
@@ -131,28 +184,13 @@ export const submitDataSubjectRequest = async (
  * @returns https://docs.mparticle.com/developers/apis/dsr-api/v3/#example-response-body
  */
 export const getStatusOfDataSubjectRequest = async (
+	mParticleDataSubjectClient: MParticleDataSubjectClient,
 	requestId: string,
 ): Promise<DataSubjectRequestState> => {
-	const response = await requestDataSubjectApi<{
-		controller_id: string;
-		expected_completion_time: Date;
-		subject_request_id: string;
-		group_id: string | null;
-		request_status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
-		api_version: string;
-		results_url: string | null;
-		extensions: Record<
-			string,
-			{
-				domain: string;
-				name: string;
-				status: 'pending' | 'skipped' | 'sent' | 'failed';
-				status_message: string;
-			}
-		> | null;
-	}>(`/requests/${requestId}`, {
-		method: 'GET',
-	});
+	const response = await mParticleDataSubjectClient.get(
+		`/requests/${requestId}`,
+		getRequestsResponseSchema,
+	);
 
 	if (!response.success) {
 		throw response.error;
@@ -174,30 +212,14 @@ export const getStatusOfDataSubjectRequest = async (
  * @returns https://docs.mparticle.com/developers/apis/dsr-api/v3/#example-response-body-1
  */
 export const getStatusOfDataSubjectRequestByUserId = async (
+	mParticleDataSubjectClient: MParticleDataSubjectClient,
 	userId: string,
 ): Promise<DataSubjectRequestState | null> => {
-	const response = await requestDataSubjectApi<
-		Array<{
-			controller_id: string;
-			expected_completion_time: Date;
-			subject_request_id: string;
-			group_id: string | null;
-			request_status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
-			api_version: string;
-			results_url: string | null;
-			extensions: Record<
-				string,
-				{
-					domain: string;
-					name: string;
-					status: 'pending' | 'skipped' | 'sent' | 'failed';
-					status_message: string;
-				}
-			> | null;
-		}>
-	>(`/requests?group_id=${userId}`, {
-		method: 'GET',
-	});
+	const schema = z.array(getRequestsResponseSchema);
+	const response = await mParticleDataSubjectClient.get(
+		`/requests?group_id=${userId}`,
+		schema,
+	);
 
 	if (!response.success) {
 		throw response.error;
@@ -256,5 +278,3 @@ export const processDataSubjectRequestCallback = (
 		timestamp: new Date(),
 	};
 };
-
-export { requestDataSubjectApi };
