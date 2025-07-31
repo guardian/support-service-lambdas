@@ -3,8 +3,8 @@ import type {
 	ZuoraResponse,
 } from '@modules/zuora/types/httpResponse';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { zuoraResponseSchema } from '../../../modules/zuora/src/types/httpResponse';
 import dayjs from 'dayjs';
+import { zuoraResponseSchema } from '../../../modules/zuora/src/types/httpResponse';
 import type { ZuoraGetAmendmentResponse } from './schemas';
 import { zuoraGetAmendmentResponseSchema } from './schemas';
 
