@@ -40,7 +40,7 @@ export const BatonSarEventInitiateRequestSchema =
 		dataProvider: z.literal('mparticlesar'),
 	});
 
-export const BatonEventRequestSchema = z.discriminatedUnion('action', [
+export const BatonEventRequestSchema = z.union([
 	BatonRerEventInitiateRequestSchema,
 	BatonRerEventStatusRequestSchema,
 	BatonSarEventInitiateRequestSchema,
@@ -75,7 +75,7 @@ export const BatonSarEventInitiateResponseSchema =
 		initiationReference: InitiationReferenceSchema,
 	});
 
-export const BatonEventResponseSchema = z.discriminatedUnion('action', [
+export const BatonEventResponseSchema = z.union([
 	BatonRerEventInitiateResponseSchema,
 	BatonRerEventStatusResponseSchema,
 	BatonSarEventInitiateResponseSchema,

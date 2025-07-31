@@ -105,10 +105,6 @@ describe('mparticle-api Baton tests', () => {
 	it('Initiate Data Subject Request', async () => {
 		const requestId = faker.string.uuid();
 		const submittedTime = new Date();
-		const mockSetUserAttributesResponse = {
-			ok: true,
-			status: 202,
-		};
 		const mockCreateDataSubjectRequestResponse = {
 			ok: true,
 			statusCode: 202,
@@ -119,9 +115,9 @@ describe('mparticle-api Baton tests', () => {
 				controller_id: faker.string.numeric(),
 			}),
 		};
-		(global.fetch as jest.Mock)
-			.mockResolvedValueOnce(mockSetUserAttributesResponse)
-			.mockResolvedValueOnce(mockCreateDataSubjectRequestResponse);
+		(global.fetch as jest.Mock).mockResolvedValueOnce(
+			mockCreateDataSubjectRequestResponse,
+		);
 
 		const userId = faker.string.alphanumeric();
 		const result = await invokeBatonRerHandler({
@@ -132,13 +128,13 @@ describe('mparticle-api Baton tests', () => {
 		});
 
 		expect(result).toBeDefined();
-		expect(result.requestType).toEqual('RER');
+		expect(result.requestType).toEqual('SAR');
 		expect(result.action).toEqual('initiate');
 		expect(result.status).toEqual('pending');
 		if (result.action == 'initiate') {
 			expect(result.initiationReference).toEqual(requestId);
 		}
 		expect(result.message).toBeDefined();
-		expect(global.fetch).toHaveBeenCalledTimes(2);
+		expect(global.fetch).toHaveBeenCalledTimes(1);
 	});
 });
