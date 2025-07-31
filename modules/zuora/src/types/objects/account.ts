@@ -15,6 +15,7 @@ export const zuoraAccountBasicInfoSchema = z
 export const metricsSchema = z.object({
 	totalInvoiceBalance: z.number(),
 	currency: z.string(),
+	creditBalance: z.number(),
 });
 export const billToContactSchema = z.object({
 	firstName: z.string(),
