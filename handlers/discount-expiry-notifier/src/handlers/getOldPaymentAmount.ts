@@ -2,9 +2,9 @@ import { stageFromEnvironment } from '@modules/stage';
 import { getBillingPreview } from '@modules/zuora/billingPreview';
 import { doQuery } from '@modules/zuora/query';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { BillingPreviewInvoiceItem } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
 import { z } from 'zod';
+import type { BillingPreviewInvoiceItem } from '../../../../modules/zuora/src/types/objects/billingPreview';
 import { calculateTotalAmount, filterRecords } from '../helpers';
 import {
 	BaseRecordForEmailSendSchema,

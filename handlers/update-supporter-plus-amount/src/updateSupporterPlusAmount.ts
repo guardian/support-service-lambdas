@@ -13,13 +13,13 @@ import type {
 import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import type {
 	RatePlan,
 	RatePlanCharge,
 	ZuoraSubscription,
-} from '@modules/zuora/zuoraSchemas';
-import type { Dayjs } from 'dayjs';
-import dayjs from 'dayjs';
+} from '../../../modules/zuora/src/types/objects/subscription';
 import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
 import type { EmailFields } from './sendEmail';
 import { supporterPlusAmountBands } from './supporterPlusAmountBands';

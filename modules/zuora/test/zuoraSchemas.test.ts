@@ -1,7 +1,5 @@
-import {
-	zuoraSubscriptionResponseSchema,
-	zuoraSubscriptionsFromAccountSchema,
-} from '@modules/zuora/zuoraSchemas';
+import { zuoraSubscriptionResponseSchema } from '../src/types/objects/subscription';
+import { zuoraSubscriptionsFromAccountSchema } from '../../../modules/zuora/src/types/objects/account';
 import subscriptionJson from './fixtures/subscription.json';
 import subscriptionsFromAccountJson from './fixtures/subscriptions-from-account-number-response.json';
 

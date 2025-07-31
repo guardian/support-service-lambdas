@@ -8,13 +8,13 @@ import { prettyPrint } from '@modules/prettyPrint';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import type { SimpleInvoiceItem } from '@modules/zuora/billingPreview';
-import type {
-	RatePlan,
-	ZuoraAccount,
-	ZuoraSubscription,
-} from '@modules/zuora/zuoraSchemas';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
+import type { ZuoraAccount } from '../../../modules/zuora/src/types/objects/account';
+import type {
+	RatePlan,
+	ZuoraSubscription,
+} from '../../../modules/zuora/src/types/objects/subscription';
 import type { CatalogInformation } from './catalogInformation';
 import { getCatalogInformation } from './catalogInformation';
 import type { Discount } from './discounts';

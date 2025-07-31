@@ -1,5 +1,5 @@
 import { DataExtensionNames } from '@modules/email/email';
-import { zuoraSubscriptionResponseSchema } from '@modules/zuora/zuoraSchemas';
+import { zuoraSubscriptionResponseSchema } from '../../../modules/zuora/src/types/objects/subscription';
 import type { Discount } from '../src/productToDiscountMapping';
 import {
 	catalog,
