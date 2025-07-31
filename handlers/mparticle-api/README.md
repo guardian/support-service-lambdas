@@ -7,13 +7,14 @@
 The mParticle API Lambda enables Guardian to fulfill GDPR and CCPA compliance requirements by providing a secure, scalable interface to mParticle's Data Subject Request (DSR) API. It processes privacy requests, tracks their status, and coordinates with Guardian's broader privacy ecosystem.
 
 ### Key Capabilities
-- 🔒 **Privacy Rights Fulfillment**: Process data deletion and export requests
+- 🔒 **Privacy Rights Fulfillment**: Process data deletion, export, and access requests
 - 📊 **Real-time Status Tracking**: Monitor DSR progress with callback integration  
-- 🤖 **Automated Workflows**: Integrate with Baton for orchestrated privacy operations
+- 🤖 **Automated Workflows**: Integrate with Baton for orchestrated privacy operations (RER & SAR)
 - 📈 **Analytics Forwarding**: Route event data to mParticle and downstream systems
 - 🛡️ **Enterprise Security**: Certificate validation and signature verification on callbacks from mParticle
 
 ### Compliance & Standards
+- **GDPR Article 15**: Right of Access implementation (Subject Access Requests)
 - **GDPR Article 17**: Right to Erasure implementation
 - **CCPA Section 1798.105**: Consumer data deletion rights
 - **X.509 Certificate Validation**: Cryptographic security for callbacks
@@ -84,8 +85,8 @@ Guardian Apps/Website → mParticle → Braze → Personalized Communications
 - **Personalization**: Content tailored based on reading history and preferences
 
 #### 4. **Privacy Compliance**
-- **Data Subject Requests**: When users request data deletion, both platforms must be coordinated
-- **mParticle**: Removes user data and audience memberships
+- **Data Subject Requests**: When users request data deletion or access, both platforms must be coordinated
+- **mParticle**: Removes user data and audience memberships (deletion) or exports user data (access)
 - **Braze**: Deletes user profiles and message history via mParticle's DSR forwarding
 
 ### Why This Integration Matters
@@ -128,7 +129,7 @@ graph TB
 
     %% Request Flows
     READER -->|Data Subject Request| BATON
-    BATON -->|Automated RER| BATON_H
+    BATON -->|Automated RER/SAR| BATON_H
     
     %% Processing
     BATON_H -->|Submit DSR| MPARTICLE
@@ -180,6 +181,24 @@ sequenceDiagram
     M->>MP: Status callback
     MP->>B: Return completion status
     B->>R: Confirm erasure complete
+```
+
+```mermaid
+sequenceDiagram
+    participant R as Reader
+    participant B as Baton
+    participant MP as mParticle API
+    participant M as mParticle
+
+    Note over R,M: Subject Access Request (SAR) Flow
+    
+    R->>B: Request data access
+    B->>MP: Initiate SAR (Baton Handler)
+    MP->>M: Submit OpenDSR export request
+    M->>M: Gather user data<br/>(Up to 14 days)
+    M->>MP: Status callback with download URL
+    MP->>B: Return data export details
+    B->>R: Provide access to data export
 ```
 
 ---
@@ -278,7 +297,7 @@ All configuration is managed through AWS Parameter Store. Ensure these parameter
 
 | Action | Handler | Purpose |
 |--------|---------|---------|
-| `initiate` | `handleInitiateRequest` | Initiate RER via Baton |
+| `initiate` | `handleInitiateRequest` | Initiate RER/SAR via Baton |
 | `status` | `handleStatusRequest` | Check DSR status for Baton |
 
 #### Initiate RER Request Event
@@ -305,12 +324,36 @@ All configuration is managed through AWS Parameter Store. Ensure these parameter
   ```
 - **Flow**: Identity resolution → DSR submission → correlation tracking
 
+#### Initiate SAR Request Event
+- **Action**: `initiate`
+- **Request Schema**:
+  ```typescript
+  {
+    requestType: "SAR",
+    action: "initiate", 
+    subjectId: string,
+    subjectEmail?: string,
+    dataProvider: "mparticlesar"
+  }
+  ```
+- **Response Schema**:
+  ```typescript
+  {
+    requestType: "SAR",
+    action: "initiate",
+    status: "pending" | "completed" | "failed",
+    message: string,
+    initiationReference: GUID
+  }
+  ```
+- **Flow**: Identity resolution → DSR submission → correlation tracking
+
 #### Status Check Event
 - **Action**: `status`
 - **Request Schema**:
   ```typescript
   {
-    requestType: "RER",
+    requestType: "RER" | "SAR",
     action: "status",
     initiationReference: GUID
   }
@@ -318,10 +361,11 @@ All configuration is managed through AWS Parameter Store. Ensure these parameter
 - **Response Schema**:
   ```typescript
   {
-    requestType: "RER", 
+    requestType: "RER" | "SAR", 
     action: "status",
     status: "pending" | "completed" | "failed",
-    message: string
+    message: string,
+    resultLocations?: [string]  // Only for completed SAR requests
   }
   ```
 - **Flow**: Request validation → mParticle API query → status resolution
@@ -344,11 +388,13 @@ All configuration is managed through AWS Parameter Store. Ensure these parameter
 ### Compliance Framework
 
 #### GDPR (General Data Protection Regulation)
+- **Article 15**: Right of Access implementation (Subject Access Requests)
 - **Article 17**: Right to Erasure implementation
 - **Article 20**: Data Portability through export functionality
 - **28-day response deadline**: Mandatory timeline for processing requests
 
 #### CCPA (California Consumer Privacy Act)
+- **Section 1798.100**: Consumer right to know and access personal information
 - **Section 1798.105**: Consumer data deletion requests
 - **Business day response**: Confirmation of request receipt
 - **Verification process**: Identity confirmation before processing
@@ -478,13 +524,13 @@ Managed through AWS CDK with environment-specific configurations.
 
 ### Baton Privacy Orchestration
 The Lambda integrates with Guardian's Baton system for automated privacy workflows:
-- Cross-account Lambda invocation
+- Cross-account Lambda invocation for RER and SAR requests
 - Correlation tracking for multi-service requests
 - Status synchronization across privacy processors
 
 ### mParticle Data Subject Requests
 Direct integration with mParticle's DSR API:
-- Automated request submission and tracking
+- Automated request submission and tracking (deletion and export)
 - Secure callback handling with certificate validation
 - Status polling and update processing
 
