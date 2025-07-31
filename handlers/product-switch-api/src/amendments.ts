@@ -1,7 +1,4 @@
-import type {
-	ZuoraReason,
-	ZuoraResponse,
-} from '@modules/zuora/types/httpResponse';
+import { ZuoraError } from '@modules/zuora/errors/zuoraError';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { zuoraResponseSchema } from '../../../modules/zuora/src/types/httpResponse';
@@ -18,18 +15,12 @@ export const getLastAmendment = async (
 			zuoraGetAmendmentResponseSchema,
 		);
 	} catch (error) {
-		if (error && typeof error === 'object' && 'jsonBody' in error) {
-			const jsonBody = error.jsonBody as ZuoraResponse;
-
-			if (
-				!jsonBody.success &&
-				jsonBody.reasons?.find((r: ZuoraReason) => r.code === 50000040)
-			) {
-				console.log(
-					`No amendments found for subscription ${subscriptionNumber}`,
-				);
-				return undefined;
-			}
+		if (
+			error instanceof ZuoraError &&
+			error.zuoraErrorDetails.find((r) => r.code === '50000040')
+		) {
+			console.log(`No amendments found for subscription ${subscriptionNumber}`);
+			return undefined;
 		}
 		throw error;
 	}
