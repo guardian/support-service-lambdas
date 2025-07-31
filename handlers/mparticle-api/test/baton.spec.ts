@@ -4,7 +4,7 @@ import type {
 	InitiationReference,
 } from '../src/routers/baton/types-and-schemas';
 import type { AppConfig } from '../src/utils/config';
-import { invokeBatonHandler } from '../src/utils/invoke-baton-rer-handler';
+import { invokeBatonHandler } from '../src/utils/invoke-baton-handler';
 
 jest.mock('../src/utils/config', () => ({
 	getAppConfig: jest.fn().mockResolvedValue({
