@@ -65,7 +65,6 @@ describe('writeOffInvoices', () => {
 
 		(getInvoice as jest.Mock).mockResolvedValue({
 			balance: 35,
-			accountNumber: 'ACC123',
 		});
 
 		(getAccount as jest.Mock).mockResolvedValue({
@@ -130,7 +129,6 @@ describe('writeOffInvoices', () => {
 	it('handles negative balances and charges instead of credits', async () => {
 		(getInvoice as jest.Mock).mockResolvedValue({
 			balance: -20,
-			accountNumber: 'ACC123',
 		});
 
 		const invoiceItemsNegative = [
@@ -187,7 +185,6 @@ describe('writeOffInvoices', () => {
 	it('applies credit balance when invoice is positive and account has credit', async () => {
 		(getInvoice as jest.Mock).mockResolvedValue({
 			balance: 50,
-			accountNumber: 'ACC123',
 		});
 
 		(getAccount as jest.Mock).mockResolvedValue({
@@ -214,7 +211,6 @@ describe('writeOffInvoices', () => {
 	it('fully balances invoice with credit and skips invoice item adjustments', async () => {
 		(getInvoice as jest.Mock).mockResolvedValue({
 			balance: 25,
-			accountNumber: 'ACC123',
 		});
 
 		(getAccount as jest.Mock).mockResolvedValue({
@@ -241,7 +237,6 @@ describe('writeOffInvoices', () => {
 	it('skips credit balance application when account has no credit', async () => {
 		(getInvoice as jest.Mock).mockResolvedValue({
 			balance: 35,
-			accountNumber: 'ACC123',
 		});
 
 		(getAccount as jest.Mock).mockResolvedValue({
@@ -265,7 +260,6 @@ describe('writeOffInvoices', () => {
 	it('includes correct comment and reason code in credit balance adjustment', async () => {
 		(getInvoice as jest.Mock).mockResolvedValue({
 			balance: 30,
-			accountNumber: 'ACC123',
 		});
 
 		(getAccount as jest.Mock).mockResolvedValue({
