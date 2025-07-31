@@ -1,11 +1,6 @@
-import {
-	GetQueueUrlCommand,
-	SendMessageCommand,
-	SQSClient,
-} from '@aws-sdk/client-sqs';
-import { awsConfig } from '@modules/aws/config';
 import { prettyPrint } from '@modules/prettyPrint';
 import type { SwitchInformation } from './switchInformation';
+import { sendMessageToQueue } from '../../../modules/aws/src/sqs';
 
 export type SalesforceTrackingInput = {
 	subscriptionName: string;
@@ -59,26 +54,18 @@ export const sendSalesforceTracking = async (
 		new Date(),
 	);
 
-	const client = new SQSClient(awsConfig);
 	const queueName = `product-switch-salesforce-tracking-${switchInformation.stage}`;
 	console.log(
 		`Sending Salesforce tracking message ${prettyPrint(
 			JSON.parse(messageBody),
 		)} to queue ${queueName}`,
 	);
-	const getQueueUrlCommand = new GetQueueUrlCommand({
-		QueueName: queueName,
-	});
-	const { QueueUrl } = await client.send(getQueueUrlCommand);
 
-	const command = new SendMessageCommand({
-		QueueUrl: QueueUrl,
-		MessageBody: messageBody,
-	});
+	const response = await sendMessageToQueue({
+        queueName,
+        messageBody,
+    });
 
-	console.log(`checking queue URL ${QueueUrl}`);
-
-	const response = await client.send(command);
 	console.log(
 		`Response from Salesforce tracking send was ${prettyPrint(response)}`,
 	);
