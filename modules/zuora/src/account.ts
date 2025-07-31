@@ -1,9 +1,7 @@
 import { z } from 'zod';
 import type { ZuoraClient } from './zuoraClient';
-import {
-	ZuoraSuccessResponse,
-	zuoraSuccessResponseSchema,
-} from './zuoraSchemas';
+import { zuoraResponseSchema } from '../../../modules/zuora/src/types/httpResponse';
+import type { ZuoraResponse } from '../../../modules/zuora/src/types/httpResponse';
 import { zuoraAccountSchema } from './types/objects/account';
 import type { ZuoraAccount } from './types/objects/account';
 
@@ -18,9 +16,9 @@ export const getAccount = async (
 export const deleteAccount = async (
 	zuoraClient: ZuoraClient,
 	accountNumber: string,
-): Promise<ZuoraSuccessResponse> => {
+): Promise<ZuoraResponse> => {
 	const path = `/v1/accounts/${accountNumber}`;
-	return zuoraClient.delete(path, zuoraSuccessResponseSchema);
+	return zuoraClient.delete(path, zuoraResponseSchema);
 };
 
 const responseSchema = z.object({

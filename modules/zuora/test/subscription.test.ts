@@ -6,9 +6,9 @@ import {
 	getSubscriptionsByAccountNumber,
 } from '@modules/zuora/subscription';
 import type { ZuoraSubscription } from '../../../modules/zuora/src/types/objects/subscription';
-import type { ZuoraSuccessResponse } from '@modules/zuora/zuoraSchemas';
 import { zuoraSubscriptionResponseSchema } from '../../../modules/zuora/src/types/objects/subscription';
-import { zuoraSuccessResponseSchema } from '@modules/zuora/zuoraSchemas';
+import { zuoraResponseSchema } from '../../../modules/zuora/src/types/httpResponse';
+import type { ZuoraResponse } from '../../../modules/zuora/src/types/httpResponse';
 import { zuoraSubscriptionsFromAccountSchema } from '../../../modules/zuora/src/types/objects/account';
 import type { ZuoraSubscriptionsFromAccountResponse } from '../../../modules/zuora/src/types/objects/account';
 
@@ -21,7 +21,7 @@ describe('subscription', () => {
 
 	describe('cancelSubscription', () => {
 		it('should cancel subscription with correct parameters', async () => {
-			const mockResponse: ZuoraSuccessResponse = {
+			const mockResponse: ZuoraResponse = {
 				success: true,
 			};
 
@@ -44,14 +44,14 @@ describe('subscription', () => {
 					runBilling: true,
 					collect: false,
 				}),
-				zuoraSuccessResponseSchema,
+				zuoraResponseSchema,
 				{ 'zuora-version': '211.0' },
 			);
 			expect(result).toEqual(mockResponse);
 		});
 
 		it('should handle undefined collect parameter', async () => {
-			const mockResponse: ZuoraSuccessResponse = {
+			const mockResponse: ZuoraResponse = {
 				success: true,
 			};
 
@@ -73,7 +73,7 @@ describe('subscription', () => {
 					runBilling: false,
 					collect: undefined,
 				}),
-				zuoraSuccessResponseSchema,
+				zuoraResponseSchema,
 				{ 'zuora-version': '211.0' },
 			);
 		});

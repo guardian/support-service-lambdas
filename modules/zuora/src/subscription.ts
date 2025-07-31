@@ -3,8 +3,8 @@ import { zuoraDateFormat } from './utils/common';
 import type { ZuoraClient } from './zuoraClient';
 import type { ZuoraSubscription } from './types/objects/subscription';
 import { zuoraSubscriptionResponseSchema } from './types/objects/subscription';
-import type { ZuoraSuccessResponse } from './zuoraSchemas';
-import { zuoraSuccessResponseSchema } from './zuoraSchemas';
+import { zuoraResponseSchema } from './types/httpResponse';
+import type { ZuoraResponse } from './types/httpResponse';
 import { zuoraSubscriptionsFromAccountSchema } from './types/objects/account';
 import type { ZuoraSubscriptionsFromAccountResponse } from './types/objects/account';
 
@@ -14,7 +14,7 @@ export const cancelSubscription = async (
 	contractEffectiveDate: Dayjs,
 	runBilling: boolean,
 	collect: boolean | undefined = undefined,
-): Promise<ZuoraSuccessResponse> => {
+): Promise<ZuoraResponse> => {
 	const path = `/v1/subscriptions/${subscriptionNumber}/cancel`;
 	const body = JSON.stringify({
 		cancellationEffectiveDate: zuoraDateFormat(contractEffectiveDate),
@@ -22,7 +22,7 @@ export const cancelSubscription = async (
 		runBilling,
 		collect,
 	});
-	return zuoraClient.put(path, body, zuoraSuccessResponseSchema, {
+	return zuoraClient.put(path, body, zuoraResponseSchema, {
 		'zuora-version': '211.0',
 	});
 };

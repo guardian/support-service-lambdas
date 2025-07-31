@@ -1,9 +1,9 @@
 import type { OrderRequest } from '@modules/zuora/orders';
 import { singleTriggerDate } from '@modules/zuora/orders';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { ZuoraSuccessResponse } from '@modules/zuora/zuoraSchemas';
-import { zuoraSuccessResponseSchema } from '@modules/zuora/zuoraSchemas';
 import type { Dayjs } from 'dayjs';
+import type { ZuoraResponse } from '../../../modules/zuora/src/types/httpResponse';
+import { zuoraResponseSchema } from '../../../modules/zuora/src/types/httpResponse';
 import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
 
 export const doUpdate = async ({
@@ -51,10 +51,10 @@ const doCreateOrderRequest = async (
 	body: OrderRequest,
 	context: string,
 ) => {
-	const response: ZuoraSuccessResponse = await zuoraClient.post(
+	const response: ZuoraResponse = await zuoraClient.post(
 		'/v1/orders',
 		JSON.stringify(body),
-		zuoraSuccessResponseSchema,
+		zuoraResponseSchema,
 	);
 	if (!response.success) {
 		const errorMessage = response.reasons?.at(0)?.message;
