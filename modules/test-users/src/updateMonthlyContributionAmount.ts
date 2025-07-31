@@ -5,8 +5,8 @@ import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { getSubscription } from '@modules/zuora/subscription';
 import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { zuoraResponseSchema } from '../../../modules/zuora/src/types/httpResponse';
 import dayjs from 'dayjs';
+import { zuoraResponseSchema } from '../../../modules/zuora/src/types/httpResponse';
 import type { ZuoraSubscription } from '../../../modules/zuora/src/types/objects/subscription';
 
 const getFirstContributionRatePlan = (
