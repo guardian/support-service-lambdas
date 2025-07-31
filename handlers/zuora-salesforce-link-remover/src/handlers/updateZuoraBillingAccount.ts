@@ -1,3 +1,4 @@
+import type { ZuoraResponse } from '@modules/zuora/types/httpResponse';
 import type { Handler } from 'aws-lambda';
 import { z } from 'zod';
 import { updateBillingAccountInZuora } from '../zuoraHttp';
@@ -5,7 +6,6 @@ import type {
 	BillingAccountRecord,
 	BillingAccountRecordWithSuccess,
 } from './getBillingAccounts';
-import type { ZuoraResponse } from '@modules/zuora/types/httpResponse';
 
 export const handler: Handler<
 	BillingAccountRecord,
