@@ -2,10 +2,8 @@ import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { Dayjs } from 'dayjs';
 import type { ZuoraSubscription } from '../../../modules/zuora/src/types/objects/subscription';
 import { updateSubscriptionBody } from './fixtures/request-bodies/update-subscription-body';
-import {
-	ZuoraResponse,
-	zuoraResponseSchema,
-} from '../../../modules/zuora/src/types/httpResponse';
+import { zuoraResponseSchema } from '../../../modules/zuora/src/types/httpResponse';
+import type { ZuoraResponse } from '../../../modules/zuora/src/types/httpResponse';
 
 export const doPriceRise = async (
 	zuoraClient: ZuoraClient,

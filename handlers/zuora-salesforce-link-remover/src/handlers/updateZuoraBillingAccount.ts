@@ -5,7 +5,7 @@ import type {
 	BillingAccountRecord,
 	BillingAccountRecordWithSuccess,
 } from './getBillingAccounts';
-import { ZuoraResponse } from '@modules/zuora/types/httpResponse';
+import type { ZuoraResponse } from '@modules/zuora/types/httpResponse';
 
 export const handler: Handler<
 	BillingAccountRecord,
