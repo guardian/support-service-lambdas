@@ -5,7 +5,7 @@ import type {
 	BatonEventResponse,
 } from '../routers/baton/types-and-schemas';
 
-export const invokeBatonRerHandler = async (
+export const invokeBatonHandler = async (
 	event: BatonEventRequest,
 ): Promise<BatonEventResponse> => {
 	const result: unknown = await handlerBaton(

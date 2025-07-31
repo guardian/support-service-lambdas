@@ -1,6 +1,7 @@
 import { handleRerInitiate } from './baton/handle-rer-initiate';
 import { handleRerStatus } from './baton/handle-rer-status';
 import { handleSarInitiate } from './baton/handle-sar-initiate';
+import { handleSarStatus } from './baton/handle-sar-status';
 import type {
 	BatonEventRequest,
 	BatonEventResponse,
@@ -28,6 +29,8 @@ export const batonRerRouter = {
 			switch (validatedEvent.action) {
 				case 'initiate':
 					return handleSarInitiate(validatedEvent);
+				case 'status':
+					return handleSarStatus(validatedEvent);
 			}
 		} else {
 			switch (validatedEvent.action) {

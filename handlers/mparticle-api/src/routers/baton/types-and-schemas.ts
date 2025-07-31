@@ -40,10 +40,17 @@ export const BatonSarEventInitiateRequestSchema =
 		dataProvider: z.literal('mparticlesar'),
 	});
 
+export const BatonSarEventStatusRequestSchema =
+	BatonSarEventRequestBaseSchema.extend({
+		action: z.literal('status'),
+		initiationReference: InitiationReferenceSchema,
+	});
+
 export const BatonEventRequestSchema = z.union([
 	BatonRerEventInitiateRequestSchema,
 	BatonRerEventStatusRequestSchema,
 	BatonSarEventInitiateRequestSchema,
+	BatonSarEventStatusRequestSchema,
 ]);
 
 const BatonRerEventResponseBaseSchema = z.object({
@@ -75,10 +82,17 @@ export const BatonSarEventInitiateResponseSchema =
 		initiationReference: InitiationReferenceSchema,
 	});
 
+export const BatonSarEventStatusResponseSchema =
+	BatonSarEventResponseBaseSchema.extend({
+		action: z.literal('status'),
+		resultLocations: z.array(z.string()).optional(),
+	});
+
 export const BatonEventResponseSchema = z.union([
 	BatonRerEventInitiateResponseSchema,
 	BatonRerEventStatusResponseSchema,
 	BatonSarEventInitiateResponseSchema,
+	BatonSarEventStatusResponseSchema,
 ]);
 
 // Infer types from schemas
@@ -91,6 +105,9 @@ export type BatonRerEventStatusRequest = z.infer<
 export type BatonSarEventInitiateRequest = z.infer<
 	typeof BatonSarEventInitiateRequestSchema
 >;
+export type BatonSarEventStatusRequest = z.infer<
+	typeof BatonSarEventStatusRequestSchema
+>;
 export type BatonEventRequest = z.infer<typeof BatonEventRequestSchema>;
 
 export type BatonRerEventInitiateResponse = z.infer<
@@ -101,6 +118,9 @@ export type BatonRerEventStatusResponse = z.infer<
 >;
 export type BatonSarEventInitiateResponse = z.infer<
 	typeof BatonSarEventInitiateResponseSchema
+>;
+export type BatonSarEventStatusResponse = z.infer<
+	typeof BatonSarEventStatusResponseSchema
 >;
 export type BatonEventResponse = z.infer<typeof BatonEventResponseSchema>;
 
