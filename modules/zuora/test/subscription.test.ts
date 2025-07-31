@@ -5,15 +5,10 @@ import {
 	getSubscription,
 	getSubscriptionsByAccountNumber,
 } from '@modules/zuora/subscription';
-
-import type {
-	ZuoraSubscription,
-	ZuoraSuccessResponse,
-} from '@modules/zuora/zuoraSchemas';
-import {
-	zuoraSubscriptionResponseSchema,
-	zuoraSuccessResponseSchema,
-} from '@modules/zuora/zuoraSchemas';
+import type { ZuoraSubscription } from '../../../modules/zuora/src/types/objects/subscription';
+import type { ZuoraSuccessResponse } from '@modules/zuora/zuoraSchemas';
+import { zuoraSubscriptionResponseSchema } from '../../../modules/zuora/src/types/objects/subscription';
+import { zuoraSuccessResponseSchema } from '@modules/zuora/zuoraSchemas';
 import { zuoraSubscriptionsFromAccountSchema } from '../../../modules/zuora/src/types/objects/account';
 import type { ZuoraSubscriptionsFromAccountResponse } from '../../../modules/zuora/src/types/objects/account';
 

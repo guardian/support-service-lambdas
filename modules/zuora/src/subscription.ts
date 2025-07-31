@@ -1,11 +1,10 @@
 import type { Dayjs } from 'dayjs';
 import { zuoraDateFormat } from './utils/common';
 import type { ZuoraClient } from './zuoraClient';
-import type { ZuoraSubscription, ZuoraSuccessResponse } from './zuoraSchemas';
-import {
-	zuoraSubscriptionResponseSchema,
-	zuoraSuccessResponseSchema,
-} from './zuoraSchemas';
+import type { ZuoraSubscription } from './types/objects/subscription';
+import { zuoraSubscriptionResponseSchema } from './types/objects/subscription';
+import type { ZuoraSuccessResponse } from './zuoraSchemas';
+import { zuoraSuccessResponseSchema } from './zuoraSchemas';
 import { zuoraSubscriptionsFromAccountSchema } from './types/objects/account';
 import type { ZuoraSubscriptionsFromAccountResponse } from './types/objects/account';
 

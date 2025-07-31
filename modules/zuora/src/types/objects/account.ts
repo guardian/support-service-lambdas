@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { zuoraResponseSchema } from '../httpResponse';
-import { zuoraSubscriptionSchema } from '@modules/zuora/zuoraSchemas';
+import { zuoraSubscriptionSchema } from './subscription';
 
 export const zuoraAccountBasicInfoSchema = z
 	.object({
