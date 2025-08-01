@@ -1,9 +1,9 @@
-import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
-import { awsConfig } from '@modules/aws/config';
+
 import { prettyPrint } from '@modules/prettyPrint';
 import dayjs from 'dayjs';
 import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
 import type { SwitchInformation } from './switchInformation';
+import { sendMessageToQueue } from '../../../modules/aws/src/sqs';
 
 export type SupporterRatePlanItem = {
 	subscriptionName: string; // Unique identifier for the subscription
@@ -40,7 +40,6 @@ export const sendToSupporterProductData = async (
 	switchInformation: SwitchInformation,
 ) => {
 	const queueName = `supporter-product-data-${switchInformation.stage}`;
-	const client = new SQSClient(awsConfig);
 	const messageBody = prettyPrint(
 		supporterRatePlanItemFromSwitchInformation(switchInformation),
 	);
@@ -48,12 +47,11 @@ export const sendToSupporterProductData = async (
 		`Sending supporter product data message ${messageBody} to queue ${queueName}`,
 	);
 
-	const command = new SendMessageCommand({
-		QueueUrl: queueName,
-		MessageBody: messageBody,
-	});
+    const response = await sendMessageToQueue({
+        queueName,
+        messageBody,
+    });
 
-	const response = await client.send(command);
 	console.log(
 		`Response from Salesforce tracking send was ${prettyPrint(response)}`,
 	);
