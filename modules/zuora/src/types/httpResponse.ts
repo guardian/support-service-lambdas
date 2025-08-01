@@ -1,23 +1,51 @@
 import { z } from 'zod';
 
-// Type definitions for Zuora response formats
-
-export type ZuoraErrorItem = {
-	Code: string;
-	Message: string;
-};
-
 // Zod schema definitions
 export const zuoraReasonSchema = z.object({
 	code: z.string().or(z.number()),
 	message: z.string(),
 });
-export type ZuoraReason = z.infer<typeof zuoraReasonSchema>;
 
 export const zuoraErrorItemSchema = z.object({
 	Code: z.string(),
 	Message: z.string(),
 });
+
+export const lowerCaseZuoraErrorSchema = z.object({
+	success: z.literal(false),
+	reasons: z.array(zuoraReasonSchema),
+});
+export const upperCaseZuoraErrorSchema = z.object({
+	Success: z.literal(false),
+	Errors: z.array(zuoraErrorItemSchema),
+});
+export const faultCodeAndMessageSchema = z.object({
+	FaultCode: z.string(),
+	FaultMessage: z.string(),
+});
+export const codeAndMessageSchema = z.object({
+	code: z.string(),
+	message: z.string(),
+});
+export const zuoraErrorSchema = z.union([
+	lowerCaseZuoraErrorSchema,
+	upperCaseZuoraErrorSchema,
+	faultCodeAndMessageSchema,
+	codeAndMessageSchema,
+]);
+export const zuoraLowerCaseSuccessSchema = z.object({
+	success: z.literal(true),
+});
+export const zuoraUpperCaseSuccessSchema = z.object({
+	Success: z.literal(true),
+});
+export const zuoraSuccessSchema = z.union([
+	zuoraLowerCaseSuccessSchema,
+	zuoraUpperCaseSuccessSchema,
+]);
+
+export type ZuoraLowerCaseSuccess = z.infer<typeof zuoraLowerCaseSuccessSchema>;
+export type ZuoraUpperCaseSuccess = z.infer<typeof zuoraUpperCaseSuccessSchema>;
 
 export const zuoraResponseSchema = z.object({
 	// Success indicators (some endpoints use different casing)
