@@ -33,15 +33,19 @@ export const zuoraErrorSchema = z.union([
 	faultCodeAndMessageSchema,
 	codeAndMessageSchema,
 ]);
-export const zuoraSuccessSchema = z
-	.object({
-		success: z.literal(true),
-	})
-	.or(
-		z.object({
-			Success: z.literal(true),
-		}),
-	);
+export const zuoraLowerCaseSuccessSchema = z.object({
+	success: z.literal(true),
+});
+export const zuoraUpperCaseSuccessSchema = z.object({
+	Success: z.literal(true),
+});
+export const zuoraSuccessSchema = z.union([
+	zuoraLowerCaseSuccessSchema,
+	zuoraUpperCaseSuccessSchema,
+]);
+
+export type ZuoraLowerCaseSuccess = z.infer<typeof zuoraLowerCaseSuccessSchema>;
+export type ZuoraUpperCaseSuccess = z.infer<typeof zuoraUpperCaseSuccessSchema>;
 
 export const zuoraResponseSchema = z.object({
 	// Success indicators (some endpoints use different casing)
