@@ -35,11 +35,11 @@ export const zuoraErrorSchema = z.union([
 ]);
 export const zuoraSuccessSchema = z
 	.object({
-		success: z.literal('true'),
+		success: z.literal(true),
 	})
 	.or(
 		z.object({
-			Success: z.literal('true'),
+			Success: z.literal(true),
 		}),
 	);
 
