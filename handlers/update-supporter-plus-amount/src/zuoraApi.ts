@@ -2,9 +2,9 @@ import type { OrderRequest } from '@modules/zuora/orders';
 import { singleTriggerDate } from '@modules/zuora/orders';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { Dayjs } from 'dayjs';
-import type { ZuoraResponse } from '../../../modules/zuora/src/types/httpResponse';
-import { zuoraResponseSchema } from '../../../modules/zuora/src/types/httpResponse';
-import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
+import { zuoraLowerCaseSuccessSchema } from '@modules/zuora/types/httpResponse';
+import { zuoraDateFormat } from '@modules/zuora/utils/common';
+import { ZuoraError } from '@modules/zuora/errors/zuoraError';
 
 export const doUpdate = async ({
 	zuoraClient,
@@ -51,14 +51,18 @@ const doCreateOrderRequest = async (
 	body: OrderRequest,
 	context: string,
 ) => {
-	const response: ZuoraResponse = await zuoraClient.post(
-		'/v1/orders',
-		JSON.stringify(body),
-		zuoraResponseSchema,
-	);
-	if (!response.success) {
-		const errorMessage = response.reasons?.at(0)?.message;
-		throw Error(errorMessage ?? `Unknown error ${context}`);
+	try {
+		await zuoraClient.post(
+			'/v1/orders',
+			JSON.stringify(body),
+			zuoraLowerCaseSuccessSchema,
+		);
+	} catch (error) {
+		if (error instanceof ZuoraError) {
+			const errorMessage = error.zuoraErrorDetails.at(0)?.message;
+			throw Error(errorMessage ?? `Unknown error ${context}`);
+		}
+		throw Error(`Unknown error ${context}`);
 	}
 };
 
