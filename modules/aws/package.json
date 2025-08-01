@@ -15,7 +15,6 @@
 		"@aws-sdk/credential-provider-node": "3.782.0",
 		"@types/aws-sdk": "^2.7.4",
 		"aws-sdk": "^2.1692.0",
-		"aws-sdk-client-mock": "4.1.0",
 		"zod": "catalog:"
 	}
 }
