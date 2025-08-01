@@ -365,7 +365,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 		)
 			.when(
 				Condition.booleanEquals(
-					'$.activeSubResult.checkForActiveSubAttempt.Success',
+					'$.activeSubResult.checkForActiveSubSucceeded',
 					true,
 				),
 

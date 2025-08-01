@@ -57,7 +57,7 @@ function atLeastOneCalloutFailed(invoice: ProcessedInvoice): boolean {
 	if (
 		!applyCreditToAccountBalanceResult.applyCreditToAccountBalanceAttempt
 			.Success ||
-		!activeSubResult?.checkForActiveSubAttempt.Success
+		!activeSubResult?.checkForActiveSubSucceeded
 	) {
 		return true;
 	}
