@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { zuoraSuccessSchema } from './types';
 import type { ZuoraClient } from './zuoraClient';
 
-export const doRefund = async <T extends z.ZodType = typeof zuoraSuccessSchema>(
+export const doRefund = async <T extends z.ZodType>(
 	zuoraClient: ZuoraClient,
 	body: string,
 	schema?: T,
