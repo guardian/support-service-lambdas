@@ -1,10 +1,10 @@
 import type { OrderRequest } from '@modules/zuora/orders';
 import { singleTriggerDate } from '@modules/zuora/orders';
-import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { Dayjs } from 'dayjs';
 import type { ZuoraResponse } from '@modules/zuora/types';
 import { zuoraResponseSchema } from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { Dayjs } from 'dayjs';
 
 export const doUpdate = async ({
 	zuoraClient,
