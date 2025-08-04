@@ -9,7 +9,7 @@ export const RefundResponseSchema = z.object({
 export type RefundResponse = z.infer<typeof RefundResponseSchema>;
 
 export const RefundResultSchema = RefundResponseSchema.extend({
-	refundAttempt: RefundResponseSchema,
+	refundAttempt: RefundResponseSchema.optional(),
 	paymentMethod: PaymentMethodSchema.optional(),
 	refundAmount: z.number().optional(),
 	error: z.string().optional(),
