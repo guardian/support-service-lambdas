@@ -6,14 +6,11 @@ import type { Stage } from '@modules/stage';
 import { doQuery } from '@modules/zuora/query';
 import { getSubscriptionsByAccountNumber } from '@modules/zuora/subscription';
 import { createQueryResponseSchema } from '@modules/zuora/types';
-import { zuoraDateFormat } from '@modules/zuora/utils/common';
+import type { RatePlan, ZuoraSubscription } from '@modules/zuora/types';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { z } from 'zod';
-import type {
-	RatePlan,
-	ZuoraSubscription,
-} from '../../../modules/zuora/src/types/objects/subscription';
 
 export const getActiveAccountNumbersForIdentityId = async (
 	zuoraClient: ZuoraClient,

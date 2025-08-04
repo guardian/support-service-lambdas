@@ -1,8 +1,8 @@
-import { zuoraDateFormat } from '@modules/zuora/utils/common';
+import { zuoraSubscribeResponseSchema } from '@modules/zuora/types';
+import type { ZuoraSubscribeResponse } from '@modules/zuora/types';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { Dayjs } from 'dayjs';
-import type { ZuoraSubscribeResponse } from '../../../modules/zuora/src/types/actions/subscribe';
-import { zuoraSubscribeResponseSchema } from '../../../modules/zuora/src/types/actions/subscribe';
 
 type SubscribeItem = {
 	productRatePlanId: string;

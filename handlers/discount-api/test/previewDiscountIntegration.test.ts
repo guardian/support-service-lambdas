@@ -8,9 +8,9 @@ import {
 	createSupporterPlusSubscription,
 } from '@modules/zuora/../test/it-helpers/createGuardianSubscription';
 import { cancelSubscription } from '@modules/zuora/subscription';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
 import { previewDiscountEndpoint } from '../src/discountEndpoint';
 import { validationRequirements } from '../src/eligibilityChecker';
 import type { EligibilityCheckResponseBody } from '../src/responseSchema';

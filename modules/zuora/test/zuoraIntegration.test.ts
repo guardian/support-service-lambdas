@@ -6,8 +6,8 @@
 
 import { BearerTokenProvider } from '../src/auth/bearerTokenProvider';
 import { getOAuthClientCredentials } from '../src/auth/oAuthCredentials';
-import { getSubscription } from '../src/subscription';
-import { ZuoraClient } from '../src/zuoraClient';
+import { getSubscription } from '@modules/zuora/subscription';
+import { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 test('getZuoraCredentials', async () => {
 	const credentials = await getOAuthClientCredentials('CODE');

@@ -6,15 +6,15 @@ import type {
 	PreviewOrderRequest,
 } from '@modules/zuora/orders';
 import { singleTriggerDate } from '@modules/zuora/orders';
-import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { Dayjs } from 'dayjs';
-import dayjs from 'dayjs';
 import type {
 	RatePlan,
 	RatePlanCharge,
 	ZuoraSubscription,
-} from '../../../modules/zuora/src/types/objects/subscription';
-import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
+} from '@modules/zuora/types';
+import { zuoraDateFormat } from '@modules/zuora/utils';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import { removePendingUpdateAmendments } from './amendments';
 import type { CatalogInformation } from './catalogInformation';
 import type { Discount } from './discounts';

@@ -1,17 +1,19 @@
 import dayjs from 'dayjs';
 import { stageFromEnvironment } from '@modules/stage';
+import { getAccount } from '@modules/zuora/account';
+import { applyCreditToAccountBalance } from '@modules/zuora/creditBalanceAdjustment';
 import {
 	creditInvoice,
 	getInvoice,
 	getInvoiceItems,
 } from '@modules/zuora/invoice';
-import { getAccount } from '@modules/zuora/account';
-import { InvoiceItemAdjustmentSourceType } from '@modules/zuora/types/objects/invoiceItemAdjustment';
+import {
+	GetInvoiceItemsResponse,
+	GetInvoiceResponse,
+	InvoiceItemAdjustmentSourceType,
+	ZuoraAccount,
+} from '@modules/zuora/types';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { GetInvoiceResponse } from '@modules/zuora/types/objects/invoice';
-import { ZuoraAccount } from '@modules/zuora/types/objects/account';
-import { applyCreditToAccountBalance } from '@modules/zuora/creditBalanceAdjustment';
-import { GetInvoiceItemsResponse } from '@modules/zuora/types/objects/invoiceItem';
 
 export type CancelSource = 'MMA' | 'Autocancel' | 'Salesforce';
 

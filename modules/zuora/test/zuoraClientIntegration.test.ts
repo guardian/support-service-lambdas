@@ -5,11 +5,13 @@
  */
 
 import { Logger } from '@modules/logger';
-import { BearerTokenProvider } from '../src/auth/bearerTokenProvider';
-import { getOAuthClientCredentials } from '../src/auth/oAuthCredentials';
-import { ZuoraClient } from '../src/zuoraClient';
-import type { ZuoraSubscription } from '../src//types/objects/subscription';
-import { zuoraSubscriptionResponseSchema } from '../src/types/objects/subscription';
+import {
+	getOAuthClientCredentials,
+	BearerTokenProvider,
+} from '@modules/zuora/auth';
+import type { ZuoraSubscription } from '@modules/zuora/types';
+import { zuoraSubscriptionResponseSchema } from '@modules/zuora/types';
+import { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 test('ZuoraClient', async () => {
 	const stage = 'CODE';

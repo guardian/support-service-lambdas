@@ -1,4 +1,4 @@
-import type { ZuoraResponse } from '@modules/zuora/types/httpResponse';
+import type { ZuoraResponse } from '@modules/zuora/types';
 import type { Handler } from 'aws-lambda';
 import { z } from 'zod';
 import { updateBillingAccountInZuora } from '../zuoraHttp';

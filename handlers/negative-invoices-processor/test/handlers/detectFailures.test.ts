@@ -2,7 +2,7 @@ import {
 	// failureExistsOnInvoiceProcessingAttempt,
 	invoiceHasAtLeastOneProcessingFailure,
 } from '../../src/handlers/detectFailures';
-import type { ProcessedInvoice } from '../../src/types/shared';
+import type { ProcessedInvoice } from '../../src/types';
 
 describe('invoiceHasAtLeastOneProcessingFailure', () => {
 	it('should return false when applyCreditToAccountBalanceAttempt succeeds', () => {
