@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import type { BillingPreview } from './types';
 import { billingPreviewSchema } from './types';
-import { zuoraDateFormat } from './utils/common';
+import { zuoraDateFormat } from './utils';
 import type { ZuoraClient } from './zuoraClient';
 
 export const getBillingPreview = async (

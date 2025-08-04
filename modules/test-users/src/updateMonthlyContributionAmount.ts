@@ -5,7 +5,7 @@ import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { getSubscription } from '@modules/zuora/subscription';
 import { zuoraResponseSchema } from '@modules/zuora/types';
 import type { ZuoraSubscription } from '@modules/zuora/types';
-import { zuoraDateFormat } from '@modules/zuora/utils/common';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 

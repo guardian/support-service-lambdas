@@ -9,7 +9,7 @@ import {
 } from './types';
 import { getInvoiceSchema } from './types';
 import type { GetInvoiceResponse } from './types';
-import { zuoraDateFormat } from './utils/common';
+import { zuoraDateFormat } from './utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 export const getInvoice = async (

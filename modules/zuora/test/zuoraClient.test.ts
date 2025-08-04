@@ -16,7 +16,7 @@ jest.mock('../src/auth/oAuthCredentials', () => ({
 }));
 
 jest.mock('../src/auth/bearerTokenProvider');
-jest.mock('../src/utils/common', () => ({
+jest.mock('../src/utils', () => ({
 	zuoraServerUrl: jest.fn(() => 'https://rest.apisandbox.zuora.com'),
 }));
 
