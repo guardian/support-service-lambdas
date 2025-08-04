@@ -7,9 +7,9 @@ import type {
 	DoCreditBalanceRefundInput,
 	DoCreditBalanceRefundOutput,
 } from '../types';
-import type { PaymentMethod } from '../types/shared';
-import { RefundResponseSchema } from '../types/shared';
-//comment another comment
+import type { PaymentMethod } from '../types';
+import { RefundResponseSchema } from '../types';
+
 export const handler = async (
 	event: DoCreditBalanceRefundInput,
 ): Promise<DoCreditBalanceRefundOutput> => {

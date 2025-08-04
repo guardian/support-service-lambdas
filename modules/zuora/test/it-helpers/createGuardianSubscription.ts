@@ -1,10 +1,10 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
-import dayjs from 'dayjs';
-import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import {
 	type ZuoraSubscribeResponse,
 	zuoraSubscribeResponseSchema,
-} from '../../../../modules/zuora/src/types/actions/subscribe';
+} from '@modules/zuora/types';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import dayjs from 'dayjs';
 import { contributionSubscribeBody } from '../fixtures/request-bodies/contribution-subscribe-body';
 import { digiSubSubscribeBody } from '../fixtures/request-bodies/digitalSub-subscribe-body-old-price';
 import { supporterPlusSubscribeBody } from '../fixtures/request-bodies/supporterplus-subscribe-body-tier2';

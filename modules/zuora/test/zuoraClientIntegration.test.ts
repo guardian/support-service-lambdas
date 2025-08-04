@@ -8,8 +8,8 @@ import { Logger } from '@modules/logger';
 import { BearerTokenProvider } from '../src/auth/bearerTokenProvider';
 import { getOAuthClientCredentials } from '../src/auth/oAuthCredentials';
 import { ZuoraClient } from '../src/zuoraClient';
-import type { ZuoraSubscription } from '../src//types/objects/subscription';
-import { zuoraSubscriptionResponseSchema } from '../src/types/objects/subscription';
+import type { ZuoraSubscription } from '@modules/zuora/types';
+import { zuoraSubscriptionResponseSchema } from '@modules/zuora/types';
 
 test('ZuoraClient', async () => {
 	const stage = 'CODE';

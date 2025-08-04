@@ -10,10 +10,7 @@ import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { z } from 'zod';
-import type {
-	RatePlan,
-	ZuoraSubscription,
-} from '../../../modules/zuora/src/types/objects/subscription';
+import type { RatePlan, ZuoraSubscription } from '@modules/zuora/types';
 
 export const getActiveAccountNumbersForIdentityId = async (
 	zuoraClient: ZuoraClient,

@@ -4,8 +4,6 @@ import {
 } from '@modules/zuora/types';
 import { z } from 'zod';
 
-//todo update this name (remove 'New') when duplicate schema is removed from
-//handlers/negative-invoices-processor/src/types/handlers/GetPaymentMethods.ts
 export const PaymentMethodSchema = z.object({
 	...BasePaymentMethodSchema.pick({
 		id: true,

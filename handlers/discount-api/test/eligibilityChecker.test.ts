@@ -7,8 +7,8 @@ import {
 import { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
-import { billingPreviewSchema } from '../../../modules/zuora/src/types/objects/billingPreview';
-import { zuoraSubscriptionResponseSchema } from '../../../modules/zuora/src/types/objects/subscription';
+import { billingPreviewSchema } from '@modules/zuora/types';
+import { zuoraSubscriptionResponseSchema } from '@modules/zuora/types';
 import catalogJsonProd from '../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import {
 	EligibilityChecker,

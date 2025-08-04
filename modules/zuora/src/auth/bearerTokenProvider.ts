@@ -1,6 +1,6 @@
-import type { OAuthClientCredentials, ZuoraBearerToken } from '../types/auth';
-import { zuoraBearerTokenSchema } from '../types/auth';
-import { zuoraServerUrl } from '../utils/common';
+import type { OAuthClientCredentials, ZuoraBearerToken } from '../types';
+import { zuoraBearerTokenSchema } from '../types';
+import { zuoraServerUrl } from '../utils';
 
 export class BearerTokenProvider {
 	private bearerToken: ZuoraBearerToken | null = null;
