@@ -1,8 +1,9 @@
 import { z } from 'zod';
 import { zuoraResponseSchema } from '../httpResponse';
 
-export const zuoraSubscribeResponseSchema = z.array(
-	zuoraResponseSchema.extend({
+export const zuoraSubscribeResponseSchema = z.intersection(
+	zuoraResponseSchema,
+	z.object({
 		SubscriptionNumber: z.string(),
 		AccountNumber: z.string(),
 	}),

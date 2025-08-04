@@ -28,18 +28,23 @@ export const billingAndPaymentSchema = z.object({
 	defaultPaymentMethodId: z.string(),
 });
 
-export const zuoraAccountSchema = zuoraResponseSchema.extend({
-	basicInfo: zuoraAccountBasicInfoSchema,
-	billingAndPayment: billingAndPaymentSchema,
-	billToContact: billToContactSchema,
-	metrics: metricsSchema,
-});
-
+export const zuoraAccountSchema = z.intersection(
+	zuoraResponseSchema,
+	z.object({
+		basicInfo: zuoraAccountBasicInfoSchema,
+		billingAndPayment: billingAndPaymentSchema,
+		billToContact: billToContactSchema,
+		metrics: metricsSchema,
+	}),
+);
 export type ZuoraAccount = z.infer<typeof zuoraAccountSchema>;
 
-export const zuoraSubscriptionsFromAccountSchema = zuoraResponseSchema.extend({
-	subscriptions: z.array(zuoraSubscriptionSchema).optional(),
-});
+export const zuoraSubscriptionsFromAccountSchema = z.intersection(
+	zuoraResponseSchema,
+	z.object({
+		subscriptions: z.array(zuoraSubscriptionSchema).optional(),
+	}),
+);
 
 export type ZuoraSubscriptionsFromAccountResponse = z.infer<
 	typeof zuoraSubscriptionsFromAccountSchema

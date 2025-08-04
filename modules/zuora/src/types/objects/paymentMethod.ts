@@ -102,14 +102,16 @@ const BankTransferPaymentMethodSchema = BasePaymentMethodSchema.extend({
 	mandateInfo: MandateInfoSchema,
 });
 
-// Main payment method response schema
-export const DefaultPaymentMethodResponseSchema = zuoraResponseSchema.extend({
-	defaultPaymentMethodId: z.string(),
-	paymentGateway: z.string(),
-	creditcard: z.array(CreditCardPaymentMethodSchema).optional(),
-	creditcardreferencetransaction: z
-		.array(CreditCardReferenceTransactionSchema)
-		.optional(),
-	paypal: z.array(PayPalPaymentMethodSchema).optional(),
-	banktransfer: z.array(BankTransferPaymentMethodSchema).optional(),
-});
+export const DefaultPaymentMethodResponseSchema = z.intersection(
+	zuoraResponseSchema,
+	z.object({
+		defaultPaymentMethodId: z.string(),
+		paymentGateway: z.string(),
+		creditcard: z.array(CreditCardPaymentMethodSchema).optional(),
+		creditcardreferencetransaction: z
+			.array(CreditCardReferenceTransactionSchema)
+			.optional(),
+		paypal: z.array(PayPalPaymentMethodSchema).optional(),
+		banktransfer: z.array(BankTransferPaymentMethodSchema).optional(),
+	}),
+);
