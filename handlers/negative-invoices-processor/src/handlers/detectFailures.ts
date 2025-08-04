@@ -47,36 +47,41 @@ export function invoiceHasAtLeastOneProcessingFailure(
 }
 
 function atLeastOneCalloutFailed(invoice: ProcessedInvoice): boolean {
-	const {
-		applyCreditToAccountBalanceResult,
-		activeSubResult,
-		activePaymentMethodResult,
-		refundResult,
-	} = invoice;
+	console.log(
+		'invoiceHasAtLeastOneProcessingFailure called with invoice:',
+		invoice,
+	);
+	// const {
+	// 	applyCreditToAccountBalanceResult,
+	// 	activeSubResult,
+	// 	activePaymentMethodResult,
+	// 	refundResult,
+	// } = invoice;
 
-	if (
-		!applyCreditToAccountBalanceResult.applyCreditToAccountBalanceAttempt
-			.Success ||
-		!activeSubResult?.checkForActiveSubAttempt.Success
-	) {
-		return true;
-	}
+	// if (
+	// 	!applyCreditToAccountBalanceResult.applyCreditToAccountBalanceAttempt
+	// 		.Success ||
+	// 	!activeSubResult?.checkForActiveSubAttempt.Success
+	// ) {
+	// 	return true;
+	// }
 
 	// Only check payment method and refund attempts if hasActiveSub is false
-	if (activeSubResult.hasActiveSubscription === false) {
-		if (
-			!activePaymentMethodResult?.checkForActivePaymentMethodAttempt.Success
-		) {
-			return true;
-		}
+	// if (activeSubResult.hasActiveSubscription === false) {
+	// 	if (
+	// 		!activePaymentMethodResult?.checkForActivePaymentMethodAttempt.Success
+	// 	) {
+	// 		return true;
+	// 	}
 
-		// Only check refundAttempt if hasActivePaymentMethod is true
-		if (activePaymentMethodResult.hasActivePaymentMethod === true) {
-			return !refundResult?.refundAttempt.Success;
-		}
-	}
+	// 	// Only check refundAttempt if hasActivePaymentMethod is true
+	// 	if (activePaymentMethodResult.hasActivePaymentMethod === true) {
+	// 		return !refundResult?.refundAttempt.Success;
+	// 	}
+	// }
 
-	return false;
+	// return false;
+	return true;
 }
 
 function invoiceHasNoActiveSubAndNoActivePaymentMethod(
