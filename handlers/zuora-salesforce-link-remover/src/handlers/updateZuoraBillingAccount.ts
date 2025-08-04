@@ -1,4 +1,3 @@
-import type { ZuoraResponse } from '@modules/zuora/types/httpResponse';
 import type { Handler } from 'aws-lambda';
 import { z } from 'zod';
 import { updateBillingAccountInZuora } from '../zuoraHttp';
@@ -21,18 +20,14 @@ export const handler: Handler<
 
 		const billingAccountItem = parseResponse.data.item;
 
-		const zuoraBillingAccountUpdateResponse: ZuoraResponse =
-			await updateBillingAccountInZuora(
-				billingAccountItem.Zuora__External_Id__c,
-			);
+		await updateBillingAccountInZuora(billingAccountItem.Zuora__External_Id__c);
 
 		return {
 			Id: billingAccountItem.Id,
 			GDPR_Removal_Attempts__c: billingAccountItem.GDPR_Removal_Attempts__c + 1,
 			Zuora__External_Id__c: billingAccountItem.Zuora__External_Id__c,
 			attributes: billingAccountItem.attributes,
-			crmIdRemovedSuccessfully:
-				zuoraBillingAccountUpdateResponse.success ?? false,
+			crmIdRemovedSuccessfully: true,
 		};
 	} catch (error) {
 		throw new Error(

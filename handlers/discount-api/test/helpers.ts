@@ -1,7 +1,7 @@
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { Dayjs } from 'dayjs';
-import { zuoraResponseSchema } from '../../../modules/zuora/src/types/httpResponse';
 import type { ZuoraResponse } from '../../../modules/zuora/src/types/httpResponse';
+import { zuoraSuccessSchema } from '../../../modules/zuora/src/types/httpResponse';
 import type { ZuoraSubscription } from '../../../modules/zuora/src/types/objects/subscription';
 import { updateSubscriptionBody } from './fixtures/request-bodies/update-subscription-body';
 
@@ -18,5 +18,5 @@ export const doPriceRise = async (
 	const body = JSON.stringify(
 		updateSubscriptionBody(contractEffectiveDate, ratePlanId),
 	);
-	return zuoraClient.put(path, body, zuoraResponseSchema);
+	return zuoraClient.put(path, body, zuoraSuccessSchema);
 };
