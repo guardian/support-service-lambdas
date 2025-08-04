@@ -37,18 +37,17 @@ export const handler = async (
 			MethodType: paymentMethodToRefundTo.type,
 		});
 
-		const response = await doRefund(zuoraClient, body, RefundResponseSchema);
+		await doRefund(zuoraClient, body);
 
 		return {
 			...parsedEvent,
 			refundResult: {
-				refundAttempt: response,
 				paymentMethod: paymentMethodToRefundTo,
 				refundAmount,
 			},
 		};
 	} catch (error) {
-		return {
+		const abc = {
 			...event,
 			refundResult: {
 				error:
@@ -57,6 +56,9 @@ export const handler = async (
 						: JSON.stringify(error, null, 2),
 			},
 		};
+		console.log('Error in doCreditBalanceRefund handler:', abc);
+		// Return the error in the refund
+		return abc;
 	}
 };
 

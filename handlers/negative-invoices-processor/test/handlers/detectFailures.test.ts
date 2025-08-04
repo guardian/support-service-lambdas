@@ -145,9 +145,13 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				activePaymentMethods: [],
 			},
 			refundResult: {
-				refundAttempt: {
-					Id: 'REF-001',
+				paymentMethod: {
+					id: '8ad09b7d83a313110183a8769b2b1bfe',
+					status: 'Active',
+					type: 'CreditCard',
+					isDefault: true,
 				},
+				refundAmount: 0.1,
 			},
 		};
 		const result = invoiceHasAtLeastOneProcessingFailure(invoice);
