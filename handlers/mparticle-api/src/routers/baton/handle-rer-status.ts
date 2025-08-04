@@ -6,7 +6,7 @@ import type {
 	BatonRerEventStatusResponse,
 } from './types-and-schemas';
 
-export async function handleStatusRequest(
+export async function handleRerStatus(
 	request: BatonRerEventStatusRequest,
 ): Promise<BatonRerEventStatusResponse> {
 	const mapStatus = (
