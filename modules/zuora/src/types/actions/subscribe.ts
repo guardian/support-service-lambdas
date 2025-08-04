@@ -3,10 +3,12 @@ import { zuoraResponseSchema } from '../httpResponse';
 
 export const zuoraSubscribeResponseSchema = z.intersection(
 	zuoraResponseSchema,
-	z.object({
-		SubscriptionNumber: z.string(),
-		AccountNumber: z.string(),
-	}),
+	z.array(
+		z.object({
+			SubscriptionNumber: z.string(),
+			AccountNumber: z.string(),
+		}),
+	),
 );
 
 export type ZuoraSubscribeResponse = z.infer<
