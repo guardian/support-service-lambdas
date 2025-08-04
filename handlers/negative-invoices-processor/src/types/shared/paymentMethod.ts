@@ -15,13 +15,15 @@ export const PaymentMethodSchema = z.object({
 
 export type PaymentMethod = z.infer<typeof PaymentMethodSchema>;
 
-export const PaymentMethodResponseSchema = zuoraResponseSchema.extend({
-	creditcard: z.array(PaymentMethodSchema).optional(),
-	creditcardreferencetransaction: z.array(PaymentMethodSchema).optional(),
-	banktransfer: z.array(PaymentMethodSchema).optional(),
-	paypal: z.array(PaymentMethodSchema).optional(),
-});
-
+export const PaymentMethodResponseSchema = z.intersection(
+	zuoraResponseSchema,
+	z.object({
+		creditcard: z.array(PaymentMethodSchema).optional(),
+		creditcardreferencetransaction: z.array(PaymentMethodSchema).optional(),
+		banktransfer: z.array(PaymentMethodSchema).optional(),
+		paypal: z.array(PaymentMethodSchema).optional(),
+	}),
+);
 export type PaymentMethodResponse = z.infer<typeof PaymentMethodResponseSchema>;
 
 export const PaymentMethodResultSchema = z.object({

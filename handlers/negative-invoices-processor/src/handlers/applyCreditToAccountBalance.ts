@@ -36,11 +36,13 @@ export const handler = async (
 			},
 		};
 	} catch (error) {
+		console.error('Error applying credit to account balance:', error);
 		return {
 			...event,
 			applyCreditToAccountBalanceResult: {
 				applyCreditToAccountBalanceAttempt: {
 					Success: false,
+					Errors: [],
 				},
 				error:
 					error instanceof Error
