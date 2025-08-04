@@ -4,7 +4,7 @@ import { Logger } from '@modules/logger';
 import { BearerTokenProvider } from './auth/bearerTokenProvider';
 import { getOAuthClientCredentials } from './auth/oAuthCredentials';
 import { generateZuoraError } from './errors/zuoraErrorHandler';
-import type { ZuoraResponse } from './types';
+import { zuoraErrorSchema, zuoraSuccessSchema } from './types/httpResponse';
 import { zuoraServerUrl } from './utils';
 
 export class ZuoraClient {
@@ -73,14 +73,14 @@ export class ZuoraClient {
 			},
 			body,
 		});
-		const json = (await response.json()) as ZuoraResponse;
+		const json = await response.json();
 		this.logger.log('Response from Zuora was: ', JSON.stringify(json, null, 2));
 
 		// Check both HTTP status and logical success
 		// Some Zuora endpoints return HTTP 200 with success: false for logical errors
 		const isHttpSuccess = response.ok;
 
-		if (isHttpSuccess && isLogicalSuccess(json, path)) {
+		if (isHttpSuccess && isLogicalSuccess(json)) {
 			return schema.parse(json);
 		} else {
 			// When Zuora returns a 429 status, the response headers typically contain important rate limiting information
@@ -93,17 +93,8 @@ export class ZuoraClient {
 	}
 }
 
-const isLogicalSuccess = (json: ZuoraResponse, path: string): Boolean => {
-	const hasLowercaseSuccess = 'success' in json && Boolean(json.success);
-	const hasUppercaseSuccess = 'Success' in json && Boolean(json.Success);
-
-	// For endpoints that explicitly include success fields
-	if (hasLowercaseSuccess || hasUppercaseSuccess) {
-		return true;
-	}
-
-	// For other endpoints, check for absence of error indicators
-	const hasErrorIndicators =
-		json.reasons || json.Errors || json.FaultCode || json.code;
-	return !hasErrorIndicators;
+const isLogicalSuccess = (json: unknown): boolean => {
+	const matchesSuccessfulResponse = zuoraSuccessSchema.safeParse(json).success;
+	const matchesKnownErrorResponse = zuoraErrorSchema.safeParse(json).success;
+	return matchesSuccessfulResponse || !matchesKnownErrorResponse;
 };

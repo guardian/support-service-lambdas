@@ -1,80 +1,81 @@
-import type { ZuoraErrorItem, ZuoraReason, ZuoraResponse } from '../types';
+import {
+	codeAndMessageSchema,
+	faultCodeAndMessageSchema,
+	lowerCaseZuoraErrorSchema,
+	upperCaseZuoraErrorSchema,
+} from '../types/httpResponse';
+import type { ZuoraErrorDetail } from './zuoraError';
 import { ZuoraError } from './zuoraError';
 
 export function generateZuoraError(
-	json: ZuoraResponse,
+	json: unknown,
 	response: Response,
 ): ZuoraError {
 	const statusText = response.statusText || 'Zuora API Error';
 
 	// Format 1: reasons array (authentication, account errors)
-	if (responseHasReasonsArray(json)) {
+	const lowerCaseParseResult = lowerCaseZuoraErrorSchema.safeParse(json);
+	if (lowerCaseParseResult.success) {
+		const reasons = lowerCaseParseResult.data.reasons.map((reason) => ({
+			code: reason.code.toString(),
+			message: reason.message,
+		}));
 		return new ZuoraError(
-			`${statusText}: ${formatReasons(json.reasons)}`,
+			`${statusText}: ${formatReasons(reasons)}`,
 			response.status,
-			json,
+			reasons,
 		);
 	}
 
 	// Format 2: Errors array (object API errors)
-	if (responseHasErrorsArray(json)) {
+	const upperCaseParseResult = upperCaseZuoraErrorSchema.safeParse(json);
+	if (upperCaseParseResult.success) {
+		const reasons = upperCaseParseResult.data.Errors.map((error) => ({
+			code: error.Code,
+			message: error.Message,
+		}));
 		return new ZuoraError(
-			`${statusText}: ${formatErrors(json.Errors)}`,
+			`${statusText}: ${formatReasons(reasons)}`,
 			response.status,
+			reasons,
 		);
 	}
 
 	// Format 3: FaultCode/FaultMessage (query errors)
-	if (responseHasFaultCodeAndFaultMessage(json)) {
+	const faultCodeParseResult = faultCodeAndMessageSchema.safeParse(json);
+	if (faultCodeParseResult.success) {
 		return new ZuoraError(
-			`${statusText}: ${json.FaultCode}: ${json.FaultMessage}`,
+			`${statusText}: ${faultCodeParseResult.data.FaultCode}: ${faultCodeParseResult.data.FaultMessage}`,
 			response.status,
+			[
+				{
+					code: faultCodeParseResult.data.FaultCode,
+					message: faultCodeParseResult.data.FaultMessage,
+				},
+			],
 		);
 	}
 
 	// Format 4: Simple code/message
-	if (responseHasCodeAndMessage(json)) {
+	const codeAndMessageParseResult = codeAndMessageSchema.safeParse(json);
+	if (codeAndMessageParseResult.success) {
 		return new ZuoraError(
-			`${statusText}: ${json.code}: ${json.message}`,
+			`${statusText}: ${codeAndMessageParseResult.data.code}: ${codeAndMessageParseResult.data.message}`,
 			response.status,
+			[
+				{
+					code: codeAndMessageParseResult.data.code,
+					message: codeAndMessageParseResult.data.message,
+				},
+			],
 		);
 	}
 
-	return new ZuoraError(statusText, response.status);
+	return new ZuoraError(statusText, response.status, []);
 }
 
-function responseHasReasonsArray(
-	json: ZuoraResponse,
-): json is ZuoraResponse & { reasons: ZuoraReason[] } {
-	return Boolean(json.reasons && Array.isArray(json.reasons));
-}
-
-function formatReasons(reasons: ZuoraReason[]): string {
+function formatReasons(reasons: ZuoraErrorDetail[]): string {
 	return reasons
-		.map((reason: ZuoraReason) => `${reason.code}: ${reason.message}`)
+		.map((reason) => `${reason.code}: ${reason.message}`)
 		.join('; ');
-}
-
-function responseHasErrorsArray(
-	json: ZuoraResponse,
-): json is ZuoraResponse & { Errors: ZuoraErrorItem[] } {
-	return Boolean(json.Errors && Array.isArray(json.Errors));
-}
-
-function formatErrors(errors: ZuoraErrorItem[]): string {
-	return errors
-		.map((error: ZuoraErrorItem) => `${error.Code}: ${error.Message}`)
-		.join('; ');
-}
-
-function responseHasFaultCodeAndFaultMessage(
-	json: ZuoraResponse,
-): json is ZuoraResponse & { FaultCode: string; FaultMessage: string } {
-	return Boolean(json.FaultCode && json.FaultMessage);
-}
-
-function responseHasCodeAndMessage(
-	json: ZuoraResponse,
-): json is ZuoraResponse & { code: string; message: string } {
-	return Boolean(json.code && json.message);
 }
