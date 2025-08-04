@@ -34,9 +34,9 @@ export const adjustNonCollectedInvoice = async (
 		'InvoiceDetail',
 		'Created by the product-switch-api to zero out an amount of less than 50 pence/cents as this is less than the minimum Stripe charge amount',
 	);
-	if (!adjustmentResult.Success) {
-		throw new Error('An error occurred while adjusting the invoice');
-	}
+	// if (!adjustmentResult.Success) {
+	// 	throw new Error('An error occurred while adjusting the invoice');
+	// }
 	return adjustmentResult;
 };
 
