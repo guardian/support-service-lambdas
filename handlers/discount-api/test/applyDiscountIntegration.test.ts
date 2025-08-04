@@ -5,9 +5,9 @@ import type { EmailMessageWithUserId } from '@modules/email/email';
 import { Logger } from '@modules/logger';
 import type { Stage } from '@modules/stage';
 import { cancelSubscription } from '@modules/zuora/subscription';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
 import {
 	createDigitalSubscription,
 	createSupporterPlusSubscription,

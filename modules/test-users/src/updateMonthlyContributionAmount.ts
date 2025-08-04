@@ -3,11 +3,11 @@ import { prettyPrint } from '@modules/prettyPrint';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { getSubscription } from '@modules/zuora/subscription';
-import { zuoraDateFormat } from '@modules/zuora/utils/common';
+import { zuoraResponseSchema } from '@modules/zuora/types';
+import type { ZuoraSubscription } from '@modules/zuora/types';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import { zuoraResponseSchema } from '../../../modules/zuora/src/types/httpResponse';
-import type { ZuoraSubscription } from '../../../modules/zuora/src/types/objects/subscription';
 
 const getFirstContributionRatePlan = (
 	productCatalog: ProductCatalog,

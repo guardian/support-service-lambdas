@@ -1,10 +1,10 @@
 import type { Dayjs } from 'dayjs';
-import { zuoraDateFormat } from './utils/common';
+import { zuoraDateFormat } from './utils';
+import { zuoraResponseSchema } from './types';
+import type { ZuoraResponse } from './types';
+import { addDiscountPreviewSchema } from './types';
+import type { AddDiscountPreview } from './types';
 import type { ZuoraClient } from './zuoraClient';
-import { zuoraResponseSchema } from './types/httpResponse';
-import type { ZuoraResponse } from './types/httpResponse';
-import { addDiscountPreviewSchema } from './types/objects/discount';
-import type { AddDiscountPreview } from './types/objects/discount';
 
 export const addDiscount = async (
 	zuoraClient: ZuoraClient,

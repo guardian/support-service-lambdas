@@ -1,5 +1,5 @@
 import type { Dayjs } from 'dayjs';
-import { zuoraDateFormat } from './utils/common';
+import { zuoraDateFormat } from './utils';
 
 export type ProcessingOptions = {
 	runBilling: boolean;

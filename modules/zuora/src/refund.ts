@@ -1,6 +1,6 @@
 import { z } from 'zod';
+import { zuoraResponseSchema } from './types';
 import type { ZuoraClient } from './zuoraClient';
-import { zuoraResponseSchema } from './types/httpResponse';
 
 export const doRefund = async <
 	T extends z.ZodType = typeof zuoraResponseSchema,

@@ -1,5 +1,5 @@
 import { calculateTotalAmount, filterRecords } from '../src/helpers';
-import type { BillingPreviewInvoiceItem } from '../../../modules/zuora/src/types/objects/billingPreview';
+import type { BillingPreviewInvoiceItem } from '@modules/zuora/types';
 
 describe('calculateTotalAmount', () => {
 	test('should return the total amount for given invoice items', () => {
