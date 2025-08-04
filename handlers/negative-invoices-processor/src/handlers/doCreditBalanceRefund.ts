@@ -44,7 +44,7 @@ export const handler = async (
 			},
 		};
 	} catch (error) {
-		const abc = {
+		return {
 			...event,
 			refundResult: {
 				error:
@@ -53,9 +53,6 @@ export const handler = async (
 						: JSON.stringify(error, null, 2),
 			},
 		};
-		console.log('Error in doCreditBalanceRefund handler:', abc);
-		// Return the error in the refund
-		return abc;
 	}
 };
 
