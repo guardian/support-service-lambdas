@@ -1,9 +1,7 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
 import dayjs from 'dayjs';
-import type {
-	ZuoraSubscribeResponse,
-	zuoraSubscribeResponseSchema,
-} from '@modules/zuora/types';
+import { zuoraSubscribeResponseSchema } from '@modules/zuora/types';
+import type { ZuoraSubscribeResponse } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { contributionSubscribeBody } from '../fixtures/request-bodies/contribution-subscribe-body';
 import { digiSubSubscribeBody } from '../fixtures/request-bodies/digitalSub-subscribe-body-old-price';
