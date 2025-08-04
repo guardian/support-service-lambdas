@@ -50,7 +50,7 @@ function atLeastOneCalloutFailed(invoice: ProcessedInvoice): boolean {
 		applyCreditToAccountBalanceResult,
 		activeSubResult,
 		activePaymentMethodResult,
-		refundResult,
+		// refundResult,
 	} = invoice;
 
 	if (
@@ -70,9 +70,9 @@ function atLeastOneCalloutFailed(invoice: ProcessedInvoice): boolean {
 		}
 
 		// Only check refundAttempt if hasActivePaymentMethod is true
-		if (activePaymentMethodResult.hasActivePaymentMethod === true) {
-			return !refundResult?.refundAttempt.Success;
-		}
+		// if (activePaymentMethodResult.hasActivePaymentMethod === true) {
+		// 	return !refundResult?.refundAttempt.Success;
+		// }
 	}
 
 	return false;

@@ -103,11 +103,11 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				hasActivePaymentMethod: true,
 				activePaymentMethods: [],
 			},
-			refundResult: {
-				refundAttempt: {
-					Success: true,
-				},
-			},
+			// refundResult: {
+			// 	refundAttempt: {
+			// 		Success: true,
+			// 	},
+			// },
 		};
 
 		const result = invoiceHasAtLeastOneProcessingFailure(invoice);
@@ -170,11 +170,11 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				hasActivePaymentMethod: true,
 				activePaymentMethods: [],
 			},
-			refundResult: {
-				refundAttempt: {
-					Success: true,
-				},
-			},
+			// refundResult: {
+			// refundAttempt: {
+			// 	Success: true,
+			// },
+			// },
 		};
 
 		const result = invoiceHasAtLeastOneProcessingFailure(invoice);
@@ -206,42 +206,42 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 		expect(result).toBe(false);
 	});
 
-	it('should return true when refundResult fails', () => {
-		const invoice: ProcessedInvoice = {
-			invoiceId: 'INV-001',
-			accountId: 'ACC-001',
-			invoiceNumber: 'INV-001',
-			invoiceBalance: 100,
-			applyCreditToAccountBalanceResult: {
-				applyCreditToAccountBalanceAttempt: {
-					Success: true,
-				},
-			},
-			activeSubResult: {
-				checkForActiveSubAttempt: {
-					Success: true,
-				},
-				hasActiveSubscription: false,
-			},
-			activePaymentMethodResult: {
-				checkForActivePaymentMethodAttempt: {
-					Success: true,
-				},
-				hasActivePaymentMethod: true,
-				activePaymentMethods: [],
-			},
-			refundResult: {
-				refundAttempt: {
-					Success: false,
-				},
-				error: 'Refund failed',
-			},
-		};
+	// it('should return true when refundResult fails', () => {
+	// 	const invoice: ProcessedInvoice = {
+	// 		invoiceId: 'INV-001',
+	// 		accountId: 'ACC-001',
+	// 		invoiceNumber: 'INV-001',
+	// 		invoiceBalance: 100,
+	// 		applyCreditToAccountBalanceResult: {
+	// 			applyCreditToAccountBalanceAttempt: {
+	// 				Success: true,
+	// 			},
+	// 		},
+	// 		activeSubResult: {
+	// 			checkForActiveSubAttempt: {
+	// 				Success: true,
+	// 			},
+	// 			hasActiveSubscription: false,
+	// 		},
+	// 		activePaymentMethodResult: {
+	// 			checkForActivePaymentMethodAttempt: {
+	// 				Success: true,
+	// 			},
+	// 			hasActivePaymentMethod: true,
+	// 			activePaymentMethods: [],
+	// 		},
+	// refundResult: {
+	// 	refundAttempt: {
+	// 		Success: false,
+	// 	},
+	// 	error: 'Refund failed',
+	// },
+	// 	};
 
-		const result = invoiceHasAtLeastOneProcessingFailure(invoice);
+	// 	const result = invoiceHasAtLeastOneProcessingFailure(invoice);
 
-		expect(result).toBe(true);
-	});
+	// 	expect(result).toBe(true);
+	// });
 });
 
 describe('failureExistsOnInvoiceProcessingAttempt', () => {
