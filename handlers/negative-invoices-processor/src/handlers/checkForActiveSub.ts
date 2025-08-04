@@ -1,6 +1,6 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { doQuery } from '@modules/zuora/query';
-import { createQueryResponseSchema } from '@modules/zuora/types/httpResponse';
+import { createQueryResponseSchema } from '@modules/zuora/types';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { z } from 'zod';
 import { CheckForActiveSubInputSchema } from '../types';

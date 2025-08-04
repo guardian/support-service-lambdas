@@ -4,6 +4,7 @@ import { Lazy } from '@modules/lazy';
 import type { Logger } from '@modules/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
+import { getAccount } from '@modules/zuora/account';
 import {
 	getBillingPreview,
 	getNextInvoice,
@@ -16,14 +17,12 @@ import {
 import { addDiscount, previewDiscount } from '@modules/zuora/discount';
 import { isNotRemovedOrDiscount } from '@modules/zuora/rateplan';
 import { getSubscription } from '@modules/zuora/subscription';
+import type { ZuoraAccount, ZuoraSubscription } from '@modules/zuora/types';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getZuoraCatalog } from '@modules/zuora-catalog/S3';
 import type { APIGatewayProxyEventHeaders } from 'aws-lambda';
 import dayjs from 'dayjs';
-import { getAccount } from '../../../modules/zuora/src/account';
-import type { ZuoraAccount } from '../../../modules/zuora/src/types/objects/account';
-import type { ZuoraSubscription } from '../../../modules/zuora/src/types/objects/subscription';
-import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
 import { EligibilityChecker } from './eligibilityChecker';
 import { generateCancellationDiscountConfirmationEmail } from './generateCancellationDiscountConfirmationEmail';
 import { getDiscountFromSubscription } from './productToDiscountMapping';

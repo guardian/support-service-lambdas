@@ -10,8 +10,8 @@ import {
 	getUserBenefitsFromUserProducts,
 	getValidUserProducts,
 } from '@modules/product-benefits/userBenefits';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 import codeZuoraCatalog from '../../zuora-catalog/test/fixtures/catalog-code.json';
-import { zuoraDateFormat } from '../../zuora/src/utils/common';
 
 const codeProductCatalog = generateProductCatalog(codeZuoraCatalog);
 const codeCatalogHelper = new ProductCatalogHelper(codeProductCatalog);

@@ -5,12 +5,16 @@ import {
 	getSubscription,
 	getSubscriptionsByAccountNumber,
 } from '@modules/zuora/subscription';
-import type { ZuoraSubscription } from '../../../modules/zuora/src/types/objects/subscription';
-import { zuoraSubscriptionResponseSchema } from '../../../modules/zuora/src/types/objects/subscription';
-import { zuoraResponseSchema } from '../../../modules/zuora/src/types/httpResponse';
-import type { ZuoraResponse } from '../../../modules/zuora/src/types/httpResponse';
-import { zuoraSubscriptionsFromAccountSchema } from '../../../modules/zuora/src/types/objects/account';
-import type { ZuoraSubscriptionsFromAccountResponse } from '../../../modules/zuora/src/types/objects/account';
+import {
+	zuoraResponseSchema,
+	zuoraSubscriptionsFromAccountSchema,
+	zuoraSubscriptionResponseSchema,
+} from '@modules/zuora/types';
+import type {
+	ZuoraResponse,
+	ZuoraSubscription,
+	ZuoraSubscriptionsFromAccountResponse,
+} from '@modules/zuora/types';
 
 jest.mock('@modules/zuora/zuoraClient');
 

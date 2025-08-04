@@ -1,8 +1,8 @@
 import type { Dayjs } from 'dayjs';
-import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { zuoraResponseSchema } from './types/httpResponse';
-import type { ZuoraResponse } from './types/httpResponse';
-import { zuoraDateFormat } from './utils/common';
+import { zuoraResponseSchema } from './types';
+import type { ZuoraResponse } from './types';
+import { zuoraDateFormat } from './utils';
+import type { ZuoraClient } from './zuoraClient';
 
 export const createPayment = async (
 	zuoraClient: ZuoraClient,

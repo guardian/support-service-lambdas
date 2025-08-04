@@ -12,15 +12,15 @@ import type {
 } from '@modules/product-catalog/productCatalog';
 import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
-import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { Dayjs } from 'dayjs';
-import dayjs from 'dayjs';
 import type {
 	RatePlan,
 	RatePlanCharge,
 	ZuoraSubscription,
-} from '../../../modules/zuora/src/types/objects/subscription';
-import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
+} from '@modules/zuora/types';
+import { zuoraDateFormat } from '@modules/zuora/utils';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import type { EmailFields } from './sendEmail';
 import { supporterPlusAmountBands } from './supporterPlusAmountBands';
 import { doUpdate } from './zuoraApi';

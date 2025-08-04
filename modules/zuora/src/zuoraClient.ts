@@ -3,9 +3,9 @@ import type { Stage } from '@modules/stage';
 import { Logger } from '@modules/logger';
 import { BearerTokenProvider } from './auth/bearerTokenProvider';
 import { getOAuthClientCredentials } from './auth/oAuthCredentials';
-import { zuoraServerUrl } from './utils/common';
 import { generateZuoraError } from './errors/zuoraErrorHandler';
-import type { ZuoraResponse } from './types/httpResponse';
+import type { ZuoraResponse } from './types';
+import { zuoraServerUrl } from './utils';
 
 export class ZuoraClient {
 	static async create(stage: Stage, logger: Logger = new Logger()) {

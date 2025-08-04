@@ -1,10 +1,7 @@
-import type {
-	ZuoraReason,
-	ZuoraResponse,
-} from '@modules/zuora/types/httpResponse';
+import { zuoraResponseSchema } from '@modules/zuora/types';
+import type { ZuoraReason, ZuoraResponse } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import { zuoraResponseSchema } from '../../../modules/zuora/src/types/httpResponse';
 import type { ZuoraGetAmendmentResponse } from './schemas';
 import { zuoraGetAmendmentResponseSchema } from './schemas';
 
