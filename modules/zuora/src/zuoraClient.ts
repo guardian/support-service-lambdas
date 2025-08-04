@@ -79,11 +79,8 @@ export class ZuoraClient {
 		// Check both HTTP status and logical success
 		// Some Zuora endpoints return HTTP 200 with success: false for logical errors
 		const isHttpSuccess = response.ok;
-		const isLogicalSuccess =
-			zuoraSuccessSchema.safeParse(json).success ||
-			!zuoraErrorSchema.safeParse(json).success;
 
-		if (isHttpSuccess && isLogicalSuccess) {
+		if (isHttpSuccess && isLogicalSuccess(json)) {
 			return schema.parse(json);
 		} else {
 			// When Zuora returns a 429 status, the response headers typically contain important rate limiting information
@@ -95,3 +92,9 @@ export class ZuoraClient {
 		}
 	}
 }
+
+const isLogicalSuccess = (json: unknown): boolean => {
+	const matchesSuccessfulResponse = zuoraSuccessSchema.safeParse(json).success;
+	const matchesKnownErrorResponse = zuoraErrorSchema.safeParse(json).success;
+	return matchesSuccessfulResponse || !matchesKnownErrorResponse;
+};
