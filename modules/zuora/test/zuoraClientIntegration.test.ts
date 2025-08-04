@@ -5,8 +5,10 @@
  */
 
 import { Logger } from '@modules/logger';
-import { BearerTokenProvider } from '../src/auth/bearerTokenProvider';
-import { getOAuthClientCredentials } from '../src/auth/oAuthCredentials';
+import {
+	getOAuthClientCredentials,
+	BearerTokenProvider,
+} from '@modules/zuora/auth';
 import { ZuoraClient } from '../src/zuoraClient';
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import { zuoraSubscriptionResponseSchema } from '@modules/zuora/types';

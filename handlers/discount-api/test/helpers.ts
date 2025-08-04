@@ -1,6 +1,5 @@
 import { zuoraResponseSchema } from '@modules/zuora/types';
-import type { ZuoraResponse } from '@modules/zuora/types';
-import type { ZuoraSubscription } from '@modules/zuora/types';
+import type { ZuoraResponse, ZuoraSubscription } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { Dayjs } from 'dayjs';
 import { updateSubscriptionBody } from './fixtures/request-bodies/update-subscription-body';
