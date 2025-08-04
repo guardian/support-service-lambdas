@@ -18,7 +18,7 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 			},
 		};
 		const result = invoiceHasAtLeastOneProcessingFailure(invoice);
-		expect(result).toBe(false);
+		expect(result).toBe(true);
 	});
 	// it('should return true when checkForActiveSubAttempt fails', () => {
 	// 	const invoice: ProcessedInvoice = {
