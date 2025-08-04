@@ -7,7 +7,7 @@ export const doRefund = async <T extends z.ZodType = typeof zuoraSuccessSchema>(
 	body: string,
 	schema?: T,
 ): Promise<z.infer<T>> => {
-	const path = `/v1/object/refund1`;
+	const path = `/v1/object/refund`;
 	const finalSchema = (schema ?? zuoraSuccessSchema) as T;
 	return zuoraClient.post(path, body, finalSchema);
 };

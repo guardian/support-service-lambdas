@@ -2,10 +2,7 @@ import { stageFromEnvironment } from '@modules/stage';
 import { doRefund } from '@modules/zuora/refund';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import {
-	DoCreditBalanceRefundInputSchema,
-	RefundResponseSchema,
-} from '../types';
+import { DoCreditBalanceRefundInputSchema } from '../types';
 import type {
 	DoCreditBalanceRefundInput,
 	DoCreditBalanceRefundOutput,

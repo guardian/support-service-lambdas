@@ -1,5 +1,5 @@
 import { doRefund } from '@modules/zuora/refund';
-import { zuoraResponseSchema } from '@modules/zuora/types';
+import { zuoraSuccessSchema } from '@modules/zuora/types';
 import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 import { z } from 'zod';
 
@@ -16,7 +16,7 @@ describe('doRefund', () => {
 			Type: 'Refund',
 		});
 
-		const result = await doRefund(mockZuoraClient, body, zuoraResponseSchema);
+		const result = await doRefund(mockZuoraClient, body, zuoraSuccessSchema);
 		expect(result).toEqual(mockResponse);
 	});
 
@@ -36,7 +36,7 @@ describe('doRefund', () => {
 	});
 
 	describe('dynamic typing', () => {
-		it('should use default zuoraResponseSchema when no schema provided', async () => {
+		it('should use default zuoraSuccessSchema when no schema provided', async () => {
 			const mockResponse = { success: true, code: 'SUCCESS' };
 			mockZuoraClient.post = jest.fn().mockResolvedValue(mockResponse);
 
@@ -51,7 +51,7 @@ describe('doRefund', () => {
 			expect(mockZuoraClient.post).toHaveBeenCalledWith(
 				'/v1/object/refund',
 				body,
-				zuoraResponseSchema,
+				zuoraSuccessSchema,
 			);
 			expect(result).toEqual(mockResponse);
 		});
