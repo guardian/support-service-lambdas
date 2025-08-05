@@ -14,7 +14,7 @@ Lambda functions orchestrated by a State Machine
 
 ## Process Flow
 
-[Diagram]()
+[Diagram](https://docs.google.com/drawings/d/1FDyLUv1NWBwglfstUrDveRpwBchWwt3zbWAV3G5SFsI/edit?usp=sharing)
 
 ## Notes
 
