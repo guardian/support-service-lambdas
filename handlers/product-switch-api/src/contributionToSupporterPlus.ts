@@ -10,8 +10,8 @@ import type {
 	RatePlan,
 	RatePlanCharge,
 	ZuoraSubscription,
-} from '../../../modules/zuora/src/types/objects/subscription';
-import { zuoraDateFormat } from '../../../modules/zuora/src/utils/common';
+} from '@modules/zuora/types/objects/subscription';
+import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import { removePendingUpdateAmendments } from './amendments';
 import type { CatalogInformation } from './catalogInformation';
 import type { Discount } from './discounts';

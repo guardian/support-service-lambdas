@@ -1,5 +1,5 @@
 import { OrderAction } from '@modules/zuora/orders/orderActions';
-import { NewAccount } from '@modules/zuora/orders/newAccount';
+import { NewAccount, PaymentMethod } from '@modules/zuora/orders/newAccount';
 
 export type ProcessingOptions = {
 	runBilling: boolean;
@@ -11,13 +11,15 @@ export type PreviewOptions = {
 	specificPreviewThruDate: string;
 };
 
-type NewAccountOrderRequest = {
-	newAccount: NewAccount;
+type NewAccountOrderRequest<T extends PaymentMethod> = {
+	newAccount: NewAccount<T>;
 };
 export type ExistingAccountOrderRequest = {
 	existingAccountNumber: string;
 };
-type AccountOrderRequest = NewAccountOrderRequest | ExistingAccountOrderRequest;
+type AccountOrderRequest =
+	| NewAccountOrderRequest<PaymentMethod>
+	| ExistingAccountOrderRequest;
 export type OrderRequest = AccountOrderRequest & {
 	orderDate: string;
 	description?: string;
