@@ -53,7 +53,7 @@ function atLeastOneCalloutFailed(invoice: ProcessedInvoice): boolean {
 		refundResult,
 	} = invoice;
 
-	if (applyCreditToAccountBalanceResult?.error) {
+	if (applyCreditToAccountBalanceResult.error) {
 		return true;
 	}
 
