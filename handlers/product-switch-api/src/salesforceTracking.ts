@@ -1,6 +1,6 @@
 import { prettyPrint } from '@modules/prettyPrint';
 import type { SwitchInformation } from './switchInformation';
-import { sendMessageToQueue } from '../../../modules/aws/src/sqs';
+import { sendMessageToQueue } from '@modules/aws/sqs';
 
 export type SalesforceTrackingInput = {
 	subscriptionName: string;
