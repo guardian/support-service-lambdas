@@ -8,10 +8,6 @@ export type TriggerDates = [
 		triggerDate: string;
 	},
 	{
-		name: 'ServiceActivation';
-		triggerDate: string;
-	},
-	{
 		name: 'CustomerAcceptance';
 		triggerDate: string;
 	},
@@ -132,12 +128,71 @@ export function singleTriggerDate(applyFromDate: Dayjs): TriggerDates {
 			triggerDate: zuoraDateFormat(applyFromDate),
 		},
 		{
-			name: 'ServiceActivation',
-			triggerDate: zuoraDateFormat(applyFromDate),
-		},
-		{
 			name: 'CustomerAcceptance',
 			triggerDate: zuoraDateFormat(applyFromDate),
 		},
 	];
+}
+
+export function buildCreateSubscriptionOrderAction({
+	productRatePlanId,
+	contractEffectiveDate,
+	customerAcceptanceDate,
+	chargeOverride,
+}: {
+	productRatePlanId: string;
+	contractEffectiveDate: Dayjs;
+	customerAcceptanceDate?: Dayjs;
+	chargeOverride?: { productRatePlanChargeId: string; overrideAmount: number };
+}): CreateSubscriptionOrderAction {
+	const chargeOverrides = chargeOverride
+		? [
+				{
+					productRatePlanChargeId: chargeOverride.productRatePlanChargeId,
+					pricing: {
+						recurringFlatFee: {
+							listPrice: chargeOverride.overrideAmount,
+						},
+					},
+				},
+			]
+		: [];
+
+	return {
+		type: 'CreateSubscription',
+		triggerDates: [
+			{
+				name: 'ContractEffective',
+				triggerDate: zuoraDateFormat(contractEffectiveDate),
+			},
+			{
+				name: 'CustomerAcceptance',
+				triggerDate: zuoraDateFormat(
+					customerAcceptanceDate ?? contractEffectiveDate,
+				),
+			},
+		],
+		createSubscription: {
+			terms: {
+				initialTerm: {
+					period: 12,
+					periodType: 'Month',
+					termType: 'TERMED',
+				},
+				renewalSetting: 'RENEW_WITH_SPECIFIC_TERM',
+				renewalTerms: [
+					{
+						period: 12,
+						periodType: 'Month',
+					},
+				],
+			},
+			subscribeToRatePlans: [
+				{
+					productRatePlanId,
+					chargeOverrides,
+				},
+			],
+		},
+	};
 }
