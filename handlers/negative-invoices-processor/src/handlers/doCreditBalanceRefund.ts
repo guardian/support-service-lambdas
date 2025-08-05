@@ -2,7 +2,10 @@ import { stageFromEnvironment } from '@modules/stage';
 import { doRefund } from '@modules/zuora/refund';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import { DoCreditBalanceRefundInputSchema } from '../types';
+import {
+	DoCreditBalanceRefundInputSchema,
+	RefundResponseSchema,
+} from '../types';
 import type {
 	DoCreditBalanceRefundInput,
 	DoCreditBalanceRefundOutput,
@@ -34,7 +37,7 @@ export const handler = async (
 			MethodType: paymentMethodToRefundTo.type,
 		});
 
-		await doRefund(zuoraClient, body);
+		await doRefund(zuoraClient, body, RefundResponseSchema);
 
 		return {
 			...parsedEvent,

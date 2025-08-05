@@ -23,6 +23,10 @@ export {
 	type ProcessedInvoice,
 } from './processedInvoice';
 
-export { RefundResultSchema } from './refund';
+export {
+	RefundResponseSchema,
+	RefundResultSchema,
+	type RefundResponse,
+} from './refund';
 
 export { ActiveSubscriptionResultSchema } from './subscription';
