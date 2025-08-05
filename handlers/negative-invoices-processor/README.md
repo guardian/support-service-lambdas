@@ -8,6 +8,10 @@ Ensure any money owed to customers, represented as negative balances on invoices
 
 Lambda functions orchestrated by a State Machine
 
+## Timeframe
+
+Executes once per day
+
 ## Notifications
 
 - Error notifications sent to developers via google chat
