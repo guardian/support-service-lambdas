@@ -1,6 +1,6 @@
 import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 import { applyCreditToAccountBalance } from '@modules/zuora/creditBalanceAdjustment';
-import { zuoraResponseSchema } from '@modules/zuora/types';
+import { zuoraSuccessSchema } from '@modules/zuora/types';
 import { z } from 'zod';
 
 jest.mock('@modules/zuora/zuoraClient');
@@ -26,13 +26,13 @@ describe('applyCreditToAccountBalance', () => {
 		const result = await applyCreditToAccountBalance(
 			mockZuoraClient,
 			body,
-			zuoraResponseSchema,
+			zuoraSuccessSchema,
 		);
 
 		expect(mockZuoraClient.post).toHaveBeenCalledWith(
 			'/v1/object/credit-balance-adjustment',
 			body,
-			zuoraResponseSchema,
+			zuoraSuccessSchema,
 		);
 		expect(result).toEqual(mockResponse);
 	});
@@ -48,7 +48,7 @@ describe('applyCreditToAccountBalance', () => {
 		});
 
 		await expect(
-			applyCreditToAccountBalance(mockZuoraClient, body, zuoraResponseSchema),
+			applyCreditToAccountBalance(mockZuoraClient, body, zuoraSuccessSchema),
 		).rejects.toThrow('Network error');
 	});
 
@@ -63,12 +63,12 @@ describe('applyCreditToAccountBalance', () => {
 		});
 
 		await expect(
-			applyCreditToAccountBalance(mockZuoraClient, body, zuoraResponseSchema),
+			applyCreditToAccountBalance(mockZuoraClient, body, zuoraSuccessSchema),
 		).resolves.toEqual(invalidResponse);
 	});
 
 	describe('dynamic typing', () => {
-		it('should use default zuoraResponseSchema when no schema provided', async () => {
+		it('should use default zuoraSuccessSchema when no schema provided', async () => {
 			const mockResponse = {
 				Id: '8a12865f9836b7d7019836f101057d47',
 				Success: true,
@@ -86,7 +86,7 @@ describe('applyCreditToAccountBalance', () => {
 			expect(mockZuoraClient.post).toHaveBeenCalledWith(
 				'/v1/object/credit-balance-adjustment',
 				body,
-				zuoraResponseSchema,
+				zuoraSuccessSchema,
 			);
 			expect(result).toEqual(mockResponse);
 		});
