@@ -69,7 +69,6 @@ function atLeastOneCalloutFailed(invoice: ProcessedInvoice): boolean {
 			return true;
 		}
 
-		// Only check refundAttempt if hasActivePaymentMethod is true
 		if (activePaymentMethodResult.hasActivePaymentMethod === true) {
 			if (refundResult?.error) {
 				return true;

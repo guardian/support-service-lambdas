@@ -37,11 +37,12 @@ export const handler = async (
 			MethodType: paymentMethodToRefundTo.type,
 		});
 
-		await doRefund(zuoraClient, body, RefundResponseSchema);
+		const response = await doRefund(zuoraClient, body, RefundResponseSchema);
 
 		return {
 			...parsedEvent,
 			refundResult: {
+				refundId: response.Id,
 				paymentMethod: paymentMethodToRefundTo,
 				refundAmount,
 			},
