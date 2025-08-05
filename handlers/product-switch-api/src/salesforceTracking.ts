@@ -1,6 +1,6 @@
+import { sendMessageToQueue } from '@modules/aws/sqs';
 import { prettyPrint } from '@modules/prettyPrint';
 import type { SwitchInformation } from './switchInformation';
-import { sendMessageToQueue } from '@modules/aws/sqs';
 
 export type SalesforceTrackingInput = {
 	subscriptionName: string;
@@ -62,9 +62,9 @@ export const sendSalesforceTracking = async (
 	);
 
 	const response = await sendMessageToQueue({
-        queueName,
-        messageBody,
-    });
+		queueName,
+		messageBody,
+	});
 
 	console.log(
 		`Response from Salesforce tracking send was ${prettyPrint(response)}`,

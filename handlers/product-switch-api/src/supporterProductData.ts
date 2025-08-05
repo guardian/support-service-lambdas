@@ -1,9 +1,8 @@
-
 import { prettyPrint } from '@modules/prettyPrint';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import dayjs from 'dayjs';
-import type { SwitchInformation } from './switchInformation';
 import { sendMessageToQueue } from '../../../modules/aws/src/sqs';
+import type { SwitchInformation } from './switchInformation';
 
 export type SupporterRatePlanItem = {
 	subscriptionName: string; // Unique identifier for the subscription
@@ -47,10 +46,10 @@ export const sendToSupporterProductData = async (
 		`Sending supporter product data message ${messageBody} to queue ${queueName}`,
 	);
 
-    const response = await sendMessageToQueue({
-        queueName,
-        messageBody,
-    });
+	const response = await sendMessageToQueue({
+		queueName,
+		messageBody,
+	});
 
 	console.log(
 		`Response from Salesforce tracking send was ${prettyPrint(response)}`,
