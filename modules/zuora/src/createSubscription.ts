@@ -5,12 +5,9 @@ import { z } from 'zod';
 const createSubscriptionResponseSchema = z.object({
 	orderNumber: z.string(),
 	accountNumber: z.string(),
-	subscriptions: z.array(
-		z.object({
-			subscriptionNumber: z.string(),
-		}),
-	),
+	subscriptionNumbers: z.array(z.string()),
 });
+
 type CreateSubscriptionResponse = z.infer<
 	typeof createSubscriptionResponseSchema
 >;
