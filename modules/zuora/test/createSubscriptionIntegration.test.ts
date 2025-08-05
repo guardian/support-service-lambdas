@@ -1,3 +1,9 @@
+/**
+ * Integration test for the creating a subscription through the Orders api.
+ *
+ * @group integration
+ */
+
 import {
 	CreateSubscriptionOrderAction,
 	singleTriggerDate,
