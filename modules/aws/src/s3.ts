@@ -8,9 +8,9 @@ import {
 	S3Client,
 } from '@aws-sdk/client-s3';
 import { Readable } from 'node:stream';
-import { awsConfig } from '@modules/aws/config';
 import { z } from 'zod';
 import { Upload } from '@aws-sdk/lib-storage';
+import { awsConfig } from './config';
 
 const s3Client = new S3Client(awsConfig);
 
