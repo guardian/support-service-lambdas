@@ -11,6 +11,7 @@ import {
 	PolicyStatement,
 	Role,
 } from 'aws-cdk-lib/aws-iam';
+import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { SrLambdaDomain } from './cdk/sr-lambda-domain';
@@ -28,6 +29,15 @@ export class MParticleApi extends GuStack {
 			'/accountIds/baton',
 		).stringValue;
 
+		const sarResultsBucket = StringParameter.fromStringParameterName(
+			this,
+			'SarResultsBucket',
+			`/${this.stage}/${this.stack}/${app}/sarResultsBucket`,
+		).stringValue;
+
+		// this must be the same as used in the code
+		const sarS3BaseKey = 'mparticle-results/';
+
 		// HTTP API Lambda
 		const httpLambda = new GuLambdaFunction(this, `${app}-http-lambda`, {
 			app,
@@ -35,20 +45,29 @@ export class MParticleApi extends GuStack {
 			fileName: `${app}.zip`,
 			runtime: nodeVersion,
 			timeout: Duration.seconds(15),
+			loggingFormat: LoggingFormat.TEXT,
 			handler: 'index.handlerHttp',
 			functionName: `${app}-http-${this.stage}`,
-			events: [],
 		});
 
-		// Baton RER Lambda
+		// make sure our lambda can write to the central baton bucket
+		// https://github.com/guardian/baton/?tab=readme-ov-file#:~:text=The%20convention%20is%20to%20write%20these%20to%20the%20gu%2Dbaton%2Dresults%20bucket%20that%20is%20hosted%20in%20the%20baton%20AWS%20account.
+		const s3BatonWritePolicy: PolicyStatement = new PolicyStatement({
+			actions: ['s3:PutObject'],
+			resources: [
+				`arn:aws:s3:::${sarResultsBucket}/${sarS3BaseKey}${this.stage}/*`,
+			],
+		});
+
 		const batonLambda = new GuLambdaFunction(this, `${app}-baton-lambda`, {
 			app,
 			memorySize: 1024,
 			fileName: `${app}.zip`,
 			runtime: nodeVersion,
+			loggingFormat: LoggingFormat.TEXT,
 			handler: 'index.handlerBaton',
 			functionName: `${app}-baton-${this.stage}`,
-			events: [],
+			initialPolicy: [s3BatonWritePolicy],
 		});
 
 		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {

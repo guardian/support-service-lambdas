@@ -13,7 +13,8 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^9.8.0",
-    "@types/aws-lambda": "^8.10.147"
+    "@types/aws-lambda": "^8.10.147",
+    "@aws-sdk/client-s3": "3.859.0"
   },
   "dependencies": {
     "@peculiar/x509": "^1.12.3",

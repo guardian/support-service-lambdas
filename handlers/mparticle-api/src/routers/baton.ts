@@ -1,7 +1,7 @@
 import { handleRerInitiate } from './baton/handle-rer-initiate';
 import { handleRerStatus } from './baton/handle-rer-status';
 import { handleSarInitiate } from './baton/handle-sar-initiate';
-import { handleSarStatus } from './baton/handle-sar-status';
+import type { HandleSarStatus } from './baton/handle-sar-status';
 import type {
 	BatonEventRequest,
 	BatonEventResponse,
@@ -20,25 +20,27 @@ export function validateRequest(data: BatonEventRequest): BatonEventRequest {
 	return result.data;
 }
 
-export const batonRerRouter = {
+export const batonRerRouter = (handleSarStatus: HandleSarStatus) => ({
 	routeRequest: async (
 		event: BatonEventRequest,
 	): Promise<BatonEventResponse> => {
 		const validatedEvent = validateRequest(event);
-		if (validatedEvent.requestType === 'SAR') {
-			switch (validatedEvent.action) {
-				case 'initiate':
-					return handleSarInitiate(validatedEvent);
-				case 'status':
-					return handleSarStatus(validatedEvent);
-			}
-		} else {
-			switch (validatedEvent.action) {
-				case 'initiate':
-					return handleRerInitiate(validatedEvent);
-				case 'status':
-					return handleRerStatus(validatedEvent);
-			}
+		switch (validatedEvent.requestType) {
+			case 'SAR':
+				switch (validatedEvent.action) {
+					case 'initiate':
+						return handleSarInitiate(validatedEvent);
+					case 'status':
+						return handleSarStatus.handleSarStatus(validatedEvent);
+				}
+				break; // unreachable - only needed for no-fallthrough rule
+			case 'RER':
+				switch (validatedEvent.action) {
+					case 'initiate':
+						return handleRerInitiate(validatedEvent);
+					case 'status':
+						return handleRerStatus(validatedEvent);
+				}
 		}
 	},
-};
+});
