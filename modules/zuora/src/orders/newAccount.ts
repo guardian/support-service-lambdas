@@ -1,4 +1,4 @@
-import { Currency } from '@modules/internationalisation/currency';
+import type { Currency } from '@modules/internationalisation/currency';
 
 type CreditCardReferenceTransaction = {
 	type: 'CreditCardReferenceTransaction';
@@ -45,7 +45,7 @@ export type PaymentGateway<T extends PaymentMethod> =
 				? PayPalPaymentGateway
 				: never;
 
-type Contact = {
+export type Contact = {
 	firstName: string;
 	lastName: string;
 	workEmail: string;
@@ -75,12 +75,8 @@ export type NewAccount<T extends PaymentMethod> = {
 };
 
 // Builder function to simplify the creation of a new account object.
-//
-// The structure of the new account follows the format used by support-frontend,
-// for example it has the salesforce account id in the name field.
-// if we want to make this more general for any reason it will be important to
-// check this doesn't cause any issues with acquisitions from support.theguardian.com
 export function buildNewAccountObject<T extends PaymentMethod>({
+	accountName,
 	createdRequestId,
 	salesforceAccountId,
 	salesforceContactId,
@@ -91,6 +87,7 @@ export function buildNewAccountObject<T extends PaymentMethod>({
 	billToContact,
 	soldToContact,
 }: {
+	accountName: string;
 	createdRequestId: string;
 	salesforceAccountId: string;
 	salesforceContactId: string;
@@ -102,7 +99,7 @@ export function buildNewAccountObject<T extends PaymentMethod>({
 	soldToContact?: Contact;
 }): NewAccount<T> {
 	return {
-		name: salesforceAccountId,
+		name: accountName,
 		currency,
 		crmId: salesforceAccountId,
 		customFields: {
