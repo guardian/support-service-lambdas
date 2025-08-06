@@ -1,4 +1,4 @@
-import { BillingPeriod } from '@modules/billingPeriod';
+import type { BillingPeriod } from '@modules/billingPeriod';
 import type { Dayjs } from 'dayjs';
 import { zuoraDateFormat } from '../utils/common';
 
@@ -134,6 +134,8 @@ export function singleTriggerDate(applyFromDate: Dayjs): TriggerDates {
 	];
 }
 
+// Builder function to simplify the creation of a CreateSubscriptionOrderAction
+// object as a lot of it is boilerplate.
 export function buildCreateSubscriptionOrderAction({
 	productRatePlanId,
 	contractEffectiveDate,
