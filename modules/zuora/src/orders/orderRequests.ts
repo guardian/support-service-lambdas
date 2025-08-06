@@ -1,5 +1,10 @@
-import { OrderAction } from '@modules/zuora/orders/orderActions';
-import { NewAccount, PaymentMethod } from '@modules/zuora/orders/newAccount';
+import type { z } from 'zod';
+import type {
+	NewAccount,
+	PaymentMethod,
+} from '@modules/zuora/orders/newAccount';
+import type { OrderAction } from '@modules/zuora/orders/orderActions';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 export type ProcessingOptions = {
 	runBilling: boolean;
@@ -34,3 +39,18 @@ export type PreviewOrderRequest = OrderRequest & {
 export type CreateOrderRequest = OrderRequest & {
 	processingOptions: ProcessingOptions;
 };
+export type AnyOrderRequest = CreateOrderRequest | PreviewOrderRequest;
+
+export function executeOrderRequest<
+	I,
+	O,
+	T extends z.ZodType<O, z.ZodTypeDef, I>,
+>(
+	zuoraClient: ZuoraClient,
+	orderRequest: AnyOrderRequest,
+	schema: T,
+): Promise<O> {
+	const path = `/v1/orders`;
+	const body = JSON.stringify(orderRequest);
+	return zuoraClient.post(path, body, schema);
+}
