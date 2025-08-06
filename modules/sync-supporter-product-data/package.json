@@ -6,7 +6,7 @@
     "lint": "eslint src/**/*.ts"
   },
   "devDependencies": {
-    "@aws-sdk/client-sqs": "3.787.0",
+    "@aws-sdk/client-sqs": "^3.848.0",
     "dayjs": "^1.11.13",
     "ts-node": "10.9.2"
   },
