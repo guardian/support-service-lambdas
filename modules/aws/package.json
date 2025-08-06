@@ -7,12 +7,12 @@
 		"fix-formatting": "prettier --write **.ts"
 	},
 	"dependencies": {
-		"@aws-sdk/client-cloudwatch": "3.777.0",
-		"@aws-sdk/client-lambda": "^3.826.0",
-		"@aws-sdk/client-s3": "3.777.0",
-		"@aws-sdk/client-ssm": "^3.777.0",
-		"@aws-sdk/credential-provider-node": "3.782.0",
-		"@aws-sdk/lib-storage": "^3.859.0",
+		"@aws-sdk/client-cloudwatch": "^3.848.0",
+		"@aws-sdk/client-lambda": "^3.848.0",
+		"@aws-sdk/client-s3": "^3.848.0",
+		"@aws-sdk/client-ssm": "^3.848.0",
+		"@aws-sdk/credential-provider-node": "^3.848.0",
+		"@aws-sdk/lib-storage": "^3.848.0",
 		"@types/aws-sdk": "^2.7.4",
 		"aws-sdk": "^2.1692.0",
 		"aws-sdk-client-mock": "4.1.0",
