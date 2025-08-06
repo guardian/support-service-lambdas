@@ -12,6 +12,7 @@ export const ConfigSchema = z.object({
 		secret: z.string(),
 	}),
 	pod: z.string(),
+	sarResultsBucket: z.string(),
 });
 export type AppConfig = z.infer<typeof ConfigSchema>;
 

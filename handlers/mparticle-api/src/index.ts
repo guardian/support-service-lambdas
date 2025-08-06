@@ -9,6 +9,8 @@ import {
 	BatonEventResponse,
 } from './routers/baton/types-and-schemas';
 import { batonRerRouter } from './routers/baton';
+import { getAppConfig, getEnv } from './utils/config';
+import { HandleSarStatus } from './routers/baton/handle-sar-status';
 
 export const handlerHttp: Handler<
 	APIGatewayProxyEvent,
@@ -26,15 +28,33 @@ export const handlerHttp: Handler<
 	}
 };
 
+// this must be the same base key as we have permissions set in the CDK
+const sarS3BaseKey = 'mparticle-results/';
+
 export const handlerBaton: Handler<
 	BatonEventRequest,
 	BatonEventResponse
 > = async (event: BatonEventRequest): Promise<BatonEventResponse> => {
 	try {
+		const { handleSarStatus } = await services();
+		const router = batonRerRouter(handleSarStatus);
 		console.debug('Processing Baton event');
-		return batonRerRouter.routeRequest(event);
+		return router.routeRequest(event);
 	} catch (error) {
 		console.error('Baton handler error:', error);
 		throw error; // Re-throw to trigger Lambda retry mechanism
 	}
 };
+
+async function services() {
+	console.log('Starting lambda');
+	const config = await getAppConfig();
+	return {
+		handleSarStatus: new HandleSarStatus(
+			config.sarResultsBucket,
+			sarS3BaseKey,
+			() => new Date(),
+		),
+		stage: getEnv('STAGE'),
+	};
+}

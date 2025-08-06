@@ -1,10 +1,15 @@
 import { faker } from '@faker-js/faker';
+import { streamHttpToS3 } from '../../../modules/aws/src/s3';
+import { batonRerRouter } from '../src/routers/baton';
+import { HandleSarStatus } from '../src/routers/baton/handle-sar-status';
 import type {
 	GUID,
 	InitiationReference,
 } from '../src/routers/baton/types-and-schemas';
 import type { AppConfig } from '../src/utils/config';
 import { invokeBatonHandler } from '../src/utils/invoke-baton-handler';
+
+jest.mock('../../../modules/aws/src/s3');
 
 jest.mock('../src/utils/config', () => ({
 	getAppConfig: jest.fn().mockResolvedValue({
@@ -22,6 +27,10 @@ jest.mock('../src/utils/config', () => ({
 }));
 
 describe('mparticle-api Baton tests', () => {
+	const mockStreamHttpToS3 = streamHttpToS3 as jest.MockedFunction<
+		typeof streamHttpToS3
+	>;
+
 	beforeEach(() => {
 		jest.resetModules();
 		global.fetch = jest.fn();
@@ -140,6 +149,7 @@ describe('mparticle-api Baton tests', () => {
 
 	it('Get Subject Access Request Status', async () => {
 		const requestId: InitiationReference = faker.string.uuid() as GUID;
+		const resultsUrl = 'https://localhost/sar-data-1234.zip';
 		const mockGetSubjectRequestByIdResponse = {
 			ok: true,
 			status: 200,
@@ -149,14 +159,24 @@ describe('mparticle-api Baton tests', () => {
 				controller_id: faker.string.numeric(),
 				request_status: 'completed',
 				received_time: faker.date.recent(),
-				results_url: faker.internet.url(),
+				results_url: resultsUrl,
 			}),
 		};
 		(global.fetch as jest.Mock).mockResolvedValueOnce(
 			mockGetSubjectRequestByIdResponse,
 		);
 
-		const result = await invokeBatonHandler({
+		mockStreamHttpToS3.mockResolvedValueOnce(undefined);
+		const sarResultsBucket = 'bucketName';
+		const dateTimeString = '2025-08-06T18:19:42.123Z';
+		const router = batonRerRouter(
+			new HandleSarStatus(
+				sarResultsBucket,
+				'basekey/',
+				() => new Date(Date.parse(dateTimeString)),
+			),
+		);
+		const result = await router.routeRequest({
 			requestType: 'SAR',
 			action: 'status',
 			initiationReference: requestId,
@@ -175,5 +195,11 @@ describe('mparticle-api Baton tests', () => {
 			}
 		}
 		expect(global.fetch).toHaveBeenCalledTimes(1);
+
+		expect(mockStreamHttpToS3).toHaveBeenCalledWith(
+			resultsUrl,
+			sarResultsBucket,
+			`basekey/${dateTimeString}-${requestId}.zip`,
+		);
 	});
 });
