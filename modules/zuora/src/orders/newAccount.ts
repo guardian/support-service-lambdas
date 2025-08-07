@@ -1,4 +1,4 @@
-import type { Currency } from '@modules/internationalisation/currency';
+import type { IsoCurrency } from '@modules/internationalisation/currency';
 
 type CreditCardReferenceTransaction = {
 	type: 'CreditCardReferenceTransaction';
@@ -50,16 +50,16 @@ export type Contact = {
 	lastName: string;
 	workEmail: string;
 	country: string;
-	state: string;
-	city: string;
-	address1: string;
+	state?: string;
+	city?: string; // There are a lot of optional fields on this object as digital products do not require a full address
+	address1?: string;
 	address2?: string;
-	postalCode: string;
+	postalCode?: string;
 };
 
 export type NewAccount<T extends PaymentMethod> = {
 	name: string;
-	currency: Currency;
+	currency: IsoCurrency;
 	crmId: string; // Salesforce accountId
 	customFields: {
 		sfContactId__c: string; // Salesforce contactId
@@ -92,7 +92,7 @@ export function buildNewAccountObject<T extends PaymentMethod>({
 	salesforceAccountId: string;
 	salesforceContactId: string;
 	identityId: string;
-	currency: Currency;
+	currency: IsoCurrency;
 	paymentGateway: PaymentGateway<T>;
 	paymentMethod: T;
 	billToContact: Contact;
