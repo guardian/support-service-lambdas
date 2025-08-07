@@ -51,9 +51,6 @@ export const handler = async (
 		return {
 			...event,
 			refundResult: {
-				refundAttempt: {
-					Success: false,
-				},
 				error:
 					error instanceof Error
 						? error.message
