@@ -86,7 +86,7 @@ object SalesforceDDMandate extends Logging {
         Id: MandateSfId,
         GoCardless_Mandate_ID__c: GoCardlessMandateID,
         Last_Mandate_Event__c: Option[MandateEventSfId],
-        Status_Changed_At__c: EventHappenedAt,
+        Status_Changed_At__c: Option[EventHappenedAt],
     ) extends WithMandateSfId
     implicit val reads = Json.reads[MandateLookupDetail]
 

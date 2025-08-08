@@ -119,7 +119,7 @@ object Handler extends Logging {
     Id = sfMandate.Id,
     GoCardless_Mandate_ID__c = gcMandateEventDetail.mandate.id,
     Last_Mandate_Event__c = Some(newMandateWithEventId.id),
-    Status_Changed_At__c = EventHappenedAt(gcMandateEventDetail.event.created_at),
+    Status_Changed_At__c = Some(EventHappenedAt(gcMandateEventDetail.event.created_at)),
   ))
 
   def getOrCreateMandateInSf(
@@ -173,7 +173,10 @@ object Handler extends Logging {
   ) = {
     sfMandate match {
       // if mandate already existed in SF then only patch the 'Last Event' if it's more recent
-      case MandateLookupDetail(_, _, _, lastUpdated) if lastUpdated.value < gcMandateEventDetail.event.created_at =>
+      case MandateLookupDetail(_, _, _, Some(lastUpdated)) if lastUpdated.value < gcMandateEventDetail.event.created_at =>
+        patchMandateOp
+      // if Status_Changed_At__c is missing then always patch the 'Last Event', old Mandate Events are deleted after one year so we can presume this is newer
+      case MandateLookupDetail(_, _, _, None) =>
         patchMandateOp
       // if mandate had to be created in SF then always patch the 'Last Event'
       case MandateWithSfId(_) =>
