@@ -1,8 +1,8 @@
 import type { BillingPeriod } from '@modules/billingPeriod';
 import type { EmailMessageWithUserId } from '@modules/email/email';
 import { DataExtensionNames, sendEmail } from '@modules/email/email';
-import type { IsoCurrency } from '@modules/internationalisation/isoCurrency';
-import { getCurrencyGlyph } from '@modules/internationalisation/isoCurrency';
+import type { IsoCurrency } from '@modules/internationalisation/currency';
+import { getCurrencyGlyph } from '@modules/internationalisation/currency';
 import dayjs from 'dayjs';
 import type { SwitchInformation } from './switchInformation';
 

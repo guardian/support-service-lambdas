@@ -1,7 +1,7 @@
 import { getSingleOrThrow } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
-import type { IsoCurrency } from '@modules/internationalisation/isoCurrency';
-import { isSupportedCurrency } from '@modules/internationalisation/isoCurrency';
+import type { IsoCurrency } from '@modules/internationalisation/currency';
+import { isSupportedCurrency } from '@modules/internationalisation/currency';
 import type { Logger } from '@modules/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';

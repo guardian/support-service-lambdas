@@ -1,5 +1,5 @@
 import type { BillingPeriod } from '@modules/billingPeriod';
-import type { IsoCurrency } from '@modules/internationalisation/isoCurrency';
+import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 

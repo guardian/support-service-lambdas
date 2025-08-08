@@ -1,4 +1,4 @@
-import type { IsoCurrency } from '@modules/internationalisation/isoCurrency';
+import type { IsoCurrency } from '@modules/internationalisation/currency';
 import type { ProductBillingPeriod } from '@modules/product-catalog/productBillingPeriods';
 
 export const supporterPlusAmountBands: {

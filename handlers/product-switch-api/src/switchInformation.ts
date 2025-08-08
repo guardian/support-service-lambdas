@@ -1,7 +1,7 @@
 import type { BillingPeriod } from '@modules/billingPeriod';
 import { ValidationError } from '@modules/errors';
-import type { IsoCurrency } from '@modules/internationalisation/isoCurrency';
-import { isSupportedCurrency } from '@modules/internationalisation/isoCurrency';
+import type { IsoCurrency } from '@modules/internationalisation/currency';
+import { isSupportedCurrency } from '@modules/internationalisation/currency';
 import type { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
