@@ -6,15 +6,15 @@ export const CurrencyValues = [
 	'CAD',
 	'NZD',
 ] as const;
-export type Currency = (typeof CurrencyValues)[number];
+export type IsoCurrency = (typeof CurrencyValues)[number];
 
 export const isSupportedCurrency = (
 	maybeCurrency: string,
-): maybeCurrency is Currency => {
+): maybeCurrency is IsoCurrency => {
 	return (CurrencyValues as readonly string[]).includes(maybeCurrency);
 };
 
-const currencyToGlyphMapping: { [C in Currency]: string } = {
+const currencyToGlyphMapping: { [C in IsoCurrency]: string } = {
 	GBP: '£',
 	EUR: '€',
 	AUD: 'AU$',
@@ -23,5 +23,5 @@ const currencyToGlyphMapping: { [C in Currency]: string } = {
 	NZD: 'NZ$',
 };
 
-export const getCurrencyGlyph = (currency: Currency) =>
+export const getCurrencyGlyph = (currency: IsoCurrency) =>
 	currencyToGlyphMapping[currency];

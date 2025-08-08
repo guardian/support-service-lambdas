@@ -1,7 +1,7 @@
 import type { BillingPeriod } from '@modules/billingPeriod';
 import type { EmailMessageWithUserId } from '@modules/email/email';
 import { DataExtensionNames, sendEmail } from '@modules/email/email';
-import type { Currency } from '@modules/internationalisation/currency';
+import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { getCurrencyGlyph } from '@modules/internationalisation/currency';
 import dayjs from 'dayjs';
 import type { SwitchInformation } from './switchInformation';
@@ -13,7 +13,7 @@ export const buildEmailMessage = (
 	emailAddress: string,
 	firstName: string,
 	lastName: string,
-	currency: Currency,
+	currency: IsoCurrency,
 	productPrice: number,
 	billingPeriod: BillingPeriod,
 	subscriptionNumber: string,
