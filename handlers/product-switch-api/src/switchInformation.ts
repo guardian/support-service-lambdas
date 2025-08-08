@@ -1,7 +1,7 @@
 import type { BillingPeriod } from '@modules/billingPeriod';
 import { ValidationError } from '@modules/errors';
-import type { Currency } from '@modules/internationalisation/currency';
-import { isSupportedCurrency } from '@modules/internationalisation/currency';
+import type { IsoCurrency } from '@modules/internationalisation/isoCurrency';
+import { isSupportedCurrency } from '@modules/internationalisation/isoCurrency';
 import type { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
@@ -36,7 +36,7 @@ export type SubscriptionInformation = {
 	previousProductName: string;
 	previousRatePlanName: string;
 	previousAmount: number;
-	currency: Currency;
+	currency: IsoCurrency;
 	billingPeriod: BillingPeriod;
 };
 
@@ -117,7 +117,7 @@ export const subscriptionHasAlreadySwitchedToSupporterPlus = (
 	);
 };
 
-const getCurrency = (contributionRatePlan: RatePlan): Currency => {
+const getCurrency = (contributionRatePlan: RatePlan): IsoCurrency => {
 	const currency = getIfDefined(
 		contributionRatePlan.ratePlanCharges[0]?.currency,
 		'No currency found on the rate plan charge',

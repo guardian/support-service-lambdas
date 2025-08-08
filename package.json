@@ -12,7 +12,8 @@
 		"new-lambda": "pnpm hygen new-lambda api-gateway && pnpm install && pnpm --filter cdk lint --fix && pnpm fix-formatting && pnpm --filter cdk test -- -u && git add ./cdk/lib/__snapshots__/*.test.ts.snap",
 		"prepare": "husky",
 		"fix-formatting": "pnpm -r run fix-formatting",
-		"check-formatting": "pnpm -r run check-formatting"
+		"check-formatting": "pnpm -r run check-formatting",
+		"validate": "pnpm -r run fix-formatting && pnpm -r run lint --fix && pnpm -r run type-check && pnpm -r run test"
 	},
 	"devDependencies": {
 		"@guardian/eslint-config-typescript": "12.0.0",

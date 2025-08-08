@@ -1,5 +1,5 @@
 import type { BillingPeriod } from '@modules/billingPeriod';
-import type { Currency } from '@modules/internationalisation/currency';
+import type { IsoCurrency } from '@modules/internationalisation/isoCurrency';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 
@@ -28,7 +28,7 @@ const getCatalogBillingPeriod = (billingPeriod: BillingPeriod) => {
 export const getCatalogInformation = (
 	productCatalog: ProductCatalog,
 	billingPeriod: BillingPeriod,
-	currency: Currency,
+	currency: IsoCurrency,
 ): CatalogInformation => {
 	const catalogBillingPeriod = getCatalogBillingPeriod(billingPeriod);
 	const price = getIfDefined(

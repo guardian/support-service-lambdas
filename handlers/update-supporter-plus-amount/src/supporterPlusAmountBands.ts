@@ -1,8 +1,8 @@
-import type { Currency } from '@modules/internationalisation/currency';
+import type { IsoCurrency } from '@modules/internationalisation/isoCurrency';
 import type { ProductBillingPeriod } from '@modules/product-catalog/productBillingPeriods';
 
 export const supporterPlusAmountBands: {
-	[C in Currency]: {
+	[C in IsoCurrency]: {
 		[K in ProductBillingPeriod<'SupporterPlus'>]: { min: number; max: number };
 	};
 } = {
