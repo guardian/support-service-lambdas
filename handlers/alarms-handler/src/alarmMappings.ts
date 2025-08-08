@@ -27,12 +27,8 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'contributions-store-queue',
 		'dotcom-components',
 		...mobilePurchasesApps,
-		'new-product-api',
 		'price-migration-engine-state-machine',
 		'promotions-tool',
-		'sf-contact-merge',
-		'sf-emails-to-s3-exporter',
-		'sf-gocardless-sync',
 		'super-mode',
 		'support-reminders',
 		'ticker-calculator',
@@ -100,11 +96,15 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'digital-voucher-suspension-processor',
 
 		// salesforce
+		'new-product-api',
 		'salesforce-disaster-recovery',
 		'salesforce-disaster-recovery-health-check',
 		'single-contribution-salesforce-writes',
 		'sf-datalake-export',
 		'salesforce-event-bus',
+		'sf-contact-merge',
+		'sf-emails-to-s3-exporter',
+		'sf-gocardless-sync',
 
 		// zuora
 		'invoicing-api',
