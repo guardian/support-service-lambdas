@@ -4,7 +4,7 @@ import {
 	executeOrderRequest,
 } from '@modules/zuora/orders/orderRequests';
 import { z } from 'zod';
-import { Currency } from '@modules/internationalisation/currency';
+import { IsoCurrency } from '@modules/internationalisation/currency';
 import {
 	buildNewAccountObject,
 	Contact,
@@ -34,7 +34,7 @@ type CreateSubscriptionInputFields<T extends PaymentMethod> = {
 	salesforceAccountId: string;
 	salesforceContactId: string;
 	identityId: string;
-	currency: Currency;
+	currency: IsoCurrency;
 	paymentGateway: PaymentGateway<T>;
 	paymentMethod: T;
 	billToContact: Contact;
