@@ -4,14 +4,14 @@
  * @group integration
  */
 
-import { Currency } from '@modules/internationalisation/currency';
+import { IsoCurrency } from '@modules/internationalisation/currency';
 import { DirectDebit, PaymentGateway } from '@modules/zuora/orders/newAccount';
 import dayjs from 'dayjs';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { createSubscription } from '@modules/zuora/createSubscription';
 
 test('We can create a subscription with a new account', async () => {
-	const currency: Currency = 'GBP';
+	const currency: IsoCurrency = 'GBP';
 	const paymentGateway: PaymentGateway<DirectDebit> = 'GoCardless';
 	const paymentMethod: DirectDebit = {
 		accountHolderInfo: {
