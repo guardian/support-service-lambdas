@@ -118,7 +118,7 @@ object Handler extends Logging {
   } yield sfMandateMap + (gcMandateEventDetail.mandate.id -> MandateLookupDetail(
     Id = sfMandate.Id,
     GoCardless_Mandate_ID__c = gcMandateEventDetail.mandate.id,
-    Last_Mandate_Event__c = newMandateWithEventId.id,
+    Last_Mandate_Event__c = Some(newMandateWithEventId.id),
     Status_Changed_At__c = EventHappenedAt(gcMandateEventDetail.event.created_at),
   ))
 
