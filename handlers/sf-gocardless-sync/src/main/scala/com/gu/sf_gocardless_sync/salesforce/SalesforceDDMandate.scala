@@ -85,6 +85,7 @@ object SalesforceDDMandate extends Logging {
     case class MandateLookupDetail(
         Id: MandateSfId,
         GoCardless_Mandate_ID__c: GoCardlessMandateID,
+        Last_Mandate_Event__c: Option[MandateEventSfId],
         Status_Changed_At__c: EventHappenedAt,
     ) extends WithMandateSfId
     implicit val reads = Json.reads[MandateLookupDetail]
@@ -100,7 +101,7 @@ object SalesforceDDMandate extends Logging {
       sfGet.setupRequest(toRequest).parse[MandateSearchQueryResponse].map(toResponse).runRequest
 
     def toRequest(mandateIDs: List[GoCardlessMandateID]) = {
-      val soqlQuery = s"SELECT Id, GoCardless_Mandate_ID__c, Status_Changed_At__c " +
+      val soqlQuery = s"SELECT Id, GoCardless_Mandate_ID__c, Last_Mandate_Event__c, Status_Changed_At__c " +
         s"FROM DD_Mandate__c " +
         s"WHERE GoCardless_Mandate_ID__c IN (${mandateIDs.map(mandateID => s"'${mandateID.value}'").mkString(", ")})"
       logger.info(s"using SF query : $soqlQuery")
