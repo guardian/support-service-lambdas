@@ -19,7 +19,7 @@ Use zod to parse all JSON input, e.g. input data, or input from external APIs
 
 ### REST clients
 To create a REST client, follow the existing pattern in modules/zuora/src/zuoraClient.ts 
-have a static create method that takes the a sutable config object and stage as a parameter
+have a static create method that takes a suitable config object and stage as a parameter
 ensure that the exposed methods are the http verbs
 - only implement the necessary verbs
 - the common code must be extracted to a shared "fetch" method 
