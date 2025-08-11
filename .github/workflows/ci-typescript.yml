@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  common:
+  modules:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -30,12 +30,28 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - run: pnpm install
-      - run: pnpm --filter "./modules/**" check-formatting
-      - run: pnpm --filter "./modules/**" lint
-      - run: pnpm --filter "./modules/**" test
+      - run: pnpm --filter cdk verify
+
+  cdk-checks:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install --global corepack@0.31.0
+      - run: corepack enable
+        shell: bash
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - run: pnpm install
+      - run: pnpm --filter cdk verify
 
   gu-cdk-build:
-    needs: common
+    needs: [modules, cdk-checks]
     strategy:
       matrix:
         subproject:
@@ -72,7 +88,7 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - run: pnpm install
-      - run: pnpm --filter cdk package
+      - run: pnpm --filter cdk synth
       - run: pnpm --filter ${{ matrix.subproject }} package
 
       - name: Configure AWS credentials

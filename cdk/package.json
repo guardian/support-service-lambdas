@@ -11,6 +11,7 @@
     "lint": "eslint lib/** bin/** --ext .ts --no-error-on-unmatched-pattern",
     "synth": "cdk synth --path-metadata false --version-reporting false",
     "diff": "cdk diff --path-metadata false --version-reporting false",
+    "verify": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test",
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm synth",
     "fix-formatting": "prettier --write **.ts"
   },
