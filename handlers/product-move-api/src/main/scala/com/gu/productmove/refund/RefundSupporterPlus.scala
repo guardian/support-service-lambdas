@@ -29,7 +29,7 @@ object RefundInput {
 }
 
 object RefundSupporterPlus {
-  def applyRefund(refundInput: RefundInput): ZIO[
+  def applyRefund(refundInput: RefundInput, today: LocalDate): ZIO[
     InvoicingApiRefund & CreditBalanceAdjustment & Stage & SttpBackend[Task, Any] & AwsS3 & InvoiceItemQuery &
       GetInvoice & InvoiceItemAdjustment & RunBilling & PostInvoices,
     Throwable | TransactionError,
@@ -37,7 +37,7 @@ object RefundSupporterPlus {
   ] =
     for {
       _ <- ZIO.log(s"Generating negative invoice for sub ${refundInput.subscriptionName}")
-      _ <- ZIO.serviceWithZIO[RunBilling](_.run(refundInput.accountId, refundInput.cancellationBillingDate))
+      _ <- ZIO.serviceWithZIO[RunBilling](_.run(refundInput.accountId, today, refundInput.cancellationBillingDate))
       _ <- ZIO.log(s"Getting invoice items for sub ${refundInput.subscriptionName}")
       refundInvoiceDetails <- GetRefundInvoiceDetails.get(refundInput.subscriptionName)
       _ <- ZIO.serviceWithZIO[PostInvoices](
