@@ -12,9 +12,6 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 			invoiceNumber: 'INV-001',
 			invoiceBalance: 100,
 			applyCreditToAccountBalanceResult: {
-				applyCreditToAccountBalanceAttempt: {
-					Success: false,
-				},
 				error: 'Credit application failed',
 			},
 		};
@@ -31,9 +28,7 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 			invoiceNumber: 'INV-001',
 			invoiceBalance: 100,
 			applyCreditToAccountBalanceResult: {
-				applyCreditToAccountBalanceAttempt: {
-					Success: true,
-				},
+				creditBalanceAdjustmentId: 'credit-123',
 			},
 			activeSubResult: {
 				checkForActiveSubAttempt: {
@@ -56,9 +51,7 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 			invoiceNumber: 'INV-001',
 			invoiceBalance: 100,
 			applyCreditToAccountBalanceResult: {
-				applyCreditToAccountBalanceAttempt: {
-					Success: true,
-				},
+				creditBalanceAdjustmentId: 'credit-123',
 			},
 			activeSubResult: {
 				checkForActiveSubAttempt: {
@@ -86,9 +79,7 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 			invoiceNumber: 'INV-001',
 			invoiceBalance: 100,
 			applyCreditToAccountBalanceResult: {
-				applyCreditToAccountBalanceAttempt: {
-					Success: true,
-				},
+				creditBalanceAdjustmentId: 'credit-123',
 			},
 			activeSubResult: {
 				checkForActiveSubAttempt: {
@@ -122,9 +113,7 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 			invoiceNumber: 'INV-001',
 			invoiceBalance: 100,
 			applyCreditToAccountBalanceResult: {
-				applyCreditToAccountBalanceAttempt: {
-					Success: true,
-				},
+				creditBalanceAdjustmentId: 'credit-123',
 			},
 			activeSubResult: {
 				checkForActiveSubAttempt: {
@@ -153,9 +142,7 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 			invoiceNumber: 'INV-001',
 			invoiceBalance: 100,
 			applyCreditToAccountBalanceResult: {
-				applyCreditToAccountBalanceAttempt: {
-					Success: true,
-				},
+				creditBalanceAdjustmentId: 'credit-123',
 			},
 			activeSubResult: {
 				checkForActiveSubAttempt: {
@@ -189,9 +176,7 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 			invoiceNumber: 'INV-001',
 			invoiceBalance: 100,
 			applyCreditToAccountBalanceResult: {
-				applyCreditToAccountBalanceAttempt: {
-					Success: true,
-				},
+				creditBalanceAdjustmentId: 'credit-123',
 			},
 			activeSubResult: {
 				checkForActiveSubAttempt: {
@@ -213,9 +198,7 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 			invoiceNumber: 'INV-001',
 			invoiceBalance: 100,
 			applyCreditToAccountBalanceResult: {
-				applyCreditToAccountBalanceAttempt: {
-					Success: true,
-				},
+				creditBalanceAdjustmentId: 'credit-123',
 			},
 			activeSubResult: {
 				checkForActiveSubAttempt: {
@@ -253,9 +236,7 @@ describe('failureExistsOnInvoiceProcessingAttempt', () => {
 				invoiceNumber: 'INV-001',
 				invoiceBalance: 100,
 				applyCreditToAccountBalanceResult: {
-					applyCreditToAccountBalanceAttempt: {
-						Success: true,
-					},
+					creditBalanceAdjustmentId: 'credit-123',
 				},
 				activeSubResult: {
 					checkForActiveSubAttempt: {
