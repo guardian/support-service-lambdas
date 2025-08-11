@@ -44,10 +44,14 @@ object RefundSupporterPlus {
         _.postInvoices(refundInvoiceDetails.negativeInvoiceId, refundInput.cancellationBillingDate),
       )
       _ <- ZIO.log(s"Amount to refund is ${refundInvoiceDetails.refundAmount}")
-      _ <- InvoicingApiRefund.refund(
-        refundInput.subscriptionName,
-        refundInvoiceDetails.refundAmount,
-      )
+      _ <-
+        if (refundInvoiceDetails.refundAmount == BigDecimal(0))
+          ZIO.log("skipping zero refund")
+        else
+          InvoicingApiRefund.refund(
+            refundInput.subscriptionName,
+            refundInvoiceDetails.refundAmount,
+          )
       _ <- ensureThatNegativeInvoiceBalanceIsZero(refundInvoiceDetails)
     } yield ()
 
