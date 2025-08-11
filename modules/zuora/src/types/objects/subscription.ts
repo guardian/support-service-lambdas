@@ -47,7 +47,8 @@ export const zuoraSubscriptionSchema = z.object({
 	),
 });
 
-export const zuoraSubscriptionResponseSchema = zuoraResponseSchema.merge(
+export const zuoraSubscriptionResponseSchema = z.intersection(
+	zuoraResponseSchema,
 	zuoraSubscriptionSchema,
 );
 

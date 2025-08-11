@@ -11,11 +11,11 @@ export const createPayment = async (
 	accountId: string, // This is the account ID, not the account number
 	paymentMethodId: string,
 	effectiveDate: Dayjs,
-): Promise<void> => {
+): Promise<ZuoraResponse> => {
 	console.log(
 		`Creating payment of ${paymentAmount} for invoice ${invoiceId}, on account ${accountId} with payment method ${paymentMethodId}`,
 	);
-	const result: ZuoraResponse = await zuoraClient.post(
+	return await zuoraClient.post(
 		'/v1/object/payment',
 		JSON.stringify({
 			AccountId: accountId,
@@ -30,8 +30,4 @@ export const createPayment = async (
 		}),
 		zuoraResponseSchema,
 	);
-
-	if (!result.Success) {
-		throw new Error('An error occurred while creating the payment');
-	}
 };
