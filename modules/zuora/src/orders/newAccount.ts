@@ -69,7 +69,7 @@ export type NewAccount<T extends PaymentMethod> = {
 	paymentGateway: PaymentGateway<T>; // Generic to make sure we will only accept payment gateways that match the payment method
 	paymentMethod: T;
 	billToContact: Contact;
-	soldToContact?: Contact;
+	soldToContact?: Contact & { SpecialDeliveryInstructions__c?: string };
 };
 
 // Builder function to simplify the creation of a new account object.
@@ -84,6 +84,7 @@ export function buildNewAccountObject<T extends PaymentMethod>({
 	paymentMethod,
 	billToContact,
 	soldToContact,
+	deliveryInstructions,
 }: {
 	accountName: string;
 	createdRequestId: string;
@@ -95,6 +96,7 @@ export function buildNewAccountObject<T extends PaymentMethod>({
 	paymentMethod: T;
 	billToContact: Contact;
 	soldToContact?: Contact;
+	deliveryInstructions?: string;
 }): NewAccount<T> {
 	return {
 		name: accountName,
@@ -110,6 +112,11 @@ export function buildNewAccountObject<T extends PaymentMethod>({
 		paymentGateway,
 		paymentMethod,
 		billToContact,
-		soldToContact,
+		soldToContact: soldToContact
+			? {
+					...soldToContact,
+					SpecialDeliveryInstructions__c: deliveryInstructions,
+				}
+			: undefined,
 	};
 }
