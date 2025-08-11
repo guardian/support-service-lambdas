@@ -16,7 +16,7 @@ export type DirectDebit = {
 type PayPal = {
 	type: 'PayPalNativeEC';
 	BAID: string;
-	paymentMethodId: string;
+	email: string;
 };
 export type PaymentMethod =
 	| CreditCardReferenceTransaction
