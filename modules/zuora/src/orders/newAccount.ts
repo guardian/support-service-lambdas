@@ -3,6 +3,7 @@ import type { IsoCurrency } from '@modules/internationalisation/currency';
 type CreditCardReferenceTransaction = {
 	type: 'CreditCardReferenceTransaction';
 	tokenId: string;
+	secondTokenId: string;
 };
 export type DirectDebit = {
 	type: 'Bacs';
@@ -25,16 +26,13 @@ export type PaymentMethod =
 //Gateway names need to match to those set in Zuora
 //See: https://apisandbox.zuora.com/apps/NewGatewaySetting.do?method=list
 type StripePaymentGateway =
-	| 'Stripe Gateway 1'
-	| 'Stripe Gateway AUD'
-	| 'Stripe PaymentIntents Default'
-	| 'Stripe PaymentIntents AUD'
+	| 'Stripe PaymentIntents GNM Membership'
+	| 'Stripe PaymentIntents GNM Membership AUS'
 	| 'Stripe - Observer - Tortoise Media';
 type PayPalPaymentGateway = 'PayPal Express';
 type GoCardlessPaymentGateway =
 	| 'GoCardless'
-	| 'GoCardless - Observer - Tortoise Media'
-	| 'GoCardless - Zuora Instance';
+	| 'GoCardless - Observer - Tortoise Media';
 
 export type PaymentGateway<T extends PaymentMethod> =
 	T extends CreditCardReferenceTransaction
