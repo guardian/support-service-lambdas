@@ -42,7 +42,7 @@ export const handler = async (
 		return {
 			...parsedEvent,
 			refundResult: {
-				refundAttempt: response,
+				refundId: response.Id,
 				paymentMethod: paymentMethodToRefundTo,
 				refundAmount,
 			},
@@ -51,9 +51,6 @@ export const handler = async (
 		return {
 			...event,
 			refundResult: {
-				refundAttempt: {
-					Success: false,
-				},
 				error:
 					error instanceof Error
 						? error.message
