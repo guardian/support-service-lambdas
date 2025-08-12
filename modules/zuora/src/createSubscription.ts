@@ -8,12 +8,16 @@ import { IsoCurrency } from '@modules/internationalisation/currency';
 import {
 	buildNewAccountObject,
 	Contact,
-	PaymentGateway,
-	PaymentMethod,
 } from '@modules/zuora/orders/newAccount';
 import dayjs, { Dayjs } from 'dayjs';
 import { buildCreateSubscriptionOrderAction } from '@modules/zuora/orders/orderActions';
 import { zuoraDateFormat } from '@modules/zuora/utils';
+import {
+	PaymentGateway,
+	PaymentMethod,
+} from '@modules/zuora/orders/paymentMethods';
+import { ProductPurchaseFor } from '@modules/product-catalog/productPurchaseSchema';
+import { ProductKey } from '@modules/product-catalog/productCatalog';
 
 const createSubscriptionResponseSchema = z.object({
 	orderNumber: z.string(),
@@ -28,6 +32,38 @@ export type CreateSubscriptionResponse = z.infer<
 	typeof createSubscriptionResponseSchema
 >;
 
+type BaseProductSpecificFields<T extends ProductKey> = {
+	productInformation: ProductPurchaseFor<T>;
+};
+
+type DeliveryProductSpecificFields<
+	T extends
+		| 'HomeDelivery'
+		| 'SubscriptionCard'
+		| 'TierThree'
+		| 'GuardianWeeklyDomestic'
+		| 'GuardianWeeklyRestOfWorld'
+		| 'NationalDelivery',
+> = BaseProductSpecificFields<T> & {
+	firstDeliveryDate: string;
+	soldToContact: Contact;
+} & (T extends 'NationalDelivery' ? { deliveryAgent: string } : {});
+
+export const homeDeliveryFields: DeliveryProductSpecificFields<'HomeDelivery'> =
+	{
+		productInformation: {
+			product: 'HomeDelivery',
+			ratePlan: 'EverydayPlus',
+		},
+		firstDeliveryDate: '2023-01-01',
+		soldToContact: {
+			firstName: 'John',
+			lastName: 'Doe',
+			workEmail: '',
+			country: 'GB',
+		},
+	};
+
 type CreateSubscriptionInputFields<T extends PaymentMethod> = {
 	accountName: string;
 	createdRequestId: string;
@@ -38,11 +74,12 @@ type CreateSubscriptionInputFields<T extends PaymentMethod> = {
 	paymentGateway: PaymentGateway<T>;
 	paymentMethod: T;
 	billToContact: Contact;
-	soldToContact?: Contact;
-	productRatePlanId: string;
-	contractEffectiveDate: Dayjs;
-	customerAcceptanceDate?: Dayjs;
-	chargeOverride?: { productRatePlanChargeId: string; overrideAmount: number };
+	// soldToContact?: Contact;
+	// productRatePlanId: string;
+	// contractEffectiveDate: Dayjs;
+	// customerAcceptanceDate?: Dayjs;
+	// chargeOverride?: { productRatePlanChargeId: string; overrideAmount: number };
+	// deliveryAgent?: string; // Optional delivery agent for National Delivery products
 	runBilling?: boolean;
 	collectPayment?: boolean;
 };

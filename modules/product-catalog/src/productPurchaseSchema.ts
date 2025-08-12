@@ -4,7 +4,7 @@
 // product and rate plan passed in the support-workers state
 
 import { z } from 'zod';
-import type { ProductKey } from '@modules/product-catalog/productCatalog';
+import { ProductKey } from '@modules/product-catalog/productCatalog';
 
 const deliveryContactSchema = z.object({
 	firstName: z.string(),
@@ -24,17 +24,6 @@ const dateOrDateStringSchema = z.preprocess(
 );
 
 export const productPurchaseSchema = z.discriminatedUnion('product', [
-	z.object({
-		product: z.literal('SupporterPlus'),
-		ratePlan: z.union([
-			z.literal('OneYearStudent'),
-			z.literal('V1DeprecatedMonthly'),
-			z.literal('V1DeprecatedAnnual'),
-			z.literal('Monthly'),
-			z.literal('Annual'),
-		]),
-		amount: z.number(),
-	}),
 	z.object({
 		product: z.literal('Contribution'),
 		ratePlan: z.union([z.literal('Annual'), z.literal('Monthly')]),
@@ -106,6 +95,17 @@ export const productPurchaseSchema = z.discriminatedUnion('product', [
 			z.literal('V1DeprecatedMonthly'),
 			z.literal('V2DeprecatedMonthly'),
 		]),
+	}),
+	z.object({
+		product: z.literal('SupporterPlus'),
+		ratePlan: z.union([
+			z.literal('OneYearStudent'),
+			z.literal('V1DeprecatedMonthly'),
+			z.literal('V1DeprecatedAnnual'),
+			z.literal('Monthly'),
+			z.literal('Annual'),
+		]),
+		amount: z.number(),
 	}),
 	z.object({
 		product: z.literal('GuardianWeeklyDomestic'),

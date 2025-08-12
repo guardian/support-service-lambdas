@@ -1,10 +1,8 @@
 import type { z } from 'zod';
-import type {
-	NewAccount,
-	PaymentMethod,
-} from '@modules/zuora/orders/newAccount';
+import type { NewAccount } from '@modules/zuora/orders/newAccount';
 import type { OrderAction } from '@modules/zuora/orders/orderActions';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { PaymentMethod } from '@modules/zuora/orders/paymentMethods';
 
 export type ProcessingOptions = {
 	runBilling: boolean;

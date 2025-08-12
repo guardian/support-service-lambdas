@@ -112,6 +112,9 @@ export type CreateSubscriptionOrderAction = BaseOrderAction & {
 			},
 		];
 	};
+	customFields?: {
+		DeliveryAgent__c: string;
+	};
 };
 export type OrderAction =
 	| ChangePlanOrderAction
@@ -141,11 +144,13 @@ export function buildCreateSubscriptionOrderAction({
 	contractEffectiveDate,
 	customerAcceptanceDate,
 	chargeOverride,
+	deliveryAgent,
 }: {
 	productRatePlanId: string;
 	contractEffectiveDate: Dayjs;
 	customerAcceptanceDate?: Dayjs;
 	chargeOverride?: { productRatePlanChargeId: string; overrideAmount: number };
+	deliveryAgent?: string; // Optional delivery agent for National Delivery products
 }): CreateSubscriptionOrderAction {
 	const chargeOverrides = chargeOverride
 		? [
@@ -159,6 +164,10 @@ export function buildCreateSubscriptionOrderAction({
 				},
 			]
 		: [];
+
+	const customFields = deliveryAgent
+		? { DeliveryAgent__c: deliveryAgent }
+		: undefined;
 
 	return {
 		type: 'CreateSubscription',
@@ -196,5 +205,6 @@ export function buildCreateSubscriptionOrderAction({
 				},
 			],
 		},
+		customFields: customFields,
 	};
 }

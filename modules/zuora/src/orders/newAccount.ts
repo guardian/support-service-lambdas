@@ -1,47 +1,10 @@
 import type { IsoCurrency } from '@modules/internationalisation/currency';
+import {
+	PaymentGateway,
+	PaymentMethod,
+} from '@modules/zuora/orders/paymentMethods';
 
-type CreditCardReferenceTransaction = {
-	type: 'CreditCardReferenceTransaction';
-	tokenId: string;
-	secondTokenId: string;
-};
-export type DirectDebit = {
-	type: 'Bacs';
-	accountHolderInfo: {
-		accountHolderName: string;
-	};
-	accountNumber: string;
-	bankCode: string;
-};
-type PayPal = {
-	type: 'PayPalNativeEC';
-	BAID: string;
-	email: string;
-};
-export type PaymentMethod =
-	| CreditCardReferenceTransaction
-	| DirectDebit
-	| PayPal;
-
-//Gateway names need to match to those set in Zuora
-//See: https://apisandbox.zuora.com/apps/NewGatewaySetting.do?method=list
-type StripePaymentGateway =
-	| 'Stripe PaymentIntents GNM Membership'
-	| 'Stripe PaymentIntents GNM Membership AUS'
-	| 'Stripe - Observer - Tortoise Media';
-type PayPalPaymentGateway = 'PayPal Express';
-type GoCardlessPaymentGateway =
-	| 'GoCardless'
-	| 'GoCardless - Observer - Tortoise Media';
-
-export type PaymentGateway<T extends PaymentMethod> =
-	T extends CreditCardReferenceTransaction
-		? StripePaymentGateway
-		: T extends DirectDebit
-			? GoCardlessPaymentGateway
-			: T extends PayPal
-				? PayPalPaymentGateway
-				: never;
+// This file contains types for creating a new account via the Orders API.
 
 export type Contact = {
 	firstName: string;
@@ -63,6 +26,7 @@ export type NewAccount<T extends PaymentMethod> = {
 		sfContactId__c: string; // Salesforce contactId
 		IdentityId__c: string;
 		CreatedRequestId__c: string; // Support workers requestId, used to prevent duplicates
+		DeliveryAgent__c?: string; // Optional delivery agent for National Delivery products
 	};
 	billCycleDay: 0;
 	autoPay: boolean;
@@ -96,6 +60,7 @@ export function buildNewAccountObject<T extends PaymentMethod>({
 	paymentMethod: T;
 	billToContact: Contact;
 	soldToContact?: Contact;
+	deliveryAgent?: string; //TODO: Make this required for National Delivery products
 	deliveryInstructions?: string;
 }): NewAccount<T> {
 	return {
