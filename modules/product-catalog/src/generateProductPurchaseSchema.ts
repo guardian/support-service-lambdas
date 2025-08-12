@@ -17,6 +17,13 @@ const header = `
 // product and rate plan passed in the support-workers state
 
 import { z } from 'zod';
+import { ProductKey } from '@modules/product-catalog/productCatalog';
+`;
+
+const footer = `
+	export type ProductPurchase = z.infer<typeof productPurchaseSchema>;
+	// Generic type for a specific product
+	export type ProductPurchaseFor<P extends ProductKey> = Extract<ProductPurchase,{ product: P }>;
 `;
 
 export const generateProductPurchaseSchema = (
@@ -34,6 +41,7 @@ export const generateProductPurchaseSchema = (
 	export const productPurchaseSchema = z.discriminatedUnion('product', [
 		${zuoraProductsSchema}
 		]);
+	${footer}
 	`;
 };
 
