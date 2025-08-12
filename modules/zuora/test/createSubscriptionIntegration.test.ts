@@ -5,10 +5,13 @@
  */
 
 import { IsoCurrency } from '@modules/internationalisation/currency';
-import { DirectDebit, PaymentGateway } from '@modules/zuora/orders/newAccount';
 import dayjs from 'dayjs';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { createSubscription } from '@modules/zuora/createSubscription';
+import {
+	DirectDebit,
+	PaymentGateway,
+} from '@modules/zuora/orders/paymentMethods';
 
 test('We can create a subscription with a new account', async () => {
 	const currency: IsoCurrency = 'GBP';
