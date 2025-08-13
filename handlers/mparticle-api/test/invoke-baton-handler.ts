@@ -1,9 +1,9 @@
 import type { Callback, Context } from 'aws-lambda';
-import { handlerBaton } from '../index';
+import { handlerBaton } from '../src';
 import type {
 	BatonEventRequest,
 	BatonEventResponse,
-} from '../routers/baton/types-and-schemas';
+} from '../src/routers/baton/types-and-schemas';
 
 export const invokeBatonHandler = async (
 	event: BatonEventRequest,

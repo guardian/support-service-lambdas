@@ -1,33 +1,6 @@
+import { z } from 'zod';
 import type { EventBatch } from '../../interfaces/event-batch';
-import { getAppConfig } from '../utils/config';
-import type { HttpResponse } from '../utils/make-http-request';
-import { makeHttpRequest } from '../utils/make-http-request';
-
-async function requestEventsApi<T>(
-	url: string,
-	options: {
-		method?: 'POST';
-		body?: unknown;
-	},
-): Promise<HttpResponse<T>> {
-	const appConfig = await getAppConfig();
-	return makeHttpRequest<T>(url, {
-		method: options.method,
-		baseURL: `https://s2s.${appConfig.pod}.mparticle.com/v2`,
-		headers: {
-			'Content-Type': 'application/json',
-			/**
-			 * Authentication
-			 * The DSR API is secured via basic authentication. Credentials are issued at the level of an mParticle workspace.
-			 * You can obtain credentials for your workspace from the Workspace Settings screen. Note that this authentication
-			 * is for a single workspace and scopes the DSR to this workspace only.
-			 * https://docs.mparticle.com/developers/apis/dsr-api/v3/#authentication
-			 */
-			Authorization: `Basic ${Buffer.from(`${appConfig.inputPlatform.key}:${appConfig.inputPlatform.secret}`).toString('base64')}`,
-		},
-		body: options.body,
-	});
-}
+import type { EventsAPI, MParticleClient } from './mparticleClient';
 
 /**
  * Upload an event batch
@@ -37,11 +10,12 @@ async function requestEventsApi<T>(
  * @returns https://docs.mparticle.com/developers/apis/dsr-api/v3/#example-success-response-body
  */
 export const uploadAnEventBatch = async (
+	mParticleEventsAPIClient: MParticleClient<EventsAPI>,
 	batch: EventBatch,
 ): Promise<object> => {
-	const response = await requestEventsApi(`/events`, {
-		method: 'POST',
-		body: {
+	const response = await mParticleEventsAPIClient.post(
+		`/events`,
+		{
 			events: batch.events?.map((event) => {
 				return {
 					data: event.data,
@@ -58,7 +32,8 @@ export const uploadAnEventBatch = async (
 			context: batch.context,
 			ip: batch.ip,
 		},
-	});
+		z.string(),
+	);
 
 	if (!response.success) {
 		throw response.error;
@@ -68,11 +43,12 @@ export const uploadAnEventBatch = async (
 };
 
 export const setUserAttributesForRightToErasureRequest = async (
+	mParticleEventsAPIClient: MParticleClient<EventsAPI>,
 	environment: 'production' | 'development',
 	userId: string,
 	submittedTime: string,
 ): Promise<object> => {
-	return uploadAnEventBatch({
+	return uploadAnEventBatch(mParticleEventsAPIClient, {
 		userAttributes: {
 			dsr_erasure_requested: true,
 			dsr_erasure_status: 'requested',
@@ -84,5 +60,3 @@ export const setUserAttributesForRightToErasureRequest = async (
 		environment: environment,
 	});
 };
-
-export { requestEventsApi };

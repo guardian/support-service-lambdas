@@ -1,7 +1,13 @@
+import type {
+	DataSubjectAPI,
+	EventsAPI,
+	MParticleClient,
+} from '../apis/mparticleClient';
+import type { SRS3Client } from '../apis/srs3Client';
 import { handleRerInitiate } from './baton/handle-rer-initiate';
 import { handleRerStatus } from './baton/handle-rer-status';
 import { handleSarInitiate } from './baton/handle-sar-initiate';
-import type { HandleSarStatus } from './baton/handle-sar-status';
+import { handleSarStatus } from './baton/handle-sar-status';
 import type {
 	BatonEventRequest,
 	BatonEventResponse,
@@ -20,7 +26,12 @@ export function validateRequest(data: BatonEventRequest): BatonEventRequest {
 	return result.data;
 }
 
-export const batonRerRouter = (handleSarStatus: HandleSarStatus) => ({
+export const batonRerRouter = (
+	mParticleDataSubjectClient: MParticleClient<DataSubjectAPI>,
+	mParticleEventsAPIClient: MParticleClient<EventsAPI>,
+	isProd: boolean,
+	srs3Client: SRS3Client,
+) => ({
 	routeRequest: async (
 		event: BatonEventRequest,
 	): Promise<BatonEventResponse> => {
@@ -29,17 +40,30 @@ export const batonRerRouter = (handleSarStatus: HandleSarStatus) => ({
 			case 'SAR':
 				switch (validatedEvent.action) {
 					case 'initiate':
-						return handleSarInitiate(validatedEvent);
+						return handleSarInitiate(
+							mParticleDataSubjectClient,
+							isProd,
+							validatedEvent,
+						);
 					case 'status':
-						return handleSarStatus.handleSarStatus(validatedEvent);
+						return handleSarStatus(
+							mParticleDataSubjectClient,
+							srs3Client,
+							validatedEvent.initiationReference,
+						);
 				}
 				break; // unreachable - only needed for no-fallthrough rule
 			case 'RER':
 				switch (validatedEvent.action) {
 					case 'initiate':
-						return handleRerInitiate(validatedEvent);
+						return handleRerInitiate(
+							mParticleDataSubjectClient,
+							mParticleEventsAPIClient,
+							isProd,
+							validatedEvent,
+						);
 					case 'status':
-						return handleRerStatus(validatedEvent);
+						return handleRerStatus(mParticleDataSubjectClient, validatedEvent);
 				}
 		}
 	},

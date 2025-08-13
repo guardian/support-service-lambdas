@@ -9,16 +9,23 @@ import {
 	BatonEventResponse,
 } from './routers/baton/types-and-schemas';
 import { batonRerRouter } from './routers/baton';
-import { getAppConfig, getEnv } from './utils/config';
-import { HandleSarStatus } from './routers/baton/handle-sar-status';
+import { AppConfig, getAppConfig, getEnv } from './utils/config';
+import { MParticleClientImpl } from './apis/mparticleClient';
+import { SRS3ClientImpl } from './apis/srs3Client';
 
 export const handlerHttp: Handler<
 	APIGatewayProxyEvent,
 	APIGatewayProxyResult
 > = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
 	try {
+		const { mParticleDataSubjectClient, mParticleEventsAPIClient, isProd } =
+			await services();
 		console.debug('Processing HTTP request');
-		return httpRouter.routeRequest(event);
+		return httpRouter(
+			mParticleDataSubjectClient,
+			mParticleEventsAPIClient,
+			isProd,
+		).routeRequest(event);
 	} catch (error) {
 		console.error('HTTP handler error:', error);
 		return {
@@ -36,8 +43,18 @@ export const handlerBaton: Handler<
 	BatonEventResponse
 > = async (event: BatonEventRequest): Promise<BatonEventResponse> => {
 	try {
-		const { handleSarStatus } = await services();
-		const router = batonRerRouter(handleSarStatus);
+		const {
+			mParticleDataSubjectClient,
+			mParticleEventsAPIClient,
+			srs3Client,
+			isProd,
+		} = await services();
+		const router = batonRerRouter(
+			mParticleDataSubjectClient,
+			mParticleEventsAPIClient,
+			isProd,
+			srs3Client,
+		);
 		console.debug('Processing Baton event');
 		return router.routeRequest(event);
 	} catch (error) {
@@ -48,13 +65,20 @@ export const handlerBaton: Handler<
 
 async function services() {
 	console.log('Starting lambda');
-	const config = await getAppConfig();
+	const stage = getEnv('STAGE');
+	const config: AppConfig = await getAppConfig();
 	return {
-		handleSarStatus: new HandleSarStatus(
+		mParticleDataSubjectClient:
+			MParticleClientImpl.createMParticleDataSubjectClient(config.workspace),
+		mParticleEventsAPIClient: MParticleClientImpl.createEventsApiClient(
+			config.inputPlatform,
+			config.pod,
+		),
+		srs3Client: new SRS3ClientImpl(
 			config.sarResultsBucket,
 			sarS3BaseKey,
 			() => new Date(),
 		),
-		stage: getEnv('STAGE'),
+		isProd: stage === 'PROD',
 	};
 }

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import type { DataSubjectRequestCallback } from '../../../interfaces/data-subject-request-callback';
 import { processDataSubjectRequestCallback } from '../../apis/data-subject-requests';
 import { validateDataSubjectRequestCallback } from '../../utils/validate-data-subject-request-callback';
+import { DataSubjectAPI, MParticleClient } from '../../apis/mparticleClient';
 
 export const dataSubjectRequestCallbackParser = {
 	path: z.object({
@@ -34,7 +35,9 @@ export const dataSubjectRequestCallbackParser = {
 	}),
 };
 
-export function dataSubjectRequestCallbackHandler() {
+export function dataSubjectRequestCallbackHandler(
+	dataSubjectAPIMParticleClient: MParticleClient<DataSubjectAPI>,
+) {
 	return async (
 		event: APIGatewayProxyEvent,
 		parsed: { path: { requestId: string }; body: DataSubjectRequestCallback },
@@ -44,6 +47,7 @@ export function dataSubjectRequestCallbackHandler() {
 				([k]) => k.toLowerCase() === key.toLowerCase(),
 			)?.[1];
 		const callbackValidationResult = await validateDataSubjectRequestCallback(
+			dataSubjectAPIMParticleClient,
 			getHeader('x-opendsr-processor-domain'),
 			getHeader('x-opendsr-signature'),
 			event.body,

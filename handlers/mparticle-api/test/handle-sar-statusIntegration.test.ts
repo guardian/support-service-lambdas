@@ -11,36 +11,45 @@ import {
 } from '@aws-sdk/client-s3';
 import { awsConfig } from '@modules/aws/config';
 import { getFileFromS3 } from '@modules/aws/s3';
-import { HandleSarStatus } from '../src/routers/baton/handle-sar-status';
+import type { GetRequestsResponse } from '../src/apis/data-subject-requests';
+import type {
+	DataSubjectAPI,
+	MParticleClient,
+} from '../src/apis/mparticleClient';
+import type { SRS3Client } from '../src/apis/srs3Client';
+import { SRS3ClientImpl } from '../src/apis/srs3Client';
+import { handleSarStatus } from '../src/routers/baton/handle-sar-status';
+import type { InitiationReference } from '../src/routers/baton/types-and-schemas';
 
 const s3Client = new S3Client(awsConfig);
 
-test('fetchToS3', async () => {
+test('fetch a real URL to a real S3 bucket, and check the content', async () => {
 	const bucketName = 'support-service-lambdas-test'; // this is a real bucket
 	const sarS3BaseKey = 'handleSarStatusIntegrationTest/';
-	const dummyRef = 'dummy-ref';
+	const dummyRef = 'dummy-ref' as InitiationReference;
 
 	const realUrl = 'https://manage.theguardian.com/sitemap.txt';
+
 	// we just want to make sure it's the right file, checking the length is rough and ready
 	const expectedMinimumSitemapLength = 5000;
 	const expectedMaximumSitemapLength = 10000;
 
-	const dateTimeString = '2025-08-06T18:19:42.123Z';
-	const handleSarStatus = new HandleSarStatus(
-		bucketName,
-		sarS3BaseKey,
-		() => new Date(Date.parse(dateTimeString)),
-	);
-
 	await deleteFiles(bucketName, sarS3BaseKey);
 
-	const actualS3Key = await handleSarStatus.fetchToS3(realUrl, dummyRef);
+	const { realDummyURLDataSubjectClient, realS3Client } =
+		createRealServicesToTestEndpoints(realUrl, bucketName, sarS3BaseKey);
 
-	console.log("checking what's in s3 " + actualS3Key);
-	const s3File = await getFileFromS3({ bucketName, filePath: actualS3Key });
+	// now run the actual business logic
+	const actualS3Url = (
+		await handleSarStatus(realDummyURLDataSubjectClient, realS3Client, dummyRef)
+	).resultLocations?.[0];
 
-	expect(s3File.length).toBeGreaterThan(expectedMinimumSitemapLength);
-	expect(s3File.length).toBeLessThan(expectedMaximumSitemapLength);
+	console.log("checking what's in s3 " + actualS3Url);
+
+	const actualS3File = await getFileFromS3(parseS3Url(actualS3Url!));
+
+	expect(actualS3File.length).toBeGreaterThan(expectedMinimumSitemapLength);
+	expect(actualS3File.length).toBeLessThan(expectedMaximumSitemapLength);
 }, 30000);
 
 async function deleteFiles(
@@ -75,4 +84,46 @@ async function deleteFiles(
 	} else {
 		console.log('No files found to delete');
 	}
+}
+
+function parseS3Url(s3Url: string): { bucketName: string; filePath: string } {
+	const match = s3Url.match(/^s3:\/\/([^/]+)\/(.+)$/);
+	if (!match) {
+		throw new Error(`Invalid S3 URL format: ${s3Url}`);
+	}
+	return { bucketName: match[1]!, filePath: match[2]! };
+}
+
+function createRealServicesToTestEndpoints(
+	realUrl: string,
+	bucketName: string,
+	sarS3BaseKey: string,
+) {
+	const mockSARStatusResponse: GetRequestsResponse = {
+		expected_completion_time: new Date(),
+		subject_request_id: 'subject_request_idsubject_request_id',
+		request_status: 'completed',
+		results_url: realUrl,
+		controller_id: 'controller_idcontroller_id',
+	};
+	const realDummyURLDataSubjectClient: MParticleClient<DataSubjectAPI> = {
+		clientType: 'dataSubject',
+		get: jest.fn().mockResolvedValue({
+			success: true,
+			data: mockSARStatusResponse,
+		}),
+		post: jest.fn().mockRejectedValue(new Error('Mock error')),
+		getStream: jest.fn().mockImplementation(async (path: string) => {
+			expect(path).toBe(realUrl);
+			const response = await fetch(realUrl);
+			return response.body;
+		}),
+	};
+
+	const realS3Client: SRS3Client = new SRS3ClientImpl(
+		bucketName,
+		sarS3BaseKey,
+		() => new Date(Date.parse('2025-08-06T18:19:42.123Z')),
+	);
+	return { realDummyURLDataSubjectClient, realS3Client };
 }

@@ -5,8 +5,10 @@ import type {
 	BatonRerEventStatusRequest,
 	BatonRerEventStatusResponse,
 } from './types-and-schemas';
+import { DataSubjectAPI, MParticleClient } from '../../apis/mparticleClient';
 
 export async function handleRerStatus(
+	mParticleDataSubjectClient: MParticleClient<DataSubjectAPI>,
 	request: BatonRerEventStatusRequest,
 ): Promise<BatonRerEventStatusResponse> {
 	const mapStatus = (
@@ -25,7 +27,10 @@ export async function handleRerStatus(
 	};
 
 	const dataSubjectRequestState: DataSubjectRequestState =
-		await getStatusOfDataSubjectRequest(request.initiationReference);
+		await getStatusOfDataSubjectRequest(
+			mParticleDataSubjectClient,
+			request.initiationReference,
+		);
 
 	const response: BatonRerEventStatusResponse = {
 		requestType: 'RER' as const,

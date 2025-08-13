@@ -1,13 +1,17 @@
 import { faker } from '@faker-js/faker';
-import { streamHttpToS3 } from '../../../modules/aws/src/s3';
-import { batonRerRouter } from '../src/routers/baton';
-import { HandleSarStatus } from '../src/routers/baton/handle-sar-status';
+import type {
+	DataSubjectAPI,
+	MParticleClient,
+} from '../src/apis/mparticleClient';
+import { mparticleDataSubjectBaseURL } from '../src/apis/mparticleClient';
+import type { SRS3Client } from '../src/apis/srs3Client';
+import { handleSarStatus } from '../src/routers/baton/handle-sar-status';
 import type {
 	GUID,
 	InitiationReference,
 } from '../src/routers/baton/types-and-schemas';
 import type { AppConfig } from '../src/utils/config';
-import { invokeBatonHandler } from '../src/utils/invoke-baton-handler';
+import { invokeBatonHandler } from './invoke-baton-handler';
 
 jest.mock('../../../modules/aws/src/s3');
 
@@ -27,10 +31,6 @@ jest.mock('../src/utils/config', () => ({
 }));
 
 describe('mparticle-api Baton tests', () => {
-	const mockStreamHttpToS3 = streamHttpToS3 as jest.MockedFunction<
-		typeof streamHttpToS3
-	>;
-
 	beforeEach(() => {
 		jest.resetModules();
 		global.fetch = jest.fn();
@@ -46,16 +46,18 @@ describe('mparticle-api Baton tests', () => {
 		const mockSetUserAttributesResponse = {
 			ok: true,
 			status: 202,
+			text: () => '',
 		};
 		const mockCreateDataSubjectRequestResponse = {
 			ok: true,
 			statusCode: 202,
-			json: () => ({
-				expected_completion_time: faker.date.soon(),
-				received_time: submittedTime,
-				subject_request_id: requestId,
-				controller_id: faker.string.numeric(),
-			}),
+			text: () =>
+				JSON.stringify({
+					expected_completion_time: faker.date.soon(),
+					received_time: submittedTime,
+					subject_request_id: requestId,
+					controller_id: faker.string.numeric(),
+				}),
 		};
 		(global.fetch as jest.Mock)
 			.mockResolvedValueOnce(mockSetUserAttributesResponse)
@@ -85,13 +87,18 @@ describe('mparticle-api Baton tests', () => {
 		const mockGetSubjectRequestByIdResponse = {
 			ok: true,
 			status: 200,
-			json: () => ({
-				expected_completion_time: faker.date.soon(),
-				subject_request_id: requestId,
-				controller_id: faker.string.numeric(),
-				request_status: 'in_progress',
-				received_time: faker.date.recent(),
-			}),
+			text: () =>
+				JSON.stringify({
+					expected_completion_time: faker.date.soon(),
+					subject_request_id: requestId,
+					controller_id: faker.string.numeric(),
+					request_status: 'in_progress',
+					received_time: faker.date.recent(),
+					group_id: null,
+					api_version: '3.0',
+					results_url: null,
+					extensions: null,
+				}),
 		};
 		(global.fetch as jest.Mock).mockResolvedValueOnce(
 			mockGetSubjectRequestByIdResponse,
@@ -117,12 +124,13 @@ describe('mparticle-api Baton tests', () => {
 		const mockCreateDataSubjectRequestResponse = {
 			ok: true,
 			statusCode: 201,
-			json: () => ({
-				expected_completion_time: faker.date.soon(),
-				received_time: submittedTime,
-				subject_request_id: requestId,
-				controller_id: faker.string.numeric(),
-			}),
+			text: () =>
+				JSON.stringify({
+					expected_completion_time: faker.date.soon(),
+					received_time: submittedTime,
+					subject_request_id: requestId,
+					controller_id: faker.string.numeric(),
+				}),
 		};
 		(global.fetch as jest.Mock).mockResolvedValueOnce(
 			mockCreateDataSubjectRequestResponse,
@@ -147,59 +155,80 @@ describe('mparticle-api Baton tests', () => {
 		expect(global.fetch).toHaveBeenCalledTimes(1);
 	});
 
-	it('Get Subject Access Request Status', async () => {
+	it('should get the status of a SAR including downloading the result', async () => {
 		const requestId: InitiationReference = faker.string.uuid() as GUID;
-		const resultsUrl = 'https://localhost/sar-data-1234.zip';
+		const zipRelativePath = '/sar-data-1234.zip';
+		const resultsUrl = mparticleDataSubjectBaseURL + zipRelativePath;
+		const testZipData = '1234TestZipData';
 		const mockGetSubjectRequestByIdResponse = {
-			ok: true,
-			status: 200,
-			json: () => ({
+			success: true,
+			data: {
 				expected_completion_time: faker.date.soon(),
 				subject_request_id: requestId,
 				controller_id: faker.string.numeric(),
 				request_status: 'completed',
 				received_time: faker.date.recent(),
 				results_url: resultsUrl,
+			},
+		};
+
+		const mockDataSubjectClient: MParticleClient<DataSubjectAPI> = {
+			clientType: 'dataSubject',
+			get: jest.fn().mockImplementation((path: string) => {
+				console.log('Mock get called with path:', path);
+				expect(path).toBe('/requests/' + requestId);
+				return Promise.resolve(mockGetSubjectRequestByIdResponse);
+			}),
+			post: jest.fn().mockRejectedValue(new Error('Mock error')),
+			getStream: jest.fn().mockImplementation((path: string) => {
+				console.log('Mock getStream called with path:', path);
+				expect(path).toBe(zipRelativePath);
+				const stream = new ReadableStream({
+					start(controller) {
+						controller.enqueue(new TextEncoder().encode(testZipData));
+						controller.close();
+					},
+				});
+				return Promise.resolve(stream);
 			}),
 		};
-		(global.fetch as jest.Mock).mockResolvedValueOnce(
-			mockGetSubjectRequestByIdResponse,
+
+		const mockS3Client: SRS3Client = {
+			write: jest.fn().mockResolvedValue(`s3://myBucket123/${requestId}`),
+		};
+
+		const result = await handleSarStatus(
+			mockDataSubjectClient,
+			mockS3Client,
+			requestId,
 		);
 
-		mockStreamHttpToS3.mockResolvedValueOnce(undefined);
-		const sarResultsBucket = 'bucketName';
-		const dateTimeString = '2025-08-06T18:19:42.123Z';
-		const router = batonRerRouter(
-			new HandleSarStatus(
-				sarResultsBucket,
-				'basekey/',
-				() => new Date(Date.parse(dateTimeString)),
-			),
-		);
-		const result = await router.routeRequest({
+		const { message, ...resultWithoutMessage } = result;
+		expect(resultWithoutMessage).toEqual({
 			requestType: 'SAR',
 			action: 'status',
-			initiationReference: requestId,
+			status: 'completed',
+			resultLocations: ['s3://myBucket123/' + requestId],
 		});
 
-		expect(result).toBeDefined();
-		expect(result.requestType).toEqual('SAR');
-		expect(result.action).toEqual('status');
-		expect(result.status).toEqual('completed');
-		expect(result.message).toBeDefined();
-		if (result.requestType === 'SAR' && result.action === 'status') {
-			expect(result.resultLocations).toBeDefined();
-			expect(result.resultLocations).toHaveLength(1);
-			if (result.resultLocations) {
-				expect(result.resultLocations[0]).toBeDefined();
-			}
-		}
-		expect(global.fetch).toHaveBeenCalledTimes(1);
-
-		expect(mockStreamHttpToS3).toHaveBeenCalledWith(
-			resultsUrl,
-			sarResultsBucket,
-			`basekey/${dateTimeString}-${requestId}.zip`,
+		// check the critical side effect was called
+		expect(mockS3Client.write).toHaveBeenCalledWith(
+			requestId,
+			expect.any(ReadableStream),
 		);
+
+		// check what was written to S3 is correct
+		const writeCalls = (mockS3Client.write as jest.Mock).mock.calls as Array<
+			[string, ReadableStream]
+		>;
+
+		const actualStreamContent = await getStreamContent(writeCalls[0]![1]);
+		expect(actualStreamContent).toBe(testZipData);
 	});
 });
+
+async function getStreamContent(streamArg: ReadableStream) {
+	return new TextDecoder().decode(
+		(await streamArg.getReader().read()).value! as Uint8Array,
+	);
+}
