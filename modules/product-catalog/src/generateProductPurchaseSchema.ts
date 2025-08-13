@@ -9,6 +9,7 @@ import {
 	isSupportedProduct,
 	isSupportedProductRatePlan,
 } from '@modules/product-catalog/zuoraToProductNameMappings';
+import { isDeliveryProduct } from '@modules/product-catalog/productCatalog';
 
 const header = `
 // ---------- This file is auto-generated. Do not edit manually. -------------
@@ -18,6 +19,19 @@ const header = `
 
 import { z } from 'zod';
 import { ProductKey } from '@modules/product-catalog/productCatalog';
+
+const contactSchema = z.object({
+	firstName: z.string(),
+	lastName: z.string(),
+	workEmail: z.string(),
+	country: z.string(),
+	state: z.string().nullish(),
+	city: z.string(),
+	address1: z.string(),
+	address2: z.string().nullish(),
+	postalCode: z.string(),
+});
+
 `;
 
 const footer = `
@@ -45,8 +59,23 @@ export const generateProductPurchaseSchema = (
 	`;
 };
 
-const productAllowsAmountOverride = (product: string): boolean => {
-	return product === 'Contribution' || product === 'SupporterPlus';
+const generateProductSpecificFields = (
+	productName: string,
+): string | undefined => {
+	if (productName === 'Contribution' || productName === 'SupporterPlus') {
+		return 'amount: z.number(),';
+	}
+	if (isDeliveryProduct(productName)) {
+		const deliveryFields = `
+			firstDeliveryDate: z.date(),
+			soldToContact: contactSchema,`;
+		if (productName === 'NationalDelivery') {
+			return `${deliveryFields}
+			deliveryAgent: z.string(),`;
+		}
+		return deliveryFields;
+	}
+	return '';
 };
 
 const generateProductsSchema = (product: CatalogProduct) => {
@@ -66,8 +95,7 @@ const generateProductsSchema = (product: CatalogProduct) => {
 
 	return `z.object({
 		product: z.literal('${productName}'),
-		ratePlan: ${ratePlanUnion},
-		${productAllowsAmountOverride(productName) ? 'amount: z.number(),' : ''}
+		ratePlan: ${ratePlanUnion}, ${generateProductSpecificFields(productName)}
 	})`;
 };
 

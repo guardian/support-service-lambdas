@@ -6,6 +6,18 @@
 import { z } from 'zod';
 import type { ProductKey } from '@modules/product-catalog/productCatalog';
 
+const contactSchema = z.object({
+	firstName: z.string(),
+	lastName: z.string(),
+	workEmail: z.string(),
+	country: z.string(),
+	state: z.string().nullish(),
+	city: z.string(),
+	address1: z.string(),
+	address2: z.string().nullish(),
+	postalCode: z.string(),
+});
+
 export const productPurchaseSchema = z.discriminatedUnion('product', [
 	z.object({
 		product: z.literal('SupporterPlus'),
@@ -32,6 +44,8 @@ export const productPurchaseSchema = z.discriminatedUnion('product', [
 			z.literal('Quarterly'),
 			z.literal('ThreeMonthGift'),
 		]),
+		firstDeliveryDate: z.date(),
+		soldToContact: contactSchema,
 	}),
 	z.object({
 		product: z.literal('GuardianAdLite'),
@@ -49,6 +63,8 @@ export const productPurchaseSchema = z.discriminatedUnion('product', [
 			z.literal('DomesticAnnual'),
 			z.literal('DomesticMonthly'),
 		]),
+		firstDeliveryDate: z.date(),
+		soldToContact: contactSchema,
 	}),
 	z.object({
 		product: z.literal('DigitalSubscription'),
@@ -70,6 +86,9 @@ export const productPurchaseSchema = z.discriminatedUnion('product', [
 			z.literal('Sixday'),
 			z.literal('Weekend'),
 		]),
+		firstDeliveryDate: z.date(),
+		soldToContact: contactSchema,
+		deliveryAgent: z.string(),
 	}),
 	z.object({
 		product: z.literal('SupporterMembership'),
@@ -91,6 +110,8 @@ export const productPurchaseSchema = z.discriminatedUnion('product', [
 			z.literal('Monthly'),
 			z.literal('ThreeMonthGift'),
 		]),
+		firstDeliveryDate: z.date(),
+		soldToContact: contactSchema,
 	}),
 	z.object({
 		product: z.literal('SubscriptionCard'),
@@ -106,18 +127,26 @@ export const productPurchaseSchema = z.discriminatedUnion('product', [
 			z.literal('Sunday'),
 			z.literal('Saturday'),
 		]),
+		firstDeliveryDate: z.date(),
+		soldToContact: contactSchema,
 	}),
 	z.object({
 		product: z.literal('GuardianWeeklyZoneA'),
 		ratePlan: z.union([z.literal('Annual'), z.literal('Quarterly')]),
+		firstDeliveryDate: z.date(),
+		soldToContact: contactSchema,
 	}),
 	z.object({
 		product: z.literal('GuardianWeeklyZoneB'),
 		ratePlan: z.union([z.literal('Quarterly'), z.literal('Annual')]),
+		firstDeliveryDate: z.date(),
+		soldToContact: contactSchema,
 	}),
 	z.object({
 		product: z.literal('GuardianWeeklyZoneC'),
 		ratePlan: z.union([z.literal('Quarterly'), z.literal('Annual')]),
+		firstDeliveryDate: z.date(),
+		soldToContact: contactSchema,
 	}),
 	z.object({
 		product: z.literal('NewspaperVoucher'),
@@ -133,6 +162,8 @@ export const productPurchaseSchema = z.discriminatedUnion('product', [
 			z.literal('Sixday'),
 			z.literal('Saturday'),
 		]),
+		firstDeliveryDate: z.date(),
+		soldToContact: contactSchema,
 	}),
 	z.object({
 		product: z.literal('HomeDelivery'),
@@ -148,6 +179,8 @@ export const productPurchaseSchema = z.discriminatedUnion('product', [
 			z.literal('Sunday'),
 			z.literal('Saturday'),
 		]),
+		firstDeliveryDate: z.date(),
+		soldToContact: contactSchema,
 	}),
 	z.object({
 		product: z.literal('PatronMembership'),
