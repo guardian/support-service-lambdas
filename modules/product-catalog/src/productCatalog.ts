@@ -7,6 +7,26 @@ export type ProductCatalog = z.infer<typeof productCatalogSchema>;
 
 // -------- Product --------
 export type ProductKey = keyof ProductCatalog;
+export const deliveryProducts = [
+	'HomeDelivery',
+	'NationalDelivery',
+	'SubscriptionCard',
+	'NewspaperVoucher',
+	'TierThree',
+	'GuardianWeeklyRestOfWorld',
+	'GuardianWeeklyDomestic',
+	'GuardianWeeklyZoneA',
+	'GuardianWeeklyZoneB',
+	'GuardianWeeklyZoneC',
+] as const;
+export type DeliveryProductKey = (typeof deliveryProducts)[number];
+
+export function isDeliveryProduct(
+	productKey: unknown,
+): productKey is DeliveryProductKey {
+	return deliveryProducts.includes(productKey as DeliveryProductKey);
+}
+
 export type Product<P extends ProductKey> = ProductCatalog[P];
 
 // -------- Product Rate Plan --------
