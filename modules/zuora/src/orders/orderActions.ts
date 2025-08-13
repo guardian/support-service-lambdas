@@ -85,6 +85,7 @@ export type CreateSubscriptionOrderAction = BaseOrderAction & {
 	type: 'CreateSubscription';
 	createSubscription: {
 		terms: {
+			autoRenew: boolean;
 			initialTerm: {
 				period: number;
 				periodType: BillingPeriod;
@@ -190,6 +191,7 @@ export function buildCreateSubscriptionOrderAction({
 					periodType: 'Month',
 					termType: 'TERMED',
 				},
+				autoRenew: true, //TODO: do we need this?
 				renewalSetting: 'RENEW_WITH_SPECIFIC_TERM',
 				renewalTerms: [
 					{
