@@ -5,8 +5,8 @@
  */
 
 import type { Stage } from '@modules/stage';
-import { addDiscount } from '@modules/zuora/addDiscount';
-import { getSubscription } from '@modules/zuora/getSubscription';
+import { addDiscount } from '@modules/zuora/discount';
+import { getSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { createDigitalSubscription } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';

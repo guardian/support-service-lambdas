@@ -2,7 +2,7 @@ import {
 	failureExistsOnInvoiceProcessingAttempt,
 	invoiceHasAtLeastOneProcessingFailure,
 } from '../../src/handlers/detectFailures';
-import type { ProcessedInvoice } from '../../src/types/shared';
+import type { ProcessedInvoice } from '../../src/types';
 
 describe('invoiceHasAtLeastOneProcessingFailure', () => {
 	it('should return true when applyCreditToAccountBalanceAttempt fails', () => {
@@ -11,8 +11,10 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 			accountId: 'ACC-001',
 			invoiceNumber: 'INV-001',
 			invoiceBalance: 100,
-			applyCreditToAccountBalanceAttempt: {
-				Success: false,
+			applyCreditToAccountBalanceResult: {
+				applyCreditToAccountBalanceAttempt: {
+					Success: false,
+				},
 				error: 'Credit application failed',
 			},
 		};
@@ -28,11 +30,16 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 			accountId: 'ACC-001',
 			invoiceNumber: 'INV-001',
 			invoiceBalance: 100,
-			applyCreditToAccountBalanceAttempt: {
-				Success: true,
+			applyCreditToAccountBalanceResult: {
+				applyCreditToAccountBalanceAttempt: {
+					Success: true,
+				},
 			},
-			checkForActiveSubAttempt: {
-				Success: false,
+			activeSubResult: {
+				checkForActiveSubAttempt: {
+					Success: false,
+				},
+				hasActiveSubscription: undefined,
 				error: 'Active sub check failed',
 			},
 		};
@@ -48,15 +55,21 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 			accountId: 'ACC-001',
 			invoiceNumber: 'INV-001',
 			invoiceBalance: 100,
-			applyCreditToAccountBalanceAttempt: {
-				Success: true,
+			applyCreditToAccountBalanceResult: {
+				applyCreditToAccountBalanceAttempt: {
+					Success: true,
+				},
 			},
-			checkForActiveSubAttempt: {
-				Success: false,
-				hasActiveSub: undefined,
+			activeSubResult: {
+				checkForActiveSubAttempt: {
+					Success: false,
+				},
+				hasActiveSubscription: undefined,
 			},
-			checkForActivePaymentMethodAttempt: {
-				Success: false,
+			activePaymentMethodResult: {
+				checkForActivePaymentMethodAttempt: {
+					Success: false,
+				},
 				error: 'Payment method check failed',
 			},
 		};
@@ -72,20 +85,28 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 			accountId: 'ACC-001',
 			invoiceNumber: 'INV-001',
 			invoiceBalance: 100,
-			applyCreditToAccountBalanceAttempt: {
-				Success: true,
+			applyCreditToAccountBalanceResult: {
+				applyCreditToAccountBalanceAttempt: {
+					Success: true,
+				},
 			},
-			checkForActiveSubAttempt: {
-				Success: true,
-				hasActiveSub: true,
+			activeSubResult: {
+				checkForActiveSubAttempt: {
+					Success: true,
+				},
+				hasActiveSubscription: true,
 			},
-			checkForActivePaymentMethodAttempt: {
-				Success: true,
+			activePaymentMethodResult: {
+				checkForActivePaymentMethodAttempt: {
+					Success: true,
+				},
 				hasActivePaymentMethod: true,
 				activePaymentMethods: [],
 			},
-			refundAttempt: {
-				Success: true,
+			refundResult: {
+				refundAttempt: {
+					Success: true,
+				},
 			},
 		};
 
@@ -100,15 +121,21 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 			accountId: 'ACC-001',
 			invoiceNumber: 'INV-001',
 			invoiceBalance: 100,
-			applyCreditToAccountBalanceAttempt: {
-				Success: true,
+			applyCreditToAccountBalanceResult: {
+				applyCreditToAccountBalanceAttempt: {
+					Success: true,
+				},
 			},
-			checkForActiveSubAttempt: {
-				Success: true,
-				hasActiveSub: false,
+			activeSubResult: {
+				checkForActiveSubAttempt: {
+					Success: true,
+				},
+				hasActiveSubscription: false,
 			},
-			checkForActivePaymentMethodAttempt: {
-				Success: true,
+			activePaymentMethodResult: {
+				checkForActivePaymentMethodAttempt: {
+					Success: true,
+				},
 				hasActivePaymentMethod: false,
 				activePaymentMethods: [],
 			},
@@ -125,20 +152,28 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 			accountId: 'ACC-001',
 			invoiceNumber: 'INV-001',
 			invoiceBalance: 100,
-			applyCreditToAccountBalanceAttempt: {
-				Success: true,
+			applyCreditToAccountBalanceResult: {
+				applyCreditToAccountBalanceAttempt: {
+					Success: true,
+				},
 			},
-			checkForActiveSubAttempt: {
-				Success: true,
-				hasActiveSub: false,
+			activeSubResult: {
+				checkForActiveSubAttempt: {
+					Success: true,
+				},
+				hasActiveSubscription: false,
 			},
-			checkForActivePaymentMethodAttempt: {
-				Success: true,
+			activePaymentMethodResult: {
+				checkForActivePaymentMethodAttempt: {
+					Success: true,
+				},
 				hasActivePaymentMethod: true,
 				activePaymentMethods: [],
 			},
-			refundAttempt: {
-				Success: true,
+			refundResult: {
+				refundAttempt: {
+					Success: true,
+				},
 			},
 		};
 
@@ -153,12 +188,16 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 			accountId: 'ACC-001',
 			invoiceNumber: 'INV-001',
 			invoiceBalance: 100,
-			applyCreditToAccountBalanceAttempt: {
-				Success: true,
+			applyCreditToAccountBalanceResult: {
+				applyCreditToAccountBalanceAttempt: {
+					Success: true,
+				},
 			},
-			checkForActiveSubAttempt: {
-				Success: true,
-				hasActiveSub: true,
+			activeSubResult: {
+				checkForActiveSubAttempt: {
+					Success: true,
+				},
+				hasActiveSubscription: true,
 			},
 		};
 
@@ -167,26 +206,34 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 		expect(result).toBe(false);
 	});
 
-	it('should return true when refundAttempt fails', () => {
+	it('should return true when refundResult fails', () => {
 		const invoice: ProcessedInvoice = {
 			invoiceId: 'INV-001',
 			accountId: 'ACC-001',
 			invoiceNumber: 'INV-001',
 			invoiceBalance: 100,
-			applyCreditToAccountBalanceAttempt: {
-				Success: true,
+			applyCreditToAccountBalanceResult: {
+				applyCreditToAccountBalanceAttempt: {
+					Success: true,
+				},
 			},
-			checkForActiveSubAttempt: {
-				Success: true,
-				hasActiveSub: false,
+			activeSubResult: {
+				checkForActiveSubAttempt: {
+					Success: true,
+				},
+				hasActiveSubscription: false,
 			},
-			checkForActivePaymentMethodAttempt: {
-				Success: true,
+			activePaymentMethodResult: {
+				checkForActivePaymentMethodAttempt: {
+					Success: true,
+				},
 				hasActivePaymentMethod: true,
 				activePaymentMethods: [],
 			},
-			refundAttempt: {
-				Success: false,
+			refundResult: {
+				refundAttempt: {
+					Success: false,
+				},
 				error: 'Refund failed',
 			},
 		};
@@ -205,15 +252,21 @@ describe('failureExistsOnInvoiceProcessingAttempt', () => {
 				accountId: 'ACC-001',
 				invoiceNumber: 'INV-001',
 				invoiceBalance: 100,
-				applyCreditToAccountBalanceAttempt: {
-					Success: true,
+				applyCreditToAccountBalanceResult: {
+					applyCreditToAccountBalanceAttempt: {
+						Success: true,
+					},
 				},
-				checkForActiveSubAttempt: {
-					Success: true,
-					hasActiveSub: true,
+				activeSubResult: {
+					checkForActiveSubAttempt: {
+						Success: true,
+					},
+					hasActiveSubscription: true,
 				},
-				checkForActivePaymentMethodAttempt: {
-					Success: true,
+				activePaymentMethodResult: {
+					checkForActivePaymentMethodAttempt: {
+						Success: true,
+					},
 					hasActivePaymentMethod: true,
 					activePaymentMethods: [],
 				},

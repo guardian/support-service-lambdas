@@ -11,6 +11,7 @@ import zio.json.*
 import zio.{Exit, Runtime, Unsafe}
 
 import java.io.{OutputStream, PrintStream}
+import java.time.LocalDate
 import scala.jdk.CollectionConverters.*
 
 class RefundHandler extends RequestHandler[SQSEvent, Unit] {
@@ -52,7 +53,7 @@ class RefundHandler extends RequestHandler[SQSEvent, Unit] {
     Unsafe.unsafe { implicit u =>
       runtime.unsafe.run(
         RefundSupporterPlus
-          .applyRefund(refundInput)
+          .applyRefund(refundInput, LocalDate.now())
           .provide(
             AwsS3Live.layer,
             AwsCredentialsLive.layer,

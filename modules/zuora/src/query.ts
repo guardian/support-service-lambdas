@@ -6,30 +6,11 @@ export const doQuery = async <T>(
 	query: string,
 	queryResponseSchema: z.Schema<T>,
 ): Promise<T> => {
-	try {
-		console.log('Querying zuora...');
-		console.log('Query:', query);
+	console.log('Querying Zuora:', query);
 
-		const result = await zuoraClient.post(
-			'/v1/action/query',
-			JSON.stringify({
-				queryString: query,
-			}),
-			queryResponseSchema,
-		);
-		const parsedResult = queryResponseSchema.parse(result) as { done: boolean };
+	const body = JSON.stringify({
+		queryString: query,
+	});
 
-		if (!parsedResult.done) {
-			throw new Error(
-				'Query did not complete successfully. Result: ' +
-					JSON.stringify(result),
-			);
-		}
-		return result as T;
-	} catch (error) {
-		const errorMessage =
-			error instanceof Error ? error.message : JSON.stringify(error, null, 2);
-
-		throw new Error(errorMessage);
-	}
+	return await zuoraClient.post('/v1/action/query', body, queryResponseSchema);
 };

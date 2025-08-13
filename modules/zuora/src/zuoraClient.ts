@@ -1,18 +1,11 @@
-import type { Stage } from '@modules/stage';
 import type { z } from 'zod';
-import { Logger } from '@modules/zuora/logger';
-import { BearerTokenProvider } from './bearerTokenProvider';
-import { zuoraServerUrl } from './common';
-import { getOAuthClientCredentials } from './oAuthCredentials';
-
-export class ZuoraError extends Error {
-	constructor(
-		message: string,
-		public code: number,
-	) {
-		super(message);
-	}
-}
+import type { Stage } from '@modules/stage';
+import { Logger } from '@modules/logger';
+import { BearerTokenProvider } from './auth/bearerTokenProvider';
+import { getOAuthClientCredentials } from './auth/oAuthCredentials';
+import { generateZuoraError } from './errors/zuoraErrorHandler';
+import { zuoraErrorSchema, zuoraSuccessSchema } from './types/httpResponse';
+import { zuoraServerUrl } from './utils';
 
 export class ZuoraClient {
 	static async create(stage: Stage, logger: Logger = new Logger()) {
@@ -83,18 +76,25 @@ export class ZuoraClient {
 		const json = await response.json();
 		this.logger.log('Response from Zuora was: ', JSON.stringify(json, null, 2));
 
-		// Inspecting response.ok works for /v1/object/* but not for /v1/accounts/*.
-		// TODO find a way to handle this more for both scenarios.
-		if (response.ok) {
+		// Check both HTTP status and logical success
+		// Some Zuora endpoints return HTTP 200 with success: false for logical errors
+		const isHttpSuccess = response.ok;
+
+		if (isHttpSuccess && isLogicalSuccess(json)) {
 			return schema.parse(json);
 		} else {
-			this.logger.error(response.text);
-
+			// When Zuora returns a 429 status, the response headers typically contain important rate limiting information
 			if (response.status === 429) {
 				this.logger.log(response.headers);
 			}
 
-			throw new ZuoraError(response.statusText, response.status);
+			throw generateZuoraError(json, response);
 		}
 	}
 }
+
+const isLogicalSuccess = (json: unknown): boolean => {
+	const matchesSuccessfulResponse = zuoraSuccessSchema.safeParse(json).success;
+	const matchesKnownErrorResponse = zuoraErrorSchema.safeParse(json).success;
+	return matchesSuccessfulResponse || !matchesKnownErrorResponse;
+};

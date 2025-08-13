@@ -15,6 +15,6 @@
 	},
 	"dependencies": {
 		"@aws-sdk/client-sfn": "^3.848.0",
-		"@aws-sdk/client-sns": "3.693.0"
+		"@aws-sdk/client-sns": "^3.848.0"
 	}
 }

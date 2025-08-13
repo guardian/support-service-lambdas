@@ -322,7 +322,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 		)
 			.when(
 				Condition.booleanEquals(
-					'$.checkForActivePaymentMethodAttempt.hasActivePaymentMethod',
+					'$.activePaymentMethodResult.hasActivePaymentMethod',
 					true,
 				),
 				doCreditBalanceRefundLambdaTask,
@@ -335,7 +335,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 		)
 			.when(
 				Condition.booleanEquals(
-					'$.checkForActivePaymentMethodAttempt.Success',
+					'$.activePaymentMethodResult.checkForActivePaymentMethodAttempt.Success',
 					true,
 				),
 
@@ -349,7 +349,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 			.when(
 				Condition.and(
 					Condition.booleanEquals(
-						'$.checkForActiveSubAttempt.hasActiveSub',
+						'$.activeSubResult.hasActiveSubscription',
 						false,
 					),
 				),
@@ -364,7 +364,10 @@ export class NegativeInvoicesProcessor extends GuStack {
 			'Successful active sub callout?',
 		)
 			.when(
-				Condition.booleanEquals('$.checkForActiveSubAttempt.Success', true),
+				Condition.booleanEquals(
+					'$.activeSubResult.checkForActiveSubAttempt.Success',
+					true,
+				),
 
 				hasActiveSubChoice,
 			)
@@ -376,7 +379,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 		)
 			.when(
 				Condition.booleanEquals(
-					'$.applyCreditToAccountBalanceAttempt.Success',
+					'$.applyCreditToAccountBalanceResult.applyCreditToAccountBalanceAttempt.Success',
 					true,
 				),
 				checkForActiveSubLambdaTask.next(activeSubCalloutWasSuccessful),

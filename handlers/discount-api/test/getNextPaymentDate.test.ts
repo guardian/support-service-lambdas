@@ -1,5 +1,5 @@
 import { getNextNonFreePaymentDate } from '@modules/zuora/billingPreview';
-import { zuoraDateFormat } from '@modules/zuora/common';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 import dayjs from 'dayjs';
 
 test('getNextNonFreePaymentDate fails if all payments are free', () => {

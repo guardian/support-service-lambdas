@@ -1,7 +1,7 @@
 import {
-	zuoraSubscriptionResponseSchema,
 	zuoraSubscriptionsFromAccountSchema,
-} from '@modules/zuora/zuoraSchemas';
+	zuoraSubscriptionResponseSchema,
+} from '@modules/zuora/types';
 import subscriptionJson from './fixtures/subscription.json';
 import subscriptionsFromAccountJson from './fixtures/subscriptions-from-account-number-response.json';
 
@@ -16,5 +16,6 @@ test('ZuoraSubscriptionsFromAccountResponse schema is correct', () => {
 	const result = zuoraSubscriptionsFromAccountSchema.parse(
 		subscriptionsFromAccountJson,
 	);
-	expect(result.subscriptions.length).toBe(1);
+	expect(result.subscriptions).toBeDefined();
+	expect(result.subscriptions?.length).toBe(1);
 });

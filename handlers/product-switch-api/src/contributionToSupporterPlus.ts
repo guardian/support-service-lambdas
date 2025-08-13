@@ -1,5 +1,4 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
-import { zuoraDateFormat } from '@modules/zuora/common';
 import type {
 	ChangePlanOrderAction,
 	CreateOrderRequest,
@@ -7,12 +6,13 @@ import type {
 	PreviewOrderRequest,
 } from '@modules/zuora/orders';
 import { singleTriggerDate } from '@modules/zuora/orders';
-import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type {
 	RatePlan,
 	RatePlanCharge,
 	ZuoraSubscription,
-} from '@modules/zuora/zuoraSchemas';
+} from '@modules/zuora/types';
+import { zuoraDateFormat } from '@modules/zuora/utils';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import { removePendingUpdateAmendments } from './amendments';
