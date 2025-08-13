@@ -7,7 +7,7 @@
 import { IsoCurrency } from '@modules/internationalisation/currency';
 import dayjs from 'dayjs';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { createSubscription } from '@modules/zuora/createSubscription';
+import { createSubscription } from '@modules/zuora/createSubscription/createSubscription';
 import {
 	DirectDebit,
 	PaymentGateway,
