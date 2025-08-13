@@ -4,7 +4,6 @@
 // product and rate plan passed in the support-workers state
 
 import { z } from 'zod';
-import { ProductKey } from '@modules/product-catalog/productCatalog';
 
 const deliveryContactSchema = z.object({
 	firstName: z.string(),
@@ -210,38 +209,3 @@ export const productPurchaseSchema = z.discriminatedUnion('product', [
 ]);
 
 export type ProductPurchase = z.infer<typeof productPurchaseSchema>;
-
-// Extended type that adds fields based on product value
-export type ExtendedProductPurchase<
-	T extends ProductPurchase = ProductPurchase,
-> = T extends {
-	product:
-		| 'HomeDelivery'
-		| 'SubscriptionCard'
-		| 'TierThree'
-		| 'GuardianWeeklyDomestic'
-		| 'GuardianWeeklyRestOfWorld';
-}
-	? T & { firstDeliveryDate: string }
-	: T extends { product: 'NationalDelivery' }
-		? T & { firstDeliveryDate: string; deliveryAgent: string }
-		: T;
-
-// Helper type to get extended type for specific product
-export type ExtendedProductPurchaseFor<P extends ProductPurchase['product']> =
-	ExtendedProductPurchase<Extract<ProductPurchase, { product: P }>>;
-
-// For HomeDelivery specifically
-export const homeDeliveryPurchase: ExtendedProductPurchase = {
-	product: 'HomeDelivery',
-	ratePlan: 'EverydayPlus',
-	firstDeliveryDate: '2023-01-01', // Required
-};
-
-// For digital products (no extra fields)
-export const digitalPurchase: ExtendedProductPurchaseFor<'DigitalSubscription'> =
-	{
-		product: 'DigitalSubscription',
-		ratePlan: 'Monthly',
-		// No extra fields required
-	};

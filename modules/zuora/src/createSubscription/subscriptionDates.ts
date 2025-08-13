@@ -1,10 +1,8 @@
+import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import {
-	isDeliveryProduct,
-	ProductSpecificFields,
-} from '@modules/zuora/createSubscription/productSpecificFields';
-import { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
+import type { ProductSpecificFields } from '@modules/zuora/createSubscription/productSpecificFields';
+import { isDeliveryProduct } from '@modules/zuora/createSubscription/productSpecificFields';
 
 const DigitalSubscription = {
 	freeTrialPeriodInDays: 14,
