@@ -9,15 +9,25 @@ import {
 	buildNewAccountObject,
 	Contact,
 } from '@modules/zuora/orders/newAccount';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import { buildCreateSubscriptionOrderAction } from '@modules/zuora/orders/orderActions';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import {
 	PaymentGateway,
 	PaymentMethod,
 } from '@modules/zuora/orders/paymentMethods';
-import { ProductPurchaseFor } from '@modules/product-catalog/productPurchaseSchema';
-import { ProductKey } from '@modules/product-catalog/productCatalog';
+import {
+	ProductPurchase,
+	ProductPurchaseFor,
+} from '@modules/product-catalog/productPurchaseSchema';
+import {
+	ProductCatalog,
+	ProductKey,
+} from '@modules/product-catalog/productCatalog';
+import {
+	isDeliveryProduct,
+	ProductSpecificFields,
+} from '@modules/zuora/createSubscription/productSpecificFields';
 
 const createSubscriptionResponseSchema = z.object({
 	orderNumber: z.string(),
@@ -32,48 +42,20 @@ export type CreateSubscriptionResponse = z.infer<
 	typeof createSubscriptionResponseSchema
 >;
 
-type BaseProductSpecificFields<T extends ProductKey> = {
-	productInformation: ProductPurchaseFor<T>;
-};
-
-type DeliveryProductSpecificFields<
-	T extends
-		| 'HomeDelivery'
-		| 'SubscriptionCard'
-		| 'TierThree'
-		| 'GuardianWeeklyDomestic'
-		| 'GuardianWeeklyRestOfWorld'
-		| 'NationalDelivery',
-> = BaseProductSpecificFields<T> & {
-	firstDeliveryDate: string;
-	soldToContact: Contact;
-} & (T extends 'NationalDelivery' ? { deliveryAgent: string } : {});
-
-export const homeDeliveryFields: DeliveryProductSpecificFields<'HomeDelivery'> =
-	{
-		productInformation: {
-			product: 'HomeDelivery',
-			ratePlan: 'EverydayPlus',
-		},
-		firstDeliveryDate: '2023-01-01',
-		soldToContact: {
-			firstName: 'John',
-			lastName: 'Doe',
-			workEmail: '',
-			country: 'GB',
-		},
-	};
-
-type CreateSubscriptionInputFields<T extends PaymentMethod> = {
+type CreateSubscriptionInputFields<
+	P extends ProductKey,
+	PM extends PaymentMethod,
+> = {
 	accountName: string;
 	createdRequestId: string;
 	salesforceAccountId: string;
 	salesforceContactId: string;
 	identityId: string;
 	currency: IsoCurrency;
-	paymentGateway: PaymentGateway<T>;
-	paymentMethod: T;
+	paymentGateway: PaymentGateway<PM>;
+	paymentMethod: PM;
 	billToContact: Contact;
+	productSpecificFields: ProductSpecificFields;
 	// soldToContact?: Contact;
 	// productRatePlanId: string;
 	// contractEffectiveDate: Dayjs;
@@ -84,7 +66,22 @@ type CreateSubscriptionInputFields<T extends PaymentMethod> = {
 	collectPayment?: boolean;
 };
 
-const buildCreateSubscriptionRequest = <T extends PaymentMethod>({
+export function getAmount(
+	productInformation: ProductPurchase,
+): number | undefined {
+	switch (productInformation.product) {
+		case 'Contribution':
+			return productInformation.amount;
+		case 'SupporterPlus':
+			return productInformation.amount;
+	}
+	return;
+}
+
+function buildCreateSubscriptionRequest<
+	P extends ProductKey,
+	PM extends PaymentMethod,
+>({
 	accountName,
 	createdRequestId,
 	salesforceAccountId,
@@ -94,14 +91,10 @@ const buildCreateSubscriptionRequest = <T extends PaymentMethod>({
 	paymentGateway,
 	paymentMethod,
 	billToContact,
-	soldToContact,
-	productRatePlanId,
-	contractEffectiveDate,
-	customerAcceptanceDate,
-	chargeOverride,
+	productSpecificFields,
 	runBilling,
 	collectPayment,
-}: CreateSubscriptionInputFields<T>): AnyOrderRequest => {
+}: CreateSubscriptionInputFields<P, PM>): AnyOrderRequest {
 	const newAccount = buildNewAccountObject({
 		accountName: accountName,
 		createdRequestId: createdRequestId,
@@ -112,13 +105,22 @@ const buildCreateSubscriptionRequest = <T extends PaymentMethod>({
 		paymentGateway: paymentGateway,
 		paymentMethod: paymentMethod,
 		billToContact: billToContact,
-		soldToContact: soldToContact,
+		soldToContact: isDeliveryProduct(productSpecificFields)
+			? productSpecificFields.soldToContact
+			: undefined,
 	});
+	const { contractEffectiveDate, customerAcceptanceDate } =
+		getSubscriptionDates(dayjs(), productSpecificState);
 	const createSubscriptionOrderAction = buildCreateSubscriptionOrderAction({
-		productRatePlanId: productRatePlanId,
+		productRatePlanId:
+			productSpecificFields.productInformation.productRatePlanId,
 		contractEffectiveDate: contractEffectiveDate,
 		customerAcceptanceDate: customerAcceptanceDate,
 		chargeOverride: chargeOverride,
+		deliveryAgent:
+			productSpecificFields.product === 'NationalDelivery'
+				? productSpecificFields.deliveryAgent
+				: undefined,
 	});
 	return {
 		newAccount: newAccount,
@@ -134,14 +136,18 @@ const buildCreateSubscriptionRequest = <T extends PaymentMethod>({
 			collectPayment: collectPayment ?? false,
 		},
 	};
-};
-export const createSubscription = async <T extends PaymentMethod>(
+}
+export const createSubscription = async <
+	P extends ProductKey,
+	PM extends PaymentMethod,
+>(
 	zuoraClient: ZuoraClient,
-	inputFields: CreateSubscriptionInputFields<T>,
+	productCatalog: ProductCatalog,
+	inputFields: CreateSubscriptionInputFields<P, PM>,
 ): Promise<CreateSubscriptionResponse> => {
 	return executeOrderRequest(
 		zuoraClient,
-		buildCreateSubscriptionRequest(inputFields),
+		buildCreateSubscriptionRequest(productCatalog, inputFields),
 		createSubscriptionResponseSchema,
 	);
 };

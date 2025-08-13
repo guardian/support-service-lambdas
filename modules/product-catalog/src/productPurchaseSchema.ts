@@ -210,8 +210,38 @@ export const productPurchaseSchema = z.discriminatedUnion('product', [
 ]);
 
 export type ProductPurchase = z.infer<typeof productPurchaseSchema>;
-// Generic type for a specific product
-export type ProductPurchaseFor<P extends ProductKey> = Extract<
-	ProductPurchase,
-	{ product: P }
->;
+
+// Extended type that adds fields based on product value
+export type ExtendedProductPurchase<
+	T extends ProductPurchase = ProductPurchase,
+> = T extends {
+	product:
+		| 'HomeDelivery'
+		| 'SubscriptionCard'
+		| 'TierThree'
+		| 'GuardianWeeklyDomestic'
+		| 'GuardianWeeklyRestOfWorld';
+}
+	? T & { firstDeliveryDate: string }
+	: T extends { product: 'NationalDelivery' }
+		? T & { firstDeliveryDate: string; deliveryAgent: string }
+		: T;
+
+// Helper type to get extended type for specific product
+export type ExtendedProductPurchaseFor<P extends ProductPurchase['product']> =
+	ExtendedProductPurchase<Extract<ProductPurchase, { product: P }>>;
+
+// For HomeDelivery specifically
+export const homeDeliveryPurchase: ExtendedProductPurchase = {
+	product: 'HomeDelivery',
+	ratePlan: 'EverydayPlus',
+	firstDeliveryDate: '2023-01-01', // Required
+};
+
+// For digital products (no extra fields)
+export const digitalPurchase: ExtendedProductPurchaseFor<'DigitalSubscription'> =
+	{
+		product: 'DigitalSubscription',
+		ratePlan: 'Monthly',
+		// No extra fields required
+	};
