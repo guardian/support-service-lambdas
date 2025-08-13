@@ -16,10 +16,7 @@ import {
 	PaymentGateway,
 	PaymentMethod,
 } from '@modules/zuora/orders/paymentMethods';
-import {
-	ProductPurchase,
-	ProductPurchaseFor,
-} from '@modules/product-catalog/productPurchaseSchema';
+import { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 import {
 	ProductCatalog,
 	ProductKey,
@@ -28,6 +25,9 @@ import {
 	isDeliveryProduct,
 	ProductSpecificFields,
 } from '@modules/zuora/createSubscription/productSpecificFields';
+
+import { getSubscriptionDates } from '@modules/zuora/createSubscription/subscriptionDates';
+import { getChargeOverride } from '@modules/zuora/createSubscription/chargeOverride';
 
 const createSubscriptionResponseSchema = z.object({
 	orderNumber: z.string(),
@@ -81,20 +81,23 @@ export function getAmount(
 function buildCreateSubscriptionRequest<
 	P extends ProductKey,
 	PM extends PaymentMethod,
->({
-	accountName,
-	createdRequestId,
-	salesforceAccountId,
-	salesforceContactId,
-	identityId,
-	currency,
-	paymentGateway,
-	paymentMethod,
-	billToContact,
-	productSpecificFields,
-	runBilling,
-	collectPayment,
-}: CreateSubscriptionInputFields<P, PM>): AnyOrderRequest {
+>(
+	productCatalog: ProductCatalog,
+	{
+		accountName,
+		createdRequestId,
+		salesforceAccountId,
+		salesforceContactId,
+		identityId,
+		currency,
+		paymentGateway,
+		paymentMethod,
+		billToContact,
+		productSpecificFields,
+		runBilling,
+		collectPayment,
+	}: CreateSubscriptionInputFields<P, PM>,
+): AnyOrderRequest {
 	const newAccount = buildNewAccountObject({
 		accountName: accountName,
 		createdRequestId: createdRequestId,
@@ -110,7 +113,13 @@ function buildCreateSubscriptionRequest<
 			: undefined,
 	});
 	const { contractEffectiveDate, customerAcceptanceDate } =
-		getSubscriptionDates(dayjs(), productSpecificState);
+		getSubscriptionDates(dayjs(), productSpecificFields);
+
+	const chargeOverride = getChargeOverride(
+		productCatalog,
+		productSpecificFields,
+	);
+
 	const createSubscriptionOrderAction = buildCreateSubscriptionOrderAction({
 		productRatePlanId:
 			productSpecificFields.productInformation.productRatePlanId,

@@ -1,6 +1,10 @@
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import { ProductSpecificFields } from '@modules/zuora/createSubscription/productSpecificFields';
+import {
+	isDeliveryProduct,
+	ProductSpecificFields,
+} from '@modules/zuora/createSubscription/productSpecificFields';
+import { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 
 const DigitalSubscription = {
 	freeTrialPeriodInDays: 14,
@@ -11,9 +15,9 @@ const GuardianAdLite = {
 	freeTrialPeriodInDays: 15,
 };
 
-export const getSubscriptionDates = <T extends ProductSpecificFields>(
+export const getSubscriptionDates = <T extends ProductPurchase>(
 	now: Dayjs,
-	productSpecificState: T,
+	productSpecificFields: ProductSpecificFields<T>,
 ): {
 	contractEffectiveDate: Dayjs;
 	customerAcceptanceDate: Dayjs;
@@ -22,31 +26,28 @@ export const getSubscriptionDates = <T extends ProductSpecificFields>(
 		contractEffectiveDate: now,
 		customerAcceptanceDate: getCustomerAcceptanceDate(
 			now,
-			productSpecificState,
+			productSpecificFields,
 		),
 	};
 };
 
-const getCustomerAcceptanceDate = <T extends ProductSpecificFields>(
+const getCustomerAcceptanceDate = <T extends ProductPurchase>(
 	now: Dayjs,
-	productSpecificState: T,
+	productSpecificFields: ProductSpecificFields<T>,
 ): Dayjs => {
-	switch (productSpecificState.product) {
-		case 'GuardianWeeklyDomestic':
-		case 'GuardianWeeklyRestOfWorld':
-		case 'TierThree':
-		case 'Paper':
-			return dayjs(productSpecificState.firstDeliveryDate);
-		case 'DigitalSubscription':
-			return now.add(
-				DigitalSubscription.freeTrialPeriodInDays +
-					DigitalSubscription.paymentGracePeriodInDays,
-				'day',
-			);
-		case 'GuardianAdLite':
-			return now.add(GuardianAdLite.freeTrialPeriodInDays, 'day');
-
-		default:
-			return now;
+	if (isDeliveryProduct(productSpecificFields)) {
+		return dayjs(productSpecificFields.firstDeliveryDate);
 	}
+
+	if (productSpecificFields.product === 'DigitalSubscription') {
+		return now.add(
+			DigitalSubscription.freeTrialPeriodInDays +
+				DigitalSubscription.paymentGracePeriodInDays,
+			'day',
+		);
+	}
+	if (productSpecificFields.product === 'GuardianAdLite') {
+		return now.add(GuardianAdLite.freeTrialPeriodInDays, 'day');
+	}
+	return now;
 };
