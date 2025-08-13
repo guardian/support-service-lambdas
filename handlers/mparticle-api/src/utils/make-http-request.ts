@@ -1,3 +1,4 @@
+import { groupMap } from '@modules/arrayFunctions';
 import type { z } from 'zod';
 
 export class HttpError extends Error {
@@ -30,6 +31,10 @@ export type HttpResponse<T> =
 			error: HttpError | Error;
 	  };
 
+export type Schema<RESP> =
+	| z.ZodType<RESP, z.ZodTypeDef, unknown>
+	| ((body: string, contentType?: string) => RESP);
+
 export class RestRequestMaker {
 	constructor(
 		public baseURL: string,
@@ -39,11 +44,11 @@ export class RestRequestMaker {
 	async makeRESTRequest<REQ, RESP>(
 		path: string,
 		method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
-		schema: z.ZodType<RESP, z.ZodTypeDef, unknown>,
+		schema: Schema<RESP>,
 		body?: REQ,
 	) {
 		console.log(`REQUEST: ${method} ${path}`, body);
-		return this.requestWithoutLogging(path, method, schema, body).then(
+		return this.restRequestWithoutLogging(path, method, schema, body).then(
 			(resp) => {
 				if (resp.success) {
 					console.log(`RESPONSE: ${method} ${path}`, resp.data);
@@ -55,10 +60,10 @@ export class RestRequestMaker {
 		);
 	}
 
-	private async requestWithoutLogging<REQ, RESP>(
+	private async restRequestWithoutLogging<REQ, RESP>(
 		path: string,
 		method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
-		schema: z.ZodType<RESP, z.ZodTypeDef, unknown>,
+		schema: Schema<RESP>,
 		body?: REQ,
 	): Promise<HttpResponse<RESP>> {
 		const requestHeaders = body
@@ -71,22 +76,30 @@ export class RestRequestMaker {
 			requestHeaders,
 		);
 
-		let responseBody: string | object | undefined = undefined;
-		let json = undefined;
+		const headers: Record<string, string[]> = groupMap(
+			[...response.headers.entries()],
+			([k]) => k.toLowerCase(),
+			([, v]) => v,
+		);
+		const contentType = headers['content-type']?.[0];
+
+		const responseText = await response.text();
 		try {
-			responseBody = await response.text();
-			if (responseBody !== '') {
-				json = JSON.parse(responseBody) as object;
+			if (typeof schema === 'object' && 'parse' in schema) {
+				if (contentType !== 'application/json') {
+					throw new Error("response content-type wasn't JSON: " + contentType);
+				}
+				const data = schema.parse(JSON.parse(responseText));
+				return { success: true, data };
+			} else {
+				// schema is a function
+				return { success: true, data: schema(responseText, contentType) };
 			}
-			const data = schema.parse(json ?? '');
-			return { success: true, data };
 		} catch (cause) {
 			return {
 				success: false,
 				error: new Error(
-					'could not parse response as JSON: ' + json
-						? JSON.stringify(json)
-						: responseBody,
+					'could not parse response: ' + responseText + JSON.stringify(headers),
 					{ cause },
 				),
 			};

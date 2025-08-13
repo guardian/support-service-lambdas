@@ -5,6 +5,12 @@ import type { DataSubjectRequestState } from '../interfaces/data-subject-request
 import type { DataSubjectRequestSubmission } from '../interfaces/data-subject-request-submission';
 import type { AppConfig } from '../src/utils/config';
 import { invokeHttpHandler } from './invoke-http-handler';
+import {
+	getRequestResponse,
+	getRequestsResponse,
+	mockFetchJsonResponse,
+	mockFetchResponse,
+} from './mockFetch';
 
 jest.mock('../src/utils/config', () => ({
 	getAppConfig: jest.fn().mockResolvedValue({
@@ -32,14 +38,7 @@ describe('mparticle-api HTTP tests', () => {
 	});
 
 	it('Register an event', async () => {
-		const mockRegisterEventResponse = {
-			ok: true,
-			status: 202,
-			text: () => '',
-		};
-		(global.fetch as jest.Mock).mockResolvedValueOnce(
-			mockRegisterEventResponse,
-		);
+		mockFetchResponse('', 202);
 
 		const result = await invokeHttpHandler({
 			httpMethod: 'POST',
@@ -87,25 +86,8 @@ describe('mparticle-api HTTP tests', () => {
 	it('Create Data Subject Request', async () => {
 		const requestId = faker.string.uuid();
 		const submittedTime = new Date();
-		const mockSetUserAttributesResponse = {
-			ok: true,
-			status: 202,
-			text: () => '',
-		};
-		const mockCreateDataSubjectRequestResponse = {
-			ok: true,
-			statusCode: 202,
-			text: () =>
-				JSON.stringify({
-					expected_completion_time: faker.date.soon(),
-					received_time: submittedTime,
-					subject_request_id: requestId,
-					controller_id: faker.string.numeric(),
-				}),
-		};
-		(global.fetch as jest.Mock)
-			.mockResolvedValueOnce(mockSetUserAttributesResponse)
-			.mockResolvedValueOnce(mockCreateDataSubjectRequestResponse);
+		mockFetchResponse('', 202);
+		mockFetchJsonResponse(getRequestResponse(submittedTime, requestId), 202);
 
 		const result = await invokeHttpHandler({
 			httpMethod: 'POST',
@@ -131,25 +113,7 @@ describe('mparticle-api HTTP tests', () => {
 
 	it('Get Data Subject Request by Id', async () => {
 		const requestId = faker.string.uuid();
-		const mockGetSubjectRequestByIdResponse = {
-			ok: true,
-			status: 200,
-			text: () =>
-				JSON.stringify({
-					expected_completion_time: faker.date.soon(),
-					subject_request_id: requestId,
-					controller_id: faker.string.numeric(),
-					request_status: 'in_progress',
-					received_time: faker.date.recent(),
-					group_id: null,
-					api_version: '3.0',
-					results_url: null,
-					extensions: null,
-				}),
-		};
-		(global.fetch as jest.Mock).mockResolvedValueOnce(
-			mockGetSubjectRequestByIdResponse,
-		);
+		mockFetchJsonResponse(getRequestsResponse(requestId));
 
 		const result = await invokeHttpHandler({
 			httpMethod: 'GET',
@@ -167,24 +131,16 @@ describe('mparticle-api HTTP tests', () => {
 
 	it('Handle Data Subject Request state callback', async () => {
 		const requestId = '475974fa-6b42-4370-bb56-b5d845686bb5'; // Do not fake it to match the header signature
-		const mockDiscoveryResponse = {
-			ok: true,
-			status: 200,
-			text: () =>
-				JSON.stringify({
-					processor_certificate:
-						'https://static.mparticle.com/dsr/opendsr_cert.pem',
-				}),
-		};
-		const mockGetCertificateResponse = {
-			ok: true,
-			status: 200,
-			text: () =>
-				fs.readFileSync(path.join(__dirname, 'processor-certificate.pem')),
-		};
-		(global.fetch as jest.Mock)
-			.mockResolvedValueOnce(mockDiscoveryResponse)
-			.mockResolvedValueOnce(mockGetCertificateResponse);
+		mockFetchJsonResponse({
+			processor_certificate:
+				'https://static.mparticle.com/dsr/opendsr_cert.pem',
+		});
+		mockFetchResponse(
+			fs.readFileSync(
+				path.join(__dirname, 'processor-certificate.pem'),
+				'utf8',
+			),
+		);
 
 		const result = await invokeHttpHandler({
 			httpMethod: 'POST',

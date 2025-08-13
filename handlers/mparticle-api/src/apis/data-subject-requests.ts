@@ -21,6 +21,15 @@ function parseDataSubjectRequestStatus(
 	}
 }
 
+const getRequestResponseSchema = z.object({
+	expected_completion_time: z.string().transform((val) => new Date(val)),
+	received_time: z.string().transform((val) => new Date(val)),
+	subject_request_id: z.string(),
+	controller_id: z.string(),
+});
+
+export type GetRequestResponse = z.infer<typeof getRequestResponseSchema>;
+
 /**
  * Submit a Data Subject Request (DSR)
  * A request in the OpenDSR format communicates a Data Subject’s wish to access or erase their data.
@@ -62,17 +71,10 @@ export const submitDataSubjectRequest = async (
 		},
 	};
 
-	const schema = z.object({
-		expected_completion_time: z.string().transform((val) => new Date(val)),
-		received_time: z.string().transform((val) => new Date(val)),
-		subject_request_id: z.string(),
-		controller_id: z.string(),
-	});
-
 	const response = await mParticleDataSubjectClient.post(
 		`/requests`,
 		requestBody,
-		schema,
+		getRequestResponseSchema,
 	);
 
 	if (!response.success) {

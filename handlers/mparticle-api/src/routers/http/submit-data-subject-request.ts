@@ -35,6 +35,7 @@ export function submitDataSubjectRequestHandler(
 		 * https://docs.mparticle.com/guides/data-subject-requests/#erasure-request-waiting-period
 		 */
 		try {
+			// FIXME only set for erasure (not SAR?)
 			await setUserAttributesForRightToErasureRequest(
 				mParticleEventsAPIClient,
 				parsed.body.environment,

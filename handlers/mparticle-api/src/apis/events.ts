@@ -1,4 +1,3 @@
-import { z } from 'zod';
 import type { EventBatch } from '../../interfaces/event-batch';
 import type { EventsAPI, MParticleClient } from './mparticleClient';
 
@@ -32,7 +31,7 @@ export const uploadAnEventBatch = async (
 			context: batch.context,
 			ip: batch.ip,
 		},
-		z.literal(''),
+		() => undefined,
 	);
 
 	if (!response.success) {

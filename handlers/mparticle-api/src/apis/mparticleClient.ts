@@ -1,9 +1,6 @@
-import type { z } from 'zod';
 import type { AppConfig } from '../utils/config';
-import {
-	type HttpResponse,
-	RestRequestMaker,
-} from '../utils/make-http-request';
+import type { HttpResponse, Schema } from '../utils/make-http-request';
+import { RestRequestMaker } from '../utils/make-http-request';
 
 export interface DataSubjectAPI {
 	readonly clientType: 'dataSubject';
@@ -17,15 +14,12 @@ export interface MParticleClient<
 	T extends DataSubjectAPI | EventsAPI = DataSubjectAPI | EventsAPI,
 > {
 	readonly clientType: T['clientType'];
-	get<RESP>(
-		path: string,
-		schema: z.ZodType<RESP, z.ZodTypeDef, unknown>,
-	): Promise<HttpResponse<RESP>>;
+	get<RESP>(path: string, schema: Schema<RESP>): Promise<HttpResponse<RESP>>;
 
 	post<REQ, RESP>(
 		path: string,
 		body: REQ,
-		schema: z.ZodType<RESP, z.ZodTypeDef, unknown>,
+		schema: Schema<RESP>,
 	): Promise<HttpResponse<RESP>>;
 
 	getStream(path: string): Promise<ReadableStream>;
@@ -88,7 +82,7 @@ export class MParticleClientImpl<
 
 	async get<RESP>(
 		path: string,
-		schema: z.ZodType<RESP, z.ZodTypeDef, unknown>,
+		schema: Schema<RESP>,
 	): Promise<HttpResponse<RESP>> {
 		return await this.rest.makeRESTRequest(path, 'GET', schema);
 	}
@@ -96,7 +90,7 @@ export class MParticleClientImpl<
 	async post<REQ, RESP>(
 		path: string,
 		body: REQ,
-		schema: z.ZodType<RESP, z.ZodTypeDef, unknown>,
+		schema: Schema<RESP>,
 	): Promise<HttpResponse<RESP>> {
 		return await this.rest.makeRESTRequest(path, 'POST', schema, body);
 	}

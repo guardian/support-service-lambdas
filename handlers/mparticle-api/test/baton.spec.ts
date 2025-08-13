@@ -12,6 +12,12 @@ import type {
 } from '../src/routers/baton/types-and-schemas';
 import type { AppConfig } from '../src/utils/config';
 import { invokeBatonHandler } from './invoke-baton-handler';
+import {
+	getRequestResponse,
+	getRequestsResponse,
+	mockFetchJsonResponse,
+	mockFetchResponse,
+} from './mockFetch';
 
 jest.mock('../../../modules/aws/src/s3');
 
@@ -43,25 +49,8 @@ describe('mparticle-api Baton tests', () => {
 	it('Initiate Right to Erasure Request', async () => {
 		const requestId = faker.string.uuid();
 		const submittedTime = new Date();
-		const mockSetUserAttributesResponse = {
-			ok: true,
-			status: 202,
-			text: () => '',
-		};
-		const mockCreateDataSubjectRequestResponse = {
-			ok: true,
-			statusCode: 202,
-			text: () =>
-				JSON.stringify({
-					expected_completion_time: faker.date.soon(),
-					received_time: submittedTime,
-					subject_request_id: requestId,
-					controller_id: faker.string.numeric(),
-				}),
-		};
-		(global.fetch as jest.Mock)
-			.mockResolvedValueOnce(mockSetUserAttributesResponse)
-			.mockResolvedValueOnce(mockCreateDataSubjectRequestResponse);
+		mockFetchResponse('', 202);
+		mockFetchJsonResponse(getRequestResponse(submittedTime, requestId), 202);
 
 		const userId = faker.string.alphanumeric();
 		const result = await invokeBatonHandler({
@@ -84,25 +73,7 @@ describe('mparticle-api Baton tests', () => {
 
 	it('Get Right to Erasure Request Status', async () => {
 		const requestId: InitiationReference = faker.string.uuid() as GUID;
-		const mockGetSubjectRequestByIdResponse = {
-			ok: true,
-			status: 200,
-			text: () =>
-				JSON.stringify({
-					expected_completion_time: faker.date.soon(),
-					subject_request_id: requestId,
-					controller_id: faker.string.numeric(),
-					request_status: 'in_progress',
-					received_time: faker.date.recent(),
-					group_id: null,
-					api_version: '3.0',
-					results_url: null,
-					extensions: null,
-				}),
-		};
-		(global.fetch as jest.Mock).mockResolvedValueOnce(
-			mockGetSubjectRequestByIdResponse,
-		);
+		mockFetchJsonResponse(getRequestsResponse(requestId));
 
 		const result = await invokeBatonHandler({
 			requestType: 'RER',
@@ -121,20 +92,8 @@ describe('mparticle-api Baton tests', () => {
 	it('Initiate Subject Access Request', async () => {
 		const requestId = faker.string.uuid();
 		const submittedTime = new Date();
-		const mockCreateDataSubjectRequestResponse = {
-			ok: true,
-			statusCode: 201,
-			text: () =>
-				JSON.stringify({
-					expected_completion_time: faker.date.soon(),
-					received_time: submittedTime,
-					subject_request_id: requestId,
-					controller_id: faker.string.numeric(),
-				}),
-		};
-		(global.fetch as jest.Mock).mockResolvedValueOnce(
-			mockCreateDataSubjectRequestResponse,
-		);
+
+		mockFetchJsonResponse(getRequestResponse(submittedTime, requestId), 201);
 
 		const userId = faker.string.alphanumeric();
 		const result = await invokeBatonHandler({
