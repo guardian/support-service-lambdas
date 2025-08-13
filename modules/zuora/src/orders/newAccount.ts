@@ -1,5 +1,5 @@
 import type { IsoCurrency } from '@modules/internationalisation/currency';
-import {
+import type {
 	PaymentGateway,
 	PaymentMethod,
 } from '@modules/zuora/orders/paymentMethods';
