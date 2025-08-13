@@ -17,12 +17,15 @@ private class RunBillingLive(zuoraGet: ZuoraGet) extends RunBilling {
   import RunBilling.*
 
   // https://developer.zuora.com/v1-api-reference/older-api/operation/Action_POSTgenerate/
-  override def run(accountId: ZuoraAccountId, today: LocalDate): Task[Option[InvoiceId]] =
+  override def run(accountId: ZuoraAccountId, today: LocalDate, targetDate: LocalDate): Task[Option[InvoiceId]] = {
+    // make the invoice date today, in case there's been a delay and the accounting period has closed
+    val accountToGenerate = AccountToGenerate(accountId, today, targetDate)
+    val runBillingRequest = RunBillingRequest(List(accountToGenerate), "Invoice")
     for {
       errorOrRunBillingResponse <- zuoraGet
         .post[RunBillingRequest, RunBillingResponse](
           uri"action/generate",
-          RunBillingRequest(List(AccountToGenerate(accountId, today, today)), "Invoice"),
+          runBillingRequest,
           ZuoraRestBody.ZuoraSuccessCheck.None,
         )
         .map(_.head) // we have hard coded one item in the request so there will be one in the response
@@ -33,6 +36,7 @@ private class RunBillingLive(zuoraGet: ZuoraGet) extends RunBilling {
         case Right(runBillingResponse: RunBillingSuccessResponse) => ZIO.some(InvoiceId(runBillingResponse.Id))
       }
     } yield maybeInvoiceId
+  }
 
   private case class AccountToGenerate(AccountId: ZuoraAccountId, InvoiceDate: LocalDate, TargetDate: LocalDate)
       derives JsonEncoder
@@ -40,7 +44,7 @@ private class RunBillingLive(zuoraGet: ZuoraGet) extends RunBilling {
 }
 
 trait RunBilling {
-  def run(accountId: ZuoraAccountId, today: LocalDate): Task[Option[InvoiceId]]
+  def run(accountId: ZuoraAccountId, today: LocalDate, targetDate: LocalDate): Task[Option[InvoiceId]]
 }
 
 object RunBilling {
