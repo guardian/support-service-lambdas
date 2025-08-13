@@ -46,9 +46,17 @@ export const handleSarStatus = async (
 
 		// strip off the base, then it will be added back on.  This is so there's no chance
 		// of accidentally sending our credentials to an untrusted URL.
-		const path = dataSubjectRequestState.resultsUrl.replace(
-			new RegExp(`^${mparticleDataSubjectBaseURL}`),
-			'',
+		if (
+			!dataSubjectRequestState.resultsUrl.startsWith(
+				mparticleDataSubjectBaseURL,
+			)
+		) {
+			throw new Error(
+				`Results URL does not start with trusted base URL: ${mparticleDataSubjectBaseURL}`,
+			);
+		}
+		const path = dataSubjectRequestState.resultsUrl.slice(
+			mparticleDataSubjectBaseURL.length,
 		);
 		const stream = await mParticleDataSubjectClient.getStream(path);
 		//Readable.fromWeb(response.body)
