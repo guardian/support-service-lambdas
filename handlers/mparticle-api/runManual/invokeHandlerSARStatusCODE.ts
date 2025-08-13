@@ -5,7 +5,7 @@ import {
 } from '../src/routers/baton/types-and-schemas';
 
 const initiationReference: InitiationReference =
-	'bdc701f6-0df0-441b-9ea3-0eccbe124e1f' as InitiationReference;
+	'6fd4c21e-a661-464b-8388-b09bf81604fc' as InitiationReference;
 
 const handlerTestEvent: BatonSarEventStatusRequest = {
 	initiationReference,

@@ -631,7 +631,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
                     {
                       "Ref": "SarResultsBucketParameter",
                     },
-                    "/mparticle-results/CODE/*",
+                    "/mparticle-results/*",
                   ],
                 ],
               },
@@ -1795,7 +1795,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
                     {
                       "Ref": "SarResultsBucketParameter",
                     },
-                    "/mparticle-results/PROD/*",
+                    "/mparticle-results/*",
                   ],
                 ],
               },
