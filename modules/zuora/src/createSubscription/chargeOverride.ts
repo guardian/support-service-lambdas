@@ -1,5 +1,5 @@
-import { ProductCatalog } from '@modules/product-catalog/productCatalog';
-import { ProductSpecificFields } from '@modules/zuora/createSubscription/productSpecificFields';
+import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
+import type { ProductSpecificFields } from '@modules/zuora/createSubscription/productSpecificFields';
 
 export const getChargeOverride = (
 	productCatalog: ProductCatalog,

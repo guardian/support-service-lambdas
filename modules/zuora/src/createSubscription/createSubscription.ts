@@ -1,33 +1,24 @@
-import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import {
-	AnyOrderRequest,
-	executeOrderRequest,
-} from '@modules/zuora/orders/orderRequests';
-import { z } from 'zod';
-import { IsoCurrency } from '@modules/internationalisation/currency';
-import {
-	buildNewAccountObject,
-	Contact,
-} from '@modules/zuora/orders/newAccount';
+import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
+import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
+import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 import dayjs from 'dayjs';
+import { z } from 'zod';
+import { getChargeOverride } from '@modules/zuora/createSubscription/chargeOverride';
+import { isDeliveryProduct } from '@modules/zuora/createSubscription/productSpecificFields';
+import type { ProductSpecificFields } from '@modules/zuora/createSubscription/productSpecificFields';
+import { getSubscriptionDates } from '@modules/zuora/createSubscription/subscriptionDates';
+import { buildNewAccountObject } from '@modules/zuora/orders/newAccount';
+import type { Contact } from '@modules/zuora/orders/newAccount';
 import { buildCreateSubscriptionOrderAction } from '@modules/zuora/orders/orderActions';
-import { zuoraDateFormat } from '@modules/zuora/utils';
-import {
+import { executeOrderRequest } from '@modules/zuora/orders/orderRequests';
+import type { AnyOrderRequest } from '@modules/zuora/orders/orderRequests';
+import type {
 	PaymentGateway,
 	PaymentMethod,
 } from '@modules/zuora/orders/paymentMethods';
-import { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
-import {
-	ProductCatalog,
-	ProductKey,
-} from '@modules/product-catalog/productCatalog';
-import {
-	isDeliveryProduct,
-	ProductSpecificFields,
-} from '@modules/zuora/createSubscription/productSpecificFields';
-
-import { getSubscriptionDates } from '@modules/zuora/createSubscription/subscriptionDates';
-import { getChargeOverride } from '@modules/zuora/createSubscription/chargeOverride';
+import { zuoraDateFormat } from '@modules/zuora/utils';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 const createSubscriptionResponseSchema = z.object({
 	orderNumber: z.string(),
@@ -42,46 +33,37 @@ export type CreateSubscriptionResponse = z.infer<
 	typeof createSubscriptionResponseSchema
 >;
 
-type CreateSubscriptionInputFields<
-	P extends ProductKey,
-	PM extends PaymentMethod,
-> = {
+type CreateSubscriptionInputFields<T extends PaymentMethod> = {
 	accountName: string;
 	createdRequestId: string;
 	salesforceAccountId: string;
 	salesforceContactId: string;
 	identityId: string;
 	currency: IsoCurrency;
-	paymentGateway: PaymentGateway<PM>;
-	paymentMethod: PM;
+	paymentGateway: PaymentGateway<T>;
+	paymentMethod: T;
 	billToContact: Contact;
 	productSpecificFields: ProductSpecificFields;
-	// soldToContact?: Contact;
-	// productRatePlanId: string;
-	// contractEffectiveDate: Dayjs;
-	// customerAcceptanceDate?: Dayjs;
-	// chargeOverride?: { productRatePlanChargeId: string; overrideAmount: number };
-	// deliveryAgent?: string; // Optional delivery agent for National Delivery products
 	runBilling?: boolean;
 	collectPayment?: boolean;
 };
 
-export function getAmount(
-	productInformation: ProductPurchase,
-): number | undefined {
-	switch (productInformation.product) {
-		case 'Contribution':
-			return productInformation.amount;
-		case 'SupporterPlus':
-			return productInformation.amount;
-	}
-	return;
+function getProductRatePlanId<T extends ProductPurchase>(
+	productCatalog: ProductCatalog,
+	productSpecificFields: ProductSpecificFields<T>,
+): string {
+	const productCatalogHelper = new ProductCatalogHelper(productCatalog);
+	// TODO: Fix up  the types here
+	const productRatePlan = productCatalogHelper.getProductRatePlan(
+		productSpecificFields.product,
+		// @ts-expect-error this is safe, I just can't figure out how to convince TypeScript
+		productSpecificFields.ratePlan,
+	);
+	// @ts-expect-error this is safe, I just can't figure out how to convince TypeScript
+	return productRatePlan.id as string;
 }
 
-function buildCreateSubscriptionRequest<
-	P extends ProductKey,
-	PM extends PaymentMethod,
->(
+function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 	productCatalog: ProductCatalog,
 	{
 		accountName,
@@ -96,7 +78,7 @@ function buildCreateSubscriptionRequest<
 		productSpecificFields,
 		runBilling,
 		collectPayment,
-	}: CreateSubscriptionInputFields<P, PM>,
+	}: CreateSubscriptionInputFields<T>,
 ): AnyOrderRequest {
 	const newAccount = buildNewAccountObject({
 		accountName: accountName,
@@ -121,8 +103,10 @@ function buildCreateSubscriptionRequest<
 	);
 
 	const createSubscriptionOrderAction = buildCreateSubscriptionOrderAction({
-		productRatePlanId:
-			productSpecificFields.productInformation.productRatePlanId,
+		productRatePlanId: getProductRatePlanId(
+			productCatalog,
+			productSpecificFields,
+		),
 		contractEffectiveDate: contractEffectiveDate,
 		customerAcceptanceDate: customerAcceptanceDate,
 		chargeOverride: chargeOverride,
@@ -146,13 +130,10 @@ function buildCreateSubscriptionRequest<
 		},
 	};
 }
-export const createSubscription = async <
-	P extends ProductKey,
-	PM extends PaymentMethod,
->(
+export const createSubscription = async <T extends PaymentMethod>(
 	zuoraClient: ZuoraClient,
 	productCatalog: ProductCatalog,
-	inputFields: CreateSubscriptionInputFields<P, PM>,
+	inputFields: CreateSubscriptionInputFields<T>,
 ): Promise<CreateSubscriptionResponse> => {
 	return executeOrderRequest(
 		zuoraClient,
