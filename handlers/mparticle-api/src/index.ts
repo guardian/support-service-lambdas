@@ -10,7 +10,7 @@ import {
 } from './routers/baton/types-and-schemas';
 import { batonRerRouter } from './routers/baton';
 import { AppConfig, getAppConfig, getEnv } from './utils/config';
-import { MParticleClientImpl } from './apis/mparticleClient';
+import { MParticleClient } from './apis/mparticleClient';
 import { SRS3ClientImpl } from './apis/srs3Client';
 
 export const handlerHttp: Handler<
@@ -69,8 +69,8 @@ async function services() {
 	const config: AppConfig = await getAppConfig();
 	return {
 		mParticleDataSubjectClient:
-			MParticleClientImpl.createMParticleDataSubjectClient(config.workspace),
-		mParticleEventsAPIClient: MParticleClientImpl.createEventsApiClient(
+			MParticleClient.createMParticleDataSubjectClient(config.workspace),
+		mParticleEventsAPIClient: MParticleClient.createEventsApiClient(
 			config.inputPlatform,
 			config.pod,
 		),

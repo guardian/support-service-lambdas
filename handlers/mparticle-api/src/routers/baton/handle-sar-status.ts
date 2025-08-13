@@ -42,25 +42,14 @@ export const handleSarStatus = async (
 	if (!dataSubjectRequestState.resultsUrl) {
 		resultLocations = undefined;
 	} else {
+		// Docs about results_url:
 		// https://docs.mparticle.com/developers/apis/dsr-api/v3/#example-response-body:~:text=is%203.0.-,results_url,-string
 
-		// strip off the base, then it will be added back on.  This is so there's no chance
-		// of accidentally sending our credentials to an untrusted URL.
-		if (
-			!dataSubjectRequestState.resultsUrl.startsWith(
-				mparticleDataSubjectBaseURL,
-			)
-		) {
-			throw new Error(
-				`Results URL does not start with trusted base URL: ${mparticleDataSubjectBaseURL}`,
-			);
-		}
-		const path = dataSubjectRequestState.resultsUrl.slice(
-			mparticleDataSubjectBaseURL.length,
-		);
+		// The trusted base url is automatically added in the mparticleClient.
+		// This means there's no chance of accidentally sending our credentials to an untrusted URL.
+		// Since we have a full url here, we need to strip off the base.
+		const path = stripBaseUrl(dataSubjectRequestState.resultsUrl);
 		const stream = await mParticleDataSubjectClient.getStream(path);
-		//Readable.fromWeb(response.body)
-		if (stream == null) throw new Error('No stream');
 		const s3Url = await srs3Client.write(initiationReference, stream);
 		resultLocations = [s3Url];
 	}
@@ -75,3 +64,13 @@ export const handleSarStatus = async (
 
 	return response;
 };
+
+function stripBaseUrl(resultsUrl: string) {
+	if (!resultsUrl.startsWith(mparticleDataSubjectBaseURL)) {
+		throw new Error(
+			`Results URL does not start with trusted base URL: ${mparticleDataSubjectBaseURL}`,
+		);
+	}
+	const path = resultsUrl.slice(mparticleDataSubjectBaseURL.length);
+	return path;
+}

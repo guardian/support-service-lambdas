@@ -32,7 +32,7 @@ export const uploadAnEventBatch = async (
 			context: batch.context,
 			ip: batch.ip,
 		},
-		z.string(),
+		z.literal(''),
 	);
 
 	if (!response.success) {

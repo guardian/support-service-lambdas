@@ -31,15 +31,8 @@ export interface MParticleClient<
 	getStream(path: string): Promise<ReadableStream>;
 }
 
-export const mparticleDataSubjectBaseURL = 'https://opendsr.mparticle.com/v3';
-
-export class MParticleClientImpl<
-	T extends DataSubjectAPI | EventsAPI = DataSubjectAPI | EventsAPI,
-> implements MParticleClient<T>
-{
-	readonly clientType: T['clientType'];
-
-	static createMParticleDataSubjectClient(
+export const MParticleClient = {
+	createMParticleDataSubjectClient(
 		config: AppConfig['workspace'],
 	): MParticleClient<DataSubjectAPI> {
 		return new MParticleClientImpl<DataSubjectAPI>(
@@ -48,9 +41,9 @@ export class MParticleClientImpl<
 			config.secret,
 			'dataSubject',
 		);
-	}
+	},
 
-	static createEventsApiClient(
+	createEventsApiClient(
 		config: AppConfig['inputPlatform'],
 		pod: string,
 	): MParticleClient<EventsAPI> {
@@ -61,7 +54,16 @@ export class MParticleClientImpl<
 			config.secret,
 			'eventsApi',
 		);
-	}
+	},
+};
+
+export const mparticleDataSubjectBaseURL = 'https://opendsr.mparticle.com/v3';
+
+export class MParticleClientImpl<
+	T extends DataSubjectAPI | EventsAPI = DataSubjectAPI | EventsAPI,
+> implements MParticleClient<T>
+{
+	readonly clientType: T['clientType'];
 
 	private readonly rest: RestRequestMaker;
 	constructor(

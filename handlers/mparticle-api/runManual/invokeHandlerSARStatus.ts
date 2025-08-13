@@ -5,15 +5,19 @@ import {
 import { batonRerRouter } from '../src/routers/baton';
 import { ConfigSchema } from '../src/utils/config';
 import { loadConfig } from '@modules/aws/appConfig';
-import { MParticleClientImpl } from '../src/apis/mparticleClient';
+import { MParticleClient } from '../src/apis/mparticleClient';
 import { SRS3ClientImpl } from '../src/apis/srs3Client';
 
 /*
-This downloads an existing completed SAR into a bucket, so you can test
-- get membership credentials
-- update initiationReference
-- run this
-- check sarResultsBucket (support-service-lambdas-test)
+ **************************************************************************
+ * This script downloads an existing completed SAR into a bucket, so you can test
+ **************************************************************************
+ *
+ *	How to use:
+ *	- get membership credentials
+ *	- update initiationReference (get the value from mparticle console)
+ *	- run this
+ *	- check sarResultsBucket (support-service-lambdas-test)
  */
 const initiationReference: InitiationReference =
 	'6fd4c21e-a661-464b-8388-b09bf81604fc' as InitiationReference;
@@ -29,8 +33,8 @@ const sarResultsBucket = 'support-service-lambdas-test';
 
 loadConfig('CODE', 'support', 'mparticle-api', ConfigSchema).then((config) => {
 	const mParticleDataSubjectClient =
-		MParticleClientImpl.createMParticleDataSubjectClient(config.workspace);
-	const mParticleEventsAPIClient = MParticleClientImpl.createEventsApiClient(
+		MParticleClient.createMParticleDataSubjectClient(config.workspace);
+	const mParticleEventsAPIClient = MParticleClient.createEventsApiClient(
 		config.inputPlatform,
 		config.pod,
 	);
