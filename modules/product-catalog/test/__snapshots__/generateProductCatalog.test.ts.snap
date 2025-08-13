@@ -18,6 +18,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
   "Contribution": {
     "active": true,
     "billingSystem": "zuora",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -58,6 +59,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
   "DigitalSubscription": {
     "active": true,
     "billingSystem": "zuora",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -147,6 +149,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
   "GuardianAdLite": {
     "active": true,
     "billingSystem": "zuora",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Monthly": {
         "billingPeriod": "Month",
@@ -165,6 +168,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
   "GuardianPatron": {
     "active": true,
     "billingSystem": "stripe",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "GuardianPatron": {
         "billingPeriod": "Month",
@@ -181,6 +185,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
   "GuardianWeeklyDomestic": {
     "active": true,
     "billingSystem": "zuora",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -272,6 +277,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
   "GuardianWeeklyRestOfWorld": {
     "active": true,
     "billingSystem": "zuora",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -343,6 +349,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
   "GuardianWeeklyZoneA": {
     "active": false,
     "billingSystem": "zuora",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -377,6 +384,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
   "GuardianWeeklyZoneB": {
     "active": false,
     "billingSystem": "zuora",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -417,6 +425,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
   "GuardianWeeklyZoneC": {
     "active": false,
     "billingSystem": "zuora",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -457,6 +466,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
   "HomeDelivery": {
     "active": true,
     "billingSystem": "zuora",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Everyday": {
         "billingPeriod": "Month",
@@ -670,6 +680,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
   "NationalDelivery": {
     "active": true,
     "billingSystem": "zuora",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Everyday": {
         "billingPeriod": "Month",
@@ -829,6 +840,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
   "NewspaperVoucher": {
     "active": false,
     "billingSystem": "zuora",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Everyday": {
         "billingPeriod": "Month",
@@ -1045,6 +1057,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
   "OneTimeContribution": {
     "active": true,
     "billingSystem": "stripe",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "OneTime": {
         "billingPeriod": "OneTime",
@@ -1061,6 +1074,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
   "PartnerMembership": {
     "active": false,
     "billingSystem": "zuora",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -1115,6 +1129,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
   "PatronMembership": {
     "active": false,
     "billingSystem": "zuora",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -1169,6 +1184,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
   "SubscriptionCard": {
     "active": true,
     "billingSystem": "zuora",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Everyday": {
         "billingPeriod": "Month",
@@ -1385,6 +1401,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
   "SupporterMembership": {
     "active": false,
     "billingSystem": "zuora",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -1479,6 +1496,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
   "SupporterPlus": {
     "active": true,
     "billingSystem": "zuora",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -1599,6 +1617,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
   "TierThree": {
     "active": true,
     "billingSystem": "zuora",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "DomesticAnnual": {
         "billingPeriod": "Annual",
@@ -1779,6 +1798,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
   "Contribution": {
     "active": true,
     "billingSystem": "zuora",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -1819,6 +1839,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
   "DigitalSubscription": {
     "active": true,
     "billingSystem": "zuora",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -1908,6 +1929,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
   "GuardianAdLite": {
     "active": true,
     "billingSystem": "zuora",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Monthly": {
         "billingPeriod": "Month",
@@ -1926,6 +1948,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
   "GuardianPatron": {
     "active": true,
     "billingSystem": "stripe",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "GuardianPatron": {
         "billingPeriod": "Month",
@@ -1942,6 +1965,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
   "GuardianWeeklyDomestic": {
     "active": true,
     "billingSystem": "zuora",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -2033,6 +2057,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
   "GuardianWeeklyRestOfWorld": {
     "active": true,
     "billingSystem": "zuora",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -2104,6 +2129,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
   "GuardianWeeklyZoneA": {
     "active": false,
     "billingSystem": "zuora",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -2136,6 +2162,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
   "GuardianWeeklyZoneB": {
     "active": false,
     "billingSystem": "zuora",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -2176,6 +2203,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
   "GuardianWeeklyZoneC": {
     "active": false,
     "billingSystem": "zuora",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -2216,6 +2244,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
   "HomeDelivery": {
     "active": true,
     "billingSystem": "zuora",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Everyday": {
         "billingPeriod": "Month",
@@ -2429,6 +2458,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
   "NationalDelivery": {
     "active": true,
     "billingSystem": "zuora",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Everyday": {
         "billingPeriod": "Month",
@@ -2588,6 +2618,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
   "NewspaperVoucher": {
     "active": false,
     "billingSystem": "zuora",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Everyday": {
         "billingPeriod": "Month",
@@ -2801,6 +2832,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
   "OneTimeContribution": {
     "active": true,
     "billingSystem": "stripe",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "OneTime": {
         "billingPeriod": "OneTime",
@@ -2817,6 +2849,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
   "PartnerMembership": {
     "active": false,
     "billingSystem": "zuora",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -2871,6 +2904,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
   "PatronMembership": {
     "active": false,
     "billingSystem": "zuora",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -2925,6 +2959,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
   "SubscriptionCard": {
     "active": true,
     "billingSystem": "zuora",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Everyday": {
         "billingPeriod": "Month",
@@ -3138,6 +3173,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
   "SupporterMembership": {
     "active": false,
     "billingSystem": "zuora",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -3232,6 +3268,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
   "SupporterPlus": {
     "active": true,
     "billingSystem": "zuora",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -3332,6 +3369,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
   "TierThree": {
     "active": true,
     "billingSystem": "zuora",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "DomesticAnnual": {
         "billingPeriod": "Annual",

@@ -2,10 +2,32 @@
 
 import { z } from 'zod';
 
+export const productKeys = [
+	'SupporterPlus',
+	'Contribution',
+	'GuardianWeeklyRestOfWorld',
+	'GuardianAdLite',
+	'TierThree',
+	'DigitalSubscription',
+	'NationalDelivery',
+	'SupporterMembership',
+	'GuardianWeeklyDomestic',
+	'SubscriptionCard',
+	'GuardianWeeklyZoneA',
+	'GuardianWeeklyZoneB',
+	'GuardianWeeklyZoneC',
+	'NewspaperVoucher',
+	'HomeDelivery',
+	'PatronMembership',
+	'PartnerMembership',
+] as const;
+export const productKeySchema = z.enum(productKeys);
+
 export const productCatalogSchema = z.object({
 	Contribution: z.object({
 		active: z.boolean(),
 		billingSystem: z.literal('zuora'),
+		isDeliveryProduct: z.literal(false),
 		ratePlans: z.object({
 			Annual: z.object({
 				billingPeriod: z.literal('Annual'),
@@ -46,6 +68,7 @@ export const productCatalogSchema = z.object({
 	DigitalSubscription: z.object({
 		active: z.boolean(),
 		billingSystem: z.literal('zuora'),
+		isDeliveryProduct: z.literal(false),
 		ratePlans: z.object({
 			Annual: z.object({
 				billingPeriod: z.literal('Annual'),
@@ -135,6 +158,7 @@ export const productCatalogSchema = z.object({
 	GuardianAdLite: z.object({
 		active: z.boolean(),
 		billingSystem: z.literal('zuora'),
+		isDeliveryProduct: z.literal(false),
 		ratePlans: z.object({
 			Monthly: z.object({
 				billingPeriod: z.literal('Month'),
@@ -151,6 +175,7 @@ export const productCatalogSchema = z.object({
 	GuardianPatron: z.object({
 		active: z.boolean(),
 		billingSystem: z.literal('stripe'),
+		isDeliveryProduct: z.literal(false),
 		ratePlans: z.object({
 			GuardianPatron: z.object({
 				billingPeriod: z.literal('Month'),
@@ -167,6 +192,7 @@ export const productCatalogSchema = z.object({
 	GuardianWeeklyDomestic: z.object({
 		active: z.boolean(),
 		billingSystem: z.literal('zuora'),
+		isDeliveryProduct: z.literal(true),
 		ratePlans: z.object({
 			Annual: z.object({
 				billingPeriod: z.literal('Annual'),
@@ -258,6 +284,7 @@ export const productCatalogSchema = z.object({
 	GuardianWeeklyRestOfWorld: z.object({
 		active: z.boolean(),
 		billingSystem: z.literal('zuora'),
+		isDeliveryProduct: z.literal(true),
 		ratePlans: z.object({
 			Annual: z.object({
 				billingPeriod: z.literal('Annual'),
@@ -314,6 +341,7 @@ export const productCatalogSchema = z.object({
 	GuardianWeeklyZoneA: z.object({
 		active: z.boolean(),
 		billingSystem: z.literal('zuora'),
+		isDeliveryProduct: z.literal(true),
 		ratePlans: z.object({
 			Annual: z.object({
 				billingPeriod: z.literal('Annual'),
@@ -340,6 +368,7 @@ export const productCatalogSchema = z.object({
 	GuardianWeeklyZoneB: z.object({
 		active: z.boolean(),
 		billingSystem: z.literal('zuora'),
+		isDeliveryProduct: z.literal(true),
 		ratePlans: z.object({
 			Annual: z.object({
 				billingPeriod: z.literal('Annual'),
@@ -380,6 +409,7 @@ export const productCatalogSchema = z.object({
 	GuardianWeeklyZoneC: z.object({
 		active: z.boolean(),
 		billingSystem: z.literal('zuora'),
+		isDeliveryProduct: z.literal(true),
 		ratePlans: z.object({
 			Annual: z.object({
 				billingPeriod: z.literal('Annual'),
@@ -420,6 +450,7 @@ export const productCatalogSchema = z.object({
 	HomeDelivery: z.object({
 		active: z.boolean(),
 		billingSystem: z.literal('zuora'),
+		isDeliveryProduct: z.literal(true),
 		ratePlans: z.object({
 			Everyday: z.object({
 				billingPeriod: z.literal('Month'),
@@ -613,6 +644,7 @@ export const productCatalogSchema = z.object({
 	NationalDelivery: z.object({
 		active: z.boolean(),
 		billingSystem: z.literal('zuora'),
+		isDeliveryProduct: z.literal(true),
 		ratePlans: z.object({
 			Everyday: z.object({
 				billingPeriod: z.literal('Month'),
@@ -760,6 +792,7 @@ export const productCatalogSchema = z.object({
 	NewspaperVoucher: z.object({
 		active: z.boolean(),
 		billingSystem: z.literal('zuora'),
+		isDeliveryProduct: z.literal(true),
 		ratePlans: z.object({
 			Everyday: z.object({
 				billingPeriod: z.literal('Month'),
@@ -953,6 +986,7 @@ export const productCatalogSchema = z.object({
 	OneTimeContribution: z.object({
 		active: z.boolean(),
 		billingSystem: z.literal('stripe'),
+		isDeliveryProduct: z.literal(false),
 		ratePlans: z.object({
 			OneTime: z.object({
 				billingPeriod: z.literal('OneTime'),
@@ -969,6 +1003,7 @@ export const productCatalogSchema = z.object({
 	PartnerMembership: z.object({
 		active: z.boolean(),
 		billingSystem: z.literal('zuora'),
+		isDeliveryProduct: z.literal(false),
 		ratePlans: z.object({
 			Annual: z.object({
 				billingPeriod: z.literal('Annual'),
@@ -1015,6 +1050,7 @@ export const productCatalogSchema = z.object({
 	PatronMembership: z.object({
 		active: z.boolean(),
 		billingSystem: z.literal('zuora'),
+		isDeliveryProduct: z.literal(false),
 		ratePlans: z.object({
 			Annual: z.object({
 				billingPeriod: z.literal('Annual'),
@@ -1061,6 +1097,7 @@ export const productCatalogSchema = z.object({
 	SubscriptionCard: z.object({
 		active: z.boolean(),
 		billingSystem: z.literal('zuora'),
+		isDeliveryProduct: z.literal(true),
 		ratePlans: z.object({
 			Everyday: z.object({
 				billingPeriod: z.literal('Month'),
@@ -1254,6 +1291,7 @@ export const productCatalogSchema = z.object({
 	SupporterMembership: z.object({
 		active: z.boolean(),
 		billingSystem: z.literal('zuora'),
+		isDeliveryProduct: z.literal(false),
 		ratePlans: z.object({
 			Annual: z.object({
 				billingPeriod: z.literal('Annual'),
@@ -1344,6 +1382,7 @@ export const productCatalogSchema = z.object({
 	SupporterPlus: z.object({
 		active: z.boolean(),
 		billingSystem: z.literal('zuora'),
+		isDeliveryProduct: z.literal(false),
 		ratePlans: z.object({
 			Annual: z.object({
 				billingPeriod: z.literal('Annual'),
@@ -1444,6 +1483,7 @@ export const productCatalogSchema = z.object({
 	TierThree: z.object({
 		active: z.boolean(),
 		billingSystem: z.literal('zuora'),
+		isDeliveryProduct: z.literal(true),
 		ratePlans: z.object({
 			DomesticAnnual: z.object({
 				billingPeriod: z.literal('Annual'),

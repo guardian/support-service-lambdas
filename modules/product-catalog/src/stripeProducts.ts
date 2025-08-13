@@ -10,6 +10,7 @@ export const stripeProducts: Partial<
 	GuardianPatron: {
 		billingSystem: 'stripe',
 		active: true,
+		isDeliveryProduct: false,
 		ratePlans: {
 			GuardianPatron: {
 				id: 'guardian_patron',
@@ -26,6 +27,7 @@ export const stripeProducts: Partial<
 	OneTimeContribution: {
 		billingSystem: 'stripe',
 		active: true,
+		isDeliveryProduct: false,
 		ratePlans: {
 			OneTime: {
 				id: 'single_contribution',
@@ -44,6 +46,7 @@ export const stripeProducts: Partial<
 export const stripeProductsSchema = `GuardianPatron: z.object({
 	billingSystem: z.literal('stripe'),
 	active: z.boolean(),
+	isDeliveryProduct: z.literal(false),
 	ratePlans: z.object({
 		GuardianPatron: z.object({
 			id: z.string(),
@@ -60,6 +63,7 @@ export const stripeProductsSchema = `GuardianPatron: z.object({
 OneTimeContribution: z.object({
 	billingSystem: z.literal('stripe'),
 	active: z.boolean(),
+	isDeliveryProduct: z.literal(false),
 	ratePlans: z.object({
 		OneTime: z.object({
 			id: z.string(),
