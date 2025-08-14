@@ -6,7 +6,7 @@ import type {
 	ZuoraProductRatePlan,
 	ZuoraProductRatePlanCharge,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import { deliveryProducts } from '@modules/product-catalog/productCatalog';
+import { isDeliveryProduct } from '@modules/product-catalog/productCatalog';
 import { stripeProductsSchema } from '@modules/product-catalog/stripeProducts';
 import {
 	getProductRatePlanChargeKey,
@@ -55,12 +55,11 @@ const generateZuoraProductSchema = (product: CatalogProduct) => {
 	const ratePlanSchema = supportedRatePlans.map((productRatePlan) =>
 		generateProductRatePlanSchema(productRatePlan),
 	);
-	const isDeliveryProduct = deliveryProducts.includes(productName);
 
 	return `${productName}: z.object({
 		billingSystem: z.literal('zuora'),
 		active: z.boolean(),
-		isDeliveryProduct: z.literal(${isDeliveryProduct}),
+		isDeliveryProduct: z.literal(${isDeliveryProduct(productName)}),
 		ratePlans: z.object({
 			${ratePlanSchema.join(',\n')},
 		}),

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "sync-user": "ts-node ./src/syncUser.ts",
+    "build": "tsc --noEmit",
     "lint": "eslint src/**/*.ts"
   },
   "devDependencies": {
