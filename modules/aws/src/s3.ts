@@ -65,6 +65,7 @@ export const getFileFromS3 = async ({
 export const streamToS3 = async (
 	s3Bucket: string,
 	s3Key: string,
+	contentType: string | undefined,
 	stream: ReadableStream,
 ) => {
 	console.log(`streaming data to ${s3Bucket} ${s3Key}`);
@@ -75,8 +76,7 @@ export const streamToS3 = async (
 			Bucket: s3Bucket,
 			Key: s3Key,
 			Body: stream,
-			ContentType: 'application/zip',
-			ContentLength: undefined, // TBC is this needed?
+			ContentType: contentType,
 		},
 	});
 

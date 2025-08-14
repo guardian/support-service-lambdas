@@ -32,7 +32,7 @@ export const MParticleClient = {
 		config: AppConfig['workspace'],
 	): MParticleClient<DataSubjectAPI> {
 		return new MParticleClientImpl<DataSubjectAPI>(
-			mparticleDataSubjectBaseURL,
+			'https://opendsr.mparticle.com/v3',
 			config.key,
 			config.secret,
 			'dataSubject',
@@ -51,8 +51,6 @@ export const MParticleClient = {
 		);
 	},
 };
-
-export const mparticleDataSubjectBaseURL = 'https://opendsr.mparticle.com/v3';
 
 export class MParticleClientImpl<
 	T extends DataSubjectAPI | EventsAPI = DataSubjectAPI | EventsAPI,

@@ -3,7 +3,6 @@ import type {
 	DataSubjectAPI,
 	MParticleClient,
 } from '../src/apis/mparticleClient';
-import { mparticleDataSubjectBaseURL } from '../src/apis/mparticleClient';
 import type { SRS3Client } from '../src/apis/srs3Client';
 import { handleSarStatus } from '../src/routers/baton/handle-sar-status';
 import type {
@@ -117,7 +116,8 @@ describe('mparticle-api Baton tests', () => {
 	it('should get the status of a SAR including downloading the result', async () => {
 		const requestId: InitiationReference = faker.string.uuid() as GUID;
 		const zipRelativePath = '/sar-data-1234.zip';
-		const resultsUrl = mparticleDataSubjectBaseURL + zipRelativePath;
+		const baseURL = 'https://opendsr.mparticle.com/v3';
+		const resultsUrl = baseURL + zipRelativePath;
 		const testZipData = '1234TestZipData';
 		const mockGetSubjectRequestByIdResponse = {
 			success: true,
@@ -150,7 +150,7 @@ describe('mparticle-api Baton tests', () => {
 				});
 				return Promise.resolve(stream);
 			}),
-			baseURL: mparticleDataSubjectBaseURL,
+			baseURL,
 		};
 
 		const mockS3Client: SRS3Client = {
