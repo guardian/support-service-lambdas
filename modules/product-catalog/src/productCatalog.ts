@@ -7,11 +7,14 @@ export type ProductCatalog = z.infer<typeof productCatalogSchema>;
 
 // -------- Product --------
 export type ProductKey = keyof ProductCatalog;
-export const deliveryProducts = [
+export const newspaperProducts: ProductKey[] = [
 	'HomeDelivery',
 	'NationalDelivery',
 	'SubscriptionCard',
 	'NewspaperVoucher',
+];
+export const deliveryProducts: ProductKey[] = [
+	...newspaperProducts,
 	'TierThree',
 	'GuardianWeeklyRestOfWorld',
 	'GuardianWeeklyDomestic',
@@ -19,8 +22,15 @@ export const deliveryProducts = [
 	'GuardianWeeklyZoneB',
 	'GuardianWeeklyZoneC',
 ] as const;
-export type DeliveryProductKey = (typeof deliveryProducts)[number];
 
+export type NewspaperProductKey = (typeof newspaperProducts)[number];
+export function isNewspaperProduct(
+	productKey: unknown,
+): productKey is NewspaperProductKey {
+	return newspaperProducts.includes(productKey as NewspaperProductKey);
+}
+
+export type DeliveryProductKey = (typeof deliveryProducts)[number];
 export function isDeliveryProduct(
 	productKey: unknown,
 ): productKey is DeliveryProductKey {

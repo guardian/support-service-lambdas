@@ -54,10 +54,28 @@ test('productPurchaseSchema works', () => {
 	).toBe(true);
 	expect(
 		productPurchaseSchema.safeParse({
+			product: 'HomeDelivery',
+			ratePlan: 'EverydayPlus',
+			firstDeliveryDate: new Date('2023-10-01'),
+			deliveryContact: contact,
+		}).success,
+	).toBe(false); // All newspaper products requires delivery instructions
+	expect(
+		productPurchaseSchema.safeParse({
+			product: 'HomeDelivery',
+			ratePlan: 'EverydayPlus',
+			firstDeliveryDate: new Date('2023-10-01'),
+			deliveryContact: contact,
+			deliveryInstructions: 'Leave it in the porch',
+		}).success,
+	).toBe(true);
+	expect(
+		productPurchaseSchema.safeParse({
 			product: 'NationalDelivery',
 			ratePlan: 'EverydayPlus',
 			firstDeliveryDate: new Date('2023-10-01'),
 			deliveryContact: contact,
+			deliveryInstructions: 'Leave it in the porch',
 		}).success,
 	).toBe(false); // National Delivery requires a delivery agent
 	expect(
@@ -66,6 +84,7 @@ test('productPurchaseSchema works', () => {
 			ratePlan: 'EverydayPlus',
 			firstDeliveryDate: new Date('2023-10-01'),
 			deliveryContact: contact,
+			deliveryInstructions: 'Leave it in the porch',
 			deliveryAgent: 'test-agent',
 		}).success,
 	).toBe(true);

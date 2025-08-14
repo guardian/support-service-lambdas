@@ -88,6 +88,7 @@ export const productPurchaseSchema = z.discriminatedUnion('product', [
 		]),
 		firstDeliveryDate: z.date(),
 		deliveryContact: deliveryContactSchema,
+		deliveryInstructions: z.string(),
 		deliveryAgent: z.string(),
 	}),
 	z.object({
@@ -129,6 +130,7 @@ export const productPurchaseSchema = z.discriminatedUnion('product', [
 		]),
 		firstDeliveryDate: z.date(),
 		deliveryContact: deliveryContactSchema,
+		deliveryInstructions: z.string(),
 	}),
 	z.object({
 		product: z.literal('GuardianWeeklyZoneA'),
@@ -164,6 +166,7 @@ export const productPurchaseSchema = z.discriminatedUnion('product', [
 		]),
 		firstDeliveryDate: z.date(),
 		deliveryContact: deliveryContactSchema,
+		deliveryInstructions: z.string(),
 	}),
 	z.object({
 		product: z.literal('HomeDelivery'),
@@ -181,6 +184,7 @@ export const productPurchaseSchema = z.discriminatedUnion('product', [
 		]),
 		firstDeliveryDate: z.date(),
 		deliveryContact: deliveryContactSchema,
+		deliveryInstructions: z.string(),
 	}),
 	z.object({
 		product: z.literal('PatronMembership'),

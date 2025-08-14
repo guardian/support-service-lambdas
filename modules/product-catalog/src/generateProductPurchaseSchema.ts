@@ -3,7 +3,10 @@ import type {
 	ZuoraCatalog,
 	ZuoraProductRatePlan,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import { isDeliveryProduct } from '@modules/product-catalog/productCatalog';
+import {
+	isDeliveryProduct,
+	isNewspaperProduct,
+} from '@modules/product-catalog/productCatalog';
 import {
 	getProductRatePlanKey,
 	getZuoraProductKey,
@@ -59,21 +62,23 @@ export const generateProductPurchaseSchema = (
 	`;
 };
 
-const generateProductSpecificFields = (
-	productName: string,
-): string | undefined => {
+const generateProductSpecificFields = (productName: string): string => {
 	if (productName === 'Contribution' || productName === 'SupporterPlus') {
 		return 'amount: z.number(),';
 	}
 	if (isDeliveryProduct(productName)) {
-		const deliveryFields = `
+		let fields = `
 			firstDeliveryDate: z.date(),
 			deliveryContact: deliveryContactSchema,`;
-		if (productName === 'NationalDelivery') {
-			return `${deliveryFields}
+		if (isNewspaperProduct(productName)) {
+			fields += `
+			deliveryInstructions: z.string(),`;
+			if (productName === 'NationalDelivery') {
+				fields += `
 			deliveryAgent: z.string(),`;
+			}
 		}
-		return deliveryFields;
+		return fields;
 	}
 	return '';
 };
