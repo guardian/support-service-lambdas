@@ -2,6 +2,11 @@ import { createRoute, Router } from '@modules/routing/router';
 import type { DataSubjectRequestCallback } from '../../interfaces/data-subject-request-callback';
 import type { DataSubjectRequestForm } from '../../interfaces/data-subject-request-form';
 import type { EventBatch } from '../../interfaces/event-batch';
+import type {
+	DataSubjectAPI,
+	EventsAPI,
+	MParticleClient,
+} from '../apis/mparticleClient';
 import {
 	dataSubjectRequestCallbackHandler,
 	dataSubjectRequestCallbackParser,
@@ -19,29 +24,38 @@ import {
 	uploadEventBatchHandler,
 } from './http/upload-event-batch';
 
-export const httpRouter = new Router([
-	createRoute<unknown, DataSubjectRequestForm>({
-		httpMethod: 'POST',
-		path: '/data-subject-requests',
-		handler: submitDataSubjectRequestHandler(),
-		parser: dataSubjectRequestFormParser,
-	}),
-	createRoute<{ requestId: string }, unknown>({
-		httpMethod: 'GET',
-		path: '/data-subject-requests/{requestId}',
-		handler: getDataSubjectRequestStatusHandler(),
-		parser: requestIdPathParser,
-	}),
-	createRoute<{ requestId: string }, DataSubjectRequestCallback>({
-		httpMethod: 'POST',
-		path: '/data-subject-requests/{requestId}/callback',
-		handler: dataSubjectRequestCallbackHandler(),
-		parser: dataSubjectRequestCallbackParser,
-	}),
-	createRoute<unknown, EventBatch>({
-		httpMethod: 'POST',
-		path: '/events',
-		handler: uploadEventBatchHandler(),
-		parser: eventBatchParser,
-	}),
-]);
+export const httpRouter = (
+	mParticleDataSubjectClient: MParticleClient<DataSubjectAPI>,
+	mParticleEventsAPIClient: MParticleClient<EventsAPI>,
+	isProd: boolean,
+) =>
+	new Router([
+		createRoute<unknown, DataSubjectRequestForm>({
+			httpMethod: 'POST',
+			path: '/data-subject-requests',
+			handler: submitDataSubjectRequestHandler(
+				mParticleDataSubjectClient,
+				mParticleEventsAPIClient,
+				isProd,
+			),
+			parser: dataSubjectRequestFormParser,
+		}),
+		createRoute<{ requestId: string }, unknown>({
+			httpMethod: 'GET',
+			path: '/data-subject-requests/{requestId}',
+			handler: getDataSubjectRequestStatusHandler(mParticleDataSubjectClient),
+			parser: requestIdPathParser,
+		}),
+		createRoute<{ requestId: string }, DataSubjectRequestCallback>({
+			httpMethod: 'POST',
+			path: '/data-subject-requests/{requestId}/callback',
+			handler: dataSubjectRequestCallbackHandler(mParticleDataSubjectClient),
+			parser: dataSubjectRequestCallbackParser,
+		}),
+		createRoute<unknown, EventBatch>({
+			httpMethod: 'POST',
+			path: '/events',
+			handler: uploadEventBatchHandler(mParticleEventsAPIClient),
+			parser: eventBatchParser,
+		}),
+	]);

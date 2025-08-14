@@ -1,3 +1,7 @@
+import { groupMap } from '@modules/arrayFunctions';
+import type { z } from 'zod';
+import { withLogging } from './withLogging';
+
 export class HttpError extends Error {
 	public statusCode: number;
 	public statusText: string;
@@ -25,66 +29,103 @@ export type HttpResponse<T> =
 	  }
 	| {
 			success: false;
-			error: HttpError;
+			error: HttpError | Error;
 	  };
 
-export async function makeHttpRequest<T>(
-	url: string,
-	options: {
-		method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-		baseURL?: string;
-		headers?: Record<string, string>;
-		body?: unknown;
-	},
-): Promise<HttpResponse<T>> {
-	try {
-		const response = await fetch(`${options.baseURL}${url}`, {
-			method: options.method,
-			headers: options.headers,
-			body: options.body ? JSON.stringify(options.body) : undefined,
-		});
+export type Schema<RESP> =
+	| z.ZodType<RESP, z.ZodTypeDef, unknown>
+	| ((body: string, contentType?: string) => RESP);
 
-		if (!response.ok) {
-			let errorBody;
-			try {
-				errorBody = await response.json();
-			} catch {
-				try {
-					errorBody = await response.text();
-				} catch {
-					/* empty */
+export class RestRequestMaker {
+	constructor(
+		public baseURL: string,
+		private headers: Record<string, string>,
+	) {}
+
+	makeRESTRequest = withLogging(
+		this.restRequestWithoutLogging.bind(this),
+		() => 'HTTP ' + this.baseURL,
+		this.restRequestWithoutLogging.toString(),
+		2,
+	);
+
+	private async restRequestWithoutLogging<REQ, RESP>(
+		method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+		path: string,
+		schema: Schema<RESP>,
+		body?: REQ,
+	): Promise<HttpResponse<RESP>> {
+		const requestHeaders = body
+			? { 'Content-Type': 'application/json' }
+			: undefined;
+		const response = await this.rawHttpRequest(
+			path,
+			method,
+			body,
+			requestHeaders,
+		);
+
+		const headers: Record<string, string[]> = groupMap(
+			[...response.headers.entries()],
+			([k]) => k.toLowerCase(),
+			([, v]) => v,
+		);
+		const contentType = headers['content-type']?.[0]?.split('; ')?.[0];
+
+		const responseText = await response.text();
+		try {
+			if (typeof schema === 'object' && 'parse' in schema) {
+				if (contentType !== 'application/json') {
+					throw new Error("response content-type wasn't JSON: " + contentType);
 				}
+				const data = schema.parse(JSON.parse(responseText));
+				return { success: true, data };
+			} else {
+				// schema is a function
+				return { success: true, data: schema(responseText, contentType) };
 			}
-
+		} catch (cause) {
 			return {
 				success: false,
-				error: new HttpError(
-					`HTTP ${response.status}: ${response.statusText}`,
-					response.status,
-					response.statusText,
-					errorBody,
+				error: new Error(
+					'could not parse response: ' + responseText + JSON.stringify(headers),
+					{ cause },
 				),
 			};
 		}
-
-		try {
-			const data = (await response.json()) as T;
-			return { success: true, data };
-		} catch {
-			return {
-				success: true,
-				data: {} as T,
-			};
-		}
-	} catch (err) {
-		return {
-			success: false,
-			error: new HttpError(
-				'Network Error',
-				0,
-				'Network Error',
-				err instanceof Error ? err.message : 'Unknown error occurred',
-			),
-		};
 	}
+
+	async rawHttpRequest(
+		path: string,
+		method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+		body?: unknown,
+		headers?: Record<string, string>,
+	): Promise<Response> {
+		const response = await fetch(`${this.baseURL}${path}`, {
+			method: method,
+			headers: { ...this.headers, ...headers },
+			body: body ? JSON.stringify(body) : undefined,
+		});
+
+		if (!response.ok) {
+			throw new HttpError(
+				`HTTP ${response.status}: ${response.statusText}`,
+				response.status,
+				response.statusText,
+				await extractErrorBody(response),
+			);
+		}
+		return response;
+	}
+}
+
+async function extractErrorBody(response: Response) {
+	let errorBody: string | object | undefined;
+	try {
+		errorBody = await response.text();
+		errorBody = JSON.parse(errorBody) as object; // see if we can squeeze json out of it
+	} catch {
+		/*we tried our best to get something useful*/
+	}
+	return errorBody;
 }

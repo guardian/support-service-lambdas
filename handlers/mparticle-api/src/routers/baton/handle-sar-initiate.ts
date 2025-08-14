@@ -7,15 +7,18 @@ import type {
 	BatonSarEventInitiateResponse,
 	InitiationReference,
 } from './types-and-schemas';
+import { DataSubjectAPI, MParticleClient } from '../../apis/mparticleClient';
 
 export async function handleSarInitiate(
+	mParticleDataSubjectClient: MParticleClient<DataSubjectAPI>,
+	isProd: boolean,
 	request: BatonSarEventInitiateRequest,
 ): Promise<BatonSarEventInitiateResponse> {
 	const submittedTime = new Date().toISOString();
 	const environment = getEnv('STAGE') === 'PROD' ? 'production' : 'development';
 
 	const dataSubjectRequestSubmissionResponse: DataSubjectRequestSubmission =
-		await submitDataSubjectRequest({
+		await submitDataSubjectRequest(mParticleDataSubjectClient, isProd, {
 			regulation: 'gdpr',
 			requestId: randomUUID(),
 			requestType: 'access',

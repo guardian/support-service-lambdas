@@ -2,6 +2,7 @@ import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
 import type { EventBatch } from '../../../interfaces/event-batch';
 import { uploadAnEventBatch } from '../../apis/events';
+import { EventsAPI, MParticleClient } from '../../apis/mparticleClient';
 
 export const eventBatchParser = {
 	body: z.object({
@@ -26,14 +27,18 @@ export const eventBatchParser = {
 	}),
 };
 
-export function uploadEventBatchHandler() {
+export function uploadEventBatchHandler(
+	mParticleEventsAPIClient: MParticleClient<EventsAPI>,
+) {
 	return async (
 		event: APIGatewayProxyEvent,
 		parsed: { path: unknown; body: EventBatch },
 	): Promise<APIGatewayProxyResult> => {
 		return {
 			statusCode: 201,
-			body: JSON.stringify(await uploadAnEventBatch(parsed.body)),
+			body: JSON.stringify(
+				await uploadAnEventBatch(mParticleEventsAPIClient, parsed.body),
+			),
 		};
 	};
 }

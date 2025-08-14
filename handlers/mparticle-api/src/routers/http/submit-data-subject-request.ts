@@ -3,6 +3,11 @@ import { z } from 'zod';
 import type { DataSubjectRequestForm } from '../../../interfaces/data-subject-request-form';
 import { submitDataSubjectRequest } from '../../apis/data-subject-requests';
 import { setUserAttributesForRightToErasureRequest } from '../../apis/events';
+import {
+	DataSubjectAPI,
+	EventsAPI,
+	MParticleClient,
+} from '../../apis/mparticleClient';
 
 export const dataSubjectRequestFormParser = {
 	body: z.object({
@@ -15,7 +20,11 @@ export const dataSubjectRequestFormParser = {
 	}),
 };
 
-export function submitDataSubjectRequestHandler() {
+export function submitDataSubjectRequestHandler(
+	mParticleDataSubjectClient: MParticleClient<DataSubjectAPI>,
+	mParticleEventsAPIClient: MParticleClient<EventsAPI>,
+	isProd: boolean,
+) {
 	return async (
 		event: APIGatewayProxyEvent,
 		parsed: { path: unknown; body: DataSubjectRequestForm },
@@ -26,7 +35,9 @@ export function submitDataSubjectRequestHandler() {
 		 * https://docs.mparticle.com/guides/data-subject-requests/#erasure-request-waiting-period
 		 */
 		try {
+			// FIXME only set for erasure (not SAR?)
 			await setUserAttributesForRightToErasureRequest(
+				mParticleEventsAPIClient,
 				parsed.body.environment,
 				parsed.body.userId,
 				parsed.body.submittedTime,
@@ -40,7 +51,13 @@ export function submitDataSubjectRequestHandler() {
 
 		return {
 			statusCode: 201,
-			body: JSON.stringify(await submitDataSubjectRequest(parsed.body)),
+			body: JSON.stringify(
+				await submitDataSubjectRequest(
+					mParticleDataSubjectClient,
+					isProd,
+					parsed.body,
+				),
+			),
 		};
 	};
 }

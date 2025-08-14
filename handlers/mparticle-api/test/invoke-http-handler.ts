@@ -4,7 +4,7 @@ import type {
 	Callback,
 	Context,
 } from 'aws-lambda';
-import { handlerHttp } from '../index';
+import { handlerHttp } from '../src';
 
 export const invokeHttpHandler = async ({
 	httpMethod,
