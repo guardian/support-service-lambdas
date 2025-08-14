@@ -81,7 +81,7 @@ export class RestRequestMaker {
 			([k]) => k.toLowerCase(),
 			([, v]) => v,
 		);
-		const contentType = headers['content-type']?.[0];
+		const contentType = headers['content-type']?.[0]?.split('; ')?.[0];
 
 		const responseText = await response.text();
 		try {

@@ -93,6 +93,7 @@ export const submitDataSubjectRequest = async (
 					getDataSubjectRequestResponse.expectedCompletionTime,
 				receivedTime: new Date(),
 				requestId: getDataSubjectRequestResponse.requestId,
+				controllerId: getDataSubjectRequestResponse.controllerId,
 			};
 		}
 
@@ -103,6 +104,7 @@ export const submitDataSubjectRequest = async (
 		expectedCompletionTime: new Date(response.data.expected_completion_time),
 		receivedTime: new Date(response.data.received_time),
 		requestId: response.data.subject_request_id,
+		controllerId: response.data.controller_id,
 	};
 };
 

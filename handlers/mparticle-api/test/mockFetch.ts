@@ -30,7 +30,9 @@ export function mockFetchJsonResponse(bodyObject: object, statusCode?: number) {
 	(global.fetch as jest.Mock).mockResolvedValueOnce({
 		ok: true,
 		statusCode: statusCode ?? 200,
-		headers: { entries: () => [['Content-Type', 'application/json']] },
+		headers: {
+			entries: () => [['Content-Type', 'application/json; charset=utf-8']],
+		},
 		text: () => JSON.stringify(bodyObject),
 	});
 }

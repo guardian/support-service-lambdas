@@ -41,9 +41,8 @@ export const MParticleClient = {
 		config: AppConfig['inputPlatform'],
 		pod: string,
 	): MParticleClient<EventsAPI> {
-		const baseURL = `https://s2s.${pod}.mparticle.com/v2`;
 		return new MParticleClientImpl<EventsAPI>(
-			baseURL,
+			`https://s2s.${pod}.mparticle.com/v2`,
 			config.key,
 			config.secret,
 			'eventsApi',
