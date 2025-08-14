@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import { stageFromEnvironment } from '@modules/stage';
 import { getAccount } from '@modules/zuora/account';
 import { applyCreditToAccountBalance } from '@modules/zuora/creditBalanceAdjustment';
@@ -7,22 +6,23 @@ import {
 	getInvoice,
 	getInvoiceItems,
 } from '@modules/zuora/invoice';
-import {
+import type {
 	GetInvoiceItemsResponse,
 	GetInvoiceResponse,
 	InvoiceItemAdjustmentSourceType,
 	ZuoraAccount,
 } from '@modules/zuora/types';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import dayjs from 'dayjs';
 
 export type CancelSource = 'MMA' | 'Autocancel' | 'Salesforce';
 
 export type LambdaEvent = {
-	Items: {
+	Items: Array<{
 		invoice_id: string;
 		cancel_source: CancelSource;
 		invoice_number: string;
-	}[];
+	}>;
 };
 
 type AdjustableItem = {
@@ -86,7 +86,7 @@ export const handler = async (event: LambdaEvent) => {
 						Amount: adjustmentAmount,
 						Type: 'Decrease',
 						SourceTransactionNumber: invoice.invoice_number,
-						Comment: `${cancelSourceToCommentMap[cancelSource as CancelSource]} - Credit balance applied to invoice.`,
+						Comment: `${cancelSourceToCommentMap[cancelSource]} - Credit balance applied to invoice.`,
 					}),
 				);
 
@@ -135,13 +135,15 @@ export const handler = async (event: LambdaEvent) => {
 					adjustmentAmount,
 					item.availableToCreditAmount > 0 ? 'Credit' : 'Charge',
 					item.sourceType,
-					cancelSourceToCommentMap[cancelSource as CancelSource],
+					cancelSourceToCommentMap[cancelSource],
 					'Write-off',
 				);
 
 				currentBalance -= adjustmentAmount * (currentBalance > 0 ? 1 : -1);
 
-				if (currentBalance == 0) break;
+				if (currentBalance == 0) {
+					break;
+				}
 			}
 
 			console.log(`Successfully processed invoice ${invoiceId}`);
@@ -166,7 +168,6 @@ export const handler = async (event: LambdaEvent) => {
 
 			// For other errors, log and continue
 			console.error(`Unexpected error for invoice ${invoiceId}, skipping...`);
-			continue;
 		}
 	}
 };
