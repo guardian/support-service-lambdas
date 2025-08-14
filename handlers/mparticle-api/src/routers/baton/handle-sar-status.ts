@@ -6,7 +6,7 @@ import type {
 	InitiationReference,
 } from './types-and-schemas';
 import { DataSubjectAPI, MParticleClient } from '../../apis/mparticleClient';
-import { SRS3Client } from '../../apis/srs3Client';
+import { BatonS3Writer } from '../../apis/batonS3Writer';
 
 function mapStatus(
 	requestStatus: DataSubjectRequestStatus,
@@ -25,7 +25,7 @@ function mapStatus(
 
 export const handleSarStatus = async (
 	mParticleDataSubjectClient: MParticleClient<DataSubjectAPI>,
-	srs3Client: SRS3Client,
+	batonS3Writer: BatonS3Writer,
 	initiationReference: InitiationReference,
 ) => {
 	const dataSubjectRequestState: DataSubjectRequestState =
@@ -49,7 +49,7 @@ export const handleSarStatus = async (
 			mParticleDataSubjectClient.baseURL,
 		);
 		const stream = await mParticleDataSubjectClient.getStream(path);
-		const s3Url = await srs3Client.write(initiationReference, stream);
+		const s3Url = await batonS3Writer.write(initiationReference, stream);
 		resultLocations = [s3Url];
 	}
 

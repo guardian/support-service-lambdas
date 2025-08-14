@@ -11,7 +11,7 @@ import {
 import { batonRerRouter } from './routers/baton';
 import { AppConfig, getAppConfig, getEnv } from './utils/config';
 import { MParticleClient } from './apis/mparticleClient';
-import { SRS3ClientImpl } from './apis/srs3Client';
+import { BatonS3WriterImpl } from './apis/batonS3Writer';
 import { withLogging } from './utils/withLogging';
 
 export const handlerHttp: Handler<APIGatewayProxyEvent, APIGatewayProxyResult> =
@@ -46,14 +46,14 @@ export const handlerBaton: Handler<BatonEventRequest, BatonEventResponse> =
 			const {
 				mParticleDataSubjectClient,
 				mParticleEventsAPIClient,
-				srs3Client,
+				batonS3Writer,
 				isProd,
 			} = await services();
 			const router = batonRerRouter(
 				mParticleDataSubjectClient,
 				mParticleEventsAPIClient,
 				isProd,
-				srs3Client,
+				batonS3Writer,
 			);
 			console.debug('Processing Baton event');
 			return router.routeRequest(event);
@@ -74,7 +74,7 @@ async function services() {
 			config.inputPlatform,
 			config.pod,
 		),
-		srs3Client: new SRS3ClientImpl(
+		batonS3Writer: new BatonS3WriterImpl(
 			config.sarResultsBucket,
 			sarS3BaseKey,
 			() => new Date(),

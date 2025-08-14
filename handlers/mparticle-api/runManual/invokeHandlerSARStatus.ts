@@ -6,7 +6,7 @@ import { batonRerRouter } from '../src/routers/baton';
 import { ConfigSchema } from '../src/utils/config';
 import { loadConfig } from '@modules/aws/appConfig';
 import { MParticleClient } from '../src/apis/mparticleClient';
-import { SRS3ClientImpl } from '../src/apis/srs3Client';
+import { BatonS3WriterImpl } from '../src/apis/batonS3Writer';
 
 /*
  **************************************************************************
@@ -39,17 +39,19 @@ loadConfig('CODE', 'support', 'mparticle-api', ConfigSchema).then((config) => {
 		config.pod,
 	);
 
-	const srs3Client = new SRS3ClientImpl(
+	const dummyDate = () => new Date(0);
+	const batonS3Writer = new BatonS3WriterImpl(
 		sarResultsBucket,
 		sarS3BaseKey,
-		() => new Date(0),
+		dummyDate,
 	);
 
 	batonRerRouter(
+		//TODO call the child not the router
 		mParticleDataSubjectClient,
 		mParticleEventsAPIClient,
 		false,
-		srs3Client,
+		batonS3Writer,
 	)
 		.routeRequest(handlerTestEvent)
 		.then((out) => {

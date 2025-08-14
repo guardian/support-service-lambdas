@@ -21,14 +21,14 @@ function parseDataSubjectRequestStatus(
 	}
 }
 
-const getRequestResponseSchema = z.object({
+const postRequestsResponseSchema = z.object({
 	expected_completion_time: z.string().transform((val) => new Date(val)),
 	received_time: z.string().transform((val) => new Date(val)),
 	subject_request_id: z.string(),
 	controller_id: z.string(),
 });
 
-export type GetRequestResponse = z.infer<typeof getRequestResponseSchema>;
+export type PostRequestsResponse = z.infer<typeof postRequestsResponseSchema>;
 
 /**
  * Submit a Data Subject Request (DSR)
@@ -74,7 +74,7 @@ export const submitDataSubjectRequest = async (
 	const response = await mParticleDataSubjectClient.post(
 		`/requests`,
 		requestBody,
-		getRequestResponseSchema,
+		postRequestsResponseSchema,
 	);
 
 	if (!response.success) {

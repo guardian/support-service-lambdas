@@ -1,13 +1,13 @@
 import { faker } from '@faker-js/faker';
 import type {
-	GetRequestResponse,
 	GetRequestsResponse,
+	PostRequestsResponse,
 } from '../src/apis/data-subject-requests';
 
 export function getRequestResponse(
 	submittedTime: Date,
 	requestId: string,
-): GetRequestResponse {
+): PostRequestsResponse {
 	return {
 		expected_completion_time: faker.date.soon(),
 		received_time: submittedTime,

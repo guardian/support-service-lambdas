@@ -1,9 +1,9 @@
 import { faker } from '@faker-js/faker';
+import type { BatonS3Writer } from '../src/apis/batonS3Writer';
 import type {
 	DataSubjectAPI,
 	MParticleClient,
 } from '../src/apis/mparticleClient';
-import type { SRS3Client } from '../src/apis/srs3Client';
 import { handleSarStatus } from '../src/routers/baton/handle-sar-status';
 import type {
 	GUID,
@@ -153,7 +153,7 @@ describe('mparticle-api Baton tests', () => {
 			baseURL,
 		};
 
-		const mockS3Client: SRS3Client = {
+		const mockS3Client: BatonS3Writer = {
 			write: jest.fn().mockResolvedValue(`s3://myBucket123/${requestId}`),
 		};
 

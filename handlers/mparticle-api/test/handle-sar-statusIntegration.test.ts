@@ -11,13 +11,13 @@ import {
 } from '@aws-sdk/client-s3';
 import { awsConfig } from '@modules/aws/config';
 import { getFileFromS3 } from '@modules/aws/s3';
+import type { BatonS3Writer } from '../src/apis/batonS3Writer';
+import { BatonS3WriterImpl } from '../src/apis/batonS3Writer';
 import type { GetRequestsResponse } from '../src/apis/data-subject-requests';
 import type {
 	DataSubjectAPI,
 	MParticleClient,
 } from '../src/apis/mparticleClient';
-import type { SRS3Client } from '../src/apis/srs3Client';
-import { SRS3ClientImpl } from '../src/apis/srs3Client';
 import { handleSarStatus } from '../src/routers/baton/handle-sar-status';
 import type { InitiationReference } from '../src/routers/baton/types-and-schemas';
 
@@ -128,7 +128,7 @@ function createRealServicesToTestEndpoints(
 		baseURL,
 	};
 
-	const realS3Client: SRS3Client = new SRS3ClientImpl(
+	const realS3Client: BatonS3Writer = new BatonS3WriterImpl(
 		bucketName,
 		sarS3BaseKey,
 		() => new Date(Date.parse('2025-08-06T18:19:42.123Z')),

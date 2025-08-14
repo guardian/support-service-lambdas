@@ -4,6 +4,14 @@ export type AsyncFunction<TArgs extends unknown[], TReturn> = (
 	...args: TArgs
 ) => Promise<TReturn>;
 
+/**
+ * This function wraps an existing function and logs entry and exit together with the values passed in and returned
+ *
+ * @param fn the function to wrap
+ * @param functionName an optional free text string to identify the function called
+ * @param fnAsString if you have to call .bind(this) on your function, pass in function.toString() here to retain parameter names
+ * @param shortArgsNum when the function returns, one argument will be logged again for identification purposes, this overrides that
+ */
 export function withLogging<TArgs extends unknown[], TReturn>(
 	fn: AsyncFunction<TArgs, TReturn>,
 	functionName?: string | (() => string),

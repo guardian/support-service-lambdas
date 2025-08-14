@@ -1,9 +1,9 @@
+import type { BatonS3Writer } from '../apis/batonS3Writer';
 import type {
 	DataSubjectAPI,
 	EventsAPI,
 	MParticleClient,
 } from '../apis/mparticleClient';
-import type { SRS3Client } from '../apis/srs3Client';
 import { handleRerInitiate } from './baton/handle-rer-initiate';
 import { handleRerStatus } from './baton/handle-rer-status';
 import { handleSarInitiate } from './baton/handle-sar-initiate';
@@ -30,7 +30,7 @@ export const batonRerRouter = (
 	mParticleDataSubjectClient: MParticleClient<DataSubjectAPI>,
 	mParticleEventsAPIClient: MParticleClient<EventsAPI>,
 	isProd: boolean,
-	srs3Client: SRS3Client,
+	batonS3Writer: BatonS3Writer,
 ) => ({
 	routeRequest: async (
 		event: BatonEventRequest,
@@ -48,7 +48,7 @@ export const batonRerRouter = (
 					case 'status':
 						return handleSarStatus(
 							mParticleDataSubjectClient,
-							srs3Client,
+							batonS3Writer,
 							validatedEvent.initiationReference,
 						);
 				}

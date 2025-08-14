@@ -1,11 +1,11 @@
 import { streamToS3 } from '@modules/aws/s3';
 import { withLogging } from '../utils/withLogging';
 
-export interface SRS3Client {
+export interface BatonS3Writer {
 	write: (reference: string, stream: ReadableStream) => Promise<string>;
 }
 
-export class SRS3ClientImpl implements SRS3Client {
+export class BatonS3WriterImpl implements BatonS3Writer {
 	constructor(
 		readonly sarResultsBucket: string,
 		private readonly sarS3BaseKey: string,
