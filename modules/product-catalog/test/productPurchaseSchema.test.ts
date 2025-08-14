@@ -34,7 +34,7 @@ test('productPurchaseSchema works', () => {
 		productPurchaseSchema.safeParse({
 			product: 'GuardianWeeklyRestOfWorld',
 			ratePlan: 'Monthly',
-			soldToContact: contact,
+			deliveryContact: contact,
 		}).success,
 	).toBe(false); // First delivery date is required for delivery products
 	expect(
@@ -43,13 +43,13 @@ test('productPurchaseSchema works', () => {
 			ratePlan: 'Monthly',
 			firstDeliveryDate: new Date('2023-10-01'),
 		}).success,
-	).toBe(false); // soldToContact is required for delivery products
+	).toBe(false); // deliveryContact is required for delivery products
 	expect(
 		productPurchaseSchema.safeParse({
 			product: 'GuardianWeeklyRestOfWorld',
 			ratePlan: 'Annual',
 			firstDeliveryDate: new Date('2023-10-01'),
-			soldToContact: contact,
+			deliveryContact: contact,
 		}).success,
 	).toBe(true);
 	expect(
@@ -57,7 +57,7 @@ test('productPurchaseSchema works', () => {
 			product: 'NationalDelivery',
 			ratePlan: 'EverydayPlus',
 			firstDeliveryDate: new Date('2023-10-01'),
-			soldToContact: contact,
+			deliveryContact: contact,
 		}).success,
 	).toBe(false); // National Delivery requires a delivery agent
 	expect(
@@ -65,7 +65,7 @@ test('productPurchaseSchema works', () => {
 			product: 'NationalDelivery',
 			ratePlan: 'EverydayPlus',
 			firstDeliveryDate: new Date('2023-10-01'),
-			soldToContact: contact,
+			deliveryContact: contact,
 			deliveryAgent: 'test-agent',
 		}).success,
 	).toBe(true);

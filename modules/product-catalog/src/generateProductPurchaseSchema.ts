@@ -3,13 +3,13 @@ import type {
 	ZuoraCatalog,
 	ZuoraProductRatePlan,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
+import { isDeliveryProduct } from '@modules/product-catalog/productCatalog';
 import {
 	getProductRatePlanKey,
 	getZuoraProductKey,
 	isSupportedProduct,
 	isSupportedProductRatePlan,
 } from '@modules/product-catalog/zuoraToProductNameMappings';
-import { isDeliveryProduct } from '@modules/product-catalog/productCatalog';
 
 const header = `
 // ---------- This file is auto-generated. Do not edit manually. -------------
@@ -20,7 +20,7 @@ const header = `
 import { z } from 'zod';
 import { ProductKey } from '@modules/product-catalog/productCatalog';
 
-const contactSchema = z.object({
+const deliveryContactSchema = z.object({
 	firstName: z.string(),
 	lastName: z.string(),
 	workEmail: z.string(),
@@ -68,7 +68,7 @@ const generateProductSpecificFields = (
 	if (isDeliveryProduct(productName)) {
 		const deliveryFields = `
 			firstDeliveryDate: z.date(),
-			soldToContact: contactSchema,`;
+			deliveryContact: deliveryContactSchema,`;
 		if (productName === 'NationalDelivery') {
 			return `${deliveryFields}
 			deliveryAgent: z.string(),`;
