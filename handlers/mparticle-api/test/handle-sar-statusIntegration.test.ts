@@ -1,6 +1,9 @@
 /**
  * check that we can copy from an http url to an s3 bucket on completion of an mparticle SAR
  *
+ * This uses the manage-frontend sitemap as a handy internet accessible file, and it uses the
+ * testBucketName to write it to a bucket accessible from membership account
+ *
  * @group integration
  */
 
@@ -24,9 +27,9 @@ import type { InitiationReference } from '../src/routers/baton/types-and-schemas
 const s3Client = new S3Client(awsConfig);
 
 test('fetch a real URL to a real S3 bucket, and check the content', async () => {
-	const bucketName = 'support-service-lambdas-test'; // this is a real bucket
+	const testBucketName = 'support-service-lambdas-test'; // this is a real bucket
 	const sarS3BaseKey = 'handleSarStatusIntegrationTest/';
-	const dummyRef = 'dummy-ref' as InitiationReference;
+	const testRef = 'test12345Ref' as InitiationReference;
 
 	const baseURL = 'https://manage.theguardian.com';
 	const realPath = '/sitemap.txt';
@@ -35,19 +38,19 @@ test('fetch a real URL to a real S3 bucket, and check the content', async () => 
 	const expectedMinimumSitemapLength = 5000;
 	const expectedMaximumSitemapLength = 10000;
 
-	await deleteFiles(bucketName, sarS3BaseKey);
+	await deleteFiles(testBucketName, sarS3BaseKey);
 
-	const { realDummyURLDataSubjectClient, realS3Client } =
+	const { manageURLDataSubjectClient, realS3Client } =
 		createRealServicesToTestEndpoints(
 			realPath,
 			baseURL,
-			bucketName,
+			testBucketName,
 			sarS3BaseKey,
 		);
 
 	// now run the actual business logic
 	const actualS3Url = (
-		await handleSarStatus(realDummyURLDataSubjectClient, realS3Client, dummyRef)
+		await handleSarStatus(manageURLDataSubjectClient, realS3Client, testRef)
 	).resultLocations?.[0];
 
 	console.log("checking what's in s3 " + actualS3Url);
@@ -113,7 +116,7 @@ function createRealServicesToTestEndpoints(
 		results_url: baseURL + realPath,
 		controller_id: 'controller_idcontroller_id',
 	};
-	const realDummyURLDataSubjectClient: MParticleClient<DataSubjectAPI> = {
+	const manageURLDataSubjectClient: MParticleClient<DataSubjectAPI> = {
 		clientType: 'dataSubject',
 		get: jest.fn().mockResolvedValue({
 			success: true,
@@ -133,5 +136,8 @@ function createRealServicesToTestEndpoints(
 		sarS3BaseKey,
 		() => new Date(Date.parse('2025-08-06T18:19:42.123Z')),
 	);
-	return { realDummyURLDataSubjectClient, realS3Client };
+	return {
+		manageURLDataSubjectClient,
+		realS3Client,
+	};
 }

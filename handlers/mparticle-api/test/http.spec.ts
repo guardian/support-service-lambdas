@@ -6,10 +6,12 @@ import type { DataSubjectRequestSubmission } from '../interfaces/data-subject-re
 import type { AppConfig } from '../src/utils/config';
 import { invokeHttpHandler } from './invoke-http-handler';
 import {
-	getRequestResponse,
-	getRequestsResponse,
+	getMockCreateDataSubjectRequestResponse,
+	getMockGetSubjectRequestByIdResponse,
 	mockFetchJsonResponse,
 	mockFetchResponse,
+	mockRegisterEventResponse,
+	mockSetUserAttributesResponse,
 } from './mockFetch';
 
 jest.mock('../src/utils/config', () => ({
@@ -38,7 +40,7 @@ describe('mparticle-api HTTP tests', () => {
 	});
 
 	it('Register an event', async () => {
-		mockFetchResponse('', 202);
+		mockFetchResponse(mockRegisterEventResponse, 202);
 
 		const result = await invokeHttpHandler({
 			httpMethod: 'POST',
@@ -86,8 +88,11 @@ describe('mparticle-api HTTP tests', () => {
 	it('Create Data Subject Request', async () => {
 		const requestId = faker.string.uuid();
 		const submittedTime = new Date();
-		mockFetchResponse('', 202);
-		mockFetchJsonResponse(getRequestResponse(submittedTime, requestId), 202);
+		mockFetchResponse(mockSetUserAttributesResponse, 202);
+		mockFetchJsonResponse(
+			getMockCreateDataSubjectRequestResponse(submittedTime, requestId),
+			202,
+		);
 
 		const result = await invokeHttpHandler({
 			httpMethod: 'POST',
@@ -113,7 +118,7 @@ describe('mparticle-api HTTP tests', () => {
 
 	it('Get Data Subject Request by Id', async () => {
 		const requestId = faker.string.uuid();
-		mockFetchJsonResponse(getRequestsResponse(requestId));
+		mockFetchJsonResponse(getMockGetSubjectRequestByIdResponse(requestId));
 
 		const result = await invokeHttpHandler({
 			httpMethod: 'GET',

@@ -12,10 +12,11 @@ import type {
 import type { AppConfig } from '../src/utils/config';
 import { invokeBatonHandler } from './invoke-baton-handler';
 import {
-	getRequestResponse,
-	getRequestsResponse,
+	getMockCreateDataSubjectRequestResponse,
+	getMockGetSubjectRequestByIdResponse,
 	mockFetchJsonResponse,
 	mockFetchResponse,
+	mockSetUserAttributesResponse,
 } from './mockFetch';
 
 jest.mock('../../../modules/aws/src/s3');
@@ -48,8 +49,11 @@ describe('mparticle-api Baton tests', () => {
 	it('Initiate Right to Erasure Request', async () => {
 		const requestId = faker.string.uuid();
 		const submittedTime = new Date();
-		mockFetchResponse('', 202);
-		mockFetchJsonResponse(getRequestResponse(submittedTime, requestId), 202);
+		mockFetchResponse(mockSetUserAttributesResponse, 202);
+		mockFetchJsonResponse(
+			getMockCreateDataSubjectRequestResponse(submittedTime, requestId),
+			202,
+		);
 
 		const userId = faker.string.alphanumeric();
 		const result = await invokeBatonHandler({
@@ -72,7 +76,7 @@ describe('mparticle-api Baton tests', () => {
 
 	it('Get Right to Erasure Request Status', async () => {
 		const requestId: InitiationReference = faker.string.uuid() as GUID;
-		mockFetchJsonResponse(getRequestsResponse(requestId));
+		mockFetchJsonResponse(getMockGetSubjectRequestByIdResponse(requestId));
 
 		const result = await invokeBatonHandler({
 			requestType: 'RER',
@@ -92,7 +96,10 @@ describe('mparticle-api Baton tests', () => {
 		const requestId = faker.string.uuid();
 		const submittedTime = new Date();
 
-		mockFetchJsonResponse(getRequestResponse(submittedTime, requestId), 201);
+		mockFetchJsonResponse(
+			getMockCreateDataSubjectRequestResponse(submittedTime, requestId),
+			201,
+		);
 
 		const userId = faker.string.alphanumeric();
 		const result = await invokeBatonHandler({

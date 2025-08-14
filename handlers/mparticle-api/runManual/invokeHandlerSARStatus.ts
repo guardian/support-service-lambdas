@@ -39,11 +39,11 @@ loadConfig('CODE', 'support', 'mparticle-api', ConfigSchema).then((config) => {
 		config.pod,
 	);
 
-	const dummyDate = () => new Date(0);
+	const mockDate = () => new Date(0);
 	const batonS3Writer = new BatonS3WriterImpl(
 		sarResultsBucket,
 		sarS3BaseKey,
-		dummyDate,
+		mockDate,
 	);
 
 	batonRerRouter(

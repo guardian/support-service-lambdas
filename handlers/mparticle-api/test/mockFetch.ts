@@ -4,7 +4,11 @@ import type {
 	PostRequestsResponse,
 } from '../src/apis/data-subject-requests';
 
-export function getRequestResponse(
+export const mockSetUserAttributesResponse = '';
+
+export const mockRegisterEventResponse = '';
+
+export function getMockCreateDataSubjectRequestResponse(
 	submittedTime: Date,
 	requestId: string,
 ): PostRequestsResponse {
@@ -16,7 +20,9 @@ export function getRequestResponse(
 	};
 }
 
-export function getRequestsResponse(requestId: string): GetRequestsResponse {
+export function getMockGetSubjectRequestByIdResponse(
+	requestId: string,
+): GetRequestsResponse {
 	return {
 		expected_completion_time: faker.date.soon(),
 		subject_request_id: requestId,
