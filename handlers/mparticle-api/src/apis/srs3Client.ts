@@ -1,4 +1,5 @@
 import { streamToS3 } from '@modules/aws/s3';
+import { withLogging } from '../utils/withLogging';
 
 export interface SRS3Client {
 	write: (reference: string, stream: ReadableStream) => Promise<string>;
@@ -19,7 +20,12 @@ export class SRS3ClientImpl implements SRS3Client {
 		const fileName = this.now().toISOString() + '-' + reference + '.zip';
 		const s3Key = this.sarS3BaseKey + fileName;
 
-		await streamToS3(stream, this.sarResultsBucket, s3Key);
+		await withLogging(
+			streamToS3,
+			undefined,
+			undefined,
+			2,
+		)(this.sarResultsBucket, s3Key, stream);
 		return `s3://${this.sarResultsBucket}/${s3Key}`;
 	};
 }

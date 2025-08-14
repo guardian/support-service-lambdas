@@ -12,56 +12,56 @@ import { batonRerRouter } from './routers/baton';
 import { AppConfig, getAppConfig, getEnv } from './utils/config';
 import { MParticleClient } from './apis/mparticleClient';
 import { SRS3ClientImpl } from './apis/srs3Client';
+import { withLogging } from './utils/withLogging';
 
-export const handlerHttp: Handler<
-	APIGatewayProxyEvent,
-	APIGatewayProxyResult
-> = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-	try {
-		const { mParticleDataSubjectClient, mParticleEventsAPIClient, isProd } =
-			await services();
-		console.debug('Processing HTTP request');
-		return httpRouter(
-			mParticleDataSubjectClient,
-			mParticleEventsAPIClient,
-			isProd,
-		).routeRequest(event);
-	} catch (error) {
-		console.error('HTTP handler error:', error);
-		return {
-			statusCode: 500,
-			body: JSON.stringify({ error: 'Internal server error' }),
-		};
-	}
-};
+export const handlerHttp: Handler<APIGatewayProxyEvent, APIGatewayProxyResult> =
+	withLogging(
+		async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+			try {
+				const { mParticleDataSubjectClient, mParticleEventsAPIClient, isProd } =
+					await services();
+				console.debug('Processing HTTP request');
+				return httpRouter(
+					mParticleDataSubjectClient,
+					mParticleEventsAPIClient,
+					isProd,
+				).routeRequest(event);
+			} catch (error) {
+				console.error('HTTP handler error:', error);
+				return {
+					statusCode: 500,
+					body: JSON.stringify({ error: 'Internal server error' }),
+				};
+			}
+		},
+		'handlerHttp',
+	);
 
 // this must be the same base key as we have permissions set in the CDK
 const sarS3BaseKey = 'mparticle-results/';
 
-export const handlerBaton: Handler<
-	BatonEventRequest,
-	BatonEventResponse
-> = async (event: BatonEventRequest): Promise<BatonEventResponse> => {
-	try {
-		const {
-			mParticleDataSubjectClient,
-			mParticleEventsAPIClient,
-			srs3Client,
-			isProd,
-		} = await services();
-		const router = batonRerRouter(
-			mParticleDataSubjectClient,
-			mParticleEventsAPIClient,
-			isProd,
-			srs3Client,
-		);
-		console.debug('Processing Baton event');
-		return router.routeRequest(event);
-	} catch (error) {
-		console.error('Baton handler error:', error);
-		throw error; // Re-throw to trigger Lambda retry mechanism
-	}
-};
+export const handlerBaton: Handler<BatonEventRequest, BatonEventResponse> =
+	withLogging(async (event: BatonEventRequest): Promise<BatonEventResponse> => {
+		try {
+			const {
+				mParticleDataSubjectClient,
+				mParticleEventsAPIClient,
+				srs3Client,
+				isProd,
+			} = await services();
+			const router = batonRerRouter(
+				mParticleDataSubjectClient,
+				mParticleEventsAPIClient,
+				isProd,
+				srs3Client,
+			);
+			console.debug('Processing Baton event');
+			return router.routeRequest(event);
+		} catch (error) {
+			console.error('Baton handler error:', error);
+			throw error; // Re-throw to trigger Lambda retry mechanism
+		}
+	}, 'handlerBaton');
 
 async function services() {
 	console.log('Starting lambda');

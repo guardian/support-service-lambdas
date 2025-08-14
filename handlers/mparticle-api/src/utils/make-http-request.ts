@@ -1,5 +1,6 @@
 import { groupMap } from '@modules/arrayFunctions';
 import type { z } from 'zod';
+import { withLogging } from './withLogging';
 
 export class HttpError extends Error {
 	public statusCode: number;
@@ -41,28 +42,16 @@ export class RestRequestMaker {
 		private headers: Record<string, string>,
 	) {}
 
-	async makeRESTRequest<REQ, RESP>(
-		path: string,
-		method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
-		schema: Schema<RESP>,
-		body?: REQ,
-	) {
-		console.log(`REQUEST: ${method} ${path}`, body);
-		return this.restRequestWithoutLogging(path, method, schema, body).then(
-			(resp) => {
-				if (resp.success) {
-					console.log(`RESPONSE: ${method} ${path}`, resp.data);
-				} else {
-					console.error('RESPONSE: (failed)', resp.error);
-				}
-				return resp;
-			},
-		);
-	}
+	makeRESTRequest = withLogging(
+		this.restRequestWithoutLogging.bind(this),
+		() => 'HTTP ' + this.baseURL,
+		this.restRequestWithoutLogging.toString(),
+		2,
+	);
 
 	private async restRequestWithoutLogging<REQ, RESP>(
-		path: string,
 		method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+		path: string,
 		schema: Schema<RESP>,
 		body?: REQ,
 	): Promise<HttpResponse<RESP>> {

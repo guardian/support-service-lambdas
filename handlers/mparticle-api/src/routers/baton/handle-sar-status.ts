@@ -5,11 +5,7 @@ import type {
 	BatonSarEventStatusResponse,
 	InitiationReference,
 } from './types-and-schemas';
-import {
-	DataSubjectAPI,
-	MParticleClient,
-	mparticleDataSubjectBaseURL,
-} from '../../apis/mparticleClient';
+import { DataSubjectAPI, MParticleClient } from '../../apis/mparticleClient';
 import { SRS3Client } from '../../apis/srs3Client';
 
 function mapStatus(
@@ -48,7 +44,10 @@ export const handleSarStatus = async (
 		// The trusted base url is automatically added in the mparticleClient.
 		// This means there's no chance of accidentally sending our credentials to an untrusted URL.
 		// Since we have a full url here, we need to strip off the base.
-		const path = stripBaseUrl(dataSubjectRequestState.resultsUrl);
+		const path = stripBaseUrl(
+			dataSubjectRequestState.resultsUrl,
+			mParticleDataSubjectClient.baseURL,
+		);
 		const stream = await mParticleDataSubjectClient.getStream(path);
 		const s3Url = await srs3Client.write(initiationReference, stream);
 		resultLocations = [s3Url];
@@ -65,12 +64,12 @@ export const handleSarStatus = async (
 	return response;
 };
 
-function stripBaseUrl(resultsUrl: string) {
-	if (!resultsUrl.startsWith(mparticleDataSubjectBaseURL)) {
+function stripBaseUrl(resultsUrl: string, baseURL: string): string {
+	if (!resultsUrl.startsWith(baseURL)) {
 		throw new Error(
-			`Results URL does not start with trusted base URL: ${mparticleDataSubjectBaseURL}`,
+			`Results URL ${resultsUrl} does not start with trusted base URL: ${baseURL}`,
 		);
 	}
-	const path = resultsUrl.slice(mparticleDataSubjectBaseURL.length);
+	const path = resultsUrl.slice(baseURL.length);
 	return path;
 }

@@ -150,6 +150,7 @@ describe('mparticle-api Baton tests', () => {
 				});
 				return Promise.resolve(stream);
 			}),
+			baseURL: mparticleDataSubjectBaseURL,
 		};
 
 		const mockS3Client: SRS3Client = {

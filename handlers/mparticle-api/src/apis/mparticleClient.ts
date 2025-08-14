@@ -14,6 +14,8 @@ export interface MParticleClient<
 	T extends DataSubjectAPI | EventsAPI = DataSubjectAPI | EventsAPI,
 > {
 	readonly clientType: T['clientType'];
+	readonly baseURL: string;
+
 	get<RESP>(path: string, schema: Schema<RESP>): Promise<HttpResponse<RESP>>;
 
 	post<REQ, RESP>(
@@ -60,7 +62,7 @@ export class MParticleClientImpl<
 
 	private readonly rest: RestRequestMaker;
 	constructor(
-		baseURL: string,
+		readonly baseURL: string,
 		key: string,
 		secret: string,
 		clientType: T['clientType'],
@@ -83,7 +85,7 @@ export class MParticleClientImpl<
 		path: string,
 		schema: Schema<RESP>,
 	): Promise<HttpResponse<RESP>> {
-		return await this.rest.makeRESTRequest(path, 'GET', schema);
+		return await this.rest.makeRESTRequest('GET', path, schema);
 	}
 
 	async post<REQ, RESP>(
@@ -91,7 +93,7 @@ export class MParticleClientImpl<
 		body: REQ,
 		schema: Schema<RESP>,
 	): Promise<HttpResponse<RESP>> {
-		return await this.rest.makeRESTRequest(path, 'POST', schema, body);
+		return await this.rest.makeRESTRequest('POST', path, schema, body);
 	}
 
 	async getStream(path: string): Promise<ReadableStream> {

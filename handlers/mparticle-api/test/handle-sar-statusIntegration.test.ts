@@ -28,7 +28,8 @@ test('fetch a real URL to a real S3 bucket, and check the content', async () => 
 	const sarS3BaseKey = 'handleSarStatusIntegrationTest/';
 	const dummyRef = 'dummy-ref' as InitiationReference;
 
-	const realUrl = 'https://manage.theguardian.com/sitemap.txt';
+	const baseURL = 'https://manage.theguardian.com';
+	const realPath = '/sitemap.txt';
 
 	// we just want to make sure it's the right file, checking the length is rough and ready
 	const expectedMinimumSitemapLength = 5000;
@@ -37,7 +38,12 @@ test('fetch a real URL to a real S3 bucket, and check the content', async () => 
 	await deleteFiles(bucketName, sarS3BaseKey);
 
 	const { realDummyURLDataSubjectClient, realS3Client } =
-		createRealServicesToTestEndpoints(realUrl, bucketName, sarS3BaseKey);
+		createRealServicesToTestEndpoints(
+			realPath,
+			baseURL,
+			bucketName,
+			sarS3BaseKey,
+		);
 
 	// now run the actual business logic
 	const actualS3Url = (
@@ -95,7 +101,8 @@ function parseS3Url(s3Url: string): { bucketName: string; filePath: string } {
 }
 
 function createRealServicesToTestEndpoints(
-	realUrl: string,
+	realPath: string,
+	baseURL: string,
 	bucketName: string,
 	sarS3BaseKey: string,
 ) {
@@ -103,7 +110,7 @@ function createRealServicesToTestEndpoints(
 		expected_completion_time: new Date(),
 		subject_request_id: 'subject_request_idsubject_request_id',
 		request_status: 'completed',
-		results_url: realUrl,
+		results_url: baseURL + realPath,
 		controller_id: 'controller_idcontroller_id',
 	};
 	const realDummyURLDataSubjectClient: MParticleClient<DataSubjectAPI> = {
@@ -114,10 +121,11 @@ function createRealServicesToTestEndpoints(
 		}),
 		post: jest.fn().mockRejectedValue(new Error('Mock error')),
 		getStream: jest.fn().mockImplementation(async (path: string) => {
-			expect(path).toBe(realUrl);
-			const response = await fetch(realUrl);
+			expect(path).toBe(realPath);
+			const response = await fetch(baseURL + realPath);
 			return response.body;
 		}),
+		baseURL,
 	};
 
 	const realS3Client: SRS3Client = new SRS3ClientImpl(

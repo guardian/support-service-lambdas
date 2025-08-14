@@ -63,9 +63,9 @@ export const getFileFromS3 = async ({
 };
 
 export const streamToS3 = async (
-	stream: ReadableStream,
 	s3Bucket: string,
 	s3Key: string,
+	stream: ReadableStream,
 ) => {
 	console.log(`streaming data to ${s3Bucket} ${s3Key}`);
 
