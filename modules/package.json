@@ -4,6 +4,7 @@
   "scripts": {
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
+    "build": "tsc --noEmit",
     "check-formatting": "prettier --check **.ts",
     "fix-formatting": "prettier --write **.ts"
   }
