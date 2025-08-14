@@ -4,6 +4,7 @@
   "scripts": {
     "check-formatting": "prettier --check **/*.ts",
     "test": "jest --group=-integration",
+    "build": "tsc --noEmit",
     "lint": "eslint src/**/*.ts test/**/*.ts"
   },
   "dependencies": {
