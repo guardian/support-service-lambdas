@@ -6,7 +6,6 @@
  *
  * @group integration
  */
-
 import {
 	DeleteObjectsCommand,
 	ListObjectsV2Command,
@@ -14,15 +13,15 @@ import {
 } from '@aws-sdk/client-s3';
 import { awsConfig } from '@modules/aws/config';
 import { getFileFromS3 } from '@modules/aws/s3';
-import type { BatonS3Writer } from '../src/apis/batonS3Writer';
-import { BatonS3WriterImpl } from '../src/apis/batonS3Writer';
-import type { GetRequestsResponse } from '../src/apis/data-subject-requests';
+import type { GetRequestsResponse } from '../../src/apis/dataSubjectRequests/getStatus';
+import { handleSarStatus } from '../../src/routers/baton/access/handleStatus';
+import type { InitiationReference } from '../../src/routers/baton/initiationReference';
+import type { BatonS3Writer } from '../../src/services/batonS3Writer';
+import { BatonS3WriterImpl } from '../../src/services/batonS3Writer';
 import type {
 	DataSubjectAPI,
 	MParticleClient,
-} from '../src/apis/mparticleClient';
-import { handleSarStatus } from '../src/routers/baton/handle-sar-status';
-import type { InitiationReference } from '../src/routers/baton/types-and-schemas';
+} from '../../src/services/mparticleClient';
 
 const s3Client = new S3Client(awsConfig);
 

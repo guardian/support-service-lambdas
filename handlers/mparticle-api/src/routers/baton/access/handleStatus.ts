@@ -1,12 +1,22 @@
-import type { DataSubjectRequestState } from '../../../interfaces/data-subject-request-state';
-import { DataSubjectRequestStatus } from '../../../interfaces/data-subject-request-state';
-import { getStatusOfDataSubjectRequest } from '../../apis/data-subject-requests';
-import type {
-	BatonSarEventStatusResponse,
+import {
+	DataSubjectAPI,
+	MParticleClient,
+} from '../../../services/mparticleClient';
+import { BatonS3Writer } from '../../../services/batonS3Writer';
+import {
+	DataSubjectRequestState,
+	DataSubjectRequestStatus,
+	getStatusOfDataSubjectRequest,
+} from '../../../apis/dataSubjectRequests/getStatus';
+import { z } from 'zod';
+import {
+	BatonSarEventRequestBaseSchema,
+	BatonSarEventResponseBaseSchema,
+} from './schema';
+import {
 	InitiationReference,
-} from './types-and-schemas';
-import { DataSubjectAPI, MParticleClient } from '../../apis/mparticleClient';
-import { BatonS3Writer } from '../../apis/batonS3Writer';
+	InitiationReferenceSchema,
+} from '../initiationReference';
 
 function mapStatus(
 	requestStatus: DataSubjectRequestStatus,
@@ -23,6 +33,22 @@ function mapStatus(
 	}
 }
 
+export const BatonSarEventStatusRequestSchema =
+	BatonSarEventRequestBaseSchema.extend({
+		action: z.literal('status'),
+		initiationReference: InitiationReferenceSchema,
+	});
+export const BatonSarEventStatusResponseSchema =
+	BatonSarEventResponseBaseSchema.extend({
+		action: z.literal('status'),
+		resultLocations: z.array(z.string()).optional(),
+	});
+export type BatonSarEventStatusRequest = z.infer<
+	typeof BatonSarEventStatusRequestSchema
+>;
+export type BatonSarEventStatusResponse = z.infer<
+	typeof BatonSarEventStatusResponseSchema
+>;
 export const handleSarStatus = async (
 	mParticleDataSubjectClient: MParticleClient<DataSubjectAPI>,
 	batonS3Writer: BatonS3Writer,

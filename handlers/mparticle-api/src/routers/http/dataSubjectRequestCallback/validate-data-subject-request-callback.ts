@@ -2,7 +2,10 @@ import * as crypto from 'crypto';
 import * as tls from 'tls';
 import { X509Certificate } from '@peculiar/x509';
 import { z } from 'zod';
-import type { DataSubjectAPI, MParticleClient } from '../apis/mparticleClient';
+import type {
+	DataSubjectAPI,
+	MParticleClient,
+} from '../../../services/mparticleClient';
 
 const ALLOWED_PROCESSOR_DOMAINS = [
 	'opendsr.mparticle.com',

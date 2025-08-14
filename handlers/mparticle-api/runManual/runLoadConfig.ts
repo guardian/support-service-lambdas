@@ -1,5 +1,5 @@
 import { loadConfig } from '@modules/aws/appConfig';
-import { ConfigSchema } from '../src/utils/config';
+import { ConfigSchema } from '../src/services/config';
 
 // run this to check the CODE and PROD config are readable and look right
 

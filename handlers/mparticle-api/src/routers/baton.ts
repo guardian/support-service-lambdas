@@ -1,21 +1,45 @@
-import type { BatonS3Writer } from '../apis/batonS3Writer';
+import { z } from 'zod';
+import type { BatonS3Writer } from '../services/batonS3Writer';
 import type {
 	DataSubjectAPI,
 	EventsAPI,
 	MParticleClient,
-} from '../apis/mparticleClient';
-import { handleRerInitiate } from './baton/handle-rer-initiate';
-import { handleRerStatus } from './baton/handle-rer-status';
-import { handleSarInitiate } from './baton/handle-sar-initiate';
-import { handleSarStatus } from './baton/handle-sar-status';
-import type {
-	BatonEventRequest,
-	BatonEventResponse,
-} from './baton/types-and-schemas';
+} from '../services/mparticleClient';
 import {
-	BatonEventRequestSchema,
-	ValidationError,
-} from './baton/types-and-schemas';
+	BatonSarEventInitiateRequestSchema,
+	BatonSarEventInitiateResponseSchema,
+	handleSarInitiate,
+} from './baton/access/handleInitiate';
+import {
+	BatonSarEventStatusRequestSchema,
+	BatonSarEventStatusResponseSchema,
+	handleSarStatus,
+} from './baton/access/handleStatus';
+import {
+	BatonRerEventInitiateRequestSchema,
+	BatonRerEventInitiateResponseSchema,
+	handleRerInitiate,
+} from './baton/erasure/handleInitiate';
+import {
+	BatonRerEventStatusRequestSchema,
+	BatonRerEventStatusResponseSchema,
+	handleRerStatus,
+} from './baton/erasure/handleStatus';
+
+export const BatonEventRequestSchema = z.union([
+	BatonRerEventInitiateRequestSchema,
+	BatonRerEventStatusRequestSchema,
+	BatonSarEventInitiateRequestSchema,
+	BatonSarEventStatusRequestSchema,
+]);
+export const BatonEventResponseSchema = z.union([
+	BatonRerEventInitiateResponseSchema,
+	BatonRerEventStatusResponseSchema,
+	BatonSarEventInitiateResponseSchema,
+	BatonSarEventStatusResponseSchema,
+]);
+export type BatonEventRequest = z.infer<typeof BatonEventRequestSchema>;
+export type BatonEventResponse = z.infer<typeof BatonEventResponseSchema>;
 
 export function validateRequest(data: BatonEventRequest): BatonEventRequest {
 	const result = BatonEventRequestSchema.safeParse(data);
@@ -68,3 +92,13 @@ export const batonRerRouter = (
 		}
 	},
 });
+
+class ValidationError extends Error {
+	constructor(
+		message: string,
+		public readonly errors: z.ZodError,
+	) {
+		super(message);
+		this.name = 'ValidationError';
+	}
+}

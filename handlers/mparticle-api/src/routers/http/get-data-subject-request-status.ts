@@ -1,7 +1,10 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
-import { getStatusOfDataSubjectRequest } from '../../apis/data-subject-requests';
-import { DataSubjectAPI, MParticleClient } from '../../apis/mparticleClient';
+import {
+	DataSubjectAPI,
+	MParticleClient,
+} from '../../services/mparticleClient';
+import { getStatusOfDataSubjectRequest } from '../../apis/dataSubjectRequests/getStatus';
 
 export const requestIdPathParser = {
 	path: z.object({

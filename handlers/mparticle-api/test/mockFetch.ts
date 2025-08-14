@@ -1,8 +1,6 @@
 import { faker } from '@faker-js/faker';
-import type {
-	GetRequestsResponse,
-	PostRequestsResponse,
-} from '../src/apis/data-subject-requests';
+import type { GetRequestsResponse } from '../src/apis/dataSubjectRequests/getStatus';
+import type { PostRequestsResponse } from '../src/apis/dataSubjectRequests/submit';
 
 export const mockSetUserAttributesResponse = '';
 

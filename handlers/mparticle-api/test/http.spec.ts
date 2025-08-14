@@ -1,9 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { faker } from '@faker-js/faker';
-import type { DataSubjectRequestState } from '../interfaces/data-subject-request-state';
-import type { DataSubjectRequestSubmission } from '../interfaces/data-subject-request-submission';
-import type { AppConfig } from '../src/utils/config';
+
+import type { AppConfig } from '../src/services/config';
 import { invokeHttpHandler } from './invoke-http-handler';
 import {
 	getMockCreateDataSubjectRequestResponse,
@@ -13,8 +12,10 @@ import {
 	mockRegisterEventResponse,
 	mockSetUserAttributesResponse,
 } from './mockFetch';
+import { DataSubjectRequestSubmission } from '../src/apis/dataSubjectRequests/submit';
+import { DataSubjectRequestState } from '../src/apis/dataSubjectRequests/getStatus';
 
-jest.mock('../src/utils/config', () => ({
+jest.mock('../src/services/config', () => ({
 	getAppConfig: jest.fn().mockResolvedValue({
 		inputPlatform: {
 			key: faker.string.nanoid(),
