@@ -74,9 +74,13 @@ export class MParticleClientImpl<
 		 * https://docs.mparticle.com/developers/apis/dsr-api/v3/#authentication
 		 */
 		const authHeader = `Basic ${Buffer.from(`${key}:${secret}`).toString('base64')}`;
-		this.rest = new RestRequestMaker(baseURL, {
-			Authorization: authHeader,
-		});
+		this.rest = new RestRequestMaker(
+			baseURL,
+			{
+				Authorization: authHeader,
+			},
+			fetch,
+		);
 	}
 
 	async get<RESP>(

@@ -40,6 +40,7 @@ export class RestRequestMaker {
 	constructor(
 		public baseURL: string,
 		private headers: Record<string, string>,
+		private fetch: typeof global.fetch,
 	) {}
 
 	makeRESTRequest = withLogging(
@@ -88,7 +89,10 @@ export class RestRequestMaker {
 			return {
 				success: false,
 				error: new Error(
-					'could not parse response: ' + responseText + JSON.stringify(headers),
+					'could not parse response: ' +
+						responseText +
+						' headers: ' +
+						JSON.stringify(headers),
 					{ cause },
 				),
 			};
@@ -101,7 +105,7 @@ export class RestRequestMaker {
 		body?: unknown,
 		headers?: Record<string, string>,
 	): Promise<Response> {
-		const response = await fetch(`${this.baseURL}${path}`, {
+		const response = await this.fetch(`${this.baseURL}${path}`, {
 			method: method,
 			headers: { ...this.headers, ...headers },
 			body: body ? JSON.stringify(body) : undefined,
