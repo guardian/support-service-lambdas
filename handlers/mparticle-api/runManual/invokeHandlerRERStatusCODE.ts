@@ -1,15 +1,15 @@
 import { invokeFunction } from '@modules/aws/lambda';
 import {
-	BatonSarEventStatusRequest,
+	BatonRerEventStatusRequest,
 	InitiationReference,
 } from '../src/routers/baton/types-and-schemas';
 
 const initiationReference: InitiationReference =
-	'8a6747ea-cef6-4b2d-8178-8bb81b13c4e9' as InitiationReference;
+	'9d3a0eb2-40c1-4fc5-a8c4-35e367005dd2' as InitiationReference;
 
-const handlerTestEvent: BatonSarEventStatusRequest = {
+const handlerTestEvent: BatonRerEventStatusRequest = {
 	initiationReference,
-	requestType: 'SAR',
+	requestType: 'RER',
 	action: 'status',
 };
 
