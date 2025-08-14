@@ -1,17 +1,44 @@
 import { randomUUID } from 'crypto';
-import type { DataSubjectRequestSubmission } from '../../../interfaces/data-subject-request-submission';
-import { submitDataSubjectRequest } from '../../apis/data-subject-requests';
-import { setUserAttributesForRightToErasureRequest } from '../../apis/events';
-import type {
-	BatonRerEventInitiateRequest,
-	BatonRerEventInitiateResponse,
-	InitiationReference,
-} from './types-and-schemas';
+
 import {
 	DataSubjectAPI,
 	EventsAPI,
 	MParticleClient,
-} from '../../apis/mparticleClient';
+} from '../../../services/mparticleClient';
+import { addErasureExclusionAttributes } from '../../shared/addErasureExclusionAttributes';
+import {
+	DataSubjectRequestSubmission,
+	submitDataSubjectRequest,
+} from '../../../apis/dataSubjectRequests/submit';
+import { z } from 'zod';
+import {
+	BatonRerEventRequestBaseSchema,
+	BatonRerEventResponseBaseSchema,
+} from './schema';
+import {
+	InitiationReference,
+	InitiationReferenceSchema,
+} from '../initiationReference';
+
+export const BatonRerEventInitiateRequestSchema =
+	BatonRerEventRequestBaseSchema.extend({
+		action: z.literal('initiate'),
+		subjectId: z.string().min(1, 'Subject Id is required'),
+		subjectEmail: z.string().email().optional(),
+		dataProvider: z.literal('mparticlerer'),
+	});
+export const BatonRerEventInitiateResponseSchema =
+	BatonRerEventResponseBaseSchema.extend({
+		action: z.literal('initiate'),
+		initiationReference: InitiationReferenceSchema,
+	});
+// Infer types from schemas
+export type BatonRerEventInitiateRequest = z.infer<
+	typeof BatonRerEventInitiateRequestSchema
+>;
+export type BatonRerEventInitiateResponse = z.infer<
+	typeof BatonRerEventInitiateResponseSchema
+>;
 
 export async function handleRerInitiate(
 	mParticleDataSubjectClient: MParticleClient<DataSubjectAPI>,
@@ -28,7 +55,7 @@ export async function handleRerInitiate(
 	 * https://docs.mparticle.com/guides/data-subject-requests/#erasure-request-waiting-period
 	 */
 	try {
-		await setUserAttributesForRightToErasureRequest(
+		await addErasureExclusionAttributes(
 			mParticleEventsAPIClient,
 			environment,
 			request.subjectId,

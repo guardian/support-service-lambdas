@@ -1,15 +1,10 @@
 import { faker } from '@faker-js/faker';
-import type { BatonS3Writer } from '../src/apis/batonS3Writer';
+import type { BatonS3Writer } from '../src/services/batonS3Writer';
+import type { AppConfig } from '../src/services/config';
 import type {
 	DataSubjectAPI,
 	MParticleClient,
-} from '../src/apis/mparticleClient';
-import { handleSarStatus } from '../src/routers/baton/handle-sar-status';
-import type {
-	GUID,
-	InitiationReference,
-} from '../src/routers/baton/types-and-schemas';
-import type { AppConfig } from '../src/utils/config';
+} from '../src/services/mparticleClient';
 import { invokeBatonHandler } from './invoke-baton-handler';
 import {
 	getMockCreateDataSubjectRequestResponse,
@@ -18,10 +13,15 @@ import {
 	mockFetchResponse,
 	mockSetUserAttributesResponse,
 } from './mockFetch';
+import {
+	GUID,
+	InitiationReference,
+} from '../src/routers/baton/initiationReference';
+import { handleSarStatus } from '../src/routers/baton/access/handleStatus';
 
 jest.mock('../../../modules/aws/src/s3');
 
-jest.mock('../src/utils/config', () => ({
+jest.mock('../src/services/config', () => ({
 	getAppConfig: jest.fn().mockResolvedValue({
 		inputPlatform: {
 			key: faker.string.nanoid(),

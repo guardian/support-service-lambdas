@@ -1,14 +1,21 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
-import type { DataSubjectRequestForm } from '../../../interfaces/data-subject-request-form';
-import { submitDataSubjectRequest } from '../../apis/data-subject-requests';
-import { setUserAttributesForRightToErasureRequest } from '../../apis/events';
+
 import {
 	DataSubjectAPI,
 	EventsAPI,
 	MParticleClient,
-} from '../../apis/mparticleClient';
+} from '../../services/mparticleClient';
+import { addErasureExclusionAttributes } from '../shared/addErasureExclusionAttributes';
+import {
+	DataSubjectRequestForm,
+	submitDataSubjectRequest,
+} from '../../apis/dataSubjectRequests/submit';
 
+/**
+ * Data Subject Request Form
+ * https://docs.mparticle.com/developers/apis/dsr-api/v3/#submit-a-data-subject-request-dsr
+ */
 export const dataSubjectRequestFormParser = {
 	body: z.object({
 		regulation: z.enum(['gdpr', 'ccpa']),
@@ -36,7 +43,7 @@ export function submitDataSubjectRequestHandler(
 		 */
 		try {
 			// FIXME only set for erasure (not SAR?)
-			await setUserAttributesForRightToErasureRequest(
+			await addErasureExclusionAttributes(
 				mParticleEventsAPIClient,
 				parsed.body.environment,
 				parsed.body.userId,

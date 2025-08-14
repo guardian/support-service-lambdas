@@ -1,8 +1,6 @@
 import { invokeFunction } from '@modules/aws/lambda';
-import {
-	BatonRerEventStatusRequest,
-	InitiationReference,
-} from '../src/routers/baton/types-and-schemas';
+import { InitiationReference } from '../src/routers/baton/initiationReference';
+import { BatonRerEventStatusRequest } from '../src/routers/baton/erasure/handleStatus';
 
 const initiationReference: InitiationReference =
 	'9d3a0eb2-40c1-4fc5-a8c4-35e367005dd2' as InitiationReference;

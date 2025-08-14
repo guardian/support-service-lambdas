@@ -1,5 +1,5 @@
 import { invokeFunction } from '@modules/aws/lambda';
-import { BatonSarEventInitiateRequest } from '../src/routers/baton/types-and-schemas';
+import { BatonSarEventInitiateRequest } from '../src/routers/baton/access/handleInitiate';
 
 const handlerTestEvent: BatonSarEventInitiateRequest = {
 	dataProvider: 'mparticlesar',

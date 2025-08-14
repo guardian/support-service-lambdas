@@ -1,5 +1,11 @@
-import type { EventBatch } from '../../interfaces/event-batch';
-import type { EventsAPI, MParticleClient } from './mparticleClient';
+import type {
+	EventsAPI,
+	MParticleClient,
+} from '../../services/mparticleClient';
+import { eventBatchParser } from '../../routers/http/upload-event-batch';
+import { z } from 'zod';
+
+export type EventBatch = z.infer<typeof eventBatchParser.body>;
 
 /**
  * Upload an event batch
@@ -39,23 +45,4 @@ export const uploadAnEventBatch = async (
 	}
 
 	return {};
-};
-
-export const setUserAttributesForRightToErasureRequest = async (
-	mParticleEventsAPIClient: MParticleClient<EventsAPI>,
-	environment: 'production' | 'development',
-	userId: string,
-	submittedTime: string,
-): Promise<object> => {
-	return uploadAnEventBatch(mParticleEventsAPIClient, {
-		userAttributes: {
-			dsr_erasure_requested: true,
-			dsr_erasure_status: 'requested',
-			dsr_erasure_date: submittedTime,
-		},
-		userIdentities: {
-			customer_id: userId,
-		},
-		environment: environment,
-	});
 };
