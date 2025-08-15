@@ -75,7 +75,7 @@ const generateProductSpecificFields = (productName: string): string => {
 			deliveryInstructions: z.string(),`;
 			if (productName === 'NationalDelivery') {
 				fields += `
-			deliveryAgent: z.string(),`;
+				deliveryAgent: z.number(),`;
 			}
 		}
 		return fields;

@@ -89,7 +89,7 @@ export const productPurchaseSchema = z.discriminatedUnion('product', [
 		firstDeliveryDate: z.date(),
 		deliveryContact: deliveryContactSchema,
 		deliveryInstructions: z.string(),
-		deliveryAgent: z.string(),
+		deliveryAgent: z.number(),
 	}),
 	z.object({
 		product: z.literal('SupporterMembership'),

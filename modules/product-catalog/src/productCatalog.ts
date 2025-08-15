@@ -7,6 +7,13 @@ export type ProductCatalog = z.infer<typeof productCatalogSchema>;
 
 // -------- Product --------
 export type ProductKey = keyof ProductCatalog;
+
+export type ZuoraProductKey = {
+	[K in ProductKey]: ProductCatalog[K]['billingSystem'] extends 'zuora'
+		? K
+		: never;
+}[ProductKey];
+
 export const newspaperProducts: ProductKey[] = [
 	'HomeDelivery',
 	'NationalDelivery',
@@ -46,6 +53,9 @@ export type ProductRatePlan<
 	P extends ProductKey,
 	PRP extends ProductRatePlanKey<P>,
 > = ProductCatalog[P]['ratePlans'][PRP];
+
+export type ZuoraProductRatePlanKey<P extends ZuoraProductKey> =
+	keyof ProductCatalog[P]['ratePlans'];
 
 export class ProductCatalogHelper {
 	constructor(private catalogData: ProductCatalog) {}

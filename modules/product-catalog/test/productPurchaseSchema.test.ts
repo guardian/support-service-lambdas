@@ -85,7 +85,7 @@ test('productPurchaseSchema works', () => {
 			firstDeliveryDate: new Date('2023-10-01'),
 			deliveryContact: contact,
 			deliveryInstructions: 'Leave it in the porch',
-			deliveryAgent: 'test-agent',
+			deliveryAgent: 123,
 		}).success,
 	).toBe(true);
 	expect(
