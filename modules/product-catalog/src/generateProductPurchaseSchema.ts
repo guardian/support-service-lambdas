@@ -68,7 +68,7 @@ const generateProductSpecificFields = (productName: string): string => {
 	}
 	if (isDeliveryProduct(productName)) {
 		let fields = `
-			firstDeliveryDate: z.date(),
+			firstDeliveryDate: z.string().transform((dateStr) => new Date(dateStr)),
 			deliveryContact: deliveryContactSchema,`;
 		if (isNewspaperProduct(productName)) {
 			fields += `

@@ -22,8 +22,8 @@ test('productPurchaseSchema works', () => {
 			product: 'Contribution',
 			ratePlan: 'Monthly',
 			amount: 10,
-		}).success,
-	).toBe(true);
+		}).error,
+	).toBeUndefined();
 	expect(
 		productPurchaseSchema.safeParse({
 			product: 'Contribution',
@@ -41,22 +41,22 @@ test('productPurchaseSchema works', () => {
 		productPurchaseSchema.safeParse({
 			product: 'GuardianWeeklyRestOfWorld',
 			ratePlan: 'Monthly',
-			firstDeliveryDate: new Date('2023-10-01'),
+			firstDeliveryDate: '2023-10-01',
 		}).success,
 	).toBe(false); // deliveryContact is required for delivery products
 	expect(
 		productPurchaseSchema.safeParse({
 			product: 'GuardianWeeklyRestOfWorld',
 			ratePlan: 'Annual',
-			firstDeliveryDate: new Date('2023-10-01'),
+			firstDeliveryDate: '2023-10-01',
 			deliveryContact: contact,
-		}).success,
-	).toBe(true);
+		}).error,
+	).toBeUndefined();
 	expect(
 		productPurchaseSchema.safeParse({
 			product: 'HomeDelivery',
 			ratePlan: 'EverydayPlus',
-			firstDeliveryDate: new Date('2023-10-01'),
+			firstDeliveryDate: '2023-10-01',
 			deliveryContact: contact,
 		}).success,
 	).toBe(false); // All newspaper products requires delivery instructions
@@ -64,16 +64,16 @@ test('productPurchaseSchema works', () => {
 		productPurchaseSchema.safeParse({
 			product: 'HomeDelivery',
 			ratePlan: 'EverydayPlus',
-			firstDeliveryDate: new Date('2023-10-01'),
+			firstDeliveryDate: '2023-10-01',
 			deliveryContact: contact,
 			deliveryInstructions: 'Leave it in the porch',
-		}).success,
-	).toBe(true);
+		}).error,
+	).toBeUndefined();
 	expect(
 		productPurchaseSchema.safeParse({
 			product: 'NationalDelivery',
 			ratePlan: 'EverydayPlus',
-			firstDeliveryDate: new Date('2023-10-01'),
+			firstDeliveryDate: '2023-10-01',
 			deliveryContact: contact,
 			deliveryInstructions: 'Leave it in the porch',
 		}).success,
@@ -82,12 +82,12 @@ test('productPurchaseSchema works', () => {
 		productPurchaseSchema.safeParse({
 			product: 'NationalDelivery',
 			ratePlan: 'EverydayPlus',
-			firstDeliveryDate: new Date('2023-10-01'),
+			firstDeliveryDate: '2023-10-01',
 			deliveryContact: contact,
 			deliveryInstructions: 'Leave it in the porch',
 			deliveryAgent: 123,
-		}).success,
-	).toBe(true);
+		}).error,
+	).toBeUndefined();
 	expect(
 		productPurchaseSchema.safeParse({
 			product: 'GuardianAdLite',
@@ -98,6 +98,6 @@ test('productPurchaseSchema works', () => {
 		productPurchaseSchema.safeParse({
 			product: 'GuardianAdLite',
 			ratePlan: 'Monthly',
-		}).success,
-	).toBe(true);
+		}).error,
+	).toBeUndefined();
 });
