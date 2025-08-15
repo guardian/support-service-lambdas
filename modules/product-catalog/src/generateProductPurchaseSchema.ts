@@ -35,6 +35,11 @@ const deliveryContactSchema = z.object({
 	postalCode: z.string(),
 });
 
+const dateOrDateStringSchema = z.preprocess(
+	(input) => (typeof input === 'string' ? new Date(input) : input),
+	z.date(),
+);
+
 `;
 
 const footer = `
@@ -68,7 +73,7 @@ const generateProductSpecificFields = (productName: string): string => {
 	}
 	if (isDeliveryProduct(productName)) {
 		let fields = `
-			firstDeliveryDate: z.string().transform((dateStr) => new Date(dateStr)),
+			firstDeliveryDate: dateOrDateStringSchema,
 			deliveryContact: deliveryContactSchema,`;
 		if (isNewspaperProduct(productName)) {
 			fields += `
