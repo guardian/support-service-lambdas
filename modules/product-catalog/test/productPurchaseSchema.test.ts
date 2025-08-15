@@ -101,6 +101,14 @@ describe('productPurchaseSchema', () => {
 				ratePlan: 'Monthly',
 			}).error,
 		).toBeUndefined();
+		expect(
+			productPurchaseSchema.safeParse({
+				product: 'SubscriptionCard',
+				ratePlan: 'SixdayPlus',
+				firstDeliveryDate: '2023-10-01',
+				deliveryContact: contact,
+			}).error,
+		).toBeUndefined();
 	});
 	test('it can handle either string or date for firstDeliveryDate', () => {
 		expect(

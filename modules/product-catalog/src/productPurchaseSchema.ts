@@ -135,7 +135,6 @@ export const productPurchaseSchema = z.discriminatedUnion('product', [
 		]),
 		firstDeliveryDate: dateOrDateStringSchema,
 		deliveryContact: deliveryContactSchema,
-		deliveryInstructions: z.string(),
 	}),
 	z.object({
 		product: z.literal('GuardianWeeklyZoneA'),
@@ -171,7 +170,6 @@ export const productPurchaseSchema = z.discriminatedUnion('product', [
 		]),
 		firstDeliveryDate: dateOrDateStringSchema,
 		deliveryContact: deliveryContactSchema,
-		deliveryInstructions: z.string(),
 	}),
 	z.object({
 		product: z.literal('HomeDelivery'),

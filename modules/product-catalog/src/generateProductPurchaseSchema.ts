@@ -5,7 +5,7 @@ import type {
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import {
 	isDeliveryProduct,
-	isNewspaperProduct,
+	requiresDeliveryInstructions,
 } from '@modules/product-catalog/productCatalog';
 import {
 	getProductRatePlanKey,
@@ -75,7 +75,7 @@ const generateProductSpecificFields = (productName: string): string => {
 		let fields = `
 			firstDeliveryDate: dateOrDateStringSchema,
 			deliveryContact: deliveryContactSchema,`;
-		if (isNewspaperProduct(productName)) {
+		if (requiresDeliveryInstructions(productName)) {
 			fields += `
 			deliveryInstructions: z.string(),`;
 			if (productName === 'NationalDelivery') {

@@ -30,11 +30,8 @@ export const deliveryProducts: ProductKey[] = [
 	'GuardianWeeklyZoneC',
 ] as const;
 
-export type NewspaperProductKey = (typeof newspaperProducts)[number];
-export function isNewspaperProduct(
-	productKey: unknown,
-): productKey is NewspaperProductKey {
-	return newspaperProducts.includes(productKey as NewspaperProductKey);
+export function requiresDeliveryInstructions(productKey: unknown): boolean {
+	return productKey === 'HomeDelivery' || productKey === 'NationalDelivery';
 }
 
 export type DeliveryProductKey = (typeof deliveryProducts)[number];
