@@ -17,7 +17,7 @@ export type Route<TPath, TBody> = {
 	path: string;
 	handler: (
 		event: APIGatewayProxyEvent,
-		parsed: { path: TPath; body: TBody }
+		parsed: { path: TPath; body: TBody },
 	) => Promise<APIGatewayProxyResult>;
 	parser?: {
 		path?: z.Schema<TPath>;
@@ -26,7 +26,7 @@ export type Route<TPath, TBody> = {
 };
 
 export function createRoute<TPath, TBody>(
-	route: Route<TPath, TBody>
+	route: Route<TPath, TBody>,
 ): Route<unknown, unknown> {
 	return route as Route<unknown, unknown>;
 }
@@ -38,7 +38,7 @@ export const NotFoundResponse = {
 
 function matchPath(
 	routePath: string,
-	eventPath: string
+	eventPath: string,
 ): { params: Record<string, string> } | undefined {
 	const routeParts = routePath.split('/').filter(Boolean);
 	const eventParts = eventPath.split('/').filter(Boolean);
@@ -64,24 +64,34 @@ function matchPath(
 }
 
 export class Router {
-	constructor(private routes: ReadonlyArray<Route<unknown, unknown>>) { }
+	constructor(private routes: ReadonlyArray<Route<unknown, unknown>>) {}
 	async routeRequest(
 		event: APIGatewayProxyEvent,
 	): Promise<APIGatewayProxyResult> {
 		try {
 			for (const route of this.routes) {
 				const matchResult = matchPath(route.path, event.path);
-				if (route.httpMethod.toUpperCase() === event.httpMethod.toUpperCase() && matchResult) {
+				if (
+					route.httpMethod.toUpperCase() === event.httpMethod.toUpperCase() &&
+					matchResult
+				) {
 					const eventWithParams = {
 						...event,
-						pathParameters: { ...(event.pathParameters ?? {}), ...matchResult.params },
+						pathParameters: {
+							...(event.pathParameters ?? {}),
+							...matchResult.params,
+						},
 					};
 
 					let parsedPath, parsedBody;
 					try {
-						parsedPath = route.parser?.path?.parse(eventWithParams.pathParameters);
+						parsedPath = route.parser?.path?.parse(
+							eventWithParams.pathParameters,
+						);
 						parsedBody = route.parser?.body?.parse(
-							eventWithParams.body ? JSON.parse(eventWithParams.body) : undefined,
+							eventWithParams.body
+								? JSON.parse(eventWithParams.body)
+								: undefined,
 						);
 					} catch (error) {
 						if (error instanceof z.ZodError) {
