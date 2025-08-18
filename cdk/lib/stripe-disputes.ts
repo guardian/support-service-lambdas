@@ -5,10 +5,7 @@ import { GuCname } from '@guardian/cdk/lib/constructs/dns';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
 import { Duration, RemovalPolicy } from 'aws-cdk-lib';
-import {
-	CfnBasePathMapping,
-	CfnDomainName,
-} from 'aws-cdk-lib/aws-apigateway';
+import { CfnBasePathMapping, CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
 import { Table, AttributeType, BillingMode } from 'aws-cdk-lib/aws-dynamodb';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
@@ -44,7 +41,8 @@ export class StripeDisputes extends GuStack {
 				type: AttributeType.STRING,
 			},
 			billingMode: BillingMode.PAY_PER_REQUEST,
-			removalPolicy: this.stage === 'PROD' ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
+			removalPolicy:
+				this.stage === 'PROD' ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
 			pointInTimeRecovery: this.stage === 'PROD',
 		});
 
@@ -56,7 +54,8 @@ export class StripeDisputes extends GuStack {
 				type: AttributeType.STRING,
 			},
 			billingMode: BillingMode.PAY_PER_REQUEST,
-			removalPolicy: this.stage === 'PROD' ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
+			removalPolicy:
+				this.stage === 'PROD' ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
 			timeToLiveAttribute: 'ttl',
 		});
 
@@ -69,10 +68,7 @@ export class StripeDisputes extends GuStack {
 				'dynamodb:Query',
 				'dynamodb:Scan',
 			],
-			resources: [
-				disputeRecordsTable.tableArn,
-				idempotencyTable.tableArn,
-			],
+			resources: [disputeRecordsTable.tableArn, idempotencyTable.tableArn],
 		});
 
 		// SSM Parameter Store permissions for Stripe webhook secret
@@ -89,9 +85,7 @@ export class StripeDisputes extends GuStack {
 
 		// Secrets Manager permissions (if needed for API keys)
 		const secretsPolicy = new PolicyStatement({
-			actions: [
-				'secretsmanager:GetSecretValue',
-			],
+			actions: ['secretsmanager:GetSecretValue'],
 			resources: [
 				`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/support/stripe-disputes/*`,
 			],
@@ -115,8 +109,7 @@ export class StripeDisputes extends GuStack {
 			this,
 			`stripe-disputes-webhook-lambda`,
 			{
-				description:
-					'Lambda function to handle Stripe dispute webhook events',
+				description: 'Lambda function to handle Stripe dispute webhook events',
 				functionName: `stripe-disputes-${this.stage}`,
 				loggingFormat: LoggingFormat.JSON,
 				handler: 'index.stripeDisputesHandler',
