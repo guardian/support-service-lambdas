@@ -24,6 +24,7 @@ import {
 import { SoftOptInConsentSetter } from '../lib/soft-opt-in-consent-setter';
 import type { StripeWebhookEndpointsProps } from '../lib/stripe-webhook-endpoints';
 import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
+import { StripeDisputes } from '../lib/stripe-disputes';
 import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
 import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
 import { UserBenefits } from '../lib/user-benefits';
@@ -202,6 +203,23 @@ new StripeWebhookEndpoints(
 	'stripe-webhook-endpoints-PROD',
 	stripeWebhookEndpointsProdProps,
 );
+
+new StripeDisputes(app, 'stripe-disputes-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+	certificateId: supportCertificateId,
+	internalDomainName: `stripe-disputes-code.${supportApisDomain}`,
+	publicDomainName: 'stripe-disputes.code.dev-guardianapis.com',
+	hostedZoneId: supportHostedZoneId,
+});
+new StripeDisputes(app, 'stripe-disputes-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+	certificateId: supportCertificateId,
+	internalDomainName: `stripe-disputes.${supportApisDomain}`,
+	publicDomainName: 'stripe-disputes.guardianapis.com',
+	hostedZoneId: supportHostedZoneId,
+});
 
 new ProductSwitchApi(app, 'product-switch-api-CODE', {
 	stack: 'support',

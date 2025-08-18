@@ -1,0 +1,13 @@
+stacks:
+  - support
+regions:
+  - eu-west-1
+deployments:
+  stripe-disputes:
+    type: aws-lambda
+    parameters:
+      bucket: support-dist
+      fileName: stripe-disputes.zip
+      functionNames:
+        - stripe-disputes-CODE
+        - stripe-disputes-PROD
