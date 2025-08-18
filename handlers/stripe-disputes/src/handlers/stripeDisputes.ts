@@ -54,9 +54,7 @@ export const processDisputeFundsWithdrawn = (
 	// TODO: Implement dispute funds withdrawn logic
 };
 
-export const handler = async (
-	event: APIGatewayProxyEvent,
-): Promise<APIGatewayProxyResult> => {
+export const handler = (event: APIGatewayProxyEvent): APIGatewayProxyResult => {
 	console.log('Received Stripe webhook event:', JSON.stringify(event, null, 2));
 
 	try {

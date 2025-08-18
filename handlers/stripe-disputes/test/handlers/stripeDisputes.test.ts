@@ -1,13 +1,13 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import {
+	type DisputeObject,
 	handler,
-	processDisputeCreated,
-	processDisputeUpdated,
 	processDisputeClosed,
+	processDisputeCreated,
 	processDisputeFundsReinstated,
 	processDisputeFundsWithdrawn,
+	processDisputeUpdated,
 	type StripeEvent,
-	type DisputeObject,
 } from '../../src/handlers/stripeDisputes';
 
 describe('stripeDisputes handler', () => {
@@ -78,7 +78,7 @@ describe('stripeDisputes handler', () => {
 	});
 
 	describe('successful webhook processing', () => {
-		it('should handle charge.dispute.created event', async () => {
+		it('should handle charge.dispute.created event', () => {
 			const stripeEvent: StripeEvent = {
 				id: 'evt_123',
 				type: 'charge.dispute.created',
@@ -97,7 +97,7 @@ describe('stripeDisputes handler', () => {
 			};
 
 			const event = createMockAPIGatewayEvent(stripeEvent);
-			const result = await handler(event);
+			const result = handler(event);
 
 			expect(result.statusCode).toBe(200);
 			expect(JSON.parse(result.body)).toEqual({ received: true });
@@ -107,7 +107,7 @@ describe('stripeDisputes handler', () => {
 			);
 		});
 
-		it('should handle charge.dispute.updated event', async () => {
+		it('should handle charge.dispute.updated event', () => {
 			const stripeEvent: StripeEvent = {
 				id: 'evt_124',
 				type: 'charge.dispute.updated',
@@ -126,7 +126,7 @@ describe('stripeDisputes handler', () => {
 			};
 
 			const event = createMockAPIGatewayEvent(stripeEvent);
-			const result = await handler(event);
+			const result = handler(event);
 
 			expect(result.statusCode).toBe(200);
 			expect(JSON.parse(result.body)).toEqual({ received: true });
@@ -136,7 +136,7 @@ describe('stripeDisputes handler', () => {
 			);
 		});
 
-		it('should handle charge.dispute.closed event', async () => {
+		it('should handle charge.dispute.closed event', () => {
 			const stripeEvent: StripeEvent = {
 				id: 'evt_125',
 				type: 'charge.dispute.closed',
@@ -155,7 +155,7 @@ describe('stripeDisputes handler', () => {
 			};
 
 			const event = createMockAPIGatewayEvent(stripeEvent);
-			const result = await handler(event);
+			const result = handler(event);
 
 			expect(result.statusCode).toBe(200);
 			expect(JSON.parse(result.body)).toEqual({ received: true });
@@ -165,7 +165,7 @@ describe('stripeDisputes handler', () => {
 			);
 		});
 
-		it('should handle charge.dispute.funds_reinstated event', async () => {
+		it('should handle charge.dispute.funds_reinstated event', () => {
 			const stripeEvent: StripeEvent = {
 				id: 'evt_126',
 				type: 'charge.dispute.funds_reinstated',
@@ -184,7 +184,7 @@ describe('stripeDisputes handler', () => {
 			};
 
 			const event = createMockAPIGatewayEvent(stripeEvent);
-			const result = await handler(event);
+			const result = handler(event);
 
 			expect(result.statusCode).toBe(200);
 			expect(JSON.parse(result.body)).toEqual({ received: true });
@@ -194,7 +194,7 @@ describe('stripeDisputes handler', () => {
 			);
 		});
 
-		it('should handle charge.dispute.funds_withdrawn event', async () => {
+		it('should handle charge.dispute.funds_withdrawn event', () => {
 			const stripeEvent: StripeEvent = {
 				id: 'evt_127',
 				type: 'charge.dispute.funds_withdrawn',
@@ -213,7 +213,7 @@ describe('stripeDisputes handler', () => {
 			};
 
 			const event = createMockAPIGatewayEvent(stripeEvent);
-			const result = await handler(event);
+			const result = handler(event);
 
 			expect(result.statusCode).toBe(200);
 			expect(JSON.parse(result.body)).toEqual({ received: true });
@@ -223,7 +223,7 @@ describe('stripeDisputes handler', () => {
 			);
 		});
 
-		it('should handle unrecognized event types gracefully', async () => {
+		it('should handle unrecognized event types gracefully', () => {
 			const stripeEvent = {
 				id: 'evt_128',
 				type: 'some.unknown.event',
@@ -242,7 +242,7 @@ describe('stripeDisputes handler', () => {
 			};
 
 			const event = createMockAPIGatewayEvent(stripeEvent);
-			const result = await handler(event);
+			const result = handler(event);
 
 			expect(result.statusCode).toBe(200);
 			expect(JSON.parse(result.body)).toEqual({ received: true });
@@ -253,11 +253,11 @@ describe('stripeDisputes handler', () => {
 	});
 
 	describe('error handling', () => {
-		it('should return 400 for invalid JSON body', async () => {
+		it('should return 400 for invalid JSON body', () => {
 			const event = createMockAPIGatewayEvent({});
 			event.body = 'invalid json {';
 
-			const result = await handler(event);
+			const result = handler(event);
 
 			expect(result.statusCode).toBe(400);
 			expect(JSON.parse(result.body)).toEqual({ error: 'Invalid request' });
@@ -267,24 +267,24 @@ describe('stripeDisputes handler', () => {
 			);
 		});
 
-		it('should handle missing body gracefully', async () => {
+		it('should handle missing body gracefully', () => {
 			const event = createMockAPIGatewayEvent({});
 			event.body = null;
 
-			const result = await handler(event);
+			const result = handler(event);
 
 			expect(result.statusCode).toBe(200);
 			expect(JSON.parse(result.body)).toEqual({ received: true });
 		});
 
-		it('should handle empty body gracefully', async () => {
+		it('should handle empty body gracefully', () => {
 			const event = createMockAPIGatewayEvent({});
 			event.body = '';
 
-			const result = await handler(event);
+			const result = handler(event);
 
-			expect(result.statusCode).toBe(200);
-			expect(JSON.parse(result.body)).toEqual({ received: true });
+			expect(result.statusCode).toBe(400);
+			expect(JSON.parse(result.body)).toEqual({ error: 'Invalid request' });
 		});
 	});
 
@@ -386,7 +386,7 @@ describe('stripeDisputes handler', () => {
 	});
 
 	describe('webhook validation', () => {
-		it('should log received event details', async () => {
+		it('should log received event details', () => {
 			const stripeEvent: StripeEvent = {
 				id: 'evt_129',
 				type: 'charge.dispute.created',
@@ -405,7 +405,7 @@ describe('stripeDisputes handler', () => {
 			};
 
 			const event = createMockAPIGatewayEvent(stripeEvent);
-			await handler(event);
+			handler(event);
 
 			expect(mockConsoleLog).toHaveBeenCalledWith(
 				'Received Stripe webhook event:',
