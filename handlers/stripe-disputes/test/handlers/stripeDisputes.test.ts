@@ -7,6 +7,7 @@ import {
 	processDisputeFundsReinstated,
 	processDisputeFundsWithdrawn,
 	type StripeEvent,
+	type DisputeObject,
 } from '../../src/handlers/stripeDisputes';
 
 describe('stripeDisputes handler', () => {
@@ -89,6 +90,8 @@ describe('stripeDisputes handler', () => {
 						currency: 'gbp',
 						reason: 'fraudulent',
 						status: 'warning_needs_response',
+						charge: 'ch_123',
+						created: 1704067200,
 					},
 				},
 			};
@@ -116,6 +119,8 @@ describe('stripeDisputes handler', () => {
 						currency: 'gbp',
 						reason: 'fraudulent',
 						status: 'under_review',
+						charge: 'ch_123',
+						created: 1704067200,
 					},
 				},
 			};
@@ -143,6 +148,8 @@ describe('stripeDisputes handler', () => {
 						currency: 'gbp',
 						reason: 'fraudulent',
 						status: 'lost',
+						charge: 'ch_123',
+						created: 1704067200,
 					},
 				},
 			};
@@ -170,6 +177,8 @@ describe('stripeDisputes handler', () => {
 						currency: 'gbp',
 						reason: 'fraudulent',
 						status: 'won',
+						charge: 'ch_123',
+						created: 1704067200,
 					},
 				},
 			};
@@ -197,6 +206,8 @@ describe('stripeDisputes handler', () => {
 						currency: 'gbp',
 						reason: 'fraudulent',
 						status: 'warning_closed',
+						charge: 'ch_123',
+						created: 1704067200,
 					},
 				},
 			};
@@ -220,6 +231,12 @@ describe('stripeDisputes handler', () => {
 				data: {
 					object: {
 						id: 'obj_123',
+						amount: 0,
+						currency: 'gbp',
+						reason: 'general',
+						status: 'unknown',
+						charge: 'ch_unknown',
+						created: 1704067200,
 					},
 				},
 			};
@@ -272,14 +289,18 @@ describe('stripeDisputes handler', () => {
 	});
 
 	describe('individual dispute processors', () => {
-		it('processDisputeCreated should log dispute data', async () => {
-			const disputeData = {
+		it('processDisputeCreated should log dispute data', () => {
+			const disputeData: DisputeObject = {
 				id: 'dp_123',
 				amount: 5000,
 				currency: 'gbp',
+				reason: 'fraudulent',
+				status: 'warning_needs_response',
+				charge: 'ch_123',
+				created: 1704067200,
 			};
 
-			await processDisputeCreated(disputeData);
+			processDisputeCreated(disputeData);
 
 			expect(mockConsoleLog).toHaveBeenCalledWith(
 				'Processing dispute created:',
@@ -287,13 +308,18 @@ describe('stripeDisputes handler', () => {
 			);
 		});
 
-		it('processDisputeUpdated should log dispute data', async () => {
-			const disputeData = {
+		it('processDisputeUpdated should log dispute data', () => {
+			const disputeData: DisputeObject = {
 				id: 'dp_123',
+				amount: 5000,
+				currency: 'gbp',
+				reason: 'fraudulent',
 				status: 'under_review',
+				charge: 'ch_123',
+				created: 1704067200,
 			};
 
-			await processDisputeUpdated(disputeData);
+			processDisputeUpdated(disputeData);
 
 			expect(mockConsoleLog).toHaveBeenCalledWith(
 				'Processing dispute updated:',
@@ -301,13 +327,18 @@ describe('stripeDisputes handler', () => {
 			);
 		});
 
-		it('processDisputeClosed should log dispute data', async () => {
-			const disputeData = {
+		it('processDisputeClosed should log dispute data', () => {
+			const disputeData: DisputeObject = {
 				id: 'dp_123',
+				amount: 5000,
+				currency: 'gbp',
+				reason: 'fraudulent',
 				status: 'lost',
+				charge: 'ch_123',
+				created: 1704067200,
 			};
 
-			await processDisputeClosed(disputeData);
+			processDisputeClosed(disputeData);
 
 			expect(mockConsoleLog).toHaveBeenCalledWith(
 				'Processing dispute closed:',
@@ -315,13 +346,18 @@ describe('stripeDisputes handler', () => {
 			);
 		});
 
-		it('processDisputeFundsReinstated should log dispute data', async () => {
-			const disputeData = {
+		it('processDisputeFundsReinstated should log dispute data', () => {
+			const disputeData: DisputeObject = {
 				id: 'dp_123',
+				amount: 5000,
+				currency: 'gbp',
+				reason: 'fraudulent',
 				status: 'won',
+				charge: 'ch_123',
+				created: 1704067200,
 			};
 
-			await processDisputeFundsReinstated(disputeData);
+			processDisputeFundsReinstated(disputeData);
 
 			expect(mockConsoleLog).toHaveBeenCalledWith(
 				'Processing dispute funds reinstated:',
@@ -329,13 +365,18 @@ describe('stripeDisputes handler', () => {
 			);
 		});
 
-		it('processDisputeFundsWithdrawn should log dispute data', async () => {
-			const disputeData = {
+		it('processDisputeFundsWithdrawn should log dispute data', () => {
+			const disputeData: DisputeObject = {
 				id: 'dp_123',
+				amount: 5000,
+				currency: 'gbp',
+				reason: 'fraudulent',
 				status: 'warning_closed',
+				charge: 'ch_123',
+				created: 1704067200,
 			};
 
-			await processDisputeFundsWithdrawn(disputeData);
+			processDisputeFundsWithdrawn(disputeData);
 
 			expect(mockConsoleLog).toHaveBeenCalledWith(
 				'Processing dispute funds withdrawn:',
@@ -353,6 +394,12 @@ describe('stripeDisputes handler', () => {
 				data: {
 					object: {
 						id: 'dp_123',
+						amount: 5000,
+						currency: 'gbp',
+						reason: 'fraudulent',
+						status: 'warning_needs_response',
+						charge: 'ch_123',
+						created: 1704067200,
 					},
 				},
 			};
