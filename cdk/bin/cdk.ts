@@ -23,8 +23,8 @@ import {
 } from '../lib/single-contribution-salesforce-writes';
 import { SoftOptInConsentSetter } from '../lib/soft-opt-in-consent-setter';
 import type { StripeWebhookEndpointsProps } from '../lib/stripe-webhook-endpoints';
-import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
 import { StripeDisputes } from '../lib/stripe-disputes';
+import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
 import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
 import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
 import { UserBenefits } from '../lib/user-benefits';
