@@ -7,11 +7,16 @@
 import { IsoCurrency } from '@modules/internationalisation/currency';
 import dayjs from 'dayjs';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { createSubscription } from '@modules/zuora/createSubscription/createSubscription';
+import {
+	createSubscription,
+	CreateSubscriptionInputFields,
+} from '@modules/zuora/createSubscription/createSubscription';
 import {
 	DirectDebit,
 	PaymentGateway,
 } from '@modules/zuora/orders/paymentMethods';
+import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
+import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
 
 test('We can create a subscription with a new account', async () => {
 	const currency: IsoCurrency = 'GBP';
@@ -35,7 +40,7 @@ test('We can create a subscription with a new account', async () => {
 		postalCode: 'N1 9GU',
 	};
 
-	const inputFields = {
+	const inputFields: CreateSubscriptionInputFields<DirectDebit> = {
 		accountName: 'Test Account',
 		createdRequestId: 'REQUEST-ID',
 		salesforceAccountId: 'CRM-ID',
@@ -45,17 +50,23 @@ test('We can create a subscription with a new account', async () => {
 		paymentGateway: paymentGateway,
 		paymentMethod: paymentMethod,
 		billToContact: contact,
-		productRatePlanId: '2c92c0f85a6b134e015a7fcd9f0c7855',
-		contractEffectiveDate: dayjs(),
-		customerAcceptanceDate: dayjs(),
-		chargeOverride: {
-			productRatePlanChargeId: '2c92c0f85a6b1352015a7fcf35ab397c',
-			overrideAmount: 8.99,
+		productPurchase: {
+			product: 'NationalDelivery',
+			ratePlan: 'EverydayPlus',
+			firstDeliveryDate: dayjs().add(1, 'month').toDate(),
+			deliveryContact: contact,
+			deliveryInstructions: 'Leave at front door',
+			deliveryAgent: 123,
 		},
 		runBilling: true,
 		collectPayment: true,
 	};
 	const client = await ZuoraClient.create('CODE');
-	const response = await createSubscription(client, inputFields);
+	const productCatalog = generateProductCatalog(code);
+	const response = await createSubscription(
+		client,
+		productCatalog,
+		inputFields,
+	);
 	console.log(JSON.stringify(response));
 });
