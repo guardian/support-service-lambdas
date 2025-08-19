@@ -11,10 +11,10 @@ export type Contact = {
 	lastName: string;
 	workEmail: string;
 	country: string;
-	state?: string;
+	state?: string | null;
 	city?: string; // There are a lot of optional fields on this object as digital products do not require a full address
 	address1?: string;
-	address2?: string;
+	address2?: string | null;
 	postalCode?: string;
 };
 
