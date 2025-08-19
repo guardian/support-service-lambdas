@@ -1,7 +1,6 @@
 import type { BillingPeriod } from '@modules/billingPeriod';
 import type { Dayjs } from 'dayjs';
 import { zuoraDateFormat } from '../utils/common';
-import { ReaderType } from '@modules/zuora/createSubscription/readerType';
 
 export type TriggerDates = [
 	{
@@ -147,15 +146,11 @@ export function buildCreateSubscriptionOrderAction({
 	contractEffectiveDate,
 	customerAcceptanceDate,
 	chargeOverride,
-	deliveryAgent,
-	readerType,
 }: {
 	productRatePlanId: string;
 	contractEffectiveDate: Dayjs;
 	customerAcceptanceDate?: Dayjs;
 	chargeOverride?: { productRatePlanChargeId: string; overrideAmount: number };
-	deliveryAgent: string | undefined;
-	readerType: ReaderType;
 }): CreateSubscriptionOrderAction {
 	const chargeOverrides = chargeOverride
 		? [
@@ -169,11 +164,6 @@ export function buildCreateSubscriptionOrderAction({
 				},
 			]
 		: [];
-
-	const customFields = {
-		DeliveryAgent__c: deliveryAgent,
-		ReaderType__c: readerType,
-	};
 
 	return {
 		type: 'CreateSubscription',
@@ -212,6 +202,5 @@ export function buildCreateSubscriptionOrderAction({
 				},
 			],
 		},
-		customFields: customFields,
 	};
 }

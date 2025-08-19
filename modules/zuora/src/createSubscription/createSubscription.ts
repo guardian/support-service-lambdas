@@ -1,9 +1,12 @@
 import type { IsoCurrency } from '@modules/internationalisation/currency';
-import { ProductCatalog } from '@modules/product-catalog/productCatalog';
+import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 import dayjs from 'dayjs';
 import { z } from 'zod';
 import { getChargeOverride } from '@modules/zuora/createSubscription/chargeOverride';
+import { getProductRatePlan } from '@modules/zuora/createSubscription/getProductRatePlan';
+import type { GiftRecipient } from '@modules/zuora/createSubscription/giftRecipient';
+import { ReaderType } from '@modules/zuora/createSubscription/readerType';
 import { getSubscriptionDates } from '@modules/zuora/createSubscription/subscriptionDates';
 import type { Contact } from '@modules/zuora/orders/newAccount';
 import { buildNewAccountObject } from '@modules/zuora/orders/newAccount';
@@ -16,8 +19,6 @@ import type {
 } from '@modules/zuora/orders/paymentMethods';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { getProductRatePlanId } from '@modules/zuora/createSubscription/getProductRatePlanId';
-import { ReaderType } from '@modules/zuora/createSubscription/readerType';
 
 const createSubscriptionResponseSchema = z.object({
 	orderNumber: z.string(),
@@ -32,7 +33,7 @@ export type CreateSubscriptionResponse = z.infer<
 	typeof createSubscriptionResponseSchema
 >;
 
-type CreateSubscriptionInputFields<T extends PaymentMethod> = {
+export type CreateSubscriptionInputFields<T extends PaymentMethod> = {
 	accountName: string;
 	createdRequestId: string;
 	salesforceAccountId: string;
@@ -43,6 +44,7 @@ type CreateSubscriptionInputFields<T extends PaymentMethod> = {
 	paymentMethod: T;
 	billToContact: Contact;
 	productPurchase: ProductPurchase;
+	giftRecipient?: GiftRecipient;
 	runBilling?: boolean;
 	collectPayment?: boolean;
 };
@@ -60,19 +62,17 @@ function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		paymentMethod,
 		billToContact,
 		productPurchase,
+		giftRecipient,
 		runBilling,
 		collectPayment,
 	}: CreateSubscriptionInputFields<T>,
 ): AnyOrderRequest {
 	// TODO:
 	//  Apply promotion if present
-	//  ReaderType - GIFT, PATRON
+	//  ReaderType - GIFT ✅, PATRON
 	//  DeliveryAgent ✅
-	//  Validate paper payment gateway
+	//  Set contribution amount correctly for S+ (amount - cost) ✅
 	//  Set term & autoRenew correctly for GW gifts (and S+ students?)
-	//  Set contribution amount correctly for S+ (amount - cost)
-	//  Output state
-	//  CSR mode is NOT needed
 	const { deliveryContact, deliveryAgent, deliveryInstructions } = {
 		deliveryContact: undefined,
 		deliveryAgent: '',
@@ -96,17 +96,24 @@ function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 	const { contractEffectiveDate, customerAcceptanceDate } =
 		getSubscriptionDates(dayjs(), productPurchase);
 
-	const chargeOverride = getChargeOverride(productCatalog, productPurchase);
-	const readerType = ReaderType.Direct;
+	const chargeOverride = getChargeOverride(
+		productCatalog,
+		productPurchase,
+		currency,
+	);
+	const readerType = giftRecipient ? ReaderType.Gift : ReaderType.Direct; // TODO: patron if there is a patron promo
 
 	const createSubscriptionOrderAction = buildCreateSubscriptionOrderAction({
-		productRatePlanId: getProductRatePlanId(productCatalog, productPurchase),
+		productRatePlanId: getProductRatePlan(productCatalog, productPurchase).id,
 		contractEffectiveDate: contractEffectiveDate,
 		customerAcceptanceDate: customerAcceptanceDate,
 		chargeOverride: chargeOverride,
-		deliveryAgent: deliveryAgent.toString(),
-		readerType: readerType,
 	});
+
+	const customFields = {
+		DeliveryAgent__c: deliveryAgent.toString(),
+		ReaderType__c: readerType,
+	};
 	return {
 		newAccount: newAccount,
 		orderDate: zuoraDateFormat(dayjs()),
@@ -114,6 +121,7 @@ function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		subscriptions: [
 			{
 				orderActions: [createSubscriptionOrderAction],
+				customFields: customFields,
 			},
 		],
 		processingOptions: {

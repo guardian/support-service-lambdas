@@ -1,6 +1,6 @@
 import type { z } from 'zod';
 import type { productCatalogSchema } from '@modules/product-catalog/productCatalogSchema';
-import { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
+import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 
 type ProductBillingSystem = 'stripe' | 'zuora';
 
