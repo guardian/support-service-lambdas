@@ -1,17 +1,15 @@
 import prod from '../../zuora-catalog/test/fixtures/catalog-prod.json';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import { getChargeOverride } from '@modules/zuora/createSubscription/chargeOverride';
-import { ProductSpecificFields } from '@modules/zuora/createSubscription/productSpecificFields';
-import { contact } from './fixtures/createSubscriptionFixtures';
+import { deliveryContact } from './fixtures/createSubscriptionFixtures';
+import { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 
 describe('getChargeOverride', () => {
 	const productCatalog = generateProductCatalog(prod);
 	const chargeOverrideShouldBeUndefinedForProduct = (
-		productInformation: ProductSpecificFields,
+		productPurchase: ProductPurchase,
 	) => {
-		expect(
-			getChargeOverride(productCatalog, productInformation),
-		).toBeUndefined();
+		expect(getChargeOverride(productCatalog, productPurchase)).toBeUndefined();
 	};
 
 	test('should return the correct charge override for a Contribution', () => {
@@ -71,20 +69,20 @@ describe('getChargeOverride', () => {
 		chargeOverrideShouldBeUndefinedForProduct({
 			product: 'NewspaperVoucher',
 			ratePlan: 'EverydayPlus',
-			firstDeliveryDate: '2024-06-20',
-			soldToContact: contact,
+			firstDeliveryDate: new Date('2024-06-20'),
+			deliveryContact: deliveryContact,
 		});
 		chargeOverrideShouldBeUndefinedForProduct({
 			product: 'GuardianWeeklyRestOfWorld',
 			ratePlan: 'Annual',
-			firstDeliveryDate: '2024-06-20',
-			soldToContact: contact,
+			firstDeliveryDate: new Date('2024-06-20'),
+			deliveryContact: deliveryContact,
 		});
 		chargeOverrideShouldBeUndefinedForProduct({
 			product: 'TierThree',
 			ratePlan: 'DomesticAnnual',
-			firstDeliveryDate: '2024-06-20',
-			soldToContact: contact,
+			firstDeliveryDate: new Date('2024-06-20'),
+			deliveryContact: deliveryContact,
 		});
 		chargeOverrideShouldBeUndefinedForProduct({
 			product: 'GuardianAdLite',

@@ -1,24 +1,22 @@
 import type { IsoCurrency } from '@modules/internationalisation/currency';
-import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
-import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
+import { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 import dayjs from 'dayjs';
 import { z } from 'zod';
 import { getChargeOverride } from '@modules/zuora/createSubscription/chargeOverride';
-import { isDeliveryProduct } from '@modules/zuora/createSubscription/productSpecificFields';
-import type { ProductSpecificFields } from '@modules/zuora/createSubscription/productSpecificFields';
 import { getSubscriptionDates } from '@modules/zuora/createSubscription/subscriptionDates';
-import { buildNewAccountObject } from '@modules/zuora/orders/newAccount';
 import type { Contact } from '@modules/zuora/orders/newAccount';
+import { buildNewAccountObject } from '@modules/zuora/orders/newAccount';
 import { buildCreateSubscriptionOrderAction } from '@modules/zuora/orders/orderActions';
-import { executeOrderRequest } from '@modules/zuora/orders/orderRequests';
 import type { AnyOrderRequest } from '@modules/zuora/orders/orderRequests';
+import { executeOrderRequest } from '@modules/zuora/orders/orderRequests';
 import type {
 	PaymentGateway,
 	PaymentMethod,
 } from '@modules/zuora/orders/paymentMethods';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { getProductRatePlanId } from '@modules/zuora/createSubscription/getProductRatePlanId';
 
 const createSubscriptionResponseSchema = z.object({
 	orderNumber: z.string(),
@@ -43,25 +41,10 @@ type CreateSubscriptionInputFields<T extends PaymentMethod> = {
 	paymentGateway: PaymentGateway<T>;
 	paymentMethod: T;
 	billToContact: Contact;
-	productSpecificFields: ProductSpecificFields;
+	productPurchase: ProductPurchase;
 	runBilling?: boolean;
 	collectPayment?: boolean;
 };
-
-function getProductRatePlanId<T extends ProductPurchase>(
-	productCatalog: ProductCatalog,
-	productSpecificFields: ProductSpecificFields<T>,
-): string {
-	const productCatalogHelper = new ProductCatalogHelper(productCatalog);
-	// TODO: Fix up  the types here
-	const productRatePlan = productCatalogHelper.getProductRatePlan(
-		productSpecificFields.product,
-		// @ts-expect-error this is safe, I just can't figure out how to convince TypeScript
-		productSpecificFields.ratePlan,
-	);
-	// @ts-expect-error this is safe, I just can't figure out how to convince TypeScript
-	return productRatePlan.id as string;
-}
 
 function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 	productCatalog: ProductCatalog,
@@ -75,11 +58,27 @@ function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		paymentGateway,
 		paymentMethod,
 		billToContact,
-		productSpecificFields,
+		productPurchase,
 		runBilling,
 		collectPayment,
 	}: CreateSubscriptionInputFields<T>,
 ): AnyOrderRequest {
+	// TODO:
+	//  Apply promotion if present
+	//  ReaderType - GIFT, PATRON
+	//  DeliveryAgent ✅
+	//  Validate paper payment gateway
+	//  Set term & autoRenew correctly for GW gifts (and S+ students?)
+	//  Set contribution amount correctly for S+ (amount - cost)
+	//  Output state
+	//  CSR mode is NOT needed
+	const { soldToContact, deliveryAgent, deliveryInstructions } = {
+		soldToContact: undefined,
+		deliveryAgent: '',
+		deliveryInstructions: undefined,
+		...productPurchase,
+	};
+
 	const newAccount = buildNewAccountObject({
 		accountName: accountName,
 		createdRequestId: createdRequestId,
@@ -90,30 +89,20 @@ function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		paymentGateway: paymentGateway,
 		paymentMethod: paymentMethod,
 		billToContact: billToContact,
-		soldToContact: isDeliveryProduct(productSpecificFields)
-			? productSpecificFields.soldToContact
-			: undefined,
+		soldToContact: soldToContact,
+		deliveryInstructions: deliveryInstructions,
 	});
 	const { contractEffectiveDate, customerAcceptanceDate } =
-		getSubscriptionDates(dayjs(), productSpecificFields);
+		getSubscriptionDates(dayjs(), productPurchase);
 
-	const chargeOverride = getChargeOverride(
-		productCatalog,
-		productSpecificFields,
-	);
+	const chargeOverride = getChargeOverride(productCatalog, productPurchase);
 
 	const createSubscriptionOrderAction = buildCreateSubscriptionOrderAction({
-		productRatePlanId: getProductRatePlanId(
-			productCatalog,
-			productSpecificFields,
-		),
+		productRatePlanId: getProductRatePlanId(productCatalog, productPurchase),
 		contractEffectiveDate: contractEffectiveDate,
 		customerAcceptanceDate: customerAcceptanceDate,
 		chargeOverride: chargeOverride,
-		deliveryAgent:
-			productSpecificFields.product === 'NationalDelivery'
-				? productSpecificFields.deliveryAgent
-				: undefined,
+		deliveryAgent: deliveryAgent.toString(),
 	});
 	return {
 		newAccount: newAccount,
@@ -125,8 +114,8 @@ function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 			},
 		],
 		processingOptions: {
-			runBilling: runBilling ?? false,
-			collectPayment: collectPayment ?? false,
+			runBilling: runBilling ?? true,
+			collectPayment: collectPayment ?? true,
 		},
 	};
 }

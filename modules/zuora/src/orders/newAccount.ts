@@ -60,7 +60,6 @@ export function buildNewAccountObject<T extends PaymentMethod>({
 	paymentMethod: T;
 	billToContact: Contact;
 	soldToContact?: Contact;
-	deliveryAgent?: string; //TODO: Make this required for National Delivery products
 	deliveryInstructions?: string;
 }): NewAccount<T> {
 	return {

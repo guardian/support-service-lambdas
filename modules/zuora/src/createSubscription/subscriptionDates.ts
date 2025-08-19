@@ -1,8 +1,7 @@
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import type { ProductSpecificFields } from '@modules/zuora/createSubscription/productSpecificFields';
-import { isDeliveryProduct } from '@modules/zuora/createSubscription/productSpecificFields';
+import { isDeliveryProductPurchase } from '@modules/product-catalog/productCatalog';
 
 const DigitalSubscription = {
 	freeTrialPeriodInDays: 14,
@@ -13,38 +12,35 @@ const GuardianAdLite = {
 	freeTrialPeriodInDays: 15,
 };
 
-export const getSubscriptionDates = <T extends ProductPurchase>(
+export const getSubscriptionDates = (
 	now: Dayjs,
-	productSpecificFields: ProductSpecificFields<T>,
+	productPurchase: ProductPurchase,
 ): {
 	contractEffectiveDate: Dayjs;
 	customerAcceptanceDate: Dayjs;
 } => {
 	return {
 		contractEffectiveDate: now,
-		customerAcceptanceDate: getCustomerAcceptanceDate(
-			now,
-			productSpecificFields,
-		),
+		customerAcceptanceDate: getCustomerAcceptanceDate(now, productPurchase),
 	};
 };
 
-const getCustomerAcceptanceDate = <T extends ProductPurchase>(
+const getCustomerAcceptanceDate = (
 	now: Dayjs,
-	productSpecificFields: ProductSpecificFields<T>,
+	productPurchase: ProductPurchase,
 ): Dayjs => {
-	if (isDeliveryProduct(productSpecificFields)) {
-		return dayjs(productSpecificFields.firstDeliveryDate);
+	if (isDeliveryProductPurchase(productPurchase)) {
+		return dayjs(productPurchase.firstDeliveryDate);
 	}
 
-	if (productSpecificFields.product === 'DigitalSubscription') {
+	if (productPurchase.product === 'DigitalSubscription') {
 		return now.add(
 			DigitalSubscription.freeTrialPeriodInDays +
 				DigitalSubscription.paymentGracePeriodInDays,
 			'day',
 		);
 	}
-	if (productSpecificFields.product === 'GuardianAdLite') {
+	if (productPurchase.product === 'GuardianAdLite') {
 		return now.add(GuardianAdLite.freeTrialPeriodInDays, 'day');
 	}
 	return now;
