@@ -17,6 +17,7 @@ import type {
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getProductRatePlanId } from '@modules/zuora/createSubscription/getProductRatePlanId';
+import { ReaderType } from '@modules/zuora/createSubscription/readerType';
 
 const createSubscriptionResponseSchema = z.object({
 	orderNumber: z.string(),
@@ -72,8 +73,8 @@ function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 	//  Set contribution amount correctly for S+ (amount - cost)
 	//  Output state
 	//  CSR mode is NOT needed
-	const { soldToContact, deliveryAgent, deliveryInstructions } = {
-		soldToContact: undefined,
+	const { deliveryContact, deliveryAgent, deliveryInstructions } = {
+		deliveryContact: undefined,
 		deliveryAgent: '',
 		deliveryInstructions: undefined,
 		...productPurchase,
@@ -89,13 +90,14 @@ function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		paymentGateway: paymentGateway,
 		paymentMethod: paymentMethod,
 		billToContact: billToContact,
-		soldToContact: soldToContact,
+		soldToContact: deliveryContact,
 		deliveryInstructions: deliveryInstructions,
 	});
 	const { contractEffectiveDate, customerAcceptanceDate } =
 		getSubscriptionDates(dayjs(), productPurchase);
 
 	const chargeOverride = getChargeOverride(productCatalog, productPurchase);
+	const readerType = ReaderType.Direct;
 
 	const createSubscriptionOrderAction = buildCreateSubscriptionOrderAction({
 		productRatePlanId: getProductRatePlanId(productCatalog, productPurchase),
@@ -103,6 +105,7 @@ function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		customerAcceptanceDate: customerAcceptanceDate,
 		chargeOverride: chargeOverride,
 		deliveryAgent: deliveryAgent.toString(),
+		readerType: readerType,
 	});
 	return {
 		newAccount: newAccount,

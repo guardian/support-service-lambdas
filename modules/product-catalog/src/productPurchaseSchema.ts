@@ -16,6 +16,7 @@ const deliveryContactSchema = z.object({
 	address2: z.string().nullish(),
 	postalCode: z.string(),
 });
+export type DeliveryContact = z.infer<typeof deliveryContactSchema>;
 
 const dateOrDateStringSchema = z.preprocess(
 	(input) => (typeof input === 'string' ? new Date(input) : input),
