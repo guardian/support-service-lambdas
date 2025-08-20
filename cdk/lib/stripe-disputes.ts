@@ -33,44 +33,6 @@ export class StripeDisputes extends GuStack {
 			Stage: this.stage,
 		};
 
-		// Create DynamoDB table for storing dispute records
-		const disputeRecordsTable = new Table(this, 'DisputeRecordsTable', {
-			tableName: `stripe-dispute-records-${this.stage}`,
-			partitionKey: {
-				name: 'disputeId',
-				type: AttributeType.STRING,
-			},
-			billingMode: BillingMode.PAY_PER_REQUEST,
-			removalPolicy:
-				this.stage === 'PROD' ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
-			pointInTimeRecovery: this.stage === 'PROD',
-		});
-
-		// Create DynamoDB table for idempotency
-		const idempotencyTable = new Table(this, 'IdempotencyTable', {
-			tableName: `stripe-dispute-idempotency-${this.stage}`,
-			partitionKey: {
-				name: 'eventId',
-				type: AttributeType.STRING,
-			},
-			billingMode: BillingMode.PAY_PER_REQUEST,
-			removalPolicy:
-				this.stage === 'PROD' ? RemovalPolicy.RETAIN : RemovalPolicy.DESTROY,
-			timeToLiveAttribute: 'ttl',
-		});
-
-		// DynamoDB permissions
-		const dynamoDbPolicy = new PolicyStatement({
-			actions: [
-				'dynamodb:GetItem',
-				'dynamodb:PutItem',
-				'dynamodb:UpdateItem',
-				'dynamodb:Query',
-				'dynamodb:Scan',
-			],
-			resources: [disputeRecordsTable.tableArn, idempotencyTable.tableArn],
-		});
-
 		// SSM Parameter Store permissions for Stripe webhook secret
 		const ssmPolicy = new PolicyStatement({
 			actions: [
@@ -94,14 +56,12 @@ export class StripeDisputes extends GuStack {
 		const commonLambdaProps = {
 			app,
 			fileName: `${app}.zip`,
-			initialPolicy: [dynamoDbPolicy, ssmPolicy, secretsPolicy],
+			initialPolicy: [ssmPolicy, secretsPolicy],
 			runtime: nodeVersion,
 			memorySize: 1024,
 			timeout: Duration.seconds(30),
 			environment: {
-				...commonEnvironmentVariables,
-				DISPUTE_RECORDS_TABLE: disputeRecordsTable.tableName,
-				IDEMPOTENCY_TABLE: idempotencyTable.tableName,
+				...commonEnvironmentVariables
 			},
 		};
 
