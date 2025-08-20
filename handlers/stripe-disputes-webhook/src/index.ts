@@ -43,6 +43,7 @@ function listenDisputeCreatedHandler(logger: Logger) {
 		const subscriptionNumber = listenDisputeCreatedInputSchema.parse(
 			JSON.parse(getIfDefined(event.body, 'No body was provided')),
 		).subscriptionNumber;
+		await Promise.resolve();
 		logger.mutableAddContext(subscriptionNumber);
 		return {
 			body: JSON.stringify({ ...event, stage }),
@@ -60,6 +61,7 @@ function listenDisputeClosedHandler(logger: Logger) {
 			JSON.parse(getIfDefined(event.body, 'No body was provided')),
 		).subscriptionNumber;
 		logger.mutableAddContext(subscriptionNumber);
+		await Promise.resolve();
 		return {
 			body: JSON.stringify({ ...event, stage }),
 			statusCode: 200,

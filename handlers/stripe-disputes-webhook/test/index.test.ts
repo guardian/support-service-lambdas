@@ -1,10 +1,13 @@
 import { Logger } from '@modules/logger';
-import type { APIGatewayProxyEvent, Context } from 'aws-lambda';
+import type {
+	APIGatewayProxyEvent,
+	APIGatewayProxyHandler,
+	APIGatewayProxyResult,
+	Context,
+} from 'aws-lambda';
+import { handler as rawHandler } from '../src/index';
 
-// Set environment variable before importing the handler
-process.env.STAGE = 'TEST';
-
-import { handler } from '../src/index';
+const handler = rawHandler as unknown as APIGatewayProxyHandler;
 
 const mockEvent = (
 	path: string,
@@ -70,6 +73,7 @@ const mockContext: Context = {
 };
 
 beforeEach(() => {
+	process.env.STAGE = 'TEST';
 	jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {});
 	jest
 		.spyOn(Logger.prototype, 'mutableAddContext')
@@ -78,6 +82,7 @@ beforeEach(() => {
 
 afterEach(() => {
 	jest.restoreAllMocks();
+	delete process.env.STAGE;
 });
 
 describe('Stripe Disputes Webhook Handler', () => {
@@ -93,8 +98,14 @@ describe('Stripe Disputes Webhook Handler', () => {
 				JSON.stringify(requestBody),
 			);
 
-			const result = await handler(event, mockContext, () => {});
-			const responseBody = JSON.parse(result.body);
+			const result: APIGatewayProxyResult = await handler(
+				event,
+				mockContext,
+				() => {},
+			);
+			const responseBody = JSON.parse(result.body) as typeof event & {
+				stage: string;
+			};
 
 			expect(result.statusCode).toBe(200);
 			expect(responseBody).toMatchObject({
@@ -107,7 +118,11 @@ describe('Stripe Disputes Webhook Handler', () => {
 			const event = mockEvent('/listen-dispute-created', 'POST', '');
 			event.body = null;
 
-			const result = await handler(event, mockContext, () => {});
+			const result: APIGatewayProxyResult = await handler(
+				event,
+				mockContext,
+				() => {},
+			);
 
 			expect(result.statusCode).toBe(500);
 		});
@@ -120,7 +135,11 @@ describe('Stripe Disputes Webhook Handler', () => {
 				JSON.stringify(requestBody),
 			);
 
-			const result = await handler(event, mockContext, () => {});
+			const result: APIGatewayProxyResult = await handler(
+				event,
+				mockContext,
+				() => {},
+			);
 
 			expect(result.statusCode).toBe(500);
 		});
@@ -132,7 +151,11 @@ describe('Stripe Disputes Webhook Handler', () => {
 				'invalid-json',
 			);
 
-			const result = await handler(event, mockContext, () => {});
+			const result: APIGatewayProxyResult = await handler(
+				event,
+				mockContext,
+				() => {},
+			);
 
 			expect(result.statusCode).toBe(500);
 		});
@@ -166,8 +189,14 @@ describe('Stripe Disputes Webhook Handler', () => {
 				JSON.stringify(requestBody),
 			);
 
-			const result = await handler(event, mockContext, () => {});
-			const responseBody = JSON.parse(result.body);
+			const result: APIGatewayProxyResult = await handler(
+				event,
+				mockContext,
+				() => {},
+			);
+			const responseBody = JSON.parse(result.body) as typeof event & {
+				stage: string;
+			};
 
 			expect(result.statusCode).toBe(200);
 			expect(responseBody).toMatchObject({
@@ -180,7 +209,11 @@ describe('Stripe Disputes Webhook Handler', () => {
 			const event = mockEvent('/listen-dispute-closed', 'POST', '');
 			event.body = null;
 
-			const result = await handler(event, mockContext, () => {});
+			const result: APIGatewayProxyResult = await handler(
+				event,
+				mockContext,
+				() => {},
+			);
 
 			expect(result.statusCode).toBe(500);
 		});
@@ -193,7 +226,11 @@ describe('Stripe Disputes Webhook Handler', () => {
 				JSON.stringify(requestBody),
 			);
 
-			const result = await handler(event, mockContext, () => {});
+			const result: APIGatewayProxyResult = await handler(
+				event,
+				mockContext,
+				() => {},
+			);
 
 			expect(result.statusCode).toBe(500);
 		});
@@ -201,7 +238,11 @@ describe('Stripe Disputes Webhook Handler', () => {
 		it('should fail when body is invalid JSON', async () => {
 			const event = mockEvent('/listen-dispute-closed', 'POST', 'invalid-json');
 
-			const result = await handler(event, mockContext, () => {});
+			const result: APIGatewayProxyResult = await handler(
+				event,
+				mockContext,
+				() => {},
+			);
 
 			expect(result.statusCode).toBe(500);
 		});
@@ -227,7 +268,11 @@ describe('Stripe Disputes Webhook Handler', () => {
 		it('should handle unsupported HTTP methods', async () => {
 			const event = mockEvent('/listen-dispute-created', 'GET', '{}');
 
-			const result = await handler(event, mockContext, () => {});
+			const result: APIGatewayProxyResult = await handler(
+				event,
+				mockContext,
+				() => {},
+			);
 
 			expect(result.statusCode).toBe(404);
 		});
@@ -235,7 +280,11 @@ describe('Stripe Disputes Webhook Handler', () => {
 		it('should handle unsupported paths', async () => {
 			const event = mockEvent('/unknown-path', 'POST', '{}');
 
-			const result = await handler(event, mockContext, () => {});
+			const result: APIGatewayProxyResult = await handler(
+				event,
+				mockContext,
+				() => {},
+			);
 
 			expect(result.statusCode).toBe(404);
 		});
@@ -252,7 +301,11 @@ describe('Stripe Disputes Webhook Handler', () => {
 				JSON.stringify(requestBody),
 			);
 
-			const result = await handler(event, mockContext, () => {});
+			const result: APIGatewayProxyResult = await handler(
+				event,
+				mockContext,
+				() => {},
+			);
 
 			expect(loggerSpy).toHaveBeenCalledWith(
 				`Input is ${JSON.stringify(event)}`,

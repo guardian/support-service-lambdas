@@ -1,7 +1,7 @@
 import {
 	listenDisputeClosedInputSchema,
-	listenDisputeCreatedInputSchema,
 	type ListenDisputeClosedRequestBody,
+	listenDisputeCreatedInputSchema,
 	type ListenDisputeCreatedRequestBody,
 } from '../src/requestSchema';
 
