@@ -9,7 +9,7 @@ const mockFetch = jest.fn();
 describe('RestRequestMaker', () => {
 	const baseURL = 'https://api.example.com';
 	const headers = { Authorization: 'Bearer token123' };
-	let restRequestMaker: RestRequestMaker = new RestRequestMaker(
+	const restRequestMaker: RestRequestMaker = new RestRequestMaker(
 		baseURL,
 		headers,
 		mockFetch,
