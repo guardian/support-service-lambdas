@@ -1,11 +1,12 @@
-import { batonRerRouter } from '../src/routers/baton';
 import { ConfigSchema } from '../src/services/config';
 import { loadConfig } from '@modules/aws/appConfig';
 import { MParticleClient } from '../src/services/mparticleClient';
 import { BatonS3WriterImpl } from '../src/services/batonS3Writer';
 import { InitiationReference } from '../src/routers/baton/initiationReference';
-import { BatonSarEventStatusRequest } from '../src/routers/baton/access/handleStatus';
-import { handleSarStatus } from '../src/routers/baton/handle-sar-status';
+import { 
+	handleSarStatus, 
+	BatonSarEventStatusResponse 
+} from '../src/routers/baton/access/handleStatus';
 
 /*
  **************************************************************************
@@ -38,7 +39,7 @@ loadConfig('CODE', 'support', 'mparticle-api', ConfigSchema).then((config) => {
 		mParticleDataSubjectClient,
 		batonS3Writer,
 		initiationReference,
-	).then((out) => {
+	).then((out: BatonSarEventStatusResponse) => {
 		console.log(out);
 		const consoleUrl = `http://eu-west-1.console.aws.amazon.com/s3/buckets/${sarResultsBucket}?prefix=${sarS3BaseKey}`;
 		console.log('check the results in the console', consoleUrl);
