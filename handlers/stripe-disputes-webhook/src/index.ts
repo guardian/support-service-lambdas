@@ -2,11 +2,7 @@ import { Logger } from '@modules/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { Router } from '@modules/routing/router';
 import type { Stage } from '@modules/stage';
-import type {
-	APIGatewayProxyEvent,
-	APIGatewayProxyResult,
-	Handler,
-} from 'aws-lambda';
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import {
 	listenDisputeClosedInputSchema,
 	listenDisputeCreatedInputSchema,
@@ -26,7 +22,7 @@ const router = new Router([
 		handler: listenDisputeClosedHandler(logger),
 	},
 ]);
-export const handler: Handler = async (
+export const handler = async (
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
 	logger.log(`Input is ${JSON.stringify(event)}`);

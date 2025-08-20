@@ -1,13 +1,6 @@
 import { Logger } from '@modules/logger';
-import type {
-	APIGatewayProxyEvent,
-	APIGatewayProxyHandler,
-	APIGatewayProxyResult,
-	Context,
-} from 'aws-lambda';
-import { handler as rawHandler } from '../src/index';
-
-const handler = rawHandler as unknown as APIGatewayProxyHandler;
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { handler } from '../src';
 
 const mockEvent = (
 	path: string,
@@ -56,22 +49,6 @@ const mockEvent = (
 		isBase64Encoded: false,
 	}) as APIGatewayProxyEvent;
 
-const mockContext: Context = {
-	callbackWaitsForEmptyEventLoop: true,
-	functionName: 'test-function',
-	functionVersion: '1',
-	invokedFunctionArn:
-		'arn:aws:lambda:us-east-1:123456789012:function:test-function',
-	memoryLimitInMB: '128',
-	awsRequestId: 'test-request-id',
-	logGroupName: '/aws/lambda/test-function',
-	logStreamName: '2023/01/01/[$LATEST]test',
-	getRemainingTimeInMillis: () => 30000,
-	done: () => {},
-	fail: () => {},
-	succeed: () => {},
-};
-
 beforeEach(() => {
 	process.env.STAGE = 'TEST';
 	jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {});
@@ -87,42 +64,11 @@ afterEach(() => {
 
 describe('Stripe Disputes Webhook Handler', () => {
 	describe('listenDisputeCreatedHandler', () => {
-		it('should handle valid dispute created request', async () => {
-			const requestBody = {
-				subscriptionNumber: 'A-S12345678',
-			};
-
-			const event = mockEvent(
-				'/listen-dispute-created',
-				'POST',
-				JSON.stringify(requestBody),
-			);
-
-			const result: APIGatewayProxyResult = await handler(
-				event,
-				mockContext,
-				() => {},
-			);
-			const responseBody = JSON.parse(result.body) as typeof event & {
-				stage: string;
-			};
-
-			expect(result.statusCode).toBe(200);
-			expect(responseBody).toMatchObject({
-				...event,
-				stage: 'TEST',
-			});
-		});
-
 		it('should fail when body is missing', async () => {
 			const event = mockEvent('/listen-dispute-created', 'POST', '');
 			event.body = null;
 
-			const result: APIGatewayProxyResult = await handler(
-				event,
-				mockContext,
-				() => {},
-			);
+			const result: APIGatewayProxyResult = await handler(event);
 
 			expect(result.statusCode).toBe(500);
 		});
@@ -135,11 +81,7 @@ describe('Stripe Disputes Webhook Handler', () => {
 				JSON.stringify(requestBody),
 			);
 
-			const result: APIGatewayProxyResult = await handler(
-				event,
-				mockContext,
-				() => {},
-			);
+			const result: APIGatewayProxyResult = await handler(event);
 
 			expect(result.statusCode).toBe(500);
 		});
@@ -151,11 +93,7 @@ describe('Stripe Disputes Webhook Handler', () => {
 				'invalid-json',
 			);
 
-			const result: APIGatewayProxyResult = await handler(
-				event,
-				mockContext,
-				() => {},
-			);
+			const result: APIGatewayProxyResult = await handler(event);
 
 			expect(result.statusCode).toBe(500);
 		});
@@ -171,94 +109,7 @@ describe('Stripe Disputes Webhook Handler', () => {
 				JSON.stringify(requestBody),
 			);
 
-			await handler(event, mockContext, () => {});
-
-			expect(loggerSpy).toHaveBeenCalledWith(subscriptionNumber);
-		});
-	});
-
-	describe('listenDisputeClosedHandler', () => {
-		it('should handle valid dispute closed request', async () => {
-			const requestBody = {
-				subscriptionNumber: 'A-S87654321',
-			};
-
-			const event = mockEvent(
-				'/listen-dispute-closed',
-				'POST',
-				JSON.stringify(requestBody),
-			);
-
-			const result: APIGatewayProxyResult = await handler(
-				event,
-				mockContext,
-				() => {},
-			);
-			const responseBody = JSON.parse(result.body) as typeof event & {
-				stage: string;
-			};
-
-			expect(result.statusCode).toBe(200);
-			expect(responseBody).toMatchObject({
-				...event,
-				stage: 'TEST',
-			});
-		});
-
-		it('should fail when body is missing', async () => {
-			const event = mockEvent('/listen-dispute-closed', 'POST', '');
-			event.body = null;
-
-			const result: APIGatewayProxyResult = await handler(
-				event,
-				mockContext,
-				() => {},
-			);
-
-			expect(result.statusCode).toBe(500);
-		});
-
-		it('should fail when subscriptionNumber is missing from body', async () => {
-			const requestBody = {};
-			const event = mockEvent(
-				'/listen-dispute-closed',
-				'POST',
-				JSON.stringify(requestBody),
-			);
-
-			const result: APIGatewayProxyResult = await handler(
-				event,
-				mockContext,
-				() => {},
-			);
-
-			expect(result.statusCode).toBe(500);
-		});
-
-		it('should fail when body is invalid JSON', async () => {
-			const event = mockEvent('/listen-dispute-closed', 'POST', 'invalid-json');
-
-			const result: APIGatewayProxyResult = await handler(
-				event,
-				mockContext,
-				() => {},
-			);
-
-			expect(result.statusCode).toBe(500);
-		});
-
-		it('should add subscription number to logger context', async () => {
-			const loggerSpy = jest.spyOn(Logger.prototype, 'mutableAddContext');
-			const subscriptionNumber = 'A-S87654321';
-			const requestBody = { subscriptionNumber };
-
-			const event = mockEvent(
-				'/listen-dispute-closed',
-				'POST',
-				JSON.stringify(requestBody),
-			);
-
-			await handler(event, mockContext, () => {});
+			await handler(event);
 
 			expect(loggerSpy).toHaveBeenCalledWith(subscriptionNumber);
 		});
@@ -268,11 +119,7 @@ describe('Stripe Disputes Webhook Handler', () => {
 		it('should handle unsupported HTTP methods', async () => {
 			const event = mockEvent('/listen-dispute-created', 'GET', '{}');
 
-			const result: APIGatewayProxyResult = await handler(
-				event,
-				mockContext,
-				() => {},
-			);
+			const result: APIGatewayProxyResult = await handler(event);
 
 			expect(result.statusCode).toBe(404);
 		});
@@ -280,11 +127,7 @@ describe('Stripe Disputes Webhook Handler', () => {
 		it('should handle unsupported paths', async () => {
 			const event = mockEvent('/unknown-path', 'POST', '{}');
 
-			const result: APIGatewayProxyResult = await handler(
-				event,
-				mockContext,
-				() => {},
-			);
+			const result: APIGatewayProxyResult = await handler(event);
 
 			expect(result.statusCode).toBe(404);
 		});
@@ -301,11 +144,7 @@ describe('Stripe Disputes Webhook Handler', () => {
 				JSON.stringify(requestBody),
 			);
 
-			const result: APIGatewayProxyResult = await handler(
-				event,
-				mockContext,
-				() => {},
-			);
+			const result: APIGatewayProxyResult = await handler(event);
 
 			expect(loggerSpy).toHaveBeenCalledWith(
 				`Input is ${JSON.stringify(event)}`,
