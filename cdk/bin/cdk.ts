@@ -4,7 +4,6 @@ import { AlarmsHandler } from '../lib/alarms-handler';
 import { BatchEmailSender } from '../lib/batch-email-sender';
 import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
 import { DiscountApi } from '../lib/discount-api';
-import { StripeDisputesWebhook } from '../lib/stripe-disputes-webhook';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
 import { MetricPushApi } from '../lib/metric-push-api';
@@ -23,6 +22,7 @@ import {
 	SingleContributionSalesforceWrites,
 } from '../lib/single-contribution-salesforce-writes';
 import { SoftOptInConsentSetter } from '../lib/soft-opt-in-consent-setter';
+import { StripeDisputesWebhook } from '../lib/stripe-disputes-webhook';
 import type { StripeWebhookEndpointsProps } from '../lib/stripe-webhook-endpoints';
 import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
 import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
