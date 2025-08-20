@@ -5,6 +5,7 @@ import { MParticleClient } from '../src/services/mparticleClient';
 import { BatonS3WriterImpl } from '../src/services/batonS3Writer';
 import { InitiationReference } from '../src/routers/baton/initiationReference';
 import { BatonSarEventStatusRequest } from '../src/routers/baton/access/handleStatus';
+import { handleSarStatus } from '../src/routers/baton/handle-sar-status';
 
 /*
  **************************************************************************
@@ -20,41 +21,26 @@ import { BatonSarEventStatusRequest } from '../src/routers/baton/access/handleSt
 const initiationReference: InitiationReference =
 	'6fd4c21e-a661-464b-8388-b09bf81604fc' as InitiationReference;
 
-const handlerTestEvent: BatonSarEventStatusRequest = {
-	initiationReference,
-	requestType: 'SAR',
-	action: 'status',
-};
-
 const sarS3BaseKey = 'handleSarStatusIntegrationTest/';
 const sarResultsBucket = 'support-service-lambdas-test';
 
 loadConfig('CODE', 'support', 'mparticle-api', ConfigSchema).then((config) => {
 	const mParticleDataSubjectClient =
 		MParticleClient.createMParticleDataSubjectClient(config.workspace);
-	const mParticleEventsAPIClient = MParticleClient.createEventsApiClient(
-		config.inputPlatform,
-		config.pod,
-	);
 
-	const mockDate = () => new Date(0);
 	const batonS3Writer = new BatonS3WriterImpl(
 		sarResultsBucket,
 		sarS3BaseKey,
-		mockDate,
+		() => new Date(),
 	);
 
-	batonRerRouter(
-		//TODO call the child not the router
+	handleSarStatus(
 		mParticleDataSubjectClient,
-		mParticleEventsAPIClient,
-		false,
 		batonS3Writer,
-	)
-		.routeRequest(handlerTestEvent)
-		.then((out) => {
-			console.log(out);
-			const consoleUrl = `http://eu-west-1.console.aws.amazon.com/s3/buckets/${sarResultsBucket}?prefix=${sarS3BaseKey}`;
-			console.log('check the results in the console', consoleUrl);
-		});
+		initiationReference,
+	).then((out) => {
+		console.log(out);
+		const consoleUrl = `http://eu-west-1.console.aws.amazon.com/s3/buckets/${sarResultsBucket}?prefix=${sarS3BaseKey}`;
+		console.log('check the results in the console', consoleUrl);
+	});
 });
