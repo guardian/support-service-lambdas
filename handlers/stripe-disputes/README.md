@@ -1,4 +1,4 @@
-# stripe-disputes-webhook
+# stripe-disputes
 
 This lambda is used for handling Stripe disputes webhook events.
 It processes events related to disputes, such as when a dispute is created or updated.

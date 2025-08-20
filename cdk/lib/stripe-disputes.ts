@@ -13,7 +13,7 @@ import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { nodeVersion } from './node-version';
 
-export interface StripeDisputesWebhookProps extends GuStackProps {
+export interface StripeDisputesProps extends GuStackProps {
 	stack: string;
 	stage: string;
 	certificateId: string;
@@ -21,11 +21,11 @@ export interface StripeDisputesWebhookProps extends GuStackProps {
 	hostedZoneId: string;
 }
 
-export class StripeDisputesWebhook extends GuStack {
-	constructor(scope: App, id: string, props: StripeDisputesWebhookProps) {
+export class StripeDisputes extends GuStack {
+	constructor(scope: App, id: string, props: StripeDisputesProps) {
 		super(scope, id, props);
 
-		const app = 'stripe-disputes-webhook';
+		const app = 'stripe-disputes';
 		const nameWithStage = `${app}-${this.stage}`;
 
 		const commonEnvironmentVariables = {

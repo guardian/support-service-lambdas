@@ -295,7 +295,7 @@ importers:
 
   handlers/salesforce-event-bus: {}
 
-  handlers/stripe-disputes-webhook:
+  handlers/stripe-disputes:
     dependencies:
       dayjs:
         specifier: ^1.11.13
