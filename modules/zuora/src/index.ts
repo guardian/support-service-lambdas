@@ -8,7 +8,6 @@ export * from './billingPreview';
 export * from './creditBalanceAdjustment';
 export * from './discount';
 export * from './invoice';
-export * from './orders';
 export * from './payment';
 export * from './paymentMethod';
 export * from './query';
