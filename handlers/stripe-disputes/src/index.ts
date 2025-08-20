@@ -35,7 +35,7 @@ function listenDisputeCreatedHandler(logger: Logger) {
 	return async (
 		event: APIGatewayProxyEvent,
 	): Promise<APIGatewayProxyResult> => {
-		logger.log('listenDisputeCreatedHandler');
+		logger.log('listenDisputeCreatedHandler test ooo');
 		const subscriptionNumber = listenDisputeCreatedInputSchema.parse(
 			JSON.parse(getIfDefined(event.body, 'No body was provided')),
 		).subscriptionNumber;
