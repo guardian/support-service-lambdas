@@ -1,16 +1,16 @@
 import { createRoute, Router } from '@modules/routing/router';
-import type { DataSubjectRequestCallback } from '../../interfaces/data-subject-request-callback';
-import type { DataSubjectRequestForm } from '../../interfaces/data-subject-request-form';
-import type { EventBatch } from '../../interfaces/event-batch';
+import type { DataSubjectRequestForm } from '../apis/dataSubjectRequests/submit';
+import type { EventBatch } from '../apis/events/uploadAnEventBatch';
 import type {
 	DataSubjectAPI,
 	EventsAPI,
 	MParticleClient,
-} from '../apis/mparticleClient';
+} from '../services/mparticleClient';
+import type { DataSubjectRequestCallback } from './http/dataSubjectRequestCallback/data-subject-request-callback';
 import {
 	dataSubjectRequestCallbackHandler,
 	dataSubjectRequestCallbackParser,
-} from './http/data-subject-request-callback';
+} from './http/dataSubjectRequestCallback/data-subject-request-callback';
 import {
 	getDataSubjectRequestStatusHandler,
 	requestIdPathParser,

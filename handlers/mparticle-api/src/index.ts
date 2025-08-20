@@ -7,11 +7,11 @@ import { httpRouter } from './routers/http';
 import {
 	BatonEventRequest,
 	BatonEventResponse,
-} from './routers/baton/types-and-schemas';
-import { batonRerRouter } from './routers/baton';
-import { AppConfig, getAppConfig, getEnv } from './utils/config';
-import { MParticleClient } from './apis/mparticleClient';
-import { BatonS3WriterImpl } from './apis/batonS3Writer';
+	batonRerRouter,
+} from './routers/baton';
+import { AppConfig, getAppConfig, getEnv } from './services/config';
+import { MParticleClient } from './services/mparticleClient';
+import { BatonS3WriterImpl } from './services/batonS3Writer';
 import { withLogging } from './utils/withLogging';
 
 export const handlerHttp: Handler<APIGatewayProxyEvent, APIGatewayProxyResult> =

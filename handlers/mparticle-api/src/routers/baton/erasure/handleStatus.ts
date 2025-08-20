@@ -1,11 +1,34 @@
-import type { DataSubjectRequestState } from '../../../interfaces/data-subject-request-state';
-import { DataSubjectRequestStatus } from '../../../interfaces/data-subject-request-state';
-import { getStatusOfDataSubjectRequest } from '../../apis/data-subject-requests';
-import type {
-	BatonRerEventStatusRequest,
-	BatonRerEventStatusResponse,
-} from './types-and-schemas';
-import { DataSubjectAPI, MParticleClient } from '../../apis/mparticleClient';
+import {
+	DataSubjectAPI,
+	MParticleClient,
+} from '../../../services/mparticleClient';
+import {
+	DataSubjectRequestState,
+	DataSubjectRequestStatus,
+	getStatusOfDataSubjectRequest,
+} from '../../../apis/dataSubjectRequests/getStatus';
+import { z } from 'zod';
+import {
+	BatonRerEventRequestBaseSchema,
+	BatonRerEventResponseBaseSchema,
+} from './schema';
+import { InitiationReferenceSchema } from '../initiationReference';
+
+export const BatonRerEventStatusRequestSchema =
+	BatonRerEventRequestBaseSchema.extend({
+		action: z.literal('status'),
+		initiationReference: InitiationReferenceSchema,
+	});
+export const BatonRerEventStatusResponseSchema =
+	BatonRerEventResponseBaseSchema.extend({
+		action: z.literal('status'),
+	});
+export type BatonRerEventStatusRequest = z.infer<
+	typeof BatonRerEventStatusRequestSchema
+>;
+export type BatonRerEventStatusResponse = z.infer<
+	typeof BatonRerEventStatusResponseSchema
+>;
 
 export async function handleRerStatus(
 	mParticleDataSubjectClient: MParticleClient<DataSubjectAPI>,

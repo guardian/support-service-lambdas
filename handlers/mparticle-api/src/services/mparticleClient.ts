@@ -1,6 +1,6 @@
-import type { AppConfig } from '../utils/config';
-import type { HttpResponse, Schema } from '../utils/make-http-request';
-import { RestRequestMaker } from '../utils/make-http-request';
+import type { AppConfig } from './config';
+import type { HttpResponse, Schema } from './make-http-request';
+import { RestRequestMaker } from './make-http-request';
 
 export interface DataSubjectAPI {
 	readonly clientType: 'dataSubject';
@@ -74,9 +74,13 @@ export class MParticleClientImpl<
 		 * https://docs.mparticle.com/developers/apis/dsr-api/v3/#authentication
 		 */
 		const authHeader = `Basic ${Buffer.from(`${key}:${secret}`).toString('base64')}`;
-		this.rest = new RestRequestMaker(baseURL, {
-			Authorization: authHeader,
-		});
+		this.rest = new RestRequestMaker(
+			baseURL,
+			{
+				Authorization: authHeader,
+			},
+			fetch,
+		);
 	}
 
 	async get<RESP>(

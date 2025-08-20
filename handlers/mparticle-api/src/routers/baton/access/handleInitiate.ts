@@ -1,13 +1,43 @@
 import { randomUUID } from 'crypto';
-import type { DataSubjectRequestSubmission } from '../../../interfaces/data-subject-request-submission';
-import { submitDataSubjectRequest } from '../../apis/data-subject-requests';
-import { getEnv } from '../../utils/config';
-import type {
-	BatonSarEventInitiateRequest,
-	BatonSarEventInitiateResponse,
+
+import { getEnv } from '../../../services/config';
+
+import {
+	DataSubjectAPI,
+	MParticleClient,
+} from '../../../services/mparticleClient';
+import {
+	DataSubjectRequestSubmission,
+	submitDataSubjectRequest,
+} from '../../../apis/dataSubjectRequests/submit';
+import { z } from 'zod';
+import {
+	BatonSarEventRequestBaseSchema,
+	BatonSarEventResponseBaseSchema,
+} from './schema';
+import {
 	InitiationReference,
-} from './types-and-schemas';
-import { DataSubjectAPI, MParticleClient } from '../../apis/mparticleClient';
+	InitiationReferenceSchema,
+} from '../initiationReference';
+
+export const BatonSarEventInitiateRequestSchema =
+	BatonSarEventRequestBaseSchema.extend({
+		action: z.literal('initiate'),
+		subjectId: z.string().min(1, 'Subject Id is required'),
+		subjectEmail: z.string().email().optional(),
+		dataProvider: z.literal('mparticlesar'),
+	});
+export const BatonSarEventInitiateResponseSchema =
+	BatonSarEventResponseBaseSchema.extend({
+		action: z.literal('initiate'),
+		initiationReference: InitiationReferenceSchema,
+	});
+export type BatonSarEventInitiateRequest = z.infer<
+	typeof BatonSarEventInitiateRequestSchema
+>;
+export type BatonSarEventInitiateResponse = z.infer<
+	typeof BatonSarEventInitiateResponseSchema
+>;
 
 export async function handleSarInitiate(
 	mParticleDataSubjectClient: MParticleClient<DataSubjectAPI>,

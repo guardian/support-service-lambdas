@@ -1,9 +1,14 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
-import type { DataSubjectRequestCallback } from '../../../interfaces/data-subject-request-callback';
-import { processDataSubjectRequestCallback } from '../../apis/data-subject-requests';
-import { validateDataSubjectRequestCallback } from '../../utils/validate-data-subject-request-callback';
-import { DataSubjectAPI, MParticleClient } from '../../apis/mparticleClient';
+import { validateDataSubjectRequestCallback } from './validate-data-subject-request-callback';
+import {
+	DataSubjectAPI,
+	MParticleClient,
+} from '../../../services/mparticleClient';
+
+export type DataSubjectRequestCallback = z.infer<
+	typeof dataSubjectRequestCallbackParser.body
+>;
 
 export const dataSubjectRequestCallbackParser = {
 	path: z.object({
@@ -67,3 +72,33 @@ export function dataSubjectRequestCallbackHandler(
 		};
 	};
 }
+
+/**
+ * Callback post made on completion of the Data Subject Request (DSR) by mParticle
+ * When a request changes status, including when a request is first created, mParticle sends a callback
+ * POST to all URLs specified in the status_callback_urls array of the request. Callbacks are queued
+ * and sent every 15 minutes.
+ * https://docs.mparticle.com/developers/apis/dsr-api/v3/#submit-a-data-subject-request-dsr
+ * https://docs.mparticle.com/developers/apis/dsr-api/v3/#example-response-body
+ * @param {string} requestId - The ID of the request to check the status of.
+ * @param {DataSubjectRequestCallback} payload - The data containing the data subject request state details.
+ * @returns Confirmation message and timestamp
+ */
+export const processDataSubjectRequestCallback = (
+	requestId: string,
+	payload: DataSubjectRequestCallback,
+): {
+	message: string;
+	timestamp: Date;
+} => {
+	// Just log this information so we can have track of it on Cloud Watch
+	console.info('Process Data Subject Request Callback from mParticle', {
+		requestId,
+		form: payload,
+	});
+
+	return {
+		message: 'Callback accepted and processed',
+		timestamp: new Date(),
+	};
+};
