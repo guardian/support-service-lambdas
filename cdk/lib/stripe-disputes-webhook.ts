@@ -36,8 +36,7 @@ export class StripeDisputesWebhook extends GuStack {
 
 		// ---- API-triggered lambda functions ---- //
 		const lambda = new GuApiLambda(this, `${app}-lambda`, {
-			description:
-				'A lambda that handles stripe disputes webhook events',
+			description: 'A lambda that handles stripe disputes webhook events',
 			functionName: nameWithStage,
 			loggingFormat: LoggingFormat.TEXT,
 			fileName: `${app}.zip`,
