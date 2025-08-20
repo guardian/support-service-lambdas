@@ -2,12 +2,24 @@ stacks:
   - support
 regions:
   - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
 deployments:
-  stripe-disputes:
+  stripe-disputes-cloudformation:
+    type: cloud-formation
+    app: stripe-disputes-api
+    parameters:
+      templateStagePaths:
+        CODE: stripe-disputes-CODE.template.json
+        PROD: stripe-disputes-PROD.template.json
+
+  stripe-disputes-api:
     type: aws-lambda
     parameters:
-      bucket: support-dist
-      fileName: stripe-disputes.zip
+      fileName: stripe-disputes-api.zip
+      bucketSsmLookup: true
+      prefixStack: false
       functionNames:
-        - stripe-disputes-CODE
-        - stripe-disputes-PROD
+        - stripe-disputes-webhook-lambda-
+    dependencies: [stripe-disputes-cloudformation]
