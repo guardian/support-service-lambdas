@@ -1,12 +1,19 @@
 import { Logger } from '@modules/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { Router } from '@modules/routing/router';
+import { getSecretValue } from '@modules/secrets-manager/getSecret';
 import type { Stage } from '@modules/stage';
+import { stageFromEnvironment } from '@modules/stage';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import {
 	listenDisputeClosedInputSchema,
 	listenDisputeCreatedInputSchema,
 } from './requestSchema';
+
+interface SalesforceCredentials {
+	client_id: string;
+	client_secret: string;
+}
 
 const stage = process.env.STAGE as Stage;
 const logger = new Logger();
@@ -36,11 +43,18 @@ function listenDisputeCreatedHandler(logger: Logger) {
 		event: APIGatewayProxyEvent,
 	): Promise<APIGatewayProxyResult> => {
 		logger.log('listenDisputeCreatedHandler test ooo');
-		const subscriptionNumber = listenDisputeCreatedInputSchema.parse(
+
+		// Get Salesforce credentials from AWS Secrets Manager
+		const salesforceCredentials = await getSecretValue<SalesforceCredentials>(
+			`${stageFromEnvironment()}/Stripe/Dispute-webhook-secrets/salesforce`,
+		);
+		console.log('Salesforce credentials:', salesforceCredentials);
+
+		const stripeWebhook = listenDisputeCreatedInputSchema.parse(
 			JSON.parse(getIfDefined(event.body, 'No body was provided')),
-		).subscriptionNumber;
+		);
 		await Promise.resolve();
-		logger.mutableAddContext(subscriptionNumber);
+		logger.mutableAddContext(stripeWebhook.data.object.id);
 		return {
 			body: JSON.stringify({ ...event, stage }),
 			statusCode: 200,
@@ -53,10 +67,17 @@ function listenDisputeClosedHandler(logger: Logger) {
 		event: APIGatewayProxyEvent,
 	): Promise<APIGatewayProxyResult> => {
 		logger.log('listenDisputeClosedHandler');
-		const subscriptionNumber = listenDisputeClosedInputSchema.parse(
+
+		// Get Salesforce credentials from AWS Secrets Manager
+		const salesforceCredentials = await getSecretValue<SalesforceCredentials>(
+			`${stageFromEnvironment()}/Stripe/Dispute-webhook-secrets/salesforce`,
+		);
+		console.log('Salesforce credentials:', salesforceCredentials);
+
+		const stripeWebhook = listenDisputeClosedInputSchema.parse(
 			JSON.parse(getIfDefined(event.body, 'No body was provided')),
-		).subscriptionNumber;
-		logger.mutableAddContext(subscriptionNumber);
+		);
+		logger.mutableAddContext(stripeWebhook.data.object.id);
 		await Promise.resolve();
 		return {
 			body: JSON.stringify({ ...event, stage }),
