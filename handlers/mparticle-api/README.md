@@ -375,8 +375,7 @@ This lambda helps Guardian fulfill GDPR and CCPA compliance requirements by:
 ## 📞 Support & Monitoring
 
 ### Team Information
-- **Primary Owner**: Value Team
-- **Slack Channel**: [@P&E/Value](https://chat.google.com/room/AAAAuotUxTg?cls=7)
+- **Primary Owner**: Consult the following [file](https://docs.google.com/spreadsheets/d/1bb8WB-6ZFRdUwERHMOVIolN8WU8zJMcsyi-WJuwp07Q/edit?gid=0#gid=0)
 
 ### External Dependencies
 - **mParticle DSR API**: Data subject request processing
