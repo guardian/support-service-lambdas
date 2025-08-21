@@ -214,8 +214,64 @@ sequenceDiagram
 
 ## 🚀 Quick Start
 
-### Configuration
-All configuration is managed through AWS Parameter Store. Ensure these parameters are set for your environment:
+The recommended workflow for testing dependency updates or validating changes is to **deploy to CODE** and test the live integrations.
+
+### 1. Prerequisites
+
+Ensure you have the required AWS profile and permissions. Use Janus to download the Membership profile.
+
+### 2. Verify Configuration
+
+Check that CODE configuration is accessible:
+```bash
+cd handlers/mparticle-api
+pnpm check-config
+```
+
+This validates that all required parameters are accessible in Parameter Store.
+
+### 3. Test Basic Integrations
+
+#### Test RER (Right to Erasure) Flow
+```bash
+# Edit the test data in runManual/invokeHandlerRERInitiateCODE.ts first
+# Update subjectEmail and subjectId with test values
+pnpm ts-node runManual/invokeHandlerRERInitiateCODE.ts
+```
+
+#### Test SAR (Subject Access Request) Flow  
+```bash
+# Edit the test data in runManual/invokeHandlerSARInitiateCODE.ts first
+# Update subjectEmail and subjectId with test values
+pnpm ts-node runManual/invokeHandlerSARInitiateCODE.ts
+```
+
+#### Test Status Checking
+```bash
+# Use the requestId from previous tests
+pnpm ts-node runManual/invokeHandlerRERStatusCODE.ts
+pnpm ts-node runManual/invokeHandlerSARStatusCODE.ts
+```
+
+### 4. Run Automated Tests
+
+```bash
+# Unit tests (fast, no external dependencies)
+pnpm test
+
+# Integration tests (slower, tests actual API integrations)
+pnpm it-test
+```
+
+### 5. Monitor Live Requests
+
+Check CloudWatch logs for your test requests:
+- Lambda function logs: `mparticle-api-baton-CODE` and `mparticle-api-http-CODE`
+- API Gateway logs: Look for your test request IDs
+
+### Configuration Reference
+
+All configuration is managed through AWS Parameter Store. CODE environment uses these parameters:
 
 #### Workspace Credentials
 - **`/{stage}/support/mparticle-api/workspace/key`**
@@ -239,6 +295,9 @@ All configuration is managed through AWS Parameter Store. Ensure these parameter
 - **`/{stage}/support/mparticle-api/pod`**
   - *Description*: mParticle pod/cluster identifier (e.g., "us1", "us2", "eu1") for regional API endpoints
   - *mParticle Reference*: [Data Hosting Locations](https://docs.mparticle.com/developers/guides/data-localization/)
+
+- **`/{stage}/support/mparticle-api/sarResultsBucket`**
+  - *Description*: S3 bucket name for storing SAR (Subject Access Request) export results
 
 ---
 
