@@ -377,12 +377,6 @@ This lambda helps Guardian fulfill GDPR and CCPA compliance requirements by:
 ### Team Information
 - **Primary Owner**: Consult the following [file](https://docs.google.com/spreadsheets/d/1bb8WB-6ZFRdUwERHMOVIolN8WU8zJMcsyi-WJuwp07Q/edit?gid=0#gid=0)
 
-### External Dependencies
-- **mParticle DSR API**: Data subject request processing
-- **AWS Parameter Store**: Configuration management
-- **CloudWatch**: Logging and monitoring
-- **Baton**: Privacy workflow orchestration
-
 ---
 
 ## 🤝 Integration Points
