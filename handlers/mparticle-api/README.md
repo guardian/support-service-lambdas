@@ -52,6 +52,8 @@ For more information about the Baton privacy orchestration system, see the [Bato
 [Braze](https://www.braze.com/) is The Guardian's customer engagement platform that powers email communications and reader outreach campaigns.
 
 ### Guardian's Use of Braze
+In the Guardian, mParticle extracts relevant data from the data lake and writes it to Braze, allowing the CRM team to manage data points without code changes to the braze-diff-publisher. In due course mParticle will replace the diff publisher entirely.
+
 - **CRM Email Campaigns**: The CRM team uses Braze to send targeted email campaigns driven by BigQuery data analysis
 - **Service Emails**: Automated transactional emails like subscription confirmations, billing notifications, and account updates
 - **Reader Engagement**: Newsletter campaigns, breaking news alerts, and personalized content recommendations
