@@ -302,11 +302,11 @@ importers:
         version: 1.11.13
       zod:
         specifier: 'catalog:'
-        version: 3.25.48
+        version: 3.25.76
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
-        version: 8.10.147
+        version: 8.10.152
 
   handlers/ticket-tailor-webhook:
     dependencies:
