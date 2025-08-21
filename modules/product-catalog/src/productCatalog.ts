@@ -41,6 +41,33 @@ export function isDeliveryProduct(
 	return deliveryProducts.includes(productKey as DeliveryProductKey);
 }
 
+// Eventually all but OneTimeContribution will come from a custom field in Zuora's Product Catalog
+const customerFacingNameMapping: Record<ProductKey, string> = {
+    GuardianAdLite: 'Guardian Ad-Lite',
+    SupporterPlus: 'All-access digital',
+    TierThree: 'Digital + print',
+    DigitalSubscription: 'The Guardian Digital Edition',
+    HomeDelivery: 'Newspaper Home Delivery',
+    NationalDelivery: 'Newspaper Home Delivery',
+    NewspaperVoucher: 'Newspaper Voucher',
+    SubscriptionCard: 'Newspaper Subscription Card',
+    SupporterMembership: 'Supporter Membership',
+    PartnerMembership: 'Partner Membership',
+    PatronMembership: 'Patron Membership',
+    GuardianPatron: 'Guardian Patron',
+    GuardianWeeklyDomestic: 'Guardian Weekly',
+    GuardianWeeklyRestOfWorld: 'Guardian Weekly',
+    GuardianWeeklyZoneA: 'Guardian Weekly',
+    GuardianWeeklyZoneB: 'Guardian Weekly',
+    GuardianWeeklyZoneC: 'Guardian Weekly',
+    Contribution: 'Support',
+    OneTimeContribution: 'Support just once',
+};
+
+export function getCustomerFacingName(productKey: unknown): string {
+    return customerFacingNameMapping[productKey as ProductKey];
+}
+
 export type Product<P extends ProductKey> = ProductCatalog[P];
 
 // -------- Product Rate Plan --------
