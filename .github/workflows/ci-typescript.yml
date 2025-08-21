@@ -48,6 +48,7 @@ jobs:
           - generate-product-catalog
           - alarms-handler
           - discount-api
+          - stripe-disputes
           - discount-expiry-notifier
           - salesforce-disaster-recovery
           - salesforce-disaster-recovery-health-check
