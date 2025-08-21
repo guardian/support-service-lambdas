@@ -183,7 +183,7 @@ sequenceDiagram
     
     R->>B: Request data erasure
     B->>MP: Initiate RER (Baton Handler)
-    MP->>MP: Set user attributes<br/>(remove from audiences)
+    MP->>M: Set user attributes<br/>(remove from audiences)
     MP->>M: Submit OpenDSR request
     M->>M: Process erasure<br/>(Up to 14 days)
     M->>BR: Forward DSR to Braze
