@@ -89,7 +89,7 @@ export class StripeDisputes extends GuStack {
 					effect: Effect.ALLOW,
 					actions: ['s3:GetObject'],
 					resources: [
-						`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`
+						`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`,
 					],
 				}),
 			],
