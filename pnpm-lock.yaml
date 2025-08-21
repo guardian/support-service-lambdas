@@ -387,12 +387,6 @@ importers:
       '@aws-sdk/lib-storage':
         specifier: ^3.848.0
         version: 3.864.0(@aws-sdk/client-s3@3.864.0)
-      '@types/aws-sdk':
-        specifier: ^2.7.4
-        version: 2.7.4
-      aws-sdk:
-        specifier: ^2.1692.0
-        version: 2.1692.0
       zod:
         specifier: 'catalog:'
         version: 3.25.76

@@ -15,8 +15,6 @@
 		"@aws-sdk/client-ssm": "^3.848.0",
 		"@aws-sdk/credential-provider-node": "^3.848.0",
 		"@aws-sdk/lib-storage": "^3.848.0",
-		"@types/aws-sdk": "^2.7.4",
-		"aws-sdk": "^2.1692.0",
 		"zod": "catalog:"
 	}
 }
