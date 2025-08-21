@@ -311,34 +311,13 @@ All configuration is managed through AWS Parameter Store. CODE environment uses 
 
 ### HTTP Router Endpoints
 
-| Method | Path | Handler | Purpose |
-|--------|------|---------|---------|
-| `POST` | `/data-subject-requests` | `submitDataSubjectRequestHandler` | Submit new DSR |
-| `GET` | `/data-subject-requests/{requestId}` | `getDataSubjectRequestStatusHandler` | Query DSR status |
-| `POST` | `/data-subject-requests/{requestId}/callback` | `dataSubjectRequestCallbackHandler` | mParticle status updates |
-| `POST` | `/events` | `uploadEventBatchHandler` | Upload event batches |
+For the complete and up-to-date list of endpoints, request/response schemas, and handlers, see: **[`src/routers/http.ts`](src/routers/http.ts)**
 
-#### Submit Data Subject Request
-- **Purpose**: Submit a new Data Subject Request to mParticle
-- **Security**: Zod schema validation
-- **Request Schema**: `{ email: string, type: "delete" | "ccpa_delete" | "gdpr_delete" | "export", regulation?: string }`
-- **Response**: Request ID and initial status
-
-#### Query Request Status  
-- **Purpose**: Retrieve current status of submitted DSR
-- **Path Parameter**: `requestId` - unique DSR identifier
-- **Response**: Status, timestamps, and download URLs (for exports)
-
-#### Status Callback Handler
-- **Purpose**: Receive status updates from mParticle
-- **Security**: X.509 certificate + RSA-SHA256 signature validation
-- **Public Access**: Secured through certificate validation
-- **Headers**: `X-MP-Signature`, `X-MP-Certificate`
-
-#### Upload Event Batch
-- **Purpose**: Forward analytics events to mParticle
-- **Request Schema**: `{ events: Array<{ event_type: string, data: Record<string, any>, timestamp?: number, user_id?: string, session_id?: string }> }`
-- **Processing**: Event transformation and batch forwarding
+Key implementation notes:
+- **Security**: All endpoints use comprehensive Zod schema validation
+- **Callback Security**: mParticle callbacks (status updates) use X.509 certificate + RSA-SHA256 signature validation  
+- **Public Access**: Only callback endpoints are publicly accessible, secured through certificate validation
+- **Headers**: Callback endpoints expect `X-MP-Signature` and `X-MP-Certificate` headers
 
 ---
 
@@ -346,85 +325,15 @@ All configuration is managed through AWS Parameter Store. CODE environment uses 
 
 ### Baton Router Events
 
-| Action | Handler | Purpose |
-|--------|---------|---------|
-| `initiate` | `handleInitiateRequest` | Initiate RER/SAR via Baton |
-| `status` | `handleStatusRequest` | Check DSR status for Baton |
+For the complete and up-to-date list of Baton event handlers, request/response schemas, and validation logic, see: **[`src/routers/baton.ts`](src/routers/baton.ts)**
 
-#### Initiate RER Request Event
-- **Action**: `initiate`
-- **Request Schema**:
-  ```typescript
-  {
-    requestType: "RER",
-    action: "initiate", 
-    subjectId: string,
-    subjectEmail?: string,
-    dataProvider: "mparticlerer"
-  }
-  ```
-- **Response Schema**:
-  ```typescript
-  {
-    requestType: "RER",
-    action: "initiate",
-    status: "pending" | "completed" | "failed",
-    message: string,
-    initiationReference: GUID
-  }
-  ```
-- **Flow**: Identity resolution → DSR submission → correlation tracking
-
-#### Initiate SAR Request Event
-- **Action**: `initiate`
-- **Request Schema**:
-  ```typescript
-  {
-    requestType: "SAR",
-    action: "initiate", 
-    subjectId: string,
-    subjectEmail?: string,
-    dataProvider: "mparticlesar"
-  }
-  ```
-- **Response Schema**:
-  ```typescript
-  {
-    requestType: "SAR",
-    action: "initiate",
-    status: "pending" | "completed" | "failed",
-    message: string,
-    initiationReference: GUID
-  }
-  ```
-- **Flow**: Identity resolution → DSR submission → correlation tracking
-
-#### Status Check Event
-- **Action**: `status`
-- **Request Schema**:
-  ```typescript
-  {
-    requestType: "RER" | "SAR",
-    action: "status",
-    initiationReference: GUID
-  }
-  ```
-- **Response Schema**:
-  ```typescript
-  {
-    requestType: "RER" | "SAR", 
-    action: "status",
-    status: "pending" | "completed" | "failed",
-    message: string,
-    resultLocations?: [string]  // Only for completed SAR requests
-  }
-  ```
-- **Flow**: Request validation → mParticle API query → status resolution
-
-### Cross-Account Security
-- **Method**: IAM role-based Lambda invocation
-- **Trust Relationship**: Baton account → mParticle API account
-- **Authentication**: Cross-account role assumption
+Key implementation notes:
+- **Cross-Account Security**: IAM role-based Lambda invocation with trust relationship between Baton account → mParticle API account
+- **Schema Validation**: All events use comprehensive Zod schema validation via `BatonEventRequestSchema` and `BatonEventResponseSchema`
+- **Event Types**: Supports both RER (Right to Erasure) and SAR (Subject Access Request) workflows
+- **Actions**: `initiate` for starting new requests, `status` for checking existing request progress
+- **Identity Resolution**: Handles both `subjectId` and optional `subjectEmail` for user identification
+- **Correlation Tracking**: Uses `initiationReference` GUID for request tracking across systems
 
 ---
 
