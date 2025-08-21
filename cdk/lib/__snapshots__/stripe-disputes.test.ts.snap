@@ -124,10 +124,7 @@ exports[`The stripe disputes webhook API stack matches the snapshot 1`] = `
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": [
-                "arn:aws:s3::*:membership-dist/membership/CODE/stripe-disputes/",
-                "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-CODE/*",
-              ],
+              "Resource": "arn:aws:s3::*:membership-dist/membership/CODE/stripe-disputes/",
             },
           ],
           "Version": "2012-10-17",
@@ -1055,10 +1052,7 @@ exports[`The stripe disputes webhook API stack matches the snapshot 2`] = `
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": [
-                "arn:aws:s3::*:membership-dist/membership/PROD/stripe-disputes/",
-                "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-PROD/*",
-              ],
+              "Resource": "arn:aws:s3::*:membership-dist/membership/PROD/stripe-disputes/",
             },
           ],
           "Version": "2012-10-17",
