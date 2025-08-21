@@ -1,7 +1,7 @@
+import { sendMessageToQueue } from '@modules/aws/sqs';
 import { prettyPrint } from '@modules/prettyPrint';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import dayjs from 'dayjs';
-import { sendMessageToQueue } from '@modules/aws/sqs';
 import type { SwitchInformation } from './switchInformation';
 
 export type SupporterRatePlanItem = {
