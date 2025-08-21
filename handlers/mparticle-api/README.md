@@ -71,7 +71,7 @@ mParticle and Braze work together to create a comprehensive data and engagement 
 
 ### Data Flow Architecture
 ```
-Guardian Apps/Website → mParticle → Braze → Personalized Communications
+BigQuery data lake → mParticle → Braze → Personalized Communications
 ```
 
 ### How They Work Together
