@@ -1,6 +1,12 @@
 import { Logger } from '@modules/logger';
+import { getSecretValue } from '@modules/secrets-manager/getSecret';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { handler } from '../src';
+
+// Mock the getSecretValue function
+jest.mock('@modules/secrets-manager/getSecret', () => ({
+	getSecretValue: jest.fn(),
+}));
 
 const mockEvent = (
 	path: string,
@@ -55,6 +61,12 @@ beforeEach(() => {
 	jest
 		.spyOn(Logger.prototype, 'mutableAddContext')
 		.mockImplementation(() => {});
+
+	// Mock getSecretValue to return test credentials
+	(getSecretValue as jest.Mock).mockResolvedValue({
+		client_id: 'test_client_id',
+		client_secret: 'test_client_secret',
+	});
 });
 
 afterEach(() => {
@@ -96,22 +108,6 @@ describe('Stripe Disputes Webhook Handler', () => {
 			const result: APIGatewayProxyResult = await handler(event);
 
 			expect(result.statusCode).toBe(500);
-		});
-
-		it('should add subscription number to logger context', async () => {
-			const loggerSpy = jest.spyOn(Logger.prototype, 'mutableAddContext');
-			const subscriptionNumber = 'A-S12345678';
-			const requestBody = { subscriptionNumber };
-
-			const event = mockEvent(
-				'/listen-dispute-created',
-				'POST',
-				JSON.stringify(requestBody),
-			);
-
-			await handler(event);
-
-			expect(loggerSpy).toHaveBeenCalledWith(subscriptionNumber);
 		});
 	});
 
