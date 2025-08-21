@@ -1,10 +1,17 @@
 # mParticle API Lambda
 
-**A privacy-compliant data processing bridge between Guardian and mParticle's APIs.**
+This lambda integrates the Baton tool with mParticle API to allow both erasure and subject access requests to be raised and tracked in the standard way. As part of this, it handles mParticle callbacks to track the status of requests in real time.
 
-## 🌟 Overview
+## Overview
 
-The mParticle API Lambda enables Guardian to fulfill GDPR and CCPA compliance requirements by providing a secure, scalable interface to mParticle's Data Subject Request (DSR) API. It processes privacy requests, tracks their status, and coordinates with Guardian's broader privacy ecosystem.
+The mParticle API Lambda provides:
+- 🔒 **Privacy Rights Fulfillment**: Process data deletion and export requests via mParticle's DSR API
+- 📊 **Real-time Status Tracking**: Monitor DSR progress with secure callback integration  
+- 🤖 **Baton Integration**: Automated workflows for orchestrated privacy operations (RER & SAR)
+- 📈 **Analytics Forwarding**: Route event data to mParticle and downstream systems
+- 🛡️ **Enterprise Security**: Certificate validation and signature verification on callbacks
+
+For more information about the Baton privacy orchestration system, see the [Baton documentation](https://github.com/guardian/baton).
 
 ### Key Capabilities
 - 🔒 **Privacy Rights Fulfillment**: Process data deletion, export, and access requests
@@ -385,20 +392,6 @@ All configuration is managed through AWS Parameter Store. Ensure these parameter
 - **Signature Verification**: RSA-SHA256 signature validation
 - **Cross-Account Security**: IAM role-based Baton integration
 
-### Compliance Framework
-
-#### GDPR (General Data Protection Regulation)
-- **Article 15**: Right of Access implementation (Subject Access Requests)
-- **Article 17**: Right to Erasure implementation
-- **Article 20**: Data Portability through export functionality
-- **28-day response deadline**: Mandatory timeline for processing requests
-
-#### CCPA (California Consumer Privacy Act)
-- **Section 1798.100**: Consumer right to know and access personal information
-- **Section 1798.105**: Consumer data deletion requests
-- **Business day response**: Confirmation of request receipt
-- **Verification process**: Identity confirmation before processing
-
 ### Certificate Validation Process
 1. **Certificate Extraction**: Extract certificate from `X-MP-Certificate` header
 2. **Chain Validation**: Verify complete certificate chain to trusted root
@@ -447,16 +440,12 @@ pnpm test --watch
 
 ---
 
-## 🚨 Business Context & Compliance
+## 🚨 Compliance & Business Context
 
-### The Guardian's Data Ecosystem
-The Guardian collects comprehensive reader data including:
-- 📖 **Content Engagement**: Article views, reading time, interaction patterns
-- 🎯 **Subscription Data**: Payment information, subscription preferences
-- 📧 **Marketing Analytics**: Email engagement, campaign performance
-- 📱 **Cross-Platform Behavior**: Mobile app usage, web interactions
-
-This data flows through **mParticle** for analytics and audience segmentation, then forwards to **Braze** for marketing automation.
+This lambda helps Guardian fulfill GDPR and CCPA compliance requirements by:
+- **GDPR Article 15**: Right of Access implementation (Subject Access Requests)
+- **GDPR Article 17**: Right to Erasure implementation
+- **CCPA Section 1798.105**: Consumer data deletion rights
 
 ### Risk Mitigation
 - **Automated processing** reduces manual errors
@@ -523,8 +512,8 @@ Managed through AWS CDK with environment-specific configurations.
 ## 🤝 Integration Points
 
 ### Baton Privacy Orchestration
-The Lambda integrates with Guardian's Baton system for automated privacy workflows:
-- Cross-account Lambda invocation for RER and SAR requests
+Cross-account Lambda invocation for automated privacy workflows:
+- RER and SAR request initiation and tracking
 - Correlation tracking for multi-service requests
 - Status synchronization across privacy processors
 
