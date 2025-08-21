@@ -175,20 +175,20 @@ graph TB
 sequenceDiagram
     participant R as Reader
     participant B as Baton
-    participant MP as mParticle API
-    participant M as mParticle
+    participant LAMBDA as mParticle API
+    participant MP as mParticle
     participant BR as Braze
 
     Note over R,BR: Right to Erasure Request (RER) Flow
     
     R->>B: Request data erasure
-    B->>MP: Initiate RER (Baton Handler)
-    MP->>M: Set user attributes<br/>(remove from audiences)
-    MP->>M: Submit OpenDSR request
-    M->>M: Process erasure<br/>(Up to 14 days)
-    M->>BR: Forward DSR to Braze
-    M->>MP: Status callback
-    MP->>B: Return completion status
+    B->>LAMBDA: Initiate RER (Baton Handler)
+    LAMBDA->>MP: Set user attributes<br/>(remove from audiences)
+    LAMBDA->>MP: Submit OpenDSR request
+    MP->>MP: Process erasure<br/>(Up to 14 days)
+    MP->>BR: Forward DSR to Braze
+    MP->>LAMBDA: Status callback
+    LAMBDA->>B: Return completion status
     B->>R: Confirm erasure complete
 ```
 
@@ -196,17 +196,17 @@ sequenceDiagram
 sequenceDiagram
     participant R as Reader
     participant B as Baton
-    participant MP as mParticle API
-    participant M as mParticle
+    participant LAMBDA as mParticle API
+    participant MP as mParticle
 
-    Note over R,M: Subject Access Request (SAR) Flow
+    Note over R,MP: Subject Access Request (SAR) Flow
     
     R->>B: Request data access
-    B->>MP: Initiate SAR (Baton Handler)
-    MP->>M: Submit OpenDSR export request
-    M->>M: Gather user data<br/>(Up to 14 days)
-    M->>MP: Status callback with download URL
-    MP->>B: Return data export details
+    B->>LAMBDA: Initiate SAR (Baton Handler)
+    LAMBDA->>MP: Submit OpenDSR export request
+    MP->>MP: Gather user data<br/>(Up to 14 days)
+    MP->>LAMBDA: Status callback with download URL
+    LAMBDA->>B: Return data export details
     B->>R: Provide access to data export
 ```
 
