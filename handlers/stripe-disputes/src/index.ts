@@ -9,6 +9,10 @@ import {
 	listenDisputeClosedInputSchema,
 	listenDisputeCreatedInputSchema,
 } from './requestSchema';
+import type { SfConnectedAppAuth } from '@modules/salesforce/src/auth';
+import { doSfAuthClientCredentials } from '@modules/salesforce/src/auth';
+import { upsertPaymentDisputeInSalesforce } from './services/salesforceCreate';
+import { mapStripeDisputeToSalesforce } from './services/stripeToSalesforceMapper';
 
 interface SalesforceCredentials {
 	client_id: string;
@@ -42,21 +46,45 @@ function listenDisputeCreatedHandler(logger: Logger) {
 	return async (
 		event: APIGatewayProxyEvent,
 	): Promise<APIGatewayProxyResult> => {
-		logger.log('listenDisputeCreatedHandler test ooo');
+		logger.log('Processing Stripe dispute created webhook');
+
+		// Parse the Stripe webhook payload
+		const stripeWebhook = listenDisputeCreatedInputSchema.parse(
+			JSON.parse(getIfDefined(event.body, 'No body was provided')),
+		);
+		logger.mutableAddContext(stripeWebhook.data.object.id);
 
 		// Get Salesforce credentials from AWS Secrets Manager
 		const salesforceCredentials = await getSecretValue<SalesforceCredentials>(
 			`${stageFromEnvironment()}/Stripe/Dispute-webhook-secrets/salesforce`,
 		);
-		console.log('Salesforce credentials:', salesforceCredentials);
 
-		const stripeWebhook = listenDisputeCreatedInputSchema.parse(
-			JSON.parse(getIfDefined(event.body, 'No body was provided')),
+		// Convert to SfConnectedAppAuth format and authenticate with Salesforce
+		const sfConnectedAppAuth: SfConnectedAppAuth = {
+			clientId: salesforceCredentials.client_id,
+			clientSecret: salesforceCredentials.client_secret,
+		};
+		const salesforceAuth = await doSfAuthClientCredentials(sfConnectedAppAuth);
+
+		// Map Stripe dispute data to Salesforce Payment Dispute format
+		const paymentDisputeRecord = mapStripeDisputeToSalesforce(stripeWebhook);
+
+		// Upsert the Payment Dispute record in Salesforce using Dispute_ID__c as external ID
+		const salesforceResult = await upsertPaymentDisputeInSalesforce(
+			salesforceAuth,
+			paymentDisputeRecord,
 		);
-		await Promise.resolve();
-		logger.mutableAddContext(stripeWebhook.data.object.id);
+
+		logger.log(
+			`Payment Dispute created in Salesforce with ID: ${salesforceResult.id}`,
+		);
+
 		return {
-			body: JSON.stringify({ ...event, stage }),
+			body: JSON.stringify({
+				success: salesforceResult.success,
+				salesforceId: salesforceResult.id,
+				disputeId: stripeWebhook.data.object.id,
+			}),
 			statusCode: 200,
 		};
 	};

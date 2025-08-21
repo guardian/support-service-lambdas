@@ -8,6 +8,20 @@ jest.mock('@modules/secrets-manager/getSecret', () => ({
 	getSecretValue: jest.fn(),
 }));
 
+// Mock salesforce services
+jest.mock('../src/services/salesforceCreate', () => ({
+	upsertPaymentDisputeInSalesforce: jest.fn().mockResolvedValue({
+		id: 'mock_salesforce_id',
+		success: true,
+	}),
+}));
+
+jest.mock('../src/services/stripeToSalesforceMapper', () => ({
+	mapStripeDisputeToSalesforce: jest.fn().mockReturnValue({
+		Dispute_ID__c: 'mock_dispute_id',
+	}),
+}));
+
 const mockEvent = (
 	path: string,
 	httpMethod: string,
