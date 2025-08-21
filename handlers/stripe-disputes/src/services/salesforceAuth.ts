@@ -1,16 +1,8 @@
 import { z } from 'zod';
 
-export type SfConnectedAppAuth = {
-	clientId: string;
-	clientSecret: string;
-};
-
-export type SfApiUserAuth = {
-	url: string;
-	grant_type: string;
-	username: string;
-	password: string;
-	token: string;
+export type SalesforceCredentials = {
+	client_id: string;
+	client_secret: string;
 };
 
 const SalesforceAuthResponseSchema = z.object({
@@ -21,32 +13,41 @@ const SalesforceAuthResponseSchema = z.object({
 	issued_at: z.string(),
 	signature: z.string(),
 });
-export type SfAuthResponse = z.infer<typeof SalesforceAuthResponseSchema>;
 
-export async function doSfAuth(
-	sfApiUserAuth: SfApiUserAuth,
-	sfConnectedAppAuth: SfConnectedAppAuth,
-): Promise<SfAuthResponse> {
-	console.log('authenticating with Salesforce...');
+export type SalesforceAuthResponse = z.infer<
+	typeof SalesforceAuthResponseSchema
+>;
+
+/**
+ * Authenticate with Salesforce using OAuth 2.0 Client Credentials flow
+ * Follows the pattern from @modules/salesforce/src/auth.ts but for client credentials
+ */
+export async function authenticateWithSalesforce(
+	credentials: SalesforceCredentials,
+): Promise<SalesforceAuthResponse> {
+	console.log('authenticating with Salesforce using client credentials...');
 
 	try {
 		const options = {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-			body: buildBody(sfApiUserAuth, sfConnectedAppAuth),
+			body: buildClientCredentialsBody(credentials),
 		};
 
-		const response = await fetch(sfApiUserAuth.url, options);
+		const response = await fetch(
+			'https://login.salesforce.com/services/oauth2/token',
+			options,
+		);
 
 		if (!response.ok) {
 			const errorText = await response.text();
 			const errorMessage = `Error response from Salesforce: ${errorText}`;
-
 			throw new Error(errorMessage);
 		}
+
 		console.log('successfully authenticated with Salesforce');
 
-		const sfAuthResponse = (await response.json()) as SfAuthResponse;
+		const sfAuthResponse = (await response.json()) as SalesforceAuthResponse;
 
 		const parseResponse =
 			SalesforceAuthResponseSchema.safeParse(sfAuthResponse);
@@ -68,15 +69,12 @@ export async function doSfAuth(
 	}
 }
 
-function buildBody(
-	sfApiUserAuth: SfApiUserAuth,
-	sfConnectedAppAuth: SfConnectedAppAuth,
+function buildClientCredentialsBody(
+	credentials: SalesforceCredentials,
 ): string {
 	return (
-		`grant_type=password` +
-		`&client_id=${sfConnectedAppAuth.clientId}` +
-		`&client_secret=${sfConnectedAppAuth.clientSecret}` +
-		`&username=${sfApiUserAuth.username}` +
-		`&password=${sfApiUserAuth.password}${sfApiUserAuth.token}`
+		`grant_type=client_credentials` +
+		`&client_id=${credentials.client_id}` +
+		`&client_secret=${credentials.client_secret}`
 	);
 }

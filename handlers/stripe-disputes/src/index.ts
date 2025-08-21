@@ -9,15 +9,10 @@ import {
 	listenDisputeClosedInputSchema,
 	listenDisputeCreatedInputSchema,
 } from './requestSchema';
-import type { SfConnectedAppAuth } from '@modules/salesforce/src/auth';
-import { doSfAuthClientCredentials } from '@modules/salesforce/src/auth';
+import type { SalesforceCredentials } from './services/salesforceAuth';
+import { authenticateWithSalesforce } from './services/salesforceAuth';
 import { upsertPaymentDisputeInSalesforce } from './services/salesforceCreate';
 import { mapStripeDisputeToSalesforce } from './services/stripeToSalesforceMapper';
-
-interface SalesforceCredentials {
-	client_id: string;
-	client_secret: string;
-}
 
 const stage = process.env.STAGE as Stage;
 const logger = new Logger();
@@ -59,12 +54,10 @@ function listenDisputeCreatedHandler(logger: Logger) {
 			`${stageFromEnvironment()}/Stripe/Dispute-webhook-secrets/salesforce`,
 		);
 
-		// Convert to SfConnectedAppAuth format and authenticate with Salesforce
-		const sfConnectedAppAuth: SfConnectedAppAuth = {
-			clientId: salesforceCredentials.client_id,
-			clientSecret: salesforceCredentials.client_secret,
-		};
-		const salesforceAuth = await doSfAuthClientCredentials(sfConnectedAppAuth);
+		// Authenticate with Salesforce
+		const salesforceAuth = await authenticateWithSalesforce(
+			salesforceCredentials,
+		);
 
 		// Map Stripe dispute data to Salesforce Payment Dispute format
 		const paymentDisputeRecord = mapStripeDisputeToSalesforce(stripeWebhook);

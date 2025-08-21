@@ -1,6 +1,6 @@
-import type { SfAuthResponse } from '@modules/salesforce/src/auth';
 import { sfApiVersion } from '@modules/salesforce/src/config';
 import { z } from 'zod';
+import type { SalesforceAuthResponse } from './salesforceAuth';
 import type { PaymentDisputeRecord } from './stripeToSalesforceMapper';
 
 const SalesforceCreateErrorSchema = z.object({
@@ -24,7 +24,7 @@ export type SalesforceCreateResponse = z.infer<
  * Follows the pattern from @modules/salesforce/src/updateRecords.ts
  */
 export async function upsertPaymentDisputeInSalesforce(
-	authResponse: SfAuthResponse,
+	authResponse: SalesforceAuthResponse,
 	paymentDispute: PaymentDisputeRecord,
 ): Promise<SalesforceCreateResponse> {
 	console.log('upserting Payment Dispute record in Salesforce...');
