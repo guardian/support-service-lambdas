@@ -372,24 +372,6 @@ This lambda helps Guardian fulfill GDPR and CCPA compliance requirements by:
 
 ---
 
-## 🔧 Development & Configuration
-
-### Environment Variables
-- `STAGE`: Deployment environment (CODE/PROD)
-- `AWS_REGION`: AWS region for Parameter Store access -> eu-west-1
-
-### Local Development
-```bash
-# Set environment
-export STAGE=CODE
-export AWS_REGION=eu-west-1
-```
-
-### Deployment
-Managed through AWS CDK with environment-specific configurations.
-
----
-
 ## 📞 Support & Monitoring
 
 ### Team Information
