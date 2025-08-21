@@ -358,26 +358,6 @@ Key implementation notes:
 
 ---
 
-## 🧪 Testing
-
-### Test Structure
-```
-tests/
-├── unit/
-│   ├── handlers/
-│   │   ├── httpRouter.test.ts       # HTTP endpoint tests
-│   │   └── batonRouter.test.ts      # Baton integration tests
-│   ├── services/
-│   │   ├── mparticle.test.ts        # mParticle API client tests
-│   │   └── validation.test.ts       # Certificate validation tests
-│   └── schemas/
-│       └── validation.test.ts       # Zod schema validation tests
-├── fixtures/                        # Test data and mock responses
-└── helpers/                         # Test utility functions
-```
-
----
-
 ## 🚨 Compliance & Business Context
 
 This lambda helps Guardian fulfill GDPR and CCPA compliance requirements by:
