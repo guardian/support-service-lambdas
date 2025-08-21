@@ -212,23 +212,6 @@ sequenceDiagram
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- Node.js 18+ and pnpm
-- AWS CLI configured with Parameter Store access (using Janus)
-- Basic understanding of Lambda and API Gateway
-
-### Installation
-```bash
-# Install dependencies
-pnpm install
-
-# Build the project  
-pnpm build
-
-# Run tests
-pnpm test
-```
-
 ### Configuration
 All configuration is managed through AWS Parameter Store. Ensure these parameters are set for your environment:
 
@@ -423,21 +406,6 @@ tests/
 └── helpers/                         # Test utility functions
 ```
 
-### Running Tests
-```bash
-# Run all tests
-pnpm test
-
-# Run with coverage
-pnpm test --coverage
-
-# Run specific tests
-pnpm test httpRouter.test.ts
-
-# Development mode
-pnpm test --watch
-```
-
 ---
 
 ## 🚨 Compliance & Business Context
@@ -471,16 +439,6 @@ src/
 ├── apis/                 # External API clients
 ├── utils/                # Utility functions
 └── index.ts              # Main entry point
-```
-
-### Development Scripts
-```bash
-pnpm build              # Compile TypeScript
-pnpm test               # Run all tests
-pnpm lint               # Run ESLint
-pnpm check-formatting   # Format code with Prettier
-pnpm fix-formatting     # Format code with Prettier
-pnpm check-config       # Check configuration files
 ```
 
 ### Local Development
