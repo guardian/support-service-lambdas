@@ -49,14 +49,14 @@ For more information about the Baton privacy orchestration system, see the [Bato
 
 ## 📧 What is Braze?
 
-[Braze](https://www.braze.com/) is a customer engagement platform that enables personalized messaging across email, push notifications, in-app messages, SMS, and web push.
+[Braze](https://www.braze.com/) is The Guardian's customer engagement platform that powers email communications and reader outreach campaigns.
 
-### Core Features
-- **Multi-Channel Messaging**: Email, push, SMS, in-app, and web messaging
-- **Personalization Engine**: AI-powered content personalization and optimization
-- **Journey Orchestration**: Automated, cross-channel customer journey campaigns
-- **Real-Time Analytics**: Campaign performance tracking and user behavior analytics
-- **A/B Testing**: Comprehensive testing framework for message optimization
+### Guardian's Use of Braze
+- **CRM Email Campaigns**: The CRM team uses Braze to send targeted email campaigns driven by BigQuery data analysis
+- **Service Emails**: Automated transactional emails like subscription confirmations, billing notifications, and account updates
+- **Reader Engagement**: Newsletter campaigns, breaking news alerts, and personalized content recommendations
+- **Audience Segmentation**: Dynamic reader segments based on subscription status, reading behavior, and engagement patterns
+- **Campaign Analytics**: Performance tracking for email open rates, click-through rates, and reader engagement metrics
 
 ### Official Resources
 - [Braze Documentation](https://www.braze.com/docs/)
