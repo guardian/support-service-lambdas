@@ -9,7 +9,7 @@ The mParticle API Lambda enables Guardian to fulfill GDPR and CCPA compliance re
 ### Key Capabilities
 - 🔒 **Privacy Rights Fulfillment**: Process data deletion, export, and access requests
 - 📊 **Real-time Status Tracking**: Monitor DSR progress with callback integration  
-- 🤖 **Automated Workflows**: Integrate with Baton for orchestrated privacy operations (RER & SAR)
+- 🤖 **Automated Workflows**: Integrate with [Baton](https://github.com/guardian/baton) for orchestrated privacy operations (RER & SAR)
 - 📈 **Analytics Forwarding**: Route event data to mParticle and downstream systems
 - 🛡️ **Enterprise Security**: Certificate validation and signature verification on callbacks from mParticle
 
