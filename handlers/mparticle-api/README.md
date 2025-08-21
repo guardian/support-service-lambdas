@@ -378,19 +378,6 @@ This lambda helps Guardian fulfill GDPR and CCPA compliance requirements by:
 - `STAGE`: Deployment environment (CODE/PROD)
 - `AWS_REGION`: AWS region for Parameter Store access
 
-### Code Structure
-```
-src/
-├── routers/              # Request routing logic
-│   ├── http.ts            # HTTP API Gateway router
-│   ├── baton.ts           # Baton integration router
-│   ├── http/              # HTTP endpoint handlers
-│   └── baton/             # Baton event handlers
-├── apis/                 # External API clients
-├── utils/                # Utility functions
-└── index.ts              # Main entry point
-```
-
 ### Local Development
 ```bash
 # Set environment
