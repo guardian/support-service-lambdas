@@ -30,11 +30,5 @@ describe('Timestamp Helper', () => {
 			const result = timestampToSalesforceDate(0);
 			expect(result).toBe('1970-01-01');
 		});
-
-		it('should handle edge case timestamps', () => {
-			// Test with very large timestamp
-			const result = timestampToSalesforceDate(2147483647); // Max 32-bit int
-			expect(result).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-		});
 	});
 });

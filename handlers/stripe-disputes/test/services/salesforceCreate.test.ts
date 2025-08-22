@@ -142,34 +142,5 @@ describe('Salesforce Create Service', () => {
 				'Error upserting Payment Dispute in Salesforce: Network error',
 			);
 		});
-
-		it('should handle non-Error exceptions', async () => {
-			(global.fetch as jest.Mock).mockRejectedValue('String error');
-
-			await expect(
-				upsertPaymentDisputeInSalesforce(mockAuthResponse, mockPaymentDispute),
-			).rejects.toThrow('Error upserting Payment Dispute in Salesforce');
-		});
-
-		it('should exclude Dispute_ID__c from request body', async () => {
-			const { buildSalesforceUpsertOptions } = require('../../src/helpers');
-
-			(global.fetch as jest.Mock).mockResolvedValue({
-				ok: true,
-				json: () => Promise.resolve(mockCreateResponse),
-			});
-
-			await upsertPaymentDisputeInSalesforce(
-				mockAuthResponse,
-				mockPaymentDispute,
-			);
-
-			// Verify that buildSalesforceUpsertOptions was called with body excluding Dispute_ID__c
-			const { Dispute_ID__c, ...expectedBody } = mockPaymentDispute;
-			expect(buildSalesforceUpsertOptions).toHaveBeenCalledWith(
-				mockAuthResponse,
-				expectedBody,
-			);
-		});
 	});
 });

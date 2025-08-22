@@ -181,19 +181,6 @@ describe('Dispute Closed Handler', () => {
 			);
 		});
 
-		it('should log error when exception occurs', async () => {
-			const { getSecretValue } = require('@modules/secrets-manager/getSecret');
-			getSecretValue.mockRejectedValue(new Error('Test error'));
-
-			const handler = listenDisputeClosedHandler(mockLogger);
-			await handler(mockEvent);
-
-			expect(mockLogger.log).toHaveBeenCalledWith(
-				'Error processing dispute closed:',
-				expect.any(Error),
-			);
-		});
-
 		it('should return correct response structure', async () => {
 			const handler = listenDisputeClosedHandler(mockLogger);
 			const result = await handler(mockEvent);

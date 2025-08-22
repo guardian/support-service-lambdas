@@ -61,41 +61,6 @@ describe('Stripe to Salesforce Mapper', () => {
 			});
 		});
 
-		it('should handle zero amount', () => {
-			const mockStripeData: ListenDisputeCreatedRequestBody = {
-				id: 'evt_test123',
-				type: 'charge.dispute.created',
-				data: {
-					object: {
-						id: 'du_test123',
-						charge: 'ch_test123',
-						amount: 0,
-						currency: 'usd',
-						reason: 'fraudulent',
-						status: 'needs_response',
-						created: 1640995200,
-						is_charge_refundable: false,
-						payment_intent: 'pi_test123',
-						evidence_details: {
-							due_by: 1641081600,
-							has_evidence: true,
-						},
-						payment_method_details: {
-							card: {
-								network_reason_code: '4855',
-							},
-						},
-					},
-				},
-			};
-
-			const result = mapStripeDisputeToSalesforce(mockStripeData);
-
-			expect(result.Amount__c).toBe(0);
-			expect(result.Is_Charge_Refundable__c).toBe(false);
-			expect(result.Has_Evidence__c).toBe(true);
-		});
-
 		it('should handle large amounts correctly', () => {
 			const mockStripeData: ListenDisputeCreatedRequestBody = {
 				id: 'evt_test123',

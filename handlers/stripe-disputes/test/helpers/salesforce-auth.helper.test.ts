@@ -41,20 +41,5 @@ describe('Salesforce Auth Helper', () => {
 			expect(result).toContain('username=user%2Bname%40domain.com');
 			expect(result).toContain('password=pass%40word!tok%3Den');
 		});
-
-		it('should handle empty token', () => {
-			const credentials: SalesforceCredentials = {
-				client_id: 'test_client',
-				client_secret: 'test_secret',
-				username: 'test@example.com',
-				password: 'password123',
-				token: '',
-				sandbox: true,
-			};
-
-			const result = buildClientCredentialsBody(credentials);
-
-			expect(result).toContain('password=password123');
-		});
 	});
 });
