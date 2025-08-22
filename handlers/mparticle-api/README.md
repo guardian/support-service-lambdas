@@ -67,49 +67,6 @@ In the Guardian, mParticle extracts relevant data from the data lake and writes 
 
 ---
 
-## 🔗 mParticle and Braze Integration
-
-mParticle and Braze work together to create a comprehensive data and engagement ecosystem for The Guardian's digital audience.
-
-### Data Flow Architecture
-```
-BigQuery data lake → mParticle → Braze → Personalized Communications
-```
-
-### How They Work Together
-
-#### 1. **Data Collection & Unification**
-- **mParticle Role**: Collects user interaction data from Guardian's websites and mobile apps
-- **Data Types**: Page views, article reads, subscription events, user preferences
-- **Identity Resolution**: Creates unified user profiles across devices and platforms
-
-#### 2. **Audience Segmentation**
-- **mParticle Role**: Creates dynamic audience segments based on behavior patterns
-- **Examples**: "Regular readers", "Subscription likely", "Weekend browsers"
-- **Real-Time Updates**: Segments update as user behavior changes
-
-#### 3. **Engagement Activation**
-- **Braze Role**: Receives audience data from mParticle for targeted messaging
-- **Message Types**: Newsletter subscriptions, breaking news alerts, subscription offers
-- **Personalization**: Content tailored based on reading history and preferences
-
-#### 4. **Privacy Compliance**
-- **Data Subject Requests**: When users request data deletion or access, both platforms must be coordinated
-- **mParticle**: Removes user data and audience memberships (deletion) or exports user data (access)
-- **Braze**: Deletes user profiles and message history via mParticle's DSR forwarding
-
-### Why This Integration Matters
-- **Unified Experience**: Consistent messaging across all Guardian touchpoints
-- **Privacy Compliance**: Coordinated data handling ensures GDPR/CCPA compliance
-- **Personalization**: Reader engagement improves through data-driven content delivery
-- **Operational Efficiency**: Single data pipeline reduces complexity and maintenance
-
-### Official Integration Resources
-- [mParticle + Braze Integration Guide](https://docs.mparticle.com/integrations/braze/audience/)
-- [Braze mParticle Partnership](https://www.braze.com/partners/technology-partners/mparticle/)
-
----
-
 ## 🏗️ System Architecture
 
 ```mermaid
