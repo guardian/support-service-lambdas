@@ -1,9 +1,15 @@
+import * as console from 'node:console';
+import type { Logger } from '@modules/logger';
 import { z } from 'zod';
+import { getSalesForceApiBaseUrl } from '../helpers';
 
 export type SalesforceCredentials = {
 	client_id: string;
 	client_secret: string;
+	username: string;
+	password: string; // should include security token
 	sandbox?: boolean;
+	token?: string; // optional, if not included in password
 };
 
 const SalesforceAuthResponseSchema = z.object({
@@ -24,6 +30,7 @@ export type SalesforceAuthResponse = z.infer<
  * Follows the pattern from @modules/salesforce/src/auth.ts but for client credentials
  */
 export async function authenticateWithSalesforce(
+	logger: Logger,
 	credentials: SalesforceCredentials,
 ): Promise<SalesforceAuthResponse> {
 	console.log('authenticating with Salesforce using client credentials...');
@@ -35,9 +42,10 @@ export async function authenticateWithSalesforce(
 			body: buildClientCredentialsBody(credentials),
 		};
 
-		const salesforceUrl = credentials.sandbox
-			? 'https://test.salesforce.com/services/oauth2/token'
-			: 'https://login.salesforce.com/services/oauth2/token';
+		const salesforceUrl = `${getSalesForceApiBaseUrl(credentials.sandbox === true)}/services/oauth2/token`;
+
+		logger.log('Salesforce URL:', salesforceUrl);
+		logger.log('Request options:', options);
 
 		const response = await fetch(salesforceUrl, options);
 
@@ -74,9 +82,15 @@ export async function authenticateWithSalesforce(
 function buildClientCredentialsBody(
 	credentials: SalesforceCredentials,
 ): string {
+	const password = credentials.token
+		? `${credentials.password}${credentials.token}`
+		: credentials.password;
+
 	return (
-		`grant_type=client_credentials` +
-		`&client_id=${credentials.client_id}` +
-		`&client_secret=${credentials.client_secret}`
+		`grant_type=password` +
+		`&client_id=${encodeURIComponent(credentials.client_id)}` +
+		`&client_secret=${encodeURIComponent(credentials.client_secret)}` +
+		`&username=${encodeURIComponent(credentials.username)}` +
+		`&password=${encodeURIComponent(password)}`
 	);
 }

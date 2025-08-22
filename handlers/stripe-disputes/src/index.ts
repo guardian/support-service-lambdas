@@ -54,10 +54,14 @@ function listenDisputeCreatedHandler(logger: Logger) {
 			`${stageFromEnvironment()}/Stripe/Dispute-webhook-secrets/salesforce`,
 		);
 
-		salesforceCredentials.sandbox = stageFromEnvironment() === 'CODE';
+		logger.log(JSON.stringify(salesforceCredentials, null, 2));
+		logger.log('salesforceCredentials.sandbox');
+		logger.log(salesforceCredentials.sandbox);
+		logger.log('salesforceCredentials.sandbox');
 
 		// Authenticate with Salesforce
 		const salesforceAuth = await authenticateWithSalesforce(
+			logger,
 			salesforceCredentials,
 		);
 
