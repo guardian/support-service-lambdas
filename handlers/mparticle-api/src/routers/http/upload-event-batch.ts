@@ -44,11 +44,10 @@ export function uploadEventBatchHandler(
 		event: APIGatewayProxyEvent,
 		parsed: { path: unknown; body: EventBatch },
 	): Promise<APIGatewayProxyResult> => {
+		await uploadAnEventBatch(mParticleEventsAPIClient, parsed.body);
 		return {
 			statusCode: 201,
-			body: JSON.stringify(
-				await uploadAnEventBatch(mParticleEventsAPIClient, parsed.body),
-			),
+			body: '',
 		};
 	};
 }

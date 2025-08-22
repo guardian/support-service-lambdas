@@ -12,12 +12,11 @@ export type EventBatch = z.infer<typeof eventBatchParser.body>;
  * Sends usage data into mParticle
  * https://docs.mparticle.com/developers/apis/http/#upload-an-event-batch
  * @param batch - The event batch to upload
- * @returns https://docs.mparticle.com/developers/apis/dsr-api/v3/#example-success-response-body
  */
 export const uploadAnEventBatch = async (
 	mParticleEventsAPIClient: MParticleClient<EventsAPI>,
 	batch: EventBatch,
-): Promise<object> => {
+): Promise<void> => {
 	const response = await mParticleEventsAPIClient.post(
 		`/events`,
 		{
@@ -43,6 +42,4 @@ export const uploadAnEventBatch = async (
 	if (!response.success) {
 		throw response.error;
 	}
-
-	return {};
 };
