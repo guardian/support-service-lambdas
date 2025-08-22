@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // Stripe webhook event schema based on charge.dispute.created payload
-const stripeDisputeDataSchema = z.object({
+export const stripeDisputeDataSchema = z.object({
 	object: z.object({
 		id: z.string(), // Dispute ID
 		charge: z.string(), // Charge ID
@@ -23,23 +23,3 @@ const stripeDisputeDataSchema = z.object({
 		}),
 	}),
 });
-
-export const listenDisputeCreatedInputSchema = z.object({
-	id: z.string(), // Event ID
-	type: z.literal('charge.dispute.created'),
-	data: stripeDisputeDataSchema,
-});
-
-export type ListenDisputeCreatedRequestBody = z.infer<
-	typeof listenDisputeCreatedInputSchema
->;
-
-export const listenDisputeClosedInputSchema = z.object({
-	id: z.string(), // Event ID
-	type: z.literal('charge.dispute.closed'),
-	data: stripeDisputeDataSchema,
-});
-
-export type ListenDisputeClosedRequestBody = z.infer<
-	typeof listenDisputeClosedInputSchema
->;
