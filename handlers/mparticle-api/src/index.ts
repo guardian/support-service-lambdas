@@ -59,7 +59,7 @@ export const handlerBaton: Handler<BatonEventRequest, BatonEventResponse> =
 			return router.routeRequest(event);
 		} catch (error) {
 			console.error('Baton handler error:', error);
-			throw error; // Re-throw to trigger Lambda retry mechanism
+			throw error;
 		}
 	}, 'handlerBaton');
 
