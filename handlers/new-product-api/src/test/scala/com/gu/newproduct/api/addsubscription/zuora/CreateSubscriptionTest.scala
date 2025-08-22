@@ -43,6 +43,7 @@ class CreateSubscriptionTest extends AnyFlatSpec with Matchers {
       AcquisitionSource__c = "sourcesource",
       CreatedByCSR__c = "csrcsr",
       DeliveryAgent__c = None,
+      LastPlanAddedDate__c = "2018-07-02",
       subscribeToRatePlans = List(
         SubscribeToRatePlans(
           productRatePlanId = "hiProductRatePlanId",

@@ -48,6 +48,7 @@ object CreateSubscription {
         AcquisitionSource__c: String,
         CreatedByCSR__c: String,
         DeliveryAgent__c: Option[String],
+        LastPlanAddedDate__c: String,
     )
 
     implicit val writesRequest: OWrites[WireCreateRequest] = Json.writes[WireCreateRequest]
@@ -65,6 +66,7 @@ object CreateSubscription {
       AcquisitionSource__c = acquisitionSource.value,
       CreatedByCSR__c = createdByCSR.value,
       DeliveryAgent__c = deliveryAgent.map(_.value),
+      LastPlanAddedDate__c = currentDate.format(DateTimeFormatter.ISO_LOCAL_DATE),
       subscribeToRatePlans = ratePlans.map { ratePlan =>
         SubscribeToRatePlans(
           productRatePlanId = ratePlan.productRatePlanId.value,
