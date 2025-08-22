@@ -36,24 +36,25 @@ export function submitDataSubjectRequestHandler(
 		event: APIGatewayProxyEvent,
 		parsed: { path: unknown; body: DataSubjectRequestForm },
 	): Promise<APIGatewayProxyResult> => {
-		/**
-		 * If you wish to remove users from audiences or from event forwarding during the waiting period,
-		 * set a user attribute and apply audience criteria and/or forwarding rules to exclude them.
-		 * https://docs.mparticle.com/guides/data-subject-requests/#erasure-request-waiting-period
-		 */
-		try {
-			// FIXME only set for erasure (not SAR?)
-			await addErasureExclusionAttributes(
-				mParticleEventsAPIClient,
-				parsed.body.environment,
-				parsed.body.userId,
-				parsed.body.submittedTime,
-			);
-		} catch (error) {
-			console.warn(
-				'It was not possible to set the User Attribute to remove user from audiences or from event forwarding during the waiting period.',
-				error,
-			);
+		if (parsed.body.requestType === 'erasure') {
+			/**
+			 * If you wish to remove users from audiences or from event forwarding during the waiting period,
+			 * set a user attribute and apply audience criteria and/or forwarding rules to exclude them.
+			 * https://docs.mparticle.com/guides/data-subject-requests/#erasure-request-waiting-period
+			 */
+			try {
+				await addErasureExclusionAttributes(
+					mParticleEventsAPIClient,
+					parsed.body.environment,
+					parsed.body.userId,
+					parsed.body.submittedTime,
+				);
+			} catch (error) {
+				console.warn(
+					'It was not possible to set the User Attribute to remove user from audiences or from event forwarding during the waiting period.',
+					error,
+				);
+			}
 		}
 
 		return {
