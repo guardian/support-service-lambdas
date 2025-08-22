@@ -3,6 +3,7 @@ import { z } from 'zod';
 export type SalesforceCredentials = {
 	client_id: string;
 	client_secret: string;
+	sandbox?: boolean;
 };
 
 const SalesforceAuthResponseSchema = z.object({
@@ -34,10 +35,11 @@ export async function authenticateWithSalesforce(
 			body: buildClientCredentialsBody(credentials),
 		};
 
-		const response = await fetch(
-			'https://login.salesforce.com/services/oauth2/token',
-			options,
-		);
+		const salesforceUrl = credentials.sandbox
+			? 'https://test.salesforce.com/services/oauth2/token'
+			: 'https://login.salesforce.com/services/oauth2/token';
+
+		const response = await fetch(salesforceUrl, options);
 
 		if (!response.ok) {
 			const errorText = await response.text();
