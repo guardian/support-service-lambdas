@@ -8,8 +8,8 @@ export type SalesforceCredentials = {
 	client_secret: string;
 	username: string;
 	password: string; // should include security token
-	sandbox?: boolean;
-	token?: string; // optional, if not included in password
+	sandbox: boolean;
+	token: string; // optional, if not included in password
 };
 
 const SalesforceAuthResponseSchema = z.object({
@@ -42,7 +42,7 @@ export async function authenticateWithSalesforce(
 			body: buildClientCredentialsBody(credentials),
 		};
 
-		const salesforceUrl = `${getSalesForceApiBaseUrl(credentials.sandbox === true)}/services/oauth2/token`;
+		const salesforceUrl = `${getSalesForceApiBaseUrl(credentials.sandbox)}/services/oauth2/token`;
 
 		logger.log('Salesforce URL:', salesforceUrl);
 		logger.log('Request options:', options);
@@ -82,12 +82,10 @@ export async function authenticateWithSalesforce(
 function buildClientCredentialsBody(
 	credentials: SalesforceCredentials,
 ): string {
-	const password = credentials.token
-		? `${credentials.password}${credentials.token}`
-		: credentials.password;
+	const password = `${credentials.password}${credentials.token}`;
 
 	return (
-		`grant_type=password` +
+		`grant_type=client_credentials` +
 		`&client_id=${encodeURIComponent(credentials.client_id)}` +
 		`&client_secret=${encodeURIComponent(credentials.client_secret)}` +
 		`&username=${encodeURIComponent(credentials.username)}` +
