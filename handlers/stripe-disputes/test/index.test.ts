@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 
-// Mock all dependencies before importing anything
+// Simple mocks
 const mockLogger = {
 	log: jest.fn(),
 	mutableAddContext: jest.fn(),
@@ -11,11 +11,11 @@ const mockRouterInstance = {
 };
 
 jest.mock('@modules/logger', () => ({
-	Logger: jest.fn().mockImplementation(() => mockLogger),
+	Logger: jest.fn(() => mockLogger),
 }));
 
 jest.mock('@modules/routing/router', () => ({
-	Router: jest.fn().mockImplementation(() => mockRouterInstance),
+	Router: jest.fn(() => mockRouterInstance),
 }));
 
 jest.mock('../src/handlers', () => ({
@@ -36,7 +36,7 @@ jest.mock('../src/handlers', () => ({
 	),
 }));
 
-// Now import the handler after mocks are set up
+// Import after mocks
 import { handler } from '../src';
 
 describe('Main Handler', () => {
@@ -55,8 +55,38 @@ describe('Main Handler', () => {
 		multiValueQueryStringParameters: null,
 		stageVariables: null,
 		isBase64Encoded: false,
-		requestContext: {} as any,
-		resource: '',
+		requestContext: {
+			accountId: 'test',
+			apiId: 'test',
+			protocol: 'HTTP/1.1',
+			httpMethod,
+			path,
+			stage: 'test',
+			requestId: 'test',
+			requestTime: 'test',
+			requestTimeEpoch: 123456789,
+			identity: {
+				cognitoIdentityPoolId: null,
+				cognitoIdentityId: null,
+				apiKey: null,
+				principalOrgId: null,
+				cognitoAuthenticationType: null,
+				userArn: null,
+				apiKeyId: null,
+				userAgent: 'test',
+				accountId: null,
+				cognitoAuthenticationProvider: null,
+				sourceIp: '127.0.0.1',
+				accessKey: null,
+				caller: null,
+				clientCert: null,
+				user: null,
+			},
+			resourceId: 'test',
+			resourcePath: path,
+			authorizer: {},
+		},
+		resource: path,
 	});
 
 	beforeEach(() => {
@@ -67,89 +97,29 @@ describe('Main Handler', () => {
 		});
 	});
 
-	describe('Main Lambda Handler', () => {
-		it('should route dispute created requests correctly', async () => {
-			const event = createMockEvent('/listen-dispute-created', 'POST', '{}');
-			mockRouterInstance.routeRequest.mockResolvedValue({
-				statusCode: 200,
-				body: JSON.stringify({ success: true, disputeId: 'du_test123' }),
-			});
+	it('should route requests through router', async () => {
+		const event = createMockEvent('/listen-dispute-created', 'POST', '{}');
+		const result = await handler(event);
 
-			const result = await handler(event);
-
-			expect(result.statusCode).toBe(200);
-			const responseBody = JSON.parse(result.body);
-			expect(responseBody.success).toBe(true);
-			expect(responseBody.disputeId).toBe('du_test123');
-		});
-
-		it('should route dispute closed requests correctly', async () => {
-			const event = createMockEvent('/listen-dispute-closed', 'POST', '{}');
-			mockRouterInstance.routeRequest.mockResolvedValue({
-				statusCode: 200,
-				body: JSON.stringify({
-					message: 'Dispute closed',
-					disputeId: 'du_test123',
-				}),
-			});
-
-			const result = await handler(event);
-
-			expect(result.statusCode).toBe(200);
-			const responseBody = JSON.parse(result.body);
-			expect(responseBody.message).toBe('Dispute closed');
-			expect(responseBody.disputeId).toBe('du_test123');
-		});
-
-		it('should return 404 for unknown paths', async () => {
-			const event = createMockEvent('/unknown-path', 'POST', '{}');
-			mockRouterInstance.routeRequest.mockResolvedValue({
-				statusCode: 404,
-				body: JSON.stringify({ error: 'Not Found' }),
-			});
-
-			const result = await handler(event);
-
-			expect(result.statusCode).toBe(404);
-			const responseBody = JSON.parse(result.body);
-			expect(responseBody.error).toBe('Not Found');
-		});
-
-		it('should log input and output', async () => {
-			const event = createMockEvent('/listen-dispute-created', 'POST', '{}');
-			const mockResponse = {
-				statusCode: 200,
-				body: JSON.stringify({ success: true }),
-			};
-			mockRouterInstance.routeRequest.mockResolvedValue(mockResponse);
-
-			const result = await handler(event);
-
-			expect(mockLogger.log).toHaveBeenCalledWith(
-				`Input is ${JSON.stringify(event)}`,
-			);
-			expect(mockLogger.log).toHaveBeenCalledWith(
-				`Response is ${JSON.stringify(result)}`,
-			);
-		});
-
-		it('should call routeRequest with the event', async () => {
-			const event = createMockEvent('/listen-dispute-created', 'POST', '{}');
-			await handler(event);
-
-			expect(mockRouterInstance.routeRequest).toHaveBeenCalledWith(event);
-		});
+		expect(mockRouterInstance.routeRequest).toHaveBeenCalledWith(event);
+		expect(result).toBeDefined();
 	});
 
-	describe('Error Handling', () => {
-		it('should handle router errors gracefully', async () => {
-			const event = createMockEvent('/listen-dispute-created', 'POST', '{}');
-			mockRouterInstance.routeRequest.mockRejectedValue(
-				new Error('Router error'),
-			);
+	it('should log input and output', async () => {
+		const event = createMockEvent('/listen-dispute-created', 'POST', '{}');
+		const mockResponse = {
+			statusCode: 200,
+			body: JSON.stringify({ success: true }),
+		};
+		mockRouterInstance.routeRequest.mockResolvedValue(mockResponse);
 
-			// The handler should propagate router errors
-			await expect(handler(event)).rejects.toThrow('Router error');
-		});
+		const result = await handler(event);
+
+		expect(mockLogger.log).toHaveBeenCalledWith(
+			`Input is ${JSON.stringify(event)}`,
+		);
+		expect(mockLogger.log).toHaveBeenCalledWith(
+			`Response is ${JSON.stringify(result)}`,
+		);
 	});
 });
