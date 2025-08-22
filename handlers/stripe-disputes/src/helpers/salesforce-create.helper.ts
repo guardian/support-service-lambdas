@@ -1,6 +1,6 @@
 import { sfApiVersion } from '@modules/salesforce/src/config';
-import type { SalesforceAuthResponse } from '../types';
 import type { PaymentDisputeRecord } from '../interfaces';
+import type { SalesforceAuthResponse } from '../types';
 
 export function buildSalesforceUpsertUrl(
 	authResponse: SalesforceAuthResponse,

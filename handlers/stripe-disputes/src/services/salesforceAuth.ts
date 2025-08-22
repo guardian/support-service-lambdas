@@ -1,11 +1,11 @@
 import * as console from 'node:console';
 import type { Logger } from '@modules/logger';
 import {
-	getSalesForceApiBaseUrl,
 	buildClientCredentialsBody,
+	getSalesForceApiBaseUrl,
 } from '../helpers';
+import type { SalesforceAuthResponse, SalesforceCredentials } from '../types';
 import { SalesforceAuthResponseSchema } from '../zod-schemas';
-import type { SalesforceCredentials, SalesforceAuthResponse } from '../types';
 
 /**
  * Authenticate with Salesforce using OAuth 2.0 Client Credentials flow
