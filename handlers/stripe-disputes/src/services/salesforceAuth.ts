@@ -27,7 +27,6 @@ export async function authenticateWithSalesforce(
 		const salesforceUrl = `${getSalesForceApiBaseUrl(credentials.sandbox)}/services/oauth2/token`;
 
 		logger.log('Salesforce URL:', salesforceUrl);
-		logger.log('Request options:', options);
 
 		const response = await fetch(salesforceUrl, options);
 
