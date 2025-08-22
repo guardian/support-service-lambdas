@@ -27,7 +27,3 @@ export const handler = async (
 	logger.log(`Response is ${JSON.stringify(response)}`);
 	return response;
 };
-
-// this is a type safe version of stringify
-//export const stringify = <T>(t: T, type: ZodType<T>): string =>
-//	JSON.stringify(type.parse(t));
