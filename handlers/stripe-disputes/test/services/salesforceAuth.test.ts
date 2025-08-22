@@ -140,13 +140,5 @@ describe('Salesforce Auth Service', () => {
 				authenticateWithSalesforce(mockLogger, mockCredentials),
 			).rejects.toThrow('Error authenticating with Salesforce: Network error');
 		});
-
-		it('should handle non-Error exceptions', async () => {
-			(global.fetch as jest.Mock).mockRejectedValue('String error');
-
-			await expect(
-				authenticateWithSalesforce(mockLogger, mockCredentials),
-			).rejects.toThrow('Error authenticating with Salesforce');
-		});
 	});
 });

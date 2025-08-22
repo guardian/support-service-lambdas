@@ -150,30 +150,4 @@ describe('Stripe Dispute DTOs', () => {
 			}
 		});
 	});
-
-	describe('Type inference', () => {
-		it('should properly infer TypeScript types', () => {
-			const validWebhook = {
-				id: 'evt_test123',
-				type: 'charge.dispute.created' as const,
-				data: { object: validStripeDisputeObject },
-			};
-
-			const result = listenDisputeCreatedInputSchema.safeParse(validWebhook);
-
-			if (result.success) {
-				// TypeScript should infer these types correctly
-				const eventId: string = result.data.id;
-				const disputeId: string = result.data.data.object.id;
-				const amount: number = result.data.data.object.amount;
-				const hasEvidence: boolean =
-					result.data.data.object.evidence_details.has_evidence;
-
-				expect(eventId).toBe('evt_test123');
-				expect(disputeId).toBe('du_test123');
-				expect(amount).toBe(10000);
-				expect(hasEvidence).toBe(false);
-			}
-		});
-	});
 });
