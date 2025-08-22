@@ -1,29 +1,11 @@
 import * as console from 'node:console';
 import type { Logger } from '@modules/logger';
-import { z } from 'zod';
-import { getSalesForceApiBaseUrl } from '../helpers';
-
-export type SalesforceCredentials = {
-	client_id: string;
-	client_secret: string;
-	username: string;
-	password: string; // should include security token
-	sandbox: boolean;
-	token: string; // optional, if not included in password
-};
-
-const SalesforceAuthResponseSchema = z.object({
-	access_token: z.string(),
-	instance_url: z.string().url(),
-	id: z.string().url(),
-	token_type: z.string(),
-	issued_at: z.string(),
-	signature: z.string(),
-});
-
-export type SalesforceAuthResponse = z.infer<
-	typeof SalesforceAuthResponseSchema
->;
+import {
+	getSalesForceApiBaseUrl,
+	buildClientCredentialsBody,
+} from '../helpers';
+import { SalesforceAuthResponseSchema } from '../zod-schemas';
+import type { SalesforceCredentials, SalesforceAuthResponse } from '../types';
 
 /**
  * Authenticate with Salesforce using OAuth 2.0 Client Credentials flow
@@ -77,18 +59,4 @@ export async function authenticateWithSalesforce(
 				: errorTextBase;
 		throw new Error(errorText);
 	}
-}
-
-function buildClientCredentialsBody(
-	credentials: SalesforceCredentials,
-): string {
-	const password = `${credentials.password}${credentials.token}`;
-
-	return (
-		`grant_type=client_credentials` +
-		`&client_id=${encodeURIComponent(credentials.client_id)}` +
-		`&client_secret=${encodeURIComponent(credentials.client_secret)}` +
-		`&username=${encodeURIComponent(credentials.username)}` +
-		`&password=${encodeURIComponent(password)}`
-	);
 }
