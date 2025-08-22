@@ -384,12 +384,6 @@ This lambda helps Guardian fulfill GDPR and CCPA compliance requirements by:
 
 ## 📋 Quick Reference
 
-### AWS Resources
-- **Lambda Functions**: `mparticle-api-http-{stage}`, `mparticle-api-baton-{stage}`
-- **API Gateway**: `mparticle-api-{stage}`
-- **Parameter Store**: `/{stage}/support/mparticle-api/*`
-- **Cross-Account Role**: `baton-mparticle-lambda-role-{stage}`
-
 ### Base URLs
 | Environment | URL |
 |-------------|-----|
