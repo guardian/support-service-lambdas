@@ -379,22 +379,6 @@ This lambda helps Guardian fulfill GDPR and CCPA compliance requirements by:
 
 ---
 
-## 🤝 Integration Points
-
-### Baton Privacy Orchestration
-Cross-account Lambda invocation for automated privacy workflows:
-- RER and SAR request initiation and tracking
-- Correlation tracking for multi-service requests
-- Status synchronization across privacy processors
-
-### mParticle Data Subject Requests
-Direct integration with mParticle's DSR API:
-- Automated request submission and tracking (deletion and export)
-- Secure callback handling with certificate validation
-- Status polling and update processing
-
----
-
 ## 📋 Quick Reference
 
 ### AWS Resources
