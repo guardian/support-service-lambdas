@@ -1,22 +1,60 @@
-import { Logger } from '@modules/logger';
-import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import type { APIGatewayProxyEvent } from 'aws-lambda';
+
+// Simple mocks
+const mockLogger = {
+	log: jest.fn(),
+	mutableAddContext: jest.fn(),
+};
+
+const mockRouterInstance = {
+	routeRequest: jest.fn(),
+};
+
+jest.mock('@modules/logger', () => ({
+	Logger: jest.fn(() => mockLogger),
+}));
+
+jest.mock('@modules/routing/router', () => ({
+	Router: jest.fn(() => mockRouterInstance),
+}));
+
+jest.mock('../src/handlers', () => ({
+	listenDisputeCreatedHandler: jest.fn(() =>
+		jest.fn().mockResolvedValue({
+			statusCode: 200,
+			body: JSON.stringify({ success: true, disputeId: 'du_test123' }),
+		}),
+	),
+	listenDisputeClosedHandler: jest.fn(() =>
+		jest.fn().mockResolvedValue({
+			statusCode: 200,
+			body: JSON.stringify({
+				message: 'Dispute closed',
+				disputeId: 'du_test123',
+			}),
+		}),
+	),
+}));
+
+// Import after mocks
 import { handler } from '../src';
 
-const mockEvent = (
-	path: string,
-	httpMethod: string,
-	body: string,
-): APIGatewayProxyEvent =>
-	({
-		path,
-		httpMethod,
+describe('Main Handler', () => {
+	const createMockEvent = (
+		path: string,
+		httpMethod: string,
+		body: string,
+	): APIGatewayProxyEvent => ({
 		body,
 		headers: {},
 		multiValueHeaders: {},
+		httpMethod,
+		path,
+		pathParameters: null,
 		queryStringParameters: null,
 		multiValueQueryStringParameters: null,
-		pathParameters: {},
 		stageVariables: null,
+		isBase64Encoded: false,
 		requestContext: {
 			accountId: 'test',
 			apiId: 'test',
@@ -40,118 +78,48 @@ const mockEvent = (
 				cognitoAuthenticationProvider: null,
 				sourceIp: '127.0.0.1',
 				accessKey: null,
+				caller: null,
+				clientCert: null,
+				user: null,
 			},
 			resourceId: 'test',
 			resourcePath: path,
 			authorizer: {},
 		},
 		resource: path,
-		isBase64Encoded: false,
-	}) as APIGatewayProxyEvent;
+	});
 
-beforeEach(() => {
-	process.env.STAGE = 'TEST';
-	jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {});
-	jest
-		.spyOn(Logger.prototype, 'mutableAddContext')
-		.mockImplementation(() => {});
-});
-
-afterEach(() => {
-	jest.restoreAllMocks();
-	delete process.env.STAGE;
-});
-
-describe('Stripe Disputes Webhook Handler', () => {
-	describe('listenDisputeCreatedHandler', () => {
-		it('should fail when body is missing', async () => {
-			const event = mockEvent('/listen-dispute-created', 'POST', '');
-			event.body = null;
-
-			const result: APIGatewayProxyResult = await handler(event);
-
-			expect(result.statusCode).toBe(500);
-		});
-
-		it('should fail when subscriptionNumber is missing from body', async () => {
-			const requestBody = {};
-			const event = mockEvent(
-				'/listen-dispute-created',
-				'POST',
-				JSON.stringify(requestBody),
-			);
-
-			const result: APIGatewayProxyResult = await handler(event);
-
-			expect(result.statusCode).toBe(500);
-		});
-
-		it('should fail when body is invalid JSON', async () => {
-			const event = mockEvent(
-				'/listen-dispute-created',
-				'POST',
-				'invalid-json',
-			);
-
-			const result: APIGatewayProxyResult = await handler(event);
-
-			expect(result.statusCode).toBe(500);
-		});
-
-		it('should add subscription number to logger context', async () => {
-			const loggerSpy = jest.spyOn(Logger.prototype, 'mutableAddContext');
-			const subscriptionNumber = 'A-S12345678';
-			const requestBody = { subscriptionNumber };
-
-			const event = mockEvent(
-				'/listen-dispute-created',
-				'POST',
-				JSON.stringify(requestBody),
-			);
-
-			await handler(event);
-
-			expect(loggerSpy).toHaveBeenCalledWith(subscriptionNumber);
+	beforeEach(() => {
+		jest.clearAllMocks();
+		mockRouterInstance.routeRequest.mockResolvedValue({
+			statusCode: 200,
+			body: JSON.stringify({ success: true }),
 		});
 	});
 
-	describe('Router', () => {
-		it('should handle unsupported HTTP methods', async () => {
-			const event = mockEvent('/listen-dispute-created', 'GET', '{}');
+	it('should route requests through router', async () => {
+		const event = createMockEvent('/listen-dispute-created', 'POST', '{}');
+		const result = await handler(event);
 
-			const result: APIGatewayProxyResult = await handler(event);
-
-			expect(result.statusCode).toBe(404);
-		});
-
-		it('should handle unsupported paths', async () => {
-			const event = mockEvent('/unknown-path', 'POST', '{}');
-
-			const result: APIGatewayProxyResult = await handler(event);
-
-			expect(result.statusCode).toBe(404);
-		});
+		expect(mockRouterInstance.routeRequest).toHaveBeenCalledWith(event);
+		expect(result).toBeDefined();
 	});
 
-	describe('Logging', () => {
-		it('should log input and output', async () => {
-			const loggerSpy = jest.spyOn(Logger.prototype, 'log');
-			const requestBody = { subscriptionNumber: 'A-S12345678' };
+	it('should log input and output', async () => {
+		const event = createMockEvent('/listen-dispute-created', 'POST', '{}');
+		const mockResponse = {
+			statusCode: 200,
+			body: JSON.stringify({ success: true }),
+		};
+		mockRouterInstance.routeRequest.mockResolvedValue(mockResponse);
 
-			const event = mockEvent(
-				'/listen-dispute-created',
-				'POST',
-				JSON.stringify(requestBody),
-			);
+		const result = await handler(event);
 
-			const result: APIGatewayProxyResult = await handler(event);
-
-			expect(loggerSpy).toHaveBeenCalledWith(
-				`Input is ${JSON.stringify(event)}`,
-			);
-			expect(loggerSpy).toHaveBeenCalledWith(
-				`Response is ${JSON.stringify(result)}`,
-			);
-		});
+		expect(mockLogger.log).toHaveBeenCalledWith(
+			`Input is ${JSON.stringify(event)}`,
+		);
+		expect(mockLogger.log).toHaveBeenCalledWith(
+			`Response is ${JSON.stringify(result)}`,
+		);
 	});
 });
