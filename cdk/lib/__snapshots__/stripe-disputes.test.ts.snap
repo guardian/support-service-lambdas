@@ -210,7 +210,7 @@ exports[`The stripe disputes webhook API stack matches the snapshot 1`] = `
                       {
                         "Ref": "AWS::AccountId",
                       },
-                      ":secret:CODE/Stripe/Dispute-webhook-secrets/salesforce-*",
+                      ":secret:CODE/Salesforce/ConnectedApp/StripeDisputeWebhooks-*",
                     ],
                   ],
                 },
@@ -1156,7 +1156,7 @@ exports[`The stripe disputes webhook API stack matches the snapshot 2`] = `
                       {
                         "Ref": "AWS::AccountId",
                       },
-                      ":secret:PROD/Stripe/Dispute-webhook-secrets/salesforce-*",
+                      ":secret:PROD/Salesforce/ConnectedApp/StripeDisputeWebhooks-*",
                     ],
                   ],
                 },

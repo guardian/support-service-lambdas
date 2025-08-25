@@ -105,7 +105,7 @@ export class StripeDisputes extends GuStack {
 						actions: ['secretsmanager:GetSecretValue'],
 						resources: [
 							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Stripe/Dispute-webhook-secrets/salesforce-*`,
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Salesforce/ConnectedApp/StripeDisputeWebhooks-*`,
 						],
 					}),
 				],

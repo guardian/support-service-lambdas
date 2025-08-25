@@ -26,7 +26,7 @@ export function listenDisputeCreatedHandler(logger: Logger) {
 
 			// Get Salesforce credentials from AWS Secrets Manager
 			const salesforceCredentials = await getSecretValue<SalesforceCredentials>(
-				`${stageFromEnvironment()}/Stripe/Dispute-webhook-secrets/salesforce`,
+				`${stageFromEnvironment()}/Salesforce/ConnectedApp/StripeDisputeWebhooks`,
 			);
 
 			// Authenticate with Salesforce

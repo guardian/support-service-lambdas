@@ -115,7 +115,7 @@ describe('Dispute Closed Handler', () => {
 			await handler(mockEvent);
 
 			expect(getSecretValue).toHaveBeenCalledWith(
-				'TEST/Stripe/Dispute-webhook-secrets/salesforce',
+				'TEST/Salesforce/ConnectedApp/StripeDisputeWebhooks',
 			);
 		});
 
