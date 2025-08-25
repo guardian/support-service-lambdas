@@ -28,9 +28,6 @@ describe('Salesforce Auth Service', () => {
 	const mockCredentials: SalesforceCredentials = {
 		client_id: 'test_client',
 		client_secret: 'test_secret',
-		username: 'test@example.com',
-		password: 'password123',
-		token: 'token456',
 		sandbox: true,
 	};
 

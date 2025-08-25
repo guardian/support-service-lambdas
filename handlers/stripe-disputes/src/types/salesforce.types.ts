@@ -1,10 +1,7 @@
 export type SalesforceCredentials = {
 	client_id: string;
 	client_secret: string;
-	username: string;
-	password: string; // should include security token
 	sandbox: boolean;
-	token: string; // optional, if not included in password
 };
 
 export type SalesforceAuthResponse = {

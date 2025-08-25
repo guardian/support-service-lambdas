@@ -7,9 +7,6 @@ describe('Salesforce Auth Helper', () => {
 			const credentials: SalesforceCredentials = {
 				client_id: 'test_client_id',
 				client_secret: 'test_secret',
-				username: 'test@example.com',
-				password: 'password123',
-				token: 'token456',
 				sandbox: true,
 			};
 
@@ -18,9 +15,9 @@ describe('Salesforce Auth Helper', () => {
 			expect(result).toBe(
 				'grant_type=client_credentials' +
 					'&client_id=test_client_id' +
-					'&client_secret=test_secret' +
-					'&username=test%40example.com' +
-					'&password=password123token456',
+					'&client_secret=test_secret', // +
+				//'&username=test%40example.com' +
+				//'&password=password123token456',
 			);
 		});
 
@@ -28,9 +25,6 @@ describe('Salesforce Auth Helper', () => {
 			const credentials: SalesforceCredentials = {
 				client_id: 'client with spaces',
 				client_secret: 'secret&with&ampersands',
-				username: 'user+name@domain.com',
-				password: 'pass@word!',
-				token: 'tok=en',
 				sandbox: false,
 			};
 
@@ -38,8 +32,6 @@ describe('Salesforce Auth Helper', () => {
 
 			expect(result).toContain('client_id=client%20with%20spaces');
 			expect(result).toContain('client_secret=secret%26with%26ampersands');
-			expect(result).toContain('username=user%2Bname%40domain.com');
-			expect(result).toContain('password=pass%40word!tok%3Den');
 		});
 	});
 });
