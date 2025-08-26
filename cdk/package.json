@@ -34,5 +34,6 @@
     "setupFilesAfterEnv": [
       "./jest.setup.js"
     ]
-  }
+  },
+  "packageManager": "pnpm@10.11.0"
 }
