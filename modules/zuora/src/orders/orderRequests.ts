@@ -46,10 +46,24 @@ export function executeOrderRequest<
 	T extends z.ZodType<O, z.ZodTypeDef, I>,
 >(
 	zuoraClient: ZuoraClient,
-	orderRequest: AnyOrderRequest,
+	orderRequest: CreateOrderRequest,
 	schema: T,
 ): Promise<O> {
 	const path = `/v1/orders`;
+	const body = JSON.stringify(orderRequest);
+	return zuoraClient.post(path, body, schema);
+}
+
+export function previewOrderRequest<
+	I,
+	O,
+	T extends z.ZodType<O, z.ZodTypeDef, I>,
+>(
+	zuoraClient: ZuoraClient,
+	orderRequest: PreviewOrderRequest,
+	schema: T,
+): Promise<O> {
+	const path = `/v1/orders/preview`;
 	const body = JSON.stringify(orderRequest);
 	return zuoraClient.post(path, body, schema);
 }

@@ -11,7 +11,7 @@ import { getSubscriptionDates } from '@modules/zuora/createSubscription/subscrip
 import type { Contact } from '@modules/zuora/orders/newAccount';
 import { buildNewAccountObject } from '@modules/zuora/orders/newAccount';
 import { buildCreateSubscriptionOrderAction } from '@modules/zuora/orders/orderActions';
-import type { AnyOrderRequest } from '@modules/zuora/orders/orderRequests';
+import type { CreateOrderRequest } from '@modules/zuora/orders/orderRequests';
 import { executeOrderRequest } from '@modules/zuora/orders/orderRequests';
 import type {
 	PaymentGateway,
@@ -66,7 +66,7 @@ function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		runBilling,
 		collectPayment,
 	}: CreateSubscriptionInputFields<T>,
-): AnyOrderRequest {
+): CreateOrderRequest {
 	// TODO:
 	//  Apply promotion if present
 	//  ReaderType - GIFT ✅, PATRON
@@ -82,7 +82,7 @@ function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 
 	const newAccount = buildNewAccountObject({
 		accountName: accountName,
-		createdRequestId: createdRequestId,
+		createdRequestId: createdRequestId, // TODO: could use Idempotency-Key header instead?
 		salesforceAccountId: salesforceAccountId,
 		salesforceContactId: salesforceContactId,
 		identityId: identityId,
