@@ -3,6 +3,8 @@ import type { z } from 'zod';
 import { executeZoqlQuery } from '../helpers';
 import type { ZuoraInvoiceFromStripeChargeIdResult } from '../interfaces';
 import {
+	ZuoraGetInvoiceItemQueryOutputResponseSchema,
+	type ZuoraGetInvoiceItemQueryOutputSchema,
 	ZuoraGetInvoicePaymentQueryOutputResponseSchema,
 	type ZuoraGetInvoicePaymentQueryOutputSchema,
 	ZuoraGetInvoiceQueryOutputResponseSchema,
@@ -78,6 +80,27 @@ export const zuoraGetInvoiceFromStripeChargeId = async (
 	const invoice: z.infer<typeof ZuoraGetInvoiceQueryOutputSchema> =
 		invoices.records[0];
 
+	const invoicesItems: z.infer<
+		typeof ZuoraGetInvoiceItemQueryOutputResponseSchema
+	> = await executeZoqlQuery(
+		`SELECT Id, SubscriptionId, SubscriptionNumber FROM InvoiceItem WHERE InvoiceId = '${invoice.Id}'`,
+		zuoraClient,
+		ZuoraGetInvoiceItemQueryOutputResponseSchema,
+	);
+
+	if (invoicesItems.records.length === 0) {
+		throw new Error(
+			`No invoicesItems found in Zuora with ReferenceID = '${invoice.Id}'`,
+		);
+	}
+
+	if (invoicesItems.records[0] == undefined) {
+		throw new Error('invoicesItems found but record is undefined');
+	}
+
+	const invoiceItem: z.infer<typeof ZuoraGetInvoiceItemQueryOutputSchema> =
+		invoicesItems.records[0];
+
 	return {
 		paymentId: foundPayment.Id,
 		paymentStatus: foundPayment.Status,
@@ -88,5 +111,7 @@ export const zuoraGetInvoiceFromStripeChargeId = async (
 		paymentsInvoiceId: foundPaymentsInvoice.Id,
 		invoiceNumber: invoice.InvoiceNumber,
 		invoiceStatus: invoice.Status,
+		subscriptionId: invoiceItem.SubscriptionId,
+		SubscriptionNumber: invoiceItem.SubscriptionNumber,
 	} satisfies ZuoraInvoiceFromStripeChargeIdResult;
 };
