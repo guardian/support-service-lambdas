@@ -88,7 +88,6 @@ export const buildNewTermRequestBody = (
 					{
 						type: 'RenewSubscription',
 						triggerDates: singleTriggerDate(newTermStartDate),
-						renewSubscription: {},
 					},
 				],
 			},

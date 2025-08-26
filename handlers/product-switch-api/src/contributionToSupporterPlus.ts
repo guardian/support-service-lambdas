@@ -340,7 +340,6 @@ export const buildSwitchRequestBody = (
 				{
 					type: 'RenewSubscription',
 					triggerDates: singleTriggerDate(orderDate),
-					renewSubscription: {},
 				},
 			]
 		: [];

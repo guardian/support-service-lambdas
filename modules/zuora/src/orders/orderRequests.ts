@@ -38,7 +38,6 @@ export type PreviewOrderRequest = OrderRequest & {
 export type CreateOrderRequest = OrderRequest & {
 	processingOptions: ProcessingOptions;
 };
-export type AnyOrderRequest = CreateOrderRequest | PreviewOrderRequest;
 
 export function executeOrderRequest<
 	I,
@@ -47,11 +46,11 @@ export function executeOrderRequest<
 >(
 	zuoraClient: ZuoraClient,
 	orderRequest: CreateOrderRequest,
-	schema: T,
+	responseSchema: T,
 ): Promise<O> {
 	const path = `/v1/orders`;
 	const body = JSON.stringify(orderRequest);
-	return zuoraClient.post(path, body, schema);
+	return zuoraClient.post(path, body, responseSchema);
 }
 
 export function previewOrderRequest<
@@ -61,9 +60,9 @@ export function previewOrderRequest<
 >(
 	zuoraClient: ZuoraClient,
 	orderRequest: PreviewOrderRequest,
-	schema: T,
+	responseSchema: T,
 ): Promise<O> {
 	const path = `/v1/orders/preview`;
 	const body = JSON.stringify(orderRequest);
-	return zuoraClient.post(path, body, schema);
+	return zuoraClient.post(path, body, responseSchema);
 }

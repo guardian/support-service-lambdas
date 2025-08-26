@@ -70,7 +70,6 @@ export type UpdateProductOrderAction = BaseOrderAction & {
 };
 export type RenewSubscriptionOrderAction = BaseOrderAction & {
 	type: 'RenewSubscription';
-	renewSubscription: object;
 };
 export type TermsAndConditionsOrderAction = BaseOrderAction & {
 	type: 'TermsAndConditions';
