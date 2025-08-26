@@ -50,6 +50,7 @@ export function isDeliveryProductPurchase(
 	{ product: DeliveryProductKey }
 > {
 	return isDeliveryProduct(productPurchase.product);
+}
 
 // Eventually all but OneTimeContribution will come from a custom field in Zuora's Product Catalog
 const customerFacingNameMapping: Record<ProductKey, string> = {

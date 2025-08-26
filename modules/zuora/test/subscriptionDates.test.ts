@@ -88,7 +88,6 @@ describe('getSubscriptionDates', () => {
 	it('should set customerAcceptanceDate to now for other product types', () => {
 		const products = ['SupporterPlus', 'Contribution'] as const;
 		products.forEach((product) => {
-			console.log(`Testing product type: ${product}`);
 			const productPurchase: ProductPurchase = {
 				product,
 				ratePlan: 'Monthly',

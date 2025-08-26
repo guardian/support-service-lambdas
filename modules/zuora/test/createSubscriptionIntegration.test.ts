@@ -76,7 +76,7 @@ describe('createSubscription integration', () => {
 			productCatalog,
 			inputFields,
 		);
-		console.log(JSON.stringify(response));
+		expect(response.subscriptionNumbers.length).toEqual(1);
 	});
 
 	test('We can preview a subscription with a new account', async () => {
@@ -92,5 +92,6 @@ describe('createSubscription integration', () => {
 			inputFields,
 		);
 		console.log(JSON.stringify(response));
+		expect(response.previewResult.invoices.length).toBeGreaterThan(0);
 	});
 });
