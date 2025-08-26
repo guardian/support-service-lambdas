@@ -91,7 +91,7 @@ describe('mparticle-api HTTP tests', () => {
 		const submittedTime = new Date();
 		mockFetchResponse(mockSetUserAttributesResponse, 202);
 		mockFetchJsonResponse(
-			getMockCreateDataSubjectRequestResponse(submittedTime, requestId),
+			getMockCreateDataSubjectRequestResponse(requestId),
 			202,
 		);
 

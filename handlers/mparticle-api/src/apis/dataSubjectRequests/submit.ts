@@ -21,11 +21,6 @@ export interface DataSubjectRequestSubmission {
 	expectedCompletionTime: Date;
 
 	/**
-	 * The estimated time by which the request was submitted, in UTC.
-	 */
-	receivedTime: Date;
-
-	/**
 	 * The controller-provided identifier of the request in a GUID v4 format.
 	 */
 	requestId: string;
@@ -38,7 +33,6 @@ export interface DataSubjectRequestSubmission {
 
 const schema = z.object({
 	expected_completion_time: z.string().transform((val) => new Date(val)),
-	received_time: z.string().transform((val) => new Date(val)),
 	subject_request_id: z.string(),
 	controller_id: z.string(),
 });
@@ -113,7 +107,6 @@ export const submitDataSubjectRequest = async (
 				return {
 					expectedCompletionTime:
 						getDataSubjectRequestResponse.expectedCompletionTime,
-					receivedTime: new Date(),
 					requestId: getDataSubjectRequestResponse.requestId,
 					controllerId: getDataSubjectRequestResponse.controllerId,
 				};
@@ -125,7 +118,6 @@ export const submitDataSubjectRequest = async (
 
 	return {
 		expectedCompletionTime: new Date(response.data.expected_completion_time),
-		receivedTime: new Date(response.data.received_time),
 		requestId: response.data.subject_request_id,
 		controllerId: response.data.controller_id,
 	};
