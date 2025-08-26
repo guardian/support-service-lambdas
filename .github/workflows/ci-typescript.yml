@@ -29,6 +29,9 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: pnpm install
       - run: pnpm --filter "./modules/**" check-formatting
       - run: pnpm --filter "./modules/**" build
@@ -73,6 +76,9 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: pnpm install
       - run: pnpm --filter cdk package
       - run: pnpm --filter ${{ matrix.subproject }} package
