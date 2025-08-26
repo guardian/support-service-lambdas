@@ -4,7 +4,21 @@ import type {
 	MParticleClient,
 } from '../../services/mparticleClient';
 import { getStatusOfDataSubjectRequestByUserId } from './getStatusByUserId';
-import { dataSubjectRequestFormParser } from '../../routers/http/submit-data-subject-request';
+
+/**
+ * Data Subject Request Form
+ * https://docs.mparticle.com/developers/apis/dsr-api/v3/#submit-a-data-subject-request-dsr
+ */
+export const dataSubjectRequestFormParser = {
+	body: z.object({
+		regulation: z.enum(['gdpr', 'ccpa']),
+		requestId: z.string().uuid(),
+		requestType: z.enum(['access', 'portability', 'erasure']),
+		submittedTime: z.string().datetime(),
+		userId: z.string(),
+		environment: z.enum(['production', 'development']),
+	}),
+};
 
 export type DataSubjectRequestForm = z.infer<
 	typeof dataSubjectRequestFormParser.body

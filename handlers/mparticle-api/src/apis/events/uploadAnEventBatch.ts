@@ -2,8 +2,37 @@ import type {
 	EventsAPI,
 	MParticleClient,
 } from '../../services/mparticleClient';
-import { eventBatchParser } from '../../routers/http/upload-event-batch';
 import { z } from 'zod';
+
+/**
+ * Event Batch
+ * https://docs.mparticle.com/developers/apis/http/#example-json-request-body
+ * https://docs.mparticle.com/developers/apis/json-reference/
+ */
+export const eventBatchParser = {
+	body: z.object({
+		events: z
+			.array(
+				z.object({
+					/** Custom data payload for the event */
+					data: z.record(z.string(), z.unknown()),
+
+					/** Type identifier for the event */
+					eventType: z.string(),
+				}),
+			)
+			.optional(),
+		deviceInfo: z.record(z.string(), z.unknown()).optional(),
+		userAttributes: z.record(z.string(), z.unknown()),
+		deletedUserAttributes: z.array(z.string()).optional(),
+		userIdentities: z.record(z.string(), z.unknown()), //
+		applicationInfo: z.record(z.string(), z.unknown()).optional(),
+		schemaVersion: z.number().optional(),
+		environment: z.enum(['production', 'development']), //
+		context: z.record(z.string(), z.unknown()).optional(),
+		ip: z.string().optional(),
+	}),
+};
 
 export type EventBatch = z.infer<typeof eventBatchParser.body>;
 
@@ -20,7 +49,7 @@ export const uploadAnEventBatch = async (
 	const response = await mParticleEventsAPIClient.post(
 		`/events`,
 		{
-			events: batch.events?.map((event) => {
+			events: batch.events?.map((event: { data: Record<string, unknown>; eventType: string }) => {
 				return {
 					data: event.data,
 					event_type: event.eventType,

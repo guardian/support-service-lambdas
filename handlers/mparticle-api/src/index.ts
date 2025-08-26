@@ -18,14 +18,9 @@ export const handlerHttp: Handler<APIGatewayProxyEvent, APIGatewayProxyResult> =
 	withLogging(
 		async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
 			try {
-				const { mParticleDataSubjectClient, mParticleEventsAPIClient, isProd } =
-					await services();
+				const { mParticleDataSubjectClient } = await services();
 				console.debug('Processing HTTP request');
-				return httpRouter(
-					mParticleDataSubjectClient,
-					mParticleEventsAPIClient,
-					isProd,
-				).routeRequest(event);
+				return httpRouter(mParticleDataSubjectClient).routeRequest(event);
 			} catch (error) {
 				console.error('HTTP handler error:', error);
 				return {
