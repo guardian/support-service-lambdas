@@ -11,4 +11,5 @@ project/project/
 .DS_Store
 node_modules/
 pre-commit-disput.sh
+pre-commit-disput-fast.sh
 *.zip
