@@ -49,12 +49,14 @@ export const uploadAnEventBatch = async (
 	const response = await mParticleEventsAPIClient.post(
 		`/events`,
 		{
-			events: batch.events?.map((event: { data: Record<string, unknown>; eventType: string }) => {
-				return {
-					data: event.data,
-					event_type: event.eventType,
-				};
-			}),
+			events: batch.events?.map(
+				(event: { data: Record<string, unknown>; eventType: string }) => {
+					return {
+						data: event.data,
+						event_type: event.eventType,
+					};
+				},
+			),
 			device_info: batch.deviceInfo,
 			user_attributes: batch.userAttributes,
 			deleted_user_attributes: batch.deletedUserAttributes,

@@ -4,10 +4,7 @@ import { faker } from '@faker-js/faker';
 
 import type { AppConfig } from '../src/services/config';
 import { invokeHttpHandler } from './invoke-http-handler';
-import {
-	mockFetchJsonResponse,
-	mockFetchResponse,
-} from './mockFetch';
+import { mockFetchJsonResponse, mockFetchResponse } from './mockFetch';
 
 jest.mock('../src/services/config', () => ({
 	getAppConfig: jest.fn().mockResolvedValue({
