@@ -53,11 +53,11 @@ function atLeastOneCalloutFailed(invoice: ProcessedInvoice): boolean {
 		refundResult,
 	} = invoice;
 
-	if (
-		!applyCreditToAccountBalanceResult.applyCreditToAccountBalanceAttempt
-			.Success ||
-		!activeSubResult?.checkForActiveSubAttempt.Success
-	) {
+	if (applyCreditToAccountBalanceResult.error) {
+		return true;
+	}
+
+	if (!activeSubResult?.checkForActiveSubAttempt.Success) {
 		return true;
 	}
 

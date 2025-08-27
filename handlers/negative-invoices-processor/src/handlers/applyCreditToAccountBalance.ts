@@ -22,26 +22,22 @@ export const handler = async (
 			Type: 'Increase',
 		});
 
-		const applyCreditToAccountBalanceAttempt =
-			await applyCreditToAccountBalance(
-				zuoraClient,
-				body,
-				ApplyCreditToAccountBalanceResponseSchema,
-			);
+		const response = await applyCreditToAccountBalance(
+			zuoraClient,
+			body,
+			ApplyCreditToAccountBalanceResponseSchema,
+		);
 
 		return {
 			...parsedEvent,
 			applyCreditToAccountBalanceResult: {
-				applyCreditToAccountBalanceAttempt,
+				creditBalanceAdjustmentId: response.Id,
 			},
 		};
 	} catch (error) {
 		return {
 			...event,
 			applyCreditToAccountBalanceResult: {
-				applyCreditToAccountBalanceAttempt: {
-					Success: false,
-				},
 				error:
 					error instanceof Error
 						? error.message
