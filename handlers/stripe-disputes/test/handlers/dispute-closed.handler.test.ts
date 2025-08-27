@@ -11,6 +11,16 @@ jest.mock('@modules/stage', () => ({
 	stageFromEnvironment: jest.fn(() => 'TEST'),
 }));
 
+jest.mock('@modules/zuora/zuoraClient', () => ({
+	ZuoraClient: {
+		create: jest.fn(),
+	},
+}));
+
+jest.mock('../../src/services', () => ({
+	zuoraGetInvoiceFromStripeChargeId: jest.fn(),
+}));
+
 describe('Dispute Closed Handler', () => {
 	const mockLogger: Logger = {
 		log: jest.fn(),
@@ -75,6 +85,16 @@ describe('Dispute Closed Handler', () => {
 			token: 'token456',
 			sandbox: true,
 		});
+
+		// Mock ZuoraClient
+		const { ZuoraClient } = require('@modules/zuora/zuoraClient');
+		ZuoraClient.create.mockResolvedValue({});
+
+		// Mock zuora service
+		const { zuoraGetInvoiceFromStripeChargeId } = require('../../src/services');
+		zuoraGetInvoiceFromStripeChargeId.mockResolvedValue({
+			invoice: { id: 'inv_123' },
+		});
 	});
 
 	afterEach(() => {
@@ -109,14 +129,12 @@ describe('Dispute Closed Handler', () => {
 			);
 		});
 
-		it('should call getSecretValue with correct secret name', async () => {
-			const { getSecretValue } = require('@modules/secrets-manager/getSecret');
+		it('should create ZuoraClient with correct stage and logger', async () => {
+			const { ZuoraClient } = require('@modules/zuora/zuoraClient');
 			const handler = listenDisputeClosedHandler(mockLogger);
 			await handler(mockEvent);
 
-			expect(getSecretValue).toHaveBeenCalledWith(
-				'TEST/Salesforce/ConnectedApp/StripeDisputeWebhooks',
-			);
+			expect(ZuoraClient.create).toHaveBeenCalledWith('TEST', mockLogger);
 		});
 
 		it('should handle missing request body', async () => {
@@ -129,7 +147,7 @@ describe('Dispute Closed Handler', () => {
 			expect(responseBody.error).toBe('Internal server error');
 			expect(mockLogger.log).toHaveBeenCalledWith(
 				'Error processing dispute closed:',
-				expect.any(ReferenceError),
+				expect.any(String),
 			);
 		});
 
@@ -143,7 +161,7 @@ describe('Dispute Closed Handler', () => {
 			expect(responseBody.error).toBe('Internal server error');
 			expect(mockLogger.log).toHaveBeenCalledWith(
 				'Error processing dispute closed:',
-				expect.any(SyntaxError),
+				expect.any(String),
 			);
 		});
 
@@ -161,13 +179,13 @@ describe('Dispute Closed Handler', () => {
 			expect(responseBody.error).toBe('Internal server error');
 			expect(mockLogger.log).toHaveBeenCalledWith(
 				'Error processing dispute closed:',
-				expect.any(Error),
+				expect.any(String),
 			);
 		});
 
-		it('should handle getSecretValue error', async () => {
-			const { getSecretValue } = require('@modules/secrets-manager/getSecret');
-			getSecretValue.mockRejectedValue(new Error('Secret not found'));
+		it('should handle ZuoraClient creation error', async () => {
+			const { ZuoraClient } = require('@modules/zuora/zuoraClient');
+			ZuoraClient.create.mockRejectedValue(new Error('Zuora client error'));
 
 			const handler = listenDisputeClosedHandler(mockLogger);
 			const result = await handler(mockEvent);
@@ -177,7 +195,7 @@ describe('Dispute Closed Handler', () => {
 			expect(responseBody.error).toBe('Internal server error');
 			expect(mockLogger.log).toHaveBeenCalledWith(
 				'Error processing dispute closed:',
-				expect.any(Error),
+				expect.any(String),
 			);
 		});
 
