@@ -35,7 +35,7 @@ export function listenDisputeClosedHandler(logger: Logger) {
 
 			return {
 				body: JSON.stringify({
-					message: invoiceFromZuora,
+					message: 'Dispute closed webhook received',
 					disputeId: stripeWebhook.data.object.id,
 					stage: process.env.STAGE,
 				}),
@@ -48,7 +48,7 @@ export function listenDisputeClosedHandler(logger: Logger) {
 			);
 			return {
 				body: JSON.stringify({ error: 'Internal server error' }),
-				statusCode: 200,
+				statusCode: 500,
 			};
 		}
 	};
