@@ -6,10 +6,11 @@
 		"it-test": "jest --group=integration",
 		"check-formatting": "prettier --check **.ts",
 		"fix-formatting": "prettier --write **.ts",
-		"lint": "eslint src/**/*.ts test/**/*.ts"
+		"lint": "eslint src/**/*.ts test/**/*.ts",
+		"build": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@aws-sdk/client-s3": "3.777.0",
+		"@aws-sdk/client-s3": "^3.848.0",
 		"@google-cloud/bigquery": "^7.9.3",
 		"aws-sdk": "^2.1692.0",
 		"google-auth-library": "^9.15.0",

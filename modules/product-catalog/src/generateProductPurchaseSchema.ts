@@ -4,6 +4,10 @@ import type {
 	ZuoraProductRatePlan,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import {
+	isDeliveryProduct,
+	requiresDeliveryInstructions,
+} from '@modules/product-catalog/productCatalog';
+import {
 	getProductRatePlanKey,
 	getZuoraProductKey,
 	isSupportedProduct,
@@ -17,6 +21,31 @@ const header = `
 // product and rate plan passed in the support-workers state
 
 import { z } from 'zod';
+import { ProductKey } from '@modules/product-catalog/productCatalog';
+
+const deliveryContactSchema = z.object({
+	firstName: z.string(),
+	lastName: z.string(),
+	workEmail: z.string(),
+	country: z.string(),
+	state: z.string().nullish(),
+	city: z.string(),
+	address1: z.string(),
+	address2: z.string().nullish(),
+	postalCode: z.string(),
+});
+
+const dateOrDateStringSchema = z.preprocess(
+	(input) => (typeof input === 'string' ? new Date(input) : input),
+	z.date(),
+);
+
+`;
+
+const footer = `
+	export type ProductPurchase = z.infer<typeof productPurchaseSchema>;
+	// Generic type for a specific product
+	export type ProductPurchaseFor<P extends ProductKey> = Extract<ProductPurchase,{ product: P }>;
 `;
 
 export const generateProductPurchaseSchema = (
@@ -34,11 +63,29 @@ export const generateProductPurchaseSchema = (
 	export const productPurchaseSchema = z.discriminatedUnion('product', [
 		${zuoraProductsSchema}
 		]);
+	${footer}
 	`;
 };
 
-const productAllowsAmountOverride = (product: string): boolean => {
-	return product === 'Contribution' || product === 'SupporterPlus';
+const generateProductSpecificFields = (productName: string): string => {
+	if (productName === 'Contribution' || productName === 'SupporterPlus') {
+		return 'amount: z.number(),';
+	}
+	if (isDeliveryProduct(productName)) {
+		let fields = `
+			firstDeliveryDate: dateOrDateStringSchema,
+			deliveryContact: deliveryContactSchema,`;
+		if (requiresDeliveryInstructions(productName)) {
+			fields += `
+			deliveryInstructions: z.string(),`;
+			if (productName === 'NationalDelivery') {
+				fields += `
+				deliveryAgent: z.number(),`;
+			}
+		}
+		return fields;
+	}
+	return '';
 };
 
 const generateProductsSchema = (product: CatalogProduct) => {
@@ -58,8 +105,7 @@ const generateProductsSchema = (product: CatalogProduct) => {
 
 	return `z.object({
 		product: z.literal('${productName}'),
-		ratePlan: ${ratePlanUnion},
-		${productAllowsAmountOverride(productName) ? 'amount: z.number(),' : ''}
+		ratePlan: ${ratePlanUnion}, ${generateProductSpecificFields(productName)}
 	})`;
 };
 

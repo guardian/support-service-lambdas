@@ -1,12 +1,21 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { faker } from '@faker-js/faker';
-import type { DataSubjectRequestState } from '../interfaces/data-subject-request-state';
-import type { DataSubjectRequestSubmission } from '../interfaces/data-subject-request-submission';
-import type { AppConfig } from '../src/utils/config';
-import { invokeHttpHandler } from '../src/utils/invoke-http-handler';
 
-jest.mock('../src/utils/config', () => ({
+import type { AppConfig } from '../src/services/config';
+import { invokeHttpHandler } from './invoke-http-handler';
+import {
+	getMockCreateDataSubjectRequestResponse,
+	getMockGetSubjectRequestByIdResponse,
+	mockFetchJsonResponse,
+	mockFetchResponse,
+	mockRegisterEventResponse,
+	mockSetUserAttributesResponse,
+} from './mockFetch';
+import { DataSubjectRequestSubmission } from '../src/apis/dataSubjectRequests/submit';
+import { DataSubjectRequestState } from '../src/apis/dataSubjectRequests/getStatus';
+
+jest.mock('../src/services/config', () => ({
 	getAppConfig: jest.fn().mockResolvedValue({
 		inputPlatform: {
 			key: faker.string.nanoid(),
@@ -32,13 +41,7 @@ describe('mparticle-api HTTP tests', () => {
 	});
 
 	it('Register an event', async () => {
-		const mockRegisterEventResponse = {
-			ok: true,
-			status: 202,
-		};
-		(global.fetch as jest.Mock).mockResolvedValueOnce(
-			mockRegisterEventResponse,
-		);
+		mockFetchResponse(mockRegisterEventResponse, 202);
 
 		const result = await invokeHttpHandler({
 			httpMethod: 'POST',
@@ -86,23 +89,11 @@ describe('mparticle-api HTTP tests', () => {
 	it('Create Data Subject Request', async () => {
 		const requestId = faker.string.uuid();
 		const submittedTime = new Date();
-		const mockSetUserAttributesResponse = {
-			ok: true,
-			status: 202,
-		};
-		const mockCreateDataSubjectRequestResponse = {
-			ok: true,
-			statusCode: 202,
-			json: () => ({
-				expected_completion_time: faker.date.soon(),
-				received_time: submittedTime,
-				subject_request_id: requestId,
-				controller_id: faker.string.numeric(),
-			}),
-		};
-		(global.fetch as jest.Mock)
-			.mockResolvedValueOnce(mockSetUserAttributesResponse)
-			.mockResolvedValueOnce(mockCreateDataSubjectRequestResponse);
+		mockFetchResponse(mockSetUserAttributesResponse, 202);
+		mockFetchJsonResponse(
+			getMockCreateDataSubjectRequestResponse(submittedTime, requestId),
+			202,
+		);
 
 		const result = await invokeHttpHandler({
 			httpMethod: 'POST',
@@ -128,20 +119,7 @@ describe('mparticle-api HTTP tests', () => {
 
 	it('Get Data Subject Request by Id', async () => {
 		const requestId = faker.string.uuid();
-		const mockGetSubjectRequestByIdResponse = {
-			ok: true,
-			status: 200,
-			json: () => ({
-				expected_completion_time: faker.date.soon(),
-				subject_request_id: requestId,
-				controller_id: faker.string.numeric(),
-				request_status: 'in_progress',
-				received_time: faker.date.recent(),
-			}),
-		};
-		(global.fetch as jest.Mock).mockResolvedValueOnce(
-			mockGetSubjectRequestByIdResponse,
-		);
+		mockFetchJsonResponse(getMockGetSubjectRequestByIdResponse(requestId));
 
 		const result = await invokeHttpHandler({
 			httpMethod: 'GET',
@@ -159,23 +137,16 @@ describe('mparticle-api HTTP tests', () => {
 
 	it('Handle Data Subject Request state callback', async () => {
 		const requestId = '475974fa-6b42-4370-bb56-b5d845686bb5'; // Do not fake it to match the header signature
-		const mockDiscoveryResponse = {
-			ok: true,
-			status: 200,
-			json: () => ({
-				processor_certificate:
-					'https://static.mparticle.com/dsr/opendsr_cert.pem',
-			}),
-		};
-		const mockGetCertificateResponse = {
-			ok: true,
-			status: 200,
-			text: () =>
-				fs.readFileSync(path.join(__dirname, 'processor-certificate.pem')),
-		};
-		(global.fetch as jest.Mock)
-			.mockResolvedValueOnce(mockDiscoveryResponse)
-			.mockResolvedValueOnce(mockGetCertificateResponse);
+		mockFetchJsonResponse({
+			processor_certificate:
+				'https://static.mparticle.com/dsr/opendsr_cert.pem',
+		});
+		mockFetchResponse(
+			fs.readFileSync(
+				path.join(__dirname, 'processor-certificate.pem'),
+				'utf8',
+			),
+		);
 
 		const result = await invokeHttpHandler({
 			httpMethod: 'POST',
