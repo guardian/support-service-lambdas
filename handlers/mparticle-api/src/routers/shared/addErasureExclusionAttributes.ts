@@ -12,8 +12,8 @@ export const addErasureExclusionAttributes = async (
 	environment: 'production' | 'development',
 	userId: string,
 	submittedTime: string,
-): Promise<object> => {
-	return uploadAnEventBatch(mParticleEventsAPIClient, {
+): Promise<void> => {
+	await uploadAnEventBatch(mParticleEventsAPIClient, {
 		userAttributes: {
 			dsr_erasure_requested: true,
 			dsr_erasure_status: 'requested',

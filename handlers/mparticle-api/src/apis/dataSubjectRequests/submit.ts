@@ -4,7 +4,21 @@ import type {
 	MParticleClient,
 } from '../../services/mparticleClient';
 import { getStatusOfDataSubjectRequestByUserId } from './getStatusByUserId';
-import { dataSubjectRequestFormParser } from '../../routers/http/submit-data-subject-request';
+
+/**
+ * Data Subject Request Form
+ * https://docs.mparticle.com/developers/apis/dsr-api/v3/#submit-a-data-subject-request-dsr
+ */
+export const dataSubjectRequestFormParser = {
+	body: z.object({
+		regulation: z.enum(['gdpr', 'ccpa']),
+		requestId: z.string().uuid(),
+		requestType: z.enum(['access', 'portability', 'erasure']),
+		submittedTime: z.string().datetime(),
+		userId: z.string(),
+		environment: z.enum(['production', 'development']),
+	}),
+};
 
 export type DataSubjectRequestForm = z.infer<
 	typeof dataSubjectRequestFormParser.body
@@ -21,11 +35,6 @@ export interface DataSubjectRequestSubmission {
 	expectedCompletionTime: Date;
 
 	/**
-	 * The estimated time by which the request was submitted, in UTC.
-	 */
-	receivedTime: Date;
-
-	/**
 	 * The controller-provided identifier of the request in a GUID v4 format.
 	 */
 	requestId: string;
@@ -38,7 +47,6 @@ export interface DataSubjectRequestSubmission {
 
 const schema = z.object({
 	expected_completion_time: z.string().transform((val) => new Date(val)),
-	received_time: z.string().transform((val) => new Date(val)),
 	subject_request_id: z.string(),
 	controller_id: z.string(),
 });
@@ -93,23 +101,30 @@ export const submitDataSubjectRequest = async (
 	);
 
 	if (!response.success) {
-		/**
-		 * This can happen when the user retries to submit a request for erasure for the same id.
-		 * Let's try to search for an existent request on mParticle before throwing an error.
-		 */
-		const getDataSubjectRequestResponse =
-			await getStatusOfDataSubjectRequestByUserId(
-				mParticleDataSubjectClient,
-				form.userId,
-			);
-		if (getDataSubjectRequestResponse) {
-			return {
-				expectedCompletionTime:
-					getDataSubjectRequestResponse.expectedCompletionTime,
-				receivedTime: new Date(),
-				requestId: getDataSubjectRequestResponse.requestId,
-				controllerId: getDataSubjectRequestResponse.controllerId,
-			};
+		// Check if this is specifically a duplicate request error before attempting fallback
+		const isDuplicateRequestError =
+			'code' in response.error &&
+			response.error?.code === 400 &&
+			response.error?.message?.includes('Subject request already exists');
+
+		if (isDuplicateRequestError) {
+			/**
+			 * This can happen when the user retries to submit a request for erasure for the same id.
+			 * Let's try to search for an existent request on mParticle before throwing an error.
+			 */
+			const getDataSubjectRequestResponse =
+				await getStatusOfDataSubjectRequestByUserId(
+					mParticleDataSubjectClient,
+					form.userId,
+				);
+			if (getDataSubjectRequestResponse) {
+				return {
+					expectedCompletionTime:
+						getDataSubjectRequestResponse.expectedCompletionTime,
+					requestId: getDataSubjectRequestResponse.requestId,
+					controllerId: getDataSubjectRequestResponse.controllerId,
+				};
+			}
 		}
 
 		throw response.error;
@@ -117,7 +132,6 @@ export const submitDataSubjectRequest = async (
 
 	return {
 		expectedCompletionTime: new Date(response.data.expected_completion_time),
-		receivedTime: new Date(response.data.received_time),
 		requestId: response.data.subject_request_id,
 		controllerId: response.data.controller_id,
 	};

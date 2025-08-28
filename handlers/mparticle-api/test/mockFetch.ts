@@ -7,12 +7,10 @@ export const mockSetUserAttributesResponse = '';
 export const mockRegisterEventResponse = '';
 
 export function getMockCreateDataSubjectRequestResponse(
-	submittedTime: Date,
 	requestId: string,
 ): PostRequestsResponse {
 	return {
 		expected_completion_time: faker.date.soon(),
-		received_time: submittedTime,
 		subject_request_id: requestId,
 		controller_id: faker.string.numeric(),
 	};
