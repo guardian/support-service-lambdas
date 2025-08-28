@@ -1,10 +1,11 @@
 import type { Logger } from '@modules/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
-import { getSecretValue } from '@modules/secrets-manager/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
+import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { listenDisputeClosedInputSchema } from '../dtos';
-import type { SalesforceCredentials } from '../types';
+import type { ZuoraInvoiceFromStripeChargeIdResult } from '../interfaces';
+import { zuoraGetInvoiceFromStripeChargeId } from '../services';
 
 export function listenDisputeClosedHandler(logger: Logger) {
 	return async (
@@ -13,18 +14,25 @@ export function listenDisputeClosedHandler(logger: Logger) {
 		try {
 			logger.log('Processing Stripe dispute closed webhook');
 
-			// Get Salesforce credentials from AWS Secrets Manager
-			const salesforceCredentials = await getSecretValue<SalesforceCredentials>(
-				`${stageFromEnvironment()}/Salesforce/ConnectedApp/StripeDisputeWebhooks`,
-			);
-			console.log('Salesforce credentials:', salesforceCredentials);
-
 			const stripeWebhook = listenDisputeClosedInputSchema.parse(
 				JSON.parse(getIfDefined(event.body, 'No body was provided')),
 			);
 			logger.mutableAddContext(stripeWebhook.data.object.id);
 
+			const paymentId = stripeWebhook.data.object.charge;
+
+			logger.log(`Payment ID from dispute: ${paymentId}`);
+
+			const stage = stageFromEnvironment();
+			const zuoraClient: ZuoraClient = await ZuoraClient.create(stage, logger);
+
+			const invoiceFromZuora: ZuoraInvoiceFromStripeChargeIdResult =
+				await zuoraGetInvoiceFromStripeChargeId(paymentId, zuoraClient);
+
+			logger.log(JSON.stringify({ invoiceFromZuora }));
+
 			// TODO: Implement dispute closed logic
+
 			return {
 				body: JSON.stringify({
 					message: 'Dispute closed webhook received',
@@ -34,7 +42,10 @@ export function listenDisputeClosedHandler(logger: Logger) {
 				statusCode: 200,
 			};
 		} catch (error) {
-			logger.log('Error processing dispute closed:', error);
+			logger.log(
+				'Error processing dispute closed:',
+				error instanceof Error ? error.message : String(error),
+			);
 			return {
 				body: JSON.stringify({ error: 'Internal server error' }),
 				statusCode: 500,

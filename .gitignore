@@ -10,5 +10,4 @@ project/project/
 .bloop/
 .DS_Store
 node_modules/
-pre-commit-disput.sh
 *.zip

@@ -116,10 +116,10 @@ describe('Main Handler', () => {
 		const result = await handler(event);
 
 		expect(mockLogger.log).toHaveBeenCalledWith(
-			`Input is ${JSON.stringify(event)}`,
+			`Input: ${JSON.stringify(event)}`,
 		);
 		expect(mockLogger.log).toHaveBeenCalledWith(
-			`Response is ${JSON.stringify(result)}`,
+			`Response: ${JSON.stringify(result)}`,
 		);
 	});
 });
