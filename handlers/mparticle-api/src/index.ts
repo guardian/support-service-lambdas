@@ -18,12 +18,13 @@ export const handlerHttp: Handler<APIGatewayProxyEvent, APIGatewayProxyResult> =
 	withLogging(
 		async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
 			try {
-				const { mParticleDataSubjectClient, mParticleEventsAPIClient, isProd } =
+				const { mParticleDataSubjectClient, mParticleEventsAPIClient, batonS3Writer, isProd } =
 					await services();
 				console.debug('Processing HTTP request');
 				return httpRouter(
 					mParticleDataSubjectClient,
 					mParticleEventsAPIClient,
+					batonS3Writer,
 					isProd,
 				).routeRequest(event);
 			} catch (error) {

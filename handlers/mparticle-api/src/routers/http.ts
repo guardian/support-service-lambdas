@@ -6,6 +6,7 @@ import type {
 	EventsAPI,
 	MParticleClient,
 } from '../services/mparticleClient';
+import type { BatonS3Writer } from '../services/batonS3Writer';
 import type { DataSubjectRequestCallback } from './http/dataSubjectRequestCallback/data-subject-request-callback';
 import {
 	dataSubjectRequestCallbackHandler,
@@ -27,6 +28,7 @@ import {
 export const httpRouter = (
 	mParticleDataSubjectClient: MParticleClient<DataSubjectAPI>,
 	mParticleEventsAPIClient: MParticleClient<EventsAPI>,
+	batonS3Writer: BatonS3Writer,
 	isProd: boolean,
 ) =>
 	new Router([
@@ -49,7 +51,7 @@ export const httpRouter = (
 		createRoute<{ requestId: string }, DataSubjectRequestCallback>({
 			httpMethod: 'POST',
 			path: '/data-subject-requests/{requestId}/callback',
-			handler: dataSubjectRequestCallbackHandler(mParticleDataSubjectClient),
+			handler: dataSubjectRequestCallbackHandler(mParticleDataSubjectClient, batonS3Writer),
 			parser: dataSubjectRequestCallbackParser,
 		}),
 		createRoute<unknown, EventBatch>({
