@@ -6,6 +6,7 @@ import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
 import { DiscountApi } from '../lib/discount-api';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
+import { HolidayStopApi } from '../lib/holiday-stop-api';
 import { MetricPushApi } from '../lib/metric-push-api';
 import { MParticleApi } from '../lib/mparticle-api';
 import { NegativeInvoicesProcessor } from '../lib/negative-invoices-processor';
@@ -383,6 +384,14 @@ new MParticleApi(app, 'mparticle-api-CODE', {
 	stage: 'CODE',
 });
 new MParticleApi(app, 'mparticle-api-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+});
+new HolidayStopApi(app, 'holiday-stop-api-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+});
+new HolidayStopApi(app, 'holiday-stop-api-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 });
