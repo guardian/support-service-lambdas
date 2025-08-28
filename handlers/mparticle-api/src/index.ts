@@ -77,7 +77,6 @@ async function services() {
 		batonS3Writer: new BatonS3WriterImpl(
 			config.sarResultsBucket,
 			sarS3BaseKey,
-			() => new Date(),
 		),
 		isProd: stage === 'PROD',
 	};

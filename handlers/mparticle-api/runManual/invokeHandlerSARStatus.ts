@@ -32,7 +32,6 @@ loadConfig('CODE', 'support', 'mparticle-api', ConfigSchema).then((config) => {
 	const batonS3Writer = new BatonS3WriterImpl(
 		sarResultsBucket,
 		sarS3BaseKey,
-		() => new Date(),
 	);
 
 	handleSarStatus(

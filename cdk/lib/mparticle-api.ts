@@ -44,11 +44,15 @@ export class MParticleApi extends GuStack {
 			functionName: `${app}-http-${this.stage}`,
 		});
 
-		// make sure our lambda can write to the central baton bucket
+		// make sure our lambda can write to and list objects in the central baton bucket
 		// https://github.com/guardian/baton/?tab=readme-ov-file#:~:text=The%20convention%20is%20to%20write%20these%20to%20the%20gu%2Dbaton%2Dresults%20bucket%20that%20is%20hosted%20in%20the%20baton%20AWS%20account.
+		// s3:ListBucket permission is needed to check if files already exist before downloading
 		const s3BatonWritePolicy: PolicyStatement = new PolicyStatement({
-			actions: ['s3:PutObject'],
-			resources: [`arn:aws:s3:::${sarResultsBucket}/${sarS3BaseKey}*`],
+			actions: ['s3:PutObject', 's3:ListBucket'],
+			resources: [
+				`arn:aws:s3:::${sarResultsBucket}/${sarS3BaseKey}*`, // for PutObject
+				`arn:aws:s3:::${sarResultsBucket}`, // for ListBucket
+			],
 		});
 
 		const batonLambda = new SrLambda(this, `${app}-baton-lambda`, {
