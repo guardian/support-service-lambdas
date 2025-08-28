@@ -5,8 +5,6 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuLambdaFunction",
-      "GuLambdaFunction",
       "GuApiGatewayWithLambdaByPath",
     ],
     "gu:cdk:version": "TEST",
@@ -952,8 +950,6 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuLambdaFunction",
-      "GuLambdaFunction",
       "GuApiGatewayWithLambdaByPath",
     ],
     "gu:cdk:version": "TEST",
