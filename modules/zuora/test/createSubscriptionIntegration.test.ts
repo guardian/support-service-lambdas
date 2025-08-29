@@ -44,31 +44,46 @@ describe('createSubscription integration', () => {
 		deliveryInstructions: 'Leave at front door',
 		deliveryAgent: 123,
 	};
+	const paymentGateway: PaymentGateway<DirectDebit> = 'GoCardless';
+	const paymentMethod: DirectDebit = {
+		accountHolderInfo: {
+			accountHolderName: 'RB',
+		},
+		accountNumber: '55779911',
+		bankCode: '200000',
+		type: 'Bacs',
+	};
+	const createInputFields: CreateSubscriptionInputFields<DirectDebit> = {
+		accountName: 'Test Account',
+		createdRequestId: 'REQUEST-ID',
+		salesforceAccountId: 'CRM-ID',
+		salesforceContactId: 'SF-CONTACT-ID',
+		identityId: 'IDENTITY-ID',
+		currency: currency,
+		paymentGateway: paymentGateway,
+		paymentMethod: paymentMethod,
+		billToContact: contact,
+		productPurchase: productPurchase,
+		runBilling: true,
+		collectPayment: true,
+	};
 
 	test('We can create a subscription with a new account', async () => {
-		const paymentGateway: PaymentGateway<DirectDebit> = 'GoCardless';
-		const paymentMethod: DirectDebit = {
-			accountHolderInfo: {
-				accountHolderName: 'RB',
-			},
-			accountNumber: '55779911',
-			bankCode: '200000',
-			type: 'Bacs',
-		};
+		const client = await ZuoraClient.create('CODE');
+		const response = await createSubscription(
+			client,
+			productCatalog,
+			createInputFields,
+		);
+		expect(response.subscriptionNumbers.length).toEqual(1);
+	});
+
+	test('Setting an idempotency key prevents duplicate subscriptions', async () => {
+		const idempotencyKey = 'TEST-IDEMPOTENCY-KEY-' + new Date().getTime();
 
 		const inputFields: CreateSubscriptionInputFields<DirectDebit> = {
-			accountName: 'Test Account',
-			createdRequestId: 'REQUEST-ID',
-			salesforceAccountId: 'CRM-ID',
-			salesforceContactId: 'SF-CONTACT-ID',
-			identityId: 'IDENTITY-ID',
-			currency: currency,
-			paymentGateway: paymentGateway,
-			paymentMethod: paymentMethod,
-			billToContact: contact,
-			productPurchase: productPurchase,
-			runBilling: true,
-			collectPayment: true,
+			...createInputFields,
+			createdRequestId: idempotencyKey,
 		};
 		const client = await ZuoraClient.create('CODE');
 		const response = await createSubscription(
@@ -76,8 +91,13 @@ describe('createSubscription integration', () => {
 			productCatalog,
 			inputFields,
 		);
-		expect(response.subscriptionNumbers.length).toEqual(1);
-	});
+		const response2 = await createSubscription(
+			client,
+			productCatalog,
+			inputFields,
+		);
+		expect(response).toEqual(response2);
+	}, 10000);
 
 	test('We can preview a subscription with a new account', async () => {
 		const inputFields: PreviewCreateSubscriptionInputFields = {
