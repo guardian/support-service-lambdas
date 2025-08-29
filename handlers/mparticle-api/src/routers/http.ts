@@ -1,6 +1,7 @@
 import { createRoute, Router } from '@modules/routing/router';
 import type { DataSubjectRequestForm } from '../apis/dataSubjectRequests/submit';
 import type { EventBatch } from '../apis/events/uploadAnEventBatch';
+import type { BatonS3Writer } from '../services/batonS3Writer';
 import type {
 	DataSubjectAPI,
 	EventsAPI,
@@ -27,6 +28,7 @@ import {
 export const httpRouter = (
 	mParticleDataSubjectClient: MParticleClient<DataSubjectAPI>,
 	mParticleEventsAPIClient: MParticleClient<EventsAPI>,
+	batonS3Writer: BatonS3Writer,
 	isProd: boolean,
 ) =>
 	new Router([
@@ -49,7 +51,10 @@ export const httpRouter = (
 		createRoute<{ requestId: string }, DataSubjectRequestCallback>({
 			httpMethod: 'POST',
 			path: '/data-subject-requests/{requestId}/callback',
-			handler: dataSubjectRequestCallbackHandler(mParticleDataSubjectClient),
+			handler: dataSubjectRequestCallbackHandler(
+				mParticleDataSubjectClient,
+				batonS3Writer,
+			),
 			parser: dataSubjectRequestCallbackParser,
 		}),
 		createRoute<unknown, EventBatch>({
