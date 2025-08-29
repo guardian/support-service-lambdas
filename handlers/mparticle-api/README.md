@@ -56,7 +56,7 @@ In the Guardian, mParticle extracts relevant data from the data lake and writes 
 
 - **CRM Email Campaigns**: The CRM team uses Braze to send targeted email campaigns driven by BigQuery data analysis
 - **Service Emails**: Automated transactional emails like subscription confirmations, billing notifications, and account updates
-- **Reader Engagement**: Newsletter campaigns, breaking news alerts, and personalized content recommendations
+- **Reader Engagement**: Newsletter campaigns, onboarding, and personalized content recommendations
 - **Audience Segmentation**: Dynamic reader segments based on subscription status, reading behavior, and engagement patterns
 - **Campaign Analytics**: Performance tracking for email open rates, click-through rates, and reader engagement metrics
 
