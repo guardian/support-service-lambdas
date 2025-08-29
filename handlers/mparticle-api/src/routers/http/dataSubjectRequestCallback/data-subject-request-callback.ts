@@ -70,7 +70,7 @@ export function dataSubjectRequestCallbackHandler(
 			statusCode: 202,
 			body: JSON.stringify(
 				await processDataSubjectRequestCallback(
-					parsed.path.requestId, 
+					parsed.path.requestId,
 					parsed.body,
 					dataSubjectAPIMParticleClient,
 					batonS3Writer,

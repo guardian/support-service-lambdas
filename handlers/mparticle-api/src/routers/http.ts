@@ -51,7 +51,10 @@ export const httpRouter = (
 		createRoute<{ requestId: string }, DataSubjectRequestCallback>({
 			httpMethod: 'POST',
 			path: '/data-subject-requests/{requestId}/callback',
-			handler: dataSubjectRequestCallbackHandler(mParticleDataSubjectClient, batonS3Writer),
+			handler: dataSubjectRequestCallbackHandler(
+				mParticleDataSubjectClient,
+				batonS3Writer,
+			),
 			parser: dataSubjectRequestCallbackParser,
 		}),
 		createRoute<unknown, EventBatch>({

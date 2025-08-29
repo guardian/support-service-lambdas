@@ -9,13 +9,15 @@ jest.mock('../../src/utils/withLogging', () => ({
 	withLogging: (fn: any) => fn,
 }));
 
-const mockCheckFileExistsInS3 = checkFileExistsInS3 as jest.MockedFunction<typeof checkFileExistsInS3>;
+const mockCheckFileExistsInS3 = checkFileExistsInS3 as jest.MockedFunction<
+	typeof checkFileExistsInS3
+>;
 const mockStreamToS3 = streamToS3 as jest.MockedFunction<typeof streamToS3>;
 
 describe('BatonS3WriterImpl', () => {
 	const bucketName = 'test-bucket';
 	const s3BaseKey = 'sar-results/';
-	
+
 	let batonS3Writer: BatonS3WriterImpl;
 
 	beforeEach(() => {
@@ -58,7 +60,7 @@ describe('BatonS3WriterImpl', () => {
 			expect(result).toBeNull();
 			expect(console.warn).toHaveBeenCalledWith(
 				`Error checking for existing file for reference ${reference}:`,
-				error
+				error,
 			);
 		});
 	});
@@ -79,7 +81,7 @@ describe('BatonS3WriterImpl', () => {
 				bucketName,
 				expectedS3Key,
 				'application/zip',
-				stream
+				stream,
 			);
 		});
 

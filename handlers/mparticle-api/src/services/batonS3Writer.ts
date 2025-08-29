@@ -42,7 +42,10 @@ export class BatonS3WriterImpl implements BatonS3Writer {
 
 			return null;
 		} catch (error) {
-			console.warn(`Error checking for existing file for reference ${reference}:`, error);
+			console.warn(
+				`Error checking for existing file for reference ${reference}:`,
+				error,
+			);
 			return null;
 		}
 	};
