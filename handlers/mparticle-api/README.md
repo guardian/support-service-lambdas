@@ -5,20 +5,13 @@ This lambda integrates the Baton tool with mParticle API to allow both erasure a
 ## Overview
 
 The mParticle API Lambda provides:
-- 🔒 **Privacy Rights Fulfillment**: Process data deletion and export requests via mParticle's DSR API
-- 📊 **Real-time Status Tracking**: Monitor DSR progress with secure callback integration  
-- 🤖 **Baton Integration**: Automated workflows for orchestrated privacy operations (RER & SAR)
-- 📈 **Analytics Forwarding**: Route event data to mParticle and downstream systems
-- 🛡️ **Enterprise Security**: Certificate validation and signature verification on callbacks
-
-For more information about the Baton privacy orchestration system, see the [Baton documentation](https://github.com/guardian/baton).
-
-### Key Capabilities
 - 🔒 **Privacy Rights Fulfillment**: Process data deletion, export, and access requests
 - 📊 **Real-time Status Tracking**: Monitor DSR progress with callback integration  
 - 🤖 **Automated Workflows**: Integrate with [Baton](https://github.com/guardian/baton) for orchestrated privacy operations (RER & SAR)
 - 📈 **Analytics Forwarding**: Route event data to mParticle and downstream systems
 - 🛡️ **Enterprise Security**: Certificate validation and signature verification on callbacks from mParticle
+
+For more information about the Baton privacy orchestration system, see the [Baton documentation](https://github.com/guardian/baton).
 
 ### Compliance & Standards
 - **GDPR Article 15**: Right of Access implementation (Subject Access Requests)
