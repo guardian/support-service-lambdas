@@ -47,10 +47,14 @@ export function executeOrderRequest<
 	zuoraClient: ZuoraClient,
 	orderRequest: CreateOrderRequest,
 	responseSchema: T,
+	idempotencyKey?: string,
 ): Promise<O> {
 	const path = `/v1/orders`;
 	const body = JSON.stringify(orderRequest);
-	return zuoraClient.post(path, body, responseSchema);
+	const headers = idempotencyKey
+		? { 'idempotency-key': idempotencyKey }
+		: undefined;
+	return zuoraClient.post(path, body, responseSchema, headers);
 }
 
 export function previewOrderRequest<
