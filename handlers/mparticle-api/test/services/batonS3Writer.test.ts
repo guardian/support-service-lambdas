@@ -1,12 +1,12 @@
-import { BatonS3WriterImpl } from '../../src/services/batonS3Writer';
-import { checkFileExistsInS3 } from '@modules/aws/s3FileExists';
 import { streamToS3 } from '@modules/aws/s3';
+import { checkFileExistsInS3 } from '@modules/aws/s3FileExists';
+import { BatonS3WriterImpl } from '../../src/services/batonS3Writer';
 
 // Mock the dependencies
 jest.mock('@modules/aws/s3FileExists');
 jest.mock('@modules/aws/s3');
 jest.mock('../../src/utils/withLogging', () => ({
-	withLogging: (fn: any) => fn,
+	withLogging: <TArgs extends unknown[], TReturn>(fn: (...args: TArgs) => Promise<TReturn>) => fn,
 }));
 
 const mockCheckFileExistsInS3 = checkFileExistsInS3 as jest.MockedFunction<

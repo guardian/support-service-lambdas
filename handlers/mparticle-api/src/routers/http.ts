@@ -1,12 +1,12 @@
 import { createRoute, Router } from '@modules/routing/router';
 import type { DataSubjectRequestForm } from '../apis/dataSubjectRequests/submit';
 import type { EventBatch } from '../apis/events/uploadAnEventBatch';
+import type { BatonS3Writer } from '../services/batonS3Writer';
 import type {
 	DataSubjectAPI,
 	EventsAPI,
 	MParticleClient,
 } from '../services/mparticleClient';
-import type { BatonS3Writer } from '../services/batonS3Writer';
 import type { DataSubjectRequestCallback } from './http/dataSubjectRequestCallback/data-subject-request-callback';
 import {
 	dataSubjectRequestCallbackHandler,
