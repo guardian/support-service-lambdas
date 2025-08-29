@@ -23,7 +23,11 @@ export const checkFileExistsInS3 = async ({
 		return true;
 	} catch (error: any) {
 		// If the error is NoSuchKey or NotFound, the file doesn't exist
-		if (error.name === 'NoSuchKey' || error.name === 'NotFound' || error.$metadata?.httpStatusCode === 404) {
+		if (
+			error.name === 'NoSuchKey' ||
+			error.name === 'NotFound' ||
+			error.$metadata?.httpStatusCode === 404
+		) {
 			return false;
 		}
 		// For other errors (permissions, etc.), re-throw

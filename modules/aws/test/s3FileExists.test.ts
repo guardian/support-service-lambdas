@@ -66,6 +66,8 @@ describe('checkFileExistsInS3', () => {
 		error.name = 'AccessDenied';
 		mockSend.mockRejectedValue(error);
 
-		await expect(checkFileExistsInS3({ bucketName, filePath })).rejects.toThrow('Access Denied');
+		await expect(checkFileExistsInS3({ bucketName, filePath })).rejects.toThrow(
+			'Access Denied',
+		);
 	});
 });

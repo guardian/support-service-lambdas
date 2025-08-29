@@ -144,7 +144,12 @@ describe('S3 functions', () => {
 				},
 			});
 
-			await streamToS3('test-bucket', 'path/to/file.txt', undefined, testStream);
+			await streamToS3(
+				'test-bucket',
+				'path/to/file.txt',
+				undefined,
+				testStream,
+			);
 
 			expect(MockedUpload).toHaveBeenCalledTimes(1);
 			expect(MockedUpload).toHaveBeenCalledWith({
