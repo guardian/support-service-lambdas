@@ -20,13 +20,13 @@ interface SrLambdaProps {
 
 /**
  * Standard lambda configuration for support-service-lambdas.
- * 
+ *
  * Provides sensible defaults for:
  * - loggingFormat: LoggingFormat.TEXT (per repo standard from PR #2660)
  * - runtime: nodeVersion (NODEJS_20_X for TypeScript lambdas)
  * - memorySize: 1024 (common default)
  * - timeout: 15 seconds (suitable for most HTTP APIs)
- * 
+ *
  * All defaults can be overridden when needed.
  */
 export class SrLambda extends GuLambdaFunction {
