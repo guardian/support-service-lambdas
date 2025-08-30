@@ -1,4 +1,6 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
+import { ZuoraTermType } from '@modules/zuora-catalog/zuoraCatalogSchema';
+import { TermType } from '@modules/product-catalog/productCatalog';
 
 const zuoraCatalogToProductKey: Record<string, string> = {
 	'Guardian Ad-Lite': 'GuardianAdLite',
@@ -195,6 +197,13 @@ export const getProductRatePlanChargeKey = (
 		zuoraCatalogToProductRatePlanChargeKey[productRatePlanCharge],
 		`Unexpected product rate plan charge type ${productRatePlanCharge}`,
 	);
+};
+export const getTermTypeName = (zuoraTermType: ZuoraTermType): TermType => {
+	if (zuoraTermType === 'ONETERM') {
+		return 'FixedTerm';
+	} else {
+		return 'Recurring';
+	}
 };
 export const isSupportedProductRatePlan = (productRatePlan: string) =>
 	Object.keys(zuoraCatalogToProductRatePlanKey).includes(productRatePlan);

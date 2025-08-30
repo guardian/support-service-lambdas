@@ -92,6 +92,8 @@ export type ProductRatePlan<
 export type ZuoraProductRatePlanKey<P extends ZuoraProductKey> =
 	keyof ProductCatalog[P]['ratePlans'];
 
+export type TermType = 'Recurring' | 'FixedTerm';
+
 export class ProductCatalogHelper {
 	constructor(private catalogData: ProductCatalog) {}
 
