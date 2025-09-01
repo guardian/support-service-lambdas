@@ -4,7 +4,6 @@
 // product and rate plan passed in the support-workers state
 
 import { z } from 'zod';
-import type { ProductKey } from '@modules/product-catalog/productCatalog';
 
 const deliveryContactSchema = z.object({
 	firstName: z.string(),
@@ -17,6 +16,7 @@ const deliveryContactSchema = z.object({
 	address2: z.string().nullish(),
 	postalCode: z.string(),
 });
+export type DeliveryContact = z.infer<typeof deliveryContactSchema>;
 
 const dateOrDateStringSchema = z.preprocess(
 	(input) => (typeof input === 'string' ? new Date(input) : input),
@@ -24,17 +24,6 @@ const dateOrDateStringSchema = z.preprocess(
 );
 
 export const productPurchaseSchema = z.discriminatedUnion('product', [
-	z.object({
-		product: z.literal('SupporterPlus'),
-		ratePlan: z.union([
-			z.literal('OneYearStudent'),
-			z.literal('V1DeprecatedMonthly'),
-			z.literal('V1DeprecatedAnnual'),
-			z.literal('Monthly'),
-			z.literal('Annual'),
-		]),
-		amount: z.number(),
-	}),
 	z.object({
 		product: z.literal('Contribution'),
 		ratePlan: z.union([z.literal('Annual'), z.literal('Monthly')]),
@@ -106,6 +95,17 @@ export const productPurchaseSchema = z.discriminatedUnion('product', [
 			z.literal('V1DeprecatedMonthly'),
 			z.literal('V2DeprecatedMonthly'),
 		]),
+	}),
+	z.object({
+		product: z.literal('SupporterPlus'),
+		ratePlan: z.union([
+			z.literal('OneYearStudent'),
+			z.literal('V1DeprecatedMonthly'),
+			z.literal('V1DeprecatedAnnual'),
+			z.literal('Monthly'),
+			z.literal('Annual'),
+		]),
+		amount: z.number(),
 	}),
 	z.object({
 		product: z.literal('GuardianWeeklyDomestic'),
@@ -210,8 +210,3 @@ export const productPurchaseSchema = z.discriminatedUnion('product', [
 ]);
 
 export type ProductPurchase = z.infer<typeof productPurchaseSchema>;
-// Generic type for a specific product
-export type ProductPurchaseFor<P extends ProductKey> = Extract<
-	ProductPurchase,
-	{ product: P }
->;

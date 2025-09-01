@@ -2,6 +2,7 @@
 // the Guardian Patron product although this may change in the future. This file is combined
 // with the Zuora products to create a full product catalog.
 import type { Product } from '@modules/product-catalog/productCatalog';
+import { getCustomerFacingName } from '@modules/product-catalog/productCatalog';
 
 export type StripeProductKey = 'GuardianPatron' | 'OneTimeContribution';
 export const stripeProducts: Partial<
@@ -10,6 +11,7 @@ export const stripeProducts: Partial<
 	GuardianPatron: {
 		billingSystem: 'stripe',
 		active: true,
+		customerFacingName: getCustomerFacingName('GuardianPatron'),
 		isDeliveryProduct: false,
 		ratePlans: {
 			GuardianPatron: {
@@ -27,6 +29,7 @@ export const stripeProducts: Partial<
 	OneTimeContribution: {
 		billingSystem: 'stripe',
 		active: true,
+		customerFacingName: getCustomerFacingName('OneTimeContribution'),
 		isDeliveryProduct: false,
 		ratePlans: {
 			OneTime: {
@@ -46,6 +49,7 @@ export const stripeProducts: Partial<
 export const stripeProductsSchema = `GuardianPatron: z.object({
 	billingSystem: z.literal('stripe'),
 	active: z.boolean(),
+	customerFacingName: z.string(),
 	isDeliveryProduct: z.literal(false),
 	ratePlans: z.object({
 		GuardianPatron: z.object({
@@ -63,6 +67,7 @@ export const stripeProductsSchema = `GuardianPatron: z.object({
 OneTimeContribution: z.object({
 	billingSystem: z.literal('stripe'),
 	active: z.boolean(),
+	customerFacingName: z.string(),
 	isDeliveryProduct: z.literal(false),
 	ratePlans: z.object({
 		OneTime: z.object({

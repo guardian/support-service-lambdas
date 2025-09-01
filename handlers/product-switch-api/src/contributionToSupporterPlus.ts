@@ -1,17 +1,19 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type {
 	ChangePlanOrderAction,
-	CreateOrderRequest,
 	OrderAction,
+} from '@modules/zuora/orders/orderActions';
+import { singleTriggerDate } from '@modules/zuora/orders/orderActions';
+import type {
+	CreateOrderRequest,
 	PreviewOrderRequest,
-} from '@modules/zuora/orders';
-import { singleTriggerDate } from '@modules/zuora/orders';
+} from '@modules/zuora/orders/orderRequests';
 import type {
 	RatePlan,
 	RatePlanCharge,
 	ZuoraSubscription,
-} from '@modules/zuora/types';
-import { zuoraDateFormat } from '@modules/zuora/utils';
+} from '@modules/zuora/types/objects/subscription';
+import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
@@ -338,7 +340,6 @@ export const buildSwitchRequestBody = (
 				{
 					type: 'RenewSubscription',
 					triggerDates: singleTriggerDate(orderDate),
-					renewSubscription: {},
 				},
 			]
 		: [];

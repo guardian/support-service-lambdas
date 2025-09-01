@@ -1,5 +1,6 @@
 import type { z } from 'zod';
 import type { productCatalogSchema } from '@modules/product-catalog/productCatalogSchema';
+import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 
 type ProductBillingSystem = 'stripe' | 'zuora';
 
@@ -14,13 +15,13 @@ export type ZuoraProductKey = {
 		: never;
 }[ProductKey];
 
-export const newspaperProducts: ProductKey[] = [
+export const newspaperProducts = [
 	'HomeDelivery',
 	'NationalDelivery',
 	'SubscriptionCard',
 	'NewspaperVoucher',
-];
-export const deliveryProducts: ProductKey[] = [
+] as const;
+export const deliveryProducts = [
 	...newspaperProducts,
 	'TierThree',
 	'GuardianWeeklyRestOfWorld',
@@ -35,10 +36,20 @@ export function requiresDeliveryInstructions(productKey: unknown): boolean {
 }
 
 export type DeliveryProductKey = (typeof deliveryProducts)[number];
+
 export function isDeliveryProduct(
 	productKey: unknown,
 ): productKey is DeliveryProductKey {
 	return deliveryProducts.includes(productKey as DeliveryProductKey);
+}
+
+export function isDeliveryProductPurchase(
+	productPurchase: ProductPurchase,
+): productPurchase is Extract<
+	ProductPurchase,
+	{ product: DeliveryProductKey }
+> {
+	return isDeliveryProduct(productPurchase.product);
 }
 
 // Eventually all but OneTimeContribution will come from a custom field in Zuora's Product Catalog
