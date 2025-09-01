@@ -264,7 +264,7 @@ def sort_filter_rules(json_obj):
           },
         ],
         "AlarmDescription": "This means the product catalog may not be up to date in S3. This lambda runs on a regular schedule so action will only be necessary if the alarm is triggered continuously",
-        "AlarmName": "The generate-product-catalog Lambda has failed",
+        "AlarmName": "The generate-product-catalog-CODE Lambda has failed",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
@@ -920,7 +920,7 @@ def sort_filter_rules(json_obj):
           },
         ],
         "AlarmDescription": "This means the product catalog may not be up to date in S3. This lambda runs on a regular schedule so action will only be necessary if the alarm is triggered continuously",
-        "AlarmName": "The generate-product-catalog Lambda has failed",
+        "AlarmName": "The generate-product-catalog-PROD Lambda has failed",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
