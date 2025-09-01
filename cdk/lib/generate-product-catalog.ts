@@ -12,6 +12,8 @@ import { LambdaDestination } from 'aws-cdk-lib/aws-s3-notifications';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { nodeVersion } from './node-version';
 
+export const productCatalogBucketName = 'gu-product-catalog';
+
 export interface GenerateProductCatalogProps extends GuStackProps {
 	stack: string;
 	stage: string;
@@ -46,7 +48,6 @@ export class GenerateProductCatalog extends GuStack {
 		});
 
 		const zuoraCatalogBucketName = 'gu-zuora-catalog';
-		const productCatalogBucketName = 'gu-product-catalog';
 		const zuoraCatalogFolder = `PROD/Zuora-${this.stage}`;
 		const zuoraCatalogBucket = Bucket.fromBucketName(
 			this,
