@@ -4,7 +4,11 @@ import { GuCname } from '@guardian/cdk/lib/constructs/dns';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda/lambda';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
-import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
+import {
+	CfnAlarm,
+	ComparisonOperator,
+	Metric,
+} from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { Bucket, EventType } from 'aws-cdk-lib/aws-s3';
@@ -13,7 +17,7 @@ import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { nodeVersion } from './node-version';
 
 export const productCatalogBucketName = 'gu-product-catalog';
-
+export const failedSchemaValidationMetricName = 'failed-schema-validation';
 export interface GenerateProductCatalogProps extends GuStackProps {
 	stack: string;
 	stage: string;
@@ -87,6 +91,23 @@ export class GenerateProductCatalog extends GuStack {
 			],
 		});
 
+		const putMetricPolicy: Policy = new Policy(this, 'Put Metric Policy', {
+			statements: [
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: ['cloudwatch:PutMetricData'],
+					resources: ['*'],
+					conditions: {
+						StringEquals: {
+							'cloudwatch:namespace': app,
+						},
+					},
+				}),
+			],
+		});
+
+		lambda.role?.attachInlinePolicy(putMetricPolicy);
+
 		lambda.role?.attachInlinePolicy(s3InlinePolicy);
 
 		new GuCname(this, 'NS1 DNS entry', {
@@ -94,6 +115,34 @@ export class GenerateProductCatalog extends GuStack {
 			domainName: props.domainName,
 			ttl: Duration.hours(1),
 			resourceRecord: 'guardian.map.fastly.net',
+		});
+
+		const logsUrl = `https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fgenerate-product-catalog-${this.stage}`;
+		new CfnAlarm(this, 'failedSchemaValidationAlarm', {
+			alarmActions: [
+				`arn:aws:sns:${this.region}:${this.account}:alarms-handler-topic-${this.stage}`,
+			],
+			alarmName: `The generate-product-catalog-${this.stage} lambda generated a catalog which cannot be parsed by the current schema`,
+			alarmDescription:
+				'A run of the generate-product-catalog lambda generated a version of the product catalog which failed to ' +
+				'validate against the current schema.\nThis version was not written to S3 to stop it causing errors with ' +
+				'production applications, but this means that the catalog is out of date in some way.\n' +
+				`Check the logs at ${logsUrl} to find the cause`,
+			comparisonOperator: 'GreaterThanOrEqualToThreshold',
+			dimensions: [
+				{
+					name: 'Stage',
+					value: this.stage,
+				},
+			],
+			actionsEnabled: this.stage === 'PROD',
+			evaluationPeriods: 1,
+			metricName: failedSchemaValidationMetricName,
+			namespace: app,
+			period: 3600,
+			statistic: 'Sum',
+			threshold: 1,
+			treatMissingData: 'notBreaching',
 		});
 
 		new SrLambdaAlarm(this, `FailedProductCatalogLambdaAlarm`, {

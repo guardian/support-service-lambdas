@@ -327,6 +327,32 @@ def sort_filter_rules(json_obj):
       },
       "Type": "Guardian::DNS::RecordSet",
     },
+    "PutMetricPolicy702DBD41": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "cloudwatch:PutMetricData",
+              "Condition": {
+                "StringEquals": {
+                  "cloudwatch:namespace": "generate-product-catalog",
+                },
+              },
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "PutMetricPolicy702DBD41",
+        "Roles": [
+          {
+            "Ref": "generateproductcataloglambdaServiceRole5FF40E84",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "S3inlinepolicy3B07399A": {
       "Properties": {
         "PolicyDocument": {
@@ -366,6 +392,66 @@ def sort_filter_rules(json_obj):
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "failedSchemaValidationAlarm": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "A run of the generate-product-catalog lambda generated a version of the product catalog which failed to validate against the current schema.
+This version was not written to S3 to stop it causing errors with production applications, but this means that the catalog is out of date in some way.
+Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fgenerate-product-catalog-CODE to find the cause",
+        "AlarmName": "The generate-product-catalog-CODE lambda generated a catalog which cannot be parsed by the current schema",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "failed-schema-validation",
+        "Namespace": "generate-product-catalog",
+        "Period": 3600,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
     },
     "generateproductcataloglambda1E6192C7": {
       "DependsOn": [
@@ -983,6 +1069,32 @@ def sort_filter_rules(json_obj):
       },
       "Type": "Guardian::DNS::RecordSet",
     },
+    "PutMetricPolicy702DBD41": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "cloudwatch:PutMetricData",
+              "Condition": {
+                "StringEquals": {
+                  "cloudwatch:namespace": "generate-product-catalog",
+                },
+              },
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "PutMetricPolicy702DBD41",
+        "Roles": [
+          {
+            "Ref": "generateproductcataloglambdaServiceRole5FF40E84",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "S3inlinepolicy3B07399A": {
       "Properties": {
         "PolicyDocument": {
@@ -1022,6 +1134,66 @@ def sort_filter_rules(json_obj):
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "failedSchemaValidationAlarm": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "A run of the generate-product-catalog lambda generated a version of the product catalog which failed to validate against the current schema.
+This version was not written to S3 to stop it causing errors with production applications, but this means that the catalog is out of date in some way.
+Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fgenerate-product-catalog-PROD to find the cause",
+        "AlarmName": "The generate-product-catalog-PROD lambda generated a catalog which cannot be parsed by the current schema",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "failed-schema-validation",
+        "Namespace": "generate-product-catalog",
+        "Period": 3600,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
     },
     "generateproductcataloglambda1E6192C7": {
       "DependsOn": [
