@@ -1,5 +1,5 @@
-import type { OrderRequest } from '@modules/zuora/orders';
-import { singleTriggerDate } from '@modules/zuora/orders';
+import { singleTriggerDate } from '@modules/zuora/orders/orderActions';
+import type { OrderRequest } from '@modules/zuora/orders/orderRequests';
 import type { ZuoraResponse } from '@modules/zuora/types';
 import { zuoraResponseSchema } from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils';
@@ -88,7 +88,6 @@ export const buildNewTermRequestBody = (
 					{
 						type: 'RenewSubscription',
 						triggerDates: singleTriggerDate(newTermStartDate),
-						renewSubscription: {},
 					},
 				],
 			},
