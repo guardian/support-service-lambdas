@@ -96,27 +96,25 @@ export class GenerateProductCatalog extends GuStack {
 			resourceRecord: 'guardian.map.fastly.net',
 		});
 
-		if (this.stage === 'PROD') {
-			new SrLambdaAlarm(this, `FailedProductCatalogLambdaAlarm`, {
-				app,
-				alarmName: `The ${app} Lambda has failed`,
-				alarmDescription:
-					'This means the product catalog may not be up to date in S3. This lambda runs on a regular schedule so action will only be necessary if the alarm is triggered continuously',
-				evaluationPeriods: 1,
-				threshold: 1,
-				comparisonOperator:
-					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-				metric: new Metric({
-					metricName: 'Errors',
-					namespace: 'AWS/Lambda',
-					statistic: 'Sum',
-					period: Duration.seconds(300),
-					dimensionsMap: {
-						FunctionName: lambda.functionName,
-					},
-				}),
-				lambdaFunctionNames: lambda.functionName,
-			});
-		}
+		new SrLambdaAlarm(this, `FailedProductCatalogLambdaAlarm`, {
+			app,
+			alarmName: `The ${app} Lambda has failed`,
+			alarmDescription:
+				'This means the product catalog may not be up to date in S3. This lambda runs on a regular schedule so action will only be necessary if the alarm is triggered continuously',
+			evaluationPeriods: 1,
+			threshold: 1,
+			actionsEnabled: this.stage === 'PROD',
+			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+			metric: new Metric({
+				metricName: 'Errors',
+				namespace: 'AWS/Lambda',
+				statistic: 'Sum',
+				period: Duration.seconds(300),
+				dimensionsMap: {
+					FunctionName: lambda.functionName,
+				},
+			}),
+			lambdaFunctionNames: lambda.functionName,
+		});
 	}
 }
