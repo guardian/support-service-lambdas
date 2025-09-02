@@ -432,7 +432,7 @@ Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
         "EvaluationPeriods": 1,
         "MetricName": "failed-schema-validation",
         "Namespace": "support-service-lambdas",
-        "Period": 3600,
+        "Period": 60,
         "Statistic": "Sum",
         "Tags": [
           {
@@ -1178,7 +1178,7 @@ Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
         "EvaluationPeriods": 1,
         "MetricName": "failed-schema-validation",
         "Namespace": "support-service-lambdas",
-        "Period": 3600,
+        "Period": 60,
         "Statistic": "Sum",
         "Tags": [
           {

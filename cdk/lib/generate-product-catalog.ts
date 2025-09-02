@@ -144,7 +144,7 @@ export class GenerateProductCatalog extends GuStack {
 			evaluationPeriods: 1,
 			metricName: failedSchemaValidationMetricName,
 			namespace: metricNamespace,
-			period: 3600,
+			period: 60, // 1 minute
 			statistic: 'Sum',
 			threshold: 1,
 			treatMissingData: 'notBreaching',
