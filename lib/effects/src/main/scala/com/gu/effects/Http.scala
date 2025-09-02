@@ -27,11 +27,10 @@ object Http extends Logging {
 
     { request: Request =>
       val maybeBodySummary = Option(request.body).map(bodySummary)
-      val headersSummary = request.headers.asScala.map { h => s"${h.getFirst}: ${h.getSecond}" }.mkString(", ")
       logger.info(
-        s"HTTP request: ${request.method} ${request.url}" +
-          maybeBodySummary.map(summary => s", body:  $summary").getOrElse("") +
-          s", headers: {$headersSummary}" // TODO:delete comment - Logging request headers
+        s"HTTP request: ${request.method} ${request.url}" + maybeBodySummary
+          .map(summary => s", body:  $summary")
+          .getOrElse(""),
       )
       val response = restClient.newCall(request).execute
       logger.info(s"HTTP response: ${response.code}")
@@ -49,10 +48,7 @@ object Http extends Logging {
       .build()
 
     { request: Request =>
-      val headersSummary = request.headers.asScala.map { h => s"${h.getFirst}: ${h.getSecond}" }.mkString(", ")
-      logger.info(
-                s"HTTP request: ${request.method} ${request.url} ${request.headers.toMultimap.size}, headers: {$headersSummary}"
-      )
+      logger.info(s"HTTP request: ${request.method} ${request.url} ${request.headers.toMultimap.size}")
       val response = restClient.newCall(request).execute
       logger.info(s"HTTP response: ${response.code}")
       response
