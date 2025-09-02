@@ -30,20 +30,23 @@ export const writeProductCatalogToS3 = async (stage: Stage) => {
 			parseResult.error,
 		);
 		await putMetric(failedSchemaValidationMetricName);
-	}
-	console.log('The generated product catalog passed validation, writing to S3');
+	} else {
+		console.log(
+			'The generated product catalog passed validation, writing to S3',
+		);
 
-	const command = new PutObjectCommand({
-		Bucket: productCatalogBucketName,
-		Key: `${stage}/product-catalog.json`,
-		ContentType: 'application/json',
-		Body: JSON.stringify(productCatalog, null, 2),
-	});
+		const command = new PutObjectCommand({
+			Bucket: productCatalogBucketName,
+			Key: `${stage}/product-catalog.json`,
+			ContentType: 'application/json',
+			Body: JSON.stringify(productCatalog, null, 2),
+		});
 
-	try {
-		const response = await client.send(command);
-		console.log('Response from S3 was ', response);
-	} catch (err) {
-		console.error('An error occurred while writing the catalog to S3: ', err);
+		try {
+			const response = await client.send(command);
+			console.log('Response from S3 was ', response);
+		} catch (err) {
+			console.error('An error occurred while writing the catalog to S3: ', err);
+		}
 	}
 };
