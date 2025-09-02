@@ -47,9 +47,11 @@ object SalesforceClient extends LazyLogging {
 
   def withAlternateAccessTokenIfPresentInHeaderList(
       headers: Option[Map[String, String]],
-  ): StringHttpRequest => StringHttpRequest =
+  ): StringHttpRequest => StringHttpRequest = {
     logger.info(s"withAlternateAccessTokenIfPresentInHeaderList called with headers: $headers")
     withMaybeAlternateAccessToken(headers.flatMap(_.get("X-Ephemeral-Salesforce-Access-Token")))
+  }
+
 
   def withMaybeAlternateAccessToken(
       maybeAlternateAccessToken: Option[String],
