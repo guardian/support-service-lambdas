@@ -59,6 +59,7 @@ const generateZuoraProductSchema = (product: CatalogProduct) => {
 	return `${productName}: z.object({
 		billingSystem: z.literal('zuora'),
 		active: z.boolean(),
+		customerFacingName: z.string(),
 		isDeliveryProduct: z.literal(${isDeliveryProduct(productName)}),
 		ratePlans: z.object({
 			${ratePlanSchema.join(',\n')},
