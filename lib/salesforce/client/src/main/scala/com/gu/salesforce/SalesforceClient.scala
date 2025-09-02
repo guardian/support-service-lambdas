@@ -53,7 +53,10 @@ object SalesforceClient extends LazyLogging {
   )(requestInfo: StringHttpRequest): StringHttpRequest =
     maybeAlternateAccessToken
       .map { alternateAccessToken =>
-        requestInfo.copy(headers = requestInfo.headers ++ getAuthHeaders(alternateAccessToken))
+        val nonAuthHeaders = requestInfo.headers.filterNot(header =>
+          header.name.equalsIgnoreCase("Authorization") || header.name.equalsIgnoreCase("X-SFDC-Session")
+        )
+        requestInfo.copy(headers = nonAuthHeaders ++ getAuthHeaders(alternateAccessToken))
       }
       .getOrElse(requestInfo)
 
