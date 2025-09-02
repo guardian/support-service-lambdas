@@ -335,7 +335,7 @@ def sort_filter_rules(json_obj):
               "Action": "cloudwatch:PutMetricData",
               "Condition": {
                 "StringEquals": {
-                  "cloudwatch:namespace": "generate-product-catalog",
+                  "cloudwatch:namespace": "support-service-lambdas",
                 },
               },
               "Effect": "Allow",
@@ -427,7 +427,7 @@ Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
         ],
         "EvaluationPeriods": 1,
         "MetricName": "failed-schema-validation",
-        "Namespace": "generate-product-catalog",
+        "Namespace": "support-service-lambdas",
         "Period": 3600,
         "Statistic": "Sum",
         "Tags": [
@@ -1077,7 +1077,7 @@ def sort_filter_rules(json_obj):
               "Action": "cloudwatch:PutMetricData",
               "Condition": {
                 "StringEquals": {
-                  "cloudwatch:namespace": "generate-product-catalog",
+                  "cloudwatch:namespace": "support-service-lambdas",
                 },
               },
               "Effect": "Allow",
@@ -1169,7 +1169,7 @@ Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
         ],
         "EvaluationPeriods": 1,
         "MetricName": "failed-schema-validation",
-        "Namespace": "generate-product-catalog",
+        "Namespace": "support-service-lambdas",
         "Period": 3600,
         "Statistic": "Sum",
         "Tags": [

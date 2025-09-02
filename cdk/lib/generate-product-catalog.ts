@@ -13,6 +13,7 @@ import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { Bucket, EventType } from 'aws-cdk-lib/aws-s3';
 import { LambdaDestination } from 'aws-cdk-lib/aws-s3-notifications';
+import { metricNamespace } from '../../modules/aws/src/cloudwatch';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { nodeVersion } from './node-version';
 
@@ -99,7 +100,7 @@ export class GenerateProductCatalog extends GuStack {
 					resources: ['*'],
 					conditions: {
 						StringEquals: {
-							'cloudwatch:namespace': app,
+							'cloudwatch:namespace': metricNamespace,
 						},
 					},
 				}),
@@ -138,7 +139,7 @@ export class GenerateProductCatalog extends GuStack {
 			actionsEnabled: this.stage === 'PROD',
 			evaluationPeriods: 1,
 			metricName: failedSchemaValidationMetricName,
-			namespace: app,
+			namespace: metricNamespace,
 			period: 3600,
 			statistic: 'Sum',
 			threshold: 1,
