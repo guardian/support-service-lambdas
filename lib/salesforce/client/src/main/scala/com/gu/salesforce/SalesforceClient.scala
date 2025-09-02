@@ -28,8 +28,12 @@ object SalesforceClient extends LazyLogging {
 
   private def withAuthAndBaseUrl(sfAuth: SalesforceAuth)(requestInfo: StringHttpRequest): Request = {
     val builder = requestInfo.requestMethod.builder
-    val authHeaders = getAuthHeaders(sfAuth.access_token)
-    val headersWithAuth: List[Header] = requestInfo.headers ++ authHeaders
+    val hasAuthHeader = requestInfo.headers.exists(h =>
+      h.name.equalsIgnoreCase("Authorization") || h.name.equalsIgnoreCase("X-SFDC-Session")
+    )
+    val headersWithAuth =     
+      if (hasAuthHeader) requestInfo.headers
+      else requestInfo.headers ++ getAuthHeaders(sfAuth.access_token)
 
     logger.info(s"SalesforceClient: Final headers for request: ${headersWithAuth.map(h => s"${h.name}: ${h.value}").mkString(", ")}")
 
