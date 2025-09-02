@@ -143,7 +143,12 @@ export const applyDiscountEndpoint = async (
 		discount.productRatePlanId,
 	);
 
-	if (!discounted.success) {
+	if (
+		!(
+			('success' in discounted && discounted.success === true) ||
+			('Success' in discounted && discounted.Success === true)
+		)
+	) {
 		throw new Error('discount was not applied: ' + JSON.stringify(discounted));
 	}
 

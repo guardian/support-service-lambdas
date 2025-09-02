@@ -214,6 +214,7 @@ describe('subscription', () => {
 
 		it('returns the response from zuoraClient.get', async () => {
 			const mockResponse: ZuoraSubscriptionsFromAccountResponse = {
+				success: true,
 				subscriptions: [
 					{
 						id: '8ad0887183a3024f0183a899d0434b41',
