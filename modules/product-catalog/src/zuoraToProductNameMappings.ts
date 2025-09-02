@@ -1,6 +1,6 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
-import { ZuoraTermType } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import { TermType } from '@modules/product-catalog/productCatalog';
+import type { ZuoraTermType } from '@modules/zuora-catalog/zuoraCatalogSchema';
+import type { TermType } from '@modules/product-catalog/productCatalog';
 
 const zuoraCatalogToProductKey: Record<string, string> = {
 	'Guardian Ad-Lite': 'GuardianAdLite',

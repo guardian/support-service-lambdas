@@ -22,9 +22,10 @@ import {
 	PreviewCreateSubscriptionInputFields,
 } from '@modules/zuora/createSubscription/previewCreateSubscription';
 import { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 
 describe('createSubscription integration', () => {
-	const productCatalog = generateProductCatalog(code);
+	const productCatalog = generateProductCatalog(zuoraCatalogSchema.parse(code));
 	const currency: IsoCurrency = 'GBP';
 	const contact = {
 		firstName: 'John',

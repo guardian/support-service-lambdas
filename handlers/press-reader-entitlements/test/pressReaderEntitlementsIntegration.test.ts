@@ -3,13 +3,16 @@
  */
 
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import zuoraCatalogFixture from '../../../modules/zuora-catalog/test/fixtures/catalog-code.json';
 import { getMemberDetails } from '../src';
 import { getClientAccessToken, getUserDetails } from '../src/identity';
 import { getLatestSubscription } from '../src/supporterProductData';
 
 test('Entitlements check', async () => {
-	const productCatalog = generateProductCatalog(zuoraCatalogFixture);
+	const productCatalog = generateProductCatalog(
+		zuoraCatalogSchema.parse(zuoraCatalogFixture),
+	);
 	const memberDetails = await getLatestSubscription(
 		'CODE',
 		'110001137',

@@ -12,8 +12,11 @@ import {
 } from '@modules/product-benefits/userBenefits';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import codeZuoraCatalog from '../../zuora-catalog/test/fixtures/catalog-code.json';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 
-const codeProductCatalog = generateProductCatalog(codeZuoraCatalog);
+const codeProductCatalog = generateProductCatalog(
+	zuoraCatalogSchema.parse(codeZuoraCatalog),
+);
 const codeCatalogHelper = new ProductCatalogHelper(codeProductCatalog);
 
 describe('getUserProductsFromSupporterProductDataItems', () => {

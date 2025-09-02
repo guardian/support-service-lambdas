@@ -12,6 +12,7 @@ import {
 	zuoraSubscriptionResponseSchema,
 } from '@modules/zuora/types';
 import type { ZuoraSubscription } from '@modules/zuora/types';
+import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import {
@@ -32,7 +33,7 @@ import subscriptionJson from './fixtures/subscription.json';
 import zuoraSubscriptionWithMonthlyContribution from './fixtures/zuora-subscription-with-monthly-contribution.json';
 
 export const getProductCatalogFromFixture = (): ProductCatalog =>
-	generateProductCatalog(zuoraCatalogFixture);
+	generateProductCatalog(zuoraCatalogSchema.parse(zuoraCatalogFixture));
 
 test('url parsing', () => {
 	const successfulParsing = parseUrlPath(

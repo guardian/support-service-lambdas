@@ -37,8 +37,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 60,
           "USD": 60,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -56,8 +54,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 5,
           "USD": 5,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -83,8 +79,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 269.99,
           "USD": 249,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -102,8 +96,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 26.99,
           "USD": 24.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "OneYearGift": {
         "charges": {
@@ -120,8 +112,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 99,
           "USD": 99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Quarterly": {
         "billingPeriod": "Quarter",
@@ -139,8 +129,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 79.99,
           "USD": 74.94,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "ThreeMonthGift": {
         "charges": {
@@ -157,8 +145,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 36,
           "USD": 36,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -179,8 +165,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 5,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -224,8 +208,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 660,
           "USD": 360,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -243,8 +225,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 55,
           "USD": 30,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "OneYearGift": {
         "billingPeriod": "Annual",
@@ -262,8 +242,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 660,
           "USD": 360,
         },
-        "termLength": 12,
-        "termType": "FixedTerm",
       },
       "Quarterly": {
         "billingPeriod": "Quarter",
@@ -281,8 +259,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 165,
           "USD": 90,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "ThreeMonthGift": {
         "billingPeriod": "Quarter",
@@ -300,8 +276,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 165,
           "USD": 90,
         },
-        "termLength": 3,
-        "termType": "FixedTerm",
       },
     },
   },
@@ -323,8 +297,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 336,
           "USD": 432,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -338,8 +310,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 28,
           "USD": 36,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "OneYearGift": {
         "billingPeriod": "Annual",
@@ -353,8 +323,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 336,
           "USD": 432,
         },
-        "termLength": 12,
-        "termType": "FixedTerm",
       },
       "Quarterly": {
         "billingPeriod": "Quarter",
@@ -368,8 +336,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 83.9,
           "USD": 108,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "ThreeMonthGift": {
         "billingPeriod": "Quarter",
@@ -383,8 +349,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 83.9,
           "USD": 108,
         },
-        "termLength": 3,
-        "termType": "FixedTerm",
       },
     },
   },
@@ -407,8 +371,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 120,
           "USD": 240,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Quarterly": {
         "billingPeriod": "Quarter",
@@ -423,8 +385,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 30,
           "USD": 60,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -450,8 +410,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 392,
           "USD": 240,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Quarterly": {
         "billingPeriod": "Quarter",
@@ -469,8 +427,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 98,
           "USD": 60,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -496,8 +452,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 392,
           "USD": 260,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Quarterly": {
         "billingPeriod": "Quarter",
@@ -515,8 +469,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 98,
           "USD": 65,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -555,8 +507,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 83.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "EverydayPlus": {
         "billingPeriod": "Month",
@@ -590,8 +540,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 83.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Saturday": {
         "billingPeriod": "Month",
@@ -604,8 +552,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 20.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "SaturdayPlus": {
         "billingPeriod": "Month",
@@ -621,8 +567,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 20.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Sixday": {
         "billingPeriod": "Month",
@@ -650,8 +594,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 73.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "SixdayPlus": {
         "billingPeriod": "Month",
@@ -682,8 +624,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 73.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Sunday": {
         "billingPeriod": "Month",
@@ -696,8 +636,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 20.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "SundayPlus": {
         "billingPeriod": "Month",
@@ -713,8 +651,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 20.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Weekend": {
         "billingPeriod": "Month",
@@ -730,8 +666,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 33.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "WeekendPlus": {
         "billingPeriod": "Month",
@@ -750,8 +684,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 34.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -790,8 +722,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 83.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "EverydayPlus": {
         "billingPeriod": "Month",
@@ -825,8 +755,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 83.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Sixday": {
         "billingPeriod": "Month",
@@ -854,8 +782,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 73.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "SixdayPlus": {
         "billingPeriod": "Month",
@@ -886,8 +812,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 73.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Weekend": {
         "billingPeriod": "Month",
@@ -903,8 +827,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 33.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "WeekendPlus": {
         "billingPeriod": "Month",
@@ -923,8 +845,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 34.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -963,8 +883,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 69.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "EverydayPlus": {
         "billingPeriod": "Month",
@@ -998,8 +916,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 69.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Saturday": {
         "billingPeriod": "Month",
@@ -1012,8 +928,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "SaturdayPlus": {
         "billingPeriod": "Month",
@@ -1029,8 +943,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Sixday": {
         "billingPeriod": "Month",
@@ -1058,8 +970,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 61.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "SixdayPlus": {
         "billingPeriod": "Month",
@@ -1093,8 +1003,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 61.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Sunday": {
         "billingPeriod": "Month",
@@ -1107,8 +1015,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "SundayPlus": {
         "billingPeriod": "Month",
@@ -1124,8 +1030,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Weekend": {
         "billingPeriod": "Month",
@@ -1141,8 +1045,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 26.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "WeekendPlus": {
         "billingPeriod": "Month",
@@ -1161,8 +1063,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 27.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -1201,8 +1101,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 149,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -1215,8 +1113,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "V1DeprecatedAnnual": {
         "billingPeriod": "Annual",
@@ -1229,8 +1125,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 135,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "V1DeprecatedMonthly": {
         "billingPeriod": "Month",
@@ -1243,8 +1137,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -1265,8 +1157,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 599,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -1279,8 +1169,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 60,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "V1DeprecatedAnnual": {
         "billingPeriod": "Annual",
@@ -1293,8 +1181,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 540,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "V1DeprecatedMonthly": {
         "billingPeriod": "Month",
@@ -1307,8 +1193,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 60,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -1347,8 +1231,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 69.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "EverydayPlus": {
         "billingPeriod": "Month",
@@ -1382,8 +1264,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 69.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Saturday": {
         "billingPeriod": "Month",
@@ -1396,8 +1276,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "SaturdayPlus": {
         "billingPeriod": "Month",
@@ -1413,8 +1291,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Sixday": {
         "billingPeriod": "Month",
@@ -1442,8 +1318,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 61.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "SixdayPlus": {
         "billingPeriod": "Month",
@@ -1477,8 +1351,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 61.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Sunday": {
         "billingPeriod": "Month",
@@ -1491,8 +1363,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "SundayPlus": {
         "billingPeriod": "Month",
@@ -1508,8 +1378,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Weekend": {
         "billingPeriod": "Month",
@@ -1525,8 +1393,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 26.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "WeekendPlus": {
         "billingPeriod": "Month",
@@ -1545,8 +1411,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 27.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -1571,8 +1435,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 75,
           "USD": 120,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -1589,8 +1451,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 7,
           "USD": 9.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "V1DeprecatedAnnual": {
         "billingPeriod": "Annual",
@@ -1603,8 +1463,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 60,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "V1DeprecatedMonthly": {
         "billingPeriod": "Month",
@@ -1617,8 +1475,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 5,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "V2DeprecatedAnnual": {
         "billingPeriod": "Annual",
@@ -1635,8 +1491,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 51,
           "USD": 89.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "V2DeprecatedMonthly": {
         "billingPeriod": "Month",
@@ -1653,8 +1507,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 9,
           "USD": 7.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -1683,8 +1535,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 200,
           "USD": 150,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "GuardianWeeklyDomesticMonthly": {
         "billingPeriod": "Month",
@@ -1705,8 +1555,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 57,
           "USD": 43,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -1727,8 +1575,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 20,
           "USD": 15,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "OneYearStudent": {
         "billingPeriod": "Annual",
@@ -1749,8 +1595,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 15,
           "USD": 10,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "V1DeprecatedAnnual": {
         "billingPeriod": "Annual",
@@ -1768,8 +1612,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 160,
           "USD": 120,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "V1DeprecatedMonthly": {
         "billingPeriod": "Month",
@@ -1787,8 +1629,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 17,
           "USD": 13,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -1817,8 +1657,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 800,
           "USD": 510,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "DomesticAnnualV2": {
         "billingPeriod": "Annual",
@@ -1842,8 +1680,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 824,
           "USD": 534,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "DomesticMonthly": {
         "billingPeriod": "Month",
@@ -1864,8 +1700,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 70,
           "USD": 45,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "DomesticMonthlyV2": {
         "billingPeriod": "Month",
@@ -1889,8 +1723,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 72,
           "USD": 47,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "RestOfWorldAnnual": {
         "billingPeriod": "Annual",
@@ -1907,8 +1739,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 417.6,
           "USD": 546,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "RestOfWorldAnnualV2": {
         "billingPeriod": "Annual",
@@ -1928,8 +1758,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 441.6,
           "USD": 570,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "RestOfWorldMonthly": {
         "billingPeriod": "Month",
@@ -1946,8 +1774,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 36.8,
           "USD": 48,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "RestOfWorldMonthlyV2": {
         "billingPeriod": "Month",
@@ -1967,8 +1793,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 38.8,
           "USD": 50,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -2012,8 +1836,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 80,
           "USD": 60,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -2031,8 +1853,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 10,
           "USD": 5,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -2058,8 +1878,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 269.99,
           "USD": 249,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -2077,8 +1895,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 26.99,
           "USD": 24.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "OneYearGift": {
         "charges": {
@@ -2095,8 +1911,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 175,
           "USD": 165,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Quarterly": {
         "billingPeriod": "Quarter",
@@ -2114,8 +1928,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 79.99,
           "USD": 74.94,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "ThreeMonthGift": {
         "charges": {
@@ -2132,8 +1944,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 63,
           "USD": 60,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -2154,8 +1964,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 5,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -2199,8 +2007,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 660,
           "USD": 360,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -2218,8 +2024,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 55,
           "USD": 30,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "OneYearGift": {
         "billingPeriod": "Annual",
@@ -2237,8 +2041,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 660,
           "USD": 360,
         },
-        "termLength": 12,
-        "termType": "FixedTerm",
       },
       "Quarterly": {
         "billingPeriod": "Quarter",
@@ -2256,8 +2058,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 165,
           "USD": 90,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "ThreeMonthGift": {
         "billingPeriod": "Quarter",
@@ -2275,8 +2075,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 165,
           "USD": 90,
         },
-        "termLength": 3,
-        "termType": "FixedTerm",
       },
     },
   },
@@ -2298,8 +2096,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 336,
           "USD": 432,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -2313,8 +2109,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 28,
           "USD": 36,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "OneYearGift": {
         "billingPeriod": "Annual",
@@ -2328,8 +2122,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 336,
           "USD": 432,
         },
-        "termLength": 12,
-        "termType": "FixedTerm",
       },
       "Quarterly": {
         "billingPeriod": "Quarter",
@@ -2343,8 +2135,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 83.9,
           "USD": 108,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "ThreeMonthGift": {
         "billingPeriod": "Quarter",
@@ -2358,8 +2148,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 83.9,
           "USD": 108,
         },
-        "termLength": 3,
-        "termType": "FixedTerm",
       },
     },
   },
@@ -2381,8 +2169,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 120,
           "USD": 240,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Quarterly": {
         "billingPeriod": "Quarter",
@@ -2396,8 +2182,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 30,
           "USD": 60,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -2423,8 +2207,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 392,
           "USD": 240,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Quarterly": {
         "billingPeriod": "Quarter",
@@ -2442,8 +2224,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 98,
           "USD": 60,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -2469,8 +2249,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 392,
           "USD": 260,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Quarterly": {
         "billingPeriod": "Quarter",
@@ -2488,8 +2266,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 98,
           "USD": 65,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -2528,8 +2304,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 83.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "EverydayPlus": {
         "billingPeriod": "Month",
@@ -2563,8 +2337,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 83.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Saturday": {
         "billingPeriod": "Month",
@@ -2577,8 +2349,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 20.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "SaturdayPlus": {
         "billingPeriod": "Month",
@@ -2594,8 +2364,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 20.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Sixday": {
         "billingPeriod": "Month",
@@ -2623,8 +2391,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 73.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "SixdayPlus": {
         "billingPeriod": "Month",
@@ -2655,8 +2421,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 73.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Sunday": {
         "billingPeriod": "Month",
@@ -2669,8 +2433,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 20.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "SundayPlus": {
         "billingPeriod": "Month",
@@ -2686,8 +2448,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 20.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Weekend": {
         "billingPeriod": "Month",
@@ -2703,8 +2463,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 33.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "WeekendPlus": {
         "billingPeriod": "Month",
@@ -2723,8 +2481,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 34.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -2763,8 +2519,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 83.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "EverydayPlus": {
         "billingPeriod": "Month",
@@ -2798,8 +2552,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 83.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Sixday": {
         "billingPeriod": "Month",
@@ -2827,8 +2579,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 73.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "SixdayPlus": {
         "billingPeriod": "Month",
@@ -2859,8 +2609,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 73.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Weekend": {
         "billingPeriod": "Month",
@@ -2876,8 +2624,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 33.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "WeekendPlus": {
         "billingPeriod": "Month",
@@ -2896,8 +2642,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 34.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -2936,8 +2680,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 69.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "EverydayPlus": {
         "billingPeriod": "Month",
@@ -2971,8 +2713,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 69.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Saturday": {
         "billingPeriod": "Month",
@@ -2985,8 +2725,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "SaturdayPlus": {
         "billingPeriod": "Month",
@@ -3002,8 +2740,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Sixday": {
         "billingPeriod": "Month",
@@ -3031,8 +2767,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 61.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "SixdayPlus": {
         "billingPeriod": "Month",
@@ -3063,8 +2797,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 61.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Sunday": {
         "billingPeriod": "Month",
@@ -3077,8 +2809,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "SundayPlus": {
         "billingPeriod": "Month",
@@ -3094,8 +2824,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Weekend": {
         "billingPeriod": "Month",
@@ -3111,8 +2839,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 26.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "WeekendPlus": {
         "billingPeriod": "Month",
@@ -3131,8 +2857,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 27.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -3171,8 +2895,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 149,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -3185,8 +2907,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "V1DeprecatedAnnual": {
         "billingPeriod": "Annual",
@@ -3199,8 +2919,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 135,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "V1DeprecatedMonthly": {
         "billingPeriod": "Month",
@@ -3213,8 +2931,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -3235,8 +2951,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 599,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -3249,8 +2963,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 60,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "V1DeprecatedAnnual": {
         "billingPeriod": "Annual",
@@ -3263,8 +2975,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 540,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "V1DeprecatedMonthly": {
         "billingPeriod": "Month",
@@ -3277,8 +2987,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 60,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -3317,8 +3025,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 69.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "EverydayPlus": {
         "billingPeriod": "Month",
@@ -3352,8 +3058,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 69.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Saturday": {
         "billingPeriod": "Month",
@@ -3366,8 +3070,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "SaturdayPlus": {
         "billingPeriod": "Month",
@@ -3383,8 +3085,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Sixday": {
         "billingPeriod": "Month",
@@ -3412,8 +3112,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 61.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "SixdayPlus": {
         "billingPeriod": "Month",
@@ -3444,8 +3142,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 61.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Sunday": {
         "billingPeriod": "Month",
@@ -3458,8 +3154,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "SundayPlus": {
         "billingPeriod": "Month",
@@ -3475,8 +3169,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Weekend": {
         "billingPeriod": "Month",
@@ -3492,8 +3184,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 26.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "WeekendPlus": {
         "billingPeriod": "Month",
@@ -3512,8 +3202,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 27.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -3538,8 +3226,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 75,
           "USD": 120,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -3556,8 +3242,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 7,
           "USD": 9.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "V1DeprecatedAnnual": {
         "billingPeriod": "Annual",
@@ -3570,8 +3254,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 50,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "V1DeprecatedMonthly": {
         "billingPeriod": "Month",
@@ -3584,8 +3266,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 5,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "V2DeprecatedAnnual": {
         "billingPeriod": "Annual",
@@ -3602,8 +3282,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 49,
           "USD": 69,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "V2DeprecatedMonthly": {
         "billingPeriod": "Month",
@@ -3620,8 +3298,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 5,
           "USD": 6.99,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -3650,8 +3326,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 200,
           "USD": 150,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -3672,8 +3346,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 20,
           "USD": 15,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "OneYearStudent": {
         "billingPeriod": "Annual",
@@ -3694,8 +3366,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 15,
           "USD": 10,
         },
-        "termLength": 12,
-        "termType": "FixedTerm",
       },
       "V1DeprecatedAnnual": {
         "billingPeriod": "Annual",
@@ -3713,8 +3383,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 160,
           "USD": 120,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "V1DeprecatedMonthly": {
         "billingPeriod": "Month",
@@ -3732,8 +3400,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 17,
           "USD": 13,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
@@ -3762,8 +3428,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 800,
           "USD": 510,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "DomesticAnnualV2": {
         "billingPeriod": "Annual",
@@ -3787,8 +3451,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 802,
           "USD": 512,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "DomesticMonthly": {
         "billingPeriod": "Month",
@@ -3809,8 +3471,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 70,
           "USD": 45,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "DomesticMonthlyV2": {
         "billingPeriod": "Month",
@@ -3834,8 +3494,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 72,
           "USD": 47,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "RestOfWorldAnnual": {
         "billingPeriod": "Annual",
@@ -3852,8 +3510,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 417.6,
           "USD": 546,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "RestOfWorldAnnualV2": {
         "billingPeriod": "Annual",
@@ -3873,8 +3529,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 419.6,
           "USD": 548,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "RestOfWorldMonthly": {
         "billingPeriod": "Month",
@@ -3891,8 +3545,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 36.8,
           "USD": 48,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
       "RestOfWorldMonthlyV2": {
         "billingPeriod": "Month",
@@ -3912,8 +3564,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 38.8,
           "USD": 50,
         },
-        "termLength": 12,
-        "termType": "Recurring",
       },
     },
   },
