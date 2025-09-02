@@ -135,6 +135,10 @@ export class GenerateProductCatalog extends GuStack {
 					name: 'Stage',
 					value: this.stage,
 				},
+				{
+					name: 'App',
+					value: app,
+				},
 			],
 			actionsEnabled: this.stage === 'PROD',
 			evaluationPeriods: 1,

@@ -424,6 +424,10 @@ Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
             "Name": "Stage",
             "Value": "CODE",
           },
+          {
+            "Name": "App",
+            "Value": "generate-product-catalog",
+          },
         ],
         "EvaluationPeriods": 1,
         "MetricName": "failed-schema-validation",
@@ -1165,6 +1169,10 @@ Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
           {
             "Name": "Stage",
             "Value": "PROD",
+          },
+          {
+            "Name": "App",
+            "Value": "generate-product-catalog",
           },
         ],
         "EvaluationPeriods": 1,
