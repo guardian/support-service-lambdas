@@ -192,7 +192,8 @@ export const getSwitchInformationWithOwnerCheck = async (
 	const actualBasePrice =
 		maybeDiscount?.discountedPrice ?? catalogInformation.supporterPlus.price;
 
-	const contributionAmount = Math.max(0, previousAmount - actualBasePrice);
+	const userDesiredAmount = input.newAmount ?? previousAmount;
+	const contributionAmount = Math.max(0, userDesiredAmount - actualBasePrice);
 
 	const subscriptionInformation = {
 		accountNumber: subscription.accountNumber,
@@ -213,7 +214,7 @@ export const getSwitchInformationWithOwnerCheck = async (
 		input,
 		startNewTerm,
 		contributionAmount,
-		actualTotalPrice: contributionAmount + actualBasePrice,
+		actualTotalPrice: userDesiredAmount,
 		account: userInformation,
 		subscription: subscriptionInformation,
 		catalog: catalogInformation,
