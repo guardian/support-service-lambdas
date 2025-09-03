@@ -1,6 +1,6 @@
+import { doQuery } from '@modules/zuora/query';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { z } from 'zod';
-import { executeZoqlQuery } from '../helpers';
 import type { ZuoraInvoiceFromStripeChargeIdResult } from '../interfaces';
 import {
 	ZuoraGetInvoiceItemQueryOutputResponseSchema,
@@ -19,9 +19,9 @@ export const zuoraGetInvoiceFromStripeChargeId = async (
 ): Promise<ZuoraInvoiceFromStripeChargeIdResult> => {
 	const paymentResponse: z.infer<
 		typeof ZuoraGetPaymentQueryOutputResponseSchema
-	> = await executeZoqlQuery(
-		`SELECT id, referenceid, paymentnumber, status, accountid FROM Payment WHERE ReferenceID = '${stripeChargeId}' LIMIT 1`,
+	> = await doQuery(
 		zuoraClient,
+		`SELECT id, referenceid, paymentnumber, status, accountid FROM Payment WHERE ReferenceID = '${stripeChargeId}' LIMIT 1`,
 		ZuoraGetPaymentQueryOutputResponseSchema,
 	);
 
@@ -40,9 +40,9 @@ export const zuoraGetInvoiceFromStripeChargeId = async (
 
 	const paymentsInvoices: z.infer<
 		typeof ZuoraGetInvoicePaymentQueryOutputResponseSchema
-	> = await executeZoqlQuery(
-		`SELECT invoiceid FROM InvoicePayment WHERE PaymentID = '${foundPayment.Id}'`,
+	> = await doQuery(
 		zuoraClient,
+		`SELECT invoiceid FROM InvoicePayment WHERE PaymentID = '${foundPayment.Id}'`,
 		ZuoraGetInvoicePaymentQueryOutputResponseSchema,
 	);
 
@@ -61,9 +61,9 @@ export const zuoraGetInvoiceFromStripeChargeId = async (
 	> = paymentsInvoices.records[0];
 
 	const invoices: z.infer<typeof ZuoraGetInvoiceQueryOutputResponseSchema> =
-		await executeZoqlQuery(
-			`SELECT Id, InvoiceNumber, Status FROM Invoice WHERE id = '${foundPaymentsInvoice.InvoiceId}'`,
+		await doQuery(
 			zuoraClient,
+			`SELECT Id, InvoiceNumber, Status FROM Invoice WHERE id = '${foundPaymentsInvoice.InvoiceId}'`,
 			ZuoraGetInvoiceQueryOutputResponseSchema,
 		);
 
@@ -82,9 +82,9 @@ export const zuoraGetInvoiceFromStripeChargeId = async (
 
 	const invoicesItems: z.infer<
 		typeof ZuoraGetInvoiceItemQueryOutputResponseSchema
-	> = await executeZoqlQuery(
-		`SELECT Id, SubscriptionId, SubscriptionNumber FROM InvoiceItem WHERE InvoiceId = '${invoice.Id}'`,
+	> = await doQuery(
 		zuoraClient,
+		`SELECT Id, SubscriptionId, SubscriptionNumber FROM InvoiceItem WHERE InvoiceId = '${invoice.Id}'`,
 		ZuoraGetInvoiceItemQueryOutputResponseSchema,
 	);
 
