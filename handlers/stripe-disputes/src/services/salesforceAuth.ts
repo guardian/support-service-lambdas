@@ -1,4 +1,3 @@
-import * as console from 'node:console';
 import type { Logger } from '@modules/logger';
 import {
 	buildClientCredentialsBody,
@@ -15,7 +14,7 @@ export async function authenticateWithSalesforce(
 	logger: Logger,
 	credentials: SalesforceCredentials,
 ): Promise<SalesforceAuthResponse> {
-	console.log('authenticating with Salesforce using client credentials...');
+	logger.log('authenticating with Salesforce using client credentials...');
 
 	try {
 		const options = {
@@ -36,7 +35,7 @@ export async function authenticateWithSalesforce(
 			throw new Error(errorMessage);
 		}
 
-		console.log('successfully authenticated with Salesforce');
+		logger.log('successfully authenticated with Salesforce');
 
 		const sfAuthResponse = (await response.json()) as SalesforceAuthResponse;
 

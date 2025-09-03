@@ -28,7 +28,7 @@ export function mapStripeDisputeToSalesforce(
 		Charge_ID__c: dispute.charge,
 		Reason__c: dispute.reason,
 		Status__c: dispute.status,
-		Amount__c: dispute.amount / 100, // Convert cents to dollars
+		Amount__c: dispute.amount / 100,
 		Evidence_Due_Date__c: timestampToSalesforceDate(
 			dispute.evidence_details.due_by,
 		),

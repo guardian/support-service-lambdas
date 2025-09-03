@@ -1,3 +1,4 @@
+import type { Logger } from '@modules/logger';
 import {
 	buildSalesforceUpsertOptions,
 	buildSalesforceUpsertUrl,
@@ -16,8 +17,9 @@ import { SalesforceCreateResponseSchema } from '../zod-schemas';
 export async function upsertPaymentDisputeInSalesforce(
 	authResponse: SalesforceAuthResponse,
 	paymentDispute: PaymentDisputeRecord,
+	logger: Logger,
 ): Promise<SalesforceUpsertResponse> {
-	console.log('upserting Payment Dispute record in Salesforce...');
+	logger.log('upserting Payment Dispute record in Salesforce...');
 
 	try {
 		// Use PATCH with external ID for upsert: /sobjects/SObjectType/FieldName/FieldValue
@@ -51,7 +53,7 @@ export async function upsertPaymentDisputeInSalesforce(
 			);
 		}
 
-		console.log('successfully upserted Payment Dispute record in Salesforce');
+		logger.log('successfully upserted Payment Dispute record in Salesforce');
 		return parseResponse.data;
 	} catch (error) {
 		const errorTextBase = 'Error upserting Payment Dispute in Salesforce';

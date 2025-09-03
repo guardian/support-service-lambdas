@@ -158,6 +158,7 @@ describe('upsertSalesforceObject', () => {
 		expect(upsertPaymentDisputeInSalesforce).toHaveBeenCalledWith(
 			mockSalesforceAuth,
 			mockPaymentDisputeRecord,
+			mockLogger,
 		);
 
 		expect(result).toEqual(mockUpsertResponse);
