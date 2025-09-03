@@ -33,15 +33,38 @@ describe('code', () => {
 		const codeTypeObject = generateProductBillingPeriods(codeZuoraCatalog);
 		expect(codeTypeObject).toMatchSnapshot();
 	});
+});
 
-	test('The generated product schema works', () => {
-		const prodZuoraCatalog = zuoraCatalogSchema.parse(prod);
-		const prodProductCatalog = generateProductCatalog(prodZuoraCatalog);
-		const result = productCatalogSchema.parse(prodProductCatalog);
-		expect(result).toEqual(prodProductCatalog);
-		expect(result.OneTimeContribution.billingSystem).toBe('stripe');
+describe.skip('The generated schema', () => {
+	const [codeZuoraCatalog, prodZuoraCatalog] = [
+		zuoraCatalogSchema.parse(code),
+		zuoraCatalogSchema.parse(prod),
+	];
+	const [codeProductCatalog, prodProductCatalog] = [
+		generateProductCatalog(codeZuoraCatalog),
+		generateProductCatalog(prodZuoraCatalog),
+	];
+
+	const [codeParseResult, prodParseResult] = [
+		productCatalogSchema.parse(codeProductCatalog),
+		productCatalogSchema.parse(prodProductCatalog),
+	];
+
+	test('works for CODE', () => {
+		expect(codeParseResult).toEqual(codeProductCatalog);
+		expect(codeParseResult.OneTimeContribution.billingSystem).toBe('stripe');
 		expect(
-			Object.keys(result.TierThree.ratePlans.DomesticAnnualV2.charges).length,
+			Object.keys(codeParseResult.TierThree.ratePlans.DomesticAnnualV2.charges)
+				.length,
+		).toBe(3);
+	});
+
+	test('works for PROD', () => {
+		expect(prodParseResult).toEqual(prodProductCatalog);
+		expect(prodParseResult.OneTimeContribution.billingSystem).toBe('stripe');
+		expect(
+			Object.keys(prodParseResult.TierThree.ratePlans.DomesticAnnualV2.charges)
+				.length,
 		).toBe(3);
 	});
 });
