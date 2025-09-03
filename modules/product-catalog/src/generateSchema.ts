@@ -31,7 +31,7 @@ export const generateSchema = (catalog: ZuoraCatalog): string => {
 
 	const productKeys = supportedZuoraProducts
 		.map((product) => getZuoraProductKey(product.name))
-		.sort((a, b) => a.localeCompare(b));
+		.sort();
 
 	const zuoraProductsSchema = supportedZuoraProducts
 		.map((product) => generateZuoraProductSchema(product))

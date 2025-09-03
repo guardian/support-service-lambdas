@@ -25,7 +25,7 @@ const getBillingPeriodsForProduct = (
 				(billingPeriod) =>
 					billingPeriod !== null && billingPeriod != 'Specific_Weeks',
 			) as string[],
-	).sort((a, b) => a.localeCompare(b));
+	).sort();
 
 const getBillingPeriodsForStripeProduct = (
 	productKey: StripeProductKey,
@@ -38,7 +38,7 @@ const getBillingPeriodsForStripeProduct = (
 		return typed.billingPeriod;
 	});
 	return {
-		[productKey]: distinct(billingPeriods).sort((a, b) => a.localeCompare(b)),
+		[productKey]: distinct(billingPeriods).sort(),
 	};
 };
 
