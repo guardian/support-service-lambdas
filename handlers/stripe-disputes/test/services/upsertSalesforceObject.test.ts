@@ -95,7 +95,7 @@ describe('upsertSalesforceObject', () => {
 		Charge_ID__c: 'ch_test123',
 		SubscriptionNumber__c: '',
 		PaymentId__c: '',
-		AccountId__c: '',
+		Billing_AccountId__c: '',
 		InvoiceId__c: '',
 	};
 

@@ -64,7 +64,7 @@ describe('Stripe to Salesforce Mapper', () => {
 				Has_Evidence__c: false,
 				SubscriptionNumber__c: '',
 				PaymentId__c: '',
-				AccountId__c: '',
+				Billing_AccountId__c: '',
 				InvoiceId__c: '',
 			});
 		});
@@ -164,7 +164,7 @@ describe('Stripe to Salesforce Mapper', () => {
 				Has_Evidence__c: false,
 				SubscriptionNumber__c: 'SUB-001',
 				PaymentId__c: 'payment-123',
-				AccountId__c: 'account-456',
+				Billing_AccountId__c: 'account-456',
 				InvoiceId__c: 'invoice-789',
 			});
 		});
@@ -231,7 +231,7 @@ describe('Stripe to Salesforce Mapper', () => {
 				Has_Evidence__c: false,
 				SubscriptionNumber__c: '',
 				PaymentId__c: 'payment-123',
-				AccountId__c: '',
+				Billing_AccountId__c: '',
 				InvoiceId__c: 'invoice-789',
 			});
 		});
@@ -283,7 +283,7 @@ describe('Stripe to Salesforce Mapper', () => {
 				Has_Evidence__c: true,
 				SubscriptionNumber__c: '',
 				PaymentId__c: '',
-				AccountId__c: '',
+				Billing_AccountId__c: '',
 				InvoiceId__c: '',
 			});
 		});

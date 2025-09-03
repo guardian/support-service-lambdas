@@ -15,6 +15,6 @@ export interface PaymentDisputeRecord {
 	Has_Evidence__c: boolean;
 	SubscriptionNumber__c: string;
 	PaymentId__c: string;
-	AccountId__c: string;
+	Billing_AccountId__c: string;
 	InvoiceId__c: string;
 }

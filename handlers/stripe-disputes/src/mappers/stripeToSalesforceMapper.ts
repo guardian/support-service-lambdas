@@ -40,7 +40,7 @@ export function mapStripeDisputeToSalesforce(
 		Has_Evidence__c: dispute.evidence_details.has_evidence,
 		SubscriptionNumber__c: zuoraData?.SubscriptionNumber ?? '',
 		PaymentId__c: zuoraData?.paymentId ?? '',
-		AccountId__c: zuoraData?.paymentAccountId ?? '',
+		Billing_AccountId__c: zuoraData?.paymentAccountId ?? '',
 		InvoiceId__c: zuoraData?.InvoiceId ?? '',
 	};
 }
