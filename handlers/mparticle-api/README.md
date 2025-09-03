@@ -216,7 +216,7 @@ pnpm it-test
 ### 5. Monitor Live Requests
 
 Check CloudWatch logs for your test requests:
-- Lambda function logs: `mparticle-api-baton-CODE` and `mparticle-api-http-CODE`
+- Lambda function logs: `[mparticle-api-baton-CODE](https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fmparticle-api-baton-CODE)` and `[mparticle-api-http-CODE](https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fmparticle-api-http-CODE)`
 - API Gateway logs: Look for your test request IDs
 
 ### Configuration Reference
