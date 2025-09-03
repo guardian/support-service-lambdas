@@ -12,7 +12,16 @@ import { SalesforceCreateResponseSchema } from '../zod-schemas';
 
 /**
  * Upserts a Payment Dispute record in Salesforce using Dispute_ID__c as external ID
- * Follows the pattern from @modules/salesforce/src/updateRecords.ts
+ *
+ * This function performs an HTTP PATCH request to Salesforce to create or update
+ * a Payment Dispute record. It uses the Dispute_ID__c field as an external ID
+ * for upsert operations, following Salesforce best practices.
+ *
+ * @param authResponse - Salesforce authentication response containing access token and instance URL
+ * @param paymentDispute - Payment dispute record data to upsert
+ * @param logger - Logger instance for tracking the operation
+ * @returns Promise containing the Salesforce upsert response with record ID and success status
+ * @throws {Error} When the HTTP request fails or response validation fails
  */
 export async function upsertPaymentDisputeInSalesforce(
 	authResponse: SalesforceAuthResponse,

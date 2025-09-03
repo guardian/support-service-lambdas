@@ -5,7 +5,25 @@ import { listenDisputeCreatedInputSchema } from '../dtos';
 import { upsertSalesforceObject } from '../services';
 import type { SalesforceUpsertResponse } from '../types';
 
+/**
+ * Creates a handler function for processing Stripe dispute created webhooks
+ *
+ * @param logger - Logger instance for tracking webhook processing
+ * @returns Handler function that processes API Gateway events for dispute creation
+ */
 export function listenDisputeCreatedHandler(logger: Logger) {
+	/**
+	 * Processes Stripe dispute created webhook events
+	 *
+	 * This handler:
+	 * 1. Validates the incoming webhook payload
+	 * 2. Upserts the dispute data to Salesforce
+	 * 3. Returns success response with Salesforce record ID
+	 *
+	 * @param event - API Gateway proxy event containing webhook payload
+	 * @returns Promise with HTTP response containing operation result
+	 * @throws Returns 500 status code for any processing errors
+	 */
 	return async (
 		event: APIGatewayProxyEvent,
 	): Promise<APIGatewayProxyResult> => {

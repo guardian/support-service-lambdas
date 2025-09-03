@@ -11,7 +11,26 @@ import {
 } from '../services';
 import type { SalesforceUpsertResponse } from '../types';
 
+/**
+ * Creates a handler function for processing Stripe dispute closed webhooks
+ *
+ * @param logger - Logger instance for tracking webhook processing
+ * @returns Handler function that processes API Gateway events for dispute closure
+ */
 export function listenDisputeClosedHandler(logger: Logger) {
+	/**
+	 * Processes Stripe dispute closed webhook events
+	 *
+	 * This handler:
+	 * 1. Validates the incoming webhook payload
+	 * 2. Retrieves related invoice data from Zuora
+	 * 3. Upserts enriched dispute data to Salesforce
+	 * 4. Returns success response
+	 *
+	 * @param event - API Gateway proxy event containing webhook payload
+	 * @returns Promise with HTTP response containing operation result
+	 * @throws Returns 500 status code for any processing errors
+	 */
 	return async (
 		event: APIGatewayProxyEvent,
 	): Promise<APIGatewayProxyResult> => {
