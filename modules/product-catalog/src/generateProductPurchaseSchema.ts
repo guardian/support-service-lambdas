@@ -51,9 +51,11 @@ const footer = `
 export const generateProductPurchaseSchema = (
 	catalog: ZuoraCatalog,
 ): string => {
-	const supportedZuoraProducts = catalog.products.filter((product) =>
-		isSupportedProduct(product.name),
-	);
+	const supportedZuoraProducts = catalog.products
+		.filter((product) => isSupportedProduct(product.name))
+		.sort((a, b) =>
+			getZuoraProductKey(a.name).localeCompare(getZuoraProductKey(b.name)),
+		);
 
 	const zuoraProductsSchema = supportedZuoraProducts
 		.map((product) => generateProductsSchema(product))
@@ -90,9 +92,11 @@ const generateProductSpecificFields = (productName: string): string => {
 
 const generateProductsSchema = (product: CatalogProduct) => {
 	const productName = getZuoraProductKey(product.name);
-	const supportedRatePlans = product.productRatePlans.filter(
-		(productRatePlan) => isSupportedProductRatePlan(productRatePlan.name),
-	);
+	const supportedRatePlans = product.productRatePlans
+		.filter((productRatePlan) =>
+			isSupportedProductRatePlan(productRatePlan.name),
+		)
+		.sort((a, b) => a.name.localeCompare(b.name));
 	const ratePlanLiterals = supportedRatePlans.map((productRatePlan) =>
 		generateRatePlanLiteral(productRatePlan),
 	);
