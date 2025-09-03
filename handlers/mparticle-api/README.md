@@ -186,6 +186,7 @@ This validates that all required parameters are accessible in Parameter Store.
 ```bash
 # Edit the test data in runManual/invokeHandlerRERInitiateCODE.ts first
 # Update subjectEmail and subjectId with test values
+# Note that requests take serveral days to complete in mparticle - you can see progress via the dashboard
 pnpm ts-node runManual/invokeHandlerRERInitiateCODE.ts
 ```
 
