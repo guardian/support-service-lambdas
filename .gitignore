@@ -11,3 +11,4 @@ project/project/
 .DS_Store
 node_modules/
 *.zip
+ handlers/stripe-disputes/coverage

@@ -5,7 +5,7 @@ import {
 import type { PaymentDisputeRecord } from '../interfaces';
 import type {
 	SalesforceAuthResponse,
-	SalesforceCreateResponse,
+	SalesforceUpsertResponse,
 } from '../types';
 import { SalesforceCreateResponseSchema } from '../zod-schemas';
 
@@ -16,7 +16,7 @@ import { SalesforceCreateResponseSchema } from '../zod-schemas';
 export async function upsertPaymentDisputeInSalesforce(
 	authResponse: SalesforceAuthResponse,
 	paymentDispute: PaymentDisputeRecord,
-): Promise<SalesforceCreateResponse> {
+): Promise<SalesforceUpsertResponse> {
 	console.log('upserting Payment Dispute record in Salesforce...');
 
 	try {
@@ -41,7 +41,7 @@ export async function upsertPaymentDisputeInSalesforce(
 		}
 
 		const sfCreateResponse =
-			(await response.json()) as SalesforceCreateResponse;
+			(await response.json()) as SalesforceUpsertResponse;
 		const parseResponse =
 			SalesforceCreateResponseSchema.safeParse(sfCreateResponse);
 

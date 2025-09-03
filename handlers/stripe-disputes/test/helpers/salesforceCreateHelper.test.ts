@@ -30,6 +30,10 @@ describe('Salesforce Create Helper', () => {
 		Is_Charge_Refundable__c: true,
 		Created_Date__c: '2025-08-21T10:11:22.000Z',
 		Has_Evidence__c: false,
+		SubscriptionNumber__c: 'SUB-001',
+		PaymentId__c: 'payment-123',
+		AccountId__c: 'account-456',
+		InvoiceId__c: 'invoice-789',
 	};
 
 	describe('buildSalesforceUpsertUrl', () => {
@@ -59,6 +63,10 @@ describe('Salesforce Create Helper', () => {
 				Is_Charge_Refundable__c: true,
 				Created_Date__c: '2025-08-21T10:11:22.000Z',
 				Has_Evidence__c: false,
+				SubscriptionNumber__c: 'SUB-001',
+				PaymentId__c: 'payment-123',
+				AccountId__c: 'account-456',
+				InvoiceId__c: 'invoice-789',
 			};
 
 			const result = buildSalesforceUpsertOptions(

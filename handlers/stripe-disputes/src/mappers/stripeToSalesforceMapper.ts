@@ -3,13 +3,17 @@ import {
 	timestampToSalesforceDate,
 	timestampToSalesforceDateTime,
 } from '../helpers';
-import type { PaymentDisputeRecord } from '../interfaces';
+import type {
+	PaymentDisputeRecord,
+	ZuoraInvoiceFromStripeChargeIdResult,
+} from '../interfaces';
 
 /**
  * Maps Stripe dispute webhook data to Salesforce Payment Dispute record format
  */
 export function mapStripeDisputeToSalesforce(
 	stripeData: ListenDisputeCreatedRequestBody,
+	zuoraData?: ZuoraInvoiceFromStripeChargeIdResult,
 ): PaymentDisputeRecord {
 	const dispute = stripeData.data.object;
 
@@ -31,5 +35,9 @@ export function mapStripeDisputeToSalesforce(
 		Is_Charge_Refundable__c: dispute.is_charge_refundable,
 		Created_Date__c: timestampToSalesforceDateTime(dispute.created),
 		Has_Evidence__c: dispute.evidence_details.has_evidence,
+		SubscriptionNumber__c: zuoraData?.SubscriptionNumber ?? '',
+		PaymentId__c: zuoraData?.paymentId ?? '',
+		AccountId__c: zuoraData?.paymentAccountId ?? '',
+		InvoiceId__c: zuoraData?.InvoiceId ?? '',
 	};
 }

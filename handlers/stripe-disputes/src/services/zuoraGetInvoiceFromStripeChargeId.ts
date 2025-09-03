@@ -76,8 +76,15 @@ export const zuoraGetInvoiceFromStripeChargeId = async (
 		throw new Error('invoicesItems found but record is undefined');
 	}
 
-	const invoiceItem: z.infer<typeof ZuoraGetInvoiceItemQueryOutputSchema> =
-		invoicesItems.records[0];
+	const invoiceItem:
+		| z.infer<typeof ZuoraGetInvoiceItemQueryOutputSchema>
+		| undefined = invoicesItems.records.filter((item) => {
+		return item.SubscriptionId != null;
+	})[0];
+
+	if (!invoiceItem) {
+		throw new Error('No invoice item with a subscription found');
+	}
 
 	return {
 		paymentId: foundPayment.Id,
@@ -87,7 +94,7 @@ export const zuoraGetInvoiceFromStripeChargeId = async (
 		paymentReferenceId: foundPayment.ReferenceId,
 		InvoiceId: foundPaymentsInvoice.InvoiceId,
 		paymentsInvoiceId: foundPaymentsInvoice.Id,
-		subscriptionId: invoiceItem.SubscriptionId,
-		SubscriptionNumber: invoiceItem.SubscriptionNumber,
+		subscriptionId: invoiceItem.SubscriptionId!,
+		SubscriptionNumber: invoiceItem.SubscriptionNumber!,
 	} satisfies ZuoraInvoiceFromStripeChargeIdResult;
 };

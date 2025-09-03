@@ -237,4 +237,101 @@ describe('zuoraGetInvoiceFromStripeChargeId', () => {
 
 		expect(doQuery).toHaveBeenCalledTimes(1);
 	});
+
+	it('should filter invoice items and throw error when no item has subscription', async () => {
+		doQuery
+			.mockResolvedValueOnce({
+				records: [
+					{
+						Id: 'payment-123',
+						Status: 'Processed',
+						PaymentNumber: 'P-001',
+						AccountId: 'account-123',
+						ReferenceId: 'ch_stripe123',
+					},
+				],
+			})
+			.mockResolvedValueOnce({
+				records: [
+					{
+						Id: 'invoice-payment-123',
+						InvoiceId: 'invoice-123',
+					},
+				],
+			})
+			.mockResolvedValueOnce({
+				records: [
+					{
+						Id: 'invoice-item-123',
+						SubscriptionId: null,
+						SubscriptionNumber: null,
+					},
+					{
+						Id: 'invoice-item-124',
+						SubscriptionId: null,
+						SubscriptionNumber: null,
+					},
+				],
+			});
+
+		await expect(
+			zuoraGetInvoiceFromStripeChargeId('ch_stripe123', mockZuoraClient),
+		).rejects.toThrow('No invoice item with a subscription found');
+
+		expect(doQuery).toHaveBeenCalledTimes(3);
+	});
+
+	it('should successfully filter and find invoice item with subscription', async () => {
+		doQuery
+			.mockResolvedValueOnce({
+				records: [
+					{
+						Id: 'payment-123',
+						Status: 'Processed',
+						PaymentNumber: 'P-001',
+						AccountId: 'account-123',
+						ReferenceId: 'ch_stripe123',
+					},
+				],
+			})
+			.mockResolvedValueOnce({
+				records: [
+					{
+						Id: 'invoice-payment-123',
+						InvoiceId: 'invoice-123',
+					},
+				],
+			})
+			.mockResolvedValueOnce({
+				records: [
+					{
+						Id: 'invoice-item-123',
+						SubscriptionId: null,
+						SubscriptionNumber: null,
+					},
+					{
+						Id: 'invoice-item-124',
+						SubscriptionId: 'subscription-456',
+						SubscriptionNumber: 'SUB-002',
+					},
+				],
+			});
+
+		const result = await zuoraGetInvoiceFromStripeChargeId(
+			'ch_stripe123',
+			mockZuoraClient,
+		);
+
+		expect(result).toEqual({
+			paymentId: 'payment-123',
+			paymentStatus: 'Processed',
+			paymentPaymentNumber: 'P-001',
+			paymentAccountId: 'account-123',
+			paymentReferenceId: 'ch_stripe123',
+			InvoiceId: 'invoice-123',
+			paymentsInvoiceId: 'invoice-payment-123',
+			subscriptionId: 'subscription-456',
+			SubscriptionNumber: 'SUB-002',
+		});
+	});
 });

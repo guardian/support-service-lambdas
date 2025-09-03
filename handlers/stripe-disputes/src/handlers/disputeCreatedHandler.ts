@@ -1,15 +1,9 @@
 import type { Logger } from '@modules/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
-import { getSecretValue } from '@modules/secrets-manager/getSecret';
-import { stageFromEnvironment } from '@modules/stage';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { listenDisputeCreatedInputSchema } from '../dtos';
-import { mapStripeDisputeToSalesforce } from '../mappers';
-import {
-	authenticateWithSalesforce,
-	upsertPaymentDisputeInSalesforce,
-} from '../services';
-import type { SalesforceCredentials } from '../types';
+import { upsertSalesforceObject } from '../services';
+import type { SalesforceUpsertResponse } from '../types';
 
 export function listenDisputeCreatedHandler(logger: Logger) {
 	return async (
@@ -24,28 +18,11 @@ export function listenDisputeCreatedHandler(logger: Logger) {
 			);
 			logger.mutableAddContext(stripeWebhook.data.object.id);
 
-			// Get Salesforce credentials from AWS Secrets Manager
-			const salesforceCredentials = await getSecretValue<SalesforceCredentials>(
-				`${stageFromEnvironment()}/Salesforce/ConnectedApp/StripeDisputeWebhooks`,
-			);
-
-			// Authenticate with Salesforce
-			const salesforceAuth = await authenticateWithSalesforce(
-				logger,
-				salesforceCredentials,
-			);
-
-			// Map Stripe dispute data to Salesforce Payment Dispute format
-			const paymentDisputeRecord = mapStripeDisputeToSalesforce(stripeWebhook);
-
-			// Upsert the Payment Dispute record in Salesforce using Dispute_ID__c as external ID
-			const salesforceResult = await upsertPaymentDisputeInSalesforce(
-				salesforceAuth,
-				paymentDisputeRecord,
-			);
+			const salesforceResult: SalesforceUpsertResponse =
+				await upsertSalesforceObject(logger, stripeWebhook);
 
 			logger.log(
-				`Payment Dispute created in Salesforce with ID: ${salesforceResult.id}`,
+				`Payment Dispute upserted in Salesforce with ID: ${salesforceResult.id}`,
 			);
 
 			return {

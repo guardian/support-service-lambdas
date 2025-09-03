@@ -12,12 +12,7 @@ jest.mock('@modules/stage', () => ({
 }));
 
 jest.mock('../../src/services', () => ({
-	authenticateWithSalesforce: jest.fn(),
-	upsertPaymentDisputeInSalesforce: jest.fn(),
-}));
-
-jest.mock('../../src/mappers', () => ({
-	mapStripeDisputeToSalesforce: jest.fn(),
+	upsertSalesforceObject: jest.fn(),
 }));
 
 describe('Dispute Created Handler', () => {
@@ -72,33 +67,9 @@ describe('Dispute Created Handler', () => {
 		jest.clearAllMocks();
 
 		// Setup default mocks
-		const { getSecretValue } = require('@modules/secrets-manager/getSecret');
-		const {
-			authenticateWithSalesforce,
-			upsertPaymentDisputeInSalesforce,
-		} = require('../../src/services');
-		const { mapStripeDisputeToSalesforce } = require('../../src/mappers');
+		const { upsertSalesforceObject } = require('../../src/services');
 
-		getSecretValue.mockResolvedValue({
-			client_id: 'test_client',
-			client_secret: 'test_secret',
-			username: 'test@example.com',
-			password: 'password123',
-			token: 'token456',
-			sandbox: true,
-		});
-
-		authenticateWithSalesforce.mockResolvedValue({
-			access_token: 'mock_token',
-			instance_url: 'https://test.salesforce.com',
-		});
-
-		mapStripeDisputeToSalesforce.mockReturnValue({
-			Dispute_ID__c: 'du_test123',
-			attributes: { type: 'Payment_Dispute__c' },
-		});
-
-		upsertPaymentDisputeInSalesforce.mockResolvedValue({
+		upsertSalesforceObject.mockResolvedValue({
 			id: 'sf_record_123',
 			success: true,
 			errors: [],
@@ -135,13 +106,14 @@ describe('Dispute Created Handler', () => {
 			);
 		});
 
-		it('should call getSecretValue with correct secret name', async () => {
-			const { getSecretValue } = require('@modules/secrets-manager/getSecret');
+		it('should call upsertSalesforceObject with correct parameters', async () => {
+			const { upsertSalesforceObject } = require('../../src/services');
 			const handler = listenDisputeCreatedHandler(mockLogger);
 			await handler(mockEvent);
 
-			expect(getSecretValue).toHaveBeenCalledWith(
-				'TEST/Salesforce/ConnectedApp/StripeDisputeWebhooks',
+			expect(upsertSalesforceObject).toHaveBeenCalledWith(
+				mockLogger,
+				validWebhookPayload,
 			);
 		});
 
@@ -193,9 +165,9 @@ describe('Dispute Created Handler', () => {
 			);
 		});
 
-		it('should handle Salesforce authentication error', async () => {
-			const { authenticateWithSalesforce } = require('../../src/services');
-			authenticateWithSalesforce.mockRejectedValue(new Error('Auth failed'));
+		it('should handle Salesforce service error', async () => {
+			const { upsertSalesforceObject } = require('../../src/services');
+			upsertSalesforceObject.mockRejectedValue(new Error('Service failed'));
 
 			const handler = listenDisputeCreatedHandler(mockLogger);
 			const result = await handler(mockEvent);
@@ -209,32 +181,12 @@ describe('Dispute Created Handler', () => {
 			);
 		});
 
-		it('should handle Salesforce upsert error', async () => {
-			const {
-				upsertPaymentDisputeInSalesforce,
-			} = require('../../src/services');
-			upsertPaymentDisputeInSalesforce.mockRejectedValue(
-				new Error('Upsert failed'),
-			);
-
-			const handler = listenDisputeCreatedHandler(mockLogger);
-			const result = await handler(mockEvent);
-
-			expect(result.statusCode).toBe(500);
-			const responseBody = JSON.parse(result.body);
-			expect(responseBody.error).toBe('Internal server error');
-			expect(mockLogger.log).toHaveBeenCalledWith(
-				'Error processing dispute created:',
-				expect.any(Error),
-			);
-		});
-
-		it('should log successful Salesforce creation', async () => {
+		it('should log successful Salesforce upsert', async () => {
 			const handler = listenDisputeCreatedHandler(mockLogger);
 			await handler(mockEvent);
 
 			expect(mockLogger.log).toHaveBeenCalledWith(
-				'Payment Dispute created in Salesforce with ID: sf_record_123',
+				'Payment Dispute upserted in Salesforce with ID: sf_record_123',
 			);
 		});
 	});
