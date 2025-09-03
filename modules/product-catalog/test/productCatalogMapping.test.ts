@@ -1,14 +1,11 @@
 import { findDuplicates } from '@modules/arrayFunctions';
 import type { Stage } from '@modules/stage';
 import { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
-import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
-import codeJson from '../../zuora-catalog/test/fixtures/catalog-code.json';
-import prodJson from '../../zuora-catalog/test/fixtures/catalog-prod.json';
+import codeZuoraCatalog from '../../zuora-catalog/test/fixtures/catalog-code.json';
+import prodZuoraCatalog from '../../zuora-catalog/test/fixtures/catalog-prod.json';
 
-const codeZuoraCatalog = zuoraCatalogSchema.parse(codeJson);
-const prodZuoraCatalog = zuoraCatalogSchema.parse(prodJson);
 const codeProductCatalog = generateProductCatalog(codeZuoraCatalog);
 const prodProductCatalog = generateProductCatalog(prodZuoraCatalog);
 const codeCatalogHelper = new ProductCatalogHelper(codeProductCatalog);

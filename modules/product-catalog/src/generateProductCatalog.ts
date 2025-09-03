@@ -15,6 +15,7 @@ import {
 	activeProducts,
 	getProductRatePlanChargeKey,
 	getProductRatePlanKey,
+	getTermLength,
 	getTermTypeName,
 	getZuoraProductKey,
 	isSupportedProduct,
@@ -118,7 +119,7 @@ const getZuoraProduct = (
 								productRatePlan.productRatePlanCharges,
 							),
 							termType: getTermTypeName(productRatePlan.TermType__c),
-							termLength: productRatePlan.DefaultTerm__c,
+							termLength: getTermLength(productRatePlan.DefaultTerm__c),
 							...(billingPeriod && { billingPeriod }),
 						},
 					};

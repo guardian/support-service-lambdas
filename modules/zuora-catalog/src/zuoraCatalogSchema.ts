@@ -7,11 +7,6 @@ export type ZuoraProductRatePlan =
 export type ZuoraProductRatePlanCharge =
 	ZuoraProductRatePlan['productRatePlanCharges'][number];
 export type Pricing = ZuoraProductRatePlanCharge['pricing'][number];
-export type ZuoraTermType = z.infer<typeof termTypeSchema>;
-
-const termTypeSchema = z
-	.union([z.literal('TERMED'), z.literal('EVERGREEN'), z.literal('ONETERM')])
-	.nullable();
 
 export const zuoraCatalogSchema = z.object({
 	products: z.array(
@@ -28,11 +23,9 @@ export const zuoraCatalogSchema = z.object({
 					name: z.string(),
 					effectiveStartDate: z.string(),
 					effectiveEndDate: z.string(),
-					TermType__c: termTypeSchema,
-					DefaultTerm__c: z
-						.string()
-						.nullable()
-						.transform((val) => (val ? Number(val) : 12)), //If the default term is null, we assume it's 12 months
+					TermType__c: z.string().nullable(),
+					DefaultTerm__c: z.string().nullable(),
+
 					productRatePlanCharges: z.array(
 						z.object({
 							id: z.string(),

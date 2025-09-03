@@ -1,6 +1,5 @@
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
-import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import codeZuoraCatalog from '../../../modules/zuora-catalog/test/fixtures/catalog-code.json';
 import { getLatestValidSubscription } from '../src/supporterProductData';
 import type { Member } from '../src/xmlBuilder';
@@ -66,9 +65,7 @@ describe('xmlBuilder', () => {
 	});
 });
 
-const codeProductCatalog = generateProductCatalog(
-	zuoraCatalogSchema.parse(codeZuoraCatalog),
-);
+const codeProductCatalog = generateProductCatalog(codeZuoraCatalog);
 
 describe('getLatestValidSubscription', () => {
 	it('gets latest subscription by term end date', () => {

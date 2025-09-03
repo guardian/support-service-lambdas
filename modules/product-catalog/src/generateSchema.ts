@@ -40,6 +40,7 @@ export const generateSchema = (catalog: ZuoraCatalog): string => {
 	return `${header}
 	  export const productKeys = ${JSON.stringify(productKeys)} as const;
 	  export const productKeySchema = z.enum(productKeys);
+	  export const termTypeSchema = z.enum(['Recurring', 'FixedTerm']);
 	  
 		export const productCatalogSchema = z.object({
 		${stripeProductsSchema},
@@ -83,6 +84,8 @@ const generateProductRatePlanSchema = (
 			${ratePlanChargesSchema.join(',\n')},
 		}),
 		${getBillingPeriodForRatePlan(productRatePlan)}
+		termType: termTypeSchema,
+		termLength: z.number(),
 	})`;
 };
 
