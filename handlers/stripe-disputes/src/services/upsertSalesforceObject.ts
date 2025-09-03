@@ -1,8 +1,14 @@
 import type { Logger } from '@modules/logger';
 import { getSecretValue } from '@modules/secrets-manager/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
-import type { ListenDisputeCreatedRequestBody } from '../dtos';
-import type { PaymentDisputeRecord } from '../interfaces';
+import type {
+	ListenDisputeClosedRequestBody,
+	ListenDisputeCreatedRequestBody,
+} from '../dtos';
+import type {
+	PaymentDisputeRecord,
+	ZuoraInvoiceFromStripeChargeIdResult,
+} from '../interfaces';
 import { mapStripeDisputeToSalesforce } from '../mappers';
 import type {
 	SalesforceAuthResponse,
@@ -14,7 +20,10 @@ import { upsertPaymentDisputeInSalesforce } from './salesforceCreate';
 
 export const upsertSalesforceObject = async (
 	logger: Logger,
-	dataFromStripe: ListenDisputeCreatedRequestBody,
+	dataFromStripe:
+		| ListenDisputeCreatedRequestBody
+		| ListenDisputeClosedRequestBody,
+	zuoraData?: ZuoraInvoiceFromStripeChargeIdResult,
 ): Promise<SalesforceUpsertResponse> => {
 	const salesforceCredentials = await getSecretValue<SalesforceCredentials>(
 		`${stageFromEnvironment()}/Salesforce/ConnectedApp/StripeDisputeWebhooks`,
@@ -26,7 +35,7 @@ export const upsertSalesforceObject = async (
 
 	// Map Stripe dispute data to Salesforce Payment Dispute format
 	const paymentDisputeRecord: PaymentDisputeRecord =
-		mapStripeDisputeToSalesforce(dataFromStripe);
+		mapStripeDisputeToSalesforce(dataFromStripe, zuoraData);
 
 	// Upsert the Payment Dispute record in Salesforce using Dispute_ID__c as external ID
 	return upsertPaymentDisputeInSalesforce(salesforceAuth, paymentDisputeRecord);

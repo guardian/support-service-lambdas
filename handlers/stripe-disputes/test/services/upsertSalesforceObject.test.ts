@@ -1,5 +1,9 @@
 import type { Logger } from '@modules/logger';
-import type { ListenDisputeCreatedRequestBody } from '../../src/dtos';
+import type {
+	ListenDisputeClosedRequestBody,
+	ListenDisputeCreatedRequestBody,
+} from '../../src/dtos';
+import type { ZuoraInvoiceFromStripeChargeIdResult } from '../../src/interfaces';
 import { upsertSalesforceObject } from '../../src/services/upsertSalesforceObject';
 
 // Mock all dependencies
@@ -142,7 +146,10 @@ describe('upsertSalesforceObject', () => {
 
 		// Verify mapping was called
 		const { mapStripeDisputeToSalesforce } = require('../../src/mappers');
-		expect(mapStripeDisputeToSalesforce).toHaveBeenCalledWith(mockWebhookData);
+		expect(mapStripeDisputeToSalesforce).toHaveBeenCalledWith(
+			mockWebhookData,
+			undefined,
+		);
 
 		// Verify upsert was called
 		const {
@@ -187,5 +194,77 @@ describe('upsertSalesforceObject', () => {
 		await expect(
 			upsertSalesforceObject(mockLogger, mockWebhookData),
 		).rejects.toThrow('Upsert failed');
+	});
+
+	it('should successfully upsert with Zuora data', async () => {
+		const mockZuoraData: ZuoraInvoiceFromStripeChargeIdResult = {
+			paymentId: 'payment-123',
+			paymentStatus: 'Processed',
+			paymentPaymentNumber: 'P-001',
+			paymentAccountId: 'account-456',
+			paymentReferenceId: 'ch_test123',
+			InvoiceId: 'invoice-789',
+			paymentsInvoiceId: 'invoice-payment-101',
+			subscriptionId: 'subscription-111',
+			SubscriptionNumber: 'SUB-001',
+		};
+
+		const result = await upsertSalesforceObject(
+			mockLogger,
+			mockWebhookData,
+			mockZuoraData,
+		);
+
+		// Verify mapping was called with Zuora data
+		const { mapStripeDisputeToSalesforce } = require('../../src/mappers');
+		expect(mapStripeDisputeToSalesforce).toHaveBeenCalledWith(
+			mockWebhookData,
+			mockZuoraData,
+		);
+
+		expect(result).toEqual(mockUpsertResponse);
+	});
+
+	it('should handle dispute closed webhook', async () => {
+		const mockClosedWebhookData: ListenDisputeClosedRequestBody = {
+			id: 'evt_closed123',
+			type: 'charge.dispute.closed',
+			data: {
+				object: {
+					id: 'du_closed123',
+					charge: 'ch_closed123',
+					amount: 5000,
+					currency: 'usd',
+					reason: 'fraudulent',
+					status: 'closed',
+					created: 1755775482,
+					is_charge_refundable: false,
+					payment_intent: 'pi_closed123',
+					evidence_details: {
+						due_by: 1756511999,
+						has_evidence: true,
+					},
+					payment_method_details: {
+						card: {
+							network_reason_code: '4855',
+						},
+					},
+				},
+			},
+		};
+
+		const result = await upsertSalesforceObject(
+			mockLogger,
+			mockClosedWebhookData,
+		);
+
+		// Verify mapping was called with closed webhook data
+		const { mapStripeDisputeToSalesforce } = require('../../src/mappers');
+		expect(mapStripeDisputeToSalesforce).toHaveBeenCalledWith(
+			mockClosedWebhookData,
+			undefined,
+		);
+
+		expect(result).toEqual(mockUpsertResponse);
 	});
 });

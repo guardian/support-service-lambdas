@@ -5,7 +5,11 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { listenDisputeClosedInputSchema } from '../dtos';
 import type { ZuoraInvoiceFromStripeChargeIdResult } from '../interfaces';
-import { zuoraGetInvoiceFromStripeChargeId } from '../services';
+import {
+	upsertSalesforceObject,
+	zuoraGetInvoiceFromStripeChargeId,
+} from '../services';
+import type { SalesforceUpsertResponse } from '../types';
 
 export function listenDisputeClosedHandler(logger: Logger) {
 	return async (
@@ -14,12 +18,12 @@ export function listenDisputeClosedHandler(logger: Logger) {
 		try {
 			logger.log('Processing Stripe dispute closed webhook');
 
-			const stripeWebhook = listenDisputeClosedInputSchema.parse(
+			const stripeWebhookData = listenDisputeClosedInputSchema.parse(
 				JSON.parse(getIfDefined(event.body, 'No body was provided')),
 			);
-			logger.mutableAddContext(stripeWebhook.data.object.id);
+			logger.mutableAddContext(stripeWebhookData.data.object.id);
 
-			const paymentId = stripeWebhook.data.object.charge;
+			const paymentId = stripeWebhookData.data.object.charge;
 
 			logger.log(`Payment ID from dispute: ${paymentId}`);
 
@@ -31,12 +35,23 @@ export function listenDisputeClosedHandler(logger: Logger) {
 
 			logger.log(JSON.stringify({ invoiceFromZuora }));
 
+			const salesforceResult: SalesforceUpsertResponse =
+				await upsertSalesforceObject(
+					logger,
+					stripeWebhookData,
+					invoiceFromZuora,
+				);
+
+			logger.log(
+				`Payment Dispute upserted in Salesforce with ID: ${salesforceResult.id}`,
+			);
+
 			// TODO: Implement dispute closed logic
 
 			return {
 				body: JSON.stringify({
 					message: 'Dispute closed webhook received',
-					disputeId: stripeWebhook.data.object.id,
+					disputeId: stripeWebhookData.data.object.id,
 					stage: process.env.STAGE,
 				}),
 				statusCode: 200,

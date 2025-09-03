@@ -19,6 +19,7 @@ jest.mock('@modules/zuora/zuoraClient', () => ({
 
 jest.mock('../../src/services', () => ({
 	zuoraGetInvoiceFromStripeChargeId: jest.fn(),
+	upsertSalesforceObject: jest.fn(),
 }));
 
 describe('Dispute Closed Handler', () => {
@@ -90,10 +91,27 @@ describe('Dispute Closed Handler', () => {
 		const { ZuoraClient } = require('@modules/zuora/zuoraClient');
 		ZuoraClient.create.mockResolvedValue({});
 
-		// Mock zuora service
-		const { zuoraGetInvoiceFromStripeChargeId } = require('../../src/services');
+		// Mock services
+		const {
+			zuoraGetInvoiceFromStripeChargeId,
+			upsertSalesforceObject,
+		} = require('../../src/services');
 		zuoraGetInvoiceFromStripeChargeId.mockResolvedValue({
-			invoice: { id: 'inv_123' },
+			paymentId: 'payment-123',
+			paymentStatus: 'Processed',
+			paymentPaymentNumber: 'P-001',
+			paymentAccountId: 'account-456',
+			paymentReferenceId: 'ch_test123',
+			InvoiceId: 'invoice-789',
+			paymentsInvoiceId: 'invoice-payment-101',
+			subscriptionId: 'subscription-111',
+			SubscriptionNumber: 'SUB-001',
+		});
+
+		upsertSalesforceObject.mockResolvedValue({
+			id: 'sf_record_123',
+			success: true,
+			errors: [],
 		});
 	});
 
@@ -135,6 +153,50 @@ describe('Dispute Closed Handler', () => {
 			await handler(mockEvent);
 
 			expect(ZuoraClient.create).toHaveBeenCalledWith('TEST', mockLogger);
+		});
+
+		it('should call zuoraGetInvoiceFromStripeChargeId with correct parameters', async () => {
+			const {
+				zuoraGetInvoiceFromStripeChargeId,
+			} = require('../../src/services');
+			const handler = listenDisputeClosedHandler(mockLogger);
+			await handler(mockEvent);
+
+			expect(zuoraGetInvoiceFromStripeChargeId).toHaveBeenCalledWith(
+				'ch_test123',
+				{},
+			);
+		});
+
+		it('should call upsertSalesforceObject with webhook and Zuora data', async () => {
+			const { upsertSalesforceObject } = require('../../src/services');
+			const handler = listenDisputeClosedHandler(mockLogger);
+			await handler(mockEvent);
+
+			expect(upsertSalesforceObject).toHaveBeenCalledWith(
+				mockLogger,
+				validWebhookPayload,
+				{
+					paymentId: 'payment-123',
+					paymentStatus: 'Processed',
+					paymentPaymentNumber: 'P-001',
+					paymentAccountId: 'account-456',
+					paymentReferenceId: 'ch_test123',
+					InvoiceId: 'invoice-789',
+					paymentsInvoiceId: 'invoice-payment-101',
+					subscriptionId: 'subscription-111',
+					SubscriptionNumber: 'SUB-001',
+				},
+			);
+		});
+
+		it('should log successful Salesforce upsert', async () => {
+			const handler = listenDisputeClosedHandler(mockLogger);
+			await handler(mockEvent);
+
+			expect(mockLogger.log).toHaveBeenCalledWith(
+				'Payment Dispute upserted in Salesforce with ID: sf_record_123',
+			);
 		});
 
 		it('should handle missing request body', async () => {

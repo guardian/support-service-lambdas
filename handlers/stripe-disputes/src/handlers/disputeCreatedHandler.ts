@@ -13,13 +13,13 @@ export function listenDisputeCreatedHandler(logger: Logger) {
 			logger.log('Processing Stripe dispute created webhook');
 
 			// Parse the Stripe webhook payload
-			const stripeWebhook = listenDisputeCreatedInputSchema.parse(
+			const stripeWebhookData = listenDisputeCreatedInputSchema.parse(
 				JSON.parse(getIfDefined(event.body, 'No body was provided')),
 			);
-			logger.mutableAddContext(stripeWebhook.data.object.id);
+			logger.mutableAddContext(stripeWebhookData.data.object.id);
 
 			const salesforceResult: SalesforceUpsertResponse =
-				await upsertSalesforceObject(logger, stripeWebhook);
+				await upsertSalesforceObject(logger, stripeWebhookData);
 
 			logger.log(
 				`Payment Dispute upserted in Salesforce with ID: ${salesforceResult.id}`,
@@ -29,7 +29,7 @@ export function listenDisputeCreatedHandler(logger: Logger) {
 				body: JSON.stringify({
 					success: salesforceResult.success,
 					salesforceId: salesforceResult.id,
-					disputeId: stripeWebhook.data.object.id,
+					disputeId: stripeWebhookData.data.object.id,
 				}),
 				statusCode: 200,
 			};

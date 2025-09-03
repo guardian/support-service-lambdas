@@ -1,4 +1,7 @@
-import type { ListenDisputeCreatedRequestBody } from '../dtos';
+import type {
+	ListenDisputeClosedRequestBody,
+	ListenDisputeCreatedRequestBody,
+} from '../dtos';
 import {
 	timestampToSalesforceDate,
 	timestampToSalesforceDateTime,
@@ -12,7 +15,7 @@ import type {
  * Maps Stripe dispute webhook data to Salesforce Payment Dispute record format
  */
 export function mapStripeDisputeToSalesforce(
-	stripeData: ListenDisputeCreatedRequestBody,
+	stripeData: ListenDisputeCreatedRequestBody | ListenDisputeClosedRequestBody,
 	zuoraData?: ZuoraInvoiceFromStripeChargeIdResult,
 ): PaymentDisputeRecord {
 	const dispute = stripeData.data.object;
