@@ -20,7 +20,63 @@ For more information about the Baton privacy orchestration system, see the [Bato
 - **X.509 Certificate Validation**: Cryptographic security for callbacks
 - **AWS Security Best Practices**: Encrypted data storage and Parameter Store configuration
 
----
+## 🚀 Quick Start
+
+The recommended workflow for testing dependency updates or validating changes is to **deploy to CODE** and test the live integrations.
+
+### 1. Prerequisites
+
+Ensure you have the required AWS profile and permissions. Use Janus to download the Membership profile.
+
+### 2. Verify Configuration
+
+Check that CODE configuration is accessible:
+```bash
+cd handlers/mparticle-api
+pnpm check-config
+```
+
+This validates that all required parameters are accessible in Parameter Store.
+
+### 3. Test Basic Integrations
+
+#### Test RER (Right to Erasure) Flow
+```bash
+# Edit the test data in runManual/invokeHandlerRERInitiateCODE.ts first
+# Update subjectEmail and subjectId with test values
+# Note that requests take serveral days to complete in mparticle - you can see progress via the dashboard
+pnpm ts-node runManual/invokeHandlerRERInitiateCODE.ts
+```
+
+#### Test SAR (Subject Access Request) Flow  
+```bash
+# Edit the test data in runManual/invokeHandlerSARInitiateCODE.ts first
+# Update subjectEmail and subjectId with test values
+pnpm ts-node runManual/invokeHandlerSARInitiateCODE.ts
+```
+
+#### Test Status Checking
+```bash
+# Use the requestId from previous tests
+pnpm ts-node runManual/invokeHandlerRERStatusCODE.ts
+pnpm ts-node runManual/invokeHandlerSARStatusCODE.ts
+```
+
+### 4. Run Automated Tests
+
+```bash
+# Unit tests (fast, no external dependencies)
+pnpm test
+
+# Integration tests (slower, tests actual API integrations)
+pnpm it-test
+```
+
+### 5. Monitor Live Requests
+
+Check CloudWatch logs for your test requests:
+- Lambda function logs: [mparticle-api-baton-CODE](https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fmparticle-api-baton-CODE) and [mparticle-api-http-CODE](https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fmparticle-api-http-CODE)
+- API Gateway logs: Look for your test request IDs
 
 ## � What is mParticle?
 
@@ -37,8 +93,6 @@ For more information about the Baton privacy orchestration system, see the [Bato
 - [mParticle Documentation](https://docs.mparticle.com/)
 - [Data Subject Request API](https://docs.mparticle.com/developers/dsr-api/)
 - [Privacy Controls Overview](https://docs.mparticle.com/guides/data-privacy-controls/)
-
----
 
 ## 📧 What is Braze?
 
@@ -57,8 +111,6 @@ In the Guardian, mParticle extracts relevant data from the data lake and writes 
 - [Braze Documentation](https://www.braze.com/docs/)
 - [Data Privacy & Protection](https://www.braze.com/docs/developer_guide/disclosures/security_qualifications/)
 - [GDPR Compliance Guide](https://www.braze.com/docs/help/gdpr_compliance/)
-
----
 
 ## 🏗️ System Architecture
 
@@ -160,101 +212,7 @@ sequenceDiagram
     B->>R: Provide access to data export
 ```
 
----
-
-## 🚀 Quick Start
-
-The recommended workflow for testing dependency updates or validating changes is to **deploy to CODE** and test the live integrations.
-
-### 1. Prerequisites
-
-Ensure you have the required AWS profile and permissions. Use Janus to download the Membership profile.
-
-### 2. Verify Configuration
-
-Check that CODE configuration is accessible:
-```bash
-cd handlers/mparticle-api
-pnpm check-config
-```
-
-This validates that all required parameters are accessible in Parameter Store.
-
-### 3. Test Basic Integrations
-
-#### Test RER (Right to Erasure) Flow
-```bash
-# Edit the test data in runManual/invokeHandlerRERInitiateCODE.ts first
-# Update subjectEmail and subjectId with test values
-# Note that requests take serveral days to complete in mparticle - you can see progress via the dashboard
-pnpm ts-node runManual/invokeHandlerRERInitiateCODE.ts
-```
-
-#### Test SAR (Subject Access Request) Flow  
-```bash
-# Edit the test data in runManual/invokeHandlerSARInitiateCODE.ts first
-# Update subjectEmail and subjectId with test values
-pnpm ts-node runManual/invokeHandlerSARInitiateCODE.ts
-```
-
-#### Test Status Checking
-```bash
-# Use the requestId from previous tests
-pnpm ts-node runManual/invokeHandlerRERStatusCODE.ts
-pnpm ts-node runManual/invokeHandlerSARStatusCODE.ts
-```
-
-### 4. Run Automated Tests
-
-```bash
-# Unit tests (fast, no external dependencies)
-pnpm test
-
-# Integration tests (slower, tests actual API integrations)
-pnpm it-test
-```
-
-### 5. Monitor Live Requests
-
-Check CloudWatch logs for your test requests:
-- Lambda function logs: `[mparticle-api-baton-CODE](https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fmparticle-api-baton-CODE)` and `[mparticle-api-http-CODE](https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fmparticle-api-http-CODE)`
-- API Gateway logs: Look for your test request IDs
-
-### Configuration Reference
-
-All configuration is managed through AWS Parameter Store. Each environment uses these parameters:
-
-#### Workspace Credentials
-- **`/{stage}/support/mparticle-api/workspace/key`**
-  - *Description*: mParticle workspace API key for Data Subject Request operations
-  - *mParticle Reference*: [Managing Workspaces](https://docs.mparticle.com/guides/platform-guide/introduction/#managing-workspaces)
-
-- **`/{stage}/support/mparticle-api/workspace/secret`**
-  - *Description*: mParticle workspace API secret for Data Subject Request operations
-  - *mParticle Reference*: [Managing Workspaces](https://docs.mparticle.com/guides/platform-guide/introduction/#managing-workspaces)
-
-#### Input Platform Credentials
-- **`/{stage}/support/mparticle-api/inputPlatform/key`**
-  - *Description*: mParticle input platform API key for event ingestion and data collection
-  - *mParticle Reference*: [HTTP APIs Authentication](https://docs.mparticle.com/developers/apis/http/#authentication)
-
-- **`/{stage}/support/mparticle-api/inputPlatform/secret`**
-  - *Description*: mParticle input platform API secret for event ingestion and data collection
-  - *mParticle Reference*: [HTTP APIs Authentication](https://docs.mparticle.com/developers/apis/http/#authentication)
-
-#### Environment Configuration
-- **`/{stage}/support/mparticle-api/pod`**
-  - *Description*: mParticle pod/cluster identifier (e.g., "us1", "us2", "eu1") for regional API endpoints
-  - *mParticle Reference*: [Data Hosting Locations](https://docs.mparticle.com/developers/guides/data-localization/)
-
-- **`/{stage}/support/mparticle-api/sarResultsBucket`**
-  - *Description*: S3 bucket name for storing SAR (Subject Access Request) export results
-
----
-
 ## 🌐 HTTP API Endpoints
-
-## 🚀 Quick Start
 
 ### Base URLs
 | Environment | URL |
@@ -273,8 +231,6 @@ Key implementation notes:
 - **Public Access**: Only callback endpoints are publicly accessible, secured through certificate validation
 - **Headers**: Callback endpoints expect `X-MP-Signature` and `X-MP-Certificate` headers
 
----
-
 ## 🤖 Baton Integration Events
 
 ### Baton Router Events
@@ -288,8 +244,6 @@ Key implementation notes:
 - **Actions**: `initiate` for starting new requests, `status` for checking existing request progress
 - **Identity Resolution**: Handles both `subjectId` and optional `subjectEmail` for user identification
 - **Correlation Tracking**: Uses `initiationReference` GUID for request tracking across systems
-
----
 
 ## 🔒 Security & Compliance
 
@@ -310,8 +264,6 @@ Key implementation notes:
 2. **Public Key Extraction**: Extract public key from validated certificate
 3. **Signature Verification**: Cryptographic verification of message integrity
 
----
-
 ## 🚨 Compliance & Business Context
 
 This lambda helps Guardian fulfill GDPR and CCPA compliance requirements by:
@@ -324,14 +276,10 @@ This lambda helps Guardian fulfill GDPR and CCPA compliance requirements by:
 - **Centralized orchestration** via Baton ensures no system is missed
 - **Real-time monitoring** detects and alerts on failures immediately
 
----
-
 ## 📞 Support & Monitoring
 
 ### Team Information
 - **Primary Owner**: Consult the following [file](https://docs.google.com/spreadsheets/d/1bb8WB-6ZFRdUwERHMOVIolN8WU8zJMcsyi-WJuwp07Q/edit?gid=0#gid=0)
-
----
 
 ## 📋 Quick Reference
 
