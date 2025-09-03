@@ -1,5 +1,8 @@
 import type { z } from 'zod';
-import type { productCatalogSchema } from '@modules/product-catalog/productCatalogSchema';
+import type {
+	productCatalogSchema,
+	termTypeSchema,
+} from '@modules/product-catalog/productCatalogSchema';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 
 type ProductBillingSystem = 'stripe' | 'zuora';
@@ -92,7 +95,7 @@ export type ProductRatePlan<
 export type ZuoraProductRatePlanKey<P extends ZuoraProductKey> =
 	keyof ProductCatalog[P]['ratePlans'];
 
-export type TermType = 'Recurring' | 'FixedTerm';
+export type TermType = z.infer<typeof termTypeSchema>;
 
 export class ProductCatalogHelper {
 	constructor(private catalogData: ProductCatalog) {}
