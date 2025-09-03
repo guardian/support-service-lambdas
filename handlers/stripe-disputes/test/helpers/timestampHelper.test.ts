@@ -1,7 +1,7 @@
 import {
 	timestampToSalesforceDate,
 	timestampToSalesforceDateTime,
-} from '../../src/helpers/timestamp.helper';
+} from '../../src/helpers/timestampHelper';
 
 describe('Timestamp Helper', () => {
 	describe('timestampToSalesforceDateTime', () => {

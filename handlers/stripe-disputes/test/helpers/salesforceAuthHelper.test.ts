@@ -1,4 +1,4 @@
-import { buildClientCredentialsBody } from '../../src/helpers/salesforce-auth.helper';
+import { buildClientCredentialsBody } from '../../src/helpers/salesforceAuthHelper';
 import type { SalesforceCredentials } from '../../src/types';
 
 describe('Salesforce Auth Helper', () => {

@@ -1,7 +1,7 @@
 import {
 	buildSalesforceUpsertOptions,
 	buildSalesforceUpsertUrl,
-} from '../../src/helpers/salesforce-create.helper';
+} from '../../src/helpers/salesforceCreateHelper';
 import type { PaymentDisputeRecord } from '../../src/interfaces';
 import type { SalesforceAuthResponse } from '../../src/types';
 

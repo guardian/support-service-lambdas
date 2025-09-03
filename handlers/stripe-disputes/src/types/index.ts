@@ -1,1 +1,1 @@
-export * from './salesforce.types';
+export * from './salesforceTypes';

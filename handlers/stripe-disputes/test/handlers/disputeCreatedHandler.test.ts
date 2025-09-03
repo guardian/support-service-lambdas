@@ -1,6 +1,6 @@
 import type { Logger } from '@modules/logger';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
-import { listenDisputeCreatedHandler } from '../../src/handlers/dispute-created.handler';
+import { listenDisputeCreatedHandler } from '../../src/handlers/disputeCreatedHandler';
 
 // Mock all dependencies
 jest.mock('@modules/secrets-manager/getSecret', () => ({

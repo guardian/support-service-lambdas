@@ -1,4 +1,4 @@
-import { getSalesForceApiBaseUrl } from '../../src/helpers/salesforce-url.helper';
+import { getSalesForceApiBaseUrl } from '../../src/helpers/salesforceUrlHelper';
 
 describe('getSalesForceApiBaseUrl', () => {
 	it('should return sandbox URL when isSandbox is true', () => {

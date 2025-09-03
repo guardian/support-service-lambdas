@@ -1,8 +1,8 @@
 import type { ListenDisputeCreatedRequestBody } from '../../src/dtos';
-import { mapStripeDisputeToSalesforce } from '../../src/mappers/stripe-to-salesforce.mapper';
+import { mapStripeDisputeToSalesforce } from '../../src/mappers/stripeToSalesforceMapper';
 
 // Mock the timestamp helpers
-jest.mock('../../src/helpers/timestamp.helper', () => ({
+jest.mock('../../src/helpers/timestampHelper', () => ({
 	timestampToSalesforceDateTime: jest.fn((timestamp) =>
 		new Date(timestamp * 1000).toISOString(),
 	),

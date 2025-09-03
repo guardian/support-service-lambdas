@@ -1,2 +1,2 @@
-export * from './payment-dispute.interface';
-export * from './zuora-invoice-from-stripe-chargeId-result.interface';
+export * from './paymentDisputeInterface';
+export * from './zuoraInvoiceFromStripeChargeIdResult.interface';
