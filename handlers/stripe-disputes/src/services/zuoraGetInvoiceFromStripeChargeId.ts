@@ -7,8 +7,6 @@ import {
 	type ZuoraGetInvoiceItemQueryOutputSchema,
 	ZuoraGetInvoicePaymentQueryOutputResponseSchema,
 	type ZuoraGetInvoicePaymentQueryOutputSchema,
-	ZuoraGetInvoiceQueryOutputResponseSchema,
-	type ZuoraGetInvoiceQueryOutputSchema,
 	ZuoraGetPaymentQueryOutputResponseSchema,
 	type ZuoraGetPaymentQueryOutputSchema,
 } from '../zod-schemas';
@@ -60,37 +58,17 @@ export const zuoraGetInvoiceFromStripeChargeId = async (
 		typeof ZuoraGetInvoicePaymentQueryOutputSchema
 	> = paymentsInvoices.records[0];
 
-	const invoices: z.infer<typeof ZuoraGetInvoiceQueryOutputResponseSchema> =
-		await doQuery(
-			zuoraClient,
-			`SELECT Id, InvoiceNumber, Status FROM Invoice WHERE id = '${foundPaymentsInvoice.InvoiceId}'`,
-			ZuoraGetInvoiceQueryOutputResponseSchema,
-		);
-
-	if (invoices.records.length === 0) {
-		throw new Error(
-			`No invoices found in Zuora with ReferenceID = '${foundPaymentsInvoice.InvoiceId}'`,
-		);
-	}
-
-	if (invoices.records[0] == undefined) {
-		throw new Error('invoices found but record is undefined');
-	}
-
-	const invoice: z.infer<typeof ZuoraGetInvoiceQueryOutputSchema> =
-		invoices.records[0];
-
 	const invoicesItems: z.infer<
 		typeof ZuoraGetInvoiceItemQueryOutputResponseSchema
 	> = await doQuery(
 		zuoraClient,
-		`SELECT Id, SubscriptionId, SubscriptionNumber FROM InvoiceItem WHERE InvoiceId = '${invoice.Id}'`,
+		`SELECT Id, SubscriptionId, SubscriptionNumber FROM InvoiceItem WHERE InvoiceId = '${foundPaymentsInvoice.InvoiceId}'`,
 		ZuoraGetInvoiceItemQueryOutputResponseSchema,
 	);
 
 	if (invoicesItems.records.length === 0) {
 		throw new Error(
-			`No invoicesItems found in Zuora with ReferenceID = '${invoice.Id}'`,
+			`No invoicesItems found in Zuora with ReferenceID = '${foundPaymentsInvoice.InvoiceId}'`,
 		);
 	}
 
@@ -109,8 +87,6 @@ export const zuoraGetInvoiceFromStripeChargeId = async (
 		paymentReferenceId: foundPayment.ReferenceId,
 		InvoiceId: foundPaymentsInvoice.InvoiceId,
 		paymentsInvoiceId: foundPaymentsInvoice.Id,
-		invoiceNumber: invoice.InvoiceNumber,
-		invoiceStatus: invoice.Status,
 		subscriptionId: invoiceItem.SubscriptionId,
 		SubscriptionNumber: invoiceItem.SubscriptionNumber,
 	} satisfies ZuoraInvoiceFromStripeChargeIdResult;

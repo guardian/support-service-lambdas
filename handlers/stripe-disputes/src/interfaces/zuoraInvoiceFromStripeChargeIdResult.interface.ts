@@ -6,8 +6,6 @@ export interface ZuoraInvoiceFromStripeChargeIdResult {
 	paymentReferenceId: string;
 	InvoiceId: string;
 	paymentsInvoiceId: string;
-	invoiceNumber: string;
-	invoiceStatus: string;
 	subscriptionId: string;
 	SubscriptionNumber: string;
 }
