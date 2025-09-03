@@ -222,7 +222,7 @@ Check CloudWatch logs for your test requests:
 
 ### Configuration Reference
 
-All configuration is managed through AWS Parameter Store. CODE environment uses these parameters:
+All configuration is managed through AWS Parameter Store. Each environment uses these parameters:
 
 #### Workspace Credentials
 - **`/{stage}/support/mparticle-api/workspace/key`**
