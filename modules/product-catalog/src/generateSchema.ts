@@ -29,9 +29,9 @@ export const generateSchema = (catalog: ZuoraCatalog): string => {
 		isSupportedProduct(product.name),
 	);
 
-	const productKeys = supportedZuoraProducts.map((product) =>
-		getZuoraProductKey(product.name),
-	);
+	const productKeys = supportedZuoraProducts
+		.map((product) => getZuoraProductKey(product.name))
+		.sort((a, b) => a.localeCompare(b));
 
 	const zuoraProductsSchema = supportedZuoraProducts
 		.map((product) => generateZuoraProductSchema(product))

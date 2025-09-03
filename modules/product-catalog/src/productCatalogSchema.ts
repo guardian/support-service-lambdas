@@ -3,23 +3,23 @@
 import { z } from 'zod';
 
 export const productKeys = [
-	'SupporterPlus',
 	'Contribution',
-	'GuardianWeeklyRestOfWorld',
-	'GuardianAdLite',
-	'TierThree',
 	'DigitalSubscription',
-	'NationalDelivery',
-	'SupporterMembership',
+	'GuardianAdLite',
 	'GuardianWeeklyDomestic',
-	'SubscriptionCard',
+	'GuardianWeeklyRestOfWorld',
 	'GuardianWeeklyZoneA',
 	'GuardianWeeklyZoneB',
 	'GuardianWeeklyZoneC',
-	'NewspaperVoucher',
 	'HomeDelivery',
-	'PatronMembership',
+	'NationalDelivery',
+	'NewspaperVoucher',
 	'PartnerMembership',
+	'PatronMembership',
+	'SubscriptionCard',
+	'SupporterMembership',
+	'SupporterPlus',
+	'TierThree',
 ] as const;
 export const productKeySchema = z.enum(productKeys);
 
