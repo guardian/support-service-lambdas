@@ -1,6 +1,7 @@
 import type { BillingPeriod } from '@modules/billingPeriod';
 import type { Dayjs } from 'dayjs';
 import { zuoraDateFormat } from '../utils/common';
+import { TermType } from '@modules/product-catalog/productCatalog';
 
 export type TriggerDates = [
 	{
@@ -84,18 +85,17 @@ export type CreateSubscriptionOrderAction = BaseOrderAction & {
 	type: 'CreateSubscription';
 	createSubscription: {
 		terms: {
+			autoRenew: boolean;
 			initialTerm: {
 				period: number;
 				periodType: BillingPeriod;
 				termType: 'TERMED';
 			};
-			renewalSetting: 'RENEW_WITH_SPECIFIC_TERM';
-			renewalTerms: [
-				{
-					period: 12;
-					periodType: 'Month';
-				},
-			];
+			renewalSetting?: 'RENEW_WITH_SPECIFIC_TERM';
+			renewalTerms?: {
+				period: number;
+				periodType: BillingPeriod;
+			}[];
 		};
 		subscribeToRatePlans: [
 			{
@@ -144,11 +144,15 @@ export function buildCreateSubscriptionOrderAction({
 	contractEffectiveDate,
 	customerAcceptanceDate,
 	chargeOverride,
+	termType,
+	termLength,
 }: {
 	productRatePlanId: string;
 	contractEffectiveDate: Dayjs;
 	customerAcceptanceDate?: Dayjs;
 	chargeOverride?: { productRatePlanChargeId: string; overrideAmount: number };
+	termType: TermType;
+	termLength: number;
 }): CreateSubscriptionOrderAction {
 	const chargeOverrides = chargeOverride
 		? [
@@ -162,6 +166,33 @@ export function buildCreateSubscriptionOrderAction({
 				},
 			]
 		: [];
+
+	const terms =
+		termType === 'Recurring'
+			? {
+					autoRenew: true,
+					initialTerm: {
+						period: 12,
+						periodType: 'Month' as BillingPeriod,
+						termType: 'TERMED' as const,
+					},
+					renewalSetting: 'RENEW_WITH_SPECIFIC_TERM' as const,
+					renewalTerms: [
+						// TODO: is this needed if it's the same as initial term?
+						{
+							period: 12,
+							periodType: 'Month' as BillingPeriod,
+						},
+					],
+				}
+			: {
+					autoRenew: false,
+					initialTerm: {
+						period: termLength,
+						periodType: 'Month' as BillingPeriod, // TODO: Days for GW gifts?
+						termType: 'TERMED' as const,
+					},
+				};
 
 	return {
 		type: 'CreateSubscription',
@@ -178,20 +209,7 @@ export function buildCreateSubscriptionOrderAction({
 			},
 		],
 		createSubscription: {
-			terms: {
-				initialTerm: {
-					period: 12,
-					periodType: 'Month',
-					termType: 'TERMED',
-				},
-				renewalSetting: 'RENEW_WITH_SPECIFIC_TERM',
-				renewalTerms: [
-					{
-						period: 12,
-						periodType: 'Month',
-					},
-				],
-			},
+			terms: terms,
 			subscribeToRatePlans: [
 				{
 					productRatePlanId,
