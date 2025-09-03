@@ -60,7 +60,7 @@ const createTestContribution = async (
 	});
 
 	const input = {
-		price: switchPrice,
+		newAmount: switchPrice,
 		preview,
 		applyDiscountIfAvailable: clientRequestedSwitchDiscount,
 	};
