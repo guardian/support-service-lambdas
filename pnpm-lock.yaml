@@ -297,6 +297,9 @@ importers:
 
   handlers/stripe-disputes:
     dependencies:
+      aws-sdk:
+        specifier: ^2.1692.0
+        version: 2.1692.0
       dayjs:
         specifier: ^1.11.13
         version: 1.11.18
