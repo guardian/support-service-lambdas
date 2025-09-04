@@ -110,7 +110,7 @@ function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		customerAcceptanceDate: customerAcceptanceDate,
 		chargeOverride: chargeOverride,
 		termType: productRatePlan.termType,
-		termLength: productRatePlan.termLength,
+		termLengthInMonths: productRatePlan.termLengthInMonths,
 	});
 
 	const customFields = {
