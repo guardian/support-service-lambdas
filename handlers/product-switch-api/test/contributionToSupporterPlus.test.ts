@@ -417,7 +417,7 @@ test('When newAmount is not specified, it uses previousAmount without validation
 		new Lazy(() => Promise.resolve([]), 'test'),
 		today,
 	);
-	
+
 	// Should use the previous amount (£50) and have zero contribution (since £50 < £120)
 	expect(switchInformation.actualTotalPrice).toBe(50);
 	expect(switchInformation.contributionAmount).toBe(0);

@@ -193,15 +193,15 @@ export const getSwitchInformationWithOwnerCheck = async (
 		maybeDiscount?.discountedPrice ?? catalogInformation.supporterPlus.price;
 
 	const userDesiredAmount = input.newAmount ?? previousAmount;
-	
+
 	// Validate that the user's desired amount is at least the base Supporter Plus price
 	// Only validate when newAmount is explicitly provided by the frontend
 	if (input.newAmount && userDesiredAmount < actualBasePrice) {
 		throw new ValidationError(
-			`Cannot switch to Supporter Plus: desired amount (${userDesiredAmount}) is less than the minimum Supporter Plus price (${actualBasePrice}). Use the update-supporter-plus-amount API to modify contribution amounts instead.`
+			`Cannot switch to Supporter Plus: desired amount (${userDesiredAmount}) is less than the minimum Supporter Plus price (${actualBasePrice}). Use the update-supporter-plus-amount API to modify contribution amounts instead.`,
 		);
 	}
-	
+
 	const contributionAmount = Math.max(0, userDesiredAmount - actualBasePrice);
 
 	const subscriptionInformation = {
