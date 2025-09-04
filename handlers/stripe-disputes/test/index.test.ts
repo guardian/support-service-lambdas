@@ -99,7 +99,8 @@ describe('Main Handler', () => {
 
 	it('should route requests through router', async () => {
 		const event = createMockEvent('/listen-dispute-created', 'POST', '{}');
-		const result = await handler(event);
+		const mockContext = {} as any;
+		const result = await handler(event, mockContext);
 
 		expect(mockRouterInstance.routeRequest).toHaveBeenCalledWith(event);
 		expect(result).toBeDefined();
@@ -107,19 +108,20 @@ describe('Main Handler', () => {
 
 	it('should log input and output', async () => {
 		const event = createMockEvent('/listen-dispute-created', 'POST', '{}');
+		const mockContext = {} as any;
 		const mockResponse = {
 			statusCode: 200,
 			body: JSON.stringify({ success: true }),
 		};
 		mockRouterInstance.routeRequest.mockResolvedValue(mockResponse);
 
-		const result = await handler(event);
+		const result = await handler(event, mockContext);
 
 		expect(mockLogger.log).toHaveBeenCalledWith(
 			`Input: ${JSON.stringify(event)}`,
 		);
 		expect(mockLogger.log).toHaveBeenCalledWith(
-			`Response: ${JSON.stringify(result)}`,
+			`Webhook response: ${JSON.stringify(result)}`,
 		);
 	});
 });

@@ -1,4 +1,5 @@
 import { GuApiLambda } from '@guardian/cdk';
+import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import type { App } from 'aws-cdk-lib';
@@ -8,9 +9,15 @@ import {
 	CfnBasePathMapping,
 	CfnDomainName,
 } from 'aws-cdk-lib/aws-apigateway';
+import {
+	ComparisonOperator,
+	TreatMissingData,
+} from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
+import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
+import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { nodeVersion } from './node-version';
 
 export interface StripeDisputesProps extends GuStackProps {
@@ -28,15 +35,50 @@ export class StripeDisputes extends GuStack {
 		const app = 'stripe-disputes';
 		const nameWithStage = `${app}-${this.stage}`;
 
+		// ---- SQS Queues with retry and DLQ ---- //
+		const deadLetterQueue = new Queue(this, `dead-letters-${app}-queue`, {
+			queueName: `dead-letters-${app}-queue-${this.stage}`,
+			retentionPeriod: Duration.days(14),
+		});
+
+		const disputeEventsQueue = new Queue(this, `${app}-events-queue`, {
+			queueName: `${app}-events-queue-${this.stage}`,
+			deadLetterQueue: {
+				queue: deadLetterQueue,
+				maxReceiveCount: 3, // 3 retries before going to DLQ
+			},
+			visibilityTimeout: Duration.seconds(300), // Match lambda timeout
+		});
+
+		// ---- CloudWatch Alarm for DLQ monitoring ---- //
+		new GuAlarm(this, 'DeadLetterQueueAlarm', {
+			app: app,
+			alarmName: `${this.stage} ${app} - Failed to process dispute webhook`,
+			alarmDescription:
+				`There are one or more failed dispute webhook events in the ${app} dead letter queue (DLQ). ` +
+				`Check the attributes of the failed message(s) for details of the error and ` +
+				'ensure the Stripe webhook processing is working correctly.\n' +
+				`DLQ: https://${this.region}.console.aws.amazon.com/sqs/v2/home?region=${this.region}#/queues/https%3A%2F%2Fsqs.${this.region}.amazonaws.com%2F${this.account}%2F${deadLetterQueue.queueName}`,
+			metric: deadLetterQueue.metricApproximateNumberOfMessagesVisible(),
+			threshold: 1,
+			evaluationPeriods: 1,
+			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+			treatMissingData: TreatMissingData.IGNORE,
+			snsTopicName: `alarms-handler-topic-${this.stage}`,
+			actionsEnabled: this.stage === 'PROD',
+		});
+
 		const commonEnvironmentVariables = {
 			App: app,
 			Stack: this.stack,
 			Stage: this.stage,
+			DISPUTE_EVENTS_QUEUE_URL: disputeEventsQueue.queueUrl,
 		};
 
 		// ---- API-triggered lambda functions ---- //
 		const lambda = new GuApiLambda(this, `${app}-lambda`, {
-			description: 'A lambda that handles stripe disputes webhook events',
+			description:
+				'A lambda that handles stripe disputes webhook events and processes SQS events',
 			functionName: nameWithStage,
 			loggingFormat: LoggingFormat.TEXT,
 			fileName: `${app}.zip`,
@@ -52,7 +94,8 @@ export class StripeDisputes extends GuStack {
 			api: {
 				id: nameWithStage,
 				restApiName: nameWithStage,
-				description: 'API Gateway created by CDK',
+				description:
+					'API Gateway for Stripe dispute webhooks (sync response) with SQS event processing',
 				proxy: true,
 				deployOptions: {
 					stageName: this.stage,
@@ -62,6 +105,12 @@ export class StripeDisputes extends GuStack {
 					apiKeyRequired: true,
 				},
 			},
+			events: [
+				new SqsEventSource(disputeEventsQueue, {
+					batchSize: 1, // Process one dispute event at a time
+					maxBatchingWindow: Duration.seconds(0), // Process immediately
+				}),
+			],
 		});
 
 		const usagePlan = lambda.api.addUsagePlan('UsagePlan', {
@@ -124,9 +173,24 @@ export class StripeDisputes extends GuStack {
 			],
 		});
 
+		const sqsDisputeEventsPolicy: Policy = new Policy(
+			this,
+			'SQS dispute events policy',
+			{
+				statements: [
+					new PolicyStatement({
+						effect: Effect.ALLOW,
+						actions: ['sqs:SendMessage', 'sqs:GetQueueAttributes'],
+						resources: [disputeEventsQueue.queueArn],
+					}),
+				],
+			},
+		);
+
 		lambda.role?.attachInlinePolicy(s3InlinePolicy);
 		lambda.role?.attachInlinePolicy(secretsManagerPolicy);
 		lambda.role?.attachInlinePolicy(sqsEmailPolicy);
+		lambda.role?.attachInlinePolicy(sqsDisputeEventsPolicy);
 
 		// ---- DNS ---- //
 		const certificateArn = `arn:aws:acm:eu-west-1:${this.account}:certificate/${props.certificateId}`;
