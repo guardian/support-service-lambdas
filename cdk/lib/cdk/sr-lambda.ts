@@ -4,7 +4,6 @@ import { Duration } from 'aws-cdk-lib';
 import { LoggingFormat, type Runtime } from 'aws-cdk-lib/aws-lambda';
 import { nodeVersion } from '../node-version';
 
-// Define the props interface based on actual usage patterns in the codebase
 interface SrLambdaProps {
 	app: string;
 	fileName: string;
