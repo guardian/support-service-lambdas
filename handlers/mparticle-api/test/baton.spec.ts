@@ -48,10 +48,9 @@ describe('mparticle-api Baton tests', () => {
 
 	it('Initiate Right to Erasure Request', async () => {
 		const requestId = faker.string.uuid();
-		const submittedTime = new Date();
 		mockFetchResponse(mockSetUserAttributesResponse, 202);
 		mockFetchJsonResponse(
-			getMockCreateDataSubjectRequestResponse(submittedTime, requestId),
+			getMockCreateDataSubjectRequestResponse(requestId),
 			202,
 		);
 
@@ -94,10 +93,9 @@ describe('mparticle-api Baton tests', () => {
 
 	it('Initiate Subject Access Request', async () => {
 		const requestId = faker.string.uuid();
-		const submittedTime = new Date();
 
 		mockFetchJsonResponse(
-			getMockCreateDataSubjectRequestResponse(submittedTime, requestId),
+			getMockCreateDataSubjectRequestResponse(requestId),
 			201,
 		);
 
@@ -133,7 +131,6 @@ describe('mparticle-api Baton tests', () => {
 				subject_request_id: requestId,
 				controller_id: faker.string.numeric(),
 				request_status: 'completed',
-				received_time: faker.date.recent(),
 				results_url: resultsUrl,
 			},
 		};

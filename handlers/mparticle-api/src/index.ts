@@ -27,9 +27,7 @@ export const handlerHttp: Handler<APIGatewayProxyEvent, APIGatewayProxyResult> =
 				console.debug('Processing HTTP request');
 				return httpRouter(
 					mParticleDataSubjectClient,
-					mParticleEventsAPIClient,
 					batonS3Writer,
-					isProd,
 				).routeRequest(event);
 			} catch (error) {
 				console.error('HTTP handler error:', error);
@@ -64,7 +62,7 @@ export const handlerBaton: Handler<BatonEventRequest, BatonEventResponse> =
 			return router.routeRequest(event);
 		} catch (error) {
 			console.error('Baton handler error:', error);
-			throw error; // Re-throw to trigger Lambda retry mechanism
+			throw error;
 		}
 	}, 'handlerBaton');
 
