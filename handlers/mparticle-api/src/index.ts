@@ -20,9 +20,7 @@ export const handlerHttp: Handler<APIGatewayProxyEvent, APIGatewayProxyResult> =
 			try {
 				const {
 					mParticleDataSubjectClient,
-					mParticleEventsAPIClient,
 					batonS3Writer,
-					isProd,
 				} = await services();
 				console.debug('Processing HTTP request');
 				return httpRouter(
