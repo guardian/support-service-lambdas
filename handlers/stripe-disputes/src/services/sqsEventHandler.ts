@@ -5,6 +5,7 @@ import type {
 	ListenDisputeCreatedRequestBody,
 } from '../dtos';
 import { upsertSalesforceObject } from './upsertSalesforceObject';
+import type { SalesforceUpsertResponse } from '../types';
 
 /**
  * Interface for SQS dispute event message
@@ -42,7 +43,9 @@ export async function handleSqsEvents(
 			);
 
 			// Process the dispute event directly using the unified service
-			await upsertSalesforceObject(logger, message.webhookData);
+			const upsertSalesforceObjectResponse: SalesforceUpsertResponse = await upsertSalesforceObject(logger, message.webhookData);
+
+			logger.log('Salesforce upsert response:', JSON.stringify(upsertSalesforceObjectResponse));
 
 			logger.log(
 				`Successfully processed ${message.eventType} for dispute ${message.disputeId}`,
