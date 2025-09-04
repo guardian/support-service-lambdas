@@ -91,8 +91,8 @@ export type CreateSubscriptionOrderAction = BaseOrderAction & {
 				periodType: BillingPeriod;
 				termType: 'TERMED';
 			};
-			renewalSetting?: 'RENEW_WITH_SPECIFIC_TERM';
-			renewalTerms?: Array<{
+			renewalSetting: 'RENEW_WITH_SPECIFIC_TERM';
+			renewalTerms: Array<{
 				period: number;
 				periodType: BillingPeriod;
 			}>;
