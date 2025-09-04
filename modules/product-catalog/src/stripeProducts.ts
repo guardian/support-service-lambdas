@@ -24,7 +24,7 @@ export const stripeProducts: Partial<
 				},
 				billingPeriod: 'Month',
 				termType: 'Recurring',
-				termLength: 12,
+				termLengthInMonths: 12,
 			},
 		},
 	},
@@ -44,7 +44,7 @@ export const stripeProducts: Partial<
 				},
 				billingPeriod: 'OneTime',
 				termType: 'FixedTerm',
-				termLength: 0,
+				termLengthInMonths: 0,
 			},
 		},
 	},
@@ -59,6 +59,8 @@ export const stripeProductsSchema = `GuardianPatron: z.object({
 		GuardianPatron: z.object({
 			id: z.string(),
 			pricing: z.object({}),
+			termLengthInMonths: z.number(),
+			termType: termTypeSchema,
 			charges: z.object({
 				Subscription: z.object({
 					id: z.string(),
@@ -77,6 +79,8 @@ OneTimeContribution: z.object({
 		OneTime: z.object({
 			id: z.string(),
 			pricing: z.object({}),
+			termLengthInMonths: z.number(),
+			termType: termTypeSchema,
 			charges: z.object({
 				Contribution: z.object({
 					id: z.string(),

@@ -119,7 +119,7 @@ const getZuoraProduct = (
 								productRatePlan.productRatePlanCharges,
 							),
 							termType: getTermTypeName(productRatePlan.TermType__c),
-							termLength: getTermLength(productRatePlan.DefaultTerm__c),
+							termLengthInMonths: getTermLength(productRatePlan.DefaultTerm__c),
 							...(billingPeriod && { billingPeriod }),
 						},
 					};

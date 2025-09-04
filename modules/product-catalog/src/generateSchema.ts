@@ -85,7 +85,7 @@ const generateProductRatePlanSchema = (
 		}),
 		${getBillingPeriodForRatePlan(productRatePlan)}
 		termType: termTypeSchema,
-		termLength: z.number(),
+		termLengthInMonths: z.number(),
 	})`;
 };
 
