@@ -1738,7 +1738,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "billingPeriod": "Annual",
         "charges": {
           "Contribution": {
-            "id": "71a10c6269b981784c9817e189270008",
+            "id": "f86b79cab60442f58e2e995303d9ef91",
           },
           "Subscription": {
             "id": "71a10c6269b981784c9817e188d60001",
@@ -1754,7 +1754,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "USD": 10,
         },
         "termLengthInMonths": 12,
-        "termType": "Recurring",
+        "termType": "FixedTerm",
       },
       "V1DeprecatedAnnual": {
         "billingPeriod": "Annual",
