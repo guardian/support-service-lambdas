@@ -13,11 +13,6 @@ export class BatonS3WriterImpl implements BatonS3Writer {
 		private readonly sarS3BaseKey: string,
 	) {}
 
-	/**
-	 * Generate a deterministic S3 key based on reference.
-	 * Format: {baseKey}{reference}.zip
-	 * This avoids timestamp-based naming which can cause lookup issues.
-	 */
 	private generateS3Key(reference: string): string {
 		return `${this.sarS3BaseKey}${reference}.zip`;
 	}
