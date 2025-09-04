@@ -159,6 +159,7 @@ describe('mparticle-api Baton tests', () => {
 
 		const mockS3Client: BatonS3Writer = {
 			write: jest.fn().mockResolvedValue(`s3://myBucket123/${requestId}`),
+			getUrlIfExists: jest.fn().mockResolvedValue(null), // No existing file
 		};
 
 		const result = await handleSarStatus(

@@ -18,9 +18,12 @@ export const handlerHttp: Handler<APIGatewayProxyEvent, APIGatewayProxyResult> =
 	withLogging(
 		async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
 			try {
-				const { mParticleDataSubjectClient } = await services();
+				const { mParticleDataSubjectClient, batonS3Writer } = await services();
 				console.debug('Processing HTTP request');
-				return httpRouter(mParticleDataSubjectClient).routeRequest(event);
+				return httpRouter(
+					mParticleDataSubjectClient,
+					batonS3Writer,
+				).routeRequest(event);
 			} catch (error) {
 				console.error('HTTP handler error:', error);
 				return {
@@ -69,11 +72,7 @@ async function services() {
 			config.inputPlatform,
 			config.pod,
 		),
-		batonS3Writer: new BatonS3WriterImpl(
-			config.sarResultsBucket,
-			sarS3BaseKey,
-			() => new Date(),
-		),
+		batonS3Writer: new BatonS3WriterImpl(config.sarResultsBucket, sarS3BaseKey),
 		isProd: stage === 'PROD',
 	};
 }

@@ -64,19 +64,32 @@ export const handleSarStatus = async (
 	if (!dataSubjectRequestState.resultsUrl) {
 		resultLocations = undefined;
 	} else {
-		// Docs about results_url:
-		// https://docs.mparticle.com/developers/apis/dsr-api/v3/#example-response-body:~:text=is%203.0.-,results_url,-string
+		// Check if we already have the file in S3 to avoid redundant downloads
+		const existingS3Url =
+			await batonS3Writer.getUrlIfExists(initiationReference);
 
-		// The trusted base url is automatically added in the mparticleClient.
-		// This means there's no chance of accidentally sending our credentials to an untrusted URL.
-		// Since we have a full url here, we need to strip off the base.
-		const path = stripBaseUrl(
-			dataSubjectRequestState.resultsUrl,
-			mParticleDataSubjectClient.baseURL,
-		);
-		const stream = await mParticleDataSubjectClient.getStream(path);
-		const s3Url = await batonS3Writer.write(initiationReference, stream);
-		resultLocations = [s3Url];
+		if (existingS3Url) {
+			// File already exists, return the existing location
+			console.log(
+				`File already exists in S3 for reference ${initiationReference}: ${existingS3Url}`,
+			);
+			resultLocations = [existingS3Url];
+		} else {
+			// File doesn't exist, download and upload to S3
+			// Docs about results_url:
+			// https://docs.mparticle.com/developers/apis/dsr-api/v3/#example-response-body:~:text=is%203.0.-,results_url,-string
+
+			// The trusted base url is automatically added in the mparticleClient.
+			// This means there's no chance of accidentally sending our credentials to an untrusted URL.
+			// Since we have a full url here, we need to strip off the base.
+			const path = stripBaseUrl(
+				dataSubjectRequestState.resultsUrl,
+				mParticleDataSubjectClient.baseURL,
+			);
+			const stream = await mParticleDataSubjectClient.getStream(path);
+			const s3Url = await batonS3Writer.write(initiationReference, stream);
+			resultLocations = [s3Url];
+		}
 	}
 
 	const response: BatonSarEventStatusResponse = {

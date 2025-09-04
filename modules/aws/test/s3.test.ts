@@ -1,16 +1,23 @@
 import { S3Client } from '@aws-sdk/client-s3';
-import { getFileFromS3, uploadFileToS3 } from '../src/s3';
+import { Upload } from '@aws-sdk/lib-storage';
+import { getFileFromS3, streamToS3, uploadFileToS3 } from '../src/s3';
 
 // Mock the S3Client
 jest.mock('@aws-sdk/client-s3');
+jest.mock('@aws-sdk/lib-storage');
 
 const MockedS3Client = S3Client as jest.MockedClass<typeof S3Client>;
+const MockedUpload = Upload as jest.MockedClass<typeof Upload>;
 const mockSend = jest.fn();
+const mockUploadDone = jest.fn();
 
 beforeEach(() => {
 	MockedS3Client.mockClear();
+	MockedUpload.mockClear();
 	mockSend.mockClear();
+	mockUploadDone.mockClear();
 	MockedS3Client.prototype.send = mockSend;
+	MockedUpload.prototype.done = mockUploadDone;
 });
 
 describe('S3 functions', () => {
@@ -87,6 +94,94 @@ describe('S3 functions', () => {
 					filePath: 'path/to/file.txt',
 				}),
 			).rejects.toThrow('File is empty');
+		});
+	});
+
+	describe('streamToS3', () => {
+		beforeEach(() => {
+			jest.resetAllMocks();
+			console.error = jest.fn();
+			console.log = jest.fn();
+		});
+
+		test('should stream data to S3', async () => {
+			mockUploadDone.mockResolvedValue({});
+
+			const testStream = new ReadableStream({
+				start(controller) {
+					controller.enqueue(new TextEncoder().encode('test data'));
+					controller.close();
+				},
+			});
+
+			await streamToS3(
+				'test-bucket',
+				'path/to/file.txt',
+				'text/plain',
+				testStream,
+			);
+
+			expect(MockedUpload).toHaveBeenCalledTimes(1);
+			expect(MockedUpload).toHaveBeenCalledWith({
+				client: expect.any(Object),
+				params: {
+					Bucket: 'test-bucket',
+					Key: 'path/to/file.txt',
+					Body: testStream,
+					ContentType: 'text/plain',
+				},
+			});
+			expect(mockUploadDone).toHaveBeenCalledTimes(1);
+		});
+
+		test('should stream data to S3 without content type', async () => {
+			mockUploadDone.mockResolvedValue({});
+
+			const testStream = new ReadableStream({
+				start(controller) {
+					controller.enqueue(new TextEncoder().encode('test data'));
+					controller.close();
+				},
+			});
+
+			await streamToS3(
+				'test-bucket',
+				'path/to/file.txt',
+				undefined,
+				testStream,
+			);
+
+			expect(MockedUpload).toHaveBeenCalledTimes(1);
+			expect(MockedUpload).toHaveBeenCalledWith({
+				client: expect.any(Object),
+				params: {
+					Bucket: 'test-bucket',
+					Key: 'path/to/file.txt',
+					Body: testStream,
+					ContentType: undefined,
+				},
+			});
+			expect(mockUploadDone).toHaveBeenCalledTimes(1);
+		});
+
+		test('should throw error if upload fails', async () => {
+			const errorMessage = 'Failed to upload stream';
+
+			mockUploadDone.mockRejectedValue(new Error(errorMessage));
+
+			const testStream = new ReadableStream({
+				start(controller) {
+					controller.enqueue(new TextEncoder().encode('test data'));
+					controller.close();
+				},
+			});
+
+			await expect(
+				streamToS3('test-bucket', 'path/to/file.txt', 'text/plain', testStream),
+			).rejects.toThrow('Failed to upload stream');
+
+			expect(MockedUpload).toHaveBeenCalledTimes(1);
+			expect(mockUploadDone).toHaveBeenCalledTimes(1);
 		});
 	});
 });
