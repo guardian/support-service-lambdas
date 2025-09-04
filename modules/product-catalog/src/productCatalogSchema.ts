@@ -22,6 +22,7 @@ export const productKeys = [
 	'TierThree',
 ] as const;
 export const productKeySchema = z.enum(productKeys);
+export const termTypeSchema = z.enum(['Recurring', 'FixedTerm']);
 
 export const productCatalogSchema = z.object({
 	Contribution: z.object({
@@ -46,6 +47,8 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Monthly: z.object({
 				billingPeriod: z.literal('Month'),
@@ -63,6 +66,8 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 		}),
 	}),
@@ -88,6 +93,8 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Monthly: z.object({
 				billingPeriod: z.literal('Month'),
@@ -105,6 +112,8 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			OneYearGift: z.object({
 				charges: z.object({
@@ -121,6 +130,9 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Quarterly: z.object({
 				billingPeriod: z.literal('Quarter'),
@@ -138,6 +150,8 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			ThreeMonthGift: z.object({
 				charges: z.object({
@@ -154,6 +168,9 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 		}),
 	}),
@@ -172,6 +189,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 		}),
 	}),
@@ -190,6 +209,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 		}),
 	}),
@@ -215,6 +236,8 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Monthly: z.object({
 				billingPeriod: z.literal('Month'),
@@ -232,6 +255,8 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			OneYearGift: z.object({
 				billingPeriod: z.literal('Annual'),
@@ -249,6 +274,8 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Quarterly: z.object({
 				billingPeriod: z.literal('Quarter'),
@@ -266,6 +293,8 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			ThreeMonthGift: z.object({
 				billingPeriod: z.literal('Quarter'),
@@ -283,6 +312,8 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 		}),
 	}),
@@ -301,6 +332,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number(), USD: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Monthly: z.object({
 				billingPeriod: z.literal('Month'),
@@ -311,6 +344,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number(), USD: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			OneYearGift: z.object({
 				billingPeriod: z.literal('Annual'),
@@ -321,6 +356,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number(), USD: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Quarterly: z.object({
 				billingPeriod: z.literal('Quarter'),
@@ -331,6 +368,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number(), USD: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			ThreeMonthGift: z.object({
 				billingPeriod: z.literal('Quarter'),
@@ -341,6 +380,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number(), USD: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 		}),
 	}),
@@ -359,6 +400,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number(), USD: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Quarterly: z.object({
 				billingPeriod: z.literal('Quarter'),
@@ -369,6 +412,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number(), USD: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 		}),
 	}),
@@ -394,6 +439,8 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Quarterly: z.object({
 				billingPeriod: z.literal('Quarter'),
@@ -411,6 +458,8 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 		}),
 	}),
@@ -436,6 +485,8 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Quarterly: z.object({
 				billingPeriod: z.literal('Quarter'),
@@ -453,6 +504,8 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 		}),
 	}),
@@ -489,6 +542,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			EverydayPlus: z.object({
 				billingPeriod: z.literal('Month'),
@@ -520,6 +575,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Saturday: z.object({
 				billingPeriod: z.literal('Month'),
@@ -530,6 +587,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			SaturdayPlus: z.object({
 				billingPeriod: z.literal('Month'),
@@ -543,6 +602,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Sixday: z.object({
 				billingPeriod: z.literal('Month'),
@@ -568,6 +629,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			SixdayPlus: z.object({
 				billingPeriod: z.literal('Month'),
@@ -596,6 +659,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Sunday: z.object({
 				billingPeriod: z.literal('Month'),
@@ -606,6 +671,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			SundayPlus: z.object({
 				billingPeriod: z.literal('Month'),
@@ -619,6 +686,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Weekend: z.object({
 				billingPeriod: z.literal('Month'),
@@ -632,6 +701,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			WeekendPlus: z.object({
 				billingPeriod: z.literal('Month'),
@@ -648,6 +719,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 		}),
 	}),
@@ -684,6 +757,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			EverydayPlus: z.object({
 				billingPeriod: z.literal('Month'),
@@ -715,6 +790,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Sixday: z.object({
 				billingPeriod: z.literal('Month'),
@@ -740,6 +817,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			SixdayPlus: z.object({
 				billingPeriod: z.literal('Month'),
@@ -768,6 +847,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Weekend: z.object({
 				billingPeriod: z.literal('Month'),
@@ -781,6 +862,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			WeekendPlus: z.object({
 				billingPeriod: z.literal('Month'),
@@ -797,6 +880,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 		}),
 	}),
@@ -833,6 +918,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			EverydayPlus: z.object({
 				billingPeriod: z.literal('Month'),
@@ -864,6 +951,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Saturday: z.object({
 				billingPeriod: z.literal('Month'),
@@ -874,6 +963,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			SaturdayPlus: z.object({
 				billingPeriod: z.literal('Month'),
@@ -887,6 +978,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Sixday: z.object({
 				billingPeriod: z.literal('Month'),
@@ -912,6 +1005,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			SixdayPlus: z.object({
 				billingPeriod: z.literal('Month'),
@@ -940,6 +1035,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Sunday: z.object({
 				billingPeriod: z.literal('Month'),
@@ -950,6 +1047,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			SundayPlus: z.object({
 				billingPeriod: z.literal('Month'),
@@ -963,6 +1062,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Weekend: z.object({
 				billingPeriod: z.literal('Month'),
@@ -976,6 +1077,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			WeekendPlus: z.object({
 				billingPeriod: z.literal('Month'),
@@ -992,6 +1095,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 		}),
 	}),
@@ -1010,6 +1115,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 		}),
 	}),
@@ -1028,6 +1135,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Monthly: z.object({
 				billingPeriod: z.literal('Month'),
@@ -1038,6 +1147,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			V1DeprecatedAnnual: z.object({
 				billingPeriod: z.literal('Annual'),
@@ -1048,6 +1159,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			V1DeprecatedMonthly: z.object({
 				billingPeriod: z.literal('Month'),
@@ -1058,6 +1171,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 		}),
 	}),
@@ -1076,6 +1191,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Monthly: z.object({
 				billingPeriod: z.literal('Month'),
@@ -1086,6 +1203,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			V1DeprecatedAnnual: z.object({
 				billingPeriod: z.literal('Annual'),
@@ -1096,6 +1215,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			V1DeprecatedMonthly: z.object({
 				billingPeriod: z.literal('Month'),
@@ -1106,6 +1227,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 		}),
 	}),
@@ -1142,6 +1265,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			EverydayPlus: z.object({
 				billingPeriod: z.literal('Month'),
@@ -1173,6 +1298,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Saturday: z.object({
 				billingPeriod: z.literal('Month'),
@@ -1183,6 +1310,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			SaturdayPlus: z.object({
 				billingPeriod: z.literal('Month'),
@@ -1196,6 +1325,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Sixday: z.object({
 				billingPeriod: z.literal('Month'),
@@ -1221,6 +1352,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			SixdayPlus: z.object({
 				billingPeriod: z.literal('Month'),
@@ -1249,6 +1382,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Sunday: z.object({
 				billingPeriod: z.literal('Month'),
@@ -1259,6 +1394,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			SundayPlus: z.object({
 				billingPeriod: z.literal('Month'),
@@ -1272,6 +1409,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Weekend: z.object({
 				billingPeriod: z.literal('Month'),
@@ -1285,6 +1424,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			WeekendPlus: z.object({
 				billingPeriod: z.literal('Month'),
@@ -1301,6 +1442,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 		}),
 	}),
@@ -1325,6 +1468,8 @@ export const productCatalogSchema = z.object({
 					GBP: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Monthly: z.object({
 				billingPeriod: z.literal('Month'),
@@ -1341,6 +1486,8 @@ export const productCatalogSchema = z.object({
 					GBP: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			V1DeprecatedAnnual: z.object({
 				billingPeriod: z.literal('Annual'),
@@ -1351,6 +1498,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			V1DeprecatedMonthly: z.object({
 				billingPeriod: z.literal('Month'),
@@ -1361,6 +1510,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			V2DeprecatedAnnual: z.object({
 				billingPeriod: z.literal('Annual'),
@@ -1377,6 +1528,8 @@ export const productCatalogSchema = z.object({
 					GBP: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			V2DeprecatedMonthly: z.object({
 				billingPeriod: z.literal('Month'),
@@ -1393,6 +1546,8 @@ export const productCatalogSchema = z.object({
 					GBP: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 		}),
 	}),
@@ -1421,6 +1576,8 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Monthly: z.object({
 				billingPeriod: z.literal('Month'),
@@ -1441,6 +1598,8 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			OneYearStudent: z.object({
 				billingPeriod: z.literal('Annual'),
@@ -1461,6 +1620,8 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			V1DeprecatedAnnual: z.object({
 				billingPeriod: z.literal('Annual'),
@@ -1478,6 +1639,8 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			V1DeprecatedMonthly: z.object({
 				billingPeriod: z.literal('Month'),
@@ -1495,6 +1658,8 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 		}),
 	}),
@@ -1523,6 +1688,8 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			DomesticAnnualV2: z.object({
 				billingPeriod: z.literal('Annual'),
@@ -1546,6 +1713,8 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			DomesticMonthly: z.object({
 				billingPeriod: z.literal('Month'),
@@ -1566,6 +1735,8 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			DomesticMonthlyV2: z.object({
 				billingPeriod: z.literal('Month'),
@@ -1589,6 +1760,8 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			RestOfWorldAnnual: z.object({
 				billingPeriod: z.literal('Annual'),
@@ -1602,6 +1775,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number(), USD: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			RestOfWorldAnnualV2: z.object({
 				billingPeriod: z.literal('Annual'),
@@ -1618,6 +1793,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number(), USD: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			RestOfWorldMonthly: z.object({
 				billingPeriod: z.literal('Month'),
@@ -1631,6 +1808,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number(), USD: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			RestOfWorldMonthlyV2: z.object({
 				billingPeriod: z.literal('Month'),
@@ -1647,6 +1826,8 @@ export const productCatalogSchema = z.object({
 				}),
 				id: z.string(),
 				pricing: z.object({ GBP: z.number(), USD: z.number() }),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 		}),
 	}),
