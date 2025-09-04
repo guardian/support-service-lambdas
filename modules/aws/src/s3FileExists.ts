@@ -30,8 +30,6 @@ export const checkFileExistsInS3 = async ({
 		) {
 			return false;
 		}
-		// For other errors (permissions, etc.), re-throw
-		console.error('Error checking file existence in S3:', error);
 		throw error;
 	}
 };
