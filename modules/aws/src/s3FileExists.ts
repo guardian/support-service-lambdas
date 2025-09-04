@@ -22,7 +22,6 @@ export const checkFileExistsInS3 = async ({
 		await s3Client.send(command);
 		return true;
 	} catch (error: any) {
-		// If the error is NoSuchKey or NotFound, the file doesn't exist
 		if (
 			error.name === 'NoSuchKey' ||
 			error.name === 'NotFound' ||
