@@ -37,7 +37,6 @@ export class SrLambda extends GuLambdaFunction {
 			timeout: Duration.seconds(15),
 		};
 
-		// Merge defaults with user props, allowing user props to override defaults
 		const finalProps = {
 			...defaultProps,
 			...props,
