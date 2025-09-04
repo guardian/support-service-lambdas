@@ -53,6 +53,11 @@ export const upsertSalesforceObject = async (
 	const paymentDisputeRecord: PaymentDisputeRecord =
 		mapStripeDisputeToSalesforce(dataFromStripe, zuoraData);
 
+	logger.log(
+		'Mapped Payment Dispute record:',
+		JSON.stringify(paymentDisputeRecord),
+	);
+
 	// Upsert the Payment Dispute record in Salesforce using Dispute_ID__c as external ID
 	return upsertPaymentDisputeInSalesforce(
 		salesforceAuth,
