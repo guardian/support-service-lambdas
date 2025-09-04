@@ -29,12 +29,12 @@ describe('BatonS3WriterImpl', () => {
 		console.warn = jest.fn();
 	});
 
-	describe('checkIfFileExists', () => {
+	describe('getUrlIfExists', () => {
 		it('should return S3 URL when file exists', async () => {
 			const reference = 'test-reference-123';
 			mockCheckFileExistsInS3.mockResolvedValue(true);
 
-			const result = await batonS3Writer.checkIfFileExists(reference);
+			const result = await batonS3Writer.getUrlIfExists(reference);
 
 			expect(result).toBe(`s3://${bucketName}/${s3BaseKey}${reference}.zip`);
 			expect(mockCheckFileExistsInS3).toHaveBeenCalledWith({
@@ -47,7 +47,7 @@ describe('BatonS3WriterImpl', () => {
 			const reference = 'test-reference-123';
 			mockCheckFileExistsInS3.mockResolvedValue(false);
 
-			const result = await batonS3Writer.checkIfFileExists(reference);
+			const result = await batonS3Writer.getUrlIfExists(reference);
 
 			expect(result).toBeNull();
 		});
@@ -57,7 +57,7 @@ describe('BatonS3WriterImpl', () => {
 			const error = new Error('S3 error');
 			mockCheckFileExistsInS3.mockRejectedValue(error);
 
-			const result = await batonS3Writer.checkIfFileExists(reference);
+			const result = await batonS3Writer.getUrlIfExists(reference);
 
 			expect(result).toBeNull();
 			expect(console.warn).toHaveBeenCalledWith(

@@ -66,7 +66,7 @@ export const handleSarStatus = async (
 	} else {
 		// Check if we already have the file in S3 to avoid redundant downloads
 		const existingS3Url =
-			await batonS3Writer.checkIfFileExists(initiationReference);
+			await batonS3Writer.getUrlIfExists(initiationReference);
 
 		if (existingS3Url) {
 			// File already exists, return the existing location

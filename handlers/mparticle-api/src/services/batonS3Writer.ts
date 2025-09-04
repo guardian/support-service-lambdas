@@ -4,7 +4,7 @@ import { withLogging } from '../utils/withLogging';
 
 export interface BatonS3Writer {
 	write: (reference: string, stream: ReadableStream) => Promise<string>;
-	checkIfFileExists: (reference: string) => Promise<string | null>;
+	getUrlIfExists: (reference: string) => Promise<string | null>;
 }
 
 export class BatonS3WriterImpl implements BatonS3Writer {
@@ -27,7 +27,7 @@ export class BatonS3WriterImpl implements BatonS3Writer {
 	 * Returns the S3 URL if found, null if not found.
 	 * Uses deterministic naming for direct lookup.
 	 */
-	checkIfFileExists = async (reference: string): Promise<string | null> => {
+	getUrlIfExists = async (reference: string): Promise<string | null> => {
 		try {
 			const s3Key = this.generateS3Key(reference);
 			const exists = await checkFileExistsInS3({

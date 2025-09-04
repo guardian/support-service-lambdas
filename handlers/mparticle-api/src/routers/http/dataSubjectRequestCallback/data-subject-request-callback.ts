@@ -118,7 +118,7 @@ export const processDataSubjectRequestCallback = async (
 			});
 
 			// Check if file already exists to avoid redundant downloads
-			const existingFile = await batonS3Writer.checkIfFileExists(requestId);
+			const existingFile = await batonS3Writer.getUrlIfExists(requestId);
 			if (existingFile) {
 				console.info('File already exists, skipping download', {
 					requestId,
