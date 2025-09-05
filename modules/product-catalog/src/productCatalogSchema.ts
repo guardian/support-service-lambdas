@@ -1604,9 +1604,6 @@ export const productCatalogSchema = z.object({
 			OneYearStudent: z.object({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
-					Contribution: z.object({
-						id: z.string(),
-					}),
 					Subscription: z.object({
 						id: z.string(),
 					}),
