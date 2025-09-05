@@ -4,6 +4,7 @@ exports[`The stripe disputes webhook API stack matches the snapshot 1`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
+      "GuAlarm",
       "GuDistributionBucketParameter",
       "GuApiLambda",
     ],
@@ -76,6 +77,99 @@ exports[`The stripe disputes webhook API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Route53::RecordSet",
     },
+    "DeadLetterQueueAlarm48D9D867": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "There are one or more failed dispute webhook events in the stripe-disputes dead letter queue (DLQ). Check the attributes of the failed message(s) for details of the error and ensure the Stripe webhook processing is working correctly.
+DLQ: https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/sqs/v2/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#/queues/https%3A%2F%2Fsqs.",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".amazonaws.com%2F",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              "%2F",
+              {
+                "Fn::GetAtt": [
+                  "deadlettersstripedisputesqueueACC1EFEB",
+                  "QueueName",
+                ],
+              },
+            ],
+          ],
+        },
+        "AlarmName": "CODE stripe-disputes - Failed to process dispute webhook",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "deadlettersstripedisputesqueueACC1EFEB",
+                "QueueName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 300,
+        "Statistic": "Maximum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "ignore",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
     "DomainName": {
       "Properties": {
         "DomainName": "stripe-disputes.code.support.guardianapis.com",
@@ -130,6 +224,35 @@ exports[`The stripe disputes webhook API stack matches the snapshot 1`] = `
           "Version": "2012-10-17",
         },
         "PolicyName": "S3inlinepolicy3B07399A",
+        "Roles": [
+          {
+            "Ref": "stripedisputeslambdaServiceRoleC28AF041",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SQSdisputeeventspolicyD716E307": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "stripedisputeseventsqueueF268BDE0",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SQSdisputeeventspolicyD716E307",
         "Roles": [
           {
             "Ref": "stripedisputeslambdaServiceRoleC28AF041",
@@ -228,6 +351,69 @@ exports[`The stripe disputes webhook API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "deadlettersstripedisputesqueueACC1EFEB": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "dead-letters-stripe-disputes-queue-CODE",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "stripedisputeseventsqueueF268BDE0": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "QueueName": "stripe-disputes-events-queue-CODE",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "deadlettersstripedisputesqueueACC1EFEB",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 3,
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "VisibilityTimeout": 300,
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
     "stripedisputeslambda5D84A389": {
       "DependsOn": [
         "stripedisputeslambdaServiceRoleDefaultPolicy663B70D0",
@@ -240,11 +426,14 @@ exports[`The stripe disputes webhook API stack matches the snapshot 1`] = `
           },
           "S3Key": "membership/CODE/stripe-disputes/stripe-disputes.zip",
         },
-        "Description": "A lambda that handles stripe disputes webhook events",
+        "Description": "A lambda that handles stripe disputes webhook events and processes SQS events",
         "Environment": {
           "Variables": {
             "APP": "stripe-disputes",
             "App": "stripe-disputes",
+            "DISPUTE_EVENTS_QUEUE_URL": {
+              "Ref": "stripedisputeseventsqueueF268BDE0",
+            },
             "STACK": "membership",
             "STAGE": "CODE",
             "Stack": "membership",
@@ -349,6 +538,22 @@ exports[`The stripe disputes webhook API stack matches the snapshot 1`] = `
           "Statement": [
             {
               "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "stripedisputeseventsqueueF268BDE0",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
                 "s3:GetObject*",
                 "s3:GetBucket*",
                 "s3:List*",
@@ -442,6 +647,44 @@ exports[`The stripe disputes webhook API stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "stripedisputeslambdaSqsEventSourcestripedisputesCODEstripedisputeseventsqueueD7FA3D4B282A3170": {
+      "Properties": {
+        "BatchSize": 1,
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "stripedisputeseventsqueueF268BDE0",
+            "Arn",
+          ],
+        },
+        "FunctionName": {
+          "Ref": "stripedisputeslambda5D84A389",
+        },
+        "MaximumBatchingWindowInSeconds": 0,
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
     },
     "stripedisputeslambdastripedisputesCODEANY3E0A14E5": {
       "Properties": {
@@ -636,14 +879,14 @@ exports[`The stripe disputes webhook API stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "stripedisputeslambdastripedisputesCODEDeployment6A75C6C7e6338f918ee47694246e584378339acd": {
+    "stripedisputeslambdastripedisputesCODEDeployment6A75C6C7c95b721e1d235b79ecab4d7d75ef19f8": {
       "DependsOn": [
         "stripedisputeslambdastripedisputesCODEproxyANY0953AB1A",
         "stripedisputeslambdastripedisputesCODEproxyD9CC269C",
         "stripedisputeslambdastripedisputesCODEANY3E0A14E5",
       ],
       "Properties": {
-        "Description": "API Gateway created by CDK",
+        "Description": "API Gateway for Stripe dispute webhooks (sync response) with SQS event processing",
         "RestApiId": {
           "Ref": "stripedisputeslambdastripedisputesCODEF5B6CDFC",
         },
@@ -656,7 +899,7 @@ exports[`The stripe disputes webhook API stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "stripedisputeslambdastripedisputesCODEDeployment6A75C6C7e6338f918ee47694246e584378339acd",
+          "Ref": "stripedisputeslambdastripedisputesCODEDeployment6A75C6C7c95b721e1d235b79ecab4d7d75ef19f8",
         },
         "RestApiId": {
           "Ref": "stripedisputeslambdastripedisputesCODEF5B6CDFC",
@@ -690,7 +933,7 @@ exports[`The stripe disputes webhook API stack matches the snapshot 1`] = `
     "stripedisputeslambdastripedisputesCODEF5B6CDFC": {
       "Properties": {
         "ApiKeySourceType": "HEADER",
-        "Description": "API Gateway created by CDK",
+        "Description": "API Gateway for Stripe dispute webhooks (sync response) with SQS event processing",
         "Name": "stripe-disputes-CODE",
         "Tags": [
           {
@@ -950,6 +1193,7 @@ exports[`The stripe disputes webhook API stack matches the snapshot 2`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
+      "GuAlarm",
       "GuDistributionBucketParameter",
       "GuApiLambda",
     ],
@@ -1022,6 +1266,99 @@ exports[`The stripe disputes webhook API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Route53::RecordSet",
     },
+    "DeadLetterQueueAlarm48D9D867": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "There are one or more failed dispute webhook events in the stripe-disputes dead letter queue (DLQ). Check the attributes of the failed message(s) for details of the error and ensure the Stripe webhook processing is working correctly.
+DLQ: https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/sqs/v2/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#/queues/https%3A%2F%2Fsqs.",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".amazonaws.com%2F",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              "%2F",
+              {
+                "Fn::GetAtt": [
+                  "deadlettersstripedisputesqueueACC1EFEB",
+                  "QueueName",
+                ],
+              },
+            ],
+          ],
+        },
+        "AlarmName": "PROD stripe-disputes - Failed to process dispute webhook",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "deadlettersstripedisputesqueueACC1EFEB",
+                "QueueName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 300,
+        "Statistic": "Maximum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "ignore",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
     "DomainName": {
       "Properties": {
         "DomainName": "stripe-disputes.support.guardianapis.com",
@@ -1076,6 +1413,35 @@ exports[`The stripe disputes webhook API stack matches the snapshot 2`] = `
           "Version": "2012-10-17",
         },
         "PolicyName": "S3inlinepolicy3B07399A",
+        "Roles": [
+          {
+            "Ref": "stripedisputeslambdaServiceRoleC28AF041",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SQSdisputeeventspolicyD716E307": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "stripedisputeseventsqueueF268BDE0",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SQSdisputeeventspolicyD716E307",
         "Roles": [
           {
             "Ref": "stripedisputeslambdaServiceRoleC28AF041",
@@ -1174,6 +1540,69 @@ exports[`The stripe disputes webhook API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "deadlettersstripedisputesqueueACC1EFEB": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "dead-letters-stripe-disputes-queue-PROD",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "stripedisputeseventsqueueF268BDE0": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "QueueName": "stripe-disputes-events-queue-PROD",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "deadlettersstripedisputesqueueACC1EFEB",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 3,
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "VisibilityTimeout": 300,
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
     "stripedisputeslambda5D84A389": {
       "DependsOn": [
         "stripedisputeslambdaServiceRoleDefaultPolicy663B70D0",
@@ -1186,11 +1615,14 @@ exports[`The stripe disputes webhook API stack matches the snapshot 2`] = `
           },
           "S3Key": "membership/PROD/stripe-disputes/stripe-disputes.zip",
         },
-        "Description": "A lambda that handles stripe disputes webhook events",
+        "Description": "A lambda that handles stripe disputes webhook events and processes SQS events",
         "Environment": {
           "Variables": {
             "APP": "stripe-disputes",
             "App": "stripe-disputes",
+            "DISPUTE_EVENTS_QUEUE_URL": {
+              "Ref": "stripedisputeseventsqueueF268BDE0",
+            },
             "STACK": "membership",
             "STAGE": "PROD",
             "Stack": "membership",
@@ -1295,6 +1727,22 @@ exports[`The stripe disputes webhook API stack matches the snapshot 2`] = `
           "Statement": [
             {
               "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "stripedisputeseventsqueueF268BDE0",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
                 "s3:GetObject*",
                 "s3:GetBucket*",
                 "s3:List*",
@@ -1389,10 +1837,48 @@ exports[`The stripe disputes webhook API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "stripedisputeslambdaSqsEventSourcestripedisputesPRODstripedisputeseventsqueueE0B39D5B86E95604": {
+      "Properties": {
+        "BatchSize": 1,
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "stripedisputeseventsqueueF268BDE0",
+            "Arn",
+          ],
+        },
+        "FunctionName": {
+          "Ref": "stripedisputeslambda5D84A389",
+        },
+        "MaximumBatchingWindowInSeconds": 0,
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
+    },
     "stripedisputeslambdastripedisputesPROD22A54B2D": {
       "Properties": {
         "ApiKeySourceType": "HEADER",
-        "Description": "API Gateway created by CDK",
+        "Description": "API Gateway for Stripe dispute webhooks (sync response) with SQS event processing",
         "Name": "stripe-disputes-PROD",
         "Tags": [
           {
@@ -1612,14 +2098,14 @@ exports[`The stripe disputes webhook API stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "stripedisputeslambdastripedisputesPRODDeploymentB5E75472115f495ea4dc75b3dee93c7f554b00c8": {
+    "stripedisputeslambdastripedisputesPRODDeploymentB5E75472dd85b54686f33255bfd577f56b06fe58": {
       "DependsOn": [
         "stripedisputeslambdastripedisputesPRODproxyANYD5E0D645",
         "stripedisputeslambdastripedisputesPRODproxy5FC52972",
         "stripedisputeslambdastripedisputesPRODANY9114FCEB",
       ],
       "Properties": {
-        "Description": "API Gateway created by CDK",
+        "Description": "API Gateway for Stripe dispute webhooks (sync response) with SQS event processing",
         "RestApiId": {
           "Ref": "stripedisputeslambdastripedisputesPROD22A54B2D",
         },
@@ -1632,7 +2118,7 @@ exports[`The stripe disputes webhook API stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "stripedisputeslambdastripedisputesPRODDeploymentB5E75472115f495ea4dc75b3dee93c7f554b00c8",
+          "Ref": "stripedisputeslambdastripedisputesPRODDeploymentB5E75472dd85b54686f33255bfd577f56b06fe58",
         },
         "RestApiId": {
           "Ref": "stripedisputeslambdastripedisputesPROD22A54B2D",
