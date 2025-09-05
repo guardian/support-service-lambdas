@@ -41,6 +41,8 @@ export const upsertSalesforceObject = async (
 		| ListenDisputeClosedRequestBody,
 	zuoraData?: ZuoraInvoiceFromStripeChargeIdResult,
 ): Promise<SalesforceUpsertResponse> => {
+	logger.log('Starting upsertSalesforceObject process');
+
 	const salesforceCredentials = await getSecretValue<SalesforceCredentials>(
 		`${stageFromEnvironment()}/Salesforce/ConnectedApp/StripeDisputeWebhooks`,
 	);

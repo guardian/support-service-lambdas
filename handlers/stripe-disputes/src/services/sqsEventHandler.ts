@@ -36,6 +36,7 @@ export async function handleSqsEvents(
 
 			// Parse the message
 			const message = JSON.parse(record.body) as DisputeEventMessage;
+			logger.log(JSON.stringify(message));
 			logger.mutableAddContext(message.disputeId);
 
 			logger.log(
