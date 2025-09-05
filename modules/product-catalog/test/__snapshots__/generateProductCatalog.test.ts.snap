@@ -1737,9 +1737,6 @@ exports[`code Generated product catalog matches snapshot 1`] = `
       "OneYearStudent": {
         "billingPeriod": "Annual",
         "charges": {
-          "Contribution": {
-            "id": "71a10c6269b981784c9817e189270008",
-          },
           "Subscription": {
             "id": "71a10c6269b981784c9817e188d60001",
           },
@@ -3686,9 +3683,6 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
       "OneYearStudent": {
         "billingPeriod": "Annual",
         "charges": {
-          "Contribution": {
-            "id": "8a12994698c1ab070198fbeb2def3eff",
-          },
           "Subscription": {
             "id": "8a129797980d634c019818808aef7672",
           },
