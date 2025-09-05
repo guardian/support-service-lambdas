@@ -4,8 +4,10 @@ import type {
 	ListenDisputeClosedRequestBody,
 	ListenDisputeCreatedRequestBody,
 } from '../dtos';
-import type { SalesforceUpsertResponse } from '../types';
-import { upsertSalesforceObject } from './upsertSalesforceObject';
+import {
+	handleListenDisputeClosed,
+	handleListenDisputeCreated,
+} from '../sqs-consumers';
 
 /**
  * Interface for SQS dispute event message
@@ -36,25 +38,34 @@ export async function handleSqsEvents(
 
 			// Parse the message
 			const message = JSON.parse(record.body) as DisputeEventMessage;
-			logger.log(JSON.stringify(message));
 			logger.mutableAddContext(message.disputeId);
 
 			logger.log(
 				`Processing ${message.eventType} for dispute ${message.disputeId}`,
 			);
 
-			// Process the dispute event directly using the unified service
-			const upsertSalesforceObjectResponse: SalesforceUpsertResponse =
-				await upsertSalesforceObject(logger, message.webhookData);
-
-			logger.log(
-				'Salesforce upsert response:',
-				JSON.stringify(upsertSalesforceObjectResponse),
-			);
-
-			logger.log(
-				`Successfully processed ${message.eventType} for dispute ${message.disputeId}`,
-			);
+			// Route to appropriate consumer based on event type
+			switch (message.eventType) {
+				case 'dispute.created': {
+					await handleListenDisputeCreated(
+						logger,
+						message.webhookData as ListenDisputeCreatedRequestBody,
+						message.disputeId,
+					);
+					break;
+				}
+				case 'dispute.closed': {
+					await handleListenDisputeClosed(
+						logger,
+						message.webhookData as ListenDisputeClosedRequestBody,
+						message.disputeId,
+					);
+					break;
+				}
+				default: {
+					throw new Error(`Unknown event type: ${String(message.eventType)}`);
+				}
+			}
 		} catch (error) {
 			logger.error(`Failed to process SQS record ${record.messageId}:`, error);
 			// Re-throw to trigger SQS retry mechanism
