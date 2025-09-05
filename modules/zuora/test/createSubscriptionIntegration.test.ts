@@ -12,6 +12,7 @@ import {
 	CreateSubscriptionInputFields,
 } from '@modules/zuora/createSubscription/createSubscription';
 import {
+	CreditCardReferenceTransaction,
 	DirectDebit,
 	PaymentGateway,
 } from '@modules/zuora/orders/paymentMethods';
@@ -55,7 +56,7 @@ describe('createSubscription integration', () => {
 	};
 	const createInputFields: CreateSubscriptionInputFields<DirectDebit> = {
 		accountName: 'Test Account',
-		createdRequestId: 'REQUEST-ID',
+		createdRequestId: 'REQUEST-ID' + new Date().getTime(),
 		salesforceAccountId: 'CRM-ID',
 		salesforceContactId: 'SF-CONTACT-ID',
 		identityId: 'IDENTITY-ID',
@@ -113,5 +114,53 @@ describe('createSubscription integration', () => {
 		);
 		console.log(JSON.stringify(response));
 		expect(response.previewResult.invoices.length).toBeGreaterThan(0);
+	});
+
+	test('We can create a fixed term subscription', async () => {
+		const fixedTermProductPurchase: ProductPurchase = {
+			product: 'SupporterPlus',
+			ratePlan: 'OneYearStudent',
+			amount: 9,
+		};
+		const inputFields: CreateSubscriptionInputFields<DirectDebit> = {
+			...createInputFields,
+			createdRequestId: 'TEST-IDEMPOTENCY-KEY-' + new Date().getTime(), // We don't want to reuse the same idempotency key
+			productPurchase: fixedTermProductPurchase,
+		};
+		const client = await ZuoraClient.create('CODE');
+		const response = await createSubscription(
+			client,
+			productCatalog,
+			inputFields,
+		);
+		expect(response.subscriptionNumbers.length).toEqual(1);
+	});
+
+	test('We can create a subscription with a credit card', async () => {
+		// Test with supporter plus so we can check if invoices are generated correctly
+		const productPurchase: ProductPurchase = {
+			product: 'SupporterPlus',
+			ratePlan: 'Monthly',
+			amount: 12,
+		};
+		const creditCardFields: CreditCardReferenceTransaction = {
+			type: 'CreditCardReferenceTransaction',
+			tokenId: 'card_E0zitFfsO2wTEn',
+			secondTokenId: 'cus_E0zic0cedDT5MZ',
+		};
+		const inputFields: CreateSubscriptionInputFields<CreditCardReferenceTransaction> =
+			{
+				...createInputFields,
+				productPurchase: productPurchase,
+				paymentMethod: creditCardFields,
+				paymentGateway: 'Stripe PaymentIntents GNM Membership',
+			};
+		const client = await ZuoraClient.create('CODE');
+		const response = await createSubscription(
+			client,
+			productCatalog,
+			inputFields,
+		);
+		expect(response.subscriptionNumbers.length).toEqual(1);
 	});
 });

@@ -103,11 +103,14 @@ function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 	);
 	const readerType = giftRecipient ? ReaderType.Gift : ReaderType.Direct; // TODO: patron if there is a patron promo
 
+	const productRatePlan = getProductRatePlan(productCatalog, productPurchase);
 	const createSubscriptionOrderAction = buildCreateSubscriptionOrderAction({
-		productRatePlanId: getProductRatePlan(productCatalog, productPurchase).id,
+		productRatePlanId: productRatePlan.id,
 		contractEffectiveDate: contractEffectiveDate,
 		customerAcceptanceDate: customerAcceptanceDate,
 		chargeOverride: chargeOverride,
+		termType: productRatePlan.termType,
+		termLengthInMonths: productRatePlan.termLengthInMonths,
 	});
 
 	const customFields = {
