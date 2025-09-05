@@ -191,7 +191,7 @@ export function buildCreateSubscriptionOrderAction({
 						customerAcceptanceDate,
 						termLengthInMonths,
 					),
-					'Days',
+					'Day',
 					false,
 				];
 
