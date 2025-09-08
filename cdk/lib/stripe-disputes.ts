@@ -185,6 +185,23 @@ export class StripeDisputes extends GuStack {
 			},
 		);
 
+		const secretsManagerPolicySQS: Policy = new Policy(
+			this,
+			'Secrets Manager policy SQS',
+			{
+				statements: [
+					new PolicyStatement({
+						effect: Effect.ALLOW,
+						actions: ['secretsmanager:GetSecretValue'],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Salesforce/ConnectedApp/StripeDisputeWebhooks-*`,
+						],
+					}),
+				],
+			},
+		);
+
 		const sqsEmailPolicy: Policy = new Policy(this, 'SQS email policy', {
 			statements: [
 				new PolicyStatement({
@@ -217,7 +234,7 @@ export class StripeDisputes extends GuStack {
 		lambda.role?.attachInlinePolicy(sqsDisputeEventsPolicy);
 
 		lambdaForSQSConsumers.role?.attachInlinePolicy(s3InlinePolicy);
-		lambdaForSQSConsumers.role?.attachInlinePolicy(secretsManagerPolicy);
+		lambdaForSQSConsumers.role?.attachInlinePolicy(secretsManagerPolicySQS);
 		lambdaForSQSConsumers.role?.attachInlinePolicy(sqsEmailPolicy);
 		lambdaForSQSConsumers.role?.attachInlinePolicy(sqsDisputeEventsPolicy);
 
