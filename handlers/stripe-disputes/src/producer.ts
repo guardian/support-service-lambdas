@@ -1,17 +1,7 @@
 import { Logger } from '@modules/logger';
 import { Router } from '@modules/routing/router';
-import type {
-	APIGatewayProxyEvent,
-	APIGatewayProxyResult,
-	SQSEvent,
-	Context,
-} from 'aws-lambda';
-// Original handlers kept for reference but not used in router
-// import {
-// 	listenDisputeCreatedHandler,
-// 	listenDisputeClosedHandler,
-// } from './handlers';
-import { handleStripeWebhook, handleSqsEvents } from './services';
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { handleStripeWebhook } from './services';
 
 const logger = new Logger();
 
@@ -37,8 +27,7 @@ const router = new Router([
  * 2. SQS event → processes dispute asynchronously → calls Salesforce/Zuora
  */
 export const handler = async (
-	event: APIGatewayProxyEvent | SQSEvent,
-	context: Context,
+	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult | void> => {
 	logger.log(`Input: ${JSON.stringify(event)}`);
 
@@ -49,12 +38,6 @@ export const handler = async (
 		const response = await router.routeRequest(event);
 		logger.log(`Webhook response: ${JSON.stringify(response)}`);
 		return response;
-	} else if (isSqsEvent(event)) {
-		// Handle asynchronous SQS event processing
-		logger.log(`Processing ${event.Records.length} SQS dispute events`);
-		await handleSqsEvents(logger, event);
-		logger.log('SQS events processed successfully');
-		return; // No return value for SQS events
 	} else {
 		logger.error('Unknown event type received');
 		throw new Error('Unsupported event type');
@@ -66,16 +49,4 @@ export const handler = async (
  */
 function isApiGatewayEvent(event: any): event is APIGatewayProxyEvent {
 	return event.httpMethod !== undefined && event.path !== undefined;
-}
-
-/**
- * Type guard to check if event is from SQS
- */
-function isSqsEvent(event: any): event is SQSEvent {
-	return (
-		event.Records !== undefined &&
-		Array.isArray(event.Records) &&
-		event.Records.length > 0 &&
-		event.Records[0].eventSource === 'aws:sqs'
-	);
 }
