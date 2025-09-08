@@ -21,8 +21,6 @@ export async function handleListenDisputeCreated(
 ): Promise<SalesforceUpsertResponse> {
 	logger.log(`Processing dispute creation for dispute ${disputeId}`);
 
-	// Current implementation: Salesforce upsert
-	// TODO: Add creation-specific logic here in the future
 	const upsertSalesforceObjectResponse: SalesforceUpsertResponse =
 		await upsertSalesforceObject(logger, webhookData);
 
