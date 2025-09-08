@@ -25,6 +25,7 @@ import subscriptionJson2 from './fixtures/digital-subscriptions/eligibility-chec
 import subscriptionJson3 from './fixtures/digital-subscriptions/eligibility-checker-test3.json';
 import subscriptionJson1 from './fixtures/supporter-plus/free-2-months.json';
 import subSupporterPlusFullPrice from './fixtures/supporter-plus/full-price.json';
+import student from './fixtures/supporter-plus/student.json';
 
 const eligibilityChecker = new EligibilityChecker(new Logger());
 const catalogProd = new ZuoraCatalogHelper(
@@ -132,6 +133,17 @@ test('Eligibility check fails for a subscription which hasnt been running long',
 		);
 
 	expect(ac2).toThrow(validationRequirements.twoMonthsMin);
+});
+
+test('Eligibility check fails for a sub without an upcoming payment (student subscription)', async () => {
+	const sub = zuoraSubscriptionResponseSchema.parse(student);
+
+	const ac2 = () =>
+		eligibilityChecker.assertGenerallyEligible(sub, 0, () =>
+			Promise.resolve([]),
+		);
+
+	await expect(ac2).rejects.toThrow(validationRequirements.mustHaveNextInvoice);
 });
 
 test('Eligibility check works for a price risen subscription', async () => {

@@ -1,6 +1,10 @@
 export class Logger {
 	constructor(private prefix: string[] = []) {}
 
+	public resetContext(): void {
+		this.prefix = [];
+	}
+
 	public mutableAddContext(value: string): void {
 		this.prefix.push(value);
 	}

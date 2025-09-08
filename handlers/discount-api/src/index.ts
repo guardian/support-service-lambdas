@@ -41,6 +41,7 @@ const router = new Router([
 export const handler: Handler = async (
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
+	logger.resetContext();
 	logger.log(`Input is ${JSON.stringify(event)}`);
 	const response = await router.routeRequest(event);
 	logger.log(`Response is ${JSON.stringify(response)}`);
