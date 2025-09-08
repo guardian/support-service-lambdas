@@ -168,6 +168,22 @@ export class StripeDisputes extends GuStack {
 			],
 		});
 
+		const s3InlinePolicyLambda2: Policy = new Policy(
+			this,
+			'S3 inline policy Lambda2',
+			{
+				statements: [
+					new PolicyStatement({
+						effect: Effect.ALLOW,
+						actions: ['s3:GetObject'],
+						resources: [
+							`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`,
+						],
+					}),
+				],
+			},
+		);
+
 		const secretsManagerPolicy: Policy = new Policy(
 			this,
 			'Secrets Manager policy',
@@ -185,7 +201,7 @@ export class StripeDisputes extends GuStack {
 			},
 		);
 
-		const secretsManagerPolicySQS: Policy = new Policy(
+		const secretsManagerLambda2: Policy = new Policy(
 			this,
 			'Secrets Manager policy SQS',
 			{
@@ -214,9 +230,39 @@ export class StripeDisputes extends GuStack {
 			],
 		});
 
+		const sqsEmailPolicyLambda2: Policy = new Policy(
+			this,
+			'SQS email policy Lambda2',
+			{
+				statements: [
+					new PolicyStatement({
+						effect: Effect.ALLOW,
+						actions: ['sqs:sendmessage'],
+						resources: [
+							`arn:aws:sqs:${this.region}:${this.account}:braze-emails-${this.stage}`,
+						],
+					}),
+				],
+			},
+		);
+
 		const sqsDisputeEventsPolicy: Policy = new Policy(
 			this,
 			'SQS dispute events policy',
+			{
+				statements: [
+					new PolicyStatement({
+						effect: Effect.ALLOW,
+						actions: ['sqs:SendMessage', 'sqs:GetQueueAttributes'],
+						resources: [disputeEventsQueue.queueArn],
+					}),
+				],
+			},
+		);
+
+		const sqsDisputeEventsPolicyLambda2: Policy = new Policy(
+			this,
+			'SQS dispute events policy Lambda2',
 			{
 				statements: [
 					new PolicyStatement({
@@ -233,10 +279,12 @@ export class StripeDisputes extends GuStack {
 		lambda.role?.attachInlinePolicy(sqsEmailPolicy);
 		lambda.role?.attachInlinePolicy(sqsDisputeEventsPolicy);
 
-		lambdaForSQSConsumers.role?.attachInlinePolicy(s3InlinePolicy);
-		lambdaForSQSConsumers.role?.attachInlinePolicy(secretsManagerPolicySQS);
-		lambdaForSQSConsumers.role?.attachInlinePolicy(sqsEmailPolicy);
-		lambdaForSQSConsumers.role?.attachInlinePolicy(sqsDisputeEventsPolicy);
+		lambdaForSQSConsumers.role?.attachInlinePolicy(s3InlinePolicyLambda2);
+		lambdaForSQSConsumers.role?.attachInlinePolicy(secretsManagerLambda2);
+		lambdaForSQSConsumers.role?.attachInlinePolicy(sqsEmailPolicyLambda2);
+		lambdaForSQSConsumers.role?.attachInlinePolicy(
+			sqsDisputeEventsPolicyLambda2,
+		);
 
 		// ---- DNS ---- //
 		const certificateArn = `arn:aws:acm:eu-west-1:${this.account}:certificate/${props.certificateId}`;

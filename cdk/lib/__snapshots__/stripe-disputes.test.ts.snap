@@ -229,6 +229,24 @@ DLQ: https://",
           {
             "Ref": "stripedisputeslambdaServiceRoleC28AF041",
           },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "S3inlinepolicyLambda2263E5DBA": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3::*:membership-dist/membership/CODE/stripe-disputes/",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "S3inlinepolicyLambda2263E5DBA",
+        "Roles": [
           {
             "Ref": "stripedisputeslambdasqsconsumersServiceRole7AC53C77",
           },
@@ -261,6 +279,32 @@ DLQ: https://",
           {
             "Ref": "stripedisputeslambdaServiceRoleC28AF041",
           },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SQSdisputeeventspolicyLambda200052903": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "stripedisputeseventsqueueF268BDE0",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SQSdisputeeventspolicyLambda200052903",
+        "Roles": [
           {
             "Ref": "stripedisputeslambdasqsconsumersServiceRole7AC53C77",
           },
@@ -300,6 +344,39 @@ DLQ: https://",
           {
             "Ref": "stripedisputeslambdaServiceRoleC28AF041",
           },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SQSemailpolicyLambda2146D29F8": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:sendmessage",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":braze-emails-CODE",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SQSemailpolicyLambda2146D29F8",
+        "Roles": [
           {
             "Ref": "stripedisputeslambdasqsconsumersServiceRole7AC53C77",
           },
@@ -1754,6 +1831,24 @@ DLQ: https://",
           {
             "Ref": "stripedisputeslambdaServiceRoleC28AF041",
           },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "S3inlinepolicyLambda2263E5DBA": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3::*:membership-dist/membership/PROD/stripe-disputes/",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "S3inlinepolicyLambda2263E5DBA",
+        "Roles": [
           {
             "Ref": "stripedisputeslambdasqsconsumersServiceRole7AC53C77",
           },
@@ -1786,6 +1881,32 @@ DLQ: https://",
           {
             "Ref": "stripedisputeslambdaServiceRoleC28AF041",
           },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SQSdisputeeventspolicyLambda200052903": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "stripedisputeseventsqueueF268BDE0",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SQSdisputeeventspolicyLambda200052903",
+        "Roles": [
           {
             "Ref": "stripedisputeslambdasqsconsumersServiceRole7AC53C77",
           },
@@ -1825,6 +1946,39 @@ DLQ: https://",
           {
             "Ref": "stripedisputeslambdaServiceRoleC28AF041",
           },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SQSemailpolicyLambda2146D29F8": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:sendmessage",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":braze-emails-PROD",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SQSemailpolicyLambda2146D29F8",
+        "Roles": [
           {
             "Ref": "stripedisputeslambdasqsconsumersServiceRole7AC53C77",
           },
