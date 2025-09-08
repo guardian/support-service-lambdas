@@ -21,6 +21,6 @@ deployments:
       bucketSsmLookup: true
       prefixStack: false
       functionNames:
-      - stripe-disputes-producer
-      - stripe-disputes-consumer
+      - stripe-disputes-producer-
+      - stripe-disputes-consumer-
     dependencies: [stripe-disputes-cloudformation]
