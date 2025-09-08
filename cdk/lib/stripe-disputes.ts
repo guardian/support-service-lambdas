@@ -2,6 +2,7 @@ import { GuApiLambda } from '@guardian/cdk';
 import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
+import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import {
@@ -113,6 +114,29 @@ export class StripeDisputes extends GuStack {
 			],
 		});
 
+		const lambdaForSQSConsumers = new GuLambdaFunction(
+			this,
+			`${app}-lambda-sqs-consumers`,
+			{
+				description: 'A lambda that handles stripe disputes SQS events',
+				functionName: nameWithStage,
+				loggingFormat: LoggingFormat.TEXT,
+				fileName: `${app}.zip`,
+				handler: 'index.handler',
+				runtime: nodeVersion,
+				memorySize: 1024,
+				timeout: Duration.seconds(300),
+				environment: commonEnvironmentVariables,
+				app: app,
+				events: [
+					new SqsEventSource(disputeEventsQueue, {
+						batchSize: 1, // Process one dispute event at a time
+						maxBatchingWindow: Duration.seconds(0), // Process immediately
+					}),
+				],
+			},
+		);
+
 		const usagePlan = lambda.api.addUsagePlan('UsagePlan', {
 			name: nameWithStage,
 			description: 'REST endpoints for stripe disputes webhook api',
@@ -191,6 +215,11 @@ export class StripeDisputes extends GuStack {
 		lambda.role?.attachInlinePolicy(secretsManagerPolicy);
 		lambda.role?.attachInlinePolicy(sqsEmailPolicy);
 		lambda.role?.attachInlinePolicy(sqsDisputeEventsPolicy);
+
+		lambdaForSQSConsumers.role?.attachInlinePolicy(s3InlinePolicy);
+		lambdaForSQSConsumers.role?.attachInlinePolicy(secretsManagerPolicy);
+		lambdaForSQSConsumers.role?.attachInlinePolicy(sqsEmailPolicy);
+		lambdaForSQSConsumers.role?.attachInlinePolicy(sqsDisputeEventsPolicy);
 
 		// ---- DNS ---- //
 		const certificateArn = `arn:aws:acm:eu-west-1:${this.account}:certificate/${props.certificateId}`;
