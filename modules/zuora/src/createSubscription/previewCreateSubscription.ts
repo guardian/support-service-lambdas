@@ -37,11 +37,14 @@ export const previewCreateSubscription = async (
 		currency,
 	);
 
+	const productRatePlan = getProductRatePlan(productCatalog, productPurchase);
 	const createSubscriptionOrderAction = buildCreateSubscriptionOrderAction({
-		productRatePlanId: getProductRatePlan(productCatalog, productPurchase).id,
+		productRatePlanId: productRatePlan.id,
 		contractEffectiveDate: contractEffectiveDate,
 		customerAcceptanceDate: customerAcceptanceDate,
 		chargeOverride: chargeOverride,
+		termType: productRatePlan.termType,
+		termLengthInMonths: productRatePlan.termLengthInMonths,
 	});
 
 	const numberOfMonthsToPreview = 13; // 13 allows for annual subs to have a second invoice

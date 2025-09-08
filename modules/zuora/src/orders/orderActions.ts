@@ -1,4 +1,5 @@
 import type { BillingPeriod } from '@modules/billingPeriod';
+import type { TermType } from '@modules/product-catalog/productCatalog';
 import type { Dayjs } from 'dayjs';
 import { zuoraDateFormat } from '../utils/common';
 
@@ -84,18 +85,17 @@ export type CreateSubscriptionOrderAction = BaseOrderAction & {
 	type: 'CreateSubscription';
 	createSubscription: {
 		terms: {
+			autoRenew: boolean;
 			initialTerm: {
 				period: number;
 				periodType: BillingPeriod;
 				termType: 'TERMED';
 			};
 			renewalSetting: 'RENEW_WITH_SPECIFIC_TERM';
-			renewalTerms: [
-				{
-					period: 12;
-					periodType: 'Month';
-				},
-			];
+			renewalTerms: Array<{
+				period: number;
+				periodType: BillingPeriod;
+			}>;
 		};
 		subscribeToRatePlans: [
 			{
@@ -137,6 +137,21 @@ export function singleTriggerDate(applyFromDate: Dayjs): TriggerDates {
 	];
 }
 
+export function initialTermInDays(
+	contractEffectiveDate: Dayjs,
+	customerAcceptanceDate: Dayjs,
+	termLength: number,
+) {
+	// This functionality is ported over from the previous version of this code.
+	// I think the reason we need the term in days is because for delivery products
+	// the term starts on the contract effective date (when the order is placed)
+	// but the customer acceptance date (when the first delivery is made) can be
+	// some days later. We need to ensure that the term covers the full period
+	// from contract effective date to [termLength] after customer acceptance date.
+	const termEnd = customerAcceptanceDate.add(termLength, 'month');
+	return termEnd.diff(contractEffectiveDate, 'day');
+}
+
 // Builder function to simplify the creation of a CreateSubscriptionOrderAction
 // object as a lot of it is boilerplate.
 export function buildCreateSubscriptionOrderAction({
@@ -144,11 +159,15 @@ export function buildCreateSubscriptionOrderAction({
 	contractEffectiveDate,
 	customerAcceptanceDate,
 	chargeOverride,
+	termType,
+	termLengthInMonths,
 }: {
 	productRatePlanId: string;
 	contractEffectiveDate: Dayjs;
-	customerAcceptanceDate?: Dayjs;
+	customerAcceptanceDate: Dayjs;
 	chargeOverride?: { productRatePlanChargeId: string; overrideAmount: number };
+	termType: TermType;
+	termLengthInMonths: number;
 }): CreateSubscriptionOrderAction {
 	const chargeOverrides = chargeOverride
 		? [
@@ -163,6 +182,35 @@ export function buildCreateSubscriptionOrderAction({
 			]
 		: [];
 
+	const [initialPeriodLength, initialPeriodType, autoRenew] =
+		termType === 'Recurring'
+			? [12, 'Month', true]
+			: [
+					initialTermInDays(
+						contractEffectiveDate,
+						customerAcceptanceDate,
+						termLengthInMonths,
+					),
+					'Day',
+					false,
+				];
+
+	const terms = {
+		autoRenew: autoRenew,
+		initialTerm: {
+			period: initialPeriodLength,
+			periodType: initialPeriodType as BillingPeriod,
+			termType: 'TERMED' as const,
+		},
+		renewalSetting: 'RENEW_WITH_SPECIFIC_TERM' as const,
+		renewalTerms: [
+			{
+				period: termLengthInMonths,
+				periodType: 'Month' as BillingPeriod,
+			},
+		],
+	};
+
 	return {
 		type: 'CreateSubscription',
 		triggerDates: [
@@ -172,26 +220,11 @@ export function buildCreateSubscriptionOrderAction({
 			},
 			{
 				name: 'CustomerAcceptance',
-				triggerDate: zuoraDateFormat(
-					customerAcceptanceDate ?? contractEffectiveDate,
-				),
+				triggerDate: zuoraDateFormat(customerAcceptanceDate),
 			},
 		],
 		createSubscription: {
-			terms: {
-				initialTerm: {
-					period: 12,
-					periodType: 'Month',
-					termType: 'TERMED',
-				},
-				renewalSetting: 'RENEW_WITH_SPECIFIC_TERM',
-				renewalTerms: [
-					{
-						period: 12,
-						periodType: 'Month',
-					},
-				],
-			},
+			terms: terms,
 			subscribeToRatePlans: [
 				{
 					productRatePlanId,
