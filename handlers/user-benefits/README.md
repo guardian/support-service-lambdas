@@ -6,5 +6,7 @@ Authentication is done via an Okta JWT header in the request, using the [identit
 
 # Urls
 
-- PROD: user-benefits.guardianapis.com/benefits/me
+- PROD:
+  - me: user-benefits.guardianapis.com/benefits/me
+  - benefits list: https://user-benefits.guardianapis.com/benefits/list
 - CODE: user-benefits.code.dev-guardianapis.com/benefits/me

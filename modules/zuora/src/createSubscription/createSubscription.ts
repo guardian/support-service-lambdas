@@ -82,7 +82,7 @@ function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 
 	const newAccount = buildNewAccountObject({
 		accountName: accountName,
-		createdRequestId: createdRequestId, // TODO: could use Idempotency-Key header instead?
+		createdRequestId: createdRequestId,
 		salesforceAccountId: salesforceAccountId,
 		salesforceContactId: salesforceContactId,
 		identityId: identityId,
@@ -139,5 +139,6 @@ export const createSubscription = async <T extends PaymentMethod>(
 		zuoraClient,
 		buildCreateSubscriptionRequest(productCatalog, inputFields),
 		createSubscriptionResponseSchema,
+		inputFields.createdRequestId,
 	);
 };

@@ -22,8 +22,8 @@ const router = new Router([
 export const handler = async (
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
-	logger.log(`Input is ${JSON.stringify(event)}`);
+	logger.log(`Input: ${JSON.stringify(event)}`);
 	const response = await router.routeRequest(event);
-	logger.log(`Response is ${JSON.stringify(response)}`);
+	logger.log(`Response: ${JSON.stringify(response)}`);
 	return response;
 };

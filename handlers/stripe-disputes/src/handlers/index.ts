@@ -1,2 +1,2 @@
-export * from './dispute-created.handler';
-export * from './dispute-closed.handler';
+export * from './disputeCreatedHandler';
+export * from './disputeClosedHandler';

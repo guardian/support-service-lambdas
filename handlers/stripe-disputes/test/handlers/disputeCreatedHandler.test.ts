@@ -1,6 +1,6 @@
 import type { Logger } from '@modules/logger';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
-import { listenDisputeClosedHandler } from '../../src/handlers/dispute-closed.handler';
+import { listenDisputeCreatedHandler } from '../../src/handlers/disputeCreatedHandler';
 
 // Mock all dependencies
 jest.mock('@modules/secrets-manager/getSecret', () => ({
@@ -11,7 +11,11 @@ jest.mock('@modules/stage', () => ({
 	stageFromEnvironment: jest.fn(() => 'TEST'),
 }));
 
-describe('Dispute Closed Handler', () => {
+jest.mock('../../src/services', () => ({
+	upsertSalesforceObject: jest.fn(),
+}));
+
+describe('Dispute Created Handler', () => {
 	const mockLogger: Logger = {
 		log: jest.fn(),
 		mutableAddContext: jest.fn(),
@@ -19,7 +23,7 @@ describe('Dispute Closed Handler', () => {
 
 	const validWebhookPayload = {
 		id: 'evt_test123',
-		type: 'charge.dispute.closed',
+		type: 'charge.dispute.created',
 		data: {
 			object: {
 				id: 'du_test123',
@@ -27,13 +31,13 @@ describe('Dispute Closed Handler', () => {
 				amount: 10000,
 				currency: 'usd',
 				reason: 'fraudulent',
-				status: 'closed',
+				status: 'needs_response',
 				created: 1755775482,
-				is_charge_refundable: false,
+				is_charge_refundable: true,
 				payment_intent: 'pi_test123',
 				evidence_details: {
 					due_by: 1756511999,
-					has_evidence: true,
+					has_evidence: false,
 				},
 				payment_method_details: {
 					card: {
@@ -49,7 +53,7 @@ describe('Dispute Closed Handler', () => {
 		headers: {},
 		multiValueHeaders: {},
 		httpMethod: 'POST',
-		path: '/listen-dispute-closed',
+		path: '/listen-dispute-created',
 		pathParameters: null,
 		queryStringParameters: null,
 		multiValueQueryStringParameters: null,
@@ -62,87 +66,83 @@ describe('Dispute Closed Handler', () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 
-		// Mock process.env.STAGE
-		process.env.STAGE = 'TEST';
-
 		// Setup default mocks
-		const { getSecretValue } = require('@modules/secrets-manager/getSecret');
-		getSecretValue.mockResolvedValue({
-			client_id: 'test_client',
-			client_secret: 'test_secret',
-			username: 'test@example.com',
-			password: 'password123',
-			token: 'token456',
-			sandbox: true,
+		const { upsertSalesforceObject } = require('../../src/services');
+
+		upsertSalesforceObject.mockResolvedValue({
+			id: 'sf_record_123',
+			success: true,
+			errors: [],
 		});
 	});
 
-	afterEach(() => {
-		delete process.env.STAGE;
-	});
-
-	describe('listenDisputeClosedHandler', () => {
+	describe('listenDisputeCreatedHandler', () => {
 		it('should successfully process valid webhook', async () => {
-			const handler = listenDisputeClosedHandler(mockLogger);
+			const handler = listenDisputeCreatedHandler(mockLogger);
 			const result = await handler(mockEvent);
 
 			expect(result.statusCode).toBe(200);
 			const responseBody = JSON.parse(result.body);
-			expect(responseBody.message).toBe('Dispute closed webhook received');
-			expect(responseBody.disputeId).toBe('du_test123');
-			expect(responseBody.stage).toBe('TEST');
+			expect(responseBody).toEqual({
+				success: true,
+				salesforceId: 'sf_record_123',
+				disputeId: 'du_test123',
+			});
 		});
 
 		it('should add dispute ID to logger context', async () => {
-			const handler = listenDisputeClosedHandler(mockLogger);
+			const handler = listenDisputeCreatedHandler(mockLogger);
 			await handler(mockEvent);
 
 			expect(mockLogger.mutableAddContext).toHaveBeenCalledWith('du_test123');
 		});
 
 		it('should log processing message', async () => {
-			const handler = listenDisputeClosedHandler(mockLogger);
+			const handler = listenDisputeCreatedHandler(mockLogger);
 			await handler(mockEvent);
 
 			expect(mockLogger.log).toHaveBeenCalledWith(
-				'Processing Stripe dispute closed webhook',
+				'Processing Stripe dispute created webhook',
 			);
 		});
 
-		it('should call getSecretValue with correct secret name', async () => {
-			const { getSecretValue } = require('@modules/secrets-manager/getSecret');
-			const handler = listenDisputeClosedHandler(mockLogger);
+		it('should call upsertSalesforceObject with correct parameters', async () => {
+			const { upsertSalesforceObject } = require('../../src/services');
+			const handler = listenDisputeCreatedHandler(mockLogger);
 			await handler(mockEvent);
 
-			expect(getSecretValue).toHaveBeenCalledWith(
-				'TEST/Salesforce/ConnectedApp/StripeDisputeWebhooks',
+			expect(upsertSalesforceObject).toHaveBeenCalledWith(
+				mockLogger,
+				validWebhookPayload,
 			);
 		});
 
 		it('should handle missing request body', async () => {
 			const eventWithoutBody = { ...mockEvent, body: null };
-			const handler = listenDisputeClosedHandler(mockLogger);
+			const handler = listenDisputeCreatedHandler(mockLogger);
+
+			// The handler should catch the error and return 500
 			const result = await handler(eventWithoutBody);
 
 			expect(result.statusCode).toBe(500);
 			const responseBody = JSON.parse(result.body);
 			expect(responseBody.error).toBe('Internal server error');
 			expect(mockLogger.log).toHaveBeenCalledWith(
-				'Error processing dispute closed:',
+				'Error processing dispute created:',
 				expect.any(ReferenceError),
 			);
 		});
 
 		it('should handle invalid JSON in body', async () => {
 			const eventWithInvalidJSON = { ...mockEvent, body: 'invalid-json' };
-			const handler = listenDisputeClosedHandler(mockLogger);
+			const handler = listenDisputeCreatedHandler(mockLogger);
 			const result = await handler(eventWithInvalidJSON);
 
 			expect(result.statusCode).toBe(500);
 			const responseBody = JSON.parse(result.body);
 			expect(responseBody.error).toBe('Internal server error');
 			expect(mockLogger.log).toHaveBeenCalledWith(
-				'Error processing dispute closed:',
+				'Error processing dispute created:',
 				expect.any(SyntaxError),
 			);
 		});
@@ -153,44 +153,41 @@ describe('Dispute Closed Handler', () => {
 				...mockEvent,
 				body: JSON.stringify(invalidPayload),
 			};
-			const handler = listenDisputeClosedHandler(mockLogger);
+			const handler = listenDisputeCreatedHandler(mockLogger);
 			const result = await handler(eventWithInvalidPayload);
 
 			expect(result.statusCode).toBe(500);
 			const responseBody = JSON.parse(result.body);
 			expect(responseBody.error).toBe('Internal server error');
 			expect(mockLogger.log).toHaveBeenCalledWith(
-				'Error processing dispute closed:',
+				'Error processing dispute created:',
 				expect.any(Error),
 			);
 		});
 
-		it('should handle getSecretValue error', async () => {
-			const { getSecretValue } = require('@modules/secrets-manager/getSecret');
-			getSecretValue.mockRejectedValue(new Error('Secret not found'));
+		it('should handle Salesforce service error', async () => {
+			const { upsertSalesforceObject } = require('../../src/services');
+			upsertSalesforceObject.mockRejectedValue(new Error('Service failed'));
 
-			const handler = listenDisputeClosedHandler(mockLogger);
+			const handler = listenDisputeCreatedHandler(mockLogger);
 			const result = await handler(mockEvent);
 
 			expect(result.statusCode).toBe(500);
 			const responseBody = JSON.parse(result.body);
 			expect(responseBody.error).toBe('Internal server error');
 			expect(mockLogger.log).toHaveBeenCalledWith(
-				'Error processing dispute closed:',
+				'Error processing dispute created:',
 				expect.any(Error),
 			);
 		});
 
-		it('should return correct response structure', async () => {
-			const handler = listenDisputeClosedHandler(mockLogger);
-			const result = await handler(mockEvent);
+		it('should log successful Salesforce upsert', async () => {
+			const handler = listenDisputeCreatedHandler(mockLogger);
+			await handler(mockEvent);
 
-			const responseBody = JSON.parse(result.body);
-			expect(responseBody).toEqual({
-				message: 'Dispute closed webhook received',
-				disputeId: 'du_test123',
-				stage: 'TEST',
-			});
+			expect(mockLogger.log).toHaveBeenCalledWith(
+				'Payment Dispute upserted in Salesforce with ID: sf_record_123',
+			);
 		});
 	});
 });

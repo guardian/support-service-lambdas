@@ -6,10 +6,7 @@ import type {
 	ZuoraProductRatePlan,
 	ZuoraProductRatePlanCharge,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import {
-	getCustomerFacingName,
-	isDeliveryProduct,
-} from '@modules/product-catalog/productCatalog';
+import { isDeliveryProduct } from '@modules/product-catalog/productCatalog';
 import { stripeProductsSchema } from '@modules/product-catalog/stripeProducts';
 import {
 	getProductRatePlanChargeKey,
@@ -32,9 +29,9 @@ export const generateSchema = (catalog: ZuoraCatalog): string => {
 		isSupportedProduct(product.name),
 	);
 
-	const productKeys = supportedZuoraProducts.map((product) =>
-		getZuoraProductKey(product.name),
-	);
+	const productKeys = supportedZuoraProducts
+		.map((product) => getZuoraProductKey(product.name))
+		.sort();
 
 	const zuoraProductsSchema = supportedZuoraProducts
 		.map((product) => generateZuoraProductSchema(product))
@@ -43,6 +40,7 @@ export const generateSchema = (catalog: ZuoraCatalog): string => {
 	return `${header}
 	  export const productKeys = ${JSON.stringify(productKeys)} as const;
 	  export const productKeySchema = z.enum(productKeys);
+	  export const termTypeSchema = z.enum(['Recurring', 'FixedTerm']);
 	  
 		export const productCatalogSchema = z.object({
 		${stripeProductsSchema},
@@ -62,7 +60,7 @@ const generateZuoraProductSchema = (product: CatalogProduct) => {
 	return `${productName}: z.object({
 		billingSystem: z.literal('zuora'),
 		active: z.boolean(),
-		customerFacingName: z.literal(${getCustomerFacingName(productName)}),
+		customerFacingName: z.string(),
 		isDeliveryProduct: z.literal(${isDeliveryProduct(productName)}),
 		ratePlans: z.object({
 			${ratePlanSchema.join(',\n')},
@@ -86,6 +84,8 @@ const generateProductRatePlanSchema = (
 			${ratePlanChargesSchema.join(',\n')},
 		}),
 		${getBillingPeriodForRatePlan(productRatePlan)}
+		termType: termTypeSchema,
+		termLengthInMonths: z.number(),
 	})`;
 };
 

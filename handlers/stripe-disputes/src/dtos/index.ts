@@ -1,3 +1,3 @@
-export * from './stripe-dispute-data.dto';
-export * from './listen-dispute-created.dto';
-export * from './listen-dispute-closed.dto';
+export * from './stripeDisputeData.dto';
+export * from './listenDisputeCreated.dto';
+export * from './listenDisputeClosed.dto';

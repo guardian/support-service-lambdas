@@ -1,3 +1,4 @@
+import type { Logger } from '@modules/logger';
 import type { PaymentDisputeRecord } from '../../src/interfaces';
 import { upsertPaymentDisputeInSalesforce } from '../../src/services/salesforceCreate';
 import type { SalesforceAuthResponse } from '../../src/types';
@@ -28,6 +29,11 @@ jest.mock('../../src/zod-schemas', () => ({
 global.fetch = jest.fn();
 
 describe('Salesforce Create Service', () => {
+	const mockLogger: Logger = {
+		log: jest.fn(),
+		mutableAddContext: jest.fn(),
+	} as any;
+
 	const mockAuthResponse: SalesforceAuthResponse = {
 		access_token: 'mock_token',
 		instance_url: 'https://test.salesforce.com',
@@ -50,6 +56,10 @@ describe('Salesforce Create Service', () => {
 		Is_Charge_Refundable__c: true,
 		Created_Date__c: '2025-08-21T10:11:22.000Z',
 		Has_Evidence__c: false,
+		SubscriptionNumber__c: 'SUB-001',
+		PaymentId__c: 'payment-123',
+		Billing_AccountId__c: 'account-456',
+		InvoiceId__c: 'invoice-789',
 	};
 
 	const mockCreateResponse = {
@@ -79,6 +89,7 @@ describe('Salesforce Create Service', () => {
 			const result = await upsertPaymentDisputeInSalesforce(
 				mockAuthResponse,
 				mockPaymentDispute,
+				mockLogger,
 			);
 
 			expect(result).toEqual(mockCreateResponse);
@@ -104,7 +115,11 @@ describe('Salesforce Create Service', () => {
 			});
 
 			await expect(
-				upsertPaymentDisputeInSalesforce(mockAuthResponse, mockPaymentDispute),
+				upsertPaymentDisputeInSalesforce(
+					mockAuthResponse,
+					mockPaymentDispute,
+					mockLogger,
+				),
 			).rejects.toThrow(
 				'Error upserting Payment Dispute in Salesforce: Bad Request - Invalid field value',
 			);
@@ -127,7 +142,11 @@ describe('Salesforce Create Service', () => {
 			});
 
 			await expect(
-				upsertPaymentDisputeInSalesforce(mockAuthResponse, mockPaymentDispute),
+				upsertPaymentDisputeInSalesforce(
+					mockAuthResponse,
+					mockPaymentDispute,
+					mockLogger,
+				),
 			).rejects.toThrow(
 				'Error upserting Payment Dispute in Salesforce: Error parsing response from Salesforce',
 			);
@@ -137,7 +156,11 @@ describe('Salesforce Create Service', () => {
 			(global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
 
 			await expect(
-				upsertPaymentDisputeInSalesforce(mockAuthResponse, mockPaymentDispute),
+				upsertPaymentDisputeInSalesforce(
+					mockAuthResponse,
+					mockPaymentDispute,
+					mockLogger,
+				),
 			).rejects.toThrow(
 				'Error upserting Payment Dispute in Salesforce: Network error',
 			);
