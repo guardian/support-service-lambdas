@@ -1,1 +1,1 @@
-export * from './stripe-to-salesforce.mapper';
+export * from './stripeToSalesforceMapper';

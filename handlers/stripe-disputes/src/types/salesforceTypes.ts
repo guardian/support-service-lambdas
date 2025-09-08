@@ -19,7 +19,7 @@ export type SalesforceCreateError = {
 	fields: string[];
 };
 
-export type SalesforceCreateResponse = {
+export type SalesforceUpsertResponse = {
 	id?: string;
 	success: boolean;
 	errors: SalesforceCreateError[];

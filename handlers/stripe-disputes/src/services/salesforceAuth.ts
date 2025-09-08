@@ -1,4 +1,3 @@
-import * as console from 'node:console';
 import type { Logger } from '@modules/logger';
 import {
 	buildClientCredentialsBody,
@@ -9,13 +8,20 @@ import { SalesforceAuthResponseSchema } from '../zod-schemas';
 
 /**
  * Authenticate with Salesforce using OAuth 2.0 Client Credentials flow
- * Follows the pattern from @modules/salesforce/src/auth.ts but for client credentials
+ *
+ * This function performs OAuth authentication to obtain an access token
+ * for making authenticated requests to the Salesforce API.
+ *
+ * @param logger - Logger instance for tracking authentication process
+ * @param credentials - Salesforce OAuth credentials including client ID, secret, and sandbox flag
+ * @returns Promise containing Salesforce access token and instance URL
+ * @throws {Error} When authentication fails or response validation fails
  */
 export async function authenticateWithSalesforce(
 	logger: Logger,
 	credentials: SalesforceCredentials,
 ): Promise<SalesforceAuthResponse> {
-	console.log('authenticating with Salesforce using client credentials...');
+	logger.log('authenticating with Salesforce using client credentials...');
 
 	try {
 		const options = {
@@ -36,7 +42,7 @@ export async function authenticateWithSalesforce(
 			throw new Error(errorMessage);
 		}
 
-		console.log('successfully authenticated with Salesforce');
+		logger.log('successfully authenticated with Salesforce');
 
 		const sfAuthResponse = (await response.json()) as SalesforceAuthResponse;
 
