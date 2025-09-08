@@ -491,7 +491,7 @@ DLQ: https://",
             "Stage": "CODE",
           },
         },
-        "FunctionName": "stripe-disputes-CODE",
+        "FunctionName": "stripe-disputes-CODE-consumer",
         "Handler": "index.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
@@ -763,7 +763,7 @@ DLQ: https://",
             "Stage": "CODE",
           },
         },
-        "FunctionName": "stripe-disputes-CODE",
+        "FunctionName": "stripe-disputes-CODE-producer",
         "Handler": "index.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
@@ -1148,7 +1148,7 @@ DLQ: https://",
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "stripedisputeslambdaproducerstripedisputesCODEDeployment2CF62E5E8a0efa0a004440fc9ade08616018285f": {
+    "stripedisputeslambdaproducerstripedisputesCODEDeployment2CF62E5E77e4d135aac951e620f69a636eb219b2": {
       "DependsOn": [
         "stripedisputeslambdaproducerstripedisputesCODEproxyANY4F6D2A61",
         "stripedisputeslambdaproducerstripedisputesCODEproxy7EE73D25",
@@ -1168,7 +1168,7 @@ DLQ: https://",
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "stripedisputeslambdaproducerstripedisputesCODEDeployment2CF62E5E8a0efa0a004440fc9ade08616018285f",
+          "Ref": "stripedisputeslambdaproducerstripedisputesCODEDeployment2CF62E5E77e4d135aac951e620f69a636eb219b2",
         },
         "RestApiId": {
           "Ref": "stripedisputeslambdaproducerstripedisputesCODEF2CEBE4E",
@@ -1949,7 +1949,7 @@ DLQ: https://",
             "Stage": "PROD",
           },
         },
-        "FunctionName": "stripe-disputes-PROD",
+        "FunctionName": "stripe-disputes-PROD-consumer",
         "Handler": "index.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
@@ -2221,7 +2221,7 @@ DLQ: https://",
             "Stage": "PROD",
           },
         },
-        "FunctionName": "stripe-disputes-PROD",
+        "FunctionName": "stripe-disputes-PROD-producer",
         "Handler": "index.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
@@ -2636,7 +2636,7 @@ DLQ: https://",
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "stripedisputeslambdaproducerstripedisputesPRODDeployment1B2FECC9ec8eeb8c58c6646bd1551f2761e10d4c": {
+    "stripedisputeslambdaproducerstripedisputesPRODDeployment1B2FECC90de2ab2f82bbeffdea062aa1503a315c": {
       "DependsOn": [
         "stripedisputeslambdaproducerstripedisputesPRODproxyANYE20BAFBC",
         "stripedisputeslambdaproducerstripedisputesPRODproxyAE1A1225",
@@ -2656,7 +2656,7 @@ DLQ: https://",
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "stripedisputeslambdaproducerstripedisputesPRODDeployment1B2FECC9ec8eeb8c58c6646bd1551f2761e10d4c",
+          "Ref": "stripedisputeslambdaproducerstripedisputesPRODDeployment1B2FECC90de2ab2f82bbeffdea062aa1503a315c",
         },
         "RestApiId": {
           "Ref": "stripedisputeslambdaproducerstripedisputesPROD219C9FA6",

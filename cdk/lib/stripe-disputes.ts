@@ -86,7 +86,7 @@ export class StripeDisputes extends GuStack {
 		const lambdaProducer = new GuApiLambda(this, `${app}-lambda-producer`, {
 			description:
 				'A lambda that handles stripe disputes webhook events and processes SQS events',
-			functionName: nameWithStage,
+			functionName: `${nameWithStage}-producer`,
 			loggingFormat: LoggingFormat.TEXT,
 			fileName: `${app}.zip`,
 			handler: 'index.handler',
@@ -120,7 +120,7 @@ export class StripeDisputes extends GuStack {
 			`${app}-lambda-consumer`,
 			{
 				description: 'A lambda that handles stripe disputes SQS events',
-				functionName: nameWithStage,
+				functionName: `${nameWithStage}-consumer`,
 				loggingFormat: LoggingFormat.TEXT,
 				fileName: `${app}.zip`,
 				handler: 'index.handler',
