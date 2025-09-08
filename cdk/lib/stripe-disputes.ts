@@ -29,6 +29,12 @@ export interface StripeDisputesProps extends GuStackProps {
 	hostedZoneId: string;
 }
 
+type GuLambdaFunctionOrApi = GuLambdaFunction | GuApiLambda;
+type GuLambdaFunctionOrApiItem = {
+	name: string;
+	lambda: GuLambdaFunctionOrApi;
+};
+
 export class StripeDisputes extends GuStack {
 	constructor(scope: App, id: string, props: StripeDisputesProps) {
 		super(scope, id, props);
@@ -77,7 +83,7 @@ export class StripeDisputes extends GuStack {
 		};
 
 		// ---- API-triggered lambda functions ---- //
-		const lambda = new GuApiLambda(this, `${app}-lambda`, {
+		const lambdaProducer = new GuApiLambda(this, `${app}-lambda-producer`, {
 			description:
 				'A lambda that handles stripe disputes webhook events and processes SQS events',
 			functionName: nameWithStage,
@@ -106,17 +112,12 @@ export class StripeDisputes extends GuStack {
 					apiKeyRequired: true,
 				},
 			},
-			events: [
-				new SqsEventSource(disputeEventsQueue, {
-					batchSize: 1, // Process one dispute event at a time
-					maxBatchingWindow: Duration.seconds(0), // Process immediately
-				}),
-			],
+			events: [],
 		});
 
-		const lambdaForSQSConsumers = new GuLambdaFunction(
+		const lambdaConsumer = new GuLambdaFunction(
 			this,
-			`${app}-lambda-sqs-consumers`,
+			`${app}-lambda-consumer`,
 			{
 				description: 'A lambda that handles stripe disputes SQS events',
 				functionName: nameWithStage,
@@ -137,27 +138,31 @@ export class StripeDisputes extends GuStack {
 			},
 		);
 
-		const usagePlan = lambda.api.addUsagePlan('UsagePlan', {
+		const usagePlan = lambdaProducer.api.addUsagePlan('UsagePlan', {
 			name: nameWithStage,
 			description: 'REST endpoints for stripe disputes webhook api',
 			apiStages: [
 				{
-					stage: lambda.api.deploymentStage,
-					api: lambda.api,
+					stage: lambdaProducer.api.deploymentStage,
+					api: lambdaProducer.api,
 				},
 			],
 		});
 
 		// create api key
-		const apiKey = lambda.api.addApiKey(`${app}-key-${this.stage}`, {
+		const apiKey = lambdaProducer.api.addApiKey(`${app}-key-${this.stage}`, {
 			apiKeyName: `${app}-key-${this.stage}`,
 		});
 
 		// associate api key to plan
 		usagePlan.addApiKey(apiKey);
 
-		const s3InlinePolicy: Policy = new Policy(this, 'S3 inline policy', {
-			statements: [
+		this.createPolicyAndAttachToLambdas(
+			[
+				{ lambda: lambdaProducer, name: 'Lambda producer' },
+				{ lambda: lambdaConsumer, name: 'Lambda Consumer' },
+			],
+			[
 				new PolicyStatement({
 					effect: Effect.ALLOW,
 					actions: ['s3:GetObject'],
@@ -166,60 +171,27 @@ export class StripeDisputes extends GuStack {
 					],
 				}),
 			],
-		});
-
-		const s3InlinePolicyLambda2: Policy = new Policy(
-			this,
-			'S3 inline policy Lambda2',
-			{
-				statements: [
-					new PolicyStatement({
-						effect: Effect.ALLOW,
-						actions: ['s3:GetObject'],
-						resources: [
-							`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`,
-						],
-					}),
-				],
-			},
+			'Allow S3 Get Object',
 		);
 
-		const secretsManagerPolicy: Policy = new Policy(
-			this,
-			'Secrets Manager policy',
-			{
-				statements: [
-					new PolicyStatement({
-						effect: Effect.ALLOW,
-						actions: ['secretsmanager:GetSecretValue'],
-						resources: [
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Salesforce/ConnectedApp/StripeDisputeWebhooks-*`,
-						],
-					}),
-				],
-			},
+		this.createPolicyAndAttachToLambdas(
+			[{ lambda: lambdaConsumer, name: 'Lambda Consumer' }],
+			[
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: ['secretsmanager:GetSecretValue'],
+					resources: [
+						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Salesforce/ConnectedApp/StripeDisputeWebhooks-*`,
+					],
+				}),
+			],
+			'Allow Secrets Manager Get Secret Value',
 		);
 
-		const secretsManagerLambda2: Policy = new Policy(
-			this,
-			'Secrets Manager policy SQS',
-			{
-				statements: [
-					new PolicyStatement({
-						effect: Effect.ALLOW,
-						actions: ['secretsmanager:GetSecretValue'],
-						resources: [
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Salesforce/ConnectedApp/StripeDisputeWebhooks-*`,
-						],
-					}),
-				],
-			},
-		);
-
-		const sqsEmailPolicy: Policy = new Policy(this, 'SQS email policy', {
-			statements: [
+		this.createPolicyAndAttachToLambdas(
+			[{ lambda: lambdaConsumer, name: 'Lambda Consumer' }],
+			[
 				new PolicyStatement({
 					effect: Effect.ALLOW,
 					actions: ['sqs:sendmessage'],
@@ -228,62 +200,22 @@ export class StripeDisputes extends GuStack {
 					],
 				}),
 			],
-		});
-
-		const sqsEmailPolicyLambda2: Policy = new Policy(
-			this,
-			'SQS email policy Lambda2',
-			{
-				statements: [
-					new PolicyStatement({
-						effect: Effect.ALLOW,
-						actions: ['sqs:sendmessage'],
-						resources: [
-							`arn:aws:sqs:${this.region}:${this.account}:braze-emails-${this.stage}`,
-						],
-					}),
-				],
-			},
+			'Allow SQS SendMessage to Braze Emails Queue',
 		);
 
-		const sqsDisputeEventsPolicy: Policy = new Policy(
-			this,
-			'SQS dispute events policy',
-			{
-				statements: [
-					new PolicyStatement({
-						effect: Effect.ALLOW,
-						actions: ['sqs:SendMessage', 'sqs:GetQueueAttributes'],
-						resources: [disputeEventsQueue.queueArn],
-					}),
-				],
-			},
-		);
-
-		const sqsDisputeEventsPolicyLambda2: Policy = new Policy(
-			this,
-			'SQS dispute events policy Lambda2',
-			{
-				statements: [
-					new PolicyStatement({
-						effect: Effect.ALLOW,
-						actions: ['sqs:SendMessage', 'sqs:GetQueueAttributes'],
-						resources: [disputeEventsQueue.queueArn],
-					}),
-				],
-			},
-		);
-
-		lambda.role?.attachInlinePolicy(s3InlinePolicy);
-		lambda.role?.attachInlinePolicy(secretsManagerPolicy);
-		lambda.role?.attachInlinePolicy(sqsEmailPolicy);
-		lambda.role?.attachInlinePolicy(sqsDisputeEventsPolicy);
-
-		lambdaForSQSConsumers.role?.attachInlinePolicy(s3InlinePolicyLambda2);
-		lambdaForSQSConsumers.role?.attachInlinePolicy(secretsManagerLambda2);
-		lambdaForSQSConsumers.role?.attachInlinePolicy(sqsEmailPolicyLambda2);
-		lambdaForSQSConsumers.role?.attachInlinePolicy(
-			sqsDisputeEventsPolicyLambda2,
+		this.createPolicyAndAttachToLambdas(
+			[
+				{ lambda: lambdaProducer, name: 'Lambda producer' },
+				{ lambda: lambdaConsumer, name: 'Lambda Consumer' },
+			],
+			[
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: ['sqs:SendMessage', 'sqs:GetQueueAttributes'],
+					resources: [disputeEventsQueue.queueArn],
+				}),
+			],
+			'Allow SQS SendMessage and GetQueueAttributes to Dispute Events Queue',
 		);
 
 		// ---- DNS ---- //
@@ -298,8 +230,8 @@ export class StripeDisputes extends GuStack {
 
 		new CfnBasePathMapping(this, 'BasePathMapping', {
 			domainName: cfnDomainName.ref,
-			restApiId: lambda.api.restApiId,
-			stage: lambda.api.deploymentStage.stageName,
+			restApiId: lambdaProducer.api.restApiId,
+			stage: lambdaProducer.api.deploymentStage.stageName,
 		});
 
 		new CfnRecordSet(this, 'DNSRecord', {
@@ -309,5 +241,23 @@ export class StripeDisputes extends GuStack {
 			ttl: '120',
 			resourceRecords: [cfnDomainName.attrRegionalDomainName],
 		});
+	}
+
+	createPolicyAndAttachToLambdas(
+		lambdasFunctions: GuLambdaFunctionOrApiItem[],
+		statements: PolicyStatement[],
+		policyName: string,
+	) {
+		lambdasFunctions.forEach((lambdaFunction: GuLambdaFunctionOrApiItem) => {
+			const policy = new Policy(
+				this,
+				`${policyName} on ${lambdaFunction.name}`,
+				{
+					statements: statements,
+				},
+			);
+			lambdaFunction.lambda.role?.attachInlinePolicy(policy);
+		});
+		return;
 	}
 }
