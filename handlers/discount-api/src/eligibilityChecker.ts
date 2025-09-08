@@ -33,11 +33,6 @@ export class EligibilityChecker {
 		);
 		const nextInvoiceItems = await getNextInvoiceItems();
 		this.assertValidState(
-			nextInvoiceItems.length > 0,
-			validationRequirements.mustHaveNextInvoice,
-			`${nextInvoiceItems.length}`,
-		);
-		this.assertValidState(
 			nextInvoiceItems.every((item) => item.amount >= 0),
 			validationRequirements.noNegativePreviewItems,
 			JSON.stringify(nextInvoiceItems),
@@ -108,7 +103,15 @@ export class EligibilityChecker {
 		);
 	};
 
-	assertValidState = (isValid: boolean, message: string, actual: string) => {
+	assertValidState: (
+		isValid: boolean,
+		message: string,
+		actual: string,
+	) => asserts isValid = (
+		isValid: boolean,
+		message: string,
+		actual: string,
+	): asserts isValid => {
 		this.logger.log(`Asserting <${message}>`);
 		if (!isValid) {
 			this.logger.log(
@@ -129,5 +132,5 @@ export const validationRequirements = {
 	zeroAccountBalance: 'account balance is zero',
 	atLeastCatalogPrice: 'next invoice must be at least the catalog price',
 	nextInvoiceGreaterThanZero: 'next invoice total must be greater than zero',
-	mustHaveNextInvoice: 'subscription must have an upcoming invoice',
+	mustHaveDiscountDefined: 'subscription must have a discount defined',
 };

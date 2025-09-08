@@ -25,7 +25,6 @@ import subscriptionJson2 from './fixtures/digital-subscriptions/eligibility-chec
 import subscriptionJson3 from './fixtures/digital-subscriptions/eligibility-checker-test3.json';
 import subscriptionJson1 from './fixtures/supporter-plus/free-2-months.json';
 import subSupporterPlusFullPrice from './fixtures/supporter-plus/full-price.json';
-import student from './fixtures/supporter-plus/student.json';
 
 const eligibilityChecker = new EligibilityChecker(new Logger());
 const catalogProd = new ZuoraCatalogHelper(
@@ -45,7 +44,7 @@ function asLazy<T>(value: T): () => Promise<T> {
 test('Eligibility check fails for a Supporter plus which has already had the offer', async () => {
 	const sub = zuoraSubscriptionResponseSchema.parse(subscriptionJson1);
 	const billingPreview = loadBillingPreview('A-S00898839', billingPreviewJson1);
-	const discount = getDiscountFromSubscription('CODE', sub);
+	const discount = getDiscountFromSubscription(new Logger(), 'CODE', sub);
 	const after2Months = dayjs(sub.contractEffectiveDate)
 		.add(2, 'months')
 		.add(1, 'days');
@@ -96,7 +95,7 @@ test('Eligibility check fails for a S+ subscription which is on a reduced price'
 		sub.subscriptionNumber,
 		billingPreviewJson1,
 	);
-	const discount = getDiscountFromSubscription('CODE', sub);
+	const discount = getDiscountFromSubscription(new Logger(), 'CODE', sub);
 	const after2Months = dayjs(sub.contractEffectiveDate)
 		.add(2, 'months')
 		.add(1, 'days');
@@ -122,7 +121,7 @@ test('Eligibility check fails for a S+ subscription which is on a reduced price'
 
 test('Eligibility check fails for a subscription which hasnt been running long', () => {
 	const sub = zuoraSubscriptionResponseSchema.parse(subSupporterPlusFullPrice);
-	const discount = getDiscountFromSubscription('CODE', sub);
+	const discount = getDiscountFromSubscription(new Logger(), 'CODE', sub);
 	const nearlyLongEnough = dayjs(sub.contractEffectiveDate).add(2, 'months');
 
 	const ac2 = () =>
@@ -135,24 +134,13 @@ test('Eligibility check fails for a subscription which hasnt been running long',
 	expect(ac2).toThrow(validationRequirements.twoMonthsMin);
 });
 
-test('Eligibility check fails for a sub without an upcoming payment (student subscription)', async () => {
-	const sub = zuoraSubscriptionResponseSchema.parse(student);
-
-	const ac2 = () =>
-		eligibilityChecker.assertGenerallyEligible(sub, 0, () =>
-			Promise.resolve([]),
-		);
-
-	await expect(ac2).rejects.toThrow(validationRequirements.mustHaveNextInvoice);
-});
-
 test('Eligibility check works for a price risen subscription', async () => {
 	const sub = zuoraSubscriptionResponseSchema.parse(subscriptionJson2);
 	const billingPreview = loadBillingPreview(
 		sub.subscriptionNumber,
 		billingPreviewJson2,
 	);
-	const discount = getDiscountFromSubscription('PROD', sub);
+	const discount = getDiscountFromSubscription(new Logger(), 'PROD', sub);
 
 	await eligibilityChecker.assertGenerallyEligible(
 		sub,
@@ -175,7 +163,7 @@ test('Eligibility check works for supporter plus with 2 rate plans', async () =>
 		sub.subscriptionNumber,
 		billingPreviewSupporterPlusFullPrice,
 	);
-	const discount = getDiscountFromSubscription('CODE', sub);
+	const discount = getDiscountFromSubscription(new Logger(), 'CODE', sub);
 	const after2Months = dayjs(sub.contractEffectiveDate)
 		.add(2, 'months')
 		.add(1, 'days');
