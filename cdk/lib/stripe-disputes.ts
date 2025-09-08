@@ -40,7 +40,8 @@ export class StripeDisputes extends GuStack {
 		super(scope, id, props);
 
 		const app = 'stripe-disputes';
-		const nameWithStage = `${app}-${this.stage}`;
+		const nameWithStageProducer = `${app}-producer-${this.stage}`;
+		const nameWithStageConsumer = `${app}-consumer-${this.stage}`;
 
 		// ---- SQS Queues with retry and DLQ ---- //
 		const deadLetterQueue = new Queue(this, `dead-letters-${app}-queue`, {
@@ -86,7 +87,7 @@ export class StripeDisputes extends GuStack {
 		const lambdaProducer = new GuApiLambda(this, `${app}-lambda-producer`, {
 			description:
 				'A lambda that handles stripe disputes webhook events and processes SQS events',
-			functionName: `${nameWithStage}-producer`,
+			functionName: nameWithStageProducer,
 			loggingFormat: LoggingFormat.TEXT,
 			fileName: `${app}.zip`,
 			handler: 'index.handler',
@@ -99,8 +100,8 @@ export class StripeDisputes extends GuStack {
 			},
 			app: app,
 			api: {
-				id: nameWithStage,
-				restApiName: nameWithStage,
+				id: nameWithStageProducer,
+				restApiName: nameWithStageProducer,
 				description:
 					'API Gateway for Stripe dispute webhooks (sync response) with SQS event processing',
 				proxy: true,
@@ -120,7 +121,7 @@ export class StripeDisputes extends GuStack {
 			`${app}-lambda-consumer`,
 			{
 				description: 'A lambda that handles stripe disputes SQS events',
-				functionName: `${nameWithStage}-consumer`,
+				functionName: nameWithStageConsumer,
 				loggingFormat: LoggingFormat.TEXT,
 				fileName: `${app}.zip`,
 				handler: 'index.handler',
@@ -139,7 +140,7 @@ export class StripeDisputes extends GuStack {
 		);
 
 		const usagePlan = lambdaProducer.api.addUsagePlan('UsagePlan', {
-			name: nameWithStage,
+			name: nameWithStageProducer,
 			description: 'REST endpoints for stripe disputes webhook api',
 			apiStages: [
 				{
