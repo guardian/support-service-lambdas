@@ -24,7 +24,15 @@ zipFile="./handlers/$PROJECT_NAME/target/$PROJECT_NAME.zip"
 
 aws s3 cp $zipFile s3://$s3Bucket/$s3Path --profile membership --region eu-west-1
 aws lambda update-function-code \
-  --function-name $PROJECT_NAME-CODE \
+  --function-name stripe-disputes-consumer-CODE \
+  --s3-bucket $s3Bucket \
+  --s3-key $s3Path \
+  --profile membership \
+  --region eu-west-1 \
+  > /dev/null
+
+aws lambda update-function-code \
+  --function-name stripe-disputes-producer-CODE \
   --s3-bucket $s3Bucket \
   --s3-key $s3Path \
   --profile membership \

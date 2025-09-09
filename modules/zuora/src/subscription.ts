@@ -14,14 +14,29 @@ export const cancelSubscription = async (
 	contractEffectiveDate: Dayjs,
 	runBilling: boolean,
 	collect: boolean | undefined = undefined,
+	cancellationPolicy:
+		| 'SpecificDate'
+		| 'EndOfLastInvoicePeriod' = 'SpecificDate',
 ): Promise<ZuoraResponse> => {
 	const path = `/v1/subscriptions/${subscriptionNumber}/cancel`;
-	const body = JSON.stringify({
-		cancellationEffectiveDate: zuoraDateFormat(contractEffectiveDate),
-		cancellationPolicy: 'SpecificDate',
+	const requestBody: any = {
+		cancellationPolicy,
 		runBilling,
-		collect,
-	});
+	};
+
+	// Only include cancellationEffectiveDate for SpecificDate policy
+	if (cancellationPolicy === 'SpecificDate') {
+		requestBody.cancellationEffectiveDate = zuoraDateFormat(
+			contractEffectiveDate,
+		);
+	}
+
+	// Only include collect if it's not undefined
+	if (collect !== undefined) {
+		requestBody.collect = collect;
+	}
+
+	const body = JSON.stringify(requestBody);
 	return zuoraClient.put(path, body, zuoraResponseSchema, {
 		'zuora-version': '211.0',
 	});
