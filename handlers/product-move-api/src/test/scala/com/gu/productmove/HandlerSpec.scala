@@ -34,7 +34,7 @@ import zio.*
 import zio.test.*
 import zio.test.Assertion.*
 
-import java.time.{LocalDate, LocalDateTime, OffsetDateTime, ZoneOffset}
+import java.time.{LocalDate, LocalDateTime, OffsetDateTime, ZoneId, ZoneOffset}
 import scala.language.postfixOps
 
 object HandlerSpec extends ZIOSpecDefault {
@@ -115,6 +115,7 @@ object HandlerSpec extends ZIOSpecDefault {
             endpointJsonInputBody,
             getSubscriptionResponse,
             getAccountResponse,
+            LocalDate.ofInstant(time3, ZoneId.systemDefault()),
           )
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
@@ -158,6 +159,7 @@ object HandlerSpec extends ZIOSpecDefault {
             endpointJsonInputBody,
             getSubscriptionResponse,
             getAccountResponse,
+            LocalDate.ofInstant(time, ZoneId.systemDefault()),
           )
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
@@ -203,6 +205,7 @@ object HandlerSpec extends ZIOSpecDefault {
             endpointJsonInputBody,
             getSubscriptionResponse,
             getAccountResponse,
+            LocalDate.ofInstant(time, ZoneId.systemDefault()),
           )
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
@@ -246,6 +249,7 @@ object HandlerSpec extends ZIOSpecDefault {
             endpointJsonInputBody,
             getSubscriptionResponse,
             getAccountResponse,
+            LocalDate.ofInstant(time3, ZoneId.systemDefault()),
           )
         } yield {
           assert(output)(equalTo(subscriptionUpdatePreviewResult2)) &&
@@ -284,6 +288,7 @@ object HandlerSpec extends ZIOSpecDefault {
             endpointJsonInputBody,
             getSubscriptionResponse,
             getAccountResponse,
+            LocalDate.ofInstant(time, ZoneId.systemDefault()),
           )
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
@@ -323,6 +328,7 @@ object HandlerSpec extends ZIOSpecDefault {
             endpointJsonInputBody,
             getSubscriptionResponseNeedingTermRenewal, // Using the term renewal scenario
             getAccountResponse,
+            LocalDate.ofInstant(time, ZoneId.systemDefault()),
           )
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
@@ -362,6 +368,7 @@ object HandlerSpec extends ZIOSpecDefault {
             endpointJsonInputBody,
             getSubscriptionResponse,
             getAccountResponse,
+            LocalDate.ofInstant(time, ZoneId.systemDefault()),
           )
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
@@ -399,6 +406,7 @@ object HandlerSpec extends ZIOSpecDefault {
             endpointJsonInputBody,
             getSubscriptionResponse,
             getAccountResponse,
+            LocalDate.ofInstant(time, ZoneId.systemDefault()),
           )
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
@@ -446,6 +454,7 @@ object HandlerSpec extends ZIOSpecDefault {
             endpointJsonInputBody,
             getSubscriptionResponse,
             getAccountResponse,
+            LocalDate.ofInstant(time2, ZoneId.systemDefault()),
           )
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
