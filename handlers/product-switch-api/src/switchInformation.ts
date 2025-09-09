@@ -199,7 +199,7 @@ export const getSwitchInformationWithOwnerCheck = async (
 	// Only validate when newAmount is explicitly provided by the frontend
 	if (input.newAmount && userDesiredAmount < actualBasePrice) {
 		throw new ValidationError(
-			`Cannot switch to Supporter Plus: desired amount (${userDesiredAmount}) is less than the minimum Supporter Plus price (${actualBasePrice}). Use the  members-data-api to modify contribution amounts instead.`,
+			`Cannot switch to Supporter Plus: desired amount (${userDesiredAmount}) is less than the minimum Supporter Plus price (${actualBasePrice}). Use the members-data-api to modify contribution amounts instead.`,
 		);
 	}
 
