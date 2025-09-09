@@ -29,11 +29,7 @@ loadConfig('CODE', 'support', 'mparticle-api', ConfigSchema).then((config) => {
 	const mParticleDataSubjectClient =
 		MParticleClient.createMParticleDataSubjectClient(config.workspace);
 
-	const batonS3Writer = new BatonS3WriterImpl(
-		sarResultsBucket,
-		sarS3BaseKey,
-		() => new Date(),
-	);
+	const batonS3Writer = new BatonS3WriterImpl(sarResultsBucket, sarS3BaseKey);
 
 	handleSarStatus(
 		mParticleDataSubjectClient,

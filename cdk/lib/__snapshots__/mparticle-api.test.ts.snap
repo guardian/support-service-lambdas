@@ -5,8 +5,6 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuLambdaFunction",
-      "GuLambdaFunction",
       "GuApiGatewayWithLambdaByPath",
     ],
     "gu:cdk:version": "TEST",
@@ -621,20 +619,36 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "s3:PutObject",
+              "Action": [
+                "s3:PutObject",
+                "s3:ListBucket",
+              ],
               "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:s3:::",
-                    {
-                      "Ref": "SarResultsBucketParameter",
-                    },
-                    "/mparticle-results/*",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "SarResultsBucketParameter",
+                      },
+                      "/mparticle-results/*",
+                    ],
                   ],
-                ],
-              },
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "SarResultsBucketParameter",
+                      },
+                    ],
+                  ],
+                },
+              ],
             },
             {
               "Action": [
@@ -952,8 +966,6 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuLambdaFunction",
-      "GuLambdaFunction",
       "GuApiGatewayWithLambdaByPath",
     ],
     "gu:cdk:version": "TEST",
@@ -1785,20 +1797,36 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "s3:PutObject",
+              "Action": [
+                "s3:PutObject",
+                "s3:ListBucket",
+              ],
               "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:s3:::",
-                    {
-                      "Ref": "SarResultsBucketParameter",
-                    },
-                    "/mparticle-results/*",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "SarResultsBucketParameter",
+                      },
+                      "/mparticle-results/*",
+                    ],
                   ],
-                ],
-              },
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "SarResultsBucketParameter",
+                      },
+                    ],
+                  ],
+                },
+              ],
             },
             {
               "Action": [

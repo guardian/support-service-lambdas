@@ -133,7 +133,6 @@ function createRealServicesToTestEndpoints(
 	const realS3Client: BatonS3Writer = new BatonS3WriterImpl(
 		bucketName,
 		sarS3BaseKey,
-		() => new Date(Date.parse('2025-08-06T18:19:42.123Z')),
 	);
 	return {
 		manageURLDataSubjectClient,
