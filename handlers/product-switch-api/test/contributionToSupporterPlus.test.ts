@@ -442,6 +442,6 @@ test('When newAmount is less than base Supporter Plus price, it throws a validat
 			today,
 		),
 	).rejects.toThrow(
-		'Cannot switch to Supporter Plus: desired amount (80) is less than the minimum Supporter Plus price (120). Use the update-supporter-plus-amount API to modify contribution amounts instead.',
+		'Cannot switch to Supporter Plus: desired amount (80) is less than the minimum Supporter Plus price (120). Use the members-data-api to modify contribution amounts instead.',
 	);
 });
