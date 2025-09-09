@@ -29,7 +29,11 @@ export type OrderRequest = AccountOrderRequest & {
 	subscriptions: Array<{
 		subscriptionNumber?: string;
 		orderActions: OrderAction[];
-		customFields?: Record<string, string>;
+		customFields?: {
+			LastPlanAddedDate__c?: string;
+			DeliveryAgent__c?: string;
+			ReaderType__c?: string;
+		};
 	}>;
 };
 export type PreviewOrderRequest = OrderRequest & {

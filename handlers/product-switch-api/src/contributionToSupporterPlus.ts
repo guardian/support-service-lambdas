@@ -6,6 +6,7 @@ import type {
 import { singleTriggerDate } from '@modules/zuora/orders/orderActions';
 import type {
 	CreateOrderRequest,
+	OrderRequest,
 	PreviewOrderRequest,
 } from '@modules/zuora/orders/orderRequests';
 import type {
@@ -288,7 +289,7 @@ function buildNewTermOrderActions(orderDate: dayjs.Dayjs): OrderAction[] {
 	return [
 		{
 			type: 'TermsAndConditions',
-            triggerDates: singleTriggerDate(orderDate),
+			triggerDates: singleTriggerDate(orderDate),
 			termsAndConditions: {
 				lastTerm: {
 					termType: 'TERMED',
@@ -298,8 +299,7 @@ function buildNewTermOrderActions(orderDate: dayjs.Dayjs): OrderAction[] {
 		},
 		{
 			type: 'RenewSubscription',
-            triggerDates: singleTriggerDate(orderDate),
-			renewSubscription: {},
+			triggerDates: singleTriggerDate(orderDate),
 		},
 	];
 }
@@ -334,7 +334,7 @@ const buildPreviewRequestBody = (
 function buildSwitchRequestWithoutOptions(
 	productSwitchInformation: SwitchInformation,
 	orderDate: dayjs.Dayjs,
-): Omit<CreateOrderRequest, 'processingOptions'> {
+): OrderRequest {
 	const { startNewTerm, contributionAmount, catalog } =
 		productSwitchInformation;
 	const { accountNumber, subscriptionNumber } =

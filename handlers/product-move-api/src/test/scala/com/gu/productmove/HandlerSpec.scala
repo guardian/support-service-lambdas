@@ -328,6 +328,7 @@ object HandlerSpec extends ZIOSpecDefault {
             endpointJsonInputBody,
             getSubscriptionResponseNeedingTermRenewal, // Using the term renewal scenario
             getAccountResponse,
+            LocalDate.ofInstant(time, ZoneId.systemDefault()),
           )
         } yield {
           assert(output)(equalTo(expectedOutput)) &&
