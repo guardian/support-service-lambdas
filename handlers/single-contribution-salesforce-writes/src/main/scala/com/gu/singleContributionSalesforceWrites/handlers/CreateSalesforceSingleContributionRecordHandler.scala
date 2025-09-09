@@ -19,6 +19,7 @@ case class PaymentApiMessageDetail(
     postalCode: Option[String],
     state: Option[String],
     email: String,
+    paypalTransactionId: Option[String],
 )
 
 case class PaymentApiMessage(

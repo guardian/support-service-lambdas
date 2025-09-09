@@ -1,9 +1,10 @@
 import { sum } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import { Lazy } from '@modules/lazy';
+import type { Logger } from '@modules/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
-import { addDiscount, previewDiscount } from '@modules/zuora/addDiscount';
+import { getAccount } from '@modules/zuora/account';
 import {
 	getBillingPreview,
 	getNextInvoice,
@@ -13,16 +14,12 @@ import {
 	itemsForSubscription,
 	toSimpleInvoiceItems,
 } from '@modules/zuora/billingPreview';
-import { zuoraDateFormat } from '@modules/zuora/common';
-import { getAccount } from '@modules/zuora/getAccount';
-import { getSubscription } from '@modules/zuora/getSubscription';
-import type { Logger } from '@modules/zuora/logger';
+import { addDiscount, previewDiscount } from '@modules/zuora/discount';
 import { isNotRemovedOrDiscount } from '@modules/zuora/rateplan';
+import { getSubscription } from '@modules/zuora/subscription';
+import type { ZuoraAccount, ZuoraSubscription } from '@modules/zuora/types';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type {
-	ZuoraAccount,
-	ZuoraSubscription,
-} from '@modules/zuora/zuoraSchemas';
 import { getZuoraCatalog } from '@modules/zuora-catalog/S3';
 import type { APIGatewayProxyEventHeaders } from 'aws-lambda';
 import dayjs from 'dayjs';

@@ -9,6 +9,9 @@ import play.api.libs.json.{Json, Reads}
 
 object SalesforceClient extends LazyLogging {
 
+  //one or both headers must be present in the request and cannot be duplicated
+  private val AuthHeaderNames: Set[String] = Set("Authorization", "X-SFDC-Session")
+
   def auth(
       getResponse: Request => Response,
       config: SFAuthConfig,
@@ -28,8 +31,11 @@ object SalesforceClient extends LazyLogging {
 
   private def withAuthAndBaseUrl(sfAuth: SalesforceAuth)(requestInfo: StringHttpRequest): Request = {
     val builder = requestInfo.requestMethod.builder
-    val authHeaders = getAuthHeaders(sfAuth.access_token)
-    val headersWithAuth: List[Header] = requestInfo.headers ++ authHeaders
+    val headerNamesInRequest = requestInfo.headers.map(_.name.toLowerCase).toSet
+    val hasAuthHeader = AuthHeaderNames.map(_.toLowerCase).intersect(headerNamesInRequest).nonEmpty
+    val headersWithAuth =     
+      if (hasAuthHeader) requestInfo.headers
+      else requestInfo.headers ++ getAuthHeaders(sfAuth.access_token)
 
     val builderWithHeaders = headersWithAuth.foldLeft(builder)((builder: Request.Builder, header: Header) => {
       builder.addHeader(header.name, header.value)
@@ -48,12 +54,16 @@ object SalesforceClient extends LazyLogging {
   ): StringHttpRequest => StringHttpRequest =
     withMaybeAlternateAccessToken(headers.flatMap(_.get("X-Ephemeral-Salesforce-Access-Token")))
 
+
   def withMaybeAlternateAccessToken(
       maybeAlternateAccessToken: Option[String],
   )(requestInfo: StringHttpRequest): StringHttpRequest =
     maybeAlternateAccessToken
       .map { alternateAccessToken =>
-        requestInfo.copy(headers = requestInfo.headers ++ getAuthHeaders(alternateAccessToken))
+        val nonAuthHeaders = requestInfo.headers.filterNot(header =>
+          AuthHeaderNames.map(_.toLowerCase).contains(header.name.toLowerCase)
+        )
+        requestInfo.copy(headers = nonAuthHeaders ++ getAuthHeaders(alternateAccessToken))
       }
       .getOrElse(requestInfo)
 

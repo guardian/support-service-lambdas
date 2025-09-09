@@ -198,6 +198,7 @@ object ProductMoveEndpoint {
           new SubscriptionUpdateLive(
             new ZuoraGetLive(ZuoraClientLive.impl(SecretsLive.impl(creds, stage), sttpClient).get),
           ),
+          TermRenewalLive(zuoraGet),
           SQSLive.impl(stage, creds).get,
           stage,
         ),

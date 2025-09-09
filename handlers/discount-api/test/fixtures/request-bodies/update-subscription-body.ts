@@ -1,4 +1,4 @@
-import { zuoraDateFormat } from '@modules/zuora/common';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { Dayjs } from 'dayjs';
 
 export const updateSubscriptionBody = (

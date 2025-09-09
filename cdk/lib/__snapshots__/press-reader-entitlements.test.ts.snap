@@ -7,7 +7,6 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
       "GuDistributionBucketParameter",
       "GuApiLambda",
       "GuApiGateway5xxPercentageAlarm",
-      "GuAlarm",
       "GuCname",
     ],
     "gu:cdk:version": "TEST",
@@ -83,6 +82,38 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
         "Namespace": "AWS/ApiGateway",
         "Period": 300,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "pressreaderentitlementslambda849A2923",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
         "Threshold": 10,
       },
       "Type": "AWS::CloudWatch::Alarm",
@@ -153,6 +184,24 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
               "Stat": "SampleCount",
             },
             "ReturnData": false,
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
           },
         ],
         "Threshold": 5,
@@ -290,6 +339,9 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
         },
         "FunctionName": "press-reader-entitlements-CODE",
         "Handler": "index.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
@@ -994,7 +1046,6 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
       "GuDistributionBucketParameter",
       "GuApiLambda",
       "GuApiGateway5xxPercentageAlarm",
-      "GuAlarm",
       "GuCname",
     ],
     "gu:cdk:version": "TEST",
@@ -1070,6 +1121,38 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
         "Namespace": "AWS/ApiGateway",
         "Period": 300,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "pressreaderentitlementslambda849A2923",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
         "Threshold": 10,
       },
       "Type": "AWS::CloudWatch::Alarm",
@@ -1140,6 +1223,24 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
               "Stat": "SampleCount",
             },
             "ReturnData": false,
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
           },
         ],
         "Threshold": 5,
@@ -1277,6 +1378,9 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
         },
         "FunctionName": "press-reader-entitlements-PROD",
         "Handler": "index.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [

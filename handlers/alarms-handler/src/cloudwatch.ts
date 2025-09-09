@@ -1,52 +1,69 @@
+import type { MetricAlarm, Tag } from '@aws-sdk/client-cloudwatch';
 import {
 	CloudWatchClient,
+	DescribeAlarmsCommand,
 	ListTagsForResourceCommand,
 } from '@aws-sdk/client-cloudwatch';
-import type { Tag } from '@aws-sdk/client-cloudwatch';
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
+import { flatten } from '@modules/arrayFunctions';
+import { awsConfig, getAwsConfig, isRunningLocally } from '@modules/aws/config';
+import { fetchAllPages } from '@modules/aws/fetchAllPages';
+import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
+import type { Accounts } from './configSchema';
 
-const buildCrossAccountCloudwatchClient = (roleArn: string) => {
-	const credentials = fromTemporaryCredentials({
-		params: { RoleArn: roleArn },
-	});
+const buildCrossAccountCloudwatchClient = (
+	roleArn: string,
+	profile: string,
+) => {
+	const config = isRunningLocally
+		? getAwsConfig(profile)
+		: {
+				region: 'eu-west-1',
+				credentials: fromTemporaryCredentials({ params: { RoleArn: roleArn } }),
+			};
 
-	return new CloudWatchClient({ region: 'eu-west-1', credentials });
+	return new CloudWatchClient(config);
 };
 
-// Use the awsAccountId of the alarm to decide which credentials are needed to fetch the alarm's tags
-const buildCloudwatchClient = (awsAccountId: string): CloudWatchClient => {
-	const mobileAccountId = getIfDefined<string>(
-		process.env['MOBILE_AWS_ACCOUNT_ID'],
-		'MOBILE_AWS_ACCOUNT_ID environment variable not set',
-	);
-	if (awsAccountId === mobileAccountId) {
-		console.log('Using mobile account credentials to fetch tags');
+type CloudWatchClients = {
+	mobile: CloudWatchClient;
+	targeting: CloudWatchClient;
+	membership: CloudWatchClient;
+};
 
-		const roleArn = getIfDefined<string>(
-			process.env['MOBILE_ROLE_ARN'],
-			'MOBILE_ROLE_ARN environment variable not set',
-		);
+export type AlarmWithTags = { alarm: MetricAlarm; tags: Lazy<Tags> };
 
-		return buildCrossAccountCloudwatchClient(roleArn);
-	}
+export type Cloudwatch = {
+	getTags: (alarmArn: string, awsAccountId: string) => Promise<Tags>;
+	getAllAlarmsInAlarm: () => Promise<AlarmWithTags[]>;
+};
 
-	const targetingAccountId = getIfDefined<string>(
-		process.env['TARGETING_AWS_ACCOUNT_ID'],
-		'TARGETING_AWS_ACCOUNT_ID environment variable not set',
-	);
-	if (awsAccountId === targetingAccountId) {
-		console.log('Using targeting account credentials to fetch tags');
+export const buildCloudwatch = (config: Accounts) => {
+	const { MOBILE, TARGETING } = config;
+	const cloudwatchClients: CloudWatchClients = {
+		membership: new CloudWatchClient(awsConfig),
+		mobile: buildCrossAccountCloudwatchClient(MOBILE.roleArn, 'mobile'),
+		targeting: buildCrossAccountCloudwatchClient(
+			TARGETING.roleArn,
+			'targeting',
+		),
+	};
 
-		const roleArn = getIfDefined<string>(
-			process.env['TARGETING_ROLE_ARN'],
-			'TARGETING_ROLE_ARN environment variable not set',
-		);
+	// Use the awsAccountId of the alarm to decide which credentials are needed to fetch the alarm's tags
+	const buildCloudwatchClient = (awsAccountId: string): CloudWatchClient => {
+		const accountIds = {
+			[config.MOBILE.id]: 'mobile',
+			[config.TARGETING.id]: 'targeting',
+		} as const;
+		return cloudwatchClients[accountIds[awsAccountId] ?? 'membership'];
+	};
 
-		return buildCrossAccountCloudwatchClient(roleArn);
-	}
-
-	return new CloudWatchClient({ region: 'eu-west-1' });
+	return {
+		getTags: (alarmArn: string, awsAccountId: string) =>
+			getTags(alarmArn, buildCloudwatchClient(awsAccountId)),
+		getAllAlarmsInAlarm: () => getAllAlarmsInAlarm(cloudwatchClients),
+	};
 };
 
 export type Tags = {
@@ -54,12 +71,10 @@ export type Tags = {
 	DiagnosticLinks?: string;
 };
 
-export const getTags = async (
+const getTags = async (
 	alarmArn: string,
-	awsAccountId: string,
+	client: CloudWatchClient,
 ): Promise<Tags> => {
-	const client = buildCloudwatchClient(awsAccountId);
-
 	const request = new ListTagsForResourceCommand({
 		ResourceARN: alarmArn,
 	});
@@ -71,3 +86,42 @@ export const getTags = async (
 	);
 	return Object.fromEntries(entries) as Tags;
 };
+
+export async function getAllAlarmsInAlarm(
+	cloudwatchClients: Record<string, CloudWatchClient>,
+): Promise<AlarmWithTags[]> {
+	return Promise.all(
+		Object.entries(cloudwatchClients).map(async ([accountName, client]) => {
+			console.log('checking account ' + accountName);
+			return await getAlarmsInAlarmForClient(client);
+		}),
+	).then(flatten);
+}
+
+const getAlarmsInAlarmForClient = async (
+	client: CloudWatchClient,
+): Promise<AlarmWithTags[]> =>
+	fetchAllPages(async (token) => {
+		const request = new DescribeAlarmsCommand({
+			StateValue: 'ALARM',
+			NextToken: token,
+		});
+		const response = await client.send(request);
+		const metricAlarms = getIfDefined(
+			response.MetricAlarms,
+			'response didnt include MetricAlarms',
+		);
+		return {
+			nextToken: response.NextToken,
+			thisPage: metricAlarms.map((alarm) => {
+				const alarmArn = getIfDefined(alarm.AlarmArn, 'no alarm ARN');
+				return {
+					alarm,
+					tags: new Lazy(
+						() => getTags(alarmArn, client),
+						'tags for ' + alarmArn,
+					),
+				};
+			}),
+		};
+	});

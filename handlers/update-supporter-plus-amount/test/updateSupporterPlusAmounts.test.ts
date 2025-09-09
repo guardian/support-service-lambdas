@@ -1,7 +1,7 @@
+import { Logger } from '@modules/logger';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
-import { Logger } from '@modules/zuora/logger';
-import { zuoraSubscriptionResponseSchema } from '@modules/zuora/zuoraSchemas';
+import { zuoraSubscriptionResponseSchema } from '@modules/zuora/types';
 import zuoraCatalogFixture from '../../../modules/zuora-catalog/test/fixtures/catalog-code.json';
 import { getSupporterPlusData } from '../src/updateSupporterPlusAmount';
 import subscriptionJson from './fixtures/subscription.json';

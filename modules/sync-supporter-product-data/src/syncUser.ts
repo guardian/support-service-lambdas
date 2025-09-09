@@ -3,12 +3,26 @@ import { awsConfig } from '@modules/aws/config';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
-import { zuoraDateFormat } from '@modules/zuora/common';
-import { getActiveAccountNumbersForIdentityId } from '@modules/zuora/getAccountsForIdentityId';
-import { getSubscriptionsByAccountNumber } from '@modules/zuora/getSubscription';
+import { doQuery } from '@modules/zuora/query';
+import { getSubscriptionsByAccountNumber } from '@modules/zuora/subscription';
+import { createQueryResponseSchema } from '@modules/zuora/types';
+import type { RatePlan, ZuoraSubscription } from '@modules/zuora/types';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { RatePlan, ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
+import { z } from 'zod';
+
+export const getActiveAccountNumbersForIdentityId = async (
+	zuoraClient: ZuoraClient,
+	identityId: string,
+) => {
+	const query = `select accountNumber from account where status = 'Active' and IdentityId__c = '${identityId}'`;
+	const queryResponseSchema = createQueryResponseSchema({
+		AccountNumber: z.string(),
+	});
+	const result = await doQuery(zuoraClient, query, queryResponseSchema);
+	return result.records?.map((record) => record.AccountNumber);
+};
 
 type MessageBody = {
 	subscriptionName: string;
@@ -44,7 +58,7 @@ void (async () => {
 	);
 	const subscriptions = (
 		await Promise.all(
-			accountNumbers.map((accountNumber) =>
+			(accountNumbers ?? []).map((accountNumber) =>
 				getSubscriptionsByAccountNumber(client, accountNumber),
 			),
 		)

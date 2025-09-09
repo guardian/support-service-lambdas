@@ -1,13 +1,13 @@
+import { Logger } from '@modules/logger';
 import {
 	getNextInvoiceItems,
 	itemsForSubscription,
 	toSimpleInvoiceItems,
 } from '@modules/zuora/billingPreview';
-import { Logger } from '@modules/zuora/logger';
 import {
 	billingPreviewSchema,
 	zuoraSubscriptionResponseSchema,
-} from '@modules/zuora/zuoraSchemas';
+} from '@modules/zuora/types';
 import { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';

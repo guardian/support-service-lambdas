@@ -2,17 +2,29 @@ import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
-import { Duration } from 'aws-cdk-lib';
+import { aws_cloudwatch, Duration } from 'aws-cdk-lib';
+import { Metric, Stats, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
+import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
+import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import {
 	Effect,
 	PolicyStatement,
 	Role,
 	ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
-import { Architecture } from 'aws-cdk-lib/aws-lambda';
-// import { Bucket } from 'aws-cdk-lib/aws-s3';
-import { DefinitionBody, StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
+import { Architecture, LoggingFormat } from 'aws-cdk-lib/aws-lambda';
+import { Bucket } from 'aws-cdk-lib/aws-s3';
+import {
+	Choice,
+	Condition,
+	DefinitionBody,
+	JsonPath,
+	Map,
+	Pass,
+	StateMachine,
+} from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
+import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { nodeVersion } from './node-version';
 
 export class NegativeInvoicesProcessor extends GuStack {
@@ -52,9 +64,9 @@ export class NegativeInvoicesProcessor extends GuStack {
 			resources: ['*'],
 		});
 
-		// new Bucket(this, 'Bucket', {
-		// 	bucketName: `${appName}-${this.stage.toLowerCase()}`,
-		// });
+		const bucket = new Bucket(this, 'Bucket', {
+			bucketName: `${appName}-${this.stage.toLowerCase()}`,
+		});
 
 		const getInvoicesLambda = new GuLambdaFunction(
 			this,
@@ -62,6 +74,7 @@ export class NegativeInvoicesProcessor extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-get-invoices-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
@@ -75,19 +88,364 @@ export class NegativeInvoicesProcessor extends GuStack {
 			},
 		);
 
+		const checkForActiveSubLambda = new GuLambdaFunction(
+			this,
+			'check-for-active-sub-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-check-for-active-sub-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+				},
+				handler: 'checkForActiveSub.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['secretsmanager:GetSecretValue'],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+						],
+					}),
+				],
+			},
+		);
+
+		const getPaymentMethodsLambda = new GuLambdaFunction(
+			this,
+			'get-payment-methods-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-get-payment-methods-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+				},
+				handler: 'getPaymentMethods.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['secretsmanager:GetSecretValue'],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+						],
+					}),
+				],
+			},
+		);
+
+		const applyCreditToAccountBalanceLambda = new GuLambdaFunction(
+			this,
+			'apply-credit-to-account-balance-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-apply-credit-to-account-balance-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+				},
+				handler: 'applyCreditToAccountBalance.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['secretsmanager:GetSecretValue'],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+						],
+					}),
+				],
+			},
+		);
+
+		const doCreditBalanceRefundLambda = new GuLambdaFunction(
+			this,
+			'do-credit-balance-refund-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-do-credit-balance-refund-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+				},
+				handler: 'doCreditBalanceRefund.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['secretsmanager:GetSecretValue'],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+						],
+					}),
+				],
+			},
+		);
+
+		const saveResultsLambda = new GuLambdaFunction(
+			this,
+			'save-results-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-save-results-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+					S3_BUCKET: bucket.bucketName,
+				},
+				handler: 'saveResults.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+				initialPolicy: [
+					new PolicyStatement({
+						actions: ['s3:GetObject', 's3:PutObject'],
+						resources: [bucket.arnForObjects('*')],
+					}),
+					allowPutMetric,
+				],
+			},
+		);
+
+		const detectFailuresLambda = new GuLambdaFunction(
+			this,
+			'detect-failures-lambda',
+			{
+				app: appName,
+				functionName: `${appName}-detect-failures-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
+				runtime: nodeVersion,
+				environment: {
+					Stage: this.stage,
+				},
+				handler: 'detectFailures.handler',
+				fileName: `${appName}.zip`,
+				architecture: Architecture.ARM_64,
+				initialPolicy: [allowPutMetric],
+			},
+		);
+
 		const getInvoicesLambdaTask = new LambdaInvoke(this, 'Get invoices', {
 			lambdaFunction: getInvoicesLambda,
 			outputPath: '$.Payload',
 		}).addRetry({
 			errors: ['States.ALL'],
 			interval: Duration.seconds(10),
-			maxAttempts: 2, // Retry only once (1 initial attempt + 1 retry)
+			maxAttempts: 2,
 		});
-		const definitionBody = DefinitionBody.fromChainable(getInvoicesLambdaTask);
 
-		new StateMachine(this, `${appName}-state-machine-${this.stage}`, {
-			stateMachineName: `${appName}-${this.stage}`,
-			definitionBody: definitionBody,
+		const checkForActiveSubLambdaTask = new LambdaInvoke(
+			this,
+			'Check for Active Sub',
+			{
+				lambdaFunction: checkForActiveSubLambda,
+				outputPath: '$.Payload',
+			},
+		).addRetry({
+			errors: ['States.ALL'],
+			interval: Duration.seconds(10),
+			maxAttempts: 2,
+		});
+
+		const getPaymentMethodsLambdaTask = new LambdaInvoke(
+			this,
+			'Get Payment Methods',
+			{
+				lambdaFunction: getPaymentMethodsLambda,
+				outputPath: '$.Payload',
+			},
+		).addRetry({
+			errors: ['States.ALL'],
+			interval: Duration.seconds(10),
+			maxAttempts: 2,
+		});
+
+		const applyCreditToAccountBalanceLambdaTask = new LambdaInvoke(
+			this,
+			'Apply credit to account balance',
+			{
+				lambdaFunction: applyCreditToAccountBalanceLambda,
+				outputPath: '$.Payload',
+			},
+		).addRetry({
+			errors: ['States.ALL'],
+			interval: Duration.seconds(10),
+			maxAttempts: 2,
+		});
+
+		const doCreditBalanceRefundLambdaTask = new LambdaInvoke(
+			this,
+			'Do credit balance refund',
+			{
+				lambdaFunction: doCreditBalanceRefundLambda,
+				outputPath: '$.Payload',
+			},
+		).addRetry({
+			errors: ['States.ALL'],
+			interval: Duration.seconds(10),
+			maxAttempts: 2,
+		});
+
+		const saveResultsLambdaTask = new LambdaInvoke(this, 'Save results to S3', {
+			lambdaFunction: saveResultsLambda,
+			outputPath: '$.Payload',
+		}).addRetry({
+			errors: ['States.ALL'],
+			interval: Duration.seconds(10),
+			maxAttempts: 2,
+		});
+
+		const detectFailuresLambdaTask = new LambdaInvoke(
+			this,
+			'Alarm on failures',
+			{
+				lambdaFunction: detectFailuresLambda,
+				outputPath: '$.Payload',
+			},
+		);
+
+		const invoiceProcessorMap = new Map(this, 'Invoice processor map', {
+			maxConcurrency: 1,
+			itemsPath: JsonPath.stringAt('$.invoices'),
+			resultPath: '$.processedInvoices',
+		});
+
+		const hasActivePaymentMethodChoice = new Choice(
+			this,
+			'Has active payment method?',
+		)
+			.when(
+				Condition.booleanEquals(
+					'$.activePaymentMethodResult.hasActivePaymentMethod',
+					true,
+				),
+				doCreditBalanceRefundLambdaTask,
+			)
+			.otherwise(new Pass(this, 'No active payment method found'));
+
+		const activePaymentMethodCalloutWasSuccessful = new Choice(
+			this,
+			'Successful active payment method callout?',
+		)
+			.when(
+				Condition.booleanEquals(
+					'$.activePaymentMethodResult.checkForActivePaymentMethodAttempt.Success',
+					true,
+				),
+
+				hasActivePaymentMethodChoice,
+			)
+			.otherwise(
+				new Pass(this, 'Error: active payment method check unsuccessful'),
+			);
+
+		const hasActiveSubChoice = new Choice(this, 'Has active sub?')
+			.when(
+				Condition.and(
+					Condition.booleanEquals(
+						'$.activeSubResult.hasActiveSubscription',
+						false,
+					),
+				),
+				getPaymentMethodsLambdaTask.next(
+					activePaymentMethodCalloutWasSuccessful,
+				),
+			)
+			.otherwise(new Pass(this, 'Has active sub: true'));
+
+		const activeSubCalloutWasSuccessful = new Choice(
+			this,
+			'Successful active sub callout?',
+		)
+			.when(
+				Condition.booleanEquals(
+					'$.activeSubResult.checkForActiveSubAttempt.Success',
+					true,
+				),
+
+				hasActiveSubChoice,
+			)
+			.otherwise(new Pass(this, 'Error: active sub check unsuccessful'));
+
+		const CreditAppliedSuccessfullyChoice = new Choice(
+			this,
+			'Credit applied successfully?',
+		)
+			.when(
+				Condition.booleanEquals(
+					'$.applyCreditToAccountBalanceResult.applyCreditToAccountBalanceAttempt.Success',
+					true,
+				),
+				checkForActiveSubLambdaTask.next(activeSubCalloutWasSuccessful),
+			)
+			.otherwise(new Pass(this, 'Error: apply credit unsuccessful'));
+
+		invoiceProcessorMap.iterator(
+			applyCreditToAccountBalanceLambdaTask.next(
+				CreditAppliedSuccessfullyChoice,
+			),
+		);
+
+		const definitionBody = DefinitionBody.fromChainable(
+			getInvoicesLambdaTask
+				.next(invoiceProcessorMap)
+				.next(saveResultsLambdaTask)
+				.next(detectFailuresLambdaTask),
+		);
+
+		const stateMachine = new StateMachine(
+			this,
+			`${appName}-state-machine-${this.stage}`,
+			{
+				stateMachineName: `${appName}-${this.stage}`,
+				definitionBody: definitionBody,
+			},
+		);
+
+		const lambdaFunctionsToAlarmOn = [getInvoicesLambda, detectFailuresLambda];
+
+		lambdaFunctionsToAlarmOn.forEach((lambdaFunction, index) => {
+			new SrLambdaAlarm(this, `alarm-${index}`, {
+				alarmName: `Negative Invoices Processor - ${lambdaFunction.functionName} - something went wrong - ${this.stage}`,
+				alarmDescription:
+					'Something went wrong when executing the Negative Invoices Processor. See Cloudwatch logs for more information on the error.',
+				datapointsToAlarm: 1,
+				evaluationPeriods: 1,
+				lambdaFunctionNames: lambdaFunction.functionName,
+				comparisonOperator:
+					aws_cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+				metric: new Metric({
+					metricName: 'Errors',
+					namespace: 'AWS/Lambda',
+					statistic: Stats.SUM,
+					period: Duration.seconds(60),
+					dimensionsMap: {
+						FunctionName: lambdaFunction.functionName,
+					},
+				}),
+				threshold: 0,
+				treatMissingData: TreatMissingData.MISSING,
+				app: appName,
+				actionsEnabled: this.stage === 'PROD',
+			});
+		});
+
+		const cronEveryDayAtNoon = { minute: '0', hour: '11' };
+		const cronOncePerYear = { minute: '0', hour: '0', day: '1', month: '1' };
+
+		const executionFrequency =
+			this.stage === 'PROD' ? cronEveryDayAtNoon : cronOncePerYear;
+
+		new Rule(this, 'ScheduleStateMachineRule', {
+			schedule: Schedule.cron(executionFrequency),
+			targets: [new SfnStateMachine(stateMachine)],
+			enabled: true,
 		});
 	}
 }

@@ -1,17 +1,20 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
-import { zuoraDateFormat } from '@modules/zuora/common';
 import type {
 	ChangePlanOrderAction,
-	CreateOrderRequest,
 	OrderAction,
+} from '@modules/zuora/orders/orderActions';
+import { singleTriggerDate } from '@modules/zuora/orders/orderActions';
+import type {
+	CreateOrderRequest,
 	PreviewOrderRequest,
-} from '@modules/zuora/orders';
-import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+} from '@modules/zuora/orders/orderRequests';
 import type {
 	RatePlan,
 	RatePlanCharge,
 	ZuoraSubscription,
-} from '@modules/zuora/zuoraSchemas';
+} from '@modules/zuora/types/objects/subscription';
+import { zuoraDateFormat } from '@modules/zuora/utils/common';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import { removePendingUpdateAmendments } from './amendments';
@@ -245,20 +248,7 @@ const buildAddDiscountOrderAction = (
 	return [
 		{
 			type: 'AddProduct',
-			triggerDates: [
-				{
-					name: 'ContractEffective',
-					triggerDate: zuoraDateFormat(orderDate),
-				},
-				{
-					name: 'ServiceActivation',
-					triggerDate: zuoraDateFormat(orderDate),
-				},
-				{
-					name: 'CustomerAcceptance',
-					triggerDate: zuoraDateFormat(orderDate),
-				},
-			],
+			triggerDates: singleTriggerDate(orderDate),
 			addProduct: {
 				productRatePlanId: discount.productRatePlanId,
 			},
@@ -273,20 +263,7 @@ const buildChangePlanOrderAction = (
 ): ChangePlanOrderAction => {
 	return {
 		type: 'ChangePlan',
-		triggerDates: [
-			{
-				name: 'ContractEffective',
-				triggerDate: zuoraDateFormat(orderDate),
-			},
-			{
-				name: 'ServiceActivation',
-				triggerDate: zuoraDateFormat(orderDate),
-			},
-			{
-				name: 'CustomerAcceptance',
-				triggerDate: zuoraDateFormat(orderDate),
-			},
-		],
+		triggerDates: singleTriggerDate(orderDate),
 		changePlan: {
 			productRatePlanId: catalog.contribution.productRatePlanId,
 			subType: 'Upgrade',
@@ -311,20 +288,7 @@ function buildNewTermOrderActions(orderDate: dayjs.Dayjs): OrderAction[] {
 	return [
 		{
 			type: 'TermsAndConditions',
-			triggerDates: [
-				{
-					name: 'ContractEffective',
-					triggerDate: zuoraDateFormat(orderDate),
-				},
-				{
-					name: 'ServiceActivation',
-					triggerDate: zuoraDateFormat(orderDate),
-				},
-				{
-					name: 'CustomerAcceptance',
-					triggerDate: zuoraDateFormat(orderDate),
-				},
-			],
+            triggerDates: singleTriggerDate(orderDate),
 			termsAndConditions: {
 				lastTerm: {
 					termType: 'TERMED',
@@ -334,20 +298,7 @@ function buildNewTermOrderActions(orderDate: dayjs.Dayjs): OrderAction[] {
 		},
 		{
 			type: 'RenewSubscription',
-			triggerDates: [
-				{
-					name: 'ContractEffective',
-					triggerDate: zuoraDateFormat(orderDate),
-				},
-				{
-					name: 'ServiceActivation',
-					triggerDate: zuoraDateFormat(orderDate),
-				},
-				{
-					name: 'CustomerAcceptance',
-					triggerDate: zuoraDateFormat(orderDate),
-				},
-			],
+            triggerDates: singleTriggerDate(orderDate),
 			renewSubscription: {},
 		},
 	];

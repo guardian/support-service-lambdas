@@ -7,17 +7,17 @@ import console from 'console';
 import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
+import { getAccount } from '@modules/zuora/account';
 import {
 	getBillingPreview,
 	itemsForSubscription,
 	toSimpleInvoiceItems,
 } from '@modules/zuora/billingPreview';
-import { zuoraDateFormat } from '@modules/zuora/common';
-import { getAccount } from '@modules/zuora/getAccount';
-import { getSubscription } from '@modules/zuora/getSubscription';
 import { createPayment } from '@modules/zuora/payment';
+import { getSubscription } from '@modules/zuora/subscription';
+import type { ZuoraSubscription } from '@modules/zuora/types';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
 import type { ContributionTestAdditionalOptions } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import { createContribution } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
@@ -60,7 +60,7 @@ const createTestContribution = async (
 	});
 
 	const input = {
-		price: switchPrice,
+		newAmount: switchPrice,
 		preview,
 		applyDiscountIfAvailable: clientRequestedSwitchDiscount,
 	};

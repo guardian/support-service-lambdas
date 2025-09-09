@@ -1,0 +1,264 @@
+import { GuApiLambda } from '@guardian/cdk';
+import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
+import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
+import { GuStack } from '@guardian/cdk/lib/constructs/core';
+import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
+import type { App } from 'aws-cdk-lib';
+import { Duration } from 'aws-cdk-lib';
+import {
+	ApiKeySourceType,
+	CfnBasePathMapping,
+	CfnDomainName,
+} from 'aws-cdk-lib/aws-apigateway';
+import {
+	ComparisonOperator,
+	TreatMissingData,
+} from 'aws-cdk-lib/aws-cloudwatch';
+import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
+import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
+import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
+import { Queue } from 'aws-cdk-lib/aws-sqs';
+import { nodeVersion } from './node-version';
+
+export interface StripeDisputesProps extends GuStackProps {
+	stack: string;
+	stage: string;
+	certificateId: string;
+	domainName: string;
+	hostedZoneId: string;
+}
+
+type GuLambdaFunctionOrApi = GuLambdaFunction | GuApiLambda;
+type GuLambdaFunctionOrApiItem = {
+	name: string;
+	lambda: GuLambdaFunctionOrApi;
+};
+
+export class StripeDisputes extends GuStack {
+	constructor(scope: App, id: string, props: StripeDisputesProps) {
+		super(scope, id, props);
+
+		const app = 'stripe-disputes';
+		const nameWithStageProducer = `${app}-producer-${this.stage}`;
+		const nameWithStageConsumer = `${app}-consumer-${this.stage}`;
+
+		// ---- SQS Queues with retry and DLQ ---- //
+		const deadLetterQueue = new Queue(this, `dead-letters-${app}-queue`, {
+			queueName: `dead-letters-${app}-queue-${this.stage}`,
+			retentionPeriod: Duration.days(14),
+		});
+
+		const disputeEventsQueue = new Queue(this, `${app}-events-queue`, {
+			queueName: `${app}-events-queue-${this.stage}`,
+			deadLetterQueue: {
+				queue: deadLetterQueue,
+				maxReceiveCount: 3, // 3 retries before going to DLQ
+			},
+			visibilityTimeout: Duration.seconds(300), // Match lambda timeout
+		});
+
+		// ---- CloudWatch Alarm for DLQ monitoring ---- //
+		new GuAlarm(this, 'DeadLetterQueueAlarm', {
+			app: app,
+			alarmName: `${this.stage} ${app} - Failed to process dispute webhook`,
+			alarmDescription:
+				`There are one or more failed dispute webhook events in the ${app} dead letter queue (DLQ). ` +
+				`Check the attributes of the failed message(s) for details of the error and ` +
+				'ensure the Stripe webhook processing is working correctly.\n' +
+				`DLQ: https://${this.region}.console.aws.amazon.com/sqs/v2/home?region=${this.region}#/queues/https%3A%2F%2Fsqs.${this.region}.amazonaws.com%2F${this.account}%2F${deadLetterQueue.queueName}`,
+			metric: deadLetterQueue.metricApproximateNumberOfMessagesVisible(),
+			threshold: 1,
+			evaluationPeriods: 1,
+			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+			treatMissingData: TreatMissingData.IGNORE,
+			snsTopicName: `alarms-handler-topic-${this.stage}`,
+			actionsEnabled: this.stage === 'PROD',
+		});
+
+		const commonEnvironmentVariables = {
+			App: app,
+			Stack: this.stack,
+			Stage: this.stage,
+			DISPUTE_EVENTS_QUEUE_URL: disputeEventsQueue.queueUrl,
+		};
+
+		// ---- API-triggered lambda functions ---- //
+		const lambdaProducer = new GuApiLambda(this, `${app}-lambda-producer`, {
+			description:
+				'A lambda that handles stripe disputes webhook events and processes SQS events',
+			functionName: nameWithStageProducer,
+			loggingFormat: LoggingFormat.TEXT,
+			fileName: `${app}.zip`,
+			handler: 'producer.handler',
+			runtime: nodeVersion,
+			memorySize: 1024,
+			timeout: Duration.seconds(300),
+			environment: commonEnvironmentVariables,
+			monitoringConfiguration: {
+				noMonitoring: true, // There is a threshold alarm defined below
+			},
+			app: app,
+			api: {
+				id: nameWithStageProducer,
+				restApiName: nameWithStageProducer,
+				description:
+					'API Gateway for Stripe dispute webhooks (sync response) with SQS event processing',
+				proxy: true,
+				deployOptions: {
+					stageName: this.stage,
+				},
+				apiKeySourceType: ApiKeySourceType.HEADER,
+				defaultMethodOptions: {
+					apiKeyRequired: true,
+				},
+			},
+			events: [],
+		});
+
+		const lambdaConsumer = new GuLambdaFunction(
+			this,
+			`${app}-lambda-consumer`,
+			{
+				description: 'A lambda that handles stripe disputes SQS events',
+				functionName: nameWithStageConsumer,
+				loggingFormat: LoggingFormat.TEXT,
+				fileName: `${app}.zip`,
+				handler: 'consumer.handler',
+				runtime: nodeVersion,
+				memorySize: 1024,
+				timeout: Duration.seconds(300),
+				environment: commonEnvironmentVariables,
+				app: app,
+				events: [
+					new SqsEventSource(disputeEventsQueue, {
+						batchSize: 1, // Process one dispute event at a time
+						maxBatchingWindow: Duration.seconds(0), // Process immediately
+					}),
+				],
+			},
+		);
+
+		const usagePlan = lambdaProducer.api.addUsagePlan('UsagePlan', {
+			name: nameWithStageProducer,
+			description: 'REST endpoints for stripe disputes webhook api',
+			apiStages: [
+				{
+					stage: lambdaProducer.api.deploymentStage,
+					api: lambdaProducer.api,
+				},
+			],
+		});
+
+		// create api key
+		const apiKey = lambdaProducer.api.addApiKey(`${app}-key-${this.stage}`, {
+			apiKeyName: `${app}-key-${this.stage}`,
+		});
+
+		// associate api key to plan
+		usagePlan.addApiKey(apiKey);
+
+		this.createPolicyAndAttachToLambdas(
+			[
+				{ lambda: lambdaProducer, name: 'Lambda producer' },
+				{ lambda: lambdaConsumer, name: 'Lambda Consumer' },
+			],
+			[
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: ['s3:GetObject'],
+					resources: [
+						`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`,
+					],
+				}),
+			],
+			'Allow S3 Get Object',
+		);
+
+		this.createPolicyAndAttachToLambdas(
+			[{ lambda: lambdaConsumer, name: 'Lambda Consumer' }],
+			[
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: ['secretsmanager:GetSecretValue'],
+					resources: [
+						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Salesforce/ConnectedApp/StripeDisputeWebhooks-*`,
+					],
+				}),
+			],
+			'Allow Secrets Manager Get Secret Value',
+		);
+
+		this.createPolicyAndAttachToLambdas(
+			[{ lambda: lambdaConsumer, name: 'Lambda Consumer' }],
+			[
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: ['sqs:sendmessage'],
+					resources: [
+						`arn:aws:sqs:${this.region}:${this.account}:braze-emails-${this.stage}`,
+					],
+				}),
+			],
+			'Allow SQS SendMessage to Braze Emails Queue',
+		);
+
+		this.createPolicyAndAttachToLambdas(
+			[
+				{ lambda: lambdaProducer, name: 'Lambda producer' },
+				{ lambda: lambdaConsumer, name: 'Lambda Consumer' },
+			],
+			[
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: ['sqs:SendMessage', 'sqs:GetQueueAttributes'],
+					resources: [disputeEventsQueue.queueArn],
+				}),
+			],
+			'Allow SQS SendMessage and GetQueueAttributes to Dispute Events Queue',
+		);
+
+		// ---- DNS ---- //
+		const certificateArn = `arn:aws:acm:eu-west-1:${this.account}:certificate/${props.certificateId}`;
+		const cfnDomainName = new CfnDomainName(this, 'DomainName', {
+			domainName: props.domainName,
+			regionalCertificateArn: certificateArn,
+			endpointConfiguration: {
+				types: ['REGIONAL'],
+			},
+		});
+
+		new CfnBasePathMapping(this, 'BasePathMapping', {
+			domainName: cfnDomainName.ref,
+			restApiId: lambdaProducer.api.restApiId,
+			stage: lambdaProducer.api.deploymentStage.stageName,
+		});
+
+		new CfnRecordSet(this, 'DNSRecord', {
+			name: props.domainName,
+			type: 'CNAME',
+			hostedZoneId: props.hostedZoneId,
+			ttl: '120',
+			resourceRecords: [cfnDomainName.attrRegionalDomainName],
+		});
+	}
+
+	createPolicyAndAttachToLambdas(
+		lambdasFunctions: GuLambdaFunctionOrApiItem[],
+		statements: PolicyStatement[],
+		policyName: string,
+	) {
+		lambdasFunctions.forEach((lambdaFunction: GuLambdaFunctionOrApiItem) => {
+			const policy = new Policy(
+				this,
+				`${policyName} on ${lambdaFunction.name}`,
+				{
+					statements: statements,
+				},
+			);
+			lambdaFunction.lambda.role?.attachInlinePolicy(policy);
+		});
+		return;
+	}
+}

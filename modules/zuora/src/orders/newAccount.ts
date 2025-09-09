@@ -1,0 +1,86 @@
+import type { IsoCurrency } from '@modules/internationalisation/currency';
+import type {
+	PaymentGateway,
+	PaymentMethod,
+} from '@modules/zuora/orders/paymentMethods';
+
+// This file contains types for creating a new account via the Orders API.
+
+export type Contact = {
+	firstName: string;
+	lastName: string;
+	workEmail: string;
+	country: string;
+	state?: string | null;
+	city?: string; // There are a lot of optional fields on this object as digital products do not require a full address
+	address1?: string;
+	address2?: string | null;
+	postalCode?: string;
+};
+
+export type NewAccount<T extends PaymentMethod> = {
+	name: string;
+	currency: IsoCurrency;
+	crmId: string; // Salesforce accountId
+	customFields: {
+		sfContactId__c: string; // Salesforce contactId
+		IdentityId__c: string;
+		CreatedRequestId__c: string; // Support workers requestId, used to prevent duplicates
+		DeliveryAgent__c?: string; // Optional delivery agent for National Delivery products
+	};
+	billCycleDay: 0;
+	autoPay: boolean;
+	paymentGateway: PaymentGateway<T>; // Generic to make sure we will only accept payment gateways that match the payment method
+	paymentMethod: T;
+	billToContact: Contact;
+	soldToContact?: Contact & { SpecialDeliveryInstructions__c?: string };
+};
+
+// Builder function to simplify the creation of a new account object.
+export function buildNewAccountObject<T extends PaymentMethod>({
+	accountName,
+	createdRequestId,
+	salesforceAccountId,
+	salesforceContactId,
+	identityId,
+	currency,
+	paymentGateway,
+	paymentMethod,
+	billToContact,
+	soldToContact,
+	deliveryInstructions,
+}: {
+	accountName: string;
+	createdRequestId: string;
+	salesforceAccountId: string;
+	salesforceContactId: string;
+	identityId: string;
+	currency: IsoCurrency;
+	paymentGateway: PaymentGateway<T>;
+	paymentMethod: T;
+	billToContact: Contact;
+	soldToContact?: Contact;
+	deliveryInstructions?: string;
+}): NewAccount<T> {
+	return {
+		name: accountName,
+		currency,
+		crmId: salesforceAccountId,
+		customFields: {
+			sfContactId__c: salesforceContactId,
+			IdentityId__c: identityId,
+			CreatedRequestId__c: createdRequestId,
+		},
+		billCycleDay: 0,
+		autoPay: true,
+		paymentGateway,
+		paymentMethod,
+		billToContact,
+		soldToContact: soldToContact
+			? {
+					...soldToContact,
+					SpecialDeliveryInstructions__c: deliveryInstructions,
+				}
+			: undefined,
+	};
+}

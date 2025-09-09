@@ -1,5 +1,4 @@
 import { GuApiLambda } from '@guardian/cdk';
-import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuCname } from '@guardian/cdk/lib/constructs/dns';
@@ -12,7 +11,9 @@ import {
 } from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
+import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { nodeVersion } from './node-version';
 
 export interface PressReaderEntitlementsProps extends GuStackProps {
@@ -48,6 +49,7 @@ export class PressReaderEntitlements extends GuStack {
 			description:
 				'An API Gateway triggered lambda generated in the support-service-lambdas repo',
 			functionName: nameWithStage,
+			loggingFormat: LoggingFormat.TEXT,
 			fileName: `${app}.zip`,
 			handler: 'index.handler',
 			initialPolicy: [supporterProductDataTablePolicy],
@@ -103,7 +105,7 @@ export class PressReaderEntitlements extends GuStack {
 		const alarmDescription = (description: string) =>
 			`Impact - ${description}. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit`;
 
-		new GuAlarm(this, 'ApiGateway4XXAlarmCDK', {
+		new SrLambdaAlarm(this, 'ApiGateway4XXAlarmCDK', {
 			app,
 			alarmName: alarmName('API gateway 4XX response'),
 			alarmDescription: alarmDescription(
@@ -111,8 +113,7 @@ export class PressReaderEntitlements extends GuStack {
 			),
 			evaluationPeriods: 1,
 			threshold: 10,
-			snsTopicName: `alarms-handler-topic-${this.stage}`,
-			actionsEnabled: this.stage === 'PROD',
+			lambdaFunctionNames: lambda.functionName,
 			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 			metric: new Metric({
 				metricName: '4XXError',

@@ -6,11 +6,17 @@ import type {
 	ZuoraProductRatePlanCharge,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
+import {
+	getCustomerFacingName,
+	isDeliveryProduct,
+} from '@modules/product-catalog/productCatalog';
 import { stripeProducts } from '@modules/product-catalog/stripeProducts';
 import {
 	activeProducts,
 	getProductRatePlanChargeKey,
 	getProductRatePlanKey,
+	getTermLength,
+	getTermTypeName,
 	getZuoraProductKey,
 	isSupportedProduct,
 	isSupportedProductRatePlan,
@@ -86,11 +92,15 @@ const getBillingPeriod = (productRatePlan: ZuoraProductRatePlan) => {
 
 const getZuoraProduct = (
 	isActive: boolean,
+	customerFacingName: string,
+	isDeliveryProduct: boolean,
 	productRatePlans: ZuoraProductRatePlan[],
 ) => {
 	return {
 		billingSystem: 'zuora',
 		active: isActive,
+		customerFacingName,
+		isDeliveryProduct,
 		ratePlans: arrayToObject(
 			productRatePlans
 				.filter((productRatePlan) =>
@@ -108,6 +118,8 @@ const getZuoraProduct = (
 							charges: getProductRatePlanCharges(
 								productRatePlan.productRatePlanCharges,
 							),
+							termType: getTermTypeName(productRatePlan.TermType__c),
+							termLengthInMonths: getTermLength(productRatePlan.DefaultTerm__c),
 							...(billingPeriod && { billingPeriod }),
 						},
 					};
@@ -128,6 +140,8 @@ export const generateProductCatalog = (
 			return {
 				[productName]: getZuoraProduct(
 					activeProducts.includes(productName),
+					getCustomerFacingName(productName),
+					isDeliveryProduct(productName),
 					product.productRatePlans,
 				),
 			};

@@ -1,5 +1,4 @@
 import { GuApiGatewayWithLambdaByPath } from '@guardian/cdk';
-import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
@@ -15,8 +14,9 @@ import {
 } from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { LoggingFormat, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
+import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 
 export interface NewProductApiProps extends GuStackProps {
 	domainName: string;
@@ -32,7 +32,6 @@ export class NewProductApi extends GuStack {
 		super(scope, id, props);
 
 		// ---- Miscellaneous constants ---- //
-		const isProd = this.stage === 'PROD';
 		const app = 'new-product-api';
 		const runtime = Runtime.JAVA_21;
 		const fileName = 'new-product-api.jar';
@@ -50,7 +49,6 @@ export class NewProductApi extends GuStack {
 			timeout,
 			environment,
 		};
-		const alarmTopic = 'alarms-handler-topic-PROD';
 
 		// ---- API-triggered lambda functions ---- //
 		const addSubscriptionLambda = new GuLambdaFunction(
@@ -59,6 +57,7 @@ export class NewProductApi extends GuStack {
 			{
 				handler: 'com.gu.newproduct.api.addsubscription.Handler::apply',
 				functionName: `add-subscription-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				...sharedLambdaProps,
 			},
 		);
@@ -66,6 +65,7 @@ export class NewProductApi extends GuStack {
 		const productCatalogLambda = new GuLambdaFunction(this, 'product-catalog', {
 			handler: 'com.gu.newproduct.api.productcatalog.Handler::apply',
 			functionName: `product-catalog-${this.stage}`,
+			loggingFormat: LoggingFormat.TEXT,
 			...sharedLambdaProps,
 		});
 
@@ -95,14 +95,16 @@ export class NewProductApi extends GuStack {
 		});
 
 		// ---- Alarms ---- //
-		new GuAlarm(this, 'ApiGateway4XXAlarm', {
+		new SrLambdaAlarm(this, 'ApiGateway4XXAlarm', {
 			app,
 			alarmName: `new-product-api-${this.stage} API gateway 4XX response`,
 			alarmDescription: 'New Product API received an invalid request',
 			evaluationPeriods: 1,
 			threshold: 6,
-			actionsEnabled: isProd,
-			snsTopicName: alarmTopic,
+			lambdaFunctionNames: [
+				addSubscriptionLambda.functionName,
+				productCatalogLambda.functionName,
+			],
 			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 			metric: new Metric({
 				metricName: '4XXError',
@@ -115,14 +117,16 @@ export class NewProductApi extends GuStack {
 			}),
 		});
 
-		new GuAlarm(this, 'ApiGateway5XXAlarm', {
+		new SrLambdaAlarm(this, 'ApiGateway5XXAlarm', {
 			app,
 			alarmName: `new-product-api-${this.stage} 5XX error`,
 			alarmDescription: `new-product-api-${this.stage} exceeded 1% 5XX error rate`,
 			evaluationPeriods: 1,
 			threshold: 1,
-			actionsEnabled: isProd,
-			snsTopicName: alarmTopic,
+			lambdaFunctionNames: [
+				addSubscriptionLambda.functionName,
+				productCatalogLambda.functionName,
+			],
 			comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
 			metric: new Metric({
 				metricName: '5XXError',

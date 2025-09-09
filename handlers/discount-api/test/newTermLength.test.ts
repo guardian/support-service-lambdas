@@ -1,4 +1,4 @@
-import { getNewTermLengthIfRequired } from '@modules/zuora/addDiscount';
+import { getNewTermLengthIfRequired } from '@modules/zuora/discount';
 import dayjs from 'dayjs';
 
 test('getNewTermLengthIfRequired works out the new term length if the next billing date is after the current end date', () => {

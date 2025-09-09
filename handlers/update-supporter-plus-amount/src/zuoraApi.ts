@@ -1,8 +1,9 @@
-import { zuoraDateFormat } from '@modules/zuora/common';
-import type { OrderRequest } from '@modules/zuora/orders';
+import { singleTriggerDate } from '@modules/zuora/orders/orderActions';
+import type { OrderRequest } from '@modules/zuora/orders/orderRequests';
+import type { ZuoraResponse } from '@modules/zuora/types';
+import { zuoraResponseSchema } from '@modules/zuora/types';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { ZuoraSuccessResponse } from '@modules/zuora/zuoraSchemas';
-import { zuoraSuccessResponseSchema } from '@modules/zuora/zuoraSchemas';
 import type { Dayjs } from 'dayjs';
 
 export const doUpdate = async ({
@@ -50,10 +51,10 @@ const doCreateOrderRequest = async (
 	body: OrderRequest,
 	context: string,
 ) => {
-	const response: ZuoraSuccessResponse = await zuoraClient.post(
+	const response: ZuoraResponse = await zuoraClient.post(
 		'/v1/orders',
 		JSON.stringify(body),
-		zuoraSuccessResponseSchema,
+		zuoraResponseSchema,
 	);
 	if (!response.success) {
 		const errorMessage = response.reasons?.at(0)?.message;
@@ -76,20 +77,7 @@ export const buildNewTermRequestBody = (
 				orderActions: [
 					{
 						type: 'TermsAndConditions',
-						triggerDates: [
-							{
-								name: 'ContractEffective',
-								triggerDate: zuoraDateFormat(newTermStartDate),
-							},
-							{
-								name: 'ServiceActivation',
-								triggerDate: zuoraDateFormat(newTermStartDate),
-							},
-							{
-								name: 'CustomerAcceptance',
-								triggerDate: zuoraDateFormat(newTermStartDate),
-							},
-						],
+						triggerDates: singleTriggerDate(newTermStartDate),
 						termsAndConditions: {
 							lastTerm: {
 								termType: 'TERMED',
@@ -99,21 +87,7 @@ export const buildNewTermRequestBody = (
 					},
 					{
 						type: 'RenewSubscription',
-						triggerDates: [
-							{
-								name: 'ContractEffective',
-								triggerDate: zuoraDateFormat(newTermStartDate),
-							},
-							{
-								name: 'ServiceActivation',
-								triggerDate: zuoraDateFormat(newTermStartDate),
-							},
-							{
-								name: 'CustomerAcceptance',
-								triggerDate: zuoraDateFormat(newTermStartDate),
-							},
-						],
-						renewSubscription: {},
+						triggerDates: singleTriggerDate(newTermStartDate),
 					},
 				],
 			},
@@ -146,20 +120,7 @@ export const buildUpdateAmountRequestBody = ({
 				orderActions: [
 					{
 						type: 'UpdateProduct',
-						triggerDates: [
-							{
-								name: 'ContractEffective',
-								triggerDate: zuoraDateFormat(applyFromDate),
-							},
-							{
-								name: 'ServiceActivation',
-								triggerDate: zuoraDateFormat(applyFromDate),
-							},
-							{
-								name: 'CustomerAcceptance',
-								triggerDate: zuoraDateFormat(applyFromDate),
-							},
-						],
+						triggerDates: singleTriggerDate(applyFromDate),
 						updateProduct: {
 							ratePlanId,
 							chargeUpdates: [

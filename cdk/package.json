@@ -15,12 +15,12 @@
     "fix-formatting": "prettier --write **.ts"
   },
   "devDependencies": {
-    "@guardian/cdk": "52.3.0",
+    "@guardian/cdk": "61.8.2",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.15.14",
-    "aws-cdk": "2.109.0",
-    "aws-cdk-lib": "2.109.0",
-    "constructs": "10.3.0",
+    "aws-cdk": "2.1014.0",
+    "aws-cdk-lib": "2.195.0",
+    "constructs": "10.4.2",
     "source-map-support": "^0.5.21",
     "ts-node": "^10.9.2"
   },

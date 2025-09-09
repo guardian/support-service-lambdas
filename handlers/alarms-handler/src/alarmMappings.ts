@@ -1,5 +1,3 @@
-import { getIfDefined } from '@modules/nullAndUndefined';
-
 type Team = 'VALUE' | 'GROWTH' | 'PORTFOLIO' | 'PLATFORM' | 'SRE';
 
 const mobilePurchasesApps = [
@@ -29,12 +27,8 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'contributions-store-queue',
 		'dotcom-components',
 		...mobilePurchasesApps,
-		'new-product-api',
 		'price-migration-engine-state-machine',
 		'promotions-tool',
-		'sf-contact-merge',
-		'sf-emails-to-s3-exporter',
-		'sf-gocardless-sync',
 		'super-mode',
 		'support-reminders',
 		'ticker-calculator',
@@ -80,6 +74,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'stripe-intent',
 		'workers',
 		'payment-api',
+		'supporter-product-data',
 
 		// support-service-lambdas
 		'catalog-service',
@@ -101,15 +96,22 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'digital-voucher-suspension-processor',
 
 		// salesforce
+		'new-product-api',
 		'salesforce-disaster-recovery',
 		'salesforce-disaster-recovery-health-check',
 		'single-contribution-salesforce-writes',
 		'sf-datalake-export',
+		'salesforce-event-bus',
+		'sf-contact-merge',
+		'sf-emails-to-s3-exporter',
+		'sf-gocardless-sync',
 
 		// zuora
 		'invoicing-api',
 		'zuora-callout-apis',
 		'zuora-oracle-fusion',
+		'write-off-unpaid-invoices',
+		'negative-invoices-processor',
 
 		// stripe
 		'stripe-patrons-data',
@@ -145,33 +147,18 @@ const buildAppToTeamMappings = (
 	return mappings;
 };
 
-export type AlarmMappings = {
-	getTeams: (appName?: string) => Team[];
-	getTeamWebhookUrl: (team: Team) => string;
-};
+export type AppToTeams = (appName?: string) => Team[];
 
 export const buildAlarmMappings = (
 	mappings: Record<string, string[]>,
-): AlarmMappings => {
+): AppToTeams => {
 	const appToTeamMappings: Record<string, Team[]> =
 		buildAppToTeamMappings(mappings);
 
-	const getTeams = (appName?: string): Team[] => {
-		if (appName && appToTeamMappings[appName]) {
-			return appToTeamMappings[appName];
-		}
-
-		return ['SRE'];
-	};
-
-	const getTeamWebhookUrl = (team: Team): string => {
-		return getIfDefined<string>(
-			process.env[`${team}_WEBHOOK`],
-			`${team}_WEBHOOK environment variable not set`,
-		);
-	};
-
-	return { getTeams, getTeamWebhookUrl };
+	return (appName?: string) =>
+		appName && appToTeamMappings[appName]
+			? appToTeamMappings[appName]
+			: ['SRE'];
 };
 
-export const prodAlarmMappings = buildAlarmMappings(teamToAppMappings);
+export const prodAppToTeams = buildAlarmMappings(teamToAppMappings);

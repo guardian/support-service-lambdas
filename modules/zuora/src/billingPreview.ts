@@ -2,10 +2,10 @@ import { groupBy, sortBy, sumNumbers } from '@modules/arrayFunctions';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
-import { zuoraDateFormat } from './common';
+import type { BillingPreview } from './types';
+import { billingPreviewSchema } from './types';
+import { zuoraDateFormat } from './utils';
 import type { ZuoraClient } from './zuoraClient';
-import type { BillingPreview } from './zuoraSchemas';
-import { billingPreviewSchema } from './zuoraSchemas';
 
 export const getBillingPreview = async (
 	zuoraClient: ZuoraClient,

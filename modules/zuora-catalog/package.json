@@ -6,10 +6,11 @@
     "it-test": "jest --group=integration",
     "check-formatting": "prettier --check **.ts",
     "fix-formatting": "prettier --write **.ts",
+    "build": "tsc --noEmit",
     "lint": "eslint src/**/*.ts test/**/*.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "3.777.0",
+    "@aws-sdk/client-s3": "^3.873.0",
     "zod": "catalog:"
   }
 }

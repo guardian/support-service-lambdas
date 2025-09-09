@@ -4,7 +4,7 @@ import { DataExtensionNames } from '@modules/email/email';
 import { ValidationError } from '@modules/errors';
 import type { Stage } from '@modules/stage';
 import { isNotRemovedOrDiscount } from '@modules/zuora/rateplan';
-import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
+import type { ZuoraSubscription } from '@modules/zuora/types';
 
 function getDiscountableRatePlan(subscription: ZuoraSubscription) {
 	return getSingleOrThrow(

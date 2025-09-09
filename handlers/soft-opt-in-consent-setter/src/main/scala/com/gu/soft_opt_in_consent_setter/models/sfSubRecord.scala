@@ -1,5 +1,8 @@
 package com.gu.soft_opt_in_consent_setter.models
 
+import io.circe.Decoder
+import io.circe.generic.semiauto.deriveDecoder
+
 case class SFSubRecord(
     Id: String,
     Name: String,
@@ -32,3 +35,12 @@ case class Subscription_Rate_Plan_Updates__r(
 case class SFBuyer(IdentityID__c: String)
 
 case class SFSubRecordResponse(totalSize: Int, done: Boolean, records: Seq[SFSubRecord])
+object SFSubRecordResponse {
+  implicit val decoderSFBuyer: Decoder[SFBuyer] = deriveDecoder
+  implicit val decoderSFSubscription: Decoder[SFSubscription__r] = deriveDecoder
+  implicit val decoderSubscription_Rate_Plan_Updates__r: Decoder[Subscription_Rate_Plan_Updates__r] = deriveDecoder
+  implicit val decoderSubscriptionRatePlanUpdateRecord: Decoder[SubscriptionRatePlanUpdateRecord] = deriveDecoder
+  implicit val decoderSFSubRecord: Decoder[SFSubRecord] = deriveDecoder
+
+  implicit val decoder: Decoder[SFSubRecordResponse] = deriveDecoder
+}

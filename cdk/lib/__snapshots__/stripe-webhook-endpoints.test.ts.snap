@@ -21,8 +21,6 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
       "GuLambdaFunction",
       "GuApiGatewayWithLambdaByPath",
       "GuApiGateway5xxPercentageAlarm",
-      "GuAlarm",
-      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -101,7 +99,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
                 {
                   "Ref": "AWS::AccountId",
                 },
-                ":conversion-dev",
+                ":alarms-handler-topic-CODE",
               ],
             ],
           },
@@ -120,6 +118,42 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
         "Namespace": "AWS/ApiGateway",
         "Period": 300,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "paymentintentissuescdklambdaD549B87A",
+                  },
+                  " lambda:",
+                  {
+                    "Ref": "customerupdatedcdklambda94E6ED36",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
         "Threshold": 1,
       },
       "Type": "AWS::CloudWatch::Alarm",
@@ -140,7 +174,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
                 {
                   "Ref": "AWS::AccountId",
                 },
-                ":conversion-dev",
+                ":alarms-handler-topic-CODE",
               ],
             ],
           },
@@ -159,6 +193,42 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
         "Namespace": "AWS/ApiGateway",
         "Period": 60,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "paymentintentissuescdklambdaD549B87A",
+                  },
+                  " lambda:",
+                  {
+                    "Ref": "customerupdatedcdklambda94E6ED36",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
         "Threshold": 1,
       },
       "Type": "AWS::CloudWatch::Alarm",
@@ -229,6 +299,24 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
               "Stat": "SampleCount",
             },
             "ReturnData": false,
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
           },
         ],
         "Threshold": 1,
@@ -988,6 +1076,9 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
         },
         "FunctionName": "stripe-customer-updated-cdk-CODE",
         "Handler": "com.gu.stripeCardUpdated.Lambda::apply",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
         "MemorySize": 1536,
         "Role": {
           "Fn::GetAtt": [
@@ -1200,6 +1291,9 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 1`] = `
         },
         "FunctionName": "stripe-payment-intent-issues-cdk-CODE",
         "Handler": "com.gu.paymentIntentIssues.Lambda::handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
         "MemorySize": 1536,
         "Role": {
           "Fn::GetAtt": [
@@ -1413,8 +1507,6 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
       "GuLambdaFunction",
       "GuApiGatewayWithLambdaByPath",
       "GuApiGateway5xxPercentageAlarm",
-      "GuAlarm",
-      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -1493,7 +1585,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
                 {
                   "Ref": "AWS::AccountId",
                 },
-                ":conversion-dev",
+                ":alarms-handler-topic-PROD",
               ],
             ],
           },
@@ -1512,6 +1604,42 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
         "Namespace": "AWS/ApiGateway",
         "Period": 300,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "paymentintentissuescdklambdaD549B87A",
+                  },
+                  " lambda:",
+                  {
+                    "Ref": "customerupdatedcdklambda94E6ED36",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
         "Threshold": 1,
       },
       "Type": "AWS::CloudWatch::Alarm",
@@ -1532,7 +1660,7 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
                 {
                   "Ref": "AWS::AccountId",
                 },
-                ":conversion-dev",
+                ":alarms-handler-topic-PROD",
               ],
             ],
           },
@@ -1551,6 +1679,42 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
         "Namespace": "AWS/ApiGateway",
         "Period": 60,
         "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "paymentintentissuescdklambdaD549B87A",
+                  },
+                  " lambda:",
+                  {
+                    "Ref": "customerupdatedcdklambda94E6ED36",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
         "Threshold": 1,
       },
       "Type": "AWS::CloudWatch::Alarm",
@@ -1621,6 +1785,24 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
               "Stat": "SampleCount",
             },
             "ReturnData": false,
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
           },
         ],
         "Threshold": 1,
@@ -2380,6 +2562,9 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
         },
         "FunctionName": "stripe-customer-updated-cdk-PROD",
         "Handler": "com.gu.stripeCardUpdated.Lambda::apply",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
         "MemorySize": 1536,
         "Role": {
           "Fn::GetAtt": [
@@ -2592,6 +2777,9 @@ exports[`The StripeWebhookEndpoints stack matches the snapshot 2`] = `
         },
         "FunctionName": "stripe-payment-intent-issues-cdk-PROD",
         "Handler": "com.gu.paymentIntentIssues.Lambda::handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
         "MemorySize": 1536,
         "Role": {
           "Fn::GetAtt": [
