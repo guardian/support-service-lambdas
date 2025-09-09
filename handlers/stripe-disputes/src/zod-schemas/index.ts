@@ -1,2 +1,5 @@
-export * from './salesforce-auth.schema';
-export * from './salesforce-create.schema';
+export * from './salesforceAuthSchema';
+export * from './salesforceCreateSchema';
+export * from './zuoraGetInvoicePaymentQueryOutput';
+export * from './zuoraGetPaymentQueryOutput';
+export * from './zuoraGetInvoiceItemsQueryOutput';

@@ -192,7 +192,18 @@ export const getSwitchInformationWithOwnerCheck = async (
 	const actualBasePrice =
 		maybeDiscount?.discountedPrice ?? catalogInformation.supporterPlus.price;
 
-	const contributionAmount = Math.max(0, previousAmount - actualBasePrice);
+	// newAmount is only passed in where the user is in the switch journey - for cancellation saves the new amount is discounted for the first year - they always get the base price (with discount)
+	const userDesiredAmount = input.newAmount ?? previousAmount;
+
+	// Validate that the user's desired amount is at least the base Supporter Plus price
+	// Only validate when newAmount is explicitly provided by the frontend
+	if (input.newAmount && userDesiredAmount < actualBasePrice) {
+		throw new ValidationError(
+			`Cannot switch to Supporter Plus: desired amount (${userDesiredAmount}) is less than the minimum Supporter Plus price (${actualBasePrice}). Use the members-data-api to modify contribution amounts instead.`,
+		);
+	}
+
+	const contributionAmount = Math.max(0, userDesiredAmount - actualBasePrice);
 
 	const subscriptionInformation = {
 		accountNumber: subscription.accountNumber,
@@ -213,7 +224,7 @@ export const getSwitchInformationWithOwnerCheck = async (
 		input,
 		startNewTerm,
 		contributionAmount,
-		actualTotalPrice: contributionAmount + actualBasePrice,
+		actualTotalPrice: userDesiredAmount,
 		account: userInformation,
 		subscription: subscriptionInformation,
 		catalog: catalogInformation,

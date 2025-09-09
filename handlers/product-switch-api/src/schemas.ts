@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const productSwitchRequestSchema = z.object({
 	preview: z.boolean(),
+	newAmount: z.optional(z.number().positive()),
 	csrUserId: z.optional(z.string()),
 	caseId: z.optional(z.string()),
 	applyDiscountIfAvailable: z.optional(z.boolean()),

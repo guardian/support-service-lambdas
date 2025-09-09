@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { stripeDisputeDataSchema } from './stripe-dispute-data.dto';
+import { stripeDisputeDataSchema } from './stripeDisputeData.dto';
 
 export const listenDisputeClosedInputSchema = z.object({
 	id: z.string(), // Event ID
