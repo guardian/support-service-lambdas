@@ -9,6 +9,7 @@ import {
 } from '@aws-sdk/client-cloudwatch';
 
 export type Stage = 'CODE' | 'DEV' | 'PROD';
+export const metricNamespace = 'support-service-lambdas';
 
 const getStage = (): Stage | undefined => {
 	const stage = process.env.Stage;
@@ -41,7 +42,7 @@ export async function putMetric(metricName: string): Promise<void> {
 	];
 
 	const params: PutMetricDataCommandInput = {
-		Namespace: `support-service-lambdas`,
+		Namespace: metricNamespace,
 		MetricData: [
 			{
 				MetricName: metricName,

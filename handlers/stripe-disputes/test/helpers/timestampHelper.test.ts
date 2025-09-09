@@ -1,7 +1,7 @@
 import {
 	timestampToSalesforceDate,
 	timestampToSalesforceDateTime,
-} from '../../src/helpers/timestamp.helper';
+} from '../../src/helpers/timestampHelper';
 
 describe('Timestamp Helper', () => {
 	describe('timestampToSalesforceDateTime', () => {
@@ -29,6 +29,23 @@ describe('Timestamp Helper', () => {
 		it('should handle timestamp 0', () => {
 			const result = timestampToSalesforceDate(0);
 			expect(result).toBe('1970-01-01');
+		});
+
+		it('should throw error for invalid timestamp that results in undefined date', () => {
+			// Mock toISOString to return empty string to trigger undefined from split
+			const originalDate = global.Date;
+			global.Date = class extends originalDate {
+				toISOString() {
+					return '';
+				}
+			} as any;
+
+			expect(() => timestampToSalesforceDate(1640995200)).toThrow(
+				'Invalid timestamp: 1640995200',
+			);
+
+			// Restore original Date
+			global.Date = originalDate;
 		});
 	});
 });
