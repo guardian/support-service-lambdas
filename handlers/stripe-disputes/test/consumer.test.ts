@@ -7,14 +7,16 @@ const mockLogger = {
 	mutableAddContext: jest.fn(),
 };
 
-const mockHandleSqsEvents = jest.fn();
+const mockHandleListenDisputeCreated = jest.fn();
+const mockHandleListenDisputeClosed = jest.fn();
 
 jest.mock('@modules/logger', () => ({
 	Logger: jest.fn(() => mockLogger),
 }));
 
-jest.mock('../src/services', () => ({
-	handleSqsEvents: mockHandleSqsEvents,
+jest.mock('../src/sqs-consumers', () => ({
+	handleListenDisputeCreated: mockHandleListenDisputeCreated,
+	handleListenDisputeClosed: mockHandleListenDisputeClosed,
 }));
 
 // Import after mocks
@@ -52,7 +54,8 @@ describe('Consumer Handler', () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		mockHandleSqsEvents.mockResolvedValue(undefined);
+		mockHandleListenDisputeCreated.mockResolvedValue(undefined);
+		mockHandleListenDisputeClosed.mockResolvedValue(undefined);
 	});
 
 	describe('SQS Event Processing', () => {
@@ -64,7 +67,11 @@ describe('Consumer Handler', () => {
 			expect(mockLogger.log).toHaveBeenCalledWith(
 				`Input: ${JSON.stringify(event)}`,
 			);
-			expect(mockHandleSqsEvents).toHaveBeenCalledWith(mockLogger, event);
+			expect(mockHandleListenDisputeCreated).toHaveBeenCalledWith(
+				mockLogger,
+				expect.objectContaining({ data: { object: { id: 'du_test123' } } }),
+				'du_test123',
+			);
 			expect(mockLogger.log).toHaveBeenCalledWith(
 				'SQS events processed successfully',
 			);
@@ -73,10 +80,16 @@ describe('Consumer Handler', () => {
 
 		it('should handle processing errors', async () => {
 			const error = new Error('Processing failed');
-			mockHandleSqsEvents.mockRejectedValue(error);
+			mockHandleListenDisputeCreated.mockRejectedValue(error);
 			const event = createMockSqsEvent('dispute.created', 'du_error');
 
 			await expect(handler(event)).rejects.toThrow('Processing failed');
+
+			expect(mockHandleListenDisputeCreated).toHaveBeenCalledWith(
+				mockLogger,
+				expect.objectContaining({ data: { object: { id: 'du_error' } } }),
+				'du_error',
+			);
 		});
 
 		it('should handle multiple SQS records', async () => {
@@ -92,9 +105,15 @@ describe('Consumer Handler', () => {
 			expect(mockLogger.log).toHaveBeenCalledWith(
 				`Processing 2 SQS dispute events`,
 			);
-			expect(mockHandleSqsEvents).toHaveBeenCalledWith(
+			expect(mockHandleListenDisputeCreated).toHaveBeenCalledWith(
 				mockLogger,
-				multiRecordEvent,
+				expect.objectContaining({ data: { object: { id: 'du_1' } } }),
+				'du_1',
+			);
+			expect(mockHandleListenDisputeClosed).toHaveBeenCalledWith(
+				mockLogger,
+				expect.objectContaining({ data: { object: { id: 'du_2' } } }),
+				'du_2',
 			);
 		});
 	});

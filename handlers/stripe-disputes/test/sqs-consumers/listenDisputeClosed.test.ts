@@ -1,23 +1,62 @@
-import type { Logger } from '@modules/logger';
+/* eslint-disable @typescript-eslint/no-unsafe-argument -- Test mocks require any type */
 import type { ListenDisputeClosedRequestBody } from '../../src/dtos';
-import { upsertSalesforceObject } from '../../src/services/upsertSalesforceObject';
 import { handleListenDisputeClosed } from '../../src/sqs-consumers/listenDisputeClosed';
-import type { SalesforceUpsertResponse } from '../../src/types';
+
+const mockZuoraClient = {
+	post: jest.fn(() => Promise.resolve({ Success: true })),
+	put: jest.fn(() => Promise.resolve({ Success: true })),
+};
+
+jest.mock('@modules/stage', () => ({
+	stageFromEnvironment: jest.fn(() => 'CODE'),
+}));
+
+jest.mock('@modules/zuora/zuoraClient', () => ({
+	ZuoraClient: {
+		create: jest.fn(() => Promise.resolve(mockZuoraClient)),
+	},
+}));
+
+jest.mock('@modules/zuora/subscription', () => ({
+	getSubscription: jest.fn(() =>
+		Promise.resolve({ status: 'Active', subscriptionNumber: 'SUB-12345' }),
+	),
+	cancelSubscription: jest.fn(() => Promise.resolve({ Success: true })),
+}));
 
 jest.mock('../../src/services/upsertSalesforceObject', () => ({
-	upsertSalesforceObject: jest.fn(),
+	upsertSalesforceObject: jest.fn(() =>
+		Promise.resolve({ id: 'sf_123', success: true, errors: [] }),
+	),
 }));
-const mockUpsertSalesforceObject =
-	upsertSalesforceObject as jest.MockedFunction<typeof upsertSalesforceObject>;
+
+jest.mock('../../src/services/zuoraGetInvoiceFromStripeChargeId', () => ({
+	zuoraGetInvoiceFromStripeChargeId: jest.fn(() =>
+		Promise.resolve({
+			paymentId: 'ch_test456',
+			paymentPaymentNumber: 'P-12345',
+			InvoiceId: 'INV-12345',
+			SubscriptionNumber: 'SUB-12345',
+			paymentAccountId: 'acc_123',
+		}),
+	),
+}));
+
+jest.mock('../../src/services/zuoraPaymentService', () => ({
+	rejectPayment: jest.fn(() => Promise.resolve({ Success: true })),
+}));
+
+jest.mock('../../src/services/zuoraInvoiceService', () => ({
+	writeOffInvoice: jest.fn(() => Promise.resolve({ Success: true })),
+}));
+
+const mockLogger = {
+	log: jest.fn(),
+	error: jest.fn(),
+	mutableAddContext: jest.fn(),
+} as any;
 
 describe('handleListenDisputeClosed', () => {
-	const mockLogger: Logger = {
-		log: jest.fn(),
-		error: jest.fn(),
-		mutableAddContext: jest.fn(),
-		addContext: jest.fn(),
-	} as any;
-
 	const mockWebhookData: ListenDisputeClosedRequestBody = {
 		id: 'evt_test456',
 		type: 'charge.dispute.closed',
@@ -29,11 +68,11 @@ describe('handleListenDisputeClosed', () => {
 				currency: 'usd',
 				reason: 'fraudulent',
 				status: 'lost',
-				created: 1699123456,
+				created: 1699099200,
 				is_charge_refundable: false,
 				payment_intent: 'pi_test456',
 				evidence_details: {
-					due_by: 1699900800,
+					due_by: 1699185600,
 					has_evidence: true,
 				},
 				payment_method_details: {
@@ -45,198 +84,22 @@ describe('handleListenDisputeClosed', () => {
 		},
 	};
 
-	const mockSalesforceResponse: SalesforceUpsertResponse = {
-		id: 'sf_test456',
-		success: true,
-		errors: [],
-	};
-
 	beforeEach(() => {
 		jest.clearAllMocks();
-		mockUpsertSalesforceObject.mockResolvedValue(mockSalesforceResponse);
 	});
 
-	describe('successful processing', () => {
-		it('should process dispute closed event successfully', async () => {
-			const result = await handleListenDisputeClosed(
-				mockLogger,
-				mockWebhookData,
-				'du_test456',
+	describe('comprehensive dispute processing', () => {
+		it('should process dispute closure with Zuora integration', async () => {
+			// Get mocked functions
+			const mockRejectPayment = jest.mocked(
+				require('../../src/services/zuoraPaymentService').rejectPayment,
 			);
-
-			expect(mockLogger.log).toHaveBeenCalledWith(
-				'Processing dispute closure for dispute du_test456',
+			const mockWriteOffInvoice = jest.mocked(
+				require('../../src/services/zuoraInvoiceService').writeOffInvoice,
 			);
-			expect(mockUpsertSalesforceObject).toHaveBeenCalledWith(
-				mockLogger,
-				mockWebhookData,
+			const mockCancelSubscription = jest.mocked(
+				require('@modules/zuora/subscription').cancelSubscription,
 			);
-			expect(mockLogger.log).toHaveBeenCalledWith(
-				'Salesforce upsert response for dispute closure:',
-				JSON.stringify(mockSalesforceResponse),
-			);
-			expect(mockLogger.log).toHaveBeenCalledWith(
-				'Successfully processed dispute closure for dispute du_test456',
-			);
-			expect(result).toEqual(mockSalesforceResponse);
-		});
-
-		it('should log all processing steps', async () => {
-			await handleListenDisputeClosed(
-				mockLogger,
-				mockWebhookData,
-				'du_test456',
-			);
-
-			expect(mockLogger.log).toHaveBeenCalledTimes(3);
-			expect(mockLogger.log).toHaveBeenNthCalledWith(
-				1,
-				'Processing dispute closure for dispute du_test456',
-			);
-			expect(mockLogger.log).toHaveBeenNthCalledWith(
-				2,
-				'Salesforce upsert response for dispute closure:',
-				JSON.stringify(mockSalesforceResponse),
-			);
-			expect(mockLogger.log).toHaveBeenNthCalledWith(
-				3,
-				'Successfully processed dispute closure for dispute du_test456',
-			);
-		});
-	});
-
-	describe('error handling', () => {
-		it('should propagate errors from upsertSalesforceObject', async () => {
-			const error = new Error('Salesforce connection timeout');
-			mockUpsertSalesforceObject.mockRejectedValue(error);
-
-			await expect(
-				handleListenDisputeClosed(mockLogger, mockWebhookData, 'du_test456'),
-			).rejects.toThrow('Salesforce connection timeout');
-
-			expect(mockLogger.log).toHaveBeenCalledWith(
-				'Processing dispute closure for dispute du_test456',
-			);
-			expect(mockUpsertSalesforceObject).toHaveBeenCalledWith(
-				mockLogger,
-				mockWebhookData,
-			);
-			// Should not log success messages if error occurs
-			expect(mockLogger.log).not.toHaveBeenCalledWith(
-				expect.stringContaining('Salesforce upsert response'),
-			);
-			expect(mockLogger.log).not.toHaveBeenCalledWith(
-				expect.stringContaining('Successfully processed'),
-			);
-		});
-	});
-
-	describe('different dispute closure scenarios', () => {
-		it('should handle won disputes', async () => {
-			const wonDisputeData = {
-				...mockWebhookData,
-				data: {
-					...mockWebhookData.data,
-					object: {
-						...mockWebhookData.data.object,
-						id: 'du_won123',
-						status: 'won',
-						is_charge_refundable: true,
-					},
-				},
-			};
-
-			const result = await handleListenDisputeClosed(
-				mockLogger,
-				wonDisputeData,
-				'du_won123',
-			);
-
-			expect(mockLogger.log).toHaveBeenCalledWith(
-				'Processing dispute closure for dispute du_won123',
-			);
-			expect(mockUpsertSalesforceObject).toHaveBeenCalledWith(
-				mockLogger,
-				wonDisputeData,
-			);
-			expect(result).toEqual(mockSalesforceResponse);
-		});
-
-		it('should handle lost disputes', async () => {
-			const lostDisputeData = {
-				...mockWebhookData,
-				data: {
-					...mockWebhookData.data,
-					object: {
-						...mockWebhookData.data.object,
-						id: 'du_lost123',
-						status: 'lost',
-						is_charge_refundable: false,
-					},
-				},
-			};
-
-			const result = await handleListenDisputeClosed(
-				mockLogger,
-				lostDisputeData,
-				'du_lost123',
-			);
-
-			expect(mockLogger.log).toHaveBeenCalledWith(
-				'Processing dispute closure for dispute du_lost123',
-			);
-			expect(result).toEqual(mockSalesforceResponse);
-		});
-
-		it('should handle different closure reasons', async () => {
-			const differentReasonData = {
-				...mockWebhookData,
-				data: {
-					...mockWebhookData.data,
-					object: {
-						...mockWebhookData.data.object,
-						reason: 'subscription_canceled',
-						network_reason_code: '4863',
-					},
-				},
-			};
-
-			const result = await handleListenDisputeClosed(
-				mockLogger,
-				differentReasonData,
-				'du_test456',
-			);
-
-			expect(mockUpsertSalesforceObject).toHaveBeenCalledWith(
-				mockLogger,
-				differentReasonData,
-			);
-			expect(result).toEqual(mockSalesforceResponse);
-		});
-	});
-
-	describe('integration points', () => {
-		it('should pass correct parameters to upsertSalesforceObject', async () => {
-			await handleListenDisputeClosed(
-				mockLogger,
-				mockWebhookData,
-				'du_test456',
-			);
-
-			expect(mockUpsertSalesforceObject).toHaveBeenCalledTimes(1);
-			expect(mockUpsertSalesforceObject).toHaveBeenCalledWith(
-				mockLogger,
-				mockWebhookData,
-			);
-		});
-
-		it('should return the response from upsertSalesforceObject', async () => {
-			const customResponse: SalesforceUpsertResponse = {
-				id: 'custom_sf_closed_id',
-				success: true,
-				errors: [],
-			};
-			mockUpsertSalesforceObject.mockResolvedValue(customResponse);
 
 			const result = await handleListenDisputeClosed(
 				mockLogger,
@@ -244,25 +107,42 @@ describe('handleListenDisputeClosed', () => {
 				'du_test456',
 			);
 
-			expect(result).toEqual(customResponse);
-		});
-	});
+			expect(result.success).toBe(true);
 
-	describe('future extensibility', () => {
-		it('should be ready for closure-specific logic extension', async () => {
-			// This test documents the current behavior and ensures
-			// the function structure supports future enhancements
-			await handleListenDisputeClosed(
+			// Verify payment rejection service call
+			expect(mockRejectPayment).toHaveBeenCalledWith(
+				mockZuoraClient,
+				'P-12345',
+				'chargeback',
+			);
+
+			// Verify invoice write-off service call
+			expect(mockWriteOffInvoice).toHaveBeenCalledWith(
+				mockZuoraClient,
+				'INV-12345',
+				expect.stringContaining('Dispute ID: du_test456'),
+			);
+
+			// Verify subscription cancellation with EndOfLastInvoicePeriod
+			expect(mockCancelSubscription).toHaveBeenCalledWith(
+				mockZuoraClient,
+				'SUB-12345',
+				expect.any(Object), // dayjs date
+				false, // runBilling
+				false, // collect
+				'EndOfLastInvoicePeriod', // cancellationPolicy
+			);
+		});
+
+		it('should handle processing successfully', async () => {
+			const result = await handleListenDisputeClosed(
 				mockLogger,
 				mockWebhookData,
 				'du_test456',
 			);
 
-			// Current behavior: only calls upsertSalesforceObject
-			expect(mockUpsertSalesforceObject).toHaveBeenCalledTimes(1);
-
-			// Future: Could add cleanup operations, notifications, etc.
-			// The function signature and structure are ready for such additions
+			expect(result).toBeDefined();
+			expect(result.success).toBe(true);
 		});
 	});
 });
