@@ -41,6 +41,8 @@ export const upsertSalesforceObject = async (
 		| ListenDisputeClosedRequestBody,
 	zuoraData?: ZuoraInvoiceFromStripeChargeIdResult,
 ): Promise<SalesforceUpsertResponse> => {
+	logger.log('Starting upsertSalesforceObject process');
+
 	const salesforceCredentials = await getSecretValue<SalesforceCredentials>(
 		`${stageFromEnvironment()}/Salesforce/ConnectedApp/StripeDisputeWebhooks`,
 	);
@@ -52,6 +54,11 @@ export const upsertSalesforceObject = async (
 	// Map Stripe dispute data to Salesforce Payment Dispute format
 	const paymentDisputeRecord: PaymentDisputeRecord =
 		mapStripeDisputeToSalesforce(dataFromStripe, zuoraData);
+
+	logger.log(
+		'Mapped Payment Dispute record:',
+		JSON.stringify(paymentDisputeRecord),
+	);
 
 	// Upsert the Payment Dispute record in Salesforce using Dispute_ID__c as external ID
 	return upsertPaymentDisputeInSalesforce(
