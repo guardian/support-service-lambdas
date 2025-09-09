@@ -5,10 +5,7 @@ import type { Logger } from '@modules/logger';
 import type { Stage } from '@modules/stage';
 import { isNotRemovedOrDiscount } from '@modules/zuora/rateplan';
 import type { ZuoraSubscription } from '@modules/zuora/types';
-import {
-	EligibilityChecker,
-	validationRequirements,
-} from './eligibilityChecker';
+import { assertValidState, validationRequirements } from './eligibilityChecker';
 
 function getDiscountableRatePlan(subscription: ZuoraSubscription) {
 	return getSingleOrThrow(
@@ -30,12 +27,8 @@ export const getDiscountFromSubscription = (
 	const discount =
 		ProductToDiscountMapping(stage)[discountableProductRatePlanId];
 
-	const assertValidState: (
-		isValid: boolean,
-		message: string,
-		actual: string,
-	) => asserts isValid = new EligibilityChecker(logger).assertValidState;
 	assertValidState(
+		logger,
 		discount !== undefined,
 		validationRequirements.mustHaveDiscountDefined,
 		JSON.stringify(discount),

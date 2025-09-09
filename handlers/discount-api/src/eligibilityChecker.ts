@@ -103,25 +103,30 @@ export class EligibilityChecker {
 		);
 	};
 
-	assertValidState: (
+	private assertValidState(
 		isValid: boolean,
 		message: string,
 		actual: string,
-	) => asserts isValid = (
-		isValid: boolean,
-		message: string,
-		actual: string,
-	): asserts isValid => {
-		this.logger.log(`Asserting <${message}>`);
-		if (!isValid) {
-			this.logger.log(
-				`FAILED: subscription did not meet precondition <${message}> (was ${actual})`,
-			);
-			throw new ValidationError(
-				`subscription did not meet precondition <${message}> (was ${actual})`,
-			);
-		}
-	};
+	): asserts isValid {
+		return assertValidState(this.logger, isValid, message, actual);
+	}
+}
+
+export function assertValidState(
+	logger: Logger,
+	isValid: boolean,
+	message: string,
+	actual: string,
+): asserts isValid {
+	logger.log(`Asserting <${message}>`);
+	if (!isValid) {
+		logger.log(
+			`FAILED: subscription did not meet precondition <${message}> (was ${actual})`,
+		);
+		throw new ValidationError(
+			`subscription did not meet precondition <${message}> (was ${actual})`,
+		);
+	}
 }
 
 export const validationRequirements = {
