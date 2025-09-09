@@ -192,6 +192,7 @@ export const getSwitchInformationWithOwnerCheck = async (
 	const actualBasePrice =
 		maybeDiscount?.discountedPrice ?? catalogInformation.supporterPlus.price;
 
+  // newAmount is only passed in where the user is in the switch journey - for cancellation saves the new amount is discounted for the first year - they always get the base price (with discount)
 	const userDesiredAmount = input.newAmount ?? previousAmount;
 
 	// Validate that the user's desired amount is at least the base Supporter Plus price
