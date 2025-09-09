@@ -40,7 +40,7 @@ object Handler extends Logging {
     )
   }
 
-  private def handle(apiGatewayRequest: ApiGatewayRequest): ApiResponse = {
+  def handle(apiGatewayRequest: ApiGatewayRequest): ApiResponse = {
     val useOldSend = apiGatewayRequest.queryStringParameters.flatMap(_.get("oldApi")).map(_.toBoolean).getOrElse(false)
     if (useOldSend) {
       apiGatewayRequest
