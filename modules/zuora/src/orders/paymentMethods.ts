@@ -2,6 +2,10 @@ export type CreditCardReferenceTransaction = {
 	type: 'CreditCardReferenceTransaction';
 	tokenId: string;
 	secondTokenId: string;
+	cardNumber: string;
+	cardType: string;
+	expirationMonth: number;
+	expirationYear: number;
 };
 
 export type DirectDebit = {
