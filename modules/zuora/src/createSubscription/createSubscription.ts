@@ -120,7 +120,7 @@ function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 	return {
 		newAccount: newAccount,
 		orderDate: zuoraDateFormat(dayjs()),
-		description: `Created in execution ${createdRequestId} by support-workers, using createSubscription.ts in support-service-lambdas`,
+		description: `Created by createSubscription.ts in support-service-lambdas`,
 		subscriptions: [
 			{
 				orderActions: [createSubscriptionOrderAction],
