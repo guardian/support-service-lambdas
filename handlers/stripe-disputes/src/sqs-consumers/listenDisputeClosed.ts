@@ -127,7 +127,7 @@ export async function handleListenDisputeClosed(
 					subscriptionNumber,
 					dayjs(), // Not used for EndOfLastInvoicePeriod but required by signature
 					false, // Don't run billing
-					false, // Don't collect
+					undefined, // Don't collect
 					'EndOfLastInvoicePeriod', // Use EndOfLastInvoicePeriod policy as requested
 				);
 
