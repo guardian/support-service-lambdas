@@ -3,7 +3,7 @@ export type CreditCardReferenceTransaction = {
 	tokenId: string;
 	secondTokenId: string;
 	cardNumber: string;
-	cardType: string;
+	cardType?: string;
 	expirationMonth: number;
 	expirationYear: number;
 };
