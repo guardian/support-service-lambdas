@@ -5,8 +5,6 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuLambdaFunction",
-      "GuLambdaFunction",
       "GuApiGatewayWithLambdaByPath",
     ],
     "gu:cdk:version": "TEST",
@@ -47,6 +45,10 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
     "DistributionBucketName": {
       "Default": "/account/services/artifact.bucket",
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+    "SarResultsBucketParameter": {
+      "Default": "/CODE/support/mparticle-api/sarResultsBucket",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
   },
@@ -523,7 +525,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
         "FunctionName": "mparticle-api-baton-CODE",
         "Handler": "index.handlerBaton",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1024,
         "Role": {
@@ -616,6 +618,38 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
       "Properties": {
         "PolicyDocument": {
           "Statement": [
+            {
+              "Action": [
+                "s3:PutObject",
+                "s3:ListBucket",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "SarResultsBucketParameter",
+                      },
+                      "/mparticle-results/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "SarResultsBucketParameter",
+                      },
+                    ],
+                  ],
+                },
+              ],
+            },
             {
               "Action": [
                 "s3:GetObject*",
@@ -734,7 +768,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
         "FunctionName": "mparticle-api-http-CODE",
         "Handler": "index.handlerHttp",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1024,
         "Role": {
@@ -932,8 +966,6 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuLambdaFunction",
-      "GuLambdaFunction",
       "GuApiGatewayWithLambdaByPath",
     ],
     "gu:cdk:version": "TEST",
@@ -974,6 +1006,10 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
     "DistributionBucketName": {
       "Default": "/account/services/artifact.bucket",
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+    "SarResultsBucketParameter": {
+      "Default": "/PROD/support/mparticle-api/sarResultsBucket",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
   },
@@ -1667,7 +1703,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
         "FunctionName": "mparticle-api-baton-PROD",
         "Handler": "index.handlerBaton",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1024,
         "Role": {
@@ -1760,6 +1796,38 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
       "Properties": {
         "PolicyDocument": {
           "Statement": [
+            {
+              "Action": [
+                "s3:PutObject",
+                "s3:ListBucket",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "SarResultsBucketParameter",
+                      },
+                      "/mparticle-results/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "SarResultsBucketParameter",
+                      },
+                    ],
+                  ],
+                },
+              ],
+            },
             {
               "Action": [
                 "s3:GetObject*",
@@ -1878,7 +1946,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
         "FunctionName": "mparticle-api-http-PROD",
         "Handler": "index.handlerHttp",
         "LoggingConfig": {
-          "LogFormat": "JSON",
+          "LogFormat": "Text",
         },
         "MemorySize": 1024,
         "Role": {

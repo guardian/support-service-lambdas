@@ -7,7 +7,7 @@ exports[`code Generated product billing period types match snapshot 1`] = `
 import type { ProductKey } from '@modules/product-catalog/productCatalog';
 	
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- we are using this for type generation
-	const productBillingPeriods = {"GuardianAdLite":["Month"],"GuardianWeeklyZoneB":["Semi_Annual","Three_Years","Two_Years","Annual","Quarter"],"TierThree":["Annual","Month"],"DigitalSubscription":["Month","Annual","Quarter"],"HomeDelivery":["Month"],"NationalDelivery":["Month"],"SupporterPlus":["Annual","Month"],"SupporterMembership":["Month","Annual"],"GuardianWeeklyRestOfWorld":["Quarter","Annual","Month"],"GuardianWeeklyDomestic":["Quarter","Annual","Month"],"SubscriptionCard":["Month"],"Contribution":["Annual","Month"],"GuardianWeeklyZoneA":["Semi_Annual","Two_Years","Annual","Three_Years","Quarter"],"GuardianWeeklyZoneC":["Annual","Quarter"],"NewspaperVoucher":["Month"],"PatronMembership":["Annual","Month"],"PartnerMembership":["Annual","Month"],"GuardianPatron":["Month"],"OneTimeContribution":["OneTime"]} as const;
+	const productBillingPeriods = {"GuardianAdLite":["Month"],"GuardianWeeklyZoneB":["Annual","Quarter","Semi_Annual","Three_Years","Two_Years"],"TierThree":["Annual","Month"],"DigitalSubscription":["Annual","Month","Quarter"],"HomeDelivery":["Month"],"NationalDelivery":["Month"],"SupporterPlus":["Annual","Month"],"SupporterMembership":["Annual","Month"],"GuardianWeeklyRestOfWorld":["Annual","Month","Quarter"],"GuardianWeeklyDomestic":["Annual","Month","Quarter"],"SubscriptionCard":["Month"],"Contribution":["Annual","Month"],"GuardianWeeklyZoneA":["Annual","Quarter","Semi_Annual","Three_Years","Two_Years"],"GuardianWeeklyZoneC":["Annual","Quarter"],"NewspaperVoucher":["Month"],"PatronMembership":["Annual","Month"],"PartnerMembership":["Annual","Month"],"GuardianPatron":["Month"],"OneTimeContribution":["OneTime"]} as const;
 	
 	export type ProductBillingPeriod<P extends ProductKey> = (typeof productBillingPeriods)[P][number];
 	"
@@ -18,6 +18,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
   "Contribution": {
     "active": true,
     "billingSystem": "zuora",
+    "customerFacingName": "Support",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -35,6 +37,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 60,
           "USD": 60,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -52,12 +56,16 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 5,
           "USD": 5,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "DigitalSubscription": {
     "active": true,
     "billingSystem": "zuora",
+    "customerFacingName": "The Guardian Digital Edition",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -75,6 +83,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 269.99,
           "USD": 249,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -92,6 +102,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 26.99,
           "USD": 24.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "OneYearGift": {
         "charges": {
@@ -108,6 +120,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 99,
           "USD": 99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Quarterly": {
         "billingPeriod": "Quarter",
@@ -125,6 +139,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 79.99,
           "USD": 74.94,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "ThreeMonthGift": {
         "charges": {
@@ -141,12 +157,16 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 36,
           "USD": 36,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "GuardianAdLite": {
     "active": true,
     "billingSystem": "zuora",
+    "customerFacingName": "Guardian Ad-Lite",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Monthly": {
         "billingPeriod": "Month",
@@ -159,12 +179,16 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 5,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "GuardianPatron": {
     "active": true,
     "billingSystem": "stripe",
+    "customerFacingName": "Guardian Patron",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "GuardianPatron": {
         "billingPeriod": "Month",
@@ -175,12 +199,16 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "guardian_patron",
         "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "GuardianWeeklyDomestic": {
     "active": true,
     "billingSystem": "zuora",
+    "customerFacingName": "Guardian Weekly",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -198,6 +226,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 660,
           "USD": 360,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -215,6 +245,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 55,
           "USD": 30,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "OneYearGift": {
         "billingPeriod": "Annual",
@@ -232,6 +264,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 660,
           "USD": 360,
         },
+        "termLengthInMonths": 12,
+        "termType": "FixedTerm",
       },
       "Quarterly": {
         "billingPeriod": "Quarter",
@@ -249,6 +283,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 165,
           "USD": 90,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "ThreeMonthGift": {
         "billingPeriod": "Quarter",
@@ -266,12 +302,16 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 165,
           "USD": 90,
         },
+        "termLengthInMonths": 3,
+        "termType": "FixedTerm",
       },
     },
   },
   "GuardianWeeklyRestOfWorld": {
     "active": true,
     "billingSystem": "zuora",
+    "customerFacingName": "Guardian Weekly",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -285,6 +325,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 336,
           "USD": 432,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -298,6 +340,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 28,
           "USD": 36,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "OneYearGift": {
         "billingPeriod": "Annual",
@@ -311,6 +355,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 336,
           "USD": 432,
         },
+        "termLengthInMonths": 12,
+        "termType": "FixedTerm",
       },
       "Quarterly": {
         "billingPeriod": "Quarter",
@@ -324,6 +370,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 83.9,
           "USD": 108,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "ThreeMonthGift": {
         "billingPeriod": "Quarter",
@@ -337,12 +385,16 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 83.9,
           "USD": 108,
         },
+        "termLengthInMonths": 3,
+        "termType": "FixedTerm",
       },
     },
   },
   "GuardianWeeklyZoneA": {
     "active": false,
     "billingSystem": "zuora",
+    "customerFacingName": "Guardian Weekly",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -357,6 +409,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 120,
           "USD": 240,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Quarterly": {
         "billingPeriod": "Quarter",
@@ -371,12 +425,16 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 30,
           "USD": 60,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "GuardianWeeklyZoneB": {
     "active": false,
     "billingSystem": "zuora",
+    "customerFacingName": "Guardian Weekly",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -394,6 +452,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 392,
           "USD": 240,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Quarterly": {
         "billingPeriod": "Quarter",
@@ -411,12 +471,16 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 98,
           "USD": 60,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "GuardianWeeklyZoneC": {
     "active": false,
     "billingSystem": "zuora",
+    "customerFacingName": "Guardian Weekly",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -434,6 +498,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 392,
           "USD": 260,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Quarterly": {
         "billingPeriod": "Quarter",
@@ -451,12 +517,16 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 98,
           "USD": 65,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "HomeDelivery": {
     "active": true,
     "billingSystem": "zuora",
+    "customerFacingName": "Newspaper Home Delivery",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Everyday": {
         "billingPeriod": "Month",
@@ -487,6 +557,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 83.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "EverydayPlus": {
         "billingPeriod": "Month",
@@ -520,6 +592,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 83.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Saturday": {
         "billingPeriod": "Month",
@@ -532,6 +606,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 20.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "SaturdayPlus": {
         "billingPeriod": "Month",
@@ -547,6 +623,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 20.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Sixday": {
         "billingPeriod": "Month",
@@ -574,6 +652,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 73.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "SixdayPlus": {
         "billingPeriod": "Month",
@@ -604,6 +684,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 73.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Sunday": {
         "billingPeriod": "Month",
@@ -616,6 +698,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 20.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "SundayPlus": {
         "billingPeriod": "Month",
@@ -631,6 +715,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 20.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Weekend": {
         "billingPeriod": "Month",
@@ -646,6 +732,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 33.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "WeekendPlus": {
         "billingPeriod": "Month",
@@ -664,12 +752,16 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 34.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "NationalDelivery": {
     "active": true,
     "billingSystem": "zuora",
+    "customerFacingName": "Newspaper Home Delivery",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Everyday": {
         "billingPeriod": "Month",
@@ -700,6 +792,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 83.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "EverydayPlus": {
         "billingPeriod": "Month",
@@ -733,6 +827,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 83.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Sixday": {
         "billingPeriod": "Month",
@@ -760,6 +856,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 73.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "SixdayPlus": {
         "billingPeriod": "Month",
@@ -790,6 +888,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 73.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Weekend": {
         "billingPeriod": "Month",
@@ -805,6 +905,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 33.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "WeekendPlus": {
         "billingPeriod": "Month",
@@ -823,12 +925,16 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 34.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "NewspaperVoucher": {
     "active": false,
     "billingSystem": "zuora",
+    "customerFacingName": "Newspaper Voucher",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Everyday": {
         "billingPeriod": "Month",
@@ -859,6 +965,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 69.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "EverydayPlus": {
         "billingPeriod": "Month",
@@ -892,6 +1000,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 69.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Saturday": {
         "billingPeriod": "Month",
@@ -904,6 +1014,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "SaturdayPlus": {
         "billingPeriod": "Month",
@@ -919,6 +1031,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Sixday": {
         "billingPeriod": "Month",
@@ -946,6 +1060,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 61.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "SixdayPlus": {
         "billingPeriod": "Month",
@@ -979,6 +1095,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 61.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Sunday": {
         "billingPeriod": "Month",
@@ -991,6 +1109,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "SundayPlus": {
         "billingPeriod": "Month",
@@ -1006,6 +1126,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Weekend": {
         "billingPeriod": "Month",
@@ -1021,6 +1143,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 26.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "WeekendPlus": {
         "billingPeriod": "Month",
@@ -1039,12 +1163,16 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 27.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "OneTimeContribution": {
     "active": true,
     "billingSystem": "stripe",
+    "customerFacingName": "Support just once",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "OneTime": {
         "billingPeriod": "OneTime",
@@ -1055,12 +1183,16 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "single_contribution",
         "pricing": {},
+        "termLengthInMonths": 0,
+        "termType": "FixedTerm",
       },
     },
   },
   "PartnerMembership": {
     "active": false,
     "billingSystem": "zuora",
+    "customerFacingName": "Partner Membership",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -1073,6 +1205,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 149,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -1085,6 +1219,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "V1DeprecatedAnnual": {
         "billingPeriod": "Annual",
@@ -1097,6 +1233,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 135,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "V1DeprecatedMonthly": {
         "billingPeriod": "Month",
@@ -1109,12 +1247,16 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "PatronMembership": {
     "active": false,
     "billingSystem": "zuora",
+    "customerFacingName": "Patron Membership",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -1127,6 +1269,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 599,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -1139,6 +1283,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 60,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "V1DeprecatedAnnual": {
         "billingPeriod": "Annual",
@@ -1151,6 +1297,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 540,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "V1DeprecatedMonthly": {
         "billingPeriod": "Month",
@@ -1163,12 +1311,16 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 60,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "SubscriptionCard": {
     "active": true,
     "billingSystem": "zuora",
+    "customerFacingName": "Newspaper Subscription Card",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Everyday": {
         "billingPeriod": "Month",
@@ -1199,6 +1351,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 69.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "EverydayPlus": {
         "billingPeriod": "Month",
@@ -1232,6 +1386,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 69.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Saturday": {
         "billingPeriod": "Month",
@@ -1244,6 +1400,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "SaturdayPlus": {
         "billingPeriod": "Month",
@@ -1259,6 +1417,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Sixday": {
         "billingPeriod": "Month",
@@ -1286,6 +1446,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 61.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "SixdayPlus": {
         "billingPeriod": "Month",
@@ -1319,6 +1481,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 61.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Sunday": {
         "billingPeriod": "Month",
@@ -1331,6 +1495,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "SundayPlus": {
         "billingPeriod": "Month",
@@ -1346,6 +1512,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Weekend": {
         "billingPeriod": "Month",
@@ -1361,6 +1529,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 26.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "WeekendPlus": {
         "billingPeriod": "Month",
@@ -1379,12 +1549,16 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 27.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "SupporterMembership": {
     "active": false,
     "billingSystem": "zuora",
+    "customerFacingName": "Supporter Membership",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -1401,6 +1575,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 75,
           "USD": 120,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -1417,6 +1593,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 7,
           "USD": 9.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "V1DeprecatedAnnual": {
         "billingPeriod": "Annual",
@@ -1429,6 +1607,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 60,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "V1DeprecatedMonthly": {
         "billingPeriod": "Month",
@@ -1441,6 +1621,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 5,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "V2DeprecatedAnnual": {
         "billingPeriod": "Annual",
@@ -1457,6 +1639,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 51,
           "USD": 89.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "V2DeprecatedMonthly": {
         "billingPeriod": "Month",
@@ -1473,12 +1657,16 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 9,
           "USD": 7.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "SupporterPlus": {
     "active": true,
     "billingSystem": "zuora",
+    "customerFacingName": "All-access digital",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -1499,6 +1687,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 200,
           "USD": 150,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "GuardianWeeklyDomesticMonthly": {
         "billingPeriod": "Month",
@@ -1519,6 +1709,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 57,
           "USD": 43,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -1539,26 +1731,27 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 20,
           "USD": 15,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "OneYearStudent": {
         "billingPeriod": "Annual",
         "charges": {
-          "Contribution": {
-            "id": "71a10c6269b981784c9817e189270008",
-          },
           "Subscription": {
             "id": "71a10c6269b981784c9817e188d60001",
           },
         },
         "id": "71a10c6269b981784c9817e1887c0000",
         "pricing": {
-          "AUD": 200,
-          "CAD": 150,
-          "EUR": 120,
+          "AUD": 15,
+          "CAD": 10,
+          "EUR": 10,
           "GBP": 9,
-          "NZD": 200,
-          "USD": 150,
+          "NZD": 15,
+          "USD": 10,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "V1DeprecatedAnnual": {
         "billingPeriod": "Annual",
@@ -1576,6 +1769,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 160,
           "USD": 120,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "V1DeprecatedMonthly": {
         "billingPeriod": "Month",
@@ -1593,12 +1788,16 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 17,
           "USD": 13,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "TierThree": {
     "active": true,
     "billingSystem": "zuora",
+    "customerFacingName": "Digital + print",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "DomesticAnnual": {
         "billingPeriod": "Annual",
@@ -1619,6 +1818,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 800,
           "USD": 510,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "DomesticAnnualV2": {
         "billingPeriod": "Annual",
@@ -1642,6 +1843,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 824,
           "USD": 534,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "DomesticMonthly": {
         "billingPeriod": "Month",
@@ -1662,6 +1865,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 70,
           "USD": 45,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "DomesticMonthlyV2": {
         "billingPeriod": "Month",
@@ -1685,6 +1890,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 72,
           "USD": 47,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "RestOfWorldAnnual": {
         "billingPeriod": "Annual",
@@ -1701,6 +1908,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 417.6,
           "USD": 546,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "RestOfWorldAnnualV2": {
         "billingPeriod": "Annual",
@@ -1720,6 +1929,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 441.6,
           "USD": 570,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "RestOfWorldMonthly": {
         "billingPeriod": "Month",
@@ -1736,6 +1947,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 36.8,
           "USD": 48,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "RestOfWorldMonthlyV2": {
         "billingPeriod": "Month",
@@ -1755,6 +1968,8 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "GBP": 38.8,
           "USD": 50,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
@@ -1768,7 +1983,7 @@ exports[`prod Generated product billing types match snapshot 1`] = `
 import type { ProductKey } from '@modules/product-catalog/productCatalog';
 	
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- we are using this for type generation
-	const productBillingPeriods = {"Contribution":["Annual","Month"],"GuardianWeeklyRestOfWorld":["Month","Annual","Quarter"],"GuardianAdLite":["Month"],"TierThree":["Annual","Month"],"DigitalSubscription":["Quarter","Month","Annual"],"NationalDelivery":["Month"],"SupporterMembership":["Annual","Month"],"SupporterPlus":["Annual","Month"],"GuardianWeeklyDomestic":["Annual","Quarter","Month"],"SubscriptionCard":["Month"],"GuardianWeeklyZoneA":["Annual","Three_Years","Semi_Annual","Two_Years","Quarter"],"GuardianWeeklyZoneB":["Annual","Three_Years","Two_Years","Semi_Annual","Quarter"],"GuardianWeeklyZoneC":["Semi_Annual","Annual","Quarter"],"NewspaperVoucher":["Month"],"HomeDelivery":["Month"],"PatronMembership":["Month","Annual"],"PartnerMembership":["Annual","Month"],"GuardianPatron":["Month"],"OneTimeContribution":["OneTime"]} as const;
+	const productBillingPeriods = {"SupporterPlus":["Annual","Month"],"Contribution":["Annual","Month"],"GuardianWeeklyRestOfWorld":["Annual","Month","Quarter"],"GuardianAdLite":["Month"],"TierThree":["Annual","Month"],"DigitalSubscription":["Annual","Month","Quarter"],"NationalDelivery":["Month"],"SupporterMembership":["Annual","Month"],"GuardianWeeklyDomestic":["Annual","Month","Quarter"],"SubscriptionCard":["Month"],"GuardianWeeklyZoneA":["Annual","Quarter","Semi_Annual","Three_Years","Two_Years"],"GuardianWeeklyZoneB":["Annual","Quarter","Semi_Annual","Three_Years","Two_Years"],"GuardianWeeklyZoneC":["Annual","Quarter","Semi_Annual"],"NewspaperVoucher":["Month"],"HomeDelivery":["Month"],"PatronMembership":["Annual","Month"],"PartnerMembership":["Annual","Month"],"GuardianPatron":["Month"],"OneTimeContribution":["OneTime"]} as const;
 	
 	export type ProductBillingPeriod<P extends ProductKey> = (typeof productBillingPeriods)[P][number];
 	"
@@ -1779,6 +1994,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
   "Contribution": {
     "active": true,
     "billingSystem": "zuora",
+    "customerFacingName": "Support",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -1796,6 +2013,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 80,
           "USD": 60,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -1813,12 +2032,16 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 10,
           "USD": 5,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "DigitalSubscription": {
     "active": true,
     "billingSystem": "zuora",
+    "customerFacingName": "The Guardian Digital Edition",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -1836,6 +2059,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 269.99,
           "USD": 249,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -1853,6 +2078,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 26.99,
           "USD": 24.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "OneYearGift": {
         "charges": {
@@ -1869,6 +2096,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 175,
           "USD": 165,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Quarterly": {
         "billingPeriod": "Quarter",
@@ -1886,6 +2115,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 79.99,
           "USD": 74.94,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "ThreeMonthGift": {
         "charges": {
@@ -1902,12 +2133,16 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 63,
           "USD": 60,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "GuardianAdLite": {
     "active": true,
     "billingSystem": "zuora",
+    "customerFacingName": "Guardian Ad-Lite",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Monthly": {
         "billingPeriod": "Month",
@@ -1920,12 +2155,16 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 5,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "GuardianPatron": {
     "active": true,
     "billingSystem": "stripe",
+    "customerFacingName": "Guardian Patron",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "GuardianPatron": {
         "billingPeriod": "Month",
@@ -1936,12 +2175,16 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "guardian_patron",
         "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "GuardianWeeklyDomestic": {
     "active": true,
     "billingSystem": "zuora",
+    "customerFacingName": "Guardian Weekly",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -1959,6 +2202,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 660,
           "USD": 360,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -1976,6 +2221,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 55,
           "USD": 30,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "OneYearGift": {
         "billingPeriod": "Annual",
@@ -1993,6 +2240,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 660,
           "USD": 360,
         },
+        "termLengthInMonths": 12,
+        "termType": "FixedTerm",
       },
       "Quarterly": {
         "billingPeriod": "Quarter",
@@ -2010,6 +2259,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 165,
           "USD": 90,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "ThreeMonthGift": {
         "billingPeriod": "Quarter",
@@ -2027,12 +2278,16 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 165,
           "USD": 90,
         },
+        "termLengthInMonths": 3,
+        "termType": "FixedTerm",
       },
     },
   },
   "GuardianWeeklyRestOfWorld": {
     "active": true,
     "billingSystem": "zuora",
+    "customerFacingName": "Guardian Weekly",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -2046,6 +2301,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 336,
           "USD": 432,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -2059,6 +2316,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 28,
           "USD": 36,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "OneYearGift": {
         "billingPeriod": "Annual",
@@ -2072,6 +2331,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 336,
           "USD": 432,
         },
+        "termLengthInMonths": 12,
+        "termType": "FixedTerm",
       },
       "Quarterly": {
         "billingPeriod": "Quarter",
@@ -2085,6 +2346,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 83.9,
           "USD": 108,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "ThreeMonthGift": {
         "billingPeriod": "Quarter",
@@ -2098,12 +2361,16 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 83.9,
           "USD": 108,
         },
+        "termLengthInMonths": 3,
+        "termType": "FixedTerm",
       },
     },
   },
   "GuardianWeeklyZoneA": {
     "active": false,
     "billingSystem": "zuora",
+    "customerFacingName": "Guardian Weekly",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -2117,6 +2384,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 120,
           "USD": 240,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Quarterly": {
         "billingPeriod": "Quarter",
@@ -2130,12 +2399,16 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 30,
           "USD": 60,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "GuardianWeeklyZoneB": {
     "active": false,
     "billingSystem": "zuora",
+    "customerFacingName": "Guardian Weekly",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -2153,6 +2426,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 392,
           "USD": 240,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Quarterly": {
         "billingPeriod": "Quarter",
@@ -2170,12 +2445,16 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 98,
           "USD": 60,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "GuardianWeeklyZoneC": {
     "active": false,
     "billingSystem": "zuora",
+    "customerFacingName": "Guardian Weekly",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -2193,6 +2472,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 392,
           "USD": 260,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Quarterly": {
         "billingPeriod": "Quarter",
@@ -2210,12 +2491,16 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 98,
           "USD": 65,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "HomeDelivery": {
     "active": true,
     "billingSystem": "zuora",
+    "customerFacingName": "Newspaper Home Delivery",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Everyday": {
         "billingPeriod": "Month",
@@ -2246,6 +2531,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 83.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "EverydayPlus": {
         "billingPeriod": "Month",
@@ -2279,6 +2566,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 83.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Saturday": {
         "billingPeriod": "Month",
@@ -2291,6 +2580,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 20.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "SaturdayPlus": {
         "billingPeriod": "Month",
@@ -2306,6 +2597,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 20.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Sixday": {
         "billingPeriod": "Month",
@@ -2333,6 +2626,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 73.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "SixdayPlus": {
         "billingPeriod": "Month",
@@ -2363,6 +2658,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 73.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Sunday": {
         "billingPeriod": "Month",
@@ -2375,6 +2672,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 20.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "SundayPlus": {
         "billingPeriod": "Month",
@@ -2390,6 +2689,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 20.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Weekend": {
         "billingPeriod": "Month",
@@ -2405,6 +2706,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 33.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "WeekendPlus": {
         "billingPeriod": "Month",
@@ -2423,12 +2726,16 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 34.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "NationalDelivery": {
     "active": true,
     "billingSystem": "zuora",
+    "customerFacingName": "Newspaper Home Delivery",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Everyday": {
         "billingPeriod": "Month",
@@ -2459,6 +2766,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 83.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "EverydayPlus": {
         "billingPeriod": "Month",
@@ -2492,6 +2801,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 83.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Sixday": {
         "billingPeriod": "Month",
@@ -2519,6 +2830,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 73.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "SixdayPlus": {
         "billingPeriod": "Month",
@@ -2549,6 +2862,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 73.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Weekend": {
         "billingPeriod": "Month",
@@ -2564,6 +2879,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 33.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "WeekendPlus": {
         "billingPeriod": "Month",
@@ -2582,12 +2899,16 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 34.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "NewspaperVoucher": {
     "active": false,
     "billingSystem": "zuora",
+    "customerFacingName": "Newspaper Voucher",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Everyday": {
         "billingPeriod": "Month",
@@ -2618,6 +2939,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 69.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "EverydayPlus": {
         "billingPeriod": "Month",
@@ -2651,6 +2974,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 69.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Saturday": {
         "billingPeriod": "Month",
@@ -2663,6 +2988,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "SaturdayPlus": {
         "billingPeriod": "Month",
@@ -2678,6 +3005,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Sixday": {
         "billingPeriod": "Month",
@@ -2705,6 +3034,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 61.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "SixdayPlus": {
         "billingPeriod": "Month",
@@ -2735,6 +3066,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 61.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Sunday": {
         "billingPeriod": "Month",
@@ -2747,6 +3080,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "SundayPlus": {
         "billingPeriod": "Month",
@@ -2762,6 +3097,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Weekend": {
         "billingPeriod": "Month",
@@ -2777,6 +3114,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 26.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "WeekendPlus": {
         "billingPeriod": "Month",
@@ -2795,12 +3134,16 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 27.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "OneTimeContribution": {
     "active": true,
     "billingSystem": "stripe",
+    "customerFacingName": "Support just once",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "OneTime": {
         "billingPeriod": "OneTime",
@@ -2811,12 +3154,16 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "single_contribution",
         "pricing": {},
+        "termLengthInMonths": 0,
+        "termType": "FixedTerm",
       },
     },
   },
   "PartnerMembership": {
     "active": false,
     "billingSystem": "zuora",
+    "customerFacingName": "Partner Membership",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -2829,6 +3176,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 149,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -2841,6 +3190,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "V1DeprecatedAnnual": {
         "billingPeriod": "Annual",
@@ -2853,6 +3204,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 135,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "V1DeprecatedMonthly": {
         "billingPeriod": "Month",
@@ -2865,12 +3218,16 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "PatronMembership": {
     "active": false,
     "billingSystem": "zuora",
+    "customerFacingName": "Patron Membership",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -2883,6 +3240,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 599,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -2895,6 +3254,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 60,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "V1DeprecatedAnnual": {
         "billingPeriod": "Annual",
@@ -2907,6 +3268,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 540,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "V1DeprecatedMonthly": {
         "billingPeriod": "Month",
@@ -2919,12 +3282,16 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 60,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "SubscriptionCard": {
     "active": true,
     "billingSystem": "zuora",
+    "customerFacingName": "Newspaper Subscription Card",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "Everyday": {
         "billingPeriod": "Month",
@@ -2955,6 +3322,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 69.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "EverydayPlus": {
         "billingPeriod": "Month",
@@ -2988,6 +3357,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 69.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Saturday": {
         "billingPeriod": "Month",
@@ -3000,6 +3371,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "SaturdayPlus": {
         "billingPeriod": "Month",
@@ -3015,6 +3388,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Sixday": {
         "billingPeriod": "Month",
@@ -3042,6 +3417,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 61.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "SixdayPlus": {
         "billingPeriod": "Month",
@@ -3072,6 +3449,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 61.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Sunday": {
         "billingPeriod": "Month",
@@ -3084,6 +3463,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "SundayPlus": {
         "billingPeriod": "Month",
@@ -3099,6 +3480,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 15.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Weekend": {
         "billingPeriod": "Month",
@@ -3114,6 +3497,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 26.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "WeekendPlus": {
         "billingPeriod": "Month",
@@ -3132,12 +3517,16 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 27.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "SupporterMembership": {
     "active": false,
     "billingSystem": "zuora",
+    "customerFacingName": "Supporter Membership",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -3154,6 +3543,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 75,
           "USD": 120,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -3170,6 +3561,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 7,
           "USD": 9.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "V1DeprecatedAnnual": {
         "billingPeriod": "Annual",
@@ -3182,6 +3575,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 50,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "V1DeprecatedMonthly": {
         "billingPeriod": "Month",
@@ -3194,6 +3589,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "pricing": {
           "GBP": 5,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "V2DeprecatedAnnual": {
         "billingPeriod": "Annual",
@@ -3210,6 +3607,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 49,
           "USD": 69,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "V2DeprecatedMonthly": {
         "billingPeriod": "Month",
@@ -3226,12 +3625,16 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 5,
           "USD": 6.99,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "SupporterPlus": {
     "active": true,
     "billingSystem": "zuora",
+    "customerFacingName": "All-access digital",
+    "isDeliveryProduct": false,
     "ratePlans": {
       "Annual": {
         "billingPeriod": "Annual",
@@ -3252,6 +3655,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 200,
           "USD": 150,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "Monthly": {
         "billingPeriod": "Month",
@@ -3272,26 +3677,27 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 20,
           "USD": 15,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "OneYearStudent": {
         "billingPeriod": "Annual",
         "charges": {
-          "Contribution": {
-            "id": "8a129797980d634c019818808aa0766a",
-          },
           "Subscription": {
             "id": "8a129797980d634c019818808aef7672",
           },
         },
         "id": "8a129797980d634c019818808a4c7668",
         "pricing": {
-          "AUD": 200,
-          "CAD": 150,
-          "EUR": 120,
+          "AUD": 15,
+          "CAD": 10,
+          "EUR": 10,
           "GBP": 9,
-          "NZD": 200,
-          "USD": 150,
+          "NZD": 15,
+          "USD": 10,
         },
+        "termLengthInMonths": 12,
+        "termType": "FixedTerm",
       },
       "V1DeprecatedAnnual": {
         "billingPeriod": "Annual",
@@ -3309,6 +3715,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 160,
           "USD": 120,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "V1DeprecatedMonthly": {
         "billingPeriod": "Month",
@@ -3326,12 +3734,16 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 17,
           "USD": 13,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },
   "TierThree": {
     "active": true,
     "billingSystem": "zuora",
+    "customerFacingName": "Digital + print",
+    "isDeliveryProduct": true,
     "ratePlans": {
       "DomesticAnnual": {
         "billingPeriod": "Annual",
@@ -3352,6 +3764,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 800,
           "USD": 510,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "DomesticAnnualV2": {
         "billingPeriod": "Annual",
@@ -3375,6 +3789,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 802,
           "USD": 512,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "DomesticMonthly": {
         "billingPeriod": "Month",
@@ -3395,6 +3811,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 70,
           "USD": 45,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "DomesticMonthlyV2": {
         "billingPeriod": "Month",
@@ -3418,6 +3836,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 72,
           "USD": 47,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "RestOfWorldAnnual": {
         "billingPeriod": "Annual",
@@ -3434,6 +3854,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 417.6,
           "USD": 546,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "RestOfWorldAnnualV2": {
         "billingPeriod": "Annual",
@@ -3453,6 +3875,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 419.6,
           "USD": 548,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "RestOfWorldMonthly": {
         "billingPeriod": "Month",
@@ -3469,6 +3893,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 36.8,
           "USD": 48,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
       "RestOfWorldMonthlyV2": {
         "billingPeriod": "Month",
@@ -3488,6 +3914,8 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "GBP": 38.8,
           "USD": 50,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
       },
     },
   },

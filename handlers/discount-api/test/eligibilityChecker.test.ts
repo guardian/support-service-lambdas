@@ -44,7 +44,7 @@ function asLazy<T>(value: T): () => Promise<T> {
 test('Eligibility check fails for a Supporter plus which has already had the offer', async () => {
 	const sub = zuoraSubscriptionResponseSchema.parse(subscriptionJson1);
 	const billingPreview = loadBillingPreview('A-S00898839', billingPreviewJson1);
-	const discount = getDiscountFromSubscription('CODE', sub);
+	const discount = getDiscountFromSubscription(new Logger(), 'CODE', sub);
 	const after2Months = dayjs(sub.contractEffectiveDate)
 		.add(2, 'months')
 		.add(1, 'days');
@@ -95,7 +95,7 @@ test('Eligibility check fails for a S+ subscription which is on a reduced price'
 		sub.subscriptionNumber,
 		billingPreviewJson1,
 	);
-	const discount = getDiscountFromSubscription('CODE', sub);
+	const discount = getDiscountFromSubscription(new Logger(), 'CODE', sub);
 	const after2Months = dayjs(sub.contractEffectiveDate)
 		.add(2, 'months')
 		.add(1, 'days');
@@ -121,7 +121,7 @@ test('Eligibility check fails for a S+ subscription which is on a reduced price'
 
 test('Eligibility check fails for a subscription which hasnt been running long', () => {
 	const sub = zuoraSubscriptionResponseSchema.parse(subSupporterPlusFullPrice);
-	const discount = getDiscountFromSubscription('CODE', sub);
+	const discount = getDiscountFromSubscription(new Logger(), 'CODE', sub);
 	const nearlyLongEnough = dayjs(sub.contractEffectiveDate).add(2, 'months');
 
 	const ac2 = () =>
@@ -140,7 +140,7 @@ test('Eligibility check works for a price risen subscription', async () => {
 		sub.subscriptionNumber,
 		billingPreviewJson2,
 	);
-	const discount = getDiscountFromSubscription('PROD', sub);
+	const discount = getDiscountFromSubscription(new Logger(), 'PROD', sub);
 
 	await eligibilityChecker.assertGenerallyEligible(
 		sub,
@@ -163,7 +163,7 @@ test('Eligibility check works for supporter plus with 2 rate plans', async () =>
 		sub.subscriptionNumber,
 		billingPreviewSupporterPlusFullPrice,
 	);
-	const discount = getDiscountFromSubscription('CODE', sub);
+	const discount = getDiscountFromSubscription(new Logger(), 'CODE', sub);
 	const after2Months = dayjs(sub.contractEffectiveDate)
 		.add(2, 'months')
 		.add(1, 'days');

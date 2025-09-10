@@ -1,6 +1,6 @@
 import { uploadFileToS3 } from '@modules/aws/s3';
-import { buildAuthClient, runQuery } from '@modules/bigquery/src/bigquery';
 import { getSSMParam } from '@modules/aws/ssm';
+import { buildAuthClient, runQuery } from '@modules/bigquery/src/bigquery';
 
 export const handler = async ({ filePath }: { filePath: string }) => {
 	const gcpConfig = await getSSMParam(
@@ -9,7 +9,7 @@ export const handler = async ({ filePath }: { filePath: string }) => {
 
 	const authClient = await buildAuthClient(gcpConfig);
 
-	const [jsonContent, _] = await runQuery(
+	const [jsonContent] = await runQuery(
 		authClient,
 		process.env.GCP_PROJECT_ID!,
 		query,

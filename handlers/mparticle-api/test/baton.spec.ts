@@ -1,12 +1,27 @@
 import { faker } from '@faker-js/faker';
+import type { BatonS3Writer } from '../src/services/batonS3Writer';
+import type { AppConfig } from '../src/services/config';
 import type {
+	DataSubjectAPI,
+	MParticleClient,
+} from '../src/services/mparticleClient';
+import { invokeBatonHandler } from './invoke-baton-handler';
+import {
+	getMockCreateDataSubjectRequestResponse,
+	getMockGetSubjectRequestByIdResponse,
+	mockFetchJsonResponse,
+	mockFetchResponse,
+	mockSetUserAttributesResponse,
+} from './mockFetch';
+import {
 	GUID,
 	InitiationReference,
-} from '../src/routers/baton/types-and-schemas';
-import type { AppConfig } from '../src/utils/config';
-import { invokeBatonHandler } from '../src/utils/invoke-baton-handler';
+} from '../src/routers/baton/initiationReference';
+import { handleSarStatus } from '../src/routers/baton/access/handleStatus';
 
-jest.mock('../src/utils/config', () => ({
+jest.mock('../../../modules/aws/src/s3');
+
+jest.mock('../src/services/config', () => ({
 	getAppConfig: jest.fn().mockResolvedValue({
 		inputPlatform: {
 			key: faker.string.nanoid(),
@@ -33,24 +48,11 @@ describe('mparticle-api Baton tests', () => {
 
 	it('Initiate Right to Erasure Request', async () => {
 		const requestId = faker.string.uuid();
-		const submittedTime = new Date();
-		const mockSetUserAttributesResponse = {
-			ok: true,
-			status: 202,
-		};
-		const mockCreateDataSubjectRequestResponse = {
-			ok: true,
-			statusCode: 202,
-			json: () => ({
-				expected_completion_time: faker.date.soon(),
-				received_time: submittedTime,
-				subject_request_id: requestId,
-				controller_id: faker.string.numeric(),
-			}),
-		};
-		(global.fetch as jest.Mock)
-			.mockResolvedValueOnce(mockSetUserAttributesResponse)
-			.mockResolvedValueOnce(mockCreateDataSubjectRequestResponse);
+		mockFetchResponse(mockSetUserAttributesResponse, 202);
+		mockFetchJsonResponse(
+			getMockCreateDataSubjectRequestResponse(requestId),
+			202,
+		);
 
 		const userId = faker.string.alphanumeric();
 		const result = await invokeBatonHandler({
@@ -73,20 +75,7 @@ describe('mparticle-api Baton tests', () => {
 
 	it('Get Right to Erasure Request Status', async () => {
 		const requestId: InitiationReference = faker.string.uuid() as GUID;
-		const mockGetSubjectRequestByIdResponse = {
-			ok: true,
-			status: 200,
-			json: () => ({
-				expected_completion_time: faker.date.soon(),
-				subject_request_id: requestId,
-				controller_id: faker.string.numeric(),
-				request_status: 'in_progress',
-				received_time: faker.date.recent(),
-			}),
-		};
-		(global.fetch as jest.Mock).mockResolvedValueOnce(
-			mockGetSubjectRequestByIdResponse,
-		);
+		mockFetchJsonResponse(getMockGetSubjectRequestByIdResponse(requestId));
 
 		const result = await invokeBatonHandler({
 			requestType: 'RER',
@@ -104,19 +93,10 @@ describe('mparticle-api Baton tests', () => {
 
 	it('Initiate Subject Access Request', async () => {
 		const requestId = faker.string.uuid();
-		const submittedTime = new Date();
-		const mockCreateDataSubjectRequestResponse = {
-			ok: true,
-			statusCode: 201,
-			json: () => ({
-				expected_completion_time: faker.date.soon(),
-				received_time: submittedTime,
-				subject_request_id: requestId,
-				controller_id: faker.string.numeric(),
-			}),
-		};
-		(global.fetch as jest.Mock).mockResolvedValueOnce(
-			mockCreateDataSubjectRequestResponse,
+
+		mockFetchJsonResponse(
+			getMockCreateDataSubjectRequestResponse(requestId),
+			201,
 		);
 
 		const userId = faker.string.alphanumeric();
@@ -138,42 +118,82 @@ describe('mparticle-api Baton tests', () => {
 		expect(global.fetch).toHaveBeenCalledTimes(1);
 	});
 
-	it('Get Subject Access Request Status', async () => {
+	it('should get the status of a SAR including downloading the result', async () => {
 		const requestId: InitiationReference = faker.string.uuid() as GUID;
+		const zipRelativePath = '/sar-data-1234.zip';
+		const baseURL = 'https://opendsr.mparticle.com/v3';
+		const resultsUrl = baseURL + zipRelativePath;
+		const testZipData = '1234TestZipData';
 		const mockGetSubjectRequestByIdResponse = {
-			ok: true,
-			status: 200,
-			json: () => ({
+			success: true,
+			data: {
 				expected_completion_time: faker.date.soon(),
 				subject_request_id: requestId,
 				controller_id: faker.string.numeric(),
 				request_status: 'completed',
-				received_time: faker.date.recent(),
-				results_url: faker.internet.url(),
-			}),
+				results_url: resultsUrl,
+			},
 		};
-		(global.fetch as jest.Mock).mockResolvedValueOnce(
-			mockGetSubjectRequestByIdResponse,
+
+		const mockDataSubjectClient: MParticleClient<DataSubjectAPI> = {
+			clientType: 'dataSubject',
+			get: jest.fn().mockImplementation((path: string) => {
+				console.log('Mock get called with path:', path);
+				expect(path).toBe('/requests/' + requestId);
+				return Promise.resolve(mockGetSubjectRequestByIdResponse);
+			}),
+			post: jest.fn().mockRejectedValue(new Error('Mock error')),
+			getStream: jest.fn().mockImplementation((path: string) => {
+				console.log('Mock getStream called with path:', path);
+				expect(path).toBe(zipRelativePath);
+				const stream = new ReadableStream({
+					start(controller) {
+						controller.enqueue(new TextEncoder().encode(testZipData));
+						controller.close();
+					},
+				});
+				return Promise.resolve(stream);
+			}),
+			baseURL,
+		};
+
+		const mockS3Client: BatonS3Writer = {
+			write: jest.fn().mockResolvedValue(`s3://myBucket123/${requestId}`),
+			getUrlIfExists: jest.fn().mockResolvedValue(null), // No existing file
+		};
+
+		const result = await handleSarStatus(
+			mockDataSubjectClient,
+			mockS3Client,
+			requestId,
 		);
 
-		const result = await invokeBatonHandler({
+		const { message, ...resultWithoutMessage } = result;
+		expect(resultWithoutMessage).toEqual({
 			requestType: 'SAR',
 			action: 'status',
-			initiationReference: requestId,
+			status: 'completed',
+			resultLocations: ['s3://myBucket123/' + requestId],
 		});
 
-		expect(result).toBeDefined();
-		expect(result.requestType).toEqual('SAR');
-		expect(result.action).toEqual('status');
-		expect(result.status).toEqual('completed');
-		expect(result.message).toBeDefined();
-		if (result.requestType === 'SAR' && result.action === 'status') {
-			expect(result.resultLocations).toBeDefined();
-			expect(result.resultLocations).toHaveLength(1);
-			if (result.resultLocations) {
-				expect(result.resultLocations[0]).toBeDefined();
-			}
-		}
-		expect(global.fetch).toHaveBeenCalledTimes(1);
+		// check the critical side effect was called
+		expect(mockS3Client.write).toHaveBeenCalledWith(
+			requestId,
+			expect.any(ReadableStream),
+		);
+
+		// check what was written to S3 is correct
+		const writeCalls = (mockS3Client.write as jest.Mock).mock.calls as Array<
+			[string, ReadableStream]
+		>;
+
+		const actualStreamContent = await getStreamContent(writeCalls[0]![1]);
+		expect(actualStreamContent).toBe(testZipData);
 	});
 });
+
+async function getStreamContent(streamArg: ReadableStream) {
+	return new TextDecoder().decode(
+		(await streamArg.getReader().read()).value! as Uint8Array,
+	);
+}

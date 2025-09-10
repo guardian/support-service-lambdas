@@ -21,6 +21,7 @@ import {
 	SingleContributionSalesforceWrites,
 } from '../lib/single-contribution-salesforce-writes';
 import { SoftOptInConsentSetter } from '../lib/soft-opt-in-consent-setter';
+import { StripeDisputes } from '../lib/stripe-disputes';
 import type { StripeWebhookEndpointsProps } from '../lib/stripe-webhook-endpoints';
 import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
 import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
@@ -130,6 +131,21 @@ new DiscountApi(app, 'discount-api-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 	domainName: `discount-api.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
+});
+
+new StripeDisputes(app, 'stripe-disputes-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+	domainName: `stripe-disputes-code.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
+});
+new StripeDisputes(app, 'stripe-disputes-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+	domainName: `stripe-disputes.${supportApisDomain}`,
 	hostedZoneId: supportHostedZoneId,
 	certificateId: supportCertificateId,
 });

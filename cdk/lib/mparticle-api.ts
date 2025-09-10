@@ -1,7 +1,6 @@
 import { GuApiGatewayWithLambdaByPath } from '@guardian/cdk';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
-import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import {
@@ -12,9 +11,9 @@ import {
 	Role,
 } from 'aws-cdk-lib/aws-iam';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
+import { SrLambda } from './cdk/sr-lambda';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { SrLambdaDomain } from './cdk/sr-lambda-domain';
-import { nodeVersion } from './node-version';
 
 export class MParticleApi extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {
@@ -28,27 +27,41 @@ export class MParticleApi extends GuStack {
 			'/accountIds/baton',
 		).stringValue;
 
+		const sarResultsBucket = StringParameter.fromStringParameterName(
+			this,
+			'SarResultsBucket',
+			`/${this.stage}/${this.stack}/${app}/sarResultsBucket`,
+		).stringValue;
+
+		// this must be the same as used in the code
+		const sarS3BaseKey = 'mparticle-results/';
+
 		// HTTP API Lambda
-		const httpLambda = new GuLambdaFunction(this, `${app}-http-lambda`, {
+		const httpLambda = new SrLambda(this, `${app}-http-lambda`, {
 			app,
-			memorySize: 1024,
 			fileName: `${app}.zip`,
-			runtime: nodeVersion,
-			timeout: Duration.seconds(15),
 			handler: 'index.handlerHttp',
 			functionName: `${app}-http-${this.stage}`,
-			events: [],
 		});
 
-		// Baton RER Lambda
-		const batonLambda = new GuLambdaFunction(this, `${app}-baton-lambda`, {
+		// make sure our lambda can write to and list objects in the central baton bucket
+		// https://github.com/guardian/baton/?tab=readme-ov-file#:~:text=The%20convention%20is%20to%20write%20these%20to%20the%20gu%2Dbaton%2Dresults%20bucket%20that%20is%20hosted%20in%20the%20baton%20AWS%20account.
+		// s3:ListBucket permission is needed to check if files already exist before downloading
+		const s3BatonWritePolicy: PolicyStatement = new PolicyStatement({
+			actions: ['s3:PutObject', 's3:ListBucket'],
+			resources: [
+				`arn:aws:s3:::${sarResultsBucket}/${sarS3BaseKey}*`, // for PutObject
+				`arn:aws:s3:::${sarResultsBucket}`, // for ListBucket
+			],
+		});
+
+		const batonLambda = new SrLambda(this, `${app}-baton-lambda`, {
 			app,
-			memorySize: 1024,
 			fileName: `${app}.zip`,
-			runtime: nodeVersion,
 			handler: 'index.handlerBaton',
 			functionName: `${app}-baton-${this.stage}`,
-			events: [],
+			timeout: Duration.seconds(30), // Longer timeout for data processing
+			initialPolicy: [s3BatonWritePolicy],
 		});
 
 		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {

@@ -2,6 +2,7 @@
 // the Guardian Patron product although this may change in the future. This file is combined
 // with the Zuora products to create a full product catalog.
 import type { Product } from '@modules/product-catalog/productCatalog';
+import { getCustomerFacingName } from '@modules/product-catalog/productCatalog';
 
 export type StripeProductKey = 'GuardianPatron' | 'OneTimeContribution';
 export const stripeProducts: Partial<
@@ -10,6 +11,8 @@ export const stripeProducts: Partial<
 	GuardianPatron: {
 		billingSystem: 'stripe',
 		active: true,
+		customerFacingName: getCustomerFacingName('GuardianPatron'),
+		isDeliveryProduct: false,
 		ratePlans: {
 			GuardianPatron: {
 				id: 'guardian_patron',
@@ -20,12 +23,16 @@ export const stripeProducts: Partial<
 					Subscription: { id: 'guardian_patron' },
 				},
 				billingPeriod: 'Month',
+				termType: 'Recurring',
+				termLengthInMonths: 12,
 			},
 		},
 	},
 	OneTimeContribution: {
 		billingSystem: 'stripe',
 		active: true,
+		customerFacingName: getCustomerFacingName('OneTimeContribution'),
+		isDeliveryProduct: false,
 		ratePlans: {
 			OneTime: {
 				id: 'single_contribution',
@@ -36,6 +43,8 @@ export const stripeProducts: Partial<
 					Contribution: { id: 'single_contribution' },
 				},
 				billingPeriod: 'OneTime',
+				termType: 'FixedTerm',
+				termLengthInMonths: 0,
 			},
 		},
 	},
@@ -44,10 +53,14 @@ export const stripeProducts: Partial<
 export const stripeProductsSchema = `GuardianPatron: z.object({
 	billingSystem: z.literal('stripe'),
 	active: z.boolean(),
+	customerFacingName: z.string(),
+	isDeliveryProduct: z.literal(false),
 	ratePlans: z.object({
 		GuardianPatron: z.object({
 			id: z.string(),
 			pricing: z.object({}),
+			termLengthInMonths: z.number(),
+			termType: termTypeSchema,
 			charges: z.object({
 				Subscription: z.object({
 					id: z.string(),
@@ -60,10 +73,14 @@ export const stripeProductsSchema = `GuardianPatron: z.object({
 OneTimeContribution: z.object({
 	billingSystem: z.literal('stripe'),
 	active: z.boolean(),
+	customerFacingName: z.string(),
+	isDeliveryProduct: z.literal(false),
 	ratePlans: z.object({
 		OneTime: z.object({
 			id: z.string(),
 			pricing: z.object({}),
+			termLengthInMonths: z.number(),
+			termType: termTypeSchema,
 			charges: z.object({
 				Contribution: z.object({
 					id: z.string(),

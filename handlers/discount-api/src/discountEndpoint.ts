@@ -220,6 +220,10 @@ async function getDiscountToApply(
 	const catalog = () => getZuoraCatalog(stage);
 	const eligibilityChecker = new EligibilityChecker(logger);
 
+	logger.log('Working out the appropriate discount for the subscription');
+	const { discount, discountableProductRatePlanId } =
+		getDiscountFromSubscription(logger, stage, subscription);
+
 	// don't get the billing preview until we know the subscription is not cancelled
 	const lazyBillingPreview = new Lazy(
 		() =>
@@ -241,10 +245,6 @@ async function getDiscountToApply(
 
 	// now we know the subscription is not cancelled we can force the billing preview
 	const billingPreview = await lazyBillingPreview.get();
-
-	logger.log('Working out the appropriate discount for the subscription');
-	const { discount, discountableProductRatePlanId } =
-		getDiscountFromSubscription(stage, subscription);
 
 	logger.log('Checking this subscription is eligible for the discount');
 	switch (discount.eligibilityCheckForRatePlan) {

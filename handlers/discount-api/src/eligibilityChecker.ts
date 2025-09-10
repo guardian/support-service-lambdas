@@ -103,14 +103,30 @@ export class EligibilityChecker {
 		);
 	};
 
-	assertValidState = (isValid: boolean, message: string, actual: string) => {
-		this.logger.log(`Asserting <${message}>`);
-		if (!isValid) {
-			throw new ValidationError(
-				`subscription did not meet precondition <${message}> (was ${actual})`,
-			);
-		}
-	};
+	private assertValidState(
+		isValid: boolean,
+		message: string,
+		actual: string,
+	): asserts isValid {
+		return assertValidState(this.logger, isValid, message, actual);
+	}
+}
+
+export function assertValidState(
+	logger: Logger,
+	isValid: boolean,
+	message: string,
+	actual: string,
+): asserts isValid {
+	logger.log(`Asserting <${message}>`);
+	if (!isValid) {
+		logger.log(
+			`FAILED: subscription did not meet precondition <${message}> (was ${actual})`,
+		);
+		throw new ValidationError(
+			`subscription did not meet precondition <${message}> (was ${actual})`,
+		);
+	}
 }
 
 export const validationRequirements = {
@@ -121,4 +137,5 @@ export const validationRequirements = {
 	zeroAccountBalance: 'account balance is zero',
 	atLeastCatalogPrice: 'next invoice must be at least the catalog price',
 	nextInvoiceGreaterThanZero: 'next invoice total must be greater than zero',
+	mustHaveDiscountDefined: 'subscription must have a discount defined',
 };
