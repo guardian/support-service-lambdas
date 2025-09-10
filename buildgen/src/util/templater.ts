@@ -1,4 +1,4 @@
-import { HandlerConfig } from '../data/config';
+import { HandlerConfig } from '../data/build';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
 

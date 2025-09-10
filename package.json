@@ -14,9 +14,8 @@
 		"fix-formatting": "pnpm -r run fix-formatting",
 		"check-formatting": "pnpm -r run check-formatting",
 		"validate": "pnpm -r run fix-formatting && pnpm -r run lint --fix && pnpm -r run type-check && pnpm -r run test",
-        "preinstall": "if [ ! -d buildgen/node_modules ]; then cd buildgen && pnpm install --frozen-lockfile --ignore-scripts; cd ..; fi && pnpm run buildgen && pnpm install --ignore-scripts",
-        "buildgen": "cd buildgen && pnpm run generate"
-	},
+        "buildgen": "cd buildgen && pnpm run buildgen"
+    },
 	"devDependencies": {
 		"@guardian/eslint-config-typescript": "12.0.0",
 		"@guardian/prettier": "^8.0.1",

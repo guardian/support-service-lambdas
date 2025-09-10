@@ -2,7 +2,6 @@ import 'source-map-support/register';
 import { App } from 'aws-cdk-lib';
 import { BatchEmailSender } from '../lib/batch-email-sender';
 import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
-import { DiscountApi } from '../lib/discount-api';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
 import { MetricPushApi } from '../lib/metric-push-api';
@@ -119,21 +118,6 @@ new SingleContributionSalesforceWrites(
 	`${SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME}-PROD`,
 	{ stack: 'membership', stage: 'PROD' },
 );
-
-new DiscountApi(app, 'discount-api-CODE', {
-	stack: 'support',
-	stage: 'CODE',
-	domainName: `discount-api-code.${supportApisDomain}`,
-	hostedZoneId: supportHostedZoneId,
-	certificateId: supportCertificateId,
-});
-new DiscountApi(app, 'discount-api-PROD', {
-	stack: 'support',
-	stage: 'PROD',
-	domainName: `discount-api.${supportApisDomain}`,
-	hostedZoneId: supportHostedZoneId,
-	certificateId: supportCertificateId,
-});
 
 new StripeDisputes(app, 'stripe-disputes-CODE', {
 	stack: 'support',

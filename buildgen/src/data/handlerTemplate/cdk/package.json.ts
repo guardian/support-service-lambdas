@@ -1,4 +1,5 @@
-import { HandlerConfig } from '../../config';
+import { HandlerConfig } from '../../build';
+import { notice } from '../../snippets/notices';
 
 export default (config: HandlerConfig) => ({
 	name: `${config.name}-cdk`,
@@ -17,6 +18,7 @@ export default (config: HandlerConfig) => ({
 			'pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm synth',
 		'fix-formatting': 'prettier --write **.ts',
 	},
+	NOTICE: notice(__filename),
 	dependencies: {
 		'@modules/cdk': 'workspace:*',
 	},

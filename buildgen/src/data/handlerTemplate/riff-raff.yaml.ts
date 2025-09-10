@@ -1,4 +1,4 @@
-import { HandlerConfig } from '../config';
+import { HandlerConfig } from '../build';
 
 export default (pkg: HandlerConfig) => ({
 	stacks: ['support'],
@@ -21,7 +21,7 @@ export default (pkg: HandlerConfig) => ({
 				fileName: `${pkg.name}.zip`,
 				bucketSsmLookup: true,
 				prefixStack: false,
-				functionNames: pkg.functionNames,
+				functionNames: pkg.functionNames ?? [pkg.name + '-'],
 			},
 			dependencies: [`${pkg.name}-cloudformation`],
 		},

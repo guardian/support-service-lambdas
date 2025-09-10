@@ -1,0 +1,23 @@
+{
+  "name": "alarms-handler",
+  "scripts": {
+    "test": "jest --group=-integration",
+    "it-test": "jest --group=integration",
+    "type-check": "tsc --noEmit",
+    "build": "esbuild --bundle --platform=node --target=node18 --outdir=target/ src/index.ts src/indexScheduled.ts",
+    "lint": "eslint src/**/*.ts test/**/*.ts",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr alarms-handler.zip ./*.js",
+    "check-formatting": "prettier --check **.ts",
+    "fix-formatting": "prettier --write **.ts"
+  },
+  "NOTICE": "To edit - 1. update buildgen/src/data/build.ts - 2. run `pnpm buildgen` - template: buildgen/src/data/handlerTemplate/lambda/package.json.ts",
+  "dependencies": {
+    "@aws-sdk/client-cloudwatch": "^3.848.0",
+    "@aws-sdk/credential-providers": "^3.848.0",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.147",
+    "dayjs": "^1.11.13"
+  }
+}

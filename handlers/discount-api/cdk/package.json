@@ -1,0 +1,42 @@
+{
+  "name": "discount-api-cdk",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "type-check": "tsc --noEmit",
+    "test": "jest",
+    "test-update": "jest -u",
+    "check-formatting": "prettier --check **.ts",
+    "lint": "eslint lib/** bin/** --ext .ts --no-error-on-unmatched-pattern",
+    "synth": "cdk synth --path-metadata false --version-reporting false",
+    "diff": "cdk diff --path-metadata false --version-reporting false",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm synth",
+    "fix-formatting": "prettier --write **.ts"
+  },
+  "NOTICE": "To edit - 1. update buildgen/src/data/build.ts - 2. run `pnpm buildgen` - template: buildgen/src/data/handlerTemplate/cdk/package.json.ts",
+  "dependencies": {
+    "@modules/cdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@guardian/cdk": "61.8.2",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.15.14",
+    "aws-cdk": "2.1014.0",
+    "aws-cdk-lib": "2.195.0",
+    "constructs": "10.4.2",
+    "source-map-support": "^0.5.21",
+    "ts-node": "^10.9.2"
+  },
+  "jest": {
+    "testMatch": [
+      "<rootDir>/lib/**/*.test.ts"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "setupFilesAfterEnv": [
+      "./jest.setup.js"
+    ]
+  }
+}

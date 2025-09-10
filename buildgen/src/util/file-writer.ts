@@ -1,13 +1,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { execSync } from 'child_process';
-import { GeneratedFile } from '../steps/generateSteps';
+import { GeneratedFile } from '../steps/generate';
 
 export function writeFiles(rootPath: string, files: GeneratedFile[]): void {
-	assertNoCommittedFiles(files, rootPath);
-
 	files.forEach((file) => {
-		const fullPath = path.join(rootPath, file.relativePath);
+		const fullPath = safeJoin(rootPath, file.relativePath);
 		ensureDirectoryExists(path.dirname(fullPath));
 
 		const scriptName = path.basename(__filename);
@@ -16,41 +13,54 @@ export function writeFiles(rootPath: string, files: GeneratedFile[]): void {
 	});
 }
 
-function assertNoCommittedFiles(
-	files: GeneratedFile[],
-	rootPath: string,
-): void {
-	const committedFiles = getCommittedFiles(rootPath);
-	const conflictingFiles = files
-		.map((file) => file.relativePath)
-		.filter((relativePath) => committedFiles.has(relativePath));
+function safeJoin(basePath: string, relativePath: string): string {
+	const fullPath = path.join(basePath, relativePath);
+	const resolvedBase = path.resolve(basePath);
+	const resolvedTarget = path.resolve(fullPath);
 
-	if (conflictingFiles.length > 0) {
+	if (!resolvedTarget.startsWith(resolvedBase + path.sep)) {
 		throw new Error(
-			`Some buildgen'ed files were mistakenly committed, please remove and run buildgen again: ${conflictingFiles.join(', ')}`,
+			`Path traversal detected: ${relativePath} escapes base directory ${basePath}`,
 		);
 	}
-}
 
-function getCommittedFiles(rootPath: string): Set<string> {
-	try {
-		const output = execSync('git ls-files', {
-			cwd: rootPath,
-			encoding: 'utf8',
-		});
-		return new Set(
-			output
-				.trim()
-				.split('\n')
-				.filter((line) => line.length > 0),
-		);
-	} catch (error) {
-		throw new Error('Not in a git repository or git command failed: ' + error);
-	}
+	return fullPath;
 }
 
 function ensureDirectoryExists(dirPath: string): void {
 	if (!fs.existsSync(dirPath)) {
 		fs.mkdirSync(dirPath, { recursive: true });
 	}
+}
+
+export function loadGeneratedFileNames(
+	repoRoot: string,
+	markerFileName: string,
+): string[] {
+	const markerPath = safeJoin(repoRoot, markerFileName);
+
+	if (!fs.existsSync(markerPath)) {
+		return [];
+	}
+
+	const content = fs.readFileSync(markerPath, 'utf8');
+	return content
+		.split('\n')
+		.filter((line) => line.trim() && !line.trim().startsWith('#'))
+		.map((line) => line.trim());
+}
+
+export function deleteRepoFiles(
+	repoRoot: string,
+	relativePaths: string[],
+): void {
+	relativePaths.forEach((relativePath) => {
+		const fullPath = safeJoin(repoRoot, relativePath);
+
+		if (fs.existsSync(fullPath)) {
+			const scriptName = path.basename(__filename);
+			console.log(`${scriptName}: deleting: ${relativePath}`);
+			fs.unlinkSync(fullPath);
+		}
+	});
 }

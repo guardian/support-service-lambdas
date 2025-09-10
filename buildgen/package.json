@@ -4,9 +4,13 @@
   "private": true,
   "description": "Build file generator for handlers",
   "scripts": {
-    "generate": "bash scripts/generate-template-list.sh && REPO_ROOT=\"$(pwd | sed 's|/buildgen.*||')\" && ts-node src/generate.ts \"$REPO_ROOT\"",
+    "buildgen": "pnpm snapshot:update",
+    "snapshot:update": "bash scripts/generate-template-list.sh && REPO_ROOT=\"$(pwd | sed 's|/buildgen.*||')\" && ts-node src/cli.ts --generate \"$REPO_ROOT\"",
+    "snapshot:clean": "bash scripts/generate-template-list.sh && REPO_ROOT=\"$(pwd | sed 's|/buildgen.*||')\" && ts-node src/cli.ts --clean \"$REPO_ROOT\"",
+    "snapshot:assert": "bash scripts/generate-template-list.sh && REPO_ROOT=\"$(pwd | sed 's|/buildgen.*||')\" && bash -c 'jest --testNamePattern=\"checkActual $*\"' -- \"$@\"",
+    "migrate-handler": "REPO_ROOT=\"$(pwd | sed 's|/buildgen.*||')\" && bash scripts/migrate-handler.sh \"$REPO_ROOT\"",
     "check": "bash scripts/generate-template-list.sh && tsc --noEmit",
-    "clean": "rm -rf src/data/generated.ts dist",
+    "clean": "rm -rf src/steps/generatedMappings.ts dist",
     "test": "bash scripts/generate-template-list.sh && jest"
   },
   "dependencies": {
