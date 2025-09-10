@@ -129,7 +129,7 @@ describe('handleListenDisputeClosed', () => {
 				'SUB-12345',
 				expect.any(Object), // dayjs date
 				false, // runBilling
-				false, // collect
+				undefined, // collect
 				'EndOfLastInvoicePeriod', // cancellationPolicy
 			);
 		});
