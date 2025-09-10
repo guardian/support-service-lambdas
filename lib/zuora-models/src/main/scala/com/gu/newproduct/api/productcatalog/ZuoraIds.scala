@@ -28,6 +28,7 @@ object ZuoraIds {
       monthlyV2: PlanAndCharges,
       annual: PlanAndCharge,
       annualV2: PlanAndCharges,
+      student: PlanAndCharge,
   ) {
     val planAndChargeByApiPlanId: Map[PlanId, PlanAndCharges] = Map(
       MonthlySupporterPlus -> monthlyV2,
@@ -243,6 +244,10 @@ object ZuoraIds {
             productRatePlanChargeId = ProductRatePlanChargeId("8a128ed885fc6ded01860228f7cb3d5f"),
             contributionProductRatePlanChargeId = ProductRatePlanChargeId("8a12892d85fc6df4018602451322287f"),
           ),
+          student = PlanAndCharge(
+            productRatePlanId = ProductRatePlanId("8a129797980d634c019818808a4c7668"),
+            productRatePlanChargeId = ProductRatePlanChargeId("8a129797980d634c019818808aef7672"),
+          ),
         ),
         ContributionsZuoraIds(
           monthly = PlanAndCharge(
@@ -335,6 +340,10 @@ object ZuoraIds {
             productRatePlanId = ProductRatePlanId("8ad08e1a8586721801858805663f6fab"),
             productRatePlanChargeId = ProductRatePlanChargeId("8ad08e1a858672180185880566606fad"),
             contributionProductRatePlanChargeId = ProductRatePlanChargeId("8ad096ca858682bb0185881568385d73"),
+          ),
+          student = PlanAndCharge(
+            productRatePlanId = ProductRatePlanId("71a10c6269b981784c9817e1887c0000"),
+            productRatePlanChargeId = ProductRatePlanChargeId("71a10c6269b981784c9817e188d60001"),
           ),
         ),
         ContributionsZuoraIds(
