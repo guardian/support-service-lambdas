@@ -1,32 +1,36 @@
 # Buildcheck - build file checker
 
 ## What is buildcheck?
-Buildcheck checks the build files for all lambda modules and their associated cdk modules on every build.
+Buildcheck checks the content of the build files for all lambda modules and their associated cdk modules on every build.
 
 The expected content is defined programmatically in typescript, similar to how CDK defines cloudformation.
 
-An update command is provided to refresh the build files from the definition.
+The build files are still committed as normal, and an update command is provided to refresh them from the definition.
 
 ## Pros and cons
-The benefits of buildcheck are similar to CDK:
+The benefits and drawbacks of buildcheck are similar to CDK or SBT:
 - prevent inconsistencies between lambdas/modules including dependency versions and pnpm scripts
-- reuse of common constructs
-- have a predefined/central list of approved dependencies
+- have a central list of recommended dependencies
 - files can be generated where necessary, or buildcheck can be pulled in as a module to reuse definitions
 - allows more fine grained modules to be manageable (i.e. separate CDK per lambda) improving build times and organisation
+- easier to add and review new lambda boilerplate as it's guaranteed to be standard
+- all the usual DRY benefits
 
 The disadvantages are mainly around tooling:
 - automated PRs to bump dependencies will fail unless the dependencies.ts file is updated accordingly
 - harder to add dependencies as you need to add them to build.ts and then run update-build.
-- non standard
+- non standard, could surprise new people
+- extra level of abstraction, could slow down regular developers
 
 ## HOWTO
 ### Add a dependency
-1. edit [src/data/build.ts](src/data/build.ts) 
+1. open [src/data/build.ts](src/data/build.ts) 
+1. edit your lambda definition accordingly
 1. run `pnpm update-build`
 ### Bump a version
-1. edit [src/data/dependencies.ts](src/data/dependencies.ts) 
-2. `pnpm update-build`
+1. open [src/data/dependencies.ts](src/data/dependencies.ts)
+1. edit the version number accordingly
+1. `pnpm update-build`
 ### Quick fix a failing buildcheck in GHA
 1. run `pnpm update-build` to refresh the full set of build files
 2. commit and push

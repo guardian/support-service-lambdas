@@ -1,5 +1,5 @@
 #!/bin/bash -e
-# generates a typescript file with all the template files imported
+# This is an internally used script to automatically produce an index of templates
 script_name=$(basename "$0")
 
 echo "$script_name: START generating template list..."

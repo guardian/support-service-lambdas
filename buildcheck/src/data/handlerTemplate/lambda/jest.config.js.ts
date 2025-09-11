@@ -1,4 +1,7 @@
-export default `/** @type {import('ts-jest').JestConfigWithTsJest} */
+import { notice } from '../../snippets/notices';
+
+export default `// ${notice(__filename)}
+/** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
 	preset: 'ts-jest',
 	testEnvironment: 'node',

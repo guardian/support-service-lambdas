@@ -1,4 +1,6 @@
 #!/bin/bash -e
+# This migration script is run via pnpm and does some of the mechanical work to move a
+# handler over to the new split cdk/managed build format.  See the README.md for more information.
 
 script_name=$(basename "$0")
 

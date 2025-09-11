@@ -19,7 +19,7 @@ export function generateWarningFile(
 	const buildGenHeader = `# Buildcheck managed file list
 The files listed below are managed by buildcheck and their content is checked by the build.
 
-## Changing managed files
+## HOWTO edit managed files
 1. edit the build definition in buildcheck/src/data/
 2. run \`pnpm update-build\` at the root
 

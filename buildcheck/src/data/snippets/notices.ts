@@ -9,5 +9,5 @@ export function relativePath(filename: string) {
 }
 
 export const notice = (filename: string) =>
-	'To edit - 1. update buildcheck/src/data/build.ts - 2. run `pnpm update-build` - template: ' +
+	'GENERATED FILE: see buildcheck/README.md - template: ' +
 	relativePath(filename);

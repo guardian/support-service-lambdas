@@ -1,5 +1,12 @@
 import { dep } from './dependencies';
 
+/*
+This is the main build definition for all handlers.
+
+Each record defines one handler and contains any customisations to the recommended
+build structure assumed by this repo.
+ */
+
 const alarmsHandler: HandlerConfig = {
 	name: 'alarms-handler',
 	functionNames: ['alarms-handler-', 'alarms-handler-scheduled-'],

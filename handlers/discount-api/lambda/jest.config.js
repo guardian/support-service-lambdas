@@ -1,3 +1,4 @@
+// GENERATED FILE: see buildcheck/README.md - template: buildcheck/src/data/handlerTemplate/lambda/jest.config.js.ts
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
 	preset: 'ts-jest',

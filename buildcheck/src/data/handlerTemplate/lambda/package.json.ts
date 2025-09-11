@@ -19,7 +19,8 @@ export default (pkg: HandlerConfig) => {
 			'check-formatting': 'prettier --check **.ts',
 			'fix-formatting': 'prettier --write **.ts',
 		},
-		NOTICE: notice(__filename),
+		NOTICE1: notice(__filename),
+		NOTICE2: 'all dependencies are defined in buildcheck/src/data/build.ts',
 		dependencies: pkg.dependencies,
 		devDependencies: pkg.devDependencies,
 	};
