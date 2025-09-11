@@ -147,6 +147,10 @@ describe('createSubscription integration', () => {
 			type: 'CreditCardReferenceTransaction',
 			tokenId: 'card_E0zitFfsO2wTEn',
 			secondTokenId: 'cus_E0zic0cedDT5MZ',
+			cardNumber: '4242',
+			cardType: 'Visa',
+			expirationMonth: 12,
+			expirationYear: 2025,
 		};
 		const inputFields: CreateSubscriptionInputFields<CreditCardReferenceTransaction> =
 			{
