@@ -1,7 +1,6 @@
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { writeOffInvoice } from '../../src/services/zuoraInvoiceService';
 
-// Mock dayjs
 jest.mock('dayjs', () =>
 	jest.fn(() => ({
 		format: jest.fn(() => '2023-11-04'),

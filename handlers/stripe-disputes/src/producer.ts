@@ -18,13 +18,6 @@ const router = new Router([
 	},
 ]);
 
-/**
- * Hybrid Lambda handler supporting both API Gateway webhooks and SQS events
- *
- * Flow:
- * 1. Stripe webhook → API Gateway → validates + sends to SQS → returns 200
- * 2. SQS event → processes dispute asynchronously → calls Salesforce/Zuora
- */
 export const handler = async (
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult | void> => {
@@ -41,9 +34,6 @@ export const handler = async (
 	}
 };
 
-/**
- * Type guard to check if event is from API Gateway
- */
 function isApiGatewayEvent(event: any): event is APIGatewayProxyEvent {
 	return event.httpMethod !== undefined && event.path !== undefined;
 }

@@ -1,6 +1,5 @@
 import type { SQSEvent } from 'aws-lambda';
 
-// Simple mocks
 const mockLogger = {
 	log: jest.fn(),
 	error: jest.fn(),
@@ -19,7 +18,6 @@ jest.mock('../src/sqs-consumers', () => ({
 	handleListenDisputeClosed: mockHandleListenDisputeClosed,
 }));
 
-// Import after mocks
 import { handler } from '../src/consumer';
 
 describe('Consumer Handler', () => {

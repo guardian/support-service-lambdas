@@ -11,9 +11,6 @@ import {
 
 const logger = new Logger();
 
-/**
- * Interface for SQS dispute event message
- */
 interface DisputeEventMessage {
 	eventType: 'dispute.created' | 'dispute.closed';
 	webhookData: ListenDisputeCreatedRequestBody | ListenDisputeClosedRequestBody;
@@ -21,14 +18,6 @@ interface DisputeEventMessage {
 	disputeId: string;
 }
 
-/**
- * SQS Consumer Lambda handler for processing Stripe dispute events
- *
- * This handler:
- * 1. Receives events from the SQS dispute queue
- * 2. Processes disputes asynchronously with Salesforce/Zuora integration
- * 3. Benefits from SQS retry mechanism and dead letter queue on failures
- */
 export const handler = async (event: SQSEvent): Promise<void> => {
 	logger.log(`Input: ${JSON.stringify(event)}`);
 	logger.log(`Processing ${event.Records.length} SQS dispute events`);

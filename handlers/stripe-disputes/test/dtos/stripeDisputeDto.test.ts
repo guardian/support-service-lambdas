@@ -42,7 +42,7 @@ describe('Stripe Dispute DTOs', () => {
 			const invalidData = {
 				object: {
 					...validStripeDisputeObject,
-					id: undefined, // Missing required field
+					id: undefined,
 				},
 			};
 
@@ -54,7 +54,7 @@ describe('Stripe Dispute DTOs', () => {
 			const invalidData = {
 				object: {
 					...validStripeDisputeObject,
-					amount: 'invalid-amount', // Should be number
+					amount: 'invalid-amount',
 				},
 			};
 
@@ -91,7 +91,7 @@ describe('Stripe Dispute DTOs', () => {
 		it('should reject wrong webhook type', () => {
 			const invalidWebhook = {
 				id: 'evt_test123',
-				type: 'charge.dispute.closed', // Wrong type
+				type: 'charge.dispute.closed',
 				data: { object: validStripeDisputeObject },
 			};
 
@@ -101,7 +101,6 @@ describe('Stripe Dispute DTOs', () => {
 
 		it('should reject missing webhook fields', () => {
 			const invalidWebhook = {
-				// Missing id
 				type: 'charge.dispute.created',
 				data: { object: validStripeDisputeObject },
 			};
@@ -126,7 +125,7 @@ describe('Stripe Dispute DTOs', () => {
 		it('should reject wrong webhook type', () => {
 			const invalidWebhook = {
 				id: 'evt_test123',
-				type: 'charge.dispute.created', // Wrong type
+				type: 'charge.dispute.created',
 				data: { object: validStripeDisputeObject },
 			};
 

@@ -1,6 +1,5 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 
-// Simple mocks
 const mockLogger = {
 	log: jest.fn(),
 	error: jest.fn(),
@@ -23,7 +22,6 @@ jest.mock('../src/services', () => ({
 	handleStripeWebhook: jest.fn(() => jest.fn()),
 }));
 
-// Import after mocks
 import { handler } from '../src/producer';
 
 describe('Producer Handler', () => {
