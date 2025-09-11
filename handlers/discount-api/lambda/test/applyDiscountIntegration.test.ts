@@ -11,7 +11,7 @@ import dayjs from 'dayjs';
 import {
 	createDigitalSubscription,
 	createSupporterPlusSubscription,
-} from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
+} from '../../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import { applyDiscountEndpoint } from '../src/discountEndpoint';
 import type { ApplyDiscountResponseBody } from '../src/responseSchema';
 
