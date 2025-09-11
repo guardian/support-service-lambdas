@@ -1,6 +1,6 @@
 import { relativePath } from './notices';
 import path from 'path';
-import { GeneratedFile } from '../../steps/generatedFile';
+import { GeneratedFile } from '../../src/steps/generatedFile';
 
 // the generated file is named after this file.
 // if you rename it, clean the snapshot first, then generate afterwards
@@ -20,7 +20,7 @@ export function generateWarningFile(
 The files listed below are managed by buildcheck and their content is checked by the build.
 
 ## HOWTO edit managed files
-1. edit the build definition in buildcheck/src/data/
+1. edit the build definition in buildcheck/data/
 2. run \`pnpm update-build\` at the root
 
 For further details, see [buildcheck/README.md](${pathToRoot}/buildcheck/README.md)

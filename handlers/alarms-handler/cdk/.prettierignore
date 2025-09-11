@@ -1,2 +1,2 @@
-# GENERATED FILE: see buildcheck/README.md - template: buildcheck/src/data/handlerTemplate/cdk/.prettierignore.ts
+# GENERATED FILE: see buildcheck/README.md - template: buildcheck/data/handlerTemplate/cdk/.prettierignore.ts
 dist/

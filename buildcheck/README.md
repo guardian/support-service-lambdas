@@ -24,11 +24,11 @@ The disadvantages are mainly around tooling:
 
 ## HOWTO
 ### Add a dependency
-1. open [src/data/build.ts](src/data/build.ts) 
+1. open [data/build.ts](data/build.ts) 
 1. edit your lambda definition accordingly
 1. run `pnpm update-build`
 ### Bump a version
-1. open [src/data/dependencies.ts](src/data/dependencies.ts)
+1. open [data/dependencies.ts](data/dependencies.ts)
 1. edit the version number accordingly
 1. `pnpm update-build`
 ### Quick fix a failing buildcheck in GHA
@@ -36,13 +36,13 @@ The disadvantages are mainly around tooling:
 2. commit and push
 
 ### Edit the templates
-Templates are stored in [src/data/handlerTemplate](src/data/handlerTemplate)
+Templates are stored in [data/handlerTemplate](data/handlerTemplate)
 
 ### Migrate an existing handler to use buildcheck
 This requires the project to be restructured, and the definition added to buildcheck and then tested and refined.
 
 1. run the migration script `pnpm run migrate-handler <handler-name>`
-1. Add your new handler to [src/data/build.ts](src/data/build.ts)
+1. Add your new handler to [data/build.ts](data/build.ts)
 1. Run `pnpm snapshot:assert <handler-name>` to see any differences
 1. Edit the buildcheck data (and existing files) to resolve any differences
 1. retest until you are happy

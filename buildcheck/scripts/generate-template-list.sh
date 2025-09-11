@@ -5,8 +5,9 @@ script_name=$(basename "$0")
 echo "$script_name: START generating template list..."
 
 script_dir=$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")
-src_dir=$(readlink -f "$script_dir/../src")
-data_dir="$src_dir/data"
+buildgen_dir=$(readlink -f "$script_dir/..")
+src_dir="$buildgen_dir/src"
+data_dir="$buildgen_dir/data"
 template_dir="$data_dir/handlerTemplate"
 output_file="$src_dir/steps/generatedMappings.ts"
 
@@ -22,7 +23,7 @@ echo -n "" > "$output_file" # empty the file
 # Generate imports
 for name_without_ext in "${template_files[@]}"; do
     import_name=$(echo "$name_without_ext" | sed 's/[^a-zA-Z0-9]/_/g')
-    echo "import $import_name from '../data/handlerTemplate/$name_without_ext';"
+    echo "import $import_name from '../../data/handlerTemplate/$name_without_ext';"
 done >> "$output_file"
 echo "import { type Template } from '../util/templater';" >> "$output_file"
 

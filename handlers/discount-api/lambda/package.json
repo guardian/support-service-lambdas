@@ -10,8 +10,8 @@
     "check-formatting": "prettier --check **.ts",
     "fix-formatting": "prettier --write **.ts"
   },
-  "NOTICE1": "GENERATED FILE: see buildcheck/README.md - template: buildcheck/src/data/handlerTemplate/lambda/package.json.ts",
-  "NOTICE2": "all dependencies are defined in buildcheck/src/data/build.ts",
+  "NOTICE1": "GENERATED FILE: see buildcheck/README.md - template: buildcheck/data/handlerTemplate/lambda/package.json.ts",
+  "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
     "dayjs": "^1.11.13",
     "zod": "catalog:"

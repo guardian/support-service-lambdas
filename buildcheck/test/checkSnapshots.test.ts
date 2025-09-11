@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { generatorConfig } from '../src/data/build';
+import { generatorConfig } from '../data/build';
 import { generate } from '../src/steps/generate';
 import type { GeneratedFile } from '../src/steps/generatedFile';
 

@@ -20,7 +20,7 @@ export default (pkg: HandlerConfig) => {
 			'fix-formatting': 'prettier --write **.ts',
 		},
 		NOTICE1: notice(__filename),
-		NOTICE2: 'all dependencies are defined in buildcheck/src/data/build.ts',
+		NOTICE2: 'all dependencies are defined in buildcheck/data/build.ts',
 		dependencies: pkg.dependencies,
 		devDependencies: pkg.devDependencies,
 	};
