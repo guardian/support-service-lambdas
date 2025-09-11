@@ -37,7 +37,6 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 		try {
 			logger.log(`Processing SQS record: ${record.messageId}`);
 
-			// Parse the message
 			const message = JSON.parse(record.body) as DisputeEventMessage;
 			logger.mutableAddContext(message.disputeId);
 
@@ -45,7 +44,6 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				`Processing ${message.eventType} for dispute ${message.disputeId}`,
 			);
 
-			// Route to appropriate consumer based on event type
 			switch (message.eventType) {
 				case 'dispute.created': {
 					await handleListenDisputeCreated(
@@ -73,12 +71,10 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 			);
 		} catch (error) {
 			logger.error(`Failed to process SQS record ${record.messageId}:`, error);
-			// Re-throw to trigger SQS retry mechanism
 			throw error;
 		}
 	});
 
-	// Wait for all records to be processed
 	await Promise.all(promises);
 
 	logger.log('SQS events processed successfully');

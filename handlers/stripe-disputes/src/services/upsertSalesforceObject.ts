@@ -47,7 +47,6 @@ export const upsertSalesforceObject = async (
 		`${stageFromEnvironment()}/Salesforce/ConnectedApp/StripeDisputeWebhooks`,
 	);
 
-	// Authenticate with Salesforce
 	const salesforceAuth: SalesforceAuthResponse =
 		await authenticateWithSalesforce(logger, salesforceCredentials);
 
