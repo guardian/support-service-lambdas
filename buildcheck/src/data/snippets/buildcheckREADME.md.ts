@@ -16,14 +16,14 @@ export function generateWarningFile(
 	generatedFiles: string[],
 	pathToRoot: string,
 ): GeneratedFile {
-	const buildGenHeader = `# Buildgen managed file list
-The files listed below are managed by buildgen and their content is checked by the build.
+	const buildGenHeader = `# Buildcheck managed file list
+The files listed below are managed by buildcheck and their content is checked by the build.
 
 ## Changing managed files
-1. edit the build definition in buildgen/src/data/
-2. run \`pnpm buildgen\` at the root
+1. edit the build definition in buildcheck/src/data/
+2. run \`pnpm update-build\` at the root
 
-For further details, see [buildgen/README.md](${pathToRoot}/buildgen/README.md)
+For further details, see [buildcheck/README.md](${pathToRoot}/buildcheck/README.md)
 
 ## Generated file list:
 `;

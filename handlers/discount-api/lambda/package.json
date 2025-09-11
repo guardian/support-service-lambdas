@@ -10,7 +10,7 @@
     "check-formatting": "prettier --check **.ts",
     "fix-formatting": "prettier --write **.ts"
   },
-  "NOTICE": "To edit - 1. update buildgen/src/data/build.ts - 2. run `pnpm buildgen` - template: buildgen/src/data/handlerTemplate/lambda/package.json.ts",
+  "NOTICE": "To edit - 1. update buildcheck/src/data/build.ts - 2. run `pnpm update-build` - template: buildcheck/src/data/handlerTemplate/lambda/package.json.ts",
   "dependencies": {
     "dayjs": "^1.11.13",
     "zod": "catalog:"

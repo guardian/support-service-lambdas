@@ -71,7 +71,7 @@ importers:
         specifier: 'catalog:'
         version: 5.9.2
 
-  buildgen:
+  buildcheck:
     dependencies:
       js-yaml:
         specifier: ^4.1.0

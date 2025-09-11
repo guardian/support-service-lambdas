@@ -1,7 +1,7 @@
 import * as path from 'path';
 import type { GeneratorConfig, HandlerConfig } from '../data/build';
 import { generatorConfig } from '../data/build';
-import { generateWarningFile } from '../data/snippets/buildgenREADME.md';
+import { generateWarningFile } from '../data/snippets/buildcheckREADME.md';
 import type { Template } from '../util/templater';
 import { applyTemplates } from '../util/templater';
 import type { GeneratedFile } from './generatedFile';

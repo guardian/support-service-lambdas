@@ -4,7 +4,7 @@ import { parseArguments } from './util/argsParser';
 import {
 	parseGeneratedFilenames,
 	warningFileName,
-} from './data/snippets/buildgenREADME.md';
+} from './data/snippets/buildcheckREADME.md';
 
 // main entry point from pnpm
 try {

@@ -10,7 +10,7 @@ packages:
   - 'cdk'
   - 'cdk/module'
   # build generator
-  - 'buildgen'
+  - 'buildcheck'
 
 catalog:
   zod: ^3.23.8

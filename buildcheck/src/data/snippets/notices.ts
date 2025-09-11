@@ -1,6 +1,6 @@
 export function relativePath(filename: string) {
 	// not watertight logic, but it isn't security critical
-	const moduleName = 'buildgen';
+	const moduleName = 'buildcheck';
 	const repoRootIndex = filename.indexOf('/' + moduleName + '/');
 	const relativePath =
 		repoRootIndex !== -1 ? filename.substring(repoRootIndex + 1) : filename;
@@ -9,5 +9,5 @@ export function relativePath(filename: string) {
 }
 
 export const notice = (filename: string) =>
-	'To edit - 1. update buildgen/src/data/build.ts - 2. run `pnpm buildgen` - template: ' +
+	'To edit - 1. update buildcheck/src/data/build.ts - 2. run `pnpm update-build` - template: ' +
 	relativePath(filename);

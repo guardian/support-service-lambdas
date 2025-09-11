@@ -30,10 +30,10 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - run: pnpm install
-      - run: pnpm --filter "./modules/**" --filter "./buildgen" check-formatting
+      - run: pnpm --filter "./modules/**" --filter "./buildcheck" check-formatting
       - run: pnpm --filter "./modules/**" build
-      - run: pnpm --filter "./modules/**" --filter "./buildgen" lint
-      - run: pnpm --filter "./modules/**" --filter "./buildgen" test
+      - run: pnpm --filter "./modules/**" --filter "./buildcheck" lint
+      - run: pnpm --filter "./modules/**" --filter "./buildcheck" test
 
   gu-cdk-build:
     needs: common
