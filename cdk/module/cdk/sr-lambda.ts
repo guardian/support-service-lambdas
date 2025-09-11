@@ -2,7 +2,7 @@ import type { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { Duration } from 'aws-cdk-lib';
 import { LoggingFormat, type Runtime } from 'aws-cdk-lib/aws-lambda';
-import { nodeVersion } from '../../lib/node-version';
+import { nodeVersion } from '../node-version';
 
 interface SrLambdaProps {
 	app: string;

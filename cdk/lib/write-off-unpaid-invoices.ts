@@ -28,7 +28,7 @@ import {
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { SrLambdaAlarm } from '../module/cdk/sr-lambda-alarm';
-import { nodeVersion } from './node-version';
+import { nodeVersion } from '../module/node-version';
 
 export class WriteOffUnpaidInvoices extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {

@@ -14,7 +14,7 @@ import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { SrLambdaAlarm } from '../module/cdk/sr-lambda-alarm';
-import { nodeVersion } from './node-version';
+import { nodeVersion } from '../module/node-version';
 
 export interface PressReaderEntitlementsProps extends GuStackProps {
 	stack: string;
