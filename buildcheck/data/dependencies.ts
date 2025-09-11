@@ -1,17 +1,18 @@
-const awsClientVersion = '^3.848.0';
+import {
+	separateDepRecords,
+	withPrefix,
+	withVersion,
+} from '../src/util/dependencyMapper';
 
-const awsSdk = (name: string) => ({
-	['@aws-sdk/' + name]: awsClientVersion,
+// these are predefined recommended dependencies for use in your lambdas
+export const dep = separateDepRecords({
+	zod: 'catalog:',
+	dayjs: '^1.11.13',
+	'@types/aws-lambda': '^8.10.147',
+	...awsClients(['client-cloudwatch', 'credential-providers']),
 });
 
-const zod = { zod: 'catalog:' };
-const dayjs = { dayjs: '^1.11.13' };
-const awsLambdaTypes = { '@types/aws-lambda': '^8.10.147' };
-
-// push it into an object to get easy auto-complete
-export const dep = {
-	zod,
-	dayjs,
-	awsLambdaTypes,
-	awsSdk,
-} as const;
+function awsClients<T extends string>(ids: T[]) {
+	const awsClientVersion = '^3.848.0';
+	return withVersion(withPrefix(ids, '@aws-sdk/'), awsClientVersion);
+}

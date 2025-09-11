@@ -1,9 +1,9 @@
 import * as path from 'path';
 import * as yaml from 'js-yaml';
-import type { HandlerConfig } from '../../data/build';
+import type { HandlerDefinition } from '../../data/build';
 
 export type TemplateContent = string | Record<string, unknown>;
-export type TemplateFunction = (data: HandlerConfig) => TemplateContent;
+export type TemplateFunction = (data: HandlerDefinition) => TemplateContent;
 export type TemplateValue = TemplateContent | TemplateFunction;
 
 export interface Template {
@@ -11,7 +11,7 @@ export interface Template {
 	template: TemplateValue;
 }
 
-export function applyTemplates(pkg: HandlerConfig, templates: Template[]) {
+export function applyTemplates(pkg: HandlerDefinition, templates: Template[]) {
 	return templates.map((template) => {
 		const rawContent =
 			typeof template.template === 'function'

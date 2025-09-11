@@ -3,41 +3,11 @@ import { dep } from './dependencies';
 /*
 This is the main build definition for all handlers.
 
-Each record defines one handler and contains any customisations to the recommended
-build structure assumed by this repo.
+Each record defines one handler and contains anything unique compared with the
+assumed build structure.
  */
 
-const alarmsHandler: HandlerConfig = {
-	name: 'alarms-handler',
-	functionNames: ['alarms-handler-', 'alarms-handler-scheduled-'],
-	entryPoints: ['src/index.ts', 'src/indexScheduled.ts'],
-	dependencies: {
-		...dep.awsSdk('client-cloudwatch'),
-		...dep.awsSdk('credential-providers'),
-		...dep.zod,
-	},
-	devDependencies: {
-		...dep.awsLambdaTypes,
-		...dep.dayjs,
-	},
-};
-
-const discountApi: HandlerConfig = {
-	name: 'discount-api',
-	dependencies: {
-		...dep.dayjs,
-		...dep.zod,
-	},
-	devDependencies: {
-		...dep.awsLambdaTypes,
-	},
-};
-
-export const generatorConfig: GeneratorConfig = {
-	packages: [alarmsHandler, discountApi],
-};
-
-export interface HandlerConfig {
+export interface HandlerDefinition {
 	name: string;
 	functionNames?: string[];
 	entryPoints?: string[];
@@ -45,6 +15,30 @@ export interface HandlerConfig {
 	devDependencies?: Record<string, string>;
 }
 
-export interface GeneratorConfig {
-	packages: HandlerConfig[];
-}
+const alarmsHandler: HandlerDefinition = {
+	name: 'alarms-handler',
+	functionNames: ['alarms-handler-', 'alarms-handler-scheduled-'],
+	entryPoints: ['src/index.ts', 'src/indexScheduled.ts'],
+	dependencies: {
+		...dep['@aws-sdk/client-cloudwatch'],
+		...dep['@aws-sdk/credential-providers'],
+		...dep.zod,
+	},
+	devDependencies: {
+		...dep['@types/aws-lambda'],
+		...dep.dayjs,
+	},
+};
+
+const discountApi: HandlerDefinition = {
+	name: 'discount-api',
+	dependencies: {
+		...dep.dayjs,
+		...dep.zod,
+	},
+	devDependencies: {
+		...dep['@types/aws-lambda'],
+	},
+};
+
+export const build: HandlerDefinition[] = [alarmsHandler, discountApi];

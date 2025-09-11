@@ -9,5 +9,5 @@ export function relativePath(filename: string) {
 }
 
 export const notice = (filename: string) =>
-	'GENERATED FILE: see buildcheck/README.md - template: ' +
+	'MANAGED FILE: to push changes see buildcheck/README.md - template: ' +
 	relativePath(filename);

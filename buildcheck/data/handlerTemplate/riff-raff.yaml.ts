@@ -1,6 +1,6 @@
-import { HandlerConfig } from '../build';
+import { HandlerDefinition } from '../build';
 
-export default (pkg: HandlerConfig) => ({
+export default (pkg: HandlerDefinition) => ({
 	stacks: ['support'],
 	regions: ['eu-west-1'],
 	allowedStages: ['CODE', 'PROD'],

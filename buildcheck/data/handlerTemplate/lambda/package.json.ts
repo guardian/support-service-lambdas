@@ -1,7 +1,7 @@
-import { HandlerConfig } from '../../build';
+import { HandlerDefinition } from '../../build';
 import { notice } from '../../snippets/notices';
 
-export default (pkg: HandlerConfig) => {
+export default (pkg: HandlerDefinition) => {
 	const entryPoints = pkg.entryPoints
 		? pkg.entryPoints?.join(' ')
 		: 'src/index.ts';

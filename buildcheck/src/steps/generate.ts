@@ -1,6 +1,6 @@
 import * as path from 'path';
-import type { GeneratorConfig, HandlerConfig } from '../../data/build';
-import { generatorConfig } from '../../data/build';
+import type { HandlerDefinition } from '../../data/build';
+import { build } from '../../data/build';
 import { generateWarningFile } from '../../data/snippets/BUILDCHECK.md';
 import type { Template } from '../util/templater';
 import { applyTemplates } from '../util/templater';
@@ -9,10 +9,10 @@ import defaultTemplates from './generatedMappings';
 
 // generates files across the whole repository
 export function generate(
-	config: GeneratorConfig = generatorConfig,
+	buildDefinition: HandlerDefinition[] = build,
 	templates: Template[] = defaultTemplates,
 ): GeneratedFile[] {
-	const files = config.packages.flatMap((pkg) => {
+	const files = buildDefinition.flatMap((pkg) => {
 		const handlerFiles = generateHandler(pkg, templates);
 		const filesRelativeToRoot = mapRelativePath(handlerFiles, (relativePath) =>
 			path.join('handlers', pkg.name, relativePath),
@@ -45,7 +45,7 @@ function withWarningFile(
 
 // generates all known files across a single handler according to any custom data
 export function generateHandler(
-	pkg: HandlerConfig,
+	pkg: HandlerDefinition,
 	templates: Template[],
 ): GeneratedFile[] {
 	return withWarningFile(applyTemplates(pkg, templates), '../..');

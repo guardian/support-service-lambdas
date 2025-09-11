@@ -14,7 +14,7 @@
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm synth",
     "fix-formatting": "prettier --write **.ts"
   },
-  "NOTICE": "GENERATED FILE: see buildcheck/README.md - template: buildcheck/data/handlerTemplate/cdk/package.json.ts",
+  "NOTICE": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/handlerTemplate/cdk/package.json.ts",
   "dependencies": {
     "@modules/cdk": "workspace:*"
   },

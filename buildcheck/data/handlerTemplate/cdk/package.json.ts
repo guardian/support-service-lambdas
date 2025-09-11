@@ -1,7 +1,7 @@
-import { HandlerConfig } from '../../build';
+import { HandlerDefinition } from '../../build';
 import { notice } from '../../snippets/notices';
 
-export default (config: HandlerConfig) => ({
+export default (config: HandlerDefinition) => ({
 	name: `${config.name}-cdk`,
 	version: '0.0.0',
 	private: true,
