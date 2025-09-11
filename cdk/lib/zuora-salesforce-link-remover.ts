@@ -18,7 +18,7 @@ import {
 	StateMachine,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
-import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
+import { SrLambdaAlarm } from '../module/cdk/sr-lambda-alarm';
 import { nodeVersion } from './node-version';
 
 export class ZuoraSalesforceLinkRemover extends GuStack {

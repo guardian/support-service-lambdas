@@ -1,5 +1,5 @@
-import { DiscountApi } from '../lib/discount-api';
 import { App } from 'aws-cdk-lib';
+import { DiscountApi } from '../lib/discount-api';
 
 const app = new App();
 export const supportHostedZoneId = 'Z3KO35ELNWZMSX';
