@@ -1,10 +1,16 @@
 packages:
   # lambdas
   - 'handlers/*'
+  - 'handlers/*/lambda'
+  # per lambda cdk
+  - 'handlers/*/cdk'
   # shared code
   - 'modules/*'
   # cdk directory
   - 'cdk'
+  - 'cdk/module'
+  # build generator
+  - 'buildcheck'
 
 catalog:
   zod: ^3.23.8

@@ -1,5 +1,5 @@
 import type { Dayjs } from 'dayjs';
-import { catalog } from '../../../../../handlers/discount-api/src/productToDiscountMapping';
+import { catalog } from '../../../../../handlers/discount-api/lambda/src/productToDiscountMapping';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 
 export const digiSubSubscribeBody = (
