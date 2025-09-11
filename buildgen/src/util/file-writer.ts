@@ -33,10 +33,7 @@ function ensureDirectoryExists(dirPath: string): void {
 	}
 }
 
-export function loadGeneratedFileNames(
-	repoRoot: string,
-	markerFileName: string,
-): string[] {
+export function readLines(repoRoot: string, markerFileName: string): string[] {
 	const markerPath = safeJoin(repoRoot, markerFileName);
 
 	if (!fs.existsSync(markerPath)) {
@@ -44,10 +41,7 @@ export function loadGeneratedFileNames(
 	}
 
 	const content = fs.readFileSync(markerPath, 'utf8');
-	return content
-		.split('\n')
-		.filter((line) => line.trim() && !line.trim().startsWith('#'))
-		.map((line) => line.trim());
+	return content.split('\n').map((line) => line.trim());
 }
 
 export function deleteRepoFiles(

@@ -2,7 +2,7 @@ import { generatorConfig, GeneratorConfig, HandlerConfig } from '../data/build';
 import { applyTemplates, Template } from '../util/templater';
 import * as path from 'path';
 import defaultTemplates from './generatedMappings';
-import { generateWarningFile } from '../data/snippets/buildgenREADME.txt';
+import { generateWarningFile } from '../data/snippets/buildgenREADME.md';
 
 // generates files across the whole repository
 export function generate(
@@ -16,7 +16,7 @@ export function generate(
 		);
 		return filesRelativeToRoot;
 	});
-	return withWarningFile(files);
+	return withWarningFile(files, '.');
 }
 
 function mapRelativePath(
@@ -29,8 +29,14 @@ function mapRelativePath(
 	}));
 }
 
-function withWarningFile(files: { relativePath: string; content: string }[]) {
-	const warningFile = generateWarningFile(files.map((f) => f.relativePath));
+function withWarningFile(
+	files: { relativePath: string; content: string }[],
+	pathToRoot: string,
+) {
+	const warningFile = generateWarningFile(
+		files.map((f) => f.relativePath),
+		pathToRoot,
+	);
 	return [...files, warningFile];
 }
 
@@ -39,7 +45,7 @@ export function generateHandler(
 	pkg: HandlerConfig,
 	templates: Template[],
 ): GeneratedFile[] {
-	return withWarningFile(applyTemplates(pkg, templates));
+	return withWarningFile(applyTemplates(pkg, templates), '../..');
 }
 
 export interface GeneratedFile {

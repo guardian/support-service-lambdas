@@ -1,19 +1,17 @@
 import { generate } from './steps/generate';
-import {
-	writeFiles,
-	loadGeneratedFileNames,
-	deleteRepoFiles,
-} from './util/file-writer';
+import { writeFiles, deleteRepoFiles, readLines } from './util/file-writer';
 import { parseArguments } from './util/argsParser';
-import { warningFileName } from './data/snippets/buildgenREADME.txt';
+import {
+	parseGeneratedFilenames,
+	warningFileName,
+} from './data/snippets/buildgenREADME.md';
 
 // main entry point from pnpm
 try {
 	const { mode, repoRoot } = parseArguments(process.argv);
 
-	const previouslyGeneratedFiles = loadGeneratedFileNames(
-		repoRoot,
-		warningFileName,
+	const previouslyGeneratedFiles = parseGeneratedFilenames(
+		readLines(repoRoot, warningFileName),
 	);
 	console.log('previouslyGeneratedFiles to delete', previouslyGeneratedFiles);
 
