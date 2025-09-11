@@ -101,7 +101,9 @@ describe('payment', () => {
 
 			const callArgs = (mockZuoraClient.post as jest.Mock).mock.calls[0];
 			const requestBody = JSON.parse(callArgs[1] as string);
-			expect(requestBody.gatewayReconciliationReason).toBe('insufficient_funds');
+			expect(requestBody.gatewayReconciliationReason).toBe(
+				'insufficient_funds',
+			);
 		});
 
 		it('should handle different payment numbers', async () => {
@@ -142,7 +144,10 @@ describe('payment', () => {
 				'gatewayReconciliationStatus',
 				'payment_failed',
 			);
-			expect(requestBody).toHaveProperty('gatewayReconciliationReason', 'fraud');
+			expect(requestBody).toHaveProperty(
+				'gatewayReconciliationReason',
+				'fraud',
+			);
 			expect(requestBody).toHaveProperty(
 				'gatewayResponse',
 				'Payment disputed - chargeback received',

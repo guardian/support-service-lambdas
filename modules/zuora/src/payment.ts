@@ -41,7 +41,9 @@ export const rejectPayment = async (
 	paymentNumber: string,
 	rejectionReason: string = 'chargeback',
 ): Promise<ZuoraResponse> => {
-	console.log(`Rejecting payment ${paymentNumber} with reason: ${rejectionReason}`);
+	console.log(
+		`Rejecting payment ${paymentNumber} with reason: ${rejectionReason}`,
+	);
 	const path = `/v1/gateway-settlement/payments/${paymentNumber}/reject`;
 	const body = JSON.stringify({
 		gatewayReconciliationStatus: 'payment_failed',
