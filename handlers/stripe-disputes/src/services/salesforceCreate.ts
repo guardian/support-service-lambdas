@@ -31,7 +31,6 @@ export async function upsertPaymentDisputeInSalesforce(
 	logger.log('upserting Payment Dispute record in Salesforce...');
 
 	try {
-		// Use PATCH with external ID for upsert: /sobjects/SObjectType/FieldName/FieldValue
 		const url = buildSalesforceUpsertUrl(authResponse, paymentDispute);
 
 		// Remove Dispute_ID__c from the body since it's in the URL
