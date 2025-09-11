@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { GeneratedFile } from '../steps/generate';
+import type { GeneratedFile } from '../steps/generatedFile';
 
 export function writeFiles(rootPath: string, files: GeneratedFile[]): void {
 	files.forEach((file) => {

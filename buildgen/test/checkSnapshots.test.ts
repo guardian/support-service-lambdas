@@ -1,7 +1,8 @@
-import { generate, GeneratedFile } from './generate';
-import { generatorConfig } from '../data/build';
 import * as fs from 'fs';
 import * as path from 'path';
+import { generatorConfig } from '../src/data/build';
+import { generate } from '../src/steps/generate';
+import type { GeneratedFile } from '../src/steps/generatedFile';
 
 function readContent(repoRoot: string, relativePath: string) {
 	const fullDiskPath = path.join(repoRoot, relativePath);
@@ -15,7 +16,7 @@ function readContent(repoRoot: string, relativePath: string) {
 // used for filtering by pnpm snapshot checker
 const filterToken = 'checkActual %s';
 
-function testFilesMatch<T>(
+function testFilesMatch(
 	files: GeneratedFile[],
 	handlerName: string,
 	repoRoot: string,

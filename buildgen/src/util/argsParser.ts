@@ -30,7 +30,6 @@ export function parseArguments(argv: string[]): ParsedArgs {
 	}
 
 	const repoRoot = args[1];
-	const packageArgs = args.slice(2);
 
 	if (
 		!fs.existsSync(repoRoot) ||

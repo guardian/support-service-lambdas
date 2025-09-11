@@ -1,6 +1,6 @@
-import { GeneratedFile } from '../../steps/generate';
 import { relativePath } from './notices';
 import path from 'path';
+import { GeneratedFile } from '../../steps/generatedFile';
 
 // the generated file is named after this file.
 // if you rename it, clean the snapshot first, then generate afterwards

@@ -1,8 +1,8 @@
-import { HandlerConfig } from '../data/build';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
+import type { HandlerConfig } from '../data/build';
 
-export type TemplateContent = string | Record<string, any>;
+export type TemplateContent = string | Record<string, unknown>;
 export type TemplateFunction = (data: HandlerConfig) => TemplateContent;
 export type TemplateValue = TemplateContent | TemplateFunction;
 

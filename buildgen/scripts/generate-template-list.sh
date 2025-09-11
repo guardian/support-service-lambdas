@@ -45,6 +45,7 @@ done >> "$output_file"
 
 echo "];" >> "$output_file"
 echo "" >> "$output_file"
+echo "// eslint-disable-next-line import/no-default-export -- generated file" >> "$output_file"
 echo "export default templates;" >> "$output_file"
 
 echo "$script_name: FINISH wrote ${#template_files[@]} templates to $output_file"

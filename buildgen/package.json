@@ -9,9 +9,12 @@
     "snapshot:clean": "bash scripts/generate-template-list.sh && REPO_ROOT=\"$(pwd | sed 's|/buildgen.*||')\" && ts-node src/cli.ts --clean \"$REPO_ROOT\"",
     "snapshot:assert": "bash scripts/generate-template-list.sh && REPO_ROOT=\"$(pwd | sed 's|/buildgen.*||')\" && bash -c 'jest --testNamePattern=\"checkActual $*\"' -- \"$@\"",
     "migrate-handler": "REPO_ROOT=\"$(pwd | sed 's|/buildgen.*||')\" && bash scripts/migrate-handler.sh \"$REPO_ROOT\"",
-    "check": "bash scripts/generate-template-list.sh && tsc --noEmit",
     "clean": "rm -rf src/steps/generatedMappings.ts dist",
-    "test": "bash scripts/generate-template-list.sh && jest"
+    "test": "bash scripts/generate-template-list.sh && jest",
+    "type-check": "bash scripts/generate-template-list.sh && tsc --noEmit",
+    "lint": "bash scripts/generate-template-list.sh && eslint src/**/*.ts test/**/*.ts",
+    "check-formatting": "bash scripts/generate-template-list.sh && prettier --check **.ts",
+    "fix-formatting": "bash scripts/generate-template-list.sh && prettier --write **.ts"
   },
   "dependencies": {
     "js-yaml": "^4.1.0"
