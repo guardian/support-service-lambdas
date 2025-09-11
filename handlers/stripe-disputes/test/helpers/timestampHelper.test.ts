@@ -6,7 +6,7 @@ import {
 describe('Timestamp Helper', () => {
 	describe('timestampToSalesforceDateTime', () => {
 		it('should convert Unix timestamp to ISO datetime string', () => {
-			const timestamp = 1640995200; // 2022-01-01T00:00:00.000Z
+			const timestamp = 1640995200;
 			const result = timestampToSalesforceDateTime(timestamp);
 
 			expect(result).toBe('2022-01-01T00:00:00.000Z');
@@ -20,7 +20,7 @@ describe('Timestamp Helper', () => {
 
 	describe('timestampToSalesforceDate', () => {
 		it('should convert Unix timestamp to ISO date string', () => {
-			const timestamp = 1640995200; // 2022-01-01
+			const timestamp = 1640995200;
 			const result = timestampToSalesforceDate(timestamp);
 
 			expect(result).toBe('2022-01-01');
@@ -32,7 +32,6 @@ describe('Timestamp Helper', () => {
 		});
 
 		it('should throw error for invalid timestamp that results in undefined date', () => {
-			// Mock toISOString to return empty string to trigger undefined from split
 			const originalDate = global.Date;
 			global.Date = class extends originalDate {
 				toISOString() {
@@ -44,7 +43,6 @@ describe('Timestamp Helper', () => {
 				'Invalid timestamp: 1640995200',
 			);
 
-			// Restore original Date
 			global.Date = originalDate;
 		});
 	});

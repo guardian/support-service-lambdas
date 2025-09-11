@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument -- Test mocks require any type */
+import type { Logger } from '@modules/logger';
 import type { ListenDisputeClosedRequestBody } from '../../src/dtos';
 import { handleListenDisputeClosed } from '../../src/sqs-consumers/listenDisputeClosed';
 
@@ -54,7 +54,9 @@ const mockLogger = {
 	log: jest.fn(),
 	error: jest.fn(),
 	mutableAddContext: jest.fn(),
-} as any;
+	resetContext: jest.fn(),
+	getMessage: jest.fn(),
+} as unknown as jest.Mocked<Logger>;
 
 describe('handleListenDisputeClosed', () => {
 	const mockWebhookData: ListenDisputeClosedRequestBody = {

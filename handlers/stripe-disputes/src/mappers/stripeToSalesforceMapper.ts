@@ -11,17 +11,6 @@ import type {
 	ZuoraInvoiceFromStripeChargeIdResult,
 } from '../interfaces';
 
-/**
- * Maps Stripe dispute webhook data to Salesforce Payment Dispute record format
- *
- * This function transforms Stripe webhook data into the format expected by Salesforce,
- * with optional enrichment from Zuora data for subscription and billing information.
- * Handles both dispute created and dispute closed events.
- *
- * @param stripeData - Stripe webhook payload (created or closed dispute event)
- * @param zuoraData - Optional Zuora data to enrich the record with billing information
- * @returns Salesforce Payment Dispute record ready for upsert
- */
 export function mapStripeDisputeToSalesforce(
 	stripeData: ListenDisputeCreatedRequestBody | ListenDisputeClosedRequestBody,
 	zuoraData?: ZuoraInvoiceFromStripeChargeIdResult,

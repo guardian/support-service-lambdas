@@ -3,7 +3,6 @@ import type { PaymentDisputeRecord } from '../../src/interfaces';
 import { upsertPaymentDisputeInSalesforce } from '../../src/services/salesforceCreate';
 import type { SalesforceAuthResponse } from '../../src/types';
 
-// Mock dependencies
 jest.mock('../../src/helpers', () => ({
 	buildSalesforceUpsertUrl: jest.fn(
 		() =>
@@ -25,7 +24,6 @@ jest.mock('../../src/zod-schemas', () => ({
 	},
 }));
 
-// Mock fetch globally
 global.fetch = jest.fn();
 
 describe('Salesforce Create Service', () => {
@@ -71,7 +69,6 @@ describe('Salesforce Create Service', () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 
-		// Mock successful validation
 		const { SalesforceCreateResponseSchema } = require('../../src/zod-schemas');
 		SalesforceCreateResponseSchema.safeParse.mockReturnValue({
 			success: true,
