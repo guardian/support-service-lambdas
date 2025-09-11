@@ -1,5 +1,5 @@
+import { rejectPayment } from '@modules/zuora/payment';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { rejectPayment } from '../../src/services/zuoraPaymentService';
 
 describe('ZuoraPaymentService', () => {
 	const mockZuoraClient = {
