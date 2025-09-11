@@ -1,5 +1,7 @@
 import type { Logger } from '@modules/logger';
 import { stageFromEnvironment } from '@modules/stage';
+import { writeOffInvoice } from '@modules/zuora/invoice';
+import { rejectPayment } from '@modules/zuora/payment';
 import {
 	cancelSubscription,
 	getSubscription,
@@ -9,9 +11,7 @@ import dayjs from 'dayjs';
 import type { ListenDisputeClosedRequestBody } from '../dtos';
 import type { ZuoraInvoiceFromStripeChargeIdResult } from '../interfaces';
 import {
-	rejectPayment,
 	upsertSalesforceObject,
-	writeOffInvoice,
 	zuoraGetInvoiceFromStripeChargeId,
 } from '../services';
 import type { SalesforceUpsertResponse } from '../types';

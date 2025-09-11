@@ -42,11 +42,11 @@ jest.mock('../../src/services/zuoraGetInvoiceFromStripeChargeId', () => ({
 	),
 }));
 
-jest.mock('../../src/services/zuoraPaymentService', () => ({
+jest.mock('@modules/zuora/payment', () => ({
 	rejectPayment: jest.fn(() => Promise.resolve({ Success: true })),
 }));
 
-jest.mock('../../src/services/zuoraInvoiceService', () => ({
+jest.mock('@modules/zuora/invoice', () => ({
 	writeOffInvoice: jest.fn(() => Promise.resolve({ Success: true })),
 }));
 
@@ -94,10 +94,10 @@ describe('handleListenDisputeClosed', () => {
 		it('should process dispute closure with Zuora integration', async () => {
 			// Get mocked functions
 			const mockRejectPayment = jest.mocked(
-				require('../../src/services/zuoraPaymentService').rejectPayment,
+				require('@modules/zuora/payment').rejectPayment,
 			);
 			const mockWriteOffInvoice = jest.mocked(
-				require('../../src/services/zuoraInvoiceService').writeOffInvoice,
+				require('@modules/zuora/invoice').writeOffInvoice,
 			);
 			const mockCancelSubscription = jest.mocked(
 				require('@modules/zuora/subscription').cancelSubscription,
