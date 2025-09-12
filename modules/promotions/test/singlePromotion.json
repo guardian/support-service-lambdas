@@ -1,0 +1,77 @@
+{
+  "uuid": {
+    "S": "0718e22e-a25b-45d2-bb87-ec6ff93cddfc"
+  },
+  "appliesTo": {
+    "M": {
+      "countries": {
+        "L": [
+          {
+            "S": "JE"
+          },
+          {
+            "S": "GI"
+          },
+          {
+            "S": "IM"
+          },
+          {
+            "S": "GB"
+          },
+          {
+            "S": "SH"
+          },
+          {
+            "S": "GG"
+          },
+          {
+            "S": "FK"
+          }
+        ]
+      },
+      "productRatePlanIds": {
+        "L": [
+          {
+            "S": "2c92a0fd79ac64b00179ae3f9d474960"
+          }
+        ]
+      }
+    }
+  },
+  "campaignCode": {
+    "S": "C_LXLY0U85"
+  },
+  "codes": {
+    "M": {
+      "Channel 0": {
+        "L": [
+          {
+            "S": "3TIER_WEEKLY_UK_MONTHLY_V2"
+          }
+        ]
+      }
+    }
+  },
+  "description": {
+    "S": "Three Tier Weekly UK Monthly"
+  },
+  "name": {
+    "S": "Three Tier Weekly UK Monthly V2"
+  },
+  "promotionType": {
+    "M": {
+      "amount": {
+        "N": "33.33"
+      },
+      "durationMonths": {
+        "N": "12"
+      },
+      "name": {
+        "S": "percent_discount"
+      }
+    }
+  },
+  "starts": {
+    "S": "2024-06-19T00:00:00.000+01:00"
+  }
+}
