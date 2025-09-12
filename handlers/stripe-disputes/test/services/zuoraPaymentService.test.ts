@@ -12,7 +12,7 @@ describe('ZuoraPaymentService', () => {
 
 	describe('rejectPayment', () => {
 		it('should reject payment with default chargeback reason', async () => {
-			const mockResponse = { Success: true, Id: 'rejection_123' };
+			const mockResponse = { success: true, Id: 'rejection_123' };
 			mockZuoraClient.post = jest.fn().mockResolvedValue(mockResponse);
 
 			const result = await rejectPayment(mockZuoraClient, 'P-12345');
@@ -32,7 +32,7 @@ describe('ZuoraPaymentService', () => {
 		});
 
 		it('should reject payment with custom reason', async () => {
-			const mockResponse = { Success: true };
+			const mockResponse = { success: true };
 			mockZuoraClient.post = jest.fn().mockResolvedValue(mockResponse);
 
 			await rejectPayment(mockZuoraClient, 'P-67890', 'insufficient_funds');

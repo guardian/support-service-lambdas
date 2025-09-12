@@ -18,7 +18,7 @@ describe('ZuoraInvoiceService', () => {
 
 	describe('writeOffInvoice', () => {
 		it('should write off invoice with comment and current date', async () => {
-			const mockResponse = { Success: true, Id: 'memo_123' };
+			const mockResponse = { success: true, Id: 'memo_123' };
 			mockZuoraClient.put = jest.fn().mockResolvedValue(mockResponse);
 
 			const comment = 'Dispute closure write-off';
@@ -42,7 +42,7 @@ describe('ZuoraInvoiceService', () => {
 		});
 
 		it('should handle invoice numbers and IDs', async () => {
-			const mockResponse = { Success: true };
+			const mockResponse = { success: true };
 			mockZuoraClient.put = jest.fn().mockResolvedValue(mockResponse);
 
 			await writeOffInvoice(
@@ -68,7 +68,7 @@ describe('ZuoraInvoiceService', () => {
 		});
 
 		it('should include all required fields in request body', async () => {
-			mockZuoraClient.put = jest.fn().mockResolvedValue({ Success: true });
+			mockZuoraClient.put = jest.fn().mockResolvedValue({ success: true });
 
 			await writeOffInvoice(mockZuoraClient, 'INV-12345', 'Custom comment');
 

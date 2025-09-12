@@ -69,7 +69,7 @@ export async function handleListenDisputeClosed(
 					JSON.stringify(rejectPaymentResponse),
 				);
 
-				if (!rejectPaymentResponse.Success) {
+				if (!rejectPaymentResponse.success) {
 					logger.error('Failed to reject payment in Zuora');
 				}
 			} else {
@@ -90,7 +90,7 @@ export async function handleListenDisputeClosed(
 					JSON.stringify(writeOffResponse),
 				);
 
-				if (!writeOffResponse.Success) {
+				if (!writeOffResponse.success) {
 					logger.error('Failed to write off invoice in Zuora');
 				}
 			} else {
@@ -114,7 +114,7 @@ export async function handleListenDisputeClosed(
 					JSON.stringify(cancelResponse),
 				);
 
-				if (!cancelResponse.Success) {
+				if (!cancelResponse.success) {
 					logger.error('Failed to cancel subscription in Zuora');
 				}
 			} else {
