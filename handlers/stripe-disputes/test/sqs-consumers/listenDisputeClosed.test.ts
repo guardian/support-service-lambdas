@@ -3,8 +3,8 @@ import type { ListenDisputeClosedRequestBody } from '../../src/dtos';
 import { handleListenDisputeClosed } from '../../src/sqs-consumers/listenDisputeClosed';
 
 const mockZuoraClient = {
-	post: jest.fn(() => Promise.resolve({ Success: true })),
-	put: jest.fn(() => Promise.resolve({ Success: true })),
+	post: jest.fn(() => Promise.resolve({ success: true })),
+	put: jest.fn(() => Promise.resolve({ success: true })),
 };
 
 jest.mock('@modules/stage', () => ({
@@ -21,7 +21,7 @@ jest.mock('@modules/zuora/subscription', () => ({
 	getSubscription: jest.fn(() =>
 		Promise.resolve({ status: 'Active', subscriptionNumber: 'SUB-12345' }),
 	),
-	cancelSubscription: jest.fn(() => Promise.resolve({ Success: true })),
+	cancelSubscription: jest.fn(() => Promise.resolve({ success: true })),
 }));
 
 jest.mock('../../src/services/upsertSalesforceObject', () => ({
@@ -43,11 +43,11 @@ jest.mock('../../src/services/zuoraGetInvoiceFromStripeChargeId', () => ({
 }));
 
 jest.mock('@modules/zuora/payment', () => ({
-	rejectPayment: jest.fn(() => Promise.resolve({ Success: true })),
+	rejectPayment: jest.fn(() => Promise.resolve({ success: true })),
 }));
 
 jest.mock('@modules/zuora/invoice', () => ({
-	writeOffInvoice: jest.fn(() => Promise.resolve({ Success: true })),
+	writeOffInvoice: jest.fn(() => Promise.resolve({ success: true })),
 }));
 
 const mockLogger = {
