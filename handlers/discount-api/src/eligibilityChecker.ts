@@ -1,6 +1,6 @@
 import { ValidationError } from '@modules/errors';
-import type { Logger } from '@modules/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
+import type { Logger } from '@modules/routing/logger';
 import { getNextInvoiceTotal } from '@modules/zuora/billingPreview';
 import type { SimpleInvoiceItem } from '@modules/zuora/billingPreview';
 import type { ZuoraSubscription } from '@modules/zuora/types';

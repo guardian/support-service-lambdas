@@ -1,4 +1,4 @@
-import type { Logger } from '@modules/logger';
+import type { Logger } from '@modules/routing/logger';
 import type { BearerTokenProvider } from '@modules/zuora/auth/bearerTokenProvider';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getLastAmendment } from '../src/amendments';

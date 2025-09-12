@@ -2,7 +2,7 @@
  * @group integration
  */
 import type { EmailMessageWithUserId } from '@modules/email/email';
-import { Logger } from '@modules/logger';
+import { Logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import { cancelSubscription } from '@modules/zuora/subscription';
 import { zuoraDateFormat } from '@modules/zuora/utils';

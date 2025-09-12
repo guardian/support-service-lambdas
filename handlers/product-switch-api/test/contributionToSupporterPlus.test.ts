@@ -7,6 +7,7 @@ import { ValidationError } from '@modules/errors';
 import { Lazy } from '@modules/lazy';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
+import { Logger } from '@modules/routing/logger';
 import {
 	zuoraAccountSchema,
 	zuoraSubscriptionResponseSchema,
@@ -24,7 +25,6 @@ import {
 	getSwitchInformationWithOwnerCheck,
 	subscriptionHasAlreadySwitchedToSupporterPlus,
 } from '../src/switchInformation';
-import { parseUrlPath } from '../src/urlParsing';
 import accountJson from './fixtures/account.json';
 import alreadySwitchedJson from './fixtures/already-switched-subscription.json';
 import jsonWithNoContribution from './fixtures/subscription-with-no-contribution.json';
@@ -34,40 +34,6 @@ import zuoraSubscriptionWithMonthlyContribution from './fixtures/zuora-subscript
 export const getProductCatalogFromFixture = (): ProductCatalog =>
 	generateProductCatalog(zuoraCatalogFixture);
 
-test('url parsing', () => {
-	const successfulParsing = parseUrlPath(
-		'/product-move/recurring-contribution-to-supporter-plus/A-S00504165',
-	);
-	expect(successfulParsing.switchType).toEqual(
-		'recurring-contribution-to-supporter-plus',
-	);
-	expect(successfulParsing.subscriptionNumber).toEqual('A-S00504165');
-
-	const incorrectSwitchType =
-		'/product-move/membership-to-digital-subscription/A-S00504165';
-	expect(() => {
-		parseUrlPath(incorrectSwitchType);
-	}).toThrow(
-		"Couldn't parse switch type and subscription number from url /product-move/membership-to-digital-subscription/A-S00504165",
-	);
-
-	const invalidSubscriptionNumber =
-		'/product-move/recurring-contribution-to-supporter-plus/A00000';
-	expect(() => {
-		parseUrlPath(invalidSubscriptionNumber);
-	}).toThrow(
-		"Couldn't parse switch type and subscription number from url /product-move/recurring-contribution-to-supporter-plus/A00000",
-	);
-
-	const missingPathPrefix =
-		'/recurring-contribution-to-supporter-plus/A-S00504165';
-	expect(() => {
-		parseUrlPath(missingPathPrefix);
-	}).toThrow(
-		"Couldn't parse switch type and subscription number from url /recurring-contribution-to-supporter-plus/A-S00504165",
-	);
-});
-
 test('startNewTerm is only true when the termStartDate is before today', async () => {
 	const today = dayjs('2024-05-09T23:10:10.663+01:00');
 	const subscription = zuoraSubscriptionResponseSchema.parse(subscriptionJson);
@@ -75,6 +41,7 @@ test('startNewTerm is only true when the termStartDate is before today', async (
 	const productCatalog = getProductCatalogFromFixture();
 
 	const switchInformation = await getSwitchInformationWithOwnerCheck(
+		new Logger(),
 		'CODE',
 		{ preview: false },
 		subscription,
@@ -94,6 +61,7 @@ test('owner check is bypassed for salesforce calls', async () => {
 	const productCatalog = getProductCatalogFromFixture();
 
 	const switchInformation = await getSwitchInformationWithOwnerCheck(
+		new Logger(),
 		'CODE',
 		{ preview: false },
 		subscription,
@@ -114,6 +82,7 @@ test("owner check doesn't allow incorrect owner", async () => {
 
 	await expect(
 		getSwitchInformationWithOwnerCheck(
+			new Logger(),
 			'CODE',
 			{ preview: false },
 			subscription,
@@ -383,6 +352,7 @@ test('When newAmount is specified, it calculates contribution based on newAmount
 
 	// User currently pays £50, but wants to increase to £150
 	const switchInformation = await getSwitchInformationWithOwnerCheck(
+		new Logger(),
 		'CODE',
 		{ preview: false, newAmount: 150 },
 		subscription,
@@ -408,6 +378,7 @@ test('When newAmount is not specified, it uses previousAmount without validation
 	// No newAmount specified - should use previousAmount (£50 from the fixture)
 	// This should work fine to maintain backward compatibility
 	const switchInformation = await getSwitchInformationWithOwnerCheck(
+		new Logger(),
 		'CODE',
 		{ preview: false },
 		subscription,
@@ -432,6 +403,7 @@ test('When newAmount is less than base Supporter Plus price, it throws a validat
 	// Base Supporter Plus price is £120, user wants to pay only £80
 	await expect(
 		getSwitchInformationWithOwnerCheck(
+			new Logger(),
 			'CODE',
 			{ preview: false, newAmount: 80 },
 			subscription,

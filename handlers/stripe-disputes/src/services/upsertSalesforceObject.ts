@@ -1,4 +1,4 @@
-import type { Logger } from '@modules/logger';
+import type { Logger } from '@modules/routing/logger';
 import { getSecretValue } from '@modules/secrets-manager/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
 import type {

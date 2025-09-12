@@ -1,5 +1,6 @@
 import { sendMessageToQueue } from '@modules/aws/sqs';
 import { prettyPrint } from '@modules/prettyPrint';
+import type { Logger } from '@modules/routing/logger';
 import type { SwitchInformation } from './switchInformation';
 
 export type SalesforceTrackingInput = {
@@ -45,6 +46,7 @@ export function createSQSMessageBody(
 }
 
 export const sendSalesforceTracking = async (
+	logger: Logger,
 	paidAmount: number,
 	switchInformation: SwitchInformation,
 ) => {
@@ -55,7 +57,7 @@ export const sendSalesforceTracking = async (
 	);
 
 	const queueName = `product-switch-salesforce-tracking-${switchInformation.stage}`;
-	console.log(
+	logger.log(
 		`Sending Salesforce tracking message ${prettyPrint(
 			JSON.parse(messageBody),
 		)} to queue ${queueName}`,
@@ -66,7 +68,7 @@ export const sendSalesforceTracking = async (
 		messageBody,
 	});
 
-	console.log(
+	logger.log(
 		`Response from Salesforce tracking send was ${prettyPrint(response)}`,
 	);
 	return response;

@@ -5,7 +5,7 @@ import { BatonS3WriterImpl } from '../../src/services/batonS3Writer';
 // Mock the dependencies
 jest.mock('@modules/aws/s3FileExists');
 jest.mock('@modules/aws/s3');
-jest.mock('../../src/utils/withLogging', () => ({
+jest.mock('@modules/routing/withLogging', () => ({
 	withLogging: <TArgs extends unknown[], TReturn>(
 		fn: (...args: TArgs) => Promise<TReturn>,
 	) => fn,

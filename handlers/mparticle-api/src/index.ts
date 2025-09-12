@@ -12,7 +12,7 @@ import {
 import { AppConfig, getAppConfig, getEnv } from './services/config';
 import { MParticleClient } from './services/mparticleClient';
 import { BatonS3WriterImpl } from './services/batonS3Writer';
-import { withLogging } from './utils/withLogging';
+import { withLogging } from '@modules/routing/withLogging';
 
 export const handlerHttp: Handler<APIGatewayProxyEvent, APIGatewayProxyResult> =
 	withLogging(

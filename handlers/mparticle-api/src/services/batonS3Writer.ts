@@ -1,6 +1,6 @@
 import { streamToS3 } from '@modules/aws/s3';
 import { checkFileExistsInS3 } from '@modules/aws/s3FileExists';
-import { withLogging } from '../utils/withLogging';
+import { withLogging } from '@modules/routing/withLogging';
 
 export interface BatonS3Writer {
 	write: (reference: string, stream: ReadableStream) => Promise<string>;

@@ -1,4 +1,5 @@
 import { ZodObject } from 'zod';
+import { Logger } from '@modules/routing/logger';
 
 export type AsyncFunction<TArgs extends unknown[], TReturn> = (
 	...args: TArgs
@@ -11,12 +12,14 @@ export type AsyncFunction<TArgs extends unknown[], TReturn> = (
  * @param functionName an optional free text string to identify the function called
  * @param fnAsString if you have to call .bind(this) on your function, pass in function.toString() here to retain parameter names
  * @param shortArgsNum when the function returns, one argument will be logged again for identification purposes, this overrides that
+ * @param logger if you are using a context logger to prefix the sub id on every line, pass it in here
  */
 export function withLogging<TArgs extends unknown[], TReturn>(
 	fn: AsyncFunction<TArgs, TReturn>,
 	functionName?: string | (() => string),
 	fnAsString?: string, // fn.toString() needed for args on a bound function
 	shortArgsNum?: number,
+	logger: Logger = new Logger(),
 ): AsyncFunction<TArgs, TReturn> {
 	return async (...args: TArgs): Promise<TReturn> => {
 		const name =
@@ -38,11 +41,11 @@ export function withLogging<TArgs extends unknown[], TReturn>(
 			return [paramName, value];
 		});
 		const shortPrettyArgs = prettyArgs.slice(0, shortArgsNum ?? 1);
-		console.log(`TRACE ${name} ENTRY ARGS`, Object.fromEntries(prettyArgs));
+		logger.log(`TRACE ${name} ENTRY ARGS`, Object.fromEntries(prettyArgs));
 
 		try {
 			const result = await fn(...args);
-			console.log(
+			logger.log(
 				`TRACE ${name} EXIT SHORT_ARGS`,
 				Object.fromEntries(shortPrettyArgs),
 				'RESULT',
@@ -50,7 +53,7 @@ export function withLogging<TArgs extends unknown[], TReturn>(
 			);
 			return result;
 		} catch (error) {
-			console.error(
+			logger.error(
 				`TRACE ${name} ERROR SHORT_ARGS`,
 				Object.fromEntries(shortPrettyArgs),
 				'ERROR',

@@ -1,6 +1,6 @@
 import { sendEmail } from '@modules/email/email';
-import { Logger } from '@modules/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
+import { Logger } from '@modules/routing/logger';
 import { Router } from '@modules/routing/router';
 import type { Stage } from '@modules/stage';
 import type {
@@ -26,27 +26,23 @@ import {
 
 const stage = process.env.STAGE as Stage;
 const logger = new Logger();
-const router = new Router([
-	{
-		httpMethod: 'POST',
-		path: '/apply-discount',
-		handler: applyDiscountHandler(logger),
-	},
-	{
-		httpMethod: 'POST',
-		path: '/preview-discount',
-		handler: previewDiscountHandler(logger),
-	},
-]);
-export const handler: Handler = async (
-	event: APIGatewayProxyEvent,
-): Promise<APIGatewayProxyResult> => {
-	logger.resetContext();
-	logger.log(`Input is ${JSON.stringify(event)}`);
-	const response = await router.routeRequest(event);
-	logger.log(`Response is ${JSON.stringify(response)}`);
-	return response;
-};
+
+// main entry point from AWS
+export const handler: Handler = new Router(
+	[
+		{
+			httpMethod: 'POST',
+			path: '/apply-discount',
+			handler: applyDiscountHandler(logger),
+		},
+		{
+			httpMethod: 'POST',
+			path: '/preview-discount',
+			handler: previewDiscountHandler(logger),
+		},
+	],
+	logger,
+).routeRequest;
 
 function applyDiscountHandler(logger: Logger) {
 	return async (

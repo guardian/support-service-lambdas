@@ -9,7 +9,7 @@ const mockLogger = {
 
 const mockHandleSqsEvents = jest.fn();
 
-jest.mock('@modules/logger', () => ({
+jest.mock('@modules/routing/logger', () => ({
 	Logger: jest.fn(() => mockLogger),
 }));
 

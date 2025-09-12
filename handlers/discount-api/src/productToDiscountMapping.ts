@@ -1,7 +1,7 @@
 import { getSingleOrThrow } from '@modules/arrayFunctions';
 import type { DataExtensionName } from '@modules/email/email';
 import { DataExtensionNames } from '@modules/email/email';
-import type { Logger } from '@modules/logger';
+import type { Logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import { isNotRemovedOrDiscount } from '@modules/zuora/rateplan';
 import type { ZuoraSubscription } from '@modules/zuora/types';

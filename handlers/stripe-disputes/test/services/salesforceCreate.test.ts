@@ -1,4 +1,4 @@
-import type { Logger } from '@modules/logger';
+import type { Logger } from '@modules/routing/logger';
 import type { PaymentDisputeRecord } from '../../src/interfaces';
 import { upsertPaymentDisputeInSalesforce } from '../../src/services/salesforceCreate';
 import type { SalesforceAuthResponse } from '../../src/types';

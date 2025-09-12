@@ -1,6 +1,6 @@
 import { sendEmail } from '@modules/email/email';
 import { ValidationError } from '@modules/errors';
-import { Logger } from '@modules/logger';
+import { Logger } from '@modules/routing/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { Stage } from '@modules/stage';

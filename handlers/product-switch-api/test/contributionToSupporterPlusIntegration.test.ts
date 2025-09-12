@@ -7,6 +7,7 @@ import console from 'console';
 import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
+import { Logger } from '@modules/routing/logger';
 import { getAccount } from '@modules/zuora/account';
 import {
 	getBillingPreview,
@@ -82,6 +83,7 @@ const createTestContribution = async (
 		.then(toSimpleInvoiceItems);
 
 	const switchInformation = await getSwitchInformationWithOwnerCheck(
+		new Logger(),
 		stage,
 		input,
 		subscription,
@@ -218,7 +220,11 @@ describe('product-switching behaviour', () => {
 				false,
 			);
 
-			const response = await doSwitch(zuoraClient, switchInformation);
+			const response = await doSwitch(
+				new Logger(),
+				zuoraClient,
+				switchInformation,
+			);
 			expect(response.success).toEqual(true);
 		},
 		1000 * 60,
@@ -236,7 +242,11 @@ describe('product-switching behaviour', () => {
 				{ billingPeriod: 'Month' },
 			);
 
-			const response = await doSwitch(zuoraClient, switchInformation);
+			const response = await doSwitch(
+				new Logger(),
+				zuoraClient,
+				switchInformation,
+			);
 
 			await createPayment(
 				zuoraClient,
@@ -261,7 +271,11 @@ describe('product-switching behaviour', () => {
 				false,
 			);
 
-			const switchResponse = await doSwitch(zuoraClient, switchInformation);
+			const switchResponse = await doSwitch(
+				new Logger(),
+				zuoraClient,
+				switchInformation,
+			);
 
 			const invoiceId = getIfDefined(
 				switchResponse.invoiceIds?.[0],

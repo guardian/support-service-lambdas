@@ -1,4 +1,4 @@
-import { Logger } from '@modules/logger';
+import { Logger } from '@modules/routing/logger';
 import {
 	getNextInvoiceItems,
 	itemsForSubscription,

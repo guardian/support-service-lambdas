@@ -1,4 +1,4 @@
-import { Logger } from '@modules/logger';
+import { Logger } from '@modules/routing/logger';
 import { Router } from '@modules/routing/router';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { handleStripeWebhook } from './services';

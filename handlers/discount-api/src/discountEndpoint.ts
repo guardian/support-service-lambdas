@@ -1,8 +1,8 @@
 import { sum } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import { Lazy } from '@modules/lazy';
-import type { Logger } from '@modules/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
+import type { Logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import { getAccount } from '@modules/zuora/account';
 import {

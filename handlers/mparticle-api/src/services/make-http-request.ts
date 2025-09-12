@@ -1,6 +1,6 @@
 import { groupMap } from '@modules/arrayFunctions';
+import { withLogging } from '@modules/routing/withLogging';
 import type { z } from 'zod';
-import { withLogging } from '../utils/withLogging';
 
 export class HttpError extends Error {
 	public statusCode: number;

@@ -1,4 +1,4 @@
-import { Logger } from '@modules/logger';
+import { Logger } from '@modules/routing/logger';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { zuoraSubscriptionResponseSchema } from '@modules/zuora/types';
