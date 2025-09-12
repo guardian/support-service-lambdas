@@ -179,7 +179,7 @@ importers:
         specifier: ^1.12.3
         version: 1.13.0
       zod:
-        specifier: ^3.23.8
+        specifier: 'catalog:'
         version: 3.25.76
     devDependencies:
       '@aws-sdk/client-s3':
@@ -207,7 +207,7 @@ importers:
         specifier: ^9.15.0
         version: 9.15.1
       zod:
-        specifier: ^3.23.8
+        specifier: 'catalog:'
         version: 3.25.76
     devDependencies:
       '@types/aws-lambda':

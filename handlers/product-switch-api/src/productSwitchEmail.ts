@@ -3,6 +3,7 @@ import type { EmailMessageWithUserId } from '@modules/email/email';
 import { DataExtensionNames, sendEmail } from '@modules/email/email';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { getCurrencyGlyph } from '@modules/internationalisation/currency';
+import type { Logger } from '@modules/routing/logger';
 import dayjs from 'dayjs';
 import type { SwitchInformation } from './switchInformation';
 
@@ -45,6 +46,7 @@ export const buildEmailMessage = (
 };
 
 export const sendThankYouEmail = async (
+	logger: Logger,
 	firstPaymentAmount: number,
 	switchInformation: SwitchInformation,
 ) => {
@@ -80,5 +82,9 @@ export const sendThankYouEmail = async (
 		identityId,
 	);
 
-	return await sendEmail(switchInformation.stage, emailMessage);
+	return await sendEmail(
+		switchInformation.stage,
+		emailMessage,
+		logger.log.bind(logger),
+	);
 };

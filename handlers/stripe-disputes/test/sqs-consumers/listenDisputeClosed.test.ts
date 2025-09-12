@@ -1,4 +1,4 @@
-import type { Logger } from '@modules/logger';
+import type { Logger } from '@modules/routing/logger';
 import type { ListenDisputeClosedRequestBody } from '../../src/dtos';
 import { upsertSalesforceObject } from '../../src/services/upsertSalesforceObject';
 import { handleListenDisputeClosed } from '../../src/sqs-consumers/listenDisputeClosed';

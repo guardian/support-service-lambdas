@@ -1,5 +1,5 @@
-import type { Logger } from '@modules/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
+import type { Logger } from '@modules/routing/logger';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import AWS from 'aws-sdk';
 import {
@@ -26,10 +26,10 @@ const sqs = new AWS.SQS();
  * @returns Handler function for API Gateway events
  */
 export function handleStripeWebhook(
-	logger: Logger,
 	eventType: 'dispute.created' | 'dispute.closed',
 ) {
 	return async (
+		logger: Logger,
 		event: APIGatewayProxyEvent,
 	): Promise<APIGatewayProxyResult> => {
 		try {

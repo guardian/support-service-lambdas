@@ -1,4 +1,4 @@
-import { Logger } from '@modules/logger';
+import { Logger } from '@modules/routing/logger';
 
 test('it should be a no-op if theres no context', () => {
 	const logger = new Logger();

@@ -6,6 +6,7 @@ import type { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
+import type { Logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import type { SimpleInvoiceItem } from '@modules/zuora/billingPreview';
 import type {
@@ -131,6 +132,7 @@ const getCurrency = (contributionRatePlan: RatePlan): IsoCurrency => {
 
 // Gets a subscription from Zuora and checks that it is owned by currently logged-in user
 export const getSwitchInformationWithOwnerCheck = async (
+	logger: Logger,
 	stage: Stage,
 	input: ProductSwitchRequestBody,
 	subscription: ZuoraSubscription,
@@ -140,7 +142,7 @@ export const getSwitchInformationWithOwnerCheck = async (
 	lazyBillingPreview: Lazy<SimpleInvoiceItem[]>,
 	today: Dayjs,
 ): Promise<SwitchInformation> => {
-	console.log(
+	logger.log(
 		`Checking subscription ${subscription.subscriptionNumber} is owned by the currently logged in user`,
 	);
 	const userInformation = getAccountInformation(account);
@@ -152,7 +154,7 @@ export const getSwitchInformationWithOwnerCheck = async (
 			`Subscription ${subscription.subscriptionNumber} does not belong to identity ID ${identityIdFromRequest}`,
 		);
 	}
-	console.log(
+	logger.log(
 		`Subscription ${subscription.subscriptionNumber} is owned by identity user ${identityIdFromRequest}`,
 	);
 
@@ -179,6 +181,7 @@ export const getSwitchInformationWithOwnerCheck = async (
 	);
 
 	const maybeDiscount = await getDiscount(
+		logger,
 		!!input.applyDiscountIfAvailable,
 		previousAmount,
 		catalogInformation.supporterPlus.price,

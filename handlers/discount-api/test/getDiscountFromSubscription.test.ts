@@ -1,5 +1,5 @@
 import { DataExtensionNames } from '@modules/email/email';
-import { Logger } from '@modules/logger';
+import { Logger } from '@modules/routing/logger';
 import { zuoraSubscriptionResponseSchema } from '@modules/zuora/types';
 import { validationRequirements } from '../src/eligibilityChecker';
 import type { Discount } from '../src/productToDiscountMapping';

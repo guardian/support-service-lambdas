@@ -13,6 +13,7 @@ import {
 } from '@aws-sdk/client-s3';
 import { awsConfig } from '@modules/aws/config';
 import { getFileFromS3 } from '@modules/aws/s3';
+import { Logger } from '@modules/routing/logger';
 import type { GetRequestsResponse } from '../../src/apis/dataSubjectRequests/getStatus';
 import { handleSarStatus } from '../../src/routers/baton/access/handleStatus';
 import type { InitiationReference } from '../../src/routers/baton/initiationReference';
@@ -133,6 +134,7 @@ function createRealServicesToTestEndpoints(
 	const realS3Client: BatonS3Writer = new BatonS3WriterImpl(
 		bucketName,
 		sarS3BaseKey,
+		new Logger(),
 	);
 	return {
 		manageURLDataSubjectClient,

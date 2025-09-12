@@ -2,6 +2,7 @@ import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { userHasGuardianEmail } from '@modules/product-benefits/userBenefits';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
+import type { Logger } from '@modules/routing/logger';
 import { Router } from '@modules/routing/router';
 import type { Stage } from '@modules/stage';
 import { stageFromEnvironment } from '@modules/stage';
@@ -25,7 +26,8 @@ const lazyIdentityClientAccessToken = new Lazy(
 	async () => await getClientAccessToken(stage),
 	'Get identity client access token',
 );
-const router = new Router([
+
+export const handler: Handler = Router([
 	{
 		httpMethod: 'GET',
 		path: '/user-entitlements',
@@ -33,24 +35,19 @@ const router = new Router([
 	},
 ]);
 
-export const handler: Handler = async (
-	event: APIGatewayProxyEvent,
-): Promise<APIGatewayProxyResult> => {
-	console.log(`Input is ${JSON.stringify(event)}`);
-	return router.routeRequest(event);
-};
-
 async function userEntitlementsHandler(
+	logger: Logger,
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> {
 	const userId = getIfDefined(
 		event.queryStringParameters?.['userId'],
 		'userId does not exist',
 	);
+	logger.mutableAddContext(userId);
 
 	const memberDetails = await getMemberDetails(stage, userId);
 	const xmlBody = buildXml(memberDetails);
-	console.log(`Successful response body is ${xmlBody}`);
+	logger.log(`Successful response body is ${xmlBody}`);
 	return {
 		body: buildXml(memberDetails),
 		statusCode: 200,

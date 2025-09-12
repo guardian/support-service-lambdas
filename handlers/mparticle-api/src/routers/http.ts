@@ -1,3 +1,4 @@
+import type { Logger } from '@modules/routing/logger';
 import { createRoute, Router } from '@modules/routing/router';
 import type { BatonS3Writer } from '../services/batonS3Writer';
 import type {
@@ -13,15 +14,19 @@ import {
 export const httpRouter = (
 	mParticleDataSubjectClient: MParticleClient<DataSubjectAPI>,
 	batonS3Writer: BatonS3Writer,
+	logger: Logger,
 ) =>
-	new Router([
-		createRoute<{ requestId: string }, DataSubjectRequestCallback>({
-			httpMethod: 'POST',
-			path: '/data-subject-requests/{requestId}/callback',
-			handler: dataSubjectRequestCallbackHandler(
-				mParticleDataSubjectClient,
-				batonS3Writer,
-			),
-			parser: dataSubjectRequestCallbackParser,
-		}),
-	]);
+	Router(
+		[
+			createRoute<{ requestId: string }, DataSubjectRequestCallback>({
+				httpMethod: 'POST',
+				path: '/data-subject-requests/{requestId}/callback',
+				handler: dataSubjectRequestCallbackHandler(
+					mParticleDataSubjectClient,
+					batonS3Writer,
+				),
+				parser: dataSubjectRequestCallbackParser,
+			}),
+		],
+		logger,
+	);

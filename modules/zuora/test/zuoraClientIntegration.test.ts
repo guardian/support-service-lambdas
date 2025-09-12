@@ -4,7 +4,7 @@
  * @group integration
  */
 
-import { Logger } from '@modules/logger';
+import { Logger } from '@modules/routing/logger';
 import {
 	getOAuthClientCredentials,
 	BearerTokenProvider,

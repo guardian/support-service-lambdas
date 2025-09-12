@@ -1,4 +1,5 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
+import type { Logger } from '@modules/routing/logger';
 import type {
 	ChangePlanOrderAction,
 	OrderAction,
@@ -55,10 +56,15 @@ export type PreviewResponse = {
 export type SwitchResponse = { message: string };
 
 export const switchToSupporterPlus = async (
+	logger: Logger,
 	zuoraClient: ZuoraClient,
 	productSwitchInformation: SwitchInformation,
 ): Promise<SwitchResponse> => {
-	const switchResponse = await doSwitch(zuoraClient, productSwitchInformation);
+	const switchResponse = await doSwitch(
+		logger,
+		zuoraClient,
+		productSwitchInformation,
+	);
 
 	const paidAmount = await takePaymentOrAdjustInvoice(
 		zuoraClient,
@@ -69,9 +75,9 @@ export const switchToSupporterPlus = async (
 	);
 
 	await Promise.allSettled([
-		sendThankYouEmail(paidAmount, productSwitchInformation),
-		sendSalesforceTracking(paidAmount, productSwitchInformation),
-		sendToSupporterProductData(productSwitchInformation),
+		sendThankYouEmail(logger, paidAmount, productSwitchInformation),
+		sendSalesforceTracking(logger, paidAmount, productSwitchInformation),
+		sendToSupporterProductData(logger, productSwitchInformation),
 	]);
 	return {
 		message: `Product move completed successfully with subscription number ${productSwitchInformation.subscription.subscriptionNumber} and switch type recurring-contribution-to-supporter-plus`,
@@ -219,12 +225,13 @@ export const preview = async (
 };
 
 export const doSwitch = async (
+	logger: Logger,
 	zuoraClient: ZuoraClient,
 	productSwitchInformation: SwitchInformation,
 ): Promise<ZuoraSwitchResponse> => {
 	const { subscriptionNumber } = productSwitchInformation.subscription;
 	//If the sub has a pending amount change amendment, we need to remove it
-	await removePendingUpdateAmendments(zuoraClient, subscriptionNumber);
+	await removePendingUpdateAmendments(logger, zuoraClient, subscriptionNumber);
 
 	const requestBody = buildSwitchRequestBody(dayjs(), productSwitchInformation);
 	const zuoraResponse: ZuoraSwitchResponse = await zuoraClient.post(
