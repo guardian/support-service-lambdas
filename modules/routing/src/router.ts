@@ -2,8 +2,8 @@ import { mapPartition, zipAll } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
-import { withLogging } from '@modules/routing/withLogging';
 import { Logger } from '@modules/routing/logger';
+import { withLogging } from '@modules/routing/withLogging';
 
 export type HttpMethod =
 	| 'GET'

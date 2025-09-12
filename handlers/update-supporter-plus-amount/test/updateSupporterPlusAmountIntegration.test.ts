@@ -1,7 +1,7 @@
 import console from 'console';
 import { sendEmail } from '@modules/email/email';
-import { Logger } from '@modules/routing/logger';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
+import { Logger } from '@modules/routing/logger';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { createThankYouEmail } from '../src/sendEmail';

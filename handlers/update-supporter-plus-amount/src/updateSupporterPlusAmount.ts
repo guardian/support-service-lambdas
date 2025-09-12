@@ -2,7 +2,6 @@ import { getSingleOrThrow } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { isSupportedCurrency } from '@modules/internationalisation/currency';
-import type { Logger } from '@modules/routing/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
 import type { ProductBillingPeriod } from '@modules/product-catalog/productBillingPeriods';
@@ -10,6 +9,7 @@ import type {
 	ProductCatalog,
 	ProductRatePlan,
 } from '@modules/product-catalog/productCatalog';
+import type { Logger } from '@modules/routing/logger';
 import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
 import type {
