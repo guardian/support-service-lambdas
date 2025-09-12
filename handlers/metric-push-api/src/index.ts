@@ -1,6 +1,7 @@
 import { putMetric } from '@modules/aws/cloudwatch';
+import type { Logger } from '@modules/routing/logger';
 import { Router } from '@modules/routing/router';
-import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import type { APIGatewayProxyEvent } from 'aws-lambda';
 
 const validReferers = [
 	'https://support.thegulocal.com/',
@@ -14,13 +15,11 @@ const buildResponse = (statusCode: number) => ({
 	headers: { 'Cache-Control': 'private, no-store' },
 });
 
-const router = new Router([
+export const handler = Router([
 	{
 		httpMethod: 'GET',
 		path: '/metric-push-api',
-		handler: async (event: APIGatewayProxyEvent) => {
-			console.log(`Input is ${JSON.stringify(event)}`);
-
+		handler: async (logger: Logger, event: APIGatewayProxyEvent) => {
 			const referer = event.headers.referer ?? event.headers.Referer;
 
 			if (referer && validReferers.includes(referer)) {
@@ -32,7 +31,3 @@ const router = new Router([
 		},
 	},
 ]);
-
-export const handler = async (
-	event: APIGatewayProxyEvent,
-): Promise<APIGatewayProxyResult> => router.routeRequest(event);

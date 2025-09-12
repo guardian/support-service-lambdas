@@ -1,3 +1,4 @@
+import { Logger } from '@modules/routing/logger';
 import { z } from 'zod';
 import {
 	HttpError,
@@ -13,6 +14,7 @@ describe('RestRequestMaker', () => {
 		baseURL,
 		headers,
 		mockFetch,
+		new Logger(),
 	);
 
 	beforeEach(() => {

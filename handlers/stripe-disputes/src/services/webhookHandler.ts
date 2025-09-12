@@ -26,10 +26,10 @@ const sqs = new AWS.SQS();
  * @returns Handler function for API Gateway events
  */
 export function handleStripeWebhook(
-	logger: Logger,
 	eventType: 'dispute.created' | 'dispute.closed',
 ) {
 	return async (
+		logger: Logger,
 		event: APIGatewayProxyEvent,
 	): Promise<APIGatewayProxyResult> => {
 		try {

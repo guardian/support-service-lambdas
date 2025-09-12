@@ -18,8 +18,9 @@ import type { ProductSwitchRequestBody } from './schemas';
 import { getSwitchInformationWithOwnerCheck } from './switchInformation';
 
 export const contributionToSupporterPlusEndpoint =
-	(logger: Logger, stage: Stage, today: dayjs.Dayjs) =>
+	(stage: Stage, today: dayjs.Dayjs) =>
 	async (
+		logger: Logger,
 		event: APIGatewayProxyEvent,
 		parsed: {
 			path: { subscriptionNumber: string };

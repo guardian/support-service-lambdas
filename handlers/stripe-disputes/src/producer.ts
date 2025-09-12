@@ -6,18 +6,21 @@ import { handleStripeWebhook } from './services';
 const logger = new Logger();
 
 // Router for API Gateway webhook endpoints (synchronous)
-const router = new Router([
-	{
-		httpMethod: 'POST',
-		path: '/listen-dispute-created',
-		handler: handleStripeWebhook(logger, 'dispute.created'),
-	},
-	{
-		httpMethod: 'POST',
-		path: '/listen-dispute-closed',
-		handler: handleStripeWebhook(logger, 'dispute.closed'),
-	},
-]);
+const router = Router(
+	[
+		{
+			httpMethod: 'POST',
+			path: '/listen-dispute-created',
+			handler: handleStripeWebhook('dispute.created'),
+		},
+		{
+			httpMethod: 'POST',
+			path: '/listen-dispute-closed',
+			handler: handleStripeWebhook('dispute.closed'),
+		},
+	],
+	logger,
+);
 
 /**
  * Hybrid Lambda handler supporting both API Gateway webhooks and SQS events
@@ -35,7 +38,7 @@ export const handler = async (
 	if (isApiGatewayEvent(event)) {
 		// Handle synchronous webhook from Stripe
 		logger.log('Processing API Gateway webhook event');
-		const response = await router.routeRequest(event);
+		const response = await router(event);
 		logger.log(`Webhook response: ${JSON.stringify(response)}`);
 		return response;
 	} else {

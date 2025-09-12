@@ -7,6 +7,7 @@ import {
 	handleSarStatus,
 	BatonSarEventStatusResponse,
 } from '../src/routers/baton/access/handleStatus';
+import { Logger } from '@modules/routing/logger';
 
 /*
  **************************************************************************
@@ -26,10 +27,15 @@ const sarS3BaseKey = 'handleSarStatusIntegrationTest/';
 const sarResultsBucket = 'support-service-lambdas-test';
 
 loadConfig('CODE', 'support', 'mparticle-api', ConfigSchema).then((config) => {
-	const mParticleDataSubjectClient =
-		MParticleClient.createMParticleDataSubjectClient(config.workspace);
+	const mParticleDataSubjectClient = MParticleClient(
+		new Logger(),
+	).createMParticleDataSubjectClient(config.workspace);
 
-	const batonS3Writer = new BatonS3WriterImpl(sarResultsBucket, sarS3BaseKey);
+	const batonS3Writer = new BatonS3WriterImpl(
+		sarResultsBucket,
+		sarS3BaseKey,
+		new Logger(),
+	);
 
 	handleSarStatus(
 		mParticleDataSubjectClient,

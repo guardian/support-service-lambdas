@@ -3,7 +3,6 @@ import { ValidationError } from '@modules/errors';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
 import { Logger } from '@modules/routing/logger';
-import { withLogging } from '@modules/routing/withLogging';
 
 export type HttpMethod =
 	| 'GET'
@@ -18,6 +17,7 @@ export type Route<TPath, TBody> = {
 	httpMethod: HttpMethod;
 	path: string;
 	handler: (
+		logger: Logger,
 		event: APIGatewayProxyEvent,
 		parsed: { path: TPath; body: TBody },
 	) => Promise<APIGatewayProxyResult>;
@@ -65,27 +65,15 @@ function matchPath(
 	return { params: Object.fromEntries(matchers) };
 }
 
-export class Router {
-	constructor(
-		private routes: ReadonlyArray<Route<unknown, unknown>>,
-		logger: Logger = new Logger(),
-	) {
-		this.routeRequest = withLogging(
-			this.routeRequestWithoutLogging.bind(this),
-			'http router',
-			this.routeRequestWithoutLogging.toString(),
-			0,
-			logger,
-		);
-	}
-
-	routeRequest: (event: APIGatewayProxyEvent) => Promise<APIGatewayProxyResult>;
-
-	async routeRequestWithoutLogging(
+export function Router(
+	routes: ReadonlyArray<Route<unknown, unknown>>,
+	logger: Logger = new Logger(),
+) {
+	const httpRouter = async (
 		event: APIGatewayProxyEvent,
-	): Promise<APIGatewayProxyResult> {
+	): Promise<APIGatewayProxyResult> => {
 		try {
-			for (const route of this.routes) {
+			for (const route of routes) {
 				const matchResult = matchPath(route.path, event.path);
 				if (
 					route.httpMethod.toUpperCase() === event.httpMethod.toUpperCase() &&
@@ -122,7 +110,7 @@ export class Router {
 						throw error;
 					}
 
-					return await route.handler(eventWithParams, {
+					return await route.handler(logger, eventWithParams, {
 						path: parsedPath,
 						body: parsedBody,
 					});
@@ -143,5 +131,7 @@ export class Router {
 				statusCode: 500,
 			};
 		}
-	}
+	};
+
+	return logger.wrapRouter(httpRouter);
 }

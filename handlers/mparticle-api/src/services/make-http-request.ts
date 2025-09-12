@@ -1,5 +1,5 @@
 import { groupMap } from '@modules/arrayFunctions';
-import { withLogging } from '@modules/routing/withLogging';
+import type { Logger } from '@modules/routing/logger';
 import type { z } from 'zod';
 
 export class HttpError extends Error {
@@ -41,14 +41,17 @@ export class RestRequestMaker {
 		public baseURL: string,
 		private headers: Record<string, string>,
 		private fetch: typeof global.fetch,
-	) {}
+		logger: Logger,
+	) {
+		this.makeRESTRequest = logger.wrapFn(
+			this.restRequestWithoutLogging.bind(this),
+			() => 'HTTP ' + this.baseURL,
+			this.restRequestWithoutLogging.toString(),
+			2,
+		);
+	}
 
-	makeRESTRequest = withLogging(
-		this.restRequestWithoutLogging.bind(this),
-		() => 'HTTP ' + this.baseURL,
-		this.restRequestWithoutLogging.toString(),
-		2,
-	);
+	makeRESTRequest;
 
 	private async restRequestWithoutLogging<REQ, RESP>(
 		method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',

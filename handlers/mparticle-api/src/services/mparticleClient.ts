@@ -1,3 +1,4 @@
+import type { Logger } from '@modules/routing/logger';
 import type { AppConfig } from './config';
 import type { HttpResponse, Schema } from './make-http-request';
 import { RestRequestMaker } from './make-http-request';
@@ -27,7 +28,7 @@ export interface MParticleClient<
 	getStream(path: string): Promise<ReadableStream>;
 }
 
-export const MParticleClient = {
+export const MParticleClient = (logger: Logger) => ({
 	createMParticleDataSubjectClient(
 		config: AppConfig['workspace'],
 	): MParticleClient<DataSubjectAPI> {
@@ -36,6 +37,7 @@ export const MParticleClient = {
 			config.key,
 			config.secret,
 			'dataSubject',
+			logger,
 		);
 	},
 
@@ -48,9 +50,10 @@ export const MParticleClient = {
 			config.key,
 			config.secret,
 			'eventsApi',
+			logger,
 		);
 	},
-};
+});
 
 export class MParticleClientImpl<
 	T extends DataSubjectAPI | EventsAPI = DataSubjectAPI | EventsAPI,
@@ -64,6 +67,7 @@ export class MParticleClientImpl<
 		key: string,
 		secret: string,
 		clientType: T['clientType'],
+		logger: Logger,
 	) {
 		this.clientType = clientType;
 		/**
@@ -80,6 +84,7 @@ export class MParticleClientImpl<
 				Authorization: authHeader,
 			},
 			fetch,
+			logger,
 		);
 	}
 
