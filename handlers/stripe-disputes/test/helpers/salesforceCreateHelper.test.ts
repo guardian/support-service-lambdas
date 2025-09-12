@@ -5,8 +5,6 @@ import {
 import type { PaymentDisputeRecord } from '../../src/interfaces';
 import type { SalesforceAuthResponse } from '../../src/types';
 
-// Mock will be handled by global __mocks__ folder
-
 describe('Salesforce Create Helper', () => {
 	const mockAuthResponse: SalesforceAuthResponse = {
 		access_token: 'mock_token',

@@ -35,3 +35,22 @@ export const createPayment = async (
 		throw new Error('An error occurred while creating the payment');
 	}
 };
+
+export const rejectPayment = async (
+	zuoraClient: ZuoraClient,
+	paymentNumber: string,
+	rejectionReason: string = 'chargeback',
+): Promise<ZuoraResponse> => {
+	console.log(
+		`Rejecting payment ${paymentNumber} with reason: ${rejectionReason}`,
+	);
+	const path = `/v1/gateway-settlement/payments/${paymentNumber}/reject`;
+	const body = JSON.stringify({
+		gatewayReconciliationStatus: 'payment_failed',
+		gatewayReconciliationReason: rejectionReason,
+		gatewayResponse: 'Payment disputed - chargeback received',
+		gatewayResponseCode: '4855',
+	});
+
+	return zuoraClient.post(path, body, zuoraResponseSchema);
+};

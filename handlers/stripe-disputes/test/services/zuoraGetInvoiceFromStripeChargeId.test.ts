@@ -1,7 +1,6 @@
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { zuoraGetInvoiceFromStripeChargeId } from '../../src/services/zuoraGetInvoiceFromStripeChargeId';
 
-// Mock the doQuery function
 jest.mock('@modules/zuora/query', () => ({
 	doQuery: jest.fn(),
 }));
@@ -15,7 +14,6 @@ describe('zuoraGetInvoiceFromStripeChargeId', () => {
 	});
 
 	it('should successfully retrieve invoice data from stripe charge id', async () => {
-		// Mock payment query response
 		doQuery
 			.mockResolvedValueOnce({
 				records: [
@@ -28,7 +26,6 @@ describe('zuoraGetInvoiceFromStripeChargeId', () => {
 					},
 				],
 			})
-			// Mock invoice payment query response
 			.mockResolvedValueOnce({
 				records: [
 					{
@@ -37,7 +34,6 @@ describe('zuoraGetInvoiceFromStripeChargeId', () => {
 					},
 				],
 			})
-			// Mock invoice items query response
 			.mockResolvedValueOnce({
 				records: [
 					{
@@ -55,7 +51,6 @@ describe('zuoraGetInvoiceFromStripeChargeId', () => {
 
 		expect(doQuery).toHaveBeenCalledTimes(3);
 
-		// Verify payment query
 		expect(doQuery).toHaveBeenNthCalledWith(
 			1,
 			mockZuoraClient,
@@ -63,7 +58,6 @@ describe('zuoraGetInvoiceFromStripeChargeId', () => {
 			expect.any(Object),
 		);
 
-		// Verify invoice payment query
 		expect(doQuery).toHaveBeenNthCalledWith(
 			2,
 			mockZuoraClient,
@@ -71,7 +65,6 @@ describe('zuoraGetInvoiceFromStripeChargeId', () => {
 			expect.any(Object),
 		);
 
-		// Verify invoice items query
 		expect(doQuery).toHaveBeenNthCalledWith(
 			3,
 			mockZuoraClient,

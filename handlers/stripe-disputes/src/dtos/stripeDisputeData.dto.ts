@@ -1,19 +1,18 @@
 import { z } from 'zod';
 
-// Stripe webhook event schema based on charge.dispute.created payload
 export const stripeDisputeDataSchema = z.object({
 	object: z.object({
-		id: z.string(), // Dispute ID
-		charge: z.string(), // Charge ID
-		amount: z.number(), // Amount in cents
-		currency: z.string(), // Currency code
-		reason: z.string(), // Dispute reason
-		status: z.string(), // Dispute status
-		created: z.number(), // Unix timestamp
+		id: z.string(),
+		charge: z.string(),
+		amount: z.number(),
+		currency: z.string(),
+		reason: z.string(),
+		status: z.string(),
+		created: z.number(),
 		is_charge_refundable: z.boolean(),
 		payment_intent: z.string(),
 		evidence_details: z.object({
-			due_by: z.number(), // Unix timestamp
+			due_by: z.number(),
 			has_evidence: z.boolean(),
 		}),
 		payment_method_details: z.object({

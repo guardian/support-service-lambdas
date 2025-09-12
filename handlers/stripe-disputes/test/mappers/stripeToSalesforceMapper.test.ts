@@ -5,7 +5,6 @@ import type {
 import type { ZuoraInvoiceFromStripeChargeIdResult } from '../../src/interfaces';
 import { mapStripeDisputeToSalesforce } from '../../src/mappers/stripeToSalesforceMapper';
 
-// Mock the timestamp helpers
 jest.mock('../../src/helpers/timestampHelper', () => ({
 	timestampToSalesforceDateTime: jest.fn((timestamp) =>
 		new Date(timestamp * 1000).toISOString(),

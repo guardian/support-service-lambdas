@@ -4,10 +4,6 @@ import type {
 	ZuoraGetPaymentQueryOutputSchema,
 } from '../zod-schemas';
 
-/**
- * Zuora Payment API response types
- */
-
 export type ZuoraPaymentQueryOutput = z.infer<
 	typeof ZuoraGetPaymentQueryOutputSchema
 >;

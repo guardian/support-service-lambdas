@@ -15,21 +15,6 @@ import {
 	ZuoraGetPaymentQueryOutputResponseSchema,
 } from '../zod-schemas';
 
-/**
- * Retrieves invoice and subscription information from Zuora based on a Stripe charge ID
- *
- * This function performs a multi-step query process:
- * 1. Finds the payment record using the Stripe charge ID as reference
- * 2. Locates invoice payments associated with that payment
- * 3. Finds invoice items for the invoice, filtering for items with subscriptions
- *
- * @param stripeChargeId - The Stripe charge ID to look up in Zuora (e.g., "ch_1234567890")
- * @param zuoraClient - Authenticated Zuora client for making API calls
- * @returns Promise containing payment, invoice, and subscription information
- * @throws {Error} When no payment is found for the given Stripe charge ID
- * @throws {Error} When database queries fail or return invalid data
- * @throws {Error} When no invoice items with subscriptions are found
- */
 export const zuoraGetInvoiceFromStripeChargeId = async (
 	stripeChargeId: string,
 	zuoraClient: ZuoraClient,
