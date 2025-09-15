@@ -454,6 +454,12 @@ importers:
         specifier: ^8.10.147
         version: 8.10.152
 
+  modules/internationalisation:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+
   modules/product-benefits:
     dependencies:
       dayjs:
