@@ -63,13 +63,10 @@ export const creditInvoice = async (
 	);
 };
 
-export const writeOffInvoice = async <
-	T extends z.ZodType = typeof zuoraResponseSchema,
->(
+export const writeOffInvoice = async (
 	zuoraClient: ZuoraClient,
 	invoiceNumber: string,
 	comment: string,
-	schema?: T,
 ): Promise<ZuoraResponse> => {
 	console.log(`Writing off invoice ${invoiceNumber} with comment: ${comment}`);
 	const path = `/v1/invoices/${invoiceNumber}/write-off`;
@@ -78,6 +75,5 @@ export const writeOffInvoice = async <
 		memoDate: dayjs().format('YYYY-MM-DD'),
 		reasonCode: 'Write-off',
 	});
-	const finalSchema = (schema ?? zuoraResponseSchema) as T;
-	return zuoraClient.put(path, body, finalSchema);
+	return zuoraClient.put(path, body, zuoraResponseSchema);
 };
