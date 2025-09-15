@@ -1,3 +1,7 @@
+import {
+	isoCountrySchema,
+	supportInternationalisationSchema,
+} from '@modules/internationalisation/schemas';
 import { z } from 'zod';
 
 export const promotionCopySchema = z.object({
@@ -28,7 +32,7 @@ export const promotionTypeSchema = z.discriminatedUnion('name', [
 
 export const appliesToSchema = z.object({
 	productRatePlanIds: z.array(z.string()).transform((arr) => new Set(arr)),
-	countries: z.array(z.string()).transform((arr) => new Set(arr)),
+	countries: z.array(isoCountrySchema).transform((arr) => new Set(arr)),
 });
 
 export const promotionSchema = z.object({
@@ -43,3 +47,9 @@ export const promotionSchema = z.object({
 	landingPage: promotionCopySchema.optional(),
 });
 export type Promotion = z.infer<typeof promotionSchema>;
+
+export const appliedPromotionSchema = z.object({
+	promoCode: z.string(),
+	countryGroupId: supportInternationalisationSchema,
+});
+export type AppliedPromotion = z.infer<typeof appliedPromotionSchema>;

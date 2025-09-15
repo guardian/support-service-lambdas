@@ -1,3 +1,4 @@
+import * as console from 'node:console';
 import { DynamoDBClient, ScanCommand } from '@aws-sdk/client-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { awsConfig } from '@modules/aws/config';
@@ -17,7 +18,8 @@ export const getPromotions = async (
 	const data = await dynamoClient.send(new ScanCommand(input));
 
 	return data.Items?.map((item) => {
-		const parseResult = promotionSchema.safeParse(unmarshall(item));
+		const unmarshalledItem = unmarshall(item);
+		const parseResult = promotionSchema.safeParse(unmarshalledItem);
 		if (!parseResult.success) {
 			console.error(
 				`Failed to parse promotion: ${JSON.stringify(item, null, 2)} because of error:`,
@@ -29,9 +31,8 @@ export const getPromotions = async (
 	});
 };
 
-export const getPromotionByCode = async (stage: Stage, code: string) => {
-	const promotions = await getPromotions(stage);
-	return promotions?.find((promo) => {
+export const getPromotionByCode = (promotions: Promotion[], code: string) => {
+	return promotions.find((promo) => {
 		const allCodes = Object.values(promo.codes).flat();
 		return allCodes.includes(code);
 	});

@@ -323,4 +323,24 @@ export const countryGroups: CountryGroups = {
 		countries: ['CA'],
 		supportRegionId: SupportRegionId.CA,
 	},
+} as const;
+export const countryGroupBySupportInternationalisationId = (
+	supportInternationalisationId: SupportInternationalisationId,
+): CountryGroup => {
+	switch (supportInternationalisationId) {
+		case 'uk':
+			return countryGroups.GBPCountries;
+		case 'us':
+			return countryGroups.UnitedStates;
+		case 'au':
+			return countryGroups.AUDCountries;
+		case 'eu':
+			return countryGroups.EURCountries;
+		case 'int':
+			return countryGroups.International;
+		case 'nz':
+			return countryGroups.NZDCountries;
+		case 'ca':
+			return countryGroups.Canada;
+	}
 };
