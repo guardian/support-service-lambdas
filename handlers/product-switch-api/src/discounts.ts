@@ -1,6 +1,6 @@
 import type { BillingPeriod } from '@modules/billingPeriod';
 import type { Lazy } from '@modules/lazy';
-import type { Logger } from '@modules/routing/logger';
+import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import type { SimpleInvoiceItem } from '@modules/zuora/billingPreview';
 
@@ -36,7 +36,6 @@ const annualContribHalfPriceSupporterPlusForOneYear = (
 });
 
 export const getDiscount = async (
-	logger: Logger,
 	clientWantsADiscount: boolean,
 	oldContributionAmount: number,
 	supporterPlusPrice: number,

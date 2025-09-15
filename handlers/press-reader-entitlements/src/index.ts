@@ -2,7 +2,7 @@ import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { userHasGuardianEmail } from '@modules/product-benefits/userBenefits';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
-import type { Logger } from '@modules/routing/logger';
+import { logger } from '@modules/routing/logger';
 import { Router } from '@modules/routing/router';
 import type { Stage } from '@modules/stage';
 import { stageFromEnvironment } from '@modules/stage';
@@ -36,7 +36,6 @@ export const handler: Handler = Router([
 ]);
 
 async function userEntitlementsHandler(
-	logger: Logger,
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> {
 	const userId = getIfDefined(

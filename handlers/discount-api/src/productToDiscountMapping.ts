@@ -1,7 +1,6 @@
 import { getSingleOrThrow } from '@modules/arrayFunctions';
 import type { DataExtensionName } from '@modules/email/email';
 import { DataExtensionNames } from '@modules/email/email';
-import type { Logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import { isNotRemovedOrDiscount } from '@modules/zuora/rateplan';
 import type { ZuoraSubscription } from '@modules/zuora/types';
@@ -18,7 +17,6 @@ function getDiscountableRatePlan(subscription: ZuoraSubscription) {
 }
 
 export const getDiscountFromSubscription = (
-	logger: Logger,
 	stage: Stage,
 	subscription: ZuoraSubscription,
 ) => {
@@ -28,7 +26,6 @@ export const getDiscountFromSubscription = (
 		ProductToDiscountMapping(stage)[discountableProductRatePlanId];
 
 	assertValidState(
-		logger,
 		discount !== undefined,
 		validationRequirements.mustHaveDiscountDefined,
 		JSON.stringify(discount),

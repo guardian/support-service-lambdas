@@ -1,6 +1,5 @@
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
-import { Logger } from '@modules/routing/logger';
 import { zuoraSubscriptionResponseSchema } from '@modules/zuora/types';
 import zuoraCatalogFixture from '../../../modules/zuora-catalog/test/fixtures/catalog-code.json';
 import { getSupporterPlusData } from '../src/updateSupporterPlusAmount';
@@ -12,7 +11,6 @@ test('We can get a product rate plan from a subscription', () => {
 	const subscription = zuoraSubscriptionResponseSchema.parse(subscriptionJson);
 
 	const supporterPlusPlans = getSupporterPlusData(
-		new Logger(),
 		productCatalog,
 		subscription.ratePlans,
 	);

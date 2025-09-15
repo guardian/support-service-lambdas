@@ -9,7 +9,7 @@ import type {
 	ProductCatalog,
 	ProductRatePlan,
 } from '@modules/product-catalog/productCatalog';
-import type { Logger } from '@modules/routing/logger';
+import { logger } from '@modules/routing/logger';
 import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
 import type {
@@ -45,7 +45,6 @@ type ProductData = {
 };
 
 export const getSupporterPlusData = (
-	logger: Logger,
 	productCatalog: ProductCatalog,
 	ratePlans: RatePlan[],
 ): SupporterPlusData => {
@@ -174,7 +173,6 @@ const getNewTermStartDate = (
 };
 
 export const updateSupporterPlusAmount = async (
-	logger: Logger,
 	zuoraClient: ZuoraClient,
 	productCatalog: ProductCatalog,
 	identityIdFromRequest: string,
@@ -194,7 +192,6 @@ export const updateSupporterPlusAmount = async (
 	}
 
 	const supporterPlusData = getSupporterPlusData(
-		logger,
 		productCatalog,
 		subscription.ratePlans,
 	);

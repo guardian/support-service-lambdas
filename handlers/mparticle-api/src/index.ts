@@ -12,17 +12,16 @@ import {
 import { AppConfig, getAppConfig, getEnv } from './services/config';
 import { MParticleClient } from './services/mparticleClient';
 import { BatonS3WriterImpl } from './services/batonS3Writer';
-import { Logger } from '@modules/routing/logger';
+import { logger } from '@modules/routing/logger';
 
 export const handlerHttp: Handler<
 	APIGatewayProxyEvent,
 	APIGatewayProxyResult
 > = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
 	try {
-		const { mParticleDataSubjectClient, batonS3Writer, logger } =
-			await services();
+		const { mParticleDataSubjectClient, batonS3Writer } = await services();
 		console.debug('Processing HTTP request');
-		return httpRouter(mParticleDataSubjectClient, batonS3Writer, logger)(event);
+		return httpRouter(mParticleDataSubjectClient, batonS3Writer)(event);
 	} catch (error) {
 		console.error('HTTP handler error:', error);
 		return {
@@ -45,7 +44,6 @@ export const handlerBaton: Handler<
 			mParticleEventsAPIClient,
 			batonS3Writer,
 			isProd,
-			logger,
 		} = await services();
 		const router = batonRerRouter(
 			mParticleDataSubjectClient,
@@ -61,24 +59,17 @@ export const handlerBaton: Handler<
 };
 
 async function services() {
-	const logger = new Logger();
 	logger.log('Starting lambda');
 	const stage = getEnv('STAGE');
 	const config: AppConfig = await getAppConfig();
 	return {
-		mParticleDataSubjectClient: MParticleClient(
-			logger,
-		).createMParticleDataSubjectClient(config.workspace),
-		mParticleEventsAPIClient: MParticleClient(logger).createEventsApiClient(
+		mParticleDataSubjectClient:
+			MParticleClient.createMParticleDataSubjectClient(config.workspace),
+		mParticleEventsAPIClient: MParticleClient.createEventsApiClient(
 			config.inputPlatform,
 			config.pod,
 		),
-		batonS3Writer: new BatonS3WriterImpl(
-			config.sarResultsBucket,
-			sarS3BaseKey,
-			logger,
-		),
+		batonS3Writer: new BatonS3WriterImpl(config.sarResultsBucket, sarS3BaseKey),
 		isProd: stage === 'PROD',
-		logger,
 	};
 }

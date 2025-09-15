@@ -6,7 +6,7 @@ import type { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
-import type { Logger } from '@modules/routing/logger';
+import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import type { SimpleInvoiceItem } from '@modules/zuora/billingPreview';
 import type {
@@ -132,7 +132,6 @@ const getCurrency = (contributionRatePlan: RatePlan): IsoCurrency => {
 
 // Gets a subscription from Zuora and checks that it is owned by currently logged-in user
 export const getSwitchInformationWithOwnerCheck = async (
-	logger: Logger,
 	stage: Stage,
 	input: ProductSwitchRequestBody,
 	subscription: ZuoraSubscription,
@@ -181,7 +180,6 @@ export const getSwitchInformationWithOwnerCheck = async (
 	);
 
 	const maybeDiscount = await getDiscount(
-		logger,
 		!!input.applyDiscountIfAvailable,
 		previousAmount,
 		catalogInformation.supporterPlus.price,

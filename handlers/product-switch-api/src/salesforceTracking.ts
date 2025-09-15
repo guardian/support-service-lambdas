@@ -1,6 +1,6 @@
 import { sendMessageToQueue } from '@modules/aws/sqs';
 import { prettyPrint } from '@modules/prettyPrint';
-import type { Logger } from '@modules/routing/logger';
+import { logger } from '@modules/routing/logger';
 import type { SwitchInformation } from './switchInformation';
 
 export type SalesforceTrackingInput = {
@@ -46,7 +46,6 @@ export function createSQSMessageBody(
 }
 
 export const sendSalesforceTracking = async (
-	logger: Logger,
 	paidAmount: number,
 	switchInformation: SwitchInformation,
 ) => {

@@ -1,5 +1,4 @@
 import { putMetric } from '@modules/aws/cloudwatch';
-import type { Logger } from '@modules/routing/logger';
 import { Router } from '@modules/routing/router';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 
@@ -19,7 +18,7 @@ export const handler = Router([
 	{
 		httpMethod: 'GET',
 		path: '/metric-push-api',
-		handler: async (logger: Logger, event: APIGatewayProxyEvent) => {
+		handler: async (event: APIGatewayProxyEvent) => {
 			const referer = event.headers.referer ?? event.headers.Referer;
 
 			if (referer && validReferers.includes(referer)) {

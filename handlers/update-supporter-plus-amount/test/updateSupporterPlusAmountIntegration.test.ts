@@ -1,7 +1,6 @@
 import console from 'console';
 import { sendEmail } from '@modules/email/email';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
-import { Logger } from '@modules/routing/logger';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { createThankYouEmail } from '../src/sendEmail';
@@ -32,7 +31,6 @@ test('We can carry out an amount change', async () => {
 	const productCatalog = await getProductCatalogFromApi(stage);
 
 	const result = await updateSupporterPlusAmount(
-		new Logger(),
 		zuoraClient,
 		productCatalog,
 		identityId,

@@ -1,7 +1,7 @@
 import { Lazy } from '@modules/lazy';
 import { prettyPrint } from '@modules/prettyPrint';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
-import type { Logger } from '@modules/routing/logger';
+import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import { getAccount } from '@modules/zuora/account';
 import {
@@ -20,7 +20,6 @@ import { getSwitchInformationWithOwnerCheck } from './switchInformation';
 export const contributionToSupporterPlusEndpoint =
 	(stage: Stage, today: dayjs.Dayjs) =>
 	async (
-		logger: Logger,
 		event: APIGatewayProxyEvent,
 		parsed: {
 			path: { subscriptionNumber: string };
@@ -29,7 +28,7 @@ export const contributionToSupporterPlusEndpoint =
 	) => {
 		logger.mutableAddContext(parsed.path.subscriptionNumber);
 		const identityId = event.headers['x-identity-id'];
-		const zuoraClient = await ZuoraClient.create(stage, logger);
+		const zuoraClient = await ZuoraClient.create(stage);
 		logger.log('Loading the product catalog');
 		const productCatalog = await getProductCatalogFromApi(stage);
 		logger.log(`Request body is ${prettyPrint(parsed.body)}`);
@@ -56,7 +55,6 @@ export const contributionToSupporterPlusEndpoint =
 			.then(toSimpleInvoiceItems);
 
 		const switchInformation = await getSwitchInformationWithOwnerCheck(
-			logger,
 			stage,
 			parsed.body,
 			subscription,
@@ -69,7 +67,7 @@ export const contributionToSupporterPlusEndpoint =
 
 		const response = parsed.body.preview
 			? await preview(zuoraClient, switchInformation, subscription)
-			: await switchToSupporterPlus(logger, zuoraClient, switchInformation);
+			: await switchToSupporterPlus(zuoraClient, switchInformation);
 
 		return {
 			body: JSON.stringify(response),

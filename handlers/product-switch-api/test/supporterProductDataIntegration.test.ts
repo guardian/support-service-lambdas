@@ -2,7 +2,6 @@
  * @group integration
  */
 
-import { Logger } from '@modules/routing/logger';
 import { sendToSupporterProductData } from '../src/supporterProductData';
 import type { SwitchInformation } from '../src/switchInformation';
 
@@ -46,10 +45,7 @@ test('supporter product data', async () => {
 		},
 	};
 
-	const result = await sendToSupporterProductData(
-		new Logger(),
-		switchInformation,
-	);
+	const result = await sendToSupporterProductData(switchInformation);
 
 	console.log(result);
 	expect(result.$metadata.httpStatusCode).toEqual(200);

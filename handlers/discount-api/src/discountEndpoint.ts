@@ -2,7 +2,7 @@ import { sum } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
-import type { Logger } from '@modules/routing/logger';
+import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import { getAccount } from '@modules/zuora/account';
 import {
@@ -28,30 +28,21 @@ import { generateCancellationDiscountConfirmationEmail } from './generateCancell
 import { getDiscountFromSubscription } from './productToDiscountMapping';
 
 export const previewDiscountEndpoint = async (
-	logger: Logger,
 	stage: Stage,
 	headers: APIGatewayProxyEventHeaders,
 	subscriptionNumber: string,
 	today: dayjs.Dayjs,
 ) => {
-	const zuoraClient = await ZuoraClient.create(stage, logger);
+	const zuoraClient = await ZuoraClient.create(stage);
 
 	const { subscription, account } = await getSubscriptionIfBelongsToIdentityId(
-		logger.log.bind(logger),
 		headers,
 		zuoraClient,
 		subscriptionNumber,
 	);
 
 	const { discount, dateToApply, orderedInvoiceTotals } =
-		await getDiscountToApply(
-			logger,
-			stage,
-			subscription,
-			account,
-			zuoraClient,
-			today,
-		);
+		await getDiscountToApply(stage, subscription, account, zuoraClient, today);
 
 	logger.log('Preview the new price once the discount has been applied');
 	// note that this only returns the next payment - payments are not guaranteed to be identical
@@ -103,16 +94,14 @@ export const previewDiscountEndpoint = async (
 };
 
 export const applyDiscountEndpoint = async (
-	logger: Logger,
 	stage: Stage,
 	headers: APIGatewayProxyEventHeaders,
 	subscriptionNumber: string,
 	today: dayjs.Dayjs,
 ) => {
-	const zuoraClient = await ZuoraClient.create(stage, logger);
+	const zuoraClient = await ZuoraClient.create(stage);
 
 	const { subscription, account } = await getSubscriptionIfBelongsToIdentityId(
-		logger.log.bind(logger),
 		headers,
 		zuoraClient,
 		subscriptionNumber,
@@ -126,7 +115,6 @@ export const applyDiscountEndpoint = async (
 	);
 
 	const { discount, dateToApply } = await getDiscountToApply(
-		logger,
 		stage,
 		subscription,
 		account,
@@ -184,7 +172,6 @@ export const applyDiscountEndpoint = async (
 };
 
 async function getSubscriptionIfBelongsToIdentityId(
-	log: (message: string) => void,
 	headers: APIGatewayProxyEventHeaders,
 	zuoraClient: ZuoraClient,
 	subscriptionNumber: string,
@@ -194,12 +181,12 @@ async function getSubscriptionIfBelongsToIdentityId(
 		'Identity ID not found in request',
 	);
 
-	log('Getting the subscription details from Zuora');
+	logger.log('Getting the subscription details from Zuora');
 	const subscription = await getSubscription(zuoraClient, subscriptionNumber);
 
-	log('get account for the subscription');
+	logger.log('get account for the subscription');
 	const account = await getAccount(zuoraClient, subscription.accountNumber);
-	log('assert that sub is owned by logged in user');
+	logger.log('assert that sub is owned by logged in user');
 	if (account.basicInfo.identityId !== identityId) {
 		throw new ValidationError(
 			`Subscription ${subscription.subscriptionNumber} does not belong to identity ID ${identityId}`,
@@ -210,7 +197,6 @@ async function getSubscriptionIfBelongsToIdentityId(
 }
 
 async function getDiscountToApply(
-	logger: Logger,
 	stage: Stage,
 	subscription: ZuoraSubscription,
 	account: ZuoraAccount,
@@ -218,11 +204,11 @@ async function getDiscountToApply(
 	today: dayjs.Dayjs,
 ) {
 	const catalog = () => getZuoraCatalog(stage);
-	const eligibilityChecker = new EligibilityChecker(logger);
+	const eligibilityChecker = new EligibilityChecker();
 
 	logger.log('Working out the appropriate discount for the subscription');
 	const { discount, discountableProductRatePlanId } =
-		getDiscountFromSubscription(logger, stage, subscription);
+		getDiscountFromSubscription(stage, subscription);
 
 	// don't get the billing preview until we know the subscription is not cancelled
 	const lazyBillingPreview = new Lazy(

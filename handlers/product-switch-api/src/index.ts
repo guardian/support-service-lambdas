@@ -1,3 +1,4 @@
+import 'source-map-support/register';
 import { createRoute, Router } from '@modules/routing/router';
 import type { Stage } from '@modules/stage';
 import type { Handler } from 'aws-lambda';

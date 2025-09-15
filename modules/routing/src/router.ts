@@ -2,7 +2,7 @@ import { mapPartition, zipAll } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
-import { Logger } from '@modules/routing/logger';
+import { logger } from '@modules/routing/logger';
 
 export type HttpMethod =
 	| 'GET'
@@ -17,7 +17,6 @@ export type Route<TPath, TBody> = {
 	httpMethod: HttpMethod;
 	path: string;
 	handler: (
-		logger: Logger,
 		event: APIGatewayProxyEvent,
 		parsed: { path: TPath; body: TBody },
 	) => Promise<APIGatewayProxyResult>;
@@ -65,10 +64,7 @@ function matchPath(
 	return { params: Object.fromEntries(matchers) };
 }
 
-export function Router(
-	routes: ReadonlyArray<Route<unknown, unknown>>,
-	logger: Logger = new Logger(),
-) {
+export function Router(routes: ReadonlyArray<Route<unknown, unknown>>) {
 	const httpRouter = async (
 		event: APIGatewayProxyEvent,
 	): Promise<APIGatewayProxyResult> => {
@@ -110,7 +106,7 @@ export function Router(
 						throw error;
 					}
 
-					return await route.handler(logger, eventWithParams, {
+					return await route.handler(eventWithParams, {
 						path: parsedPath,
 						body: parsedBody,
 					});
@@ -133,5 +129,11 @@ export function Router(
 		}
 	};
 
-	return logger.wrapRouter(httpRouter, undefined, undefined, 0);
+	return logger.wrapRouter(
+		httpRouter,
+		undefined,
+		undefined,
+		0,
+		logger.getCallerInfo(),
+	);
 }

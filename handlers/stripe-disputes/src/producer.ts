@@ -6,21 +6,18 @@ import { handleStripeWebhook } from './services';
 const logger = new Logger();
 
 // Router for API Gateway webhook endpoints (synchronous)
-const router = Router(
-	[
-		{
-			httpMethod: 'POST',
-			path: '/listen-dispute-created',
-			handler: handleStripeWebhook('dispute.created'),
-		},
-		{
-			httpMethod: 'POST',
-			path: '/listen-dispute-closed',
-			handler: handleStripeWebhook('dispute.closed'),
-		},
-	],
-	logger,
-);
+const router = Router([
+	{
+		httpMethod: 'POST',
+		path: '/listen-dispute-created',
+		handler: handleStripeWebhook(logger, 'dispute.created'),
+	},
+	{
+		httpMethod: 'POST',
+		path: '/listen-dispute-closed',
+		handler: handleStripeWebhook(logger, 'dispute.closed'),
+	},
+]);
 
 /**
  * Hybrid Lambda handler supporting both API Gateway webhooks and SQS events

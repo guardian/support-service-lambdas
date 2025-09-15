@@ -1,5 +1,4 @@
 import { DataExtensionNames } from '@modules/email/email';
-import { Logger } from '@modules/routing/logger';
 import { zuoraSubscriptionResponseSchema } from '@modules/zuora/types';
 import { validationRequirements } from '../src/eligibilityChecker';
 import type { Discount } from '../src/productToDiscountMapping';
@@ -22,7 +21,7 @@ test('getDiscountFromSubscription should return an annual discount for an annual
 		eligibilityCheckForRatePlan: 'AtCatalogPrice',
 	};
 	const { discount, discountableProductRatePlanId } =
-		getDiscountFromSubscription(new Logger(), 'PROD', sub);
+		getDiscountFromSubscription('PROD', sub);
 	expect(discount).toEqual(expected);
 	expect(discountableProductRatePlanId).toEqual(catalog.PROD.digiSub.Annual);
 });
@@ -30,7 +29,7 @@ test('getDiscountFromSubscription should return an annual discount for an annual
 test('cant get a discount for a student (fixed term)', () => {
 	const sub = zuoraSubscriptionResponseSchema.parse(student);
 
-	const ac2 = () => getDiscountFromSubscription(new Logger(), 'CODE', sub);
+	const ac2 = () => getDiscountFromSubscription('CODE', sub);
 
 	expect(ac2).toThrow(validationRequirements.mustHaveDiscountDefined);
 });

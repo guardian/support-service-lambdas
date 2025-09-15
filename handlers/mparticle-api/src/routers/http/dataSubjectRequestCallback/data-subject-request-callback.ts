@@ -6,7 +6,6 @@ import {
 	MParticleClient,
 } from '../../../services/mparticleClient';
 import type { BatonS3Writer } from '../../../services/batonS3Writer';
-import { Logger } from '@modules/routing/logger';
 
 export type DataSubjectRequestCallback = z.infer<
 	typeof dataSubjectRequestCallbackParser.body
@@ -47,7 +46,6 @@ export function dataSubjectRequestCallbackHandler(
 	batonS3Writer: BatonS3Writer,
 ) {
 	return async (
-		logger: Logger,
 		event: APIGatewayProxyEvent,
 		parsed: { path: { requestId: string }; body: DataSubjectRequestCallback },
 	): Promise<APIGatewayProxyResult> => {

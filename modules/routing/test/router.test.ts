@@ -24,7 +24,7 @@ const router = Router([
 				benefitId: z.string(),
 			}),
 		},
-		handler: (logger, event, parsed) => {
+		handler: (event, parsed) => {
 			return Promise.resolve({
 				statusCode: 200,
 				body: JSON.stringify(parsed),
@@ -34,7 +34,7 @@ const router = Router([
 	createRoute({
 		httpMethod: 'PATCH',
 		path: '/benefits/enabled/{flag}',
-		handler: (logger, event, parsed) => {
+		handler: (event, parsed) => {
 			return Promise.resolve({
 				statusCode: 200,
 				body: JSON.stringify(parsed),
@@ -49,7 +49,7 @@ const router = Router([
 	createRoute({
 		httpMethod: 'POST',
 		path: '/benefits',
-		handler: (logger, event, parsed) => {
+		handler: (event, parsed) => {
 			return Promise.resolve({
 				statusCode: 200,
 				body: JSON.stringify(parsed),
@@ -66,7 +66,7 @@ const router = Router([
 	createRoute({
 		httpMethod: 'PUT',
 		path: '/benefits/{benefitId}',
-		handler: (logger, event, parsed) => {
+		handler: (event, parsed) => {
 			return Promise.resolve({
 				statusCode: 200,
 				body: JSON.stringify(parsed),

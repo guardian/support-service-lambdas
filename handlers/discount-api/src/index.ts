@@ -1,6 +1,7 @@
+import 'source-map-support/register';
 import { sendEmail } from '@modules/email/email';
 import { getIfDefined } from '@modules/nullAndUndefined';
-import type { Logger } from '@modules/routing/logger';
+import { logger } from '@modules/routing/logger';
 import { Router } from '@modules/routing/router';
 import type { Stage } from '@modules/stage';
 import type {
@@ -41,7 +42,6 @@ export const handler: Handler = Router([
 ]);
 
 async function applyDiscountHandler(
-	logger: Logger,
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> {
 	const subscriptionNumber = applyDiscountSchema.parse(
@@ -49,13 +49,12 @@ async function applyDiscountHandler(
 	).subscriptionNumber;
 	logger.mutableAddContext(subscriptionNumber);
 	const { response, emailPayload } = await applyDiscountEndpoint(
-		logger,
 		stage,
 		event.headers,
 		subscriptionNumber,
 		dayjs(),
 	);
-	await sendEmail(stage, emailPayload, logger.log.bind(logger));
+	await sendEmail(stage, emailPayload);
 	return {
 		body: stringify<ApplyDiscountResponseBody>(
 			response,
@@ -66,16 +65,14 @@ async function applyDiscountHandler(
 }
 
 async function previewDiscountHandler(
-	logger: Logger,
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> {
-	logger.log('Previewing discount');
 	const subscriptionNumber = applyDiscountSchema.parse(
 		JSON.parse(getIfDefined(event.body, 'No body was provided')),
 	).subscriptionNumber;
 	logger.mutableAddContext(subscriptionNumber);
+	logger.log('Previewing discount');
 	const result = await previewDiscountEndpoint(
-		logger,
 		stage,
 		event.headers,
 		subscriptionNumber,

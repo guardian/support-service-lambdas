@@ -1,6 +1,6 @@
 import { sendMessageToQueue } from '@modules/aws/sqs';
 import { prettyPrint } from '@modules/prettyPrint';
-import type { Logger } from '@modules/routing/logger';
+import { logger } from '@modules/routing/logger';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import dayjs from 'dayjs';
 import type { SwitchInformation } from './switchInformation';
@@ -37,7 +37,6 @@ export const supporterRatePlanItemFromSwitchInformation = (
 };
 
 export const sendToSupporterProductData = async (
-	logger: Logger,
 	switchInformation: SwitchInformation,
 ) => {
 	const queueName = `supporter-product-data-${switchInformation.stage}`;

@@ -1,4 +1,4 @@
-import type { Logger } from '@modules/routing/logger';
+import { logger } from '@modules/routing/logger';
 import { ZuoraError } from '@modules/zuora/errors/zuoraError';
 import { zuoraResponseSchema } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
@@ -38,7 +38,6 @@ const amendmentShouldBeDeleted = (
 	amendment.type === 'UpdateProduct';
 
 export const removePendingUpdateAmendments = async (
-	logger: Logger,
 	zuoraClient: ZuoraClient,
 	subscriptionNumber: string,
 ): Promise<void> => {
@@ -52,11 +51,7 @@ export const removePendingUpdateAmendments = async (
 			`v1/object/amendment/${lastAmendment?.id}`,
 			zuoraResponseSchema,
 		);
-		return await removePendingUpdateAmendments(
-			logger,
-			zuoraClient,
-			subscriptionNumber,
-		);
+		return await removePendingUpdateAmendments(zuoraClient, subscriptionNumber);
 	} else {
 		logger.log(
 			`Subscription ${subscriptionNumber} has no pending update amendment. Nothing to do.`,

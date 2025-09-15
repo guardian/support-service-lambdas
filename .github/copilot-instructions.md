@@ -17,6 +17,10 @@ Non private environment specific information e.g. base urls, endpoints, ids, mus
 Use modules/aws/src/appConfig.ts to load config from SSM
 Use zod to parse all JSON input, e.g. input data, or input from external APIs
 
+### Logging
+Always use logger.log, instead of console.log.
+In each handler, as soon as you know either the subscription id (or similar correlating information), add it to the logger context.
+
 ### REST clients
 To create a REST client, follow the existing pattern in modules/zuora/src/zuoraClient.ts 
 have a static create method that takes a suitable config object and stage as a parameter

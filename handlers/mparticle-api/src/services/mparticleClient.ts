@@ -1,4 +1,4 @@
-import type { Logger } from '@modules/routing/logger';
+import { logger } from '@modules/routing/logger';
 import type { AppConfig } from './config';
 import type { HttpResponse, Schema } from './make-http-request';
 import { RestRequestMaker } from './make-http-request';
@@ -28,7 +28,7 @@ export interface MParticleClient<
 	getStream(path: string): Promise<ReadableStream>;
 }
 
-export const MParticleClient = (logger: Logger) => ({
+export const MParticleClient = {
 	createMParticleDataSubjectClient(
 		config: AppConfig['workspace'],
 	): MParticleClient<DataSubjectAPI> {
@@ -37,7 +37,6 @@ export const MParticleClient = (logger: Logger) => ({
 			config.key,
 			config.secret,
 			'dataSubject',
-			logger,
 		);
 	},
 
@@ -50,10 +49,9 @@ export const MParticleClient = (logger: Logger) => ({
 			config.key,
 			config.secret,
 			'eventsApi',
-			logger,
 		);
 	},
-});
+};
 
 export class MParticleClientImpl<
 	T extends DataSubjectAPI | EventsAPI = DataSubjectAPI | EventsAPI,
@@ -67,7 +65,6 @@ export class MParticleClientImpl<
 		key: string,
 		secret: string,
 		clientType: T['clientType'],
-		logger: Logger,
 	) {
 		this.clientType = clientType;
 		/**
@@ -84,7 +81,6 @@ export class MParticleClientImpl<
 				Authorization: authHeader,
 			},
 			fetch,
-			logger,
 		);
 	}
 
@@ -92,7 +88,11 @@ export class MParticleClientImpl<
 		path: string,
 		schema: Schema<RESP>,
 	): Promise<HttpResponse<RESP>> {
-		return await this.rest.makeRESTRequest('GET', path, schema);
+		return await this.rest.makeRESTRequest(logger.getCallerInfo(1))(
+			'GET',
+			path,
+			schema,
+		);
 	}
 
 	async post<REQ, RESP>(
@@ -100,7 +100,12 @@ export class MParticleClientImpl<
 		body: REQ,
 		schema: Schema<RESP>,
 	): Promise<HttpResponse<RESP>> {
-		return await this.rest.makeRESTRequest('POST', path, schema, body);
+		return await this.rest.makeRESTRequest(logger.getCallerInfo(1))(
+			'POST',
+			path,
+			schema,
+			body,
+		);
 	}
 
 	async getStream(path: string): Promise<ReadableStream> {
