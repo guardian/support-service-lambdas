@@ -61,22 +61,27 @@ export class Logger {
 					arg instanceof ZodObject ? '(ZodObject not expanded)' : arg;
 				return [paramName, value];
 			});
-			const shortPrettyArgs = prettyArgs.slice(0, shortArgsNum ?? 1);
+			const shortPrettyArgs =
+				shortArgsNum === 0
+					? undefined
+					: Object.fromEntries(prettyArgs.slice(0, shortArgsNum ?? 1));
 			this.log(`TRACE ${name} ENTRY ARGS`, Object.fromEntries(prettyArgs));
 
 			try {
 				const result = await fn(...args);
 				this.log(
-					`TRACE ${name} EXIT SHORT_ARGS`,
-					Object.fromEntries(shortPrettyArgs),
+					`TRACE ${name} EXIT ` +
+						(shortPrettyArgs !== undefined ? '' : `SHORT_ARGS`),
+					shortPrettyArgs,
 					'RESULT',
 					result,
 				);
 				return result;
 			} catch (error) {
 				this.error(
-					`TRACE ${name} ERROR SHORT_ARGS`,
-					Object.fromEntries(shortPrettyArgs),
+					`TRACE ${name} ERROR ` +
+						(shortPrettyArgs !== undefined ? '' : `SHORT_ARGS`),
+					shortPrettyArgs,
 					'ERROR',
 					error,
 				);

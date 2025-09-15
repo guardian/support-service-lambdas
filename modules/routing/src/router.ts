@@ -133,5 +133,5 @@ export function Router(
 		}
 	};
 
-	return logger.wrapRouter(httpRouter);
+	return logger.wrapRouter(httpRouter, undefined, undefined, 0);
 }
