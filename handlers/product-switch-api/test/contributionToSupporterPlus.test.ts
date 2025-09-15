@@ -14,6 +14,11 @@ import {
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
+
+jest.mock('../src/payment', () => ({
+	takePaymentOrAdjustInvoice: jest.fn(),
+	adjustNonCollectedInvoice: jest.fn(),
+}));
 import {
 	previewResponseFromZuoraResponse,
 	refundExpected,

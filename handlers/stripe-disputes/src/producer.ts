@@ -34,6 +34,11 @@ export const handler = async (
 	}
 };
 
-function isApiGatewayEvent(event: any): event is APIGatewayProxyEvent {
-	return event.httpMethod !== undefined && event.path !== undefined;
+function isApiGatewayEvent(event: unknown): event is APIGatewayProxyEvent {
+	return (
+		typeof event === 'object' &&
+		event !== null &&
+		'httpMethod' in event &&
+		'path' in event
+	);
 }
