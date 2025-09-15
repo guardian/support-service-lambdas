@@ -14,7 +14,6 @@ import { zuoraResponseSchema } from './types';
 import type { ZuoraResponse } from './types';
 import { zuoraDateFormat } from './utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { z } from 'zod/index';
 
 export const getInvoice = async (
 	zuoraClient: ZuoraClient,
