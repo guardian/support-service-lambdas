@@ -2,7 +2,6 @@ import type { Logger } from '@modules/routing/logger';
 import { authenticateWithSalesforce } from '../../src/services/salesforceAuth';
 import type { SalesforceCredentials } from '../../src/types';
 
-// Mock dependencies
 jest.mock('../../src/helpers', () => ({
 	getSalesForceApiBaseUrl: jest.fn((sandbox) =>
 		sandbox ? 'https://test.salesforce.com' : 'https://login.salesforce.com',
@@ -16,7 +15,6 @@ jest.mock('../../src/zod-schemas', () => ({
 	},
 }));
 
-// Mock fetch globally
 global.fetch = jest.fn();
 
 describe('Salesforce Auth Service', () => {
@@ -43,7 +41,6 @@ describe('Salesforce Auth Service', () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 
-		// Mock successful validation
 		const { SalesforceAuthResponseSchema } = require('../../src/zod-schemas');
 		SalesforceAuthResponseSchema.safeParse.mockReturnValue({
 			success: true,

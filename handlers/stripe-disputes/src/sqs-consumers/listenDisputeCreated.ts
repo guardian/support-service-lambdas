@@ -3,17 +3,6 @@ import type { ListenDisputeCreatedRequestBody } from '../dtos';
 import { upsertSalesforceObject } from '../services/upsertSalesforceObject';
 import type { SalesforceUpsertResponse } from '../types';
 
-/**
- * Handles dispute.created SQS events
- *
- * This consumer processes dispute creation events that were queued from Stripe webhooks.
- * Currently performs Salesforce upsert, but can be extended with creation-specific logic.
- *
- * @param logger - Logger instance with dispute context
- * @param webhookData - Validated dispute created webhook payload
- * @param disputeId - Dispute ID for logging context
- * @returns Salesforce upsert response
- */
 export async function handleListenDisputeCreated(
 	logger: Logger,
 	webhookData: ListenDisputeCreatedRequestBody,

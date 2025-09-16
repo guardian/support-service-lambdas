@@ -112,6 +112,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'zuora-oracle-fusion',
 		'write-off-unpaid-invoices',
 		'negative-invoices-processor',
+		'zuora-datalake-export',
 
 		// stripe
 		'stripe-patrons-data',

@@ -6,7 +6,6 @@ import type {
 import type { ZuoraInvoiceFromStripeChargeIdResult } from '../../src/interfaces';
 import { upsertSalesforceObject } from '../../src/services/upsertSalesforceObject';
 
-// Mock all dependencies
 jest.mock('@modules/secrets-manager/getSecret', () => ({
 	getSecretValue: jest.fn(),
 }));
@@ -108,7 +107,6 @@ describe('upsertSalesforceObject', () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 
-		// Setup default mocks
 		const { getSecretValue } = require('@modules/secrets-manager/getSecret');
 		getSecretValue.mockResolvedValue(mockSalesforceCredentials);
 
@@ -129,13 +127,11 @@ describe('upsertSalesforceObject', () => {
 	it('should successfully upsert salesforce object', async () => {
 		const result = await upsertSalesforceObject(mockLogger, mockWebhookData);
 
-		// Verify getSecretValue was called with correct stage
 		const { getSecretValue } = require('@modules/secrets-manager/getSecret');
 		expect(getSecretValue).toHaveBeenCalledWith(
 			'TEST/Salesforce/ConnectedApp/StripeDisputeWebhooks',
 		);
 
-		// Verify authentication was called
 		const {
 			authenticateWithSalesforce,
 		} = require('../../src/services/salesforceAuth');
@@ -144,14 +140,12 @@ describe('upsertSalesforceObject', () => {
 			mockSalesforceCredentials,
 		);
 
-		// Verify mapping was called
 		const { mapStripeDisputeToSalesforce } = require('../../src/mappers');
 		expect(mapStripeDisputeToSalesforce).toHaveBeenCalledWith(
 			mockWebhookData,
 			undefined,
 		);
 
-		// Verify upsert was called
 		const {
 			upsertPaymentDisputeInSalesforce,
 		} = require('../../src/services/salesforceCreate');
@@ -216,7 +210,6 @@ describe('upsertSalesforceObject', () => {
 			mockZuoraData,
 		);
 
-		// Verify mapping was called with Zuora data
 		const { mapStripeDisputeToSalesforce } = require('../../src/mappers');
 		expect(mapStripeDisputeToSalesforce).toHaveBeenCalledWith(
 			mockWebhookData,
@@ -259,7 +252,6 @@ describe('upsertSalesforceObject', () => {
 			mockClosedWebhookData,
 		);
 
-		// Verify mapping was called with closed webhook data
 		const { mapStripeDisputeToSalesforce } = require('../../src/mappers');
 		expect(mapStripeDisputeToSalesforce).toHaveBeenCalledWith(
 			mockClosedWebhookData,
