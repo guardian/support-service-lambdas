@@ -3,8 +3,10 @@ import { ZodObject } from 'zod';
 export class Logger {
 	constructor(
 		private prefix: string[] = [],
+		/* eslint-disable @typescript-eslint/no-explicit-any -- this has to match console.log */
 		private logFn: (...args: any[]) => void = console.log,
 		private errorFn: (...args: any[]) => void = console.error,
+		/* eslint-enable @typescript-eslint/no-explicit-any */
 	) {}
 
 	public resetContext(): void {

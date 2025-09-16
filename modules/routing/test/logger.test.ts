@@ -6,23 +6,21 @@ function logCaller(logger: Logger) {
 }
 
 function getWrappedSum(logger: Logger) {
-	const addNumbers = async (a: number, b: number) => a + b;
+	const addNumbers = async (a: number, b: number) => Promise.resolve(a + b);
 	return logger.wrapFn(addNumbers);
 }
 
 function getWrappedFailFn(logger: Logger) {
-	const failFn = async (x: number) => {
-		throw new Error('fail');
-	};
-	const wrappedFailFn = logger.wrapFn(failFn);
-	return wrappedFailFn;
+	const failFn: (x: number) => Promise<void> = async (x: number) =>
+		Promise.reject(new Error('fail ' + x));
+	return logger.wrapFn(failFn);
 }
 
 // end of section that you shouldn't reformat
 
 const expectedCallerInfo = '[logger.test.ts:5::logCaller]';
 const expectedWrappedSum = '[logger.test.ts:10::getWrappedSum]';
-const expectedWrappedFailFn = '[logger.test.ts:17::getWrappedFailFn]';
+const expectedWrappedFailFn = '[logger.test.ts:16::getWrappedFailFn]';
 
 test('it should be a no-op if theres no context', () => {
 	const logger = new Logger();
@@ -45,8 +43,10 @@ test('it should add space separated context when you add multiple items', () => 
 });
 
 describe('wrapFn', () => {
+	/* eslint-disable @typescript-eslint/no-explicit-any -- this has to match console.log */
 	let logs: any[];
 	let errors: any[];
+	/* eslint-enable @typescript-eslint/no-explicit-any */
 	let logger: Logger;
 
 	beforeEach(() => {
@@ -98,12 +98,12 @@ describe('wrapFn', () => {
 
 		expect(logs).toEqual([expectedEntry]);
 		expect(errors).toEqual([expectedError]);
-		expect(errors[0][3].message).toBe('fail');
+		expect(((errors[0] as unknown[])[3] as Error).message).toBe('fail 42');
 	});
 
 	test('uses parameter names from fnAsString if provided', async () => {
 		const customName = async function customName(foo: string, bar: number) {
-			return foo + bar;
+			return Promise.resolve(foo + bar);
 		};
 		const wrapped = logger.wrapFn(
 			customName.bind({}),
@@ -112,23 +112,27 @@ describe('wrapFn', () => {
 		);
 		await wrapped('a', 1);
 
-		expect(logs[0][1]).toEqual({ foo: 'a', bar: 1 });
+		expect((logs[0] as unknown[])[1]).toEqual({ foo: 'a', bar: 1 });
 	});
 
 	test('shortArgsNum limits the number of args in exit log', async () => {
-		const fn = async (x: number, y: number, z: number) => x + y + z;
+		const fn = async (x: number, y: number, z: number) =>
+			Promise.resolve(x + y + z);
 		const wrapped = logger.wrapFn(fn, 'sum3', undefined, 2);
 		await wrapped(1, 2, 3);
 
-		expect(logs[1][1]).toEqual({ x: 1, y: 2 });
+		expect((logs[1] as unknown[])[1]).toEqual({ x: 1, y: 2 });
 	});
 
 	test('shortArgsNum misses the args marker when there are no args needed', async () => {
-		const fn = async (x: number, y: number, z: number) => x + y + z;
+		const fn = async (x: number, y: number, z: number) =>
+			Promise.resolve(x + y + z);
 		const wrapped = logger.wrapFn(fn, 'sum3', undefined, 0);
 		await wrapped(1, 2, 3);
 
 		// don't care about the file/function, but it shouldn't have SHORT_ARGS
-		expect(logs[1][0]).toMatch(new RegExp('\\[.+] TRACE sum3 EXIT'));
+		expect((logs[1] as unknown[])[0]).toMatch(
+			new RegExp('\\[.+] TRACE sum3 EXIT'),
+		);
 	});
 });
