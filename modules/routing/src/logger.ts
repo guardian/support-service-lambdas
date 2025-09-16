@@ -1,15 +1,19 @@
 import { ZodObject } from 'zod';
 
 export class Logger {
-	constructor(private prefix: string[] = []) {}
+	constructor(
+		private prefix: string[] = [],
+		private logFn: (...args: any[]) => void = console.log,
+		private errorFn: (...args: any[]) => void = console.error,
+	) {}
 
 	public resetContext(): void {
-		console.log('logger: resetting context', this.prefix);
+		this.logFn('logger: resetting context', this.prefix);
 		this.prefix = [];
 	}
 
 	public mutableAddContext(value: string): void {
-		console.log('logger: adding context', value);
+		this.logFn('logger: adding context', value);
 		this.prefix.push(value);
 	}
 
@@ -53,7 +57,7 @@ export class Logger {
 		callerInfo: any,
 		...optionalParams: any[]
 	): void {
-		console.log(this.getMessage(message, callerInfo), ...optionalParams);
+		this.logFn(this.getMessage(message, callerInfo), ...optionalParams);
 	}
 
 	public error(message?: any, ...optionalParams: any[]): void {
@@ -65,7 +69,7 @@ export class Logger {
 		callerInfo: any,
 		...optionalParams: any[]
 	): void {
-		console.error(this.getMessage(message, callerInfo), ...optionalParams);
+		this.errorFn(this.getMessage(message, callerInfo), ...optionalParams);
 	}
 	/* eslint-enable @typescript-eslint/no-unsafe-argument */
 
@@ -124,8 +128,8 @@ export class Logger {
 			try {
 				const result = await fn(...args);
 				this.logWithCallerInfo(
-					`TRACE ${name} EXIT ` +
-						(shortPrettyArgs !== undefined ? '' : `SHORT_ARGS`),
+					`TRACE ${name} EXIT` +
+						(shortPrettyArgs === undefined ? '' : ` SHORT_ARGS`),
 					callerInfo,
 					shortPrettyArgs,
 					'RESULT',
@@ -134,8 +138,8 @@ export class Logger {
 				return result;
 			} catch (error) {
 				this.errorWithCallerInfo(
-					`TRACE ${name} ERROR ` +
-						(shortPrettyArgs !== undefined ? '' : `SHORT_ARGS`),
+					`TRACE ${name} ERROR` +
+						(shortPrettyArgs === undefined ? '' : ` SHORT_ARGS`),
 					callerInfo,
 					shortPrettyArgs,
 					'ERROR',
