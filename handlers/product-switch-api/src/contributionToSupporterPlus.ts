@@ -313,7 +313,11 @@ export const buildSwitchRequestBody = (
 			runBilling: true,
 			collectPayment: false, // We will take payment separately because we don't want to charge the user if the amount payable is less than 50 pence/cents
 		},
-		...buildSwitchRequestWithoutOptions(productSwitchInformation, orderDate),
+		...buildSwitchRequestWithoutOptions(
+			productSwitchInformation,
+			orderDate,
+			false,
+		),
 	};
 };
 
@@ -327,22 +331,27 @@ const buildPreviewRequestBody = (
 			previewTypes: ['BillingDocs'],
 			specificPreviewThruDate: zuoraDateFormat(orderDate),
 		},
-		...buildSwitchRequestWithoutOptions(productSwitchInformation, orderDate),
+		...buildSwitchRequestWithoutOptions(
+			productSwitchInformation,
+			orderDate,
+			true,
+		),
 	};
 };
 
 function buildSwitchRequestWithoutOptions(
 	productSwitchInformation: SwitchInformation,
 	orderDate: dayjs.Dayjs,
+	preview: boolean,
 ): OrderRequest {
 	const { startNewTerm, contributionAmount, catalog } =
 		productSwitchInformation;
 	const { accountNumber, subscriptionNumber } =
 		productSwitchInformation.subscription;
 
-	const maybeNewTermOrderActions: OrderAction[] = startNewTerm
-		? buildNewTermOrderActions(orderDate)
-		: [];
+	// don't preview term update, because future dated amendments might prevent it
+	const maybeNewTermOrderActions: OrderAction[] =
+		startNewTerm && !preview ? buildNewTermOrderActions(orderDate) : [];
 
 	const discountOrderAction = productSwitchInformation.discount
 		? buildAddDiscountOrderAction(productSwitchInformation.discount, orderDate)
