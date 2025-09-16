@@ -2,7 +2,7 @@ import { Logger } from '@modules/routing/logger';
 
 // If you reformat this section of the file, you will need to update the expected line numbers
 function logCaller(logger: Logger) {
-	return logger.getMessage('msg', logger.getCallerInfo(-1));
+	return logger.getMessage(logger.getCallerInfo(-1), 'msg');
 }
 
 function getWrappedSum(logger: Logger) {
@@ -43,10 +43,9 @@ test('it should add space separated context when you add multiple items', () => 
 });
 
 describe('wrapFn', () => {
-	/* eslint-disable @typescript-eslint/no-explicit-any -- this has to match console.log */
-	let logs: any[];
-	let errors: any[];
-	/* eslint-enable @typescript-eslint/no-explicit-any */
+	let logs: string[];
+	let errors: string[];
+
 	let logger: Logger;
 
 	beforeEach(() => {
@@ -54,8 +53,8 @@ describe('wrapFn', () => {
 		errors = [];
 		logger = new Logger(
 			[],
-			(...args) => logs.push(args),
-			(...args) => errors.push(args),
+			(message) => logs.push(message),
+			(message) => errors.push(message),
 		);
 	});
 
@@ -65,18 +64,38 @@ describe('wrapFn', () => {
 
 		expect(result).toBe(5);
 
-		const expectedEntry = [
-			`${expectedWrappedSum} TRACE addNumbers ENTRY ARGS`,
-			{ a: 2, b: 3 },
-		];
+		const expectedEntry = `${expectedWrappedSum} TRACE addNumbers ENTRY ARGS
+a: 2
+b: 3`;
 
-		const expectedExit = [
-			`${expectedWrappedSum} TRACE addNumbers EXIT SHORT_ARGS`,
-			{ a: 2 }, // default short args is 1
-			'RESULT',
-			5,
-		];
+		const expectedExit = `${expectedWrappedSum} TRACE addNumbers EXIT SHORT_ARGS
+a: 2
+RESULT
+5`;
+
+		expect(logs[0]).toEqual(expectedEntry);
+		expect(logs[1]).toEqual(expectedExit);
 		expect(logs).toEqual([expectedEntry, expectedExit]);
+		expect(errors).toEqual([]);
+	});
+
+	test('logs entry and exit with complex objects', async () => {
+		const fn = async (x: number[], y: object) =>
+			Promise.resolve({ ...y, arr: x });
+		const wrapped = logger.wrapFn(fn, undefined, undefined, 0);
+		const result = await wrapped([2], { greeting: 'hi' });
+
+		expect(result).toEqual({ arr: [2], greeting: 'hi' });
+
+		const expectedEntry = `[stripped] TRACE fn ENTRY ARGS
+x: [2]
+y: { greeting: "hi" }`;
+		const expectedExit = `[stripped] TRACE fn EXIT
+RESULT
+{ greeting: "hi", arr: [2] }`;
+
+		expect(logs[0]?.replace(/^\[[^\]]+]/, '[stripped]')).toEqual(expectedEntry);
+		expect(logs[1]?.replace(/^\[[^\]]+]/, '[stripped]')).toEqual(expectedExit);
 		expect(errors).toEqual([]);
 	});
 
@@ -84,21 +103,16 @@ describe('wrapFn', () => {
 		const wrappedFailFn = getWrappedFailFn(logger);
 		await expect(wrappedFailFn(42)).rejects.toThrow('fail');
 
-		const expectedEntry = [
-			`${expectedWrappedFailFn} TRACE failFn ENTRY ARGS`,
-			{ x: 42 },
-		];
+		const expectedEntry = `${expectedWrappedFailFn} TRACE failFn ENTRY ARGS
+x: 42`;
 
-		const expectedError = [
-			`${expectedWrappedFailFn} TRACE failFn ERROR SHORT_ARGS`,
-			{ x: 42 },
-			'ERROR',
-			expect.any(Error),
-		];
-
-		expect(logs).toEqual([expectedEntry]);
-		expect(errors).toEqual([expectedError]);
-		expect(((errors[0] as unknown[])[3] as Error).message).toBe('fail 42');
+		const expectedErrorStart = `${expectedWrappedFailFn} TRACE failFn ERROR SHORT_ARGS
+x: 42
+ERROR
+Error: fail 42
+    at failFn `;
+		expect(logs[0]).toEqual(expectedEntry);
+		expect(errors[0]).toContain(expectedErrorStart);
 	});
 
 	test('uses parameter names from fnAsString if provided', async () => {
@@ -112,7 +126,9 @@ describe('wrapFn', () => {
 		);
 		await wrapped('a', 1);
 
-		expect((logs[0] as unknown[])[1]).toEqual({ foo: 'a', bar: 1 });
+		expect(logs[0]).toContain(`TRACE customName ENTRY ARGS
+foo: a
+bar: 1`);
 	});
 
 	test('shortArgsNum limits the number of args in exit log', async () => {
@@ -121,7 +137,11 @@ describe('wrapFn', () => {
 		const wrapped = logger.wrapFn(fn, 'sum3', undefined, 2);
 		await wrapped(1, 2, 3);
 
-		expect((logs[1] as unknown[])[1]).toEqual({ x: 1, y: 2 });
+		expect(logs[1]).toContain(`TRACE sum3 EXIT SHORT_ARGS
+x: 1
+y: 2
+RESULT
+6`);
 	});
 
 	test('shortArgsNum misses the args marker when there are no args needed', async () => {
@@ -131,8 +151,119 @@ describe('wrapFn', () => {
 		await wrapped(1, 2, 3);
 
 		// don't care about the file/function, but it shouldn't have SHORT_ARGS
-		expect((logs[1] as unknown[])[0]).toMatch(
-			new RegExp('\\[.+] TRACE sum3 EXIT'),
+		expect(logs[1]).toMatch(new RegExp('\\[.+] TRACE sum3 EXIT'));
+	});
+});
+
+describe('Logger.joinLines', () => {
+	test('should pretty print errors correctly', () => {
+		const logger = new Logger();
+		const error = () => new Error('Test error');
+
+		const actual = logger.prettyPrint(error());
+
+		expect(actual).toContain(`Error: Test error
+    at error (`);
+	});
+
+	test('should join primitive types, arrays, objects, and errors with compact or pretty JSON formatting without quotes around keys', () => {
+		const logger = new Logger();
+		const primitives = [42, 'hello', true, null, undefined];
+		const shortArray = [1, 2, 3];
+		const longArray = Array.from({ length: 30 }, (_, i) => i + 1);
+		const shortObject = { a: 1, b: 'x' };
+		const longObject = {
+			a: 1,
+			b: 'x',
+			c: 'y',
+			d: 'z',
+			e: 'w',
+			f: 'v',
+			g: 'u',
+			h: 't',
+			i: 's',
+			j: 'r',
+			k: 'q',
+			l: 'p',
+			m: 'o',
+			n: 'n',
+			o: 'm',
+			p: 'l',
+			q: 'k',
+			r: 'j',
+			s: 'i',
+			t: 'h',
+		};
+		const error = new Error('Test error');
+
+		const result = logger.joinLines(
+			...primitives,
+			shortArray,
+			longArray,
+			shortObject,
+			longObject,
+			error,
+		);
+
+		expect(result).toBe(
+			'42\nhello\ntrue\nnull\nundefined\n' +
+				'[1,2,3]\n' +
+				`[
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20,
+  21,
+  22,
+  23,
+  24,
+  25,
+  26,
+  27,
+  28,
+  29,
+  30
+]\n` +
+				'{ a: 1, b: "x" }\n' +
+				`{
+  a: 1,
+  b: "x",
+  c: "y",
+  d: "z",
+  e: "w",
+  f: "v",
+  g: "u",
+  h: "t",
+  i: "s",
+  j: "r",
+  k: "q",
+  l: "p",
+  m: "o",
+  n: "n",
+  o: "m",
+  p: "l",
+  q: "k",
+  r: "j",
+  s: "i",
+  t: "h"
+}\n` +
+				error.stack,
 		);
 	});
 });
