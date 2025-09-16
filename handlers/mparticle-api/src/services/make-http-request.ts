@@ -1,6 +1,6 @@
 import { groupMap } from '@modules/arrayFunctions';
+import { logger } from '@modules/routing/logger';
 import type { z } from 'zod';
-import { withLogging } from '../utils/withLogging';
 
 export class HttpError extends Error {
 	public statusCode: number;
@@ -43,12 +43,15 @@ export class RestRequestMaker {
 		private fetch: typeof global.fetch,
 	) {}
 
-	makeRESTRequest = withLogging(
-		this.restRequestWithoutLogging.bind(this),
-		() => 'HTTP ' + this.baseURL,
-		this.restRequestWithoutLogging.toString(),
-		2,
-	);
+	// has to be a function so that the callerInfo is refreshed on every call
+	makeRESTRequest = (maybeCallerInfo?: string) =>
+		logger.wrapFn(
+			this.restRequestWithoutLogging.bind(this),
+			() => 'HTTP ' + this.baseURL,
+			this.restRequestWithoutLogging.toString(),
+			2,
+			maybeCallerInfo,
+		);
 
 	private async restRequestWithoutLogging<REQ, RESP>(
 		method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',

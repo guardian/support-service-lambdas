@@ -1,11 +1,11 @@
-import { Logger } from '@modules/logger';
+import { Logger } from '@modules/routing/logger';
 import { Router } from '@modules/routing/router';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { handleStripeWebhook } from './services';
 
 const logger = new Logger();
 
-const router = new Router([
+const router = Router([
 	{
 		httpMethod: 'POST',
 		path: '/listen-dispute-created',
@@ -25,7 +25,7 @@ export const handler = async (
 
 	if (isApiGatewayEvent(event)) {
 		logger.log('Processing API Gateway webhook event');
-		const response = await router.routeRequest(event);
+		const response = await router(event);
 		logger.log(`Webhook response: ${JSON.stringify(response)}`);
 		return response;
 	} else {

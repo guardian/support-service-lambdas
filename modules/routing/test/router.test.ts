@@ -8,7 +8,7 @@ const successResponse = {
 	statusCode: 200,
 };
 
-const router = new Router([
+const router = Router([
 	{
 		httpMethod: 'GET',
 		path: '/benefits/me',
@@ -37,14 +37,14 @@ const router = new Router([
 		handler: (event, parsed) => {
 			return Promise.resolve({
 				statusCode: 200,
-				body: JSON.stringify(parsed)
+				body: JSON.stringify(parsed),
 			});
 		},
 		parser: {
 			path: z.object({
-				flag: z.enum(["on", "off"])
-			})
-		}
+				flag: z.enum(['on', 'off']),
+			}),
+		},
 	}),
 	createRoute({
 		httpMethod: 'POST',
@@ -52,16 +52,16 @@ const router = new Router([
 		handler: (event, parsed) => {
 			return Promise.resolve({
 				statusCode: 200,
-				body: JSON.stringify(parsed)
+				body: JSON.stringify(parsed),
 			});
 		},
 		parser: {
 			body: z.object({
 				name: z.string(),
 				age: z.number(),
-				isActive: z.boolean()
-			})
-		}
+				isActive: z.boolean(),
+			}),
+		},
 	}),
 	createRoute({
 		httpMethod: 'PUT',
@@ -69,41 +69,43 @@ const router = new Router([
 		handler: (event, parsed) => {
 			return Promise.resolve({
 				statusCode: 200,
-				body: JSON.stringify(parsed)
-			})
+				body: JSON.stringify(parsed),
+			});
 		},
 		parser: {
 			path: z.object({
-				benefitId: z.string()
+				benefitId: z.string(),
 			}),
 			body: z.object({
 				name: z.string(),
 				age: z.number(),
-				isActive: z.boolean()
-			})
-		}
-	})
+				isActive: z.boolean(),
+			}),
+		},
+	}),
 ]);
 
 describe('Router', () => {
 	test('it should match a route successfully', async () => {
-		expect(
-			await router.routeRequest(buildApiGatewayEvent('/benefits/me', 'GET')),
-		).toEqual(successResponse);
+		expect(await router(buildApiGatewayEvent('/benefits/me', 'GET'))).toEqual(
+			successResponse,
+		);
 	});
 	test('it should return a 404 if no route is found', async () => {
-		expect(
-			await router.routeRequest(buildApiGatewayEvent('/not-found', 'GET')),
-		).toEqual(NotFoundResponse);
+		expect(await router(buildApiGatewayEvent('/not-found', 'GET'))).toEqual(
+			NotFoundResponse,
+		);
 	});
 	test('it should check the http method as well as the path', async () => {
-		expect(
-			await router.routeRequest(buildApiGatewayEvent('/benefits/me', 'POST')),
-		).toEqual(NotFoundResponse);
+		expect(await router(buildApiGatewayEvent('/benefits/me', 'POST'))).toEqual(
+			NotFoundResponse,
+		);
 	});
 	test('it should accept path params', async () => {
-		const benefitId = "123";
-		const response = await router.routeRequest(buildApiGatewayEvent(`/benefits/${benefitId}/users`, 'POST'));
+		const benefitId = '123';
+		const response = await router(
+			buildApiGatewayEvent(`/benefits/${benefitId}/users`, 'POST'),
+		);
 		expect(response.statusCode).toEqual(200);
 		const payload = JSON.parse(response.body) as {
 			path: {
@@ -113,22 +115,26 @@ describe('Router', () => {
 		expect(payload.path.benefitId).toEqual(benefitId);
 	});
 	test('it should validate the path params', async () => {
-		const response = await router.routeRequest(buildApiGatewayEvent(`/benefits/enabled/on`, 'PATCH'));
+		const response = await router(
+			buildApiGatewayEvent(`/benefits/enabled/on`, 'PATCH'),
+		);
 		expect(response.statusCode).toEqual(200);
 		const payload = JSON.parse(response.body) as {
 			path: {
 				flag: string;
 			};
 		};
-		expect(payload.path.flag).toEqual("on");
+		expect(payload.path.flag).toEqual('on');
 	});
 	test('it should validate the body payload', async () => {
 		const request = {
-			name: "Benefit 1",
+			name: 'Benefit 1',
 			age: 1,
-			isActive: true
+			isActive: true,
 		};
-		const response = await router.routeRequest(buildApiGatewayEvent(`/benefits`, 'POST', JSON.stringify(request)));
+		const response = await router(
+			buildApiGatewayEvent(`/benefits`, 'POST', JSON.stringify(request)),
+		);
 		expect(response.statusCode).toEqual(200);
 		const payload = JSON.parse(response.body) as {
 			body: {
@@ -142,13 +148,19 @@ describe('Router', () => {
 		expect(payload.body.isActive).toEqual(request.isActive);
 	});
 	test('it should validate invalid path params and body payload', async () => {
-		const benefitId = "123";
+		const benefitId = '123';
 		const request = {
 			name: 123,
-			age: "2",
-			isActive: "yes"
+			age: '2',
+			isActive: 'yes',
 		};
-		const response = await router.routeRequest(buildApiGatewayEvent(`/benefits/${benefitId}`, 'PUT', JSON.stringify(request)));
+		const response = await router(
+			buildApiGatewayEvent(
+				`/benefits/${benefitId}`,
+				'PUT',
+				JSON.stringify(request),
+			),
+		);
 		expect(response.statusCode).toEqual(400);
 		const payload = JSON.parse(response.body) as {
 			error: string;
@@ -160,17 +172,23 @@ describe('Router', () => {
 				message: string;
 			}>;
 		};
-		expect(payload.error).toEqual("Invalid request");
-		expect(payload.details[0]?.message).toEqual("Expected string, received number");
-		expect(payload.details[1]?.message).toEqual("Expected number, received string");
-		expect(payload.details[2]?.message).toEqual("Expected boolean, received string");
+		expect(payload.error).toEqual('Invalid request');
+		expect(payload.details[0]?.message).toEqual(
+			'Expected string, received number',
+		);
+		expect(payload.details[1]?.message).toEqual(
+			'Expected number, received string',
+		);
+		expect(payload.details[2]?.message).toEqual(
+			'Expected boolean, received string',
+		);
 	});
 });
 
 const buildApiGatewayEvent = (
 	path: string,
 	httpMethod: HttpMethod,
-	body?: string
+	body?: string,
 ): APIGatewayProxyEvent => ({
 	body: body ?? null,
 	headers: {},

@@ -122,6 +122,9 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.18
+      source-map-support:
+        specifier: ^0.5.21
+        version: 0.5.21
       zod:
         specifier: 'catalog:'
         version: 3.25.76
@@ -179,7 +182,7 @@ importers:
         specifier: ^1.12.3
         version: 1.14.0
       zod:
-        specifier: ^3.23.8
+        specifier: 'catalog:'
         version: 3.25.76
     devDependencies:
       '@aws-sdk/client-s3':
@@ -207,7 +210,7 @@ importers:
         specifier: ^9.15.0
         version: 9.15.1
       zod:
-        specifier: ^3.23.8
+        specifier: 'catalog:'
         version: 3.25.76
     devDependencies:
       '@types/aws-lambda':
@@ -253,6 +256,9 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.18
+      source-map-support:
+        specifier: ^0.5.21
+        version: 0.5.21
       zod:
         specifier: 'catalog:'
         version: 3.25.76

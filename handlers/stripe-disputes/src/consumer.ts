@@ -1,4 +1,4 @@
-import { Logger } from '@modules/logger';
+import { Logger } from '@modules/routing/logger';
 import type { SQSEvent } from 'aws-lambda';
 import type {
 	ListenDisputeClosedRequestBody,

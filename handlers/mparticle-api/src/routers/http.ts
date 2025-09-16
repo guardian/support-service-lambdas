@@ -14,7 +14,7 @@ export const httpRouter = (
 	mParticleDataSubjectClient: MParticleClient<DataSubjectAPI>,
 	batonS3Writer: BatonS3Writer,
 ) =>
-	new Router([
+	Router([
 		createRoute<{ requestId: string }, DataSubjectRequestCallback>({
 			httpMethod: 'POST',
 			path: '/data-subject-requests/{requestId}/callback',

@@ -4,8 +4,8 @@ import { MParticleClient } from '../src/services/mparticleClient';
 import { BatonS3WriterImpl } from '../src/services/batonS3Writer';
 import { InitiationReference } from '../src/routers/baton/initiationReference';
 import {
-	handleSarStatus,
 	BatonSarEventStatusResponse,
+	handleSarStatus,
 } from '../src/routers/baton/access/handleStatus';
 
 /*

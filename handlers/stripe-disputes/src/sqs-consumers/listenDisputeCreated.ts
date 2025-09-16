@@ -1,4 +1,4 @@
-import type { Logger } from '@modules/logger';
+import type { Logger } from '@modules/routing/logger';
 import type { ListenDisputeCreatedRequestBody } from '../dtos';
 import { upsertSalesforceObject } from '../services/upsertSalesforceObject';
 import type { SalesforceUpsertResponse } from '../types';

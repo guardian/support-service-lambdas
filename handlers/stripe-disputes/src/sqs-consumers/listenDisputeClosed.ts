@@ -1,4 +1,4 @@
-import type { Logger } from '@modules/logger';
+import type { Logger } from '@modules/routing/logger';
 import { stageFromEnvironment } from '@modules/stage';
 import { isZuoraRequestSuccess } from '@modules/zuora/helpers';
 import { writeOffInvoice } from '@modules/zuora/invoice';
@@ -29,7 +29,7 @@ export async function handleListenDisputeClosed(
 	logger.log(`Payment ID from dispute: ${paymentId}`);
 
 	const stage = stageFromEnvironment();
-	const zuoraClient: ZuoraClient = await ZuoraClient.create(stage, logger);
+	const zuoraClient: ZuoraClient = await ZuoraClient.create(stage);
 
 	const invoiceFromZuora: ZuoraInvoiceFromStripeChargeIdResult =
 		await zuoraGetInvoiceFromStripeChargeId(paymentId, zuoraClient);

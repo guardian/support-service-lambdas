@@ -7,11 +7,11 @@ import { ValidationError } from '@modules/errors';
 import { Lazy } from '@modules/lazy';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
+import type { ZuoraSubscription } from '@modules/zuora/types';
 import {
 	zuoraAccountSchema,
 	zuoraSubscriptionResponseSchema,
 } from '@modules/zuora/types';
-import type { ZuoraSubscription } from '@modules/zuora/types';
 import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
 import {
@@ -24,7 +24,6 @@ import {
 	getSwitchInformationWithOwnerCheck,
 	subscriptionHasAlreadySwitchedToSupporterPlus,
 } from '../src/switchInformation';
-import { parseUrlPath } from '../src/urlParsing';
 import accountJson from './fixtures/account.json';
 import alreadySwitchedJson from './fixtures/already-switched-subscription.json';
 import jsonWithNoContribution from './fixtures/subscription-with-no-contribution.json';
@@ -33,40 +32,6 @@ import zuoraSubscriptionWithMonthlyContribution from './fixtures/zuora-subscript
 
 export const getProductCatalogFromFixture = (): ProductCatalog =>
 	generateProductCatalog(zuoraCatalogFixture);
-
-test('url parsing', () => {
-	const successfulParsing = parseUrlPath(
-		'/product-move/recurring-contribution-to-supporter-plus/A-S00504165',
-	);
-	expect(successfulParsing.switchType).toEqual(
-		'recurring-contribution-to-supporter-plus',
-	);
-	expect(successfulParsing.subscriptionNumber).toEqual('A-S00504165');
-
-	const incorrectSwitchType =
-		'/product-move/membership-to-digital-subscription/A-S00504165';
-	expect(() => {
-		parseUrlPath(incorrectSwitchType);
-	}).toThrow(
-		"Couldn't parse switch type and subscription number from url /product-move/membership-to-digital-subscription/A-S00504165",
-	);
-
-	const invalidSubscriptionNumber =
-		'/product-move/recurring-contribution-to-supporter-plus/A00000';
-	expect(() => {
-		parseUrlPath(invalidSubscriptionNumber);
-	}).toThrow(
-		"Couldn't parse switch type and subscription number from url /product-move/recurring-contribution-to-supporter-plus/A00000",
-	);
-
-	const missingPathPrefix =
-		'/recurring-contribution-to-supporter-plus/A-S00504165';
-	expect(() => {
-		parseUrlPath(missingPathPrefix);
-	}).toThrow(
-		"Couldn't parse switch type and subscription number from url /recurring-contribution-to-supporter-plus/A-S00504165",
-	);
-});
 
 test('startNewTerm is only true when the termStartDate is before today', async () => {
 	const today = dayjs('2024-05-09T23:10:10.663+01:00');
