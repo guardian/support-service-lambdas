@@ -16,6 +16,7 @@ export const discountPromotionTypeSchema = z.object({
 	amount: z.number(),
 	durationMonths: z.number().optional(), // This should always be present but doesn't seem to be in some old promotions
 });
+export type DiscountPromotionType = z.infer<typeof discountPromotionTypeSchema>;
 
 const unsupportedPromotionType = (name: string) =>
 	z.object({ name: z.literal(name) });
@@ -29,6 +30,7 @@ export const promotionTypeSchema = z.discriminatedUnion('name', [
 	unsupportedPromotionType('double'),
 	unsupportedPromotionType('retention'),
 ]);
+export type PromotionType = z.infer<typeof promotionTypeSchema>;
 
 export const appliesToSchema = z.object({
 	productRatePlanIds: z.array(z.string()).transform((arr) => new Set(arr)),

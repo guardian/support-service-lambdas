@@ -2,6 +2,9 @@ import type { BillingPeriod } from '@modules/billingPeriod';
 import type { TermType } from '@modules/product-catalog/productCatalog';
 import type { Dayjs } from 'dayjs';
 import { zuoraDateFormat } from '../utils/common';
+import { ValidatedPromotion } from '@modules/promotions/validatePromotion';
+import { Stage } from '@modules/stage';
+import { DiscountIds } from '@modules/promotions/config';
 
 export type TriggerDates = [
 	{
@@ -81,6 +84,36 @@ export type TermsAndConditionsOrderAction = BaseOrderAction & {
 		};
 	};
 };
+type SubscribeToProductRatePlan = {
+	productRatePlanId: string;
+	chargeOverrides?: Array<{
+		productRatePlanChargeId: string;
+		pricing: {
+			recurringFlatFee: {
+				listPrice: number;
+			};
+		};
+	}>;
+};
+type SubscribeToDiscountRatePlan = {
+	productRatePlanId: string;
+	chargeOverrides: Array<{
+		productRatePlanChargeId: string;
+		pricing: {
+			discount: {
+				discountPercentage: number;
+			};
+		};
+		endDate?: {
+			endDateCondition: 'Fixed_Period';
+			upToPeriods: number;
+			upToPeriodsType: 'Months';
+		};
+	}>;
+};
+type SubscribeToRatePlan =
+	| SubscribeToProductRatePlan
+	| SubscribeToDiscountRatePlan;
 export type CreateSubscriptionOrderAction = BaseOrderAction & {
 	type: 'CreateSubscription';
 	createSubscription: {
@@ -97,19 +130,7 @@ export type CreateSubscriptionOrderAction = BaseOrderAction & {
 				periodType: BillingPeriod;
 			}>;
 		};
-		subscribeToRatePlans: [
-			{
-				productRatePlanId: string;
-				chargeOverrides?: Array<{
-					productRatePlanChargeId: string;
-					pricing: {
-						recurringFlatFee: {
-							listPrice: number;
-						};
-					};
-				}>;
-			},
-		];
+		subscribeToRatePlans: Array<SubscribeToRatePlan>;
 	};
 	customFields?: {
 		DeliveryAgent__c: string | undefined;
@@ -152,20 +173,55 @@ export function initialTermInDays(
 	return termEnd.diff(contractEffectiveDate, 'day');
 }
 
+function buildDiscountRatePlan(
+	stage: Stage,
+	promotion: ValidatedPromotion,
+): SubscribeToDiscountRatePlan {
+	const productRatePlanId = DiscountIds[stage].productRatePlanId;
+	const productRatePlanChargeId = DiscountIds[stage].productRatePlanChargeId;
+	const endDate = promotion.durationInMonths
+		? {
+				endDate: {
+					endDateCondition: 'Fixed_Period' as const,
+					upToPeriods: promotion.durationInMonths,
+					upToPeriodsType: 'Months' as const,
+				},
+			}
+		: {};
+	return {
+		productRatePlanId: productRatePlanId,
+		chargeOverrides: [
+			{
+				productRatePlanChargeId: productRatePlanChargeId,
+				pricing: {
+					discount: {
+						discountPercentage: promotion.discountPercentage,
+					},
+				},
+				...endDate,
+			},
+		],
+	};
+}
+
 // Builder function to simplify the creation of a CreateSubscriptionOrderAction
 // object as a lot of it is boilerplate.
 export function buildCreateSubscriptionOrderAction({
+	stage,
 	productRatePlanId,
 	contractEffectiveDate,
 	customerAcceptanceDate,
 	chargeOverride,
+	validatedPromotion,
 	termType,
 	termLengthInMonths,
 }: {
+	stage: Stage;
 	productRatePlanId: string;
 	contractEffectiveDate: Dayjs;
 	customerAcceptanceDate: Dayjs;
 	chargeOverride?: { productRatePlanChargeId: string; overrideAmount: number };
+	validatedPromotion?: ValidatedPromotion;
 	termType: TermType;
 	termLengthInMonths: number;
 }): CreateSubscriptionOrderAction {
@@ -180,6 +236,10 @@ export function buildCreateSubscriptionOrderAction({
 					},
 				},
 			]
+		: [];
+
+	const discountRatePlan = validatedPromotion
+		? [buildDiscountRatePlan(stage, validatedPromotion)]
 		: [];
 
 	const [initialPeriodLength, initialPeriodType, autoRenew] =
@@ -230,6 +290,7 @@ export function buildCreateSubscriptionOrderAction({
 					productRatePlanId,
 					chargeOverrides,
 				},
+				...discountRatePlan,
 			],
 		},
 	};

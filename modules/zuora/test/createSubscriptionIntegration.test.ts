@@ -23,6 +23,7 @@ import {
 	PreviewCreateSubscriptionInputFields,
 } from '@modules/zuora/createSubscription/previewCreateSubscription';
 import { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
+import { Promotion } from '@modules/promotions/schema';
 
 describe('createSubscription integration', () => {
 	const productCatalog = generateProductCatalog(code);
@@ -55,6 +56,7 @@ describe('createSubscription integration', () => {
 		type: 'Bacs',
 	};
 	const createInputFields: CreateSubscriptionInputFields<DirectDebit> = {
+		stage: 'CODE',
 		accountName: 'Test Account',
 		createdRequestId: 'REQUEST-ID' + new Date().getTime(),
 		salesforceAccountId: 'CRM-ID',
@@ -68,12 +70,37 @@ describe('createSubscription integration', () => {
 		runBilling: true,
 		collectPayment: true,
 	};
+	const discountAmount = 25;
+	const mockPromotions: Promotion[] = [
+		{
+			name: 'Test Promotion',
+			description: 'Test Promotion Description',
+			promotionType: {
+				name: 'percent_discount',
+				durationMonths: 3,
+				amount: discountAmount,
+			},
+			appliesTo: {
+				productRatePlanIds: new Set(['71a116628be96ab11606b51ec6060555']),
+				countries: new Set(['GB']),
+			},
+			campaignCode: 'TEST-CAMPAIGN',
+			codes: { 'Test Channel': ['TEST_CODE'] },
+			starts: new Date(dayjs().subtract(1, 'day').toISOString()),
+			expires: new Date(dayjs().add(1, 'month').toISOString()),
+			landingPage: {
+				title: 'Test Promotion',
+				description: 'Test Promotion Description',
+			},
+		},
+	];
 
 	test('We can create a subscription with a new account', async () => {
 		const client = await ZuoraClient.create('CODE');
 		const response = await createSubscription(
 			client,
 			productCatalog,
+			mockPromotions,
 			createInputFields,
 		);
 		expect(response.subscriptionNumbers.length).toEqual(1);
@@ -90,11 +117,13 @@ describe('createSubscription integration', () => {
 		const response = await createSubscription(
 			client,
 			productCatalog,
+			mockPromotions,
 			inputFields,
 		);
 		const response2 = await createSubscription(
 			client,
 			productCatalog,
+			mockPromotions,
 			inputFields,
 		);
 		expect(response).toEqual(response2);
@@ -102,6 +131,7 @@ describe('createSubscription integration', () => {
 
 	test('We can preview a subscription with a new account', async () => {
 		const inputFields: PreviewCreateSubscriptionInputFields = {
+			stage: 'CODE',
 			accountNumber: 'A01036826', // You will probably need to add a valid account number here because they get deleted after a short time
 			currency: currency,
 			productPurchase: productPurchase,
@@ -110,6 +140,7 @@ describe('createSubscription integration', () => {
 		const response = await previewCreateSubscription(
 			client,
 			productCatalog,
+			mockPromotions,
 			inputFields,
 		);
 		console.log(JSON.stringify(response));
@@ -131,6 +162,7 @@ describe('createSubscription integration', () => {
 		const response = await createSubscription(
 			client,
 			productCatalog,
+			mockPromotions,
 			inputFields,
 		);
 		expect(response.subscriptionNumbers.length).toEqual(1);
@@ -163,8 +195,53 @@ describe('createSubscription integration', () => {
 		const response = await createSubscription(
 			client,
 			productCatalog,
+			mockPromotions,
 			inputFields,
 		);
 		expect(response.subscriptionNumbers.length).toEqual(1);
+	});
+	test('We can create a subscription with a promotion', async () => {
+		const inputFields: CreateSubscriptionInputFields<DirectDebit> = {
+			...createInputFields,
+			createdRequestId: 'TEST-IDEMPOTENCY-KEY-' + new Date().getTime(),
+			productPurchase: productPurchase,
+			appliedPromotion: {
+				promoCode: 'TEST_CODE',
+				countryGroupId: 'uk',
+			},
+		};
+		const client = await ZuoraClient.create('CODE');
+		const response = await createSubscription(
+			client,
+			productCatalog,
+			mockPromotions,
+			inputFields,
+		);
+		expect(response.subscriptionNumbers.length).toEqual(1);
+	});
+	test('We can preview a subscription with a promotion', async () => {
+		const inputFields: PreviewCreateSubscriptionInputFields = {
+			stage: 'CODE',
+			accountNumber: 'A01036826', // You will probably need to add a valid account number here because they get deleted after a short time
+			currency: currency,
+			productPurchase: productPurchase,
+			appliedPromotion: {
+				promoCode: 'TEST_CODE',
+				countryGroupId: 'uk',
+			},
+		};
+		const client = await ZuoraClient.create('CODE');
+		const response = await previewCreateSubscription(
+			client,
+			productCatalog,
+			mockPromotions,
+			inputFields,
+		);
+		console.log(JSON.stringify(response));
+		expect(
+			response.previewResult.invoices[0]?.invoiceItems.find(
+				(item) => item.productName === 'Discounts',
+			)?.unitPrice,
+		).toEqual(discountAmount);
 	});
 });

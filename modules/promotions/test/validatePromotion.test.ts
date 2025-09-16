@@ -1,20 +1,21 @@
 import { validatePromotion } from '../src/validatePromotion';
 import { Promotion, AppliedPromotion } from '../src/schema';
 
+const promotionName = 'Tiered Discount Weekend Home Delivery Extra';
 const productRatePlanId = 'plan123';
 const mockPromotion: Promotion = {
-	name: 'Tiered Discount Weekend Home Delivery Extra',
+	name: promotionName,
 	description:
 		'Guardian and Observer newspaper subscriptions to suit every reader',
-	promotionType: { name: 'percent_discount', amount: 23.51, durationMonths: 3 },
+	promotionType: { name: 'percent_discount', amount: 25, durationMonths: 3 },
 	appliesTo: {
 		productRatePlanIds: new Set([productRatePlanId]),
-		countries: new Set(['JE', 'GI', 'IM', 'GB', 'SH', 'GG', 'FK']),
+		countries: new Set(['GB']),
 	},
 	campaignCode: 'C_L6KVUF94',
 	codes: { 'Channel 1': ['TEST123'] },
 	starts: new Date('2024-09-25T23:00:00.000Z'),
-	expires: new Date('2024-11-05T23:59:59.000Z'),
+	expires: new Date('2099-11-05T23:59:59.000Z'),
 	landingPage: {
 		title: 'Guardian and Observer newspaper subscriptions to suit every reader',
 		description:
@@ -32,36 +33,101 @@ const invalidAppliedPromotion: AppliedPromotion = {
 	countryGroupId: 'eu',
 };
 
-describe('appliedPromotionIsValid', () => {
-	it('returns true for valid promotion and country', () => {
+describe('validatePromotion', () => {
+	it('returns a ValidatedPromotion for valid promotion and country', () => {
 		expect(
 			validatePromotion(
 				[mockPromotion],
 				validAppliedPromotion,
 				productRatePlanId,
 			),
-		).toBe(true);
+		).toStrictEqual({
+			discountPercentage: 25,
+			durationInMonths: 3,
+			promoCode: 'TEST123',
+		});
 	});
 
-	it('returns false for invalid productRatePlanId', () => {
-		expect(
-			validatePromotion([mockPromotion], validAppliedPromotion, 'planX'),
-		).toBe(false);
+	it('throws an error for invalid productRatePlanId', () => {
+		expect(() =>
+			validatePromotion(
+				[mockPromotion],
+				validAppliedPromotion,
+				'invalidProductRatePlanId',
+			),
+		).toThrow(
+			`Promotion ${promotionName} is not valid for product rate plan invalidProductRatePlanId`,
+		);
 	});
 
-	it('returns false for invalid countryGroupId', () => {
-		expect(
-			validatePromotion([mockPromotion], invalidAppliedPromotion, 'planA'),
-		).toBe(false);
+	it('throws an error for invalid countryGroupId', () => {
+		expect(() =>
+			validatePromotion(
+				[mockPromotion],
+				invalidAppliedPromotion,
+				productRatePlanId,
+			),
+		).toThrow(`Promotion ${promotionName} is not valid for country group eu`);
 	});
 
-	it('returns false if promotion code does not exist', () => {
+	it('throws an error if promotion code does not exist', () => {
 		const unknownAppliedPromotion: AppliedPromotion = {
 			promoCode: 'UNKNOWN',
 			countryGroupId: 'uk',
 		};
-		expect(
-			validatePromotion([mockPromotion], unknownAppliedPromotion, 'planA'),
-		).toBe(false);
+		expect(() =>
+			validatePromotion(
+				[mockPromotion],
+				unknownAppliedPromotion,
+				productRatePlanId,
+			),
+		).toThrow('No promotion found for code UNKNOWN');
+	});
+	it('throws an error if the promotion has not started yet', () => {
+		const futureDate = '2099-09-25';
+		const futurePromotion: Promotion = {
+			...mockPromotion,
+			starts: new Date(futureDate),
+		};
+		expect(() =>
+			validatePromotion(
+				[futurePromotion],
+				validAppliedPromotion,
+				productRatePlanId,
+			),
+		).toThrow(
+			`Promotion Tiered Discount Weekend Home Delivery Extra is not yet active, starts on ${futureDate}`,
+		);
+	});
+	it('throws an error if the promotion has expired', () => {
+		const pastDate = '2000-09-25';
+		const expiredPromotion: Promotion = {
+			...mockPromotion,
+			expires: new Date(pastDate),
+		};
+		expect(() =>
+			validatePromotion(
+				[expiredPromotion],
+				validAppliedPromotion,
+				productRatePlanId,
+			),
+		).toThrow(
+			`Promotion Tiered Discount Weekend Home Delivery Extra expired on ${pastDate}`,
+		);
+	});
+	it('throws an error if the promotion is not a discount promotion', () => {
+		const nonDiscountPromotion: Promotion = {
+			...mockPromotion,
+			promotionType: { name: 'tracking' },
+		};
+		expect(() =>
+			validatePromotion(
+				[nonDiscountPromotion],
+				validAppliedPromotion,
+				productRatePlanId,
+			),
+		).toThrow(
+			`Tiered Discount Weekend Home Delivery Extra is a tracking promotion these are no longer supported`,
+		);
 	});
 });

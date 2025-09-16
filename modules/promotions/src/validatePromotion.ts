@@ -1,26 +1,45 @@
-import {
-	countryGroupBySupportInternationalisationId,
-	SupportInternationalisationId,
-} from '@modules/internationalisation/countryGroup';
-import { getIfDefined } from '@modules/nullAndUndefined';
-import { getPromotionByCode } from './getPromotions';
-import type { AppliedPromotion, Promotion } from './schema';
 import { intersection } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
+import type { SupportInternationalisationId } from '@modules/internationalisation/countryGroup';
+import { countryGroupBySupportInternationalisationId } from '@modules/internationalisation/countryGroup';
+import { getIfDefined } from '@modules/nullAndUndefined';
+import { getPromotionByCode } from './getPromotions';
+import type {
+	AppliedPromotion,
+	DiscountPromotionType,
+	Promotion,
+	PromotionType,
+} from './schema';
+
+export type ValidatedPromotion = {
+	discountPercentage: number;
+	durationInMonths?: number;
+	promoCode: string;
+};
 
 export const validatePromotion = (
 	promotions: Promotion[],
 	appliedPromotion: AppliedPromotion,
 	productRatePlanId: string,
-) => {
+): ValidatedPromotion => {
 	const promotion = getIfDefined(
 		getPromotionByCode(promotions, appliedPromotion.promoCode),
 		'No promotion found for code ' + appliedPromotion.promoCode,
 	);
 
 	checkPromotionIsActive(promotion);
+	if (!isDiscountPromotion(promotion.promotionType)) {
+		throw new ValidationError(
+			`${promotion.name} is a ${promotion.promotionType.name} promotion these are no longer supported`,
+		);
+	}
 	validateForCountryGroup(promotion, appliedPromotion.countryGroupId);
 	validateProductRatePlan(promotion, productRatePlanId);
+	return {
+		discountPercentage: promotion.promotionType.amount,
+		durationInMonths: promotion.promotionType.durationMonths,
+		promoCode: appliedPromotion.promoCode,
+	};
 };
 
 const checkPromotionIsActive = (promotion: Promotion) => {
@@ -35,6 +54,11 @@ const checkPromotionIsActive = (promotion: Promotion) => {
 			`Promotion ${promotion.name} expired on ${promotion.expires.toISOString()}`,
 		);
 	}
+};
+const isDiscountPromotion = (
+	promotionType: PromotionType,
+): promotionType is DiscountPromotionType => {
+	return promotionType.name === 'percent_discount';
 };
 const validateForCountryGroup = (
 	promotion: Promotion,
