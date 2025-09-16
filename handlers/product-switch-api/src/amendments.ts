@@ -2,6 +2,7 @@ import { logger } from '@modules/routing/logger';
 import { ZuoraError } from '@modules/zuora/errors/zuoraError';
 import { zuoraResponseSchema } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type { ZuoraGetAmendmentResponse } from './schemas';
 import { zuoraGetAmendmentResponseSchema } from './schemas';
@@ -26,24 +27,28 @@ export const getLastAmendment = async (
 		throw error;
 	}
 };
-const amendmentIsPending = (amendment: ZuoraGetAmendmentResponse) =>
-	dayjs(amendment.customerAcceptanceDate).isAfter(dayjs());
+const amendmentIsPending = (
+	amendment: ZuoraGetAmendmentResponse,
+	today: Dayjs,
+) => dayjs(amendment.customerAcceptanceDate).isAfter(today);
 
 const amendmentShouldBeDeleted = (
 	amendment: ZuoraGetAmendmentResponse | undefined,
+	today: dayjs.Dayjs,
 ) =>
 	amendment &&
-	amendmentIsPending(amendment) &&
+	amendmentIsPending(amendment, today) &&
 	amendment.status === 'Completed' &&
 	amendment.type === 'UpdateProduct';
 
 export const removePendingUpdateAmendments = async (
 	zuoraClient: ZuoraClient,
 	subscriptionNumber: string,
+	today: dayjs.Dayjs,
 ): Promise<void> => {
 	logger.log('Checking for pending amendments');
 	const lastAmendment = await getLastAmendment(zuoraClient, subscriptionNumber);
-	if (amendmentShouldBeDeleted(lastAmendment)) {
+	if (amendmentShouldBeDeleted(lastAmendment, today)) {
 		logger.log(
 			`Subscription ${subscriptionNumber} has a pending update amendment. Deleting it.`,
 		);
@@ -51,7 +56,11 @@ export const removePendingUpdateAmendments = async (
 			`v1/object/amendment/${lastAmendment?.id}`,
 			zuoraResponseSchema,
 		);
-		return await removePendingUpdateAmendments(zuoraClient, subscriptionNumber);
+		return await removePendingUpdateAmendments(
+			zuoraClient,
+			subscriptionNumber,
+			today,
+		);
 	} else {
 		logger.log(
 			`Subscription ${subscriptionNumber} has no pending update amendment. Nothing to do.`,

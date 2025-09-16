@@ -12,7 +12,7 @@ import {
 import { getSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
-import type dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { preview, switchToSupporterPlus } from './contributionToSupporterPlus';
 import type { ProductSwitchRequestBody } from './schemas';
 import { getSwitchInformationWithOwnerCheck } from './switchInformation';
@@ -67,7 +67,7 @@ export const contributionToSupporterPlusEndpoint =
 
 		const response = parsed.body.preview
 			? await preview(zuoraClient, switchInformation, subscription)
-			: await switchToSupporterPlus(zuoraClient, switchInformation);
+			: await switchToSupporterPlus(zuoraClient, switchInformation, dayjs());
 
 		return {
 			body: JSON.stringify(response),
