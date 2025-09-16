@@ -1,19 +1,23 @@
 import type { Logger } from '@modules/logger';
+import { stageFromEnvironment } from '@modules/stage';
+import { isZuoraRequestSuccess } from '@modules/zuora/helpers';
+import { writeOffInvoice } from '@modules/zuora/invoice';
+import { rejectPayment } from '@modules/zuora/payment';
+import {
+	cancelSubscription,
+	getSubscription,
+} from '@modules/zuora/subscription';
+import type { ZuoraResponse } from '@modules/zuora/types';
+import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import dayjs from 'dayjs';
 import type { ListenDisputeClosedRequestBody } from '../dtos';
-import { upsertSalesforceObject } from '../services/upsertSalesforceObject';
+import type { ZuoraInvoiceFromStripeChargeIdResult } from '../interfaces';
+import {
+	upsertSalesforceObject,
+	zuoraGetInvoiceFromStripeChargeId,
+} from '../services';
 import type { SalesforceUpsertResponse } from '../types';
 
-/**
- * Handles dispute.closed SQS events
- *
- * This consumer processes dispute closure events that were queued from Stripe webhooks.
- * Currently performs Salesforce upsert, but can be extended with closure-specific logic.
- *
- * @param logger - Logger instance with dispute context
- * @param webhookData - Validated dispute closed webhook payload
- * @param disputeId - Dispute ID for logging context
- * @returns Salesforce upsert response
- */
 export async function handleListenDisputeClosed(
 	logger: Logger,
 	webhookData: ListenDisputeClosedRequestBody,
@@ -21,17 +25,114 @@ export async function handleListenDisputeClosed(
 ): Promise<SalesforceUpsertResponse> {
 	logger.log(`Processing dispute closure for dispute ${disputeId}`);
 
-	// Current implementation: Salesforce upsert
-	// TODO: Add closure-specific logic here in the future (e.g., notifications, cleanup)
+	const paymentId = webhookData.data.object.charge;
+	logger.log(`Payment ID from dispute: ${paymentId}`);
+
+	const stage = stageFromEnvironment();
+	const zuoraClient: ZuoraClient = await ZuoraClient.create(stage, logger);
+
+	const invoiceFromZuora: ZuoraInvoiceFromStripeChargeIdResult =
+		await zuoraGetInvoiceFromStripeChargeId(paymentId, zuoraClient);
+
+	logger.log(JSON.stringify({ invoiceFromZuora }));
+
 	const upsertSalesforceObjectResponse: SalesforceUpsertResponse =
-		await upsertSalesforceObject(logger, webhookData);
+		await upsertSalesforceObject(logger, webhookData, invoiceFromZuora);
 
 	logger.log(
-		'Salesforce upsert response for dispute closure:',
+		'Salesforce upsert response:',
 		JSON.stringify(upsertSalesforceObjectResponse),
 	);
 
-	logger.log(`Successfully processed dispute closure for dispute ${disputeId}`);
+	try {
+		const subscriptionNumber = invoiceFromZuora.SubscriptionNumber;
+		logger.log(`Retrieved subscription number: ${subscriptionNumber}`);
 
+		if (subscriptionNumber) {
+			const subscription = await getSubscription(
+				zuoraClient,
+				subscriptionNumber,
+			);
+			logger.log(`Subscription status: ${subscription.status}`);
+
+			if (invoiceFromZuora.paymentPaymentNumber) {
+				logger.log(
+					`Rejecting payment: ${invoiceFromZuora.paymentPaymentNumber}`,
+				);
+
+				const rejectPaymentResponse: ZuoraResponse = await rejectPayment(
+					zuoraClient,
+					invoiceFromZuora.paymentPaymentNumber,
+					'chargeback',
+				);
+
+				logger.log(
+					'Payment rejection response:',
+					JSON.stringify(rejectPaymentResponse),
+				);
+
+				if (!isZuoraRequestSuccess(rejectPaymentResponse)) {
+					logger.error('Failed to reject payment in Zuora');
+				} else {
+					if (invoiceFromZuora.InvoiceId) {
+						logger.log(`Writing off invoice: ${invoiceFromZuora.InvoiceId}`);
+
+						const writeOffResponse: ZuoraResponse = await writeOffInvoice(
+							zuoraClient,
+							invoiceFromZuora.InvoiceId,
+							`Invoice write-off due to Stripe dispute closure. Dispute ID: ${disputeId}`,
+						);
+
+						logger.log(
+							'Invoice write-off response:',
+							JSON.stringify(writeOffResponse),
+						);
+
+						if (!isZuoraRequestSuccess(writeOffResponse)) {
+							logger.error('Failed to write off invoice in Zuora');
+						} else {
+							if (subscription.status === 'Active') {
+								logger.log(
+									`Canceling active subscription: ${subscriptionNumber}`,
+								);
+
+								const cancelResponse = await cancelSubscription(
+									zuoraClient,
+									subscriptionNumber,
+									dayjs(),
+									false,
+									undefined,
+									'EndOfLastInvoicePeriod',
+								);
+
+								logger.log(
+									'Subscription cancellation response:',
+									JSON.stringify(cancelResponse),
+								);
+
+								if (!cancelResponse.Success) {
+									logger.error('Failed to cancel subscription in Zuora');
+								}
+							} else {
+								logger.log(
+									`Subscription already inactive (${subscription.status}), skipping cancellation`,
+								);
+							}
+						}
+					} else {
+						logger.log('No invoice ID found, skipping invoice write-off');
+					}
+				}
+			} else {
+				logger.log('No payment number found, skipping payment rejection');
+			}
+		} else {
+			logger.log('No subscription found, skipping Zuora operations');
+		}
+	} catch (zuoraError) {
+		logger.error('Error during Zuora operations:', zuoraError);
+	}
+
+	logger.log(`Successfully processed dispute closure for dispute ${disputeId}`);
 	return upsertSalesforceObjectResponse;
 }

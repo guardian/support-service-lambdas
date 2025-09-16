@@ -5,7 +5,6 @@ import { handleStripeWebhook } from './services';
 
 const logger = new Logger();
 
-// Router for API Gateway webhook endpoints (synchronous)
 const router = new Router([
 	{
 		httpMethod: 'POST',
@@ -19,21 +18,12 @@ const router = new Router([
 	},
 ]);
 
-/**
- * Hybrid Lambda handler supporting both API Gateway webhooks and SQS events
- *
- * Flow:
- * 1. Stripe webhook → API Gateway → validates + sends to SQS → returns 200
- * 2. SQS event → processes dispute asynchronously → calls Salesforce/Zuora
- */
 export const handler = async (
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult | void> => {
 	logger.log(`Input: ${JSON.stringify(event)}`);
 
-	// Detect event type
 	if (isApiGatewayEvent(event)) {
-		// Handle synchronous webhook from Stripe
 		logger.log('Processing API Gateway webhook event');
 		const response = await router.routeRequest(event);
 		logger.log(`Webhook response: ${JSON.stringify(response)}`);
@@ -44,9 +34,11 @@ export const handler = async (
 	}
 };
 
-/**
- * Type guard to check if event is from API Gateway
- */
-function isApiGatewayEvent(event: any): event is APIGatewayProxyEvent {
-	return event.httpMethod !== undefined && event.path !== undefined;
+function isApiGatewayEvent(event: unknown): event is APIGatewayProxyEvent {
+	return (
+		typeof event === 'object' &&
+		event !== null &&
+		'httpMethod' in event &&
+		'path' in event
+	);
 }

@@ -4,10 +4,6 @@ import type {
 	ZuoraGetInvoicePaymentQueryOutputSchema,
 } from '../zod-schemas';
 
-/**
- * Zuora Invoice Payment API response types
- */
-
 export type ZuoraInvoicePaymentQueryOutput = z.infer<
 	typeof ZuoraGetInvoicePaymentQueryOutputSchema
 >;
