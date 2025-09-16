@@ -45,7 +45,7 @@ export class Logger {
 	/* eslint-disable @typescript-eslint/no-explicit-any -- this has to match console.log */
 	/* eslint-disable @typescript-eslint/no-unsafe-argument -- this has to match console.log */
 	public log(message: any, ...optionalParams: any[]): void {
-		this.logWithCallerInfo(message, this.getCallerInfo(), optionalParams);
+		this.logWithCallerInfo(message, this.getCallerInfo(), ...optionalParams);
 	}
 
 	private logWithCallerInfo(
@@ -57,7 +57,7 @@ export class Logger {
 	}
 
 	public error(message?: any, ...optionalParams: any[]): void {
-		this.errorWithCallerInfo(message, this.getCallerInfo(), optionalParams);
+		this.errorWithCallerInfo(message, this.getCallerInfo(), ...optionalParams);
 	}
 
 	private errorWithCallerInfo(
