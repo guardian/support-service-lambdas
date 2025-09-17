@@ -4,25 +4,18 @@ import cats.data.NonEmptyList
 import com.gu.newproduct.api.productcatalog.ZuoraIds
 import com.gu.newproduct.api.productcatalog.ZuoraIds.SupporterPlusZuoraIds
 import com.gu.productmove.GuStageLive.Stage
+import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointSteps.getRefundDateIfEligibile
 import com.gu.productmove.endpoint.cancel.SubscriptionCancelEndpointTypes.ExpectedInput
 import com.gu.productmove.endpoint.move.ProductMoveEndpointTypes.{BadRequest, InternalServerError, OutputBody, Success}
 import com.gu.productmove.endpoint.move.assertSubscriptionBelongsToIdentityUser
 import com.gu.productmove.endpoint.zuora.GetSubscriptionToCancel
 import com.gu.productmove.endpoint.zuora.GetSubscriptionToCancel.RatePlanCharge
-import com.gu.productmove.invoicingapi.InvoicingApiRefund.RefundResponse
 import com.gu.productmove.refund.RefundInput
 import com.gu.productmove.zuora.model.SubscriptionName
-import com.gu.productmove.zuora.{
-  CancellationResponse,
-  GetAccount,
-  GetSubscription,
-  ZuoraAccountId,
-  ZuoraCancel,
-  ZuoraSetCancellationReason,
-}
+import com.gu.productmove.zuora.{GetAccount, GetSubscription, ZuoraCancel, ZuoraSetCancellationReason}
 import com.gu.productmove.{EmailMessage, IdentityId, SQS}
 import com.gu.util.config
-import zio.{Clock, IO, RIO, Task, ZIO}
+import zio.{Clock, IO, Task, ZIO}
 
 import java.time.LocalDate
 
@@ -84,18 +77,11 @@ class SubscriptionCancelEndpointSteps(
       today <- Clock.currentDateTime.map(_.toLocalDate)
 
       // check whether the sub is within the first 14 days of purchase - if it is then the subscriber is entitled to a refund
-      // Use LastPlanAddedDate__c if available (new subscriptions), otherwise fall back to effectiveStartDate (legacy subscriptions)
-      subscriptionStartDate = subscription.LastPlanAddedDate__c.getOrElse(supporterPlusCharge.effectiveStartDate)
-      shouldBeRefunded = subIsWithinFirst14Days(today, subscriptionStartDate)
-      _ <- ZIO.log(s"Should be refunded is $shouldBeRefunded (using LastPlanAddedDate__c: ${subscription.LastPlanAddedDate__c.isDefined})")
+      shouldBeRefundedDate = getRefundDateIfEligibile(today, subscription.LastPlanAddedDate__c)
+      _ <- ZIO.log(s"Backdated refund effective date is $shouldBeRefundedDate")
 
       cancellationDate <- ZIO
-        .fromOption(
-          if (shouldBeRefunded)
-            Some(subscriptionStartDate)
-          else
-            supporterPlusCharge.chargedThroughDate,
-        )
+        .fromOption(shouldBeRefundedDate.orElse(supporterPlusCharge.chargedThroughDate))
         .orElseFail(
           InternalServerError(
             s"Subscription charged through date is null for supporter plus subscription ${subscriptionName.value}. " +
@@ -109,10 +95,11 @@ class SubscriptionCancelEndpointSteps(
       _ <- ZIO.log("Sub cancelled as of: " + cancellationDate)
 
       _ <- ZIO.log(
-        if (shouldBeRefunded) s"Adding sub to the queue to do the refund asynchronously" else "No refund needed",
+        if (shouldBeRefundedDate.isDefined) s"Adding sub to the queue to do the refund asynchronously"
+        else "No refund needed",
       )
       _ <-
-        if (shouldBeRefunded)
+        if (shouldBeRefundedDate.isDefined)
           sqs.queueRefund(RefundInput(subscriptionName, account.basicInfo.id, today))
         else
           ZIO.succeed(())
@@ -167,7 +154,15 @@ class SubscriptionCancelEndpointSteps(
       )
   }
 
-  private def subIsWithinFirst14Days(now: LocalDate, contractEffectiveDate: LocalDate) =
-    now.isBefore(contractEffectiveDate.plusDays(15)) // This is 14 days from the day after the sub was taken out
+}
+
+object SubscriptionCancelEndpointSteps {
+
+  private[productmove] def getRefundDateIfEligibile(
+      today: LocalDate,
+      lastPlanAddedDate: Option[LocalDate],
+  ): Option[LocalDate] =
+    // all recently switched/acquired subs will have a LastPlanAddedDate__c, ones without are definitely not eligible
+    lastPlanAddedDate.filter(date => today.isBefore(date.plusDays(15)))
 
 }
