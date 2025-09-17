@@ -2,6 +2,7 @@ import { mapPartition, zipAll } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
+import { logger } from '@modules/routing/logger';
 
 export type HttpMethod =
 	| 'GET'
@@ -17,7 +18,7 @@ export type Route<TPath, TBody> = {
 	path: string;
 	handler: (
 		event: APIGatewayProxyEvent,
-		parsed: { path: TPath; body: TBody }
+		parsed: { path: TPath; body: TBody },
 	) => Promise<APIGatewayProxyResult>;
 	parser?: {
 		path?: z.Schema<TPath>;
@@ -26,7 +27,7 @@ export type Route<TPath, TBody> = {
 };
 
 export function createRoute<TPath, TBody>(
-	route: Route<TPath, TBody>
+	route: Route<TPath, TBody>,
 ): Route<unknown, unknown> {
 	return route as Route<unknown, unknown>;
 }
@@ -38,7 +39,7 @@ export const NotFoundResponse = {
 
 function matchPath(
 	routePath: string,
-	eventPath: string
+	eventPath: string,
 ): { params: Record<string, string> } | undefined {
 	const routeParts = routePath.split('/').filter(Boolean);
 	const eventParts = eventPath.split('/').filter(Boolean);
@@ -63,25 +64,34 @@ function matchPath(
 	return { params: Object.fromEntries(matchers) };
 }
 
-export class Router {
-	constructor(private routes: ReadonlyArray<Route<unknown, unknown>>) { }
-	async routeRequest(
+export function Router(routes: ReadonlyArray<Route<unknown, unknown>>) {
+	const httpRouter = async (
 		event: APIGatewayProxyEvent,
-	): Promise<APIGatewayProxyResult> {
+	): Promise<APIGatewayProxyResult> => {
 		try {
-			for (const route of this.routes) {
+			for (const route of routes) {
 				const matchResult = matchPath(route.path, event.path);
-				if (route.httpMethod.toUpperCase() === event.httpMethod.toUpperCase() && matchResult) {
+				if (
+					route.httpMethod.toUpperCase() === event.httpMethod.toUpperCase() &&
+					matchResult
+				) {
 					const eventWithParams = {
 						...event,
-						pathParameters: { ...(event.pathParameters ?? {}), ...matchResult.params },
+						pathParameters: {
+							...(event.pathParameters ?? {}),
+							...matchResult.params,
+						},
 					};
 
 					let parsedPath, parsedBody;
 					try {
-						parsedPath = route.parser?.path?.parse(eventWithParams.pathParameters);
+						parsedPath = route.parser?.path?.parse(
+							eventWithParams.pathParameters,
+						);
 						parsedBody = route.parser?.body?.parse(
-							eventWithParams.body ? JSON.parse(eventWithParams.body) : undefined,
+							eventWithParams.body
+								? JSON.parse(eventWithParams.body)
+								: undefined,
 						);
 					} catch (error) {
 						if (error instanceof z.ZodError) {
@@ -117,5 +127,13 @@ export class Router {
 				statusCode: 500,
 			};
 		}
-	}
+	};
+
+	return logger.wrapRouter(
+		httpRouter,
+		undefined,
+		undefined,
+		0,
+		logger.getCallerInfo(),
+	);
 }

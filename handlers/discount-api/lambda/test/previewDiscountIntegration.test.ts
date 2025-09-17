@@ -1,7 +1,6 @@
 /**
  * @group integration
  */
-import { Logger } from '@modules/logger';
 import type { Stage } from '@modules/stage';
 import {
 	createDigitalSubscription,
@@ -27,7 +26,6 @@ test("Subscriptions which don't belong to the provided identity Id are not eligi
 
 	await expect(async () => {
 		await previewDiscountEndpoint(
-			new Logger(),
 			stage,
 			{ 'x-identity-id': invalidIdentityId },
 			subscriptionNumber,
@@ -52,7 +50,6 @@ test('Subscriptions on the old price are not eligible', async () => {
 
 	await expect(async () => {
 		await previewDiscountEndpoint(
-			new Logger(),
 			stage,
 			{ 'x-identity-id': validIdentityId },
 			subscriptionNumber,
@@ -83,7 +80,6 @@ test('Subscriptions on the new price are eligible', async () => {
 	);
 
 	const result = await previewDiscountEndpoint(
-		new Logger(),
 		stage,
 		{ 'x-identity-id': validIdentityId },
 		subscriptionNumber,
@@ -126,7 +122,6 @@ test('Supporter Plus subscriptions are eligible', async () => {
 	const subscriptionNumber = await createSupporterPlusSubscription(zuoraClient);
 
 	const result = await previewDiscountEndpoint(
-		new Logger(),
 		stage,
 		{ 'x-identity-id': validIdentityId },
 		subscriptionNumber,

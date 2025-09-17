@@ -1,17 +1,14 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 
-// Simple mocks
 const mockLogger = {
 	log: jest.fn(),
 	error: jest.fn(),
 	mutableAddContext: jest.fn(),
 };
 
-const mockRouterInstance = {
-	routeRequest: jest.fn(),
-};
+const mockRouterInstance = jest.fn();
 
-jest.mock('@modules/logger', () => ({
+jest.mock('@modules/routing/logger', () => ({
 	Logger: jest.fn(() => mockLogger),
 }));
 
@@ -23,7 +20,6 @@ jest.mock('../src/services', () => ({
 	handleStripeWebhook: jest.fn(() => jest.fn()),
 }));
 
-// Import after mocks
 import { handler } from '../src/producer';
 
 describe('Producer Handler', () => {
@@ -78,7 +74,7 @@ describe('Producer Handler', () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		mockRouterInstance.routeRequest.mockResolvedValue({
+		mockRouterInstance.mockResolvedValue({
 			statusCode: 200,
 			body: JSON.stringify({ success: true }),
 		});
@@ -93,7 +89,7 @@ describe('Producer Handler', () => {
 			);
 			const result = await handler(event);
 
-			expect(mockRouterInstance.routeRequest).toHaveBeenCalledWith(event);
+			expect(mockRouterInstance).toHaveBeenCalledWith(event);
 			expect(result).toBeDefined();
 		});
 
@@ -107,7 +103,7 @@ describe('Producer Handler', () => {
 				statusCode: 200,
 				body: JSON.stringify({ success: true }),
 			};
-			mockRouterInstance.routeRequest.mockResolvedValue(mockResponse);
+			mockRouterInstance.mockResolvedValue(mockResponse);
 
 			const result = await handler(event);
 
@@ -128,7 +124,7 @@ describe('Producer Handler', () => {
 
 			await handler(event);
 
-			expect(mockRouterInstance.routeRequest).toHaveBeenCalledWith(event);
+			expect(mockRouterInstance).toHaveBeenCalledWith(event);
 		});
 
 		it('should handle dispute closed webhook', async () => {
@@ -140,7 +136,7 @@ describe('Producer Handler', () => {
 
 			await handler(event);
 
-			expect(mockRouterInstance.routeRequest).toHaveBeenCalledWith(event);
+			expect(mockRouterInstance).toHaveBeenCalledWith(event);
 		});
 	});
 });

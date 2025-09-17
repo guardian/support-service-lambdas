@@ -1,4 +1,4 @@
-import type { Logger } from '@modules/logger';
+import type { Logger } from '@modules/routing/logger';
 import {
 	buildSalesforceUpsertOptions,
 	buildSalesforceUpsertUrl,
@@ -10,19 +10,6 @@ import type {
 } from '../types';
 import { SalesforceCreateResponseSchema } from '../zod-schemas';
 
-/**
- * Upserts a Payment Dispute record in Salesforce using Dispute_ID__c as external ID
- *
- * This function performs an HTTP PATCH request to Salesforce to create or update
- * a Payment Dispute record. It uses the Dispute_ID__c field as an external ID
- * for upsert operations, following Salesforce best practices.
- *
- * @param authResponse - Salesforce authentication response containing access token and instance URL
- * @param paymentDispute - Payment dispute record data to upsert
- * @param logger - Logger instance for tracking the operation
- * @returns Promise containing the Salesforce upsert response with record ID and success status
- * @throws {Error} When the HTTP request fails or response validation fails
- */
 export async function upsertPaymentDisputeInSalesforce(
 	authResponse: SalesforceAuthResponse,
 	paymentDispute: PaymentDisputeRecord,
@@ -31,10 +18,8 @@ export async function upsertPaymentDisputeInSalesforce(
 	logger.log('upserting Payment Dispute record in Salesforce...');
 
 	try {
-		// Use PATCH with external ID for upsert: /sobjects/SObjectType/FieldName/FieldValue
 		const url = buildSalesforceUpsertUrl(authResponse, paymentDispute);
 
-		// Remove Dispute_ID__c from the body since it's in the URL
 		const { Dispute_ID__c, ...paymentDisputeBody } = paymentDispute;
 
 		const options = buildSalesforceUpsertOptions(

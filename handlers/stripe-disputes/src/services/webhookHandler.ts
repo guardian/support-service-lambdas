@@ -1,5 +1,5 @@
-import type { Logger } from '@modules/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
+import type { Logger } from '@modules/routing/logger';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import AWS from 'aws-sdk';
 import {
@@ -13,18 +13,6 @@ import type {
 
 const sqs = new AWS.SQS();
 
-/**
- * Creates a webhook handler for Stripe dispute events
- *
- * This handler:
- * 1. Validates the incoming Stripe webhook payload
- * 2. Sends the validated event to SQS for asynchronous processing
- * 3. Returns 200 OK to Stripe immediately
- *
- * @param logger - Logger instance
- * @param eventType - Type of Stripe event ('dispute.created' or 'dispute.closed')
- * @returns Handler function for API Gateway events
- */
 export function handleStripeWebhook(
 	logger: Logger,
 	eventType: 'dispute.created' | 'dispute.closed',
@@ -35,16 +23,13 @@ export function handleStripeWebhook(
 		try {
 			logger.log(`Processing Stripe ${eventType} webhook`);
 
-			// Parse and validate webhook payload
 			const webhookData = parseWebhookPayload(event, eventType);
 			logger.mutableAddContext(webhookData.data.object.id);
 
-			// Send to SQS for asynchronous processing
 			await sendToSqs(webhookData, eventType);
 
 			logger.log(`${eventType} webhook successfully queued for processing`);
 
-			// Return 200 OK to Stripe immediately
 			return {
 				statusCode: 200,
 				body: JSON.stringify({
@@ -55,7 +40,6 @@ export function handleStripeWebhook(
 		} catch (error) {
 			logger.error(`Error processing ${eventType} webhook:`, error);
 
-			// Return 500 to trigger Stripe retry
 			return {
 				statusCode: 500,
 				body: JSON.stringify({
@@ -67,9 +51,6 @@ export function handleStripeWebhook(
 	};
 }
 
-/**
- * Parses and validates the Stripe webhook payload
- */
 function parseWebhookPayload(
 	event: APIGatewayProxyEvent,
 	eventType: 'dispute.created' | 'dispute.closed',
@@ -77,7 +58,6 @@ function parseWebhookPayload(
 	const body = getIfDefined(event.body, 'No body was provided');
 	const webhookData: unknown = JSON.parse(body);
 
-	// Validate payload based on event type
 	const schema =
 		eventType === 'dispute.created'
 			? listenDisputeCreatedInputSchema
@@ -94,9 +74,6 @@ function parseWebhookPayload(
 	return validationResult.data;
 }
 
-/**
- * Sends the validated webhook data to SQS for asynchronous processing
- */
 async function sendToSqs(
 	webhookData: ListenDisputeCreatedRequestBody | ListenDisputeClosedRequestBody,
 	eventType: 'dispute.created' | 'dispute.closed',

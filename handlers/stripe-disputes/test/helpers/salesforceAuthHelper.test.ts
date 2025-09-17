@@ -15,9 +15,7 @@ describe('Salesforce Auth Helper', () => {
 			expect(result).toBe(
 				'grant_type=client_credentials' +
 					'&client_id=test_client_id' +
-					'&client_secret=test_secret', // +
-				//'&username=test%40example.com' +
-				//'&password=password123token456',
+					'&client_secret=test_secret',
 			);
 		});
 

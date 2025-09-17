@@ -31,7 +31,7 @@ describe('RestRequestMaker', () => {
 				}),
 			);
 
-			const result = await restRequestMaker.makeRESTRequest(
+			const result = await restRequestMaker.makeRESTRequest()(
 				'GET',
 				'/users/1',
 				schema,
@@ -63,7 +63,7 @@ describe('RestRequestMaker', () => {
 				}),
 			);
 
-			const result = await restRequestMaker.makeRESTRequest(
+			const result = await restRequestMaker.makeRESTRequest()(
 				'POST',
 				'/users',
 				schema,
@@ -98,7 +98,7 @@ describe('RestRequestMaker', () => {
 				}),
 			);
 
-			const result = await restRequestMaker.makeRESTRequest(
+			const result = await restRequestMaker.makeRESTRequest()(
 				'GET',
 				'/text',
 				parseFn,
@@ -127,7 +127,7 @@ describe('RestRequestMaker', () => {
 			const schema = z.object({ id: z.number() });
 
 			try {
-				await restRequestMaker.makeRESTRequest('GET', '/users/999', schema);
+				await restRequestMaker.makeRESTRequest()('GET', '/users/999', schema);
 				fail('test did not throw');
 			} catch (error) {
 				expect(error).toBeInstanceOf(HttpError);
@@ -149,7 +149,7 @@ describe('RestRequestMaker', () => {
 				}),
 			);
 
-			const result = await restRequestMaker.makeRESTRequest(
+			const result = await restRequestMaker.makeRESTRequest()(
 				'GET',
 				'/users/1',
 				schema,
@@ -172,7 +172,7 @@ describe('RestRequestMaker', () => {
 				}),
 			);
 
-			const result = await restRequestMaker.makeRESTRequest(
+			const result = await restRequestMaker.makeRESTRequest()(
 				'GET',
 				'/users/1',
 				schema,
@@ -197,7 +197,7 @@ describe('RestRequestMaker', () => {
 				}),
 			);
 
-			const result = await restRequestMaker.makeRESTRequest(
+			const result = await restRequestMaker.makeRESTRequest()(
 				'GET',
 				'/users/1',
 				schema,
@@ -215,7 +215,7 @@ describe('RestRequestMaker', () => {
 			mockFetch.mockRejectedValueOnce(new Error('Network error'));
 
 			await expect(
-				restRequestMaker.makeRESTRequest('GET', '/users/1', schema),
+				restRequestMaker.makeRESTRequest()('GET', '/users/1', schema),
 			).rejects.toThrow('Network error');
 		});
 	});
@@ -232,7 +232,7 @@ describe('RestRequestMaker', () => {
 			const schema = z.object({ id: z.number() });
 
 			try {
-				await restRequestMaker.makeRESTRequest('GET', '/users/1', schema);
+				await restRequestMaker.makeRESTRequest()('GET', '/users/1', schema);
 			} catch (error) {
 				expect(error).toBeInstanceOf(HttpError);
 				if (error instanceof HttpError) {
@@ -252,7 +252,7 @@ describe('RestRequestMaker', () => {
 			const schema = z.object({ id: z.number() });
 
 			try {
-				await restRequestMaker.makeRESTRequest('GET', '/users/1', schema);
+				await restRequestMaker.makeRESTRequest()('GET', '/users/1', schema);
 			} catch (error) {
 				expect(error).toBeInstanceOf(HttpError);
 				if (error instanceof HttpError) {
@@ -275,7 +275,7 @@ describe('RestRequestMaker', () => {
 					}),
 				);
 
-				const result = await restRequestMaker.makeRESTRequest(
+				const result = await restRequestMaker.makeRESTRequest()(
 					method,
 					'/test',
 					schema,

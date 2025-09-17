@@ -1,4 +1,4 @@
-import type { Logger } from '@modules/logger';
+import type { Logger } from '@modules/routing/logger';
 import {
 	buildClientCredentialsBody,
 	getSalesForceApiBaseUrl,
@@ -6,17 +6,6 @@ import {
 import type { SalesforceAuthResponse, SalesforceCredentials } from '../types';
 import { SalesforceAuthResponseSchema } from '../zod-schemas';
 
-/**
- * Authenticate with Salesforce using OAuth 2.0 Client Credentials flow
- *
- * This function performs OAuth authentication to obtain an access token
- * for making authenticated requests to the Salesforce API.
- *
- * @param logger - Logger instance for tracking authentication process
- * @param credentials - Salesforce OAuth credentials including client ID, secret, and sandbox flag
- * @returns Promise containing Salesforce access token and instance URL
- * @throws {Error} When authentication fails or response validation fails
- */
 export async function authenticateWithSalesforce(
 	logger: Logger,
 	credentials: SalesforceCredentials,

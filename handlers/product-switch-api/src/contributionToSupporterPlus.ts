@@ -9,6 +9,7 @@ import type {
 	OrderRequest,
 	PreviewOrderRequest,
 } from '@modules/zuora/orders/orderRequests';
+import { previewOrderRequest } from '@modules/zuora/orders/orderRequests';
 import type {
 	RatePlan,
 	RatePlanCharge,
@@ -57,8 +58,13 @@ export type SwitchResponse = { message: string };
 export const switchToSupporterPlus = async (
 	zuoraClient: ZuoraClient,
 	productSwitchInformation: SwitchInformation,
+	today: dayjs.Dayjs,
 ): Promise<SwitchResponse> => {
-	const switchResponse = await doSwitch(zuoraClient, productSwitchInformation);
+	const switchResponse = await doSwitch(
+		zuoraClient,
+		productSwitchInformation,
+		today,
+	);
 
 	const paidAmount = await takePaymentOrAdjustInvoice(
 		zuoraClient,
@@ -147,7 +153,8 @@ export const previewResponseFromZuoraResponse = (
 				invoiceItem.productRatePlanChargeId ===
 				catalogInformation.supporterPlus.subscriptionChargeId,
 		),
-		'No supporter plus invoice item found in the preview response',
+		'No supporter plus invoice item found in the preview response: id: ' +
+			catalogInformation.supporterPlus.subscriptionChargeId,
 	);
 
 	const supporterPlusContributionItem = getIfDefined(
@@ -156,7 +163,8 @@ export const previewResponseFromZuoraResponse = (
 				invoiceItem.productRatePlanChargeId ===
 				catalogInformation.supporterPlus.contributionChargeId,
 		),
-		'No supporter plus invoice item found in the preview response',
+		'No supporter plus invoice item found in the preview response: id: ' +
+			catalogInformation.supporterPlus.contributionChargeId,
 	);
 
 	const response: PreviewResponse = {
@@ -201,9 +209,9 @@ export const preview = async (
 		dayjs(),
 		productSwitchInformation,
 	);
-	const zuoraResponse: ZuoraPreviewResponse = await zuoraClient.post(
-		'v1/orders/preview',
-		JSON.stringify(requestBody),
+	const zuoraResponse: ZuoraPreviewResponse = await previewOrderRequest(
+		zuoraClient,
+		requestBody,
 		zuoraPreviewResponseSchema,
 	);
 	if (zuoraResponse.success) {
@@ -221,12 +229,13 @@ export const preview = async (
 export const doSwitch = async (
 	zuoraClient: ZuoraClient,
 	productSwitchInformation: SwitchInformation,
+	today: dayjs.Dayjs,
 ): Promise<ZuoraSwitchResponse> => {
 	const { subscriptionNumber } = productSwitchInformation.subscription;
 	//If the sub has a pending amount change amendment, we need to remove it
-	await removePendingUpdateAmendments(zuoraClient, subscriptionNumber);
+	await removePendingUpdateAmendments(zuoraClient, subscriptionNumber, today);
 
-	const requestBody = buildSwitchRequestBody(dayjs(), productSwitchInformation);
+	const requestBody = buildSwitchRequestBody(today, productSwitchInformation);
 	const zuoraResponse: ZuoraSwitchResponse = await zuoraClient.post(
 		'v1/orders?returnIds=true',
 		JSON.stringify(requestBody),
@@ -313,7 +322,11 @@ export const buildSwitchRequestBody = (
 			runBilling: true,
 			collectPayment: false, // We will take payment separately because we don't want to charge the user if the amount payable is less than 50 pence/cents
 		},
-		...buildSwitchRequestWithoutOptions(productSwitchInformation, orderDate),
+		...buildSwitchRequestWithoutOptions(
+			productSwitchInformation,
+			orderDate,
+			false,
+		),
 	};
 };
 
@@ -327,22 +340,27 @@ const buildPreviewRequestBody = (
 			previewTypes: ['BillingDocs'],
 			specificPreviewThruDate: zuoraDateFormat(orderDate),
 		},
-		...buildSwitchRequestWithoutOptions(productSwitchInformation, orderDate),
+		...buildSwitchRequestWithoutOptions(
+			productSwitchInformation,
+			orderDate,
+			true,
+		),
 	};
 };
 
 function buildSwitchRequestWithoutOptions(
 	productSwitchInformation: SwitchInformation,
 	orderDate: dayjs.Dayjs,
+	preview: boolean,
 ): OrderRequest {
 	const { startNewTerm, contributionAmount, catalog } =
 		productSwitchInformation;
 	const { accountNumber, subscriptionNumber } =
 		productSwitchInformation.subscription;
 
-	const maybeNewTermOrderActions: OrderAction[] = startNewTerm
-		? buildNewTermOrderActions(orderDate)
-		: [];
+	// don't preview term update, because future dated amendments might prevent it
+	const maybeNewTermOrderActions: OrderAction[] =
+		startNewTerm && !preview ? buildNewTermOrderActions(orderDate) : [];
 
 	const discountOrderAction = productSwitchInformation.discount
 		? buildAddDiscountOrderAction(productSwitchInformation.discount, orderDate)

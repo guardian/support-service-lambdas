@@ -1,8 +1,8 @@
 import { sendEmail } from '@modules/email/email';
 import { ValidationError } from '@modules/errors';
-import { Logger } from '@modules/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
+import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type {
@@ -20,14 +20,13 @@ const stage = process.env.STAGE as Stage;
 export const handler: Handler = async (
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
-	const logger = new Logger();
 	logger.log(`Input is ${JSON.stringify(event)}`);
-	const response = await routeRequest(logger, event);
+	const response = await routeRequest(event);
 	logger.log(`Response is ${JSON.stringify(response)}`);
 	return response;
 };
 
-const routeRequest = async (logger: Logger, event: APIGatewayProxyEvent) => {
+const routeRequest = async (event: APIGatewayProxyEvent) => {
 	try {
 		const subscriptionNumber = getSubscriptionNumberFromUrl(event.path);
 		logger.mutableAddContext(subscriptionNumber);
@@ -37,24 +36,16 @@ const routeRequest = async (logger: Logger, event: APIGatewayProxyEvent) => {
 			event.headers['x-identity-id'],
 			'Identity ID not found in request',
 		);
-		const zuoraClient = await ZuoraClient.create(stage, logger);
-		const productCatalog = await getProductCatalogFromApi(
-			stage,
-			logger.log.bind(logger),
-		);
+		const zuoraClient = await ZuoraClient.create(stage);
+		const productCatalog = await getProductCatalogFromApi(stage);
 		const emailFields = await updateSupporterPlusAmount(
-			logger,
 			zuoraClient,
 			productCatalog,
 			identityId,
 			subscriptionNumber,
 			requestBody.newPaymentAmount,
 		);
-		await sendEmail(
-			stage,
-			createThankYouEmail(emailFields),
-			logger.log.bind(logger),
-		);
+		await sendEmail(stage, createThankYouEmail(emailFields));
 		return {
 			body: JSON.stringify({ message: 'Success' }),
 			statusCode: 200,

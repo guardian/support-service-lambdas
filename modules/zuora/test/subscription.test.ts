@@ -42,15 +42,21 @@ describe('subscription', () => {
 
 			expect(mockZuoraClient.put).toHaveBeenCalledWith(
 				'/v1/subscriptions/SUB-12345/cancel',
-				JSON.stringify({
-					cancellationEffectiveDate: '2025-08-01',
-					cancellationPolicy: 'SpecificDate',
-					runBilling: true,
-					collect: false,
-				}),
+				expect.stringContaining('"cancellationEffectiveDate":"2025-08-01"'),
 				zuoraResponseSchema,
 				{ 'zuora-version': '211.0' },
 			);
+
+			// Verify the request body contains expected properties
+			const requestBody = JSON.parse(
+				(mockZuoraClient.put as jest.Mock).mock.calls[0][1],
+			);
+			expect(requestBody).toMatchObject({
+				cancellationEffectiveDate: '2025-08-01',
+				cancellationPolicy: 'SpecificDate',
+				runBilling: true,
+				collect: false,
+			});
 			expect(result).toEqual(mockResponse);
 		});
 
@@ -71,15 +77,57 @@ describe('subscription', () => {
 
 			expect(mockZuoraClient.put).toHaveBeenCalledWith(
 				'/v1/subscriptions/SUB-12345/cancel',
-				JSON.stringify({
-					cancellationEffectiveDate: '2025-08-02',
-					cancellationPolicy: 'SpecificDate',
-					runBilling: false,
-					collect: undefined,
-				}),
+				expect.stringContaining('"cancellationEffectiveDate":"2025-08-02"'),
 				zuoraResponseSchema,
 				{ 'zuora-version': '211.0' },
 			);
+
+			// Verify the request body contains expected properties
+			const requestBody = JSON.parse(
+				(mockZuoraClient.put as jest.Mock).mock.calls[0][1],
+			);
+			expect(requestBody).toMatchObject({
+				cancellationEffectiveDate: '2025-08-02',
+				cancellationPolicy: 'SpecificDate',
+				runBilling: false,
+			});
+			// collect should not be included when undefined
+			expect(requestBody).not.toHaveProperty('collect');
+		});
+
+		it('should support EndOfLastInvoicePeriod cancellation policy', async () => {
+			const mockResponse = { Success: true, Id: '123' };
+			mockZuoraClient.put.mockResolvedValue(mockResponse);
+			const contractEffectiveDate = dayjs('2025-08-03');
+
+			const result = await cancelSubscription(
+				mockZuoraClient,
+				'SUB-12345',
+				contractEffectiveDate,
+				false,
+				false,
+				'EndOfLastInvoicePeriod',
+			);
+
+			expect(mockZuoraClient.put).toHaveBeenCalledWith(
+				'/v1/subscriptions/SUB-12345/cancel',
+				expect.not.stringContaining('cancellationEffectiveDate'),
+				zuoraResponseSchema,
+				{ 'zuora-version': '211.0' },
+			);
+
+			// Verify the request body for EndOfLastInvoicePeriod
+			const requestBody = JSON.parse(
+				(mockZuoraClient.put as jest.Mock).mock.calls[0][1],
+			);
+			expect(requestBody).toMatchObject({
+				cancellationPolicy: 'EndOfLastInvoicePeriod',
+				runBilling: false,
+				collect: false,
+			});
+			// Should not include cancellationEffectiveDate
+			expect(requestBody).not.toHaveProperty('cancellationEffectiveDate');
+			expect(result).toEqual(mockResponse);
 		});
 
 		it('should throw if zuoraClient.put rejects', async () => {

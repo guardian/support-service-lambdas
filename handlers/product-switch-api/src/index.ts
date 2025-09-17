@@ -1,62 +1,35 @@
-import { ValidationError } from '@modules/errors';
-import { getIfDefined } from '@modules/nullAndUndefined';
+import 'source-map-support/register';
+import { createRoute, Router } from '@modules/routing/router';
 import type { Stage } from '@modules/stage';
-import type {
-	APIGatewayProxyEvent,
-	APIGatewayProxyResult,
-	Handler,
-} from 'aws-lambda';
+import type { Handler } from 'aws-lambda';
 import dayjs from 'dayjs';
+import { z } from 'zod';
 import { contributionToSupporterPlusEndpoint } from './productSwitchEndpoint';
-import { parseUrlPath } from './urlParsing';
+import type { ProductSwitchRequestBody } from './schemas';
+import { productSwitchRequestSchema } from './schemas';
 
 const stage = process.env.STAGE as Stage;
 
-export const handler: Handler = async (
-	event: APIGatewayProxyEvent,
-): Promise<APIGatewayProxyResult> => {
-	console.log(`Input is ${JSON.stringify(event)}`);
-	const response = await routeRequest(event);
-	console.log(`Response is ${JSON.stringify(response)}`);
-	return response;
-};
+const pathParserSchema = z.object({
+	subscriptionNumber: z
+		.string()
+		.regex(
+			/^A-S\d+$/,
+			'Subscription number must start with A-S and be followed by digits',
+		),
+});
 
-const routeRequest = async (event: APIGatewayProxyEvent) => {
-	try {
-		const parsedUrlPath = parseUrlPath(event.path);
-		if (
-			parsedUrlPath.switchType === 'recurring-contribution-to-supporter-plus'
-		) {
-			const requestBody = getIfDefined(
-				event.body,
-				'No request body was provided in call to recurring-contribution-to-supporter-plus',
-			);
-			return await contributionToSupporterPlusEndpoint(
-				stage,
-				event.headers,
-				requestBody,
-				parsedUrlPath.subscriptionNumber,
-				dayjs(),
-			);
-		} else {
-			return {
-				body: 'Not found',
-				statusCode: 404,
-			};
-		}
-	} catch (error) {
-		console.log('Caught error in index.ts ', error);
-		if (error instanceof ValidationError) {
-			console.log(`Validation failure: ${error.message}`);
-			return {
-				body: error.message,
-				statusCode: 400,
-			};
-		} else {
-			return {
-				body: 'An error occurred, check the logs for details',
-				statusCode: 500,
-			};
-		}
-	}
-};
+export type PathParser = z.infer<typeof pathParserSchema>;
+
+// entry point from AWS lambda
+export const handler: Handler = Router([
+	createRoute<PathParser, ProductSwitchRequestBody>({
+		httpMethod: 'POST',
+		path: '/product-move/recurring-contribution-to-supporter-plus/{subscriptionNumber}',
+		handler: contributionToSupporterPlusEndpoint(stage, dayjs()),
+		parser: {
+			path: pathParserSchema,
+			body: productSwitchRequestSchema,
+		},
+	}),
+]);

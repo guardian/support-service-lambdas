@@ -2,7 +2,6 @@ import { getSingleOrThrow } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { isSupportedCurrency } from '@modules/internationalisation/currency';
-import type { Logger } from '@modules/logger';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
 import type { ProductBillingPeriod } from '@modules/product-catalog/productBillingPeriods';
@@ -10,6 +9,7 @@ import type {
 	ProductCatalog,
 	ProductRatePlan,
 } from '@modules/product-catalog/productCatalog';
+import { logger } from '@modules/routing/logger';
 import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
 import type {
@@ -45,7 +45,6 @@ type ProductData = {
 };
 
 export const getSupporterPlusData = (
-	logger: Logger,
 	productCatalog: ProductCatalog,
 	ratePlans: RatePlan[],
 ): SupporterPlusData => {
@@ -174,7 +173,6 @@ const getNewTermStartDate = (
 };
 
 export const updateSupporterPlusAmount = async (
-	logger: Logger,
 	zuoraClient: ZuoraClient,
 	productCatalog: ProductCatalog,
 	identityIdFromRequest: string,
@@ -194,7 +192,6 @@ export const updateSupporterPlusAmount = async (
 	}
 
 	const supporterPlusData = getSupporterPlusData(
-		logger,
 		productCatalog,
 		subscription.ratePlans,
 	);

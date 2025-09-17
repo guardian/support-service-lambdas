@@ -1,5 +1,6 @@
 import { sendMessageToQueue } from '@modules/aws/sqs';
 import { prettyPrint } from '@modules/prettyPrint';
+import { logger } from '@modules/routing/logger';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import dayjs from 'dayjs';
 import type { SwitchInformation } from './switchInformation';
@@ -42,7 +43,7 @@ export const sendToSupporterProductData = async (
 	const messageBody = prettyPrint(
 		supporterRatePlanItemFromSwitchInformation(switchInformation),
 	);
-	console.log(
+	logger.log(
 		`Sending supporter product data message ${messageBody} to queue ${queueName}`,
 	);
 
@@ -51,7 +52,7 @@ export const sendToSupporterProductData = async (
 		messageBody,
 	});
 
-	console.log(
+	logger.log(
 		`Response from Salesforce tracking send was ${prettyPrint(response)}`,
 	);
 	return response;
