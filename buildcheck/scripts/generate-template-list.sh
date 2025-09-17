@@ -5,9 +5,9 @@ script_name=$(basename "$0")
 echo "$script_name: START generating template list..."
 
 script_dir=$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")
-buildgen_dir=$(readlink -f "$script_dir/..")
-src_dir="$buildgen_dir/src"
-data_dir="$buildgen_dir/data"
+buildcheck_dir=$(readlink -f "$script_dir/..")
+src_dir="$buildcheck_dir/src"
+data_dir="$buildcheck_dir/data"
 template_dir="$data_dir/handlerTemplate"
 output_file="$src_dir/steps/generatedMappings.ts"
 

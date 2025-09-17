@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as yaml from 'js-yaml';
 import type { HandlerDefinition } from '../../data/build';
+import type { GeneratedFile } from '../steps/generatedFile';
 
 export type TemplateContent = string | Record<string, unknown>;
 export type TemplateFunction = (data: HandlerDefinition) => TemplateContent;
@@ -11,7 +12,10 @@ export interface Template {
 	template: TemplateValue;
 }
 
-export function applyTemplates(pkg: HandlerDefinition, templates: Template[]) {
+export function applyTemplates(
+	pkg: HandlerDefinition,
+	templates: Template[],
+): GeneratedFile[] {
 	return templates.map((template) => {
 		const rawContent =
 			typeof template.template === 'function'
@@ -23,6 +27,7 @@ export function applyTemplates(pkg: HandlerDefinition, templates: Template[]) {
 		return {
 			relativePath: template.name,
 			content,
+			templatePath: 'buildcheck/data/handlerTemplate/' + template.name + '.ts',
 		};
 	});
 }

@@ -28,14 +28,16 @@ import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
 import { UserBenefits } from '../lib/user-benefits';
 import { WriteOffUnpaidInvoices } from '../lib/write-off-unpaid-invoices';
 import { ZuoraSalesforceLinkRemover } from '../lib/zuora-salesforce-link-remover';
+import {
+	membershipApisDomain,
+	membershipCertificateId,
+	membershipHostedZoneId,
+	supportApisDomain,
+	supportCertificateId,
+	supportHostedZoneId,
+} from '../module/constants';
 
 const app = new App();
-const membershipHostedZoneId = 'Z1E4V12LQGXFEC';
-const membershipCertificateId = 'c1efc564-9ff8-4a03-be48-d1990a3d79d2';
-const membershipApisDomain = 'membership.guardianapis.com';
-export const supportHostedZoneId = 'Z3KO35ELNWZMSX';
-export const supportCertificateId = 'b384a6a0-2f54-4874-b99b-96eeff96c009';
-export const supportApisDomain = 'support.guardianapis.com';
 
 export const codeProps: NewProductApiProps = {
 	stack: 'membership',

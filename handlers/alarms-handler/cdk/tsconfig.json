@@ -29,7 +29,12 @@
     "typeRoots": [
       "./node_modules/@types"
     ],
-    "outDir": "dist"
+    "outDir": "dist",
+    "paths": {
+      "@cdk/module/*": [
+        "../../../cdk/module/*"
+      ]
+    }
   },
   "include": [
     "lib/**/*",

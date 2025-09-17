@@ -2,7 +2,6 @@ import { GuApiLambda } from '@guardian/cdk';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { SrLambdaAlarm } from '@modules/cdk/cdk/sr-lambda-alarm';
-import { nodeVersion } from '@modules/cdk/node-version';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import {
@@ -14,6 +13,7 @@ import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
+import { nodeVersion } from '@cdk/module/constants';
 
 export interface DiscountApiProps extends GuStackProps {
 	stack: string;

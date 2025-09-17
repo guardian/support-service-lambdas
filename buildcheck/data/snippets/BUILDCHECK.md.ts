@@ -37,6 +37,7 @@ For further details, see [buildcheck/README.md](${pathToRoot}/buildcheck/README.
 			[...generatedFiles, warningFileName]
 				.map((name) => '- [' + name + '](' + name + ')\n')
 				.join(''),
+		templatePath: relativePath(__filename),
 	};
 }
 

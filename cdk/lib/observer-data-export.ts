@@ -23,7 +23,7 @@ import { Bucket, EventType } from 'aws-cdk-lib/aws-s3';
 import { SqsDestination } from 'aws-cdk-lib/aws-s3-notifications';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { SrLambdaAlarm } from '../module/cdk/sr-lambda-alarm';
-import { nodeVersion } from '../module/node-version';
+import { nodeVersion } from '../module/constants';
 
 export class ObserverDataExport extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {

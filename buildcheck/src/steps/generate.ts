@@ -29,13 +29,11 @@ function mapRelativePath(
 	return files.map((file) => ({
 		relativePath: pathMapper(file.relativePath),
 		content: file.content,
+		templatePath: file.templatePath,
 	}));
 }
 
-function withWarningFile(
-	files: Array<{ relativePath: string; content: string }>,
-	pathToRoot: string,
-) {
+function withWarningFile(files: GeneratedFile[], pathToRoot: string) {
 	const warningFile = generateWarningFile(
 		files.map((f) => f.relativePath),
 		pathToRoot,

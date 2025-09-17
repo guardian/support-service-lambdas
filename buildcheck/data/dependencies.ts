@@ -14,5 +14,5 @@ export const dep = separateDepRecords({
 
 function awsClients<T extends string>(ids: T[]) {
 	const awsClientVersion = '^3.848.0';
-	return withVersion(withPrefix(ids, '@aws-sdk/'), awsClientVersion);
+	return withVersion(awsClientVersion, withPrefix('@aws-sdk/', ids));
 }

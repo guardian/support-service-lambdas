@@ -16,7 +16,7 @@ import {
 import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
-import { nodeVersion } from '../module/node-version';
+import { nodeVersion } from '../module/constants';
 
 export interface TicketTailorWebhookProps extends GuStackProps {
 	stack: string;

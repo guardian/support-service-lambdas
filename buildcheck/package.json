@@ -7,7 +7,7 @@
     "update-build": "pnpm snapshot:update",
     "snapshot:update": "bash scripts/generate-template-list.sh && REPO_ROOT=\"$(pwd | sed 's|/buildcheck.*||')\" && ts-node src/cli.ts --generate \"$REPO_ROOT\"",
     "snapshot:clean": "bash scripts/generate-template-list.sh && REPO_ROOT=\"$(pwd | sed 's|/buildcheck.*||')\" && ts-node src/cli.ts --clean \"$REPO_ROOT\"",
-    "snapshot:assert": "bash scripts/generate-template-list.sh && REPO_ROOT=\"$(pwd | sed 's|/buildcheck.*||')\" && bash -c 'jest --testNamePattern=\"checkActual $*\"' -- \"$@\"",
+    "snapshot:assert": "bash scripts/generate-template-list.sh && REPO_ROOT=\"$(pwd | sed 's|/buildcheck.*||')\" && bash -c 'jest --testNamePattern=\"$*\"' -- \"$@\"",
     "migrate-handler": "REPO_ROOT=\"$(pwd | sed 's|/buildcheck.*||')\" && bash scripts/migrate-handler.sh \"$REPO_ROOT\"",
     "clean": "rm -rf src/steps/generatedMappings.ts dist",
     "test": "bash scripts/generate-template-list.sh && jest",

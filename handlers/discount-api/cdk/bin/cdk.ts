@@ -1,10 +1,12 @@
+import {
+	supportApisDomain,
+	supportCertificateId,
+	supportHostedZoneId,
+} from '@cdk/module/constants';
 import { App } from 'aws-cdk-lib';
 import { DiscountApi } from '../lib/discount-api';
 
 const app = new App();
-export const supportHostedZoneId = 'Z3KO35ELNWZMSX';
-export const supportCertificateId = 'b384a6a0-2f54-4874-b99b-96eeff96c009';
-export const supportApisDomain = 'support.guardianapis.com';
 
 new DiscountApi(app, 'discount-api-CODE', {
 	stack: 'support',

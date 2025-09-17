@@ -12,15 +12,15 @@ export function separateDepRecords<K extends string>(
 }
 
 export function withPrefix<T extends string, P extends string>(
-	libs: readonly T[],
 	prefix: P,
+	libs: readonly T[],
 ) {
 	return libs.map((lib) => `${prefix}${lib}` as const);
 }
 
 export function withVersion<T extends string>(
-	libs: readonly T[],
 	awsClientVersion: string,
+	libs: readonly T[],
 ): Record<T, string> {
 	return libs
 		.map((lib) => ({ [lib]: awsClientVersion }) as Record<T, string>)

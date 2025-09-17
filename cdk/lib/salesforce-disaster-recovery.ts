@@ -21,7 +21,7 @@ import {
 	WaitTime,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
-import { nodeVersion } from '../module/node-version';
+import { nodeVersion } from '../module/constants';
 
 interface Props extends GuStackProps {
 	salesforceApiDomain: string;

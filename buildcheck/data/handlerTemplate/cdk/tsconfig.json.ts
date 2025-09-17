@@ -26,6 +26,7 @@ export default {
 		strictPropertyInitialization: false,
 		typeRoots: ['./node_modules/@types'],
 		outDir: 'dist',
+		paths: { '@cdk/module/*': ['../../../cdk/module/*'] },
 	},
 	include: ['lib/**/*', 'bin/**/*'],
 	exclude: ['node_modules', 'cdk.out', 'lib/**/__snapshots__/**'],

@@ -38,5 +38,8 @@ export default (config: HandlerDefinition) => ({
 			'^.+\\.tsx?$': 'ts-jest',
 		},
 		setupFilesAfterEnv: ['./jest.setup.js'],
+		moduleNameMapper: {
+			'@cdk/module/(.*)$': '<rootDir>/../../../cdk/module/$1',
+		},
 	},
 });
