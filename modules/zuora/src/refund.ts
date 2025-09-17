@@ -1,11 +1,15 @@
+import { z } from 'zod';
+import { zuoraResponseSchema } from './types';
 import type { ZuoraClient } from './zuoraClient';
-import type { ZuoraUpperCaseSuccessResponse } from './zuoraSchemas';
-import { zuoraUpperCaseSuccessResponseSchema } from './zuoraSchemas';
 
-export const doRefund = async (
+export const doRefund = async <
+	T extends z.ZodType = typeof zuoraResponseSchema,
+>(
 	zuoraClient: ZuoraClient,
 	body: string,
-): Promise<ZuoraUpperCaseSuccessResponse> => {
+	schema?: T,
+): Promise<z.infer<T>> => {
 	const path = `/v1/object/refund`;
-	return zuoraClient.post(path, body, zuoraUpperCaseSuccessResponseSchema);
+	const finalSchema = (schema ?? zuoraResponseSchema) as T;
+	return zuoraClient.post(path, body, finalSchema);
 };

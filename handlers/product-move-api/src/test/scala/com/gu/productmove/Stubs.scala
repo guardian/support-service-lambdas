@@ -537,6 +537,7 @@ val expectedRequestBody = SwitchProductUpdateRequest(
   collect = Some(true),
   runBilling = Some(true),
   preview = Some(false),
+  LastPlanAddedDate__c = timeLocalDate,
 )
 
 val expectedRequestBodyLowCharge = SwitchProductUpdateRequest(
@@ -561,6 +562,7 @@ val expectedRequestBodyLowCharge = SwitchProductUpdateRequest(
   collect = Some(false),
   runBilling = Some(true),
   preview = Some(false),
+  LastPlanAddedDate__c = timeLocalDate4,
 )
 
 // MembershipToRecurringContribution
@@ -586,6 +588,7 @@ val expectedRequestBody2 = SwitchProductUpdateRequest(
   collect = Some(false),
   runBilling = Some(true),
   preview = Some(false),
+  LastPlanAddedDate__c = timeLocalDate3,
 )
 
 // RecurringContributionToSupporterPlus
@@ -612,6 +615,7 @@ val expectedRequestBodyPreview = SwitchProductUpdateRequest(
   targetDate = Some(LocalDate.of(2024, 3, 6)),
   currentTerm = Some("24"),
   currentTermPeriodType = Some("Month"),
+  LastPlanAddedDate__c = timeLocalDate2,
 )
 
 // RecurringContributionToSupporterPlus
@@ -638,6 +642,7 @@ val expectedRequestBodyPreview2 = SwitchProductUpdateRequest(
   targetDate = Some(LocalDate.of(2022, 3, 15)),
   currentTerm = Some("24"),
   currentTermPeriodType = Some("Month"),
+  LastPlanAddedDate__c = timeLocalDate4,
 )
 
 val previewResponse = SubscriptionUpdatePreviewResponse(

@@ -23,6 +23,9 @@ export const zuoraCatalogSchema = z.object({
 					name: z.string(),
 					effectiveStartDate: z.string(),
 					effectiveEndDate: z.string(),
+					TermType__c: z.string().nullable(),
+					DefaultTerm__c: z.string().nullable(),
+
 					productRatePlanCharges: z.array(
 						z.object({
 							id: z.string(),

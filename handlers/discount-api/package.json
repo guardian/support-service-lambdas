@@ -4,14 +4,15 @@
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
     "type-check": "tsc --noEmit",
-    "build": "esbuild --bundle --platform=node --target=node18 --outfile=target/index.js src/index.ts",
+    "build": "esbuild --bundle --platform=node --target=node18 --outfile=target/index.js src/index.ts --sourcemap",
     "lint": "eslint src/**/*.ts test/**/*.ts",
-    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr discount-api.zip ./*.js",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr discount-api.zip ./*.js.map ./*.js",
     "check-formatting": "prettier --check **.ts",
     "fix-formatting": "prettier --write **.ts"
   },
   "dependencies": {
     "dayjs": "^1.11.13",
+    "source-map-support": "^0.5.21",
     "zod": "catalog:"
   },
   "devDependencies": {

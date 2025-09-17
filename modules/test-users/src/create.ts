@@ -1,7 +1,7 @@
-import { zuoraDateFormat } from '@modules/zuora/common';
+import { zuoraSubscribeResponseSchema } from '@modules/zuora/types';
+import type { ZuoraSubscribeResponse } from '@modules/zuora/types';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { ZuoraSubscribeResponse } from '@modules/zuora/zuoraSchemas';
-import { zuoraSubscribeResponseSchema } from '@modules/zuora/zuoraSchemas';
 import type { Dayjs } from 'dayjs';
 
 type SubscribeItem = {

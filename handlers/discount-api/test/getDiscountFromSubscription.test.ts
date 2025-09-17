@@ -1,11 +1,13 @@
 import { DataExtensionNames } from '@modules/email/email';
-import { zuoraSubscriptionResponseSchema } from '@modules/zuora/zuoraSchemas';
+import { zuoraSubscriptionResponseSchema } from '@modules/zuora/types';
+import { validationRequirements } from '../src/eligibilityChecker';
 import type { Discount } from '../src/productToDiscountMapping';
 import {
 	catalog,
 	getDiscountFromSubscription,
 } from '../src/productToDiscountMapping';
 import json from './fixtures/digital-subscriptions/get-discount-test.json';
+import student from './fixtures/supporter-plus/student.json';
 
 test('getDiscountFromSubscription should return an annual discount for an annual sub', () => {
 	const sub = zuoraSubscriptionResponseSchema.parse(json);
@@ -22,4 +24,12 @@ test('getDiscountFromSubscription should return an annual discount for an annual
 		getDiscountFromSubscription('PROD', sub);
 	expect(discount).toEqual(expected);
 	expect(discountableProductRatePlanId).toEqual(catalog.PROD.digiSub.Annual);
+});
+
+test('cant get a discount for a student (fixed term)', () => {
+	const sub = zuoraSubscriptionResponseSchema.parse(student);
+
+	const ac2 = () => getDiscountFromSubscription('CODE', sub);
+
+	expect(ac2).toThrow(validationRequirements.mustHaveDiscountDefined);
 });

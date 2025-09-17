@@ -1,0 +1,44 @@
+import { Logger } from '@modules/routing/logger';
+import { Router } from '@modules/routing/router';
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { handleStripeWebhook } from './services';
+
+const logger = new Logger();
+
+const router = Router([
+	{
+		httpMethod: 'POST',
+		path: '/listen-dispute-created',
+		handler: handleStripeWebhook(logger, 'dispute.created'),
+	},
+	{
+		httpMethod: 'POST',
+		path: '/listen-dispute-closed',
+		handler: handleStripeWebhook(logger, 'dispute.closed'),
+	},
+]);
+
+export const handler = async (
+	event: APIGatewayProxyEvent,
+): Promise<APIGatewayProxyResult | void> => {
+	logger.log(`Input: ${JSON.stringify(event)}`);
+
+	if (isApiGatewayEvent(event)) {
+		logger.log('Processing API Gateway webhook event');
+		const response = await router(event);
+		logger.log(`Webhook response: ${JSON.stringify(response)}`);
+		return response;
+	} else {
+		logger.error('Unknown event type received');
+		throw new Error('Unsupported event type');
+	}
+};
+
+function isApiGatewayEvent(event: unknown): event is APIGatewayProxyEvent {
+	return (
+		typeof event === 'object' &&
+		event !== null &&
+		'httpMethod' in event &&
+		'path' in event
+	);
+}

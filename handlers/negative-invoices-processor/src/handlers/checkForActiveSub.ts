@@ -1,5 +1,6 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { doQuery } from '@modules/zuora/query';
+import { createQueryResponseSchema } from '@modules/zuora/types';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { z } from 'zod';
 import { CheckForActiveSubInputSchema } from '../types';
@@ -11,23 +12,28 @@ export const handler = async (
 	try {
 		const parsedEvent = CheckForActiveSubInputSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
+
 		const hasActiveSub = await hasActiveSubscription(
 			zuoraClient,
 			parsedEvent.accountId,
 		);
 		return {
 			...parsedEvent,
-			checkForActiveSubAttempt: {
-				Success: true,
-				hasActiveSub,
+			activeSubResult: {
+				checkForActiveSubAttempt: {
+					Success: true,
+				},
+				hasActiveSubscription: hasActiveSub,
 			},
 		};
 	} catch (error) {
 		return {
 			...event,
-			checkForActiveSubAttempt: {
-				Success: false,
-				hasActiveSub: undefined,
+			activeSubResult: {
+				checkForActiveSubAttempt: {
+					Success: false,
+				},
+				hasActiveSubscription: undefined,
 				error:
 					error instanceof Error
 						? error.message
@@ -37,16 +43,14 @@ export const handler = async (
 	}
 };
 
-const queryResponseSchema = z.object({
-	done: z.boolean(),
-	size: z.number(),
-});
-
 export const hasActiveSubscription = async (
 	zuoraClient: ZuoraClient,
 	accountId: string,
 ): Promise<boolean> => {
 	const query = `SELECT Id FROM Subscription WHERE AccountId = '${accountId}' AND Status = 'Active'`;
-	const result = await doQuery(zuoraClient, query, queryResponseSchema);
+	const subsQueryResponseSchema = createQueryResponseSchema({
+		Id: z.string(),
+	});
+	const result = await doQuery(zuoraClient, query, subsQueryResponseSchema);
 	return result.size > 0;
 };

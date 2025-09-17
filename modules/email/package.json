@@ -6,9 +6,10 @@
     "it-test": "jest --group=integration",
     "check-formatting": "prettier --check **.ts",
     "fix-formatting": "prettier --write **.ts",
-    "lint": "eslint src/**/*.ts test/**/*.ts"
+    "lint": "eslint src/**/*.ts test/**/*.ts",
+    "build": "tsc --noEmit"
   },
   "dependencies": {
-    "@aws-sdk/client-sqs": "3.787.0"
+    "@aws-sdk/client-sqs": "^3.848.0"
   }
 }

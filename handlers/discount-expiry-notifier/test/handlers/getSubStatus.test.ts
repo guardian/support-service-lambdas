@@ -1,11 +1,11 @@
-import { getSubscription } from '@modules/zuora/getSubscription';
+import { getSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { handler } from '../../src/handlers/getSubStatus';
 import { BigQueryRecordSchema } from '../../src/types';
 import { mockEvent } from './data/getSubStatus/event';
 
 jest.mock('@modules/zuora/zuoraClient');
-jest.mock('@modules/zuora/getSubscription');
+jest.mock('@modules/zuora/subscription');
 describe('getSubStatus handler', () => {
 	beforeEach(() => {
 		jest.resetAllMocks();

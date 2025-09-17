@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/require-await -- this is required to ensure the lambda returns a value*/
 import { DetectFailuresInputSchema } from '../types';
-import type { DetectFailuresInput } from '../types';
-import type { ProcessedInvoice } from '../types/shared';
+import type { DetectFailuresInput, ProcessedInvoice } from '../types';
 
 export const handler = async (event: DetectFailuresInput) => {
 	try {
@@ -48,28 +47,31 @@ export function invoiceHasAtLeastOneProcessingFailure(
 
 function atLeastOneCalloutFailed(invoice: ProcessedInvoice): boolean {
 	const {
-		applyCreditToAccountBalanceAttempt,
-		checkForActiveSubAttempt,
-		checkForActivePaymentMethodAttempt,
-		refundAttempt,
+		applyCreditToAccountBalanceResult,
+		activeSubResult,
+		activePaymentMethodResult,
+		refundResult,
 	} = invoice;
 
 	if (
-		!applyCreditToAccountBalanceAttempt.Success ||
-		!checkForActiveSubAttempt?.Success
+		!applyCreditToAccountBalanceResult.applyCreditToAccountBalanceAttempt
+			.Success ||
+		!activeSubResult?.checkForActiveSubAttempt.Success
 	) {
 		return true;
 	}
 
 	// Only check payment method and refund attempts if hasActiveSub is false
-	if (checkForActiveSubAttempt.hasActiveSub === false) {
-		if (!checkForActivePaymentMethodAttempt?.Success) {
+	if (activeSubResult.hasActiveSubscription === false) {
+		if (
+			!activePaymentMethodResult?.checkForActivePaymentMethodAttempt.Success
+		) {
 			return true;
 		}
 
 		// Only check refundAttempt if hasActivePaymentMethod is true
-		if (checkForActivePaymentMethodAttempt.hasActivePaymentMethod === true) {
-			return !refundAttempt?.Success;
+		if (activePaymentMethodResult.hasActivePaymentMethod === true) {
+			return !refundResult?.refundAttempt.Success;
 		}
 	}
 
@@ -79,11 +81,10 @@ function atLeastOneCalloutFailed(invoice: ProcessedInvoice): boolean {
 function invoiceHasNoActiveSubAndNoActivePaymentMethod(
 	invoice: ProcessedInvoice,
 ): boolean {
-	const { checkForActiveSubAttempt, checkForActivePaymentMethodAttempt } =
-		invoice;
+	const { activeSubResult, activePaymentMethodResult } = invoice;
 
 	return (
-		checkForActiveSubAttempt?.hasActiveSub === false &&
-		checkForActivePaymentMethodAttempt?.hasActivePaymentMethod === false
+		activeSubResult?.hasActiveSubscription === false &&
+		activePaymentMethodResult?.hasActivePaymentMethod === false
 	);
 }

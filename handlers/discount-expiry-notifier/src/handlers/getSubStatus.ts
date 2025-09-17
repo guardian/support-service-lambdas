@@ -1,5 +1,5 @@
 import { stageFromEnvironment } from '@modules/stage';
-import { getSubscription } from '@modules/zuora/getSubscription';
+import { getSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { z } from 'zod';
 import { BigQueryRecordSchema } from '../types';

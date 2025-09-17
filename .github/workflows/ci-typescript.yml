@@ -21,7 +21,7 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: npm install --global corepack@0.31.0
       - run: corepack enable
         shell: bash
@@ -31,6 +31,7 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install
       - run: pnpm --filter "./modules/**" check-formatting
+      - run: pnpm --filter "./modules/**" build
       - run: pnpm --filter "./modules/**" lint
       - run: pnpm --filter "./modules/**" test
 
@@ -47,6 +48,7 @@ jobs:
           - generate-product-catalog
           - alarms-handler
           - discount-api
+          - stripe-disputes
           - discount-expiry-notifier
           - salesforce-disaster-recovery
           - salesforce-disaster-recovery-health-check
@@ -63,7 +65,7 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: npm install --global corepack@0.31.0
       - run: corepack enable
         shell: bash

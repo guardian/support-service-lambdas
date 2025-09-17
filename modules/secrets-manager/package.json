@@ -4,10 +4,11 @@
   "scripts": {
     "check-formatting": "prettier --check **/*.ts",
     "test": "jest --group=-integration",
+    "build": "tsc --noEmit",
     "lint": "eslint src/**/*.ts test/**/*.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-secrets-manager": "3.758.0",
+    "@aws-sdk/client-secrets-manager": "^3.848.0",
     "aws-sdk-client-mock": "4.1.0"
   }
 }

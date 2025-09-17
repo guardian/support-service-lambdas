@@ -1,12 +1,14 @@
+import { getAccount } from '@modules/zuora/account';
+import { applyCreditToAccountBalance } from '@modules/zuora/creditBalanceAdjustment';
 import {
+	creditInvoice,
 	getInvoice,
 	getInvoiceItems,
-	creditInvoice,
 } from '@modules/zuora/invoice';
 import {
-	handler,
-	cancelSourceToCommentMap,
 	type CancelSource,
+	cancelSourceToCommentMap,
+	handler,
 	type LambdaEvent,
 } from '../../src/handlers/writeOffInvoices';
 
@@ -20,6 +22,14 @@ jest.mock('@modules/zuora/invoice', () => ({
 	getInvoice: jest.fn(),
 	getInvoiceItems: jest.fn(),
 	creditInvoice: jest.fn(),
+}));
+
+jest.mock('@modules/zuora/account', () => ({
+	getAccount: jest.fn(),
+}));
+
+jest.mock('@modules/zuora/creditBalanceAdjustment', () => ({
+	applyCreditToAccountBalance: jest.fn(),
 }));
 
 describe('writeOffInvoices', () => {
@@ -53,7 +63,22 @@ describe('writeOffInvoices', () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 
-		(getInvoice as jest.Mock).mockResolvedValue({ balance: 35 });
+		(getInvoice as jest.Mock).mockResolvedValue({
+			balance: 35,
+			accountId: 'ACC123',
+		});
+
+		(getAccount as jest.Mock).mockResolvedValue({
+			metrics: {
+				creditBalance: 0,
+				totalInvoiceBalance: 35,
+				currency: 'USD',
+			},
+		});
+
+		(applyCreditToAccountBalance as jest.Mock).mockResolvedValue({
+			Success: true,
+		});
 
 		(getInvoiceItems as jest.Mock).mockResolvedValue({
 			invoiceItems,
@@ -103,7 +128,10 @@ describe('writeOffInvoices', () => {
 	});
 
 	it('handles negative balances and charges instead of credits', async () => {
-		(getInvoice as jest.Mock).mockResolvedValue({ balance: -20 });
+		(getInvoice as jest.Mock).mockResolvedValue({
+			balance: -20,
+			accountId: 'ACC123',
+		});
 
 		const invoiceItemsNegative = [
 			{
@@ -123,6 +151,9 @@ describe('writeOffInvoices', () => {
 		});
 
 		await handler(mockEvent);
+
+		// Should not apply credit balance for negative invoices
+		expect(applyCreditToAccountBalance).not.toHaveBeenCalled();
 
 		expect(creditInvoice).toHaveBeenNthCalledWith(
 			1,
@@ -151,5 +182,114 @@ describe('writeOffInvoices', () => {
 		);
 
 		expect(creditInvoice).toHaveBeenCalledTimes(2);
+	});
+
+	it('applies credit balance when invoice is positive and account has credit', async () => {
+		(getInvoice as jest.Mock).mockResolvedValue({
+			balance: 50,
+			accountId: 'ACC123',
+		});
+
+		(getAccount as jest.Mock).mockResolvedValue({
+			metrics: {
+				creditBalance: 30,
+				totalInvoiceBalance: 50,
+				currency: 'USD',
+			},
+		});
+
+		await handler(mockEvent);
+
+		// Should apply credit balance adjustment
+		expect(applyCreditToAccountBalance).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.stringContaining('"Amount":30'),
+		);
+
+		// Should still process remaining balance (50 - 30 = 20) with invoice items
+		expect(getInvoiceItems).toHaveBeenCalled();
+		expect(creditInvoice).toHaveBeenCalled();
+	});
+
+	it('fully balances invoice with credit and skips invoice item adjustments', async () => {
+		(getInvoice as jest.Mock).mockResolvedValue({
+			balance: 25,
+			accountId: 'ACC123',
+		});
+
+		(getAccount as jest.Mock).mockResolvedValue({
+			metrics: {
+				creditBalance: 50, // More credit than needed
+				totalInvoiceBalance: 25,
+				currency: 'USD',
+			},
+		});
+
+		await handler(mockEvent);
+
+		// Should apply only the needed amount (25)
+		expect(applyCreditToAccountBalance).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.stringContaining('"Amount":25'),
+		);
+
+		// Should NOT process invoice items since balance is now zero
+		expect(getInvoiceItems).not.toHaveBeenCalled();
+		expect(creditInvoice).not.toHaveBeenCalled();
+	});
+
+	it('skips credit balance application when account has no credit', async () => {
+		(getInvoice as jest.Mock).mockResolvedValue({
+			balance: 35,
+			accountId: 'ACC123',
+		});
+
+		(getAccount as jest.Mock).mockResolvedValue({
+			metrics: {
+				creditBalance: 0,
+				totalInvoiceBalance: 35,
+				currency: 'USD',
+			},
+		});
+
+		await handler(mockEvent);
+
+		// Should NOT apply credit balance
+		expect(applyCreditToAccountBalance).not.toHaveBeenCalled();
+
+		// Should proceed directly to invoice item adjustments
+		expect(getInvoiceItems).toHaveBeenCalled();
+		expect(creditInvoice).toHaveBeenCalled();
+	});
+
+	it('includes correct comment and reason code in credit balance adjustment', async () => {
+		(getInvoice as jest.Mock).mockResolvedValue({
+			balance: 30,
+			accountId: 'ACC123',
+		});
+
+		(getAccount as jest.Mock).mockResolvedValue({
+			metrics: {
+				creditBalance: 40,
+				totalInvoiceBalance: 30,
+				currency: 'USD',
+			},
+		});
+
+		await handler(mockEvent);
+
+		// Verify the credit balance adjustment was called with correct parameters
+		expect(applyCreditToAccountBalance).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.stringContaining('"Amount":30'),
+		);
+		expect(applyCreditToAccountBalance).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.stringContaining('"Type":"Decrease"'),
+		);
+		expect(applyCreditToAccountBalance).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.stringContaining('MMA cancellation process'),
+		);
 	});
 });

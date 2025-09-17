@@ -42,6 +42,7 @@ object ProductMoveSpec {
           SubscriptionName(subscriptionName),
           postData,
           Some(IdentityId("test")),
+          LocalDate.parse("2000-01-01"),
         )
       } yield output
     println(output)

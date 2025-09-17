@@ -1,4 +1,4 @@
-import type { RatePlan } from '@modules/zuora/zuoraSchemas';
+import type { RatePlan } from '@modules/zuora/types';
 
 export const isDiscount = (ratePlan: RatePlan) => {
 	return (

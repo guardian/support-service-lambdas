@@ -52,6 +52,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
           collect = Some(true),
           runBilling = Some(true),
           preview = Some(false),
+          LastPlanAddedDate__c = timeLocalDate,
         )
 
         val recurringContributionToSupporterPlus = new GetRatePlans(
@@ -70,6 +71,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
                 collect = Some(true),
                 runBilling = Some(true),
                 preview = Some(false),
+                LastPlanAddedDate__c = LocalDate.ofInstant(time, ZoneId.systemDefault()),
               )
             }
         } yield assert(createRequestBody)(equalTo(expectedRequestBody))
@@ -100,6 +102,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
           collect = Some(true),
           runBilling = Some(true),
           preview = Some(false),
+          LastPlanAddedDate__c = timeLocalDate,
         )
 
         val recurringContributionToSupporterPlus = new GetRatePlans(
@@ -118,6 +121,7 @@ object SubscriptionUpdateSpec extends ZIOSpecDefault {
                 collect = Some(true),
                 runBilling = Some(true),
                 preview = Some(false),
+                LastPlanAddedDate__c = LocalDate.ofInstant(time, ZoneId.systemDefault()),
               )
             }
             .provideLayer(

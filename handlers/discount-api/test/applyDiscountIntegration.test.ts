@@ -3,9 +3,8 @@
  */
 import type { EmailMessageWithUserId } from '@modules/email/email';
 import type { Stage } from '@modules/stage';
-import { cancelSubscription } from '@modules/zuora/cancelSubscription';
-import { zuoraDateFormat } from '@modules/zuora/common';
-import { Logger } from '@modules/zuora/logger';
+import { cancelSubscription } from '@modules/zuora/subscription';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import {
@@ -28,7 +27,6 @@ test('Supporter Plus subscriptions can have a discount and get an email', async 
 	const subscriptionNumber = await createSupporterPlusSubscription(zuoraClient);
 
 	const { response, emailPayload } = await applyDiscountEndpoint(
-		new Logger(),
 		stage,
 		{ 'x-identity-id': validIdentityId },
 		subscriptionNumber,
@@ -80,7 +78,6 @@ test('digi subs can have a discount but dont get an email', async () => {
 	);
 
 	const { response, emailPayload } = await applyDiscountEndpoint(
-		new Logger(),
 		stage,
 		{ 'x-identity-id': validIdentityId },
 		subscriptionNumber,

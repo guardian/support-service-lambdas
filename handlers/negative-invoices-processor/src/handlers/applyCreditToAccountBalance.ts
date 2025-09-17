@@ -1,7 +1,10 @@
 import { stageFromEnvironment } from '@modules/stage';
-import { applyCreditToAccountBalance } from '@modules/zuora/applyCreditToAccountBalance';
+import { applyCreditToAccountBalance } from '@modules/zuora/creditBalanceAdjustment';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { InvoiceSchema } from '../types';
+import {
+	ApplyCreditToAccountBalanceResponseSchema,
+	InvoiceSchema,
+} from '../types';
 import type {
 	ApplyCreditToAccountBalanceInput,
 	ApplyCreditToAccountBalanceOutput,
@@ -20,17 +23,25 @@ export const handler = async (
 		});
 
 		const applyCreditToAccountBalanceAttempt =
-			await applyCreditToAccountBalance(zuoraClient, body);
+			await applyCreditToAccountBalance(
+				zuoraClient,
+				body,
+				ApplyCreditToAccountBalanceResponseSchema,
+			);
 
 		return {
 			...parsedEvent,
-			applyCreditToAccountBalanceAttempt,
+			applyCreditToAccountBalanceResult: {
+				applyCreditToAccountBalanceAttempt,
+			},
 		};
 	} catch (error) {
 		return {
 			...event,
-			applyCreditToAccountBalanceAttempt: {
-				Success: false,
+			applyCreditToAccountBalanceResult: {
+				applyCreditToAccountBalanceAttempt: {
+					Success: false,
+				},
 				error:
 					error instanceof Error
 						? error.message

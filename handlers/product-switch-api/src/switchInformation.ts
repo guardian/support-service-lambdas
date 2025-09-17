@@ -1,18 +1,19 @@
 import type { BillingPeriod } from '@modules/billingPeriod';
 import { ValidationError } from '@modules/errors';
-import type { Currency } from '@modules/internationalisation/currency';
+import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { isSupportedCurrency } from '@modules/internationalisation/currency';
 import type { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
+import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import type { SimpleInvoiceItem } from '@modules/zuora/billingPreview';
 import type {
 	RatePlan,
 	ZuoraAccount,
 	ZuoraSubscription,
-} from '@modules/zuora/zuoraSchemas';
+} from '@modules/zuora/types';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type { CatalogInformation } from './catalogInformation';
@@ -36,7 +37,7 @@ export type SubscriptionInformation = {
 	previousProductName: string;
 	previousRatePlanName: string;
 	previousAmount: number;
-	currency: Currency;
+	currency: IsoCurrency;
 	billingPeriod: BillingPeriod;
 };
 
@@ -117,7 +118,7 @@ export const subscriptionHasAlreadySwitchedToSupporterPlus = (
 	);
 };
 
-const getCurrency = (contributionRatePlan: RatePlan): Currency => {
+const getCurrency = (contributionRatePlan: RatePlan): IsoCurrency => {
 	const currency = getIfDefined(
 		contributionRatePlan.ratePlanCharges[0]?.currency,
 		'No currency found on the rate plan charge',
@@ -140,7 +141,7 @@ export const getSwitchInformationWithOwnerCheck = async (
 	lazyBillingPreview: Lazy<SimpleInvoiceItem[]>,
 	today: Dayjs,
 ): Promise<SwitchInformation> => {
-	console.log(
+	logger.log(
 		`Checking subscription ${subscription.subscriptionNumber} is owned by the currently logged in user`,
 	);
 	const userInformation = getAccountInformation(account);
@@ -152,7 +153,7 @@ export const getSwitchInformationWithOwnerCheck = async (
 			`Subscription ${subscription.subscriptionNumber} does not belong to identity ID ${identityIdFromRequest}`,
 		);
 	}
-	console.log(
+	logger.log(
 		`Subscription ${subscription.subscriptionNumber} is owned by identity user ${identityIdFromRequest}`,
 	);
 
@@ -192,7 +193,18 @@ export const getSwitchInformationWithOwnerCheck = async (
 	const actualBasePrice =
 		maybeDiscount?.discountedPrice ?? catalogInformation.supporterPlus.price;
 
-	const contributionAmount = Math.max(0, previousAmount - actualBasePrice);
+	// newAmount is only passed in where the user is in the switch journey - for cancellation saves the new amount is discounted for the first year - they always get the base price (with discount)
+	const userDesiredAmount = input.newAmount ?? previousAmount;
+
+	// Validate that the user's desired amount is at least the base Supporter Plus price
+	// Only validate when newAmount is explicitly provided by the frontend
+	if (input.newAmount && userDesiredAmount < actualBasePrice) {
+		throw new ValidationError(
+			`Cannot switch to Supporter Plus: desired amount (${userDesiredAmount}) is less than the minimum Supporter Plus price (${actualBasePrice}). Use the members-data-api to modify contribution amounts instead.`,
+		);
+	}
+
+	const contributionAmount = Math.max(0, userDesiredAmount - actualBasePrice);
 
 	const subscriptionInformation = {
 		accountNumber: subscription.accountNumber,
@@ -213,7 +225,7 @@ export const getSwitchInformationWithOwnerCheck = async (
 		input,
 		startNewTerm,
 		contributionAmount,
-		actualTotalPrice: contributionAmount + actualBasePrice,
+		actualTotalPrice: userDesiredAmount,
 		account: userInformation,
 		subscription: subscriptionInformation,
 		catalog: catalogInformation,
