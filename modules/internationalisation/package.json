@@ -1,0 +1,14 @@
+{
+  "name": "internationalisation",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "jest --group=-integration --passWithNoTests",
+    "check-formatting": "prettier --check **.ts",
+    "fix-formatting": "prettier --write **.ts",
+    "lint": "eslint src/**/*.ts"
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  }
+}

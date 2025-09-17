@@ -75,11 +75,7 @@ export class ZuoraClient {
 			maybeCallerInfo,
 		);
 
-	public async fetchWithoutLogging<
-		I,
-		O,
-		T extends z.ZodType<O, z.ZodTypeDef, I>,
-	>(
+	async fetchWithoutLogging<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
 		method: string,
 		schema: T,
