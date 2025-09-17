@@ -218,7 +218,7 @@ describe('product-switching behaviour', () => {
 				false,
 			);
 
-			const response = await doSwitch(zuoraClient, switchInformation);
+			const response = await doSwitch(zuoraClient, switchInformation, dayjs());
 			expect(response.success).toEqual(true);
 		},
 		1000 * 60,
@@ -236,7 +236,7 @@ describe('product-switching behaviour', () => {
 				{ billingPeriod: 'Month' },
 			);
 
-			const response = await doSwitch(zuoraClient, switchInformation);
+			const response = await doSwitch(zuoraClient, switchInformation, dayjs());
 
 			await createPayment(
 				zuoraClient,
@@ -261,7 +261,11 @@ describe('product-switching behaviour', () => {
 				false,
 			);
 
-			const switchResponse = await doSwitch(zuoraClient, switchInformation);
+			const switchResponse = await doSwitch(
+				zuoraClient,
+				switchInformation,
+				dayjs(),
+			);
 
 			const invoiceId = getIfDefined(
 				switchResponse.invoiceIds?.[0],
