@@ -39,10 +39,8 @@ export const appliesToSchema = z.object({
 
 export const promotionSchema = z.object({
 	name: z.string(),
-	description: z.string(),
 	promotionType: promotionTypeSchema,
 	appliesTo: appliesToSchema,
-	campaignCode: z.string(),
 	codes: z.record(z.string(), z.array(z.string())),
 	starts: z.coerce.date(),
 	expires: z.coerce.date().optional(),

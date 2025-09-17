@@ -5,14 +5,11 @@ const promotionName = 'Tiered Discount Weekend Home Delivery Extra';
 const productRatePlanId = 'plan123';
 const mockPromotion: Promotion = {
 	name: promotionName,
-	description:
-		'Guardian and Observer newspaper subscriptions to suit every reader',
 	promotionType: { name: 'percent_discount', amount: 25, durationMonths: 3 },
 	appliesTo: {
 		productRatePlanIds: new Set([productRatePlanId]),
 		countries: new Set(['GB']),
 	},
-	campaignCode: 'C_L6KVUF94',
 	codes: { 'Channel 1': ['TEST123'] },
 	starts: new Date('2024-09-25T23:00:00.000Z'),
 	expires: new Date('2099-11-05T23:59:59.000Z'),
