@@ -24,6 +24,8 @@ import {
 } from '@modules/zuora/createSubscription/previewCreateSubscription';
 import { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 import { Promotion } from '@modules/promotions/schema';
+import { getInvoice } from '@modules/zuora/invoice';
+import { getIfDefined } from '@modules/nullAndUndefined';
 
 describe('createSubscription integration', () => {
 	const productCatalog = generateProductCatalog(code);
@@ -74,7 +76,6 @@ describe('createSubscription integration', () => {
 	const mockPromotions: Promotion[] = [
 		{
 			name: 'Test Promotion',
-			description: 'Test Promotion Description',
 			promotionType: {
 				name: 'percent_discount',
 				durationMonths: 3,
@@ -84,7 +85,6 @@ describe('createSubscription integration', () => {
 				productRatePlanIds: new Set(['71a116628be96ab11606b51ec6060555']),
 				countries: new Set(['GB']),
 			},
-			campaignCode: 'TEST-CAMPAIGN',
 			codes: { 'Test Channel': ['TEST_CODE'] },
 			starts: new Date(dayjs().subtract(1, 'day').toISOString()),
 			expires: new Date(dayjs().add(1, 'month').toISOString()),
@@ -199,6 +199,12 @@ describe('createSubscription integration', () => {
 			inputFields,
 		);
 		expect(response.subscriptionNumbers.length).toEqual(1);
+		const invoiceNumber = getIfDefined(
+			response.invoiceNumbers?.[0],
+			'Expected an invoice number to be defined',
+		);
+		const zuoraInvoice = await getInvoice(client, invoiceNumber);
+		expect(zuoraInvoice.amount).toEqual(12);
 	});
 	test('We can create a subscription with a promotion', async () => {
 		const inputFields: CreateSubscriptionInputFields<DirectDebit> = {
@@ -218,8 +224,8 @@ describe('createSubscription integration', () => {
 			inputFields,
 		);
 		expect(response.subscriptionNumbers.length).toEqual(1);
-	});
-	test('We can preview a subscription with a promotion', async () => {
+	}, 10000);
+	test('We can preview a subscription with a discount promotion', async () => {
 		const inputFields: PreviewCreateSubscriptionInputFields = {
 			stage: 'CODE',
 			accountNumber: 'A01036826', // You will probably need to add a valid account number here because they get deleted after a short time
