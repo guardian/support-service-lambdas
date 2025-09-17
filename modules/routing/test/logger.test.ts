@@ -1,8 +1,8 @@
 import { Logger } from '@modules/routing/logger';
 
 // If you reformat this section of the file, you will need to update the expected line numbers
-function logCaller(logger: Logger) {
-	return logger.getMessage(logger.getCallerInfo(-1), 'msg');
+function getMessage(logger: Logger) {
+	return (() => logger.getMessage(logger.getCallerInfo(), 'msg'))();
 }
 
 function getWrappedSum(logger: Logger) {
@@ -18,26 +18,27 @@ function getWrappedFailFn(logger: Logger) {
 
 // end of section that you shouldn't reformat
 
-const expectedCallerInfo = '[logger.test.ts:5::logCaller]';
+const expectedCallerInfo = '[logger.test.ts:5::getMessage]';
 const expectedWrappedSum = '[logger.test.ts:10::getWrappedSum]';
 const expectedWrappedFailFn = '[logger.test.ts:16::getWrappedFailFn]';
 
 test('it should be a no-op if theres no context', () => {
-	const logger = new Logger();
-	expect(logCaller(logger)).toEqual(expectedCallerInfo + ' msg');
+	const logger = new Logger([]);
+	const actual = getMessage(logger);
+	expect(actual).toEqual(expectedCallerInfo + ' msg');
 });
 
 test('it should add space separated context when you add a single item', () => {
 	const logger = new Logger();
 	logger.mutableAddContext('A-S123');
-	expect(logCaller(logger)).toEqual('A-S123 ' + expectedCallerInfo + ' msg');
+	expect(getMessage(logger)).toEqual('A-S123 ' + expectedCallerInfo + ' msg');
 });
 
 test('it should add space separated context when you add multiple items', () => {
 	const logger = new Logger();
 	logger.mutableAddContext('A-S123');
 	logger.mutableAddContext('Contribution');
-	expect(logCaller(logger)).toEqual(
+	expect(getMessage(logger)).toEqual(
 		'A-S123 Contribution ' + expectedCallerInfo + ' msg',
 	);
 });
@@ -166,6 +167,15 @@ describe('Logger.joinLines', () => {
     at error (`);
 	});
 
+	test('should pretty print strings correctly', () => {
+		const logger = new Logger();
+		const msg = 'msg';
+
+		const actual = logger.prettyPrint(msg);
+
+		expect(actual).toEqual(`msg`);
+	});
+
 	test('should join primitive types, arrays, objects, and errors with compact or pretty JSON formatting without quotes around keys', () => {
 		const logger = new Logger();
 		const primitives = [42, 'hello', true, null, undefined];
@@ -196,14 +206,16 @@ describe('Logger.joinLines', () => {
 		};
 		const error = new Error('Test error');
 
-		const result = logger.joinLines(
+		const result = [
 			...primitives,
 			shortArray,
 			longArray,
 			shortObject,
 			longObject,
 			error,
-		);
+		]
+			.map(logger.prettyPrint)
+			.join('\n');
 
 		expect(result).toBe(
 			'42\nhello\ntrue\nnull\nundefined\n' +

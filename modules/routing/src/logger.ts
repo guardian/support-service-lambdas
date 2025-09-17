@@ -61,21 +61,18 @@ export class Logger {
 	/* eslint-disable @typescript-eslint/no-explicit-any -- this has to match console.log */
 	/* eslint-disable @typescript-eslint/no-unsafe-argument -- this has to match console.log */
 	public log(message: any, ...optionalParams: any[]): void {
-		this.logFn(
-			this.getMessage(
-				this.getCallerInfo(),
-				this.joinLines(message, ...optionalParams),
-			),
-		);
+		const callerInfo = this.getCallerInfo();
+		this.logFn(this.getMessage(callerInfo, message, ...optionalParams));
 	}
 
 	public error(message?: any, ...optionalParams: any[]): void {
-		this.errorFn(
-			this.getMessage(
-				this.getCallerInfo(),
-				this.joinLines(message, ...optionalParams),
-			),
-		);
+		const callerInfo = this.getCallerInfo();
+		this.errorFn(this.getMessage(callerInfo, message, ...optionalParams));
+	}
+
+	getMessage(callerInfo: string, ...messages: any[]): string {
+		const message = messages.map(this.prettyPrint).join('\n');
+		return this.addPrefixes(callerInfo, message);
 	}
 
 	prettyPrint = (value: any): string => {
@@ -101,13 +98,10 @@ export class Logger {
 		return String(value);
 	};
 
-	joinLines(...messages: any[]) {
-		return messages.map(this.prettyPrint).join('\n');
-	}
 	/* eslint-enable @typescript-eslint/no-explicit-any */
 	/* eslint-enable @typescript-eslint/no-unsafe-argument */
 
-	getMessage(callerInfo: string, message: string): string {
+	private addPrefixes(callerInfo: string, message: string) {
 		return [...this.prefix, '[' + callerInfo + ']', message].join(' ');
 	}
 
@@ -167,7 +161,7 @@ export class Logger {
 	) {
 		const prettyError = '\nERROR\n' + this.prettyPrint(error);
 		const errorMessage = `${prefix}ERROR${shortPrettyArgs}${prettyError}`;
-		this.errorFn(this.getMessage(callerInfo, errorMessage));
+		this.errorFn(this.addPrefixes(callerInfo, errorMessage));
 	}
 
 	private logExit<TReturn>(
@@ -178,11 +172,11 @@ export class Logger {
 	) {
 		const prettyResult = '\nRESULT\n' + this.prettyPrint(result);
 		const exitMessage = `${prefix}EXIT${shortPrettyArgs}${prettyResult}`;
-		this.logFn(this.getMessage(callerInfo, exitMessage));
+		this.logFn(this.addPrefixes(callerInfo, exitMessage));
 	}
 
 	private logEntry(callerInfo: string, prefix: string, prettyArgs: string) {
-		this.logFn(this.getMessage(callerInfo, `${prefix}ENTRY${prettyArgs}`));
+		this.logFn(this.addPrefixes(callerInfo, `${prefix}ENTRY${prettyArgs}`));
 	}
 
 	private getPrettyArgs<TArgs extends unknown[]>(
