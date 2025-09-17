@@ -1,6 +1,6 @@
 import {
 	isoCountrySchema,
-	supportInternationalisationSchema,
+	supportRegionSchema,
 } from '@modules/internationalisation/schemas';
 import { z } from 'zod';
 
@@ -50,6 +50,6 @@ export type Promotion = z.infer<typeof promotionSchema>;
 
 export const appliedPromotionSchema = z.object({
 	promoCode: z.string(),
-	countryGroupId: supportInternationalisationSchema,
+	supportRegionId: supportRegionSchema,
 });
 export type AppliedPromotion = z.infer<typeof appliedPromotionSchema>;

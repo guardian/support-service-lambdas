@@ -1,5 +1,6 @@
 import { validatePromotion } from '../src/validatePromotion';
 import { Promotion, AppliedPromotion } from '../src/schema';
+import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 
 const promotionName = 'Tiered Discount Weekend Home Delivery Extra';
 const productRatePlanId = 'plan123';
@@ -22,12 +23,12 @@ const mockPromotion: Promotion = {
 
 const validAppliedPromotion: AppliedPromotion = {
 	promoCode: 'TEST123',
-	countryGroupId: 'uk',
+	supportRegionId: SupportRegionId.UK,
 };
 
 const invalidAppliedPromotion: AppliedPromotion = {
 	promoCode: 'TEST123',
-	countryGroupId: 'eu',
+	supportRegionId: SupportRegionId.EU,
 };
 
 describe('validatePromotion', () => {
@@ -70,7 +71,7 @@ describe('validatePromotion', () => {
 	it('throws an error if promotion code does not exist', () => {
 		const unknownAppliedPromotion: AppliedPromotion = {
 			promoCode: 'UNKNOWN',
-			countryGroupId: 'uk',
+			supportRegionId: SupportRegionId.UK,
 		};
 		expect(() =>
 			validatePromotion(

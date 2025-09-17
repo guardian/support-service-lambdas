@@ -1,7 +1,7 @@
 import { intersection } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
-import type { SupportInternationalisationId } from '@modules/internationalisation/countryGroup';
-import { countryGroupBySupportInternationalisationId } from '@modules/internationalisation/countryGroup';
+import type { SupportRegionId } from '@modules/internationalisation/countryGroup';
+import { countryGroupBySupportRegionId } from '@modules/internationalisation/countryGroup';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getPromotionByCode } from './getPromotions';
 import type {
@@ -33,7 +33,7 @@ export const validatePromotion = (
 			`${promotion.name} is a ${promotion.promotionType.name} promotion these are no longer supported`,
 		);
 	}
-	validateForCountryGroup(promotion, appliedPromotion.countryGroupId);
+	validateForCountryGroup(promotion, appliedPromotion.supportRegionId);
 	validateProductRatePlan(promotion, productRatePlanId);
 	return {
 		discountPercentage: promotion.promotionType.amount,
@@ -62,10 +62,9 @@ const isDiscountPromotion = (
 };
 const validateForCountryGroup = (
 	promotion: Promotion,
-	countryGroupId: SupportInternationalisationId,
+	countryGroupId: SupportRegionId,
 ) => {
-	const countryGroup =
-		countryGroupBySupportInternationalisationId(countryGroupId);
+	const countryGroup = countryGroupBySupportRegionId(countryGroupId);
 
 	if (
 		intersection([...promotion.appliesTo.countries], countryGroup.countries)

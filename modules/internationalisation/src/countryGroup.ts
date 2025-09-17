@@ -324,23 +324,23 @@ export const countryGroups: CountryGroups = {
 		supportRegionId: SupportRegionId.CA,
 	},
 } as const;
-export const countryGroupBySupportInternationalisationId = (
-	supportInternationalisationId: SupportInternationalisationId,
+export const countryGroupBySupportRegionId = (
+	supportRegionId: SupportRegionId,
 ): CountryGroup => {
-	switch (supportInternationalisationId) {
-		case 'uk':
+	switch (supportRegionId) {
+		case SupportRegionId.UK:
 			return countryGroups.GBPCountries;
-		case 'us':
-			return countryGroups.UnitedStates;
-		case 'au':
-			return countryGroups.AUDCountries;
-		case 'eu':
+		case SupportRegionId.EU:
 			return countryGroups.EURCountries;
-		case 'int':
-			return countryGroups.International;
-		case 'nz':
-			return countryGroups.NZDCountries;
-		case 'ca':
+		case SupportRegionId.US:
+			return countryGroups.UnitedStates;
+		case SupportRegionId.CA:
 			return countryGroups.Canada;
+		case SupportRegionId.AU:
+			return countryGroups.AUDCountries;
+		case SupportRegionId.NZ:
+			return countryGroups.NZDCountries;
+		case SupportRegionId.INT:
+			return countryGroups.International;
 	}
 };

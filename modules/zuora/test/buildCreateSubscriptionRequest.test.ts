@@ -11,10 +11,10 @@ import {
 	CreditCardReferenceTransaction,
 	PaymentGateway,
 } from '@modules/zuora/orders/paymentMethods';
-import { prettyLog } from '@modules/prettyPrint';
 import { CreateSubscriptionOrderAction } from '@modules/zuora/orders/orderActions';
 import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
+import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 
 const contractEffectiveDate = dayjs('2025-09-01');
 const customerAcceptanceDate = dayjs('2025-09-05');
@@ -120,14 +120,13 @@ const isCreateSubscriptionOrderAction = (
 	);
 };
 
-describe('buildCreateSubscriptionRequest', () => {
+describe('the buildCreateSubscriptionRequest function', () => {
 	it('builds request without promotion or gift', () => {
 		const request = buildCreateSubscriptionRequest(
 			productCatalog,
 			promotions,
 			supporterPlusInput,
 		);
-		prettyLog(request);
 		if (!('newAccount' in request)) {
 			throw new Error('Expected newAccount in request');
 		}
@@ -148,7 +147,7 @@ describe('buildCreateSubscriptionRequest', () => {
 			...supporterPlusInput,
 			appliedPromotion: {
 				promoCode: 'PROMO10',
-				countryGroupId: 'uk',
+				supportRegionId: SupportRegionId.UK,
 			} as AppliedPromotion,
 		};
 		const request = buildCreateSubscriptionRequest(
@@ -193,7 +192,7 @@ describe('buildCreateSubscriptionRequest', () => {
 			...supporterPlusInput,
 			appliedPromotion: {
 				promoCode: 'TEST_PATRON',
-				countryGroupId: 'uk',
+				supportRegionId: SupportRegionId.UK,
 			} as AppliedPromotion,
 		};
 		const request = buildCreateSubscriptionRequest(

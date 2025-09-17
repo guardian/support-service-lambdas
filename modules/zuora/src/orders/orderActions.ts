@@ -1,10 +1,10 @@
 import type { BillingPeriod } from '@modules/billingPeriod';
 import type { TermType } from '@modules/product-catalog/productCatalog';
+import { DiscountIds } from '@modules/promotions/config';
+import type { ValidatedPromotion } from '@modules/promotions/validatePromotion';
+import type { Stage } from '@modules/stage';
 import type { Dayjs } from 'dayjs';
 import { zuoraDateFormat } from '../utils/common';
-import { ValidatedPromotion } from '@modules/promotions/validatePromotion';
-import { Stage } from '@modules/stage';
-import { DiscountIds } from '@modules/promotions/config';
 
 export type TriggerDates = [
 	{
@@ -130,7 +130,7 @@ export type CreateSubscriptionOrderAction = BaseOrderAction & {
 				periodType: BillingPeriod;
 			}>;
 		};
-		subscribeToRatePlans: Array<SubscribeToRatePlan>;
+		subscribeToRatePlans: SubscribeToRatePlan[];
 	};
 	customFields?: {
 		DeliveryAgent__c: string | undefined;
