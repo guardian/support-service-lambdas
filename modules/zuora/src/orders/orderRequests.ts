@@ -30,7 +30,7 @@ export type OrderRequest = AccountOrderRequest & {
 		subscriptionNumber?: string;
 		orderActions: OrderAction[];
 		customFields?: {
-			LastPlanAddedDate__c?: string;
+			LastPlanAddedDate__c: string;
 			DeliveryAgent__c?: string;
 			ReaderType__c?: string;
 		};
