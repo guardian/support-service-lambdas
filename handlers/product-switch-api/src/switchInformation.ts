@@ -225,7 +225,7 @@ export const getSwitchInformationWithOwnerCheck = async (
 		input,
 		startNewTerm,
 		contributionAmount,
-		actualTotalPrice: userDesiredAmount,
+		actualTotalPrice: contributionAmount + actualBasePrice,
 		account: userInformation,
 		subscription: subscriptionInformation,
 		catalog: catalogInformation,
