@@ -96,8 +96,8 @@ importers:
   cdk:
     devDependencies:
       '@guardian/cdk':
-        specifier: 61.8.2
-        version: 61.8.2(aws-cdk-lib@2.195.0(constructs@10.4.2))(aws-cdk@2.1014.0)(constructs@10.4.2)
+        specifier: 61.11.1
+        version: 61.11.1(aws-cdk-lib@2.195.0(constructs@10.4.2))(aws-cdk@2.1014.0)(constructs@10.4.2)
       '@types/jest':
         specifier: ^29.5.14
         version: 29.5.14
@@ -124,13 +124,13 @@ importers:
 
   handlers/alarms-handler/cdk:
     dependencies:
-      '@modules/cdk':
+      '@cdk/module':
         specifier: workspace:*
         version: link:../../../cdk/module
     devDependencies:
       '@guardian/cdk':
-        specifier: 61.8.2
-        version: 61.8.2(aws-cdk-lib@2.195.0(constructs@10.4.2))(aws-cdk@2.1014.0)(constructs@10.4.2)
+        specifier: 61.11.1
+        version: 61.11.1(aws-cdk-lib@2.195.0(constructs@10.4.2))(aws-cdk@2.1014.0)(constructs@10.4.2)
       '@types/jest':
         specifier: ^29.5.14
         version: 29.5.14
@@ -174,13 +174,13 @@ importers:
 
   handlers/discount-api/cdk:
     dependencies:
-      '@modules/cdk':
+      '@cdk/module':
         specifier: workspace:*
         version: link:../../../cdk/module
     devDependencies:
       '@guardian/cdk':
-        specifier: 61.8.2
-        version: 61.8.2(aws-cdk-lib@2.195.0(constructs@10.4.2))(aws-cdk@2.1014.0)(constructs@10.4.2)
+        specifier: 61.11.1
+        version: 61.11.1(aws-cdk-lib@2.195.0(constructs@10.4.2))(aws-cdk@2.1014.0)(constructs@10.4.2)
       '@types/jest':
         specifier: ^29.5.14
         version: 29.5.14
@@ -208,6 +208,9 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.18
+      source-map-support:
+        specifier: ^0.5.21
+        version: 0.5.21
       zod:
         specifier: 'catalog:'
         version: 3.25.76
@@ -265,7 +268,7 @@ importers:
         specifier: ^1.12.3
         version: 1.13.0
       zod:
-        specifier: ^3.23.8
+        specifier: 'catalog:'
         version: 3.25.76
     devDependencies:
       '@aws-sdk/client-s3':
@@ -293,7 +296,7 @@ importers:
         specifier: ^9.15.0
         version: 9.15.1
       zod:
-        specifier: ^3.23.8
+        specifier: 'catalog:'
         version: 3.25.76
     devDependencies:
       '@types/aws-lambda':
@@ -339,6 +342,9 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.18
+      source-map-support:
+        specifier: ^0.5.21
+        version: 0.5.21
       zod:
         specifier: 'catalog:'
         version: 3.25.76
@@ -539,6 +545,12 @@ importers:
       '@types/aws-lambda':
         specifier: ^8.10.147
         version: 8.10.152
+
+  modules/internationalisation:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
 
   modules/product-benefits:
     dependencies:
@@ -1285,13 +1297,13 @@ packages:
     resolution: {integrity: sha512-Orxzlfb9c67A15cq2JQEyVc7wEsmFBmHjZWZYQMUyJ1qivXyMwdyNOs9odi79hze+2zqdTtu1E19IM/FtqZ10g==}
     engines: {node: '>=14'}
 
-  '@guardian/cdk@61.8.2':
-    resolution: {integrity: sha512-zMXpZA/+DVus9YtmZsCvUAiEDAA/YGHjBw2Mdtmq1oW5cR4hklimpu8fCZfwCUuZISVyK7XWxaaqOtTe5vTuLg==}
+  '@guardian/cdk@61.11.1':
+    resolution: {integrity: sha512-ihWDICp6QtsOmeQh5kRipp8et+Jf9xQUHFdJadgAwLQZlao7HxOOacSbBVSJEIx+RnYF+LDb1lfkJWIdiAry0Q==}
     hasBin: true
     peerDependencies:
-      aws-cdk: 2.1014.0
-      aws-cdk-lib: 2.195.0
-      constructs: 10.4.2
+      aws-cdk: ^2.1029.1
+      aws-cdk-lib: ^2.214.0
+      constructs: ^10.4.2
 
   '@guardian/eslint-config-typescript@12.0.0':
     resolution: {integrity: sha512-lEqYzdzaFKdA4CEc0pJHj+lytBSYZeao3b+GkcGaqEd6yZWkOpSWMxrQPVgiSt3Qgv7qHM/4C4U7KhLW6ycvEA==}
@@ -2469,8 +2481,8 @@ packages:
     resolution: {integrity: sha512-QVb0dM5HvG+uaxitm8wONl7jltx8dqhfU33DcqtOZcLSVIKSDDLDi7+0LbAKiyI8hD9u42m2YxXSkMGWThaecQ==}
     engines: {iojs: '>= 1.0.0', node: '>= 0.12.0'}
 
-  codemaker@1.113.0:
-    resolution: {integrity: sha512-eMmKlM79z0QfXHHG8GV6YCrCVz14LIX+Jxxthj4dz8aq5iKvXu/p1oikd7oQj6JDSYfGoBoCXsYjjqJOMDohZw==}
+  codemaker@1.114.1:
+    resolution: {integrity: sha512-X3KgS+Jof8gi3mIVnuyDrQX/g4loOlIHpwyladoSWLxv8B+nIdnGOd2TFNtxOlNGCGyuy2RY5+nASBziLiwu9w==}
     engines: {node: '>= 14.17.0'}
 
   collect-v8-coverage@1.0.2:
@@ -3669,23 +3681,14 @@ packages:
     resolution: {integrity: sha512-iPZK6eYjbxRu3uB4/WZ3EsEIMJFMqAoopl3R+zuq0UjcAm/MO6KCweDgPfP3elTztoKP3KtnVHxTn2NHBSDVUw==}
     engines: {node: '>=10'}
 
-  lodash.camelcase@4.3.0:
-    resolution: {integrity: sha512-TwuEnCnxbc3rAvhf/LbG7tJUDzhqXyFnv3dtzLOPgCG/hODL7WFnsbwktkD7yUV0RrreP/l1PALq/YSg6VvjlA==}
-
   lodash.clonedeep@4.5.0:
     resolution: {integrity: sha512-H5ZhCF25riFd9uB5UCkVKo61m3S/xZk1x4wA6yp/L3RFP6Z/eHH1ymQcGLo7J3GMPfm0V/7m1tryHuGVxpqEBQ==}
-
-  lodash.kebabcase@4.1.1:
-    resolution: {integrity: sha512-N8XRTIMMqqDgSy4VLKPnJ/+hpGZN+PHQiJnSenYqPaVV/NCqEogTnAdZLQiGKhxX+JCs8waWq2t1XHWKOmlY8g==}
 
   lodash.memoize@4.1.2:
     resolution: {integrity: sha512-t7j+NzmgnQzTAYXcsHYLgimltOV1MXHtlOWf6GjL9Kj8GK5FInw5JotxvbOs+IvV1/Dzo04/fCGfLVs7aXb4Ag==}
 
   lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
-
-  lodash.upperfirst@4.3.1:
-    resolution: {integrity: sha512-sReKOYJIJf74dhJONhU4e0/shzi1trVbSWDOhKYE5XV2O+H7Sb2Dihwuc7xWxVl+DgFPyTqIN3zMfT9cq5iWDg==}
 
   log-symbols@4.1.0:
     resolution: {integrity: sha512-8XPvpAA8uyhfteu8pIvQxpJZ7SYYdpUivZpGy6sFsBuKRY/7rQGavedeB8aK+Zkyq6upMFVL/9AW6vOYzfRyLg==}
@@ -5958,20 +5961,17 @@ snapshots:
 
   '@google-cloud/promisify@4.0.0': {}
 
-  '@guardian/cdk@61.8.2(aws-cdk-lib@2.195.0(constructs@10.4.2))(aws-cdk@2.1014.0)(constructs@10.4.2)':
+  '@guardian/cdk@61.11.1(aws-cdk-lib@2.195.0(constructs@10.4.2))(aws-cdk@2.1014.0)(constructs@10.4.2)':
     dependencies:
       '@oclif/core': 3.26.6
       aws-cdk: 2.1014.0
       aws-cdk-lib: 2.195.0(constructs@10.4.2)
       aws-sdk: 2.1692.0
       chalk: 4.1.2
-      codemaker: 1.113.0
+      codemaker: 1.114.1
       constructs: 10.4.2
       git-url-parse: 16.1.0
       js-yaml: 4.1.0
-      lodash.camelcase: 4.3.0
-      lodash.kebabcase: 4.1.1
-      lodash.upperfirst: 4.3.1
       read-pkg-up: 7.0.1
       yargs: 17.7.2
 
@@ -7668,7 +7668,7 @@ snapshots:
 
   co@4.6.0: {}
 
-  codemaker@1.113.0:
+  codemaker@1.114.1:
     dependencies:
       camelcase: 6.3.0
       decamelize: 5.0.1
@@ -9427,17 +9427,11 @@ snapshots:
     dependencies:
       p-locate: 5.0.0
 
-  lodash.camelcase@4.3.0: {}
-
   lodash.clonedeep@4.5.0: {}
-
-  lodash.kebabcase@4.1.1: {}
 
   lodash.memoize@4.1.2: {}
 
   lodash.merge@4.6.2: {}
-
-  lodash.upperfirst@4.3.1: {}
 
   log-symbols@4.1.0:
     dependencies:

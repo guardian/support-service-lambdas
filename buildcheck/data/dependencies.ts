@@ -9,6 +9,7 @@ export const dep = separateDepRecords({
 	zod: 'catalog:',
 	dayjs: '^1.11.13',
 	'@types/aws-lambda': '^8.10.147',
+	'source-map-support': '^0.5.21',
 	...awsClients(['client-cloudwatch', 'credential-providers']),
 });
 

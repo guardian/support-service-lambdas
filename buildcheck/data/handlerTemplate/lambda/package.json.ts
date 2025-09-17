@@ -13,9 +13,10 @@ export default (pkg: HandlerDefinition) => {
 			'type-check': 'tsc --noEmit',
 			build:
 				'esbuild --bundle --platform=node --target=node18 --outdir=target/ ' +
-				entryPoints,
+				entryPoints +
+				' --sourcemap',
 			lint: 'eslint src/**/*.ts test/**/*.ts',
-			package: `pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr ${pkg.name}.zip ./*.js`,
+			package: `pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr ${pkg.name}.zip ./*.js.map ./*.js`,
 			'check-formatting': 'prettier --check **.ts',
 			'fix-formatting': 'prettier --write **.ts',
 		},

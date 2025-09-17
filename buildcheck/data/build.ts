@@ -34,6 +34,7 @@ const discountApi: HandlerDefinition = {
 	name: 'discount-api',
 	dependencies: {
 		...dep.dayjs,
+		...dep['source-map-support'],
 		...dep.zod,
 	},
 	devDependencies: {

@@ -20,10 +20,10 @@ export default (config: HandlerDefinition) => ({
 	},
 	NOTICE: notice(__filename),
 	dependencies: {
-		'@modules/cdk': 'workspace:*',
+		'@cdk/module': 'workspace:*',
 	},
 	devDependencies: {
-		'@guardian/cdk': '61.8.2',
+		'@guardian/cdk': '61.11.1',
 		'@types/jest': '^29.5.14',
 		'@types/node': '^22.15.14',
 		'aws-cdk': '2.1014.0',
