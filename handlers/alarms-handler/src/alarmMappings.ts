@@ -45,7 +45,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'holiday-stop-api',
 		'holiday-stop-processor',
 		'soft-opt-in-consent-setter',
-		'manage-help-content-publisher',
 		'mobile-purchases-soft-opt-in-acquisitions',
 		'mobile-purchases-soft-opt-in-acquisitions-dlq-processor',
 		'payment-failure-comms',
@@ -105,6 +104,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'sf-contact-merge',
 		'sf-emails-to-s3-exporter',
 		'sf-gocardless-sync',
+		'manage-help-content-publisher',
 
 		// zuora
 		'invoicing-api',
