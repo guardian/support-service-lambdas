@@ -13,18 +13,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - 
-        name: Checkout repo
-        uses: actions/checkout@v4
-      - 
-        name: Set up Java
-        uses: actions/setup-java@v4
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
         with:
           distribution: 'corretto'
-          java-version: 11
-      - 
-        name: Compile production and test code
-        run: sbt Test/compile
-      - 
-        name: Run tests
+          java-version: '21'
+          cache: 'sbt'
+
+      - name: Setup SBT
+        uses: sbt/setup-sbt@v1
+
+      - name: Run tests
         run: sbt test

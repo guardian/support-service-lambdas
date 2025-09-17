@@ -1,22 +1,22 @@
 import { ValidationError } from '@modules/errors';
 import { getIfDefined } from '@modules/nullAndUndefined';
+import { logger } from '@modules/routing/logger';
 import type { SimpleInvoiceItem } from '@modules/zuora/billingPreview';
 import { getNextInvoiceTotal } from '@modules/zuora/billingPreview';
-import type { Logger } from '@modules/zuora/logger';
-import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
+import type { ZuoraSubscription } from '@modules/zuora/types';
 import type { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 
 export class EligibilityChecker {
-	constructor(private logger: Logger) {}
+	constructor() {}
 
 	assertGenerallyEligible = async (
 		subscription: ZuoraSubscription,
 		accountBalance: number,
 		getNextInvoiceItems: () => Promise<SimpleInvoiceItem[]>,
 	) => {
-		this.logger.log('Checking basic eligibility for the subscription');
+		logger.log('Checking basic eligibility for the subscription');
 		this.assertValidState(
 			subscription.status === 'Active',
 			validationRequirements.isActive,
@@ -28,7 +28,7 @@ export class EligibilityChecker {
 			`${accountBalance}`,
 		);
 
-		this.logger.log(
+		logger.log(
 			'ensuring there are no refunds/discounts expected on the affected invoices',
 		);
 		const nextInvoiceItems = await getNextInvoiceItems();
@@ -38,7 +38,7 @@ export class EligibilityChecker {
 			JSON.stringify(nextInvoiceItems),
 		);
 
-		this.logger.log(
+		logger.log(
 			"making sure there's a payment due - avoid zero contribution amounts",
 		);
 		const nextInvoiceTotal = nextInvoiceItems
@@ -50,7 +50,7 @@ export class EligibilityChecker {
 			JSON.stringify(nextInvoiceItems),
 		);
 
-		this.logger.log('Subscription is generally eligible for the discount');
+		logger.log('Subscription is generally eligible for the discount');
 	};
 
 	assertNextPaymentIsAtCatalogPrice = (
@@ -103,14 +103,29 @@ export class EligibilityChecker {
 		);
 	};
 
-	assertValidState = (isValid: boolean, message: string, actual: string) => {
-		this.logger.log(`Asserting <${message}>`);
-		if (!isValid) {
-			throw new ValidationError(
-				`subscription did not meet precondition <${message}> (was ${actual})`,
-			);
-		}
-	};
+	private assertValidState(
+		isValid: boolean,
+		message: string,
+		actual: string,
+	): asserts isValid {
+		return assertValidState(isValid, message, actual);
+	}
+}
+
+export function assertValidState(
+	isValid: boolean,
+	message: string,
+	actual: string,
+): asserts isValid {
+	logger.log(`Asserting <${message}>`);
+	if (!isValid) {
+		logger.log(
+			`FAILED: subscription did not meet precondition <${message}> (was ${actual})`,
+		);
+		throw new ValidationError(
+			`subscription did not meet precondition <${message}> (was ${actual})`,
+		);
+	}
 }
 
 export const validationRequirements = {
@@ -121,4 +136,5 @@ export const validationRequirements = {
 	zeroAccountBalance: 'account balance is zero',
 	atLeastCatalogPrice: 'next invoice must be at least the catalog price',
 	nextInvoiceGreaterThanZero: 'next invoice total must be greater than zero',
+	mustHaveDiscountDefined: 'subscription must have a discount defined',
 };

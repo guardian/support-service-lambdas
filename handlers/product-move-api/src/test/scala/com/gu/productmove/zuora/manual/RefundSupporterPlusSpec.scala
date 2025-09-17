@@ -27,6 +27,7 @@ object RunRefundLambdaLocally extends ZIOAppDefault {
           ZuoraAccountId("8ad090fd96d24cc20196d437f54a600f"),
           LocalDate.parse("2025-05-15"),
         ),
+        LocalDate.now(),
       )
       .provide(
         AwsS3Live.layer,
@@ -57,6 +58,7 @@ object BalanceInvoicesLocally extends ZIOAppDefault {
       _ <- RefundSupporterPlus
         .applyRefund(
           RefundInput(SubscriptionName("A-S00629631"), ZuoraAccountId("choose your id here"), LocalDate.now()),
+          LocalDate.now(),
         )
         .provide(
           AwsS3Live.layer,

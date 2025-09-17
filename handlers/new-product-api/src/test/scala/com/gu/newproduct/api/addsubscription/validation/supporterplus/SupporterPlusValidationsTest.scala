@@ -61,7 +61,7 @@ class SupporterPlusValidationsTest extends AnyFlatSpec with Matchers {
 
   it should "return error if amount is missing" in {
     wiredValidator(testRequest.copy(amountMinorUnits = None), MonthlySupporterPlus, GBP) shouldBe Failed(
-      "amountMinorUnits is missing",
+      "amount must be specified",
     )
   }
 

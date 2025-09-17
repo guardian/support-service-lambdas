@@ -1,5 +1,6 @@
 import type { BillingPeriod } from '@modules/billingPeriod';
 import type { Lazy } from '@modules/lazy';
+import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import type { SimpleInvoiceItem } from '@modules/zuora/billingPreview';
 
@@ -65,12 +66,12 @@ export const getDiscount = async (
 			!hasUpcomingDiscount;
 
 		if (isEligibleForDiscount) {
-			console.log('Subscription is eligible for discount');
+			logger.log('Subscription is eligible for discount');
 			return { ...discountDetails, discountedPrice };
 		}
-		console.log('Subscription is not eligible for discount - sub is Active');
+		logger.log('Subscription is not eligible for discount - sub is Active');
 		return;
 	}
-	console.log('Subscription is not eligible for discount - sub is NOT active');
+	logger.log('Subscription is not eligible for discount - sub is NOT active');
 	return;
 };

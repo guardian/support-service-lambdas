@@ -60,6 +60,7 @@ object ProductMoveEndpointSpec extends ZIOSpecDefault {
       SubscriptionName(sub),
       null,
       identityOfMMAUser.map(IdentityId.apply),
+      LocalDate.parse("2000-01-01"),
     ).as(mockRecurringContributionToSupporterPlus.wasCalled)
   }
 
@@ -92,7 +93,7 @@ object ProductMoveEndpointSpec extends ZIOSpecDefault {
     new GetSubscription {
       override def get(subscriptionName: SubscriptionName): Task[GetSubscriptionResponse] =
         if (subscriptionName.value == expectedSubName)
-          ZIO.succeed(GetSubscriptionResponse("", "", AccountNumber(accountNumberToReturn), LocalDate.EPOCH, Nil))
+          ZIO.succeed(GetSubscriptionResponse("", "", AccountNumber(accountNumberToReturn), LocalDate.EPOCH, LocalDate.EPOCH.plusYears(1), Nil))
         else
           ZIO.fail(new Throwable("subscriptionName: " + subscriptionName))
     }
@@ -106,6 +107,7 @@ object ProductMoveEndpointSpec extends ZIOSpecDefault {
         postData: ExpectedInput,
         subscription: GetSubscriptionResponse,
         account: GetAccountResponse,
+        today: LocalDate,
     ): UIO[ProductMoveEndpointTypes.OutputBody] = {
       wasCalled = true
       ZIO.succeed(null)

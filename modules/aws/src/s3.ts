@@ -7,8 +7,10 @@ import {
 	PutObjectCommand,
 	S3Client,
 } from '@aws-sdk/client-s3';
+import { Upload } from '@aws-sdk/lib-storage';
+import { awsConfig } from './config';
 
-const s3Client = new S3Client({ region: 'eu-west-1' });
+const s3Client = new S3Client(awsConfig);
 
 export const uploadFileToS3 = async ({
 	bucketName,
@@ -58,4 +60,25 @@ export const getFileFromS3 = async ({
 		console.error(error);
 		throw error;
 	}
+};
+
+export const streamToS3 = async (
+	s3Bucket: string,
+	s3Key: string,
+	contentType: string | undefined,
+	stream: ReadableStream,
+) => {
+	console.log(`streaming data to ${s3Bucket} ${s3Key}`);
+
+	const upload = new Upload({
+		client: s3Client,
+		params: {
+			Bucket: s3Bucket,
+			Key: s3Key,
+			Body: stream,
+			ContentType: contentType,
+		},
+	});
+
+	await upload.done();
 };

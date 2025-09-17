@@ -6,9 +6,8 @@ import {
 	createDigitalSubscription,
 	createSupporterPlusSubscription,
 } from '@modules/zuora/../test/it-helpers/createGuardianSubscription';
-import { cancelSubscription } from '@modules/zuora/cancelSubscription';
-import { zuoraDateFormat } from '@modules/zuora/common';
-import { Logger } from '@modules/zuora/logger';
+import { cancelSubscription } from '@modules/zuora/subscription';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { previewDiscountEndpoint } from '../src/discountEndpoint';
@@ -27,7 +26,6 @@ test("Subscriptions which don't belong to the provided identity Id are not eligi
 
 	await expect(async () => {
 		await previewDiscountEndpoint(
-			new Logger(),
 			stage,
 			{ 'x-identity-id': invalidIdentityId },
 			subscriptionNumber,
@@ -52,7 +50,6 @@ test('Subscriptions on the old price are not eligible', async () => {
 
 	await expect(async () => {
 		await previewDiscountEndpoint(
-			new Logger(),
 			stage,
 			{ 'x-identity-id': validIdentityId },
 			subscriptionNumber,
@@ -83,7 +80,6 @@ test('Subscriptions on the new price are eligible', async () => {
 	);
 
 	const result = await previewDiscountEndpoint(
-		new Logger(),
 		stage,
 		{ 'x-identity-id': validIdentityId },
 		subscriptionNumber,
@@ -126,7 +122,6 @@ test('Supporter Plus subscriptions are eligible', async () => {
 	const subscriptionNumber = await createSupporterPlusSubscription(zuoraClient);
 
 	const result = await previewDiscountEndpoint(
-		new Logger(),
 		stage,
 		{ 'x-identity-id': validIdentityId },
 		subscriptionNumber,

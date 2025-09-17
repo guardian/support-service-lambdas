@@ -155,7 +155,8 @@ class SubscriptionCancelEndpointSteps(
       charge.productRatePlanChargeId == ids.annual.productRatePlanChargeId.value ||
         charge.productRatePlanChargeId == ids.monthly.productRatePlanChargeId.value ||
         charge.productRatePlanChargeId == ids.monthlyV2.productRatePlanChargeId.value ||
-        charge.productRatePlanChargeId == ids.annualV2.productRatePlanChargeId.value,
+        charge.productRatePlanChargeId == ids.annualV2.productRatePlanChargeId.value ||
+        charge.productRatePlanChargeId == ids.student.productRatePlanChargeId.value,
     )
     supporterPlusCharge
       .map(ZIO.succeed(_))

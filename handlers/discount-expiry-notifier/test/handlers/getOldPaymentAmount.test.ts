@@ -1,6 +1,6 @@
 import { getBillingPreview } from '@modules/zuora/billingPreview';
 import { doQuery } from '@modules/zuora/query';
-import type { BillingPreviewInvoiceItem } from '@modules/zuora/zuoraSchemas';
+import type { BillingPreviewInvoiceItem } from '@modules/zuora/types';
 import { mockZuoraClient } from '../../../../modules/zuora/test/mocks/mockZuoraClient';
 import type { QueryInvoiceItem } from '../../src/handlers/getOldPaymentAmount';
 import {

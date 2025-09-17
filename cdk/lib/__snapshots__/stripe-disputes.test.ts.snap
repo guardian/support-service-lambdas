@@ -1,0 +1,2917 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`The stripe disputes webhook API stack matches the snapshot 1`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [
+      "GuAlarm",
+      "GuDistributionBucketParameter",
+      "GuApiLambda",
+      "GuLambdaFunction",
+    ],
+    "gu:cdk:version": "TEST",
+  },
+  "Outputs": {
+    "stripedisputeslambdaproducerstripedisputesproducerCODEEndpointD234BA41": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODE94CD3A3A",
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region",
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODEDeploymentStageCODE0FCB7532",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "DistributionBucketName": {
+      "Default": "/account/services/artifact.bucket",
+      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "AllowS3GetObjectonLambdaConsumerA5ED8431": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3::*:membership-dist/membership/CODE/stripe-disputes/",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "AllowS3GetObjectonLambdaConsumerA5ED8431",
+        "Roles": [
+          {
+            "Ref": "stripedisputeslambdaconsumerServiceRole234A464E",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "AllowS3GetObjectonLambdaproducer72FA08FD": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3::*:membership-dist/membership/CODE/stripe-disputes/",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "AllowS3GetObjectonLambdaproducer72FA08FD",
+        "Roles": [
+          {
+            "Ref": "stripedisputeslambdaproducerServiceRoleF01BBA32",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "AllowSQSSendMessageandGetQueueAttributestoDisputeEventsQueueonLambdaConsumer4D5B27D1": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "stripedisputeseventsqueueF268BDE0",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "AllowSQSSendMessageandGetQueueAttributestoDisputeEventsQueueonLambdaConsumer4D5B27D1",
+        "Roles": [
+          {
+            "Ref": "stripedisputeslambdaconsumerServiceRole234A464E",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "AllowSQSSendMessageandGetQueueAttributestoDisputeEventsQueueonLambdaproducerC408E8FD": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "stripedisputeseventsqueueF268BDE0",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "AllowSQSSendMessageandGetQueueAttributestoDisputeEventsQueueonLambdaproducerC408E8FD",
+        "Roles": [
+          {
+            "Ref": "stripedisputeslambdaproducerServiceRoleF01BBA32",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "AllowSQSSendMessagetoBrazeEmailsQueueonLambdaConsumerAE167DFA": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:sendmessage",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":braze-emails-CODE",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "AllowSQSSendMessagetoBrazeEmailsQueueonLambdaConsumerAE167DFA",
+        "Roles": [
+          {
+            "Ref": "stripedisputeslambdaconsumerServiceRole234A464E",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "AllowSecretsManagerGetSecretValueonLambdaConsumer2162ED59": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:CODE/Zuora-OAuth/SupportServiceLambdas-*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:CODE/Salesforce/ConnectedApp/StripeDisputeWebhooks-*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "AllowSecretsManagerGetSecretValueonLambdaConsumer2162ED59",
+        "Roles": [
+          {
+            "Ref": "stripedisputeslambdaconsumerServiceRole234A464E",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "BasePathMapping": {
+      "Properties": {
+        "DomainName": {
+          "Ref": "DomainName",
+        },
+        "RestApiId": {
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODE94CD3A3A",
+        },
+        "Stage": {
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODEDeploymentStageCODE0FCB7532",
+        },
+      },
+      "Type": "AWS::ApiGateway::BasePathMapping",
+    },
+    "DNSRecord": {
+      "Properties": {
+        "HostedZoneId": "Z3KO35ELNWZMSX",
+        "Name": "stripe-disputes.code.support.guardianapis.com",
+        "ResourceRecords": [
+          {
+            "Fn::GetAtt": [
+              "DomainName",
+              "RegionalDomainName",
+            ],
+          },
+        ],
+        "TTL": "120",
+        "Type": "CNAME",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "DeadLetterQueueAlarm48D9D867": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "There are one or more failed dispute webhook events in the stripe-disputes dead letter queue (DLQ). Check the attributes of the failed message(s) for details of the error and ensure the Stripe webhook processing is working correctly.
+DLQ: https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/sqs/v2/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#/queues/https%3A%2F%2Fsqs.",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".amazonaws.com%2F",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              "%2F",
+              {
+                "Fn::GetAtt": [
+                  "deadlettersstripedisputesqueueACC1EFEB",
+                  "QueueName",
+                ],
+              },
+            ],
+          ],
+        },
+        "AlarmName": "CODE stripe-disputes - Failed to process dispute webhook",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "deadlettersstripedisputesqueueACC1EFEB",
+                "QueueName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 300,
+        "Statistic": "Maximum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "ignore",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "DomainName": {
+      "Properties": {
+        "DomainName": "stripe-disputes.code.support.guardianapis.com",
+        "EndpointConfiguration": {
+          "Types": [
+            "REGIONAL",
+          ],
+        },
+        "RegionalCertificateArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:acm:eu-west-1:",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
+            ],
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::DomainName",
+    },
+    "deadlettersstripedisputesqueueACC1EFEB": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "dead-letters-stripe-disputes-queue-CODE",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "stripedisputeseventsqueueF268BDE0": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "QueueName": "stripe-disputes-events-queue-CODE",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "deadlettersstripedisputesqueueACC1EFEB",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 3,
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "VisibilityTimeout": 300,
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "stripedisputeslambdaconsumerD464502F": {
+      "DependsOn": [
+        "stripedisputeslambdaconsumerServiceRoleDefaultPolicy23188124",
+        "stripedisputeslambdaconsumerServiceRole234A464E",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "membership/CODE/stripe-disputes/stripe-disputes.zip",
+        },
+        "Description": "A lambda that handles stripe disputes SQS events",
+        "Environment": {
+          "Variables": {
+            "APP": "stripe-disputes",
+            "App": "stripe-disputes",
+            "DISPUTE_EVENTS_QUEUE_URL": {
+              "Ref": "stripedisputeseventsqueueF268BDE0",
+            },
+            "STACK": "membership",
+            "STAGE": "CODE",
+            "Stack": "membership",
+            "Stage": "CODE",
+          },
+        },
+        "FunctionName": "stripe-disputes-consumer-CODE",
+        "Handler": "consumer.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "stripedisputeslambdaconsumerServiceRole234A464E",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "stripedisputeslambdaconsumerServiceRole234A464E": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "stripedisputeslambdaconsumerServiceRoleDefaultPolicy23188124": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "stripedisputeseventsqueueF268BDE0",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/membership/CODE/stripe-disputes/stripe-disputes.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/membership/stripe-disputes",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/membership/stripe-disputes/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "stripedisputeslambdaconsumerServiceRoleDefaultPolicy23188124",
+        "Roles": [
+          {
+            "Ref": "stripedisputeslambdaconsumerServiceRole234A464E",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "stripedisputeslambdaconsumerSqsEventSourcestripedisputesCODEstripedisputeseventsqueueD7FA3D4B5873E52E": {
+      "Properties": {
+        "BatchSize": 1,
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "stripedisputeseventsqueueF268BDE0",
+            "Arn",
+          ],
+        },
+        "FunctionName": {
+          "Ref": "stripedisputeslambdaconsumerD464502F",
+        },
+        "MaximumBatchingWindowInSeconds": 0,
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "stripedisputeslambdaproducer13150932": {
+      "DependsOn": [
+        "stripedisputeslambdaproducerServiceRoleDefaultPolicy99A4BFD8",
+        "stripedisputeslambdaproducerServiceRoleF01BBA32",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "membership/CODE/stripe-disputes/stripe-disputes.zip",
+        },
+        "Description": "A lambda that handles stripe disputes webhook events and processes SQS events",
+        "Environment": {
+          "Variables": {
+            "APP": "stripe-disputes",
+            "App": "stripe-disputes",
+            "DISPUTE_EVENTS_QUEUE_URL": {
+              "Ref": "stripedisputeseventsqueueF268BDE0",
+            },
+            "STACK": "membership",
+            "STAGE": "CODE",
+            "Stack": "membership",
+            "Stage": "CODE",
+          },
+        },
+        "FunctionName": "stripe-disputes-producer-CODE",
+        "Handler": "producer.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "stripedisputeslambdaproducerServiceRoleF01BBA32",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "stripedisputeslambdaproducerServiceRoleDefaultPolicy99A4BFD8": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/membership/CODE/stripe-disputes/stripe-disputes.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/membership/stripe-disputes",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/membership/stripe-disputes/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "stripedisputeslambdaproducerServiceRoleDefaultPolicy99A4BFD8",
+        "Roles": [
+          {
+            "Ref": "stripedisputeslambdaproducerServiceRoleF01BBA32",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "stripedisputeslambdaproducerServiceRoleF01BBA32": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerCODE94CD3A3A": {
+      "Properties": {
+        "ApiKeySourceType": "HEADER",
+        "Description": "API Gateway for Stripe dispute webhooks (sync response) with SQS event processing",
+        "Name": "stripe-disputes-producer-CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerCODEANY3CC4B447": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "stripedisputeslambdaproducer13150932",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "stripedisputeslambdaproducerstripedisputesproducerCODE94CD3A3A",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODE94CD3A3A",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerCODEANYApiPermissionTeststripedisputesCODEstripedisputeslambdaproducerstripedisputesproducerCODE51277FCAANYCE1A7C3C": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "stripedisputeslambdaproducer13150932",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODE94CD3A3A",
+              },
+              "/test-invoke-stage/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerCODEANYApiPermissionstripedisputesCODEstripedisputeslambdaproducerstripedisputesproducerCODE51277FCAANY841F5ACD": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "stripedisputeslambdaproducer13150932",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODE94CD3A3A",
+              },
+              "/",
+              {
+                "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODEDeploymentStageCODE0FCB7532",
+              },
+              "/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerCODEAccount81E2A332": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "stripedisputeslambdaproducerstripedisputesproducerCODE94CD3A3A",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "stripedisputeslambdaproducerstripedisputesproducerCODECloudWatchRoleE7AFABAF",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerCODECloudWatchRoleE7AFABAF": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerCODEDeploymentECBEB165c51c8d4ad41b6599b3129a278baf7a0b": {
+      "DependsOn": [
+        "stripedisputeslambdaproducerstripedisputesproducerCODEproxyANYC01EF3FC",
+        "stripedisputeslambdaproducerstripedisputesproducerCODEproxyA9D84AD7",
+        "stripedisputeslambdaproducerstripedisputesproducerCODEANY3CC4B447",
+      ],
+      "Properties": {
+        "Description": "API Gateway for Stripe dispute webhooks (sync response) with SQS event processing",
+        "RestApiId": {
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODE94CD3A3A",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerCODEDeploymentStageCODE0FCB7532": {
+      "DependsOn": [
+        "stripedisputeslambdaproducerstripedisputesproducerCODEAccount81E2A332",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODEDeploymentECBEB165c51c8d4ad41b6599b3129a278baf7a0b",
+        },
+        "RestApiId": {
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODE94CD3A3A",
+        },
+        "StageName": "CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerCODEUsagePlan9C259840": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODE94CD3A3A",
+            },
+            "Stage": {
+              "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODEDeploymentStageCODE0FCB7532",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Description": "REST endpoints for stripe disputes webhook api",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "UsagePlanName": "stripe-disputes-producer-CODE",
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerCODEUsagePlanUsagePlanKeyResourcestripedisputesCODEstripedisputeslambdaproducerstripedisputesproducerCODEstripedisputeskeyCODE38D00E6AB8ADC2E1": {
+      "Properties": {
+        "KeyId": {
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODEstripedisputeskeyCODE1794DF98",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODEUsagePlan9C259840",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerCODEproxyA9D84AD7": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "stripedisputeslambdaproducerstripedisputesproducerCODE94CD3A3A",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODE94CD3A3A",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerCODEproxyANYApiPermissionTeststripedisputesCODEstripedisputeslambdaproducerstripedisputesproducerCODE51277FCAANYproxyD6D86CFA": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "stripedisputeslambdaproducer13150932",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODE94CD3A3A",
+              },
+              "/test-invoke-stage/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerCODEproxyANYApiPermissionstripedisputesCODEstripedisputeslambdaproducerstripedisputesproducerCODE51277FCAANYproxyDE1F52A3": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "stripedisputeslambdaproducer13150932",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODE94CD3A3A",
+              },
+              "/",
+              {
+                "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODEDeploymentStageCODE0FCB7532",
+              },
+              "/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerCODEproxyANYC01EF3FC": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "stripedisputeslambdaproducer13150932",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODEproxyA9D84AD7",
+        },
+        "RestApiId": {
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODE94CD3A3A",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerCODEstripedisputeskeyCODE1794DF98": {
+      "Properties": {
+        "Enabled": true,
+        "Name": "stripe-disputes-key-CODE",
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODE94CD3A3A",
+            },
+            "StageName": {
+              "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODEDeploymentStageCODE0FCB7532",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
+  },
+}
+`;
+
+exports[`The stripe disputes webhook API stack matches the snapshot 2`] = `
+{
+  "Metadata": {
+    "gu:cdk:constructs": [
+      "GuAlarm",
+      "GuDistributionBucketParameter",
+      "GuApiLambda",
+      "GuLambdaFunction",
+    ],
+    "gu:cdk:version": "TEST",
+  },
+  "Outputs": {
+    "stripedisputeslambdaproducerstripedisputesproducerPRODEndpoint6D64A3B6": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODB20FADF6",
+            },
+            ".execute-api.",
+            {
+              "Ref": "AWS::Region",
+            },
+            ".",
+            {
+              "Ref": "AWS::URLSuffix",
+            },
+            "/",
+            {
+              "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODDeploymentStagePROD7EFD2073",
+            },
+            "/",
+          ],
+        ],
+      },
+    },
+  },
+  "Parameters": {
+    "DistributionBucketName": {
+      "Default": "/account/services/artifact.bucket",
+      "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+  },
+  "Resources": {
+    "AllowS3GetObjectonLambdaConsumerA5ED8431": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3::*:membership-dist/membership/PROD/stripe-disputes/",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "AllowS3GetObjectonLambdaConsumerA5ED8431",
+        "Roles": [
+          {
+            "Ref": "stripedisputeslambdaconsumerServiceRole234A464E",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "AllowS3GetObjectonLambdaproducer72FA08FD": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3::*:membership-dist/membership/PROD/stripe-disputes/",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "AllowS3GetObjectonLambdaproducer72FA08FD",
+        "Roles": [
+          {
+            "Ref": "stripedisputeslambdaproducerServiceRoleF01BBA32",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "AllowSQSSendMessageandGetQueueAttributestoDisputeEventsQueueonLambdaConsumer4D5B27D1": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "stripedisputeseventsqueueF268BDE0",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "AllowSQSSendMessageandGetQueueAttributestoDisputeEventsQueueonLambdaConsumer4D5B27D1",
+        "Roles": [
+          {
+            "Ref": "stripedisputeslambdaconsumerServiceRole234A464E",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "AllowSQSSendMessageandGetQueueAttributestoDisputeEventsQueueonLambdaproducerC408E8FD": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "stripedisputeseventsqueueF268BDE0",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "AllowSQSSendMessageandGetQueueAttributestoDisputeEventsQueueonLambdaproducerC408E8FD",
+        "Roles": [
+          {
+            "Ref": "stripedisputeslambdaproducerServiceRoleF01BBA32",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "AllowSQSSendMessagetoBrazeEmailsQueueonLambdaConsumerAE167DFA": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:sendmessage",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":braze-emails-PROD",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "AllowSQSSendMessagetoBrazeEmailsQueueonLambdaConsumerAE167DFA",
+        "Roles": [
+          {
+            "Ref": "stripedisputeslambdaconsumerServiceRole234A464E",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "AllowSecretsManagerGetSecretValueonLambdaConsumer2162ED59": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:PROD/Zuora-OAuth/SupportServiceLambdas-*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:secretsmanager:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":secret:PROD/Salesforce/ConnectedApp/StripeDisputeWebhooks-*",
+                    ],
+                  ],
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "AllowSecretsManagerGetSecretValueonLambdaConsumer2162ED59",
+        "Roles": [
+          {
+            "Ref": "stripedisputeslambdaconsumerServiceRole234A464E",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "BasePathMapping": {
+      "Properties": {
+        "DomainName": {
+          "Ref": "DomainName",
+        },
+        "RestApiId": {
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODB20FADF6",
+        },
+        "Stage": {
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODDeploymentStagePROD7EFD2073",
+        },
+      },
+      "Type": "AWS::ApiGateway::BasePathMapping",
+    },
+    "DNSRecord": {
+      "Properties": {
+        "HostedZoneId": "Z3KO35ELNWZMSX",
+        "Name": "stripe-disputes.support.guardianapis.com",
+        "ResourceRecords": [
+          {
+            "Fn::GetAtt": [
+              "DomainName",
+              "RegionalDomainName",
+            ],
+          },
+        ],
+        "TTL": "120",
+        "Type": "CNAME",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "DeadLetterQueueAlarm48D9D867": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "There are one or more failed dispute webhook events in the stripe-disputes dead letter queue (DLQ). Check the attributes of the failed message(s) for details of the error and ensure the Stripe webhook processing is working correctly.
+DLQ: https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/sqs/v2/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#/queues/https%3A%2F%2Fsqs.",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".amazonaws.com%2F",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              "%2F",
+              {
+                "Fn::GetAtt": [
+                  "deadlettersstripedisputesqueueACC1EFEB",
+                  "QueueName",
+                ],
+              },
+            ],
+          ],
+        },
+        "AlarmName": "PROD stripe-disputes - Failed to process dispute webhook",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "deadlettersstripedisputesqueueACC1EFEB",
+                "QueueName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 300,
+        "Statistic": "Maximum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "ignore",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "DomainName": {
+      "Properties": {
+        "DomainName": "stripe-disputes.support.guardianapis.com",
+        "EndpointConfiguration": {
+          "Types": [
+            "REGIONAL",
+          ],
+        },
+        "RegionalCertificateArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:acm:eu-west-1:",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":certificate/b384a6a0-2f54-4874-b99b-96eeff96c009",
+            ],
+          ],
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::DomainName",
+    },
+    "deadlettersstripedisputesqueueACC1EFEB": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "dead-letters-stripe-disputes-queue-PROD",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "stripedisputeseventsqueueF268BDE0": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "QueueName": "stripe-disputes-events-queue-PROD",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "deadlettersstripedisputesqueueACC1EFEB",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 3,
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "VisibilityTimeout": 300,
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "stripedisputeslambdaconsumerD464502F": {
+      "DependsOn": [
+        "stripedisputeslambdaconsumerServiceRoleDefaultPolicy23188124",
+        "stripedisputeslambdaconsumerServiceRole234A464E",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "membership/PROD/stripe-disputes/stripe-disputes.zip",
+        },
+        "Description": "A lambda that handles stripe disputes SQS events",
+        "Environment": {
+          "Variables": {
+            "APP": "stripe-disputes",
+            "App": "stripe-disputes",
+            "DISPUTE_EVENTS_QUEUE_URL": {
+              "Ref": "stripedisputeseventsqueueF268BDE0",
+            },
+            "STACK": "membership",
+            "STAGE": "PROD",
+            "Stack": "membership",
+            "Stage": "PROD",
+          },
+        },
+        "FunctionName": "stripe-disputes-consumer-PROD",
+        "Handler": "consumer.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "stripedisputeslambdaconsumerServiceRole234A464E",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "stripedisputeslambdaconsumerServiceRole234A464E": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "stripedisputeslambdaconsumerServiceRoleDefaultPolicy23188124": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "stripedisputeseventsqueueF268BDE0",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/membership/PROD/stripe-disputes/stripe-disputes.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/membership/stripe-disputes",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/membership/stripe-disputes/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "stripedisputeslambdaconsumerServiceRoleDefaultPolicy23188124",
+        "Roles": [
+          {
+            "Ref": "stripedisputeslambdaconsumerServiceRole234A464E",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "stripedisputeslambdaconsumerSqsEventSourcestripedisputesPRODstripedisputeseventsqueueE0B39D5B75C6D848": {
+      "Properties": {
+        "BatchSize": 1,
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "stripedisputeseventsqueueF268BDE0",
+            "Arn",
+          ],
+        },
+        "FunctionName": {
+          "Ref": "stripedisputeslambdaconsumerD464502F",
+        },
+        "MaximumBatchingWindowInSeconds": 0,
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "stripedisputeslambdaproducer13150932": {
+      "DependsOn": [
+        "stripedisputeslambdaproducerServiceRoleDefaultPolicy99A4BFD8",
+        "stripedisputeslambdaproducerServiceRoleF01BBA32",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "membership/PROD/stripe-disputes/stripe-disputes.zip",
+        },
+        "Description": "A lambda that handles stripe disputes webhook events and processes SQS events",
+        "Environment": {
+          "Variables": {
+            "APP": "stripe-disputes",
+            "App": "stripe-disputes",
+            "DISPUTE_EVENTS_QUEUE_URL": {
+              "Ref": "stripedisputeseventsqueueF268BDE0",
+            },
+            "STACK": "membership",
+            "STAGE": "PROD",
+            "Stack": "membership",
+            "Stage": "PROD",
+          },
+        },
+        "FunctionName": "stripe-disputes-producer-PROD",
+        "Handler": "producer.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "stripedisputeslambdaproducerServiceRoleF01BBA32",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "stripedisputeslambdaproducerServiceRoleDefaultPolicy99A4BFD8": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/membership/PROD/stripe-disputes/stripe-disputes.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/membership/stripe-disputes",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/membership/stripe-disputes/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "stripedisputeslambdaproducerServiceRoleDefaultPolicy99A4BFD8",
+        "Roles": [
+          {
+            "Ref": "stripedisputeslambdaproducerServiceRoleF01BBA32",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "stripedisputeslambdaproducerServiceRoleF01BBA32": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerPRODANY3EDEAC10": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "stripedisputeslambdaproducer13150932",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "stripedisputeslambdaproducerstripedisputesproducerPRODB20FADF6",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODB20FADF6",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerPRODANYApiPermissionTeststripedisputesPRODstripedisputeslambdaproducerstripedisputesproducerPROD7A5DFE54ANY410B8DA1": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "stripedisputeslambdaproducer13150932",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODB20FADF6",
+              },
+              "/test-invoke-stage/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerPRODANYApiPermissionstripedisputesPRODstripedisputeslambdaproducerstripedisputesproducerPROD7A5DFE54ANY874EEF2D": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "stripedisputeslambdaproducer13150932",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODB20FADF6",
+              },
+              "/",
+              {
+                "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODDeploymentStagePROD7EFD2073",
+              },
+              "/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerPRODAccountA0435C59": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "stripedisputeslambdaproducerstripedisputesproducerPRODB20FADF6",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "stripedisputeslambdaproducerstripedisputesproducerPRODCloudWatchRoleC3008504",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerPRODB20FADF6": {
+      "Properties": {
+        "ApiKeySourceType": "HEADER",
+        "Description": "API Gateway for Stripe dispute webhooks (sync response) with SQS event processing",
+        "Name": "stripe-disputes-producer-PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerPRODCloudWatchRoleC3008504": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerPRODDeploymentCC0BB07Ccbb36bfeb39c2d536b71e79edc962ac1": {
+      "DependsOn": [
+        "stripedisputeslambdaproducerstripedisputesproducerPRODproxyANY523CD05A",
+        "stripedisputeslambdaproducerstripedisputesproducerPRODproxy7610EE25",
+        "stripedisputeslambdaproducerstripedisputesproducerPRODANY3EDEAC10",
+      ],
+      "Properties": {
+        "Description": "API Gateway for Stripe dispute webhooks (sync response) with SQS event processing",
+        "RestApiId": {
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODB20FADF6",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerPRODDeploymentStagePROD7EFD2073": {
+      "DependsOn": [
+        "stripedisputeslambdaproducerstripedisputesproducerPRODAccountA0435C59",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODDeploymentCC0BB07Ccbb36bfeb39c2d536b71e79edc962ac1",
+        },
+        "RestApiId": {
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODB20FADF6",
+        },
+        "StageName": "PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerPRODUsagePlan656C6F9D": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODB20FADF6",
+            },
+            "Stage": {
+              "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODDeploymentStagePROD7EFD2073",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Description": "REST endpoints for stripe disputes webhook api",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "UsagePlanName": "stripe-disputes-producer-PROD",
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerPRODUsagePlanUsagePlanKeyResourcestripedisputesPRODstripedisputeslambdaproducerstripedisputesproducerPRODstripedisputeskeyPROD28E4CA7F2E825C5F": {
+      "Properties": {
+        "KeyId": {
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODstripedisputeskeyPRODA70E1DC4",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODUsagePlan656C6F9D",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerPRODproxy7610EE25": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "stripedisputeslambdaproducerstripedisputesproducerPRODB20FADF6",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODB20FADF6",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerPRODproxyANY523CD05A": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "stripedisputeslambdaproducer13150932",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODproxy7610EE25",
+        },
+        "RestApiId": {
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODB20FADF6",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerPRODproxyANYApiPermissionTeststripedisputesPRODstripedisputeslambdaproducerstripedisputesproducerPROD7A5DFE54ANYproxy24197D3E": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "stripedisputeslambdaproducer13150932",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODB20FADF6",
+              },
+              "/test-invoke-stage/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerPRODproxyANYApiPermissionstripedisputesPRODstripedisputeslambdaproducerstripedisputesproducerPROD7A5DFE54ANYproxyAFE6C62C": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "stripedisputeslambdaproducer13150932",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODB20FADF6",
+              },
+              "/",
+              {
+                "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODDeploymentStagePROD7EFD2073",
+              },
+              "/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "stripedisputeslambdaproducerstripedisputesproducerPRODstripedisputeskeyPRODA70E1DC4": {
+      "Properties": {
+        "Enabled": true,
+        "Name": "stripe-disputes-key-PROD",
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODB20FADF6",
+            },
+            "StageName": {
+              "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODDeploymentStagePROD7EFD2073",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
+  },
+}
+`;

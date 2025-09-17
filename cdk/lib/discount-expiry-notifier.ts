@@ -3,13 +3,7 @@ import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
 import { aws_cloudwatch, Duration } from 'aws-cdk-lib';
-import {
-	Alarm,
-	Metric,
-	Stats,
-	TreatMissingData,
-} from 'aws-cdk-lib/aws-cloudwatch';
-import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
+import { Metric, Stats, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import {
@@ -19,9 +13,8 @@ import {
 	Role,
 	ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
-import { Architecture } from 'aws-cdk-lib/aws-lambda';
+import { Architecture, LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
-import { Topic } from 'aws-cdk-lib/aws-sns';
 import {
 	DefinitionBody,
 	JsonPath,
@@ -29,6 +22,7 @@ import {
 	StateMachine,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
+import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { nodeVersion } from './node-version';
 
 export class DiscountExpiryNotifier extends GuStack {
@@ -78,6 +72,7 @@ export class DiscountExpiryNotifier extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-get-expiring-discounts-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
@@ -98,6 +93,7 @@ export class DiscountExpiryNotifier extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-filter-records-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
@@ -116,6 +112,7 @@ export class DiscountExpiryNotifier extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-get-sub-status-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
@@ -140,6 +137,7 @@ export class DiscountExpiryNotifier extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-get-old-payment-amount-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
@@ -163,6 +161,7 @@ export class DiscountExpiryNotifier extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-get-new-payment-amount-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
@@ -184,6 +183,7 @@ export class DiscountExpiryNotifier extends GuStack {
 		const sendEmailLambda = new GuLambdaFunction(this, 'send-email-lambda', {
 			app: appName,
 			functionName: `${appName}-send-email-${this.stage}`,
+			loggingFormat: LoggingFormat.TEXT,
 			runtime: nodeVersion,
 			environment: {
 				Stage: this.stage,
@@ -200,6 +200,7 @@ export class DiscountExpiryNotifier extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-save-results-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
@@ -224,6 +225,7 @@ export class DiscountExpiryNotifier extends GuStack {
 			{
 				app: appName,
 				functionName: `${appName}-alarm-on-failures-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
 					Stage: this.stage,
@@ -366,12 +368,6 @@ export class DiscountExpiryNotifier extends GuStack {
 			enabled: true,
 		});
 
-		const topic = Topic.fromTopicArn(
-			this,
-			'Topic',
-			`arn:aws:sns:${this.region}:${this.account}:alarms-handler-topic-${this.stage}`,
-		);
-
 		const lambdaFunctionsToAlarmOn = [
 			getExpiringDiscountsLambda,
 			filterRecordsLambda,
@@ -379,13 +375,13 @@ export class DiscountExpiryNotifier extends GuStack {
 		];
 
 		lambdaFunctionsToAlarmOn.forEach((lambdaFunction, index) => {
-			const alarm = new Alarm(this, `alarm-${index}`, {
+			new SrLambdaAlarm(this, `alarm-${index}`, {
 				alarmName: `Discount Expiry Notifier - ${lambdaFunction.functionName} - something went wrong - ${this.stage}`,
 				alarmDescription:
 					'Something went wrong when executing the Discount Expiry Notifier. See Cloudwatch logs for more information on the error.',
 				datapointsToAlarm: 1,
 				evaluationPeriods: 1,
-				actionsEnabled: true,
+				lambdaFunctionNames: lambdaFunction.functionName,
 				comparisonOperator:
 					aws_cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
 				metric: new Metric({
@@ -399,8 +395,8 @@ export class DiscountExpiryNotifier extends GuStack {
 				}),
 				threshold: 0,
 				treatMissingData: TreatMissingData.MISSING,
+				app: appName,
 			});
-			alarm.addAlarmAction(new SnsAction(topic));
 		});
 	}
 }

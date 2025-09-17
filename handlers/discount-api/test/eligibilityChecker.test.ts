@@ -3,11 +3,10 @@ import {
 	itemsForSubscription,
 	toSimpleInvoiceItems,
 } from '@modules/zuora/billingPreview';
-import { Logger } from '@modules/zuora/logger';
 import {
 	billingPreviewSchema,
 	zuoraSubscriptionResponseSchema,
-} from '@modules/zuora/zuoraSchemas';
+} from '@modules/zuora/types';
 import { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import dayjs from 'dayjs';
@@ -26,7 +25,7 @@ import subscriptionJson3 from './fixtures/digital-subscriptions/eligibility-chec
 import subscriptionJson1 from './fixtures/supporter-plus/free-2-months.json';
 import subSupporterPlusFullPrice from './fixtures/supporter-plus/full-price.json';
 
-const eligibilityChecker = new EligibilityChecker(new Logger());
+const eligibilityChecker = new EligibilityChecker();
 const catalogProd = new ZuoraCatalogHelper(
 	zuoraCatalogSchema.parse(catalogJsonProd),
 );

@@ -51,6 +51,7 @@ case class SwitchProductUpdateRequest(
     targetDate: Option[LocalDate] = None,
     currentTerm: Option[String] = None,
     currentTermPeriodType: Option[String] = None,
+    LastPlanAddedDate__c: LocalDate,
 ) extends SubscriptionUpdateRequest
     derives JsonEncoder
 

@@ -1,24 +1,20 @@
 import { stageFromEnvironment } from '@modules/stage';
-import { applyCreditToAccountBalance } from '@modules/zuora/applyCreditToAccountBalance';
+import { applyCreditToAccountBalance } from '@modules/zuora/creditBalanceAdjustment';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { z } from 'zod';
+import {
+	ApplyCreditToAccountBalanceResponseSchema,
+	InvoiceSchema,
+} from '../types';
+import type {
+	ApplyCreditToAccountBalanceInput,
+	ApplyCreditToAccountBalanceOutput,
+} from '../types';
 
-export const ApplyCreditToAccountBalanceInputSchema = z.object({
-	invoiceId: z.string(),
-	accountId: z.string(),
-	invoiceNumber: z.string(),
-	invoiceBalance: z.number(),
-	hasActiveSub: z.boolean(),
-	hasActivePaymentMethod: z.boolean().optional(),
-});
-
-export type ApplyCreditToAccountBalanceInput = z.infer<
-	typeof ApplyCreditToAccountBalanceInputSchema
->;
-
-export const handler = async (event: ApplyCreditToAccountBalanceInput) => {
+export const handler = async (
+	event: ApplyCreditToAccountBalanceInput,
+): Promise<ApplyCreditToAccountBalanceOutput> => {
 	try {
-		const parsedEvent = ApplyCreditToAccountBalanceInputSchema.parse(event);
+		const parsedEvent = InvoiceSchema.parse(event);
 		const zuoraClient = await ZuoraClient.create(stageFromEnvironment());
 		const body = JSON.stringify({
 			Amount: Math.abs(parsedEvent.invoiceBalance), //must be a positive value
@@ -26,18 +22,31 @@ export const handler = async (event: ApplyCreditToAccountBalanceInput) => {
 			Type: 'Increase',
 		});
 
-		const attempt = await applyCreditToAccountBalance(zuoraClient, body);
+		const applyCreditToAccountBalanceAttempt =
+			await applyCreditToAccountBalance(
+				zuoraClient,
+				body,
+				ApplyCreditToAccountBalanceResponseSchema,
+			);
 
 		return {
 			...parsedEvent,
-			attempt,
+			applyCreditToAccountBalanceResult: {
+				applyCreditToAccountBalanceAttempt,
+			},
 		};
 	} catch (error) {
 		return {
 			...event,
-			applyCreditToAccountBalanceStatus: 'Error',
-			errorDetail:
-				error instanceof Error ? error.message : JSON.stringify(error, null, 2),
+			applyCreditToAccountBalanceResult: {
+				applyCreditToAccountBalanceAttempt: {
+					Success: false,
+				},
+				error:
+					error instanceof Error
+						? error.message
+						: JSON.stringify(error, null, 2),
+			},
 		};
 	}
 };

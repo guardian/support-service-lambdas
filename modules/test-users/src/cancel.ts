@@ -1,4 +1,4 @@
-import { cancelSubscription } from '@modules/zuora/cancelSubscription';
+import { cancelSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 

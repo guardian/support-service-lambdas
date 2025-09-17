@@ -1,6 +1,6 @@
 import { getSingleOrThrow } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
-import type { Currency } from '@modules/internationalisation/currency';
+import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { isSupportedCurrency } from '@modules/internationalisation/currency';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
@@ -9,12 +9,12 @@ import type {
 	ProductCatalog,
 	ProductRatePlan,
 } from '@modules/product-catalog/productCatalog';
-import { zuoraDateFormat } from '@modules/zuora/common';
-import { getAccount } from '@modules/zuora/getAccount';
-import { getSubscription } from '@modules/zuora/getSubscription';
-import type { Logger } from '@modules/zuora/logger';
+import { logger } from '@modules/routing/logger';
+import { getAccount } from '@modules/zuora/account';
+import { getSubscription } from '@modules/zuora/subscription';
+import type { RatePlan, RatePlanCharge } from '@modules/zuora/types';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { RatePlan, RatePlanCharge } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
 import type { EmailFields } from './sendEmail';
 import { supporterPlusAmountBands } from './supporterPlusAmountBands';
@@ -40,7 +40,6 @@ type ProductData = {
 };
 
 export const getSupporterPlusData = (
-	logger: Logger,
 	productCatalog: ProductCatalog,
 	ratePlans: RatePlan[],
 ): SupporterPlusData => {
@@ -127,7 +126,7 @@ export const getSupporterPlusData = (
 
 const validateNewAmount = (
 	newAmount: number,
-	currency: Currency,
+	currency: IsoCurrency,
 	billingPeriod: ProductBillingPeriod<'SupporterPlus'>,
 ): void => {
 	const amountBand = supporterPlusAmountBands[currency][billingPeriod];
@@ -144,7 +143,6 @@ const validateNewAmount = (
 };
 
 export const updateSupporterPlusAmount = async (
-	logger: Logger,
 	zuoraClient: ZuoraClient,
 	productCatalog: ProductCatalog,
 	identityIdFromRequest: string,
@@ -164,7 +162,6 @@ export const updateSupporterPlusAmount = async (
 	}
 
 	const supporterPlusData = getSupporterPlusData(
-		logger,
 		productCatalog,
 		subscription.ratePlans,
 	);

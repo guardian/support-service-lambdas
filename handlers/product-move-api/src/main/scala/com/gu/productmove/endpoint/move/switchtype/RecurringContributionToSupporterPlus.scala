@@ -41,6 +41,7 @@ trait RecurringContributionToSupporterPlus {
       postData: ExpectedInput,
       subscription: GetSubscription.GetSubscriptionResponse,
       account: GetAccount.GetAccountResponse,
+      today: LocalDate,
   ): Task[OutputBody]
 }
 
@@ -60,6 +61,7 @@ class RecurringContributionToSupporterPlusImpl(
       postData: ExpectedInput,
       subscription: GetSubscriptionResponse,
       account: GetAccountResponse,
+      today: LocalDate,
   ): Task[OutputBody] =
     for {
       _ <- ZIO.log("RecurringContributionToSupporterPlus PostData: " + postData.toString)
@@ -96,6 +98,7 @@ class RecurringContributionToSupporterPlusImpl(
             ratePlanCharge,
             currency,
             currentRatePlan.id,
+            today,
           )
         else
           doUpdate(
@@ -119,6 +122,7 @@ class RecurringContributionToSupporterPlusImpl(
       activeRatePlanCharge: RatePlanCharge,
       currency: Currency,
       currentRatePlanId: String,
+      today: LocalDate,
   ): Task[OutputBody] = for {
     _ <- ZIO.log("Fetching Preview from Zuora")
 
@@ -133,6 +137,7 @@ class RecurringContributionToSupporterPlusImpl(
           targetDate = Some(today.plusMonths(13)),
           currentTerm = Some("24"),
           currentTermPeriodType = Some("Month"),
+          LastPlanAddedDate__c = today,
         )
     }
 
@@ -188,6 +193,7 @@ class RecurringContributionToSupporterPlusImpl(
             currency,
             currentRatePlan.id,
             price,
+            today,
           )
         else
           updateWithTermRenewal(
@@ -313,6 +319,7 @@ class RecurringContributionToSupporterPlusImpl(
       currency: Currency,
       currentRatePlanId: String,
       price: BigDecimal,
+      today: LocalDate,
   ): Task[InvoiceId] = {
     for {
       updateRequestBody <- getRatePlans.getRatePlans(billingPeriod, currency, currentRatePlanId, price).map {
@@ -327,6 +334,7 @@ class RecurringContributionToSupporterPlusImpl(
             // We will collect via a separate create payment call if the amount payable is not too small
             collect = None,
             preview = Some(false),
+            LastPlanAddedDate__c = today,
           )
       }
       updateResponse <- subscriptionUpdate.update[SubscriptionUpdateResponse](subscriptionName, updateRequestBody)
@@ -361,6 +369,7 @@ class RecurringContributionToSupporterPlusImpl(
             // We will collect via a separate create payment call if the amount payable is not too small
             collect = None,
             preview = Some(false),
+            LastPlanAddedDate__c = today,
           )
       }
       updateResponse <- subscriptionUpdate.update[SubscriptionUpdateResponse](subscriptionName, updateRequestBody)

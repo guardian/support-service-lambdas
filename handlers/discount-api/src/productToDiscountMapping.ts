@@ -1,10 +1,10 @@
 import { getSingleOrThrow } from '@modules/arrayFunctions';
 import type { DataExtensionName } from '@modules/email/email';
 import { DataExtensionNames } from '@modules/email/email';
-import { ValidationError } from '@modules/errors';
 import type { Stage } from '@modules/stage';
 import { isNotRemovedOrDiscount } from '@modules/zuora/rateplan';
-import type { ZuoraSubscription } from '@modules/zuora/zuoraSchemas';
+import type { ZuoraSubscription } from '@modules/zuora/types';
+import { assertValidState, validationRequirements } from './eligibilityChecker';
 
 function getDiscountableRatePlan(subscription: ZuoraSubscription) {
 	return getSingleOrThrow(
@@ -25,11 +25,11 @@ export const getDiscountFromSubscription = (
 	const discount =
 		ProductToDiscountMapping(stage)[discountableProductRatePlanId];
 
-	if (discount === undefined) {
-		throw new ValidationError(
-			`Subscription ${subscription.subscriptionNumber} is not eligible for any discount`,
-		);
-	}
+	assertValidState(
+		discount !== undefined,
+		validationRequirements.mustHaveDiscountDefined,
+		JSON.stringify(discount),
+	);
 
 	return { discount, discountableProductRatePlanId };
 };
@@ -159,7 +159,7 @@ const Discounts = (stage: Stage) => {
 	} as const satisfies { [K in string]: Discount };
 };
 
-function ProductToDiscountMapping(stage: Stage) {
+function ProductToDiscountMapping(stage: Stage): Record<string, Discount> {
 	const catalogForStage = catalog[stage];
 	const DiscountsForStage = Discounts(stage);
 

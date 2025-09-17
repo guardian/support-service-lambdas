@@ -1,8 +1,8 @@
 import { stageFromEnvironment } from '@modules/stage';
 import { getBillingPreview } from '@modules/zuora/billingPreview';
 import { doQuery } from '@modules/zuora/query';
+import type { BillingPreviewInvoiceItem } from '@modules/zuora/types';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { BillingPreviewInvoiceItem } from '@modules/zuora/zuoraSchemas';
 import dayjs from 'dayjs';
 import { z } from 'zod';
 import { calculateTotalAmount, filterRecords } from '../helpers';

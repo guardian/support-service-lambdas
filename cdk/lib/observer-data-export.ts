@@ -1,4 +1,3 @@
-import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack, GuStringParameter } from '@guardian/cdk/lib/constructs/core';
 import {
@@ -18,10 +17,12 @@ import {
 	ServicePrincipal,
 	User,
 } from 'aws-cdk-lib/aws-iam';
+import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Bucket, EventType } from 'aws-cdk-lib/aws-s3';
 import { SqsDestination } from 'aws-cdk-lib/aws-s3-notifications';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
+import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { nodeVersion } from './node-version';
 
 export class ObserverDataExport extends GuStack {
@@ -182,6 +183,7 @@ export class ObserverDataExport extends GuStack {
 				},
 				handler: 'encryptAndUploadObserverData.handler',
 				functionName: `encrypt-and-upload-observer-data-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				initialPolicy: [
 					new PolicyStatement({
 						actions: ['s3:GetObject'],
@@ -210,12 +212,11 @@ export class ObserverDataExport extends GuStack {
 			new SqsDestination(queue),
 		);
 
-		new GuAlarm(
+		new SrLambdaAlarm(
 			this,
 			`encrypt-and-upload-observer-data-${this.stage}-lambda-alarm`,
 			{
 				app,
-				snsTopicName: `alarms-handler-topic-${this.stage}`,
 				alarmName: `${this.stage}: Failed to encrypt & upload Observer-only data to S3 bucket shared with Unifida (Tortoise's dev team)`,
 				alarmDescription: `Fix: check logs for lambda ${lambda.functionName} and redrive event from dead letter queue ${deadLetterQueue.queueName}.`,
 				metric: deadLetterQueue
@@ -226,13 +227,12 @@ export class ObserverDataExport extends GuStack {
 				threshold: 0,
 				evaluationPeriods: 1,
 				datapointsToAlarm: 1,
-				actionsEnabled: true,
+				lambdaFunctionNames: lambda.functionName,
 			},
 		);
 
-		new GuAlarm(this, `${flow.flowName}-flow-alarm`, {
+		new SrLambdaAlarm(this, `${flow.flowName}-flow-alarm`, {
 			app,
-			snsTopicName: `alarms-handler-topic-${this.stage}`,
 			alarmName: `${this.stage}: Failed to transfer Observer-only data from Salesforce to AWS (via AppFlow)`,
 			alarmDescription: `Debug: view "Run history" in the dashboard for flow ${flow.flowName}. Manual fix: upload today's unencrypted CSV file anywhere inside the ${salesforceObserverDataTransferBucket.bucketName} bucket.`,
 			metric: new Metric({
@@ -249,7 +249,7 @@ export class ObserverDataExport extends GuStack {
 			threshold: 0,
 			evaluationPeriods: 1,
 			datapointsToAlarm: 1,
-			actionsEnabled: true,
+			lambdaFunctionNames: lambda.functionName,
 		});
 	}
 }

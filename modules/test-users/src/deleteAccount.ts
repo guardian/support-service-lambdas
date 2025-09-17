@@ -1,4 +1,4 @@
-import { deleteAccount } from '@modules/zuora/deleteAccount';
+import { deleteAccount } from '@modules/zuora/account';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 void (async () => {

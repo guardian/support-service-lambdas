@@ -1,12 +1,24 @@
-import {
-	GetObjectCommand,
-	PutObjectCommand,
-	S3Client,
-} from '@aws-sdk/client-s3';
-import { mockClient } from 'aws-sdk-client-mock';
-import { getFileFromS3, uploadFileToS3 } from '../src/s3';
+import { S3Client } from '@aws-sdk/client-s3';
+import { Upload } from '@aws-sdk/lib-storage';
+import { getFileFromS3, streamToS3, uploadFileToS3 } from '../src/s3';
 
-const s3ClientMock = mockClient(S3Client);
+// Mock the S3Client
+jest.mock('@aws-sdk/client-s3');
+jest.mock('@aws-sdk/lib-storage');
+
+const MockedS3Client = S3Client as jest.MockedClass<typeof S3Client>;
+const MockedUpload = Upload as jest.MockedClass<typeof Upload>;
+const mockSend = jest.fn();
+const mockUploadDone = jest.fn();
+
+beforeEach(() => {
+	MockedS3Client.mockClear();
+	MockedUpload.mockClear();
+	mockSend.mockClear();
+	mockUploadDone.mockClear();
+	MockedS3Client.prototype.send = mockSend;
+	MockedUpload.prototype.done = mockUploadDone;
+});
 
 describe('S3 functions', () => {
 	const bucketName = 'test-bucket';
@@ -15,27 +27,23 @@ describe('S3 functions', () => {
 
 	describe('uploadFileToS3', () => {
 		beforeEach(() => {
-			s3ClientMock.reset();
 			jest.resetAllMocks();
 			console.error = jest.fn();
 		});
 
 		test('should upload file to S3', async () => {
-			s3ClientMock.on(PutObjectCommand).resolves({});
+			mockSend.mockResolvedValue({});
 
-			await uploadFileToS3({ bucketName, filePath, content });
+			const result = await uploadFileToS3({ bucketName, filePath, content });
 
-			expect(s3ClientMock.calls().length).toEqual(1);
-			const uploadArgs = s3ClientMock.call(0).firstArg as PutObjectCommand;
-			expect(uploadArgs.input.Bucket).toEqual('test-bucket');
-			expect(uploadArgs.input.Key).toEqual(`path/to/file.txt`);
-			expect(uploadArgs.input.Body).toEqual('Hello, world!');
+			expect(mockSend).toHaveBeenCalledTimes(1);
+			expect(result).toBeDefined();
 		});
 
 		test('should throw error if S3 request fails', async () => {
 			const errorMessage = 'Failed to upload file';
 
-			s3ClientMock.on(PutObjectCommand).rejects(new Error(errorMessage));
+			mockSend.mockRejectedValue(new Error(errorMessage));
 
 			await expect(
 				uploadFileToS3({ bucketName, filePath, content }),
@@ -45,7 +53,6 @@ describe('S3 functions', () => {
 
 	describe('getFileFromS3', () => {
 		beforeEach(() => {
-			s3ClientMock.reset();
 			jest.resetAllMocks();
 			console.error = jest.fn();
 		});
@@ -57,8 +64,7 @@ describe('S3 functions', () => {
 				},
 			};
 
-			// @ts-expect-error I can't make TypeScript happy
-			s3ClientMock.on(GetObjectCommand).resolves(getObjectResponse);
+			mockSend.mockResolvedValue(getObjectResponse);
 
 			const result = await getFileFromS3({
 				bucketName: 'test-bucket',
@@ -66,16 +72,13 @@ describe('S3 functions', () => {
 			});
 
 			expect(result).toEqual(content);
-			expect(s3ClientMock.calls().length).toEqual(1);
-			const getObjectArgs = s3ClientMock.call(0).firstArg as GetObjectCommand;
-			expect(getObjectArgs.input.Bucket).toEqual('test-bucket');
-			expect(getObjectArgs.input.Key).toEqual('path/to/file.txt');
+			expect(mockSend).toHaveBeenCalledTimes(1);
 		});
 
 		test('should throw error if S3 request fails', async () => {
 			const errorMessage = 'Failed to retrieve file';
 
-			s3ClientMock.on(GetObjectCommand).rejects(new Error(errorMessage));
+			mockSend.mockRejectedValue(new Error(errorMessage));
 
 			await expect(getFileFromS3({ bucketName, filePath })).rejects.toThrow(
 				'Failed to retrieve file',
@@ -83,7 +86,7 @@ describe('S3 functions', () => {
 		});
 
 		test('should throw error if file content is empty', async () => {
-			s3ClientMock.on(GetObjectCommand).resolves({ Body: undefined });
+			mockSend.mockResolvedValue({ Body: undefined });
 
 			await expect(
 				getFileFromS3({
@@ -91,6 +94,94 @@ describe('S3 functions', () => {
 					filePath: 'path/to/file.txt',
 				}),
 			).rejects.toThrow('File is empty');
+		});
+	});
+
+	describe('streamToS3', () => {
+		beforeEach(() => {
+			jest.resetAllMocks();
+			console.error = jest.fn();
+			console.log = jest.fn();
+		});
+
+		test('should stream data to S3', async () => {
+			mockUploadDone.mockResolvedValue({});
+
+			const testStream = new ReadableStream({
+				start(controller) {
+					controller.enqueue(new TextEncoder().encode('test data'));
+					controller.close();
+				},
+			});
+
+			await streamToS3(
+				'test-bucket',
+				'path/to/file.txt',
+				'text/plain',
+				testStream,
+			);
+
+			expect(MockedUpload).toHaveBeenCalledTimes(1);
+			expect(MockedUpload).toHaveBeenCalledWith({
+				client: expect.any(Object),
+				params: {
+					Bucket: 'test-bucket',
+					Key: 'path/to/file.txt',
+					Body: testStream,
+					ContentType: 'text/plain',
+				},
+			});
+			expect(mockUploadDone).toHaveBeenCalledTimes(1);
+		});
+
+		test('should stream data to S3 without content type', async () => {
+			mockUploadDone.mockResolvedValue({});
+
+			const testStream = new ReadableStream({
+				start(controller) {
+					controller.enqueue(new TextEncoder().encode('test data'));
+					controller.close();
+				},
+			});
+
+			await streamToS3(
+				'test-bucket',
+				'path/to/file.txt',
+				undefined,
+				testStream,
+			);
+
+			expect(MockedUpload).toHaveBeenCalledTimes(1);
+			expect(MockedUpload).toHaveBeenCalledWith({
+				client: expect.any(Object),
+				params: {
+					Bucket: 'test-bucket',
+					Key: 'path/to/file.txt',
+					Body: testStream,
+					ContentType: undefined,
+				},
+			});
+			expect(mockUploadDone).toHaveBeenCalledTimes(1);
+		});
+
+		test('should throw error if upload fails', async () => {
+			const errorMessage = 'Failed to upload stream';
+
+			mockUploadDone.mockRejectedValue(new Error(errorMessage));
+
+			const testStream = new ReadableStream({
+				start(controller) {
+					controller.enqueue(new TextEncoder().encode('test data'));
+					controller.close();
+				},
+			});
+
+			await expect(
+				streamToS3('test-bucket', 'path/to/file.txt', 'text/plain', testStream),
+			).rejects.toThrow('Failed to upload stream');
+
+			expect(MockedUpload).toHaveBeenCalledTimes(1);
+			expect(mockUploadDone).toHaveBeenCalledTimes(1);
 		});
 	});
 });

@@ -1,70 +1,76 @@
 import { Lazy } from '@modules/lazy';
 import { prettyPrint } from '@modules/prettyPrint';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
+import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
+import { getAccount } from '@modules/zuora/account';
 import {
 	getBillingPreview,
 	itemsForSubscription,
 	toSimpleInvoiceItems,
 } from '@modules/zuora/billingPreview';
-import { getAccount } from '@modules/zuora/getAccount';
-import { getSubscription } from '@modules/zuora/getSubscription';
+import { getSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { APIGatewayProxyEventHeaders } from 'aws-lambda';
-import type dayjs from 'dayjs';
+import type { APIGatewayProxyEvent } from 'aws-lambda';
+import dayjs from 'dayjs';
 import { preview, switchToSupporterPlus } from './contributionToSupporterPlus';
-import { productSwitchRequestSchema } from './schemas';
+import type { ProductSwitchRequestBody } from './schemas';
 import { getSwitchInformationWithOwnerCheck } from './switchInformation';
 
-export const contributionToSupporterPlusEndpoint = async (
-	stage: Stage,
-	headers: APIGatewayProxyEventHeaders,
-	body: string,
-	subscriptionNumber: string,
-	today: dayjs.Dayjs,
-) => {
-	const identityId = headers['x-identity-id'];
-	const zuoraClient = await ZuoraClient.create(stage);
-	console.log('Loading the product catalog');
-	const productCatalog = await getProductCatalogFromApi(stage);
-	const input = productSwitchRequestSchema.parse(JSON.parse(body));
-	console.log(`Request body is ${prettyPrint(input)}`);
-	console.log('Getting the subscription and account details from Zuora');
+export const contributionToSupporterPlusEndpoint =
+	(stage: Stage, today: dayjs.Dayjs) =>
+	async (
+		event: APIGatewayProxyEvent,
+		parsed: {
+			path: { subscriptionNumber: string };
+			body: ProductSwitchRequestBody;
+		},
+	) => {
+		logger.mutableAddContext(parsed.path.subscriptionNumber);
+		const identityId = event.headers['x-identity-id'];
+		const zuoraClient = await ZuoraClient.create(stage);
+		logger.log('Loading the product catalog');
+		const productCatalog = await getProductCatalogFromApi(stage);
+		logger.log(`Request body is ${prettyPrint(parsed.body)}`);
+		logger.log('Getting the subscription and account details from Zuora');
 
-	const subscription = await getSubscription(zuoraClient, subscriptionNumber);
+		const subscription = await getSubscription(
+			zuoraClient,
+			parsed.path.subscriptionNumber,
+		);
 
-	const account = await getAccount(zuoraClient, subscription.accountNumber);
+		const account = await getAccount(zuoraClient, subscription.accountNumber);
 
-	// don't get the billing preview until we know the subscription is not cancelled
-	const lazyBillingPreview = new Lazy(
-		() =>
-			getBillingPreview(
-				zuoraClient,
-				today.add(13, 'months'),
-				subscription.accountNumber,
-			),
-		'get billing preview for the subscription',
-	)
-		.then(itemsForSubscription(subscription.subscriptionNumber))
-		.then(toSimpleInvoiceItems);
+		// don't get the billing preview until we know the subscription is not cancelled
+		const lazyBillingPreview = new Lazy(
+			() =>
+				getBillingPreview(
+					zuoraClient,
+					today.add(13, 'months'),
+					subscription.accountNumber,
+				),
+			'get billing preview for the subscription',
+		)
+			.then(itemsForSubscription(subscription.subscriptionNumber))
+			.then(toSimpleInvoiceItems);
 
-	const switchInformation = await getSwitchInformationWithOwnerCheck(
-		stage,
-		input,
-		subscription,
-		account,
-		productCatalog,
-		identityId,
-		lazyBillingPreview,
-		today,
-	);
+		const switchInformation = await getSwitchInformationWithOwnerCheck(
+			stage,
+			parsed.body,
+			subscription,
+			account,
+			productCatalog,
+			identityId,
+			lazyBillingPreview,
+			today,
+		);
 
-	const response = input.preview
-		? await preview(zuoraClient, switchInformation, subscription)
-		: await switchToSupporterPlus(zuoraClient, switchInformation);
+		const response = parsed.body.preview
+			? await preview(zuoraClient, switchInformation, subscription)
+			: await switchToSupporterPlus(zuoraClient, switchInformation, dayjs());
 
-	return {
-		body: JSON.stringify(response),
-		statusCode: 200,
+		return {
+			body: JSON.stringify(response),
+			statusCode: 200,
+		};
 	};
-};

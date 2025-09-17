@@ -27,12 +27,8 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'contributions-store-queue',
 		'dotcom-components',
 		...mobilePurchasesApps,
-		'new-product-api',
 		'price-migration-engine-state-machine',
 		'promotions-tool',
-		'sf-contact-merge',
-		'sf-emails-to-s3-exporter',
-		'sf-gocardless-sync',
 		'super-mode',
 		'support-reminders',
 		'ticker-calculator',
@@ -49,7 +45,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'holiday-stop-api',
 		'holiday-stop-processor',
 		'soft-opt-in-consent-setter',
-		'manage-help-content-publisher',
 		'mobile-purchases-soft-opt-in-acquisitions',
 		'mobile-purchases-soft-opt-in-acquisitions-dlq-processor',
 		'payment-failure-comms',
@@ -78,6 +73,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'stripe-intent',
 		'workers',
 		'payment-api',
+		'supporter-product-data',
 
 		// support-service-lambdas
 		'catalog-service',
@@ -99,16 +95,24 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'digital-voucher-suspension-processor',
 
 		// salesforce
+		'new-product-api',
 		'salesforce-disaster-recovery',
 		'salesforce-disaster-recovery-health-check',
 		'single-contribution-salesforce-writes',
 		'sf-datalake-export',
+		'salesforce-event-bus',
+		'sf-contact-merge',
+		'sf-emails-to-s3-exporter',
+		'sf-gocardless-sync',
+		'manage-help-content-publisher',
 
 		// zuora
 		'invoicing-api',
 		'zuora-callout-apis',
 		'zuora-oracle-fusion',
 		'write-off-unpaid-invoices',
+		'negative-invoices-processor',
+		'zuora-datalake-export',
 
 		// stripe
 		'stripe-patrons-data',

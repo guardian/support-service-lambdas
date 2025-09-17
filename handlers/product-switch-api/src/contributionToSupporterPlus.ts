@@ -1,18 +1,22 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
-import { zuoraDateFormat } from '@modules/zuora/common';
 import type {
 	ChangePlanOrderAction,
-	CreateOrderRequest,
 	OrderAction,
+} from '@modules/zuora/orders/orderActions';
+import { singleTriggerDate } from '@modules/zuora/orders/orderActions';
+import type {
+	CreateOrderRequest,
+	OrderRequest,
 	PreviewOrderRequest,
-} from '@modules/zuora/orders';
-import { singleTriggerDate } from '@modules/zuora/orders';
-import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+} from '@modules/zuora/orders/orderRequests';
+import { previewOrderRequest } from '@modules/zuora/orders/orderRequests';
 import type {
 	RatePlan,
 	RatePlanCharge,
 	ZuoraSubscription,
-} from '@modules/zuora/zuoraSchemas';
+} from '@modules/zuora/types/objects/subscription';
+import { zuoraDateFormat } from '@modules/zuora/utils/common';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import { removePendingUpdateAmendments } from './amendments';
@@ -54,8 +58,13 @@ export type SwitchResponse = { message: string };
 export const switchToSupporterPlus = async (
 	zuoraClient: ZuoraClient,
 	productSwitchInformation: SwitchInformation,
+	today: dayjs.Dayjs,
 ): Promise<SwitchResponse> => {
-	const switchResponse = await doSwitch(zuoraClient, productSwitchInformation);
+	const switchResponse = await doSwitch(
+		zuoraClient,
+		productSwitchInformation,
+		today,
+	);
 
 	const paidAmount = await takePaymentOrAdjustInvoice(
 		zuoraClient,
@@ -144,7 +153,8 @@ export const previewResponseFromZuoraResponse = (
 				invoiceItem.productRatePlanChargeId ===
 				catalogInformation.supporterPlus.subscriptionChargeId,
 		),
-		'No supporter plus invoice item found in the preview response',
+		'No supporter plus invoice item found in the preview response: id: ' +
+			catalogInformation.supporterPlus.subscriptionChargeId,
 	);
 
 	const supporterPlusContributionItem = getIfDefined(
@@ -153,7 +163,8 @@ export const previewResponseFromZuoraResponse = (
 				invoiceItem.productRatePlanChargeId ===
 				catalogInformation.supporterPlus.contributionChargeId,
 		),
-		'No supporter plus invoice item found in the preview response',
+		'No supporter plus invoice item found in the preview response: id: ' +
+			catalogInformation.supporterPlus.contributionChargeId,
 	);
 
 	const response: PreviewResponse = {
@@ -198,9 +209,9 @@ export const preview = async (
 		dayjs(),
 		productSwitchInformation,
 	);
-	const zuoraResponse: ZuoraPreviewResponse = await zuoraClient.post(
-		'v1/orders/preview',
-		JSON.stringify(requestBody),
+	const zuoraResponse: ZuoraPreviewResponse = await previewOrderRequest(
+		zuoraClient,
+		requestBody,
 		zuoraPreviewResponseSchema,
 	);
 	if (zuoraResponse.success) {
@@ -218,12 +229,13 @@ export const preview = async (
 export const doSwitch = async (
 	zuoraClient: ZuoraClient,
 	productSwitchInformation: SwitchInformation,
+	today: dayjs.Dayjs,
 ): Promise<ZuoraSwitchResponse> => {
 	const { subscriptionNumber } = productSwitchInformation.subscription;
 	//If the sub has a pending amount change amendment, we need to remove it
-	await removePendingUpdateAmendments(zuoraClient, subscriptionNumber);
+	await removePendingUpdateAmendments(zuoraClient, subscriptionNumber, today);
 
-	const requestBody = buildSwitchRequestBody(dayjs(), productSwitchInformation);
+	const requestBody = buildSwitchRequestBody(today, productSwitchInformation);
 	const zuoraResponse: ZuoraSwitchResponse = await zuoraClient.post(
 		'v1/orders?returnIds=true',
 		JSON.stringify(requestBody),
@@ -282,66 +294,73 @@ const buildChangePlanOrderAction = (
 	};
 };
 
-const buildPreviewRequestBody = (
-	orderDate: Dayjs,
-	productSwitchInformation: SwitchInformation,
-): PreviewOrderRequest => {
-	const { contributionAmount, catalog } = productSwitchInformation;
-	const { accountNumber, subscriptionNumber } =
-		productSwitchInformation.subscription;
-
-	const discountOrderAction = productSwitchInformation.discount
-		? buildAddDiscountOrderAction(productSwitchInformation.discount, orderDate)
-		: [];
-
-	return {
-		orderDate: zuoraDateFormat(orderDate),
-		existingAccountNumber: accountNumber,
-		previewOptions: {
-			previewThruType: 'SpecificDate',
-			previewTypes: ['BillingDocs'],
-			specificPreviewThruDate: zuoraDateFormat(orderDate),
-		},
-		subscriptions: [
-			{
-				subscriptionNumber,
-				orderActions: [
-					buildChangePlanOrderAction(orderDate, catalog, contributionAmount),
-					...discountOrderAction,
-				],
+function buildNewTermOrderActions(orderDate: dayjs.Dayjs): OrderAction[] {
+	return [
+		{
+			type: 'TermsAndConditions',
+			triggerDates: singleTriggerDate(orderDate),
+			termsAndConditions: {
+				lastTerm: {
+					termType: 'TERMED',
+					endDate: zuoraDateFormat(orderDate),
+				},
 			},
-		],
-	};
-};
+		},
+		{
+			type: 'RenewSubscription',
+			triggerDates: singleTriggerDate(orderDate),
+		},
+	];
+}
 
 export const buildSwitchRequestBody = (
 	orderDate: Dayjs,
 	productSwitchInformation: SwitchInformation,
 ): CreateOrderRequest => {
+	return {
+		processingOptions: {
+			runBilling: true,
+			collectPayment: false, // We will take payment separately because we don't want to charge the user if the amount payable is less than 50 pence/cents
+		},
+		...buildSwitchRequestWithoutOptions(
+			productSwitchInformation,
+			orderDate,
+			false,
+		),
+	};
+};
+
+const buildPreviewRequestBody = (
+	orderDate: Dayjs,
+	productSwitchInformation: SwitchInformation,
+): PreviewOrderRequest => {
+	return {
+		previewOptions: {
+			previewThruType: 'SpecificDate',
+			previewTypes: ['BillingDocs'],
+			specificPreviewThruDate: zuoraDateFormat(orderDate),
+		},
+		...buildSwitchRequestWithoutOptions(
+			productSwitchInformation,
+			orderDate,
+			true,
+		),
+	};
+};
+
+function buildSwitchRequestWithoutOptions(
+	productSwitchInformation: SwitchInformation,
+	orderDate: dayjs.Dayjs,
+	preview: boolean,
+): OrderRequest {
 	const { startNewTerm, contributionAmount, catalog } =
 		productSwitchInformation;
 	const { accountNumber, subscriptionNumber } =
 		productSwitchInformation.subscription;
 
-	const newTermOrderActions: OrderAction[] = startNewTerm
-		? [
-				{
-					type: 'TermsAndConditions',
-					triggerDates: singleTriggerDate(orderDate),
-					termsAndConditions: {
-						lastTerm: {
-							termType: 'TERMED',
-							endDate: zuoraDateFormat(orderDate),
-						},
-					},
-				},
-				{
-					type: 'RenewSubscription',
-					triggerDates: singleTriggerDate(orderDate),
-					renewSubscription: {},
-				},
-			]
-		: [];
+	// don't preview term update, because future dated amendments might prevent it
+	const maybeNewTermOrderActions: OrderAction[] =
+		startNewTerm && !preview ? buildNewTermOrderActions(orderDate) : [];
 
 	const discountOrderAction = productSwitchInformation.discount
 		? buildAddDiscountOrderAction(productSwitchInformation.discount, orderDate)
@@ -350,19 +369,16 @@ export const buildSwitchRequestBody = (
 	return {
 		orderDate: zuoraDateFormat(orderDate),
 		existingAccountNumber: accountNumber,
-		processingOptions: {
-			runBilling: true,
-			collectPayment: false, // We will take payment separately because we don't want to charge the user if the amount payable is less than 50 pence/cents
-		},
 		subscriptions: [
 			{
 				subscriptionNumber,
+				customFields: { LastPlanAddedDate__c: zuoraDateFormat(orderDate) },
 				orderActions: [
 					buildChangePlanOrderAction(orderDate, catalog, contributionAmount),
 					...discountOrderAction,
-					...newTermOrderActions,
+					...maybeNewTermOrderActions,
 				],
 			},
 		],
 	};
-};
+}

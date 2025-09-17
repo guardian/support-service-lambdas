@@ -7,6 +7,7 @@ import { DiscountApi } from '../lib/discount-api';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
 import { MetricPushApi } from '../lib/metric-push-api';
+import { MParticleApi } from '../lib/mparticle-api';
 import { NegativeInvoicesProcessor } from '../lib/negative-invoices-processor';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
@@ -15,11 +16,13 @@ import { PressReaderEntitlements } from '../lib/press-reader-entitlements';
 import { ProductSwitchApi } from '../lib/product-switch-api';
 import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery';
 import { SalesforceDisasterRecoveryHealthCheck } from '../lib/salesforce-disaster-recovery-health-check';
+import { SalesforceEventBus } from '../lib/salesforce-event-bus';
 import {
 	APP_NAME as SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME,
 	SingleContributionSalesforceWrites,
 } from '../lib/single-contribution-salesforce-writes';
 import { SoftOptInConsentSetter } from '../lib/soft-opt-in-consent-setter';
+import { StripeDisputes } from '../lib/stripe-disputes';
 import type { StripeWebhookEndpointsProps } from '../lib/stripe-webhook-endpoints';
 import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
 import { TicketTailorWebhook } from '../lib/ticket-tailor-webhook';
@@ -129,6 +132,21 @@ new DiscountApi(app, 'discount-api-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 	domainName: `discount-api.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
+});
+
+new StripeDisputes(app, 'stripe-disputes-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+	domainName: `stripe-disputes-code.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
+});
+new StripeDisputes(app, 'stripe-disputes-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+	domainName: `stripe-disputes.${supportApisDomain}`,
 	hostedZoneId: supportHostedZoneId,
 	certificateId: supportCertificateId,
 });
@@ -349,6 +367,22 @@ new WriteOffUnpaidInvoices(app, 'write-off-unpaid-invoices-CODE', {
 	stage: 'CODE',
 });
 new WriteOffUnpaidInvoices(app, 'write-off-unpaid-invoices-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+});
+new SalesforceEventBus(app, 'salesforce-event-bus-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+});
+new SalesforceEventBus(app, 'salesforce-event-bus-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+});
+new MParticleApi(app, 'mparticle-api-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+});
+new MParticleApi(app, 'mparticle-api-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 });

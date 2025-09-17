@@ -1,9 +1,10 @@
-import { zuoraDateFormat } from '@modules/zuora/common';
-import type { OrderAction, OrderRequest } from '@modules/zuora/orders';
-import { singleTriggerDate } from '@modules/zuora/orders';
+import type { OrderAction } from '@modules/zuora/orders/orderActions';
+import { singleTriggerDate } from '@modules/zuora/orders/orderActions';
+import type { OrderRequest } from '@modules/zuora/orders/orderRequests';
+import type { ZuoraResponse } from '@modules/zuora/types';
+import { zuoraResponseSchema } from '@modules/zuora/types';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { ZuoraSuccessResponse } from '@modules/zuora/zuoraSchemas';
-import { zuoraSuccessResponseSchema } from '@modules/zuora/zuoraSchemas';
 import type { Dayjs } from 'dayjs';
 
 export const doUpdate = async ({
@@ -26,10 +27,10 @@ export const doUpdate = async ({
 		accountNumber,
 		...rest,
 	});
-	const response: ZuoraSuccessResponse = await zuoraClient.post(
+	const response: ZuoraResponse = await zuoraClient.post(
 		'/v1/orders',
 		JSON.stringify(orderRequest),
-		zuoraSuccessResponseSchema,
+		zuoraResponseSchema,
 	);
 	if (!response.success) {
 		const errorMessage = response.reasons?.at(0)?.message;
@@ -74,7 +75,6 @@ const changeTermEnd = (applyFromDate: Dayjs): OrderAction => ({
 const termRenewal = (applyFromDate: Dayjs): OrderAction => ({
 	type: 'RenewSubscription',
 	triggerDates: singleTriggerDate(applyFromDate),
-	renewSubscription: {},
 });
 
 export const buildUpdateAmountRequestBody = ({

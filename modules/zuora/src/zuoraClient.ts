@@ -1,30 +1,22 @@
-import type { Stage } from '@modules/stage';
 import type { z } from 'zod';
-import { Logger } from '@modules/zuora/logger';
-import { BearerTokenProvider } from './bearerTokenProvider';
-import { zuoraServerUrl } from './common';
-import { getOAuthClientCredentials } from './oAuthCredentials';
-
-export class ZuoraError extends Error {
-	constructor(
-		message: string,
-		public code: number,
-	) {
-		super(message);
-	}
-}
+import type { Stage } from '@modules/stage';
+import { BearerTokenProvider } from './auth/bearerTokenProvider';
+import { getOAuthClientCredentials } from './auth/oAuthCredentials';
+import { generateZuoraError } from './errors/zuoraErrorHandler';
+import { zuoraErrorSchema, zuoraSuccessSchema } from './types/httpResponse';
+import { zuoraServerUrl } from './utils';
+import { logger } from '@modules/routing/logger';
 
 export class ZuoraClient {
-	static async create(stage: Stage, logger: Logger = new Logger()) {
+	static async create(stage: Stage) {
 		const credentials = await getOAuthClientCredentials(stage);
 		const bearerTokenProvider = new BearerTokenProvider(stage, credentials);
-		return new ZuoraClient(stage, bearerTokenProvider, logger);
+		return new ZuoraClient(stage, bearerTokenProvider);
 	}
 	protected zuoraServerUrl: string;
 	constructor(
 		stage: Stage,
 		private tokenProvider: BearerTokenProvider,
-		private logger: Logger,
 	) {
 		this.zuoraServerUrl = zuoraServerUrl(stage).replace(/\/$/, ''); // remove trailing slash
 	}
@@ -33,7 +25,7 @@ export class ZuoraClient {
 		path: string,
 		schema: T,
 	): Promise<O> {
-		return await this.fetch(path, 'GET', schema);
+		return await this.fetch(logger.getCallerInfo(1))(path, 'GET', schema);
 	}
 
 	public async post<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
@@ -42,7 +34,13 @@ export class ZuoraClient {
 		schema: T,
 		headers?: Record<string, string>,
 	): Promise<O> {
-		return await this.fetch(path, 'POST', schema, body, headers);
+		return await this.fetch(logger.getCallerInfo(1))(
+			path,
+			'POST',
+			schema,
+			body,
+			headers,
+		);
 	}
 
 	public async put<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
@@ -51,17 +49,33 @@ export class ZuoraClient {
 		schema: T,
 		headers?: Record<string, string>,
 	): Promise<O> {
-		return await this.fetch(path, 'PUT', schema, body, headers);
+		return await this.fetch(logger.getCallerInfo(1))(
+			path,
+			'PUT',
+			schema,
+			body,
+			headers,
+		);
 	}
 
 	public async delete<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
 		schema: T,
 	): Promise<O> {
-		return await this.fetch(path, 'DELETE', schema);
+		return await this.fetch(logger.getCallerInfo(1))(path, 'DELETE', schema);
 	}
 
-	public async fetch<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
+	// has to be a function so that the callerInfo is refreshed on every call
+	fetch = (maybeCallerInfo?: string) =>
+		logger.wrapFn(
+			this.fetchWithoutLogging.bind(this),
+			() => 'HTTP ' + this.zuoraServerUrl,
+			this.fetchWithoutLogging.toString(),
+			2,
+			maybeCallerInfo,
+		);
+
+	async fetchWithoutLogging<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
 		method: string,
 		schema: T,
@@ -70,7 +84,6 @@ export class ZuoraClient {
 	): Promise<O> {
 		const bearerToken = await this.tokenProvider.getBearerToken();
 		const url = `${this.zuoraServerUrl}/${path.replace(/^\//, '')}`;
-		this.logger.log(`${method} ${url} ${body ? `with body ${body}` : ''}`);
 		const response = await fetch(url, {
 			method,
 			headers: {
@@ -81,18 +94,26 @@ export class ZuoraClient {
 			body,
 		});
 		const json = await response.json();
-		this.logger.log('Response from Zuora was: ', JSON.stringify(json, null, 2));
 
-		if (response.ok) {
+		// Check both HTTP status and logical success
+		// Some Zuora endpoints return HTTP 200 with success: false for logical errors
+		const isHttpSuccess = response.ok;
+
+		if (isHttpSuccess && isLogicalSuccess(json)) {
 			return schema.parse(json);
 		} else {
-			this.logger.error(response.text);
-
+			// When Zuora returns a 429 status, the response headers typically contain important rate limiting information
 			if (response.status === 429) {
-				this.logger.log(response.headers);
+				logger.log(response.headers);
 			}
 
-			throw new ZuoraError(response.statusText, response.status);
+			throw generateZuoraError(json, response);
 		}
 	}
 }
+
+const isLogicalSuccess = (json: unknown): boolean => {
+	const matchesSuccessfulResponse = zuoraSuccessSchema.safeParse(json).success;
+	const matchesKnownErrorResponse = zuoraErrorSchema.safeParse(json).success;
+	return matchesSuccessfulResponse || !matchesKnownErrorResponse;
+};

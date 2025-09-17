@@ -62,6 +62,7 @@ val getSubscriptionResponse = GetSubscriptionResponse(
   "zuoraAccountId",
   AccountNumber("accountNumber"),
   termStartDate = LocalDate.of(2023, 10, 2),
+  termEndDate = LocalDate.of(2024, 10, 2),
   ratePlans = List(
     RatePlan(
       id = "89ad8casd9c0asdcaj89sdc98as",
@@ -135,6 +136,7 @@ val getSubscriptionResponse2 = GetSubscriptionResponse(
   accountNumber = AccountNumber("A00433231"),
   accountId = "8ad0823f841cf4e601841e61f6aads87",
   termStartDate = LocalDate.of(2022, 10, 28),
+  termEndDate = LocalDate.of(2023, 10, 28),
   ratePlans = List(
     RatePlan(
       productName = "Contributor",
@@ -186,6 +188,7 @@ val getSubscriptionResponse3 = GetSubscriptionResponse(
   "zuoraAccountId",
   AccountNumber("accountNumber"),
   termStartDate = LocalDate.of(2023, 10, 2),
+  termEndDate = LocalDate.of(2024, 10, 2),
   ratePlans = List(
     RatePlan(
       id = "89ad8casd9c0asdcaj89sdc98as",
@@ -203,6 +206,7 @@ val getSubscriptionResponseNoChargedThroughDate = GetSubscriptionResponse(
   accountId = "zuoraAccountId",
   accountNumber = AccountNumber("accountNumber"),
   termStartDate = LocalDate.of(2023, 10, 2),
+  termEndDate = LocalDate.of(2024, 10, 2),
   ratePlans = List(
     RatePlan(
       id = "R1",
@@ -532,6 +536,7 @@ val expectedRequestBody = SwitchProductUpdateRequest(
   collect = Some(true),
   runBilling = Some(true),
   preview = Some(false),
+  LastPlanAddedDate__c = timeLocalDate,
 )
 
 val expectedRequestBodyLowCharge = SwitchProductUpdateRequest(
@@ -556,6 +561,7 @@ val expectedRequestBodyLowCharge = SwitchProductUpdateRequest(
   collect = Some(false),
   runBilling = Some(true),
   preview = Some(false),
+  LastPlanAddedDate__c = timeLocalDate4,
 )
 
 // MembershipToRecurringContribution
@@ -581,6 +587,7 @@ val expectedRequestBody2 = SwitchProductUpdateRequest(
   collect = Some(false),
   runBilling = Some(true),
   preview = Some(false),
+  LastPlanAddedDate__c = timeLocalDate3,
 )
 
 // RecurringContributionToSupporterPlus
@@ -607,6 +614,7 @@ val expectedRequestBodyPreview = SwitchProductUpdateRequest(
   targetDate = Some(LocalDate.of(2024, 3, 6)),
   currentTerm = Some("24"),
   currentTermPeriodType = Some("Month"),
+  LastPlanAddedDate__c = timeLocalDate2,
 )
 
 // RecurringContributionToSupporterPlus
@@ -633,6 +641,7 @@ val expectedRequestBodyPreview2 = SwitchProductUpdateRequest(
   targetDate = Some(LocalDate.of(2022, 3, 15)),
   currentTerm = Some("24"),
   currentTermPeriodType = Some("Month"),
+  LastPlanAddedDate__c = timeLocalDate4,
 )
 
 val previewResponse = SubscriptionUpdatePreviewResponse(
@@ -709,3 +718,36 @@ val getInvoiceItemsResponse = GetInvoiceItemsResponse(
 // Stubs for GetInvoice service
 //-----------------------------------------------------
 val getInvoiceResponse = GetInvoiceResponse(balance = 5)
+
+// Test stub for the case where term renewal is needed
+// chargedThroughDate (2024-11-15) is after termEndDate (2024-10-2)
+val getSubscriptionResponseNeedingTermRenewal = GetSubscriptionResponse(
+  "A-S00339056",
+  "zuoraAccountId",
+  AccountNumber("accountNumber"),
+  termStartDate = LocalDate.of(2023, 10, 2),
+  termEndDate = LocalDate.of(2024, 10, 2), // Term ends before chargedThroughDate
+  ratePlans = List(
+    RatePlan(
+      id = "89ad8casd9c0asdcaj89sdc98as",
+      productName = "P1",
+      productRatePlanId = "2c92a0fc5aacfadd015ad24db4ff5e97",
+      ratePlanName = "RP1",
+      ratePlanCharges = List(
+        RatePlanCharge(
+          id = "RPC1",
+          productRatePlanChargeId = "PRPC1",
+          name = "Contribution",
+          price = Some(5.000000000),
+          currency = "GBP",
+          number = "number",
+          effectiveStartDate = LocalDate.of(2021, 1, 15),
+          effectiveEndDate = LocalDate.of(2022, 1, 15),
+          chargedThroughDate = Some(LocalDate.of(2024, 11, 15)), // After termEndDate
+          billingPeriod = Some(Monthly),
+        )
+      ),
+      lastChangeType = None,
+    ),
+  ),
+)

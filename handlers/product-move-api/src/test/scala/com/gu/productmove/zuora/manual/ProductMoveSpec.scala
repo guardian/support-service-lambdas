@@ -42,6 +42,7 @@ object ProductMoveSpec {
           SubscriptionName(subscriptionName),
           postData,
           Some(IdentityId("test")),
+          LocalDate.parse("2000-01-01"),
         )
       } yield output
     println(output)
@@ -80,6 +81,7 @@ object ProductMoveSpec {
       ),
       new ToRecurringContributionImpl(
         subscriptionUpdate,
+        TermRenewalLive(zuoraGet),
         SQSLive.impl(stage, AwsCredentialsLive.impl).get,
         stage,
       ),

@@ -13,9 +13,13 @@ import {
 	Policy,
 	PolicyStatement,
 } from 'aws-cdk-lib/aws-iam';
+import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Topic } from 'aws-cdk-lib/aws-sns';
-import { SqsSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
+import {
+	EmailSubscription,
+	SqsSubscription,
+} from 'aws-cdk-lib/aws-sns-subscriptions';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { nodeVersion } from './node-version';
 
@@ -69,6 +73,15 @@ export class AlarmsHandler extends GuStack {
 			},
 		);
 
+		const backupEmailAddress = new GuStringParameter(
+			this,
+			`${app}-backup-email-address`,
+			{
+				description:
+					'Alarm email address to use if the alarms handler itself fails',
+			},
+		);
+
 		const triggeredLambda = new GuLambdaFunction(this, `${app}-lambda`, {
 			app,
 			memorySize: 1024,
@@ -77,6 +90,7 @@ export class AlarmsHandler extends GuStack {
 			timeout: Duration.seconds(15),
 			handler: 'index.handler',
 			functionName: `${app}-${this.stage}`,
+			loggingFormat: LoggingFormat.TEXT,
 			events: [new SqsEventSource(queue)],
 			environment: {
 				APP: app,
@@ -134,9 +148,17 @@ export class AlarmsHandler extends GuStack {
 			}),
 		);
 
+		const emailTopic = new Topic(this, `${app}-email-topic`, {
+			topicName: `${app}-email-topic-${this.stage}`,
+		});
+
+		emailTopic.addSubscription(
+			new EmailSubscription(backupEmailAddress.valueAsString),
+		);
+
 		new GuAlarm(this, `${app}-alarm`, {
 			app: app,
-			snsTopicName: snsTopic.topicName,
+			snsTopicName: emailTopic.topicName, // we don't send to our own topic to avoid a loop
 			alarmName: `${this.stage}: Failed to handle CloudWatch alarm`,
 			alarmDescription: `There was an error in the lambda function that handles CloudWatch alarms.`,
 			metric: deadLetterQueue
@@ -159,6 +181,7 @@ export class AlarmsHandler extends GuStack {
 				timeout: Duration.seconds(15),
 				handler: 'indexScheduled.handler',
 				functionName: `${app}-scheduled-${this.stage}`,
+				loggingFormat: LoggingFormat.TEXT,
 				environment: {
 					APP: app,
 					STACK: this.stack,
@@ -168,7 +191,7 @@ export class AlarmsHandler extends GuStack {
 					actionsEnabled: this.stage === 'PROD',
 					toleratedErrorPercentage: 0,
 					numberOfEvaluationPeriodsAboveThresholdBeforeAlarm: 1,
-					snsTopicName: `alarms-handler-topic-${this.stage}`,
+					snsTopicName: emailTopic.topicName, // we don't send to our own topic to avoid a loop
 				},
 				rules: [
 					{

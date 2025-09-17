@@ -3,13 +3,17 @@ package com.gu.soft_opt_in_consent_setter
 import com.gu.soft_opt_in_consent_setter.models.{MpapiConfig, SoftOptInError}
 import io.circe.Decoder
 import io.circe.parser.decode
-import io.circe.generic.auto._
+import io.circe.generic.semiauto._
 import scalaj.http.{Http, HttpResponse}
 
 import scala.util.Try
 
 case class MobileSubscriptions(subscriptions: List[MobileSubscription])
 case class MobileSubscription(valid: Boolean, softOptInProductName: String)
+object MobileSubscriptions {
+  implicit val decoderMobileSubscription: Decoder[MobileSubscription] = deriveDecoder
+  implicit val decoderMobileSubscriptions: Decoder[MobileSubscriptions] = deriveDecoder
+}
 
 class MpapiConnector(config: MpapiConfig) {
 

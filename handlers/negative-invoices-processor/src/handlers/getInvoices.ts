@@ -2,13 +2,10 @@ import { getSSMParam } from '@modules/aws/ssm';
 import { buildAuthClient, runQuery } from '@modules/bigquery/src/bigquery';
 import { stageFromEnvironment } from '@modules/stage';
 import { CODEDataMockQueryResponse } from '../../test/handlers/data/CODEDataMockQueryResponse';
-import { BigQueryResultDataSchema } from '../types';
-import type { BigQueryRecord } from '../types';
+import { InvoiceRecordsArraySchema } from '../types';
+import type { GetInvoicesOutput, InvoiceRecord } from '../types';
 
-export const handler = async (): Promise<{
-	invoicesCount: number;
-	invoices: BigQueryRecord[];
-}> => {
+export const handler = async (): Promise<GetInvoicesOutput> => {
 	try {
 		const records =
 			stageFromEnvironment() === 'PROD'
@@ -24,11 +21,11 @@ export const handler = async (): Promise<{
 	}
 };
 
-export const getCODEData = (): Promise<BigQueryRecord[]> => {
+export const getCODEData = (): Promise<InvoiceRecord[]> => {
 	return Promise.resolve(CODEDataMockQueryResponse);
 };
 
-export const getPRODData = async (): Promise<BigQueryRecord[]> => {
+export const getPRODData = async (): Promise<InvoiceRecord[]> => {
 	const gcpConfig = await getSSMParam(
 		`/negative-invoices-processor/${stageFromEnvironment()}/gcp-credentials-config`,
 	);
@@ -40,13 +37,13 @@ export const getPRODData = async (): Promise<BigQueryRecord[]> => {
 		query(),
 	);
 
-	return BigQueryResultDataSchema.parse(result[0]);
+	return InvoiceRecordsArraySchema.parse(result[0]);
 };
 
 const query = (): string =>
 	`
 	SELECT
-        inv.id,
+        inv.id as invoiceId,
         inv.invoice_number as invoiceNumber,
         STRING_AGG(distinct inv.account_id, ',') AS accountId,
         MAX(inv.balance) AS invoiceBalance
@@ -62,6 +59,7 @@ const query = (): string =>
         inv.amount < 0
         AND inv.balance != 0
         AND sub.status = 'Active'
+		AND inv.Status = 'Posted'
     GROUP BY 
         inv.id, inv.invoice_number
 `;

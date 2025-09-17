@@ -1,5 +1,4 @@
 import { GuApiLambda } from '@guardian/cdk';
-import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import type { App } from 'aws-cdk-lib';
@@ -11,7 +10,9 @@ import {
 } from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
+import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { nodeVersion } from './node-version';
 
 export interface UpdateSupporterPlusAmountProps extends GuStackProps {
@@ -40,6 +41,7 @@ export class UpdateSupporterPlusAmount extends GuStack {
 			description:
 				'An API Gateway triggered lambda to carry out supporter plus amount updates',
 			functionName: nameWithStage,
+			loggingFormat: LoggingFormat.TEXT,
 			fileName: `${app}.zip`,
 			handler: 'index.handler',
 			runtime: nodeVersion,
@@ -93,7 +95,7 @@ export class UpdateSupporterPlusAmount extends GuStack {
 			`Impact - ${description}. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit`;
 
 		if (this.stage === 'PROD') {
-			new GuAlarm(this, 'ApiGateway5XXAlarm', {
+			new SrLambdaAlarm(this, 'ApiGateway5XXAlarm', {
 				app,
 				alarmName: alarmName(
 					'Update supporter plus amount - API gateway 5XX response',
@@ -104,7 +106,6 @@ export class UpdateSupporterPlusAmount extends GuStack {
 				),
 				evaluationPeriods: 1,
 				threshold: 1,
-				snsTopicName: 'alarms-handler-topic-PROD',
 				comparisonOperator:
 					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
 				metric: new Metric({
@@ -116,6 +117,7 @@ export class UpdateSupporterPlusAmount extends GuStack {
 						ApiName: nameWithStage,
 					},
 				}),
+				lambdaFunctionNames: lambda.functionName,
 			});
 		}
 
