@@ -26,6 +26,7 @@ import { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema'
 import { Promotion } from '@modules/promotions/schema';
 import { getInvoice } from '@modules/zuora/invoice';
 import { getIfDefined } from '@modules/nullAndUndefined';
+import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 
 describe('createSubscription integration', () => {
 	const productCatalog = generateProductCatalog(code);
@@ -88,10 +89,6 @@ describe('createSubscription integration', () => {
 			codes: { 'Test Channel': ['TEST_CODE'] },
 			starts: new Date(dayjs().subtract(1, 'day').toISOString()),
 			expires: new Date(dayjs().add(1, 'month').toISOString()),
-			landingPage: {
-				title: 'Test Promotion',
-				description: 'Test Promotion Description',
-			},
 		},
 	];
 
@@ -107,7 +104,7 @@ describe('createSubscription integration', () => {
 	});
 
 	test('Setting an idempotency key prevents duplicate subscriptions', async () => {
-		const idempotencyKey = 'TEST-IDEMPOTENCY-KEY-' + new Date().getTime();
+		const idempotencyKey = 'TEST-IDEMPOTENCY-KEY';
 
 		const inputFields: CreateSubscriptionInputFields<DirectDebit> = {
 			...createInputFields,
@@ -132,7 +129,7 @@ describe('createSubscription integration', () => {
 	test('We can preview a subscription with a new account', async () => {
 		const inputFields: PreviewCreateSubscriptionInputFields = {
 			stage: 'CODE',
-			accountNumber: 'A01036826', // You will probably need to add a valid account number here because they get deleted after a short time
+			accountNumber: 'A01036826', // You may need to add a valid account number here because they get deleted after a short time
 			currency: currency,
 			productPurchase: productPurchase,
 		};
@@ -155,7 +152,6 @@ describe('createSubscription integration', () => {
 		};
 		const inputFields: CreateSubscriptionInputFields<DirectDebit> = {
 			...createInputFields,
-			createdRequestId: 'TEST-IDEMPOTENCY-KEY-' + new Date().getTime(), // We don't want to reuse the same idempotency key
 			productPurchase: fixedTermProductPurchase,
 		};
 		const client = await ZuoraClient.create('CODE');
@@ -209,11 +205,10 @@ describe('createSubscription integration', () => {
 	test('We can create a subscription with a promotion', async () => {
 		const inputFields: CreateSubscriptionInputFields<DirectDebit> = {
 			...createInputFields,
-			createdRequestId: 'TEST-IDEMPOTENCY-KEY-' + new Date().getTime(),
 			productPurchase: productPurchase,
 			appliedPromotion: {
 				promoCode: 'TEST_CODE',
-				countryGroupId: 'uk',
+				supportRegionId: SupportRegionId.UK,
 			},
 		};
 		const client = await ZuoraClient.create('CODE');
@@ -228,12 +223,12 @@ describe('createSubscription integration', () => {
 	test('We can preview a subscription with a discount promotion', async () => {
 		const inputFields: PreviewCreateSubscriptionInputFields = {
 			stage: 'CODE',
-			accountNumber: 'A01036826', // You will probably need to add a valid account number here because they get deleted after a short time
+			accountNumber: 'A01036826',
 			currency: currency,
 			productPurchase: productPurchase,
 			appliedPromotion: {
 				promoCode: 'TEST_CODE',
-				countryGroupId: 'uk',
+				supportRegionId: SupportRegionId.UK,
 			},
 		};
 		const client = await ZuoraClient.create('CODE');

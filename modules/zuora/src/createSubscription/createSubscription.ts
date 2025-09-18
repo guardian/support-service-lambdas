@@ -54,7 +54,7 @@ export type CreateSubscriptionInputFields<T extends PaymentMethod> = {
 	collectPayment?: boolean;
 };
 
-export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
+function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 	productCatalog: ProductCatalog,
 	promotions: Promotion[],
 	{

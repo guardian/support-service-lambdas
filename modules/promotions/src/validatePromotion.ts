@@ -33,6 +33,7 @@ export const validatePromotion = (
 			`${promotion.name} is a ${promotion.promotionType.name} promotion these are no longer supported`,
 		);
 	}
+	checkDiscountHasDuration(promotion.promotionType);
 	validateForCountryGroup(promotion, appliedPromotion.supportRegionId);
 	validateProductRatePlan(promotion, productRatePlanId);
 	return {
@@ -55,6 +56,13 @@ const checkPromotionIsActive = (promotion: Promotion) => {
 		);
 	}
 };
+const checkDiscountHasDuration = (promotionType: DiscountPromotionType) => {
+	if (promotionType.durationMonths === undefined) {
+		throw new ValidationError(
+			`Promotion ${promotionType.name} is missing durationMonths. Perpetual discounts are not allowed`,
+		);
+	}
+};
 const isDiscountPromotion = (
 	promotionType: PromotionType,
 ): promotionType is DiscountPromotionType => {
@@ -62,16 +70,16 @@ const isDiscountPromotion = (
 };
 const validateForCountryGroup = (
 	promotion: Promotion,
-	countryGroupId: SupportRegionId,
+	supportRegionId: SupportRegionId,
 ) => {
-	const countryGroup = countryGroupBySupportRegionId(countryGroupId);
+	const countryGroup = countryGroupBySupportRegionId(supportRegionId);
 
 	if (
 		intersection([...promotion.appliesTo.countries], countryGroup.countries)
 			.length === 0
 	) {
 		throw new ValidationError(
-			`Promotion ${promotion.name} is not valid for country group ${countryGroupId}`,
+			`Promotion ${promotion.name} is not valid for country group ${countryGroup.name}`,
 		);
 	}
 };

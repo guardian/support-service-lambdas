@@ -2,32 +2,28 @@ import { validatePromotion } from '../src/validatePromotion';
 import { Promotion, AppliedPromotion } from '../src/schema';
 import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 
-const promotionName = 'Tiered Discount Weekend Home Delivery Extra';
-const productRatePlanId = 'plan123';
-const mockPromotion: Promotion = {
+const promotionName = 'Test Promotion';
+const productRatePlanId = '12345';
+const promoCode = 'TEST123';
+const testPromotion: Promotion = {
 	name: promotionName,
 	promotionType: { name: 'percent_discount', amount: 25, durationMonths: 3 },
 	appliesTo: {
 		productRatePlanIds: new Set([productRatePlanId]),
 		countries: new Set(['GB']),
 	},
-	codes: { 'Channel 1': ['TEST123'] },
+	codes: { 'Channel 1': [promoCode] },
 	starts: new Date('2024-09-25T23:00:00.000Z'),
 	expires: new Date('2099-11-05T23:59:59.000Z'),
-	landingPage: {
-		title: 'Guardian and Observer newspaper subscriptions to suit every reader',
-		description:
-			'We offer a range of packages from every day to weekend, and different subscription types depending on whether you want to collect your newspaper in a shop or get it delivered.',
-	},
 };
 
 const validAppliedPromotion: AppliedPromotion = {
-	promoCode: 'TEST123',
+	promoCode: promoCode,
 	supportRegionId: SupportRegionId.UK,
 };
 
 const invalidAppliedPromotion: AppliedPromotion = {
-	promoCode: 'TEST123',
+	promoCode: promoCode,
 	supportRegionId: SupportRegionId.EU,
 };
 
@@ -35,21 +31,21 @@ describe('validatePromotion', () => {
 	it('returns a ValidatedPromotion for valid promotion and country', () => {
 		expect(
 			validatePromotion(
-				[mockPromotion],
+				[testPromotion],
 				validAppliedPromotion,
 				productRatePlanId,
 			),
 		).toStrictEqual({
 			discountPercentage: 25,
 			durationInMonths: 3,
-			promoCode: 'TEST123',
+			promoCode: promoCode,
 		});
 	});
 
 	it('throws an error for invalid productRatePlanId', () => {
 		expect(() =>
 			validatePromotion(
-				[mockPromotion],
+				[testPromotion],
 				validAppliedPromotion,
 				'invalidProductRatePlanId',
 			),
@@ -61,11 +57,13 @@ describe('validatePromotion', () => {
 	it('throws an error for invalid countryGroupId', () => {
 		expect(() =>
 			validatePromotion(
-				[mockPromotion],
+				[testPromotion],
 				invalidAppliedPromotion,
 				productRatePlanId,
 			),
-		).toThrow(`Promotion ${promotionName} is not valid for country group eu`);
+		).toThrow(
+			`Promotion ${promotionName} is not valid for country group Europe`,
+		);
 	});
 
 	it('throws an error if promotion code does not exist', () => {
@@ -75,16 +73,31 @@ describe('validatePromotion', () => {
 		};
 		expect(() =>
 			validatePromotion(
-				[mockPromotion],
+				[testPromotion],
 				unknownAppliedPromotion,
 				productRatePlanId,
 			),
 		).toThrow('No promotion found for code UNKNOWN');
 	});
+	it('throws an error if the discount does not have a duration', () => {
+		const perpetualDiscountPromotion: Promotion = {
+			...testPromotion,
+			promotionType: { name: 'percent_discount', amount: 25 },
+		};
+		expect(() =>
+			validatePromotion(
+				[perpetualDiscountPromotion],
+				validAppliedPromotion,
+				productRatePlanId,
+			),
+		).toThrow(
+			`Promotion percent_discount is missing durationMonths. Perpetual discounts are not allowed`,
+		);
+	});
 	it('throws an error if the promotion has not started yet', () => {
 		const futureDate = '2099-09-25';
 		const futurePromotion: Promotion = {
-			...mockPromotion,
+			...testPromotion,
 			starts: new Date(futureDate),
 		};
 		expect(() =>
@@ -94,13 +107,13 @@ describe('validatePromotion', () => {
 				productRatePlanId,
 			),
 		).toThrow(
-			`Promotion Tiered Discount Weekend Home Delivery Extra is not yet active, starts on ${futureDate}`,
+			`Promotion ${promotionName} is not yet active, starts on ${futureDate}`,
 		);
 	});
 	it('throws an error if the promotion has expired', () => {
 		const pastDate = '2000-09-25';
 		const expiredPromotion: Promotion = {
-			...mockPromotion,
+			...testPromotion,
 			expires: new Date(pastDate),
 		};
 		expect(() =>
@@ -109,13 +122,11 @@ describe('validatePromotion', () => {
 				validAppliedPromotion,
 				productRatePlanId,
 			),
-		).toThrow(
-			`Promotion Tiered Discount Weekend Home Delivery Extra expired on ${pastDate}`,
-		);
+		).toThrow(`Promotion ${promotionName} expired on ${pastDate}`);
 	});
 	it('throws an error if the promotion is not a discount promotion', () => {
 		const nonDiscountPromotion: Promotion = {
-			...mockPromotion,
+			...testPromotion,
 			promotionType: { name: 'tracking' },
 		};
 		expect(() =>
@@ -125,7 +136,7 @@ describe('validatePromotion', () => {
 				productRatePlanId,
 			),
 		).toThrow(
-			`Tiered Discount Weekend Home Delivery Extra is a tracking promotion these are no longer supported`,
+			`${promotionName} is a tracking promotion these are no longer supported`,
 		);
 	});
 });
