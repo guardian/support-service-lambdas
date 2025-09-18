@@ -109,17 +109,6 @@ const guardianWeeklyGiftInput: CreateSubscriptionInputFields<CreditCardReference
 		},
 	};
 
-const isCreateSubscriptionOrderAction = (
-	obj: any,
-): obj is CreateSubscriptionOrderAction => {
-	return (
-		obj &&
-		typeof obj === 'object' &&
-		'type' in obj &&
-		obj.type === 'CreateSubscription'
-	);
-};
-
 describe('the buildCreateSubscriptionRequest function', () => {
 	it('builds request without promotion or gift', () => {
 		const request = buildCreateSubscriptionRequest(
@@ -155,10 +144,8 @@ describe('the buildCreateSubscriptionRequest function', () => {
 			promotions,
 			input,
 		);
-		const orderAction = request.subscriptions[0]?.orderActions[0];
-		if (!isCreateSubscriptionOrderAction(orderAction)) {
-			throw new Error('Expected CreateOrderRequest');
-		}
+		const orderAction = request.subscriptions[0]
+			?.orderActions[0] as CreateSubscriptionOrderAction;
 
 		expect(orderAction.createSubscription.subscribeToRatePlans.length).toBe(2);
 		expect(request.subscriptions[0]?.customFields?.ReaderType__c).toBe(
