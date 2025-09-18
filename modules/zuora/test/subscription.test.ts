@@ -301,6 +301,7 @@ describe('subscription', () => {
 										upToPeriods: null,
 										price: 12.57,
 										discountPercentage: null,
+										billingPeriodAlignment: 'AlignToCharge',
 									},
 								],
 							},

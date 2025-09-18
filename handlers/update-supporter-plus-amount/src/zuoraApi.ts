@@ -61,17 +61,6 @@ const updateAmount = (
 	},
 });
 
-const changeTermEnd = (applyFromDate: Dayjs): OrderAction => ({
-	type: 'TermsAndConditions',
-	triggerDates: singleTriggerDate(applyFromDate),
-	termsAndConditions: {
-		lastTerm: {
-			termType: 'TERMED',
-			endDate: zuoraDateFormat(applyFromDate),
-		},
-	},
-});
-
 const termRenewal = (applyFromDate: Dayjs): OrderAction => ({
 	type: 'RenewSubscription',
 	triggerDates: singleTriggerDate(applyFromDate),
@@ -107,7 +96,6 @@ export const buildUpdateAmountRequestBody = ({
 					chargeNumber,
 					contributionAmount,
 				),
-				changeTermEnd(applyFromDate),
 				...(shouldExtendTerm ? [termRenewal(applyFromDate)] : []),
 			],
 		},

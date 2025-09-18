@@ -104,13 +104,29 @@ export const getSupporterPlusData = (
 
 	logger.log('updatable charge', chargeToUpdate.id);
 
-	const basePriceMinorUnits = productData.baseChargeId
+	const baseCharge = productData.baseChargeId
 		? getIfDefined(
 				ratePlan.ratePlanCharges.find(
 					(charge) =>
 						charge.productRatePlanChargeId === productData.baseChargeId,
-				)?.price,
-				`Could not find the base charge with price property (with the id ${productData.baseChargeId}) in this rate plan`,
+				),
+				`Could not find the base charge (with the id ${productData.baseChargeId}) in this rate plan`,
+			)
+		: undefined;
+
+	if (
+		baseCharge !== undefined &&
+		baseCharge.billingPeriodAlignment !== 'AlignToCharge'
+	) {
+		throw new Error( // this will alarm, we can change to ValidationError if we want to return 4xx
+			'this is a legacy annual S+ with a broken billing period alignment, amount cannot be changed',
+		);
+	}
+
+	const basePriceMinorUnits = baseCharge
+		? getIfDefined(
+				baseCharge.price,
+				`base charge was missing price: ${JSON.stringify(baseCharge)}`,
 			) * 100
 		: 0;
 
