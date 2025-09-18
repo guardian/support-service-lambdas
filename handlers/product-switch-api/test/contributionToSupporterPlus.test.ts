@@ -364,7 +364,7 @@ test('When newAmount is specified, it calculates contribution based on newAmount
 	expect(switchInformation.contributionAmount).toBe(30); // £150 - £120 = £30
 });
 
-test('When newAmount is not specified, it uses previousAmount without validation', async () => {
+test('When newAmount is not specified, use the old amount with the base price as a floor', async () => {
 	const productCatalog = getProductCatalogFromFixture();
 	const subscription = zuoraSubscriptionResponseSchema.parse(subscriptionJson);
 	const account = zuoraAccountSchema.parse(accountJson);
@@ -383,8 +383,8 @@ test('When newAmount is not specified, it uses previousAmount without validation
 		today,
 	);
 
-	// Should use the previous amount (£50) and have zero contribution (since £50 < £120)
-	expect(switchInformation.actualTotalPrice).toBe(50);
+	// Should use the floor price (£120) and have zero contribution (since £50 < £120)
+	expect(switchInformation.actualTotalPrice).toBe(120);
 	expect(switchInformation.contributionAmount).toBe(0);
 });
 
