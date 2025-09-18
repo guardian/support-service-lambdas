@@ -30,10 +30,10 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - run: pnpm install
-      - run: pnpm --filter "./modules/**" --filter "./buildcheck" check-formatting
+      - run: pnpm --filter "./modules/**" check-formatting
       - run: pnpm --filter "./modules/**" build
-      - run: pnpm --filter "./modules/**" --filter "./buildcheck" lint
-      - run: pnpm --filter "./modules/**" --filter "./buildcheck" test
+      - run: pnpm --filter "./modules/**" lint
+      - run: pnpm --filter "./modules/**" test
 
   gu-cdk-build:
     needs: common
@@ -88,6 +88,12 @@ jobs:
           fi
 
       - run: pnpm install
+      - run:
+          if [ -d "./handlers/${{ matrix.subproject }}/BUILDCHECK.md" ]; then
+            pnpm --filter "./buildcheck" check-formatting
+            pnpm --filter "./buildcheck" lint
+            pnpm --filter "./buildcheck" test handlers/${{ matrix.subproject }}
+          fi
       - run: pnpm --filter ${{ steps.paths.outputs.cdk-module }} package
       - run: pnpm --filter ${{ matrix.subproject }} package
 
