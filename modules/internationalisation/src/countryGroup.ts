@@ -28,20 +28,21 @@ export type CountryGroupName =
 	| 'New Zealand'
 	| 'Canada';
 
-export type SupportInternationalisationId =
-	| 'uk'
-	| 'us'
-	| 'au'
-	| 'eu'
-	| 'int'
-	| 'nz'
-	| 'ca';
+export enum SupportRegionId {
+	UK = 'uk',
+	US = 'us',
+	AU = 'au',
+	EU = 'eu',
+	INT = 'int',
+	NZ = 'nz',
+	CA = 'ca',
+}
 
 export type CountryGroup = {
 	name: CountryGroupName;
 	currency: IsoCurrency;
 	countries: IsoCountry[];
-	supportInternationalisationId: SupportInternationalisationId;
+	supportRegionId: SupportRegionId;
 };
 type CountryGroups = Record<CountryGroupId, CountryGroup>;
 export const countryGroups: CountryGroups = {
@@ -49,19 +50,19 @@ export const countryGroups: CountryGroups = {
 		name: 'United Kingdom',
 		currency: 'GBP',
 		countries: ['GB', 'FK', 'GI', 'GG', 'IM', 'JE', 'SH'],
-		supportInternationalisationId: 'uk',
+		supportRegionId: SupportRegionId.UK,
 	},
 	UnitedStates: {
 		name: 'United States',
 		currency: 'USD',
 		countries: ['US'],
-		supportInternationalisationId: 'us',
+		supportRegionId: SupportRegionId.US,
 	},
 	AUDCountries: {
 		name: 'Australia',
 		currency: 'AUD',
 		countries: ['AU', 'KI', 'NR', 'NF', 'TV'],
-		supportInternationalisationId: 'au',
+		supportRegionId: SupportRegionId.AU,
 	},
 	EURCountries: {
 		name: 'Europe',
@@ -129,7 +130,7 @@ export const countryGroups: CountryGroups = {
 			'UA',
 			'MK',
 		],
-		supportInternationalisationId: 'eu',
+		supportRegionId: SupportRegionId.EU,
 	},
 	International: {
 		name: 'International',
@@ -308,18 +309,18 @@ export const countryGroups: CountryGroups = {
 			'ZM',
 			'ZW',
 		],
-		supportInternationalisationId: 'int',
+		supportRegionId: SupportRegionId.INT,
 	},
 	NZDCountries: {
 		name: 'New Zealand',
 		currency: 'NZD',
 		countries: ['NZ', 'CK'],
-		supportInternationalisationId: 'nz',
+		supportRegionId: SupportRegionId.NZ,
 	},
 	Canada: {
 		name: 'Canada',
 		currency: 'CAD',
 		countries: ['CA'],
-		supportInternationalisationId: 'ca',
+		supportRegionId: SupportRegionId.CA,
 	},
 };
