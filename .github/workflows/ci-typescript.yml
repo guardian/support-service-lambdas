@@ -88,11 +88,11 @@ jobs:
           fi
 
       - run: pnpm install
-      - run:
-          if [ -d "./handlers/${{ matrix.subproject }}/BUILDCHECK.md" ]; then
+      - run: |
+          if [ -f "./handlers/${{ matrix.subproject }}/BUILDCHECK.md" ]; then
             pnpm --filter "./buildcheck" check-formatting
             pnpm --filter "./buildcheck" lint
-            pnpm --filter "./buildcheck" test handlers/${{ matrix.subproject }}
+            pnpm --filter "./buildcheck" snapshot:assert handlers/${{ matrix.subproject }}
           fi
       - run: pnpm --filter ${{ steps.paths.outputs.cdk-module }} package
       - run: pnpm --filter ${{ matrix.subproject }} package
