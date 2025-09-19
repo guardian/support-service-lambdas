@@ -13,9 +13,11 @@
   "dependencies": {
     "aws-sdk": "^2.1692.0",
     "dayjs": "^1.11.13",
+    "stripe": "^18.5.0",
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.147"
+    "@types/aws-lambda": "^8.10.147",
+    "@types/stripe": "^8.0.417"
   }
 }
