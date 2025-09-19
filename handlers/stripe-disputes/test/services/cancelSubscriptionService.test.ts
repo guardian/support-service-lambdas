@@ -1,10 +1,12 @@
 import type { Logger } from '@modules/routing/logger';
+import { isZuoraRequestSuccess } from '@modules/zuora/helpers';
 import { cancelSubscription } from '@modules/zuora/subscription';
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { cancelSubscriptionService } from '../../src/services/cancelSubscriptionService';
 
 jest.mock('@modules/zuora/subscription');
+jest.mock('@modules/zuora/helpers');
 jest.mock('dayjs', () =>
 	jest.fn(() => ({
 		format: jest.fn(() => '2023-11-04'),
@@ -47,8 +49,9 @@ describe('cancelSubscriptionService', () => {
 
 	it('should cancel active subscription successfully', async () => {
 		const mockSubscription = createMockSubscription('Active');
-		const mockCancelResponse = { Success: true, Id: 'cancel_123' };
+		const mockCancelResponse = { success: true, Id: 'cancel_123' };
 		(cancelSubscription as jest.Mock).mockResolvedValue(mockCancelResponse);
+		(isZuoraRequestSuccess as jest.Mock).mockReturnValue(true);
 
 		const result = await cancelSubscriptionService(
 			mockLogger,
@@ -125,10 +128,11 @@ describe('cancelSubscriptionService', () => {
 	it('should throw error when cancellation fails', async () => {
 		const mockSubscription = createMockSubscription('Active');
 		const mockCancelResponse = {
-			Success: false,
+			success: false,
 			Errors: ['Cannot cancel subscription'],
 		};
 		(cancelSubscription as jest.Mock).mockResolvedValue(mockCancelResponse);
+		(isZuoraRequestSuccess as jest.Mock).mockReturnValue(false);
 
 		await expect(
 			cancelSubscriptionService(mockLogger, mockZuoraClient, mockSubscription),
@@ -145,8 +149,9 @@ describe('cancelSubscriptionService', () => {
 
 	it('should handle different subscription numbers', async () => {
 		const mockSubscription = createMockSubscription('Active', 'SUB-67890');
-		const mockCancelResponse = { Success: true, Id: 'cancel_456' };
+		const mockCancelResponse = { success: true, Id: 'cancel_456' };
 		(cancelSubscription as jest.Mock).mockResolvedValue(mockCancelResponse);
+		(isZuoraRequestSuccess as jest.Mock).mockReturnValue(true);
 
 		const result = await cancelSubscriptionService(
 			mockLogger,
@@ -184,8 +189,9 @@ describe('cancelSubscriptionService', () => {
 
 	it('should use correct cancellation policy', async () => {
 		const mockSubscription = createMockSubscription('Active');
-		const mockCancelResponse = { Success: true, Id: 'cancel_789' };
+		const mockCancelResponse = { success: true, Id: 'cancel_789' };
 		(cancelSubscription as jest.Mock).mockResolvedValue(mockCancelResponse);
+		(isZuoraRequestSuccess as jest.Mock).mockReturnValue(true);
 
 		await cancelSubscriptionService(
 			mockLogger,
