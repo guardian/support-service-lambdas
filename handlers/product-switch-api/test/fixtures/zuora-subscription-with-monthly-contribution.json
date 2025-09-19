@@ -37,7 +37,8 @@
           "upToPeriodsType": null,
           "upToPeriods": null,
           "price": 50,
-          "discountPercentage": null
+          "discountPercentage": null,
+          "billingPeriodAlignment": "AlignToCharge"
         }
       ]
     }

@@ -41,6 +41,11 @@ export const zuoraSubscriptionSchema = z.object({
 					upToPeriods: z.nullable(z.number()),
 					price: z.nullable(z.number()),
 					discountPercentage: z.nullable(z.number()),
+					billingPeriodAlignment: z.enum([
+						'AlignToCharge',
+						'AlignToSubscriptionStart',
+						'AlignToTermStart',
+					]),
 				}),
 			),
 		}),

@@ -37,7 +37,8 @@
           "upToPeriodsType": null,
           "upToPeriods": null,
           "price": 10,
-          "discountPercentage": null
+          "discountPercentage": null,
+          "billingPeriodAlignment": "AlignToCharge"
         }
       ]
     },
@@ -65,7 +66,8 @@
           "upToPeriodsType": null,
           "upToPeriods": null,
           "price": 17,
-          "discountPercentage": null
+          "discountPercentage": null,
+          "billingPeriodAlignment": "AlignToCharge"
         },
         {
           "id": "8a1299898fb956e7018fec7d98644902",
@@ -83,7 +85,8 @@
           "upToPeriodsType": null,
           "upToPeriods": null,
           "price": 0,
-          "discountPercentage": null
+          "discountPercentage": null,
+          "billingPeriodAlignment": "AlignToCharge"
         }
       ]
     }

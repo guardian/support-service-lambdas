@@ -21,6 +21,7 @@ export const doUpdate = async ({
 	ratePlanId: string;
 	chargeNumber: string;
 	contributionAmount: number;
+	isBrokenSub: boolean;
 }) => {
 	const orderRequest = buildUpdateAmountRequestBody({
 		subscriptionNumber,
@@ -85,6 +86,7 @@ export const buildUpdateAmountRequestBody = ({
 	chargeNumber,
 	contributionAmount,
 	shouldExtendTerm,
+	isBrokenSub,
 }: {
 	applyFromDate: Dayjs;
 	subscriptionNumber: string;
@@ -93,6 +95,7 @@ export const buildUpdateAmountRequestBody = ({
 	chargeNumber: string;
 	contributionAmount: number;
 	shouldExtendTerm: boolean;
+	isBrokenSub: boolean;
 }): OrderRequest => ({
 	orderDate: zuoraDateFormat(applyFromDate),
 	existingAccountNumber: accountNumber,
@@ -107,7 +110,7 @@ export const buildUpdateAmountRequestBody = ({
 					chargeNumber,
 					contributionAmount,
 				),
-				changeTermEnd(applyFromDate),
+				...(isBrokenSub ? [changeTermEnd(applyFromDate)] : []),
 				...(shouldExtendTerm ? [termRenewal(applyFromDate)] : []),
 			],
 		},
