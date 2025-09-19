@@ -5,11 +5,7 @@ import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
-import {
-	ApiKeySourceType,
-	CfnBasePathMapping,
-	CfnDomainName,
-} from 'aws-cdk-lib/aws-apigateway';
+import { CfnBasePathMapping, CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
 import {
 	ComparisonOperator,
 	TreatMissingData,
@@ -108,10 +104,6 @@ export class StripeDisputes extends GuStack {
 				deployOptions: {
 					stageName: this.stage,
 				},
-				apiKeySourceType: ApiKeySourceType.HEADER,
-				defaultMethodOptions: {
-					apiKeyRequired: true,
-				},
 			},
 			events: [],
 		});
@@ -139,7 +131,7 @@ export class StripeDisputes extends GuStack {
 			},
 		);
 
-		const usagePlan = lambdaProducer.api.addUsagePlan('UsagePlan', {
+		lambdaProducer.api.addUsagePlan('UsagePlan', {
 			name: nameWithStageProducer,
 			description: 'REST endpoints for stripe disputes webhook api',
 			apiStages: [
@@ -149,14 +141,6 @@ export class StripeDisputes extends GuStack {
 				},
 			],
 		});
-
-		// create api key
-		const apiKey = lambdaProducer.api.addApiKey(`${app}-key-${this.stage}`, {
-			apiKeyName: `${app}-key-${this.stage}`,
-		});
-
-		// associate api key to plan
-		usagePlan.addApiKey(apiKey);
 
 		this.createPolicyAndAttachToLambdas(
 			[

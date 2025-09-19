@@ -957,7 +957,6 @@ DLQ: https://",
     },
     "stripedisputeslambdaproducerstripedisputesproducerCODE94CD3A3A": {
       "Properties": {
-        "ApiKeySourceType": "HEADER",
         "Description": "API Gateway for Stripe dispute webhooks (sync response) with SQS event processing",
         "Name": "stripe-disputes-producer-CODE",
         "Tags": [
@@ -987,7 +986,6 @@ DLQ: https://",
     },
     "stripedisputeslambdaproducerstripedisputesproducerCODEANY3CC4B447": {
       "Properties": {
-        "ApiKeyRequired": true,
         "AuthorizationType": "NONE",
         "HttpMethod": "ANY",
         "Integration": {
@@ -1178,7 +1176,7 @@ DLQ: https://",
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "stripedisputeslambdaproducerstripedisputesproducerCODEDeploymentECBEB165c51c8d4ad41b6599b3129a278baf7a0b": {
+    "stripedisputeslambdaproducerstripedisputesproducerCODEDeploymentECBEB165170282681a13e060e6b7259982d9efda": {
       "DependsOn": [
         "stripedisputeslambdaproducerstripedisputesproducerCODEproxyANYC01EF3FC",
         "stripedisputeslambdaproducerstripedisputesproducerCODEproxyA9D84AD7",
@@ -1198,7 +1196,7 @@ DLQ: https://",
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODEDeploymentECBEB165c51c8d4ad41b6599b3129a278baf7a0b",
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODEDeploymentECBEB165170282681a13e060e6b7259982d9efda",
         },
         "RestApiId": {
           "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODE94CD3A3A",
@@ -1268,18 +1266,6 @@ DLQ: https://",
         "UsagePlanName": "stripe-disputes-producer-CODE",
       },
       "Type": "AWS::ApiGateway::UsagePlan",
-    },
-    "stripedisputeslambdaproducerstripedisputesproducerCODEUsagePlanUsagePlanKeyResourcestripedisputesCODEstripedisputeslambdaproducerstripedisputesproducerCODEstripedisputeskeyCODE38D00E6AB8ADC2E1": {
-      "Properties": {
-        "KeyId": {
-          "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODEstripedisputeskeyCODE1794DF98",
-        },
-        "KeyType": "API_KEY",
-        "UsagePlanId": {
-          "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODEUsagePlan9C259840",
-        },
-      },
-      "Type": "AWS::ApiGateway::UsagePlanKey",
     },
     "stripedisputeslambdaproducerstripedisputesproducerCODEproxyA9D84AD7": {
       "Properties": {
@@ -1376,7 +1362,6 @@ DLQ: https://",
     },
     "stripedisputeslambdaproducerstripedisputesproducerCODEproxyANYC01EF3FC": {
       "Properties": {
-        "ApiKeyRequired": true,
         "AuthorizationType": "NONE",
         "HttpMethod": "ANY",
         "Integration": {
@@ -1414,45 +1399,6 @@ DLQ: https://",
         },
       },
       "Type": "AWS::ApiGateway::Method",
-    },
-    "stripedisputeslambdaproducerstripedisputesproducerCODEstripedisputeskeyCODE1794DF98": {
-      "Properties": {
-        "Enabled": true,
-        "Name": "stripe-disputes-key-CODE",
-        "StageKeys": [
-          {
-            "RestApiId": {
-              "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODE94CD3A3A",
-            },
-            "StageName": {
-              "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODEDeploymentStageCODE0FCB7532",
-            },
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "stripe-disputes",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::ApiKey",
     },
   },
 }
@@ -2415,7 +2361,6 @@ DLQ: https://",
     },
     "stripedisputeslambdaproducerstripedisputesproducerPRODANY3EDEAC10": {
       "Properties": {
-        "ApiKeyRequired": true,
         "AuthorizationType": "NONE",
         "HttpMethod": "ANY",
         "Integration": {
@@ -2553,7 +2498,6 @@ DLQ: https://",
     },
     "stripedisputeslambdaproducerstripedisputesproducerPRODB20FADF6": {
       "Properties": {
-        "ApiKeySourceType": "HEADER",
         "Description": "API Gateway for Stripe dispute webhooks (sync response) with SQS event processing",
         "Name": "stripe-disputes-producer-PROD",
         "Tags": [
@@ -2636,7 +2580,7 @@ DLQ: https://",
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "stripedisputeslambdaproducerstripedisputesproducerPRODDeploymentCC0BB07Ccbb36bfeb39c2d536b71e79edc962ac1": {
+    "stripedisputeslambdaproducerstripedisputesproducerPRODDeploymentCC0BB07C986c077959189146b1969e563296b256": {
       "DependsOn": [
         "stripedisputeslambdaproducerstripedisputesproducerPRODproxyANY523CD05A",
         "stripedisputeslambdaproducerstripedisputesproducerPRODproxy7610EE25",
@@ -2656,7 +2600,7 @@ DLQ: https://",
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODDeploymentCC0BB07Ccbb36bfeb39c2d536b71e79edc962ac1",
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODDeploymentCC0BB07C986c077959189146b1969e563296b256",
         },
         "RestApiId": {
           "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODB20FADF6",
@@ -2727,18 +2671,6 @@ DLQ: https://",
       },
       "Type": "AWS::ApiGateway::UsagePlan",
     },
-    "stripedisputeslambdaproducerstripedisputesproducerPRODUsagePlanUsagePlanKeyResourcestripedisputesPRODstripedisputeslambdaproducerstripedisputesproducerPRODstripedisputeskeyPROD28E4CA7F2E825C5F": {
-      "Properties": {
-        "KeyId": {
-          "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODstripedisputeskeyPRODA70E1DC4",
-        },
-        "KeyType": "API_KEY",
-        "UsagePlanId": {
-          "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODUsagePlan656C6F9D",
-        },
-      },
-      "Type": "AWS::ApiGateway::UsagePlanKey",
-    },
     "stripedisputeslambdaproducerstripedisputesproducerPRODproxy7610EE25": {
       "Properties": {
         "ParentId": {
@@ -2756,7 +2688,6 @@ DLQ: https://",
     },
     "stripedisputeslambdaproducerstripedisputesproducerPRODproxyANY523CD05A": {
       "Properties": {
-        "ApiKeyRequired": true,
         "AuthorizationType": "NONE",
         "HttpMethod": "ANY",
         "Integration": {
@@ -2872,45 +2803,6 @@ DLQ: https://",
         },
       },
       "Type": "AWS::Lambda::Permission",
-    },
-    "stripedisputeslambdaproducerstripedisputesproducerPRODstripedisputeskeyPRODA70E1DC4": {
-      "Properties": {
-        "Enabled": true,
-        "Name": "stripe-disputes-key-PROD",
-        "StageKeys": [
-          {
-            "RestApiId": {
-              "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODB20FADF6",
-            },
-            "StageName": {
-              "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODDeploymentStagePROD7EFD2073",
-            },
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "stripe-disputes",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::ApiKey",
     },
   },
 }
