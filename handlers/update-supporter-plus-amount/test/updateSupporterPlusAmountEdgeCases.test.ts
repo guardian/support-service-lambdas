@@ -46,6 +46,7 @@ describe('Supporter Plus Amount Update - term renewal variations', () => {
 				chargeNumber: subscriptionData.ratePlans[0]!.ratePlanCharges[0]!.number,
 				contributionAmount: 10.0,
 				shouldExtendTerm,
+				isBrokenSub: false,
 			});
 
 			// Verify the request structure
@@ -77,6 +78,7 @@ describe('Supporter Plus Amount Update - term renewal variations', () => {
 				chargeNumber: 'C-12345678',
 				contributionAmount: 10.0,
 				shouldExtendTerm,
+				isBrokenSub: false,
 			});
 
 			expect(orderRequest.subscriptions[0]?.orderActions).toHaveLength(2);

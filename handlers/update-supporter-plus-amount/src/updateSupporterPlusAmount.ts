@@ -31,6 +31,7 @@ export type SupporterPlusData = {
 	productRatePlan: ProductRatePlan<'SupporterPlus', UpdatablePlans>;
 	chargeToUpdate: RatePlanCharge;
 	basePriceMinorUnits: number;
+	isBrokenSub: boolean;
 };
 
 type ProductData = {
@@ -114,14 +115,9 @@ export const getSupporterPlusData = (
 			)
 		: undefined;
 
-	if (
+	const isBrokenSub =
 		baseCharge !== undefined &&
-		baseCharge.billingPeriodAlignment !== 'AlignToCharge'
-	) {
-		throw new Error( // this will alarm, we can change to ValidationError if we want to return 4xx
-			'this is a legacy annual S+ with a broken billing period alignment, amount cannot be changed',
-		);
-	}
+		baseCharge.billingPeriodAlignment !== 'AlignToCharge';
 
 	const basePriceMinorUnits = baseCharge
 		? getIfDefined(
@@ -137,6 +133,7 @@ export const getSupporterPlusData = (
 		productRatePlan: productData.productRatePlan,
 		chargeToUpdate,
 		basePriceMinorUnits,
+		isBrokenSub,
 	};
 };
 
@@ -217,6 +214,7 @@ export const updateSupporterPlusAmount = async (
 		ratePlanId: supporterPlusData.ratePlan.id,
 		chargeNumber: chargeToUpdate.number,
 		contributionAmount: newContributionAmount,
+		isBrokenSub: supporterPlusData.isBrokenSub,
 	});
 
 	return {

@@ -21,6 +21,7 @@ export const doUpdate = async ({
 	ratePlanId: string;
 	chargeNumber: string;
 	contributionAmount: number;
+	isBrokenSub: boolean;
 }) => {
 	const orderRequest = buildUpdateAmountRequestBody({
 		subscriptionNumber,
@@ -61,6 +62,17 @@ const updateAmount = (
 	},
 });
 
+const changeTermEnd = (applyFromDate: Dayjs): OrderAction => ({
+	type: 'TermsAndConditions',
+	triggerDates: singleTriggerDate(applyFromDate),
+	termsAndConditions: {
+		lastTerm: {
+			termType: 'TERMED',
+			endDate: zuoraDateFormat(applyFromDate),
+		},
+	},
+});
+
 const termRenewal = (applyFromDate: Dayjs): OrderAction => ({
 	type: 'RenewSubscription',
 	triggerDates: singleTriggerDate(applyFromDate),
@@ -74,6 +86,7 @@ export const buildUpdateAmountRequestBody = ({
 	chargeNumber,
 	contributionAmount,
 	shouldExtendTerm,
+	isBrokenSub,
 }: {
 	applyFromDate: Dayjs;
 	subscriptionNumber: string;
@@ -82,6 +95,7 @@ export const buildUpdateAmountRequestBody = ({
 	chargeNumber: string;
 	contributionAmount: number;
 	shouldExtendTerm: boolean;
+	isBrokenSub: boolean;
 }): OrderRequest => ({
 	orderDate: zuoraDateFormat(applyFromDate),
 	existingAccountNumber: accountNumber,
@@ -96,6 +110,7 @@ export const buildUpdateAmountRequestBody = ({
 					chargeNumber,
 					contributionAmount,
 				),
+				...(isBrokenSub ? [changeTermEnd(applyFromDate)] : []),
 				...(shouldExtendTerm ? [termRenewal(applyFromDate)] : []),
 			],
 		},
