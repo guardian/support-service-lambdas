@@ -1,4 +1,5 @@
 import type { Logger } from '@modules/routing/logger';
+import { isZuoraRequestSuccess } from '@modules/zuora/helpers';
 import { cancelSubscription } from '@modules/zuora/subscription';
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
@@ -34,7 +35,7 @@ export async function cancelSubscriptionService(
 		JSON.stringify(cancelResponse),
 	);
 
-	if (!cancelResponse.Success) {
+	if (!isZuoraRequestSuccess(cancelResponse)) {
 		throw new Error('Failed to cancel subscription in Zuora');
 	}
 
