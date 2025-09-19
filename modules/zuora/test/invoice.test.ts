@@ -1,20 +1,30 @@
+import {
+	writeOffInvoice,
+	getInvoice,
+	getInvoiceItems,
+	creditInvoice,
+} from '@modules/zuora/invoice';
+import {
+	zuoraResponseSchema,
+	getInvoiceSchema,
+	getInvoiceItemsSchema,
+	invoiceItemAdjustmentResultSchema,
+	InvoiceItemAdjustmentType,
+	InvoiceItemAdjustmentSourceType,
+} from '@modules/zuora/types';
 import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
+import { z } from 'zod';
+import dayjs from 'dayjs';
 
 jest.mock('@modules/zuora/zuoraClient');
-jest.mock('dayjs', () =>
-	jest.fn(() => ({
+jest.mock('dayjs', () => {
+	const actualDayjs = jest.requireActual('dayjs');
+	const mockedDayjs = () => ({
 		format: jest.fn(() => '2023-11-04'),
-	})),
-);
-
-const invoiceMocks = {
-	getInvoice: jest.fn(),
-	getInvoiceItems: jest.fn(),
-	creditInvoice: jest.fn(),
-	writeOffInvoice: jest.fn(),
-};
-
-jest.mock('../src/invoice', () => invoiceMocks);
+	});
+	mockedDayjs.tz = actualDayjs.tz;
+	return mockedDayjs;
+});
 
 describe('invoice', () => {
 	beforeEach(() => {
@@ -28,24 +38,15 @@ describe('invoice', () => {
 				invoiceNumber: 'INV-2023-001',
 				amount: 99.99,
 			};
-			invoiceMocks.getInvoice.mockImplementation(
-				async (zuoraClient, invoiceId) => {
-					return zuoraClient.get(
-						`/v1/invoices/${invoiceId}`,
-						expect.any(Object),
-					);
-				},
-			);
 			mockZuoraClient.get = jest.fn().mockResolvedValue(mockResponse);
 
-			const { getInvoice } = require('../src/invoice');
 			const result = await getInvoice(mockZuoraClient, 'INV-123');
 
 			expect(mockZuoraClient.get).toHaveBeenCalledWith(
 				'/v1/invoices/INV-123',
-				expect.any(Object),
+				getInvoiceSchema,
 			);
-			expect(result).toBeDefined();
+			expect(result).toEqual(mockResponse);
 		});
 	});
 
@@ -57,33 +58,50 @@ describe('invoice', () => {
 					{ id: 'II-2', amount: 49.99 },
 				],
 			};
-			invoiceMocks.getInvoiceItems.mockImplementation(
-				async (zuoraClient, invoiceId) => {
-					return zuoraClient.get(
-						`/v1/invoices/${invoiceId}/items`,
-						expect.any(Object),
-					);
-				},
-			);
 			mockZuoraClient.get = jest.fn().mockResolvedValue(mockResponse);
 
-			const { getInvoiceItems } = require('../src/invoice');
 			const result = await getInvoiceItems(mockZuoraClient, 'INV-123');
 
 			expect(mockZuoraClient.get).toHaveBeenCalledWith(
 				'/v1/invoices/INV-123/items',
-				expect.any(Object),
+				getInvoiceItemsSchema,
 			);
-			expect(result).toBeDefined();
+			expect(result).toEqual(mockResponse);
+		});
+	});
+
+	describe('creditInvoice', () => {
+		it('should create invoice item adjustment', async () => {
+			const mockResponse = { Success: true, Id: 'ADJ-123' };
+			mockZuoraClient.post = jest.fn().mockResolvedValue(mockResponse);
+
+			const adjustmentDate = dayjs('2023-11-04');
+			const result = await creditInvoice(
+				adjustmentDate,
+				mockZuoraClient,
+				'INV-123',
+				'SRC-123',
+				50.0,
+				'Increase' as InvoiceItemAdjustmentType,
+				'InvoiceDetail' as InvoiceItemAdjustmentSourceType,
+				'Test adjustment',
+				'REASON-01',
+			);
+
+			expect(mockZuoraClient.post).toHaveBeenCalledWith(
+				'/v1/object/invoice-item-adjustment',
+				expect.stringContaining('"Amount":50'),
+				invoiceItemAdjustmentResultSchema,
+			);
+			expect(result).toEqual(mockResponse);
 		});
 	});
 
 	describe('writeOffInvoice', () => {
 		it('should write off invoice with comment and current date', async () => {
 			const mockResponse = { Success: true, Id: 'memo_123' };
-			invoiceMocks.writeOffInvoice.mockResolvedValue(mockResponse);
+			mockZuoraClient.put = jest.fn().mockResolvedValue(mockResponse);
 
-			const { writeOffInvoice } = require('../src/invoice');
 			const comment = 'Dispute closure write-off';
 			const result = await writeOffInvoice(
 				mockZuoraClient,
@@ -91,35 +109,121 @@ describe('invoice', () => {
 				comment,
 			);
 
+			expect(mockZuoraClient.put).toHaveBeenCalledWith(
+				'/v1/invoices/INV-12345/write-off',
+				JSON.stringify({
+					comment,
+					memoDate: '2023-11-04',
+					reasonCode: 'Write-off',
+				}),
+				zuoraResponseSchema,
+			);
 			expect(result).toEqual(mockResponse);
 		});
 
 		it('should handle invoice numbers and IDs', async () => {
 			const mockResponse = { Success: true };
-			invoiceMocks.writeOffInvoice.mockResolvedValue(mockResponse);
+			mockZuoraClient.put = jest.fn().mockResolvedValue(mockResponse);
 
-			const { writeOffInvoice } = require('../src/invoice');
 			await writeOffInvoice(
 				mockZuoraClient,
 				'8a8082c17f2b9b24017f2b9b3b4e0015',
 				'Test comment',
 			);
 
-			expect(invoiceMocks.writeOffInvoice).toHaveBeenCalledWith(
-				mockZuoraClient,
-				'8a8082c17f2b9b24017f2b9b3b4e0015',
-				'Test comment',
+			expect(mockZuoraClient.put).toHaveBeenCalledWith(
+				'/v1/invoices/8a8082c17f2b9b24017f2b9b3b4e0015/write-off',
+				expect.any(String),
+				zuoraResponseSchema,
 			);
 		});
 
 		it('should handle Zuora API errors', async () => {
 			const error = new Error('Invoice not found');
-			invoiceMocks.writeOffInvoice.mockRejectedValue(error);
+			mockZuoraClient.put = jest.fn().mockRejectedValue(error);
 
-			const { writeOffInvoice } = require('../src/invoice');
 			await expect(
 				writeOffInvoice(mockZuoraClient, 'INV-12345', 'Test comment'),
 			).rejects.toThrow('Invoice not found');
+		});
+
+		describe('dynamic typing', () => {
+			it('should use default zuoraResponseSchema when no schema provided', async () => {
+				const mockResponse = { success: true, code: 'SUCCESS' };
+				mockZuoraClient.put = jest.fn().mockResolvedValue(mockResponse);
+
+				const comment = 'Test write-off';
+				const result = await writeOffInvoice(
+					mockZuoraClient,
+					'INV-12345',
+					comment,
+				);
+
+				expect(mockZuoraClient.put).toHaveBeenCalledWith(
+					'/v1/invoices/INV-12345/write-off',
+					JSON.stringify({
+						comment,
+						memoDate: '2023-11-04',
+						reasonCode: 'Write-off',
+					}),
+					zuoraResponseSchema,
+				);
+				expect(result).toEqual(mockResponse);
+			});
+
+			it('should use custom schema when provided', async () => {
+				const customSchema = z.object({
+					customField: z.string(),
+					amount: z.number(),
+				});
+				const mockResponse = { customField: 'test', amount: 10 };
+				mockZuoraClient.put = jest.fn().mockResolvedValue(mockResponse);
+
+				const comment = 'Custom write-off';
+				const result = await writeOffInvoice(
+					mockZuoraClient,
+					'INV-12345',
+					comment,
+					customSchema,
+				);
+
+				expect(mockZuoraClient.put).toHaveBeenCalledWith(
+					'/v1/invoices/INV-12345/write-off',
+					JSON.stringify({
+						comment,
+						memoDate: '2023-11-04',
+						reasonCode: 'Write-off',
+					}),
+					customSchema,
+				);
+				expect(result).toEqual(mockResponse);
+			});
+
+			it('should maintain type safety with custom schemas', async () => {
+				const strictSchema = z
+					.object({
+						writeOffId: z.string(),
+						status: z.literal('COMPLETED'),
+					})
+					.strict();
+
+				const mockResponse = {
+					writeOffId: 'WO-123',
+					status: 'COMPLETED' as const,
+				};
+				mockZuoraClient.put = jest.fn().mockResolvedValue(mockResponse);
+
+				const comment = 'Strict write-off';
+				const result = await writeOffInvoice(
+					mockZuoraClient,
+					'INV-12345',
+					comment,
+					strictSchema,
+				);
+
+				expect(result.writeOffId).toBe('WO-123');
+				expect(result.status).toBe('COMPLETED');
+			});
 		});
 	});
 });

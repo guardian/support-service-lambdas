@@ -1,27 +1,37 @@
+import * as console from 'node:console';
 import { ZodObject } from 'zod';
+
+function extractParamNames(fnString: string) {
+	const paramMatch = fnString.match(/\(([^)]*)\)/);
+	const paramNames = paramMatch?.[1]
+		? paramMatch[1]
+				.split(',')
+				.map((param) => param.trim().split(/[=\s]/)[0]?.trim())
+		: [];
+	return paramNames;
+}
 
 export class Logger {
 	constructor(
 		private prefix: string[] = [],
-		/* eslint-disable @typescript-eslint/no-explicit-any -- this has to match console.log */
-		private logFn: (...args: any[]) => void = console.log,
-		private errorFn: (...args: any[]) => void = console.error,
-		/* eslint-enable @typescript-eslint/no-explicit-any */
+
+		private logFn = (message: string) => console.log(message),
+		private errorFn = (message: string) => console.error(message),
 	) {}
 
 	public resetContext(): void {
-		this.logFn('logger: resetting context', this.prefix);
+		this.logFn('logger: resetting context from ' + this.prefix.join(', '));
 		this.prefix = [];
 	}
 
 	public mutableAddContext(value: string): void {
-		this.logFn('logger: adding context', value);
+		this.logFn('logger: adding context ' + value);
 		this.prefix.push(value);
 	}
 
 	// look at the stack to work out the caller's details
 	// be careful about refactoring things that call this as by design it's not referentially transparent
-	public getCallerInfo(extraFrames: number = 0): string | undefined {
+	public getCallerInfo(extraFrames: number = 0): string {
 		const err = new Error();
 		const stack = err.stack?.split('\n');
 		// [0] Error, [1] at getCallerInfo, [2] at caller (internal to logger), then [3] actual code
@@ -45,40 +55,55 @@ export class Logger {
 
 			return filename + (functionName ? '::' + functionName : '');
 		}
-		return undefined;
+		return '';
 	}
 
 	/* eslint-disable @typescript-eslint/no-explicit-any -- this has to match console.log */
 	/* eslint-disable @typescript-eslint/no-unsafe-argument -- this has to match console.log */
 	public log(message: any, ...optionalParams: any[]): void {
-		this.logWithCallerInfo(message, this.getCallerInfo(), ...optionalParams);
-	}
-
-	private logWithCallerInfo(
-		message: any,
-		callerInfo: any,
-		...optionalParams: any[]
-	): void {
-		this.logFn(this.getMessage(message, callerInfo), ...optionalParams);
+		const callerInfo = this.getCallerInfo();
+		this.logFn(this.getMessage(callerInfo, message, ...optionalParams));
 	}
 
 	public error(message?: any, ...optionalParams: any[]): void {
-		this.errorWithCallerInfo(message, this.getCallerInfo(), ...optionalParams);
+		const callerInfo = this.getCallerInfo();
+		this.errorFn(this.getMessage(callerInfo, message, ...optionalParams));
 	}
 
-	private errorWithCallerInfo(
-		message: any,
-		callerInfo: any,
-		...optionalParams: any[]
-	): void {
-		this.errorFn(this.getMessage(message, callerInfo), ...optionalParams);
+	getMessage(callerInfo: string, ...messages: any[]): string {
+		const message = messages.map(this.prettyPrint).join('\n');
+		return this.addPrefixes(callerInfo, message);
 	}
+
+	prettyPrint = (value: any): string => {
+		if (value === null || value === undefined) {
+			return String(value);
+		}
+		if (value instanceof Error) {
+			return value.stack ?? '';
+		}
+		if (typeof value === 'object' || Array.isArray(value)) {
+			try {
+				const jsonString = JSON.stringify(value)
+					.replace(/"([^"]+)":/g, ' $1: ') // Remove quotes around keys
+					.replace(/}$/, ' }');
+				if (jsonString.length <= 80) {
+					return jsonString;
+				}
+				return JSON.stringify(value, null, 2).replace(/"([^"]+)":/g, '$1:');
+			} catch {
+				return String(value);
+			}
+		}
+		return String(value);
+	};
+
+	/* eslint-enable @typescript-eslint/no-explicit-any */
 	/* eslint-enable @typescript-eslint/no-unsafe-argument */
 
-	getMessage(message: any, callerInfo: string | undefined): string {
+	private addPrefixes(callerInfo: string, message: string) {
 		return [...this.prefix, '[' + callerInfo + ']', message].join(' ');
 	}
-	/* eslint-enable @typescript-eslint/no-explicit-any */
 
 	/**
 	 * This function wraps an existing function and logs entry and exit together with the values passed in and returned
@@ -91,65 +116,81 @@ export class Logger {
 	 */
 	wrapFn<TArgs extends unknown[], TReturn>(
 		fn: AsyncFunction<TArgs, TReturn>,
-		functionName?: string | (() => string),
-		fnAsString?: string, // fn.toString() needed for args on a bound function
-		shortArgsNum?: number,
-		maybeCallerInfo?: string | undefined,
+		functionName: string | (() => string) = fn.name,
+		fnString: string = fn.toString(), // fn.toString() needed for args on a bound function
+		shortArgsNum: number = 1,
+		callerInfo: string = this.getCallerInfo(),
 	): AsyncFunction<TArgs, TReturn> {
-		const callerInfo = maybeCallerInfo ?? this.getCallerInfo();
+		const prefix =
+			'TRACE ' +
+			(typeof functionName === 'function' ? functionName() : functionName) +
+			' ';
+		const paramNames = extractParamNames(fnString);
+
 		return async (...args: TArgs): Promise<TReturn> => {
-			const name =
-				typeof functionName === 'function'
-					? functionName()
-					: (functionName ?? fn.name);
+			const prettyArgsArray = this.getPrettyArgs(paramNames, args);
 
-			const fnString = fnAsString ?? fn.toString();
-			const paramMatch = fnString.match(/\(([^)]*)\)/);
-			const paramNames = paramMatch?.[1]
-				? paramMatch[1]
-						.split(',')
-						.map((param) => param.trim().split(/[=\s]/)[0]?.trim())
-				: [];
-
-			const prettyArgs: Array<[string, unknown]> = args.map((arg, index) => {
-				const paramName = paramNames[index] ?? `arg${index}`;
-				const value =
-					arg instanceof ZodObject ? '(ZodObject not expanded)' : arg;
-				return [paramName, value];
-			});
+			const prettyArgs = ' ARGS\n' + prettyArgsArray.join('\n');
 			const shortPrettyArgs =
 				shortArgsNum === 0
-					? undefined
-					: Object.fromEntries(prettyArgs.slice(0, shortArgsNum ?? 1));
-			this.logWithCallerInfo(
-				`TRACE ${name} ENTRY ARGS`,
-				callerInfo,
-				Object.fromEntries(prettyArgs),
-			);
+					? ''
+					: ' SHORT_ARGS\n' + prettyArgsArray.slice(0, shortArgsNum).join('\n');
+
+			this.logEntry(callerInfo, prefix, prettyArgs);
 
 			try {
+				// actually call the function
 				const result = await fn(...args);
-				this.logWithCallerInfo(
-					`TRACE ${name} EXIT` +
-						(shortPrettyArgs === undefined ? '' : ` SHORT_ARGS`),
-					callerInfo,
-					shortPrettyArgs,
-					'RESULT',
-					result,
-				);
+
+				this.logExit(result, prefix, shortPrettyArgs, callerInfo);
+
 				return result;
 			} catch (error) {
-				this.errorWithCallerInfo(
-					`TRACE ${name} ERROR` +
-						(shortPrettyArgs === undefined ? '' : ` SHORT_ARGS`),
-					callerInfo,
-					shortPrettyArgs,
-					'ERROR',
-					error,
-				);
+				this.logError(error, prefix, shortPrettyArgs, callerInfo);
+
 				throw error;
 			}
 		};
+	}
+
+	private logError(
+		error: unknown,
+		prefix: string,
+		shortPrettyArgs: string,
+		callerInfo: string,
+	) {
+		const prettyError = '\nERROR\n' + this.prettyPrint(error);
+		const errorMessage = `${prefix}ERROR${shortPrettyArgs}${prettyError}`;
+		this.errorFn(this.addPrefixes(callerInfo, errorMessage));
+	}
+
+	private logExit<TReturn>(
+		result: TReturn,
+		prefix: string,
+		shortPrettyArgs: string,
+		callerInfo: string,
+	) {
+		const prettyResult = '\nRESULT\n' + this.prettyPrint(result);
+		const exitMessage = `${prefix}EXIT${shortPrettyArgs}${prettyResult}`;
+		this.logFn(this.addPrefixes(callerInfo, exitMessage));
+	}
+
+	private logEntry(callerInfo: string, prefix: string, prettyArgs: string) {
+		this.logFn(this.addPrefixes(callerInfo, `${prefix}ENTRY${prettyArgs}`));
+	}
+
+	private getPrettyArgs<TArgs extends unknown[]>(
+		paramNames: Array<string | undefined>,
+		args: TArgs,
+	) {
+		return args.map((arg, index) => {
+			const paramName = paramNames[index] ?? `arg${index}`;
+			const value =
+				arg instanceof ZodObject
+					? '(ZodObject not expanded)'
+					: this.prettyPrint(arg);
+			return `${paramName}: ${value}`;
+		});
 	}
 
 	/**

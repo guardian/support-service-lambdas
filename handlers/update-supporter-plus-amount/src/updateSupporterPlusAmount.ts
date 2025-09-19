@@ -31,6 +31,7 @@ export type SupporterPlusData = {
 	productRatePlan: ProductRatePlan<'SupporterPlus', UpdatablePlans>;
 	chargeToUpdate: RatePlanCharge;
 	basePriceMinorUnits: number;
+	isBrokenSub: boolean;
 };
 
 type ProductData = {
@@ -104,13 +105,24 @@ export const getSupporterPlusData = (
 
 	logger.log('updatable charge', chargeToUpdate.id);
 
-	const basePriceMinorUnits = productData.baseChargeId
+	const baseCharge = productData.baseChargeId
 		? getIfDefined(
 				ratePlan.ratePlanCharges.find(
 					(charge) =>
 						charge.productRatePlanChargeId === productData.baseChargeId,
-				)?.price,
-				`Could not find the base charge with price property (with the id ${productData.baseChargeId}) in this rate plan`,
+				),
+				`Could not find the base charge (with the id ${productData.baseChargeId}) in this rate plan`,
+			)
+		: undefined;
+
+	const isBrokenSub =
+		baseCharge !== undefined &&
+		baseCharge.billingPeriodAlignment !== 'AlignToCharge';
+
+	const basePriceMinorUnits = baseCharge
+		? getIfDefined(
+				baseCharge.price,
+				`base charge was missing price: ${JSON.stringify(baseCharge)}`,
 			) * 100
 		: 0;
 
@@ -121,6 +133,7 @@ export const getSupporterPlusData = (
 		productRatePlan: productData.productRatePlan,
 		chargeToUpdate,
 		basePriceMinorUnits,
+		isBrokenSub,
 	};
 };
 
@@ -201,6 +214,7 @@ export const updateSupporterPlusAmount = async (
 		ratePlanId: supporterPlusData.ratePlan.id,
 		chargeNumber: chargeToUpdate.number,
 		contributionAmount: newContributionAmount,
+		isBrokenSub: supporterPlusData.isBrokenSub,
 	});
 
 	return {

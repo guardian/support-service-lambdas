@@ -46,15 +46,13 @@ describe('Supporter Plus Amount Update - term renewal variations', () => {
 				chargeNumber: subscriptionData.ratePlans[0]!.ratePlanCharges[0]!.number,
 				contributionAmount: 10.0,
 				shouldExtendTerm,
+				isBrokenSub: false,
 			});
 
 			// Verify the request structure
-			expect(orderRequest.subscriptions[0]?.orderActions).toHaveLength(2);
+			expect(orderRequest.subscriptions[0]?.orderActions).toHaveLength(1);
 			expect(orderRequest.subscriptions[0]?.orderActions?.[0]?.type).toBe(
 				'UpdateProduct',
-			);
-			expect(orderRequest.subscriptions[0]?.orderActions?.[1]?.type).toBe(
-				'TermsAndConditions',
 			);
 
 			// Should NOT extend term for mid-term changes
@@ -80,11 +78,11 @@ describe('Supporter Plus Amount Update - term renewal variations', () => {
 				chargeNumber: 'C-12345678',
 				contributionAmount: 10.0,
 				shouldExtendTerm,
+				isBrokenSub: false,
 			});
 
-			// Should have 3 actions: UpdateProduct, TermsAndConditions, and RenewSubscription
-			expect(orderRequest.subscriptions[0]?.orderActions).toHaveLength(3);
-			expect(orderRequest.subscriptions[0]?.orderActions?.[2]?.type).toBe(
+			expect(orderRequest.subscriptions[0]?.orderActions).toHaveLength(2);
+			expect(orderRequest.subscriptions[0]?.orderActions?.[1]?.type).toBe(
 				'RenewSubscription',
 			);
 			expect(shouldExtendTerm).toBe(true);

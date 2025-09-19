@@ -116,10 +116,11 @@ function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 	const customFields = {
 		DeliveryAgent__c: deliveryAgent.toString(),
 		ReaderType__c: readerType,
+		LastPlanAddedDate__c: zuoraDateFormat(contractEffectiveDate),
 	};
 	return {
 		newAccount: newAccount,
-		orderDate: zuoraDateFormat(dayjs()),
+		orderDate: zuoraDateFormat(contractEffectiveDate),
 		description: `Created by createSubscription.ts in support-service-lambdas`,
 		subscriptions: [
 			{
