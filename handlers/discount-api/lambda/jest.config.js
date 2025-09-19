@@ -4,7 +4,8 @@ module.exports = {
 	testEnvironment: 'node',
 	runner: 'groups',
 	moduleNameMapper: {
-		'@modules/(.*)/(.*)$': '<rootDir>/../../modules/$1/src/$2',
-		'@modules/(.*)$': '<rootDir>/../../modules/$1',
+		'@modules/(.*)/(.*)$': '<rootDir>/../../../modules/$1/src/$2',
+		'@modules/(.*)$': '<rootDir>/../../../modules/$1',
 	},
+	testPathIgnorePatterns: ['<rootDir>/cdk/'],
 };

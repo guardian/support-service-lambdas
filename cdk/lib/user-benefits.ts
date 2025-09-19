@@ -14,7 +14,7 @@ import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { allowedOriginsForStage } from '../../handlers/user-benefits/src/cors';
-import { nodeVersion } from './node-version';
+import { nodeVersion } from '../module/constants';
 
 export interface UserBenefitsProps extends GuStackProps {
 	stack: string;

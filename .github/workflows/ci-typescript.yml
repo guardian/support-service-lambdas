@@ -73,8 +73,22 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
+
+      - name: detect old or new handler structure
+        id: paths
+        run: |
+          if [ -d "./handlers/${{ matrix.subproject }}/cdk" ]; then
+            echo "cdk-path=./handlers/${{ matrix.subproject }}/cdk" >> $GITHUB_OUTPUT
+            echo "lambda-path=./handlers/${{ matrix.subproject }}/lambda" >> $GITHUB_OUTPUT
+            echo "cdk-module=${{ matrix.subproject }}-cdk" >> $GITHUB_OUTPUT
+          else
+            echo "cdk-path=./cdk" >> $GITHUB_OUTPUT
+            echo "lambda-path=./handlers/${{ matrix.subproject }}" >> $GITHUB_OUTPUT
+            echo "cdk-module=cdk" >> $GITHUB_OUTPUT
+          fi
+
       - run: pnpm install
-      - run: pnpm --filter cdk package
+      - run: pnpm --filter ${{ steps.paths.outputs.cdk-module }} package
       - run: pnpm --filter ${{ matrix.subproject }} package
 
       - name: Configure AWS credentials
@@ -94,6 +108,6 @@ jobs:
           commentingEnabled: 'false'
           contentDirectories: |
             ${{ matrix.subproject }}-cloudformation:
-              - ./cdk/cdk.out
+              - ${{ steps.paths.outputs.cdk-path }}/cdk.out
             ${{ matrix.subproject }}:
-              - ./handlers/${{ matrix.subproject }}/target/${{ matrix.subproject }}.zip
+              - ${{ steps.paths.outputs.lambda-path }}/target/${{ matrix.subproject }}.zip

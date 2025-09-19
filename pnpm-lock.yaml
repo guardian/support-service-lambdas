@@ -98,13 +98,46 @@ importers:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@22.18.3)(typescript@5.9.2)
 
-  handlers/alarms-handler:
+  cdk/module: {}
+
+  handlers/alarms-handler/cdk:
+    dependencies:
+      '@cdk/module':
+        specifier: workspace:*
+        version: link:../../../cdk/module
+    devDependencies:
+      '@guardian/cdk':
+        specifier: 61.11.1
+        version: 61.11.1(aws-cdk-lib@2.195.0(constructs@10.4.2))(aws-cdk@2.1014.0)(constructs@10.4.2)
+      '@types/jest':
+        specifier: ^29.5.14
+        version: 29.5.14
+      '@types/node':
+        specifier: ^22.15.14
+        version: 22.18.3
+      aws-cdk:
+        specifier: 2.1014.0
+        version: 2.1014.0
+      aws-cdk-lib:
+        specifier: 2.195.0
+        version: 2.195.0(constructs@10.4.2)
+      constructs:
+        specifier: 10.4.2
+        version: 10.4.2
+      source-map-support:
+        specifier: ^0.5.21
+        version: 0.5.21
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@22.18.3)(typescript@5.9.2)
+
+  handlers/alarms-handler/lambda:
     dependencies:
       '@aws-sdk/client-cloudwatch':
         specifier: ^3.848.0
         version: 3.888.0
       '@aws-sdk/credential-providers':
-        specifier: ^3.879.0
+        specifier: ^3.848.0
         version: 3.888.0
       zod:
         specifier: 'catalog:'
@@ -117,7 +150,38 @@ importers:
         specifier: ^1.11.13
         version: 1.11.18
 
-  handlers/discount-api:
+  handlers/discount-api/cdk:
+    dependencies:
+      '@cdk/module':
+        specifier: workspace:*
+        version: link:../../../cdk/module
+    devDependencies:
+      '@guardian/cdk':
+        specifier: 61.11.1
+        version: 61.11.1(aws-cdk-lib@2.195.0(constructs@10.4.2))(aws-cdk@2.1014.0)(constructs@10.4.2)
+      '@types/jest':
+        specifier: ^29.5.14
+        version: 29.5.14
+      '@types/node':
+        specifier: ^22.15.14
+        version: 22.18.3
+      aws-cdk:
+        specifier: 2.1014.0
+        version: 2.1014.0
+      aws-cdk-lib:
+        specifier: 2.195.0
+        version: 2.195.0(constructs@10.4.2)
+      constructs:
+        specifier: 10.4.2
+        version: 10.4.2
+      source-map-support:
+        specifier: ^0.5.21
+        version: 0.5.21
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@22.18.3)(typescript@5.9.2)
+
+  handlers/discount-api/lambda:
     dependencies:
       dayjs:
         specifier: ^1.11.13
@@ -5059,7 +5123,7 @@ snapshots:
     dependencies:
       '@aws-sdk/client-cognito-identity': 3.888.0
       '@aws-sdk/types': 3.887.0
-      '@smithy/property-provider': 4.0.5
+      '@smithy/property-provider': 4.1.1
       '@smithy/types': 4.5.0
       tslib: 2.8.1
     transitivePeerDependencies:
@@ -5170,9 +5234,9 @@ snapshots:
       '@aws-sdk/types': 3.887.0
       '@smithy/config-resolver': 4.2.1
       '@smithy/core': 3.11.0
-      '@smithy/credential-provider-imds': 4.0.7
+      '@smithy/credential-provider-imds': 4.1.1
       '@smithy/node-config-provider': 4.2.1
-      '@smithy/property-provider': 4.0.5
+      '@smithy/property-provider': 4.1.1
       '@smithy/types': 4.5.0
       tslib: 2.8.1
     transitivePeerDependencies:
@@ -5858,7 +5922,7 @@ snapshots:
   '@jest/console@29.7.0':
     dependencies:
       '@jest/types': 29.6.3
-      '@types/node': 24.4.0
+      '@types/node': 22.18.3
       chalk: 4.1.2
       jest-message-util: 29.7.0
       jest-util: 29.7.0
@@ -5871,14 +5935,14 @@ snapshots:
       '@jest/test-result': 29.7.0
       '@jest/transform': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 24.4.0
+      '@types/node': 22.18.3
       ansi-escapes: 4.3.2
       chalk: 4.1.2
       ci-info: 3.9.0
       exit: 0.1.2
       graceful-fs: 4.2.11
       jest-changed-files: 29.7.0
-      jest-config: 29.7.0(@types/node@24.4.0)(ts-node@10.9.2(@types/node@22.18.3)(typescript@5.9.2))
+      jest-config: 29.7.0(@types/node@22.18.3)(ts-node@10.9.2(@types/node@22.18.3)(typescript@5.9.2))
       jest-haste-map: 29.7.0
       jest-message-util: 29.7.0
       jest-regex-util: 29.6.3
@@ -5906,14 +5970,14 @@ snapshots:
       '@jest/test-result': 29.7.0
       '@jest/transform': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 24.4.0
+      '@types/node': 22.18.3
       ansi-escapes: 4.3.2
       chalk: 4.1.2
       ci-info: 3.9.0
       exit: 0.1.2
       graceful-fs: 4.2.11
       jest-changed-files: 29.7.0
-      jest-config: 29.7.0(@types/node@24.4.0)(ts-node@10.9.2(@types/node@24.4.0)(typescript@5.9.2))
+      jest-config: 29.7.0(@types/node@22.18.3)(ts-node@10.9.2(@types/node@24.4.0)(typescript@5.9.2))
       jest-haste-map: 29.7.0
       jest-message-util: 29.7.0
       jest-regex-util: 29.6.3
@@ -5978,7 +6042,7 @@ snapshots:
       '@jest/transform': 29.7.0
       '@jest/types': 29.6.3
       '@jridgewell/trace-mapping': 0.3.30
-      '@types/node': 24.4.0
+      '@types/node': 22.18.3
       chalk: 4.1.2
       collect-v8-coverage: 1.0.2
       exit: 0.1.2
@@ -6048,7 +6112,7 @@ snapshots:
       '@jest/schemas': 29.6.3
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
-      '@types/node': 24.4.0
+      '@types/node': 22.18.3
       '@types/yargs': 17.0.33
       chalk: 4.1.2
 
@@ -6774,7 +6838,7 @@ snapshots:
   '@types/jsonwebtoken@9.0.10':
     dependencies:
       '@types/ms': 2.1.0
-      '@types/node': 24.4.0
+      '@types/node': 22.18.3
 
   '@types/mime@1.3.5': {}
 
@@ -8677,7 +8741,7 @@ snapshots:
       - babel-plugin-macros
       - supports-color
 
-  jest-config@29.7.0(@types/node@24.4.0)(ts-node@10.9.2(@types/node@22.18.3)(typescript@5.9.2)):
+  jest-config@29.7.0(@types/node@22.18.3)(ts-node@10.9.2(@types/node@24.4.0)(typescript@5.9.2)):
     dependencies:
       '@babel/core': 7.28.3
       '@jest/test-sequencer': 29.7.0
@@ -8702,8 +8766,8 @@ snapshots:
       slash: 3.0.0
       strip-json-comments: 3.1.1
     optionalDependencies:
-      '@types/node': 24.4.0
-      ts-node: 10.9.2(@types/node@22.18.3)(typescript@5.9.2)
+      '@types/node': 22.18.3
+      ts-node: 10.9.2(@types/node@24.4.0)(typescript@5.9.2)
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
@@ -8773,7 +8837,7 @@ snapshots:
     dependencies:
       '@jest/types': 29.6.3
       '@types/graceful-fs': 4.1.9
-      '@types/node': 24.4.0
+      '@types/node': 22.18.3
       anymatch: 3.1.3
       fb-watchman: 2.0.2
       graceful-fs: 4.2.11
@@ -8852,7 +8916,7 @@ snapshots:
       '@jest/test-result': 29.7.0
       '@jest/transform': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 24.4.0
+      '@types/node': 22.18.3
       chalk: 4.1.2
       emittery: 0.13.1
       graceful-fs: 4.2.11
@@ -8880,7 +8944,7 @@ snapshots:
       '@jest/test-result': 29.7.0
       '@jest/transform': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 24.4.0
+      '@types/node': 22.18.3
       chalk: 4.1.2
       cjs-module-lexer: 1.4.3
       collect-v8-coverage: 1.0.2
@@ -8945,7 +9009,7 @@ snapshots:
     dependencies:
       '@jest/test-result': 29.7.0
       '@jest/types': 29.6.3
-      '@types/node': 24.4.0
+      '@types/node': 22.18.3
       ansi-escapes: 4.3.2
       chalk: 4.1.2
       emittery: 0.13.1

@@ -1,4 +1,4 @@
-import { handlerWithStage } from '../src/index';
+import { handlerWithStage } from '../src';
 import type { SQSEvent } from 'aws-lambda';
 import { buildCloudwatch } from '../src/cloudwatch';
 import { loadConfig } from '@modules/aws/appConfig';
