@@ -46,6 +46,7 @@
   "CreatedByCSR__c": null,
   "CASSubscriberID__c": null,
   "LastPriceChangeDate__c": null,
+  "LastPlanAddedDate__c": "2024-04-04",
   "InitialPromotionCode__c": "50SPRING2024",
   "CpqBundleJsonId__QT": null,
   "RedemptionCode__c": null,
