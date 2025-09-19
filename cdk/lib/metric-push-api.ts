@@ -12,8 +12,8 @@ import {
 } from 'aws-cdk-lib/aws-cloudwatch';
 import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
-import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
-import { nodeVersion } from './node-version';
+import { SrLambdaAlarm } from '../module/cdk/sr-lambda-alarm';
+import { nodeVersion } from '../module/constants';
 
 export class MetricPushApi extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {

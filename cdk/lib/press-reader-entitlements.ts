@@ -13,8 +13,8 @@ import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
-import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
-import { nodeVersion } from './node-version';
+import { SrLambdaAlarm } from '../module/cdk/sr-lambda-alarm';
+import { nodeVersion } from '../module/constants';
 
 export interface PressReaderEntitlementsProps extends GuStackProps {
 	stack: string;

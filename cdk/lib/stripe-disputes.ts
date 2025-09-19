@@ -19,7 +19,7 @@ import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
-import { nodeVersion } from './node-version';
+import { nodeVersion } from '../module/constants';
 
 export interface StripeDisputesProps extends GuStackProps {
 	stack: string;

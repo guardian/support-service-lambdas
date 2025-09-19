@@ -14,8 +14,8 @@ import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { Bucket, EventType } from 'aws-cdk-lib/aws-s3';
 import { LambdaDestination } from 'aws-cdk-lib/aws-s3-notifications';
 import { metricNamespace } from '../../modules/aws/src/cloudwatch';
-import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
-import { nodeVersion } from './node-version';
+import { SrLambdaAlarm } from '../module/cdk/sr-lambda-alarm';
+import { nodeVersion } from '../module/constants';
 
 export const productCatalogBucketName = 'gu-product-catalog';
 export const failedSchemaValidationMetricName = 'failed-schema-validation';

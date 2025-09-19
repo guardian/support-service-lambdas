@@ -4,7 +4,7 @@ import {
 	supportApisDomain,
 	supportCertificateId,
 	supportHostedZoneId,
-} from '../bin/cdk';
+} from '../module/constants';
 import { StripeDisputes } from './stripe-disputes';
 
 describe('The stripe disputes webhook API stack', () => {
