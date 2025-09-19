@@ -1,6 +1,9 @@
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
+import type { AppliedPromotion, Promotion } from '@modules/promotions/schema';
+import { validatePromotion } from '@modules/promotions/validatePromotion';
+import type { Stage } from '@modules/stage';
 import dayjs from 'dayjs';
 import { z } from 'zod';
 import { getChargeOverride } from '@modules/zuora/createSubscription/chargeOverride';
@@ -14,18 +17,23 @@ import { dateFromStringSchema } from '@modules/zuora/utils/dateFromStringSchema'
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 export type PreviewCreateSubscriptionInputFields = {
+	stage: Stage;
 	accountNumber: string;
 	currency: IsoCurrency;
 	productPurchase: ProductPurchase;
+	appliedPromotion?: AppliedPromotion;
 };
 
 export const previewCreateSubscription = async (
 	zuoraClient: ZuoraClient,
 	productCatalog: ProductCatalog,
+	promotions: Promotion[],
 	{
+		stage,
 		accountNumber,
 		currency,
 		productPurchase,
+		appliedPromotion,
 	}: PreviewCreateSubscriptionInputFields,
 ): Promise<PreviewCreateSubscriptionResponse> => {
 	const { contractEffectiveDate, customerAcceptanceDate } =
@@ -38,11 +46,17 @@ export const previewCreateSubscription = async (
 	);
 
 	const productRatePlan = getProductRatePlan(productCatalog, productPurchase);
+	const validatedPromotion = appliedPromotion
+		? validatePromotion(promotions, appliedPromotion, productRatePlan.id)
+		: undefined;
+
 	const createSubscriptionOrderAction = buildCreateSubscriptionOrderAction({
+		stage: stage,
 		productRatePlanId: productRatePlan.id,
 		contractEffectiveDate: contractEffectiveDate,
 		customerAcceptanceDate: customerAcceptanceDate,
 		chargeOverride: chargeOverride,
+		validatedPromotion: validatedPromotion,
 		termType: productRatePlan.termType,
 		termLengthInMonths: productRatePlan.termLengthInMonths,
 	});

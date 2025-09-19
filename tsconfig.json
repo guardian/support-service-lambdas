@@ -35,6 +35,7 @@
       "@modules/zuora-catalog/*": ["./modules/zuora-catalog/src/*"],
       "@modules/product-benefits/*": ["./modules/product-benefits/src/*"],
       "@modules/product-catalog/*": ["./modules/product-catalog/src/*"],
+      "@modules/promotions/*": ["./modules/promotions/src/*"],
       "@modules/email/*": ["./modules/email/src/*"],
       "@modules/internationalisation/*": ["./modules/internationalisation/src/*"],
       "@modules/supporter-product-data/*": ["./modules/supporter-product-data/src/*"],

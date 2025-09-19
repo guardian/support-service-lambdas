@@ -1,6 +1,7 @@
 import {
 	groupBy,
 	groupMap,
+	intersection,
 	mapValues,
 	partition,
 	sortBy,
@@ -71,4 +72,25 @@ test('partition should separate accordingly', () => {
 		[12, 23, 12],
 		['hello', 'hello', 'world'],
 	]);
+});
+
+describe('intersection', () => {
+	test('returns common elements', () => {
+		expect(intersection([1, 2, 3], [2, 3, 4])).toEqual([2, 3]);
+	});
+
+	test('returns empty array if no intersection', () => {
+		expect(intersection([1, 2], [3, 4])).toEqual([]);
+	});
+
+	test('handles empty arrays', () => {
+		expect(intersection([], [1, 2])).toEqual([]);
+		expect(intersection([1, 2], [])).toEqual([]);
+		expect(intersection([], [])).toEqual([]);
+	});
+
+	test('removes duplicates', () => {
+		expect(intersection([1, 2, 2, 3], [2, 3, 3])).toEqual([2, 3]);
+		expect(intersection([2, 3, 3], [1, 2, 2, 3])).toEqual([2, 3]);
+	});
 });

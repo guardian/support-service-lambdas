@@ -12,10 +12,10 @@ export const titleSchema = z.union([
 ]);
 
 export const giftRecipientSchema = z.object({
-	title: titleSchema.nullable(),
+	title: titleSchema.nullish(),
 	firstName: z.string(),
 	lastName: z.string(),
-	email: z.string().nullable(),
+	email: z.string().nullish(),
 });
 
 export type GiftRecipient = z.infer<typeof giftRecipientSchema>;
