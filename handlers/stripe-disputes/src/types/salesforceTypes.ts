@@ -4,6 +4,10 @@ export type SalesforceCredentials = {
 	sandbox: boolean;
 };
 
+export type StripeCredentials = {
+	secret_key: string;
+};
+
 export type SalesforceAuthResponse = {
 	access_token: string;
 	instance_url: string;
