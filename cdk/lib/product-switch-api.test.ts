@@ -4,7 +4,7 @@ import {
 	supportApisDomain,
 	supportCertificateId,
 	supportHostedZoneId,
-} from '../bin/cdk';
+} from '../module/constants';
 import { ProductSwitchApi } from './product-switch-api';
 
 describe('The Product switch api stack', () => {
