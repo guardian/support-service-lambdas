@@ -147,7 +147,10 @@ describe('the buildCreateSubscriptionRequest function', () => {
 		const orderAction = request.subscriptions[0]
 			?.orderActions[0] as CreateSubscriptionOrderAction;
 
-		expect(orderAction.createSubscription.subscribeToRatePlans.length).toBe(2);
+		const expectedNumberOfRatePlans = 2; // 1 product rate plan + 1 discount rate plan
+		expect(orderAction.createSubscription.subscribeToRatePlans.length).toBe(
+			expectedNumberOfRatePlans,
+		);
 		expect(request.subscriptions[0]?.customFields?.ReaderType__c).toBe(
 			ReaderType.Direct,
 		);
