@@ -112,3 +112,8 @@ export const mapPartition = <U, T>(array: T[], fn: (t: T) => U | undefined) =>
 		},
 		[[], []],
 	);
+
+export const intersection = <T>(a: T[], b: T[]) => {
+	const setB = new Set(b);
+	return [...new Set(a)].filter((x) => setB.has(x));
+};

@@ -1,19 +1,14 @@
 import type { Logger } from '@modules/routing/logger';
 import { stageFromEnvironment } from '@modules/stage';
-import { isZuoraRequestSuccess } from '@modules/zuora/helpers';
-import { writeOffInvoice } from '@modules/zuora/invoice';
-import { rejectPayment } from '@modules/zuora/payment';
-import {
-	cancelSubscription,
-	getSubscription,
-} from '@modules/zuora/subscription';
-import type { ZuoraResponse } from '@modules/zuora/types';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import dayjs from 'dayjs';
 import type { ListenDisputeClosedRequestBody } from '../dtos';
 import type { ZuoraInvoiceFromStripeChargeIdResult } from '../interfaces';
 import {
+	cancelSubscriptionService,
+	getSubscriptionService,
+	rejectPaymentService,
 	upsertSalesforceObject,
+	writeOffInvoiceService,
 	zuoraGetInvoiceFromStripeChargeId,
 } from '../services';
 import type { SalesforceUpsertResponse } from '../types';
@@ -45,92 +40,31 @@ export async function handleListenDisputeClosed(
 	);
 
 	try {
-		const subscriptionNumber = invoiceFromZuora.SubscriptionNumber;
-		logger.log(`Retrieved subscription number: ${subscriptionNumber}`);
+		const subscription = await getSubscriptionService(
+			logger,
+			zuoraClient,
+			invoiceFromZuora.SubscriptionNumber,
+		);
 
-		if (subscriptionNumber) {
-			const subscription = await getSubscription(
+		if (subscription) {
+			await rejectPaymentService(
+				logger,
 				zuoraClient,
-				subscriptionNumber,
+				invoiceFromZuora.paymentPaymentNumber,
 			);
-			logger.log(`Subscription status: ${subscription.status}`);
 
-			if (invoiceFromZuora.paymentPaymentNumber) {
-				logger.log(
-					`Rejecting payment: ${invoiceFromZuora.paymentPaymentNumber}`,
-				);
+			await writeOffInvoiceService(
+				logger,
+				zuoraClient,
+				invoiceFromZuora.InvoiceId,
+				disputeId,
+			);
 
-				const rejectPaymentResponse: ZuoraResponse = await rejectPayment(
-					zuoraClient,
-					invoiceFromZuora.paymentPaymentNumber,
-					'chargeback',
-				);
-
-				logger.log(
-					'Payment rejection response:',
-					JSON.stringify(rejectPaymentResponse),
-				);
-
-				if (!isZuoraRequestSuccess(rejectPaymentResponse)) {
-					logger.error('Failed to reject payment in Zuora');
-				} else {
-					if (invoiceFromZuora.InvoiceId) {
-						logger.log(`Writing off invoice: ${invoiceFromZuora.InvoiceId}`);
-
-						const writeOffResponse: ZuoraResponse = await writeOffInvoice(
-							zuoraClient,
-							invoiceFromZuora.InvoiceId,
-							`Invoice write-off due to Stripe dispute closure. Dispute ID: ${disputeId}`,
-						);
-
-						logger.log(
-							'Invoice write-off response:',
-							JSON.stringify(writeOffResponse),
-						);
-
-						if (!isZuoraRequestSuccess(writeOffResponse)) {
-							logger.error('Failed to write off invoice in Zuora');
-						} else {
-							if (subscription.status === 'Active') {
-								logger.log(
-									`Canceling active subscription: ${subscriptionNumber}`,
-								);
-
-								const cancelResponse = await cancelSubscription(
-									zuoraClient,
-									subscriptionNumber,
-									dayjs(),
-									false,
-									undefined,
-									'EndOfLastInvoicePeriod',
-								);
-
-								logger.log(
-									'Subscription cancellation response:',
-									JSON.stringify(cancelResponse),
-								);
-
-								if (!cancelResponse.Success) {
-									logger.error('Failed to cancel subscription in Zuora');
-								}
-							} else {
-								logger.log(
-									`Subscription already inactive (${subscription.status}), skipping cancellation`,
-								);
-							}
-						}
-					} else {
-						logger.log('No invoice ID found, skipping invoice write-off');
-					}
-				}
-			} else {
-				logger.log('No payment number found, skipping payment rejection');
-			}
-		} else {
-			logger.log('No subscription found, skipping Zuora operations');
+			await cancelSubscriptionService(logger, zuoraClient, subscription);
 		}
 	} catch (zuoraError) {
 		logger.error('Error during Zuora operations:', zuoraError);
+		throw zuoraError;
 	}
 
 	logger.log(`Successfully processed dispute closure for dispute ${disputeId}`);
