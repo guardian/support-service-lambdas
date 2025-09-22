@@ -165,11 +165,17 @@ object ZuoraIds {
       everyday: ProductRatePlanId,
       weekend: ProductRatePlanId,
       sixDay: ProductRatePlanId,
+      everydayPlus: ProductRatePlanId,
+      weekendPlus: ProductRatePlanId,
+      sixDayPlus: ProductRatePlanId
   ) {
     val byApiPlanId: Map[PlanId, ProductRatePlanId] = Map(
       NationalDeliveryEveryday -> everyday,
       NationalDeliveryWeekend -> weekend,
       NationalDeliverySixday -> sixDay,
+      NationalDeliveryEverydayPlus -> everydayPlus,
+      NationalDeliveryWeekendPlus -> weekendPlus,
+      NationalDeliverySixdayPlus -> sixDayPlus
     )
   }
 
@@ -313,6 +319,9 @@ object ZuoraIds {
           everyday = ProductRatePlanId("8a12999f8a268c57018a27ebe31414a4"),
           weekend = ProductRatePlanId("8a12999f8a268c57018a27ebe868150c"),
           sixDay = ProductRatePlanId("8a12999f8a268c57018a27ebfd721883"),
+          everydayPlus = ProductRatePlanId("8a1280be96d33dbf0196d48a632616f4"),
+          weekendPlus = ProductRatePlanId("8a1280be96d33dbf0196d487b55c1283"),
+          sixDayPlus = ProductRatePlanId("8a12994696d3587b0196d484491e3beb"),
         ),
         TierThreeZuoraIds(
           monthlyDomestic = ProductRatePlanId("8a1299788ff2ec100190025fccc32bb1"),
@@ -410,6 +419,9 @@ object ZuoraIds {
           everyday = ProductRatePlanId("8ad096ca8992481d018992a363bd17ad"),
           weekend = ProductRatePlanId("8ad096ca8992481d018992a36256175e"),
           sixDay = ProductRatePlanId("8ad096ca8992481d018992a35f60171b"),
+          everydayPlus = ProductRatePlanId("71a116628be96ab11606b51ec6060555"),
+          weekendPlus = ProductRatePlanId("71a1166283a96ab11606b50ebbb50381"),
+          sixDayPlus = ProductRatePlanId("71a1383e2a796aafcb16b527842001ca"),
         ),
         TierThreeZuoraIds(
           monthlyDomestic = ProductRatePlanId("8ad097b48ff26452019001cebac92376"),
