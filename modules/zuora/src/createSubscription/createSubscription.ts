@@ -1,6 +1,9 @@
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
+import type { AppliedPromotion, Promotion } from '@modules/promotions/schema';
+import { validatePromotion } from '@modules/promotions/validatePromotion';
+import type { Stage } from '@modules/stage';
 import dayjs from 'dayjs';
 import { z } from 'zod';
 import { getChargeOverride } from '@modules/zuora/createSubscription/chargeOverride';
@@ -34,6 +37,7 @@ export type CreateSubscriptionResponse = z.infer<
 >;
 
 export type CreateSubscriptionInputFields<T extends PaymentMethod> = {
+	stage: Stage;
 	accountName: string;
 	createdRequestId: string;
 	salesforceAccountId: string;
@@ -45,13 +49,16 @@ export type CreateSubscriptionInputFields<T extends PaymentMethod> = {
 	billToContact: Contact;
 	productPurchase: ProductPurchase;
 	giftRecipient?: GiftRecipient;
+	appliedPromotion?: AppliedPromotion;
 	runBilling?: boolean;
 	collectPayment?: boolean;
 };
 
 function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 	productCatalog: ProductCatalog,
+	promotions: Promotion[],
 	{
+		stage,
 		accountName,
 		createdRequestId,
 		salesforceAccountId,
@@ -63,16 +70,11 @@ function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		billToContact,
 		productPurchase,
 		giftRecipient,
+		appliedPromotion,
 		runBilling,
 		collectPayment,
 	}: CreateSubscriptionInputFields<T>,
 ): CreateOrderRequest {
-	// TODO:
-	//  Apply promotion if present
-	//  ReaderType - GIFT ✅, PATRON
-	//  DeliveryAgent ✅
-	//  Set contribution amount correctly for S+ (amount - cost) ✅
-	//  Set term & autoRenew correctly for GW gifts (and S+ students?)
 	const { deliveryContact, deliveryAgent, deliveryInstructions } = {
 		deliveryContact: undefined,
 		deliveryAgent: '',
@@ -101,14 +103,24 @@ function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		productPurchase,
 		currency,
 	);
-	const readerType = giftRecipient ? ReaderType.Gift : ReaderType.Direct; // TODO: patron if there is a patron promo
+	const readerType = giftRecipient
+		? ReaderType.Gift
+		: appliedPromotion?.promoCode.endsWith('PATRON')
+			? ReaderType.Patron
+			: ReaderType.Direct;
 
 	const productRatePlan = getProductRatePlan(productCatalog, productPurchase);
+	const validatedPromotion = appliedPromotion
+		? validatePromotion(promotions, appliedPromotion, productRatePlan.id)
+		: undefined;
+
 	const createSubscriptionOrderAction = buildCreateSubscriptionOrderAction({
+		stage: stage,
 		productRatePlanId: productRatePlan.id,
 		contractEffectiveDate: contractEffectiveDate,
 		customerAcceptanceDate: customerAcceptanceDate,
 		chargeOverride: chargeOverride,
+		validatedPromotion: validatedPromotion,
 		termType: productRatePlan.termType,
 		termLengthInMonths: productRatePlan.termLengthInMonths,
 	});
@@ -137,11 +149,12 @@ function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 export const createSubscription = async <T extends PaymentMethod>(
 	zuoraClient: ZuoraClient,
 	productCatalog: ProductCatalog,
+	promotions: Promotion[],
 	inputFields: CreateSubscriptionInputFields<T>,
 ): Promise<CreateSubscriptionResponse> => {
 	return executeOrderRequest(
 		zuoraClient,
-		buildCreateSubscriptionRequest(productCatalog, inputFields),
+		buildCreateSubscriptionRequest(productCatalog, promotions, inputFields),
 		createSubscriptionResponseSchema,
 		inputFields.createdRequestId,
 	);
