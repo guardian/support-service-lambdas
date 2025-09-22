@@ -1,0 +1,16 @@
+{
+  "name": "promotions",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "jest --group=-integration",
+    "check-formatting": "prettier --check **.ts",
+    "fix-formatting": "prettier --write **.ts",
+    "lint": "eslint src/**/*.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.879.0",
+    "@aws-sdk/util-dynamodb": "^3.879.0",
+    "zod": "catalog:"
+  }
+}
