@@ -1,6 +1,9 @@
 {
   "extends": "../../../cdk/tsconfigBase.json",
-  "include": ["lib/**/*", "bin/**/*"],
+  "include": [
+    "lib/**/*",
+    "bin/**/*"
+  ],
   "exclude": [
     "node_modules",
     "cdk.out",
