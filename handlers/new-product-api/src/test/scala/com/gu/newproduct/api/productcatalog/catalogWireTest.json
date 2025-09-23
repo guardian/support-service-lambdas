@@ -776,6 +776,23 @@
       } ],
       "paymentPlan" : "GBP 71.01 every month"
     }, {
+      "id" : "national_delivery_sixday_plus",
+      "label" : "Sixday+",
+      "startDateRules" : {
+        "daysOfWeek" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" ],
+        "selectableWindow" : {
+          "startDate" : "2020-04-02",
+          "sizeInDays" : 28
+        }
+      },
+      "paymentPlans" : [ {
+        "currencyCode" : "GBP",
+        "amount" : 71.04,
+        "billingPeriod" : "Monthly",
+        "description" : "GBP 71.04 every month"
+      } ],
+      "paymentPlan" : "GBP 71.04 every month"
+    }, {
       "id" : "national_delivery_everyday",
       "label" : "Everyday",
       "startDateRules" : {
@@ -793,6 +810,23 @@
       } ],
       "paymentPlan" : "GBP 71.00 every month"
     }, {
+      "id" : "national_delivery_everyday_plus",
+      "label" : "Everyday+",
+      "startDateRules" : {
+        "daysOfWeek" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ],
+        "selectableWindow" : {
+          "startDate" : "2020-04-01",
+          "sizeInDays" : 28
+        }
+      },
+      "paymentPlans" : [ {
+        "currencyCode" : "GBP",
+        "amount" : 71.03,
+        "billingPeriod" : "Monthly",
+        "description" : "GBP 71.03 every month"
+      } ],
+      "paymentPlan" : "GBP 71.03 every month"
+    }, {
       "id" : "national_delivery_weekend",
       "label" : "Weekend",
       "startDateRules" : {
@@ -809,6 +843,23 @@
         "description" : "GBP 71.02 every month"
       } ],
       "paymentPlan" : "GBP 71.02 every month"
+    }, {
+      "id" : "national_delivery_weekend_plus",
+      "label" : "Weekend+",
+      "startDateRules" : {
+        "daysOfWeek" : [ "Saturday", "Sunday" ],
+        "selectableWindow" : {
+          "startDate" : "2020-04-03",
+          "sizeInDays" : 28
+        }
+      },
+      "paymentPlans" : [ {
+        "currencyCode" : "GBP",
+        "amount" : 71.05,
+        "billingPeriod" : "Monthly",
+        "description" : "GBP 71.05 every month"
+      } ],
+      "paymentPlan" : "GBP 71.05 every month"
     } ],
     "enabledForDeliveryCountries" : [ "United Kingdom" ]
   }, {
