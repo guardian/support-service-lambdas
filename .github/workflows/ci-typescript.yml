@@ -14,8 +14,84 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      modules-changed: ${{ steps.filter.outputs.modules }}
+      lambdas-changed: ${{ steps.filter.outputs.changes }}
+      any-lambda-changed: ${{ steps.check-lambdas.outputs.any-changed }}
+      lambdas-to-build: ${{ steps.check-lambdas.outputs.lambdas-to-build }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          list-files: 'json'
+          filters: |
+            modules:
+              - 'modules/**'
+              - 'package.json'
+              - 'pnpm-workspace.yaml'
+              - 'tsconfig.json'
+            user-benefits:
+              - 'handlers/user-benefits/**'
+            press-reader-entitlements:
+              - 'handlers/press-reader-entitlements/**'
+            ticket-tailor-webhook:
+              - 'handlers/ticket-tailor-webhook/**'
+            update-supporter-plus-amount:
+              - 'handlers/update-supporter-plus-amount/**'
+            product-switch-api:
+              - 'handlers/product-switch-api/**'
+            generate-product-catalog:
+              - 'handlers/generate-product-catalog/**'
+            alarms-handler:
+              - 'handlers/alarms-handler/**'
+            discount-api:
+              - 'handlers/discount-api/**'
+            stripe-disputes:
+              - 'handlers/stripe-disputes/**'
+            discount-expiry-notifier:
+              - 'handlers/discount-expiry-notifier/**'
+            salesforce-disaster-recovery:
+              - 'handlers/salesforce-disaster-recovery/**'
+            salesforce-disaster-recovery-health-check:
+              - 'handlers/salesforce-disaster-recovery-health-check/**'
+            salesforce-event-bus:
+              - 'handlers/salesforce-event-bus/**'
+            zuora-salesforce-link-remover:
+              - 'handlers/zuora-salesforce-link-remover/**'
+            metric-push-api:
+              - 'handlers/metric-push-api/**'
+            observer-data-export:
+              - 'handlers/observer-data-export/**'
+            negative-invoices-processor:
+              - 'handlers/negative-invoices-processor/**'
+            write-off-unpaid-invoices:
+              - 'handlers/write-off-unpaid-invoices/**'
+            mparticle-api:
+              - 'handlers/mparticle-api/**'
+      - name: Check if any lambda changed
+        id: check-lambdas
+        run: |
+          # If modules changed, we need to build ALL lambdas
+          if [[ "${{ steps.filter.outputs.modules }}" == "true" ]]; then
+            echo "any-changed=true" >> $GITHUB_OUTPUT
+            # Set all lambdas to be built when modules change
+            echo 'lambdas-to-build=["user-benefits","press-reader-entitlements","ticket-tailor-webhook","update-supporter-plus-amount","product-switch-api","generate-product-catalog","alarms-handler","discount-api","stripe-disputes","discount-expiry-notifier","salesforce-disaster-recovery","salesforce-disaster-recovery-health-check","salesforce-event-bus","zuora-salesforce-link-remover","metric-push-api","observer-data-export","negative-invoices-processor","write-off-unpaid-invoices","mparticle-api"]' >> $GITHUB_OUTPUT
+          elif [[ "${{ steps.filter.outputs.changes }}" != "[]" ]]; then
+            echo "any-changed=true" >> $GITHUB_OUTPUT
+            # Only build changed lambdas
+            echo "lambdas-to-build=${{ steps.filter.outputs.changes }}" >> $GITHUB_OUTPUT
+          else
+            echo "any-changed=false" >> $GITHUB_OUTPUT
+            echo "lambdas-to-build=[]" >> $GITHUB_OUTPUT
+          fi
+
   common:
     runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.modules-changed == 'true' || needs.detect-changes.outputs.any-lambda-changed == 'true'
     permissions:
       id-token: write
       contents: read
@@ -36,29 +112,11 @@ jobs:
       - run: pnpm --filter "./modules/**" test
 
   gu-cdk-build:
-    needs: common
+    needs: [detect-changes]
+    if: needs.detect-changes.outputs.any-lambda-changed == 'true'
     strategy:
       matrix:
-        subproject:
-          - user-benefits
-          - press-reader-entitlements
-          - ticket-tailor-webhook
-          - update-supporter-plus-amount
-          - product-switch-api
-          - generate-product-catalog
-          - alarms-handler
-          - discount-api
-          - stripe-disputes
-          - discount-expiry-notifier
-          - salesforce-disaster-recovery
-          - salesforce-disaster-recovery-health-check
-          - salesforce-event-bus
-          - zuora-salesforce-link-remover
-          - metric-push-api
-          - observer-data-export
-          - negative-invoices-processor
-          - write-off-unpaid-invoices
-          - mparticle-api
+        subproject: ${{ fromJson(needs.detect-changes.outputs.lambdas-to-build) }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write
