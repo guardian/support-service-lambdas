@@ -167,7 +167,7 @@ object ZuoraIds {
       sixDay: ProductRatePlanId,
       everydayPlus: ProductRatePlanId,
       weekendPlus: ProductRatePlanId,
-      sixDayPlus: ProductRatePlanId
+      sixDayPlus: ProductRatePlanId,
   ) {
     val byApiPlanId: Map[PlanId, ProductRatePlanId] = Map(
       NationalDeliveryEveryday -> everyday,
@@ -175,7 +175,7 @@ object ZuoraIds {
       NationalDeliverySixday -> sixDay,
       NationalDeliveryEverydayPlus -> everydayPlus,
       NationalDeliveryWeekendPlus -> weekendPlus,
-      NationalDeliverySixdayPlus -> sixDayPlus
+      NationalDeliverySixdayPlus -> sixDayPlus,
     )
   }
 
