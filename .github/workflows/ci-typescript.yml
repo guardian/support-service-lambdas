@@ -33,6 +33,7 @@ jobs:
               - 'package.json'
               - 'pnpm-workspace.yaml'
               - 'tsconfig.json'
+              - '.github/workflows/**'
             user-benefits:
               - 'handlers/user-benefits/**'
             press-reader-entitlements:
