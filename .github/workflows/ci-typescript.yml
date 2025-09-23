@@ -98,9 +98,7 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.any-lambda-changed == 'true'
     permissions:
-      id-token: write
       contents: read
-      pull-requests: write
     steps:
       - uses: actions/checkout@v5
       - run: npm install --global corepack@0.31.0
