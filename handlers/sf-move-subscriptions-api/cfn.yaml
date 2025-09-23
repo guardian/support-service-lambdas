@@ -153,29 +153,6 @@ Resources:
           - ""
           - - sf-move-subscriptions-api-
             - Ref: stage
-      Policy:
-        Statement:
-          - Action: execute-api:Invoke
-            Effect: Allow
-            Principal: "*"
-            Resource: execute-api:/*/*/*
-          - Action: execute-api:Invoke
-            Condition:
-              NotIpAddress:
-                aws:SourceIp:
-                  Fn::Split:
-                    - ","
-                    - Fn::Join:
-                        - ""
-                        - - Fn::Join:
-                              - ","
-                              - Ref: salesForceIpRanges
-                          - ","
-                          - Ref: officeIpRange
-            Effect: Deny
-            Principal: "*"
-            Resource: execute-api:/*/*/*
-        Version: "2012-10-17"
       Tags:
         - Key: App
           Value: sf-move-subscriptions-api
@@ -446,4 +423,3 @@ Outputs:
           - /
           - Ref: sfmovesubscriptionsapiDeploymentStageobjectObject0B1836AE
           - /
-
