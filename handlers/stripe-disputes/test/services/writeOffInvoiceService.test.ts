@@ -1,11 +1,9 @@
 import type { Logger } from '@modules/routing/logger';
-import { isZuoraRequestSuccess } from '@modules/zuora/helpers';
 import { writeOffInvoice } from '@modules/zuora/invoice';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { writeOffInvoiceService } from '../../src/services/writeOffInvoiceService';
 
 jest.mock('@modules/zuora/invoice');
-jest.mock('@modules/zuora/helpers');
 
 describe('writeOffInvoiceService', () => {
 	const mockLogger = {
@@ -25,7 +23,6 @@ describe('writeOffInvoiceService', () => {
 	it('should write off invoice successfully when invoice ID is provided', async () => {
 		const mockResponse = { Success: true, Id: 'writeoff_123' };
 		(writeOffInvoice as jest.Mock).mockResolvedValue(mockResponse);
-		(isZuoraRequestSuccess as jest.Mock).mockReturnValue(true);
 
 		const result = await writeOffInvoiceService(
 			mockLogger,
@@ -47,7 +44,6 @@ describe('writeOffInvoiceService', () => {
 			'INV-12345',
 			'Invoice write-off due to Stripe dispute closure. Dispute ID: du_test456',
 		);
-		expect(isZuoraRequestSuccess).toHaveBeenCalledWith(mockResponse);
 	});
 
 	it('should return false when invoice ID is undefined', async () => {
@@ -80,34 +76,9 @@ describe('writeOffInvoiceService', () => {
 		expect(writeOffInvoice).not.toHaveBeenCalled();
 	});
 
-	it('should throw error when invoice write-off fails', async () => {
-		const mockResponse = { Success: false, Errors: ['Invoice not found'] };
-		(writeOffInvoice as jest.Mock).mockResolvedValue(mockResponse);
-		(isZuoraRequestSuccess as jest.Mock).mockReturnValue(false);
-
-		await expect(
-			writeOffInvoiceService(
-				mockLogger,
-				mockZuoraClient,
-				'INV-12345',
-				'du_test456',
-			),
-		).rejects.toThrow('Failed to write off invoice in Zuora');
-
-		expect(mockLogger.log).toHaveBeenCalledWith(
-			'Writing off invoice: INV-12345',
-		);
-		expect(mockLogger.log).toHaveBeenCalledWith(
-			'Invoice write-off response:',
-			JSON.stringify(mockResponse),
-		);
-		expect(isZuoraRequestSuccess).toHaveBeenCalledWith(mockResponse);
-	});
-
 	it('should handle different dispute IDs in comment', async () => {
 		const mockResponse = { Success: true, Id: 'writeoff_456' };
 		(writeOffInvoice as jest.Mock).mockResolvedValue(mockResponse);
-		(isZuoraRequestSuccess as jest.Mock).mockReturnValue(true);
 
 		const result = await writeOffInvoiceService(
 			mockLogger,
@@ -127,8 +98,8 @@ describe('writeOffInvoiceService', () => {
 		);
 	});
 
-	it('should propagate errors from writeOffInvoice API call', async () => {
-		const error = new Error('Network error');
+	it('should propagate errors when ZuoraClient throws', async () => {
+		const error = new Error('Zuora API error: Invoice not found');
 		(writeOffInvoice as jest.Mock).mockRejectedValue(error);
 
 		await expect(
@@ -138,18 +109,16 @@ describe('writeOffInvoiceService', () => {
 				'INV-12345',
 				'du_test456',
 			),
-		).rejects.toThrow('Network error');
+		).rejects.toThrow('Zuora API error: Invoice not found');
 
 		expect(mockLogger.log).toHaveBeenCalledWith(
 			'Writing off invoice: INV-12345',
 		);
-		expect(isZuoraRequestSuccess).not.toHaveBeenCalled();
 	});
 
 	it('should handle invoice IDs with special characters', async () => {
 		const mockResponse = { Success: true, Id: 'writeoff_789' };
 		(writeOffInvoice as jest.Mock).mockResolvedValue(mockResponse);
-		(isZuoraRequestSuccess as jest.Mock).mockReturnValue(true);
 
 		const result = await writeOffInvoiceService(
 			mockLogger,

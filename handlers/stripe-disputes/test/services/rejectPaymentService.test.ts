@@ -1,11 +1,9 @@
 import type { Logger } from '@modules/routing/logger';
-import { isZuoraRequestSuccess } from '@modules/zuora/helpers';
 import { rejectPayment } from '@modules/zuora/payment';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { rejectPaymentService } from '../../src/services/rejectPaymentService';
 
 jest.mock('@modules/zuora/payment');
-jest.mock('@modules/zuora/helpers');
 
 describe('rejectPaymentService', () => {
 	const mockLogger = {
@@ -25,7 +23,6 @@ describe('rejectPaymentService', () => {
 	it('should reject payment successfully when payment number is provided', async () => {
 		const mockResponse = { Success: true, Id: 'payment_123' };
 		(rejectPayment as jest.Mock).mockResolvedValue(mockResponse);
-		(isZuoraRequestSuccess as jest.Mock).mockReturnValue(true);
 
 		const result = await rejectPaymentService(
 			mockLogger,
@@ -44,7 +41,6 @@ describe('rejectPaymentService', () => {
 			'P-12345',
 			'chargeback',
 		);
-		expect(isZuoraRequestSuccess).toHaveBeenCalledWith(mockResponse);
 	});
 
 	it('should return false when payment number is undefined', async () => {
@@ -71,27 +67,9 @@ describe('rejectPaymentService', () => {
 		expect(rejectPayment).not.toHaveBeenCalled();
 	});
 
-	it('should throw error when payment rejection fails', async () => {
-		const mockResponse = { Success: false, Errors: ['Payment not found'] };
-		(rejectPayment as jest.Mock).mockResolvedValue(mockResponse);
-		(isZuoraRequestSuccess as jest.Mock).mockReturnValue(false);
-
-		await expect(
-			rejectPaymentService(mockLogger, mockZuoraClient, 'P-12345'),
-		).rejects.toThrow('Failed to reject payment in Zuora');
-
-		expect(mockLogger.log).toHaveBeenCalledWith('Rejecting payment: P-12345');
-		expect(mockLogger.log).toHaveBeenCalledWith(
-			'Payment rejection response:',
-			JSON.stringify(mockResponse),
-		);
-		expect(isZuoraRequestSuccess).toHaveBeenCalledWith(mockResponse);
-	});
-
 	it('should handle different payment numbers', async () => {
 		const mockResponse = { Success: true, Id: 'payment_456' };
 		(rejectPayment as jest.Mock).mockResolvedValue(mockResponse);
-		(isZuoraRequestSuccess as jest.Mock).mockReturnValue(true);
 
 		const result = await rejectPaymentService(
 			mockLogger,
@@ -108,15 +86,14 @@ describe('rejectPaymentService', () => {
 		);
 	});
 
-	it('should propagate errors from rejectPayment API call', async () => {
-		const error = new Error('Network error');
+	it('should propagate errors when ZuoraClient throws', async () => {
+		const error = new Error('Zuora API error: Payment not found');
 		(rejectPayment as jest.Mock).mockRejectedValue(error);
 
 		await expect(
 			rejectPaymentService(mockLogger, mockZuoraClient, 'P-12345'),
-		).rejects.toThrow('Network error');
+		).rejects.toThrow('Zuora API error: Payment not found');
 
 		expect(mockLogger.log).toHaveBeenCalledWith('Rejecting payment: P-12345');
-		expect(isZuoraRequestSuccess).not.toHaveBeenCalled();
 	});
 });
