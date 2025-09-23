@@ -122,7 +122,7 @@ describe('cancelSubscriptionService', () => {
 		expect(cancelSubscription).not.toHaveBeenCalled();
 	});
 
-	it('should throw error when cancellation fails', async () => {
+	it('should still return true even when Zuora response indicates failure', async () => {
 		const mockSubscription = createMockSubscription('Active');
 		const mockCancelResponse = {
 			Success: false,
@@ -130,10 +130,13 @@ describe('cancelSubscriptionService', () => {
 		};
 		(cancelSubscription as jest.Mock).mockResolvedValue(mockCancelResponse);
 
-		await expect(
-			cancelSubscriptionService(mockLogger, mockZuoraClient, mockSubscription),
-		).rejects.toThrow('Failed to cancel subscription in Zuora');
+		const result = await cancelSubscriptionService(
+			mockLogger,
+			mockZuoraClient,
+			mockSubscription,
+		);
 
+		expect(result).toBe(true);
 		expect(mockLogger.log).toHaveBeenCalledWith(
 			'Canceling active subscription: SUB-12345',
 		);
