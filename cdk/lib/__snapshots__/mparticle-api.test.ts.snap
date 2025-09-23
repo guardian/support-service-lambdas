@@ -863,6 +863,38 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
           "Statement": [
             {
               "Action": [
+                "s3:PutObject",
+                "s3:ListBucket",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "SarResultsBucketParameter",
+                      },
+                      "/mparticle-results/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "SarResultsBucketParameter",
+                      },
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": [
                 "s3:GetObject*",
                 "s3:GetBucket*",
                 "s3:List*",
@@ -2039,6 +2071,38 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
       "Properties": {
         "PolicyDocument": {
           "Statement": [
+            {
+              "Action": [
+                "s3:PutObject",
+                "s3:ListBucket",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "SarResultsBucketParameter",
+                      },
+                      "/mparticle-results/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "SarResultsBucketParameter",
+                      },
+                    ],
+                  ],
+                },
+              ],
+            },
             {
               "Action": [
                 "s3:GetObject*",
