@@ -76,27 +76,6 @@ describe('writeOffInvoiceService', () => {
 		expect(writeOffInvoice).not.toHaveBeenCalled();
 	});
 
-	it('should still return true even when Zuora response indicates failure', async () => {
-		const mockResponse = { Success: false, Errors: ['Invoice not found'] };
-		(writeOffInvoice as jest.Mock).mockResolvedValue(mockResponse);
-
-		const result = await writeOffInvoiceService(
-			mockLogger,
-			mockZuoraClient,
-			'INV-12345',
-			'du_test456',
-		);
-
-		expect(result).toBe(true);
-		expect(mockLogger.log).toHaveBeenCalledWith(
-			'Writing off invoice: INV-12345',
-		);
-		expect(mockLogger.log).toHaveBeenCalledWith(
-			'Invoice write-off response:',
-			JSON.stringify(mockResponse),
-		);
-	});
-
 	it('should handle different dispute IDs in comment', async () => {
 		const mockResponse = { Success: true, Id: 'writeoff_456' };
 		(writeOffInvoice as jest.Mock).mockResolvedValue(mockResponse);
@@ -119,8 +98,8 @@ describe('writeOffInvoiceService', () => {
 		);
 	});
 
-	it('should propagate errors from writeOffInvoice API call', async () => {
-		const error = new Error('Network error');
+	it('should propagate errors when ZuoraClient throws', async () => {
+		const error = new Error('Zuora API error: Invoice not found');
 		(writeOffInvoice as jest.Mock).mockRejectedValue(error);
 
 		await expect(
@@ -130,7 +109,7 @@ describe('writeOffInvoiceService', () => {
 				'INV-12345',
 				'du_test456',
 			),
-		).rejects.toThrow('Network error');
+		).rejects.toThrow('Zuora API error: Invoice not found');
 
 		expect(mockLogger.log).toHaveBeenCalledWith(
 			'Writing off invoice: INV-12345',

@@ -122,30 +122,6 @@ describe('cancelSubscriptionService', () => {
 		expect(cancelSubscription).not.toHaveBeenCalled();
 	});
 
-	it('should still return true even when Zuora response indicates failure', async () => {
-		const mockSubscription = createMockSubscription('Active');
-		const mockCancelResponse = {
-			Success: false,
-			Errors: ['Cannot cancel subscription'],
-		};
-		(cancelSubscription as jest.Mock).mockResolvedValue(mockCancelResponse);
-
-		const result = await cancelSubscriptionService(
-			mockLogger,
-			mockZuoraClient,
-			mockSubscription,
-		);
-
-		expect(result).toBe(true);
-		expect(mockLogger.log).toHaveBeenCalledWith(
-			'Canceling active subscription: SUB-12345',
-		);
-		expect(mockLogger.log).toHaveBeenCalledWith(
-			'Subscription cancellation response:',
-			JSON.stringify(mockCancelResponse),
-		);
-	});
-
 	it('should handle different subscription numbers', async () => {
 		const mockSubscription = createMockSubscription('Active', 'SUB-67890');
 		const mockCancelResponse = { Success: true, Id: 'cancel_456' };
@@ -171,14 +147,14 @@ describe('cancelSubscriptionService', () => {
 		);
 	});
 
-	it('should propagate errors from cancelSubscription API call', async () => {
+	it('should propagate errors when ZuoraClient throws', async () => {
 		const mockSubscription = createMockSubscription('Active');
-		const error = new Error('Network error');
+		const error = new Error('Zuora API error: Subscription not found');
 		(cancelSubscription as jest.Mock).mockRejectedValue(error);
 
 		await expect(
 			cancelSubscriptionService(mockLogger, mockZuoraClient, mockSubscription),
-		).rejects.toThrow('Network error');
+		).rejects.toThrow('Zuora API error: Subscription not found');
 
 		expect(mockLogger.log).toHaveBeenCalledWith(
 			'Canceling active subscription: SUB-12345',
