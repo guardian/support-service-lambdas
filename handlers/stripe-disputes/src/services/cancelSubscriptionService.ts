@@ -34,9 +34,5 @@ export async function cancelSubscriptionService(
 		JSON.stringify(cancelResponse),
 	);
 
-	if (!cancelResponse.Success) {
-		throw new Error('Failed to cancel subscription in Zuora');
-	}
-
 	return true;
 }
