@@ -91,7 +91,7 @@ jobs:
   common:
     runs-on: ubuntu-latest
     needs: detect-changes
-    if: needs.detect-changes.outputs.modules-changed == 'true' || needs.detect-changes.outputs.any-lambda-changed == 'true'
+    if: needs.detect-changes.outputs.any-lambda-changed == 'true'
     permissions:
       id-token: write
       contents: read
@@ -112,7 +112,7 @@ jobs:
       - run: pnpm --filter "./modules/**" test
 
   gu-cdk-build:
-    needs: [detect-changes]
+    needs: [common, detect-changes]
     if: needs.detect-changes.outputs.any-lambda-changed == 'true'
     strategy:
       matrix:
