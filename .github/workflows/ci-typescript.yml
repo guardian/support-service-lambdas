@@ -96,22 +96,27 @@ jobs:
           echo "DEBUG: global-changes: $global_changes"
           echo "DEBUG: all-filter-changes (raw): $all_filter_changes"
           
-          # Parse the space-separated list from dorny/paths-filter and filter out 'global-changes'
+          # Parse the JSON array from dorny/paths-filter and filter out 'global-changes'
           individual_lambdas_changed="[]"
-          if [[ -n "$all_filter_changes" ]] && [[ "$all_filter_changes" != "" ]]; then
-            # Convert space-separated string to array, filtering out 'global-changes'
-            lambda_array=()
-            for change in $all_filter_changes; do
-              if [[ "$change" != "global-changes" ]]; then
-                lambda_array+=("\"$change\"")
-              fi
-            done
-            
-            # Convert to JSON array
-            if [ ${#lambda_array[@]} -eq 0 ]; then
-              individual_lambdas_changed="[]"
+          if [[ -n "$all_filter_changes" ]] && [[ "$all_filter_changes" != "[]" ]]; then
+            # Check if it's valid JSON and remove 'global-changes' from the array
+            if echo "$all_filter_changes" | jq . >/dev/null 2>&1; then
+              # Remove 'global-changes' from the JSON array
+              individual_lambdas_changed=$(echo "$all_filter_changes" | jq '. - ["global-changes"]')
             else
-              individual_lambdas_changed="[$(IFS=,; echo "${lambda_array[*]}")]"
+              # Fallback: treat as space-separated list
+              lambda_array=()
+              for change in $all_filter_changes; do
+                if [[ "$change" != "global-changes" ]]; then
+                  lambda_array+=("\"$change\"")
+                fi
+              done
+              
+              if [ ${#lambda_array[@]} -eq 0 ]; then
+                individual_lambdas_changed="[]"
+              else
+                individual_lambdas_changed="[$(IFS=,; echo "${lambda_array[*]}")]"
+              fi
             fi
           fi
           
