@@ -1,3 +1,3 @@
 export default {
-	extends: '../../../tsconfig.json',
+	extends: '../../tsconfig.json',
 };

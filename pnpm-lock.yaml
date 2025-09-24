@@ -6,6 +6,21 @@ settings:
 
 catalogs:
   default:
+    '@aws-sdk/client-cloudwatch':
+      specifier: ^3.848.0
+      version: 3.879.0
+    '@aws-sdk/credential-providers':
+      specifier: ^3.848.0
+      version: 3.879.0
+    '@types/aws-lambda':
+      specifier: ^8.10.147
+      version: 8.10.152
+    dayjs:
+      specifier: ^1.11.13
+      version: 1.11.18
+    source-map-support:
+      specifier: ^0.5.21
+      version: 0.5.21
     typescript:
       specifier: ^5.6.3
       version: 5.9.2
@@ -123,36 +138,36 @@ importers:
   handlers/alarms-handler:
     dependencies:
       '@aws-sdk/client-cloudwatch':
-        specifier: ^3.848.0
+        specifier: 'catalog:'
         version: 3.879.0
       '@aws-sdk/credential-providers':
-        specifier: ^3.879.0
+        specifier: 'catalog:'
         version: 3.879.0
       zod:
         specifier: 'catalog:'
         version: 3.25.76
     devDependencies:
       '@types/aws-lambda':
-        specifier: ^8.10.147
+        specifier: 'catalog:'
         version: 8.10.152
       dayjs:
-        specifier: ^1.11.13
+        specifier: 'catalog:'
         version: 1.11.18
 
   handlers/discount-api:
     dependencies:
       dayjs:
-        specifier: ^1.11.13
+        specifier: 'catalog:'
         version: 1.11.18
       source-map-support:
-        specifier: ^0.5.21
+        specifier: 'catalog:'
         version: 0.5.21
       zod:
         specifier: 'catalog:'
         version: 3.25.76
     devDependencies:
       '@types/aws-lambda':
-        specifier: ^8.10.147
+        specifier: 'catalog:'
         version: 8.10.152
 
   handlers/discount-expiry-notifier:
