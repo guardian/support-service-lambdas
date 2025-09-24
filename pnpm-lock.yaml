@@ -126,7 +126,7 @@ importers:
         specifier: ^3.848.0
         version: 3.879.0
       '@aws-sdk/credential-providers':
-        specifier: ^3.879.0
+        specifier: ^3.848.0
         version: 3.879.0
       zod:
         specifier: 'catalog:'
