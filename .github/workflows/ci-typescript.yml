@@ -2,6 +2,12 @@ name: CI-Typescript
 on:
   pull_request:
   workflow_dispatch:
+    inputs:
+      force_build_all:
+        description: 'Force build all lambdas (ignore change detection)'
+        type: boolean
+        default: false
+        required: false
   push:
     branches:
       - main
@@ -77,17 +83,25 @@ jobs:
         run: |
           modules_changed="${{ steps.filter.outputs.modules }}"
           individual_lambdas_changed="${{ steps.filter.outputs.changes }}"
+          force_build_all="${{ github.event.inputs.force_build_all || 'false' }}"
           
           echo "DEBUG: modules-changed: $modules_changed"
           echo "DEBUG: individual-lambdas-changed: $individual_lambdas_changed"
+          echo "DEBUG: force-build-all: $force_build_all"
           
-          # If modules changed, we need to build ALL lambdas
-          if [[ "$modules_changed" == "true" ]]; then
+          # If force_build_all is true (manual dispatch override) or modules changed, build ALL lambdas
+          if [[ "$force_build_all" == "true" ]] || [[ "$modules_changed" == "true" ]]; then
             echo "any-changed=true" >> $GITHUB_OUTPUT
-            # Set all lambdas to be built when modules change
+            # Set all lambdas to be built
+            if [[ "$force_build_all" == "true" ]]; then
+              echo "INFO: Force build all enabled - building all lambdas"
+            else
+              echo "INFO: Modules changed - building all lambdas"
+            fi
             echo 'lambdas-to-build=["user-benefits","press-reader-entitlements","ticket-tailor-webhook","update-supporter-plus-amount","product-switch-api","generate-product-catalog","alarms-handler","discount-api","stripe-disputes","discount-expiry-notifier","salesforce-disaster-recovery","salesforce-disaster-recovery-health-check","salesforce-event-bus","zuora-salesforce-link-remover","metric-push-api","observer-data-export","negative-invoices-processor","write-off-unpaid-invoices","mparticle-api"]' >> $GITHUB_OUTPUT
           elif [[ "$individual_lambdas_changed" != "[]" ]]; then
             echo "any-changed=true" >> $GITHUB_OUTPUT
+            echo "INFO: Building only changed lambdas"
             # Only build changed lambdas - ensure it's always a JSON array
             if [[ "$individual_lambdas_changed" == "["* ]]; then
               # Already a JSON array
@@ -100,6 +114,7 @@ jobs:
             fi
           else
             echo "any-changed=false" >> $GITHUB_OUTPUT
+            echo "INFO: No changes detected - skipping builds"
             echo "lambdas-to-build=[]" >> $GITHUB_OUTPUT
           fi
 
