@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       modules-changed: ${{ steps.filter.outputs.modules }}
-      lambdas-changed: ${{ steps.filter.outputs.changes }}
+      individual-lambdas-changed: ${{ steps.filter.outputs.changes }}
       any-lambda-changed: ${{ steps.check-lambdas.outputs.any-changed }}
       lambdas-to-build: ${{ steps.check-lambdas.outputs.lambdas-to-build }}
     steps:
@@ -75,19 +75,29 @@ jobs:
       - name: Check if any lambda changed
         id: check-lambdas
         run: |
-          echo "DEBUG: modules filter result: ${{ steps.filter.outputs.modules }}"
-          echo "DEBUG: changes filter result: ${{ steps.filter.outputs.changes }}"
+          modules_changed="${{ steps.filter.outputs.modules }}"
+          individual_lambdas_changed="${{ steps.filter.outputs.changes }}"
+          
+          echo "DEBUG: modules-changed: $modules_changed"
+          echo "DEBUG: individual-lambdas-changed: $individual_lambdas_changed"
           
           # If modules changed, we need to build ALL lambdas
-          if [[ "${{ steps.filter.outputs.modules }}" == "true" ]]; then
+          if [[ "$modules_changed" == "true" ]]; then
             echo "any-changed=true" >> $GITHUB_OUTPUT
             # Set all lambdas to be built when modules change
             echo 'lambdas-to-build=["user-benefits","press-reader-entitlements","ticket-tailor-webhook","update-supporter-plus-amount","product-switch-api","generate-product-catalog","alarms-handler","discount-api","stripe-disputes","discount-expiry-notifier","salesforce-disaster-recovery","salesforce-disaster-recovery-health-check","salesforce-event-bus","zuora-salesforce-link-remover","metric-push-api","observer-data-export","negative-invoices-processor","write-off-unpaid-invoices","mparticle-api"]' >> $GITHUB_OUTPUT
-          elif [[ "${{ steps.filter.outputs.changes }}" != "[]" ]]; then
+          elif [[ "$individual_lambdas_changed" != "[]" ]]; then
             echo "any-changed=true" >> $GITHUB_OUTPUT
-            # Only build changed lambdas
-            echo "DEBUG: Building only changed lambdas: ${{ steps.filter.outputs.changes }}"
-            echo "lambdas-to-build=${{ steps.filter.outputs.changes }}" >> $GITHUB_OUTPUT
+            # Only build changed lambdas - ensure it's always a JSON array
+            if [[ "$individual_lambdas_changed" == "["* ]]; then
+              # Already a JSON array
+              echo "DEBUG: Building individual lambdas (array): $individual_lambdas_changed"
+              echo "lambdas-to-build=$individual_lambdas_changed" >> $GITHUB_OUTPUT
+            else
+              # Single string, wrap in array
+              echo "DEBUG: Building individual lambdas (single): [\"$individual_lambdas_changed\"]"
+              echo "lambdas-to-build=[\"$individual_lambdas_changed\"]" >> $GITHUB_OUTPUT
+            fi
           else
             echo "any-changed=false" >> $GITHUB_OUTPUT
             echo "lambdas-to-build=[]" >> $GITHUB_OUTPUT
