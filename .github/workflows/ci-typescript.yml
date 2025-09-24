@@ -23,8 +23,8 @@ jobs:
   detect-changes:
     runs-on: ubuntu-latest
     outputs:
-      global-changes: ${{ steps.detect-lambda-changes.outputs.global-changes }}
-      individual-lambdas-changed: ${{ steps.detect-lambda-changes.outputs.individual-lambdas-changed }}
+      global-changes: ${{ steps.filter.outputs.global-changes }}
+      individual-lambdas-changed: ${{ steps.filter.outputs.changes }}
       any-lambda-changed: ${{ steps.check-lambdas.outputs.any-changed }}
       lambdas-to-build: ${{ steps.check-lambdas.outputs.lambdas-to-build }}
       all-typescript-lambdas: ${{ steps.discover-lambdas.outputs.lambdas }}
@@ -47,65 +47,34 @@ jobs:
           lambdas_json="[$(IFS=,; echo "${typescript_lambdas[*]}")]"
           echo "lambdas=$lambdas_json" >> $GITHUB_OUTPUT
           echo "INFO: Discovered TypeScript lambdas: $lambdas_json"
-      - name: Detect changed lambdas
-        id: detect-lambda-changes
+      - name: Generate dynamic paths filter
+        id: generate-filter
         run: |
-          # Get the list of changed files
-          changed_files=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} 2>/dev/null || git diff --name-only HEAD~1 HEAD || echo "")
-          echo "DEBUG: Changed files: $changed_files"
-          
-          # Get list of TypeScript lambdas for reference
+          # Get discovered lambdas
           all_typescript_lambdas='${{ steps.discover-lambdas.outputs.lambdas }}'
-          typescript_lambda_names=$(echo "$all_typescript_lambdas" | jq -r '.[]')
           
-          # Check for global changes (anything outside handlers/)
-          global_changes=false
+          # Generate filter configuration dynamically
+          filter_config="global-changes:\n  - '**'\n  - '!handlers/**'\n"
           
-          # Check for changes outside handlers/ directory
-          if echo "$changed_files" | grep -qv '^handlers/'; then
-            global_changes=true
-            echo "INFO: Global changes detected (files outside handlers/)"
-          fi
-          
-          echo "global-changes=$global_changes" >> $GITHUB_OUTPUT
-          
-          # Find which TypeScript lambdas have changes
-          changed_lambdas=()
-          scala_lambda_changes=false
-          
-          for lambda_name in $typescript_lambda_names; do
-            if echo "$changed_files" | grep -q "^handlers/$lambda_name/"; then
-              changed_lambdas+=("\"$lambda_name\"")
-              echo "INFO: Changes detected in TypeScript lambda: $lambda_name"
-            fi
+          # Add each TypeScript lambda as a filter
+          for lambda_name in $(echo "$all_typescript_lambdas" | jq -r '.[]'); do
+            filter_config="${filter_config}${lambda_name}:\n  - 'handlers/${lambda_name}/**'\n"
           done
           
-          # Check if there are any changes to Scala lambdas (for informational purposes)
-          for file in $changed_files; do
-            if [[ "$file" =~ ^handlers/([^/]+)/ ]]; then
-              lambda_dir="${BASH_REMATCH[1]}"
-              # If this lambda is not in our TypeScript list, it's a Scala lambda
-              if ! echo "$typescript_lambda_names" | grep -q "^$lambda_dir$"; then
-                scala_lambda_changes=true
-                echo "INFO: Changes detected in Scala lambda: $lambda_dir (ignored by TypeScript CI)"
-              fi
-            fi
-          done
-          
-          # Convert to JSON array
-          if [ ${#changed_lambdas[@]} -eq 0 ]; then
-            changed_lambdas_json="[]"
-          else
-            changed_lambdas_json="[$(IFS=,; echo "${changed_lambdas[*]}")]"
-          fi
-          
-          echo "individual-lambdas-changed=$changed_lambdas_json" >> $GITHUB_OUTPUT
-          echo "INFO: Changed TypeScript lambdas: $changed_lambdas_json"
+          # Write to temporary file
+          echo -e "$filter_config" > /tmp/filters.yml
+          echo "Generated filter config:"
+          cat /tmp/filters.yml
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          list-files: 'json'
+          filters: /tmp/filters.yml
       - name: Check if any lambda changed
         id: check-lambdas
         run: |
-          global_changes="${{ steps.detect-lambda-changes.outputs.global-changes }}"
-          individual_lambdas_changed="${{ steps.detect-lambda-changes.outputs.individual-lambdas-changed }}"
+          global_changes="${{ steps.filter.outputs.global-changes }}"
+          individual_lambdas_changed="${{ steps.filter.outputs.changes }}"
           force_build_all="${{ github.event.inputs.force_build_all || 'false' }}"
           all_typescript_lambdas="${{ steps.discover-lambdas.outputs.lambdas }}"
           
