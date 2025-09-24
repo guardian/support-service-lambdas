@@ -22,6 +22,8 @@ concurrency:
 jobs:
   detect-changes:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       global-changes: ${{ steps.filter.outputs.global-changes }}
       individual-lambdas-changed: ${{ steps.filter.outputs.changes }}
