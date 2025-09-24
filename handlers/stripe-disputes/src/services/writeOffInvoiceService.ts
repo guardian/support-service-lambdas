@@ -1,5 +1,4 @@
 import type { Logger } from '@modules/routing/logger';
-import { isZuoraRequestSuccess } from '@modules/zuora/helpers';
 import { writeOffInvoice } from '@modules/zuora/invoice';
 import type { ZuoraResponse } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
@@ -23,10 +22,6 @@ export async function writeOffInvoiceService(
 	);
 
 	logger.log('Invoice write-off response:', JSON.stringify(writeOffResponse));
-
-	if (!isZuoraRequestSuccess(writeOffResponse)) {
-		throw new Error('Failed to write off invoice in Zuora');
-	}
 
 	return true;
 }
