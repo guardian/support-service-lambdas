@@ -5,22 +5,22 @@ import {
 	supportCertificateId,
 	supportHostedZoneId,
 } from '../bin/cdk';
-import { StripeDisputes } from './stripe-disputes';
+import { DiscountApi } from './discount-api';
 
-describe('The stripe disputes webhook API stack', () => {
+describe('The Discount API stack', () => {
 	it('matches the snapshot', () => {
 		const app = new App();
-		const codeStack = new StripeDisputes(app, 'stripe-disputes-CODE', {
+		const codeStack = new DiscountApi(app, 'discount-api-CODE', {
 			stack: 'membership',
 			stage: 'CODE',
-			domainName: `stripe-disputes.code.${supportApisDomain}`,
+			domainName: `discount-api.code.${supportApisDomain}`,
 			hostedZoneId: supportHostedZoneId,
 			certificateId: supportCertificateId,
 		});
-		const prodStack = new StripeDisputes(app, 'stripe-disputes-PROD', {
+		const prodStack = new DiscountApi(app, 'discount-api-PROD', {
 			stack: 'membership',
 			stage: 'PROD',
-			domainName: `stripe-disputes.${supportApisDomain}`,
+			domainName: `discount-api.${supportApisDomain}`,
 			hostedZoneId: supportHostedZoneId,
 			certificateId: supportCertificateId,
 		});

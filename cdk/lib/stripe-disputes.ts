@@ -5,11 +5,7 @@ import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
-import {
-	ApiKeySourceType,
-	CfnBasePathMapping,
-	CfnDomainName,
-} from 'aws-cdk-lib/aws-apigateway';
+import { CfnBasePathMapping, CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
 import {
 	ComparisonOperator,
 	TreatMissingData,
@@ -19,7 +15,7 @@ import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
-import { nodeVersion } from '../module/constants';
+import { nodeVersion } from './node-version';
 
 export interface StripeDisputesProps extends GuStackProps {
 	stack: string;
@@ -108,10 +104,6 @@ export class StripeDisputes extends GuStack {
 				deployOptions: {
 					stageName: this.stage,
 				},
-				apiKeySourceType: ApiKeySourceType.HEADER,
-				defaultMethodOptions: {
-					apiKeyRequired: true,
-				},
 			},
 			events: [],
 		});
@@ -139,7 +131,7 @@ export class StripeDisputes extends GuStack {
 			},
 		);
 
-		const usagePlan = lambdaProducer.api.addUsagePlan('UsagePlan', {
+		lambdaProducer.api.addUsagePlan('UsagePlan', {
 			name: nameWithStageProducer,
 			description: 'REST endpoints for stripe disputes webhook api',
 			apiStages: [
@@ -149,14 +141,6 @@ export class StripeDisputes extends GuStack {
 				},
 			],
 		});
-
-		// create api key
-		const apiKey = lambdaProducer.api.addApiKey(`${app}-key-${this.stage}`, {
-			apiKeyName: `${app}-key-${this.stage}`,
-		});
-
-		// associate api key to plan
-		usagePlan.addApiKey(apiKey);
 
 		this.createPolicyAndAttachToLambdas(
 			[
@@ -184,6 +168,20 @@ export class StripeDisputes extends GuStack {
 					resources: [
 						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
 						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Salesforce/ConnectedApp/StripeDisputeWebhooks-*`,
+					],
+				}),
+			],
+			'Allow Secrets Manager Get Secret Value',
+		);
+
+		this.createPolicyAndAttachToLambdas(
+			[{ lambda: lambdaProducer, name: 'Lambda Producer' }],
+			[
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: ['secretsmanager:GetSecretValue'],
+					resources: [
+						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Stripe/ConnectedApp/StripeDisputeWebhooks-*`,
 					],
 				}),
 			],

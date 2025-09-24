@@ -15,7 +15,7 @@ import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { nodeVersion } from './node-version';
 
-export interface ProductSwitchApiProps extends GuStackProps {
+export interface DiscountApiProps extends GuStackProps {
 	stack: string;
 	stage: string;
 	certificateId: string;
@@ -23,11 +23,11 @@ export interface ProductSwitchApiProps extends GuStackProps {
 	hostedZoneId: string;
 }
 
-export class ProductSwitchApi extends GuStack {
-	constructor(scope: App, id: string, props: ProductSwitchApiProps) {
+export class DiscountApi extends GuStack {
+	constructor(scope: App, id: string, props: DiscountApiProps) {
 		super(scope, id, props);
 
-		const app = 'product-switch-api';
+		const app = 'discount-api';
 		const nameWithStage = `${app}-${this.stage}`;
 
 		const commonEnvironmentVariables = {
@@ -39,7 +39,7 @@ export class ProductSwitchApi extends GuStack {
 		// ---- API-triggered lambda functions ---- //
 		const lambda = new GuApiLambda(this, `${app}-lambda`, {
 			description:
-				'An API Gateway triggered lambda for carrying out product switches. Code is in the support-service-lambdas repo',
+				'A lambda that enables the addition of discounts to existing subscriptions',
 			functionName: nameWithStage,
 			loggingFormat: LoggingFormat.TEXT,
 			fileName: `${app}.zip`,
@@ -48,20 +48,18 @@ export class ProductSwitchApi extends GuStack {
 			memorySize: 1024,
 			timeout: Duration.seconds(300),
 			environment: commonEnvironmentVariables,
-			// Create an alarm
 			monitoringConfiguration: {
-				noMonitoring: true,
+				noMonitoring: true, // There is a threshold alarm defined below
 			},
 			app: app,
 			api: {
 				id: nameWithStage,
 				restApiName: nameWithStage,
-				description: `API Gateway endpoint for the ${nameWithStage} lambda`,
+				description: 'API Gateway created by CDK',
 				proxy: true,
 				deployOptions: {
 					stageName: this.stage,
 				},
-
 				apiKeySourceType: ApiKeySourceType.HEADER,
 				defaultMethodOptions: {
 					apiKeyRequired: true,
@@ -71,7 +69,7 @@ export class ProductSwitchApi extends GuStack {
 
 		const usagePlan = lambda.api.addUsagePlan('UsagePlan', {
 			name: nameWithStage,
-			description: 'REST endpoints for product-switch-api',
+			description: 'REST endpoints for discount api',
 			apiStages: [
 				{
 					stage: lambda.api.deploymentStage,
@@ -87,6 +85,79 @@ export class ProductSwitchApi extends GuStack {
 
 		// associate api key to plan
 		usagePlan.addApiKey(apiKey);
+
+		const s3InlinePolicy: Policy = new Policy(this, 'S3 inline policy', {
+			statements: [
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: ['s3:GetObject'],
+					resources: [
+						`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`,
+						`arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-${this.stage}/*`,
+					],
+				}),
+			],
+		});
+
+		const secretsManagerPolicy: Policy = new Policy(
+			this,
+			'Secrets Manager policy',
+			{
+				statements: [
+					new PolicyStatement({
+						effect: Effect.ALLOW,
+						actions: ['secretsmanager:GetSecretValue'],
+						resources: [
+							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
+						],
+					}),
+				],
+			},
+		);
+
+		const sqsEmailPolicy: Policy = new Policy(this, 'SQS email policy', {
+			statements: [
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: ['sqs:sendmessage'],
+					resources: [
+						`arn:aws:sqs:${this.region}:${this.account}:braze-emails-${this.stage}`,
+					],
+				}),
+			],
+		});
+
+		lambda.role?.attachInlinePolicy(s3InlinePolicy);
+		lambda.role?.attachInlinePolicy(secretsManagerPolicy);
+		lambda.role?.attachInlinePolicy(sqsEmailPolicy);
+
+		// ---- Alarms ---- //
+		const alarmName = (shortDescription: string) =>
+			`DISCOUNT-API-${this.stage} ${shortDescription}`;
+
+		const alarmDescription = (description: string) =>
+			`Impact - ${description}. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit`;
+
+		new SrLambdaAlarm(this, 'ApiGateway5XXAlarmCDK', {
+			app,
+			alarmName: alarmName('Discount-api 5XX response'),
+			alarmDescription: alarmDescription(
+				'Discount api returned a 5XX response check the logs for more information: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fdiscount-api-PROD',
+			),
+			evaluationPeriods: 1,
+			threshold: 1,
+			lambdaFunctionNames: lambda.functionName,
+			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+			metric: new Metric({
+				metricName: '5XXError',
+				namespace: 'AWS/ApiGateway',
+				statistic: 'Sum',
+				period: Duration.seconds(300),
+				dimensionsMap: {
+					ApiName: nameWithStage,
+				},
+			}),
+		});
 
 		// ---- DNS ---- //
 		const certificateArn = `arn:aws:acm:eu-west-1:${this.account}:certificate/${props.certificateId}`;
@@ -111,103 +182,5 @@ export class ProductSwitchApi extends GuStack {
 			ttl: '120',
 			resourceRecords: [cfnDomainName.attrRegionalDomainName],
 		});
-
-		const s3InlinePolicy: Policy = new Policy(this, 'S3 inline policy', {
-			statements: [
-				new PolicyStatement({
-					effect: Effect.ALLOW,
-					actions: ['s3:GetObject'],
-					resources: [
-						`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`,
-					],
-				}),
-			],
-		});
-
-		const secretsManagerPolicy: Policy = new Policy(
-			this,
-			'Secrets Manager policy',
-			{
-				statements: [
-					new PolicyStatement({
-						effect: Effect.ALLOW,
-						actions: ['secretsmanager:GetSecretValue'],
-						resources: [
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
-						],
-					}),
-				],
-			},
-		);
-
-		const sqsPolicy: Policy = new Policy(this, 'SQS policy', {
-			statements: [
-				new PolicyStatement({
-					effect: Effect.ALLOW,
-					actions: ['sqs:GetQueueUrl', 'sqs:SendMessage'],
-					resources: [
-						`arn:aws:sqs:${this.region}:${this.account}:braze-emails-${this.stage}`,
-						`arn:aws:sqs:${this.region}:${this.account}:supporter-product-data-${this.stage}`,
-						`arn:aws:sqs:${this.region}:${this.account}:product-switch-salesforce-tracking-${this.stage}`,
-					],
-				}),
-			],
-		});
-
-		lambda.role?.attachInlinePolicy(s3InlinePolicy);
-		lambda.role?.attachInlinePolicy(secretsManagerPolicy);
-		lambda.role?.attachInlinePolicy(sqsPolicy);
-
-		// ---- Alarms ---- //
-		const alarmName = (shortDescription: string) =>
-			`PRODUCT-SWITCH-API-${this.stage} ${shortDescription}`;
-
-		const alarmDescription = (description: string) =>
-			`Impact - ${description}. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit`;
-
-		if (this.stage === 'PROD') {
-			new SrLambdaAlarm(this, 'ApiGateway5XXAlarmCDK', {
-				app,
-				alarmName: alarmName('API gateway 5XX response'),
-				alarmDescription: alarmDescription(
-					'Product switch api returned a 500 response, please check the logs to diagnose the issue.',
-				),
-				evaluationPeriods: 1,
-				threshold: 1,
-				comparisonOperator:
-					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-				metric: new Metric({
-					metricName: '5XXError',
-					namespace: 'AWS/ApiGateway',
-					statistic: 'Sum',
-					period: Duration.seconds(300),
-					dimensionsMap: {
-						ApiName: nameWithStage,
-					},
-				}),
-				lambdaFunctionNames: lambda.functionName,
-			});
-			new SrLambdaAlarm(this, 'ProductSwitchFailureAlarm', {
-				app,
-				alarmName: alarmName('An error occurred in the Product Switch lambda'),
-				alarmDescription: alarmDescription(
-					'Product switch lambda failed, please check the logs to diagnose the issue.',
-				),
-				comparisonOperator:
-					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-				metric: new Metric({
-					metricName: 'Errors',
-					namespace: 'AWS/Lambda',
-					statistic: 'Sum',
-					period: Duration.seconds(300),
-					dimensionsMap: {
-						FunctionName: lambda.functionName,
-					},
-				}),
-				threshold: 1,
-				evaluationPeriods: 1,
-				lambdaFunctionNames: lambda.functionName,
-			});
-		}
 	}
 }

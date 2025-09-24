@@ -4,7 +4,7 @@ import {
 	supportApisDomain,
 	supportCertificateId,
 	supportHostedZoneId,
-} from '../module/constants';
+} from '../bin/cdk';
 import { UpdateSupporterPlusAmount } from './update-supporter-plus-amount';
 
 describe('The Update supporter plus amount stack', () => {

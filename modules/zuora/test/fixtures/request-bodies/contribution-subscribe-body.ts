@@ -3,7 +3,7 @@ import { zuoraDateFormat } from '@modules/zuora/utils';
 import {
 	catalog,
 	sandboxProductRatePlanChargeIds,
-} from '../../../../../handlers/discount-api/lambda/src/productToDiscountMapping';
+} from '../../../../../handlers/discount-api/src/productToDiscountMapping';
 import type { ContributionTestAdditionalOptions } from '../../it-helpers/createGuardianSubscription';
 
 export const contributionSubscribeBody = (
