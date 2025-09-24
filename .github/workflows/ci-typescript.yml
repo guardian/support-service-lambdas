@@ -78,15 +78,29 @@ jobs:
           force_build_all="${{ github.event.inputs.force_build_all || 'false' }}"
           all_typescript_lambdas="${{ steps.discover-lambdas.outputs.lambdas }}"
           
+          echo "DEBUG: global-changes: $global_changes"
+          echo "DEBUG: all-filter-changes (raw): $all_filter_changes"
+          
           # Filter out 'global-changes' from the individual lambda changes
           individual_lambdas_changed="[]"
-          if [[ "$all_filter_changes" != "[]" ]]; then
-            # Remove 'global-changes' from the changes array
-            individual_lambdas_changed=$(echo "$all_filter_changes" | jq '. - ["global-changes"]')
+          if [[ "$all_filter_changes" != "[]" ]] && [[ -n "$all_filter_changes" ]]; then
+            # Check if it's valid JSON first
+            if echo "$all_filter_changes" | jq . >/dev/null 2>&1; then
+              # Remove 'global-changes' from the changes array
+              individual_lambdas_changed=$(echo "$all_filter_changes" | jq '. - ["global-changes"]')
+            else
+              # Handle case where it's not valid JSON (might be a single string)
+              echo "WARNING: all_filter_changes is not valid JSON: $all_filter_changes"
+              # If it's just "global-changes", set to empty array
+              if [[ "$all_filter_changes" == "global-changes" ]]; then
+                individual_lambdas_changed="[]"
+              else
+                # Assume it's a single lambda name, wrap in array
+                individual_lambdas_changed="[\"$all_filter_changes\"]"
+              fi
+            fi
           fi
           
-          echo "DEBUG: global-changes: $global_changes"
-          echo "DEBUG: all-filter-changes: $all_filter_changes"
           echo "DEBUG: individual-lambdas-changed: $individual_lambdas_changed"
           echo "DEBUG: force-build-all: $force_build_all"
           echo "DEBUG: all-typescript-lambdas: $all_typescript_lambdas"
