@@ -2,10 +2,10 @@ import * as path from 'path';
 import type { HandlerDefinition } from '../../data/build';
 import { build } from '../../data/build';
 import { generateWarningFile } from '../../data/snippets/BUILDCHECK.md';
-import type { Template } from '../util/templater';
-import { applyTemplates } from '../util/templater';
+import defaultTemplates from '../dynamic/generated/generatedMappings';
+import type { Template } from '../dynamic/templater';
+import { applyTemplates } from '../dynamic/templater';
 import type { GeneratedFile } from './generatedFile';
-import defaultTemplates from './generatedMappings';
 
 // generates files across the whole repository
 export function generate(

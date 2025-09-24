@@ -1,4 +1,4 @@
 node_modules/
 dist/
 *.log
-/src/steps/generatedMappings.ts
+/src/dynamic/generated/
