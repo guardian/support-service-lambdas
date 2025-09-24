@@ -103,43 +103,44 @@ jobs:
           if [[ -n "$all_filter_changes" ]] && [[ "$all_filter_changes" != "[]" ]]; then
             # Handle bracket-enclosed format like [global-changes,mparticle-api]
             if [[ "$all_filter_changes" =~ ^\[.*\]$ ]]; then
-              # Remove brackets and split by comma
+              # Remove brackets and split by comma, then use jq to create proper JSON
               changes_without_brackets="${all_filter_changes:1:-1}"  # Remove [ and ]
               IFS=',' read -ra changes_array <<< "$changes_without_brackets"
               
-              # Filter out global-changes and build JSON array
-              lambda_array=()
+              # Create a temp array for processing with jq
+              temp_array=()
               for change in "${changes_array[@]}"; do
-                # Trim whitespace
+                # Trim whitespace and exclude global-changes
                 change=$(echo "$change" | xargs)
                 if [[ "$change" != "global-changes" ]]; then
-                  lambda_array+=("\"$change\"")
+                  temp_array+=("$change")
                 fi
               done
               
-              if [ ${#lambda_array[@]} -eq 0 ]; then
+              # Use jq to create proper JSON array
+              if [ ${#temp_array[@]} -eq 0 ]; then
                 individual_lambdas_changed="[]"
               else
-                individual_lambdas_changed="[$(IFS=,; echo "${lambda_array[*]}")]"
+                individual_lambdas_changed=$(printf '%s\n' "${temp_array[@]}" | jq -R . | jq -s -c .)
               fi
             else
               # Check if it's valid JSON first
               if echo "$all_filter_changes" | jq . >/dev/null 2>&1; then
-                # Remove 'global-changes' from the JSON array
-                individual_lambdas_changed=$(echo "$all_filter_changes" | jq '. - ["global-changes"]')
+                # Remove 'global-changes' from the JSON array using jq
+                individual_lambdas_changed=$(echo "$all_filter_changes" | jq -c '. - ["global-changes"]')
               else
-                # Fallback: treat as space-separated list
-                lambda_array=()
+                # Fallback: treat as space-separated list and use jq to create JSON
+                temp_array=()
                 for change in $all_filter_changes; do
                   if [[ "$change" != "global-changes" ]]; then
-                    lambda_array+=("\"$change\"")
+                    temp_array+=("$change")
                   fi
                 done
                 
-                if [ ${#lambda_array[@]} -eq 0 ]; then
+                if [ ${#temp_array[@]} -eq 0 ]; then
                   individual_lambdas_changed="[]"
                 else
-                  individual_lambdas_changed="[$(IFS=,; echo "${lambda_array[*]}")]"
+                  individual_lambdas_changed=$(printf '%s\n' "${temp_array[@]}" | jq -R . | jq -s -c .)
                 fi
               fi
             fi
@@ -158,11 +159,25 @@ jobs:
             else
               echo "INFO: Global changes detected outside handler directories - building all lambdas (failsafe)"
             fi
-            echo "lambdas-to-build=$all_typescript_lambdas" >> $GITHUB_OUTPUT
+            
+            # Validate JSON before setting output
+            if echo "$all_typescript_lambdas" | jq . >/dev/null 2>&1; then
+              echo "lambdas-to-build=$all_typescript_lambdas" >> $GITHUB_OUTPUT
+            else
+              echo "ERROR: all_typescript_lambdas is not valid JSON: $all_typescript_lambdas"
+              echo "lambdas-to-build=[]" >> $GITHUB_OUTPUT
+            fi
           elif [[ "$individual_lambdas_changed" != "[]" ]]; then
             echo "any-changed=true" >> $GITHUB_OUTPUT
             echo "INFO: Only handler-specific changes detected - building individual lambdas"
-            echo "lambdas-to-build=$individual_lambdas_changed" >> $GITHUB_OUTPUT
+            
+            # Validate JSON before setting output
+            if echo "$individual_lambdas_changed" | jq . >/dev/null 2>&1; then
+              echo "lambdas-to-build=$individual_lambdas_changed" >> $GITHUB_OUTPUT
+            else
+              echo "ERROR: individual_lambdas_changed is not valid JSON: $individual_lambdas_changed"
+              echo "lambdas-to-build=[]" >> $GITHUB_OUTPUT
+            fi
           else
             echo "any-changed=false" >> $GITHUB_OUTPUT
             echo "INFO: No relevant changes detected - skipping builds"
