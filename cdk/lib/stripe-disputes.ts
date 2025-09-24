@@ -175,6 +175,20 @@ export class StripeDisputes extends GuStack {
 		);
 
 		this.createPolicyAndAttachToLambdas(
+			[{ lambda: lambdaProducer, name: 'Lambda Producer' }],
+			[
+				new PolicyStatement({
+					effect: Effect.ALLOW,
+					actions: ['secretsmanager:GetSecretValue'],
+					resources: [
+						`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Stripe/ConnectedApp/StripeDisputeWebhooks-*`,
+					],
+				}),
+			],
+			'Allow Secrets Manager Get Secret Value',
+		);
+
+		this.createPolicyAndAttachToLambdas(
 			[{ lambda: lambdaConsumer, name: 'Lambda Consumer' }],
 			[
 				new PolicyStatement({
