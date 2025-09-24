@@ -83,6 +83,11 @@ jobs:
           global-changes:
             - '**'
             - '!handlers/**'
+            - '!README.md'
+            - '!docs/**'
+            - '!*.md'
+            - '!.gitignore'
+            - '!.nvmrc'
           EOF
           
           # Add each TypeScript lambda as a filter - parse JSON properly
