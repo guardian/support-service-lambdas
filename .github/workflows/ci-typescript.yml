@@ -43,12 +43,13 @@ jobs:
             fi
           done
           
-          # Convert to properly quoted JSON array
+          # Convert to properly formatted JSON array using jq
           if [ ${#typescript_lambdas[@]} -eq 0 ]; then
             lambdas_json="[]"
           else
-            # Use printf to properly quote each element
-            printf -v lambdas_json '["%s"]' "$(IFS='","'; echo "${typescript_lambdas[*]}")"
+            # Use printf to create a newline-separated list, then jq to convert to JSON array
+            printf '%s\n' "${typescript_lambdas[@]}" | jq -R . | jq -s . > /tmp/lambdas.json
+            lambdas_json=$(cat /tmp/lambdas.json)
           fi
           
           echo "lambdas=$lambdas_json" >> $GITHUB_OUTPUT
@@ -56,19 +57,29 @@ jobs:
       - name: Generate dynamic paths filter
         id: generate-filter
         run: |
-          # Get discovered lambdas
+          # Get discovered lambdas from the previous step
           all_typescript_lambdas='${{ steps.discover-lambdas.outputs.lambdas }}'
           
-          # Generate filter configuration dynamically
-          filter_config="global-changes:\n  - '**'\n  - '!handlers/**'\n"
+          echo "DEBUG: Raw lambdas JSON: $all_typescript_lambdas"
           
-          # Add each TypeScript lambda as a filter
-          for lambda_name in $(echo "$all_typescript_lambdas" | jq -r '.[]'); do
-            filter_config="${filter_config}${lambda_name}:\n  - 'handlers/${lambda_name}/**'\n"
-          done
+          # Write base filter config
+          cat > /tmp/filters.yml << 'EOF'
+          global-changes:
+            - '**'
+            - '!handlers/**'
+          EOF
           
-          # Write to temporary file
-          echo -e "$filter_config" > /tmp/filters.yml
+          # Add each TypeScript lambda as a filter - parse JSON properly
+          if [[ "$all_typescript_lambdas" != "[]" ]]; then
+            echo "$all_typescript_lambdas" | jq -r '.[]' | while read -r lambda_name; do
+              echo "DEBUG: Adding filter for lambda: $lambda_name"
+              cat >> /tmp/filters.yml << EOF
+          ${lambda_name}:
+            - 'handlers/${lambda_name}/**'
+          EOF
+            done
+          fi
+          
           echo "Generated filter config:"
           cat /tmp/filters.yml
       - uses: dorny/paths-filter@v3
