@@ -1,6 +1,8 @@
 {
   "name": "discount-api",
   "scripts": {
+    "cdk:test": "pnpm --filter cdk test discount-api",
+    "cdk:test-update": "pnpm --filter cdk test-update discount-api",
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
     "type-check": "tsc --noEmit",

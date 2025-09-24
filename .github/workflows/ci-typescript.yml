@@ -74,7 +74,7 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - run: pnpm install
-      - run: pnpm --filter cdk package
+      - run: pnpm --filter cdk package ${{ matrix.subproject }}
       - run: pnpm --filter ${{ matrix.subproject }} package
 
       - name: Configure AWS credentials
