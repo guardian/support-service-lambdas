@@ -43,16 +43,33 @@ jobs:
             fi
           done
           
-          # Convert to compact JSON array using jq
+          echo "DEBUG: Found ${#typescript_lambdas[@]} TypeScript lambdas: ${typescript_lambdas[*]}"
+          
+          # Convert to compact JSON array using jq - with multiple fallbacks
           if [ ${#typescript_lambdas[@]} -eq 0 ]; then
             lambdas_json="[]"
+            echo "INFO: No TypeScript lambdas found"
           else
-            # Use printf to create a newline-separated list, then jq to convert to compact JSON array
-            lambdas_json=$(printf '%s\n' "${typescript_lambdas[@]}" | jq -R . | jq -s -c .)
+            # Primary method: use jq
+            if command -v jq >/dev/null 2>&1; then
+              lambdas_json=$(printf '%s\n' "${typescript_lambdas[@]}" | jq -R . | jq -s -c .)
+              echo "DEBUG: jq generated: $lambdas_json"
+              
+              # Validate the generated JSON
+              if echo "$lambdas_json" | jq . >/dev/null 2>&1; then
+                echo "SUCCESS: Valid JSON generated with jq"
+              else
+                echo "ERROR: jq generated invalid JSON, using fallback"
+                lambdas_json="[]"
+              fi
+            else
+              echo "ERROR: jq not available, using fallback"
+              lambdas_json="[]"
+            fi
           fi
           
           echo "lambdas=$lambdas_json" >> $GITHUB_OUTPUT
-          echo "INFO: Discovered TypeScript lambdas: $lambdas_json"
+          echo "INFO: Final output: $lambdas_json"
       - name: Generate dynamic paths filter
         id: generate-filter
         run: |
@@ -165,7 +182,35 @@ jobs:
               echo "lambdas-to-build=$all_typescript_lambdas" >> $GITHUB_OUTPUT
             else
               echo "ERROR: all_typescript_lambdas is not valid JSON: $all_typescript_lambdas"
-              echo "lambdas-to-build=[]" >> $GITHUB_OUTPUT
+              echo "INFO: Attempting to convert to valid JSON..."
+              
+              # Try to fix the malformed JSON by converting to proper format
+              if [[ "$all_typescript_lambdas" =~ ^\[.*\]$ ]]; then
+                # Remove brackets and parse as comma-separated list
+                values_without_brackets="${all_typescript_lambdas:1:-1}"  # Remove [ and ]
+                IFS=',' read -ra lambda_array <<< "$values_without_brackets"
+                
+                # Create proper JSON array
+                fixed_json_array=()
+                for lambda_name in "${lambda_array[@]}"; do
+                  # Trim whitespace and add to array
+                  lambda_name=$(echo "$lambda_name" | xargs)
+                  fixed_json_array+=("$lambda_name")
+                done
+                
+                # Use jq to create proper JSON
+                if [ ${#fixed_json_array[@]} -eq 0 ]; then
+                  fixed_json="[]"
+                else
+                  fixed_json=$(printf '%s\n' "${fixed_json_array[@]}" | jq -R . | jq -s -c .)
+                fi
+                
+                echo "INFO: Fixed JSON: $fixed_json"
+                echo "lambdas-to-build=$fixed_json" >> $GITHUB_OUTPUT
+              else
+                echo "ERROR: Cannot parse malformed JSON, defaulting to empty array"
+                echo "lambdas-to-build=[]" >> $GITHUB_OUTPUT
+              fi
             fi
           elif [[ "$individual_lambdas_changed" != "[]" ]]; then
             echo "any-changed=true" >> $GITHUB_OUTPUT
@@ -218,7 +263,7 @@ jobs:
 
   gu-cdk-build:
     needs: [common, detect-changes]
-    if: needs.detect-changes.outputs.any-lambda-changed == 'true'
+    if: needs.detect-changes.outputs.any-lambda-changed == 'true' && needs.detect-changes.outputs.lambdas-to-build != '[]'
     strategy:
       matrix:
         subproject: ${{ fromJson(needs.detect-changes.outputs.lambdas-to-build) }}
