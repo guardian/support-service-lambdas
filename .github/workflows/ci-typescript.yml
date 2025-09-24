@@ -43,13 +43,12 @@ jobs:
             fi
           done
           
-          # Convert to properly formatted JSON array using jq
+          # Convert to compact JSON array using jq
           if [ ${#typescript_lambdas[@]} -eq 0 ]; then
             lambdas_json="[]"
           else
-            # Use printf to create a newline-separated list, then jq to convert to JSON array
-            printf '%s\n' "${typescript_lambdas[@]}" | jq -R . | jq -s . > /tmp/lambdas.json
-            lambdas_json=$(cat /tmp/lambdas.json)
+            # Use printf to create a newline-separated list, then jq to convert to compact JSON array
+            lambdas_json=$(printf '%s\n' "${typescript_lambdas[@]}" | jq -R . | jq -s -c .)
           fi
           
           echo "lambdas=$lambdas_json" >> $GITHUB_OUTPUT
