@@ -168,6 +168,17 @@ jobs:
             echo "INFO: No relevant changes detected - skipping builds"
             echo "lambdas-to-build=[]" >> $GITHUB_OUTPUT
           fi
+          
+          # Debug: Verify all outputs are set
+          echo "DEBUG: Final outputs:"
+          echo "DEBUG: - any-changed: $(grep 'any-changed=' <<< $(cat $GITHUB_OUTPUT | tail -20) || echo 'NOT SET')"
+          echo "DEBUG: - lambdas-to-build: $(grep 'lambdas-to-build=' <<< $(cat $GITHUB_OUTPUT | tail -20) || echo 'NOT SET')"
+          
+          # Ensure lambdas-to-build is always set to valid JSON
+          if ! grep -q "lambdas-to-build=" $GITHUB_OUTPUT; then
+            echo "WARNING: lambdas-to-build not set, setting to empty array"
+            echo "lambdas-to-build=[]" >> $GITHUB_OUTPUT
+          fi
 
   common:
     runs-on: ubuntu-latest
@@ -191,7 +202,7 @@ jobs:
       - run: pnpm --filter "./modules/**" test
 
   gu-cdk-build:
-    needs: common
+    needs: [common, detect-changes]
     if: needs.detect-changes.outputs.any-lambda-changed == 'true'
     strategy:
       matrix:
