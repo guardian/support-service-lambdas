@@ -11,30 +11,7 @@ export function separateDepRecords<K extends string>(
 		.reduce((a, b) => ({ ...a, ...b }));
 }
 
-// the code won't type check if a disallowed library is present
-type DisallowedLibs = readonly ['aws-sdk'];
-
-const DISALLOWED_LIBRARY_IN_PNPM_CATALOG = Symbol('Error');
-type DisallowedLibsType = {
-	[Key in DisallowedLibs[number]]?: unknown;
-};
-
-export function getPnpmCatalog<K extends string>(
-	catalog: Record<K, string> extends DisallowedLibsType
-		? Record<K, string> & {
-				// the following line is the compiler error reported when you try to add aws-sdk v2
-				[DISALLOWED_LIBRARY_IN_PNPM_CATALOG]: `${keyof DisallowedLibsType & keyof Record<K, string>}`;
-			}
-		: Record<K, string>,
-) {
-	return separateDepRecords(
-		withVersion('catalog:', catalogDependencyNames(catalog)),
-	);
-}
-
-export function catalogDependencyNames<K extends string>(
-	catalog: Record<K, string>,
-): K[] {
+export function getPnpmCatalog<K extends string>(catalog: Record<K, string>) {
 	// check that all the aws sdk v3 versions are identical
 	const awsVersions = new Set(
 		Object.entries(catalog)
@@ -47,8 +24,14 @@ export function catalogDependencyNames<K extends string>(
 				[...awsVersions].sort().join(', '),
 		);
 	}
+	// aws sdk v2 is not allowed
+	if ((catalog as Record<string, string>)['aws-sdk']) {
+		throw new Error('AWS SDK v2 is not allowed in the pnpm catalog');
+	}
 
-	return Object.keys(catalog) as K[];
+	return separateDepRecords(
+		withVersion('catalog:', Object.keys(catalog) as K[]),
+	);
 }
 
 export function withPrefix<T extends string, P extends string>(
