@@ -23,8 +23,8 @@ jobs:
   detect-changes:
     runs-on: ubuntu-latest
     outputs:
-      global-changes: ${{ steps.filter.outputs.global-changes }}
-      individual-lambdas-changed: ${{ steps.filter.outputs.changes }}
+      global-changes: ${{ steps.detect-lambda-changes.outputs.global-changes }}
+      individual-lambdas-changed: ${{ steps.detect-lambda-changes.outputs.individual-lambdas-changed }}
       any-lambda-changed: ${{ steps.check-lambdas.outputs.any-changed }}
       lambdas-to-build: ${{ steps.check-lambdas.outputs.lambdas-to-build }}
       all-typescript-lambdas: ${{ steps.discover-lambdas.outputs.lambdas }}
@@ -47,59 +47,65 @@ jobs:
           lambdas_json="[$(IFS=,; echo "${typescript_lambdas[*]}")]"
           echo "lambdas=$lambdas_json" >> $GITHUB_OUTPUT
           echo "INFO: Discovered TypeScript lambdas: $lambdas_json"
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          list-files: 'json'
-          filters: |
-            # Individual lambda filters - these will only be used if NO other files changed
-            user-benefits:
-              - 'handlers/user-benefits/**'
-            press-reader-entitlements:
-              - 'handlers/press-reader-entitlements/**'
-            ticket-tailor-webhook:
-              - 'handlers/ticket-tailor-webhook/**'
-            update-supporter-plus-amount:
-              - 'handlers/update-supporter-plus-amount/**'
-            product-switch-api:
-              - 'handlers/product-switch-api/**'
-            generate-product-catalog:
-              - 'handlers/generate-product-catalog/**'
-            alarms-handler:
-              - 'handlers/alarms-handler/**'
-            discount-api:
-              - 'handlers/discount-api/**'
-            stripe-disputes:
-              - 'handlers/stripe-disputes/**'
-            discount-expiry-notifier:
-              - 'handlers/discount-expiry-notifier/**'
-            salesforce-disaster-recovery:
-              - 'handlers/salesforce-disaster-recovery/**'
-            salesforce-disaster-recovery-health-check:
-              - 'handlers/salesforce-disaster-recovery-health-check/**'
-            salesforce-event-bus:
-              - 'handlers/salesforce-event-bus/**'
-            zuora-salesforce-link-remover:
-              - 'handlers/zuora-salesforce-link-remover/**'
-            metric-push-api:
-              - 'handlers/metric-push-api/**'
-            observer-data-export:
-              - 'handlers/observer-data-export/**'
-            negative-invoices-processor:
-              - 'handlers/negative-invoices-processor/**'
-            write-off-unpaid-invoices:
-              - 'handlers/write-off-unpaid-invoices/**'
-            mparticle-api:
-              - 'handlers/mparticle-api/**'
-            # Detect changes to anything OUTSIDE handler directories (exclusion approach)
-            global-changes:
-              - '**'
-              - '!handlers/**'
+      - name: Detect changed lambdas
+        id: detect-lambda-changes
+        run: |
+          # Get the list of changed files
+          changed_files=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} 2>/dev/null || git diff --name-only HEAD~1 HEAD || echo "")
+          echo "DEBUG: Changed files: $changed_files"
+          
+          # Get list of TypeScript lambdas for reference
+          all_typescript_lambdas='${{ steps.discover-lambdas.outputs.lambdas }}'
+          typescript_lambda_names=$(echo "$all_typescript_lambdas" | jq -r '.[]')
+          
+          # Check for global changes (anything outside handlers/)
+          global_changes=false
+          
+          # Check for changes outside handlers/ directory
+          if echo "$changed_files" | grep -qv '^handlers/'; then
+            global_changes=true
+            echo "INFO: Global changes detected (files outside handlers/)"
+          fi
+          
+          echo "global-changes=$global_changes" >> $GITHUB_OUTPUT
+          
+          # Find which TypeScript lambdas have changes
+          changed_lambdas=()
+          scala_lambda_changes=false
+          
+          for lambda_name in $typescript_lambda_names; do
+            if echo "$changed_files" | grep -q "^handlers/$lambda_name/"; then
+              changed_lambdas+=("\"$lambda_name\"")
+              echo "INFO: Changes detected in TypeScript lambda: $lambda_name"
+            fi
+          done
+          
+          # Check if there are any changes to Scala lambdas (for informational purposes)
+          for file in $changed_files; do
+            if [[ "$file" =~ ^handlers/([^/]+)/ ]]; then
+              lambda_dir="${BASH_REMATCH[1]}"
+              # If this lambda is not in our TypeScript list, it's a Scala lambda
+              if ! echo "$typescript_lambda_names" | grep -q "^$lambda_dir$"; then
+                scala_lambda_changes=true
+                echo "INFO: Changes detected in Scala lambda: $lambda_dir (ignored by TypeScript CI)"
+              fi
+            fi
+          done
+          
+          # Convert to JSON array
+          if [ ${#changed_lambdas[@]} -eq 0 ]; then
+            changed_lambdas_json="[]"
+          else
+            changed_lambdas_json="[$(IFS=,; echo "${changed_lambdas[*]}")]"
+          fi
+          
+          echo "individual-lambdas-changed=$changed_lambdas_json" >> $GITHUB_OUTPUT
+          echo "INFO: Changed TypeScript lambdas: $changed_lambdas_json"
       - name: Check if any lambda changed
         id: check-lambdas
         run: |
-          global_changes="${{ steps.filter.outputs.global-changes }}"
-          individual_lambdas_changed="${{ steps.filter.outputs.changes }}"
+          global_changes="${{ steps.detect-lambda-changes.outputs.global-changes }}"
+          individual_lambdas_changed="${{ steps.detect-lambda-changes.outputs.individual-lambdas-changed }}"
           force_build_all="${{ github.event.inputs.force_build_all || 'false' }}"
           all_typescript_lambdas="${{ steps.discover-lambdas.outputs.lambdas }}"
           
