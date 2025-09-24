@@ -39,12 +39,18 @@ jobs:
             if [[ -f "$dir/package.json" ]]; then
               # Extract directory name without handlers/ prefix and trailing /
               lambda_name=$(basename "$dir")
-              typescript_lambdas+=("\"$lambda_name\"")
+              typescript_lambdas+=("$lambda_name")
             fi
           done
           
-          # Convert to JSON array
-          lambdas_json="[$(IFS=,; echo "${typescript_lambdas[*]}")]"
+          # Convert to properly quoted JSON array
+          if [ ${#typescript_lambdas[@]} -eq 0 ]; then
+            lambdas_json="[]"
+          else
+            # Use printf to properly quote each element
+            printf -v lambdas_json '["%s"]' "$(IFS='","'; echo "${typescript_lambdas[*]}")"
+          fi
+          
           echo "lambdas=$lambdas_json" >> $GITHUB_OUTPUT
           echo "INFO: Discovered TypeScript lambdas: $lambdas_json"
       - name: Generate dynamic paths filter
@@ -68,7 +74,6 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: filter
         with:
-          list-files: 'json'
           filters: /tmp/filters.yml
       - name: Check if any lambda changed
         id: check-lambdas
@@ -81,23 +86,22 @@ jobs:
           echo "DEBUG: global-changes: $global_changes"
           echo "DEBUG: all-filter-changes (raw): $all_filter_changes"
           
-          # Filter out 'global-changes' from the individual lambda changes
+          # Parse the space-separated list from dorny/paths-filter and filter out 'global-changes'
           individual_lambdas_changed="[]"
-          if [[ "$all_filter_changes" != "[]" ]] && [[ -n "$all_filter_changes" ]]; then
-            # Check if it's valid JSON first
-            if echo "$all_filter_changes" | jq . >/dev/null 2>&1; then
-              # Remove 'global-changes' from the changes array
-              individual_lambdas_changed=$(echo "$all_filter_changes" | jq '. - ["global-changes"]')
-            else
-              # Handle case where it's not valid JSON (might be a single string)
-              echo "WARNING: all_filter_changes is not valid JSON: $all_filter_changes"
-              # If it's just "global-changes", set to empty array
-              if [[ "$all_filter_changes" == "global-changes" ]]; then
-                individual_lambdas_changed="[]"
-              else
-                # Assume it's a single lambda name, wrap in array
-                individual_lambdas_changed="[\"$all_filter_changes\"]"
+          if [[ -n "$all_filter_changes" ]] && [[ "$all_filter_changes" != "" ]]; then
+            # Convert space-separated string to array, filtering out 'global-changes'
+            lambda_array=()
+            for change in $all_filter_changes; do
+              if [[ "$change" != "global-changes" ]]; then
+                lambda_array+=("\"$change\"")
               fi
+            done
+            
+            # Convert to JSON array
+            if [ ${#lambda_array[@]} -eq 0 ]; then
+              individual_lambdas_changed="[]"
+            else
+              individual_lambdas_changed="[$(IFS=,; echo "${lambda_array[*]}")]"
             fi
           fi
           
