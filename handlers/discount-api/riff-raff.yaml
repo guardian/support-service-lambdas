@@ -1,7 +1,7 @@
 stacks:
-  - support
+- support
 regions:
-  - eu-west-1
+- eu-west-1
 allowedStages:
   - CODE
   - PROD
@@ -13,6 +13,7 @@ deployments:
       templateStagePaths:
         CODE: discount-api-CODE.template.json
         PROD: discount-api-PROD.template.json
+
   discount-api:
     type: aws-lambda
     parameters:
@@ -20,6 +21,5 @@ deployments:
       bucketSsmLookup: true
       prefixStack: false
       functionNames:
-        - discount-api-
-    dependencies:
-      - discount-api-cloudformation
+      - discount-api-
+    dependencies: [discount-api-cloudformation]

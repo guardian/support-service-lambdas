@@ -120,46 +120,13 @@ importers:
         specifier: ^10.9.2
         version: 10.9.2(@types/node@22.18.0)(typescript@5.9.2)
 
-  cdk/module: {}
-
-  handlers/alarms-handler/cdk:
-    dependencies:
-      '@cdk/module':
-        specifier: workspace:*
-        version: link:../../../cdk/module
-    devDependencies:
-      '@guardian/cdk':
-        specifier: 61.11.1
-        version: 61.11.1(aws-cdk-lib@2.195.0(constructs@10.4.2))(aws-cdk@2.1014.0)(constructs@10.4.2)
-      '@types/jest':
-        specifier: ^29.5.14
-        version: 29.5.14
-      '@types/node':
-        specifier: ^22.15.14
-        version: 22.18.0
-      aws-cdk:
-        specifier: 2.1014.0
-        version: 2.1014.0
-      aws-cdk-lib:
-        specifier: 2.195.0
-        version: 2.195.0(constructs@10.4.2)
-      constructs:
-        specifier: 10.4.2
-        version: 10.4.2
-      source-map-support:
-        specifier: ^0.5.21
-        version: 0.5.21
-      ts-node:
-        specifier: ^10.9.2
-        version: 10.9.2(@types/node@22.18.0)(typescript@5.9.2)
-
-  handlers/alarms-handler/lambda:
+  handlers/alarms-handler:
     dependencies:
       '@aws-sdk/client-cloudwatch':
         specifier: ^3.848.0
         version: 3.879.0
       '@aws-sdk/credential-providers':
-        specifier: ^3.848.0
+        specifier: ^3.879.0
         version: 3.879.0
       zod:
         specifier: 'catalog:'
@@ -172,38 +139,7 @@ importers:
         specifier: ^1.11.13
         version: 1.11.18
 
-  handlers/discount-api/cdk:
-    dependencies:
-      '@cdk/module':
-        specifier: workspace:*
-        version: link:../../../cdk/module
-    devDependencies:
-      '@guardian/cdk':
-        specifier: 61.11.1
-        version: 61.11.1(aws-cdk-lib@2.195.0(constructs@10.4.2))(aws-cdk@2.1014.0)(constructs@10.4.2)
-      '@types/jest':
-        specifier: ^29.5.14
-        version: 29.5.14
-      '@types/node':
-        specifier: ^22.15.14
-        version: 22.18.0
-      aws-cdk:
-        specifier: 2.1014.0
-        version: 2.1014.0
-      aws-cdk-lib:
-        specifier: 2.195.0
-        version: 2.195.0(constructs@10.4.2)
-      constructs:
-        specifier: 10.4.2
-        version: 10.4.2
-      source-map-support:
-        specifier: ^0.5.21
-        version: 0.5.21
-      ts-node:
-        specifier: ^10.9.2
-        version: 10.9.2(@types/node@22.18.0)(typescript@5.9.2)
-
-  handlers/discount-api/lambda:
+  handlers/discount-api:
     dependencies:
       dayjs:
         specifier: ^1.11.13

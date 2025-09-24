@@ -1,5 +1,0 @@
-export default {
-	extends: '../../../cdk/tsconfigBase.json',
-	include: ['lib/**/*', 'bin/**/*'],
-	exclude: ['node_modules', 'cdk.out', 'lib/**/__snapshots__/**'],
-};

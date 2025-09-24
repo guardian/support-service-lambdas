@@ -1,7 +1,9 @@
 import 'source-map-support/register';
 import { App } from 'aws-cdk-lib';
+import { AlarmsHandler } from '../lib/alarms-handler';
 import { BatchEmailSender } from '../lib/batch-email-sender';
 import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
+import { DiscountApi } from '../lib/discount-api';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
 import { MetricPushApi } from '../lib/metric-push-api';
@@ -28,16 +30,14 @@ import { UpdateSupporterPlusAmount } from '../lib/update-supporter-plus-amount';
 import { UserBenefits } from '../lib/user-benefits';
 import { WriteOffUnpaidInvoices } from '../lib/write-off-unpaid-invoices';
 import { ZuoraSalesforceLinkRemover } from '../lib/zuora-salesforce-link-remover';
-import {
-	membershipApisDomain,
-	membershipCertificateId,
-	membershipHostedZoneId,
-	supportApisDomain,
-	supportCertificateId,
-	supportHostedZoneId,
-} from '../module/constants';
 
 const app = new App();
+const membershipHostedZoneId = 'Z1E4V12LQGXFEC';
+const membershipCertificateId = 'c1efc564-9ff8-4a03-be48-d1990a3d79d2';
+const membershipApisDomain = 'membership.guardianapis.com';
+export const supportHostedZoneId = 'Z3KO35ELNWZMSX';
+export const supportCertificateId = 'b384a6a0-2f54-4874-b99b-96eeff96c009';
+export const supportApisDomain = 'support.guardianapis.com';
 
 export const codeProps: NewProductApiProps = {
 	stack: 'membership',
@@ -120,6 +120,21 @@ new SingleContributionSalesforceWrites(
 	`${SINGLE_CONTRIBUTION_SALESFORCE_WRITES_APP_NAME}-PROD`,
 	{ stack: 'membership', stage: 'PROD' },
 );
+
+new DiscountApi(app, 'discount-api-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+	domainName: `discount-api-code.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
+});
+new DiscountApi(app, 'discount-api-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+	domainName: `discount-api.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
+});
 
 new StripeDisputes(app, 'stripe-disputes-CODE', {
 	stack: 'support',
@@ -219,6 +234,14 @@ new ProductSwitchApi(app, 'product-switch-api-PROD', {
 	certificateId: supportCertificateId,
 });
 
+new AlarmsHandler(app, 'alarms-handler-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+});
+new AlarmsHandler(app, 'alarms-handler-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+});
 new SalesforceDisasterRecoveryHealthCheck(
 	app,
 	'salesforce-disaster-recovery-health-check-CODE',

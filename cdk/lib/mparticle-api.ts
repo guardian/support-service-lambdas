@@ -11,9 +11,9 @@ import {
 	Role,
 } from 'aws-cdk-lib/aws-iam';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
-import { SrLambda } from '../module/cdk/sr-lambda';
-import { SrLambdaAlarm } from '../module/cdk/sr-lambda-alarm';
-import { SrLambdaDomain } from '../module/cdk/sr-lambda-domain';
+import { SrLambda } from './cdk/sr-lambda';
+import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
+import { SrLambdaDomain } from './cdk/sr-lambda-domain';
 
 export class MParticleApi extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {

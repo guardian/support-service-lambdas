@@ -9,7 +9,7 @@ import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { LoggingFormat, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
-import { SrLambdaAlarm } from '../module/cdk/sr-lambda-alarm';
+import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 
 export const APP_NAME = 'single-contribution-salesforce-writes';
 

@@ -1,7 +1,0 @@
-export default {
-	app: 'npx ts-node bin/cdk.ts',
-	context: {
-		'aws-cdk:enableDiffNoFail': 'true',
-		'@aws-cdk/core:stackRelativeExports': 'true',
-	},
-};
