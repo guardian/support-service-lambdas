@@ -93,8 +93,10 @@ jobs:
           force_build_all="${{ github.event.inputs.force_build_all || 'false' }}"
           all_typescript_lambdas="${{ steps.discover-lambdas.outputs.lambdas }}"
           
-          echo "DEBUG: global-changes: $global_changes"
+          echo "DEBUG: force-build-all: $force_build_all"
+          echo "DEBUG: all-typescript-lambdas: $all_typescript_lambdas"
           echo "DEBUG: all-filter-changes (raw): $all_filter_changes"
+          echo "DEBUG: global-changes: $global_changes"
           
           # Parse the changes from dorny/paths-filter and filter out 'global-changes'
           individual_lambdas_changed="[]"
@@ -144,8 +146,6 @@ jobs:
           fi
           
           echo "DEBUG: individual-lambdas-changed: $individual_lambdas_changed"
-          echo "DEBUG: force-build-all: $force_build_all"
-          echo "DEBUG: all-typescript-lambdas: $all_typescript_lambdas"
           
           # EXCLUSION LOGIC: Build ALL lambdas if:
           # 1. Manual override is enabled, OR
