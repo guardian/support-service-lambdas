@@ -177,41 +177,33 @@ jobs:
               echo "INFO: Global changes detected outside handler directories - building all lambdas (failsafe)"
             fi
             
-            # Validate JSON before setting output
+            # Convert all_typescript_lambdas to proper JSON format
             if echo "$all_typescript_lambdas" | jq . >/dev/null 2>&1; then
-              echo "lambdas-to-build=$all_typescript_lambdas" >> $GITHUB_OUTPUT
-            else
-              echo "ERROR: all_typescript_lambdas is not valid JSON: $all_typescript_lambdas"
-              echo "INFO: Attempting to convert to valid JSON..."
+              # Already valid JSON
+              lambdas_to_build_json="$all_typescript_lambdas"
+            elif [[ "$all_typescript_lambdas" =~ ^\[.*\]$ ]]; then
+              # Handle bracket format [item1,item2,...] - convert to proper JSON
+              values_without_brackets="${all_typescript_lambdas:1:-1}"  # Remove [ and ]
+              IFS=',' read -ra lambda_array <<< "$values_without_brackets"
               
-              # Try to fix the malformed JSON by converting to proper format
-              if [[ "$all_typescript_lambdas" =~ ^\[.*\]$ ]]; then
-                # Remove brackets and parse as comma-separated list
-                values_without_brackets="${all_typescript_lambdas:1:-1}"  # Remove [ and ]
-                IFS=',' read -ra lambda_array <<< "$values_without_brackets"
-                
-                # Create proper JSON array
-                fixed_json_array=()
-                for lambda_name in "${lambda_array[@]}"; do
-                  # Trim whitespace and add to array
-                  lambda_name=$(echo "$lambda_name" | xargs)
-                  fixed_json_array+=("$lambda_name")
-                done
-                
-                # Use jq to create proper JSON
-                if [ ${#fixed_json_array[@]} -eq 0 ]; then
-                  fixed_json="[]"
-                else
-                  fixed_json=$(printf '%s\n' "${fixed_json_array[@]}" | jq -R . | jq -s -c .)
-                fi
-                
-                echo "INFO: Fixed JSON: $fixed_json"
-                echo "lambdas-to-build=$fixed_json" >> $GITHUB_OUTPUT
+              # Create proper JSON array using jq
+              fixed_json_array=()
+              for lambda_name in "${lambda_array[@]}"; do
+                lambda_name=$(echo "$lambda_name" | xargs)  # Trim whitespace
+                fixed_json_array+=("$lambda_name")
+              done
+              
+              if [ ${#fixed_json_array[@]} -eq 0 ]; then
+                lambdas_to_build_json="[]"
               else
-                echo "ERROR: Cannot parse malformed JSON, defaulting to empty array"
-                echo "lambdas-to-build=[]" >> $GITHUB_OUTPUT
+                lambdas_to_build_json=$(printf '%s\n' "${fixed_json_array[@]}" | jq -R . | jq -s -c .)
               fi
+            else
+              # Fallback for unexpected format
+              lambdas_to_build_json="[]"
             fi
+            
+            echo "lambdas-to-build=$lambdas_to_build_json" >> $GITHUB_OUTPUT
           elif [[ "$individual_lambdas_changed" != "[]" ]]; then
             echo "any-changed=true" >> $GITHUB_OUTPUT
             echo "INFO: Only handler-specific changes detected - building individual lambdas"
