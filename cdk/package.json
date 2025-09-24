@@ -5,13 +5,13 @@
   "scripts": {
     "build": "tsc",
     "type-check": "tsc --noEmit",
-    "test": "jest",
-    "test-update": "jest -u",
+    "test": "sh -c 'jest ${1:+--testPathPattern=\"$1\"}' dummy",
+    "test-update": "sh -c 'jest -u ${1:+--testPathPattern=\"$1\"}' dummy",
     "check-formatting": "prettier --check **.ts",
     "lint": "eslint lib/** bin/** --ext .ts --no-error-on-unmatched-pattern",
     "synth": "cdk synth --path-metadata false --version-reporting false",
     "diff": "cdk diff --path-metadata false --version-reporting false",
-    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm synth",
+    "package": "sh -c 'pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test $1 && pnpm synth' dummy",
     "fix-formatting": "prettier --write **.ts"
   },
   "devDependencies": {
