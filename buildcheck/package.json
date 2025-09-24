@@ -10,7 +10,7 @@
     "snapshot:assert": "pnpm generate && REPO_ROOT=\"$(pwd | sed 's|/buildcheck.*||')\" && bash -c 'jest --testNamePattern=\"$*\"' -- \"$@\"",
     "migrate-handler": "REPO_ROOT=\"$(pwd | sed 's|/buildcheck.*||')\" && bash scripts/migrate-handler.sh \"$REPO_ROOT\"",
     "clean": "rm -rf src/dynamic/generated dist",
-    "generate": "bash src/dynamic/generate-template-list.sh",
+    "generate": "bash src/dynamic/generate-template-list.sh && bash src/dynamic/generate-deps-list.sh",
     "test": "pnpm generate && jest",
     "type-check": "pnpm generate && tsc --noEmit",
     "lint": "pnpm generate && eslint src/**/*.ts test/**/*.ts",

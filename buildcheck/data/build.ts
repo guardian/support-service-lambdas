@@ -1,4 +1,4 @@
-import { dep } from './dependencies';
+import { pnpmCatalog } from '../src/dynamic/dependencies';
 
 /*
 This is the main build definition for all handlers.
@@ -20,25 +20,25 @@ const alarmsHandler: HandlerDefinition = {
 	functionNames: ['alarms-handler-', 'alarms-handler-scheduled-'],
 	entryPoints: ['src/index.ts', 'src/indexScheduled.ts'],
 	dependencies: {
-		...dep['@aws-sdk/client-cloudwatch'],
-		...dep['@aws-sdk/credential-providers'],
-		...dep.zod,
+		...pnpmCatalog['@aws-sdk/client-cloudwatch'],
+		...pnpmCatalog['@aws-sdk/credential-providers'],
+		...pnpmCatalog.zod,
 	},
 	devDependencies: {
-		...dep['@types/aws-lambda'],
-		...dep.dayjs,
+		...pnpmCatalog['@types/aws-lambda'],
+		...pnpmCatalog.dayjs,
 	},
 };
 
 const discountApi: HandlerDefinition = {
 	name: 'discount-api',
 	dependencies: {
-		...dep.dayjs,
-		...dep['source-map-support'],
-		...dep.zod,
+		...pnpmCatalog.dayjs,
+		...pnpmCatalog['source-map-support'],
+		...pnpmCatalog.zod,
 	},
 	devDependencies: {
-		...dep['@types/aws-lambda'],
+		...pnpmCatalog['@types/aws-lambda'],
 	},
 };
 
