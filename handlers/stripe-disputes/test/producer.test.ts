@@ -53,7 +53,7 @@ describe('Producer Handler', () => {
 		stripeSignature?: string,
 	): APIGatewayProxyEvent => ({
 		body,
-		headers: stripeSignature ? { 'stripe-signature': stripeSignature } : {},
+		headers: stripeSignature ? { 'Stripe-Signature': stripeSignature } : {},
 		multiValueHeaders: {},
 		httpMethod,
 		path,

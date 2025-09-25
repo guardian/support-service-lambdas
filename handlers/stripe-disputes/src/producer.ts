@@ -27,7 +27,7 @@ export const handler = async (
 ): Promise<APIGatewayProxyResult | void> => {
 	logger.log(`Input: ${JSON.stringify(event)}`);
 
-	const stripeSignature: string | undefined = event.headers['stripe-signature'];
+	const stripeSignature: string | undefined = event.headers['Stripe-Signature'];
 
 	if (!stripeSignature) {
 		logger.error('Missing Stripe-Signature header');
