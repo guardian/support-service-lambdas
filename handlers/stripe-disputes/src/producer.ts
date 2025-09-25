@@ -42,15 +42,16 @@ export const handler = async (
 			`${stageFromEnvironment()}/Stripe/ConnectedApp/StripeDisputeWebhooks`,
 		);
 
-	// const stripeInstance = new Stripe(endpointSecretObject.secret_key);
-	// let stripeEvent: Stripe.Event | null = null;
-
 	try {
 		new Stripe(endpointSecretObject.secret_key).webhooks.constructEvent(
 			JSON.stringify(event.body),
 			stripeSignature,
 			endpointSecretObject.secret_key,
 		);
+		logger.log('Processing API Gateway webhook event');
+		const response: APIGatewayProxyResult = await router(event);
+		logger.log(`Webhook response: ${JSON.stringify(response)}`);
+		return response;
 	} catch (err) {
 		const errorMessage = err instanceof Error ? err.message : 'Unknown error';
 		logger.error(`Error verifying Stripe webhook signature: ${errorMessage}`);
@@ -59,23 +60,4 @@ export const handler = async (
 			body: JSON.stringify({ message: `Webhook Error: ${errorMessage}` }),
 		};
 	}
-
-	if (isApiGatewayEvent(event)) {
-		logger.log('Processing API Gateway webhook event');
-		const response: APIGatewayProxyResult = await router(event);
-		logger.log(`Webhook response: ${JSON.stringify(response)}`);
-		return response;
-	} else {
-		logger.error('Unknown event type received');
-		throw new Error('Unsupported event type');
-	}
 };
-
-function isApiGatewayEvent(event: unknown): event is APIGatewayProxyEvent {
-	return (
-		typeof event === 'object' &&
-		event !== null &&
-		'httpMethod' in event &&
-		'path' in event
-	);
-}
