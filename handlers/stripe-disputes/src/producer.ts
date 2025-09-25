@@ -30,7 +30,9 @@ export const handler = async (
 	const stripeSignature: string | undefined = event.headers['Stripe-Signature'];
 
 	logger.log(`Headers: ${JSON.stringify(event.headers)}`);
-	logger.log(`Stripe-Signature: ${JSON.stringify(event.headers['Stripe-Signature'])}`);
+	logger.log(
+		`Stripe-Signature: ${JSON.stringify(event.headers['Stripe-Signature'])}`,
+	);
 
 	if (!stripeSignature) {
 		logger.error('Missing Stripe-Signature header');
