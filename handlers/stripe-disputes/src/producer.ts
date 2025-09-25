@@ -55,6 +55,11 @@ export const handler = async (
 			`${stageFromEnvironment()}/Stripe/ConnectedApp/StripeDisputeWebhooks`,
 		);
 
+	logger.log({
+		webhook_endpoint_secret: endpointSecretObject.webhook_endpoint_secret,
+		secret_key: endpointSecretObject.secret_key,
+	});
+
 	try {
 		new Stripe(endpointSecretObject.secret_key).webhooks.constructEvent(
 			event.body,
