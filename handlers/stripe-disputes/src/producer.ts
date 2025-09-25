@@ -12,13 +12,31 @@ const logger = new Logger();
 const router = Router([
 	{
 		httpMethod: 'POST',
-		path: '/listen-dispute-created',
-		handler: handleStripeWebhook(logger, 'dispute.created'),
-	},
-	{
-		httpMethod: 'POST',
-		path: '/listen-dispute-closed',
-		handler: handleStripeWebhook(logger, 'dispute.closed'),
+		path: '/',
+		handler: async (event: APIGatewayProxyEvent) => {
+			// Parse the webhook body to determine the event type
+			const body = JSON.parse(event.body || '{}');
+			const eventType = body.type;
+
+			logger.log(`Received webhook event type: ${eventType}`);
+
+			// Route based on event type
+			switch (eventType) {
+				case 'charge.dispute.created':
+					return handleStripeWebhook(logger, 'dispute.created')(event);
+				case 'charge.dispute.closed':
+					return handleStripeWebhook(logger, 'dispute.closed')(event);
+				default:
+					logger.log(`Unhandled webhook event type: ${eventType}`);
+					return {
+						statusCode: 200,
+						body: JSON.stringify({
+							received: true,
+							message: `Event type ${eventType} not handled`,
+						}),
+					};
+			}
+		},
 	},
 ]);
 

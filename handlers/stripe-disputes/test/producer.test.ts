@@ -111,9 +111,9 @@ describe('Producer Handler', () => {
 	describe('Producer Webhook Processing', () => {
 		it('should handle webhook requests with valid signature', async () => {
 			const event = createMockApiGatewayEvent(
-				'/listen-dispute-created',
+				'/',
 				'POST',
-				'{}',
+				JSON.stringify({ type: 'charge.dispute.created' }),
 				'valid_signature',
 			);
 			const result = await handler(event);
@@ -122,7 +122,7 @@ describe('Producer Handler', () => {
 				'CODE/Stripe/ConnectedApp/StripeDisputeWebhooks',
 			);
 			expect(mockStripeWebhooksConstructEvent).toHaveBeenCalledWith(
-				'{}',
+				JSON.stringify({ type: 'charge.dispute.created' }),
 				'valid_signature',
 				'whsec_test_mock_webhook_secret',
 			);
@@ -138,9 +138,9 @@ describe('Producer Handler', () => {
 
 		it('should log producer input and response', async () => {
 			const event = createMockApiGatewayEvent(
-				'/listen-dispute-created',
+				'/',
 				'POST',
-				'{}',
+				JSON.stringify({ type: 'charge.dispute.created' }),
 				'valid_signature',
 			);
 			const mockResponse = {
@@ -167,9 +167,9 @@ describe('Producer Handler', () => {
 
 		it('should handle dispute created webhook', async () => {
 			const event = createMockApiGatewayEvent(
-				'/listen-dispute-created',
+				'/',
 				'POST',
-				'{}',
+				JSON.stringify({ type: 'charge.dispute.created' }),
 				'valid_signature',
 			);
 
@@ -180,9 +180,9 @@ describe('Producer Handler', () => {
 
 		it('should handle dispute closed webhook', async () => {
 			const event = createMockApiGatewayEvent(
-				'/listen-dispute-closed',
+				'/',
 				'POST',
-				'{}',
+				JSON.stringify({ type: 'charge.dispute.closed' }),
 				'valid_signature',
 			);
 
@@ -195,9 +195,9 @@ describe('Producer Handler', () => {
 	describe('Stripe Signature Verification', () => {
 		it('should return 400 when Stripe signature is missing', async () => {
 			const event = createMockApiGatewayEvent(
-				'/listen-dispute-created',
+				'/',
 				'POST',
-				'{}',
+				JSON.stringify({ type: 'charge.dispute.created' }),
 			);
 
 			const result = await handler(event);
@@ -214,7 +214,7 @@ describe('Producer Handler', () => {
 
 		it('should return 400 when request body is missing', async () => {
 			const event = createMockApiGatewayEvent(
-				'/listen-dispute-created',
+				'/',
 				'POST',
 				null as any,
 				'valid_signature',
@@ -232,9 +232,9 @@ describe('Producer Handler', () => {
 
 		it('should return 403 when Stripe signature verification fails', async () => {
 			const event = createMockApiGatewayEvent(
-				'/listen-dispute-created',
+				'/',
 				'POST',
-				'{}',
+				JSON.stringify({ type: 'charge.dispute.created' }),
 				'invalid_signature',
 			);
 
@@ -257,9 +257,9 @@ describe('Producer Handler', () => {
 
 		it('should handle non-Error objects in signature verification', async () => {
 			const event = createMockApiGatewayEvent(
-				'/listen-dispute-created',
+				'/',
 				'POST',
-				'{}',
+				JSON.stringify({ type: 'charge.dispute.created' }),
 				'invalid_signature',
 			);
 
@@ -282,9 +282,9 @@ describe('Producer Handler', () => {
 			mockStageFromEnvironment.mockReturnValue('PROD');
 
 			const event = createMockApiGatewayEvent(
-				'/listen-dispute-created',
+				'/',
 				'POST',
-				'{}',
+				JSON.stringify({ type: 'charge.dispute.created' }),
 				'valid_signature',
 			);
 
