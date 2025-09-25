@@ -13,6 +13,7 @@ const mockStripeWebhooksConstructEvent = jest.fn();
 
 const mockStripeCredentials = {
 	secret_key: 'sk_test_mock_secret_key',
+	webhook_endpoint_secret: 'whsec_test_mock_webhook_secret',
 };
 
 jest.mock('@modules/routing/logger', () => ({
@@ -121,9 +122,9 @@ describe('Producer Handler', () => {
 				'CODE/Stripe/ConnectedApp/StripeDisputeWebhooks',
 			);
 			expect(mockStripeWebhooksConstructEvent).toHaveBeenCalledWith(
-				'"{}"',
+				'{}',
 				'valid_signature',
-				'sk_test_mock_secret_key',
+				'whsec_test_mock_webhook_secret',
 			);
 			expect(mockLogger.log).toHaveBeenCalledWith(
 				`Headers: ${JSON.stringify(event.headers)}`,
@@ -207,6 +208,24 @@ describe('Producer Handler', () => {
 			expect(result).toEqual({
 				statusCode: 400,
 				body: JSON.stringify({ message: 'Missing Stripe-Signature header' }),
+			});
+			expect(mockRouterInstance).not.toHaveBeenCalled();
+		});
+
+		it('should return 400 when request body is missing', async () => {
+			const event = createMockApiGatewayEvent(
+				'/listen-dispute-created',
+				'POST',
+				null as any,
+				'valid_signature',
+			);
+
+			const result = await handler(event);
+
+			expect(mockLogger.error).toHaveBeenCalledWith('Missing request body');
+			expect(result).toEqual({
+				statusCode: 400,
+				body: JSON.stringify({ message: 'Missing request body' }),
 			});
 			expect(mockRouterInstance).not.toHaveBeenCalled();
 		});

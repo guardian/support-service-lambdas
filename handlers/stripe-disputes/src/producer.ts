@@ -42,6 +42,14 @@ export const handler = async (
 		};
 	}
 
+	if (!event.body) {
+		logger.error('Missing request body');
+		return {
+			statusCode: 400,
+			body: JSON.stringify({ message: 'Missing request body' }),
+		};
+	}
+
 	const endpointSecretObject: StripeCredentials =
 		await getSecretValue<StripeCredentials>(
 			`${stageFromEnvironment()}/Stripe/ConnectedApp/StripeDisputeWebhooks`,
@@ -49,9 +57,9 @@ export const handler = async (
 
 	try {
 		new Stripe(endpointSecretObject.secret_key).webhooks.constructEvent(
-			JSON.stringify(event.body),
+			event.body,
 			stripeSignature,
-			endpointSecretObject.secret_key,
+			endpointSecretObject.webhook_endpoint_secret,
 		);
 		logger.log('Processing API Gateway webhook event');
 		const response: APIGatewayProxyResult = await router(event);
