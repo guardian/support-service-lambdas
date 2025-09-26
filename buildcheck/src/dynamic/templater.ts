@@ -2,6 +2,7 @@ import * as path from 'path';
 import * as yaml from 'js-yaml';
 import type { HandlerDefinition } from '../../data/build';
 import type { GeneratedFile } from '../steps/generatedFile';
+import templates from './generated/generatedMappings';
 
 export type TemplateContent = string | Record<string, unknown>;
 export type TemplateFunction = (data: HandlerDefinition) => TemplateContent;
@@ -12,10 +13,7 @@ export interface Template {
 	template: TemplateValue;
 }
 
-export function applyTemplates(
-	pkg: HandlerDefinition,
-	templates: Template[],
-): GeneratedFile[] {
+export function applyTemplates(pkg: HandlerDefinition): GeneratedFile[] {
 	return templates.map((template) => {
 		const rawContent =
 			typeof template.template === 'function'
