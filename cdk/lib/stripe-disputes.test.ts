@@ -58,17 +58,6 @@ describe('The stripe disputes webhook API stack', () => {
 			});
 		});
 
-		it('should create Consumer Lambda Timeout alarm', () => {
-			template.hasResourceProperties('AWS::CloudWatch::Alarm', {
-				AlarmName: 'TEST stripe-disputes - Consumer Lambda near timeout',
-				MetricName: 'Duration',
-				Namespace: 'AWS/Lambda',
-				Statistic: 'Maximum',
-				Threshold: 290000,
-				ComparisonOperator: 'GreaterThanThreshold',
-			});
-		});
-
 		it('should create Producer API Gateway 5XX alarm', () => {
 			template.hasResourceProperties('AWS::CloudWatch::Alarm', {
 				AlarmName: 'TEST stripe-disputes - Producer API 5XX errors',
@@ -99,17 +88,6 @@ describe('The stripe disputes webhook API stack', () => {
 				Namespace: 'AWS/SQS',
 				Threshold: 300000,
 				ComparisonOperator: 'GreaterThanThreshold',
-			});
-		});
-
-		it('should create Consumer Lambda Throttle alarm', () => {
-			template.hasResourceProperties('AWS::CloudWatch::Alarm', {
-				AlarmName: 'TEST stripe-disputes - Consumer Lambda throttled',
-				MetricName: 'Throttles',
-				Namespace: 'AWS/Lambda',
-				Statistic: 'Sum',
-				Threshold: 1,
-				ComparisonOperator: 'GreaterThanOrEqualToThreshold',
 			});
 		});
 

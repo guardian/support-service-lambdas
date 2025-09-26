@@ -226,7 +226,7 @@ export class StripeDisputes extends GuStack {
 			app: app,
 			alarmName: `${this.stage} ${app} - Consumer Lambda high error rate`,
 			alarmDescription:
-				`The ${app} consumer Lambda has error rate > 1%. ` +
+				`The ${app} consumer Lambda has experienced more than 3 errors in 5 minutes. ` +
 				`This indicates failures in processing dispute webhooks from SQS. ` +
 				`Check CloudWatch logs: https://${this.region}.console.aws.amazon.com/cloudwatch/home?region=${this.region}#logsV2:log-groups/log-group/$252Faws$252Flambda$252F${nameWithStageConsumer}\n` +
 				`Common causes: Salesforce API errors, Zuora API errors, malformed webhook data`,
@@ -243,30 +243,6 @@ export class StripeDisputes extends GuStack {
 			threshold: 3, // 3 errors in 5 minutes
 			evaluationPeriods: 1,
 			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-			treatMissingData: TreatMissingData.NOT_BREACHING,
-		});
-
-		// Consumer Lambda Timeout Alarm
-		new SrLambdaAlarm(this, 'ConsumerLambdaTimeoutAlarm', {
-			app: app,
-			alarmName: `${this.stage} ${app} - Consumer Lambda near timeout`,
-			alarmDescription:
-				`The ${app} consumer Lambda execution duration is approaching timeout (>290s). ` +
-				`This may indicate performance issues with external API calls or large dispute batches. ` +
-				`Check logs: https://${this.region}.console.aws.amazon.com/cloudwatch/home?region=${this.region}#logsV2:log-groups/log-group/$252Faws$252Flambda$252F${nameWithStageConsumer}`,
-			lambdaFunctionNames: nameWithStageConsumer,
-			metric: new Metric({
-				metricName: 'Duration',
-				namespace: 'AWS/Lambda',
-				statistic: 'Maximum',
-				period: Duration.minutes(5),
-				dimensionsMap: {
-					FunctionName: nameWithStageConsumer,
-				},
-			}),
-			threshold: 290000, // 290 seconds (timeout is 300s)
-			evaluationPeriods: 1,
-			comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
 			treatMissingData: TreatMissingData.NOT_BREACHING,
 		});
 
@@ -336,30 +312,6 @@ export class StripeDisputes extends GuStack {
 			treatMissingData: TreatMissingData.NOT_BREACHING,
 			snsTopicName: `alarms-handler-topic-${this.stage}`,
 			actionsEnabled: this.stage === 'PROD',
-		});
-
-		// Consumer Lambda Throttling Alarm
-		new SrLambdaAlarm(this, 'ConsumerLambdaThrottleAlarm', {
-			app: app,
-			alarmName: `${this.stage} ${app} - Consumer Lambda throttled`,
-			alarmDescription:
-				`The ${app} consumer Lambda is being throttled. ` +
-				`This prevents processing of dispute events from the queue. ` +
-				`Consider increasing reserved concurrent executions or Lambda service limits.`,
-			lambdaFunctionNames: nameWithStageConsumer,
-			metric: new Metric({
-				metricName: 'Throttles',
-				namespace: 'AWS/Lambda',
-				statistic: 'Sum',
-				period: Duration.minutes(5),
-				dimensionsMap: {
-					FunctionName: nameWithStageConsumer,
-				},
-			}),
-			threshold: 1,
-			evaluationPeriods: 1,
-			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-			treatMissingData: TreatMissingData.NOT_BREACHING,
 		});
 
 		// ---- DNS ---- //

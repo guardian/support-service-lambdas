@@ -115,6 +115,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'zuora-datalake-export',
 
 		// stripe
+		'stripe-disputes',
 		'stripe-patrons-data',
 
 		// data retention
