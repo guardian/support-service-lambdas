@@ -13,7 +13,7 @@ template_dir="$data_dir/handlerTemplate"
 generated_dir="$src_dir/dynamic/generated"
 output_file="$generated_dir/generatedMappings.ts"
 
-mkdir $generated_dir
+[[ -d "$generated_dir" ]] || mkdir $generated_dir
 
 template_files=()
 while IFS= read -r -d '' file; do
