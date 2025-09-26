@@ -1,7 +1,6 @@
-import { notice } from '../snippets/notices';
+import { content } from '../../snippets/content';
 
-export default `// ${notice(__filename)}
-/** @type {import('ts-jest').JestConfigWithTsJest} */
+export default content(`/** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
 	preset: 'ts-jest',
 	testEnvironment: 'node',
@@ -11,4 +10,4 @@ module.exports = {
 		'@modules/(.*)$': '<rootDir>/../../modules/$1',
 	},
 };
-`;
+`);

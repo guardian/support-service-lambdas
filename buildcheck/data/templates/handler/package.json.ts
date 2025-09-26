@@ -1,11 +1,12 @@
-import { HandlerDefinition } from '../build';
-import { notice } from '../snippets/notices';
+import { HandlerDefinition } from '../../build';
+import { notice } from '../../snippets/notices';
+import { content } from '../../snippets/content';
 
 export default (pkg: HandlerDefinition) => {
 	const entryPoints = pkg.entryPoints
 		? pkg.entryPoints?.join(' ')
 		: 'src/index.ts';
-	return {
+	return content({
 		name: `${pkg.name}`,
 		scripts: {
 			test: 'jest --group=-integration',
@@ -24,5 +25,5 @@ export default (pkg: HandlerDefinition) => {
 		NOTICE2: 'all dependencies are defined in buildcheck/data/build.ts',
 		dependencies: pkg.dependencies,
 		devDependencies: pkg.devDependencies,
-	};
+	});
 };
