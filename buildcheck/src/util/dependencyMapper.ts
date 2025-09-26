@@ -11,6 +11,29 @@ export function separateDepRecords<K extends string>(
 		.reduce((a, b) => ({ ...a, ...b }));
 }
 
+export function getPnpmCatalog<K extends string>(catalog: Record<K, string>) {
+	// check that all the aws sdk v3 versions are identical
+	const awsVersions = new Set(
+		Object.entries(catalog)
+			.filter(([dep]) => dep.startsWith('@aws-sdk/'))
+			.map(([, version]) => version),
+	);
+	if (awsVersions.size !== 1) {
+		throw new Error(
+			'mismatched AWS versions in pnpm catalog: ' +
+				[...awsVersions].sort().join(', '),
+		);
+	}
+	// aws sdk v2 is not allowed
+	if ((catalog as Record<string, string>)['aws-sdk']) {
+		throw new Error('AWS SDK v2 is not allowed in the pnpm catalog');
+	}
+
+	return separateDepRecords(
+		withVersion('catalog:', Object.keys(catalog) as K[]),
+	);
+}
+
 export function withPrefix<T extends string, P extends string>(
 	prefix: P,
 	libs: readonly T[],
