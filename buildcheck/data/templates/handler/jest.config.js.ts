@@ -1,5 +1,6 @@
-// MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/jest.config.js.ts
-/** @type {import('ts-jest').JestConfigWithTsJest} */
+import { content } from '../../snippets/content';
+
+export default content(`/** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
 	preset: 'ts-jest',
 	testEnvironment: 'node',
@@ -9,3 +10,4 @@ module.exports = {
 		'@modules/(.*)$': '<rootDir>/../../modules/$1',
 	},
 };
+`);

@@ -5,6 +5,8 @@ packages:
   - 'modules/*'
   # cdk directory
   - 'cdk'
+  # build generator
+  - 'buildcheck'
 
 catalog:
   zod: ^3.23.8
