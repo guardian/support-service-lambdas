@@ -1,14 +1,12 @@
 import * as path from 'path';
-import type { HandlerDefinition, RootDefinition } from '../../data/build';
 import { contentPostProcessor } from '../../data/snippets/notices';
 import type { GeneratedFile } from '../steps/generatedFile';
-import { handlerTemplates, rootTemplates } from './generated/generatedMappings';
 import type { Template, TemplateInfo } from './template';
 
 export type TemplateFunction<T> = (data: T) => TemplateInfo;
 export type TemplateValue<T> = TemplateInfo | TemplateFunction<T>;
 
-function applyTemplates<D>(
+export function applyTemplates<D>(
 	pkg: D,
 	templates: Array<Template<D>>,
 ): GeneratedFile[] {
@@ -30,14 +28,6 @@ function applyTemplates<D>(
 			templatePath: rawContent.templatePath,
 		};
 	});
-}
-
-export function applyHandlerTemplates(pkg: HandlerDefinition): GeneratedFile[] {
-	return applyTemplates(pkg, handlerTemplates);
-}
-
-export function applyRootTemplates(pkg: RootDefinition): GeneratedFile[] {
-	return applyTemplates(pkg, rootTemplates);
 }
 
 function serializeContent(

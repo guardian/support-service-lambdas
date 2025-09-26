@@ -2,21 +2,25 @@ import * as path from 'path';
 import { build } from '../../data/build';
 import { generateWarningFile } from '../../data/snippets/BUILDCHECK.md';
 import {
-	applyHandlerTemplates,
-	applyRootTemplates,
-} from '../dynamic/templater';
+	handlerTemplates,
+	rootTemplates,
+} from '../dynamic/generated/generatedMappings';
+import { applyTemplates } from '../dynamic/templater';
 import type { GeneratedFile } from './generatedFile';
 
 // generates files across the whole repository
 export function generate(): GeneratedFile[] {
 	const handlersFiles = build.handlers.flatMap((pkg) => {
-		const handlerFiles = withWarningFile(applyHandlerTemplates(pkg), '../..');
+		const handlerFiles = withWarningFile(
+			applyTemplates(pkg, handlerTemplates),
+			'../..',
+		);
 		const filesRelativeToRoot = mapRelativePath(handlerFiles, (relativePath) =>
 			path.join('handlers', pkg.name, relativePath),
 		);
 		return filesRelativeToRoot;
 	});
-	const rootFiles = applyRootTemplates(build.root);
+	const rootFiles = applyTemplates(build.root, rootTemplates);
 	return withWarningFile([...handlersFiles, ...rootFiles], '.');
 }
 
