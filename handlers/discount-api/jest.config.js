@@ -1,4 +1,4 @@
-// MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/handlerTemplate/jest.config.js.ts
+// MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/jest.config.js.ts
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
 	preset: 'ts-jest',
