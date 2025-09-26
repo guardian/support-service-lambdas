@@ -1,4 +1,4 @@
-import { dep } from './dependencies';
+import { dep, catalog } from './dependencies';
 
 /*
 This is the main build definition for all handlers.
@@ -13,6 +13,15 @@ export interface HandlerDefinition {
 	entryPoints?: string[];
 	dependencies?: Record<string, string>;
 	devDependencies?: Record<string, string>;
+}
+
+export interface RootDefinition {
+	catalog: Record<string, string>;
+}
+
+export interface WorkspaceDefinition {
+	root: RootDefinition;
+	handlers: HandlerDefinition[];
 }
 
 const alarmsHandler: HandlerDefinition = {
@@ -42,4 +51,7 @@ const discountApi: HandlerDefinition = {
 	},
 };
 
-export const build: HandlerDefinition[] = [alarmsHandler, discountApi];
+export const build: WorkspaceDefinition = {
+	root: { catalog },
+	handlers: [alarmsHandler, discountApi],
+};
