@@ -48,9 +48,6 @@ export const handler = async (
 	const stripeSignature: string | undefined = event.headers['Stripe-Signature'];
 
 	logger.log(`Headers: ${JSON.stringify(event.headers)}`);
-	logger.log(
-		`Stripe-Signature: ${JSON.stringify(event.headers['Stripe-Signature'])}`,
-	);
 
 	if (!stripeSignature) {
 		logger.error('Missing Stripe-Signature header');
@@ -73,12 +70,8 @@ export const handler = async (
 			`${stageFromEnvironment()}/Stripe/ConnectedApp/StripeDisputeWebhooks`,
 		);
 
-	logger.log({
-		webhook_endpoint_secret: endpointSecretObject.webhook_endpoint_secret,
-		secret_key: endpointSecretObject.secret_key,
-	});
-
 	try {
+		// Doc: https://docs.stripe.com/identity/handle-verification-outcomes#create-webhook
 		new Stripe(endpointSecretObject.secret_key).webhooks.constructEvent(
 			event.body,
 			stripeSignature,

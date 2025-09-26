@@ -129,9 +129,6 @@ describe('Producer Handler', () => {
 			expect(mockLogger.log).toHaveBeenCalledWith(
 				`Headers: ${JSON.stringify(event.headers)}`,
 			);
-			expect(mockLogger.log).toHaveBeenCalledWith(
-				`Stripe-Signature: ${JSON.stringify(event.headers['Stripe-Signature'])}`,
-			);
 			expect(mockRouterInstance).toHaveBeenCalledWith(event);
 			expect(result).toBeDefined();
 		});
@@ -156,9 +153,6 @@ describe('Producer Handler', () => {
 			);
 			expect(mockLogger.log).toHaveBeenCalledWith(
 				`Headers: ${JSON.stringify(event.headers)}`,
-			);
-			expect(mockLogger.log).toHaveBeenCalledWith(
-				`Stripe-Signature: ${JSON.stringify(event.headers['Stripe-Signature'])}`,
 			);
 			expect(mockLogger.log).toHaveBeenCalledWith(
 				`Webhook response: ${JSON.stringify(result)}`,
