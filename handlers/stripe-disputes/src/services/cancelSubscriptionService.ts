@@ -1,4 +1,11 @@
+import {
+	DataExtensionNames,
+	type EmailMessageWithSfContactId,
+	sendEmail,
+} from '@modules/email/email';
 import type { Logger } from '@modules/routing/logger';
+import { stageFromEnvironment } from '@modules/stage';
+import { getAccount } from '@modules/zuora/account';
 import { cancelSubscription } from '@modules/zuora/subscription';
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
@@ -8,6 +15,7 @@ export async function cancelSubscriptionService(
 	logger: Logger,
 	zuoraClient: ZuoraClient,
 	subscription: ZuoraSubscription,
+	salesforceContactId?: string,
 ): Promise<boolean> {
 	if (subscription.status !== 'Active') {
 		logger.log(
@@ -33,6 +41,52 @@ export async function cancelSubscriptionService(
 		'Subscription cancellation response:',
 		JSON.stringify(cancelResponse),
 	);
+
+	// Get account details to retrieve customer email
+	const account = await getAccount(zuoraClient, subscription.accountNumber);
+
+	const customerEmail = account.billToContact.workEmail;
+
+	if (!customerEmail) {
+		logger.error(
+			`No email address found for subscription ${subscription.subscriptionNumber}`,
+		);
+	} else if (salesforceContactId) {
+		// Send email notification to customer
+		logger.log(
+			`Sending dispute cancellation email to customer: ${customerEmail}`,
+		);
+
+		try {
+			const emailMessage: EmailMessageWithSfContactId = {
+				To: {
+					Address: customerEmail,
+					ContactAttributes: {
+						SubscriberAttributes: {
+							EmailAddress: customerEmail,
+							SubscriptionNumber: subscription.subscriptionNumber,
+							DisputeCreatedDate: dayjs().format('YYYY-MM-DD'),
+						},
+					},
+				},
+				DataExtensionName: DataExtensionNames.stripeDisputeCancellation,
+				SfContactId: salesforceContactId,
+			};
+
+			await sendEmail(stageFromEnvironment(), emailMessage, (message: string) =>
+				logger.log(message),
+			);
+
+			logger.log('Dispute cancellation email sent successfully');
+		} catch (emailError) {
+			logger.error('Failed to send dispute cancellation email:', emailError);
+			// Don't throw - we still want to return true since cancellation succeeded
+		}
+	} else {
+		logger.log(
+			'No Salesforce contact ID provided, skipping email notification',
+		);
+	}
 
 	return true;
 }

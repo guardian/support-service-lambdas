@@ -142,7 +142,7 @@ describe('handleListenDisputeClosed', () => {
 				'du_test456',
 			);
 
-			// Verify subscription cancellation
+			// Verify subscription cancellation with salesforce contact ID
 			expect(mockCancelSubscription).toHaveBeenCalledWith(
 				mockLogger,
 				mockZuoraClient,
@@ -150,6 +150,7 @@ describe('handleListenDisputeClosed', () => {
 					status: 'Active',
 					subscriptionNumber: 'SUB-12345',
 				}),
+				'sf_123', // salesforceContactId from upsert response
 			);
 		});
 

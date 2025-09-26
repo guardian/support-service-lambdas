@@ -1,10 +1,16 @@
+import { sendEmail } from '@modules/email/email';
 import type { Logger } from '@modules/routing/logger';
+import { stageFromEnvironment } from '@modules/stage';
+import { getAccount } from '@modules/zuora/account';
 import { cancelSubscription } from '@modules/zuora/subscription';
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { cancelSubscriptionService } from '../../src/services/cancelSubscriptionService';
 
+jest.mock('@modules/zuora/account');
 jest.mock('@modules/zuora/subscription');
+jest.mock('@modules/email/email');
+jest.mock('@modules/stage');
 jest.mock('dayjs', () =>
 	jest.fn(() => ({
 		format: jest.fn(() => '2023-11-04'),
@@ -41,8 +47,19 @@ describe('cancelSubscriptionService', () => {
 		ratePlans: [],
 	});
 
+	const mockAccount = {
+		billToContact: {
+			workEmail: 'customer@example.com',
+			firstName: 'John',
+			lastName: 'Doe',
+		},
+		accountNumber: 'ACC-12345',
+	};
+
 	beforeEach(() => {
 		jest.clearAllMocks();
+		(stageFromEnvironment as jest.Mock).mockReturnValue('TEST');
+		(getAccount as jest.Mock).mockResolvedValue(mockAccount);
 	});
 
 	it('should cancel active subscription successfully', async () => {
@@ -174,5 +191,138 @@ describe('cancelSubscriptionService', () => {
 
 		const cancelCall = (cancelSubscription as jest.Mock).mock.calls[0];
 		expect(cancelCall[5]).toBe('EndOfLastInvoicePeriod');
+	});
+
+	describe('email sending', () => {
+		it('should send email when subscription is cancelled and salesforceContactId is provided', async () => {
+			const mockSubscription = createMockSubscription('Active');
+			const mockCancelResponse = { Success: true, Id: 'cancel_123' };
+			const salesforceContactId = 'SF-CONTACT-123';
+
+			(cancelSubscription as jest.Mock).mockResolvedValue(mockCancelResponse);
+			(sendEmail as jest.Mock).mockResolvedValue({ MessageId: 'msg_123' });
+
+			const result = await cancelSubscriptionService(
+				mockLogger,
+				mockZuoraClient,
+				mockSubscription,
+				salesforceContactId,
+			);
+
+			expect(result).toBe(true);
+			expect(sendEmail).toHaveBeenCalledWith(
+				'TEST',
+				expect.objectContaining({
+					To: {
+						Address: 'customer@example.com',
+						ContactAttributes: {
+							SubscriberAttributes: {
+								EmailAddress: 'customer@example.com',
+								SubscriptionNumber: 'SUB-12345',
+								DisputeCreatedDate: '2023-11-04',
+							},
+						},
+					},
+					DataExtensionName: 'stripe-dispute-cancellation',
+					SfContactId: 'SF-CONTACT-123',
+				}),
+				expect.any(Function),
+			);
+			expect(mockLogger.log).toHaveBeenCalledWith(
+				'Sending dispute cancellation email to customer: customer@example.com',
+			);
+			expect(mockLogger.log).toHaveBeenCalledWith(
+				'Dispute cancellation email sent successfully',
+			);
+		});
+
+		it('should not send email when salesforceContactId is not provided', async () => {
+			const mockSubscription = createMockSubscription('Active');
+			const mockCancelResponse = { Success: true, Id: 'cancel_123' };
+
+			(cancelSubscription as jest.Mock).mockResolvedValue(mockCancelResponse);
+
+			const result = await cancelSubscriptionService(
+				mockLogger,
+				mockZuoraClient,
+				mockSubscription,
+			);
+
+			expect(result).toBe(true);
+			expect(sendEmail).not.toHaveBeenCalled();
+			expect(mockLogger.log).toHaveBeenCalledWith(
+				'No Salesforce contact ID provided, skipping email notification',
+			);
+		});
+
+		it('should handle missing email address gracefully', async () => {
+			const mockSubscription = createMockSubscription('Active');
+			const mockCancelResponse = { Success: true, Id: 'cancel_123' };
+			const salesforceContactId = 'SF-CONTACT-123';
+
+			(cancelSubscription as jest.Mock).mockResolvedValue(mockCancelResponse);
+			(getAccount as jest.Mock).mockResolvedValue({
+				billToContact: {
+					firstName: 'John',
+					lastName: 'Doe',
+					// No workEmail
+				},
+				accountNumber: 'ACC-12345',
+			});
+
+			const result = await cancelSubscriptionService(
+				mockLogger,
+				mockZuoraClient,
+				mockSubscription,
+				salesforceContactId,
+			);
+
+			expect(result).toBe(true);
+			expect(sendEmail).not.toHaveBeenCalled();
+			expect(mockLogger.error).toHaveBeenCalledWith(
+				'No email address found for subscription SUB-12345',
+			);
+		});
+
+		it('should not throw when email sending fails', async () => {
+			const mockSubscription = createMockSubscription('Active');
+			const mockCancelResponse = { Success: true, Id: 'cancel_123' };
+			const salesforceContactId = 'SF-CONTACT-123';
+
+			(cancelSubscription as jest.Mock).mockResolvedValue(mockCancelResponse);
+			(sendEmail as jest.Mock).mockRejectedValue(new Error('SQS error'));
+
+			const result = await cancelSubscriptionService(
+				mockLogger,
+				mockZuoraClient,
+				mockSubscription,
+				salesforceContactId,
+			);
+
+			expect(result).toBe(true); // Still returns true since cancellation succeeded
+			expect(sendEmail).toHaveBeenCalled();
+			expect(mockLogger.error).toHaveBeenCalledWith(
+				'Failed to send dispute cancellation email:',
+				expect.any(Error),
+			);
+		});
+
+		it('should not send email for inactive subscriptions', async () => {
+			const mockSubscription = createMockSubscription('Cancelled');
+			const salesforceContactId = 'SF-CONTACT-123';
+
+			const result = await cancelSubscriptionService(
+				mockLogger,
+				mockZuoraClient,
+				mockSubscription,
+				salesforceContactId,
+			);
+
+			expect(result).toBe(false);
+			expect(sendEmail).not.toHaveBeenCalled();
+			expect(mockLogger.log).toHaveBeenCalledWith(
+				'Subscription already inactive (Cancelled), skipping cancellation',
+			);
+		});
 	});
 });
