@@ -8,6 +8,7 @@ exports[`The stripe disputes webhook API stack matches the snapshot 1`] = `
       "GuDistributionBucketParameter",
       "GuApiLambda",
       "GuLambdaFunction",
+      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -287,6 +288,223 @@ exports[`The stripe disputes webhook API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::BasePathMapping",
     },
+    "ConsumerLambdaErrorAlarm3D0F9AA4": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "The stripe-disputes consumer Lambda has error rate > 1%. This indicates failures in processing dispute webhooks from SQS. Check CloudWatch logs: https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/cloudwatch/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fstripe-disputes-consumer-CODE
+Common causes: Salesforce API errors, Zuora API errors, malformed webhook data",
+            ],
+          ],
+        },
+        "AlarmName": "CODE stripe-disputes - Consumer Lambda high error rate",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": "stripe-disputes-consumer-CODE",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": "lambda:stripe-disputes-consumer-CODE",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Threshold": 3,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "ConsumerLambdaThrottleAlarmC12C3EB5": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "The stripe-disputes consumer Lambda is being throttled. This prevents processing of dispute events from the queue. Consider increasing reserved concurrent executions or Lambda service limits.",
+        "AlarmName": "CODE stripe-disputes - Consumer Lambda throttled",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": "stripe-disputes-consumer-CODE",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "Throttles",
+        "Namespace": "AWS/Lambda",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": "lambda:stripe-disputes-consumer-CODE",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "ConsumerLambdaTimeoutAlarm7330307E": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "The stripe-disputes consumer Lambda execution duration is approaching timeout (>290s). This may indicate performance issues with external API calls or large dispute batches. Check logs: https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/cloudwatch/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fstripe-disputes-consumer-CODE",
+            ],
+          ],
+        },
+        "AlarmName": "CODE stripe-disputes - Consumer Lambda near timeout",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": "stripe-disputes-consumer-CODE",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "Duration",
+        "Namespace": "AWS/Lambda",
+        "Period": 300,
+        "Statistic": "Maximum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": "lambda:stripe-disputes-consumer-CODE",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Threshold": 290000,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
     "DNSRecord": {
       "Properties": {
         "HostedZoneId": "Z3KO35ELNWZMSX",
@@ -437,6 +655,252 @@ DLQ: https://",
         ],
       },
       "Type": "AWS::ApiGateway::DomainName",
+    },
+    "ProducerApiGateway4XXAlarmF620FC75": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "The stripe-disputes producer API has high 4XX error rate (>10 in 5 min). This may indicate invalid webhook signatures or missing headers. Check Stripe webhook configuration and secret key. Logs: https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/cloudwatch/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fstripe-disputes-producer-CODE",
+            ],
+          ],
+        },
+        "AlarmName": "CODE stripe-disputes - Producer API high 4XX error rate",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "Dimensions": [
+          {
+            "Name": "ApiName",
+            "Value": "stripe-disputes-producer-CODE",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "4XXError",
+        "Namespace": "AWS/ApiGateway",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": "lambda:stripe-disputes-producer-CODE",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Threshold": 10,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "ProducerApiGateway5XXAlarm2070B65D": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "The stripe-disputes producer API is returning 5XX errors. This prevents Stripe from delivering webhook events. Check for Lambda errors, timeout issues, or signature verification failures. Logs: https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/cloudwatch/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fstripe-disputes-producer-CODE",
+            ],
+          ],
+        },
+        "AlarmName": "CODE stripe-disputes - Producer API 5XX errors",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "ApiName",
+            "Value": "stripe-disputes-producer-CODE",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "5XXError",
+        "Namespace": "AWS/ApiGateway",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": "lambda:stripe-disputes-producer-CODE",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "SQSMessageAgeAlarm01D7618E": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "Messages in the stripe-disputes queue are older than 5 minutes. This indicates the consumer Lambda is not processing messages fast enough. Check for Lambda throttling or processing errors. Queue: https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/sqs/v2/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#/queues/https%3A%2F%2Fsqs.",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".amazonaws.com%2F",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              "%2F",
+              {
+                "Fn::GetAtt": [
+                  "stripedisputeseventsqueueF268BDE0",
+                  "QueueName",
+                ],
+              },
+            ],
+          ],
+        },
+        "AlarmName": "CODE stripe-disputes - SQS messages taking too long to process",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "stripedisputeseventsqueueF268BDE0",
+                "QueueName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ApproximateAgeOfOldestMessage",
+        "Namespace": "AWS/SQS",
+        "Period": 300,
+        "Statistic": "Maximum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Threshold": 300000,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
     },
     "deadlettersstripedisputesqueueACC1EFEB": {
       "DeletionPolicy": "Delete",
@@ -1448,6 +1912,7 @@ exports[`The stripe disputes webhook API stack matches the snapshot 2`] = `
       "GuDistributionBucketParameter",
       "GuApiLambda",
       "GuLambdaFunction",
+      "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -1727,6 +2192,223 @@ exports[`The stripe disputes webhook API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::BasePathMapping",
     },
+    "ConsumerLambdaErrorAlarm3D0F9AA4": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "The stripe-disputes consumer Lambda has error rate > 1%. This indicates failures in processing dispute webhooks from SQS. Check CloudWatch logs: https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/cloudwatch/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fstripe-disputes-consumer-PROD
+Common causes: Salesforce API errors, Zuora API errors, malformed webhook data",
+            ],
+          ],
+        },
+        "AlarmName": "PROD stripe-disputes - Consumer Lambda high error rate",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": "stripe-disputes-consumer-PROD",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": "lambda:stripe-disputes-consumer-PROD",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 3,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "ConsumerLambdaThrottleAlarmC12C3EB5": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "The stripe-disputes consumer Lambda is being throttled. This prevents processing of dispute events from the queue. Consider increasing reserved concurrent executions or Lambda service limits.",
+        "AlarmName": "PROD stripe-disputes - Consumer Lambda throttled",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": "stripe-disputes-consumer-PROD",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "Throttles",
+        "Namespace": "AWS/Lambda",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": "lambda:stripe-disputes-consumer-PROD",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "ConsumerLambdaTimeoutAlarm7330307E": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "The stripe-disputes consumer Lambda execution duration is approaching timeout (>290s). This may indicate performance issues with external API calls or large dispute batches. Check logs: https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/cloudwatch/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fstripe-disputes-consumer-PROD",
+            ],
+          ],
+        },
+        "AlarmName": "PROD stripe-disputes - Consumer Lambda near timeout",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": "stripe-disputes-consumer-PROD",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "Duration",
+        "Namespace": "AWS/Lambda",
+        "Period": 300,
+        "Statistic": "Maximum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": "lambda:stripe-disputes-consumer-PROD",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 290000,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
     "DNSRecord": {
       "Properties": {
         "HostedZoneId": "Z3KO35ELNWZMSX",
@@ -1877,6 +2559,252 @@ DLQ: https://",
         ],
       },
       "Type": "AWS::ApiGateway::DomainName",
+    },
+    "ProducerApiGateway4XXAlarmF620FC75": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "The stripe-disputes producer API has high 4XX error rate (>10 in 5 min). This may indicate invalid webhook signatures or missing headers. Check Stripe webhook configuration and secret key. Logs: https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/cloudwatch/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fstripe-disputes-producer-PROD",
+            ],
+          ],
+        },
+        "AlarmName": "PROD stripe-disputes - Producer API high 4XX error rate",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "Dimensions": [
+          {
+            "Name": "ApiName",
+            "Value": "stripe-disputes-producer-PROD",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "4XXError",
+        "Namespace": "AWS/ApiGateway",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": "lambda:stripe-disputes-producer-PROD",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 10,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "ProducerApiGateway5XXAlarm2070B65D": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "The stripe-disputes producer API is returning 5XX errors. This prevents Stripe from delivering webhook events. Check for Lambda errors, timeout issues, or signature verification failures. Logs: https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/cloudwatch/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fstripe-disputes-producer-PROD",
+            ],
+          ],
+        },
+        "AlarmName": "PROD stripe-disputes - Producer API 5XX errors",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "ApiName",
+            "Value": "stripe-disputes-producer-PROD",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "5XXError",
+        "Namespace": "AWS/ApiGateway",
+        "Period": 300,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": "lambda:stripe-disputes-producer-PROD",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "SQSMessageAgeAlarm01D7618E": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "Messages in the stripe-disputes queue are older than 5 minutes. This indicates the consumer Lambda is not processing messages fast enough. Check for Lambda throttling or processing errors. Queue: https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/sqs/v2/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#/queues/https%3A%2F%2Fsqs.",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".amazonaws.com%2F",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              "%2F",
+              {
+                "Fn::GetAtt": [
+                  "stripedisputeseventsqueueF268BDE0",
+                  "QueueName",
+                ],
+              },
+            ],
+          ],
+        },
+        "AlarmName": "PROD stripe-disputes - SQS messages taking too long to process",
+        "ComparisonOperator": "GreaterThanThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "stripedisputeseventsqueueF268BDE0",
+                "QueueName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ApproximateAgeOfOldestMessage",
+        "Namespace": "AWS/SQS",
+        "Period": 300,
+        "Statistic": "Maximum",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "membership",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 300000,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
     },
     "deadlettersstripedisputesqueueACC1EFEB": {
       "DeletionPolicy": "Delete",
