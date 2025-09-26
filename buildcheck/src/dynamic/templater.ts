@@ -1,15 +1,18 @@
 import * as path from 'path';
-import type { HandlerDefinition } from '../../data/build';
+import type { HandlerDefinition, RootDefinition } from '../../data/build';
 import { contentPostProcessor } from '../../data/snippets/notices';
 import type { GeneratedFile } from '../steps/generatedFile';
-import { handlerTemplates } from './generated/generatedMappings';
-import type { TemplateInfo } from './template';
+import { handlerTemplates, rootTemplates } from './generated/generatedMappings';
+import type { Template, TemplateInfo } from './template';
 
-export type TemplateFunction = (data: HandlerDefinition) => TemplateInfo;
-export type TemplateValue = TemplateInfo | TemplateFunction;
+export type TemplateFunction<T> = (data: T) => TemplateInfo;
+export type TemplateValue<T> = TemplateInfo | TemplateFunction<T>;
 
-export function applyTemplates(pkg: HandlerDefinition): GeneratedFile[] {
-	return handlerTemplates.map((template) => {
+function applyTemplates<D>(
+	pkg: D,
+	templates: Array<Template<D>>,
+): GeneratedFile[] {
+	return templates.map((template) => {
 		const rawContent =
 			typeof template.template === 'function'
 				? template.template(pkg)
@@ -27,6 +30,14 @@ export function applyTemplates(pkg: HandlerDefinition): GeneratedFile[] {
 			templatePath: rawContent.templatePath,
 		};
 	});
+}
+
+export function applyHandlerTemplates(pkg: HandlerDefinition): GeneratedFile[] {
+	return applyTemplates(pkg, handlerTemplates);
+}
+
+export function applyRootTemplates(pkg: RootDefinition): GeneratedFile[] {
+	return applyTemplates(pkg, rootTemplates);
 }
 
 function serializeContent(

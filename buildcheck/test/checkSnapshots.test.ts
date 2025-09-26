@@ -36,7 +36,7 @@ function testFilesMatch(files: GeneratedFile[], repoRoot: string) {
 }
 
 describe('file on disk (+) contains the expected content (-)', () => {
-	const handlers = build.map((pkg) => pkg.name);
+	const handlers = build.handlers.map((pkg) => pkg.name);
 
 	const repoRoot = path.resolve(__dirname, '../..');
 	console.log('repoRoot', repoRoot);

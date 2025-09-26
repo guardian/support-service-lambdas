@@ -30,6 +30,7 @@ for name_without_ext in "${template_files[@]}"; do
     echo "import $import_name from '../../../data/templates/$name_without_ext';"
 done >> "$output_file"
 echo "import { type Template } from '../template';" >> "$output_file"
+echo "import { type RootDefinition, type HandlerDefinition } from '../../../data/build';" >> "$output_file"
 
 echo "" >> "$output_file"
 echo "/*" >> "$output_file"
@@ -50,7 +51,7 @@ for subdir_name in "${subdirs[@]}"; do
     echo "" >> "$output_file"
     const_name=$(echo "${subdir_name}" | sed 's/[^a-zA-Z0-9]/_/g')
     capitalized_const_name=$(echo "${const_name}" |awk '{print toupper(substr($0,0,1)) substr($0,2)}')
-    echo "export const ${const_name}Templates: Template[] = [" >> "$output_file"
+    echo "export const ${const_name}Templates: Template<${capitalized_const_name}Definition>[] = [" >> "$output_file"
 
     # Find templates in this subdirectory
     while IFS= read -r -d '' file; do
