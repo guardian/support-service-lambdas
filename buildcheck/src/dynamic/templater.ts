@@ -1,19 +1,20 @@
 import * as path from 'path';
-import type { HandlerDefinition } from '../../data/build';
 import { contentPostProcessor } from '../../data/snippets/notices';
 import type { GeneratedFile } from '../steps/generatedFile';
-import { handlerTemplates } from './generated/generatedMappings';
 
 export type TemplateContent = string | Record<string, unknown>;
 
-export interface Template {
+export interface Template<D> {
 	targetPath: string;
-	value: TemplateContent | ((data: HandlerDefinition) => TemplateContent);
+	value: TemplateContent | ((data: D) => TemplateContent);
 	templateFilename: string;
 }
 
-export function applyTemplates(pkg: HandlerDefinition): GeneratedFile[] {
-	return handlerTemplates.map((template) => {
+export function applyTemplates<D>(
+	pkg: D,
+	templates: Array<Template<D>>,
+): GeneratedFile[] {
+	return templates.map((template) => {
 		const rawContent =
 			typeof template.value === 'function'
 				? template.value(pkg)
