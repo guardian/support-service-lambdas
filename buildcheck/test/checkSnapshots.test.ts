@@ -16,16 +16,24 @@ function readContent(repoRoot: string, relativePath: string) {
 // used for filtering by pnpm snapshot checker
 const filterToken = '%s';
 
-function testFilesMatch(files: GeneratedFile[], repoRoot: string) {
+function testFilesMatch(
+	isRoot: boolean,
+	files: GeneratedFile[],
+	repoRoot: string,
+) {
 	const filesMap = Object.fromEntries(
 		files.map((file) => [
-			file.relativePath + ' (template: ' + file.templatePath + ')',
+			[
+				...(isRoot ? ['ROOT'] : []),
+				file.targetPath,
+				'(template: ' + file.templateFilename + ')',
+			].join(' '),
 			file.content,
 		]),
 	);
 
 	test.each(Object.keys(filesMap))(filterToken, (key) => {
-		const [relativePath] = key.split(' ');
+		const [relativePath] = key.replace(/^ROOT /, '').split(' ');
 
 		const generatedContent = filesMap[key];
 
@@ -44,14 +52,14 @@ describe('file on disk (+) contains the expected content (-)', () => {
 	const allFiles = generate();
 
 	const rootLevelFiles = allFiles.filter(
-		(generatedFile) => !generatedFile.relativePath.startsWith('handlers/'),
+		(generatedFile) => !generatedFile.targetPath.startsWith('handlers/'),
 	);
-	testFilesMatch(rootLevelFiles, repoRoot);
+	testFilesMatch(true, rootLevelFiles, repoRoot);
 
 	handlers.map((handlerName) => {
 		const files = allFiles.filter((generatedFile) =>
-			generatedFile.relativePath.startsWith('handlers/' + handlerName),
+			generatedFile.targetPath.startsWith('handlers/' + handlerName),
 		);
-		testFilesMatch(files, repoRoot);
+		testFilesMatch(false, files, repoRoot);
 	});
 });

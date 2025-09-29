@@ -4,11 +4,11 @@ import type { GeneratedFile } from '../steps/generatedFile';
 
 export function writeFiles(rootPath: string, files: GeneratedFile[]): void {
 	files.forEach((file) => {
-		const fullPath = safeJoin(rootPath, file.relativePath);
+		const fullPath = safeJoin(rootPath, file.targetPath);
 		ensureDirectoryExists(path.dirname(fullPath));
 
 		const scriptName = path.basename(__filename);
-		console.log(`${scriptName}: writing: ${file.relativePath}`);
+		console.log(`${scriptName}: writing: ${file.targetPath}`);
 		fs.writeFileSync(fullPath, file.content);
 	});
 }

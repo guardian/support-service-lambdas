@@ -1,5 +1,3 @@
-import { content } from '../../snippets/content';
-
-export default content({
+export default {
 	extends: '../../tsconfig.json',
-});
+};

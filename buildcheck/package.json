@@ -4,7 +4,6 @@
   "private": true,
   "description": "Build file generator for handlers",
   "scripts": {
-    "update-build": "pnpm snapshot:update",
     "snapshot:update": "pnpm generate && REPO_ROOT=\"$(pwd | sed 's|/buildcheck.*||')\" && ts-node src/cli.ts --generate \"$REPO_ROOT\"",
     "snapshot:clean": "pnpm generate && REPO_ROOT=\"$(pwd | sed 's|/buildcheck.*||')\" && ts-node src/cli.ts --clean \"$REPO_ROOT\"",
     "snapshot:assert": "pnpm generate && REPO_ROOT=\"$(pwd | sed 's|/buildcheck.*||')\" && bash -c 'jest --testNamePattern=\"$*\"' -- \"$@\"",
