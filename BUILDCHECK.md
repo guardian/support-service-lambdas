@@ -5,7 +5,7 @@ The files listed below are managed by buildcheck and their content is checked by
 
 ## HOWTO edit managed files
 1. edit the build definition in buildcheck/data/
-2. run `pnpm update-build` at the root
+2. run `pnpm snapshot:update` at the root
 
 For further details, see [buildcheck/README.md](./buildcheck/README.md)
 

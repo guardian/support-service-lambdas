@@ -78,10 +78,7 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - run: pnpm install
-      - run: |
-          if [ -f "./handlers/${{ matrix.subproject }}/BUILDCHECK.md" ]; then
-            pnpm --filter "./buildcheck" snapshot:assert handlers/${{ matrix.subproject }}
-          fi
+      - run: pnpm --filter "./buildcheck" snapshot:assert handlers/${{ matrix.subproject }}
       - run: pnpm --filter cdk package
       - run: pnpm --filter ${{ matrix.subproject }} package
 

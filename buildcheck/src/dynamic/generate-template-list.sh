@@ -6,6 +6,7 @@ echo "$script_name: START generating template list..."
 
 script_dir=$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")
 buildcheck_dir=$(readlink -f "$script_dir/../..")
+repo_root=$(readlink -f "$buildcheck_dir/..")
 echo "buildcheck_dir: $buildcheck_dir"
 src_dir="$buildcheck_dir/src"
 data_dir="$buildcheck_dir/data"
@@ -29,7 +30,7 @@ for name_without_ext in "${template_files[@]}"; do
     import_name=$(echo "$name_without_ext" | sed 's/[^a-zA-Z0-9]/_/g')
     echo "import $import_name from '../../../data/templates/$name_without_ext';"
 done >> "$output_file"
-echo "import { type Template } from '../template';" >> "$output_file"
+echo "import { type Template } from '../templater';" >> "$output_file"
 
 echo "" >> "$output_file"
 echo "/*" >> "$output_file"
@@ -54,11 +55,12 @@ for subdir_name in "${subdirs[@]}"; do
 
     # Find templates in this subdirectory
     while IFS= read -r -d '' file; do
+        from_repo_root="${file#$repo_root/}"
         rel_path="${file#$template_dir/}"
         name_without_ext="${rel_path%.ts}"
         import_name=$(echo "$name_without_ext" | sed 's/[^a-zA-Z0-9]/_/g')
         template_name="${name_without_ext#*/}"
-        echo "  { name: \"$template_name\", template: $import_name },"
+        echo "  { name: \"$template_name\", template: $import_name, templatePath: \"$from_repo_root\" },"
     done < <(find "$template_dir/$subdir_name" -name "*.ts" -type f -print0 | sort -z) >> "$output_file"
 
     echo "];" >> "$output_file"
