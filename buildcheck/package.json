@@ -8,7 +8,7 @@
     "snapshot:clean": "pnpm generate && REPO_ROOT=\"$(pwd | sed 's|/buildcheck.*||')\" && ts-node src/cli.ts --clean \"$REPO_ROOT\"",
     "snapshot:assert": "pnpm generate && REPO_ROOT=\"$(pwd | sed 's|/buildcheck.*||')\" && bash -c 'jest --testNamePattern=\"$*\"' -- \"$@\"",
     "clean": "rm -rf src/dynamic/generated dist",
-    "generate": "bash src/dynamic/generate-template-list.sh",
+    "generate": "bash src/dynamic/generate-template-list.sh && bash src/dynamic/generate-deps-list.sh",
     "test": "pnpm generate && jest",
     "type-check": "pnpm generate && tsc --noEmit",
     "lint": "pnpm generate && eslint src/**/*.ts test/**/*.ts",
