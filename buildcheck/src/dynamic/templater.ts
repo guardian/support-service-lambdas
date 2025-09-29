@@ -1,10 +1,14 @@
 import * as path from 'path';
 import { contentPostProcessor } from '../../data/snippets/notices';
 import type { GeneratedFile } from '../steps/generatedFile';
-import type { Template, TemplateInfo } from './template';
 
-export type TemplateFunction<T> = (data: T) => TemplateInfo;
-export type TemplateValue<T> = TemplateInfo | TemplateFunction<T>;
+export type TemplateContent = string | Record<string, unknown>;
+
+export interface Template<D> {
+	targetPath: string;
+	value: TemplateContent | ((data: D) => TemplateContent);
+	templateFilename: string;
+}
 
 export function applyTemplates<D>(
 	pkg: D,
@@ -12,40 +16,39 @@ export function applyTemplates<D>(
 ): GeneratedFile[] {
 	return templates.map((template) => {
 		const rawContent =
-			typeof template.template === 'function'
-				? template.template(pkg)
-				: template.template;
+			typeof template.value === 'function'
+				? template.value(pkg)
+				: template.value;
 
 		const content = serializeContent(
 			rawContent,
-			template.name,
-			rawContent.templatePath,
+			template.targetPath,
+			template.templateFilename,
 		);
 
 		return {
-			relativePath: template.name,
 			content,
-			templatePath: rawContent.templatePath,
+			...template,
 		};
 	});
 }
 
 function serializeContent(
-	content: TemplateInfo,
+	content: TemplateContent,
 	relativePath: string,
 	templatePath: string,
 ): string {
 	const extension = path.extname(relativePath);
 	const { prefix, write } = contentPostProcessor[extension];
 	const actualPrefix = prefix ? prefix(templatePath) : '';
-	if (typeof content.content === 'string') {
-		return actualPrefix + content.content;
+	if (typeof content === 'string') {
+		return actualPrefix + content;
 	} else {
 		if (write === undefined) {
 			throw new Error(
 				`no object serialiser for file type ${extension} on ${templatePath}`,
 			);
 		}
-		return actualPrefix + write(content.content);
+		return actualPrefix + write(content);
 	}
 }

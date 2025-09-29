@@ -15,29 +15,25 @@ export function generate(): GeneratedFile[] {
 			applyTemplates(pkg, handlerTemplates),
 			'../..',
 		);
-		const filesRelativeToRoot = mapRelativePath(handlerFiles, (relativePath) =>
-			path.join('handlers', pkg.name, relativePath),
-		);
-		return filesRelativeToRoot;
+		return prependToTargetPath(handlerFiles, ['handlers', pkg.name]);
 	});
 	const rootFiles = applyTemplates(build.root, rootTemplates);
 	return withWarningFile([...handlersFiles, ...rootFiles], '.');
 }
 
-function mapRelativePath(
+function prependToTargetPath(
 	files: GeneratedFile[],
-	pathMapper: (relativePath: string) => string,
+	containingPath: string[],
 ): GeneratedFile[] {
 	return files.map((file) => ({
-		relativePath: pathMapper(file.relativePath),
-		content: file.content,
-		templatePath: file.templatePath,
+		...file,
+		targetPath: path.join(...containingPath, file.targetPath),
 	}));
 }
 
 function withWarningFile(files: GeneratedFile[], pathToRoot: string) {
 	const warningFile = generateWarningFile(
-		files.map((f) => f.relativePath),
+		files.map((f) => f.targetPath),
 		pathToRoot,
 	);
 	return [...files, warningFile];

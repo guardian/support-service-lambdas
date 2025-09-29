@@ -25,8 +25,8 @@ function testFilesMatch(
 		files.map((file) => [
 			[
 				...(isRoot ? ['ROOT'] : []),
-				file.relativePath,
-				'(template: ' + file.templatePath + ')',
+				file.targetPath,
+				'(template: ' + file.templateFilename + ')',
 			].join(' '),
 			file.content,
 		]),
@@ -52,13 +52,13 @@ describe('file on disk (+) contains the expected content (-)', () => {
 	const allFiles = generate();
 
 	const rootLevelFiles = allFiles.filter(
-		(generatedFile) => !generatedFile.relativePath.startsWith('handlers/'),
+		(generatedFile) => !generatedFile.targetPath.startsWith('handlers/'),
 	);
 	testFilesMatch(true, rootLevelFiles, repoRoot);
 
 	handlers.map((handlerName) => {
 		const files = allFiles.filter((generatedFile) =>
-			generatedFile.relativePath.startsWith('handlers/' + handlerName),
+			generatedFile.targetPath.startsWith('handlers/' + handlerName),
 		);
 		testFilesMatch(false, files, repoRoot);
 	});

@@ -2,7 +2,7 @@ import { generate } from './steps/generate';
 import { writeFiles, deleteRepoFiles, readLines } from './util/file-writer';
 import { parseArguments } from './util/argsParser';
 import {
-	parseGeneratedFilenames,
+	extractGeneratedFilenames,
 	warningFileName,
 } from '../data/snippets/BUILDCHECK.md';
 
@@ -10,7 +10,7 @@ import {
 try {
 	const { mode, repoRoot } = parseArguments(process.argv);
 
-	const previouslyGeneratedFiles = parseGeneratedFilenames(
+	const previouslyGeneratedFiles = extractGeneratedFilenames(
 		readLines(repoRoot, warningFileName),
 	);
 	console.log('previouslyGeneratedFiles to delete', previouslyGeneratedFiles);

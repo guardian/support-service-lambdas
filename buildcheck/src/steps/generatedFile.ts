@@ -1,5 +1,5 @@
 export interface GeneratedFile {
-	relativePath: string;
+	targetPath: string;
 	content: string;
-	templatePath: string;
+	templateFilename: string;
 }
