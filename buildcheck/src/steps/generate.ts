@@ -8,28 +8,24 @@ import type { GeneratedFile } from './generatedFile';
 export function generate(): GeneratedFile[] {
 	const handlersFiles = build.flatMap((pkg) => {
 		const handlerFiles = withWarningFile(applyTemplates(pkg), '../..');
-		const filesRelativeToRoot = mapRelativePath(handlerFiles, (relativePath) =>
-			path.join('handlers', pkg.name, relativePath),
-		);
-		return filesRelativeToRoot;
+		return prependToTargetPath(handlerFiles, ['handlers', pkg.name]);
 	});
 	return withWarningFile(handlersFiles, '.');
 }
 
-function mapRelativePath(
+function prependToTargetPath(
 	files: GeneratedFile[],
-	pathMapper: (relativePath: string) => string,
+	containingPath: string[],
 ): GeneratedFile[] {
 	return files.map((file) => ({
-		relativePath: pathMapper(file.relativePath),
-		content: file.content,
-		templatePath: file.templatePath,
+		...file,
+		targetPath: path.join(...containingPath, file.targetPath),
 	}));
 }
 
 function withWarningFile(files: GeneratedFile[], pathToRoot: string) {
 	const warningFile = generateWarningFile(
-		files.map((f) => f.relativePath),
+		files.map((f) => f.targetPath),
 		pathToRoot,
 	);
 	return [...files, warningFile];

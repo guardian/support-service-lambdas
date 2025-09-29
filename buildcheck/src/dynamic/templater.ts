@@ -4,33 +4,30 @@ import { contentPostProcessor } from '../../data/snippets/notices';
 import type { GeneratedFile } from '../steps/generatedFile';
 import { handlerTemplates } from './generated/generatedMappings';
 
-export interface Template {
-	name: string;
-	template: TemplateValue;
-	templatePath: string;
-}
 export type TemplateContent = string | Record<string, unknown>;
 
-export type TemplateFunction = (data: HandlerDefinition) => TemplateContent;
-export type TemplateValue = TemplateContent | TemplateFunction;
+export interface Template {
+	targetPath: string;
+	value: TemplateContent | ((data: HandlerDefinition) => TemplateContent);
+	templateFilename: string;
+}
 
 export function applyTemplates(pkg: HandlerDefinition): GeneratedFile[] {
 	return handlerTemplates.map((template) => {
 		const rawContent =
-			typeof template.template === 'function'
-				? template.template(pkg)
-				: template.template;
+			typeof template.value === 'function'
+				? template.value(pkg)
+				: template.value;
 
 		const content = serializeContent(
 			rawContent,
-			template.name,
-			template.templatePath,
+			template.targetPath,
+			template.templateFilename,
 		);
 
 		return {
-			relativePath: template.name,
 			content,
-			templatePath: template.templatePath,
+			...template,
 		};
 	});
 }

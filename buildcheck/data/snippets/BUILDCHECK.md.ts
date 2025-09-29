@@ -25,9 +25,9 @@ ${fileList.map((name) => '- [' + name + '](' + name + ')').join('\n')}
 `;
 
 	return {
-		relativePath: warningFileName,
+		targetPath: warningFileName,
 		content,
-		templatePath: relativePath(__filename),
+		templateFilename: relativePath(__filename),
 	} as GeneratedFile;
 }
 

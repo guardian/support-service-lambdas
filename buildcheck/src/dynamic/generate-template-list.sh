@@ -60,7 +60,7 @@ for subdir_name in "${subdirs[@]}"; do
         name_without_ext="${rel_path%.ts}"
         import_name=$(echo "$name_without_ext" | sed 's/[^a-zA-Z0-9]/_/g')
         template_name="${name_without_ext#*/}"
-        echo "  { name: \"$template_name\", template: $import_name, templatePath: \"$from_repo_root\" },"
+        echo "  { targetPath: \"$template_name\", value: $import_name, templateFilename: \"$from_repo_root\" },"
     done < <(find "$template_dir/$subdir_name" -name "*.ts" -type f -print0 | sort -z) >> "$output_file"
 
     echo "];" >> "$output_file"
