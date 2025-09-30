@@ -518,6 +518,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "mparticle-api",
+            "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
           },
@@ -761,6 +762,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "mparticle-api",
+            "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
           },
@@ -1728,6 +1730,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "mparticle-api",
+            "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
           },
@@ -1971,6 +1974,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "mparticle-api",
+            "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
           },

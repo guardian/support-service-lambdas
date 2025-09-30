@@ -3,6 +3,14 @@ import { App } from 'aws-cdk-lib';
 import { AlarmsHandler } from '../lib/alarms-handler';
 import { BatchEmailSender } from '../lib/batch-email-sender';
 import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
+import {
+	membershipApisDomain,
+	membershipCertificateId,
+	membershipHostedZoneId,
+	supportApisDomain,
+	supportCertificateId,
+	supportHostedZoneId,
+} from '../lib/constants';
 import { DiscountApi } from '../lib/discount-api';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
@@ -32,12 +40,6 @@ import { WriteOffUnpaidInvoices } from '../lib/write-off-unpaid-invoices';
 import { ZuoraSalesforceLinkRemover } from '../lib/zuora-salesforce-link-remover';
 
 const app = new App();
-const membershipHostedZoneId = 'Z1E4V12LQGXFEC';
-const membershipCertificateId = 'c1efc564-9ff8-4a03-be48-d1990a3d79d2';
-const membershipApisDomain = 'membership.guardianapis.com';
-export const supportHostedZoneId = 'Z3KO35ELNWZMSX';
-export const supportCertificateId = 'b384a6a0-2f54-4874-b99b-96eeff96c009';
-export const supportApisDomain = 'support.guardianapis.com';
 
 export const codeProps: NewProductApiProps = {
 	stack: 'membership',
@@ -124,16 +126,10 @@ new SingleContributionSalesforceWrites(
 new DiscountApi(app, 'discount-api-CODE', {
 	stack: 'support',
 	stage: 'CODE',
-	domainName: `discount-api-code.${supportApisDomain}`,
-	hostedZoneId: supportHostedZoneId,
-	certificateId: supportCertificateId,
 });
 new DiscountApi(app, 'discount-api-PROD', {
 	stack: 'support',
 	stage: 'PROD',
-	domainName: `discount-api.${supportApisDomain}`,
-	hostedZoneId: supportHostedZoneId,
-	certificateId: supportCertificateId,
 });
 
 new StripeDisputes(app, 'stripe-disputes-CODE', {
@@ -222,16 +218,10 @@ new StripeWebhookEndpoints(
 new ProductSwitchApi(app, 'product-switch-api-CODE', {
 	stack: 'support',
 	stage: 'CODE',
-	domainName: `product-switch-api-code.${supportApisDomain}`,
-	hostedZoneId: supportHostedZoneId,
-	certificateId: supportCertificateId,
 });
 new ProductSwitchApi(app, 'product-switch-api-PROD', {
 	stack: 'support',
 	stage: 'PROD',
-	domainName: `product-switch-api.${supportApisDomain}`,
-	hostedZoneId: supportHostedZoneId,
-	certificateId: supportCertificateId,
 });
 
 new AlarmsHandler(app, 'alarms-handler-CODE', {
@@ -261,16 +251,10 @@ new SalesforceDisasterRecoveryHealthCheck(
 new UpdateSupporterPlusAmount(app, 'update-supporter-plus-amount-CODE', {
 	stack: 'support',
 	stage: 'CODE',
-	domainName: `update-supporter-plus-amount-code.${supportApisDomain}`,
-	hostedZoneId: supportHostedZoneId,
-	certificateId: supportCertificateId,
 });
 new UpdateSupporterPlusAmount(app, 'update-supporter-plus-amount-PROD', {
 	stack: 'support',
 	stage: 'PROD',
-	domainName: `update-supporter-plus-amount.${supportApisDomain}`,
-	hostedZoneId: supportHostedZoneId,
-	certificateId: supportCertificateId,
 });
 new ZuoraSalesforceLinkRemover(app, 'zuora-salesforce-link-remover-CODE', {
 	stack: 'membership',
