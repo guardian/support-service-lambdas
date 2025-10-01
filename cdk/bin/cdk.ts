@@ -13,6 +13,7 @@ import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
 import { ObserverDataExport } from '../lib/observer-data-export';
 import { PressReaderEntitlements } from '../lib/press-reader-entitlements';
+import { ProductMoveApi } from '../lib/product-move-api';
 import { ProductSwitchApi } from '../lib/product-switch-api';
 import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery';
 import { SalesforceDisasterRecoveryHealthCheck } from '../lib/salesforce-disaster-recovery-health-check';
@@ -230,6 +231,21 @@ new ProductSwitchApi(app, 'product-switch-api-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 	domainName: `product-switch-api.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
+});
+
+new ProductMoveApi(app, 'product-move-api-CODE', {
+	stack: 'support',
+	stage: 'CODE',
+	domainName: `product-move-api-code.${supportApisDomain}`,
+	hostedZoneId: supportHostedZoneId,
+	certificateId: supportCertificateId,
+});
+new ProductMoveApi(app, 'product-move-api-PROD', {
+	stack: 'support',
+	stage: 'PROD',
+	domainName: `product-move-api.${supportApisDomain}`,
 	hostedZoneId: supportHostedZoneId,
 	certificateId: supportCertificateId,
 });
