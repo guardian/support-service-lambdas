@@ -1,46 +1,49 @@
-import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import {
+	GuAllowPolicy,
+	GuGetS3ObjectsPolicy,
+} from '@guardian/cdk/lib/constructs/iam';
 import type { SrStack } from './sr-stack';
 
-export function s3CatalogReadPolicy(scope: SrStack) {
-	return new Policy(scope, 'S3 catalog read policy', {
-		statements: [
-			new PolicyStatement({
-				effect: Effect.ALLOW,
-				actions: ['s3:GetObject'],
-				resources: [
-					...[`arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-${scope.stage}/*`],
-				],
-			}),
-		],
-	});
+class AllowGetSecretValuePolicy extends GuAllowPolicy {
+	constructor(scope: SrStack, key: string) {
+		super(scope, 'Secrets Manager policy', {
+			actions: ['secretsmanager:GetSecretValue'],
+			resources: [
+				`arn:aws:secretsmanager:${scope.region}:${scope.account}:secret:${scope.stage}/${key}`,
+			],
+		});
+	}
 }
 
-export function zuoraOAuthSecretsPolicy(scope: SrStack) {
-	return new Policy(scope, 'Secrets Manager policy', {
-		statements: [
-			new PolicyStatement({
-				effect: Effect.ALLOW,
-				actions: ['secretsmanager:GetSecretValue'],
-				resources: [
-					`arn:aws:secretsmanager:${scope.region}:${scope.account}:secret:${scope.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
-				],
-			}),
-		],
-	});
+export type SrQueueName =
+	| `braze-emails`
+	| 'supporter-product-data'
+	| 'product-switch-salesforce-tracking';
+
+export class AllowSqsSendPolicy extends GuAllowPolicy {
+	constructor(scope: SrStack, queuePrefixes: readonly SrQueueName[]) {
+		const resources = queuePrefixes.map(
+			(queuePrefix) =>
+				`arn:aws:sqs:${scope.region}:${scope.account}:${queuePrefix}-${scope.stage}`,
+		);
+		super(scope, 'SQS policy', {
+			actions: ['sqs:GetQueueUrl', 'sqs:SendMessage'],
+			resources,
+		});
+	}
 }
 
-export function getSqsPolicy(scope: SrStack, queuePrefixes: string[]) {
-	const resources = queuePrefixes.map(
-		(queuePrefix) =>
-			`arn:aws:sqs:${scope.region}:${scope.account}:${queuePrefix}-${scope.stage}`,
-	);
-	return new Policy(scope, 'SQS policy', {
-		statements: [
-			new PolicyStatement({
-				effect: Effect.ALLOW,
-				actions: ['sqs:GetQueueUrl', 'sqs:SendMessage'],
-				resources,
-			}),
-		],
-	});
+export class AllowS3CatalogReadPolicy extends GuGetS3ObjectsPolicy {
+	constructor(scope: SrStack) {
+		super(scope, 'S3 catalog read policy', {
+			bucketName: 'gu-zuora-catalog',
+			paths: [`PROD/Zuora-${scope.stage}/*`],
+		});
+	}
+}
+
+export class AllowZuoraOAuthSecretsPolicy extends AllowGetSecretValuePolicy {
+	constructor(scope: SrStack) {
+		super(scope, 'Zuora-OAuth/SupportServiceLambdas-*');
+	}
 }

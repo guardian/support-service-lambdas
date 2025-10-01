@@ -1,5 +1,9 @@
 import type { App } from 'aws-cdk-lib';
-import { getSqsPolicy, zuoraOAuthSecretsPolicy } from './cdk/policies';
+import type { SrQueueName } from './cdk/policies';
+import {
+	AllowSqsSendPolicy,
+	AllowZuoraOAuthSecretsPolicy,
+} from './cdk/policies';
 import { SrRestApi } from './cdk/sr-rest-api';
 import type { SrStageNames } from './cdk/sr-stack';
 import { SrStack } from './cdk/sr-stack';
@@ -14,13 +18,17 @@ export class ProductSwitchApi extends SrStack {
 			alarmImpact: 'Search the log link below for "error"',
 		});
 
-		const queuePrefixes = [
+		const queuePrefixes: SrQueueName[] = [
 			`braze-emails`,
 			'supporter-product-data',
 			'product-switch-salesforce-tracking',
 		];
 
-		restApi.lambda.role?.attachInlinePolicy(zuoraOAuthSecretsPolicy(this));
-		restApi.lambda.role?.attachInlinePolicy(getSqsPolicy(this, queuePrefixes));
+		restApi.lambda.role?.attachInlinePolicy(
+			new AllowZuoraOAuthSecretsPolicy(this),
+		);
+		restApi.lambda.role?.attachInlinePolicy(
+			new AllowSqsSendPolicy(this, queuePrefixes),
+		);
 	}
 }

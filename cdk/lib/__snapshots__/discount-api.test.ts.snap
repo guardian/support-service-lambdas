@@ -160,7 +160,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-CODE/*",
+              "Resource": "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-CODE/*",
             },
           ],
           "Version": "2012-10-17",
@@ -1203,7 +1203,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-PROD/*",
+              "Resource": "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-PROD/*",
             },
           ],
           "Version": "2012-10-17",

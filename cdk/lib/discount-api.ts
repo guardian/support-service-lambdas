@@ -1,8 +1,9 @@
 import type { App } from 'aws-cdk-lib';
+import type { SrQueueName } from './cdk/policies';
 import {
-	getSqsPolicy,
-	s3CatalogReadPolicy,
-	zuoraOAuthSecretsPolicy,
+	AllowS3CatalogReadPolicy,
+	AllowSqsSendPolicy,
+	AllowZuoraOAuthSecretsPolicy,
 } from './cdk/policies';
 import { SrRestApi } from './cdk/sr-rest-api';
 import type { SrStageNames } from './cdk/sr-stack';
@@ -19,10 +20,14 @@ export class DiscountApi extends SrStack {
 			gatewayDescription: 'API Gateway created by CDK', // retained to avoid recreating the AWS::ApiGateway::Deployment
 		});
 
-		const queuePrefixes = [`braze-emails`];
+		const queuePrefixes: SrQueueName[] = [`braze-emails`];
 
-		restApi.lambda.role?.attachInlinePolicy(s3CatalogReadPolicy(this));
-		restApi.lambda.role?.attachInlinePolicy(zuoraOAuthSecretsPolicy(this));
-		restApi.lambda.role?.attachInlinePolicy(getSqsPolicy(this, queuePrefixes));
+		restApi.lambda.role?.attachInlinePolicy(new AllowS3CatalogReadPolicy(this));
+		restApi.lambda.role?.attachInlinePolicy(
+			new AllowZuoraOAuthSecretsPolicy(this),
+		);
+		restApi.lambda.role?.attachInlinePolicy(
+			new AllowSqsSendPolicy(this, queuePrefixes),
+		);
 	}
 }
