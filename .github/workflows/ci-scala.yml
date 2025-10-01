@@ -54,7 +54,7 @@ jobs:
       - run: npm install --global corepack@0.31.0
       - run: corepack enable
         shell: bash
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
