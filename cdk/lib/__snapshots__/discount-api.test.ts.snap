@@ -5,6 +5,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
+      "GuGetDistributablePolicy",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -97,6 +98,10 @@ exports[`The Discount API stack matches the snapshot 1`] = `
         },
         "Tags": [
           {
+            "Key": "App",
+            "Value": "discount-api",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -116,6 +121,38 @@ exports[`The Discount API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
+    "GetDistributablePolicyDiscountapi6B555D03": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "DistributionBucketName",
+                    },
+                    "/support/CODE/discount-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "GetDistributablePolicyDiscountapi6B555D03",
+        "Roles": [
+          {
+            "Ref": "discountapilambdaServiceRole4CB5B1F4",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "S3catalogreadpolicyE18911B4": {
       "Properties": {
         "PolicyDocument": {
@@ -129,27 +166,6 @@ exports[`The Discount API stack matches the snapshot 1`] = `
           "Version": "2012-10-17",
         },
         "PolicyName": "S3catalogreadpolicyE18911B4",
-        "Roles": [
-          {
-            "Ref": "discountapilambdaServiceRole4CB5B1F4",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "S3inlinepolicy3B07399A": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/support/CODE/discount-api/",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "S3inlinepolicy3B07399A",
         "Roles": [
           {
             "Ref": "discountapilambdaServiceRole4CB5B1F4",
@@ -957,6 +973,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
+      "GuGetDistributablePolicy",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -1032,6 +1049,10 @@ exports[`The Discount API stack matches the snapshot 2`] = `
         "Period": 300,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "discount-api",
+          },
           {
             "Key": "DiagnosticLinks",
             "Value": {
@@ -1120,6 +1141,10 @@ exports[`The Discount API stack matches the snapshot 2`] = `
         },
         "Tags": [
           {
+            "Key": "App",
+            "Value": "discount-api",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1139,6 +1164,38 @@ exports[`The Discount API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
+    "GetDistributablePolicyDiscountapi6B555D03": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "DistributionBucketName",
+                    },
+                    "/support/PROD/discount-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "GetDistributablePolicyDiscountapi6B555D03",
+        "Roles": [
+          {
+            "Ref": "discountapilambdaServiceRole4CB5B1F4",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "S3catalogreadpolicyE18911B4": {
       "Properties": {
         "PolicyDocument": {
@@ -1152,27 +1209,6 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           "Version": "2012-10-17",
         },
         "PolicyName": "S3catalogreadpolicyE18911B4",
-        "Roles": [
-          {
-            "Ref": "discountapilambdaServiceRole4CB5B1F4",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "S3inlinepolicy3B07399A": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/support/PROD/discount-api/",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "S3inlinepolicy3B07399A",
         "Roles": [
           {
             "Ref": "discountapilambdaServiceRole4CB5B1F4",

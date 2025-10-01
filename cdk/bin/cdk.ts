@@ -3,6 +3,8 @@ import { App } from 'aws-cdk-lib';
 import { AlarmsHandler } from '../lib/alarms-handler';
 import { BatchEmailSender } from '../lib/batch-email-sender';
 import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
+import type { SrStageNames } from '../lib/cdk/sr-stack';
+import { stages } from '../lib/cdk/sr-stack';
 import {
 	membershipApisDomain,
 	membershipCertificateId,
@@ -123,13 +125,17 @@ new SingleContributionSalesforceWrites(
 	{ stack: 'membership', stage: 'PROD' },
 );
 
-new DiscountApi(app, 'discount-api-CODE', {
-	stack: 'support',
-	stage: 'CODE',
-});
-new DiscountApi(app, 'discount-api-PROD', {
-	stack: 'support',
-	stage: 'PROD',
+const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
+	DiscountApi,
+	ProductSwitchApi,
+	UpdateSupporterPlusAmount,
+];
+
+// generate all stacks for all stages
+stacks.forEach((Constructor) => {
+	stages.forEach((stage) => {
+		new Constructor(app, stage);
+	});
 });
 
 new StripeDisputes(app, 'stripe-disputes-CODE', {
@@ -215,15 +221,6 @@ new StripeWebhookEndpoints(
 	stripeWebhookEndpointsProdProps,
 );
 
-new ProductSwitchApi(app, 'product-switch-api-CODE', {
-	stack: 'support',
-	stage: 'CODE',
-});
-new ProductSwitchApi(app, 'product-switch-api-PROD', {
-	stack: 'support',
-	stage: 'PROD',
-});
-
 new AlarmsHandler(app, 'alarms-handler-CODE', {
 	stack: 'support',
 	stage: 'CODE',
@@ -248,14 +245,7 @@ new SalesforceDisasterRecoveryHealthCheck(
 		stage: 'PROD',
 	},
 );
-new UpdateSupporterPlusAmount(app, 'update-supporter-plus-amount-CODE', {
-	stack: 'support',
-	stage: 'CODE',
-});
-new UpdateSupporterPlusAmount(app, 'update-supporter-plus-amount-PROD', {
-	stack: 'support',
-	stage: 'PROD',
-});
+
 new ZuoraSalesforceLinkRemover(app, 'zuora-salesforce-link-remover-CODE', {
 	stack: 'membership',
 	stage: 'CODE',

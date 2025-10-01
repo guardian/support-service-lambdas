@@ -5,6 +5,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
+      "GuGetDistributablePolicy",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -97,6 +98,10 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
         },
         "Tags": [
           {
+            "Key": "App",
+            "Value": "update-supporter-plus-amount",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -116,19 +121,30 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
-    "S3inlinepolicy3B07399A": {
+    "GetDistributablePolicyUpdatesupporterplusamountE773BE49": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/support/CODE/update-supporter-plus-amount/",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "DistributionBucketName",
+                    },
+                    "/support/CODE/update-supporter-plus-amount/*",
+                  ],
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "S3inlinepolicy3B07399A",
+        "PolicyName": "GetDistributablePolicyUpdatesupporterplusamountE773BE49",
         "Roles": [
           {
             "Ref": "updatesupporterplusamountlambdaServiceRole9F342B79",
@@ -954,6 +970,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
+      "GuGetDistributablePolicy",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -1029,6 +1046,10 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
         "Period": 300,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "update-supporter-plus-amount",
+          },
           {
             "Key": "DiagnosticLinks",
             "Value": {
@@ -1117,6 +1138,10 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
         },
         "Tags": [
           {
+            "Key": "App",
+            "Value": "update-supporter-plus-amount",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1136,19 +1161,30 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
-    "S3inlinepolicy3B07399A": {
+    "GetDistributablePolicyUpdatesupporterplusamountE773BE49": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/support/PROD/update-supporter-plus-amount/",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "DistributionBucketName",
+                    },
+                    "/support/PROD/update-supporter-plus-amount/*",
+                  ],
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "S3inlinepolicy3B07399A",
+        "PolicyName": "GetDistributablePolicyUpdatesupporterplusamountE773BE49",
         "Roles": [
           {
             "Ref": "updatesupporterplusamountlambdaServiceRole9F342B79",

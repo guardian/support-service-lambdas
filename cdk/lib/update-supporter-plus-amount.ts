@@ -1,14 +1,18 @@
 import type { App } from 'aws-cdk-lib';
 import { getSqsPolicy, zuoraOAuthSecretsPolicy } from './cdk/policies';
 import { SrRestApi } from './cdk/sr-rest-api';
-import type { SrStackProps } from './cdk/sr-stack';
+import type { SrStageNames } from './cdk/sr-stack';
 import { SrStack } from './cdk/sr-stack';
 
 export class UpdateSupporterPlusAmount extends SrStack {
-	constructor(scope: App, id: string, props: SrStackProps) {
-		super(scope, id, props);
+	constructor(scope: App, stage: SrStageNames) {
+		super(scope, {
+			stack: 'support',
+			stage,
+			app: 'update-supporter-plus-amount',
+		});
 
-		const restApi = new SrRestApi(this, 'update-supporter-plus-amount', {
+		const restApi = new SrRestApi(this, {
 			lambdaDesc:
 				'An API Gateway triggered lambda to carry out supporter plus amount updates',
 			alarmImpact:

@@ -5,14 +5,14 @@ import {
 	zuoraOAuthSecretsPolicy,
 } from './cdk/policies';
 import { SrRestApi } from './cdk/sr-rest-api';
-import type { SrStackProps } from './cdk/sr-stack';
+import type { SrStageNames } from './cdk/sr-stack';
 import { SrStack } from './cdk/sr-stack';
 
 export class DiscountApi extends SrStack {
-	constructor(scope: App, id: string, props: SrStackProps) {
-		super(scope, id, props);
+	constructor(scope: App, stage: SrStageNames) {
+		super(scope, { stack: 'support', stage, app: 'discount-api' });
 
-		const restApi = new SrRestApi(this, 'discount-api', {
+		const restApi = new SrRestApi(this, {
 			lambdaDesc:
 				'A lambda that enables the addition of discounts to existing subscriptions',
 			alarmImpact: 'Search the log link below for "error"',

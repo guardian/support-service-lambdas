@@ -1,3 +1,4 @@
+import { GuGetDistributablePolicy } from '@guardian/cdk/lib/constructs/iam';
 import { Duration } from 'aws-cdk-lib';
 import {
 	ApiKeySourceType,
@@ -5,7 +6,6 @@ import {
 	CfnDomainName,
 } from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
-import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { certForStack } from '../constants';
 import { SrApiLambda } from './sr-lambda';
@@ -21,7 +21,8 @@ export interface SrRestApiProps {
 export class SrRestApi {
 	readonly lambda: SrApiLambda;
 
-	constructor(scope: SrStack, app: string, props: SrRestApiProps) {
+	constructor(scope: SrStack, props: SrRestApiProps) {
+		const app = scope.app;
 		const nameWithStage = `${app}-${scope.stage}`;
 
 		// ---- API-triggered lambda functions ---- //
@@ -70,19 +71,7 @@ export class SrRestApi {
 		// associate api key to plan
 		usagePlan.addApiKey(apiKey);
 
-		const s3InlinePolicy: Policy = new Policy(scope, 'S3 inline policy', {
-			statements: [
-				new PolicyStatement({
-					effect: Effect.ALLOW,
-					actions: ['s3:GetObject'],
-					resources: [
-						`arn:aws:s3::*:membership-dist/${scope.stack}/${scope.stage}/${app}/`,
-					],
-				}),
-			],
-		});
-
-		lambda.role?.attachInlinePolicy(s3InlinePolicy);
+		lambda.role?.attachInlinePolicy(new GuGetDistributablePolicy(scope, scope));
 
 		// ---- Alarms ---- //
 		const alarmName = (shortDescription: string) =>
