@@ -91,7 +91,8 @@ export class SrRestApi {
 		const alarmDescription = (description: string) =>
 			`Impact - ${description}. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit`;
 
-		if (scope.stage === 'PROD') {
+		const isProd = scope.stage === 'PROD';
+		if (isProd) {
 			new SrLambdaAlarm(scope, 'ApiGateway5XXAlarm', {
 				app,
 				alarmName: alarmName('API gateway 5XX response'),
@@ -116,7 +117,7 @@ export class SrRestApi {
 		const cert = certForStack[scope.stack];
 		// ---- DNS ---- //
 		const certificateArn = `arn:aws:acm:eu-west-1:${scope.account}:certificate/${cert.certificateId}`;
-		const domainName = `${app}${scope.stage == 'PROD' ? '' : '-code'}.${cert.domainName}`;
+		const domainName = `${app}${isProd ? '' : '-code'}.${cert.domainName}`;
 
 		const cfnDomainName = new CfnDomainName(scope, 'DomainName', {
 			domainName,
