@@ -41,6 +41,7 @@ object GetSubscriptionToCancel {
       accountId: String,
       accountNumber: AccountNumber,
       ratePlans: List[RatePlan],
+      LastPlanAddedDate__c: Option[LocalDate],
   )
 
   case class RatePlan(
