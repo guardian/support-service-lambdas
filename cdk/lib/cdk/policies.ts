@@ -5,8 +5,8 @@ import {
 import type { SrStack } from './sr-stack';
 
 class AllowGetSecretValuePolicy extends GuAllowPolicy {
-	constructor(scope: SrStack, key: string) {
-		super(scope, 'Secrets Manager policy', {
+	constructor(scope: SrStack, id: string, key: string) {
+		super(scope, id, {
 			actions: ['secretsmanager:GetSecretValue'],
 			resources: [
 				`arn:aws:secretsmanager:${scope.region}:${scope.account}:secret:${scope.stage}/${key}`,
@@ -21,12 +21,12 @@ export type SrQueueName =
 	| 'product-switch-salesforce-tracking';
 
 export class AllowSqsSendPolicy extends GuAllowPolicy {
-	constructor(scope: SrStack, queuePrefixes: readonly SrQueueName[]) {
+	constructor(scope: SrStack, ...queuePrefixes: readonly SrQueueName[]) {
 		const resources = queuePrefixes.map(
 			(queuePrefix) =>
 				`arn:aws:sqs:${scope.region}:${scope.account}:${queuePrefix}-${scope.stage}`,
 		);
-		super(scope, 'SQS policy', {
+		super(scope, 'SQS send policy', {
 			actions: ['sqs:GetQueueUrl', 'sqs:SendMessage'],
 			resources,
 		});
@@ -44,6 +44,10 @@ export class AllowS3CatalogReadPolicy extends GuGetS3ObjectsPolicy {
 
 export class AllowZuoraOAuthSecretsPolicy extends AllowGetSecretValuePolicy {
 	constructor(scope: SrStack) {
-		super(scope, 'Zuora-OAuth/SupportServiceLambdas-*');
+		super(
+			scope,
+			'Zuora OAuth Secrets Manager policy',
+			'Zuora-OAuth/SupportServiceLambdas-*',
+		);
 	}
 }

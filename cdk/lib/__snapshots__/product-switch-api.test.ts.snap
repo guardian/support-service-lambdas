@@ -153,7 +153,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SQSpolicy09999EF2": {
+    "SQSsendpolicy967EA932": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -217,7 +217,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SQSpolicy09999EF2",
+        "PolicyName": "SQSsendpolicy967EA932",
         "Roles": [
           {
             "Ref": "productswitchapilambdaServiceRole4826BDA0",
@@ -226,7 +226,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SecretsManagerpolicy7194A9CE": {
+    "ZuoraOAuthSecretsManagerpolicy5448D99B": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -253,7 +253,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SecretsManagerpolicy7194A9CE",
+        "PolicyName": "ZuoraOAuthSecretsManagerpolicy5448D99B",
         "Roles": [
           {
             "Ref": "productswitchapilambdaServiceRole4826BDA0",
@@ -1209,7 +1209,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SQSpolicy09999EF2": {
+    "SQSsendpolicy967EA932": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -1273,7 +1273,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SQSpolicy09999EF2",
+        "PolicyName": "SQSsendpolicy967EA932",
         "Roles": [
           {
             "Ref": "productswitchapilambdaServiceRole4826BDA0",
@@ -1282,7 +1282,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SecretsManagerpolicy7194A9CE": {
+    "ZuoraOAuthSecretsManagerpolicy5448D99B": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -1309,7 +1309,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SecretsManagerpolicy7194A9CE",
+        "PolicyName": "ZuoraOAuthSecretsManagerpolicy5448D99B",
         "Roles": [
           {
             "Ref": "productswitchapilambdaServiceRole4826BDA0",

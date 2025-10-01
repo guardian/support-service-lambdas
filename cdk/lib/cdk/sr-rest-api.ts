@@ -1,3 +1,4 @@
+import type { GuPolicy } from '@guardian/cdk/lib/constructs/iam';
 import { GuGetDistributablePolicy } from '@guardian/cdk/lib/constructs/iam';
 import { Duration } from 'aws-cdk-lib';
 import {
@@ -16,6 +17,7 @@ export interface SrRestApiProps {
 	lambdaDesc: string;
 	alarmImpact: string;
 	gatewayDescription?: string;
+	lambdaPolicies: GuPolicy[];
 }
 
 export class SrRestApi {
@@ -51,6 +53,8 @@ export class SrRestApi {
 			},
 		});
 		this.lambda = lambda;
+
+		props.lambdaPolicies.map((p) => lambda.role!.attachInlinePolicy(p));
 
 		const usagePlan = lambda.api.addUsagePlan('UsagePlan', {
 			name: nameWithStage,
