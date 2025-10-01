@@ -4,9 +4,9 @@
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
     "type-check": "tsc --noEmit",
-    "build": "mkdir -p target && esbuild --bundle --platform=node --target=node18 --outfile=target/producer.js src/producer.ts && esbuild --bundle --platform=node --target=node18 --outfile=target/consumer.js src/consumer.ts",
+    "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/producer.ts src/consumer.ts --sourcemap",
     "lint": "eslint src/**/*.ts test/**/*.ts",
-    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr stripe-disputes.zip ./*.js",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr stripe-disputes.zip ./*.js.map ./*.js",
     "check-formatting": "prettier --check **.ts",
     "fix-formatting": "prettier --write **.ts"
   },
