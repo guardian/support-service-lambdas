@@ -1,4 +1,3 @@
-import 'source-map-support/register';
 import { sendEmail } from '@modules/email/email';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { logger } from '@modules/routing/logger';

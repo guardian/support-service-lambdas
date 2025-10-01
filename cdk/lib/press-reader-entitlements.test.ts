@@ -4,7 +4,7 @@ import {
 	supportApisDomain,
 	supportCertificateId,
 	supportHostedZoneId,
-} from '../bin/cdk';
+} from './constants';
 import { PressReaderEntitlements } from './press-reader-entitlements';
 
 describe('The Press reader entitlements stack', () => {
