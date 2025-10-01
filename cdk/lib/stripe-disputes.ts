@@ -1,11 +1,8 @@
 import { GuApiLambda } from '@guardian/cdk';
 import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
-import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
-import { GuStack } from '@guardian/cdk/lib/constructs/core';
-import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
+import type { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
-import { CfnBasePathMapping, CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
 import {
 	ComparisonOperator,
 	TreatMissingData,
@@ -13,17 +10,12 @@ import {
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
-import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
+import { SrLambda } from './cdk/sr-lambda';
+import { SrRestDomain } from './cdk/sr-rest-domain';
+import type { SrStageNames } from './cdk/sr-stack';
+import { SrStack } from './cdk/sr-stack';
 import { nodeVersion } from './node-version';
-
-export interface StripeDisputesProps extends GuStackProps {
-	stack: string;
-	stage: string;
-	certificateId: string;
-	domainName: string;
-	hostedZoneId: string;
-}
 
 type GuLambdaFunctionOrApi = GuLambdaFunction | GuApiLambda;
 type GuLambdaFunctionOrApiItem = {
@@ -31,13 +23,15 @@ type GuLambdaFunctionOrApiItem = {
 	lambda: GuLambdaFunctionOrApi;
 };
 
-export class StripeDisputes extends GuStack {
-	constructor(scope: App, id: string, props: StripeDisputesProps) {
-		super(scope, id, props);
+export class StripeDisputes extends SrStack {
+	constructor(scope: App, stage: SrStageNames) {
+		super(scope, {
+			stage,
+			app: 'stripe-disputes',
+		});
 
-		const app = 'stripe-disputes';
+		const app = this.app;
 		const nameWithStageProducer = `${app}-producer-${this.stage}`;
-		const nameWithStageConsumer = `${app}-consumer-${this.stage}`;
 
 		// ---- SQS Queues with retry and DLQ ---- //
 		const deadLetterQueue = new Queue(this, `dead-letters-${app}-queue`, {
@@ -108,20 +102,14 @@ export class StripeDisputes extends GuStack {
 			events: [],
 		});
 
-		const lambdaConsumer = new GuLambdaFunction(
+		const lambdaConsumer = new SrLambda(
 			this,
 			`${app}-lambda-consumer`,
 			{
 				description: 'A lambda that handles stripe disputes SQS events',
-				functionName: nameWithStageConsumer,
-				loggingFormat: LoggingFormat.TEXT,
-				fileName: `${app}.zip`,
 				handler: 'consumer.handler',
-				runtime: nodeVersion,
-				memorySize: 1024,
 				timeout: Duration.seconds(300),
 				environment: commonEnvironmentVariables,
-				app: app,
 				events: [
 					new SqsEventSource(disputeEventsQueue, {
 						batchSize: 1, // Process one dispute event at a time
@@ -129,6 +117,7 @@ export class StripeDisputes extends GuStack {
 					}),
 				],
 			},
+			{ nameSuffix: 'consumer' },
 		);
 
 		lambdaProducer.api.addUsagePlan('UsagePlan', {
@@ -217,29 +206,7 @@ export class StripeDisputes extends GuStack {
 			'Allow SQS SendMessage and GetQueueAttributes to Dispute Events Queue',
 		);
 
-		// ---- DNS ---- //
-		const certificateArn = `arn:aws:acm:eu-west-1:${this.account}:certificate/${props.certificateId}`;
-		const cfnDomainName = new CfnDomainName(this, 'DomainName', {
-			domainName: props.domainName,
-			regionalCertificateArn: certificateArn,
-			endpointConfiguration: {
-				types: ['REGIONAL'],
-			},
-		});
-
-		new CfnBasePathMapping(this, 'BasePathMapping', {
-			domainName: cfnDomainName.ref,
-			restApiId: lambdaProducer.api.restApiId,
-			stage: lambdaProducer.api.deploymentStage.stageName,
-		});
-
-		new CfnRecordSet(this, 'DNSRecord', {
-			name: props.domainName,
-			type: 'CNAME',
-			hostedZoneId: props.hostedZoneId,
-			ttl: '120',
-			resourceRecords: [cfnDomainName.attrRegionalDomainName],
-		});
+		new SrRestDomain(this, lambdaProducer.api);
 	}
 
 	createPolicyAndAttachToLambdas(

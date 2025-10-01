@@ -10,7 +10,6 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       "GuStringParameter",
       "GuStringParameter",
       "GuDistributionBucketParameter",
-      "GuLambdaFunction",
       "GuAlarm",
       "GuScheduledLambda",
       "GuLambdaErrorPercentageAlarm",
@@ -93,6 +92,10 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
         "Statistic": "Sum",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -102,7 +105,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -138,6 +141,10 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       "Properties": {
         "Tags": [
           {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -147,7 +154,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -180,12 +187,12 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/CODE/alarms-handler/alarms-handler.zip",
+          "S3Key": "support/CODE/alarms-handler/alarms-handler.zip",
         },
         "Environment": {
           "Variables": {
             "APP": "alarms-handler",
-            "STACK": "membership",
+            "STACK": "support",
             "STAGE": "CODE",
           },
         },
@@ -217,7 +224,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -271,7 +278,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -336,7 +343,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/CODE/alarms-handler/alarms-handler.zip",
+                      "/support/CODE/alarms-handler/alarms-handler.zip",
                     ],
                   ],
                 },
@@ -357,7 +364,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/alarms-handler",
+                    ":parameter/CODE/support/alarms-handler",
                   ],
                 ],
               },
@@ -380,7 +387,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/alarms-handler/*",
+                    ":parameter/CODE/support/alarms-handler/*",
                   ],
                 ],
               },
@@ -435,7 +442,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -460,6 +467,10 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
         },
         "Tags": [
           {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -469,7 +480,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -569,12 +580,12 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/CODE/alarms-handler/alarms-handler.zip",
+          "S3Key": "support/CODE/alarms-handler/alarms-handler.zip",
         },
         "Environment": {
           "Variables": {
             "APP": "alarms-handler",
-            "STACK": "membership",
+            "STACK": "support",
             "STAGE": "CODE",
           },
         },
@@ -606,7 +617,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -728,6 +739,10 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
         ],
         "Tags": [
           {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -737,7 +752,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -792,7 +807,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -841,7 +856,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/CODE/alarms-handler/alarms-handler.zip",
+                      "/support/CODE/alarms-handler/alarms-handler.zip",
                     ],
                   ],
                 },
@@ -862,7 +877,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/alarms-handler",
+                    ":parameter/CODE/support/alarms-handler",
                   ],
                 ],
               },
@@ -885,7 +900,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/alarms-handler/*",
+                    ":parameter/CODE/support/alarms-handler/*",
                   ],
                 ],
               },
@@ -956,6 +971,10 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       "Properties": {
         "Tags": [
           {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -965,7 +984,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1051,6 +1070,10 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
         "QueueName": "dead-letters-alarms-handler-queue-CODE",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1060,7 +1083,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1085,7 +1108,6 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       "GuStringParameter",
       "GuStringParameter",
       "GuDistributionBucketParameter",
-      "GuLambdaFunction",
       "GuAlarm",
       "GuScheduledLambda",
       "GuLambdaErrorPercentageAlarm",
@@ -1168,6 +1190,10 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
         "Statistic": "Sum",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1177,7 +1203,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1213,6 +1239,10 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       "Properties": {
         "Tags": [
           {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1222,7 +1252,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1255,12 +1285,12 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/PROD/alarms-handler/alarms-handler.zip",
+          "S3Key": "support/PROD/alarms-handler/alarms-handler.zip",
         },
         "Environment": {
           "Variables": {
             "APP": "alarms-handler",
-            "STACK": "membership",
+            "STACK": "support",
             "STAGE": "PROD",
           },
         },
@@ -1292,7 +1322,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1346,7 +1376,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1411,7 +1441,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/PROD/alarms-handler/alarms-handler.zip",
+                      "/support/PROD/alarms-handler/alarms-handler.zip",
                     ],
                   ],
                 },
@@ -1432,7 +1462,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/alarms-handler",
+                    ":parameter/PROD/support/alarms-handler",
                   ],
                 ],
               },
@@ -1455,7 +1485,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/alarms-handler/*",
+                    ":parameter/PROD/support/alarms-handler/*",
                   ],
                 ],
               },
@@ -1510,7 +1540,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1535,6 +1565,10 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
         },
         "Tags": [
           {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1544,7 +1578,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1644,12 +1678,12 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/PROD/alarms-handler/alarms-handler.zip",
+          "S3Key": "support/PROD/alarms-handler/alarms-handler.zip",
         },
         "Environment": {
           "Variables": {
             "APP": "alarms-handler",
-            "STACK": "membership",
+            "STACK": "support",
             "STAGE": "PROD",
           },
         },
@@ -1681,7 +1715,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1803,6 +1837,10 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
         ],
         "Tags": [
           {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1812,7 +1850,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1867,7 +1905,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1916,7 +1954,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/PROD/alarms-handler/alarms-handler.zip",
+                      "/support/PROD/alarms-handler/alarms-handler.zip",
                     ],
                   ],
                 },
@@ -1937,7 +1975,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/alarms-handler",
+                    ":parameter/PROD/support/alarms-handler",
                   ],
                 ],
               },
@@ -1960,7 +1998,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/alarms-handler/*",
+                    ":parameter/PROD/support/alarms-handler/*",
                   ],
                 ],
               },
@@ -2031,6 +2069,10 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       "Properties": {
         "Tags": [
           {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -2040,7 +2082,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -2126,6 +2168,10 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
         "QueueName": "dead-letters-alarms-handler-queue-PROD",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -2135,7 +2181,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",

@@ -129,6 +129,9 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	DiscountApi,
 	ProductSwitchApi,
 	UpdateSupporterPlusAmount,
+	StripeDisputes,
+	MParticleApi,
+	AlarmsHandler,
 ];
 
 // generate all stacks for all stages
@@ -136,21 +139,6 @@ stacks.forEach((Constructor) => {
 	stages.forEach((stage) => {
 		new Constructor(app, stage);
 	});
-});
-
-new StripeDisputes(app, 'stripe-disputes-CODE', {
-	stack: 'support',
-	stage: 'CODE',
-	domainName: `stripe-disputes-code.${supportApisDomain}`,
-	hostedZoneId: supportHostedZoneId,
-	certificateId: supportCertificateId,
-});
-new StripeDisputes(app, 'stripe-disputes-PROD', {
-	stack: 'support',
-	stage: 'PROD',
-	domainName: `stripe-disputes.${supportApisDomain}`,
-	hostedZoneId: supportHostedZoneId,
-	certificateId: supportCertificateId,
 });
 
 new SalesforceDisasterRecovery(app, 'salesforce-disaster-recovery-CODE', {
@@ -221,14 +209,6 @@ new StripeWebhookEndpoints(
 	stripeWebhookEndpointsProdProps,
 );
 
-new AlarmsHandler(app, 'alarms-handler-CODE', {
-	stack: 'support',
-	stage: 'CODE',
-});
-new AlarmsHandler(app, 'alarms-handler-PROD', {
-	stack: 'support',
-	stage: 'PROD',
-});
 new SalesforceDisasterRecoveryHealthCheck(
 	app,
 	'salesforce-disaster-recovery-health-check-CODE',
@@ -262,23 +242,15 @@ new TicketTailorWebhook(app, 'ticket-tailor-webhook-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 });
-new PressReaderEntitlements(app, 'press-reader-entitlements-CODE', {
-	stack: 'support',
+new PressReaderEntitlements(app, {
 	stage: 'CODE',
-	internalDomainName: `press-reader-entitlements-code.${supportApisDomain}`,
 	publicDomainName: 'press-reader-entitlements.code.dev-guardianapis.com',
-	hostedZoneId: supportHostedZoneId,
-	certificateId: supportCertificateId,
 	supporterProductDataTable:
 		'supporter-product-data-tables-CODE-SupporterProductDataTable',
 });
-new PressReaderEntitlements(app, 'press-reader-entitlements-PROD', {
-	stack: 'support',
+new PressReaderEntitlements(app, {
 	stage: 'PROD',
-	internalDomainName: `press-reader-entitlements.${supportApisDomain}`,
 	publicDomainName: 'press-reader-entitlements.guardianapis.com',
-	hostedZoneId: supportHostedZoneId,
-	certificateId: supportCertificateId,
 	supporterProductDataTable:
 		'supporter-product-data-tables-PROD-SupporterProductDataTable',
 });
@@ -310,16 +282,10 @@ new DiscountExpiryNotifier(app, 'discount-expiry-notifier-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 });
-new MetricPushApi(app, 'metric-push-api-CODE', {
-	stack: 'membership',
-	stage: 'CODE',
-	cloudFormationStackName: 'membership-CODE-metric-push-api',
-});
-new MetricPushApi(app, 'metric-push-api-PROD', {
-	stack: 'membership',
-	stage: 'PROD',
-	cloudFormationStackName: 'membership-PROD-metric-push-api',
-});
+
+new MetricPushApi(app, 'CODE', 'membership-CODE-metric-push-api');
+new MetricPushApi(app, 'PROD', 'membership-PROD-metric-push-api');
+
 new ObserverDataExport(app, 'observer-data-export-CODE', {
 	stack: 'support',
 	stage: 'CODE',
@@ -349,14 +315,6 @@ new SalesforceEventBus(app, 'salesforce-event-bus-CODE', {
 	stage: 'CODE',
 });
 new SalesforceEventBus(app, 'salesforce-event-bus-PROD', {
-	stack: 'support',
-	stage: 'PROD',
-});
-new MParticleApi(app, 'mparticle-api-CODE', {
-	stack: 'support',
-	stage: 'CODE',
-});
-new MParticleApi(app, 'mparticle-api-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 });
