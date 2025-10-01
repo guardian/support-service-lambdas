@@ -1,42 +1,26 @@
 import { GuApiLambda } from '@guardian/cdk';
-import type {
-	AppIdentity,
-	GuStackProps,
-} from '@guardian/cdk/lib/constructs/core';
-import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuGetDistributablePolicy } from '@guardian/cdk/lib/constructs/iam';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
-import {
-	ApiKeySourceType,
-	CfnBasePathMapping,
-	CfnDomainName,
-} from 'aws-cdk-lib/aws-apigateway';
+import { ApiKeySourceType } from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
-import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import {
 	AllowSqsSendPolicy,
 	AllowZuoraOAuthSecretsPolicy,
 } from './cdk/policies';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
+import { SrRestDomain } from './cdk/sr-rest-domain';
+import type { SrStageNames } from './cdk/sr-stack';
+import { SrStack } from './cdk/sr-stack';
 import { nodeVersion } from './node-version';
 
-export interface ProductSwitchApiProps extends GuStackProps {
-	stack: string;
-	stage: string;
-	certificateId: string;
-	domainName: string;
-	hostedZoneId: string;
-}
-
-export class ProductSwitchApi extends GuStack implements AppIdentity {
+export class ProductSwitchApi extends SrStack {
 	readonly app: string;
-	constructor(scope: App, id: string, props: ProductSwitchApiProps) {
-		super(scope, id, props);
+	constructor(scope: App, stage: SrStageNames) {
+		super(scope, { stack: 'support', stage, app: 'product-switch-api' });
 
-		const app = 'product-switch-api';
-		this.app = app;
+		const app = this.app;
 		const nameWithStage = `${app}-${this.stage}`;
 
 		const commonEnvironmentVariables = {
@@ -97,29 +81,7 @@ export class ProductSwitchApi extends GuStack implements AppIdentity {
 		// associate api key to plan
 		usagePlan.addApiKey(apiKey);
 
-		// ---- DNS ---- //
-		const certificateArn = `arn:aws:acm:eu-west-1:${this.account}:certificate/${props.certificateId}`;
-		const cfnDomainName = new CfnDomainName(this, 'DomainName', {
-			domainName: props.domainName,
-			regionalCertificateArn: certificateArn,
-			endpointConfiguration: {
-				types: ['REGIONAL'],
-			},
-		});
-
-		new CfnBasePathMapping(this, 'BasePathMapping', {
-			domainName: cfnDomainName.ref,
-			restApiId: lambda.api.restApiId,
-			stage: lambda.api.deploymentStage.stageName,
-		});
-
-		new CfnRecordSet(this, 'DNSRecord', {
-			name: props.domainName,
-			type: 'CNAME',
-			hostedZoneId: props.hostedZoneId,
-			ttl: '120',
-			resourceRecords: [cfnDomainName.attrRegionalDomainName],
-		});
+		new SrRestDomain(this, lambda);
 
 		[
 			new GuGetDistributablePolicy(this, this),

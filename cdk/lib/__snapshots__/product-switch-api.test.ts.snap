@@ -63,7 +63,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
     "DNSRecord": {
       "Properties": {
         "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "product-switch-api.code.support.guardianapis.com",
+        "Name": "product-switch-api-code.support.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -79,7 +79,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
     },
     "DomainName": {
       "Properties": {
-        "DomainName": "product-switch-api.code.support.guardianapis.com",
+        "DomainName": "product-switch-api-code.support.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -99,6 +99,10 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
         },
         "Tags": [
           {
+            "Key": "App",
+            "Value": "product-switch-api",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -108,7 +112,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -133,7 +137,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
                     {
                       "Ref": "DistributionBucketName",
                     },
-                    "/membership/CODE/product-switch-api/*",
+                    "/support/CODE/product-switch-api/*",
                   ],
                 ],
               },
@@ -269,16 +273,16 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/CODE/product-switch-api/product-switch-api.zip",
+          "S3Key": "support/CODE/product-switch-api/product-switch-api.zip",
         },
         "Description": "An API Gateway triggered lambda for carrying out product switches. Code is in the support-service-lambdas repo",
         "Environment": {
           "Variables": {
             "APP": "product-switch-api",
             "App": "product-switch-api",
-            "STACK": "membership",
+            "STACK": "support",
             "STAGE": "CODE",
-            "Stack": "membership",
+            "Stack": "support",
             "Stage": "CODE",
           },
         },
@@ -310,7 +314,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -364,7 +368,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -413,7 +417,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/CODE/product-switch-api/product-switch-api.zip",
+                      "/support/CODE/product-switch-api/product-switch-api.zip",
                     ],
                   ],
                 },
@@ -434,7 +438,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/product-switch-api",
+                    ":parameter/CODE/support/product-switch-api",
                   ],
                 ],
               },
@@ -457,7 +461,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/product-switch-api/*",
+                    ":parameter/CODE/support/product-switch-api/*",
                   ],
                 ],
               },
@@ -494,7 +498,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -686,7 +690,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -697,7 +701,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "productswitchapilambdaproductswitchapiCODEDeployment4EE627F93aeea53542802ca6e90fed8e74be15e1": {
+    "productswitchapilambdaproductswitchapiCODEDeployment4EE627F9f431ccc963349ea8262c418d3f8cc228": {
       "DependsOn": [
         "productswitchapilambdaproductswitchapiCODEproxyANYA8660462",
         "productswitchapilambdaproductswitchapiCODEproxy466471EA",
@@ -717,7 +721,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "productswitchapilambdaproductswitchapiCODEDeployment4EE627F93aeea53542802ca6e90fed8e74be15e1",
+          "Ref": "productswitchapilambdaproductswitchapiCODEDeployment4EE627F9f431ccc963349ea8262c418d3f8cc228",
         },
         "RestApiId": {
           "Ref": "productswitchapilambdaproductswitchapiCODE34905765",
@@ -738,7 +742,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -777,7 +781,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -829,7 +833,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1060,6 +1064,10 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
         "Statistic": "Sum",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "product-switch-api",
+          },
+          {
             "Key": "DiagnosticLinks",
             "Value": {
               "Fn::Join": [
@@ -1083,7 +1091,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1147,6 +1155,10 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
         },
         "Tags": [
           {
+            "Key": "App",
+            "Value": "product-switch-api",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1156,7 +1168,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1181,7 +1193,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
                     {
                       "Ref": "DistributionBucketName",
                     },
-                    "/membership/PROD/product-switch-api/*",
+                    "/support/PROD/product-switch-api/*",
                   ],
                 ],
               },
@@ -1237,6 +1249,10 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
         "Statistic": "Sum",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "product-switch-api",
+          },
+          {
             "Key": "DiagnosticLinks",
             "Value": {
               "Fn::Join": [
@@ -1260,7 +1276,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1390,16 +1406,16 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/PROD/product-switch-api/product-switch-api.zip",
+          "S3Key": "support/PROD/product-switch-api/product-switch-api.zip",
         },
         "Description": "An API Gateway triggered lambda for carrying out product switches. Code is in the support-service-lambdas repo",
         "Environment": {
           "Variables": {
             "APP": "product-switch-api",
             "App": "product-switch-api",
-            "STACK": "membership",
+            "STACK": "support",
             "STAGE": "PROD",
-            "Stack": "membership",
+            "Stack": "support",
             "Stage": "PROD",
           },
         },
@@ -1431,7 +1447,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1485,7 +1501,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1534,7 +1550,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/PROD/product-switch-api/product-switch-api.zip",
+                      "/support/PROD/product-switch-api/product-switch-api.zip",
                     ],
                   ],
                 },
@@ -1555,7 +1571,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/product-switch-api",
+                    ":parameter/PROD/support/product-switch-api",
                   ],
                 ],
               },
@@ -1578,7 +1594,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/product-switch-api/*",
+                    ":parameter/PROD/support/product-switch-api/*",
                   ],
                 ],
               },
@@ -1615,7 +1631,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1807,7 +1823,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1818,7 +1834,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "productswitchapilambdaproductswitchapiPRODDeployment3D2B349E10b3d9ec051db83c05137457d9ec752a": {
+    "productswitchapilambdaproductswitchapiPRODDeployment3D2B349E65bcdbfaae8a4139c96195edb4830ea6": {
       "DependsOn": [
         "productswitchapilambdaproductswitchapiPRODproxyANY4B70B834",
         "productswitchapilambdaproductswitchapiPRODproxy05CF61E1",
@@ -1838,7 +1854,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "productswitchapilambdaproductswitchapiPRODDeployment3D2B349E10b3d9ec051db83c05137457d9ec752a",
+          "Ref": "productswitchapilambdaproductswitchapiPRODDeployment3D2B349E65bcdbfaae8a4139c96195edb4830ea6",
         },
         "RestApiId": {
           "Ref": "productswitchapilambdaproductswitchapiPROD165D4330",
@@ -1859,7 +1875,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1898,7 +1914,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1950,7 +1966,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
