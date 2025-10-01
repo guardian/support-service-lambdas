@@ -6,6 +6,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
       "GuApiLambda",
+      "GuGetDistributablePolicy",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -188,22 +189,30 @@ exports[`The Discount API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
-    "S3inlinepolicy3B07399A": {
+    "GetDistributablePolicyDiscountapi6B555D03": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": [
-                "arn:aws:s3::*:membership-dist/membership/CODE/discount-api/",
-                "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-CODE/*",
-              ],
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "DistributionBucketName",
+                    },
+                    "/membership/CODE/discount-api/*",
+                  ],
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "S3inlinepolicy3B07399A",
+        "PolicyName": "GetDistributablePolicyDiscountapi6B555D03",
         "Roles": [
           {
             "Ref": "discountapilambdaServiceRole4CB5B1F4",
@@ -212,12 +221,36 @@ exports[`The Discount API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SQSemailpolicy7D2D5531": {
+    "S3catalogreadpolicyE18911B4": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "sqs:sendmessage",
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-CODE/*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "S3catalogreadpolicyE18911B4",
+        "Roles": [
+          {
+            "Ref": "discountapilambdaServiceRole4CB5B1F4",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SQSsendpolicy967EA932": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:SendMessage",
+              ],
               "Effect": "Allow",
               "Resource": {
                 "Fn::Join": [
@@ -239,7 +272,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SQSemailpolicy7D2D5531",
+        "PolicyName": "SQSsendpolicy967EA932",
         "Roles": [
           {
             "Ref": "discountapilambdaServiceRole4CB5B1F4",
@@ -248,7 +281,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SecretsManagerpolicy7194A9CE": {
+    "ZuoraOAuthSecretsManagerpolicy5448D99B": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -275,7 +308,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SecretsManagerpolicy7194A9CE",
+        "PolicyName": "ZuoraOAuthSecretsManagerpolicy5448D99B",
         "Roles": [
           {
             "Ref": "discountapilambdaServiceRole4CB5B1F4",
@@ -1008,6 +1041,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
       "GuApiLambda",
+      "GuGetDistributablePolicy",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -1190,22 +1224,30 @@ exports[`The Discount API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
-    "S3inlinepolicy3B07399A": {
+    "GetDistributablePolicyDiscountapi6B555D03": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": [
-                "arn:aws:s3::*:membership-dist/membership/PROD/discount-api/",
-                "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-PROD/*",
-              ],
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "DistributionBucketName",
+                    },
+                    "/membership/PROD/discount-api/*",
+                  ],
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "S3inlinepolicy3B07399A",
+        "PolicyName": "GetDistributablePolicyDiscountapi6B555D03",
         "Roles": [
           {
             "Ref": "discountapilambdaServiceRole4CB5B1F4",
@@ -1214,12 +1256,36 @@ exports[`The Discount API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SQSemailpolicy7D2D5531": {
+    "S3catalogreadpolicyE18911B4": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "sqs:sendmessage",
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-PROD/*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "S3catalogreadpolicyE18911B4",
+        "Roles": [
+          {
+            "Ref": "discountapilambdaServiceRole4CB5B1F4",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SQSsendpolicy967EA932": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:SendMessage",
+              ],
               "Effect": "Allow",
               "Resource": {
                 "Fn::Join": [
@@ -1241,7 +1307,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SQSemailpolicy7D2D5531",
+        "PolicyName": "SQSsendpolicy967EA932",
         "Roles": [
           {
             "Ref": "discountapilambdaServiceRole4CB5B1F4",
@@ -1250,7 +1316,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SecretsManagerpolicy7194A9CE": {
+    "ZuoraOAuthSecretsManagerpolicy5448D99B": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -1277,7 +1343,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SecretsManagerpolicy7194A9CE",
+        "PolicyName": "ZuoraOAuthSecretsManagerpolicy5448D99B",
         "Roles": [
           {
             "Ref": "discountapilambdaServiceRole4CB5B1F4",

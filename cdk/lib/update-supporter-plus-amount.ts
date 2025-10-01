@@ -1,6 +1,10 @@
 import { GuApiLambda } from '@guardian/cdk';
-import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
+import type {
+	AppIdentity,
+	GuStackProps,
+} from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
+import { GuGetDistributablePolicy } from '@guardian/cdk/lib/constructs/iam';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import {
@@ -9,9 +13,12 @@ import {
 	CfnDomainName,
 } from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
-import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
+import {
+	AllowSqsSendPolicy,
+	AllowZuoraOAuthSecretsPolicy,
+} from './cdk/policies';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { nodeVersion } from './node-version';
 
@@ -23,11 +30,13 @@ export interface UpdateSupporterPlusAmountProps extends GuStackProps {
 	hostedZoneId: string;
 }
 
-export class UpdateSupporterPlusAmount extends GuStack {
+export class UpdateSupporterPlusAmount extends GuStack implements AppIdentity {
+	readonly app: string;
 	constructor(scope: App, id: string, props: UpdateSupporterPlusAmountProps) {
 		super(scope, id, props);
 
 		const app = 'update-supporter-plus-amount';
+		this.app = app;
 		const nameWithStage = `${app}-${this.stage}`;
 
 		const commonEnvironmentVariables = {
@@ -145,49 +154,10 @@ export class UpdateSupporterPlusAmount extends GuStack {
 			resourceRecords: [cfnDomainName.attrRegionalDomainName],
 		});
 
-		const s3InlinePolicy: Policy = new Policy(this, 'S3 inline policy', {
-			statements: [
-				new PolicyStatement({
-					effect: Effect.ALLOW,
-					actions: ['s3:GetObject'],
-					resources: [
-						`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`,
-					],
-				}),
-			],
-		});
-
-		const secretsManagerPolicy: Policy = new Policy(
-			this,
-			'Secrets Manager policy',
-			{
-				statements: [
-					new PolicyStatement({
-						effect: Effect.ALLOW,
-						actions: ['secretsmanager:GetSecretValue'],
-						resources: [
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
-						],
-					}),
-				],
-			},
-		);
-
-		const sqsPolicy: Policy = new Policy(this, 'SQS policy', {
-			statements: [
-				new PolicyStatement({
-					effect: Effect.ALLOW,
-					actions: ['sqs:GetQueueUrl', 'sqs:SendMessage'],
-					resources: [
-						`arn:aws:sqs:${this.region}:${this.account}:braze-emails-${this.stage}`,
-						`arn:aws:sqs:${this.region}:${this.account}:supporter-product-data-${this.stage}`,
-					],
-				}),
-			],
-		});
-
-		lambda.role?.attachInlinePolicy(s3InlinePolicy);
-		lambda.role?.attachInlinePolicy(secretsManagerPolicy);
-		lambda.role?.attachInlinePolicy(sqsPolicy);
+		[
+			new GuGetDistributablePolicy(this, this),
+			new AllowZuoraOAuthSecretsPolicy(this),
+			new AllowSqsSendPolicy(this, 'braze-emails', 'supporter-product-data'),
+		].forEach((p) => lambda.role!.attachInlinePolicy(p));
 	}
 }
