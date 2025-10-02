@@ -5,6 +5,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
+      "GuLambdaFunction",
       "GuApiGatewayWithLambdaByPath",
     ],
     "gu:cdk:version": "TEST",
@@ -40,6 +41,10 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
   "Parameters": {
     "BatonAccountIdParameter": {
       "Default": "/accountIds/baton",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+    "DeletionRequestsTopicArnParameter": {
+      "Default": "/CODE/support/mparticle-api/deletionRequestsTopicArn",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
     "DistributionBucketName": {
@@ -746,6 +751,433 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "mparticleapideletiondlqF58F4DCD": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "mparticle-api-deletion-dlq-CODE",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "mparticleapideletionlambda310D4B5A": {
+      "DependsOn": [
+        "mparticleapideletionlambdaServiceRoleDefaultPolicyF4B2C695",
+        "mparticleapideletionlambdaServiceRoleF98745D2",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/CODE/mparticle-api/mparticle-api.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "APP": "mparticle-api",
+            "STACK": "support",
+            "STAGE": "CODE",
+          },
+        },
+        "FunctionName": "mparticle-api-deletion-CODE",
+        "Handler": "index.handlerDeletion",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "mparticleapideletionlambdaServiceRoleF98745D2",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "mparticleapideletionlambdaServiceRoleDefaultPolicyF4B2C695": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:PutObject",
+                "s3:ListBucket",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "SarResultsBucketParameter",
+                      },
+                      "/mparticle-results/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "SarResultsBucketParameter",
+                      },
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "mparticleapideletionqueueDDC6E7BA",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/CODE/mparticle-api/mparticle-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/mparticle-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/mparticle-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "mparticleapideletionlambdaServiceRoleDefaultPolicyF4B2C695",
+        "Roles": [
+          {
+            "Ref": "mparticleapideletionlambdaServiceRoleF98745D2",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "mparticleapideletionlambdaServiceRoleF98745D2": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "mparticleapideletionlambdaSqsEventSourcemparticleapiCODEmparticleapideletionqueue810D13E663C2354B": {
+      "Properties": {
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "mparticleapideletionqueueDDC6E7BA",
+            "Arn",
+          ],
+        },
+        "FunctionName": {
+          "Ref": "mparticleapideletionlambda310D4B5A",
+        },
+        "FunctionResponseTypes": [
+          "ReportBatchItemFailures",
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "mparticleapideletionqueueDDC6E7BA": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "QueueName": "mparticle-api-deletion-queue-CODE",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "mparticleapideletiondlqF58F4DCD",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 3,
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "VisibilityTimeout": 300,
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "mparticleapideletionqueuePolicy91657421": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Ref": "DeletionRequestsTopicArnParameter",
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "sns.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "mparticleapideletionqueueDDC6E7BA",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "mparticleapideletionqueueDDC6E7BA",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
+    "mparticleapideletionqueuemparticleapiCODEDeletionRequestsTopicBB73B729FF20AEDD": {
+      "DependsOn": [
+        "mparticleapideletionqueuePolicy91657421",
+      ],
+      "Properties": {
+        "Endpoint": {
+          "Fn::GetAtt": [
+            "mparticleapideletionqueueDDC6E7BA",
+            "Arn",
+          ],
+        },
+        "Protocol": "sqs",
+        "Region": {
+          "Fn::Select": [
+            3,
+            {
+              "Fn::Split": [
+                ":",
+                {
+                  "Ref": "DeletionRequestsTopicArnParameter",
+                },
+              ],
+            },
+          ],
+        },
+        "TopicArn": {
+          "Ref": "DeletionRequestsTopicArnParameter",
+        },
+      },
+      "Type": "AWS::SNS::Subscription",
+    },
     "mparticleapihttplambdaF78B60DB": {
       "DependsOn": [
         "mparticleapihttplambdaServiceRoleDefaultPolicy70050791",
@@ -998,6 +1430,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
+      "GuLambdaFunction",
       "GuApiGatewayWithLambdaByPath",
     ],
     "gu:cdk:version": "TEST",
@@ -1033,6 +1466,10 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
   "Parameters": {
     "BatonAccountIdParameter": {
       "Default": "/accountIds/baton",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+    "DeletionRequestsTopicArnParameter": {
+      "Default": "/PROD/support/mparticle-api/deletionRequestsTopicArn",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
     "DistributionBucketName": {
@@ -1241,6 +1678,155 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
                   "lambda:",
                   {
                     "Ref": "mparticleapibatonlambdaF08957A4",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "MParticleDeletionDlqAlarmEFBA93FB": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "There are messages in the mParticle deletion DLQ that failed to process. Investigate and redrive if appropriate.",
+        "AlarmName": "Messages in mParticle deletion dead letter queue",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "mparticleapideletiondlqF58F4DCD",
+                "QueueName",
+              ],
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 300,
+        "Statistic": "Maximum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "mparticleapideletionlambda310D4B5A",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "MParticleDeletionLambdaErrorAlarmCCCF3C4C": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "Impact: a user deletion request may not have been processed successfully. Check the dead letter queue and lambda logs.",
+        "AlarmName": "An error occurred in the mParticle Deletion Lambda",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "mparticleapideletionlambda310D4B5A",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 86400,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "mparticleapideletionlambda310D4B5A",
                   },
                 ],
               ],
@@ -1955,6 +2541,433 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::IAM::Policy",
+    },
+    "mparticleapideletiondlqF58F4DCD": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "mparticle-api-deletion-dlq-PROD",
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "mparticleapideletionlambda310D4B5A": {
+      "DependsOn": [
+        "mparticleapideletionlambdaServiceRoleDefaultPolicyF4B2C695",
+        "mparticleapideletionlambdaServiceRoleF98745D2",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/PROD/mparticle-api/mparticle-api.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "APP": "mparticle-api",
+            "STACK": "support",
+            "STAGE": "PROD",
+          },
+        },
+        "FunctionName": "mparticle-api-deletion-PROD",
+        "Handler": "index.handlerDeletion",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "mparticleapideletionlambdaServiceRoleF98745D2",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 300,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "mparticleapideletionlambdaServiceRoleDefaultPolicyF4B2C695": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:PutObject",
+                "s3:ListBucket",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "SarResultsBucketParameter",
+                      },
+                      "/mparticle-results/*",
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:s3:::",
+                      {
+                        "Ref": "SarResultsBucketParameter",
+                      },
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "mparticleapideletionqueueDDC6E7BA",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/PROD/mparticle-api/mparticle-api.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/mparticle-api",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/mparticle-api/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "mparticleapideletionlambdaServiceRoleDefaultPolicyF4B2C695",
+        "Roles": [
+          {
+            "Ref": "mparticleapideletionlambdaServiceRoleF98745D2",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "mparticleapideletionlambdaServiceRoleF98745D2": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "mparticleapideletionlambdaSqsEventSourcemparticleapiPRODmparticleapideletionqueue42AB776E07921F1B": {
+      "Properties": {
+        "EventSourceArn": {
+          "Fn::GetAtt": [
+            "mparticleapideletionqueueDDC6E7BA",
+            "Arn",
+          ],
+        },
+        "FunctionName": {
+          "Ref": "mparticleapideletionlambda310D4B5A",
+        },
+        "FunctionResponseTypes": [
+          "ReportBatchItemFailures",
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "mparticleapideletionqueueDDC6E7BA": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "QueueName": "mparticle-api-deletion-queue-PROD",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "mparticleapideletiondlqF58F4DCD",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 3,
+        },
+        "Tags": [
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "VisibilityTimeout": 300,
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "mparticleapideletionqueuePolicy91657421": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sqs:SendMessage",
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Ref": "DeletionRequestsTopicArnParameter",
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "sns.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "mparticleapideletionqueueDDC6E7BA",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "mparticleapideletionqueueDDC6E7BA",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
+    "mparticleapideletionqueuemparticleapiPRODDeletionRequestsTopic48887672D0A6A9F1": {
+      "DependsOn": [
+        "mparticleapideletionqueuePolicy91657421",
+      ],
+      "Properties": {
+        "Endpoint": {
+          "Fn::GetAtt": [
+            "mparticleapideletionqueueDDC6E7BA",
+            "Arn",
+          ],
+        },
+        "Protocol": "sqs",
+        "Region": {
+          "Fn::Select": [
+            3,
+            {
+              "Fn::Split": [
+                ":",
+                {
+                  "Ref": "DeletionRequestsTopicArnParameter",
+                },
+              ],
+            },
+          ],
+        },
+        "TopicArn": {
+          "Ref": "DeletionRequestsTopicArnParameter",
+        },
+      },
+      "Type": "AWS::SNS::Subscription",
     },
     "mparticleapihttplambdaF78B60DB": {
       "DependsOn": [

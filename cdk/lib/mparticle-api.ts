@@ -96,28 +96,36 @@ export class MParticleApi extends GuStack {
 		});
 
 		// Lambda for handling deletion requests from SQS
-		const deletionLambda = new GuLambdaFunction(this, `${app}-deletion-lambda`, {
-			app,
-			memorySize: 1024,
-			fileName: `${app}.zip`,
-			runtime: nodeVersion,
-			loggingFormat: LoggingFormat.TEXT,
-			handler: 'index.handlerDeletion',
-			functionName: `${app}-deletion-${this.stage}`,
-			timeout: Duration.seconds(300),
-			initialPolicy: [s3BatonReadAndWritePolicy],
-			events: [new SqsEventSource(deletionRequestsQueue, {
-				reportBatchItemFailures: true,
-			})],
-		});
+		const deletionLambda = new GuLambdaFunction(
+			this,
+			`${app}-deletion-lambda`,
+			{
+				app,
+				memorySize: 1024,
+				fileName: `${app}.zip`,
+				runtime: nodeVersion,
+				loggingFormat: LoggingFormat.TEXT,
+				handler: 'index.handlerDeletion',
+				functionName: `${app}-deletion-${this.stage}`,
+				timeout: Duration.seconds(300),
+				initialPolicy: [s3BatonReadAndWritePolicy],
+				events: [
+					new SqsEventSource(deletionRequestsQueue, {
+						reportBatchItemFailures: true,
+					}),
+				],
+			},
+		);
 
 		// Subscribe SQS queue to SNS topic for deletion requests
 		const deletionRequestsTopic = Topic.fromTopicArn(
 			this,
-			'DeletionRequestsTopic', 
-			deletionRequestsTopicArn
+			'DeletionRequestsTopic',
+			deletionRequestsTopicArn,
 		);
-		deletionRequestsTopic.addSubscription(new SqsSubscription(deletionRequestsQueue));
+		deletionRequestsTopic.addSubscription(
+			new SqsSubscription(deletionRequestsQueue),
+		);
 
 		// Grant SNS permission to send messages to the deletion queue
 		deletionRequestsQueue.addToResourcePolicy(
@@ -131,7 +139,7 @@ export class MParticleApi extends GuStack {
 						'aws:SourceArn': deletionRequestsTopicArn,
 					},
 				},
-			})
+			}),
 		);
 
 		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {
