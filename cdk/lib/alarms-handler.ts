@@ -1,8 +1,6 @@
 import { GuScheduledLambda } from '@guardian/cdk';
 import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
-import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
-import { GuStack, GuStringParameter } from '@guardian/cdk/lib/constructs/core';
-import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
+import { GuStringParameter } from '@guardian/cdk/lib/constructs/core';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import { ComparisonOperator } from 'aws-cdk-lib/aws-cloudwatch';
@@ -21,13 +19,19 @@ import {
 	SqsSubscription,
 } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
+import { SrLambda } from './cdk/sr-lambda';
+import type { SrStageNames } from './cdk/sr-stack';
+import { SrStack } from './cdk/sr-stack';
 import { nodeVersion } from './node-version';
 
-export class AlarmsHandler extends GuStack {
-	constructor(scope: App, id: string, props: GuStackProps) {
-		super(scope, id, props);
+export class AlarmsHandler extends SrStack {
+	constructor(scope: App, stage: SrStageNames) {
+		super(scope, {
+			stage,
+			app: 'alarms-handler',
+		});
 
-		const app = 'alarms-handler';
+		const app = this.app;
 
 		const deadLetterQueue = new Queue(this, `dead-letters-${app}-queue`, {
 			queueName: `dead-letters-${app}-queue-${this.stage}`,
@@ -82,22 +86,14 @@ export class AlarmsHandler extends GuStack {
 			},
 		);
 
-		const triggeredLambda = new GuLambdaFunction(this, `${app}-lambda`, {
-			app,
-			memorySize: 1024,
-			fileName: `${app}.zip`,
-			runtime: nodeVersion,
-			timeout: Duration.seconds(15),
-			handler: 'index.handler',
-			functionName: `${app}-${this.stage}`,
-			loggingFormat: LoggingFormat.TEXT,
-			events: [new SqsEventSource(queue)],
-			environment: {
-				APP: app,
-				STACK: this.stack,
-				STAGE: this.stage,
+		const triggeredLambda = new SrLambda(
+			this,
+			`${app}-lambda`,
+			{
+				events: [new SqsEventSource(queue)],
 			},
-		});
+			{},
+		);
 
 		triggeredLambda.role?.attachInlinePolicy(
 			new Policy(this, `${app}-cloudwatch-policy`, {

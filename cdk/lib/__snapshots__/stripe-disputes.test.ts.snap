@@ -7,7 +7,6 @@ exports[`The stripe disputes webhook API stack matches the snapshot 1`] = `
       "GuAlarm",
       "GuDistributionBucketParameter",
       "GuApiLambda",
-      "GuLambdaFunction",
       "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
@@ -55,7 +54,7 @@ exports[`The stripe disputes webhook API stack matches the snapshot 1`] = `
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/membership/CODE/stripe-disputes/",
+              "Resource": "arn:aws:s3::*:membership-dist/support/CODE/stripe-disputes/",
             },
           ],
           "Version": "2012-10-17",
@@ -76,7 +75,7 @@ exports[`The stripe disputes webhook API stack matches the snapshot 1`] = `
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/membership/CODE/stripe-disputes/",
+              "Resource": "arn:aws:s3::*:membership-dist/support/CODE/stripe-disputes/",
             },
           ],
           "Version": "2012-10-17",
@@ -341,6 +340,10 @@ Common causes: Salesforce API errors, Zuora API errors, malformed webhook data",
         "Statistic": "Sum",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
             "Key": "DiagnosticLinks",
             "Value": "lambda:stripe-disputes-consumer-CODE",
           },
@@ -354,7 +357,7 @@ Common causes: Salesforce API errors, Zuora API errors, malformed webhook data",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -369,7 +372,7 @@ Common causes: Salesforce API errors, Zuora API errors, malformed webhook data",
     "DNSRecord": {
       "Properties": {
         "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "stripe-disputes.code.support.guardianapis.com",
+        "Name": "stripe-disputes-code.support.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -455,6 +458,10 @@ DLQ: https://",
         "Statistic": "Maximum",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -464,7 +471,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -478,7 +485,7 @@ DLQ: https://",
     },
     "DomainName": {
       "Properties": {
-        "DomainName": "stripe-disputes.code.support.guardianapis.com",
+        "DomainName": "stripe-disputes-code.support.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -498,6 +505,10 @@ DLQ: https://",
         },
         "Tags": [
           {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -507,7 +518,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -569,6 +580,10 @@ DLQ: https://",
         "Statistic": "Sum",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
             "Key": "DiagnosticLinks",
             "Value": "lambda:stripe-disputes-producer-CODE",
           },
@@ -582,7 +597,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -646,6 +661,10 @@ DLQ: https://",
         "Statistic": "Sum",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
             "Key": "DiagnosticLinks",
             "Value": "lambda:stripe-disputes-producer-CODE",
           },
@@ -659,7 +678,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -742,6 +761,10 @@ DLQ: https://",
         "Statistic": "Maximum",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -751,7 +774,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -770,6 +793,10 @@ DLQ: https://",
         "QueueName": "dead-letters-stripe-disputes-queue-CODE",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -779,7 +806,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -805,6 +832,10 @@ DLQ: https://",
         },
         "Tags": [
           {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -814,7 +845,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -836,7 +867,7 @@ DLQ: https://",
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/CODE/stripe-disputes/stripe-disputes.zip",
+          "S3Key": "support/CODE/stripe-disputes/stripe-disputes.zip",
         },
         "Description": "A lambda that handles stripe disputes SQS events",
         "Environment": {
@@ -846,9 +877,9 @@ DLQ: https://",
             "DISPUTE_EVENTS_QUEUE_URL": {
               "Ref": "stripedisputeseventsqueueF268BDE0",
             },
-            "STACK": "membership",
+            "STACK": "support",
             "STAGE": "CODE",
-            "Stack": "membership",
+            "Stack": "support",
             "Stage": "CODE",
           },
         },
@@ -880,7 +911,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -934,7 +965,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -999,7 +1030,7 @@ DLQ: https://",
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/CODE/stripe-disputes/stripe-disputes.zip",
+                      "/support/CODE/stripe-disputes/stripe-disputes.zip",
                     ],
                   ],
                 },
@@ -1020,7 +1051,7 @@ DLQ: https://",
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/stripe-disputes",
+                    ":parameter/CODE/support/stripe-disputes",
                   ],
                 ],
               },
@@ -1043,7 +1074,7 @@ DLQ: https://",
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/stripe-disputes/*",
+                    ":parameter/CODE/support/stripe-disputes/*",
                   ],
                 ],
               },
@@ -1088,7 +1119,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1108,7 +1139,7 @@ DLQ: https://",
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/CODE/stripe-disputes/stripe-disputes.zip",
+          "S3Key": "support/CODE/stripe-disputes/stripe-disputes.zip",
         },
         "Description": "A lambda that handles stripe disputes webhook events and processes SQS events",
         "Environment": {
@@ -1118,9 +1149,9 @@ DLQ: https://",
             "DISPUTE_EVENTS_QUEUE_URL": {
               "Ref": "stripedisputeseventsqueueF268BDE0",
             },
-            "STACK": "membership",
+            "STACK": "support",
             "STAGE": "CODE",
-            "Stack": "membership",
+            "Stack": "support",
             "Stage": "CODE",
           },
         },
@@ -1152,7 +1183,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1202,7 +1233,7 @@ DLQ: https://",
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/CODE/stripe-disputes/stripe-disputes.zip",
+                      "/support/CODE/stripe-disputes/stripe-disputes.zip",
                     ],
                   ],
                 },
@@ -1223,7 +1254,7 @@ DLQ: https://",
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/stripe-disputes",
+                    ":parameter/CODE/support/stripe-disputes",
                   ],
                 ],
               },
@@ -1246,7 +1277,7 @@ DLQ: https://",
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/stripe-disputes/*",
+                    ":parameter/CODE/support/stripe-disputes/*",
                   ],
                 ],
               },
@@ -1306,7 +1337,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1335,7 +1366,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1526,7 +1557,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1537,7 +1568,7 @@ DLQ: https://",
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "stripedisputeslambdaproducerstripedisputesproducerCODEDeploymentECBEB165170282681a13e060e6b7259982d9efda": {
+    "stripedisputeslambdaproducerstripedisputesproducerCODEDeploymentECBEB165538bda91920e035872fc0de4c551c998": {
       "DependsOn": [
         "stripedisputeslambdaproducerstripedisputesproducerCODEproxyANYC01EF3FC",
         "stripedisputeslambdaproducerstripedisputesproducerCODEproxyA9D84AD7",
@@ -1557,7 +1588,7 @@ DLQ: https://",
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODEDeploymentECBEB165170282681a13e060e6b7259982d9efda",
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODEDeploymentECBEB165538bda91920e035872fc0de4c551c998",
         },
         "RestApiId": {
           "Ref": "stripedisputeslambdaproducerstripedisputesproducerCODE94CD3A3A",
@@ -1578,7 +1609,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1617,7 +1648,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1772,7 +1803,6 @@ exports[`The stripe disputes webhook API stack matches the snapshot 2`] = `
       "GuAlarm",
       "GuDistributionBucketParameter",
       "GuApiLambda",
-      "GuLambdaFunction",
       "GuAlarm",
     ],
     "gu:cdk:version": "TEST",
@@ -1820,7 +1850,7 @@ exports[`The stripe disputes webhook API stack matches the snapshot 2`] = `
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/membership/PROD/stripe-disputes/",
+              "Resource": "arn:aws:s3::*:membership-dist/support/PROD/stripe-disputes/",
             },
           ],
           "Version": "2012-10-17",
@@ -1841,7 +1871,7 @@ exports[`The stripe disputes webhook API stack matches the snapshot 2`] = `
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/membership/PROD/stripe-disputes/",
+              "Resource": "arn:aws:s3::*:membership-dist/support/PROD/stripe-disputes/",
             },
           ],
           "Version": "2012-10-17",
@@ -2106,6 +2136,10 @@ Common causes: Salesforce API errors, Zuora API errors, malformed webhook data",
         "Statistic": "Sum",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
             "Key": "DiagnosticLinks",
             "Value": "lambda:stripe-disputes-consumer-PROD",
           },
@@ -2119,7 +2153,7 @@ Common causes: Salesforce API errors, Zuora API errors, malformed webhook data",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -2220,6 +2254,10 @@ DLQ: https://",
         "Statistic": "Maximum",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -2229,7 +2267,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -2263,6 +2301,10 @@ DLQ: https://",
         },
         "Tags": [
           {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -2272,7 +2314,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -2334,6 +2376,10 @@ DLQ: https://",
         "Statistic": "Sum",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
             "Key": "DiagnosticLinks",
             "Value": "lambda:stripe-disputes-producer-PROD",
           },
@@ -2347,7 +2393,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -2411,6 +2457,10 @@ DLQ: https://",
         "Statistic": "Sum",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
             "Key": "DiagnosticLinks",
             "Value": "lambda:stripe-disputes-producer-PROD",
           },
@@ -2424,7 +2474,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -2507,6 +2557,10 @@ DLQ: https://",
         "Statistic": "Maximum",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -2516,7 +2570,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -2535,6 +2589,10 @@ DLQ: https://",
         "QueueName": "dead-letters-stripe-disputes-queue-PROD",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -2544,7 +2602,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -2570,6 +2628,10 @@ DLQ: https://",
         },
         "Tags": [
           {
+            "Key": "App",
+            "Value": "stripe-disputes",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -2579,7 +2641,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -2601,7 +2663,7 @@ DLQ: https://",
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/PROD/stripe-disputes/stripe-disputes.zip",
+          "S3Key": "support/PROD/stripe-disputes/stripe-disputes.zip",
         },
         "Description": "A lambda that handles stripe disputes SQS events",
         "Environment": {
@@ -2611,9 +2673,9 @@ DLQ: https://",
             "DISPUTE_EVENTS_QUEUE_URL": {
               "Ref": "stripedisputeseventsqueueF268BDE0",
             },
-            "STACK": "membership",
+            "STACK": "support",
             "STAGE": "PROD",
-            "Stack": "membership",
+            "Stack": "support",
             "Stage": "PROD",
           },
         },
@@ -2645,7 +2707,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -2699,7 +2761,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -2764,7 +2826,7 @@ DLQ: https://",
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/PROD/stripe-disputes/stripe-disputes.zip",
+                      "/support/PROD/stripe-disputes/stripe-disputes.zip",
                     ],
                   ],
                 },
@@ -2785,7 +2847,7 @@ DLQ: https://",
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/stripe-disputes",
+                    ":parameter/PROD/support/stripe-disputes",
                   ],
                 ],
               },
@@ -2808,7 +2870,7 @@ DLQ: https://",
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/stripe-disputes/*",
+                    ":parameter/PROD/support/stripe-disputes/*",
                   ],
                 ],
               },
@@ -2853,7 +2915,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -2873,7 +2935,7 @@ DLQ: https://",
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/PROD/stripe-disputes/stripe-disputes.zip",
+          "S3Key": "support/PROD/stripe-disputes/stripe-disputes.zip",
         },
         "Description": "A lambda that handles stripe disputes webhook events and processes SQS events",
         "Environment": {
@@ -2883,9 +2945,9 @@ DLQ: https://",
             "DISPUTE_EVENTS_QUEUE_URL": {
               "Ref": "stripedisputeseventsqueueF268BDE0",
             },
-            "STACK": "membership",
+            "STACK": "support",
             "STAGE": "PROD",
-            "Stack": "membership",
+            "Stack": "support",
             "Stage": "PROD",
           },
         },
@@ -2917,7 +2979,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -2967,7 +3029,7 @@ DLQ: https://",
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/PROD/stripe-disputes/stripe-disputes.zip",
+                      "/support/PROD/stripe-disputes/stripe-disputes.zip",
                     ],
                   ],
                 },
@@ -2988,7 +3050,7 @@ DLQ: https://",
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/stripe-disputes",
+                    ":parameter/PROD/support/stripe-disputes",
                   ],
                 ],
               },
@@ -3011,7 +3073,7 @@ DLQ: https://",
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/stripe-disputes/*",
+                    ":parameter/PROD/support/stripe-disputes/*",
                   ],
                 ],
               },
@@ -3071,7 +3133,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -3237,7 +3299,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -3291,7 +3353,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -3302,7 +3364,7 @@ DLQ: https://",
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "stripedisputeslambdaproducerstripedisputesproducerPRODDeploymentCC0BB07C986c077959189146b1969e563296b256": {
+    "stripedisputeslambdaproducerstripedisputesproducerPRODDeploymentCC0BB07C8e33e36764b08d4b14847cb1ade36635": {
       "DependsOn": [
         "stripedisputeslambdaproducerstripedisputesproducerPRODproxyANY523CD05A",
         "stripedisputeslambdaproducerstripedisputesproducerPRODproxy7610EE25",
@@ -3322,7 +3384,7 @@ DLQ: https://",
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODDeploymentCC0BB07C986c077959189146b1969e563296b256",
+          "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODDeploymentCC0BB07C8e33e36764b08d4b14847cb1ade36635",
         },
         "RestApiId": {
           "Ref": "stripedisputeslambdaproducerstripedisputesproducerPRODB20FADF6",
@@ -3343,7 +3405,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -3382,7 +3444,7 @@ DLQ: https://",
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",

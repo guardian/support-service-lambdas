@@ -1,24 +1,31 @@
 import { GuApiLambda } from '@guardian/cdk';
 import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
-import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
-import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuPutCloudwatchMetricsPolicy } from '@guardian/cdk/lib/constructs/iam';
 import { type App, Duration } from 'aws-cdk-lib';
-import { CfnBasePathMapping, CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
 import {
 	ComparisonOperator,
 	Metric,
 	TreatMissingData,
 } from 'aws-cdk-lib/aws-cloudwatch';
 import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
-import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
+import { SrRestDomain } from './cdk/sr-rest-domain';
+import type { SrStageNames } from './cdk/sr-stack';
+import { SrStack } from './cdk/sr-stack';
 import { nodeVersion } from './node-version';
 
-export class MetricPushApi extends GuStack {
-	constructor(scope: App, id: string, props: GuStackProps) {
-		super(scope, id, props);
-		const app = 'metric-push-api';
+export class MetricPushApi extends SrStack {
+	constructor(
+		scope: App,
+		stage: SrStageNames,
+		cloudFormationStackName: string,
+	) {
+		super(scope, {
+			stage,
+			app: 'metric-push-api',
+			cloudFormationStackName,
+		});
+		const app = this.app;
 		const nameWithStage = `${app}-${this.stage}`;
 
 		// Lambda & API Gateway
@@ -58,30 +65,10 @@ export class MetricPushApi extends GuStack {
 		const cloudwatchPutMetricPolicy = new GuPutCloudwatchMetricsPolicy(this);
 		lambda.role?.attachInlinePolicy(cloudwatchPutMetricPolicy);
 
-		// DNS
-		const domainName = new CfnDomainName(this, 'MetricPushDomainName', {
-			regionalCertificateArn: `arn:aws:acm:${this.region}:${this.account}:certificate/b384a6a0-2f54-4874-b99b-96eeff96c009`,
-			domainName: `metric-push-api-${this.stage.toLowerCase()}.support.guardianapis.com`,
-			endpointConfiguration: {
-				types: ['REGIONAL'],
-			},
-		});
-
-		new CfnBasePathMapping(this, 'MetricPushBasePathMapping', {
-			restApiId: lambda.api.restApiId,
-			domainName: domainName.ref,
-			stage: lambda.api.deploymentStage.stageName,
-		});
-
-		const dnsRecord = new CfnRecordSet(this, 'MetricPushDNSRecord', {
-			name: `metric-push-api-${this.stage.toLowerCase()}.support.guardianapis.com`,
-			type: 'CNAME',
-			comment: `CNAME for metric-push-api API ${this.stage}`,
-			hostedZoneName: 'support.guardianapis.com.',
-			ttl: '120',
-			resourceRecords: [domainName.attrRegionalDomainName],
-		});
-		dnsRecord.overrideLogicalId('MetricPushDNSRecord');
+		const domain = new SrRestDomain(this, lambda.api, true);
+		domain.dnsRecord.overrideLogicalId('MetricPushDNSRecord');
+		domain.basePathMapping.overrideLogicalId('MetricPushBasePathMapping');
+		domain.cfnDomainName.overrideLogicalId('MetricPushDomainName');
 
 		// Alarms
 		new SrLambdaAlarm(this, '5xxApiAlarm', {

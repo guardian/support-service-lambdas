@@ -28,7 +28,6 @@ export class UpdateSupporterPlusAmount extends SrStack {
 	readonly app: string;
 	constructor(scope: App, stage: SrStageNames) {
 		super(scope, {
-			stack: 'support',
 			stage,
 			app: 'update-supporter-plus-amount',
 		});
@@ -127,7 +126,7 @@ export class UpdateSupporterPlusAmount extends SrStack {
 			});
 		}
 
-		new SrRestDomain(this, lambda);
+		new SrRestDomain(this, lambda.api);
 
 		[
 			new GuGetDistributablePolicy(this, this),

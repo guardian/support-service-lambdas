@@ -18,7 +18,7 @@ import { nodeVersion } from './node-version';
 export class ProductSwitchApi extends SrStack {
 	readonly app: string;
 	constructor(scope: App, stage: SrStageNames) {
-		super(scope, { stack: 'support', stage, app: 'product-switch-api' });
+		super(scope, { stage, app: 'product-switch-api' });
 
 		const app = this.app;
 		const nameWithStage = `${app}-${this.stage}`;
@@ -81,7 +81,7 @@ export class ProductSwitchApi extends SrStack {
 		// associate api key to plan
 		usagePlan.addApiKey(apiKey);
 
-		new SrRestDomain(this, lambda);
+		new SrRestDomain(this, lambda.api);
 
 		[
 			new GuGetDistributablePolicy(this, this),

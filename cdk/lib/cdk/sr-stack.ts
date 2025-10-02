@@ -10,7 +10,7 @@ export type SrStageNames = 'CODE' | 'PROD';
 export const stages: SrStageNames[] = ['CODE', 'PROD'];
 
 export interface SrStackProps extends Omit<GuStackProps, 'stack'> {
-	stack: SrStackNames;
+	stack?: SrStackNames; // defaults to 'support'
 	app: string;
 }
 
@@ -18,7 +18,7 @@ export class SrStack extends GuStack implements AppIdentity {
 	readonly stack: SrStackNames;
 	readonly app: string;
 	constructor(scope: App, props: SrStackProps) {
-		super(scope, `${props.app}-${props.stage}`, props);
+		super(scope, `${props.app}-${props.stage}`, { stack: 'support', ...props });
 		this.app = props.app;
 	}
 }

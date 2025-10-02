@@ -18,7 +18,7 @@ import { nodeVersion } from './node-version';
 
 export class DiscountApi extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
-		super(scope, { stack: 'support', stage, app: 'discount-api' });
+		super(scope, { stage, app: 'discount-api' });
 
 		const app = this.app;
 		const nameWithStage = `${app}-${this.stage}`;
@@ -114,6 +114,6 @@ export class DiscountApi extends SrStack {
 			}),
 		});
 
-		new SrRestDomain(this, lambda);
+		new SrRestDomain(this, lambda.api);
 	}
 }

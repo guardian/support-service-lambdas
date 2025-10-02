@@ -1,45 +1,48 @@
-import type { GuStack } from '@guardian/cdk/lib/constructs/core';
+import type { Identity } from '@guardian/cdk/lib/constructs/core';
+import type { GuFunctionProps } from '@guardian/cdk/lib/constructs/lambda';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { Duration } from 'aws-cdk-lib';
-import { LoggingFormat, type Runtime } from 'aws-cdk-lib/aws-lambda';
+import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { nodeVersion } from '../node-version';
+import type { SrStack } from './sr-stack';
 
-interface SrLambdaProps {
-	app: string;
-	fileName: string;
-	handler: string;
-	functionName?: string;
-	runtime?: Runtime;
-	loggingFormat?: LoggingFormat;
-	memorySize?: number;
-	timeout?: Duration;
-	// Allow any other props that GuLambdaFunction accepts
-	[key: string]: unknown;
+export type SrLambdaProps = {
+	nameSuffix?: string; // when you have multiple lambdas in an app
+};
+
+type GuLambdaOverrides = Omit<
+	GuFunctionProps,
+	keyof ReturnType<typeof defaultProps>
+> &
+	Partial<ReturnType<typeof defaultProps>>;
+
+function getNameWithStage(identity: Identity, nameSuffix: string | undefined) {
+	return `${identity.app}${nameSuffix ? '-' + nameSuffix : ''}-${identity.stage}`;
 }
 
-/**
- * Standard lambda configuration for support-service-lambdas.
- *
- * Provides sensible defaults for:
- * - loggingFormat: LoggingFormat.TEXT (per repo standard from PR #2660)
- * - runtime: nodeVersion (NODEJS_20_X for TypeScript lambdas)
- * - memorySize: 1024 (common default)
- * - timeout: 15 seconds (suitable for most HTTP APIs)
- *
- * All defaults can be overridden when needed.
- */
-export class SrLambda extends GuLambdaFunction {
-	constructor(scope: GuStack, id: string, props: SrLambdaProps) {
-		const defaultProps = {
-			runtime: nodeVersion,
-			loggingFormat: LoggingFormat.TEXT,
-			memorySize: 1024,
-			timeout: Duration.seconds(15),
-		};
+export function defaultProps(scope: Identity, nameSuffix: string | undefined) {
+	return {
+		app: scope.app,
+		functionName: getNameWithStage(scope, nameSuffix),
+		fileName: `${scope.app}.zip`,
+		handler: 'index.handler',
+		runtime: nodeVersion,
+		loggingFormat: LoggingFormat.TEXT,
+		memorySize: 1024,
+		timeout: Duration.seconds(15),
+	};
+}
 
+export class SrLambda extends GuLambdaFunction {
+	constructor(
+		scope: SrStack,
+		id: string,
+		lambdaOverrides: GuLambdaOverrides,
+		props: SrLambdaProps,
+	) {
 		const finalProps = {
-			...defaultProps,
-			...props,
+			...defaultProps(scope, props.nameSuffix),
+			...lambdaOverrides,
 		};
 
 		super(scope, id, finalProps);

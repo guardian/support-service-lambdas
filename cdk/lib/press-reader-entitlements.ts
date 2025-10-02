@@ -1,36 +1,31 @@
 import { GuApiLambda } from '@guardian/cdk';
-import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
-import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuCname } from '@guardian/cdk/lib/constructs/dns';
 import type { App } from 'aws-cdk-lib';
 import { Duration, Fn } from 'aws-cdk-lib';
-import {
-	ApiKeySourceType,
-	CfnBasePathMapping,
-	CfnDomainName,
-} from 'aws-cdk-lib/aws-apigateway';
+import { ApiKeySourceType } from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
-import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
+import { SrRestDomain } from './cdk/sr-rest-domain';
+import type { SrStageNames } from './cdk/sr-stack';
+import { SrStack } from './cdk/sr-stack';
 import { nodeVersion } from './node-version';
 
-export interface PressReaderEntitlementsProps extends GuStackProps {
-	stack: string;
-	stage: string;
-	internalDomainName: string;
+export interface PressReaderEntitlementsProps {
+	stage: SrStageNames;
 	publicDomainName: string;
-	hostedZoneId: string;
-	certificateId: string;
 	supporterProductDataTable: string;
 }
 
-export class PressReaderEntitlements extends GuStack {
-	constructor(scope: App, id: string, props: PressReaderEntitlementsProps) {
-		super(scope, id, props);
+export class PressReaderEntitlements extends SrStack {
+	constructor(scope: App, props: PressReaderEntitlementsProps) {
+		super(scope, {
+			stage: props.stage,
+			app: 'press-reader-entitlements',
+		});
 
-		const app = 'press-reader-entitlements';
+		const app = this.app;
 		const nameWithStage = `${app}-${this.stage}`;
 
 		const commonEnvironmentVariables = {
@@ -127,28 +122,7 @@ export class PressReaderEntitlements extends GuStack {
 		});
 
 		// ---- DNS ---- //
-		const certificateArn = `arn:aws:acm:eu-west-1:${this.account}:certificate/${props.certificateId}`;
-		const cfnDomainName = new CfnDomainName(this, 'DomainName', {
-			domainName: props.internalDomainName,
-			regionalCertificateArn: certificateArn,
-			endpointConfiguration: {
-				types: ['REGIONAL'],
-			},
-		});
-
-		new CfnBasePathMapping(this, 'BasePathMapping', {
-			domainName: cfnDomainName.ref,
-			restApiId: lambda.api.restApiId,
-			stage: lambda.api.deploymentStage.stageName,
-		});
-
-		new CfnRecordSet(this, 'DNSRecord', {
-			name: props.internalDomainName,
-			type: 'CNAME',
-			hostedZoneId: props.hostedZoneId,
-			ttl: '120',
-			resourceRecords: [cfnDomainName.attrRegionalDomainName],
-		});
+		new SrRestDomain(this, lambda.api);
 
 		new GuCname(this, `NS1 DNS entry for ${props.publicDomainName}`, {
 			app: app,
