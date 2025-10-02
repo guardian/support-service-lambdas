@@ -25,7 +25,7 @@ describe('The stripe disputes webhook API stack', () => {
 
 		it('should create Consumer Lambda Error alarm', () => {
 			template.hasResourceProperties('AWS::CloudWatch::Alarm', {
-				AlarmName: 'TEST stripe-disputes - Consumer Lambda high error rate',
+				AlarmName: 'CODE stripe-disputes - Consumer Lambda high error rate',
 				MetricName: 'Errors',
 				Namespace: 'AWS/Lambda',
 				Statistic: 'Sum',
@@ -37,7 +37,7 @@ describe('The stripe disputes webhook API stack', () => {
 
 		it('should create Producer API Gateway 5XX alarm', () => {
 			template.hasResourceProperties('AWS::CloudWatch::Alarm', {
-				AlarmName: 'TEST stripe-disputes - Producer API 5XX errors',
+				AlarmName: 'CODE stripe-disputes - Producer API 5XX errors',
 				MetricName: '5XXError',
 				Namespace: 'AWS/ApiGateway',
 				Statistic: 'Sum',
@@ -48,7 +48,7 @@ describe('The stripe disputes webhook API stack', () => {
 
 		it('should create Producer API Gateway 4XX alarm', () => {
 			template.hasResourceProperties('AWS::CloudWatch::Alarm', {
-				AlarmName: 'TEST stripe-disputes - Producer API high 4XX error rate',
+				AlarmName: 'CODE stripe-disputes - Producer API high 4XX error rate',
 				MetricName: '4XXError',
 				Namespace: 'AWS/ApiGateway',
 				Statistic: 'Sum',
@@ -60,7 +60,7 @@ describe('The stripe disputes webhook API stack', () => {
 		it('should create SQS Message Age alarm', () => {
 			template.hasResourceProperties('AWS::CloudWatch::Alarm', {
 				AlarmName:
-					'TEST stripe-disputes - SQS messages taking too long to process',
+					'CODE stripe-disputes - SQS messages taking too long to process',
 				MetricName: 'ApproximateAgeOfOldestMessage',
 				Namespace: 'AWS/SQS',
 				Threshold: 300000,
@@ -70,7 +70,7 @@ describe('The stripe disputes webhook API stack', () => {
 
 		it('should create DLQ alarm with correct properties', () => {
 			template.hasResourceProperties('AWS::CloudWatch::Alarm', {
-				AlarmName: 'TEST stripe-disputes - Failed to process dispute webhook',
+				AlarmName: 'CODE stripe-disputes - Failed to process dispute webhook',
 				MetricName: 'ApproximateNumberOfMessagesVisible',
 				Namespace: 'AWS/SQS',
 				Threshold: 1,
@@ -85,7 +85,7 @@ describe('The stripe disputes webhook API stack', () => {
 						'Fn::Join': Match.arrayWith([
 							'',
 							Match.arrayWith([
-								Match.stringLikeRegexp('alarms-handler-topic-TEST'),
+								Match.stringLikeRegexp('alarms-handler-topic-CODE'),
 							]),
 						]),
 					}),
