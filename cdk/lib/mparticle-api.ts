@@ -1,6 +1,7 @@
 import { GuApiGatewayWithLambdaByPath } from '@guardian/cdk';
 import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuStack } from '@guardian/cdk/lib/constructs/core';
+import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import {
@@ -9,11 +10,18 @@ import {
 	Policy,
 	PolicyStatement,
 	Role,
+	ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
+import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
+import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
+import { Topic } from 'aws-cdk-lib/aws-sns';
+import { SqsSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
+import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { SrLambda } from './cdk/sr-lambda';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { SrLambdaDomain } from './cdk/sr-lambda-domain';
+import { nodeVersion } from './node-version';
 
 export class MParticleApi extends GuStack {
 	constructor(scope: App, id: string, props: GuStackProps) {
@@ -33,8 +41,31 @@ export class MParticleApi extends GuStack {
 			`/${this.stage}/${this.stack}/${app}/sarResultsBucket`,
 		).stringValue;
 
+		// Get SNS topic ARN for user deletion requests
+		const deletionRequestsTopicArn = StringParameter.fromStringParameterName(
+			this,
+			'DeletionRequestsTopicArn',
+			`/${this.stage}/${this.stack}/${app}/deletionRequestsTopicArn`,
+		).stringValue;
+
 		// this must be the same as used in the code
 		const sarS3BaseKey = 'mparticle-results/';
+
+		// Dead Letter Queue for deletion requests
+		const deletionDlq = new Queue(this, `${app}-deletion-dlq`, {
+			queueName: `${app}-deletion-dlq-${this.stage}`,
+			retentionPeriod: Duration.days(14),
+		});
+
+		// SQS Queue for deletion requests
+		const deletionRequestsQueue = new Queue(this, `${app}-deletion-queue`, {
+			queueName: `${app}-deletion-queue-${this.stage}`,
+			deadLetterQueue: {
+				queue: deletionDlq,
+				maxReceiveCount: 3,
+			},
+			visibilityTimeout: Duration.seconds(300), // Should match lambda timeout
+		});
 
 		// make sure our lambdas can write to and list objects in the central baton bucket
 		// https://github.com/guardian/baton/?tab=readme-ov-file#:~:text=The%20convention%20is%20to%20write%20these%20to%20the%20gu%2Dbaton%2Dresults%20bucket%20that%20is%20hosted%20in%20the%20baton%20AWS%20account.
@@ -63,6 +94,45 @@ export class MParticleApi extends GuStack {
 			timeout: Duration.seconds(30), // Longer timeout for data processing
 			initialPolicy: [s3BatonReadAndWritePolicy],
 		});
+
+		// Lambda for handling deletion requests from SQS
+		const deletionLambda = new GuLambdaFunction(this, `${app}-deletion-lambda`, {
+			app,
+			memorySize: 1024,
+			fileName: `${app}.zip`,
+			runtime: nodeVersion,
+			loggingFormat: LoggingFormat.TEXT,
+			handler: 'index.handlerDeletion',
+			functionName: `${app}-deletion-${this.stage}`,
+			timeout: Duration.seconds(300),
+			initialPolicy: [s3BatonReadAndWritePolicy],
+			events: [new SqsEventSource(deletionRequestsQueue, {
+				reportBatchItemFailures: true,
+			})],
+		});
+
+		// Subscribe SQS queue to SNS topic for deletion requests
+		const deletionRequestsTopic = Topic.fromTopicArn(
+			this,
+			'DeletionRequestsTopic', 
+			deletionRequestsTopicArn
+		);
+		deletionRequestsTopic.addSubscription(new SqsSubscription(deletionRequestsQueue));
+
+		// Grant SNS permission to send messages to the deletion queue
+		deletionRequestsQueue.addToResourcePolicy(
+			new PolicyStatement({
+				effect: Effect.ALLOW,
+				principals: [new ServicePrincipal('sns.amazonaws.com')],
+				actions: ['sqs:SendMessage'],
+				resources: [deletionRequestsQueue.queueArn],
+				conditions: {
+					ArnEquals: {
+						'aws:SourceArn': deletionRequestsTopicArn,
+					},
+				},
+			})
+		);
 
 		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {
 			app: app,
@@ -143,6 +213,42 @@ export class MParticleApi extends GuStack {
 				threshold: 1,
 				evaluationPeriods: 1,
 				lambdaFunctionNames: batonLambda.functionName,
+			});
+
+			// Deletion Lambda error alarm
+			new SrLambdaAlarm(this, 'MParticleDeletionLambdaErrorAlarm', {
+				app,
+				alarmName: 'An error occurred in the mParticle Deletion Lambda',
+				alarmDescription:
+					'Impact: a user deletion request may not have been processed successfully. Check the dead letter queue and lambda logs.',
+				comparisonOperator:
+					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+				metric: new Metric({
+					metricName: 'Errors',
+					namespace: 'AWS/Lambda',
+					statistic: 'Sum',
+					period: Duration.hours(24),
+					dimensionsMap: {
+						FunctionName: deletionLambda.functionName,
+					},
+				}),
+				threshold: 1,
+				evaluationPeriods: 1,
+				lambdaFunctionNames: deletionLambda.functionName,
+			});
+
+			// Deletion DLQ alarm
+			new SrLambdaAlarm(this, 'MParticleDeletionDlqAlarm', {
+				app,
+				alarmName: 'Messages in mParticle deletion dead letter queue',
+				alarmDescription:
+					'There are messages in the mParticle deletion DLQ that failed to process. Investigate and redrive if appropriate.',
+				comparisonOperator:
+					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+				metric: deletionDlq.metricApproximateNumberOfMessagesVisible(),
+				threshold: 1,
+				evaluationPeriods: 1,
+				lambdaFunctionNames: deletionLambda.functionName,
 			});
 		}
 
