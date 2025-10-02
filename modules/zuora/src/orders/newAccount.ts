@@ -30,6 +30,7 @@ export type NewAccount<T extends PaymentMethod> = {
 	};
 	billCycleDay: 0;
 	autoPay: boolean;
+	paymentTerm: 'Due Upon Receipt';
 	paymentGateway: PaymentGateway<T>; // Generic to make sure we will only accept payment gateways that match the payment method
 	paymentMethod: T;
 	billToContact: Contact;
@@ -73,6 +74,7 @@ export function buildNewAccountObject<T extends PaymentMethod>({
 		},
 		billCycleDay: 0,
 		autoPay: true,
+		paymentTerm: 'Due Upon Receipt',
 		paymentGateway,
 		paymentMethod,
 		billToContact,
