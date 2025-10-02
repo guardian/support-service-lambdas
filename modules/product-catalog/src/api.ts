@@ -16,7 +16,7 @@ export const getProductCatalogFromApi = async (
 
 	const json = await response.json();
 	if (response.ok) {
-		logger.log(`Response from catalog api was: ${JSON.stringify(json)}`);
+		logger.log('Successfully fetched Product Catalog');
 		return productCatalogSchema.parse(json);
 	} else {
 		throw new Error(

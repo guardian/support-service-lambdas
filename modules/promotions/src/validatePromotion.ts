@@ -26,16 +26,32 @@ export const validatePromotion = (
 		getPromotionByCode(promotions, appliedPromotion.promoCode),
 		'No promotion found for code ' + appliedPromotion.promoCode,
 	);
+	console.log(
+		`Found promotion ${appliedPromotion.promoCode}: `,
+		promotion.name,
+	);
 
 	checkPromotionIsActive(promotion);
+
+	console.log(`${appliedPromotion.promoCode} is active`);
 	if (!isDiscountPromotion(promotion.promotionType)) {
 		throw new ValidationError(
-			`${promotion.name} is a ${promotion.promotionType.name} promotion these are no longer supported`,
+			`${appliedPromotion.promoCode} is a ${promotion.promotionType.name} promotion these are no longer supported`,
 		);
 	}
+	console.log(`${appliedPromotion.promoCode} is a discount promotion`);
 	checkDiscountHasDuration(promotion.promotionType);
+	console.log(
+		`${appliedPromotion.promoCode} has a duration of ${promotion.promotionType.durationMonths}`,
+	);
 	validateForCountryGroup(promotion, appliedPromotion.supportRegionId);
+	console.log(
+		`Promotion ${appliedPromotion.promoCode} is valid for country group ${appliedPromotion.supportRegionId}`,
+	);
 	validateProductRatePlan(promotion, productRatePlanId);
+	console.log(
+		`Promotion ${appliedPromotion.promoCode} is valid for product rate plan ${productRatePlanId}`,
+	);
 	return {
 		discountPercentage: promotion.promotionType.amount,
 		durationInMonths: promotion.promotionType.durationMonths,
