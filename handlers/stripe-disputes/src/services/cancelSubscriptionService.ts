@@ -15,7 +15,7 @@ export async function cancelSubscriptionService(
 	logger: Logger,
 	zuoraClient: ZuoraClient,
 	subscription: ZuoraSubscription,
-	salesforceContactId?: string,
+	salesforceObjectId?: string,
 ): Promise<boolean> {
 	if (subscription.status !== 'Active') {
 		logger.log(
@@ -51,7 +51,7 @@ export async function cancelSubscriptionService(
 		logger.error(
 			`No email address found for subscription ${subscription.subscriptionNumber}`,
 		);
-	} else if (salesforceContactId) {
+	} else if (salesforceObjectId) {
 		// Send email notification to customer
 		logger.log(
 			`Sending dispute cancellation email to customer: ${customerEmail}`,
@@ -70,7 +70,7 @@ export async function cancelSubscriptionService(
 					},
 				},
 				DataExtensionName: DataExtensionNames.stripeDisputeCancellation,
-				SfContactId: salesforceContactId,
+				SfContactId: salesforceObjectId,
 			};
 
 			await sendEmail(stageFromEnvironment(), emailMessage, (message: string) =>

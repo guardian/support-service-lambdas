@@ -150,7 +150,7 @@ describe('handleListenDisputeClosed', () => {
 					status: 'Active',
 					subscriptionNumber: 'SUB-12345',
 				}),
-				'sf_123', // salesforceContactId from upsert response
+				'sf_123', // salesforceObjectId from upsert response
 			);
 		});
 
