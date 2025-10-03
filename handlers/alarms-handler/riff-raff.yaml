@@ -1,3 +1,4 @@
+# MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/riff-raff.yaml.ts
 stacks:
   - support
 regions:
@@ -13,7 +14,6 @@ deployments:
       templateStagePaths:
         CODE: alarms-handler-CODE.template.json
         PROD: alarms-handler-PROD.template.json
-
   alarms-handler:
     type: aws-lambda
     parameters:
@@ -23,4 +23,5 @@ deployments:
       functionNames:
         - alarms-handler-
         - alarms-handler-scheduled-
-    dependencies: [alarms-handler-cloudformation]
+    dependencies:
+      - alarms-handler-cloudformation

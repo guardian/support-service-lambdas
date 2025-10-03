@@ -30,6 +30,10 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - run: pnpm install
+      - run: pnpm --filter "./buildcheck" type-check
+      - run: pnpm --filter "./buildcheck" check-formatting
+      - run: pnpm --filter "./buildcheck" lint
+      - run: pnpm --filter "./buildcheck" snapshot:assert ROOT
       - run: pnpm --filter "./modules/**" check-formatting
       - run: pnpm --filter "./modules/**" build
       - run: pnpm --filter "./modules/**" lint
@@ -74,6 +78,7 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - run: pnpm install
+      - run: pnpm --filter "./buildcheck" snapshot:assert handlers/${{ matrix.subproject }}
       - run: pnpm --filter cdk package
       - run: pnpm --filter ${{ matrix.subproject }} package
 
