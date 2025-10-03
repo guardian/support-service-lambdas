@@ -129,6 +129,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	DiscountApi,
 	ProductSwitchApi,
 	UpdateSupporterPlusAmount,
+	MParticleApi,
 ];
 
 // generate all stacks for all stages
@@ -349,14 +350,6 @@ new SalesforceEventBus(app, 'salesforce-event-bus-CODE', {
 	stage: 'CODE',
 });
 new SalesforceEventBus(app, 'salesforce-event-bus-PROD', {
-	stack: 'support',
-	stage: 'PROD',
-});
-new MParticleApi(app, 'mparticle-api-CODE', {
-	stack: 'support',
-	stage: 'CODE',
-});
-new MParticleApi(app, 'mparticle-api-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 });
