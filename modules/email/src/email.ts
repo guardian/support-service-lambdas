@@ -1,6 +1,5 @@
 import type { SendMessageCommandOutput } from '@aws-sdk/client-sqs';
-import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
-import { awsConfig } from '@modules/aws/config';
+import { sendMessageToQueue } from '@modules/aws/sqs';
 import { prettyPrint } from '@modules/prettyPrint';
 import type { Stage } from '@modules/stage';
 
@@ -52,16 +51,14 @@ export const sendEmail = async (
 	log: (messsage: string) => void = console.log,
 ): Promise<SendMessageCommandOutput> => {
 	const queueName = `braze-emails-${stage}`;
-	const client = new SQSClient(awsConfig);
 	log(
 		`Sending email message ${prettyPrint(emailMessage)} to queue ${queueName}`,
 	);
-	const command = new SendMessageCommand({
-		QueueUrl: queueName,
-		MessageBody: JSON.stringify(emailMessage),
-	});
 
-	const response = await client.send(command);
+	const response = await sendMessageToQueue({
+		queueName,
+		messageBody: JSON.stringify(emailMessage),
+	});
 	log(`Response from email send was ${prettyPrint(response)}`);
 	return response;
 };
