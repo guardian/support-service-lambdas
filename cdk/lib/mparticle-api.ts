@@ -7,7 +7,12 @@ import {
 	Policy,
 	PolicyStatement,
 	Role,
+	ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
+import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
+import { Topic } from 'aws-cdk-lib/aws-sns';
+import { SqsSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
+import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { SrLambda } from './cdk/sr-lambda';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
@@ -36,8 +41,27 @@ export class MParticleApi extends SrStack {
 			`/${this.stage}/${this.stack}/${app}/sarResultsBucket`,
 		).stringValue;
 
-		// this must be the same as used in the code
+		const deletionRequestsTopicArn = StringParameter.fromStringParameterName(
+			this,
+			'DeletionRequestsTopicArn',
+			`/${this.stage}/${this.stack}/${app}/deletionRequestsTopicArn`,
+		).stringValue;
+
 		const sarS3BaseKey = 'mparticle-results/';
+
+		const deletionDlq = new Queue(this, `${app}-deletion-dlq`, {
+			queueName: `${app}-deletion-dlq-${this.stage}`,
+			retentionPeriod: Duration.days(14),
+		});
+
+		const deletionRequestsQueue = new Queue(this, `${app}-deletion-queue`, {
+			queueName: `${app}-deletion-queue-${this.stage}`,
+			deadLetterQueue: {
+				queue: deletionDlq,
+				maxReceiveCount: 3,
+			},
+			visibilityTimeout: Duration.seconds(300), // Should match lambda timeout
+		});
 
 		// make sure our lambdas can write to and list objects in the central baton bucket
 		// https://github.com/guardian/baton/?tab=readme-ov-file#:~:text=The%20convention%20is%20to%20write%20these%20to%20the%20gu%2Dbaton%2Dresults%20bucket%20that%20is%20hosted%20in%20the%20baton%20AWS%20account.
@@ -70,6 +94,45 @@ export class MParticleApi extends SrStack {
 				initialPolicy: [s3BatonReadAndWritePolicy],
 			},
 			{ nameSuffix: 'baton' },
+		);
+
+		const deletionLambda = new SrLambda(
+			this,
+			`${app}-deletion-lambda`,
+			{
+				handler: 'index.handlerDeletion',
+				timeout: Duration.seconds(300),
+				initialPolicy: [s3BatonReadAndWritePolicy],
+				events: [
+					new SqsEventSource(deletionRequestsQueue, {
+						reportBatchItemFailures: true,
+					}),
+				],
+			},
+			{ nameSuffix: 'deletion' },
+		);
+
+		const deletionRequestsTopic = Topic.fromTopicArn(
+			this,
+			'DeletionRequestsTopic',
+			deletionRequestsTopicArn,
+		);
+		deletionRequestsTopic.addSubscription(
+			new SqsSubscription(deletionRequestsQueue),
+		);
+
+		deletionRequestsQueue.addToResourcePolicy(
+			new PolicyStatement({
+				effect: Effect.ALLOW,
+				principals: [new ServicePrincipal('sns.amazonaws.com')],
+				actions: ['sqs:SendMessage'],
+				resources: [deletionRequestsQueue.queueArn],
+				conditions: {
+					ArnEquals: {
+						'aws:SourceArn': deletionRequestsTopicArn,
+					},
+				},
+			}),
 		);
 
 		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {
@@ -151,6 +214,40 @@ export class MParticleApi extends SrStack {
 				threshold: 1,
 				evaluationPeriods: 1,
 				lambdaFunctionNames: batonLambda.functionName,
+			});
+
+			new SrLambdaAlarm(this, 'MParticleDeletionLambdaErrorAlarm', {
+				app,
+				alarmName: 'An error occurred in the mParticle Deletion Lambda',
+				alarmDescription:
+					'Impact: a user deletion request may not have been processed successfully. Check the dead letter queue and lambda logs.',
+				comparisonOperator:
+					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+				metric: new Metric({
+					metricName: 'Errors',
+					namespace: 'AWS/Lambda',
+					statistic: 'Sum',
+					period: Duration.hours(24),
+					dimensionsMap: {
+						FunctionName: deletionLambda.functionName,
+					},
+				}),
+				threshold: 1,
+				evaluationPeriods: 1,
+				lambdaFunctionNames: deletionLambda.functionName,
+			});
+
+			new SrLambdaAlarm(this, 'MParticleDeletionDlqAlarm', {
+				app,
+				alarmName: 'Messages in mParticle deletion dead letter queue',
+				alarmDescription:
+					'There are messages in the mParticle deletion DLQ that failed to process. Investigate and redrive if appropriate.',
+				comparisonOperator:
+					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+				metric: deletionDlq.metricApproximateNumberOfMessagesVisible(),
+				threshold: 1,
+				evaluationPeriods: 1,
+				lambdaFunctionNames: deletionLambda.functionName,
 			});
 		}
 
