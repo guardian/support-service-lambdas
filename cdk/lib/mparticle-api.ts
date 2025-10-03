@@ -1,5 +1,4 @@
 import { GuApiGatewayWithLambdaByPath } from '@guardian/cdk';
-import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import {
@@ -10,7 +9,6 @@ import {
 	Role,
 	ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
-import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { SqsSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
@@ -19,7 +17,6 @@ import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { SrLambda } from './cdk/sr-lambda';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { SrRestDomain } from './cdk/sr-rest-domain';
-import { nodeVersion } from './node-version';
 import type { SrStageNames } from './cdk/sr-stack';
 import { SrStack } from './cdk/sr-stack';
 
@@ -99,17 +96,11 @@ export class MParticleApi extends SrStack {
 			{ nameSuffix: 'baton' },
 		);
 
-		const deletionLambda = new GuLambdaFunction(
+		const deletionLambda = new SrLambda(
 			this,
 			`${app}-deletion-lambda`,
 			{
-				app,
-				memorySize: 1024,
-				fileName: `${app}.zip`,
-				runtime: nodeVersion,
-				loggingFormat: LoggingFormat.TEXT,
 				handler: 'index.handlerDeletion',
-				functionName: `${app}-deletion-${this.stage}`,
 				timeout: Duration.seconds(300),
 				initialPolicy: [s3BatonReadAndWritePolicy],
 				events: [
@@ -118,6 +109,7 @@ export class MParticleApi extends SrStack {
 					}),
 				],
 			},
+			{ nameSuffix: 'deletion' },
 		);
 
 		const deletionRequestsTopic = Topic.fromTopicArn(
