@@ -99,6 +99,7 @@ jobs:
           commentingEnabled: 'false'
           contentDirectories: |
             ${{ matrix.subproject }}-cloudformation:
-              - ./cdk/cdk.out
+              - ./cdk/cdk.out/${{ matrix.subproject }}-CODE.template.json
+              - ./cdk/cdk.out/${{ matrix.subproject }}-PROD.template.json
             ${{ matrix.subproject }}:
               - ./handlers/${{ matrix.subproject }}/target/${{ matrix.subproject }}.zip
