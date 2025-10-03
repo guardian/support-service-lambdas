@@ -1,6 +1,8 @@
 {
   "name": "product-switch-api",
   "scripts": {
+    "cdk:test": "pnpm --filter cdk test product-switch-api",
+    "cdk:test-update": "pnpm --filter cdk test-update product-switch-api",
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
     "type-check": "tsc --noEmit",

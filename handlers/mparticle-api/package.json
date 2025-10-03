@@ -1,6 +1,8 @@
 {
   "name": "mparticle-api",
   "scripts": {
+    "cdk:test": "pnpm --filter cdk test mparticle-api",
+    "cdk:test-update": "pnpm --filter cdk test-update mparticle-api",
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
     "type-check": "tsc --noEmit",
