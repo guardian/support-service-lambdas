@@ -1,21 +1,8 @@
 A module to enable sending of emails from Typescript code via Braze and [membership-workflow](https://github.com/guardian/membership-workflow/) 
 
-Lambdas which use this functionality will need appropriate IAM permissions. For an example of this see the `new-product-api` (reproduced below):
+Lambdas which use this functionality will need appropriate IAM permissions. Add the policy below to your CDK (or see [`update-supporter-plus-amount`](https://github.com/guardian/support-service-lambdas/blob/ff152cfed9ac3a91267b1a9adcc6be09378a3126/cdk/lib/update-supporter-plus-amount.ts#L134) )
 
 ```typescript
-    const sqsInlinePolicy: Policy = new Policy(this, "sqs-inline-policy", {
-    statements: [
-        new PolicyStatement({
-            effect: Effect.ALLOW,
-            actions: [
-                "sqs:GetQueueUrl",
-                "sqs:SendMessage"
-            ],
-            resources: [
-                `arn:aws:sqs:${this.region}:${this.account}:braze-emails-${this.stage}`
-            ]
-        }),
-    ],
-})
-addSubscriptionLambda.role?.attachInlinePolicy(sqsInlinePolicy);
+    const sqsInlinePolicy: Policy = new AllowSqsSendPolicy(this, 'braze-emails');
+    addSubscriptionLambda.role!.attachInlinePolicy(sqsInlinePolicy);
 ```
