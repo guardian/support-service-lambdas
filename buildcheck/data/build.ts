@@ -12,6 +12,7 @@ export interface HandlerDefinition {
 	functionNames?: string[];
 	entryPoints?: string[];
 	testTimeoutSeconds?: number;
+	extraScripts?: Record<string, string>;
 	dependencies?: Record<string, string>;
 	devDependencies?: Record<string, string>;
 }
@@ -69,9 +70,28 @@ const productSwitchApi: HandlerDefinition = {
 	},
 };
 
+const mparticleApi: HandlerDefinition = {
+	name: 'mparticle-api',
+	functionNames: ['mparticle-api-http-', 'mparticle-api-baton-'],
+	testTimeoutSeconds: 15,
+	extraScripts: {
+		'check-config': 'ts-node runManual/runLoadConfig.ts',
+	},
+	dependencies: {
+		...dep['@peculiar/x509'],
+		...dep.zod,
+	},
+	devDependencies: {
+		...dep['@faker-js/faker'],
+		...dep['@types/aws-lambda'],
+		...dep['@aws-sdk/client-s3'],
+	},
+};
+
 export const build: HandlerDefinition[] = [
 	alarmsHandler,
 	discountApi,
 	updateSupporterPlusAmount,
 	productSwitchApi,
+	mparticleApi,
 ];
