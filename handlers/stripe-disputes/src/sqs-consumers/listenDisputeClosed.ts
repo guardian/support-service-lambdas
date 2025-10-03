@@ -60,15 +60,7 @@ export async function handleListenDisputeClosed(
 				disputeId,
 			);
 
-			// Extract Salesforce Contact ID from the upsert response
-			const salesforceObjectId = upsertSalesforceObjectResponse.id;
-
-			await cancelSubscriptionService(
-				logger,
-				zuoraClient,
-				subscription,
-				salesforceObjectId,
-			);
+			await cancelSubscriptionService(logger, zuoraClient, subscription);
 		}
 	} catch (zuoraError) {
 		logger.error('Error during Zuora operations:', zuoraError);
