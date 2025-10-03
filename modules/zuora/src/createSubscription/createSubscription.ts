@@ -113,6 +113,11 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 	const validatedPromotion = appliedPromotion
 		? validatePromotion(promotions, appliedPromotion, productRatePlan.id)
 		: undefined;
+	if (validatedPromotion !== undefined) {
+		console.log(`Validated promotion is `, validatedPromotion);
+	} else {
+		console.log('No promotion applied');
+	}
 
 	const createSubscriptionOrderAction = buildCreateSubscriptionOrderAction({
 		stage: stage,

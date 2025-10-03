@@ -136,7 +136,7 @@ describe('validatePromotion', () => {
 				productRatePlanId,
 			),
 		).toThrow(
-			`${promotionName} is a tracking promotion these are no longer supported`,
+			`${promoCode} is a tracking promotion these are no longer supported`,
 		);
 	});
 });
