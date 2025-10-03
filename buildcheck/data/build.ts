@@ -11,6 +11,7 @@ export interface HandlerDefinition {
 	name: string;
 	functionNames?: string[];
 	entryPoints?: string[];
+	testTimeoutSeconds?: number;
 	dependencies?: Record<string, string>;
 	devDependencies?: Record<string, string>;
 }
@@ -54,8 +55,23 @@ const updateSupporterPlusAmount: HandlerDefinition = {
 	},
 };
 
+const productSwitchApi: HandlerDefinition = {
+	name: 'product-switch-api',
+	testTimeoutSeconds: 15,
+	dependencies: {
+		...dep['@aws-sdk/client-sqs'],
+		...dep.dayjs,
+		...dep['source-map-support'],
+		...dep.zod,
+	},
+	devDependencies: {
+		...dep['@types/aws-lambda'],
+	},
+};
+
 export const build: HandlerDefinition[] = [
 	alarmsHandler,
 	discountApi,
 	updateSupporterPlusAmount,
+	productSwitchApi,
 ];
