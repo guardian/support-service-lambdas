@@ -237,7 +237,7 @@ describe('cancelSubscriptionService', () => {
 			);
 		});
 
-		it('should handle missing email address gracefully', async () => {
+		it('should return false when no email address exists', async () => {
 			const mockSubscription = createMockSubscription('Active');
 			const mockCancelResponse = { Success: true, Id: 'cancel_123' };
 
@@ -260,10 +260,51 @@ describe('cancelSubscriptionService', () => {
 				mockSubscription,
 			);
 
-			expect(result).toBe(true);
+			expect(result).toBe(false); // Changed to false
 			expect(sendEmail).not.toHaveBeenCalled();
 			expect(mockLogger.error).toHaveBeenCalledWith(
 				'No email address found for subscription SUB-12345',
+			);
+			// Verify it only logs the error once (early return)
+			expect(mockLogger.error).toHaveBeenCalledTimes(1);
+		});
+
+		it('should return false when billToContact has no workEmail field', async () => {
+			const mockSubscription = createMockSubscription('Active');
+			const mockCancelResponse = { Success: true, Id: 'cancel_123' };
+
+			(cancelSubscription as jest.Mock).mockResolvedValue(mockCancelResponse);
+			(getAccount as jest.Mock).mockResolvedValue({
+				billToContact: {
+					// billToContact exists but has no workEmail field
+				},
+				accountNumber: 'ACC-12345',
+				basicInfo: {
+					identityId: 'identity-123',
+				},
+			});
+
+			const result = await cancelSubscriptionService(
+				mockLogger,
+				mockZuoraClient,
+				mockSubscription,
+			);
+
+			// Should return false because no email means we can't notify customer
+			expect(result).toBe(false);
+			// Should not attempt to send email
+			expect(sendEmail).not.toHaveBeenCalled();
+			// Should log error about missing email
+			expect(mockLogger.error).toHaveBeenCalledWith(
+				'No email address found for subscription SUB-12345',
+			);
+			// Should still log cancellation success messages (cancellation happened, but we return false)
+			expect(mockLogger.log).toHaveBeenCalledWith(
+				'Canceling active subscription: SUB-12345',
+			);
+			expect(mockLogger.log).toHaveBeenCalledWith(
+				'Subscription cancellation response:',
+				JSON.stringify(mockCancelResponse),
 			);
 		});
 
