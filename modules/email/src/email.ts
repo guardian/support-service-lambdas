@@ -40,6 +40,7 @@ export const DataExtensionNames = {
 	supporterPlusAnnualDiscountConfirmationEmail:
 		'supporter-plus-annual-discount-confirmation-email',
 	discountExpiryNotificationEmail: 'discount-expiry-email',
+	stripeDisputeCancellation: 'stripe-dispute-cancellation',
 } as const;
 
 export type DataExtensionName =

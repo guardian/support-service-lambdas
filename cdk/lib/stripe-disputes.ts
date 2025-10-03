@@ -8,6 +8,7 @@ import { Duration } from 'aws-cdk-lib';
 import { CfnBasePathMapping, CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
 import {
 	ComparisonOperator,
+	Metric,
 	TreatMissingData,
 } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
@@ -15,6 +16,7 @@ import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
+import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { nodeVersion } from './node-version';
 
 export interface StripeDisputesProps extends GuStackProps {
@@ -216,6 +218,101 @@ export class StripeDisputes extends GuStack {
 			],
 			'Allow SQS SendMessage and GetQueueAttributes to Dispute Events Queue',
 		);
+
+		// ---- Lambda Alarms ---- //
+
+		// Consumer Lambda Error Rate Alarm
+		new SrLambdaAlarm(this, 'ConsumerLambdaErrorAlarm', {
+			app: app,
+			alarmName: `${this.stage} ${app} - Consumer Lambda high error rate`,
+			alarmDescription:
+				`The ${app} consumer Lambda has experienced more than 3 errors in 5 minutes. ` +
+				`This indicates failures in processing dispute webhooks from SQS. ` +
+				`Check CloudWatch logs: https://${this.region}.console.aws.amazon.com/cloudwatch/home?region=${this.region}#logsV2:log-groups/log-group/$252Faws$252Flambda$252F${nameWithStageConsumer}\n` +
+				`Common causes: Salesforce API errors, Zuora API errors, malformed webhook data`,
+			lambdaFunctionNames: nameWithStageConsumer,
+			metric: new Metric({
+				metricName: 'Errors',
+				namespace: 'AWS/Lambda',
+				statistic: 'Sum',
+				period: Duration.minutes(5),
+				dimensionsMap: {
+					FunctionName: nameWithStageConsumer,
+				},
+			}),
+			threshold: 3, // 3 errors in 5 minutes
+			evaluationPeriods: 1,
+			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+			treatMissingData: TreatMissingData.NOT_BREACHING,
+		});
+
+		// Producer API Gateway 5XX Alarm
+		new SrLambdaAlarm(this, 'ProducerApiGateway5XXAlarm', {
+			app: app,
+			alarmName: `${this.stage} ${app} - Producer API 5XX errors`,
+			alarmDescription:
+				`The ${app} producer API is returning 5XX errors. ` +
+				`This prevents Stripe from delivering webhook events. ` +
+				`Check for Lambda errors, timeout issues, or signature verification failures. ` +
+				`Logs: https://${this.region}.console.aws.amazon.com/cloudwatch/home?region=${this.region}#logsV2:log-groups/log-group/$252Faws$252Flambda$252F${nameWithStageProducer}`,
+			lambdaFunctionNames: nameWithStageProducer,
+			metric: new Metric({
+				metricName: '5XXError',
+				namespace: 'AWS/ApiGateway',
+				statistic: 'Sum',
+				period: Duration.minutes(5),
+				dimensionsMap: {
+					ApiName: nameWithStageProducer,
+				},
+			}),
+			threshold: 1,
+			evaluationPeriods: 1,
+			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+			treatMissingData: TreatMissingData.NOT_BREACHING,
+		});
+
+		// Producer API Gateway 4XX Alarm (high rate)
+		new SrLambdaAlarm(this, 'ProducerApiGateway4XXAlarm', {
+			app: app,
+			alarmName: `${this.stage} ${app} - Producer API high 4XX error rate`,
+			alarmDescription:
+				`The ${app} producer API has high 4XX error rate (>10 in 5 min). ` +
+				`This may indicate invalid webhook signatures or missing headers. ` +
+				`Check Stripe webhook configuration and secret key. ` +
+				`Logs: https://${this.region}.console.aws.amazon.com/cloudwatch/home?region=${this.region}#logsV2:log-groups/log-group/$252Faws$252Flambda$252F${nameWithStageProducer}`,
+			lambdaFunctionNames: nameWithStageProducer,
+			metric: new Metric({
+				metricName: '4XXError',
+				namespace: 'AWS/ApiGateway',
+				statistic: 'Sum',
+				period: Duration.minutes(5),
+				dimensionsMap: {
+					ApiName: nameWithStageProducer,
+				},
+			}),
+			threshold: 10, // More than 10 4XX errors in 5 minutes
+			evaluationPeriods: 1,
+			comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
+			treatMissingData: TreatMissingData.NOT_BREACHING,
+		});
+
+		// SQS Message Age Alarm
+		new GuAlarm(this, 'SQSMessageAgeAlarm', {
+			app: app,
+			alarmName: `${this.stage} ${app} - SQS messages taking too long to process`,
+			alarmDescription:
+				`Messages in the ${app} queue are older than 5 minutes. ` +
+				`This indicates the consumer Lambda is not processing messages fast enough. ` +
+				`Check for Lambda throttling or processing errors. ` +
+				`Queue: https://${this.region}.console.aws.amazon.com/sqs/v2/home?region=${this.region}#/queues/https%3A%2F%2Fsqs.${this.region}.amazonaws.com%2F${this.account}%2F${disputeEventsQueue.queueName}`,
+			metric: disputeEventsQueue.metricApproximateAgeOfOldestMessage(),
+			threshold: 300000, // 5 minutes in milliseconds
+			evaluationPeriods: 1,
+			comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
+			treatMissingData: TreatMissingData.NOT_BREACHING,
+			snsTopicName: `alarms-handler-topic-${this.stage}`,
+			actionsEnabled: this.stage === 'PROD',
+		});
 
 		// ---- DNS ---- //
 		const certificateArn = `arn:aws:acm:eu-west-1:${this.account}:certificate/${props.certificateId}`;

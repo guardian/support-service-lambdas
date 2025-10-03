@@ -82,6 +82,7 @@ val getSubscriptionForCancelResponse = GetSubscriptionToCancelResponse(
   contractEffectiveDate = LocalDate.of(2020, 11, 29),
   accountId = "zuoraAccountId",
   accountNumber = AccountNumber("anAccountNumber"),
+  LastPlanAddedDate__c = Some(LocalDate.of(2020, 11, 29)),
   ratePlans = List(
     GetSubscriptionToCancel.RatePlan(
       id = "89ad8casd9c0asdcaj89sdc98as",

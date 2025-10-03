@@ -1,33 +1,26 @@
 import { GuApiLambda } from '@guardian/cdk';
-import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
-import { GuStack } from '@guardian/cdk/lib/constructs/core';
+import { GuGetDistributablePolicy } from '@guardian/cdk/lib/constructs/iam';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
-import {
-	ApiKeySourceType,
-	CfnBasePathMapping,
-	CfnDomainName,
-} from 'aws-cdk-lib/aws-apigateway';
+import { ApiKeySourceType } from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
-import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
-import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
+import {
+	AllowS3CatalogReadPolicy,
+	AllowSqsSendPolicy,
+	AllowZuoraOAuthSecretsPolicy,
+} from './cdk/policies';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
+import { SrRestDomain } from './cdk/sr-rest-domain';
+import type { SrStageNames } from './cdk/sr-stack';
+import { SrStack } from './cdk/sr-stack';
 import { nodeVersion } from './node-version';
 
-export interface DiscountApiProps extends GuStackProps {
-	stack: string;
-	stage: string;
-	certificateId: string;
-	domainName: string;
-	hostedZoneId: string;
-}
+export class DiscountApi extends SrStack {
+	constructor(scope: App, stage: SrStageNames) {
+		super(scope, { stage, app: 'discount-api' });
 
-export class DiscountApi extends GuStack {
-	constructor(scope: App, id: string, props: DiscountApiProps) {
-		super(scope, id, props);
-
-		const app = 'discount-api';
+		const app = this.app;
 		const nameWithStage = `${app}-${this.stage}`;
 
 		const commonEnvironmentVariables = {
@@ -86,50 +79,12 @@ export class DiscountApi extends GuStack {
 		// associate api key to plan
 		usagePlan.addApiKey(apiKey);
 
-		const s3InlinePolicy: Policy = new Policy(this, 'S3 inline policy', {
-			statements: [
-				new PolicyStatement({
-					effect: Effect.ALLOW,
-					actions: ['s3:GetObject'],
-					resources: [
-						`arn:aws:s3::*:membership-dist/${this.stack}/${this.stage}/${app}/`,
-						`arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-${this.stage}/*`,
-					],
-				}),
-			],
-		});
-
-		const secretsManagerPolicy: Policy = new Policy(
-			this,
-			'Secrets Manager policy',
-			{
-				statements: [
-					new PolicyStatement({
-						effect: Effect.ALLOW,
-						actions: ['secretsmanager:GetSecretValue'],
-						resources: [
-							`arn:aws:secretsmanager:${this.region}:${this.account}:secret:${this.stage}/Zuora-OAuth/SupportServiceLambdas-*`,
-						],
-					}),
-				],
-			},
-		);
-
-		const sqsEmailPolicy: Policy = new Policy(this, 'SQS email policy', {
-			statements: [
-				new PolicyStatement({
-					effect: Effect.ALLOW,
-					actions: ['sqs:sendmessage'],
-					resources: [
-						`arn:aws:sqs:${this.region}:${this.account}:braze-emails-${this.stage}`,
-					],
-				}),
-			],
-		});
-
-		lambda.role?.attachInlinePolicy(s3InlinePolicy);
-		lambda.role?.attachInlinePolicy(secretsManagerPolicy);
-		lambda.role?.attachInlinePolicy(sqsEmailPolicy);
+		[
+			new GuGetDistributablePolicy(this, this),
+			new AllowS3CatalogReadPolicy(this),
+			new AllowZuoraOAuthSecretsPolicy(this),
+			new AllowSqsSendPolicy(this, `braze-emails`),
+		].forEach((p) => lambda.role!.attachInlinePolicy(p));
 
 		// ---- Alarms ---- //
 		const alarmName = (shortDescription: string) =>
@@ -159,28 +114,6 @@ export class DiscountApi extends GuStack {
 			}),
 		});
 
-		// ---- DNS ---- //
-		const certificateArn = `arn:aws:acm:eu-west-1:${this.account}:certificate/${props.certificateId}`;
-		const cfnDomainName = new CfnDomainName(this, 'DomainName', {
-			domainName: props.domainName,
-			regionalCertificateArn: certificateArn,
-			endpointConfiguration: {
-				types: ['REGIONAL'],
-			},
-		});
-
-		new CfnBasePathMapping(this, 'BasePathMapping', {
-			domainName: cfnDomainName.ref,
-			restApiId: lambda.api.restApiId,
-			stage: lambda.api.deploymentStage.stageName,
-		});
-
-		new CfnRecordSet(this, 'DNSRecord', {
-			name: props.domainName,
-			type: 'CNAME',
-			hostedZoneId: props.hostedZoneId,
-			ttl: '120',
-			resourceRecords: [cfnDomainName.attrRegionalDomainName],
-		});
+		new SrRestDomain(this, lambda.api);
 	}
 }

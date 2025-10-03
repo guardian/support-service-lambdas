@@ -1,6 +1,4 @@
 import { GuApiGatewayWithLambdaByPath } from '@guardian/cdk';
-import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
-import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { type App, Duration } from 'aws-cdk-lib';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
@@ -20,14 +18,19 @@ import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { SrLambda } from './cdk/sr-lambda';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
-import { SrLambdaDomain } from './cdk/sr-lambda-domain';
+import { SrRestDomain } from './cdk/sr-rest-domain';
 import { nodeVersion } from './node-version';
+import type { SrStageNames } from './cdk/sr-stack';
+import { SrStack } from './cdk/sr-stack';
 
-export class MParticleApi extends GuStack {
-	constructor(scope: App, id: string, props: GuStackProps) {
-		super(scope, id, props);
+export class MParticleApi extends SrStack {
+	constructor(scope: App, stage: SrStageNames) {
+		super(scope, {
+			stage,
+			app: 'mparticle-api',
+		});
 
-		const app = 'mparticle-api';
+		const app = this.app;
 
 		const batonAccountId = StringParameter.fromStringParameterName(
 			this,
@@ -74,22 +77,27 @@ export class MParticleApi extends GuStack {
 			],
 		});
 
-		const httpLambda = new SrLambda(this, `${app}-http-lambda`, {
-			app,
-			fileName: `${app}.zip`,
-			handler: 'index.handlerHttp',
-			functionName: `${app}-http-${this.stage}`,
-			initialPolicy: [s3BatonReadAndWritePolicy],
-		});
+		// TODO combine this and `apiGateway` to a GuApiLambda (or SR version of)
+		const httpLambda = new SrLambda(
+			this,
+			`${app}-http-lambda`,
+			{
+				handler: 'index.handlerHttp',
+				initialPolicy: [s3BatonReadAndWritePolicy],
+			},
+			{ nameSuffix: 'http' },
+		);
 
-		const batonLambda = new SrLambda(this, `${app}-baton-lambda`, {
-			app,
-			fileName: `${app}.zip`,
-			handler: 'index.handlerBaton',
-			functionName: `${app}-baton-${this.stage}`,
-			timeout: Duration.seconds(30), // Longer timeout for data processing
-			initialPolicy: [s3BatonReadAndWritePolicy],
-		});
+		const batonLambda = new SrLambda(
+			this,
+			`${app}-baton-lambda`,
+			{
+				handler: 'index.handlerBaton',
+				timeout: Duration.seconds(30), // Longer timeout for data processing
+				initialPolicy: [s3BatonReadAndWritePolicy],
+			},
+			{ nameSuffix: 'baton' },
+		);
 
 		const deletionLambda = new GuLambdaFunction(
 			this,
@@ -251,10 +259,14 @@ export class MParticleApi extends GuStack {
 			});
 		}
 
-		new SrLambdaDomain(this, {
-			subdomain: 'mparticle-api',
-			restApi: apiGateway.api,
-		});
+		const domain = new SrRestDomain(this, apiGateway.api);
+		domain.dnsRecord.overrideLogicalId(`MparticleApiDnsRecord`);
+		domain.basePathMapping.overrideLogicalId(
+			`MparticleApiDomainMparticleApiBasePathMappingA467773E`,
+		);
+		domain.cfnDomainName.overrideLogicalId(
+			`MparticleApiDomainMparticleApiDomainName3EAD2748`,
+		);
 
 		/**
 		 * Export Lambda role ARN for cross-account queue access.
