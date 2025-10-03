@@ -41,23 +41,19 @@ export class MParticleApi extends GuStack {
 			`/${this.stage}/${this.stack}/${app}/sarResultsBucket`,
 		).stringValue;
 
-		// Get SNS topic ARN for user deletion requests
 		const deletionRequestsTopicArn = StringParameter.fromStringParameterName(
 			this,
 			'DeletionRequestsTopicArn',
 			`/${this.stage}/${this.stack}/${app}/deletionRequestsTopicArn`,
 		).stringValue;
 
-		// this must be the same as used in the code
 		const sarS3BaseKey = 'mparticle-results/';
 
-		// Dead Letter Queue for deletion requests
 		const deletionDlq = new Queue(this, `${app}-deletion-dlq`, {
 			queueName: `${app}-deletion-dlq-${this.stage}`,
 			retentionPeriod: Duration.days(14),
 		});
 
-		// SQS Queue for deletion requests
 		const deletionRequestsQueue = new Queue(this, `${app}-deletion-queue`, {
 			queueName: `${app}-deletion-queue-${this.stage}`,
 			deadLetterQueue: {
@@ -95,7 +91,6 @@ export class MParticleApi extends GuStack {
 			initialPolicy: [s3BatonReadAndWritePolicy],
 		});
 
-		// Lambda for handling deletion requests from SQS
 		const deletionLambda = new GuLambdaFunction(
 			this,
 			`${app}-deletion-lambda`,
@@ -117,7 +112,6 @@ export class MParticleApi extends GuStack {
 			},
 		);
 
-		// Subscribe SQS queue to SNS topic for deletion requests
 		const deletionRequestsTopic = Topic.fromTopicArn(
 			this,
 			'DeletionRequestsTopic',
@@ -127,7 +121,6 @@ export class MParticleApi extends GuStack {
 			new SqsSubscription(deletionRequestsQueue),
 		);
 
-		// Grant SNS permission to send messages to the deletion queue
 		deletionRequestsQueue.addToResourcePolicy(
 			new PolicyStatement({
 				effect: Effect.ALLOW,
@@ -223,7 +216,6 @@ export class MParticleApi extends GuStack {
 				lambdaFunctionNames: batonLambda.functionName,
 			});
 
-			// Deletion Lambda error alarm
 			new SrLambdaAlarm(this, 'MParticleDeletionLambdaErrorAlarm', {
 				app,
 				alarmName: 'An error occurred in the mParticle Deletion Lambda',
@@ -245,7 +237,6 @@ export class MParticleApi extends GuStack {
 				lambdaFunctionNames: deletionLambda.functionName,
 			});
 
-			// Deletion DLQ alarm
 			new SrLambdaAlarm(this, 'MParticleDeletionDlqAlarm', {
 				app,
 				alarmName: 'Messages in mParticle deletion dead letter queue',
