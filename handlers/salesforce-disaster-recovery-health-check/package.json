@@ -4,9 +4,9 @@
 		"test": "jest --group=-integration",
 		"it-test": "jest --group=integration",
 		"type-check": "tsc --noEmit",
-		"build": "esbuild --bundle --platform=node --target=node20 --outdir=target src/handlers/*.ts",
+		"build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/handlers/*.ts --sourcemap",
 		"lint": "eslint src/**/*.ts test/**/*.ts",
-		"package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr salesforce-disaster-recovery-health-check.zip ./*.js",
+		"package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr salesforce-disaster-recovery-health-check.zip ./*.js.map ./*.js",
 		"check-formatting": "prettier --check **.ts",
 		"fix-formatting": "prettier --write **.ts"
 	},

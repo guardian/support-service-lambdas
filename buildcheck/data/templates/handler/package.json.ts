@@ -12,7 +12,7 @@ export default (pkg: HandlerDefinition) => {
 			'it-test': 'jest --group=integration',
 			'type-check': 'tsc --noEmit',
 			build:
-				'esbuild --bundle --platform=node --target=node18 --outdir=target/ ' +
+				'esbuild --bundle --platform=node --target=node20 --outdir=target/ ' +
 				entryPoints +
 				' --sourcemap',
 			lint: 'eslint src/**/*.ts test/**/*.ts',

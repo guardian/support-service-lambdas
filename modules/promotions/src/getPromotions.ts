@@ -1,4 +1,3 @@
-import * as console from 'node:console';
 import { DynamoDBClient, ScanCommand } from '@aws-sdk/client-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { awsConfig } from '@modules/aws/config';
@@ -7,9 +6,7 @@ import { type Promotion, promotionSchema } from './schema';
 
 const dynamoClient = new DynamoDBClient(awsConfig);
 
-export const getPromotions = async (
-	stage: Stage,
-): Promise<Promotion[] | undefined> => {
+export const getPromotions = async (stage: Stage): Promise<Promotion[]> => {
 	const tableName = `MembershipSub-Promotions-${stage}`;
 	const input = {
 		TableName: tableName,
@@ -17,7 +14,13 @@ export const getPromotions = async (
 	console.log(`Querying ${tableName}`);
 	const data = await dynamoClient.send(new ScanCommand(input));
 
-	return data.Items?.map((item) => {
+	if (data.Items === undefined) {
+		throw new ReferenceError(
+			`We were unable to retrieve promotions from ${tableName}`,
+		);
+	}
+
+	return data.Items.map((item) => {
 		const unmarshalledItem = unmarshall(item);
 		const parseResult = promotionSchema.safeParse(unmarshalledItem);
 		if (!parseResult.success) {
