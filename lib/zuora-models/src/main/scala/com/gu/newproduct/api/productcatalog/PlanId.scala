@@ -116,9 +116,15 @@ object PlanId {
 
   case object NationalDeliveryWeekend extends PlanId("national_delivery_weekend") with NationalDeliveryPlanId
 
+  case object NationalDeliveryWeekendPlus extends PlanId("national_delivery_weekend_plus") with NationalDeliveryPlanId
+
   case object NationalDeliveryEveryday extends PlanId("national_delivery_everyday") with NationalDeliveryPlanId
 
+  case object NationalDeliveryEverydayPlus extends PlanId("national_delivery_everyday_plus") with NationalDeliveryPlanId
+
   case object NationalDeliverySixday extends PlanId("national_delivery_sixday") with NationalDeliveryPlanId
+
+  case object NationalDeliverySixdayPlus extends PlanId("national_delivery_sixday_plus") with NationalDeliveryPlanId
 
   val enabledVoucherPlans = List(
     VoucherEveryDay,
@@ -190,6 +196,9 @@ object PlanId {
     NationalDeliverySixday,
     NationalDeliveryEveryday,
     NationalDeliveryWeekend,
+    NationalDeliverySixdayPlus,
+    NationalDeliveryEverydayPlus,
+    NationalDeliveryWeekendPlus,
   )
 
   val enabledTierThreePlans = List(

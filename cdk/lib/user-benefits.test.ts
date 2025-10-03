@@ -4,7 +4,7 @@ import {
 	supportApisDomain,
 	supportCertificateId,
 	supportHostedZoneId,
-} from '../bin/cdk';
+} from './constants';
 import { UserBenefits } from './user-benefits';
 
 describe('The User benefits stack', () => {

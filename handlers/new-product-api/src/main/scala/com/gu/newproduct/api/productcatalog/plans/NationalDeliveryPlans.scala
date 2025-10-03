@@ -28,6 +28,9 @@ class NationalDeliveryPlans(getStartDateFromFulfilmentFiles: (ProductType, List[
     (NationalDeliveryEveryday, PlanDescription("Everyday"), everyDayRules, Monthly),
     (NationalDeliverySixday, PlanDescription("Sixday"), sixDayRules, Monthly),
     (NationalDeliveryWeekend, PlanDescription("Weekend"), weekendRules, Monthly),
+    (NationalDeliveryEverydayPlus, PlanDescription("Everyday+"), everyDayRules, Monthly),
+    (NationalDeliverySixdayPlus, PlanDescription("Sixday+"), sixDayRules, Monthly),
+    (NationalDeliveryWeekendPlus, PlanDescription("Weekend+"), weekendRules, Monthly),
   )
 
 }
