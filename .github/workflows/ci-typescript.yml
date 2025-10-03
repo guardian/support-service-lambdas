@@ -42,6 +42,7 @@ jobs:
   gu-cdk-build:
     needs: common
     strategy:
+      fail-fast: false
       matrix:
         subproject:
           - user-benefits
@@ -81,12 +82,6 @@ jobs:
       - run: pnpm --filter "./buildcheck" snapshot:assert handlers/${{ matrix.subproject }}
       - run: pnpm --filter cdk package
       - run: pnpm --filter ${{ matrix.subproject }} package
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
-          aws-region: eu-west-1
 
       - name: Upload to Riff-Raff
         uses: guardian/actions-riff-raff@v4
