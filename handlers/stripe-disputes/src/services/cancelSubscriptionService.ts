@@ -50,6 +50,13 @@ export async function cancelSubscriptionService(
 		logger.error(
 			`No email address found for subscription ${subscription.subscriptionNumber}`,
 		);
+		return true;
+	}
+
+	if (!customerEmail) {
+		logger.error(
+			`No email address found for subscription ${subscription.subscriptionNumber}`,
+		);
 	} else {
 		// Send email notification to customer
 		logger.log(
