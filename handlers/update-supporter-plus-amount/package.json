@@ -10,6 +10,8 @@
     "check-formatting": "prettier --check **.ts",
     "fix-formatting": "prettier --write **.ts"
   },
+  "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
+  "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
     "@aws-sdk/client-sqs": "^3.848.0",
     "dayjs": "^1.11.13",
