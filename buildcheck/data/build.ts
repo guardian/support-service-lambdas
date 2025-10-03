@@ -42,4 +42,20 @@ const discountApi: HandlerDefinition = {
 	},
 };
 
-export const build: HandlerDefinition[] = [alarmsHandler, discountApi];
+const updateSupporterPlusAmount: HandlerDefinition = {
+	name: 'update-supporter-plus-amount',
+	dependencies: {
+		...dep['@aws-sdk/client-sqs'],
+		...dep.dayjs,
+		...dep.zod,
+	},
+	devDependencies: {
+		...dep['@types/aws-lambda'],
+	},
+};
+
+export const build: HandlerDefinition[] = [
+	alarmsHandler,
+	discountApi,
+	updateSupporterPlusAmount,
+];
