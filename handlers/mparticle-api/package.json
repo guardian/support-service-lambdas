@@ -7,8 +7,8 @@
     "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/index.ts --sourcemap",
     "lint": "eslint src/**/*.ts test/**/*.ts",
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr mparticle-api.zip ./*.js.map ./*.js",
-    "check-formatting": "prettier --check **.ts",
-    "fix-formatting": "prettier --write **.ts",
+    "check-formatting": "prettier --check \"**/*.ts\"",
+    "fix-formatting": "prettier --write \"**/*.ts\"",
     "check-config": "ts-node runManual/runLoadConfig.ts"
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
