@@ -8,6 +8,8 @@ export default (pkg: HandlerDefinition) => {
 	return {
 		name: `${pkg.name}`,
 		scripts: {
+			'cdk:test': 'pnpm --filter cdk test ' + pkg.name,
+			'cdk:test-update': 'pnpm --filter cdk test-update ' + pkg.name,
 			test: 'jest --group=-integration',
 			'it-test': 'jest --group=integration',
 			'type-check': 'tsc --noEmit',

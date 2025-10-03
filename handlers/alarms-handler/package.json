@@ -1,6 +1,8 @@
 {
   "name": "alarms-handler",
   "scripts": {
+    "cdk:test": "pnpm --filter cdk test alarms-handler",
+    "cdk:test-update": "pnpm --filter cdk test-update alarms-handler",
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
     "type-check": "tsc --noEmit",

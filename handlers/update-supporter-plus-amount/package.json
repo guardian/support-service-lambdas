@@ -1,6 +1,8 @@
 {
   "name": "update-supporter-plus-amount",
   "scripts": {
+    "cdk:test": "pnpm --filter cdk test update-supporter-plus-amount",
+    "cdk:test-update": "pnpm --filter cdk test-update update-supporter-plus-amount",
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
     "type-check": "tsc --noEmit",
