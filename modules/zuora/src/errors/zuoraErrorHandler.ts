@@ -3,7 +3,7 @@ import {
 	faultCodeAndMessageSchema,
 	lowerCaseZuoraErrorSchema,
 	upperCaseZuoraErrorSchema,
-} from '../types/httpResponse';
+} from '@modules/zuora/types/httpResponse';
 import type { ZuoraErrorDetail } from './zuoraError';
 import { ZuoraError } from './zuoraError';
 
@@ -11,8 +11,6 @@ export function generateZuoraError(
 	json: unknown,
 	response: Response,
 ): ZuoraError {
-	const statusText = response.statusText || 'Zuora API Error';
-
 	// Format 1: reasons array (authentication, account errors)
 	const lowerCaseParseResult = lowerCaseZuoraErrorSchema.safeParse(json);
 	if (lowerCaseParseResult.success) {
@@ -21,7 +19,7 @@ export function generateZuoraError(
 			message: reason.message,
 		}));
 		return new ZuoraError(
-			`${statusText}: ${formatReasons(reasons)}`,
+			`${messageFromErrorDetails(reasons)}`,
 			response.status,
 			reasons,
 		);
@@ -35,7 +33,7 @@ export function generateZuoraError(
 			message: error.Message,
 		}));
 		return new ZuoraError(
-			`${statusText}: ${formatReasons(reasons)}`,
+			`${messageFromErrorDetails(reasons)}`,
 			response.status,
 			reasons,
 		);
@@ -45,7 +43,7 @@ export function generateZuoraError(
 	const faultCodeParseResult = faultCodeAndMessageSchema.safeParse(json);
 	if (faultCodeParseResult.success) {
 		return new ZuoraError(
-			`${statusText}: ${faultCodeParseResult.data.FaultCode}: ${faultCodeParseResult.data.FaultMessage}`,
+			`${faultCodeParseResult.data.FaultMessage}`,
 			response.status,
 			[
 				{
@@ -60,7 +58,7 @@ export function generateZuoraError(
 	const codeAndMessageParseResult = codeAndMessageSchema.safeParse(json);
 	if (codeAndMessageParseResult.success) {
 		return new ZuoraError(
-			`${statusText}: ${codeAndMessageParseResult.data.code}: ${codeAndMessageParseResult.data.message}`,
+			`${codeAndMessageParseResult.data.message}`,
 			response.status,
 			[
 				{
@@ -70,12 +68,11 @@ export function generateZuoraError(
 			],
 		);
 	}
-
+	// Fallback: unknown error format
+	const statusText = response.statusText || 'Zuora API Error';
 	return new ZuoraError(statusText, response.status, []);
 }
 
-function formatReasons(reasons: ZuoraErrorDetail[]): string {
-	return reasons
-		.map((reason) => `${reason.code}: ${reason.message}`)
-		.join('; ');
+function messageFromErrorDetails(errorDetails: ZuoraErrorDetail[]): string {
+	return errorDetails.map((reason) => reason.message).join('; ');
 }
