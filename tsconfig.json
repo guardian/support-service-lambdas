@@ -32,6 +32,7 @@
     "paths": {
       "@modules/aws/*": ["./modules/aws/src/*"],
       "@modules/zuora/*": ["./modules/zuora/src/*"],
+      "@modules/bigquery/*": ["./modules/bigquery/src/*"],
       "@modules/zuora-catalog/*": ["./modules/zuora-catalog/src/*"],
       "@modules/product-benefits/*": ["./modules/product-benefits/src/*"],
       "@modules/product-catalog/*": ["./modules/product-catalog/src/*"],
