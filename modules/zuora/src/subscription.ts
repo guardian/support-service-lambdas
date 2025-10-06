@@ -61,3 +61,13 @@ export const getSubscriptionsByAccountNumber = async (
 	);
 	return response.subscriptions ?? [];
 };
+
+export const updateSubscription = async (
+	zuoraClient: ZuoraClient,
+	subscriptionNumber: string,
+	fields: Record<string, any>,
+): Promise<ZuoraResponse> => {
+	const path = `v1/subscriptions/${subscriptionNumber}`;
+	const body = JSON.stringify(fields);
+	return zuoraClient.put(path, body, zuoraResponseSchema);
+};

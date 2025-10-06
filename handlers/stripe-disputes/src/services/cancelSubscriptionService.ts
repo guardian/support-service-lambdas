@@ -6,7 +6,10 @@ import {
 import type { Logger } from '@modules/routing/logger';
 import { stageFromEnvironment } from '@modules/stage';
 import { getAccount } from '@modules/zuora/account';
-import { cancelSubscription } from '@modules/zuora/subscription';
+import {
+	cancelSubscription,
+	updateSubscription,
+} from '@modules/zuora/subscription';
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
@@ -40,6 +43,25 @@ export async function cancelSubscriptionService(
 		'Subscription cancellation response:',
 		JSON.stringify(cancelResponse),
 	);
+
+	// Update subscription with cancellation reason
+	try {
+		logger.log('Updating subscription with cancellation reason');
+		const updateResponse = await updateSubscription(
+			zuoraClient,
+			subscription.subscriptionNumber,
+			{
+				Reason_for_Cancellation__c: 'Disputed Payment',
+			},
+		);
+		logger.log(
+			'Subscription cancellation reason update response:',
+			JSON.stringify(updateResponse),
+		);
+	} catch (updateError) {
+		logger.error('Failed to update cancellation reason:', updateError);
+		// Don't throw - the cancellation succeeded even if the update failed
+	}
 
 	// Get account details to retrieve customer email
 	const account = await getAccount(zuoraClient, subscription.accountNumber);
