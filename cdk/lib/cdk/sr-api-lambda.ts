@@ -11,7 +11,7 @@ function getApiLambdaDefaultProps(scope: Identity, props: SrApiLambdaProps) {
 		...getLambdaDefaultProps(scope, props.nameSuffix),
 		timeout: Duration.seconds(300),
 		monitoringConfiguration: {
-			noMonitoring: true, // There is a threshold alarm defined below
+			noMonitoring: true, // we don't use the standard GuCDK alarms due to low traffic
 		} as const,
 		api: {
 			id: getNameWithStage(scope, props.nameSuffix),
