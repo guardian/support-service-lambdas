@@ -18,12 +18,9 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				error: 'Credit application failed',
 			},
 		};
-
 		const result = invoiceHasAtLeastOneProcessingFailure(invoice);
-
 		expect(result).toBe(true);
 	});
-
 	it('should return true when checkForActiveSubAttempt fails', () => {
 		const invoice: ProcessedInvoice = {
 			invoiceId: 'INV-001',
@@ -43,12 +40,9 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				error: 'Active sub check failed',
 			},
 		};
-
 		const result = invoiceHasAtLeastOneProcessingFailure(invoice);
-
 		expect(result).toBe(true);
 	});
-
 	it('should return true when checkForActivePaymentMethodAttempt fails', () => {
 		const invoice: ProcessedInvoice = {
 			invoiceId: 'INV-002',
@@ -73,12 +67,9 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				error: 'Payment method check failed',
 			},
 		};
-
 		const result = invoiceHasAtLeastOneProcessingFailure(invoice);
-
 		expect(result).toBe(true);
 	});
-
 	it('should return false when all attempts succeed', () => {
 		const invoice: ProcessedInvoice = {
 			invoiceId: 'INV-001',
@@ -96,25 +87,10 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				},
 				hasActiveSubscription: true,
 			},
-			activePaymentMethodResult: {
-				checkForActivePaymentMethodAttempt: {
-					Success: true,
-				},
-				hasActivePaymentMethod: true,
-				activePaymentMethods: [],
-			},
-			refundResult: {
-				refundAttempt: {
-					Success: true,
-				},
-			},
 		};
-
 		const result = invoiceHasAtLeastOneProcessingFailure(invoice);
-
 		expect(result).toBe(false);
 	});
-
 	it('should return true when invoice has no active subscription and no active payment method (even if all API calls succeed)', () => {
 		const invoice: ProcessedInvoice = {
 			invoiceId: 'INV-001',
@@ -140,9 +116,7 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				activePaymentMethods: [],
 			},
 		};
-
 		const result = invoiceHasAtLeastOneProcessingFailure(invoice);
-
 		expect(result).toBe(true);
 	});
 
@@ -171,14 +145,16 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				activePaymentMethods: [],
 			},
 			refundResult: {
-				refundAttempt: {
-					Success: true,
+				paymentMethod: {
+					id: '8ad09b7d83a313110183a8769b2b1bfe',
+					status: 'Active',
+					type: 'CreditCard',
+					isDefault: true,
 				},
+				refundAmount: 0.1,
 			},
 		};
-
 		const result = invoiceHasAtLeastOneProcessingFailure(invoice);
-
 		expect(result).toBe(false);
 	});
 
@@ -200,9 +176,7 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				hasActiveSubscription: true,
 			},
 		};
-
 		const result = invoiceHasAtLeastOneProcessingFailure(invoice);
-
 		expect(result).toBe(false);
 	});
 
@@ -231,15 +205,11 @@ describe('invoiceHasAtLeastOneProcessingFailure', () => {
 				activePaymentMethods: [],
 			},
 			refundResult: {
-				refundAttempt: {
-					Success: false,
-				},
-				error: 'Refund failed',
+				error:
+					"Not Found: ResourceNotFoundError: Unknown object type 'Refund1'",
 			},
 		};
-
 		const result = invoiceHasAtLeastOneProcessingFailure(invoice);
-
 		expect(result).toBe(true);
 	});
 });
