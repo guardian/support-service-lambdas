@@ -10,17 +10,21 @@ export type SrLambdaProps = {
 	nameSuffix?: string; // when you have multiple lambdas in an app
 };
 
-type GuLambdaOverrides = Omit<
-	GuFunctionProps,
-	keyof ReturnType<typeof defaultProps>
-> &
-	Partial<ReturnType<typeof defaultProps>>;
+type DefaultProps = ReturnType<typeof getLambdaDefaultProps>;
+type GuLambdaOverrides = Omit<GuFunctionProps, keyof DefaultProps> &
+	Partial<DefaultProps>;
 
-function getNameWithStage(identity: Identity, nameSuffix: string | undefined) {
+export function getNameWithStage(
+	identity: Identity,
+	nameSuffix: string | undefined,
+) {
 	return `${identity.app}${nameSuffix ? '-' + nameSuffix : ''}-${identity.stage}`;
 }
 
-export function defaultProps(scope: Identity, nameSuffix: string | undefined) {
+export function getLambdaDefaultProps(
+	scope: Identity,
+	nameSuffix: string | undefined,
+) {
 	return {
 		app: scope.app,
 		functionName: getNameWithStage(scope, nameSuffix),
@@ -30,6 +34,9 @@ export function defaultProps(scope: Identity, nameSuffix: string | undefined) {
 		loggingFormat: LoggingFormat.TEXT,
 		memorySize: 1024,
 		timeout: Duration.seconds(15),
+		environment: {
+			NODE_OPTIONS: '--enable-source-maps',
+		} as Record<string, string>,
 	};
 }
 
@@ -40,9 +47,14 @@ export class SrLambda extends GuLambdaFunction {
 		lambdaOverrides: GuLambdaOverrides,
 		props: SrLambdaProps,
 	) {
+		const defaultProps = getLambdaDefaultProps(scope, props.nameSuffix);
 		const finalProps = {
-			...defaultProps(scope, props.nameSuffix),
+			...defaultProps,
 			...lambdaOverrides,
+			environment: {
+				...defaultProps.environment,
+				...lambdaOverrides.environment,
+			},
 		};
 
 		super(scope, id, finalProps);

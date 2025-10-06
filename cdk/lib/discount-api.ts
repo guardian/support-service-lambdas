@@ -1,20 +1,17 @@
-import { GuApiLambda } from '@guardian/cdk';
 import { GuGetDistributablePolicy } from '@guardian/cdk/lib/constructs/iam';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
-import { ApiKeySourceType } from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
-import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import {
 	AllowS3CatalogReadPolicy,
 	AllowSqsSendPolicy,
 	AllowZuoraOAuthSecretsPolicy,
 } from './cdk/policies';
+import { SrApiLambda } from './cdk/sr-api-lambda';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { SrRestDomain } from './cdk/sr-rest-domain';
 import type { SrStageNames } from './cdk/sr-stack';
 import { SrStack } from './cdk/sr-stack';
-import { nodeVersion } from './node-version';
 
 export class DiscountApi extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
@@ -23,42 +20,16 @@ export class DiscountApi extends SrStack {
 		const app = this.app;
 		const nameWithStage = `${app}-${this.stage}`;
 
-		const commonEnvironmentVariables = {
-			App: app,
-			Stack: this.stack,
-			Stage: this.stage,
-		};
-
 		// ---- API-triggered lambda functions ---- //
-		const lambda = new GuApiLambda(this, `${app}-lambda`, {
-			description:
-				'A lambda that enables the addition of discounts to existing subscriptions',
-			functionName: nameWithStage,
-			loggingFormat: LoggingFormat.TEXT,
-			fileName: `${app}.zip`,
-			handler: 'index.handler',
-			runtime: nodeVersion,
-			memorySize: 1024,
-			timeout: Duration.seconds(300),
-			environment: commonEnvironmentVariables,
-			monitoringConfiguration: {
-				noMonitoring: true, // There is a threshold alarm defined below
+		const lambda = new SrApiLambda(
+			this,
+			`${app}-lambda`,
+			{
+				description:
+					'A lambda that enables the addition of discounts to existing subscriptions',
 			},
-			app: app,
-			api: {
-				id: nameWithStage,
-				restApiName: nameWithStage,
-				description: 'API Gateway created by CDK',
-				proxy: true,
-				deployOptions: {
-					stageName: this.stage,
-				},
-				apiKeySourceType: ApiKeySourceType.HEADER,
-				defaultMethodOptions: {
-					apiKeyRequired: true,
-				},
-			},
-		});
+			{},
+		);
 
 		const usagePlan = lambda.api.addUsagePlan('UsagePlan', {
 			name: nameWithStage,

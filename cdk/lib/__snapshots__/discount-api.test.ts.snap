@@ -5,7 +5,6 @@ exports[`The Discount API stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuApiLambda",
       "GuGetDistributablePolicy",
     ],
     "gu:cdk:version": "TEST",
@@ -342,6 +341,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
           "Variables": {
             "APP": "discount-api",
             "App": "discount-api",
+            "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
             "Stack": "support",
@@ -1048,7 +1048,6 @@ exports[`The Discount API stack matches the snapshot 2`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuApiLambda",
       "GuGetDistributablePolicy",
     ],
     "gu:cdk:version": "TEST",
@@ -1385,6 +1384,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           "Variables": {
             "APP": "discount-api",
             "App": "discount-api",
+            "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
             "Stack": "support",
