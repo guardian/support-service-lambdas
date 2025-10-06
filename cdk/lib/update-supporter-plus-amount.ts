@@ -1,28 +1,16 @@
-import { GuApiLambda } from '@guardian/cdk';
-import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
 import { GuGetDistributablePolicy } from '@guardian/cdk/lib/constructs/iam';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
-import { ApiKeySourceType } from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
-import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import {
 	AllowSqsSendPolicy,
 	AllowZuoraOAuthSecretsPolicy,
 } from './cdk/policies';
+import { SrApiLambda } from './cdk/sr-api-lambda';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
 import { SrRestDomain } from './cdk/sr-rest-domain';
 import type { SrStageNames } from './cdk/sr-stack';
 import { SrStack } from './cdk/sr-stack';
-import { nodeVersion } from './node-version';
-
-export interface UpdateSupporterPlusAmountProps extends GuStackProps {
-	stack: string;
-	stage: string;
-	certificateId: string;
-	domainName: string;
-	hostedZoneId: string;
-}
 
 export class UpdateSupporterPlusAmount extends SrStack {
 	readonly app: string;
@@ -35,43 +23,15 @@ export class UpdateSupporterPlusAmount extends SrStack {
 		const app = this.app;
 		const nameWithStage = `${app}-${this.stage}`;
 
-		const commonEnvironmentVariables = {
-			App: app,
-			Stack: this.stack,
-			Stage: this.stage,
-		};
-
-		// ---- API-triggered lambda functions ---- //
-		const lambda = new GuApiLambda(this, `${app}-lambda`, {
-			description:
-				'An API Gateway triggered lambda to carry out supporter plus amount updates',
-			functionName: nameWithStage,
-			loggingFormat: LoggingFormat.TEXT,
-			fileName: `${app}.zip`,
-			handler: 'index.handler',
-			runtime: nodeVersion,
-			memorySize: 1024,
-			timeout: Duration.seconds(300),
-			environment: commonEnvironmentVariables,
-			monitoringConfiguration: {
-				noMonitoring: true,
+		const lambda = new SrApiLambda(
+			this,
+			`${app}-lambda`,
+			{
+				description:
+					'An API Gateway triggered lambda to carry out supporter plus amount updates',
 			},
-			app: app,
-			api: {
-				id: nameWithStage,
-				restApiName: nameWithStage,
-				description: 'API Gateway created by CDK',
-				proxy: true,
-				deployOptions: {
-					stageName: this.stage,
-				},
-
-				apiKeySourceType: ApiKeySourceType.HEADER,
-				defaultMethodOptions: {
-					apiKeyRequired: true,
-				},
-			},
-		});
+			{},
+		);
 
 		const usagePlan = lambda.api.addUsagePlan('UsagePlan', {
 			name: nameWithStage,
