@@ -1,5 +1,5 @@
 import { getSSMParam } from '@modules/aws/ssm';
-import { buildAuthClient, runQuery } from '@modules/bigquery/src/bigquery';
+import { buildAuthClient, runQuery } from '@modules/bigquery/bigquery';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { stageFromEnvironment } from '@modules/stage';
 import { functionalTestQueryResponse } from '../../test/handlers/data/functionalTestQueryResponse';
