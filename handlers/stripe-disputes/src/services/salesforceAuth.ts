@@ -19,7 +19,10 @@ export async function authenticateWithSalesforce(
 			body: buildClientCredentialsBody(credentials),
 		};
 
-		const salesforceUrl = `${getSalesForceApiBaseUrl(credentials.sandbox)}/services/oauth2/token`;
+		const credentialsSandboxString = credentials.sandbox.toString();
+		logger.log('Salesforce sandbox mode:', credentialsSandboxString);
+
+		const salesforceUrl = `${getSalesForceApiBaseUrl(credentials.sandbox.toString() === 'true')}/services/oauth2/token`;
 
 		logger.log('Salesforce URL:', salesforceUrl);
 

@@ -27,9 +27,10 @@ export const upsertSalesforceObject = async (
 ): Promise<SalesforceUpsertResponse> => {
 	logger.log('Starting upsertSalesforceObject process');
 
-	const salesforceCredentials = await getSecretValue<SalesforceCredentials>(
-		`${stageFromEnvironment()}/Salesforce/ConnectedApp/StripeDisputeWebhooks`,
-	);
+	const salesforceCredentials: SalesforceCredentials =
+		await getSecretValue<SalesforceCredentials>(
+			`${stageFromEnvironment()}/Salesforce/ConnectedApp/StripeDisputeWebhooks`,
+		);
 
 	const salesforceAuth: SalesforceAuthResponse =
 		await authenticateWithSalesforce(logger, salesforceCredentials);
