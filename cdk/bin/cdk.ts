@@ -130,6 +130,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	ProductSwitchApi,
 	UpdateSupporterPlusAmount,
 	MParticleApi,
+	MetricPushApi,
 ];
 
 // generate all stacks for all stages
@@ -311,16 +312,7 @@ new DiscountExpiryNotifier(app, 'discount-expiry-notifier-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 });
-new MetricPushApi(app, 'metric-push-api-CODE', {
-	stack: 'membership',
-	stage: 'CODE',
-	cloudFormationStackName: 'membership-CODE-metric-push-api',
-});
-new MetricPushApi(app, 'metric-push-api-PROD', {
-	stack: 'membership',
-	stage: 'PROD',
-	cloudFormationStackName: 'membership-PROD-metric-push-api',
-});
+
 new ObserverDataExport(app, 'observer-data-export-CODE', {
 	stack: 'support',
 	stage: 'CODE',

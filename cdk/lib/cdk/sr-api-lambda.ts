@@ -21,10 +21,14 @@ function getApiLambdaDefaultProps(scope: Identity, props: SrApiLambdaProps) {
 			deployOptions: {
 				stageName: scope.stage,
 			},
-			apiKeySourceType: ApiKeySourceType.HEADER,
-			defaultMethodOptions: {
-				apiKeyRequired: true,
-			},
+			...(props.isPublic
+				? {}
+				: {
+						apiKeySourceType: ApiKeySourceType.HEADER,
+						defaultMethodOptions: {
+							apiKeyRequired: true,
+						},
+					}),
 		},
 	};
 }
@@ -32,7 +36,10 @@ function getApiLambdaDefaultProps(scope: Identity, props: SrApiLambdaProps) {
 type ApiDefaultProps = ReturnType<typeof getApiLambdaDefaultProps>;
 type SrApiLambdaOverrides = Omit<GuApiLambdaProps, keyof ApiDefaultProps> &
 	Partial<ApiDefaultProps>;
-type SrApiLambdaProps = SrLambdaProps & { apiDescriptionOverride?: string };
+type SrApiLambdaProps = SrLambdaProps & {
+	apiDescriptionOverride?: string;
+	isPublic?: boolean;
+};
 
 export class SrApiLambda extends GuApiLambda {
 	constructor(
