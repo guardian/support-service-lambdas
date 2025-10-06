@@ -42,6 +42,8 @@ describe('ZuoraClient fetch method error handling', () => {
 
 	describe('HTTP 400 errors with different response formats', () => {
 		test('should handle /v1/object/* error format with Errors array', async () => {
+			const errorMessage =
+				'You cannot transfer an amount greater than the invoice balance. Please update and try again.';
 			const mockResponse = {
 				ok: false,
 				status: 400,
@@ -49,8 +51,7 @@ describe('ZuoraClient fetch method error handling', () => {
 				json: jest.fn().mockResolvedValue({
 					Errors: [
 						{
-							Message:
-								'You cannot transfer an amount greater than the invoice balance. Please update and try again.',
+							Message: errorMessage,
 							Code: 'INVALID_VALUE',
 						},
 					],
@@ -76,21 +77,19 @@ describe('ZuoraClient fetch method error handling', () => {
 				);
 			} catch (error) {
 				expect(error).toBeInstanceOf(ZuoraError);
-				expect((error as ZuoraError).message).toContain(
-					'You cannot transfer an amount greater than the invoice balance',
-				);
-				expect((error as ZuoraError).message).toContain('INVALID_VALUE');
+				expect((error as ZuoraError).message).toBe(errorMessage);
 			}
 		});
 
 		test('should handle query action error format with FaultCode/FaultMessage', async () => {
+			const errorMessage = 'invalid field for query: Invoice.accountid1';
 			const mockResponse = {
 				ok: false,
 				status: 400,
 				statusText: 'Bad Request',
 				json: jest.fn().mockResolvedValue({
 					FaultCode: 'INVALID_FIELD',
-					FaultMessage: 'invalid field for query: Invoice.accountid1',
+					FaultMessage: errorMessage,
 				}),
 			};
 
@@ -104,21 +103,19 @@ describe('ZuoraClient fetch method error handling', () => {
 				await zuoraClient.fetch()('v1/action/query', 'POST', testSchema);
 			} catch (error) {
 				expect(error).toBeInstanceOf(ZuoraError);
-				expect((error as ZuoraError).message).toContain(
-					'invalid field for query: Invoice.accountid1',
-				);
-				expect((error as ZuoraError).message).toContain('INVALID_FIELD');
+				expect((error as ZuoraError).message).toBe(errorMessage);
 			}
 		});
 
 		test('should handle invalid action error format with code/message', async () => {
+			const errorMessage = "Invalid action 'query1'";
 			const mockResponse = {
 				ok: false,
 				status: 400,
 				statusText: 'Bad Request',
 				json: jest.fn().mockResolvedValue({
 					code: 'ClientError',
-					message: "Invalid action 'query1'",
+					message: errorMessage,
 				}),
 			};
 
@@ -132,16 +129,14 @@ describe('ZuoraClient fetch method error handling', () => {
 				await zuoraClient.fetch()('v1/action/query1', 'POST', testSchema);
 			} catch (error) {
 				expect(error).toBeInstanceOf(ZuoraError);
-				expect((error as ZuoraError).message).toContain(
-					"Invalid action 'query1'",
-				);
-				expect((error as ZuoraError).message).toContain('ClientError');
+				expect((error as ZuoraError).message).toBe(errorMessage);
 			}
 		});
 	});
 
 	describe('HTTP 401 errors', () => {
 		test('should handle authentication error with reasons array', async () => {
+			const errorMessage = 'Authentication error';
 			const mockResponse = {
 				ok: false,
 				status: 401,
@@ -151,7 +146,7 @@ describe('ZuoraClient fetch method error handling', () => {
 					reasons: [
 						{
 							code: '90000011',
-							message: 'Authentication error',
+							message: errorMessage,
 						},
 					],
 				}),
@@ -175,8 +170,7 @@ describe('ZuoraClient fetch method error handling', () => {
 				);
 			} catch (error) {
 				expect(error).toBeInstanceOf(ZuoraError);
-				expect((error as ZuoraError).message).toContain('Authentication error');
-				expect((error as ZuoraError).message).toContain('90000011');
+				expect((error as ZuoraError).message).toBe(errorMessage);
 			}
 		});
 	});
@@ -243,6 +237,7 @@ describe('ZuoraClient fetch method error handling', () => {
 
 	describe('Rate limiting (HTTP 429)', () => {
 		test('should handle rate limiting with enhanced error information', async () => {
+			const errorMessage = 'Rate limit exceeded';
 			const mockResponse = {
 				ok: false,
 				status: 429,
@@ -255,7 +250,7 @@ describe('ZuoraClient fetch method error handling', () => {
 				json: jest.fn().mockResolvedValue({
 					success: false,
 					code: 'RATE_LIMIT_EXCEEDED',
-					message: 'Rate limit exceeded',
+					message: errorMessage,
 				}),
 			};
 
@@ -278,7 +273,7 @@ describe('ZuoraClient fetch method error handling', () => {
 			} catch (error) {
 				expect(error).toBeInstanceOf(ZuoraError);
 				expect((error as ZuoraError).code).toBe(429);
-				expect((error as ZuoraError).message).toContain('Rate limit exceeded');
+				expect((error as ZuoraError).message).toContain(errorMessage);
 			}
 		});
 	});
