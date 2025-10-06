@@ -131,6 +131,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	UpdateSupporterPlusAmount,
 	MParticleApi,
 	MetricPushApi,
+	PressReaderEntitlements,
 ];
 
 // generate all stacks for all stages
@@ -264,26 +265,7 @@ new TicketTailorWebhook(app, 'ticket-tailor-webhook-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 });
-new PressReaderEntitlements(app, 'press-reader-entitlements-CODE', {
-	stack: 'support',
-	stage: 'CODE',
-	internalDomainName: `press-reader-entitlements-code.${supportApisDomain}`,
-	publicDomainName: 'press-reader-entitlements.code.dev-guardianapis.com',
-	hostedZoneId: supportHostedZoneId,
-	certificateId: supportCertificateId,
-	supporterProductDataTable:
-		'supporter-product-data-tables-CODE-SupporterProductDataTable',
-});
-new PressReaderEntitlements(app, 'press-reader-entitlements-PROD', {
-	stack: 'support',
-	stage: 'PROD',
-	internalDomainName: `press-reader-entitlements.${supportApisDomain}`,
-	publicDomainName: 'press-reader-entitlements.guardianapis.com',
-	hostedZoneId: supportHostedZoneId,
-	certificateId: supportCertificateId,
-	supporterProductDataTable:
-		'supporter-product-data-tables-PROD-SupporterProductDataTable',
-});
+
 new UserBenefits(app, 'user-benefits-CODE', {
 	stack: 'support',
 	stage: 'CODE',

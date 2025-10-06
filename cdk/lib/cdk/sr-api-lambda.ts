@@ -12,7 +12,7 @@ function getApiLambdaDefaultProps(scope: Identity, props: SrApiLambdaProps) {
 		timeout: Duration.seconds(300),
 		monitoringConfiguration: {
 			noMonitoring: true, // we don't use the standard GuCDK alarms due to low traffic
-		} as const,
+		} as GuApiLambdaProps['monitoringConfiguration'],
 		api: {
 			id: getNameWithStage(scope, props.nameSuffix),
 			restApiName: getNameWithStage(scope, props.nameSuffix),
