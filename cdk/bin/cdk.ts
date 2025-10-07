@@ -132,6 +132,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	MParticleApi,
 	MetricPushApi,
 	PressReaderEntitlements,
+	UserBenefits,
 ];
 
 // generate all stacks for all stages
@@ -266,26 +267,6 @@ new TicketTailorWebhook(app, 'ticket-tailor-webhook-PROD', {
 	stage: 'PROD',
 });
 
-new UserBenefits(app, 'user-benefits-CODE', {
-	stack: 'support',
-	stage: 'CODE',
-	internalDomainName: `user-benefits-code.${supportApisDomain}`,
-	publicDomainName: 'user-benefits.code.dev-guardianapis.com',
-	hostedZoneId: supportHostedZoneId,
-	certificateId: supportCertificateId,
-	supporterProductDataTable:
-		'supporter-product-data-tables-CODE-SupporterProductDataTable',
-});
-new UserBenefits(app, 'user-benefits-PROD', {
-	stack: 'support',
-	stage: 'PROD',
-	internalDomainName: `user-benefits.${supportApisDomain}`,
-	publicDomainName: 'user-benefits.guardianapis.com',
-	hostedZoneId: supportHostedZoneId,
-	certificateId: supportCertificateId,
-	supporterProductDataTable:
-		'supporter-product-data-tables-PROD-SupporterProductDataTable',
-});
 new DiscountExpiryNotifier(app, 'discount-expiry-notifier-CODE', {
 	stack: 'support',
 	stage: 'CODE',

@@ -35,7 +35,9 @@ export class MetricPushApi extends SrStack {
 		const cloudwatchPutMetricPolicy = new GuPutCloudwatchMetricsPolicy(this);
 		lambda.role?.attachInlinePolicy(cloudwatchPutMetricPolicy);
 
-		const domain = new SrRestDomain(this, lambda.api, true);
+		const domain = new SrRestDomain(this, lambda.api, {
+			suffixProdDomain: true,
+		});
 		domain.dnsRecord.overrideLogicalId('MetricPushDNSRecord');
 		domain.basePathMapping.overrideLogicalId(`MetricPushBasePathMapping`);
 		domain.cfnDomainName.overrideLogicalId(`MetricPushDomainName`);
