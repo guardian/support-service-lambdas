@@ -5,7 +5,6 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuApiLambda",
       "GuGetDistributablePolicy",
     ],
     "gu:cdk:version": "TEST",
@@ -264,6 +263,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
           "Variables": {
             "APP": "update-supporter-plus-amount",
             "App": "update-supporter-plus-amount",
+            "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
             "Stack": "support",
@@ -970,7 +970,6 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuApiLambda",
       "GuGetDistributablePolicy",
     ],
     "gu:cdk:version": "TEST",
@@ -1304,6 +1303,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
           "Variables": {
             "APP": "update-supporter-plus-amount",
             "App": "update-supporter-plus-amount",
+            "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
             "Stack": "support",

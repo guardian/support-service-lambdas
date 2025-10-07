@@ -1,87 +1,46 @@
-import { GuApiLambda } from '@guardian/cdk';
 import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
-import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
-import { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { GuPutCloudwatchMetricsPolicy } from '@guardian/cdk/lib/constructs/iam';
 import { type App, Duration } from 'aws-cdk-lib';
-import { CfnBasePathMapping, CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
 import {
 	ComparisonOperator,
 	Metric,
 	TreatMissingData,
 } from 'aws-cdk-lib/aws-cloudwatch';
-import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
-import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
+import { SrApiLambda } from './cdk/sr-api-lambda';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
-import { nodeVersion } from './node-version';
+import { SrRestDomain } from './cdk/sr-rest-domain';
+import type { SrStageNames } from './cdk/sr-stack';
+import { SrStack } from './cdk/sr-stack';
 
-export class MetricPushApi extends GuStack {
-	constructor(scope: App, id: string, props: GuStackProps) {
-		super(scope, id, props);
-		const app = 'metric-push-api';
+export class MetricPushApi extends SrStack {
+	constructor(scope: App, stage: SrStageNames) {
+		super(scope, { stage, app: 'metric-push-api' });
+		const app = this.app;
 		const nameWithStage = `${app}-${this.stage}`;
 
-		// Lambda & API Gateway
-		const commonEnvironmentVariables = {
-			App: app,
-			Stack: this.stack,
-			Stage: this.stage,
-		};
-
-		const lambda = new GuApiLambda(this, `${app}-lambda`, {
-			description:
-				'API triggered lambda to push a metric to cloudwatch so we can alarm on errors',
-			functionName: nameWithStage,
-			loggingFormat: LoggingFormat.TEXT,
-			fileName: `${app}.zip`,
-			handler: 'index.handler',
-			runtime: nodeVersion,
-			memorySize: 512,
-			timeout: Duration.seconds(60),
-			environment: commonEnvironmentVariables,
-			// Create an alarm
-			monitoringConfiguration: {
-				noMonitoring: true,
+		const lambda = new SrApiLambda(
+			this,
+			`${app}-lambda`,
+			{
+				description:
+					'API triggered lambda to push a metric to cloudwatch so we can alarm on errors',
+				timeout: Duration.seconds(60),
 			},
-			app: app,
-			api: {
-				id: nameWithStage,
-				restApiName: nameWithStage,
-				description: `API Gateway endpoint for the ${nameWithStage} lambda`,
-				proxy: true,
-				deployOptions: {
-					stageName: this.stage,
-				},
+			{
+				apiDescriptionOverride: `API Gateway endpoint for the ${nameWithStage} lambda`,
+				isPublic: true,
 			},
-		});
+		);
 
 		const cloudwatchPutMetricPolicy = new GuPutCloudwatchMetricsPolicy(this);
 		lambda.role?.attachInlinePolicy(cloudwatchPutMetricPolicy);
 
-		// DNS
-		const domainName = new CfnDomainName(this, 'MetricPushDomainName', {
-			regionalCertificateArn: `arn:aws:acm:${this.region}:${this.account}:certificate/b384a6a0-2f54-4874-b99b-96eeff96c009`,
-			domainName: `metric-push-api-${this.stage.toLowerCase()}.support.guardianapis.com`,
-			endpointConfiguration: {
-				types: ['REGIONAL'],
-			},
+		const domain = new SrRestDomain(this, lambda.api, {
+			suffixProdDomain: true,
 		});
-
-		new CfnBasePathMapping(this, 'MetricPushBasePathMapping', {
-			restApiId: lambda.api.restApiId,
-			domainName: domainName.ref,
-			stage: lambda.api.deploymentStage.stageName,
-		});
-
-		const dnsRecord = new CfnRecordSet(this, 'MetricPushDNSRecord', {
-			name: `metric-push-api-${this.stage.toLowerCase()}.support.guardianapis.com`,
-			type: 'CNAME',
-			comment: `CNAME for metric-push-api API ${this.stage}`,
-			hostedZoneName: 'support.guardianapis.com.',
-			ttl: '120',
-			resourceRecords: [domainName.attrRegionalDomainName],
-		});
-		dnsRecord.overrideLogicalId('MetricPushDNSRecord');
+		domain.dnsRecord.overrideLogicalId('MetricPushDNSRecord');
+		domain.basePathMapping.overrideLogicalId(`MetricPushBasePathMapping`);
+		domain.cfnDomainName.overrideLogicalId(`MetricPushDomainName`);
 
 		// Alarms
 		new SrLambdaAlarm(this, '5xxApiAlarm', {

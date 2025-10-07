@@ -12,7 +12,7 @@ function getApiLambdaDefaultProps(scope: Identity, props: SrApiLambdaProps) {
 		timeout: Duration.seconds(300),
 		monitoringConfiguration: {
 			noMonitoring: true, // we don't use the standard GuCDK alarms due to low traffic
-		} as const,
+		} as GuApiLambdaProps['monitoringConfiguration'],
 		api: {
 			id: getNameWithStage(scope, props.nameSuffix),
 			restApiName: getNameWithStage(scope, props.nameSuffix),
@@ -21,10 +21,14 @@ function getApiLambdaDefaultProps(scope: Identity, props: SrApiLambdaProps) {
 			deployOptions: {
 				stageName: scope.stage,
 			},
-			apiKeySourceType: ApiKeySourceType.HEADER,
-			defaultMethodOptions: {
-				apiKeyRequired: true,
-			},
+			...(props.isPublic
+				? {}
+				: {
+						apiKeySourceType: ApiKeySourceType.HEADER,
+						defaultMethodOptions: {
+							apiKeyRequired: true,
+						},
+					}),
 		},
 	};
 }
@@ -32,7 +36,10 @@ function getApiLambdaDefaultProps(scope: Identity, props: SrApiLambdaProps) {
 type ApiDefaultProps = ReturnType<typeof getApiLambdaDefaultProps>;
 type SrApiLambdaOverrides = Omit<GuApiLambdaProps, keyof ApiDefaultProps> &
 	Partial<ApiDefaultProps>;
-type SrApiLambdaProps = SrLambdaProps & { apiDescriptionOverride?: string };
+type SrApiLambdaProps = SrLambdaProps & {
+	apiDescriptionOverride?: string;
+	isPublic?: boolean;
+};
 
 export class SrApiLambda extends GuApiLambda {
 	constructor(
