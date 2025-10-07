@@ -3,7 +3,7 @@ import {
 	faultCodeAndMessageSchema,
 	lowerCaseZuoraErrorSchema,
 	upperCaseZuoraErrorSchema,
-} from '@modules/zuora/types/httpResponse';
+} from '../types/httpResponse';
 import type { ZuoraErrorDetail } from './zuoraError';
 import { ZuoraError } from './zuoraError';
 

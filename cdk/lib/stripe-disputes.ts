@@ -195,7 +195,7 @@ export class StripeDisputes extends GuStack {
 			[
 				new PolicyStatement({
 					effect: Effect.ALLOW,
-					actions: ['sqs:sendmessage'],
+					actions: ['sqs:SendMessage', 'sqs:GetQueueUrl'],
 					resources: [
 						`arn:aws:sqs:${this.region}:${this.account}:braze-emails-${this.stage}`,
 					],
