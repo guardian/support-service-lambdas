@@ -88,7 +88,7 @@ export class PressReaderEntitlements extends SrStack {
 			}),
 		});
 
-		new SrRestDomain(this, lambda.api, false, true);
+		new SrRestDomain(this, lambda.api, { publicDomain: true });
 
 		[new GuGetDistributablePolicy(this, this)].forEach((p) =>
 			lambda.role!.attachInlinePolicy(p),

@@ -10,19 +10,23 @@ export class SrRestDomain {
 	readonly dnsRecord: CfnRecordSet;
 	readonly cfnDomainName: CfnDomainName;
 	readonly basePathMapping: CfnBasePathMapping;
+	readonly domainName: GuCname | undefined;
 	constructor(
 		scope: SrStack,
 		api: LambdaRestApi,
-		suffixProdDomain: boolean = false,
-		publicDomain: boolean = false, // if setting it to true, you have to add a fastly configuration for it
+		props?: {
+			suffixProdDomain?: boolean;
+			publicDomain?: boolean; // if setting it to true, you have to add a fastly configuration for it
+			domainIdOverride?: string;
+		},
 	) {
 		const app = scope.app;
 
 		const isProd = scope.stage === 'PROD';
 		const cert = certForStack[scope.stack];
-		// ---- DNS ---- //
+
 		const certificateArn = `arn:aws:acm:eu-west-1:${scope.account}:certificate/${cert.certificateId}`;
-		const domainName = `${app}${isProd && !suffixProdDomain ? '' : '-' + scope.stage.toLowerCase()}.${cert.domainName}`;
+		const domainName = `${app}${isProd && !props?.suffixProdDomain ? '' : '-' + scope.stage.toLowerCase()}.${cert.domainName}`;
 
 		this.cfnDomainName = new CfnDomainName(scope, 'DomainName', {
 			domainName,
@@ -46,18 +50,22 @@ export class SrRestDomain {
 			resourceRecords: [this.cfnDomainName.attrRegionalDomainName],
 		});
 
-		if (publicDomain) {
+		if (props?.publicDomain) {
 			const domainName =
 				app +
 				(scope.stage === 'PROD'
 					? `.guardianapis.com`
 					: `.code.dev-guardianapis.com`);
-			new GuCname(scope, `NS1 DNS entry for ${domainName}`, {
-				app,
-				domainName,
-				ttl: Duration.hours(1),
-				resourceRecord: 'dualstack.guardian.map.fastly.net',
-			});
+			this.domainName = new GuCname(
+				scope,
+				props.domainIdOverride ?? `NS1 DNS entry for ${domainName}`,
+				{
+					app,
+					domainName,
+					ttl: Duration.hours(1),
+					resourceRecord: 'dualstack.guardian.map.fastly.net',
+				},
+			);
 		}
 	}
 }
