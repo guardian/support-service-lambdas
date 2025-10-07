@@ -51,7 +51,7 @@ export async function cancelSubscriptionService(
 			zuoraClient,
 			subscription.subscriptionNumber,
 			{
-				Reason_for_Cancellation__c: 'Disputed Payment',
+				CancellationReason__c: 'Disputed Payment',
 			},
 		);
 		logger.log(
