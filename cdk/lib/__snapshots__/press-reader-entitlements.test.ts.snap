@@ -7,7 +7,6 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
       "GuDistributionBucketParameter",
       "GuApiGateway5xxPercentageAlarm",
       "GuCname",
-      "GuGetDistributablePolicy",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -293,38 +292,6 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
-    "GetDistributablePolicyPressreaderentitlements64111028": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:s3:::",
-                    {
-                      "Ref": "DistributionBucketName",
-                    },
-                    "/support/CODE/press-reader-entitlements/*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "GetDistributablePolicyPressreaderentitlements64111028",
-        "Roles": [
-          {
-            "Ref": "pressreaderentitlementslambdaServiceRole94C17F23",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
     "NS1DNSentryforpressreaderentitlementscodedevguardianapiscom": {
       "Properties": {
         "Name": "press-reader-entitlements.code.dev-guardianapis.com",
@@ -336,6 +303,29 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
         "TTL": 3600,
       },
       "Type": "Guardian::DNS::RecordSet",
+    },
+    "SupporterProductDataTablequeryaccess7665F484": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "dynamodb:Query",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "supporter-product-data-tables-CODE-SupporterProductDataTable",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SupporterProductDataTablequeryaccess7665F484",
+        "Roles": [
+          {
+            "Ref": "pressreaderentitlementslambdaServiceRole94C17F23",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "pressreaderentitlementslambda849A2923": {
       "DependsOn": [
@@ -457,13 +447,6 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
       "Properties": {
         "PolicyDocument": {
           "Statement": [
-            {
-              "Action": "dynamodb:Query",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::ImportValue": "supporter-product-data-tables-CODE-SupporterProductDataTable",
-              },
-            },
             {
               "Action": [
                 "s3:GetObject*",
@@ -1070,7 +1053,6 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
       "GuDistributionBucketParameter",
       "GuApiGateway5xxPercentageAlarm",
       "GuCname",
-      "GuGetDistributablePolicy",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -1356,38 +1338,6 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
-    "GetDistributablePolicyPressreaderentitlements64111028": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:s3:::",
-                    {
-                      "Ref": "DistributionBucketName",
-                    },
-                    "/support/PROD/press-reader-entitlements/*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "GetDistributablePolicyPressreaderentitlements64111028",
-        "Roles": [
-          {
-            "Ref": "pressreaderentitlementslambdaServiceRole94C17F23",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
     "NS1DNSentryforpressreaderentitlementsguardianapiscom": {
       "Properties": {
         "Name": "press-reader-entitlements.guardianapis.com",
@@ -1399,6 +1349,29 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
         "TTL": 3600,
       },
       "Type": "Guardian::DNS::RecordSet",
+    },
+    "SupporterProductDataTablequeryaccess7665F484": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "dynamodb:Query",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "supporter-product-data-tables-PROD-SupporterProductDataTable",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SupporterProductDataTablequeryaccess7665F484",
+        "Roles": [
+          {
+            "Ref": "pressreaderentitlementslambdaServiceRole94C17F23",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "pressreaderentitlementslambda849A2923": {
       "DependsOn": [
@@ -1520,13 +1493,6 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
       "Properties": {
         "PolicyDocument": {
           "Statement": [
-            {
-              "Action": "dynamodb:Query",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::ImportValue": "supporter-product-data-tables-PROD-SupporterProductDataTable",
-              },
-            },
             {
               "Action": [
                 "s3:GetObject*",

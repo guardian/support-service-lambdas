@@ -6,20 +6,18 @@ import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { certForStack } from '../constants';
 import type { SrStack } from './sr-stack';
 
+export type SrRestDomainProps = {
+	suffixProdDomain?: boolean;
+	publicDomain?: boolean; // if setting it to true, you have to add a fastly configuration for it
+	domainIdOverride?: string;
+};
+
 export class SrRestDomain {
 	readonly dnsRecord: CfnRecordSet;
 	readonly cfnDomainName: CfnDomainName;
 	readonly basePathMapping: CfnBasePathMapping;
 	readonly domainName: GuCname | undefined;
-	constructor(
-		scope: SrStack,
-		api: LambdaRestApi,
-		props?: {
-			suffixProdDomain?: boolean;
-			publicDomain?: boolean; // if setting it to true, you have to add a fastly configuration for it
-			domainIdOverride?: string;
-		},
-	) {
+	constructor(scope: SrStack, api: LambdaRestApi, props?: SrRestDomainProps) {
 		const app = scope.app;
 
 		const isProd = scope.stage === 'PROD';
