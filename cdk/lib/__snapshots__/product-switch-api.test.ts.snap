@@ -668,7 +668,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "productswitchapilambdaproductswitchapiCODEDeployment4EE627F9f431ccc963349ea8262c418d3f8cc228": {
+    "productswitchapilambdaproductswitchapiCODEDeployment4EE627F9b8c211794c3e933f91c19fe392252bd7": {
       "DependsOn": [
         "productswitchapilambdaproductswitchapiCODEproxyANYA8660462",
         "productswitchapilambdaproductswitchapiCODEproxy466471EA",
@@ -688,7 +688,7 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "productswitchapilambdaproductswitchapiCODEDeployment4EE627F9f431ccc963349ea8262c418d3f8cc228",
+          "Ref": "productswitchapilambdaproductswitchapiCODEDeployment4EE627F9b8c211794c3e933f91c19fe392252bd7",
         },
         "RestApiId": {
           "Ref": "productswitchapilambdaproductswitchapiCODE34905765",
@@ -1691,7 +1691,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "productswitchapilambdaproductswitchapiPRODDeployment3D2B349E65bcdbfaae8a4139c96195edb4830ea6": {
+    "productswitchapilambdaproductswitchapiPRODDeployment3D2B349Ec3eee5302f07e8bf5b7c934545e634ed": {
       "DependsOn": [
         "productswitchapilambdaproductswitchapiPRODproxyANY4B70B834",
         "productswitchapilambdaproductswitchapiPRODproxy05CF61E1",
@@ -1711,7 +1711,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "productswitchapilambdaproductswitchapiPRODDeployment3D2B349E65bcdbfaae8a4139c96195edb4830ea6",
+          "Ref": "productswitchapilambdaproductswitchapiPRODDeployment3D2B349Ec3eee5302f07e8bf5b7c934545e634ed",
         },
         "RestApiId": {
           "Ref": "productswitchapilambdaproductswitchapiPROD165D4330",

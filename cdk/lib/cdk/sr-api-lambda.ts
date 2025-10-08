@@ -23,7 +23,7 @@ function getApiLambdaDefaultProps(scope: Identity, props: SrApiLambdaProps) {
 			id: getNameWithStage(scope, props.nameSuffix),
 			restApiName: getNameWithStage(scope, props.nameSuffix),
 			description: props.apiDescriptionOverride ?? 'API Gateway created by CDK',
-			proxy: true,
+			proxy: false, // add proxy method later, to allow public paths
 			deployOptions: {
 				stageName: scope.stage,
 			},
@@ -73,6 +73,10 @@ export class SrApiLambda extends GuApiLambda {
 		};
 
 		super(scope, `${scope.app}-lambda`, finalProps);
+
+		// by doing these explicitly rather than using proxy:true, we can later add specific public resources
+		this.api.root.addMethod('ANY');
+		this.api.root.addResource('{proxy+}').addMethod('ANY');
 
 		if (!props.isPublic) {
 			const usagePlan = this.api.addUsagePlan('UsagePlan', {
@@ -133,5 +137,15 @@ export class SrApiLambda extends GuApiLambda {
 
 	addPolicies(...policies: GuPolicy[]) {
 		policies.forEach((p) => this.role!.attachInlinePolicy(p));
+	}
+
+	addPublicPath(path: string) {
+		const publicResource = this.api.root.addResource(path);
+		publicResource.addMethod('GET', undefined, {
+			apiKeyRequired: false,
+		});
+		publicResource.addResource('{proxy+}').addMethod('GET', undefined, {
+			apiKeyRequired: false,
+		});
 	}
 }

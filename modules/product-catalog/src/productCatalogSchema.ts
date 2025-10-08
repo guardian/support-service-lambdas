@@ -24,21 +24,44 @@ export const productKeys = [
 export const productKeySchema = z.enum(productKeys);
 export const termTypeSchema = z.enum(['Recurring', 'FixedTerm']);
 
+export type GenericProductCatalog = Record<
+	string,
+	z.infer<typeof baseProductSchema>
+>;
+
+const baseRatePlanSchema = z.object({
+	id: z.string(),
+	charges: z.record(
+		z.string(),
+		z.object({
+			id: z.string(),
+		}),
+	),
+	pricing: z.record(z.string(), z.number()),
+	termLengthInMonths: z.number(),
+	termType: termTypeSchema,
+});
+
+const baseProductSchema = z.object({
+	active: z.boolean(),
+	billingSystem: z.enum(['zuora', 'stripe']),
+	customerFacingName: z.string(),
+	isDeliveryProduct: z.boolean(),
+	ratePlans: z.record(z.string(), baseRatePlanSchema),
+});
+
 export const productCatalogSchema = z.object({
-	Contribution: z.object({
-		active: z.boolean(),
+	Contribution: baseProductSchema.extend({
 		billingSystem: z.literal('zuora'),
-		customerFacingName: z.string(),
 		isDeliveryProduct: z.literal(false),
 		ratePlans: z.object({
-			Annual: z.object({
+			Annual: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
 					Contribution: z.object({
 						id: z.string(),
 					}),
 				}),
-				id: z.string(),
 				pricing: z.object({
 					AUD: z.number(),
 					CAD: z.number(),
@@ -47,17 +70,14 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
 			}),
-			Monthly: z.object({
+			Monthly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Contribution: z.object({
 						id: z.string(),
 					}),
 				}),
-				id: z.string(),
 				pricing: z.object({
 					AUD: z.number(),
 					CAD: z.number(),
@@ -66,25 +86,20 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
 			}),
 		}),
 	}),
-	DigitalSubscription: z.object({
-		active: z.boolean(),
+	DigitalSubscription: baseProductSchema.extend({
 		billingSystem: z.literal('zuora'),
-		customerFacingName: z.string(),
 		isDeliveryProduct: z.literal(false),
 		ratePlans: z.object({
-			Annual: z.object({
+			Annual: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
 					Subscription: z.object({
 						id: z.string(),
 					}),
 				}),
-				id: z.string(),
 				pricing: z.object({
 					AUD: z.number(),
 					CAD: z.number(),
@@ -93,17 +108,14 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
 			}),
-			Monthly: z.object({
+			Monthly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Subscription: z.object({
 						id: z.string(),
 					}),
 				}),
-				id: z.string(),
 				pricing: z.object({
 					AUD: z.number(),
 					CAD: z.number(),
@@ -112,16 +124,13 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
 			}),
-			OneYearGift: z.object({
+			OneYearGift: baseRatePlanSchema.extend({
 				charges: z.object({
 					Subscription: z.object({
 						id: z.string(),
 					}),
 				}),
-				id: z.string(),
 				pricing: z.object({
 					AUD: z.number(),
 					CAD: z.number(),
@@ -130,18 +139,14 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
-
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
 			}),
-			Quarterly: z.object({
+			Quarterly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Quarter'),
 				charges: z.object({
 					Subscription: z.object({
 						id: z.string(),
 					}),
 				}),
-				id: z.string(),
 				pricing: z.object({
 					AUD: z.number(),
 					CAD: z.number(),
@@ -150,16 +155,13 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
 			}),
-			ThreeMonthGift: z.object({
+			ThreeMonthGift: baseRatePlanSchema.extend({
 				charges: z.object({
 					Subscription: z.object({
 						id: z.string(),
 					}),
 				}),
-				id: z.string(),
 				pricing: z.object({
 					AUD: z.number(),
 					CAD: z.number(),
@@ -168,66 +170,50 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
-
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
 			}),
 		}),
 	}),
-	GuardianAdLite: z.object({
-		active: z.boolean(),
+	GuardianAdLite: baseProductSchema.extend({
 		billingSystem: z.literal('zuora'),
-		customerFacingName: z.string(),
 		isDeliveryProduct: z.literal(false),
 		ratePlans: z.object({
-			Monthly: z.object({
+			Monthly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Subscription: z.object({
 						id: z.string(),
 					}),
 				}),
-				id: z.string(),
 				pricing: z.object({ GBP: z.number() }),
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
 			}),
 		}),
 	}),
-	GuardianPatron: z.object({
-		active: z.boolean(),
+	GuardianPatron: baseProductSchema.extend({
 		billingSystem: z.literal('stripe'),
-		customerFacingName: z.string(),
 		isDeliveryProduct: z.literal(false),
 		ratePlans: z.object({
-			GuardianPatron: z.object({
+			GuardianPatron: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Subscription: z.object({
 						id: z.string(),
 					}),
 				}),
-				id: z.string(),
 				pricing: z.object({}),
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
 			}),
 		}),
 	}),
-	GuardianWeeklyDomestic: z.object({
-		active: z.boolean(),
+	GuardianWeeklyDomestic: baseProductSchema.extend({
 		billingSystem: z.literal('zuora'),
-		customerFacingName: z.string(),
 		isDeliveryProduct: z.literal(true),
 		ratePlans: z.object({
-			Annual: z.object({
+			Annual: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
 					Subscription: z.object({
 						id: z.string(),
 					}),
 				}),
-				id: z.string(),
 				pricing: z.object({
 					AUD: z.number(),
 					CAD: z.number(),
@@ -236,17 +222,14 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
 			}),
-			Monthly: z.object({
+			Monthly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Subscription: z.object({
 						id: z.string(),
 					}),
 				}),
-				id: z.string(),
 				pricing: z.object({
 					AUD: z.number(),
 					CAD: z.number(),
@@ -255,17 +238,14 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
 			}),
-			OneYearGift: z.object({
+			OneYearGift: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
 					Subscription: z.object({
 						id: z.string(),
 					}),
 				}),
-				id: z.string(),
 				pricing: z.object({
 					AUD: z.number(),
 					CAD: z.number(),
@@ -274,17 +254,14 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
 			}),
-			Quarterly: z.object({
+			Quarterly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Quarter'),
 				charges: z.object({
 					Subscription: z.object({
 						id: z.string(),
 					}),
 				}),
-				id: z.string(),
 				pricing: z.object({
 					AUD: z.number(),
 					CAD: z.number(),
@@ -293,17 +270,14 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
 			}),
-			ThreeMonthGift: z.object({
+			ThreeMonthGift: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Quarter'),
 				charges: z.object({
 					Subscription: z.object({
 						id: z.string(),
 					}),
 				}),
-				id: z.string(),
 				pricing: z.object({
 					AUD: z.number(),
 					CAD: z.number(),
@@ -312,125 +286,95 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
 			}),
 		}),
 	}),
-	GuardianWeeklyRestOfWorld: z.object({
-		active: z.boolean(),
+	GuardianWeeklyRestOfWorld: baseProductSchema.extend({
 		billingSystem: z.literal('zuora'),
-		customerFacingName: z.string(),
 		isDeliveryProduct: z.literal(true),
 		ratePlans: z.object({
-			Annual: z.object({
+			Annual: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
 					Subscription: z.object({
 						id: z.string(),
 					}),
 				}),
-				id: z.string(),
 				pricing: z.object({ GBP: z.number(), USD: z.number() }),
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
 			}),
-			Monthly: z.object({
+			Monthly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Monthly: z.object({
 						id: z.string(),
 					}),
 				}),
-				id: z.string(),
 				pricing: z.object({ GBP: z.number(), USD: z.number() }),
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
 			}),
-			OneYearGift: z.object({
+			OneYearGift: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
 					Subscription: z.object({
 						id: z.string(),
 					}),
 				}),
-				id: z.string(),
 				pricing: z.object({ GBP: z.number(), USD: z.number() }),
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
 			}),
-			Quarterly: z.object({
+			Quarterly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Quarter'),
 				charges: z.object({
 					Subscription: z.object({
 						id: z.string(),
 					}),
 				}),
-				id: z.string(),
 				pricing: z.object({ GBP: z.number(), USD: z.number() }),
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
 			}),
-			ThreeMonthGift: z.object({
+			ThreeMonthGift: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Quarter'),
 				charges: z.object({
 					Subscription: z.object({
 						id: z.string(),
 					}),
 				}),
-				id: z.string(),
 				pricing: z.object({ GBP: z.number(), USD: z.number() }),
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
 			}),
 		}),
 	}),
-	GuardianWeeklyZoneA: z.object({
-		active: z.boolean(),
+	GuardianWeeklyZoneA: baseProductSchema.extend({
 		billingSystem: z.literal('zuora'),
-		customerFacingName: z.string(),
 		isDeliveryProduct: z.literal(true),
 		ratePlans: z.object({
-			Annual: z.object({
+			Annual: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
 					Subscription: z.object({
 						id: z.string(),
 					}),
 				}),
-				id: z.string(),
 				pricing: z.object({ GBP: z.number(), USD: z.number() }),
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
 			}),
-			Quarterly: z.object({
+			Quarterly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Quarter'),
 				charges: z.object({
 					Subscription: z.object({
 						id: z.string(),
 					}),
 				}),
-				id: z.string(),
 				pricing: z.object({ GBP: z.number(), USD: z.number() }),
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
 			}),
 		}),
 	}),
-	GuardianWeeklyZoneB: z.object({
-		active: z.boolean(),
+	GuardianWeeklyZoneB: baseProductSchema.extend({
 		billingSystem: z.literal('zuora'),
-		customerFacingName: z.string(),
 		isDeliveryProduct: z.literal(true),
 		ratePlans: z.object({
-			Annual: z.object({
+			Annual: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
 					Subscription: z.object({
 						id: z.string(),
 					}),
 				}),
-				id: z.string(),
 				pricing: z.object({
 					AUD: z.number(),
 					CAD: z.number(),
@@ -439,17 +383,14 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
 			}),
-			Quarterly: z.object({
+			Quarterly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Quarter'),
 				charges: z.object({
 					Subscription: z.object({
 						id: z.string(),
 					}),
 				}),
-				id: z.string(),
 				pricing: z.object({
 					AUD: z.number(),
 					CAD: z.number(),
@@ -458,25 +399,20 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
 			}),
 		}),
 	}),
-	GuardianWeeklyZoneC: z.object({
-		active: z.boolean(),
+	GuardianWeeklyZoneC: baseProductSchema.extend({
 		billingSystem: z.literal('zuora'),
-		customerFacingName: z.string(),
 		isDeliveryProduct: z.literal(true),
 		ratePlans: z.object({
-			Annual: z.object({
+			Annual: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
 					Subscription: z.object({
 						id: z.string(),
 					}),
 				}),
-				id: z.string(),
 				pricing: z.object({
 					AUD: z.number(),
 					CAD: z.number(),
@@ -485,17 +421,14 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
 			}),
-			Quarterly: z.object({
+			Quarterly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Quarter'),
 				charges: z.object({
 					Subscription: z.object({
 						id: z.string(),
 					}),
 				}),
-				id: z.string(),
 				pricing: z.object({
 					AUD: z.number(),
 					CAD: z.number(),
@@ -504,18 +437,14 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
 			}),
 		}),
 	}),
-	HomeDelivery: z.object({
-		active: z.boolean(),
+	HomeDelivery: baseProductSchema.extend({
 		billingSystem: z.literal('zuora'),
-		customerFacingName: z.string(),
 		isDeliveryProduct: z.literal(true),
 		ratePlans: z.object({
-			Everyday: z.object({
+			Everyday: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Friday: z.object({
@@ -545,7 +474,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			EverydayPlus: z.object({
+			EverydayPlus: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					DigitalPack: z.object({
@@ -578,7 +507,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			Saturday: z.object({
+			Saturday: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Saturday: z.object({
@@ -590,7 +519,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			SaturdayPlus: z.object({
+			SaturdayPlus: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					DigitalPack: z.object({
@@ -605,7 +534,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			Sixday: z.object({
+			Sixday: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Friday: z.object({
@@ -632,7 +561,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			SixdayPlus: z.object({
+			SixdayPlus: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					DigitalPack: z.object({
@@ -662,7 +591,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			Sunday: z.object({
+			Sunday: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Sunday: z.object({
@@ -674,7 +603,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			SundayPlus: z.object({
+			SundayPlus: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					DigitalPack: z.object({
@@ -689,7 +618,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			Weekend: z.object({
+			Weekend: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Saturday: z.object({
@@ -704,7 +633,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			WeekendPlus: z.object({
+			WeekendPlus: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					DigitalPack: z.object({
@@ -724,13 +653,11 @@ export const productCatalogSchema = z.object({
 			}),
 		}),
 	}),
-	NationalDelivery: z.object({
-		active: z.boolean(),
+	NationalDelivery: baseProductSchema.extend({
 		billingSystem: z.literal('zuora'),
-		customerFacingName: z.string(),
 		isDeliveryProduct: z.literal(true),
 		ratePlans: z.object({
-			Everyday: z.object({
+			Everyday: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Friday: z.object({
@@ -760,7 +687,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			EverydayPlus: z.object({
+			EverydayPlus: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					DigitalPack: z.object({
@@ -793,7 +720,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			Sixday: z.object({
+			Sixday: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Friday: z.object({
@@ -820,7 +747,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			SixdayPlus: z.object({
+			SixdayPlus: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					DigitalPack: z.object({
@@ -850,7 +777,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			Weekend: z.object({
+			Weekend: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Saturday: z.object({
@@ -865,7 +792,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			WeekendPlus: z.object({
+			WeekendPlus: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					DigitalPack: z.object({
@@ -885,13 +812,11 @@ export const productCatalogSchema = z.object({
 			}),
 		}),
 	}),
-	NewspaperVoucher: z.object({
-		active: z.boolean(),
+	NewspaperVoucher: baseProductSchema.extend({
 		billingSystem: z.literal('zuora'),
-		customerFacingName: z.string(),
 		isDeliveryProduct: z.literal(true),
 		ratePlans: z.object({
-			Everyday: z.object({
+			Everyday: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Friday: z.object({
@@ -921,7 +846,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			EverydayPlus: z.object({
+			EverydayPlus: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					DigitalPack: z.object({
@@ -954,7 +879,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			Saturday: z.object({
+			Saturday: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Saturday: z.object({
@@ -966,7 +891,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			SaturdayPlus: z.object({
+			SaturdayPlus: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					DigitalPack: z.object({
@@ -981,7 +906,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			Sixday: z.object({
+			Sixday: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Friday: z.object({
@@ -1008,7 +933,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			SixdayPlus: z.object({
+			SixdayPlus: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					DigitalPack: z.object({
@@ -1038,7 +963,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			Sunday: z.object({
+			Sunday: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Sunday: z.object({
@@ -1050,7 +975,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			SundayPlus: z.object({
+			SundayPlus: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					DigitalPack: z.object({
@@ -1065,7 +990,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			Weekend: z.object({
+			Weekend: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Saturday: z.object({
@@ -1080,7 +1005,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			WeekendPlus: z.object({
+			WeekendPlus: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					DigitalPack: z.object({
@@ -1100,33 +1025,26 @@ export const productCatalogSchema = z.object({
 			}),
 		}),
 	}),
-	OneTimeContribution: z.object({
-		active: z.boolean(),
+	OneTimeContribution: baseProductSchema.extend({
 		billingSystem: z.literal('stripe'),
-		customerFacingName: z.string(),
 		isDeliveryProduct: z.literal(false),
 		ratePlans: z.object({
-			OneTime: z.object({
+			OneTime: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('OneTime'),
 				charges: z.object({
 					Contribution: z.object({
 						id: z.string(),
 					}),
 				}),
-				id: z.string(),
 				pricing: z.object({}),
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
 			}),
 		}),
 	}),
-	PartnerMembership: z.object({
-		active: z.boolean(),
+	PartnerMembership: baseProductSchema.extend({
 		billingSystem: z.literal('zuora'),
-		customerFacingName: z.string(),
 		isDeliveryProduct: z.literal(false),
 		ratePlans: z.object({
-			Annual: z.object({
+			Annual: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
 					Subscription: z.object({
@@ -1138,7 +1056,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			Monthly: z.object({
+			Monthly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Subscription: z.object({
@@ -1150,7 +1068,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			V1DeprecatedAnnual: z.object({
+			V1DeprecatedAnnual: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
 					Subscription: z.object({
@@ -1162,7 +1080,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			V1DeprecatedMonthly: z.object({
+			V1DeprecatedMonthly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Subscription: z.object({
@@ -1176,13 +1094,11 @@ export const productCatalogSchema = z.object({
 			}),
 		}),
 	}),
-	PatronMembership: z.object({
-		active: z.boolean(),
+	PatronMembership: baseProductSchema.extend({
 		billingSystem: z.literal('zuora'),
-		customerFacingName: z.string(),
 		isDeliveryProduct: z.literal(false),
 		ratePlans: z.object({
-			Annual: z.object({
+			Annual: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
 					Subscription: z.object({
@@ -1194,7 +1110,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			Monthly: z.object({
+			Monthly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Subscription: z.object({
@@ -1206,7 +1122,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			V1DeprecatedAnnual: z.object({
+			V1DeprecatedAnnual: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
 					Subscription: z.object({
@@ -1218,7 +1134,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			V1DeprecatedMonthly: z.object({
+			V1DeprecatedMonthly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Subscription: z.object({
@@ -1232,13 +1148,11 @@ export const productCatalogSchema = z.object({
 			}),
 		}),
 	}),
-	SubscriptionCard: z.object({
-		active: z.boolean(),
+	SubscriptionCard: baseProductSchema.extend({
 		billingSystem: z.literal('zuora'),
-		customerFacingName: z.string(),
 		isDeliveryProduct: z.literal(true),
 		ratePlans: z.object({
-			Everyday: z.object({
+			Everyday: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Friday: z.object({
@@ -1268,7 +1182,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			EverydayPlus: z.object({
+			EverydayPlus: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					DigitalPack: z.object({
@@ -1301,7 +1215,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			Saturday: z.object({
+			Saturday: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Saturday: z.object({
@@ -1313,7 +1227,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			SaturdayPlus: z.object({
+			SaturdayPlus: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					DigitalPack: z.object({
@@ -1328,7 +1242,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			Sixday: z.object({
+			Sixday: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Friday: z.object({
@@ -1355,7 +1269,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			SixdayPlus: z.object({
+			SixdayPlus: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					DigitalPack: z.object({
@@ -1385,7 +1299,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			Sunday: z.object({
+			Sunday: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Sunday: z.object({
@@ -1397,7 +1311,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			SundayPlus: z.object({
+			SundayPlus: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					DigitalPack: z.object({
@@ -1412,7 +1326,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			Weekend: z.object({
+			Weekend: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Saturday: z.object({
@@ -1427,7 +1341,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			WeekendPlus: z.object({
+			WeekendPlus: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					DigitalPack: z.object({
@@ -1447,13 +1361,11 @@ export const productCatalogSchema = z.object({
 			}),
 		}),
 	}),
-	SupporterMembership: z.object({
-		active: z.boolean(),
+	SupporterMembership: baseProductSchema.extend({
 		billingSystem: z.literal('zuora'),
-		customerFacingName: z.string(),
 		isDeliveryProduct: z.literal(false),
 		ratePlans: z.object({
-			Annual: z.object({
+			Annual: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
 					Subscription: z.object({
@@ -1471,7 +1383,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			Monthly: z.object({
+			Monthly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Subscription: z.object({
@@ -1489,7 +1401,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			V1DeprecatedAnnual: z.object({
+			V1DeprecatedAnnual: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
 					Subscription: z.object({
@@ -1501,7 +1413,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			V1DeprecatedMonthly: z.object({
+			V1DeprecatedMonthly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Subscription: z.object({
@@ -1513,7 +1425,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			V2DeprecatedAnnual: z.object({
+			V2DeprecatedAnnual: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
 					Subscription: z.object({
@@ -1531,7 +1443,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			V2DeprecatedMonthly: z.object({
+			V2DeprecatedMonthly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Subscription: z.object({
@@ -1551,13 +1463,11 @@ export const productCatalogSchema = z.object({
 			}),
 		}),
 	}),
-	SupporterPlus: z.object({
-		active: z.boolean(),
+	SupporterPlus: baseProductSchema.extend({
 		billingSystem: z.literal('zuora'),
-		customerFacingName: z.string(),
 		isDeliveryProduct: z.literal(false),
 		ratePlans: z.object({
-			Annual: z.object({
+			Annual: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
 					Contribution: z.object({
@@ -1579,7 +1489,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			Monthly: z.object({
+			Monthly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Contribution: z.object({
@@ -1601,7 +1511,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			OneYearStudent: z.object({
+			OneYearStudent: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
 					Subscription: z.object({
@@ -1620,7 +1530,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			V1DeprecatedAnnual: z.object({
+			V1DeprecatedAnnual: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
 					Subscription: z.object({
@@ -1639,7 +1549,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			V1DeprecatedMonthly: z.object({
+			V1DeprecatedMonthly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					Subscription: z.object({
@@ -1660,13 +1570,11 @@ export const productCatalogSchema = z.object({
 			}),
 		}),
 	}),
-	TierThree: z.object({
-		active: z.boolean(),
+	TierThree: baseProductSchema.extend({
 		billingSystem: z.literal('zuora'),
-		customerFacingName: z.string(),
 		isDeliveryProduct: z.literal(true),
 		ratePlans: z.object({
-			DomesticAnnual: z.object({
+			DomesticAnnual: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
 					GuardianWeekly: z.object({
@@ -1688,8 +1596,55 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			DomesticAnnualV2: z.object({
+			DomesticAnnualV2: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Annual'),
+				charges: z.object({
+					GuardianWeekly: z.object({
+						id: z.string(),
+					}),
+					NewspaperArchive: z.object({
+						id: z.string(),
+					}),
+					SupporterPlus: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({
+					AUD: z.number(),
+					CAD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					NZD: z.number(),
+					USD: z.number(),
+				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
+			DomesticMonthly: baseRatePlanSchema.extend({
+				billingPeriod: z.literal('Month'),
+				charges: z.object({
+					GuardianWeekly: z.object({
+						id: z.string(),
+					}),
+					SupporterPlus: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({
+					AUD: z.number(),
+					CAD: z.number(),
+					EUR: z.number(),
+					GBP: z.number(),
+					NZD: z.number(),
+					USD: z.number(),
+				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
+			DomesticMonthlyV2: baseRatePlanSchema.extend({
+				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					GuardianWeekly: z.object({
 						id: z.string(),
@@ -1713,54 +1668,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			DomesticMonthly: z.object({
-				billingPeriod: z.literal('Month'),
-				charges: z.object({
-					GuardianWeekly: z.object({
-						id: z.string(),
-					}),
-					SupporterPlus: z.object({
-						id: z.string(),
-					}),
-				}),
-				id: z.string(),
-				pricing: z.object({
-					AUD: z.number(),
-					CAD: z.number(),
-					EUR: z.number(),
-					GBP: z.number(),
-					NZD: z.number(),
-					USD: z.number(),
-				}),
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
-			}),
-			DomesticMonthlyV2: z.object({
-				billingPeriod: z.literal('Month'),
-				charges: z.object({
-					GuardianWeekly: z.object({
-						id: z.string(),
-					}),
-					NewspaperArchive: z.object({
-						id: z.string(),
-					}),
-					SupporterPlus: z.object({
-						id: z.string(),
-					}),
-				}),
-				id: z.string(),
-				pricing: z.object({
-					AUD: z.number(),
-					CAD: z.number(),
-					EUR: z.number(),
-					GBP: z.number(),
-					NZD: z.number(),
-					USD: z.number(),
-				}),
-				termLengthInMonths: z.number(),
-				termType: termTypeSchema,
-			}),
-			RestOfWorldAnnual: z.object({
+			RestOfWorldAnnual: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
 					GuardianWeekly: z.object({
@@ -1775,7 +1683,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			RestOfWorldAnnualV2: z.object({
+			RestOfWorldAnnualV2: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
 					GuardianWeekly: z.object({
@@ -1793,7 +1701,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			RestOfWorldMonthly: z.object({
+			RestOfWorldMonthly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					GuardianWeekly: z.object({
@@ -1808,7 +1716,7 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
-			RestOfWorldMonthlyV2: z.object({
+			RestOfWorldMonthlyV2: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
 					GuardianWeekly: z.object({
