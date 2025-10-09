@@ -98,12 +98,14 @@ export class MParticleApi extends GuStack {
 				functionName: `${app}-deletion-${this.stage}`,
 				timeout: Duration.seconds(300),
 				initialPolicy: [s3BatonReadAndWritePolicy],
-				events: [
-					new SqsEventSource(mmaUserDeletionRequestsQueue, {
-						reportBatchItemFailures: true,
-					}),
-				],
 			},
+		);
+
+		// Add SQS event source mapping separately since SrLambda doesn't accept events in constructor
+		mmaUserDeletionLambda.addEventSource(
+			new SqsEventSource(mmaUserDeletionRequestsQueue, {
+				reportBatchItemFailures: true,
+			}),
 		);
 
 		const mmaUserDeletionRequestsTopic = Topic.fromTopicArn(

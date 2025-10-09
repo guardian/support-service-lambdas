@@ -1169,22 +1169,6 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
             },
             {
               "Action": [
-                "sqs:ReceiveMessage",
-                "sqs:ChangeMessageVisibility",
-                "sqs:GetQueueUrl",
-                "sqs:DeleteMessage",
-                "sqs:GetQueueAttributes",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "mparticleapimmauserdeletionrequestsqueue07FE6606",
-                  "Arn",
-                ],
-              },
-            },
-            {
-              "Action": [
                 "s3:GetObject*",
                 "s3:GetBucket*",
                 "s3:List*",
@@ -1264,6 +1248,22 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
                     },
                     ":parameter/CODE/support/mparticle-api/*",
                   ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "mparticleapimmauserdeletionrequestsqueue07FE6606",
+                  "Arn",
                 ],
               },
             },
@@ -2959,22 +2959,6 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
             },
             {
               "Action": [
-                "sqs:ReceiveMessage",
-                "sqs:ChangeMessageVisibility",
-                "sqs:GetQueueUrl",
-                "sqs:DeleteMessage",
-                "sqs:GetQueueAttributes",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "mparticleapimmauserdeletionrequestsqueue07FE6606",
-                  "Arn",
-                ],
-              },
-            },
-            {
-              "Action": [
                 "s3:GetObject*",
                 "s3:GetBucket*",
                 "s3:List*",
@@ -3054,6 +3038,22 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
                     },
                     ":parameter/PROD/support/mparticle-api/*",
                   ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "mparticleapimmauserdeletionrequestsqueue07FE6606",
+                  "Arn",
                 ],
               },
             },
