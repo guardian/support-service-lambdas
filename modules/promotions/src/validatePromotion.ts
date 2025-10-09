@@ -3,6 +3,7 @@ import { ValidationError } from '@modules/errors';
 import type { SupportRegionId } from '@modules/internationalisation/countryGroup';
 import { countryGroupBySupportRegionId } from '@modules/internationalisation/countryGroup';
 import { getIfDefined } from '@modules/nullAndUndefined';
+import { logger } from '@modules/routing/logger';
 import { getPromotionByCode } from './getPromotions';
 import type {
 	AppliedPromotion,
@@ -26,10 +27,7 @@ export const validatePromotion = (
 		getPromotionByCode(promotions, appliedPromotion.promoCode),
 		'No promotion found for code ' + appliedPromotion.promoCode,
 	);
-	console.log(
-		`Found promotion ${appliedPromotion.promoCode}: `,
-		promotion.name,
-	);
+	logger.log(`Found promotion ${appliedPromotion.promoCode}: `, promotion.name);
 
 	checkPromotionIsActive(promotion);
 
