@@ -89,6 +89,10 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
         "RoleName": "baton-mparticle-lambda-role-CODE",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -136,8 +140,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
     },
     "MparticleApiDnsRecord": {
       "Properties": {
-        "Comment": "CNAME for mparticle-api API CODE",
-        "HostedZoneName": "support.guardianapis.com.",
+        "HostedZoneId": "Z3KO35ELNWZMSX",
         "Name": "mparticle-api-code.support.guardianapis.com",
         "ResourceRecords": [
           {
@@ -178,11 +181,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
           "Fn::Join": [
             "",
             [
-              "arn:aws:acm:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
+              "arn:aws:acm:eu-west-1:",
               {
                 "Ref": "AWS::AccountId",
               },
@@ -191,6 +190,10 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
           ],
         },
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -215,6 +218,10 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
       "Properties": {
         "Name": "support-CODE-mparticle-api",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -282,6 +289,10 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
         ],
         "Tags": [
           {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -302,7 +313,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC50315be72cc8949bc76f0e24a5cca409cbf": {
+    "RestApiDeployment180EC50349f9915e9604bcc41e758d55885f65fa": {
       "DependsOn": [
         "RestApidatasubjectrequestsrequestIdcallbackPOST2BF76B7C",
         "RestApidatasubjectrequestsrequestIdcallback3E3A4143",
@@ -323,13 +334,17 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC50315be72cc8949bc76f0e24a5cca409cbf",
+          "Ref": "RestApiDeployment180EC50349f9915e9604bcc41e758d55885f65fa",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
         },
         "StageName": "prod",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -522,6 +537,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "mparticle-api",
+            "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
           },
@@ -765,6 +781,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "mparticle-api",
+            "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
           },
@@ -1513,6 +1530,10 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
         "RoleName": "baton-mparticle-lambda-role-PROD",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1595,6 +1616,10 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
         "Statistic": "Sum",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
+          {
             "Key": "DiagnosticLinks",
             "Value": {
               "Fn::Join": [
@@ -1668,6 +1693,10 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
         "Statistic": "Sum",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
+          {
             "Key": "DiagnosticLinks",
             "Value": {
               "Fn::Join": [
@@ -1740,6 +1769,10 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
         "Period": 86400,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
           {
             "Key": "DiagnosticLinks",
             "Value": {
@@ -1926,8 +1959,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
     },
     "MparticleApiDnsRecord": {
       "Properties": {
-        "Comment": "CNAME for mparticle-api API PROD",
-        "HostedZoneName": "support.guardianapis.com.",
+        "HostedZoneId": "Z3KO35ELNWZMSX",
         "Name": "mparticle-api.support.guardianapis.com",
         "ResourceRecords": [
           {
@@ -1968,11 +2000,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
           "Fn::Join": [
             "",
             [
-              "arn:aws:acm:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
+              "arn:aws:acm:eu-west-1:",
               {
                 "Ref": "AWS::AccountId",
               },
@@ -1981,6 +2009,10 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
           ],
         },
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -2005,6 +2037,10 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
       "Properties": {
         "Name": "support-PROD-mparticle-api",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -2072,6 +2108,10 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
         ],
         "Tags": [
           {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -2092,7 +2132,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC503badbaf31ab9b6a932e24974d7bac16a2": {
+    "RestApiDeployment180EC503b266cb89d9a306e4bad13767fe133d7b": {
       "DependsOn": [
         "RestApidatasubjectrequestsrequestIdcallbackPOST2BF76B7C",
         "RestApidatasubjectrequestsrequestIdcallback3E3A4143",
@@ -2113,13 +2153,17 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC503badbaf31ab9b6a932e24974d7bac16a2",
+          "Ref": "RestApiDeployment180EC503b266cb89d9a306e4bad13767fe133d7b",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
         },
         "StageName": "prod",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -2312,6 +2356,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "mparticle-api",
+            "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
           },
@@ -2555,6 +2600,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "mparticle-api",
+            "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
           },

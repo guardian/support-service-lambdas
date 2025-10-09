@@ -32,7 +32,7 @@ describe('getCODEData', () => {
 jest.mock('@modules/aws/ssm', () => ({
 	getSSMParam: jest.fn().mockResolvedValue('mock-gcp-config'),
 }));
-jest.mock('@modules/bigquery/src/bigquery', () => ({
+jest.mock('@modules/bigquery/bigquery', () => ({
 	buildAuthClient: jest.fn().mockResolvedValue('mock-auth-client'),
 	runQuery: jest.fn().mockResolvedValue([
 		[

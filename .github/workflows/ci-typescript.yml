@@ -30,6 +30,10 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - run: pnpm install
+      - run: pnpm --filter "./buildcheck" type-check
+      - run: pnpm --filter "./buildcheck" check-formatting
+      - run: pnpm --filter "./buildcheck" lint
+      - run: pnpm --filter "./buildcheck" snapshot:assert ROOT
       - run: pnpm --filter "./modules/**" check-formatting
       - run: pnpm --filter "./modules/**" build
       - run: pnpm --filter "./modules/**" lint
@@ -38,6 +42,7 @@ jobs:
   gu-cdk-build:
     needs: common
     strategy:
+      fail-fast: false
       matrix:
         subproject:
           - user-benefits
@@ -74,14 +79,9 @@ jobs:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
       - run: pnpm install
-      - run: pnpm --filter cdk package
+      - run: pnpm --filter "./buildcheck" snapshot:assert handlers/${{ matrix.subproject }}
+      - run: pnpm --filter cdk package ${{ matrix.subproject }}
       - run: pnpm --filter ${{ matrix.subproject }} package
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.GU_RIFF_RAFF_ROLE_ARN }}
-          aws-region: eu-west-1
 
       - name: Upload to Riff-Raff
         uses: guardian/actions-riff-raff@v4
@@ -94,6 +94,7 @@ jobs:
           commentingEnabled: 'false'
           contentDirectories: |
             ${{ matrix.subproject }}-cloudformation:
-              - ./cdk/cdk.out
+              - ./cdk/cdk.out/${{ matrix.subproject }}-CODE.template.json
+              - ./cdk/cdk.out/${{ matrix.subproject }}-PROD.template.json
             ${{ matrix.subproject }}:
               - ./handlers/${{ matrix.subproject }}/target/${{ matrix.subproject }}.zip

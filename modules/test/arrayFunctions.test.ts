@@ -5,7 +5,7 @@ import {
 	mapValues,
 	partition,
 	sortBy,
-} from './arrayFunctions';
+} from '../arrayFunctions';
 
 test('sortBy should sort by the relevant field', () => {
 	const data = [

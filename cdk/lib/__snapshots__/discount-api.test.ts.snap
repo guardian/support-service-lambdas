@@ -5,7 +5,6 @@ exports[`The Discount API stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuApiLambda",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -45,77 +44,6 @@ exports[`The Discount API stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
-    "ApiGateway5XXAlarmCDK11905206": {
-      "Properties": {
-        "ActionsEnabled": false,
-        "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-CODE",
-              ],
-            ],
-          },
-        ],
-        "AlarmDescription": "Impact - Discount api returned a 5XX response check the logs for more information: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fdiscount-api-PROD. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
-        "AlarmName": "DISCOUNT-API-CODE Discount-api 5XX response",
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
-        "Dimensions": [
-          {
-            "Name": "ApiName",
-            "Value": "discount-api-CODE",
-          },
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "5XXError",
-        "Namespace": "AWS/ApiGateway",
-        "Period": 300,
-        "Statistic": "Sum",
-        "Tags": [
-          {
-            "Key": "DiagnosticLinks",
-            "Value": {
-              "Fn::Join": [
-                "",
-                [
-                  "lambda:",
-                  {
-                    "Ref": "discountapilambda972ABED6",
-                  },
-                ],
-              ],
-            },
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "Threshold": 1,
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
     "BasePathMapping": {
       "Properties": {
         "DomainName": {
@@ -133,7 +61,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
     "DNSRecord": {
       "Properties": {
         "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "discount-api.code.support.guardianapis.com",
+        "Name": "discount-api-code.support.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -149,7 +77,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
     },
     "DomainName": {
       "Properties": {
-        "DomainName": "discount-api.code.support.guardianapis.com",
+        "DomainName": "discount-api-code.support.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -169,6 +97,10 @@ exports[`The Discount API stack matches the snapshot 1`] = `
         },
         "Tags": [
           {
+            "Key": "App",
+            "Value": "discount-api",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -178,7 +110,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -188,22 +120,19 @@ exports[`The Discount API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
-    "S3inlinepolicy3B07399A": {
+    "S3catalogreadpolicyE18911B4": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": [
-                "arn:aws:s3::*:membership-dist/membership/CODE/discount-api/",
-                "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-CODE/*",
-              ],
+              "Resource": "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-CODE/*",
             },
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "S3inlinepolicy3B07399A",
+        "PolicyName": "S3catalogreadpolicyE18911B4",
         "Roles": [
           {
             "Ref": "discountapilambdaServiceRole4CB5B1F4",
@@ -212,12 +141,15 @@ exports[`The Discount API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SQSemailpolicy7D2D5531": {
+    "SQSsendpolicy967EA932": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "sqs:sendmessage",
+              "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:SendMessage",
+              ],
               "Effect": "Allow",
               "Resource": {
                 "Fn::Join": [
@@ -239,7 +171,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SQSemailpolicy7D2D5531",
+        "PolicyName": "SQSsendpolicy967EA932",
         "Roles": [
           {
             "Ref": "discountapilambdaServiceRole4CB5B1F4",
@@ -248,7 +180,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SecretsManagerpolicy7194A9CE": {
+    "ZuoraOAuthSecretsManagerpolicy5448D99B": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -275,7 +207,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SecretsManagerpolicy7194A9CE",
+        "PolicyName": "ZuoraOAuthSecretsManagerpolicy5448D99B",
         "Roles": [
           {
             "Ref": "discountapilambdaServiceRole4CB5B1F4",
@@ -294,16 +226,17 @@ exports[`The Discount API stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/CODE/discount-api/discount-api.zip",
+          "S3Key": "support/CODE/discount-api/discount-api.zip",
         },
         "Description": "A lambda that enables the addition of discounts to existing subscriptions",
         "Environment": {
           "Variables": {
             "APP": "discount-api",
             "App": "discount-api",
-            "STACK": "membership",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
             "STAGE": "CODE",
-            "Stack": "membership",
+            "Stack": "support",
             "Stage": "CODE",
           },
         },
@@ -335,7 +268,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -389,7 +322,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -438,7 +371,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/CODE/discount-api/discount-api.zip",
+                      "/support/CODE/discount-api/discount-api.zip",
                     ],
                   ],
                 },
@@ -459,7 +392,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/discount-api",
+                    ":parameter/CODE/support/discount-api",
                   ],
                 ],
               },
@@ -482,7 +415,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/discount-api/*",
+                    ":parameter/CODE/support/discount-api/*",
                   ],
                 ],
               },
@@ -681,7 +614,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -692,7 +625,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "discountapilambdadiscountapiCODEDeployment15948B741b868ab49ec282f04008c03e43e51ea1": {
+    "discountapilambdadiscountapiCODEDeployment15948B74139e7a767282d0dfb798f074a3a4f3f6": {
       "DependsOn": [
         "discountapilambdadiscountapiCODEproxyANY3023C5CD",
         "discountapilambdadiscountapiCODEproxyDA26EBF1",
@@ -712,7 +645,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "discountapilambdadiscountapiCODEDeployment15948B741b868ab49ec282f04008c03e43e51ea1",
+          "Ref": "discountapilambdadiscountapiCODEDeployment15948B74139e7a767282d0dfb798f074a3a4f3f6",
         },
         "RestApiId": {
           "Ref": "discountapilambdadiscountapiCODEE1E5C869",
@@ -733,7 +666,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -763,7 +696,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -786,7 +719,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
             "Throttle": {},
           },
         ],
-        "Description": "REST endpoints for discount api",
+        "Description": "REST endpoints for discount-api",
         "Tags": [
           {
             "Key": "App",
@@ -802,7 +735,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -854,7 +787,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1007,7 +940,6 @@ exports[`The Discount API stack matches the snapshot 2`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuApiLambda",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -1068,8 +1000,8 @@ exports[`The Discount API stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "Impact - Discount api returned a 5XX response check the logs for more information: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fdiscount-api-PROD. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
-        "AlarmName": "DISCOUNT-API-PROD Discount-api 5XX response",
+        "AlarmDescription": "discount-api returned a 5XX response search the logs below for "error" for more information. Impact: an eligible user may not have been offered a discount during the cancellation flow",
+        "AlarmName": "discount-api-PROD 5XX errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
@@ -1080,9 +1012,13 @@ exports[`The Discount API stack matches the snapshot 2`] = `
         "EvaluationPeriods": 1,
         "MetricName": "5XXError",
         "Namespace": "AWS/ApiGateway",
-        "Period": 300,
+        "Period": 60,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "discount-api",
+          },
           {
             "Key": "DiagnosticLinks",
             "Value": {
@@ -1107,7 +1043,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1171,6 +1107,10 @@ exports[`The Discount API stack matches the snapshot 2`] = `
         },
         "Tags": [
           {
+            "Key": "App",
+            "Value": "discount-api",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1180,7 +1120,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1190,22 +1130,19 @@ exports[`The Discount API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
-    "S3inlinepolicy3B07399A": {
+    "S3catalogreadpolicyE18911B4": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
             {
               "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Resource": [
-                "arn:aws:s3::*:membership-dist/membership/PROD/discount-api/",
-                "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-PROD/*",
-              ],
+              "Resource": "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-PROD/*",
             },
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "S3inlinepolicy3B07399A",
+        "PolicyName": "S3catalogreadpolicyE18911B4",
         "Roles": [
           {
             "Ref": "discountapilambdaServiceRole4CB5B1F4",
@@ -1214,12 +1151,15 @@ exports[`The Discount API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SQSemailpolicy7D2D5531": {
+    "SQSsendpolicy967EA932": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "sqs:sendmessage",
+              "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:SendMessage",
+              ],
               "Effect": "Allow",
               "Resource": {
                 "Fn::Join": [
@@ -1241,7 +1181,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SQSemailpolicy7D2D5531",
+        "PolicyName": "SQSsendpolicy967EA932",
         "Roles": [
           {
             "Ref": "discountapilambdaServiceRole4CB5B1F4",
@@ -1250,7 +1190,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SecretsManagerpolicy7194A9CE": {
+    "ZuoraOAuthSecretsManagerpolicy5448D99B": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -1277,7 +1217,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SecretsManagerpolicy7194A9CE",
+        "PolicyName": "ZuoraOAuthSecretsManagerpolicy5448D99B",
         "Roles": [
           {
             "Ref": "discountapilambdaServiceRole4CB5B1F4",
@@ -1296,16 +1236,17 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/PROD/discount-api/discount-api.zip",
+          "S3Key": "support/PROD/discount-api/discount-api.zip",
         },
         "Description": "A lambda that enables the addition of discounts to existing subscriptions",
         "Environment": {
           "Variables": {
             "APP": "discount-api",
             "App": "discount-api",
-            "STACK": "membership",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
             "STAGE": "PROD",
-            "Stack": "membership",
+            "Stack": "support",
             "Stage": "PROD",
           },
         },
@@ -1337,7 +1278,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1391,7 +1332,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1440,7 +1381,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/PROD/discount-api/discount-api.zip",
+                      "/support/PROD/discount-api/discount-api.zip",
                     ],
                   ],
                 },
@@ -1461,7 +1402,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/discount-api",
+                    ":parameter/PROD/support/discount-api",
                   ],
                 ],
               },
@@ -1484,7 +1425,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/discount-api/*",
+                    ":parameter/PROD/support/discount-api/*",
                   ],
                 ],
               },
@@ -1521,7 +1462,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1713,7 +1654,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1724,7 +1665,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "discountapilambdadiscountapiPRODDeploymentF304491Bf7c4b8003729caa5febbf7e71a1bc84f": {
+    "discountapilambdadiscountapiPRODDeploymentF304491Bf7b2b1cff83efc29228377b8f600efcb": {
       "DependsOn": [
         "discountapilambdadiscountapiPRODproxyANY177F9076",
         "discountapilambdadiscountapiPRODproxy2CE9F043",
@@ -1744,7 +1685,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "discountapilambdadiscountapiPRODDeploymentF304491Bf7c4b8003729caa5febbf7e71a1bc84f",
+          "Ref": "discountapilambdadiscountapiPRODDeploymentF304491Bf7b2b1cff83efc29228377b8f600efcb",
         },
         "RestApiId": {
           "Ref": "discountapilambdadiscountapiPROD4E9716BA",
@@ -1765,7 +1706,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1788,7 +1729,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
             "Throttle": {},
           },
         ],
-        "Description": "REST endpoints for discount api",
+        "Description": "REST endpoints for discount-api",
         "Tags": [
           {
             "Key": "App",
@@ -1804,7 +1745,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1856,7 +1797,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",

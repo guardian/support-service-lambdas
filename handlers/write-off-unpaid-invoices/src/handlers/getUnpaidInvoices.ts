@@ -1,6 +1,6 @@
 import { uploadFileToS3 } from '@modules/aws/s3';
 import { getSSMParam } from '@modules/aws/ssm';
-import { buildAuthClient, runQuery } from '@modules/bigquery/src/bigquery';
+import { buildAuthClient, runQuery } from '@modules/bigquery/bigquery';
 
 export const handler = async ({ filePath }: { filePath: string }) => {
 	const gcpConfig = await getSSMParam(

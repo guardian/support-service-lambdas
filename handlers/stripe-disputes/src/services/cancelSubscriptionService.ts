@@ -1,5 +1,15 @@
+import {
+	DataExtensionNames,
+	type EmailMessageWithIdentityUserId,
+	sendEmail,
+} from '@modules/email/email';
 import type { Logger } from '@modules/routing/logger';
-import { cancelSubscription } from '@modules/zuora/subscription';
+import { stageFromEnvironment } from '@modules/stage';
+import { getAccount } from '@modules/zuora/account';
+import {
+	cancelSubscription,
+	updateSubscription,
+} from '@modules/zuora/subscription';
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
@@ -33,6 +43,74 @@ export async function cancelSubscriptionService(
 		'Subscription cancellation response:',
 		JSON.stringify(cancelResponse),
 	);
+
+	// Update subscription with cancellation reason
+	try {
+		logger.log('Updating subscription with cancellation reason');
+		const updateResponse = await updateSubscription(
+			zuoraClient,
+			subscription.subscriptionNumber,
+			{
+				CancellationReason__c: 'Disputed Payment',
+			},
+		);
+		logger.log(
+			'Subscription cancellation reason update response:',
+			JSON.stringify(updateResponse),
+		);
+	} catch (updateError) {
+		logger.error('Failed to update cancellation reason:', updateError);
+		// Don't throw - the cancellation succeeded even if the update failed
+	}
+
+	// Get account details to retrieve customer email
+	const account = await getAccount(zuoraClient, subscription.accountNumber);
+
+	const customerEmail = account.billToContact.workEmail;
+
+	if (!customerEmail) {
+		logger.error(
+			`No email address found for subscription ${subscription.subscriptionNumber}`,
+		);
+		return false;
+	}
+
+	if (!customerEmail) {
+		logger.error(
+			`No email address found for subscription ${subscription.subscriptionNumber}`,
+		);
+	} else {
+		// Send email notification to customer
+		logger.log(
+			`Sending dispute cancellation email to customer: ${customerEmail}`,
+		);
+
+		try {
+			const emailMessage: EmailMessageWithIdentityUserId = {
+				To: {
+					Address: customerEmail,
+					ContactAttributes: {
+						SubscriberAttributes: {
+							EmailAddress: customerEmail,
+							SubscriptionNumber: subscription.subscriptionNumber,
+							DisputeCreatedDate: dayjs().format('YYYY-MM-DD'),
+						},
+					},
+				},
+				DataExtensionName: DataExtensionNames.stripeDisputeCancellation,
+				IdentityUserId: account.basicInfo.identityId,
+			};
+
+			await sendEmail(stageFromEnvironment(), emailMessage, (message: string) =>
+				logger.log(message),
+			);
+
+			logger.log('Dispute cancellation email sent successfully');
+		} catch (emailError) {
+			logger.error('Failed to send dispute cancellation email:', emailError);
+			// Don't throw - we still want to return true since cancellation succeeded
+		}
+	}
 
 	return true;
 }

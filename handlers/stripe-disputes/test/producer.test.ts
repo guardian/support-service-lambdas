@@ -7,6 +7,14 @@ const mockLogger = {
 };
 
 const mockRouterInstance = jest.fn();
+const mockGetSecretValue = jest.fn();
+const mockStageFromEnvironment = jest.fn();
+const mockStripeWebhooksConstructEvent = jest.fn();
+
+const mockStripeCredentials = {
+	secret_key: 'sk_test_mock_secret_key',
+	webhook_endpoint_secret: 'whsec_test_mock_webhook_secret',
+};
 
 jest.mock('@modules/routing/logger', () => ({
 	Logger: jest.fn(() => mockLogger),
@@ -15,6 +23,22 @@ jest.mock('@modules/routing/logger', () => ({
 jest.mock('@modules/routing/router', () => ({
 	Router: jest.fn(() => mockRouterInstance),
 }));
+
+jest.mock('@modules/secrets-manager/getSecret', () => ({
+	getSecretValue: mockGetSecretValue,
+}));
+
+jest.mock('@modules/stage', () => ({
+	stageFromEnvironment: mockStageFromEnvironment,
+}));
+
+jest.mock('stripe', () => {
+	return jest.fn().mockImplementation(() => ({
+		webhooks: {
+			constructEvent: mockStripeWebhooksConstructEvent,
+		},
+	}));
+});
 
 jest.mock('../src/services', () => ({
 	handleStripeWebhook: jest.fn(() => jest.fn()),
@@ -27,9 +51,10 @@ describe('Producer Handler', () => {
 		path: string,
 		httpMethod: string,
 		body: string,
+		stripeSignature?: string,
 	): APIGatewayProxyEvent => ({
 		body,
-		headers: {},
+		headers: stripeSignature ? { 'Stripe-Signature': stripeSignature } : {},
 		multiValueHeaders: {},
 		httpMethod,
 		path,
@@ -78,26 +103,42 @@ describe('Producer Handler', () => {
 			statusCode: 200,
 			body: JSON.stringify({ success: true }),
 		});
+		mockGetSecretValue.mockResolvedValue(mockStripeCredentials);
+		mockStageFromEnvironment.mockReturnValue('CODE');
+		mockStripeWebhooksConstructEvent.mockReturnValue({});
 	});
 
 	describe('Producer Webhook Processing', () => {
-		it('should handle webhook requests', async () => {
+		it('should handle webhook requests with valid signature', async () => {
 			const event = createMockApiGatewayEvent(
-				'/listen-dispute-created',
+				'/',
 				'POST',
-				'{}',
+				JSON.stringify({ type: 'charge.dispute.created' }),
+				'valid_signature',
 			);
 			const result = await handler(event);
 
+			expect(mockGetSecretValue).toHaveBeenCalledWith(
+				'CODE/Stripe/ConnectedApp/StripeDisputeWebhooks',
+			);
+			expect(mockStripeWebhooksConstructEvent).toHaveBeenCalledWith(
+				JSON.stringify({ type: 'charge.dispute.created' }),
+				'valid_signature',
+				'whsec_test_mock_webhook_secret',
+			);
+			expect(mockLogger.log).toHaveBeenCalledWith(
+				`Headers: ${JSON.stringify(event.headers)}`,
+			);
 			expect(mockRouterInstance).toHaveBeenCalledWith(event);
 			expect(result).toBeDefined();
 		});
 
 		it('should log producer input and response', async () => {
 			const event = createMockApiGatewayEvent(
-				'/listen-dispute-created',
+				'/',
 				'POST',
-				'{}',
+				JSON.stringify({ type: 'charge.dispute.created' }),
+				'valid_signature',
 			);
 			const mockResponse = {
 				statusCode: 200,
@@ -111,15 +152,19 @@ describe('Producer Handler', () => {
 				`Input: ${JSON.stringify(event)}`,
 			);
 			expect(mockLogger.log).toHaveBeenCalledWith(
+				`Headers: ${JSON.stringify(event.headers)}`,
+			);
+			expect(mockLogger.log).toHaveBeenCalledWith(
 				`Webhook response: ${JSON.stringify(result)}`,
 			);
 		});
 
 		it('should handle dispute created webhook', async () => {
 			const event = createMockApiGatewayEvent(
-				'/listen-dispute-created',
+				'/',
 				'POST',
-				'{}',
+				JSON.stringify({ type: 'charge.dispute.created' }),
+				'valid_signature',
 			);
 
 			await handler(event);
@@ -129,14 +174,119 @@ describe('Producer Handler', () => {
 
 		it('should handle dispute closed webhook', async () => {
 			const event = createMockApiGatewayEvent(
-				'/listen-dispute-closed',
+				'/',
 				'POST',
-				'{}',
+				JSON.stringify({ type: 'charge.dispute.closed' }),
+				'valid_signature',
 			);
 
 			await handler(event);
 
 			expect(mockRouterInstance).toHaveBeenCalledWith(event);
+		});
+	});
+
+	describe('Stripe Signature Verification', () => {
+		it('should return 400 when Stripe signature is missing', async () => {
+			const event = createMockApiGatewayEvent(
+				'/',
+				'POST',
+				JSON.stringify({ type: 'charge.dispute.created' }),
+			);
+
+			const result = await handler(event);
+
+			expect(mockLogger.error).toHaveBeenCalledWith(
+				'Missing Stripe-Signature header',
+			);
+			expect(result).toEqual({
+				statusCode: 400,
+				body: JSON.stringify({ message: 'Missing Stripe-Signature header' }),
+			});
+			expect(mockRouterInstance).not.toHaveBeenCalled();
+		});
+
+		it('should return 400 when request body is missing', async () => {
+			const event = createMockApiGatewayEvent(
+				'/',
+				'POST',
+				null as any,
+				'valid_signature',
+			);
+
+			const result = await handler(event);
+
+			expect(mockLogger.error).toHaveBeenCalledWith('Missing request body');
+			expect(result).toEqual({
+				statusCode: 400,
+				body: JSON.stringify({ message: 'Missing request body' }),
+			});
+			expect(mockRouterInstance).not.toHaveBeenCalled();
+		});
+
+		it('should return 403 when Stripe signature verification fails', async () => {
+			const event = createMockApiGatewayEvent(
+				'/',
+				'POST',
+				JSON.stringify({ type: 'charge.dispute.created' }),
+				'invalid_signature',
+			);
+
+			const mockError = new Error('Invalid signature');
+			mockStripeWebhooksConstructEvent.mockImplementation(() => {
+				throw mockError;
+			});
+
+			const result = await handler(event);
+
+			expect(mockLogger.error).toHaveBeenCalledWith(
+				'Error verifying Stripe webhook signature: Invalid signature',
+			);
+			expect(result).toEqual({
+				statusCode: 403,
+				body: JSON.stringify({ message: 'Webhook Error: Invalid signature' }),
+			});
+			expect(mockRouterInstance).not.toHaveBeenCalled();
+		});
+
+		it('should handle non-Error objects in signature verification', async () => {
+			const event = createMockApiGatewayEvent(
+				'/',
+				'POST',
+				JSON.stringify({ type: 'charge.dispute.created' }),
+				'invalid_signature',
+			);
+
+			mockStripeWebhooksConstructEvent.mockImplementation(() => {
+				throw 'String error';
+			});
+
+			const result = await handler(event);
+
+			expect(mockLogger.error).toHaveBeenCalledWith(
+				'Error verifying Stripe webhook signature: Unknown error',
+			);
+			expect(result).toEqual({
+				statusCode: 403,
+				body: JSON.stringify({ message: 'Webhook Error: Unknown error' }),
+			});
+		});
+
+		it('should retrieve Stripe credentials from correct secret path', async () => {
+			mockStageFromEnvironment.mockReturnValue('PROD');
+
+			const event = createMockApiGatewayEvent(
+				'/',
+				'POST',
+				JSON.stringify({ type: 'charge.dispute.created' }),
+				'valid_signature',
+			);
+
+			await handler(event);
+
+			expect(mockGetSecretValue).toHaveBeenCalledWith(
+				'PROD/Stripe/ConnectedApp/StripeDisputeWebhooks',
+			);
 		});
 	});
 });

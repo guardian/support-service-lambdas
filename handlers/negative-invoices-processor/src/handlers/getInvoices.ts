@@ -1,5 +1,5 @@
 import { getSSMParam } from '@modules/aws/ssm';
-import { buildAuthClient, runQuery } from '@modules/bigquery/src/bigquery';
+import { buildAuthClient, runQuery } from '@modules/bigquery/bigquery';
 import { stageFromEnvironment } from '@modules/stage';
 import { CODEDataMockQueryResponse } from '../../test/handlers/data/CODEDataMockQueryResponse';
 import { InvoiceRecordsArraySchema } from '../types';

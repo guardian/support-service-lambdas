@@ -17,7 +17,7 @@ Mappings:
       destBuckets: "arn:aws:s3:::gu-salesforce-export-code*"
       localbucketName : "gu-salesforce-export-code"
     PROD:
-      destBuckets: ["arn:aws:s3:::gu-salesforce-export-prod*", "arn:aws:s3:::ophan-raw-salesforce-*"]
+      destBuckets: "arn:aws:s3:::gu-salesforce-export-prod*"
       localbucketName: "gu-salesforce-export-prod"
 Resources:
   localBucket:
@@ -177,7 +177,6 @@ Resources:
           - Effect: Allow
             Action:
             - s3:PutObject
-            - s3:PutObjectAcl
             Resource: !FindInMap [StageMap, !Ref Stage, destBuckets]
   CleanBucketRole:
     Type: AWS::IAM::Role
@@ -275,6 +274,13 @@ Resources:
                 - s3:PutObject
                 - s3:PutObjectAcl
               Resource: !FindInMap [StageMap, !Ref Stage, destBuckets]
+      - PolicyName: OphanBuckets
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Action:
+                - s3:PutObject
+              Resource: "arn:aws:s3:::ophan-raw-salesforce-*"
   CleanBucket:
     Type: AWS::Lambda::Function
     Properties:
