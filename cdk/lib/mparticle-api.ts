@@ -108,7 +108,7 @@ export class MParticleApi extends GuStack {
 
 		const mmaUserDeletionRequestsTopic = Topic.fromTopicArn(
 			this,
-			'MmaUserDeletionRequestsTopicArn',
+			'MmaUserDeletionRequestsTopic',
 			mmaUserDeletionRequestsTopicArn,
 		);
 		mmaUserDeletionRequestsTopic.addSubscription(
