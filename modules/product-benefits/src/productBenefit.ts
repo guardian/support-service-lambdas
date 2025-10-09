@@ -16,6 +16,7 @@ export const supporterPlusBenefits: ProductBenefit[] = [
 ];
 export const digitalSubscriptionBenefits = supporterPlusBenefits.concat([
 	'newspaperEdition',
+	'guardianWeeklyEdition',
 	'newspaperArchive',
 ]);
 
