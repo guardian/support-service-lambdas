@@ -1017,6 +1017,10 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
         "QueueName": "mparticle-api-mma-user-deletion-requests-dlq-CODE",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1052,6 +1056,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "mparticle-api",
+            "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
           },
@@ -1349,6 +1354,10 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
           "maxReceiveCount": 3,
         },
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -1850,6 +1859,10 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
         "Statistic": "Maximum",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
+          {
             "Key": "DiagnosticLinks",
             "Value": {
               "Fn::Join": [
@@ -1922,6 +1935,10 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
         "Period": 86400,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
           {
             "Key": "DiagnosticLinks",
             "Value": {
@@ -2836,6 +2853,10 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
         "QueueName": "mparticle-api-mma-user-deletion-requests-dlq-PROD",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -2871,6 +2892,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "mparticle-api",
+            "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
           },
@@ -3168,6 +3190,10 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
           "maxReceiveCount": 3,
         },
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "mparticle-api",
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
