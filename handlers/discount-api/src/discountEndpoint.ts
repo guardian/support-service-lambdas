@@ -8,7 +8,6 @@ import { getAccount } from '@modules/zuora/account';
 import {
 	getBillingPreview,
 	getNextInvoice,
-	getNextInvoiceItems,
 	getNextNonFreePaymentDate,
 	getOrderedInvoiceTotals,
 	itemsForSubscription,
@@ -23,7 +22,7 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getZuoraCatalog } from '@modules/zuora-catalog/S3';
 import type { APIGatewayProxyEventHeaders } from 'aws-lambda';
 import dayjs from 'dayjs';
-import { EligibilityChecker } from './eligibilityChecker';
+import { ccc } from './eligibilityChecker';
 import { generateCancellationDiscountConfirmationEmail } from './generateCancellationDiscountConfirmationEmail';
 import { getDiscountFromSubscription } from './productToDiscountMapping';
 
@@ -204,7 +203,7 @@ async function getDiscountToApply(
 	today: dayjs.Dayjs,
 ) {
 	const catalog = () => getZuoraCatalog(stage);
-	const eligibilityChecker = new EligibilityChecker();
+	// const eligibilityChecker = new EligibilityChecker(catalog, today);
 
 	logger.log('Working out the appropriate discount for the subscription');
 	const { discount, discountableProductRatePlanId } =
@@ -223,41 +222,19 @@ async function getDiscountToApply(
 		.then(itemsForSubscription(subscription.subscriptionNumber))
 		.then(toSimpleInvoiceItems);
 
-	await eligibilityChecker.assertGenerallyEligible(
+	logger.log('Checking this subscription is eligible for the discount');
+	await ccc({
+		catalog,
+		today,
+		discount,
+		account,
 		subscription,
-		account.metrics.totalInvoiceBalance,
-		() => lazyBillingPreview.then(getNextInvoiceItems).get(),
-	);
+		lazyBillingPreview,
+		discountableProductRatePlanId,
+	});
 
 	// now we know the subscription is not cancelled we can force the billing preview
 	const billingPreview = await lazyBillingPreview.get();
-
-	logger.log('Checking this subscription is eligible for the discount');
-	switch (discount.eligibilityCheckForRatePlan) {
-		case 'EligibleForFreePeriod':
-			eligibilityChecker.assertEligibleForFreePeriod(
-				discount.productRatePlanId,
-				subscription,
-				today,
-			);
-			break;
-		case 'AtCatalogPrice':
-			eligibilityChecker.assertNextPaymentIsAtCatalogPrice(
-				await catalog(),
-				billingPreview,
-				discountableProductRatePlanId,
-				account.metrics.currency,
-			);
-			break;
-		case 'NoRepeats':
-			eligibilityChecker.assertNoRepeats(
-				discount.productRatePlanId,
-				subscription,
-			);
-			break;
-		case 'NoCheck':
-			break;
-	}
 
 	const dateToApply = getNextInvoice(billingPreview).date;
 

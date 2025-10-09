@@ -4,7 +4,8 @@ import type { GenericProductCatalog } from '@modules/product-catalog/productCata
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import type { APIGatewayProxyResult } from 'aws-lambda';
-import type { Discount } from './productToDiscountMapping';
+import type { Discount } from './discountTypes';
+import { aaa } from './eligibilityChecker';
 import { ProductToDiscountMapping } from './productToDiscountMapping';
 
 export async function docsHandler(
@@ -29,12 +30,15 @@ export async function docsHandler(
 			...findPlan(prpId),
 			discount.name,
 			discount.eligibilityCheckForRatePlan,
+			aaa[discount.eligibilityCheckForRatePlan]
+				.map((item) => item.name)
+				.join('<br>'),
 		])
 		.sort();
 	return {
 		body: render(
 			'Discount list - ' + stage,
-			'product,plan,discount,eligibility'.split(','),
+			'product,plan,discount,eligibility,subchecks'.split(','),
 			rows,
 		),
 		headers: {

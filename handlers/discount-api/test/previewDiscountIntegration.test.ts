@@ -11,7 +11,7 @@ import { zuoraDateFormat } from '@modules/zuora/utils';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { previewDiscountEndpoint } from '../src/discountEndpoint';
-import { validationRequirements } from '../src/eligibilityChecker';
+import { atLeastCatalogPrice } from '../src/eligibilityChecker';
 import type { EligibilityCheckResponseBody } from '../src/responseSchema';
 
 const stage: Stage = 'CODE';
@@ -55,7 +55,7 @@ test('Subscriptions on the old price are not eligible', async () => {
 			subscriptionNumber,
 			dayjs(),
 		);
-	}).rejects.toThrow(validationRequirements.atLeastCatalogPrice);
+	}).rejects.toThrow(atLeastCatalogPrice.name);
 
 	console.log('Cancelling the subscription');
 	const cancellationResult = await cancelSubscription(

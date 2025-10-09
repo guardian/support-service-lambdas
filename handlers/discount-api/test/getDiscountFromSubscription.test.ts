@@ -1,7 +1,7 @@
 import { DataExtensionNames } from '@modules/email/email';
 import { zuoraSubscriptionResponseSchema } from '@modules/zuora/types';
-import { validationRequirements } from '../src/eligibilityChecker';
-import type { Discount } from '../src/productToDiscountMapping';
+import type { Discount } from '../src/discountTypes';
+import { mustHaveDiscountDefined } from '../src/eligibilityChecker';
 import {
 	catalog,
 	getDiscountFromSubscription,
@@ -31,5 +31,5 @@ test('cant get a discount for a student (fixed term)', () => {
 
 	const ac2 = () => getDiscountFromSubscription('CODE', sub);
 
-	expect(ac2).toThrow(validationRequirements.mustHaveDiscountDefined);
+	expect(ac2).toThrow(mustHaveDiscountDefined.name);
 });

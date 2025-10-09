@@ -30,13 +30,13 @@ export const groupMap = <T, R>(
 	);
 };
 
-export const mapValues = <V, O>(
-	obj: Record<string, V>,
+export const mapValues = <K extends string, V, O>(
+	obj: Record<K, V>,
 	fn: (v: V) => O,
-): Record<string, O> =>
+): Record<K, O> =>
 	Object.fromEntries(
-		Object.entries(obj).map(([key, value]) => [key, fn(value)]),
-	);
+		Object.entries(obj).map(([key, value]) => [key, fn(value as V)]),
+	) as Record<K, O>;
 
 export const partition = <T, U extends T>(
 	arr: T[],

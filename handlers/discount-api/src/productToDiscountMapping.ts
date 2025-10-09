@@ -4,7 +4,11 @@ import { DataExtensionNames } from '@modules/email/email';
 import type { Stage } from '@modules/stage';
 import { isNotRemovedOrDiscount } from '@modules/zuora/rateplan';
 import type { ZuoraSubscription } from '@modules/zuora/types';
-import { assertValidState, validationRequirements } from './eligibilityChecker';
+import type { Discount, EligibilityCheck } from './discountTypes';
+import {
+	assertValidState,
+	mustHaveDiscountDefined,
+} from './eligibilityChecker';
 
 function getDiscountableRatePlan(subscription: ZuoraSubscription) {
 	return getSingleOrThrow(
@@ -27,30 +31,11 @@ export const getDiscountFromSubscription = (
 
 	assertValidState(
 		discount !== undefined,
-		validationRequirements.mustHaveDiscountDefined,
+		mustHaveDiscountDefined.name,
 		JSON.stringify(discount),
 	);
 
 	return { discount, discountableProductRatePlanId };
-};
-
-export type EligibilityCheck =
-	| 'EligibleForFreePeriod'
-	| 'AtCatalogPrice'
-	| 'NoRepeats'
-	| 'NoCheck';
-
-export type Discount = {
-	// the following fields match the charge in the zuora catalog
-	// https://knowledgecenter.zuora.com/Zuora_Platform/API/G_SOAP_API/E1_SOAP_API_Object_Reference/ProductRatePlanCharge
-	productRatePlanId: string;
-	name: string;
-	upToPeriods: number;
-	upToPeriodsType: 'Days' | 'Weeks' | 'Months' | 'Years';
-	discountPercentage: number;
-	// end fields that match the zuora catalog
-	emailIdentifier: DataExtensionName;
-	eligibilityCheckForRatePlan: EligibilityCheck;
 };
 
 export const catalog = {
