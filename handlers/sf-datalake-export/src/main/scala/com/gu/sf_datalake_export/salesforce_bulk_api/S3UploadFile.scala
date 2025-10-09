@@ -27,6 +27,7 @@ object S3UploadFile extends Logging {
     val putRequest = PutObjectRequest.builder
       .bucket(fullPath.bucketName.value)
       .key(fullPath.key.map(_.value).getOrElse(""))
+      .acl(ObjectCannedACL.BUCKET_OWNER_READ)
       .build()
 
     val requestBody = RequestBody.fromString(file.content.value, StandardCharsets.UTF_8)

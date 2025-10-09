@@ -504,8 +504,8 @@ object SaveCsvToBucket extends LazyLogging {
       case "PROD" =>
         val bucket = Query.withName(batch.name).s3Bucket
         val metadata: String = Printer.spaces2.print(Metadata(job, batch).asJson)
-        val csvRequestWithAcl = putRequest(bucket, key = Query.withName(batch.name).s3Key)
-        val metadataRequestWithAcl = putRequest(bucket, key = s"metadata/${batch.name}.json")
+        val csvRequestWithAcl = putRequestWithAcl(bucket, key = Query.withName(batch.name).s3Key)
+        val metadataRequestWithAcl = putRequestWithAcl(bucket, key = s"metadata/${batch.name}.json")
         s3Client.putObject(
           csvRequestWithAcl,
           RequestBody.fromString(csvContent, StandardCharsets.UTF_8),
@@ -518,11 +518,13 @@ object SaveCsvToBucket extends LazyLogging {
     }
   }
 
-  private def putRequest(bucketName: String, key: String): PutObjectRequest =
+  private def putRequestWithAcl(bucketName: String, key: String): PutObjectRequest =
     PutObjectRequest.builder
       .bucket(bucketName)
       .key(key)
+      .acl(ObjectCannedACL.BUCKET_OWNER_READ)
       .build()
+
 }
 
 object HttpWithLongTimeout
