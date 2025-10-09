@@ -5,7 +5,6 @@ exports[`The Discount API stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuGetDistributablePolicy",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -45,81 +44,6 @@ exports[`The Discount API stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
-    "ApiGateway5XXAlarmCDK11905206": {
-      "Properties": {
-        "ActionsEnabled": false,
-        "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-CODE",
-              ],
-            ],
-          },
-        ],
-        "AlarmDescription": "Impact - Discount api returned a 5XX response check the logs for more information: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fdiscount-api-PROD. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
-        "AlarmName": "DISCOUNT-API-CODE Discount-api 5XX response",
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
-        "Dimensions": [
-          {
-            "Name": "ApiName",
-            "Value": "discount-api-CODE",
-          },
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "5XXError",
-        "Namespace": "AWS/ApiGateway",
-        "Period": 300,
-        "Statistic": "Sum",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "discount-api",
-          },
-          {
-            "Key": "DiagnosticLinks",
-            "Value": {
-              "Fn::Join": [
-                "",
-                [
-                  "lambda:",
-                  {
-                    "Ref": "discountapilambda972ABED6",
-                  },
-                ],
-              ],
-            },
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "Threshold": 1,
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
     "BasePathMapping": {
       "Properties": {
         "DomainName": {
@@ -195,38 +119,6 @@ exports[`The Discount API stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::ApiGateway::DomainName",
-    },
-    "GetDistributablePolicyDiscountapi6B555D03": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:s3:::",
-                    {
-                      "Ref": "DistributionBucketName",
-                    },
-                    "/support/CODE/discount-api/*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "GetDistributablePolicyDiscountapi6B555D03",
-        "Roles": [
-          {
-            "Ref": "discountapilambdaServiceRole4CB5B1F4",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
     },
     "S3catalogreadpolicyE18911B4": {
       "Properties": {
@@ -827,7 +719,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
             "Throttle": {},
           },
         ],
-        "Description": "REST endpoints for discount api",
+        "Description": "REST endpoints for discount-api",
         "Tags": [
           {
             "Key": "App",
@@ -1048,7 +940,6 @@ exports[`The Discount API stack matches the snapshot 2`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuGetDistributablePolicy",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -1109,8 +1000,8 @@ exports[`The Discount API stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "Impact - Discount api returned a 5XX response check the logs for more information: https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fdiscount-api-PROD. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
-        "AlarmName": "DISCOUNT-API-PROD Discount-api 5XX response",
+        "AlarmDescription": "discount-api returned a 5XX response search the logs below for "error" for more information. Impact: an eligible user may not have been offered a discount during the cancellation flow",
+        "AlarmName": "discount-api-PROD 5XX errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
@@ -1121,7 +1012,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
         "EvaluationPeriods": 1,
         "MetricName": "5XXError",
         "Namespace": "AWS/ApiGateway",
-        "Period": 300,
+        "Period": 60,
         "Statistic": "Sum",
         "Tags": [
           {
@@ -1238,38 +1129,6 @@ exports[`The Discount API stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::ApiGateway::DomainName",
-    },
-    "GetDistributablePolicyDiscountapi6B555D03": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:s3:::",
-                    {
-                      "Ref": "DistributionBucketName",
-                    },
-                    "/support/PROD/discount-api/*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "GetDistributablePolicyDiscountapi6B555D03",
-        "Roles": [
-          {
-            "Ref": "discountapilambdaServiceRole4CB5B1F4",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
     },
     "S3catalogreadpolicyE18911B4": {
       "Properties": {
@@ -1870,7 +1729,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
             "Throttle": {},
           },
         ],
-        "Description": "REST endpoints for discount api",
+        "Description": "REST endpoints for discount-api",
         "Tags": [
           {
             "Key": "App",

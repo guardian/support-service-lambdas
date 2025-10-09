@@ -1,11 +1,9 @@
-import { GuGetDistributablePolicy } from '@guardian/cdk/lib/constructs/iam';
 import type { App } from 'aws-cdk-lib';
-import { Duration, Fn } from 'aws-cdk-lib';
+import { Duration } from 'aws-cdk-lib';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
-import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { AllowSupporterProductDataQueryPolicy } from './cdk/policies';
 import { SrApiLambda } from './cdk/sr-api-lambda';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
-import { SrRestDomain } from './cdk/sr-rest-domain';
 import type { SrStageNames } from './cdk/sr-stack';
 import { SrStack } from './cdk/sr-stack';
 
@@ -16,49 +14,21 @@ export class PressReaderEntitlements extends SrStack {
 		const app = this.app;
 		const nameWithStage = `${app}-${this.stage}`;
 
-		const supporterProductDataTablePolicy = new PolicyStatement({
-			actions: ['dynamodb:Query'],
-			resources: [
-				Fn.importValue(
-					`supporter-product-data-tables-${this.stage}-SupporterProductDataTable`,
-				),
-			],
-		});
-
-		const lambda = new SrApiLambda(
-			this,
-			`${app}-lambda`,
-			{
+		const lambda = new SrApiLambda(this, {
+			lambdaOverrides: {
 				description:
 					'An API Gateway triggered lambda generated in the support-service-lambdas repo',
-				initialPolicy: [supporterProductDataTablePolicy],
 				// use the GuCDK alarm
 				monitoringConfiguration: {
 					http5xxAlarm: { tolerated5xxPercentage: 5 },
 					snsTopicName: `alarms-handler-topic-${this.stage}`,
 				},
 			},
-			{},
-		);
-
-		const usagePlan = lambda.api.addUsagePlan('UsagePlan', {
-			name: nameWithStage,
-			description: 'REST endpoints for press-reader-entitlements',
-			apiStages: [
-				{
-					stage: lambda.api.deploymentStage,
-					api: lambda.api,
-				},
-			],
+			errorImpact: 'some users would not be able to access ???',
+			srRestDomainOverrides: { publicDomain: true },
 		});
 
-		// create api key
-		const apiKey = lambda.api.addApiKey(`${app}-key-${this.stage}`, {
-			apiKeyName: `${app}-key-${this.stage}`,
-		});
-
-		// associate api key to plan
-		usagePlan.addApiKey(apiKey);
+		lambda.addPolicies(new AllowSupporterProductDataQueryPolicy(this));
 
 		// ---- Alarms ---- //
 		const alarmName = (shortDescription: string) =>
@@ -87,11 +57,5 @@ export class PressReaderEntitlements extends SrStack {
 				},
 			}),
 		});
-
-		new SrRestDomain(this, lambda.api, { publicDomain: true });
-
-		[new GuGetDistributablePolicy(this, this)].forEach((p) =>
-			lambda.role!.attachInlinePolicy(p),
-		);
 	}
 }

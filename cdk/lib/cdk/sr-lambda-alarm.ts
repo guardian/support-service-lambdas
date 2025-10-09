@@ -3,14 +3,14 @@ import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { Tags } from 'aws-cdk-lib';
 
-interface SRLambdaAlarmProps
+export interface SrLambdaAlarmProps
 	extends Omit<GuAlarmProps, 'snsTopicName' | 'actionsEnabled'> {
 	lambdaFunctionNames: string | string[];
 	actionsEnabled?: boolean; // defaults to PROD only
 }
 
 export class SrLambdaAlarm extends GuAlarm {
-	constructor(scope: GuStack, id: string, props: SRLambdaAlarmProps) {
+	constructor(scope: GuStack, id: string, props: SrLambdaAlarmProps) {
 		super(scope, id, {
 			...props,
 			snsTopicName: `alarms-handler-topic-${scope.stage}`,
