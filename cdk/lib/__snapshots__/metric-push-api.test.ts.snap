@@ -647,7 +647,7 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "metricpushapilambdametricpushapiCODEDeployment9B65369C9b8e195f5ba5aaa1cc9e4b269b959bd9": {
+    "metricpushapilambdametricpushapiCODEDeployment9B65369Cbf500934fd3289703fbdfb0b9c7f32c9": {
       "DependsOn": [
         "metricpushapilambdametricpushapiCODEproxyANYC000D577",
         "metricpushapilambdametricpushapiCODEproxyBBD345B3",
@@ -667,7 +667,7 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "metricpushapilambdametricpushapiCODEDeployment9B65369C9b8e195f5ba5aaa1cc9e4b269b959bd9",
+          "Ref": "metricpushapilambdametricpushapiCODEDeployment9B65369Cbf500934fd3289703fbdfb0b9c7f32c9",
         },
         "RestApiId": {
           "Ref": "metricpushapilambdametricpushapiCODE87B70A97",
@@ -1529,7 +1529,7 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "metricpushapilambdametricpushapiPRODDeployment353B728D6547e0ff38f2b7521e3f3f15b14f585f": {
+    "metricpushapilambdametricpushapiPRODDeployment353B728Db57e086470c162329ed23ad9b2ebb5f8": {
       "DependsOn": [
         "metricpushapilambdametricpushapiPRODproxyANY9737E265",
         "metricpushapilambdametricpushapiPRODproxy1154D5C4",
@@ -1549,7 +1549,7 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "metricpushapilambdametricpushapiPRODDeployment353B728D6547e0ff38f2b7521e3f3f15b14f585f",
+          "Ref": "metricpushapilambdametricpushapiPRODDeployment353B728Db57e086470c162329ed23ad9b2ebb5f8",
         },
         "RestApiId": {
           "Ref": "metricpushapilambdametricpushapiPRODF582713E",

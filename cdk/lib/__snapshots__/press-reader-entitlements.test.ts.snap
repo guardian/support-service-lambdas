@@ -766,7 +766,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsCODEDeploymentAF63E253d4c9f2ae469a8e1ea64845d04c7ca59b": {
+    "pressreaderentitlementslambdapressreaderentitlementsCODEDeploymentAF63E2536f6dd337e207ad4eb123297807be2ca8": {
       "DependsOn": [
         "pressreaderentitlementslambdapressreaderentitlementsCODEproxyANY94DA2830",
         "pressreaderentitlementslambdapressreaderentitlementsCODEproxyC7B8C5A6",
@@ -786,7 +786,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODEDeploymentAF63E253d4c9f2ae469a8e1ea64845d04c7ca59b",
+          "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODEDeploymentAF63E2536f6dd337e207ad4eb123297807be2ca8",
         },
         "RestApiId": {
           "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
@@ -1812,7 +1812,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::RestApi",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsPRODDeploymentD4B736714318e1b97b03f9c6682b90368e7ee55c": {
+    "pressreaderentitlementslambdapressreaderentitlementsPRODDeploymentD4B7367139f9cb238c444428972ca50ff5fef06d": {
       "DependsOn": [
         "pressreaderentitlementslambdapressreaderentitlementsPRODproxyANY3A6E2187",
         "pressreaderentitlementslambdapressreaderentitlementsPRODproxyA619485E",
@@ -1832,7 +1832,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDeploymentD4B736714318e1b97b03f9c6682b90368e7ee55c",
+          "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDeploymentD4B7367139f9cb238c444428972ca50ff5fef06d",
         },
         "RestApiId": {
           "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
