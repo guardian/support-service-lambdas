@@ -4,7 +4,6 @@ import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import {
 	digitalSubscriptionBenefits,
 	supporterPlusBenefits,
-	tierThreeBenefits,
 } from '@modules/product-benefits/productBenefit';
 import {
 	getUserBenefitsFromUserProducts,
@@ -95,7 +94,7 @@ test('getUserBenefitsFromUserProducts', () => {
 		supporterPlusBenefits,
 	);
 	expect(getUserBenefitsFromUserProducts(['TierThree'])).toEqual(
-		tierThreeBenefits,
+		digitalSubscriptionBenefits,
 	);
 	expect(getUserBenefitsFromUserProducts(['GuardianWeeklyDomestic'])).toEqual([
 		'hideSupportMessaging',
@@ -106,7 +105,7 @@ test('getUserBenefitsFromUserProducts', () => {
 test('getUserBenefitsFromUserProducts returns distinct benefits', () => {
 	expect(
 		getUserBenefitsFromUserProducts(['TierThree', 'DigitalSubscription']),
-	).toEqual(tierThreeBenefits);
+	).toEqual(digitalSubscriptionBenefits);
 });
 
 test('getUserBenefitsFromUserProducts returns the union of two benefit sets', () => {
