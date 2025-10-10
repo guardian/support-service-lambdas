@@ -7,7 +7,12 @@ import {
 	Policy,
 	PolicyStatement,
 	Role,
+	ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
+import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
+import { Topic } from 'aws-cdk-lib/aws-sns';
+import { SqsSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
+import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { SrLambda } from './cdk/sr-lambda';
 import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
@@ -36,8 +41,36 @@ export class MParticleApi extends SrStack {
 			`/${this.stage}/${this.stack}/${app}/sarResultsBucket`,
 		).stringValue;
 
-		// this must be the same as used in the code
-		const sarS3BaseKey = 'mparticle-results/';
+		const mmaUserDeletionRequestsTopicArn =
+			StringParameter.fromStringParameterName(
+				this,
+				'MmaUserDeletionRequestsTopicArn',
+				`/${this.stage}/${this.stack}/${app}/MmaUserDeletionRequestsTopicArn`,
+			).stringValue;
+
+		const sarS3BaseKey = 'mparticle-results/'; // this must be the same as used in the code
+
+		const mmaUserDeletionRequestsDlq = new Queue(
+			this,
+			`${app}-mma-user-deletion-dlq`,
+			{
+				queueName: `${app}-mma-user-deletion-requests-dlq-${this.stage}`,
+				retentionPeriod: Duration.days(14),
+			},
+		);
+
+		const mmaUserDeletionRequestsQueue = new Queue(
+			this,
+			`${app}-mma-user-deletion-requests-queue`,
+			{
+				queueName: `${app}-mma-user-deletion-requests-queue-${this.stage}`,
+				deadLetterQueue: {
+					queue: mmaUserDeletionRequestsDlq,
+					maxReceiveCount: 3,
+				},
+				visibilityTimeout: Duration.seconds(300), // Should match lambda timeout
+			},
+		);
 
 		// make sure our lambdas can write to and list objects in the central baton bucket
 		// https://github.com/guardian/baton/?tab=readme-ov-file#:~:text=The%20convention%20is%20to%20write%20these%20to%20the%20gu%2Dbaton%2Dresults%20bucket%20that%20is%20hosted%20in%20the%20baton%20AWS%20account.
@@ -70,6 +103,47 @@ export class MParticleApi extends SrStack {
 				initialPolicy: [s3BatonReadAndWritePolicy],
 			},
 			{ nameSuffix: 'baton' },
+		);
+
+		const mmaUserDeletionLambda = new SrLambda(
+			this,
+			`${app}-mma-user-deletion-lambda`,
+			{
+				handler: 'index.handlerDeletion',
+				timeout: Duration.seconds(300),
+				initialPolicy: [s3BatonReadAndWritePolicy],
+			},
+			{ nameSuffix: 'deletion' },
+		);
+
+		// Add SQS event source mapping separately since SrLambda doesn't accept events in constructor
+		mmaUserDeletionLambda.addEventSource(
+			new SqsEventSource(mmaUserDeletionRequestsQueue, {
+				reportBatchItemFailures: true,
+			}),
+		);
+
+		const mmaUserDeletionRequestsTopic = Topic.fromTopicArn(
+			this,
+			'MmaUserDeletionRequestsTopic',
+			mmaUserDeletionRequestsTopicArn,
+		);
+		mmaUserDeletionRequestsTopic.addSubscription(
+			new SqsSubscription(mmaUserDeletionRequestsQueue),
+		);
+
+		mmaUserDeletionRequestsQueue.addToResourcePolicy(
+			new PolicyStatement({
+				effect: Effect.ALLOW,
+				principals: [new ServicePrincipal('sns.amazonaws.com')],
+				actions: ['sqs:SendMessage'],
+				resources: [mmaUserDeletionRequestsQueue.queueArn],
+				conditions: {
+					ArnEquals: {
+						'aws:SourceArn': mmaUserDeletionRequestsTopicArn,
+					},
+				},
+			}),
 		);
 
 		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {
@@ -151,6 +225,42 @@ export class MParticleApi extends SrStack {
 				threshold: 1,
 				evaluationPeriods: 1,
 				lambdaFunctionNames: batonLambda.functionName,
+			});
+
+			new SrLambdaAlarm(this, 'MParticleMmaUserDeletionLambdaErrorAlarm', {
+				app,
+				alarmName:
+					'An error occurred in the mParticle MMA User Deletion Lambda',
+				alarmDescription:
+					'Impact: a user deletion request may not have been processed successfully. Check the dead letter queue and lambda logs.',
+				comparisonOperator:
+					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+				metric: new Metric({
+					metricName: 'Errors',
+					namespace: 'AWS/Lambda',
+					statistic: 'Sum',
+					period: Duration.hours(24),
+					dimensionsMap: {
+						FunctionName: mmaUserDeletionLambda.functionName,
+					},
+				}),
+				threshold: 1,
+				evaluationPeriods: 1,
+				lambdaFunctionNames: mmaUserDeletionLambda.functionName,
+			});
+
+			new SrLambdaAlarm(this, 'MParticleMmaUserDeletionDlqAlarm', {
+				app,
+				alarmName: 'Messages in mParticle MMA User Deletion dead letter queue',
+				alarmDescription:
+					'There are messages in the mParticle MMA User Deletion DLQ that failed to process. Investigate and redrive if appropriate.',
+				comparisonOperator:
+					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+				metric:
+					mmaUserDeletionRequestsDlq.metricApproximateNumberOfMessagesVisible(),
+				threshold: 1,
+				evaluationPeriods: 1,
+				lambdaFunctionNames: mmaUserDeletionLambda.functionName,
 			});
 		}
 
