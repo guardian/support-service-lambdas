@@ -20,7 +20,6 @@ export const digitalSubscriptionBenefits = supporterPlusBenefits.concat([
 	'newspaperArchive',
 ]);
 
-
 export const productBenefitMapping: Record<ProductKey, ProductBenefit[]> = {
 	GuardianAdLite: ['allowRejectAll'],
 	SupporterPlus: supporterPlusBenefits,
