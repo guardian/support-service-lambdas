@@ -16,7 +16,7 @@
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
     "@aws-sdk/client-cloudwatch": "^3.848.0",
-    "@aws-sdk/credential-providers": "^3.848.0",
+    "@aws-sdk/credential-providers": "^3.908.0",
     "zod": "catalog:"
   },
   "devDependencies": {
