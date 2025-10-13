@@ -13,7 +13,8 @@
 		"prepare": "husky",
 		"fix-formatting": "pnpm -r run fix-formatting",
 		"check-formatting": "pnpm -r run check-formatting",
-		"validate": "pnpm -r run fix-formatting && pnpm -r run lint --fix && pnpm -r run type-check && pnpm -r run test"
+		"validate": "pnpm -r run fix-formatting && pnpm -r run lint --fix && pnpm -r run type-check && pnpm -r run test",
+		"snapshot:update": "cd buildcheck && pnpm run snapshot:update"
 	},
 	"devDependencies": {
 		"@guardian/eslint-config-typescript": "12.0.0",

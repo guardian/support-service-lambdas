@@ -5,7 +5,6 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuApiLambda",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -62,7 +61,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
     "DNSRecord": {
       "Properties": {
         "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "update-supporter-plus-amount.code.support.guardianapis.com",
+        "Name": "update-supporter-plus-amount-code.support.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -78,7 +77,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
     },
     "DomainName": {
       "Properties": {
-        "DomainName": "update-supporter-plus-amount.code.support.guardianapis.com",
+        "DomainName": "update-supporter-plus-amount-code.support.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -98,6 +97,10 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
         },
         "Tags": [
           {
+            "Key": "App",
+            "Value": "update-supporter-plus-amount",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -107,7 +110,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -117,28 +120,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
-    "S3inlinepolicy3B07399A": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/membership/CODE/update-supporter-plus-amount/",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "S3inlinepolicy3B07399A",
-        "Roles": [
-          {
-            "Ref": "updatesupporterplusamountlambdaServiceRole9F342B79",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "SQSpolicy09999EF2": {
+    "SQSsendpolicy967EA932": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -186,7 +168,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SQSpolicy09999EF2",
+        "PolicyName": "SQSsendpolicy967EA932",
         "Roles": [
           {
             "Ref": "updatesupporterplusamountlambdaServiceRole9F342B79",
@@ -195,7 +177,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SecretsManagerpolicy7194A9CE": {
+    "ZuoraOAuthSecretsManagerpolicy5448D99B": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -222,7 +204,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SecretsManagerpolicy7194A9CE",
+        "PolicyName": "ZuoraOAuthSecretsManagerpolicy5448D99B",
         "Roles": [
           {
             "Ref": "updatesupporterplusamountlambdaServiceRole9F342B79",
@@ -241,16 +223,17 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/CODE/update-supporter-plus-amount/update-supporter-plus-amount.zip",
+          "S3Key": "support/CODE/update-supporter-plus-amount/update-supporter-plus-amount.zip",
         },
         "Description": "An API Gateway triggered lambda to carry out supporter plus amount updates",
         "Environment": {
           "Variables": {
             "APP": "update-supporter-plus-amount",
             "App": "update-supporter-plus-amount",
-            "STACK": "membership",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
             "STAGE": "CODE",
-            "Stack": "membership",
+            "Stack": "support",
             "Stage": "CODE",
           },
         },
@@ -282,7 +265,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -336,7 +319,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -385,7 +368,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/CODE/update-supporter-plus-amount/update-supporter-plus-amount.zip",
+                      "/support/CODE/update-supporter-plus-amount/update-supporter-plus-amount.zip",
                     ],
                   ],
                 },
@@ -406,7 +389,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/update-supporter-plus-amount",
+                    ":parameter/CODE/support/update-supporter-plus-amount",
                   ],
                 ],
               },
@@ -429,7 +412,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/update-supporter-plus-amount/*",
+                    ":parameter/CODE/support/update-supporter-plus-amount/*",
                   ],
                 ],
               },
@@ -466,7 +449,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -658,7 +641,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -669,7 +652,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEDeployment8B5BCDBBc24040d55ee548862eb1f974ece3168d": {
+    "updatesupporterplusamountlambdaupdatesupporterplusamountCODEDeployment8B5BCDBB22585c7eca68aa6f6b822b81a32c1d34": {
       "DependsOn": [
         "updatesupporterplusamountlambdaupdatesupporterplusamountCODEproxyANY831FAFB9",
         "updatesupporterplusamountlambdaupdatesupporterplusamountCODEproxyF2B3818D",
@@ -689,7 +672,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEDeployment8B5BCDBBc24040d55ee548862eb1f974ece3168d",
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEDeployment8B5BCDBB22585c7eca68aa6f6b822b81a32c1d34",
         },
         "RestApiId": {
           "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountCODEAC9A1847",
@@ -710,7 +693,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -749,7 +732,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -935,7 +918,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -954,7 +937,6 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuApiLambda",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -994,7 +976,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
-    "ApiGateway5XXAlarm56962DAF": {
+    "ApiGateway5XXAlarmCDK11905206": {
       "Properties": {
         "ActionsEnabled": true,
         "AlarmActions": [
@@ -1015,8 +997,8 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "Impact - Update supporter plus amount api returned a 5XX response. This means that a user who was trying to update the contribution amount of their supporter plus subscription has received an error. Please check the logs to diagnose the issue. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
-        "AlarmName": "update-supporter-plus-amount-PROD Update supporter plus amount - API gateway 5XX response",
+        "AlarmDescription": "update-supporter-plus-amount returned a 5XX response search the logs below for "error" for more information. Impact: a user could not update the contribution amount of their supporter plus subscription",
+        "AlarmName": "update-supporter-plus-amount-PROD 5XX errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
@@ -1027,9 +1009,13 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
         "EvaluationPeriods": 1,
         "MetricName": "5XXError",
         "Namespace": "AWS/ApiGateway",
-        "Period": 300,
+        "Period": 60,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "update-supporter-plus-amount",
+          },
           {
             "Key": "DiagnosticLinks",
             "Value": {
@@ -1054,7 +1040,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1118,6 +1104,10 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
         },
         "Tags": [
           {
+            "Key": "App",
+            "Value": "update-supporter-plus-amount",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1127,7 +1117,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1137,28 +1127,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
-    "S3inlinepolicy3B07399A": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/membership/PROD/update-supporter-plus-amount/",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "S3inlinepolicy3B07399A",
-        "Roles": [
-          {
-            "Ref": "updatesupporterplusamountlambdaServiceRole9F342B79",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "SQSpolicy09999EF2": {
+    "SQSsendpolicy967EA932": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -1206,7 +1175,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SQSpolicy09999EF2",
+        "PolicyName": "SQSsendpolicy967EA932",
         "Roles": [
           {
             "Ref": "updatesupporterplusamountlambdaServiceRole9F342B79",
@@ -1215,7 +1184,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "SecretsManagerpolicy7194A9CE": {
+    "ZuoraOAuthSecretsManagerpolicy5448D99B": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -1242,7 +1211,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SecretsManagerpolicy7194A9CE",
+        "PolicyName": "ZuoraOAuthSecretsManagerpolicy5448D99B",
         "Roles": [
           {
             "Ref": "updatesupporterplusamountlambdaServiceRole9F342B79",
@@ -1261,16 +1230,17 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/PROD/update-supporter-plus-amount/update-supporter-plus-amount.zip",
+          "S3Key": "support/PROD/update-supporter-plus-amount/update-supporter-plus-amount.zip",
         },
         "Description": "An API Gateway triggered lambda to carry out supporter plus amount updates",
         "Environment": {
           "Variables": {
             "APP": "update-supporter-plus-amount",
             "App": "update-supporter-plus-amount",
-            "STACK": "membership",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
             "STAGE": "PROD",
-            "Stack": "membership",
+            "Stack": "support",
             "Stage": "PROD",
           },
         },
@@ -1302,7 +1272,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1356,7 +1326,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1405,7 +1375,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/PROD/update-supporter-plus-amount/update-supporter-plus-amount.zip",
+                      "/support/PROD/update-supporter-plus-amount/update-supporter-plus-amount.zip",
                     ],
                   ],
                 },
@@ -1426,7 +1396,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/update-supporter-plus-amount",
+                    ":parameter/PROD/support/update-supporter-plus-amount",
                   ],
                 ],
               },
@@ -1449,7 +1419,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/update-supporter-plus-amount/*",
+                    ":parameter/PROD/support/update-supporter-plus-amount/*",
                   ],
                 ],
               },
@@ -1486,7 +1456,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1678,7 +1648,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1689,7 +1659,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODDeployment7F9E10AE5a9e8c2422844301e81e348dbc3ca226": {
+    "updatesupporterplusamountlambdaupdatesupporterplusamountPRODDeployment7F9E10AEc2f977d88fafdc4cdc48e3366f2cc3d3": {
       "DependsOn": [
         "updatesupporterplusamountlambdaupdatesupporterplusamountPRODproxyANY8129D41C",
         "updatesupporterplusamountlambdaupdatesupporterplusamountPRODproxy9DC87935",
@@ -1709,7 +1679,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPRODDeployment7F9E10AE5a9e8c2422844301e81e348dbc3ca226",
+          "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPRODDeployment7F9E10AEc2f977d88fafdc4cdc48e3366f2cc3d3",
         },
         "RestApiId": {
           "Ref": "updatesupporterplusamountlambdaupdatesupporterplusamountPROD3AEE93B7",
@@ -1730,7 +1700,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1769,7 +1739,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1955,7 +1925,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",

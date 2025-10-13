@@ -1,3 +1,4 @@
+# MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/riff-raff.yaml.ts
 stacks:
   - support
 regions:
@@ -13,7 +14,6 @@ deployments:
       templateStagePaths:
         CODE: mparticle-api-CODE.template.json
         PROD: mparticle-api-PROD.template.json
-
   mparticle-api:
     type: aws-lambda
     parameters:
@@ -21,6 +21,7 @@ deployments:
       bucketSsmLookup: true
       prefixStack: false
       functionNames:
-      - mparticle-api-http-
-      - mparticle-api-baton-
-    dependencies: [mparticle-api-cloudformation]
+        - mparticle-api-http-
+        - mparticle-api-baton-
+    dependencies:
+      - mparticle-api-cloudformation

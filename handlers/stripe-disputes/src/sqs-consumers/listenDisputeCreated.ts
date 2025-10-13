@@ -1,6 +1,12 @@
 import type { Logger } from '@modules/routing/logger';
+import { stageFromEnvironment } from '@modules/stage';
+import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ListenDisputeCreatedRequestBody } from '../dtos';
-import { upsertSalesforceObject } from '../services/upsertSalesforceObject';
+import type { ZuoraInvoiceFromStripeChargeIdResult } from '../interfaces';
+import {
+	upsertSalesforceObject,
+	zuoraGetInvoiceFromStripeChargeId,
+} from '../services';
 import type { SalesforceUpsertResponse } from '../types';
 
 export async function handleListenDisputeCreated(
@@ -10,8 +16,31 @@ export async function handleListenDisputeCreated(
 ): Promise<SalesforceUpsertResponse> {
 	logger.log(`Processing dispute creation for dispute ${disputeId}`);
 
+	const paymentId = webhookData.data.object.charge;
+	logger.log(`Payment ID from dispute: ${paymentId}`);
+
+	// Get Zuora invoice data
+	let invoiceFromZuora: ZuoraInvoiceFromStripeChargeIdResult | undefined;
+	try {
+		const stage = stageFromEnvironment();
+		const zuoraClient: ZuoraClient = await ZuoraClient.create(stage);
+
+		invoiceFromZuora = await zuoraGetInvoiceFromStripeChargeId(
+			paymentId,
+			zuoraClient,
+		);
+
+		logger.log(
+			'Zuora invoice data retrieved:',
+			JSON.stringify(invoiceFromZuora),
+		);
+	} catch (error) {
+		logger.error('Failed to fetch Zuora invoice data:', error);
+		// Continue without Zuora data - it's better to create the Salesforce record without complete data than to fail entirely
+	}
+
 	const upsertSalesforceObjectResponse: SalesforceUpsertResponse =
-		await upsertSalesforceObject(logger, webhookData);
+		await upsertSalesforceObject(logger, webhookData, invoiceFromZuora);
 
 	logger.log(
 		'Salesforce upsert response for dispute creation:',

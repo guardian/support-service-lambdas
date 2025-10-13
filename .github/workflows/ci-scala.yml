@@ -16,6 +16,7 @@ concurrency:
 jobs:
   gu-cdk-build:
     strategy:
+      fail-fast: false
       matrix:
         subproject:
           - batch-email-sender
@@ -78,6 +79,7 @@ jobs:
               - ./handlers/${{ matrix.subproject }}/target/scala-2.13/${{ matrix.subproject }}.jar
   build:
     strategy:
+      fail-fast: false
       matrix:
         subproject:
           - catalog-service
