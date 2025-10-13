@@ -9,11 +9,11 @@ import type {
 	Handler,
 } from 'aws-lambda';
 import dayjs from 'dayjs';
-import type { ZodType } from 'zod';
 import {
 	applyDiscountEndpoint,
 	previewDiscountEndpoint,
 } from './discountEndpoint';
+import { docsHandler } from './docsHandler';
 import { applyDiscountSchema } from './requestSchema';
 import type {
 	ApplyDiscountResponseBody,
@@ -23,8 +23,12 @@ import {
 	applyDiscountResponseSchema,
 	previewDiscountResponseSchema,
 } from './responseSchema';
+import { stringify } from './stringify';
 
-const stage = process.env.STAGE as Stage;
+const getEnv = (env: string): string =>
+	getIfDefined(process.env[env], `${env} environment variable not set`);
+
+const stage = getEnv('STAGE') as Stage;
 
 // main entry point from AWS
 export const handler: Handler = Router([
@@ -37,6 +41,11 @@ export const handler: Handler = Router([
 		httpMethod: 'POST',
 		path: '/preview-discount',
 		handler: previewDiscountHandler,
+	},
+	{
+		httpMethod: 'GET',
+		path: '/docs',
+		handler: () => docsHandler(stage),
 	},
 ]);
 
@@ -85,7 +94,3 @@ async function previewDiscountHandler(
 		statusCode: 200,
 	};
 }
-
-// this is a type safe version of stringify
-export const stringify = <T>(t: T, type: ZodType<T>): string =>
-	JSON.stringify(type.parse(t));
