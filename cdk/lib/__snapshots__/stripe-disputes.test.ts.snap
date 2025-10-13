@@ -153,7 +153,10 @@ exports[`The stripe disputes webhook API stack matches the snapshot 1`] = `
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "sqs:sendmessage",
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueUrl",
+              ],
               "Effect": "Allow",
               "Resource": {
                 "Fn::Join": [
@@ -1918,7 +1921,10 @@ exports[`The stripe disputes webhook API stack matches the snapshot 2`] = `
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "sqs:sendmessage",
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueUrl",
+              ],
               "Effect": "Allow",
               "Resource": {
                 "Fn::Join": [

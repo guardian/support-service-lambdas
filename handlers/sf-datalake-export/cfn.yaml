@@ -177,7 +177,6 @@ Resources:
           - Effect: Allow
             Action:
             - s3:PutObject
-            - s3:PutObjectAcl
             Resource: !FindInMap [StageMap, !Ref Stage, destBuckets]
   CleanBucketRole:
     Type: AWS::IAM::Role
@@ -275,6 +274,13 @@ Resources:
                 - s3:PutObject
                 - s3:PutObjectAcl
               Resource: !FindInMap [StageMap, !Ref Stage, destBuckets]
+      - PolicyName: OphanBuckets
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Action:
+                - s3:PutObject
+              Resource: "arn:aws:s3:::ophan-raw-salesforce-*"
   CleanBucket:
     Type: AWS::Lambda::Function
     Properties:

@@ -6,16 +6,8 @@ describe('The MetricPushApi stack', () => {
 	it('matches the snapshot', () => {
 		const app = new App();
 
-		const codeStack = new MetricPushApi(app, 'metric-push-api-CODE', {
-			stack: 'membership',
-			stage: 'CODE',
-			cloudFormationStackName: 'membership-CODE-metric-push-api',
-		});
-		const prodStack = new MetricPushApi(app, 'metric-push-api-PROD', {
-			stack: 'membership',
-			stage: 'PROD',
-			cloudFormationStackName: 'membership-PROD-metric-push-api',
-		});
+		const codeStack = new MetricPushApi(app, 'CODE');
+		const prodStack = new MetricPushApi(app, 'PROD');
 
 		expect(Template.fromStack(codeStack).toJSON()).toMatchSnapshot();
 		expect(Template.fromStack(prodStack).toJSON()).toMatchSnapshot();
