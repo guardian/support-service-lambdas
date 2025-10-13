@@ -9,6 +9,21 @@ exports[`The Discount API stack matches the snapshot 1`] = `
     "gu:cdk:version": "TEST",
   },
   "Outputs": {
+    "CognitoDomain": {
+      "Value": {
+        "Ref": "UserPoolDomain5479B217",
+      },
+    },
+    "UserPoolClientId": {
+      "Value": {
+        "Ref": "UserPoolClient2F5918F7",
+      },
+    },
+    "UserPoolId": {
+      "Value": {
+        "Ref": "DiscountApiUserPoolA8312F31",
+      },
+    },
     "discountapilambdadiscountapiCODEEndpointB74B96D0": {
       "Value": {
         "Fn::Join": [
@@ -40,6 +55,14 @@ exports[`The Discount API stack matches the snapshot 1`] = `
     "DistributionBucketName": {
       "Default": "/account/services/artifact.bucket",
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+    "GoogleOAuthClientIdParameter": {
+      "Default": "/CODE/support-service-lambdas/googleOAuthClientId",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+    "GoogleOAuthClientSecretParameter": {
+      "Default": "/CODE/support-service-lambdas/googleOAuthClientSecret",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
   },
@@ -74,6 +97,51 @@ exports[`The Discount API stack matches the snapshot 1`] = `
         "Type": "CNAME",
       },
       "Type": "AWS::Route53::RecordSet",
+    },
+    "DiscountApiUserPoolA8312F31": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AccountRecoverySetting": {
+          "RecoveryMechanisms": [
+            {
+              "Name": "verified_phone_number",
+              "Priority": 1,
+            },
+            {
+              "Name": "verified_email",
+              "Priority": 2,
+            },
+          ],
+        },
+        "AdminCreateUserConfig": {
+          "AllowAdminCreateUserOnly": true,
+        },
+        "AutoVerifiedAttributes": [
+          "email",
+        ],
+        "EmailVerificationMessage": "The verification code to your new account is {####}",
+        "EmailVerificationSubject": "Verify your new account",
+        "SmsVerificationMessage": "The verification code to your new account is {####}",
+        "UserPoolName": "discount-api-CODE",
+        "UserPoolTags": {
+          "App": "discount-api",
+          "Stack": "support",
+          "Stage": "CODE",
+          "gu:cdk:version": "TEST",
+          "gu:repo": "guardian/support-service-lambdas",
+        },
+        "UsernameAttributes": [
+          "email",
+        ],
+        "VerificationMessageTemplate": {
+          "DefaultEmailOption": "CONFIRM_WITH_CODE",
+          "EmailMessage": "The verification code to your new account is {####}",
+          "EmailSubject": "Verify your new account",
+          "SmsMessage": "The verification code to your new account is {####}",
+        },
+      },
+      "Type": "AWS::Cognito::UserPool",
+      "UpdateReplacePolicy": "Retain",
     },
     "DomainName": {
       "Properties": {
@@ -119,6 +187,28 @@ exports[`The Discount API stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::ApiGateway::DomainName",
+    },
+    "GoogleProvider566D8493": {
+      "Properties": {
+        "AttributeMapping": {
+          "email": "email",
+        },
+        "ProviderDetails": {
+          "authorize_scopes": "email",
+          "client_id": {
+            "Ref": "GoogleOAuthClientIdParameter",
+          },
+          "client_secret": {
+            "Ref": "GoogleOAuthClientSecretParameter",
+          },
+        },
+        "ProviderName": "Google",
+        "ProviderType": "Google",
+        "UserPoolId": {
+          "Ref": "DiscountApiUserPoolA8312F31",
+        },
+      },
+      "Type": "AWS::Cognito::UserPoolIdentityProvider",
     },
     "S3catalogreadpolicyE18911B4": {
       "Properties": {
@@ -180,6 +270,45 @@ exports[`The Discount API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "UserPoolClient2F5918F7": {
+      "DependsOn": [
+        "GoogleProvider566D8493",
+      ],
+      "Properties": {
+        "AllowedOAuthFlows": [
+          "implicit",
+          "code",
+        ],
+        "AllowedOAuthFlowsUserPoolClient": true,
+        "AllowedOAuthScopes": [
+          "profile",
+          "phone",
+          "email",
+          "openid",
+          "aws.cognito.signin.user.admin",
+        ],
+        "CallbackURLs": [
+          "https://discount-api-code.support.guardianapis.com/withRedirect",
+        ],
+        "GenerateSecret": true,
+        "SupportedIdentityProviders": [
+          "Google",
+        ],
+        "UserPoolId": {
+          "Ref": "DiscountApiUserPoolA8312F31",
+        },
+      },
+      "Type": "AWS::Cognito::UserPoolClient",
+    },
+    "UserPoolDomain5479B217": {
+      "Properties": {
+        "Domain": "gu-discount-api-code",
+        "UserPoolId": {
+          "Ref": "DiscountApiUserPoolA8312F31",
+        },
+      },
+      "Type": "AWS::Cognito::UserPoolDomain",
+    },
     "ZuoraOAuthSecretsManagerpolicy5448D99B": {
       "Properties": {
         "PolicyDocument": {
@@ -233,6 +362,15 @@ exports[`The Discount API stack matches the snapshot 1`] = `
           "Variables": {
             "APP": "discount-api",
             "App": "discount-api",
+            "COGNITO_CLIENT_ID": {
+              "Ref": "UserPoolClient2F5918F7",
+            },
+            "COGNITO_DOMAIN": {
+              "Ref": "UserPoolDomain5479B217",
+            },
+            "COGNITO_USER_POOL_ID": {
+              "Ref": "DiscountApiUserPoolA8312F31",
+            },
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
@@ -278,6 +416,25 @@ exports[`The Discount API stack matches the snapshot 1`] = `
         "Timeout": 300,
       },
       "Type": "AWS::Lambda::Function",
+    },
+    "discountapilambdaCognitoAuthorizerBB7A9F04": {
+      "Properties": {
+        "IdentitySource": "method.request.header.Authorization",
+        "Name": "discountapiCODEdiscountapilambdaCognitoAuthorizer7EFDDBBE",
+        "ProviderARNs": [
+          {
+            "Fn::GetAtt": [
+              "DiscountApiUserPoolA8312F31",
+              "Arn",
+            ],
+          },
+        ],
+        "RestApiId": {
+          "Ref": "discountapilambdadiscountapiCODEE1E5C869",
+        },
+        "Type": "COGNITO_USER_POOLS",
+      },
+      "Type": "AWS::ApiGateway::Authorizer",
     },
     "discountapilambdaServiceRole4CB5B1F4": {
       "Properties": {
@@ -625,15 +782,24 @@ exports[`The Discount API stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "discountapilambdadiscountapiCODEDeployment15948B743a6cd4cf5568b924396e5c06833bacbd": {
+    "discountapilambdadiscountapiCODEDeployment15948B747c07c46e11c6c18c869f9eecf754049a": {
       "DependsOn": [
         "discountapilambdadiscountapiCODEproxyANY3023C5CD",
         "discountapilambdadiscountapiCODEproxyDA26EBF1",
         "discountapilambdadiscountapiCODEANY827A81C0",
+        "discountapilambdadiscountapiCODEauthloginGETEE14C8DE",
+        "discountapilambdadiscountapiCODEauthlogin1C825D15",
+        "discountapilambdadiscountapiCODEauth8FAEF589",
+        "discountapilambdadiscountapiCODEauthtokenGET01C1AA0A",
+        "discountapilambdadiscountapiCODEauthtoken19373C19",
         "discountapilambdadiscountapiCODEdocsproxyGETC2EAC23E",
         "discountapilambdadiscountapiCODEdocsproxy67560123",
         "discountapilambdadiscountapiCODEdocsGET29AC0E0B",
         "discountapilambdadiscountapiCODEdocsE0CCF3F7",
+        "discountapilambdadiscountapiCODEwithRedirectproxyGET3CF81E01",
+        "discountapilambdadiscountapiCODEwithRedirectproxyFCCA2265",
+        "discountapilambdadiscountapiCODEwithRedirectGET46B9F19C",
+        "discountapilambdadiscountapiCODEwithRedirect2F3D1C40",
       ],
       "Properties": {
         "Description": "API Gateway created by CDK",
@@ -649,7 +815,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "discountapilambdadiscountapiCODEDeployment15948B743a6cd4cf5568b924396e5c06833bacbd",
+          "Ref": "discountapilambdadiscountapiCODEDeployment15948B747c07c46e11c6c18c869f9eecf754049a",
         },
         "RestApiId": {
           "Ref": "discountapilambdadiscountapiCODEE1E5C869",
@@ -762,6 +928,283 @@ exports[`The Discount API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::UsagePlanKey",
     },
+    "discountapilambdadiscountapiCODEauth8FAEF589": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "discountapilambdadiscountapiCODEE1E5C869",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "auth",
+        "RestApiId": {
+          "Ref": "discountapilambdadiscountapiCODEE1E5C869",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "discountapilambdadiscountapiCODEauthlogin1C825D15": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "discountapilambdadiscountapiCODEauth8FAEF589",
+        },
+        "PathPart": "login",
+        "RestApiId": {
+          "Ref": "discountapilambdadiscountapiCODEE1E5C869",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "discountapilambdadiscountapiCODEauthloginGETApiPermissionTestdiscountapiCODEdiscountapilambdadiscountapiCODED838DA36GETauthlogin5B703E03": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "discountapilambda972ABED6",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "discountapilambdadiscountapiCODEE1E5C869",
+              },
+              "/test-invoke-stage/GET/auth/login",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "discountapilambdadiscountapiCODEauthloginGETApiPermissiondiscountapiCODEdiscountapilambdadiscountapiCODED838DA36GETauthloginCD0D017A": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "discountapilambda972ABED6",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "discountapilambdadiscountapiCODEE1E5C869",
+              },
+              "/",
+              {
+                "Ref": "discountapilambdadiscountapiCODEDeploymentStageCODEDCC6DFA9",
+              },
+              "/GET/auth/login",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "discountapilambdadiscountapiCODEauthloginGETEE14C8DE": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "discountapilambda972ABED6",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "discountapilambdadiscountapiCODEauthlogin1C825D15",
+        },
+        "RestApiId": {
+          "Ref": "discountapilambdadiscountapiCODEE1E5C869",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "discountapilambdadiscountapiCODEauthtoken19373C19": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "discountapilambdadiscountapiCODEauth8FAEF589",
+        },
+        "PathPart": "token",
+        "RestApiId": {
+          "Ref": "discountapilambdadiscountapiCODEE1E5C869",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "discountapilambdadiscountapiCODEauthtokenGET01C1AA0A": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "discountapilambda972ABED6",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "discountapilambdadiscountapiCODEauthtoken19373C19",
+        },
+        "RestApiId": {
+          "Ref": "discountapilambdadiscountapiCODEE1E5C869",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "discountapilambdadiscountapiCODEauthtokenGETApiPermissionTestdiscountapiCODEdiscountapilambdadiscountapiCODED838DA36GETauthtokenE44F90BF": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "discountapilambda972ABED6",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "discountapilambdadiscountapiCODEE1E5C869",
+              },
+              "/test-invoke-stage/GET/auth/token",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "discountapilambdadiscountapiCODEauthtokenGETApiPermissiondiscountapiCODEdiscountapilambdadiscountapiCODED838DA36GETauthtoken81EABA3C": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "discountapilambda972ABED6",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "discountapilambdadiscountapiCODEE1E5C869",
+              },
+              "/",
+              {
+                "Ref": "discountapilambdadiscountapiCODEDeploymentStageCODEDCC6DFA9",
+              },
+              "/GET/auth/token",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
     "discountapilambdadiscountapiCODEdiscountapikeyCODED9ED34AC": {
       "Properties": {
         "Enabled": true,
@@ -819,7 +1262,10 @@ exports[`The Discount API stack matches the snapshot 1`] = `
     "discountapilambdadiscountapiCODEdocsGET29AC0E0B": {
       "Properties": {
         "ApiKeyRequired": false,
-        "AuthorizationType": "NONE",
+        "AuthorizationType": "COGNITO_USER_POOLS",
+        "AuthorizerId": {
+          "Ref": "discountapilambdaCognitoAuthorizerBB7A9F04",
+        },
         "HttpMethod": "GET",
         "Integration": {
           "IntegrationHttpMethod": "POST",
@@ -1028,7 +1474,10 @@ exports[`The Discount API stack matches the snapshot 1`] = `
     "discountapilambdadiscountapiCODEdocsproxyGETC2EAC23E": {
       "Properties": {
         "ApiKeyRequired": false,
-        "AuthorizationType": "NONE",
+        "AuthorizationType": "COGNITO_USER_POOLS",
+        "AuthorizerId": {
+          "Ref": "discountapilambdaCognitoAuthorizerBB7A9F04",
+        },
         "HttpMethod": "GET",
         "Integration": {
           "IntegrationHttpMethod": "POST",
@@ -1200,6 +1649,307 @@ exports[`The Discount API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::Resource",
     },
+    "discountapilambdadiscountapiCODEwithRedirect2F3D1C40": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "discountapilambdadiscountapiCODEE1E5C869",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "withRedirect",
+        "RestApiId": {
+          "Ref": "discountapilambdadiscountapiCODEE1E5C869",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "discountapilambdadiscountapiCODEwithRedirectGET46B9F19C": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "discountapilambda972ABED6",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "discountapilambdadiscountapiCODEwithRedirect2F3D1C40",
+        },
+        "RestApiId": {
+          "Ref": "discountapilambdadiscountapiCODEE1E5C869",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "discountapilambdadiscountapiCODEwithRedirectGETApiPermissionTestdiscountapiCODEdiscountapilambdadiscountapiCODED838DA36GETwithRedirect9D6667E7": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "discountapilambda972ABED6",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "discountapilambdadiscountapiCODEE1E5C869",
+              },
+              "/test-invoke-stage/GET/withRedirect",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "discountapilambdadiscountapiCODEwithRedirectGETApiPermissiondiscountapiCODEdiscountapilambdadiscountapiCODED838DA36GETwithRedirect89AF403C": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "discountapilambda972ABED6",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "discountapilambdadiscountapiCODEE1E5C869",
+              },
+              "/",
+              {
+                "Ref": "discountapilambdadiscountapiCODEDeploymentStageCODEDCC6DFA9",
+              },
+              "/GET/withRedirect",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "discountapilambdadiscountapiCODEwithRedirectproxyFCCA2265": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "discountapilambdadiscountapiCODEwithRedirect2F3D1C40",
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "discountapilambdadiscountapiCODEE1E5C869",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "discountapilambdadiscountapiCODEwithRedirectproxyGET3CF81E01": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "discountapilambda972ABED6",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "discountapilambdadiscountapiCODEwithRedirectproxyFCCA2265",
+        },
+        "RestApiId": {
+          "Ref": "discountapilambdadiscountapiCODEE1E5C869",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "discountapilambdadiscountapiCODEwithRedirectproxyGETApiPermissionTestdiscountapiCODEdiscountapilambdadiscountapiCODED838DA36GETwithRedirectproxy65A327D0": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "discountapilambda972ABED6",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "discountapilambdadiscountapiCODEE1E5C869",
+              },
+              "/test-invoke-stage/GET/withRedirect/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "discountapilambdadiscountapiCODEwithRedirectproxyGETApiPermissiondiscountapiCODEdiscountapilambdadiscountapiCODED838DA36GETwithRedirectproxyEABCE827": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "discountapilambda972ABED6",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "discountapilambdadiscountapiCODEE1E5C869",
+              },
+              "/",
+              {
+                "Ref": "discountapilambdadiscountapiCODEDeploymentStageCODEDCC6DFA9",
+              },
+              "/GET/withRedirect/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "readrepoconfig1649C8CF": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support-service-lambdas",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "readrepoconfig1649C8CF",
+        "Roles": [
+          {
+            "Ref": "discountapilambdaServiceRole4CB5B1F4",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
   },
 }
 `;
@@ -1213,6 +1963,21 @@ exports[`The Discount API stack matches the snapshot 2`] = `
     "gu:cdk:version": "TEST",
   },
   "Outputs": {
+    "CognitoDomain": {
+      "Value": {
+        "Ref": "UserPoolDomain5479B217",
+      },
+    },
+    "UserPoolClientId": {
+      "Value": {
+        "Ref": "UserPoolClient2F5918F7",
+      },
+    },
+    "UserPoolId": {
+      "Value": {
+        "Ref": "DiscountApiUserPoolA8312F31",
+      },
+    },
     "discountapilambdadiscountapiPRODEndpoint341D3591": {
       "Value": {
         "Fn::Join": [
@@ -1244,6 +2009,14 @@ exports[`The Discount API stack matches the snapshot 2`] = `
     "DistributionBucketName": {
       "Default": "/account/services/artifact.bucket",
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+    "GoogleOAuthClientIdParameter": {
+      "Default": "/PROD/support-service-lambdas/googleOAuthClientId",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+    "GoogleOAuthClientSecretParameter": {
+      "Default": "/PROD/support-service-lambdas/googleOAuthClientSecret",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
   },
@@ -1354,6 +2127,51 @@ exports[`The Discount API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Route53::RecordSet",
     },
+    "DiscountApiUserPoolA8312F31": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AccountRecoverySetting": {
+          "RecoveryMechanisms": [
+            {
+              "Name": "verified_phone_number",
+              "Priority": 1,
+            },
+            {
+              "Name": "verified_email",
+              "Priority": 2,
+            },
+          ],
+        },
+        "AdminCreateUserConfig": {
+          "AllowAdminCreateUserOnly": true,
+        },
+        "AutoVerifiedAttributes": [
+          "email",
+        ],
+        "EmailVerificationMessage": "The verification code to your new account is {####}",
+        "EmailVerificationSubject": "Verify your new account",
+        "SmsVerificationMessage": "The verification code to your new account is {####}",
+        "UserPoolName": "discount-api-PROD",
+        "UserPoolTags": {
+          "App": "discount-api",
+          "Stack": "support",
+          "Stage": "PROD",
+          "gu:cdk:version": "TEST",
+          "gu:repo": "guardian/support-service-lambdas",
+        },
+        "UsernameAttributes": [
+          "email",
+        ],
+        "VerificationMessageTemplate": {
+          "DefaultEmailOption": "CONFIRM_WITH_CODE",
+          "EmailMessage": "The verification code to your new account is {####}",
+          "EmailSubject": "Verify your new account",
+          "SmsMessage": "The verification code to your new account is {####}",
+        },
+      },
+      "Type": "AWS::Cognito::UserPool",
+      "UpdateReplacePolicy": "Retain",
+    },
     "DomainName": {
       "Properties": {
         "DomainName": "discount-api.support.guardianapis.com",
@@ -1398,6 +2216,28 @@ exports[`The Discount API stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::ApiGateway::DomainName",
+    },
+    "GoogleProvider566D8493": {
+      "Properties": {
+        "AttributeMapping": {
+          "email": "email",
+        },
+        "ProviderDetails": {
+          "authorize_scopes": "email",
+          "client_id": {
+            "Ref": "GoogleOAuthClientIdParameter",
+          },
+          "client_secret": {
+            "Ref": "GoogleOAuthClientSecretParameter",
+          },
+        },
+        "ProviderName": "Google",
+        "ProviderType": "Google",
+        "UserPoolId": {
+          "Ref": "DiscountApiUserPoolA8312F31",
+        },
+      },
+      "Type": "AWS::Cognito::UserPoolIdentityProvider",
     },
     "S3catalogreadpolicyE18911B4": {
       "Properties": {
@@ -1459,6 +2299,45 @@ exports[`The Discount API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
+    "UserPoolClient2F5918F7": {
+      "DependsOn": [
+        "GoogleProvider566D8493",
+      ],
+      "Properties": {
+        "AllowedOAuthFlows": [
+          "implicit",
+          "code",
+        ],
+        "AllowedOAuthFlowsUserPoolClient": true,
+        "AllowedOAuthScopes": [
+          "profile",
+          "phone",
+          "email",
+          "openid",
+          "aws.cognito.signin.user.admin",
+        ],
+        "CallbackURLs": [
+          "https://discount-api.support.guardianapis.com/withRedirect",
+        ],
+        "GenerateSecret": true,
+        "SupportedIdentityProviders": [
+          "Google",
+        ],
+        "UserPoolId": {
+          "Ref": "DiscountApiUserPoolA8312F31",
+        },
+      },
+      "Type": "AWS::Cognito::UserPoolClient",
+    },
+    "UserPoolDomain5479B217": {
+      "Properties": {
+        "Domain": "gu-discount-api-prod",
+        "UserPoolId": {
+          "Ref": "DiscountApiUserPoolA8312F31",
+        },
+      },
+      "Type": "AWS::Cognito::UserPoolDomain",
+    },
     "ZuoraOAuthSecretsManagerpolicy5448D99B": {
       "Properties": {
         "PolicyDocument": {
@@ -1512,6 +2391,15 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           "Variables": {
             "APP": "discount-api",
             "App": "discount-api",
+            "COGNITO_CLIENT_ID": {
+              "Ref": "UserPoolClient2F5918F7",
+            },
+            "COGNITO_DOMAIN": {
+              "Ref": "UserPoolDomain5479B217",
+            },
+            "COGNITO_USER_POOL_ID": {
+              "Ref": "DiscountApiUserPoolA8312F31",
+            },
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
@@ -1557,6 +2445,25 @@ exports[`The Discount API stack matches the snapshot 2`] = `
         "Timeout": 300,
       },
       "Type": "AWS::Lambda::Function",
+    },
+    "discountapilambdaCognitoAuthorizerBB7A9F04": {
+      "Properties": {
+        "IdentitySource": "method.request.header.Authorization",
+        "Name": "discountapiPRODdiscountapilambdaCognitoAuthorizer9ECBA6CC",
+        "ProviderARNs": [
+          {
+            "Fn::GetAtt": [
+              "DiscountApiUserPoolA8312F31",
+              "Arn",
+            ],
+          },
+        ],
+        "RestApiId": {
+          "Ref": "discountapilambdadiscountapiPROD4E9716BA",
+        },
+        "Type": "COGNITO_USER_POOLS",
+      },
+      "Type": "AWS::ApiGateway::Authorizer",
     },
     "discountapilambdaServiceRole4CB5B1F4": {
       "Properties": {
@@ -1934,15 +2841,24 @@ exports[`The Discount API stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "discountapilambdadiscountapiPRODDeploymentF304491B5f329dc94f3acf5e3c58f19488fd42af": {
+    "discountapilambdadiscountapiPRODDeploymentF304491Bf204aa156cfffd8a2964af799f8646e4": {
       "DependsOn": [
         "discountapilambdadiscountapiPRODproxyANY177F9076",
         "discountapilambdadiscountapiPRODproxy2CE9F043",
         "discountapilambdadiscountapiPRODANY1101E911",
+        "discountapilambdadiscountapiPRODauthloginGET0DDC5027",
+        "discountapilambdadiscountapiPRODauthlogin1FEBF2BE",
+        "discountapilambdadiscountapiPRODauth58CE5C69",
+        "discountapilambdadiscountapiPRODauthtokenGETF7EEE38E",
+        "discountapilambdadiscountapiPRODauthtoken9077F868",
         "discountapilambdadiscountapiPRODdocsproxyGET78210CC7",
         "discountapilambdadiscountapiPRODdocsproxy0CD335AB",
         "discountapilambdadiscountapiPRODdocsGETA59BC91A",
         "discountapilambdadiscountapiPRODdocsE4183A4C",
+        "discountapilambdadiscountapiPRODwithRedirectproxyGET4AFAD241",
+        "discountapilambdadiscountapiPRODwithRedirectproxy6E5821F7",
+        "discountapilambdadiscountapiPRODwithRedirectGET6D9E7A04",
+        "discountapilambdadiscountapiPRODwithRedirectD0A6CA01",
       ],
       "Properties": {
         "Description": "API Gateway created by CDK",
@@ -1958,7 +2874,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "discountapilambdadiscountapiPRODDeploymentF304491B5f329dc94f3acf5e3c58f19488fd42af",
+          "Ref": "discountapilambdadiscountapiPRODDeploymentF304491Bf204aa156cfffd8a2964af799f8646e4",
         },
         "RestApiId": {
           "Ref": "discountapilambdadiscountapiPROD4E9716BA",
@@ -2041,6 +2957,283 @@ exports[`The Discount API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::UsagePlanKey",
     },
+    "discountapilambdadiscountapiPRODauth58CE5C69": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "discountapilambdadiscountapiPROD4E9716BA",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "auth",
+        "RestApiId": {
+          "Ref": "discountapilambdadiscountapiPROD4E9716BA",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "discountapilambdadiscountapiPRODauthlogin1FEBF2BE": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "discountapilambdadiscountapiPRODauth58CE5C69",
+        },
+        "PathPart": "login",
+        "RestApiId": {
+          "Ref": "discountapilambdadiscountapiPROD4E9716BA",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "discountapilambdadiscountapiPRODauthloginGET0DDC5027": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "discountapilambda972ABED6",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "discountapilambdadiscountapiPRODauthlogin1FEBF2BE",
+        },
+        "RestApiId": {
+          "Ref": "discountapilambdadiscountapiPROD4E9716BA",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "discountapilambdadiscountapiPRODauthloginGETApiPermissionTestdiscountapiPRODdiscountapilambdadiscountapiPROD571B732AGETauthlogin91D2A515": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "discountapilambda972ABED6",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "discountapilambdadiscountapiPROD4E9716BA",
+              },
+              "/test-invoke-stage/GET/auth/login",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "discountapilambdadiscountapiPRODauthloginGETApiPermissiondiscountapiPRODdiscountapilambdadiscountapiPROD571B732AGETauthlogin4BD60BDA": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "discountapilambda972ABED6",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "discountapilambdadiscountapiPROD4E9716BA",
+              },
+              "/",
+              {
+                "Ref": "discountapilambdadiscountapiPRODDeploymentStagePROD7923EEA6",
+              },
+              "/GET/auth/login",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "discountapilambdadiscountapiPRODauthtoken9077F868": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "discountapilambdadiscountapiPRODauth58CE5C69",
+        },
+        "PathPart": "token",
+        "RestApiId": {
+          "Ref": "discountapilambdadiscountapiPROD4E9716BA",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "discountapilambdadiscountapiPRODauthtokenGETApiPermissionTestdiscountapiPRODdiscountapilambdadiscountapiPROD571B732AGETauthtoken140D3AB8": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "discountapilambda972ABED6",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "discountapilambdadiscountapiPROD4E9716BA",
+              },
+              "/test-invoke-stage/GET/auth/token",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "discountapilambdadiscountapiPRODauthtokenGETApiPermissiondiscountapiPRODdiscountapilambdadiscountapiPROD571B732AGETauthtokenBA3863D7": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "discountapilambda972ABED6",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "discountapilambdadiscountapiPROD4E9716BA",
+              },
+              "/",
+              {
+                "Ref": "discountapilambdadiscountapiPRODDeploymentStagePROD7923EEA6",
+              },
+              "/GET/auth/token",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "discountapilambdadiscountapiPRODauthtokenGETF7EEE38E": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "discountapilambda972ABED6",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "discountapilambdadiscountapiPRODauthtoken9077F868",
+        },
+        "RestApiId": {
+          "Ref": "discountapilambdadiscountapiPROD4E9716BA",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
     "discountapilambdadiscountapiPRODdiscountapikeyPROD0198BD73": {
       "Properties": {
         "Enabled": true,
@@ -2098,7 +3291,10 @@ exports[`The Discount API stack matches the snapshot 2`] = `
     "discountapilambdadiscountapiPRODdocsGETA59BC91A": {
       "Properties": {
         "ApiKeyRequired": false,
-        "AuthorizationType": "NONE",
+        "AuthorizationType": "COGNITO_USER_POOLS",
+        "AuthorizerId": {
+          "Ref": "discountapilambdaCognitoAuthorizerBB7A9F04",
+        },
         "HttpMethod": "GET",
         "Integration": {
           "IntegrationHttpMethod": "POST",
@@ -2229,7 +3425,10 @@ exports[`The Discount API stack matches the snapshot 2`] = `
     "discountapilambdadiscountapiPRODdocsproxyGET78210CC7": {
       "Properties": {
         "ApiKeyRequired": false,
-        "AuthorizationType": "NONE",
+        "AuthorizationType": "COGNITO_USER_POOLS",
+        "AuthorizerId": {
+          "Ref": "discountapilambdaCognitoAuthorizerBB7A9F04",
+        },
         "HttpMethod": "GET",
         "Integration": {
           "IntegrationHttpMethod": "POST",
@@ -2478,6 +3677,307 @@ exports[`The Discount API stack matches the snapshot 2`] = `
         },
       },
       "Type": "AWS::Lambda::Permission",
+    },
+    "discountapilambdadiscountapiPRODwithRedirectD0A6CA01": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "discountapilambdadiscountapiPROD4E9716BA",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "withRedirect",
+        "RestApiId": {
+          "Ref": "discountapilambdadiscountapiPROD4E9716BA",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "discountapilambdadiscountapiPRODwithRedirectGET6D9E7A04": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "discountapilambda972ABED6",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "discountapilambdadiscountapiPRODwithRedirectD0A6CA01",
+        },
+        "RestApiId": {
+          "Ref": "discountapilambdadiscountapiPROD4E9716BA",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "discountapilambdadiscountapiPRODwithRedirectGETApiPermissionTestdiscountapiPRODdiscountapilambdadiscountapiPROD571B732AGETwithRedirect737B3014": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "discountapilambda972ABED6",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "discountapilambdadiscountapiPROD4E9716BA",
+              },
+              "/test-invoke-stage/GET/withRedirect",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "discountapilambdadiscountapiPRODwithRedirectGETApiPermissiondiscountapiPRODdiscountapilambdadiscountapiPROD571B732AGETwithRedirect30FF19C1": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "discountapilambda972ABED6",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "discountapilambdadiscountapiPROD4E9716BA",
+              },
+              "/",
+              {
+                "Ref": "discountapilambdadiscountapiPRODDeploymentStagePROD7923EEA6",
+              },
+              "/GET/withRedirect",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "discountapilambdadiscountapiPRODwithRedirectproxy6E5821F7": {
+      "Properties": {
+        "ParentId": {
+          "Ref": "discountapilambdadiscountapiPRODwithRedirectD0A6CA01",
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "discountapilambdadiscountapiPROD4E9716BA",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "discountapilambdadiscountapiPRODwithRedirectproxyGET4AFAD241": {
+      "Properties": {
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "GET",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "discountapilambda972ABED6",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "discountapilambdadiscountapiPRODwithRedirectproxy6E5821F7",
+        },
+        "RestApiId": {
+          "Ref": "discountapilambdadiscountapiPROD4E9716BA",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "discountapilambdadiscountapiPRODwithRedirectproxyGETApiPermissionTestdiscountapiPRODdiscountapilambdadiscountapiPROD571B732AGETwithRedirectproxyC03F924E": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "discountapilambda972ABED6",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "discountapilambdadiscountapiPROD4E9716BA",
+              },
+              "/test-invoke-stage/GET/withRedirect/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "discountapilambdadiscountapiPRODwithRedirectproxyGETApiPermissiondiscountapiPRODdiscountapilambdadiscountapiPROD571B732AGETwithRedirectproxy582099E9": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "discountapilambda972ABED6",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "discountapilambdadiscountapiPROD4E9716BA",
+              },
+              "/",
+              {
+                "Ref": "discountapilambdadiscountapiPRODDeploymentStagePROD7923EEA6",
+              },
+              "/GET/withRedirect/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "readrepoconfig1649C8CF": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support-service-lambdas",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "readrepoconfig1649C8CF",
+        "Roles": [
+          {
+            "Ref": "discountapilambdaServiceRole4CB5B1F4",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
   },
 }
