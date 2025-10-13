@@ -129,6 +129,10 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	DiscountApi,
 	ProductSwitchApi,
 	UpdateSupporterPlusAmount,
+	MParticleApi,
+	MetricPushApi,
+	PressReaderEntitlements,
+	UserBenefits,
 ];
 
 // generate all stacks for all stages
@@ -262,46 +266,7 @@ new TicketTailorWebhook(app, 'ticket-tailor-webhook-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 });
-new PressReaderEntitlements(app, 'press-reader-entitlements-CODE', {
-	stack: 'support',
-	stage: 'CODE',
-	internalDomainName: `press-reader-entitlements-code.${supportApisDomain}`,
-	publicDomainName: 'press-reader-entitlements.code.dev-guardianapis.com',
-	hostedZoneId: supportHostedZoneId,
-	certificateId: supportCertificateId,
-	supporterProductDataTable:
-		'supporter-product-data-tables-CODE-SupporterProductDataTable',
-});
-new PressReaderEntitlements(app, 'press-reader-entitlements-PROD', {
-	stack: 'support',
-	stage: 'PROD',
-	internalDomainName: `press-reader-entitlements.${supportApisDomain}`,
-	publicDomainName: 'press-reader-entitlements.guardianapis.com',
-	hostedZoneId: supportHostedZoneId,
-	certificateId: supportCertificateId,
-	supporterProductDataTable:
-		'supporter-product-data-tables-PROD-SupporterProductDataTable',
-});
-new UserBenefits(app, 'user-benefits-CODE', {
-	stack: 'support',
-	stage: 'CODE',
-	internalDomainName: `user-benefits-code.${supportApisDomain}`,
-	publicDomainName: 'user-benefits.code.dev-guardianapis.com',
-	hostedZoneId: supportHostedZoneId,
-	certificateId: supportCertificateId,
-	supporterProductDataTable:
-		'supporter-product-data-tables-CODE-SupporterProductDataTable',
-});
-new UserBenefits(app, 'user-benefits-PROD', {
-	stack: 'support',
-	stage: 'PROD',
-	internalDomainName: `user-benefits.${supportApisDomain}`,
-	publicDomainName: 'user-benefits.guardianapis.com',
-	hostedZoneId: supportHostedZoneId,
-	certificateId: supportCertificateId,
-	supporterProductDataTable:
-		'supporter-product-data-tables-PROD-SupporterProductDataTable',
-});
+
 new DiscountExpiryNotifier(app, 'discount-expiry-notifier-CODE', {
 	stack: 'support',
 	stage: 'CODE',
@@ -310,16 +275,7 @@ new DiscountExpiryNotifier(app, 'discount-expiry-notifier-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 });
-new MetricPushApi(app, 'metric-push-api-CODE', {
-	stack: 'membership',
-	stage: 'CODE',
-	cloudFormationStackName: 'membership-CODE-metric-push-api',
-});
-new MetricPushApi(app, 'metric-push-api-PROD', {
-	stack: 'membership',
-	stage: 'PROD',
-	cloudFormationStackName: 'membership-PROD-metric-push-api',
-});
+
 new ObserverDataExport(app, 'observer-data-export-CODE', {
 	stack: 'support',
 	stage: 'CODE',
@@ -349,14 +305,6 @@ new SalesforceEventBus(app, 'salesforce-event-bus-CODE', {
 	stage: 'CODE',
 });
 new SalesforceEventBus(app, 'salesforce-event-bus-PROD', {
-	stack: 'support',
-	stage: 'PROD',
-});
-new MParticleApi(app, 'mparticle-api-CODE', {
-	stack: 'support',
-	stage: 'CODE',
-});
-new MParticleApi(app, 'mparticle-api-PROD', {
 	stack: 'support',
 	stage: 'PROD',
 });

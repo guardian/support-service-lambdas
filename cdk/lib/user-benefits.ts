@@ -1,36 +1,19 @@
 import { GuApiGatewayWithLambdaByPath } from '@guardian/cdk';
-import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
-import { GuStack } from '@guardian/cdk/lib/constructs/core';
-import { GuCname } from '@guardian/cdk/lib/constructs/dns';
-import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import type { App } from 'aws-cdk-lib';
 import { Duration, Fn } from 'aws-cdk-lib';
-import {
-	CfnBasePathMapping,
-	CfnDomainName,
-	UsagePlan,
-} from 'aws-cdk-lib/aws-apigateway';
+import { UsagePlan } from 'aws-cdk-lib/aws-apigateway';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
-import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { allowedOriginsForStage } from '../../handlers/user-benefits/src/cors';
-import { nodeVersion } from './node-version';
+import { SrLambda } from './cdk/sr-lambda';
+import { SrRestDomain } from './cdk/sr-rest-domain';
+import type { SrStageNames } from './cdk/sr-stack';
+import { SrStack } from './cdk/sr-stack';
 
-export interface UserBenefitsProps extends GuStackProps {
-	stack: string;
-	stage: string;
-	certificateId: string;
-	internalDomainName: string;
-	publicDomainName: string;
-	hostedZoneId: string;
-	supporterProductDataTable: string;
-}
+export class UserBenefits extends SrStack {
+	constructor(scope: App, stage: SrStageNames) {
+		super(scope, { app: 'user-benefits', stage });
 
-export class UserBenefits extends GuStack {
-	constructor(scope: App, id: string, props: UserBenefitsProps) {
-		super(scope, id, props);
-
-		const app = 'user-benefits';
+		const app = this.app;
 
 		const commonEnvironmentVariables = {
 			App: app,
@@ -40,53 +23,50 @@ export class UserBenefits extends GuStack {
 
 		const supporterProductDataTablePolicy = new PolicyStatement({
 			actions: ['dynamodb:Query'],
-			resources: [Fn.importValue(props.supporterProductDataTable)],
+			resources: [
+				Fn.importValue(
+					`supporter-product-data-tables-${this.stage}-SupporterProductDataTable`,
+				),
+			],
 		});
 
 		const commonLambdaProps = {
-			app,
-			fileName: `${app}.zip`,
 			initialPolicy: [supporterProductDataTablePolicy],
-			runtime: nodeVersion,
-			memorySize: 1024,
 			timeout: Duration.seconds(300),
 			environment: commonEnvironmentVariables,
 		};
-		const userBenefitsMeLambda = new GuLambdaFunction(
+		const userBenefitsMeLambda = new SrLambda(
 			this,
 			`user-benefits-me-lambda`,
 			{
 				description:
 					'An API Gateway triggered lambda to get the benefits of a user identified by a JWT',
-				functionName: `user-benefits-me-${this.stage}`,
-				loggingFormat: LoggingFormat.TEXT,
 				handler: 'index.benefitsMeHandler',
 				...commonLambdaProps,
 			},
+			{ nameSuffix: 'me' },
 		);
-		const userBenefitsIdentityIdLambda = new GuLambdaFunction(
+		const userBenefitsIdentityIdLambda = new SrLambda(
 			this,
 			`user-benefits-identity-id-lambda`,
 			{
 				description:
 					'An API Gateway triggered lambda to get the benefits of the user identified in the request path',
-				functionName: `user-benefits-identity-id-${this.stage}`,
-				loggingFormat: LoggingFormat.TEXT,
 				handler: 'index.benefitsIdentityIdHandler',
 				...commonLambdaProps,
 			},
+			{ nameSuffix: 'identity-id' },
 		);
-		const userBenefitsListLambda = new GuLambdaFunction(
+		const userBenefitsListLambda = new SrLambda(
 			this,
 			`user-benefits-list-lambda`,
 			{
 				description:
 					'An API Gateway triggered lambda to return the full list of benefits for each product in html or json format',
-				functionName: `user-benefits-list-${this.stage}`,
-				loggingFormat: LoggingFormat.TEXT,
 				handler: 'index.benefitsListHandler',
 				...commonLambdaProps,
 			},
+			{ nameSuffix: 'list' },
 		);
 		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {
 			app,
@@ -135,35 +115,9 @@ export class UserBenefits extends GuStack {
 		});
 		usagePlan.addApiKey(apiKey);
 
-		// ---- DNS ---- //
-		const certificateArn = `arn:aws:acm:eu-west-1:${this.account}:certificate/${props.certificateId}`;
-		const cfnDomainName = new CfnDomainName(this, 'DomainName', {
-			domainName: props.internalDomainName,
-			regionalCertificateArn: certificateArn,
-			endpointConfiguration: {
-				types: ['REGIONAL'],
-			},
-		});
-
-		new CfnBasePathMapping(this, 'BasePathMapping', {
-			domainName: cfnDomainName.ref,
-			restApiId: apiGateway.api.restApiId,
-			stage: apiGateway.api.deploymentStage.stageName,
-		});
-
-		new CfnRecordSet(this, 'DNSRecord', {
-			name: props.internalDomainName,
-			type: 'CNAME',
-			hostedZoneId: props.hostedZoneId,
-			ttl: '120',
-			resourceRecords: [cfnDomainName.attrRegionalDomainName],
-		});
-
-		new GuCname(this, 'NS1 DNS entry', {
-			app: app,
-			domainName: props.publicDomainName,
-			ttl: Duration.hours(1),
-			resourceRecord: 'guardian.map.fastly.net',
+		new SrRestDomain(this, apiGateway.api, {
+			publicDomain: true,
+			domainIdOverride: 'NS1 DNS entry',
 		});
 	}
 }

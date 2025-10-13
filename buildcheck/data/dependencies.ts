@@ -10,7 +10,14 @@ export const dep = separateDepRecords({
 	dayjs: '^1.11.13',
 	'@types/aws-lambda': '^8.10.147',
 	'source-map-support': '^0.5.21',
-	...awsClients(['client-cloudwatch', 'credential-providers']),
+	'@peculiar/x509': '^1.12.3',
+	'@faker-js/faker': '^9.8.0',
+	...awsClients([
+		'client-cloudwatch',
+		'credential-providers',
+		'client-sqs',
+		'client-s3',
+	]),
 });
 
 function awsClients<T extends string>(ids: T[]) {

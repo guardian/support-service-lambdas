@@ -8,6 +8,8 @@ export default (pkg: HandlerDefinition) => {
 	return {
 		name: `${pkg.name}`,
 		scripts: {
+			'cdk:test': 'pnpm --filter cdk test ' + pkg.name,
+			'cdk:test-update': 'pnpm --filter cdk test-update ' + pkg.name,
 			test: 'jest --group=-integration',
 			'it-test': 'jest --group=integration',
 			'type-check': 'tsc --noEmit',
@@ -17,8 +19,9 @@ export default (pkg: HandlerDefinition) => {
 				' --sourcemap',
 			lint: 'eslint src/**/*.ts test/**/*.ts',
 			package: `pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr ${pkg.name}.zip ./*.js.map ./*.js`,
-			'check-formatting': 'prettier --check **.ts',
-			'fix-formatting': 'prettier --write **.ts',
+			'check-formatting': 'prettier --check \"**/*.ts\"',
+			'fix-formatting': 'prettier --write \"**/*.ts\"',
+			...pkg.extraScripts,
 		},
 		NOTICE1: notice(__filename),
 		NOTICE2: 'all dependencies are defined in buildcheck/data/build.ts',

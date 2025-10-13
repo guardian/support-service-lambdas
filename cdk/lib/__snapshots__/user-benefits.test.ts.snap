@@ -5,9 +5,6 @@ exports[`The User benefits stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuLambdaFunction",
-      "GuLambdaFunction",
-      "GuLambdaFunction",
       "GuApiGatewayWithLambdaByPath",
       "GuApiGateway5xxPercentageAlarm",
       "GuCname",
@@ -88,7 +85,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": "membership-CODE-user-benefits",
+                    "Value": "support-CODE-user-benefits",
                   },
                 ],
                 "MetricName": "5XXError",
@@ -106,7 +103,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": "membership-CODE-user-benefits",
+                    "Value": "support-CODE-user-benefits",
                   },
                 ],
                 "MetricName": "Count",
@@ -120,6 +117,10 @@ exports[`The User benefits stack matches the snapshot 1`] = `
         ],
         "Tags": [
           {
+            "Key": "App",
+            "Value": "user-benefits",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -129,7 +130,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -158,7 +159,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
     "DNSRecord": {
       "Properties": {
         "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "user-benefits.code.support.guardianapis.com",
+        "Name": "user-benefits-code.support.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -174,7 +175,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
     },
     "DomainName": {
       "Properties": {
-        "DomainName": "user-benefits.code.support.guardianapis.com",
+        "DomainName": "user-benefits-code.support.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -194,6 +195,10 @@ exports[`The User benefits stack matches the snapshot 1`] = `
         },
         "Tags": [
           {
+            "Key": "App",
+            "Value": "user-benefits",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -203,7 +208,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -218,7 +223,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
         "Name": "user-benefits.code.dev-guardianapis.com",
         "RecordType": "CNAME",
         "ResourceRecords": [
-          "guardian.map.fastly.net",
+          "dualstack.guardian.map.fastly.net",
         ],
         "Stage": "CODE",
         "TTL": 3600,
@@ -227,8 +232,12 @@ exports[`The User benefits stack matches the snapshot 1`] = `
     },
     "RestApi0C43BF4B": {
       "Properties": {
-        "Name": "membership-CODE-user-benefits",
+        "Name": "support-CODE-user-benefits",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "user-benefits",
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -239,7 +248,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -296,6 +305,10 @@ exports[`The User benefits stack matches the snapshot 1`] = `
         ],
         "Tags": [
           {
+            "Key": "App",
+            "Value": "user-benefits",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -305,7 +318,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -316,7 +329,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC503083d8867dcf3eaf28c8354449f7bf8c9": {
+    "RestApiDeployment180EC503597a65577295016d8ba55197406b8318": {
       "DependsOn": [
         "RestApibenefitsidentityIdGET09FA095A",
         "RestApibenefitsidentityIdOPTIONSE3678C12",
@@ -345,13 +358,17 @@ exports[`The User benefits stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC503083d8867dcf3eaf28c8354449f7bf8c9",
+          "Ref": "RestApiDeployment180EC503597a65577295016d8ba55197406b8318",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
         },
         "StageName": "prod",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "user-benefits",
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -362,7 +379,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1052,6 +1069,10 @@ exports[`The User benefits stack matches the snapshot 1`] = `
         ],
         "Tags": [
           {
+            "Key": "App",
+            "Value": "user-benefits",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1061,7 +1082,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1086,6 +1107,10 @@ exports[`The User benefits stack matches the snapshot 1`] = `
         ],
         "Tags": [
           {
+            "Key": "App",
+            "Value": "user-benefits",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1095,7 +1120,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1128,16 +1153,17 @@ exports[`The User benefits stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/CODE/user-benefits/user-benefits.zip",
+          "S3Key": "support/CODE/user-benefits/user-benefits.zip",
         },
         "Description": "An API Gateway triggered lambda to get the benefits of the user identified in the request path",
         "Environment": {
           "Variables": {
             "APP": "user-benefits",
             "App": "user-benefits",
-            "STACK": "membership",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
             "STAGE": "CODE",
-            "Stack": "membership",
+            "Stack": "support",
             "Stage": "CODE",
           },
         },
@@ -1169,7 +1195,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1223,7 +1249,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1279,7 +1305,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/CODE/user-benefits/user-benefits.zip",
+                      "/support/CODE/user-benefits/user-benefits.zip",
                     ],
                   ],
                 },
@@ -1300,7 +1326,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/user-benefits",
+                    ":parameter/CODE/support/user-benefits",
                   ],
                 ],
               },
@@ -1323,7 +1349,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/user-benefits/*",
+                    ":parameter/CODE/support/user-benefits/*",
                   ],
                 ],
               },
@@ -1350,16 +1376,17 @@ exports[`The User benefits stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/CODE/user-benefits/user-benefits.zip",
+          "S3Key": "support/CODE/user-benefits/user-benefits.zip",
         },
         "Description": "An API Gateway triggered lambda to return the full list of benefits for each product in html or json format",
         "Environment": {
           "Variables": {
             "APP": "user-benefits",
             "App": "user-benefits",
-            "STACK": "membership",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
             "STAGE": "CODE",
-            "Stack": "membership",
+            "Stack": "support",
             "Stage": "CODE",
           },
         },
@@ -1391,7 +1418,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1445,7 +1472,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1501,7 +1528,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/CODE/user-benefits/user-benefits.zip",
+                      "/support/CODE/user-benefits/user-benefits.zip",
                     ],
                   ],
                 },
@@ -1522,7 +1549,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/user-benefits",
+                    ":parameter/CODE/support/user-benefits",
                   ],
                 ],
               },
@@ -1545,7 +1572,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/user-benefits/*",
+                    ":parameter/CODE/support/user-benefits/*",
                   ],
                 ],
               },
@@ -1572,16 +1599,17 @@ exports[`The User benefits stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/CODE/user-benefits/user-benefits.zip",
+          "S3Key": "support/CODE/user-benefits/user-benefits.zip",
         },
         "Description": "An API Gateway triggered lambda to get the benefits of a user identified by a JWT",
         "Environment": {
           "Variables": {
             "APP": "user-benefits",
             "App": "user-benefits",
-            "STACK": "membership",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
             "STAGE": "CODE",
-            "Stack": "membership",
+            "Stack": "support",
             "Stage": "CODE",
           },
         },
@@ -1613,7 +1641,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1667,7 +1695,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1723,7 +1751,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/CODE/user-benefits/user-benefits.zip",
+                      "/support/CODE/user-benefits/user-benefits.zip",
                     ],
                   ],
                 },
@@ -1744,7 +1772,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/user-benefits",
+                    ":parameter/CODE/support/user-benefits",
                   ],
                 ],
               },
@@ -1767,7 +1795,7 @@ exports[`The User benefits stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/user-benefits/*",
+                    ":parameter/CODE/support/user-benefits/*",
                   ],
                 ],
               },
@@ -1793,9 +1821,6 @@ exports[`The User benefits stack matches the snapshot 2`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuLambdaFunction",
-      "GuLambdaFunction",
-      "GuLambdaFunction",
       "GuApiGatewayWithLambdaByPath",
       "GuApiGateway5xxPercentageAlarm",
       "GuCname",
@@ -1876,7 +1901,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": "membership-PROD-user-benefits",
+                    "Value": "support-PROD-user-benefits",
                   },
                 ],
                 "MetricName": "5XXError",
@@ -1894,7 +1919,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
                 "Dimensions": [
                   {
                     "Name": "ApiName",
-                    "Value": "membership-PROD-user-benefits",
+                    "Value": "support-PROD-user-benefits",
                   },
                 ],
                 "MetricName": "Count",
@@ -1908,6 +1933,10 @@ exports[`The User benefits stack matches the snapshot 2`] = `
         ],
         "Tags": [
           {
+            "Key": "App",
+            "Value": "user-benefits",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1917,7 +1946,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1982,6 +2011,10 @@ exports[`The User benefits stack matches the snapshot 2`] = `
         },
         "Tags": [
           {
+            "Key": "App",
+            "Value": "user-benefits",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1991,7 +2024,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -2006,7 +2039,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
         "Name": "user-benefits.guardianapis.com",
         "RecordType": "CNAME",
         "ResourceRecords": [
-          "guardian.map.fastly.net",
+          "dualstack.guardian.map.fastly.net",
         ],
         "Stage": "PROD",
         "TTL": 3600,
@@ -2015,8 +2048,12 @@ exports[`The User benefits stack matches the snapshot 2`] = `
     },
     "RestApi0C43BF4B": {
       "Properties": {
-        "Name": "membership-PROD-user-benefits",
+        "Name": "support-PROD-user-benefits",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "user-benefits",
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -2027,7 +2064,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -2084,6 +2121,10 @@ exports[`The User benefits stack matches the snapshot 2`] = `
         ],
         "Tags": [
           {
+            "Key": "App",
+            "Value": "user-benefits",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -2093,7 +2134,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -2104,7 +2145,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC503e6ef9f661f8798863fda585ce7299270": {
+    "RestApiDeployment180EC5038a34b01ec9c29e79071b558064c7548c": {
       "DependsOn": [
         "RestApibenefitsidentityIdGET09FA095A",
         "RestApibenefitsidentityIdOPTIONSE3678C12",
@@ -2133,13 +2174,17 @@ exports[`The User benefits stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC503e6ef9f661f8798863fda585ce7299270",
+          "Ref": "RestApiDeployment180EC5038a34b01ec9c29e79071b558064c7548c",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
         },
         "StageName": "prod",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "user-benefits",
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -2150,7 +2195,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -2840,6 +2885,10 @@ exports[`The User benefits stack matches the snapshot 2`] = `
         ],
         "Tags": [
           {
+            "Key": "App",
+            "Value": "user-benefits",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -2849,7 +2898,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -2874,6 +2923,10 @@ exports[`The User benefits stack matches the snapshot 2`] = `
         ],
         "Tags": [
           {
+            "Key": "App",
+            "Value": "user-benefits",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -2883,7 +2936,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -2916,16 +2969,17 @@ exports[`The User benefits stack matches the snapshot 2`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/PROD/user-benefits/user-benefits.zip",
+          "S3Key": "support/PROD/user-benefits/user-benefits.zip",
         },
         "Description": "An API Gateway triggered lambda to get the benefits of the user identified in the request path",
         "Environment": {
           "Variables": {
             "APP": "user-benefits",
             "App": "user-benefits",
-            "STACK": "membership",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
             "STAGE": "PROD",
-            "Stack": "membership",
+            "Stack": "support",
             "Stage": "PROD",
           },
         },
@@ -2957,7 +3011,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -3011,7 +3065,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -3067,7 +3121,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/PROD/user-benefits/user-benefits.zip",
+                      "/support/PROD/user-benefits/user-benefits.zip",
                     ],
                   ],
                 },
@@ -3088,7 +3142,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/user-benefits",
+                    ":parameter/PROD/support/user-benefits",
                   ],
                 ],
               },
@@ -3111,7 +3165,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/user-benefits/*",
+                    ":parameter/PROD/support/user-benefits/*",
                   ],
                 ],
               },
@@ -3138,16 +3192,17 @@ exports[`The User benefits stack matches the snapshot 2`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/PROD/user-benefits/user-benefits.zip",
+          "S3Key": "support/PROD/user-benefits/user-benefits.zip",
         },
         "Description": "An API Gateway triggered lambda to return the full list of benefits for each product in html or json format",
         "Environment": {
           "Variables": {
             "APP": "user-benefits",
             "App": "user-benefits",
-            "STACK": "membership",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
             "STAGE": "PROD",
-            "Stack": "membership",
+            "Stack": "support",
             "Stage": "PROD",
           },
         },
@@ -3179,7 +3234,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -3233,7 +3288,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -3289,7 +3344,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/PROD/user-benefits/user-benefits.zip",
+                      "/support/PROD/user-benefits/user-benefits.zip",
                     ],
                   ],
                 },
@@ -3310,7 +3365,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/user-benefits",
+                    ":parameter/PROD/support/user-benefits",
                   ],
                 ],
               },
@@ -3333,7 +3388,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/user-benefits/*",
+                    ":parameter/PROD/support/user-benefits/*",
                   ],
                 ],
               },
@@ -3360,16 +3415,17 @@ exports[`The User benefits stack matches the snapshot 2`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/PROD/user-benefits/user-benefits.zip",
+          "S3Key": "support/PROD/user-benefits/user-benefits.zip",
         },
         "Description": "An API Gateway triggered lambda to get the benefits of a user identified by a JWT",
         "Environment": {
           "Variables": {
             "APP": "user-benefits",
             "App": "user-benefits",
-            "STACK": "membership",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
             "STAGE": "PROD",
-            "Stack": "membership",
+            "Stack": "support",
             "Stage": "PROD",
           },
         },
@@ -3401,7 +3457,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -3455,7 +3511,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -3511,7 +3567,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/PROD/user-benefits/user-benefits.zip",
+                      "/support/PROD/user-benefits/user-benefits.zip",
                     ],
                   ],
                 },
@@ -3532,7 +3588,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/user-benefits",
+                    ":parameter/PROD/support/user-benefits",
                   ],
                 ],
               },
@@ -3555,7 +3611,7 @@ exports[`The User benefits stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/user-benefits/*",
+                    ":parameter/PROD/support/user-benefits/*",
                   ],
                 ],
               },

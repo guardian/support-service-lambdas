@@ -5,7 +5,6 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuApiLambda",
       "GuApiGateway5xxPercentageAlarm",
       "GuCname",
     ],
@@ -84,6 +83,10 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
         "Statistic": "Sum",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "press-reader-entitlements",
+          },
+          {
             "Key": "DiagnosticLinks",
             "Value": {
               "Fn::Join": [
@@ -107,7 +110,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -188,6 +191,10 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
         ],
         "Tags": [
           {
+            "Key": "App",
+            "Value": "press-reader-entitlements",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -197,7 +204,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -226,7 +233,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
     "DNSRecord": {
       "Properties": {
         "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "product-switch-api.code.support.guardianapis.com",
+        "Name": "press-reader-entitlements-code.support.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -242,7 +249,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
     },
     "DomainName": {
       "Properties": {
-        "DomainName": "product-switch-api.code.support.guardianapis.com",
+        "DomainName": "press-reader-entitlements-code.support.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -262,6 +269,10 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
         },
         "Tags": [
           {
+            "Key": "App",
+            "Value": "press-reader-entitlements",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -271,7 +282,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -293,19 +304,21 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
       },
       "Type": "Guardian::DNS::RecordSet",
     },
-    "S3inlinepolicy3B07399A": {
+    "SupporterProductDataTablequeryaccess7665F484": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "s3:GetObject",
+              "Action": "dynamodb:Query",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/membership/CODE/press-reader-entitlements/",
+              "Resource": {
+                "Fn::ImportValue": "supporter-product-data-tables-CODE-SupporterProductDataTable",
+              },
             },
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "S3inlinepolicy3B07399A",
+        "PolicyName": "SupporterProductDataTablequeryaccess7665F484",
         "Roles": [
           {
             "Ref": "pressreaderentitlementslambdaServiceRole94C17F23",
@@ -324,16 +337,17 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/CODE/press-reader-entitlements/press-reader-entitlements.zip",
+          "S3Key": "support/CODE/press-reader-entitlements/press-reader-entitlements.zip",
         },
         "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
         "Environment": {
           "Variables": {
             "APP": "press-reader-entitlements",
             "App": "press-reader-entitlements",
-            "STACK": "membership",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
             "STAGE": "CODE",
-            "Stack": "membership",
+            "Stack": "support",
             "Stage": "CODE",
           },
         },
@@ -365,7 +379,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -419,7 +433,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -433,13 +447,6 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
       "Properties": {
         "PolicyDocument": {
           "Statement": [
-            {
-              "Action": "dynamodb:Query",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::ImportValue": "supporter-product-data-tables-CODE-SupporterProductDataTable",
-              },
-            },
             {
               "Action": [
                 "s3:GetObject*",
@@ -475,7 +482,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/CODE/press-reader-entitlements/press-reader-entitlements.zip",
+                      "/support/CODE/press-reader-entitlements/press-reader-entitlements.zip",
                     ],
                   ],
                 },
@@ -496,7 +503,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/press-reader-entitlements",
+                    ":parameter/CODE/support/press-reader-entitlements",
                   ],
                 ],
               },
@@ -519,7 +526,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/press-reader-entitlements/*",
+                    ":parameter/CODE/support/press-reader-entitlements/*",
                   ],
                 ],
               },
@@ -556,7 +563,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -748,7 +755,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -759,7 +766,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsCODEDeploymentAF63E253dcc78fbadae79b72e926c362765ad40f": {
+    "pressreaderentitlementslambdapressreaderentitlementsCODEDeploymentAF63E253d4c9f2ae469a8e1ea64845d04c7ca59b": {
       "DependsOn": [
         "pressreaderentitlementslambdapressreaderentitlementsCODEproxyANY94DA2830",
         "pressreaderentitlementslambdapressreaderentitlementsCODEproxyC7B8C5A6",
@@ -779,7 +786,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODEDeploymentAF63E253dcc78fbadae79b72e926c362765ad40f",
+          "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODEDeploymentAF63E253d4c9f2ae469a8e1ea64845d04c7ca59b",
         },
         "RestApiId": {
           "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
@@ -800,7 +807,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -839,7 +846,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -891,7 +898,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1044,7 +1051,6 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuApiLambda",
       "GuApiGateway5xxPercentageAlarm",
       "GuCname",
     ],
@@ -1123,6 +1129,10 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
         "Statistic": "Sum",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "press-reader-entitlements",
+          },
+          {
             "Key": "DiagnosticLinks",
             "Value": {
               "Fn::Join": [
@@ -1146,7 +1156,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1227,6 +1237,10 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
         ],
         "Tags": [
           {
+            "Key": "App",
+            "Value": "press-reader-entitlements",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1236,7 +1250,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1265,7 +1279,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
     "DNSRecord": {
       "Properties": {
         "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "product-switch-api.support.guardianapis.com",
+        "Name": "press-reader-entitlements.support.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -1281,7 +1295,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
     },
     "DomainName": {
       "Properties": {
-        "DomainName": "product-switch-api.support.guardianapis.com",
+        "DomainName": "press-reader-entitlements.support.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -1301,6 +1315,10 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
         },
         "Tags": [
           {
+            "Key": "App",
+            "Value": "press-reader-entitlements",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1310,7 +1328,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1332,19 +1350,21 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
       },
       "Type": "Guardian::DNS::RecordSet",
     },
-    "S3inlinepolicy3B07399A": {
+    "SupporterProductDataTablequeryaccess7665F484": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "s3:GetObject",
+              "Action": "dynamodb:Query",
               "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/membership/PROD/press-reader-entitlements/",
+              "Resource": {
+                "Fn::ImportValue": "supporter-product-data-tables-PROD-SupporterProductDataTable",
+              },
             },
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "S3inlinepolicy3B07399A",
+        "PolicyName": "SupporterProductDataTablequeryaccess7665F484",
         "Roles": [
           {
             "Ref": "pressreaderentitlementslambdaServiceRole94C17F23",
@@ -1363,16 +1383,17 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/PROD/press-reader-entitlements/press-reader-entitlements.zip",
+          "S3Key": "support/PROD/press-reader-entitlements/press-reader-entitlements.zip",
         },
         "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
         "Environment": {
           "Variables": {
             "APP": "press-reader-entitlements",
             "App": "press-reader-entitlements",
-            "STACK": "membership",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
             "STAGE": "PROD",
-            "Stack": "membership",
+            "Stack": "support",
             "Stage": "PROD",
           },
         },
@@ -1404,7 +1425,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1458,7 +1479,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1472,13 +1493,6 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
       "Properties": {
         "PolicyDocument": {
           "Statement": [
-            {
-              "Action": "dynamodb:Query",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::ImportValue": "supporter-product-data-tables-PROD-SupporterProductDataTable",
-              },
-            },
             {
               "Action": [
                 "s3:GetObject*",
@@ -1514,7 +1528,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/PROD/press-reader-entitlements/press-reader-entitlements.zip",
+                      "/support/PROD/press-reader-entitlements/press-reader-entitlements.zip",
                     ],
                   ],
                 },
@@ -1535,7 +1549,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/press-reader-entitlements",
+                    ":parameter/PROD/support/press-reader-entitlements",
                   ],
                 ],
               },
@@ -1558,7 +1572,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/press-reader-entitlements/*",
+                    ":parameter/PROD/support/press-reader-entitlements/*",
                   ],
                 ],
               },
@@ -1757,7 +1771,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1788,7 +1802,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1798,7 +1812,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::RestApi",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsPRODDeploymentD4B7367101f9305c35ee5681d8ac6f33855b3e0f": {
+    "pressreaderentitlementslambdapressreaderentitlementsPRODDeploymentD4B736714318e1b97b03f9c6682b90368e7ee55c": {
       "DependsOn": [
         "pressreaderentitlementslambdapressreaderentitlementsPRODproxyANY3A6E2187",
         "pressreaderentitlementslambdapressreaderentitlementsPRODproxyA619485E",
@@ -1818,7 +1832,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDeploymentD4B7367101f9305c35ee5681d8ac6f33855b3e0f",
+          "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDeploymentD4B736714318e1b97b03f9c6682b90368e7ee55c",
         },
         "RestApiId": {
           "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
@@ -1839,7 +1853,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1878,7 +1892,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1930,7 +1944,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",

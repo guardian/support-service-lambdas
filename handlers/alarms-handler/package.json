@@ -1,14 +1,16 @@
 {
   "name": "alarms-handler",
   "scripts": {
+    "cdk:test": "pnpm --filter cdk test alarms-handler",
+    "cdk:test-update": "pnpm --filter cdk test-update alarms-handler",
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
     "type-check": "tsc --noEmit",
     "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/index.ts src/indexScheduled.ts --sourcemap",
     "lint": "eslint src/**/*.ts test/**/*.ts",
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr alarms-handler.zip ./*.js.map ./*.js",
-    "check-formatting": "prettier --check **.ts",
-    "fix-formatting": "prettier --write **.ts"
+    "check-formatting": "prettier --check \"**/*.ts\"",
+    "fix-formatting": "prettier --write \"**/*.ts\""
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",

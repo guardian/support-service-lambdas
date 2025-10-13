@@ -1,6 +1,8 @@
 {
   "name": "mparticle-api",
   "scripts": {
+    "cdk:test": "pnpm --filter cdk test mparticle-api",
+    "cdk:test-update": "pnpm --filter cdk test-update mparticle-api",
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
     "type-check": "tsc --noEmit",
@@ -11,13 +13,15 @@
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "check-config": "ts-node runManual/runLoadConfig.ts"
   },
-  "devDependencies": {
-    "@faker-js/faker": "^9.8.0",
-    "@types/aws-lambda": "^8.10.147",
-    "@aws-sdk/client-s3": "^3.873.0"
-  },
+  "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
+  "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
     "@peculiar/x509": "^1.12.3",
     "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^9.8.0",
+    "@types/aws-lambda": "^8.10.147",
+    "@aws-sdk/client-s3": "^3.848.0"
   }
 }

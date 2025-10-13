@@ -3,6 +3,7 @@ import {
 	GuAllowPolicy,
 	GuGetS3ObjectsPolicy,
 } from '@guardian/cdk/lib/constructs/iam';
+import { Fn } from 'aws-cdk-lib';
 
 class AllowGetSecretValuePolicy extends GuAllowPolicy {
 	constructor(scope: GuStack, id: string, key: string) {
@@ -54,5 +55,18 @@ export class AllowZuoraOAuthSecretsPolicy extends AllowGetSecretValuePolicy {
 			'Zuora OAuth Secrets Manager policy',
 			'Zuora-OAuth/SupportServiceLambdas-*',
 		);
+	}
+}
+
+export class AllowSupporterProductDataQueryPolicy extends GuAllowPolicy {
+	constructor(scope: GuStack) {
+		super(scope, 'SupporterProductDataTable query access', {
+			actions: ['dynamodb:Query'],
+			resources: [
+				Fn.importValue(
+					`supporter-product-data-tables-${scope.stage}-SupporterProductDataTable`,
+				),
+			],
+		});
 	}
 }
