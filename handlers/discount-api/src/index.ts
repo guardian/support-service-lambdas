@@ -24,11 +24,16 @@ import {
 	previewDiscountResponseSchema,
 } from './responseSchema';
 import { stringify } from './stringify';
+import { oAuthRedirectHandler } from './oAuthRedirectHandler';
 
 const getEnv = (env: string): string =>
 	getIfDefined(process.env[env], `${env} environment variable not set`);
 
 const stage = getEnv('STAGE') as Stage;
+
+// CDK and handler have to match these values
+export const docsPath = 'docs';
+export const staffPrefix = `staff/`;
 
 // main entry point from AWS
 export const handler: Handler = Router([
@@ -43,9 +48,15 @@ export const handler: Handler = Router([
 		handler: previewDiscountHandler,
 	},
 	{
+		// ideally we could just say "@staff GET /docs => docsHandler" and it would generate both routes
 		httpMethod: 'GET',
-		path: '/docs',
+		path: '/' + docsPath,
 		handler: () => docsHandler(stage),
+	},
+	{
+		httpMethod: 'GET',
+		path: '/' + staffPrefix + docsPath,
+		handler: oAuthRedirectHandler,
 	},
 ]);
 

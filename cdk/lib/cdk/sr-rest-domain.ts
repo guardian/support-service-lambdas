@@ -12,6 +12,13 @@ export type SrRestDomainProps = {
 	domainIdOverride?: string;
 };
 
+export function domainForStack(scope: SrStack, suffixProdDomain?: boolean) {
+	const isProd = scope.stage === 'PROD';
+	const cert = certForStack[scope.stack];
+	const domainName = `${scope.app}${isProd && !suffixProdDomain ? '' : '-' + scope.stage.toLowerCase()}.${cert.domainName}`;
+	return { cert, domainName };
+}
+
 export class SrRestDomain {
 	readonly dnsRecord: CfnRecordSet;
 	readonly cfnDomainName: CfnDomainName;
@@ -19,12 +26,9 @@ export class SrRestDomain {
 	readonly domainName: GuCname | undefined;
 	constructor(scope: SrStack, api: LambdaRestApi, props?: SrRestDomainProps) {
 		const app = scope.app;
-
-		const isProd = scope.stage === 'PROD';
-		const cert = certForStack[scope.stack];
+		const { cert, domainName } = domainForStack(scope, props?.suffixProdDomain);
 
 		const certificateArn = `arn:aws:acm:eu-west-1:${scope.account}:certificate/${cert.certificateId}`;
-		const domainName = `${app}${isProd && !props?.suffixProdDomain ? '' : '-' + scope.stage.toLowerCase()}.${cert.domainName}`;
 
 		this.cfnDomainName = new CfnDomainName(scope, 'DomainName', {
 			domainName,

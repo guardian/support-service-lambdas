@@ -2,8 +2,12 @@ import { GuApiLambda, type GuApiLambdaProps } from '@guardian/cdk';
 import type { Identity } from '@guardian/cdk/lib/constructs/core';
 import type { GuPolicy } from '@guardian/cdk/lib/constructs/iam/policies/base-policy';
 import { Duration } from 'aws-cdk-lib';
-import { ApiKeySourceType } from 'aws-cdk-lib/aws-apigateway';
+import {
+	ApiKeySourceType,
+	CognitoUserPoolsAuthorizer,
+} from 'aws-cdk-lib/aws-apigateway';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
+import type { IUserPool } from 'aws-cdk-lib/aws-cognito';
 import type { SrLambdaProps } from './sr-lambda';
 import { getLambdaDefaultProps, getNameWithStage } from './sr-lambda';
 import type { SrLambdaAlarmProps } from './sr-lambda-alarm';
@@ -51,8 +55,13 @@ type SrApiLambdaProps = SrLambdaProps & {
 	srRestDomainOverrides?: SrRestDomainProps;
 };
 
+// keep in sync with the code
+export const staffPrefix = `staff/`;
+
 export class SrApiLambda extends GuApiLambda {
 	readonly domain: SrRestDomain;
+	private cognitoAuthorizer?: CognitoUserPoolsAuthorizer;
+
 	constructor(scope: SrStack, props: SrApiLambdaProps) {
 		const defaultProps = getApiLambdaDefaultProps(scope, props);
 		const deprecatedVars = {
@@ -147,5 +156,40 @@ export class SrApiLambda extends GuApiLambda {
 		publicResource.addResource('{proxy+}').addMethod('GET', undefined, {
 			apiKeyRequired: false,
 		});
+	}
+
+	addCognitoAuthorizer(userPool: IUserPool) {
+		this.cognitoAuthorizer = new CognitoUserPoolsAuthorizer(
+			this,
+			'CognitoAuthorizer',
+			{
+				cognitoUserPools: [userPool],
+			},
+		);
+		this.api.root
+			.resourceForPath('/auth/login')
+			.addMethod('GET', undefined, { apiKeyRequired: false });
+		this.api.root
+			.resourceForPath('/auth/token')
+			.addMethod('GET', undefined, { apiKeyRequired: false });
+	}
+
+	addStaffPath(path: string) {
+		if (!this.cognitoAuthorizer) {
+			throw new Error(
+				'Cognito authorizer must be added before protected paths',
+			);
+		}
+		const protectedResource = this.api.root.addResource(path);
+		protectedResource.addMethod('GET', undefined, {
+			apiKeyRequired: false,
+			authorizer: this.cognitoAuthorizer,
+		});
+		protectedResource.addResource('{proxy+}').addMethod('GET', undefined, {
+			apiKeyRequired: false,
+			authorizer: this.cognitoAuthorizer,
+		});
+		// also add the associated oauth proxy
+		this.addPublicPath(staffPrefix + path);
 	}
 }

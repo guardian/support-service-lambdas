@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import { z } from 'zod';
 import { GetParametersByPathCommand, SSMClient } from '@aws-sdk/client-ssm';
 import { awsConfig } from '../src/config';
 import { groupMap, mapValues, partition } from '../../arrayFunctions';
@@ -21,9 +21,30 @@ export const loadConfig = async <O>(
 ): Promise<O> => {
 	const configRoot = '/' + [stage, stack, app].join('/');
 	console.log('getting app config from SSM', configRoot);
+	return await loadCustomConfig(configRoot, schema);
+};
+
+export const repoConfigSchema = z.object({
+	cognitoClientSecret: z.string(),
+	googleOAuthClientId: z.string(),
+	googleOAuthClientSecret: z.string(),
+});
+export type RepoConfig = z.infer<typeof repoConfigSchema>;
+
+// need permissions to get this
+export const loadRepoConfig = async (stage: string): Promise<RepoConfig> => {
+	const configRoot = '/' + [stage, 'support-service-lambdas'].join('/');
+	console.log('getting repo config from SSM', configRoot);
+	return await loadCustomConfig(configRoot, repoConfigSchema);
+};
+
+async function loadCustomConfig<O>(
+	configRoot: string,
+	schema: z.ZodType<O, z.ZodTypeDef, any>,
+) {
 	const configFlat: SSMKeyValuePairs = await readAllRecursive(configRoot);
 	return parseSSMConfigToObject(configFlat, configRoot, schema);
-};
+}
 
 export type SSMKeyValuePairs = Record<string, string>[];
 
