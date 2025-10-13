@@ -104,7 +104,9 @@ export class ZuoraClient {
 		} else {
 			// When Zuora returns a 429 status, the response headers typically contain important rate limiting information
 			if (response.status === 429) {
-				logger.log(response.headers);
+				logger.log(
+					`Received a 429 rate limit response with response headers ${response.headers}`,
+				);
 			}
 
 			throw generateZuoraError(json, response);

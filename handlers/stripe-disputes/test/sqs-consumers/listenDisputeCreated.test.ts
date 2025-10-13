@@ -1,14 +1,26 @@
 import type { Logger } from '@modules/routing/logger';
 import type { ListenDisputeCreatedRequestBody } from '../../src/dtos';
-import { upsertSalesforceObject } from '../../src/services/upsertSalesforceObject';
+import type { ZuoraInvoiceFromStripeChargeIdResult } from '../../src/interfaces';
+import {
+	upsertSalesforceObject,
+	zuoraGetInvoiceFromStripeChargeId,
+} from '../../src/services';
 import { handleListenDisputeCreated } from '../../src/sqs-consumers/listenDisputeCreated';
 import type { SalesforceUpsertResponse } from '../../src/types';
 
-jest.mock('../../src/services/upsertSalesforceObject', () => ({
+jest.mock('@modules/zuora/zuoraClient');
+jest.mock('@modules/stage');
+jest.mock('../../src/services', () => ({
 	upsertSalesforceObject: jest.fn(),
+	zuoraGetInvoiceFromStripeChargeId: jest.fn(),
 }));
+
 const mockUpsertSalesforceObject =
 	upsertSalesforceObject as jest.MockedFunction<typeof upsertSalesforceObject>;
+const mockZuoraGetInvoice =
+	zuoraGetInvoiceFromStripeChargeId as jest.MockedFunction<
+		typeof zuoraGetInvoiceFromStripeChargeId
+	>;
 
 describe('handleListenDisputeCreated', () => {
 	const mockLogger: Logger = {
@@ -51,9 +63,22 @@ describe('handleListenDisputeCreated', () => {
 		errors: [],
 	};
 
+	const mockZuoraInvoiceData: ZuoraInvoiceFromStripeChargeIdResult = {
+		paymentId: 'ch_test123',
+		paymentStatus: 'Processed',
+		paymentPaymentNumber: 'P-00000123',
+		paymentAccountId: 'acc_123456',
+		paymentReferenceId: 'ch_test123',
+		InvoiceId: 'inv_123456',
+		paymentsInvoiceId: 'inv_123456',
+		subscriptionId: 'sub_123456',
+		SubscriptionNumber: 'A-S00123456',
+	};
+
 	beforeEach(() => {
 		jest.clearAllMocks();
 		mockUpsertSalesforceObject.mockResolvedValue(mockSalesforceResponse);
+		mockZuoraGetInvoice.mockResolvedValue(mockZuoraInvoiceData);
 	});
 
 	describe('successful processing', () => {
@@ -70,6 +95,7 @@ describe('handleListenDisputeCreated', () => {
 			expect(mockUpsertSalesforceObject).toHaveBeenCalledWith(
 				mockLogger,
 				mockWebhookData,
+				mockZuoraInvoiceData,
 			);
 			expect(mockLogger.log).toHaveBeenCalledWith(
 				'Salesforce upsert response for dispute creation:',
@@ -88,24 +114,56 @@ describe('handleListenDisputeCreated', () => {
 				'du_test123',
 			);
 
-			expect(mockLogger.log).toHaveBeenCalledTimes(3);
+			expect(mockLogger.log).toHaveBeenCalledTimes(5);
 			expect(mockLogger.log).toHaveBeenNthCalledWith(
 				1,
 				'Processing dispute creation for dispute du_test123',
 			);
 			expect(mockLogger.log).toHaveBeenNthCalledWith(
 				2,
+				'Payment ID from dispute: ch_test123',
+			);
+			expect(mockLogger.log).toHaveBeenNthCalledWith(
+				3,
+				'Zuora invoice data retrieved:',
+				JSON.stringify(mockZuoraInvoiceData),
+			);
+			expect(mockLogger.log).toHaveBeenNthCalledWith(
+				4,
 				'Salesforce upsert response for dispute creation:',
 				JSON.stringify(mockSalesforceResponse),
 			);
 			expect(mockLogger.log).toHaveBeenNthCalledWith(
-				3,
+				5,
 				'Successfully processed dispute creation for dispute du_test123',
 			);
 		});
 	});
 
 	describe('error handling', () => {
+		it('should continue when zuoraGetInvoiceFromStripeChargeId fails', async () => {
+			const error = new Error('Zuora API error');
+			mockZuoraGetInvoice.mockRejectedValue(error);
+
+			const result = await handleListenDisputeCreated(
+				mockLogger,
+				mockWebhookData,
+				'du_test123',
+			);
+
+			expect(mockLogger.error).toHaveBeenCalledWith(
+				'Failed to fetch Zuora invoice data:',
+				error,
+			);
+			// Should still call upsert with undefined zuora data
+			expect(mockUpsertSalesforceObject).toHaveBeenCalledWith(
+				mockLogger,
+				mockWebhookData,
+				undefined,
+			);
+			expect(result).toEqual(mockSalesforceResponse);
+		});
+
 		it('should propagate errors from upsertSalesforceObject', async () => {
 			const error = new Error('Salesforce API error');
 			mockUpsertSalesforceObject.mockRejectedValue(error);
@@ -120,6 +178,7 @@ describe('handleListenDisputeCreated', () => {
 			expect(mockUpsertSalesforceObject).toHaveBeenCalledWith(
 				mockLogger,
 				mockWebhookData,
+				mockZuoraInvoiceData,
 			);
 			// Should not log success messages if error occurs
 			expect(mockLogger.log).not.toHaveBeenCalledWith(
@@ -154,6 +213,7 @@ describe('handleListenDisputeCreated', () => {
 			expect(mockUpsertSalesforceObject).toHaveBeenCalledWith(
 				mockLogger,
 				differentDisputeData,
+				mockZuoraInvoiceData,
 			);
 			expect(result).toEqual(mockSalesforceResponse);
 		});
@@ -196,6 +256,7 @@ describe('handleListenDisputeCreated', () => {
 			expect(mockUpsertSalesforceObject).toHaveBeenCalledWith(
 				mockLogger,
 				mockWebhookData,
+				mockZuoraInvoiceData,
 			);
 		});
 

@@ -5,8 +5,6 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuApiLambda",
-      "GuGetDistributablePolicy",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -122,38 +120,6 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
-    "GetDistributablePolicyUpdatesupporterplusamountE773BE49": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:s3:::",
-                    {
-                      "Ref": "DistributionBucketName",
-                    },
-                    "/support/CODE/update-supporter-plus-amount/*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "GetDistributablePolicyUpdatesupporterplusamountE773BE49",
-        "Roles": [
-          {
-            "Ref": "updatesupporterplusamountlambdaServiceRole9F342B79",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
     "SQSsendpolicy967EA932": {
       "Properties": {
         "PolicyDocument": {
@@ -264,6 +230,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
           "Variables": {
             "APP": "update-supporter-plus-amount",
             "App": "update-supporter-plus-amount",
+            "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
             "Stack": "support",
@@ -970,8 +937,6 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuApiLambda",
-      "GuGetDistributablePolicy",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -1011,7 +976,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
-    "ApiGateway5XXAlarm56962DAF": {
+    "ApiGateway5XXAlarmCDK11905206": {
       "Properties": {
         "ActionsEnabled": true,
         "AlarmActions": [
@@ -1032,8 +997,8 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "Impact - Update supporter plus amount api returned a 5XX response. This means that a user who was trying to update the contribution amount of their supporter plus subscription has received an error. Please check the logs to diagnose the issue. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
-        "AlarmName": "update-supporter-plus-amount-PROD Update supporter plus amount - API gateway 5XX response",
+        "AlarmDescription": "update-supporter-plus-amount returned a 5XX response search the logs below for "error" for more information. Impact: a user could not update the contribution amount of their supporter plus subscription",
+        "AlarmName": "update-supporter-plus-amount-PROD 5XX errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
@@ -1044,7 +1009,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
         "EvaluationPeriods": 1,
         "MetricName": "5XXError",
         "Namespace": "AWS/ApiGateway",
-        "Period": 300,
+        "Period": 60,
         "Statistic": "Sum",
         "Tags": [
           {
@@ -1162,38 +1127,6 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
-    "GetDistributablePolicyUpdatesupporterplusamountE773BE49": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:s3:::",
-                    {
-                      "Ref": "DistributionBucketName",
-                    },
-                    "/support/PROD/update-supporter-plus-amount/*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "GetDistributablePolicyUpdatesupporterplusamountE773BE49",
-        "Roles": [
-          {
-            "Ref": "updatesupporterplusamountlambdaServiceRole9F342B79",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
     "SQSsendpolicy967EA932": {
       "Properties": {
         "PolicyDocument": {
@@ -1304,6 +1237,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
           "Variables": {
             "APP": "update-supporter-plus-amount",
             "App": "update-supporter-plus-amount",
+            "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
             "Stack": "support",

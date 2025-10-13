@@ -27,6 +27,8 @@ import { Promotion } from '@modules/promotions/schema';
 import { getInvoice } from '@modules/zuora/invoice';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { SupportRegionId } from '@modules/internationalisation/countryGroup';
+import { getPromotions } from '@modules/promotions/getPromotions';
+import { getSubscription } from '@modules/zuora/subscription';
 
 describe('createSubscription integration', () => {
 	const productCatalog = generateProductCatalog(code);
@@ -203,11 +205,17 @@ describe('createSubscription integration', () => {
 		expect(zuoraInvoice.amount).toEqual(12);
 	});
 	test('We can create a subscription with a promotion', async () => {
+		const promotions = await getPromotions('CODE');
+		const productPurchase: ProductPurchase = {
+			product: 'SupporterPlus',
+			ratePlan: 'Monthly',
+			amount: 12,
+		};
 		const inputFields: CreateSubscriptionInputFields<DirectDebit> = {
 			...createInputFields,
 			productPurchase: productPurchase,
 			appliedPromotion: {
-				promoCode: 'TEST_CODE',
+				promoCode: 'E2E_TEST_SPLUS_MONTHLY',
 				supportRegionId: SupportRegionId.UK,
 			},
 		};
@@ -215,10 +223,15 @@ describe('createSubscription integration', () => {
 		const response = await createSubscription(
 			client,
 			productCatalog,
-			mockPromotions,
+			promotions,
 			inputFields,
 		);
 		expect(response.subscriptionNumbers.length).toEqual(1);
+		const subscription = await getSubscription(
+			client,
+			getIfDefined(response.subscriptionNumbers[0], 'No subscription number'),
+		);
+		expect(subscription.ratePlans.length).toEqual(2); // There should be 2 rate plans one for the product and one for the promotion
 	}, 10000);
 	test('We can preview a subscription with a discount promotion', async () => {
 		const inputFields: PreviewCreateSubscriptionInputFields = {
