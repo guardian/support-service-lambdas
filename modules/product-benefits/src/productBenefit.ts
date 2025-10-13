@@ -16,8 +16,6 @@ export const supporterPlusBenefits: ProductBenefit[] = [
 ];
 export const digitalSubscriptionBenefits = supporterPlusBenefits.concat([
 	'newspaperEdition',
-]);
-export const tierThreeBenefits = digitalSubscriptionBenefits.concat([
 	'guardianWeeklyEdition',
 	'newspaperArchive',
 ]);
@@ -26,7 +24,7 @@ export const productBenefitMapping: Record<ProductKey, ProductBenefit[]> = {
 	GuardianAdLite: ['allowRejectAll'],
 	SupporterPlus: supporterPlusBenefits,
 	DigitalSubscription: digitalSubscriptionBenefits,
-	TierThree: tierThreeBenefits,
+	TierThree: digitalSubscriptionBenefits,
 	HomeDelivery: digitalSubscriptionBenefits,
 	NationalDelivery: digitalSubscriptionBenefits,
 	NewspaperVoucher: digitalSubscriptionBenefits,
