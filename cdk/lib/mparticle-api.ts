@@ -51,26 +51,22 @@ export class MParticleApi extends SrStack {
 		});
 
 		// TODO combine this and `apiGateway` to a GuApiLambda (or SR version of)
-		const httpLambda = new SrLambda(
-			this,
-			`${app}-http-lambda`,
-			{
+		const httpLambda = new SrLambda(this, `${app}-http-lambda`, {
+			nameSuffix: 'http',
+			lambdaOverrides: {
 				handler: 'index.handlerHttp',
 				initialPolicy: [s3BatonReadAndWritePolicy],
 			},
-			{ nameSuffix: 'http' },
-		);
+		});
 
-		const batonLambda = new SrLambda(
-			this,
-			`${app}-baton-lambda`,
-			{
+		const batonLambda = new SrLambda(this, `${app}-baton-lambda`, {
+			nameSuffix: 'baton',
+			lambdaOverrides: {
 				handler: 'index.handlerBaton',
 				timeout: Duration.seconds(30), // Longer timeout for data processing
 				initialPolicy: [s3BatonReadAndWritePolicy],
 			},
-			{ nameSuffix: 'baton' },
-		);
+		});
 
 		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {
 			app: app,

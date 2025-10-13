@@ -1,78 +1,104 @@
-import { GuApiLambda, type GuApiLambdaProps } from '@guardian/cdk';
+import type { NoMonitoring } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { Identity } from '@guardian/cdk/lib/constructs/core';
 import type { GuPolicy } from '@guardian/cdk/lib/constructs/iam/policies/base-policy';
 import { Duration } from 'aws-cdk-lib';
-import { ApiKeySourceType } from 'aws-cdk-lib/aws-apigateway';
-import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
+import { ApiKeySourceType, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
+import { SrApiGateway5xxAlarm } from './sr-api-gateway5xx-alarm';
 import type { SrLambdaProps } from './sr-lambda';
-import { getLambdaDefaultProps, getNameWithStage } from './sr-lambda';
+import { getNameWithStage, SrLambda } from './sr-lambda';
 import type { SrLambdaAlarmProps } from './sr-lambda-alarm';
-import { SrLambdaAlarm } from './sr-lambda-alarm';
 import type { SrRestDomainProps } from './sr-rest-domain';
 import { SrRestDomain } from './sr-rest-domain';
 import type { SrStack } from './sr-stack';
 
-function getApiLambdaDefaultProps(scope: Identity, props: SrApiLambdaProps) {
+type SrApiLambdaProps = SrLambdaProps & {
+	/**
+	 * for legacy use, if we want a specific description for the API gateway.
+	 */
+	apiDescriptionOverride?: string;
+	/**
+	 * If set, the API gateway resources will not require an API key
+	 */
+	isPublic?: boolean;
+	/**
+	 * If this lambda fails, what will the negative impact be on a user or our system.
+	 * This is important as it is used in alarms for triaging issues.
+	 */
+	errorImpact: string;
+	/**
+	 * do we want to disable standard SrCDK 5xx alarm or override any properties?
+	 */
+	monitoring?:
+		| NoMonitoring
+		| (Partial<SrLambdaAlarmProps> & { noMonitoring?: false }); // standard alarm is on a single 5xx alarms due to low traffic
+	/**
+	 * By default, you get a ssl enabled url e.g. https://discount-api.support.guardianapis.com/, but you can override aspects
+	 * of it here or add a public facing fastly enabled domain.
+	 */
+	srRestDomainProps?: SrRestDomainProps;
+};
+
+function getApiLambdaDefaultProps(scope: Identity) {
+	const deprecatedVars = {
+		// for some reason we often use these instead of the upper case STACK/STAGE/APP added by GuCDK
+		// https://github.com/guardian/cdk/blob/5569c749211b518001666cffb558fe403ff0539c/src/constructs/lambda/lambda.ts#L134-L138
+		App: scope.app,
+		Stack: scope.stack,
+		Stage: scope.stage,
+	};
 	return {
-		...getLambdaDefaultProps(scope, props.nameSuffix),
 		timeout: Duration.seconds(300),
-		monitoringConfiguration: {
-			noMonitoring: true, // we don't use the standard GuCDK alarms due to low traffic
-		} as GuApiLambdaProps['monitoringConfiguration'],
-		api: {
-			id: getNameWithStage(scope, props.nameSuffix),
-			restApiName: getNameWithStage(scope, props.nameSuffix),
-			description: props.apiDescriptionOverride ?? 'API Gateway created by CDK',
-			proxy: true,
-			deployOptions: {
-				stageName: scope.stage,
-			},
-			...(props.isPublic
-				? {}
-				: {
-						apiKeySourceType: ApiKeySourceType.HEADER,
-						defaultMethodOptions: {
-							apiKeyRequired: true,
-						},
-					}),
+		environment: {
+			...deprecatedVars,
 		},
 	};
 }
 
-type ApiDefaultProps = ReturnType<typeof getApiLambdaDefaultProps>;
-type SrApiLambdaOverrides = Omit<GuApiLambdaProps, keyof ApiDefaultProps> &
-	Partial<ApiDefaultProps>;
-type SrApiLambdaProps = SrLambdaProps & {
-	lambdaOverrides: SrApiLambdaOverrides;
-	apiDescriptionOverride?: string;
-	isPublic?: boolean;
-	errorImpact: string;
-	alarmOverrides?: Partial<SrLambdaAlarmProps>;
-	srRestDomainOverrides?: SrRestDomainProps;
-};
-
-export class SrApiLambda extends GuApiLambda {
+/**
+ * This creates a lambda with an API gateway in front, and makes it available on a suitable URL, according to SR standards.
+ */
+export class SrApiLambda extends SrLambda {
+	public readonly api: LambdaRestApi;
 	readonly domain: SrRestDomain;
 	constructor(scope: SrStack, props: SrApiLambdaProps) {
-		const defaultProps = getApiLambdaDefaultProps(scope, props);
-		const deprecatedVars = {
-			// for some reason we often use these instead of the upper case STACK/STAGE/APP added by GuCDK
-			// https://github.com/guardian/cdk/blob/5569c749211b518001666cffb558fe403ff0539c/src/constructs/lambda/lambda.ts#L134-L138
-			App: scope.app,
-			Stack: scope.stack,
-			Stage: scope.stage,
-		};
+		const defaultProps = getApiLambdaDefaultProps(scope);
 		const finalProps = {
-			...defaultProps,
-			...props.lambdaOverrides,
-			environment: {
-				...defaultProps.environment,
-				...deprecatedVars,
-				...props.lambdaOverrides.environment,
+			nameSuffix: props.nameSuffix,
+			lambdaOverrides: {
+				...defaultProps,
+				...props.lambdaOverrides,
+				environment: {
+					...defaultProps.environment,
+					...props.lambdaOverrides.environment,
+				},
 			},
 		};
 
 		super(scope, `${scope.app}-lambda`, finalProps);
+
+		this.api = new LambdaRestApi(
+			this,
+			getNameWithStage(scope, props.nameSuffix),
+			{
+				handler: this,
+
+				restApiName: getNameWithStage(scope, props.nameSuffix),
+				description:
+					props.apiDescriptionOverride ?? 'API Gateway created by CDK',
+				proxy: true,
+				deployOptions: {
+					stageName: scope.stage,
+				},
+				...(props.isPublic
+					? {}
+					: {
+							apiKeySourceType: ApiKeySourceType.HEADER,
+							defaultMethodOptions: {
+								apiKeyRequired: true,
+							},
+						}),
+			},
+		);
 
 		if (!props.isPublic) {
 			const usagePlan = this.api.addUsagePlan('UsagePlan', {
@@ -95,38 +121,13 @@ export class SrApiLambda extends GuApiLambda {
 			usagePlan.addApiKey(apiKey);
 		}
 
-		this.domain = new SrRestDomain(
-			scope,
-			this.api,
-			props.srRestDomainOverrides,
-		);
+		this.domain = new SrRestDomain(scope, this.api, props.srRestDomainProps);
 
-		if (
-			scope.stage === 'PROD' &&
-			finalProps.monitoringConfiguration.noMonitoring
-		) {
-			new SrLambdaAlarm(scope, 'ApiGateway5XXAlarmCDK', {
-				app: scope.app,
-				alarmName: getNameWithStage(scope, props.nameSuffix) + ' 5XX errors',
-				alarmDescription:
-					scope.app +
-					' returned a 5XX response search the logs below for "error" for more information. Impact: ' +
-					props.errorImpact,
-				evaluationPeriods: 1,
-				threshold: 1,
-				lambdaFunctionNames: this.functionName,
-				comparisonOperator:
-					ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-				metric: new Metric({
-					metricName: '5XXError',
-					namespace: 'AWS/ApiGateway',
-					statistic: 'Sum',
-					period: Duration.seconds(60),
-					dimensionsMap: {
-						ApiName: getNameWithStage(scope, props.nameSuffix),
-					},
-				}),
-				...props.alarmOverrides,
+		if (scope.stage === 'PROD' && !props.monitoring?.noMonitoring) {
+			new SrApiGateway5xxAlarm(scope, {
+				functionName: this.functionName,
+				errorImpact: props.errorImpact,
+				overrides: props.monitoring,
 			});
 		}
 	}

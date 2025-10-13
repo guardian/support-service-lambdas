@@ -1,3 +1,4 @@
+import { GuApiGateway5xxPercentageAlarm } from '@guardian/cdk/lib/constructs/cloudwatch/api-gateway-alarms';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
@@ -18,14 +19,16 @@ export class PressReaderEntitlements extends SrStack {
 			lambdaOverrides: {
 				description:
 					'An API Gateway triggered lambda generated in the support-service-lambdas repo',
-				// use the GuCDK alarm
-				monitoringConfiguration: {
-					http5xxAlarm: { tolerated5xxPercentage: 5 },
-					snsTopicName: `alarms-handler-topic-${this.stage}`,
-				},
 			},
 			errorImpact: 'some users would not be able to access ???',
-			srRestDomainOverrides: { publicDomain: true },
+			monitoring: { noMonitoring: true }, // we use the GuCDK 5xx alarm instead, see below
+			srRestDomainProps: { publicDomain: true },
+		});
+		new GuApiGateway5xxPercentageAlarm(this, {
+			app: this.app,
+			apiGatewayInstance: lambda.api,
+			snsTopicName: `alarms-handler-topic-${this.stage}`,
+			tolerated5xxPercentage: 5,
 		});
 
 		lambda.addPolicies(new AllowSupporterProductDataQueryPolicy(this));

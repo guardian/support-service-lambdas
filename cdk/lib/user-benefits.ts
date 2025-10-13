@@ -35,38 +35,40 @@ export class UserBenefits extends SrStack {
 			timeout: Duration.seconds(300),
 			environment: commonEnvironmentVariables,
 		};
-		const userBenefitsMeLambda = new SrLambda(
-			this,
-			`user-benefits-me-lambda`,
-			{
+		const userBenefitsMeLambda = new SrLambda(this, `user-benefits-me-lambda`, {
+			nameSuffix: 'me',
+			lambdaOverrides: {
 				description:
 					'An API Gateway triggered lambda to get the benefits of a user identified by a JWT',
 				handler: 'index.benefitsMeHandler',
 				...commonLambdaProps,
 			},
-			{ nameSuffix: 'me' },
-		);
+		});
 		const userBenefitsIdentityIdLambda = new SrLambda(
 			this,
 			`user-benefits-identity-id-lambda`,
 			{
-				description:
-					'An API Gateway triggered lambda to get the benefits of the user identified in the request path',
-				handler: 'index.benefitsIdentityIdHandler',
-				...commonLambdaProps,
+				nameSuffix: 'identity-id',
+				lambdaOverrides: {
+					description:
+						'An API Gateway triggered lambda to get the benefits of the user identified in the request path',
+					handler: 'index.benefitsIdentityIdHandler',
+					...commonLambdaProps,
+				},
 			},
-			{ nameSuffix: 'identity-id' },
 		);
 		const userBenefitsListLambda = new SrLambda(
 			this,
 			`user-benefits-list-lambda`,
 			{
-				description:
-					'An API Gateway triggered lambda to return the full list of benefits for each product in html or json format',
-				handler: 'index.benefitsListHandler',
-				...commonLambdaProps,
+				nameSuffix: 'list',
+				lambdaOverrides: {
+					description:
+						'An API Gateway triggered lambda to return the full list of benefits for each product in html or json format',
+					handler: 'index.benefitsListHandler',
+					...commonLambdaProps,
+				},
 			},
-			{ nameSuffix: 'list' },
 		);
 		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {
 			app,

@@ -7,21 +7,22 @@ import { nodeVersion } from '../node-version';
 import type { SrStack } from './sr-stack';
 
 export type SrLambdaProps = {
-	nameSuffix?: string; // when you have multiple lambdas in an app
+	/**
+	 * when you have multiple lambdas in an app, give each a different nameSuffix
+	 * Then SrCDK will use them to name the lambda and associated resources
+	 */
+	nameSuffix?: string;
+	/**
+	 * if you want to set any non-SR-standard values on GuLambdaFunction
+	 */
+	lambdaOverrides: GuLambdaOverrides;
 };
 
 type DefaultProps = ReturnType<typeof getLambdaDefaultProps>;
 type GuLambdaOverrides = Omit<GuFunctionProps, keyof DefaultProps> &
 	Partial<DefaultProps>;
 
-export function getNameWithStage(
-	identity: Identity,
-	nameSuffix: string | undefined,
-) {
-	return `${identity.app}${nameSuffix ? '-' + nameSuffix : ''}-${identity.stage}`;
-}
-
-export function getLambdaDefaultProps(
+function getLambdaDefaultProps(
 	scope: Identity,
 	nameSuffix: string | undefined,
 ) {
@@ -40,23 +41,38 @@ export function getLambdaDefaultProps(
 	};
 }
 
+/**
+ * This is a lambda function construct with sensible defaults for this repo.
+ */
 export class SrLambda extends GuLambdaFunction {
-	constructor(
-		scope: SrStack,
-		id: string,
-		lambdaOverrides: GuLambdaOverrides,
-		props: SrLambdaProps,
-	) {
-		const defaultProps = getLambdaDefaultProps(scope, props.nameSuffix);
-		const finalProps = {
-			...defaultProps,
-			...lambdaOverrides,
+	constructor(scope: SrStack, id: string, props: SrLambdaProps) {
+		const defaultGuLambdaFunctionProps = getLambdaDefaultProps(
+			scope,
+			props.nameSuffix,
+		);
+		const guLambdaFunctionProps = {
+			...defaultGuLambdaFunctionProps,
+			...props.lambdaOverrides,
 			environment: {
-				...defaultProps.environment,
-				...lambdaOverrides.environment,
+				...defaultGuLambdaFunctionProps.environment,
+				...props.lambdaOverrides.environment,
 			},
 		};
 
-		super(scope, id, finalProps);
+		super(scope, id, guLambdaFunctionProps);
 	}
+}
+
+/**
+ * produces a readable, predictable and unique name of the form my-api-PROD
+ * used for when things need to be unique within the stack
+ *
+ * @param identity pass in the srStack here
+ * @param nameSuffix if multiple lambdas are in the app, adds my-api-nameSuffix-PROD
+ */
+export function getNameWithStage(
+	identity: Identity,
+	nameSuffix: string | undefined,
+) {
+	return `${identity.app}${nameSuffix ? '-' + nameSuffix : ''}-${identity.stage}`;
 }
