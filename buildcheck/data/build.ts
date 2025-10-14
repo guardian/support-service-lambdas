@@ -88,10 +88,26 @@ const mparticleApi: HandlerDefinition = {
 	},
 };
 
+const mobilePurchasesToSupporterProductData: HandlerDefinition = {
+	name: 'mobile-purchases-to-supporter-product-data',
+	functionNames: ['mobile-purchases-to-supporter-product-data-'],
+	entryPoints: ['src/index.ts'],
+	testTimeoutSeconds: 15,
+	dependencies: {
+		...dep['@aws-sdk/client-dynamodb'],
+		...dep.zod,
+	},
+	devDependencies: {
+		...dep['@types/aws-lambda'],
+		...dep.dayjs,
+	},
+};
+
 export const build: HandlerDefinition[] = [
 	alarmsHandler,
 	discountApi,
 	updateSupporterPlusAmount,
 	productSwitchApi,
 	mparticleApi,
+	mobilePurchasesToSupporterProductData,
 ];

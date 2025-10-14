@@ -64,6 +64,7 @@ jobs:
           - negative-invoices-processor
           - write-off-unpaid-invoices
           - mparticle-api
+          - mobile-purchases-to-supporter-product-data
     runs-on: ubuntu-latest
     permissions:
       id-token: write
