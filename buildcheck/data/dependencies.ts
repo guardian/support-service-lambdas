@@ -17,6 +17,7 @@ export const dep = separateDepRecords({
 		'credential-providers',
 		'client-sqs',
 		'client-s3',
+		'client-dynamodb',
 	]),
 });
 
