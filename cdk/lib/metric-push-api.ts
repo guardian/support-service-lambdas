@@ -24,12 +24,12 @@ export class MetricPushApi extends SrStack {
 			apiDescriptionOverride: `API Gateway endpoint for the ${app}-${this.stage} lambda`,
 			isPublic: true,
 			errorImpact: 'client side errors are not being recorded',
-			alarmOverrides: {
+			monitoring: {
 				threshold: 2,
 				treatMissingData: TreatMissingData.NOT_BREACHING,
 				comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
 			},
-			srRestDomainOverrides: {
+			srRestDomainProps: {
 				suffixProdDomain: true,
 			},
 		});

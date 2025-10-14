@@ -903,12 +903,24 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
           },
         ],
         "AlarmDescription": "metric-push-api returned a 5XX response search the logs below for "error" for more information. Impact: client side errors are not being recorded",
-        "AlarmName": "metric-push-api-PROD 5XX errors",
+        "AlarmName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "metricpushapilambda0761BDD0",
+              },
+              " 5XX errors",
+            ],
+          ],
+        },
         "ComparisonOperator": "GreaterThanThreshold",
         "Dimensions": [
           {
             "Name": "ApiName",
-            "Value": "metric-push-api-PROD",
+            "Value": {
+              "Ref": "metricpushapilambda0761BDD0",
+            },
           },
         ],
         "EvaluationPeriods": 1,
