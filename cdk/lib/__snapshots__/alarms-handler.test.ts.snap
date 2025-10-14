@@ -610,7 +610,87 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       },
       "Type": "AWS::SNS::Subscription",
     },
-    "alarmshandlerscheduledCODEErrorPercentageAlarmForLambda40C786DD": {
+    "alarmshandlerscheduledcloudwatchpolicy4140AFEC": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "cloudwatch:DescribeAlarms",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "alarmshandlerscheduledcloudwatchpolicy4140AFEC",
+        "Roles": [
+          {
+            "Ref": "alarmshandlerscheduledlambdaServiceRole62346D7A",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "alarmshandlerscheduledlambdaB0DE9B60": {
+      "DependsOn": [
+        "alarmshandlerscheduledlambdaServiceRoleDefaultPolicy2CDBB3F4",
+        "alarmshandlerscheduledlambdaServiceRole62346D7A",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/CODE/alarms-handler/alarms-handler.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "APP": "alarms-handler",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
+            "STAGE": "CODE",
+          },
+        },
+        "FunctionName": "alarms-handler-scheduled-CODE",
+        "Handler": "indexScheduled.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "alarmshandlerscheduledlambdaServiceRole62346D7A",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 15,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "alarmshandlerscheduledlambdaErrorPercentageAlarmForLambda513D2105": {
       "Properties": {
         "ActionsEnabled": false,
         "AlarmActions": [
@@ -745,86 +825,6 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
         "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
-    },
-    "alarmshandlerscheduledcloudwatchpolicy4140AFEC": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "cloudwatch:DescribeAlarms",
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "alarmshandlerscheduledcloudwatchpolicy4140AFEC",
-        "Roles": [
-          {
-            "Ref": "alarmshandlerscheduledlambdaServiceRole62346D7A",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "alarmshandlerscheduledlambdaB0DE9B60": {
-      "DependsOn": [
-        "alarmshandlerscheduledlambdaServiceRoleDefaultPolicy2CDBB3F4",
-        "alarmshandlerscheduledlambdaServiceRole62346D7A",
-      ],
-      "Properties": {
-        "Code": {
-          "S3Bucket": {
-            "Ref": "DistributionBucketName",
-          },
-          "S3Key": "support/CODE/alarms-handler/alarms-handler.zip",
-        },
-        "Environment": {
-          "Variables": {
-            "APP": "alarms-handler",
-            "NODE_OPTIONS": "--enable-source-maps",
-            "STACK": "support",
-            "STAGE": "CODE",
-          },
-        },
-        "FunctionName": "alarms-handler-scheduled-CODE",
-        "Handler": "indexScheduled.handler",
-        "LoggingConfig": {
-          "LogFormat": "Text",
-        },
-        "MemorySize": 1024,
-        "Role": {
-          "Fn::GetAtt": [
-            "alarmshandlerscheduledlambdaServiceRole62346D7A",
-            "Arn",
-          ],
-        },
-        "Runtime": "nodejs20.x",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "alarms-handler",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "Timeout": 300,
-      },
-      "Type": "AWS::Lambda::Function",
     },
     "alarmshandlerscheduledlambdaServiceRole62346D7A": {
       "Properties": {
@@ -979,7 +979,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "alarmshandlerscheduledlambdaalarmshandlerscheduledCODEcron08MONFRI0451C6C56": {
+    "alarmshandlerscheduledlambdaalarmshandlerscheduledlambdacron08MONFRI05D79D892": {
       "Properties": {
         "Description": "notify about alarms in Alarm state every morning",
         "ScheduleExpression": "cron(0 8 ? * MON-FRI *)",
@@ -998,7 +998,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Events::Rule",
     },
-    "alarmshandlerscheduledlambdaalarmshandlerscheduledCODEcron08MONFRI0AllowEventRulealarmshandlerCODEalarmshandlerscheduledlambda657C4C5A1C2E48D3": {
+    "alarmshandlerscheduledlambdaalarmshandlerscheduledlambdacron08MONFRI0AllowEventRulealarmshandlerCODEalarmshandlerscheduledlambda657C4C5AAB8684EC": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -1010,7 +1010,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
         "Principal": "events.amazonaws.com",
         "SourceArn": {
           "Fn::GetAtt": [
-            "alarmshandlerscheduledlambdaalarmshandlerscheduledCODEcron08MONFRI0451C6C56",
+            "alarmshandlerscheduledlambdaalarmshandlerscheduledlambdacron08MONFRI05D79D892",
             "Arn",
           ],
         },
@@ -1758,7 +1758,87 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       },
       "Type": "AWS::SNS::Subscription",
     },
-    "alarmshandlerscheduledPRODErrorPercentageAlarmForLambda31AA5232": {
+    "alarmshandlerscheduledcloudwatchpolicy4140AFEC": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "cloudwatch:DescribeAlarms",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "alarmshandlerscheduledcloudwatchpolicy4140AFEC",
+        "Roles": [
+          {
+            "Ref": "alarmshandlerscheduledlambdaServiceRole62346D7A",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "alarmshandlerscheduledlambdaB0DE9B60": {
+      "DependsOn": [
+        "alarmshandlerscheduledlambdaServiceRoleDefaultPolicy2CDBB3F4",
+        "alarmshandlerscheduledlambdaServiceRole62346D7A",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/PROD/alarms-handler/alarms-handler.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "APP": "alarms-handler",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
+            "STAGE": "PROD",
+          },
+        },
+        "FunctionName": "alarms-handler-scheduled-PROD",
+        "Handler": "indexScheduled.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "alarmshandlerscheduledlambdaServiceRole62346D7A",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 15,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "alarmshandlerscheduledlambdaErrorPercentageAlarmForLambda513D2105": {
       "Properties": {
         "ActionsEnabled": true,
         "AlarmActions": [
@@ -1893,86 +1973,6 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
         "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
-    },
-    "alarmshandlerscheduledcloudwatchpolicy4140AFEC": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "cloudwatch:DescribeAlarms",
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "alarmshandlerscheduledcloudwatchpolicy4140AFEC",
-        "Roles": [
-          {
-            "Ref": "alarmshandlerscheduledlambdaServiceRole62346D7A",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "alarmshandlerscheduledlambdaB0DE9B60": {
-      "DependsOn": [
-        "alarmshandlerscheduledlambdaServiceRoleDefaultPolicy2CDBB3F4",
-        "alarmshandlerscheduledlambdaServiceRole62346D7A",
-      ],
-      "Properties": {
-        "Code": {
-          "S3Bucket": {
-            "Ref": "DistributionBucketName",
-          },
-          "S3Key": "support/PROD/alarms-handler/alarms-handler.zip",
-        },
-        "Environment": {
-          "Variables": {
-            "APP": "alarms-handler",
-            "NODE_OPTIONS": "--enable-source-maps",
-            "STACK": "support",
-            "STAGE": "PROD",
-          },
-        },
-        "FunctionName": "alarms-handler-scheduled-PROD",
-        "Handler": "indexScheduled.handler",
-        "LoggingConfig": {
-          "LogFormat": "Text",
-        },
-        "MemorySize": 1024,
-        "Role": {
-          "Fn::GetAtt": [
-            "alarmshandlerscheduledlambdaServiceRole62346D7A",
-            "Arn",
-          ],
-        },
-        "Runtime": "nodejs20.x",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "alarms-handler",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "Timeout": 300,
-      },
-      "Type": "AWS::Lambda::Function",
     },
     "alarmshandlerscheduledlambdaServiceRole62346D7A": {
       "Properties": {
@@ -2127,7 +2127,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "alarmshandlerscheduledlambdaalarmshandlerscheduledPRODcron08MONFRI072433C55": {
+    "alarmshandlerscheduledlambdaalarmshandlerscheduledlambdacron08MONFRI05D79D892": {
       "Properties": {
         "Description": "notify about alarms in Alarm state every morning",
         "ScheduleExpression": "cron(0 8 ? * MON-FRI *)",
@@ -2146,7 +2146,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Events::Rule",
     },
-    "alarmshandlerscheduledlambdaalarmshandlerscheduledPRODcron08MONFRI0AllowEventRulealarmshandlerPRODalarmshandlerscheduledlambda3FE085C94AD55FC7": {
+    "alarmshandlerscheduledlambdaalarmshandlerscheduledlambdacron08MONFRI0AllowEventRulealarmshandlerPRODalarmshandlerscheduledlambda3FE085C9159D4A00": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
@@ -2158,7 +2158,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
         "Principal": "events.amazonaws.com",
         "SourceArn": {
           "Fn::GetAtt": [
-            "alarmshandlerscheduledlambdaalarmshandlerscheduledPRODcron08MONFRI072433C55",
+            "alarmshandlerscheduledlambdaalarmshandlerscheduledlambdacron08MONFRI05D79D892",
             "Arn",
           ],
         },

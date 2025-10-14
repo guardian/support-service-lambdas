@@ -3,6 +3,7 @@ import {
 	GuLambdaErrorPercentageAlarm,
 } from '@guardian/cdk/lib/constructs/cloudwatch';
 import { GuStringParameter } from '@guardian/cdk/lib/constructs/core';
+import { GuAllowPolicy } from '@guardian/cdk/lib/constructs/iam';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import { ComparisonOperator } from 'aws-cdk-lib/aws-cloudwatch';
@@ -20,12 +21,11 @@ import {
 	SqsSubscription,
 } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
-import { getNameWithStage, SrLambda } from './cdk/SrLambda';
+import { ReadAccountIdsPolicy } from './cdk/policies';
+import { SrLambda } from './cdk/SrLambda';
 import { SrScheduledLambda } from './cdk/SrScheduledLambda';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
-import { ReadAccountIdsPolicy } from './cdk/policies';
-import { GuAllowPolicy } from '@guardian/cdk/lib/constructs/iam';
 
 export class AlarmsHandler extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
@@ -166,7 +166,7 @@ export class AlarmsHandler extends SrStack {
 		});
 		new GuLambdaErrorPercentageAlarm(
 			this,
-			`${getNameWithStage(this, 'scheduled')}-ErrorPercentageAlarmForLambda`,
+			`${this.app}-scheduled-lambda-ErrorPercentageAlarmForLambda`,
 			{
 				actionsEnabled: this.stage === 'PROD',
 				toleratedErrorPercentage: 0,
