@@ -458,11 +458,8 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "ticket-tailor-webhook",
-            "App": "ticket-tailor-webhook",
             "STACK": "membership",
             "STAGE": "CODE",
-            "Stack": "membership",
-            "Stage": "CODE",
           },
         },
         "FunctionName": "ticket-tailor-webhook-CODE",
@@ -1302,11 +1299,8 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "ticket-tailor-webhook",
-            "App": "ticket-tailor-webhook",
             "STACK": "membership",
             "STAGE": "PROD",
-            "Stack": "membership",
-            "Stage": "PROD",
           },
         },
         "FunctionName": "ticket-tailor-webhook-PROD",

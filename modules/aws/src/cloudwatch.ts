@@ -12,7 +12,7 @@ export type Stage = 'CODE' | 'DEV' | 'PROD';
 export const metricNamespace = 'support-service-lambdas';
 
 const getStage = (): Stage | undefined => {
-	const stage = process.env.Stage;
+	const stage = process.env.STAGE;
 	if (stage === undefined) {
 		throw new Error('Stage is not defined as an environment variable');
 	}
@@ -33,7 +33,7 @@ export async function putMetric(metricName: string): Promise<void> {
 	const dimensions: Dimension[] = [
 		{
 			Name: 'App',
-			Value: process.env.App,
+			Value: process.env.APP,
 		},
 		{
 			Name: 'Stage',

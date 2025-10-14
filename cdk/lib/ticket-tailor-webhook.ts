@@ -32,12 +32,6 @@ export class TicketTailorWebhook extends GuStack {
 
 		const alarmsTopic = `alarms-handler-topic-${this.stage}`;
 
-		const commonEnvironmentVariables = {
-			App: app,
-			Stack: this.stack,
-			Stage: this.stage,
-		};
-
 		// SQS
 		const queueName = `${app}-queue-${props.stage}`;
 		const deadLetterQueueName = `${app}-dlq-${props.stage}`;
@@ -107,7 +101,6 @@ export class TicketTailorWebhook extends GuStack {
 			runtime: nodeVersion,
 			memorySize: 1024,
 			timeout: Duration.seconds(300),
-			environment: commonEnvironmentVariables,
 			app: app,
 			events,
 		});

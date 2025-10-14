@@ -245,12 +245,9 @@ exports[`The Product switch api stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "product-switch-api",
-            "App": "product-switch-api",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
-            "Stack": "support",
-            "Stage": "CODE",
           },
         },
         "FunctionName": "product-switch-api-CODE",
@@ -1280,12 +1277,9 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "product-switch-api",
-            "App": "product-switch-api",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
-            "Stack": "support",
-            "Stage": "PROD",
           },
         },
         "FunctionName": "product-switch-api-PROD",

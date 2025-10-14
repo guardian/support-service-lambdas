@@ -15,12 +15,6 @@ export class UserBenefits extends SrStack {
 
 		const app = this.app;
 
-		const commonEnvironmentVariables = {
-			App: app,
-			Stack: this.stack,
-			Stage: this.stage,
-		};
-
 		const supporterProductDataTablePolicy = new PolicyStatement({
 			actions: ['dynamodb:Query'],
 			resources: [
@@ -33,7 +27,6 @@ export class UserBenefits extends SrStack {
 		const commonLambdaProps = {
 			initialPolicy: [supporterProductDataTablePolicy],
 			timeout: Duration.seconds(300),
-			environment: commonEnvironmentVariables,
 		};
 		const userBenefitsMeLambda = new SrLambda(this, `user-benefits-me-lambda`, {
 			nameSuffix: 'me',

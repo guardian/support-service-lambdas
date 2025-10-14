@@ -473,11 +473,8 @@ Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
         "Environment": {
           "Variables": {
             "APP": "generate-product-catalog",
-            "App": "generate-product-catalog",
             "STACK": "membership",
             "STAGE": "CODE",
-            "Stack": "membership",
-            "Stage": "CODE",
           },
         },
         "FunctionName": "generate-product-catalog-CODE",
@@ -1219,11 +1216,8 @@ Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
         "Environment": {
           "Variables": {
             "APP": "generate-product-catalog",
-            "App": "generate-product-catalog",
             "STACK": "membership",
             "STAGE": "PROD",
-            "Stack": "membership",
-            "Stage": "PROD",
           },
         },
         "FunctionName": "generate-product-catalog-PROD",

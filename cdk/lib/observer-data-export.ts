@@ -174,7 +174,6 @@ export class ObserverDataExport extends GuStack {
 			{
 				...lambdaDefaultConfig,
 				environment: {
-					Stage: this.stage,
 					UnifidaSharedBucketName: sharedBucket.bucketName,
 					UnifidaPublicRsaKeyFilePath: unifidaPublicRsaKeyFilePath,
 					ObserverNewspaperSubscribersFolder:
