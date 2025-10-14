@@ -16,7 +16,7 @@ import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
-import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
+import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
 import { nodeVersion } from './node-version';
 
 export interface StripeDisputesProps extends GuStackProps {

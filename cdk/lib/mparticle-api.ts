@@ -9,11 +9,11 @@ import {
 	Role,
 } from 'aws-cdk-lib/aws-iam';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
-import { SrLambda } from './cdk/sr-lambda';
-import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
-import { SrRestDomain } from './cdk/sr-rest-domain';
-import type { SrStageNames } from './cdk/sr-stack';
-import { SrStack } from './cdk/sr-stack';
+import { SrLambda } from './cdk/SrLambda';
+import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
+import { SrRestDomain } from './cdk/SrRestDomain';
+import type { SrStageNames } from './cdk/SrStack';
+import { SrStack } from './cdk/SrStack';
 
 export class MParticleApi extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {

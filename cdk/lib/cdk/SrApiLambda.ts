@@ -2,13 +2,13 @@ import type { NoMonitoring } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuPolicy } from '@guardian/cdk/lib/constructs/iam/policies/base-policy';
 import { Duration } from 'aws-cdk-lib';
 import { ApiKeySourceType, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
-import { SrApiGateway5xxAlarm } from './sr-api-gateway5xx-alarm';
-import type { SrLambdaProps } from './sr-lambda';
-import { getNameWithStage, SrLambda } from './sr-lambda';
-import type { SrLambdaAlarmProps } from './sr-lambda-alarm';
-import type { SrRestDomainProps } from './sr-rest-domain';
-import { SrRestDomain } from './sr-rest-domain';
-import type { SrStack } from './sr-stack';
+import { SrApiGateway5xxAlarm } from './SrApiGateway5xxAlarm';
+import type { SrLambdaProps } from './SrLambda';
+import { getNameWithStage, SrLambda } from './SrLambda';
+import type { SrLambdaAlarmProps } from './SrLambdaAlarm';
+import type { SrRestDomainProps } from './SrRestDomain';
+import { SrRestDomain } from './SrRestDomain';
+import type { SrStack } from './SrStack';
 
 type SrApiLambdaProps = SrLambdaProps & {
 	/**

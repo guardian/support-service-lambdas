@@ -4,7 +4,7 @@ import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { Duration } from 'aws-cdk-lib';
 import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { nodeVersion } from '../node-version';
-import type { SrStack } from './sr-stack';
+import type { SrStack } from './SrStack';
 
 export type SrLambdaProps = {
 	/**
