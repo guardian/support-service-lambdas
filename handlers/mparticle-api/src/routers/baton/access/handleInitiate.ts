@@ -1,7 +1,5 @@
 import { randomUUID } from 'crypto';
 
-import { getEnv } from '../../../services/config';
-
 import {
 	DataSubjectAPI,
 	MParticleClient,
@@ -45,7 +43,7 @@ export async function handleSarInitiate(
 	request: BatonSarEventInitiateRequest,
 ): Promise<BatonSarEventInitiateResponse> {
 	const submittedTime = new Date().toISOString();
-	const environment = getEnv('STAGE') === 'PROD' ? 'production' : 'development';
+	const environment = isProd ? 'production' : 'development';
 
 	const dataSubjectRequestSubmissionResponse: DataSubjectRequestSubmission =
 		await submitDataSubjectRequest(mParticleDataSubjectClient, isProd, {

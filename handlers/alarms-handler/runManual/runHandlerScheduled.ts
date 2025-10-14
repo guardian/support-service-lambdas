@@ -1,15 +1,21 @@
 import { handlerWithStage } from '../src/indexScheduled';
 import dayjs from 'dayjs';
-import { loadAccountIds, loadConfig } from '@modules/aws/appConfig';
+import { loadLazyConfig } from '@modules/aws/appConfig';
 import { ConfigSchema } from '../src/configSchema';
 
-// to run this, get credentials for membership/trageting/mobile
+// to run this, get credentials for membership/targeting/mobile
 // the output will go to chat channel P&E/SR Alarms CODE
-Promise.all([
-	loadConfig('CODE', 'support', 'alarms-handler', ConfigSchema),
-	loadAccountIds(),
-])
-	.then(([config, accountIds]) =>
-		handlerWithStage(dayjs(), 'CODE', config, accountIds),
+loadLazyConfig(ConfigSchema)({
+	stage: 'CODE',
+	stack: 'support',
+	app: 'alarms-handler',
+})
+	.then(async ({ stage, appConfig, accountIds }) =>
+		handlerWithStage(
+			dayjs(),
+			stage,
+			await appConfig.get(),
+			await accountIds.get(),
+		),
 	)
 	.then(console.log);

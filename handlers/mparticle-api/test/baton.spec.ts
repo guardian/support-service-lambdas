@@ -18,28 +18,33 @@ import {
 	InitiationReference,
 } from '../src/routers/baton/initiationReference';
 import { handleSarStatus } from '../src/routers/baton/access/handleStatus';
+import { Lazy } from '@modules/lazy';
 
 jest.mock('../../../modules/aws/src/s3');
 
-jest.mock('../src/services/config', () => ({
-	getAppConfig: jest.fn().mockResolvedValue({
-		inputPlatform: {
-			key: faker.string.nanoid(),
-			secret: faker.string.nanoid(),
-		},
-		workspace: {
-			key: faker.string.nanoid(),
-			secret: faker.string.nanoid(),
-		},
-		pod: 'EU1',
-	} as AppConfig),
-	getEnv: jest.fn(() => 'CODE'),
-}));
+process.env.STAGE = 'CODE';
+process.env.STACK = 'support';
+process.env.APP = 'mparticle-api';
 
 describe('mparticle-api Baton tests', () => {
 	beforeEach(() => {
 		jest.resetModules();
 		global.fetch = jest.fn();
+
+		// put in beforeEach to avoid circular dep
+		jest.mock('../src/index', () => ({
+			config: Lazy.fromTestValue({
+				inputPlatform: {
+					key: faker.string.nanoid(),
+					secret: faker.string.nanoid(),
+				},
+				workspace: {
+					key: faker.string.nanoid(),
+					secret: faker.string.nanoid(),
+				},
+				pod: 'EU1',
+			} as AppConfig),
+		}));
 	});
 
 	afterEach(() => {

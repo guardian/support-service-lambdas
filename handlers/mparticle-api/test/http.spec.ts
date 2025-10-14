@@ -5,26 +5,31 @@ import { faker } from '@faker-js/faker';
 import type { AppConfig } from '../src/services/config';
 import { invokeHttpHandler } from './invoke-http-handler';
 import { mockFetchJsonResponse, mockFetchResponse } from './mockFetch';
+import { Lazy } from '@modules/lazy';
 
-jest.mock('../src/services/config', () => ({
-	getAppConfig: jest.fn().mockResolvedValue({
-		inputPlatform: {
-			key: faker.string.nanoid(),
-			secret: faker.string.nanoid(),
-		},
-		workspace: {
-			key: faker.string.nanoid(),
-			secret: faker.string.nanoid(),
-		},
-		pod: 'EU1',
-	} as AppConfig),
-	getEnv: jest.fn(() => 'CODE'),
-}));
+process.env.STAGE = 'CODE';
+process.env.STACK = 'support';
+process.env.APP = 'mparticle-api';
 
 describe('mparticle-api HTTP tests', () => {
 	beforeEach(() => {
 		jest.resetModules();
 		global.fetch = jest.fn();
+
+		// put in beforeEach to avoid circular dep
+		jest.mock('../src/index', () => ({
+			config: Lazy.fromTestValue({
+				inputPlatform: {
+					key: faker.string.nanoid(),
+					secret: faker.string.nanoid(),
+				},
+				workspace: {
+					key: faker.string.nanoid(),
+					secret: faker.string.nanoid(),
+				},
+				pod: 'EU1',
+			} as AppConfig),
+		}));
 	});
 
 	afterEach(() => {
