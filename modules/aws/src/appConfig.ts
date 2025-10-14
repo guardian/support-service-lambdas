@@ -4,6 +4,28 @@ import { awsConfig } from '../src/config';
 import { groupMap, mapValues, partition } from '../../arrayFunctions';
 import { fetchAllPages } from './fetchAllPages';
 import { logger } from '@modules/routing/logger';
+import { Lazy } from '@modules/lazy';
+import { getIfDefined } from '@modules/nullAndUndefined';
+
+type AppIdentity = { stage: string; stack: string; app: string };
+
+export const whoAmI: Lazy<AppIdentity> = new Lazy(async () => {
+	return { stage: getEnv('STAGE'), stack: getEnv('STACK'), app: getEnv('APP') };
+}, 'read lambda identity env vars');
+
+const getEnv = (env: string): string =>
+	getIfDefined(process.env[env], `${env} environment variable not set`);
+
+export const loadLazyConfig =
+	<O>(schema: z.ZodType<O, z.ZodTypeDef, any>) =>
+	async ({ stage, stack, app }: AppIdentity) => ({
+		stage,
+		appConfig: new Lazy(
+			() => loadConfig(stage, stack, app, schema),
+			'load app config from SSM',
+		),
+		accountIds: new Lazy(() => loadAccountIds(), 'load account ids from SSM'),
+	});
 
 /**
  * App config uses the guardian-standard SSM keys to load config.  The GU CDK lambda
@@ -32,7 +54,9 @@ export const accountIdsSchema = z.object({
 });
 export type AccountIds = z.infer<typeof accountIdsSchema>;
 
-// need permissions to get this
+/**
+ * Get a list of AWS account ids, the lambda needs ReadAccountIdsPolicy to use this
+ */
 export const loadAccountIds = async (): Promise<AccountIds> => {
 	const configRoot = '/accountIds';
 	logger.log('getting account ids from SSM', configRoot);

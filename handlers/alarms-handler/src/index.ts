@@ -1,5 +1,4 @@
-import { loadAccountIds, loadConfig } from '@modules/aws/appConfig';
-import { Lazy } from '@modules/lazy';
+import { loadLazyConfig, whoAmI } from '@modules/aws/appConfig';
 import type { SNSEventRecord, SQSEvent, SQSRecord } from 'aws-lambda';
 import { z } from 'zod';
 import type { AppToTeams } from './alarmMappings';
@@ -7,7 +6,7 @@ import { prodAppToTeams } from './alarmMappings';
 import type { Tags } from './cloudwatch';
 import { buildCloudwatch } from './cloudwatch';
 import type { WebhookUrls } from './configSchema';
-import { ConfigSchema, getEnv } from './configSchema';
+import { ConfigSchema } from './configSchema';
 
 const cloudWatchAlarmMessageSchema = z.object({
 	AlarmArn: z.string(),
@@ -28,23 +27,15 @@ const cloudWatchAlarmMessageSchema = z.object({
 type CloudWatchAlarmMessage = z.infer<typeof cloudWatchAlarmMessageSchema>;
 
 // only load config on a cold start
-export const lazyConfig = new Lazy(async () => {
-	const stage = getEnv('STAGE');
-	const stack = getEnv('STACK');
-	const app = getEnv('APP');
-	return {
-		appConfig: await loadConfig(stage, stack, app, ConfigSchema),
-		accountIds: await loadAccountIds(),
-	};
-}, 'load config from SSM');
+const config = whoAmI.then(loadLazyConfig(ConfigSchema));
 
 export const handler = async (event: SQSEvent): Promise<void> => {
-	const config = await lazyConfig.get();
+	const { appConfig, accountIds } = await config.get();
 	const getTags = buildCloudwatch(
-		config.appConfig.accounts,
-		config.accountIds,
+		(await appConfig.get()).accounts,
+		await accountIds.get(),
 	).getTags;
-	await handlerWithStage(event, config.appConfig.webhookUrls, getTags);
+	await handlerWithStage(event, (await appConfig.get()).webhookUrls, getTags);
 };
 
 export const handlerWithStage = async (

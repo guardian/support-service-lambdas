@@ -40,7 +40,7 @@ export type Cloudwatch = {
 	getAllAlarmsInAlarm: () => Promise<AlarmWithTags[]>;
 };
 
-export const buildCloudwatch = (config: Accounts, accountIds1: AccountIds) => {
+export const buildCloudwatch = (config: Accounts, accountIds: AccountIds) => {
 	const { MOBILE, TARGETING } = config;
 	const cloudwatchClients: CloudWatchClients = {
 		membership: new CloudWatchClient(awsConfig),
@@ -53,11 +53,10 @@ export const buildCloudwatch = (config: Accounts, accountIds1: AccountIds) => {
 
 	// Use the awsAccountId of the alarm to decide which credentials are needed to fetch the alarm's tags
 	const buildCloudwatchClient = (awsAccountId: string): CloudWatchClient => {
-		const accountIds = {
-			[accountIds1.mobile]: 'mobile',
-			[accountIds1.targeting]: 'targeting',
-		} as const;
-		return cloudwatchClients[accountIds[awsAccountId] ?? 'membership'];
+		const accountNamesForId = Object.fromEntries(
+			Object.entries(accountIds).map(([a, b]) => [b, a]),
+		) as Record<string, Exclude<keyof typeof accountIds, 'baton'>>;
+		return cloudwatchClients[accountNamesForId[awsAccountId] ?? 'membership'];
 	};
 
 	return {

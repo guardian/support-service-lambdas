@@ -1,8 +1,7 @@
 import type { MetricAlarm } from '@aws-sdk/client-cloudwatch';
 import { flatten, groupMap } from '@modules/arrayFunctions';
 import type { AccountIds } from '@modules/aws/appConfig';
-import { loadAccountIds, loadConfig } from '@modules/aws/appConfig';
-import { Lazy } from '@modules/lazy';
+import { loadLazyConfig, whoAmI } from '@modules/aws/appConfig';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
@@ -11,25 +10,21 @@ import { prodAppToTeams } from './alarmMappings';
 import type { AlarmWithTags } from './cloudwatch';
 import { buildCloudwatch } from './cloudwatch';
 import type { WebhookUrls } from './configSchema';
-import { ConfigSchema, getEnv } from './configSchema';
+import { ConfigSchema } from './configSchema';
 import { buildDiagnosticLinks } from './index';
 
 // only load config on a cold start
-export const lazyConfig = new Lazy(async () => {
-	const stage = getEnv('STAGE');
-	const stack = getEnv('STACK');
-	const app = getEnv('APP');
-	return {
-		stage,
-		appConfig: await loadConfig(stage, stack, app, ConfigSchema),
-		accountIds: await loadAccountIds(),
-	};
-}, 'load config from SSM');
+const config = whoAmI.then(loadLazyConfig(ConfigSchema));
 
 // called by AWS
 export const handler = async (): Promise<void> => {
-	const { stage, appConfig, accountIds } = await lazyConfig.get();
-	await handlerWithStage(dayjs(), stage, appConfig, accountIds);
+	const { stage, appConfig, accountIds } = await config.get();
+	await handlerWithStage(
+		dayjs(),
+		stage,
+		await appConfig.get(),
+		await accountIds.get(),
+	);
 };
 
 export const handlerWithStage = async (

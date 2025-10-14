@@ -9,10 +9,14 @@ import {
 	BatonEventResponse,
 	batonRerRouter,
 } from './routers/baton';
-import { AppConfig, getAppConfig, getEnv } from './services/config';
+import { ConfigSchema } from './services/config';
 import { MParticleClient } from './services/mparticleClient';
 import { BatonS3WriterImpl } from './services/batonS3Writer';
 import { logger } from '@modules/routing/logger';
+import { loadLazyConfig, whoAmI } from '@modules/aws/appConfig';
+
+// only load config on a cold start
+const config = whoAmI.then(loadLazyConfig(ConfigSchema));
 
 export const handlerHttp: Handler<
 	APIGatewayProxyEvent,
@@ -60,16 +64,20 @@ export const handlerBaton: Handler<
 
 async function services() {
 	logger.log('Starting lambda');
-	const stage = getEnv('STAGE');
-	const config: AppConfig = await getAppConfig();
+	const allConfig = await config.get();
+	const stage = allConfig.stage;
+	const appConfig = await allConfig.appConfig.get();
 	return {
 		mParticleDataSubjectClient:
-			MParticleClient.createMParticleDataSubjectClient(config.workspace),
+			MParticleClient.createMParticleDataSubjectClient(appConfig.workspace),
 		mParticleEventsAPIClient: MParticleClient.createEventsApiClient(
-			config.inputPlatform,
-			config.pod,
+			appConfig.inputPlatform,
+			appConfig.pod,
 		),
-		batonS3Writer: new BatonS3WriterImpl(config.sarResultsBucket, sarS3BaseKey),
+		batonS3Writer: new BatonS3WriterImpl(
+			appConfig.sarResultsBucket,
+			sarS3BaseKey,
+		),
 		isProd: stage === 'PROD',
 	};
 }
