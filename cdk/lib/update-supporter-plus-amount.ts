@@ -3,9 +3,9 @@ import {
 	AllowSqsSendPolicy,
 	AllowZuoraOAuthSecretsPolicy,
 } from './cdk/policies';
-import { SrApiLambda } from './cdk/sr-api-lambda';
-import type { SrStageNames } from './cdk/sr-stack';
-import { SrStack } from './cdk/sr-stack';
+import { SrApiLambda } from './cdk/SrApiLambda';
+import type { SrStageNames } from './cdk/SrStack';
+import { SrStack } from './cdk/SrStack';
 
 export class UpdateSupporterPlusAmount extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {

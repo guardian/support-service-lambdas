@@ -1,6 +1,7 @@
 import type { MetricAlarm } from '@aws-sdk/client-cloudwatch';
 import { flatten, groupMap } from '@modules/arrayFunctions';
-import { loadConfig } from '@modules/aws/appConfig';
+import type { AccountIds } from '@modules/aws/appConfig';
+import { loadAccountIds, loadConfig } from '@modules/aws/appConfig';
 import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Dayjs } from 'dayjs';
@@ -18,22 +19,30 @@ export const lazyConfig = new Lazy(async () => {
 	const stage = getEnv('STAGE');
 	const stack = getEnv('STACK');
 	const app = getEnv('APP');
-	return { stage, config: await loadConfig(stage, stack, app, ConfigSchema) };
+	return {
+		stage,
+		appConfig: await loadConfig(stage, stack, app, ConfigSchema),
+		accountIds: await loadAccountIds(),
+	};
 }, 'load config from SSM');
 
 // called by AWS
 export const handler = async (): Promise<void> => {
-	const { stage, config } = await lazyConfig.get();
-	await handlerWithStage(dayjs(), stage, config);
+	const { stage, appConfig, accountIds } = await lazyConfig.get();
+	await handlerWithStage(dayjs(), stage, appConfig, accountIds);
 };
 
 export const handlerWithStage = async (
 	now: dayjs.Dayjs,
 	stage: string,
 	config: ConfigSchema,
+	accountIds: AccountIds,
 ) => {
 	try {
-		const alarms = await buildCloudwatch(config.accounts).getAllAlarmsInAlarm();
+		const alarms = await buildCloudwatch(
+			config.accounts,
+			accountIds,
+		).getAllAlarmsInAlarm();
 
 		const chatMessages = await getChatMessages(
 			now,

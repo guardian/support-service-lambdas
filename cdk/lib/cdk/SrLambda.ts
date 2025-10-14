@@ -1,10 +1,11 @@
 import type { Identity } from '@guardian/cdk/lib/constructs/core';
+import type { GuPolicy } from '@guardian/cdk/lib/constructs/iam/policies/base-policy';
 import type { GuFunctionProps } from '@guardian/cdk/lib/constructs/lambda';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { Duration } from 'aws-cdk-lib';
 import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { nodeVersion } from '../node-version';
-import type { SrStack } from './sr-stack';
+import type { SrStack } from './SrStack';
 
 export type SrLambdaProps = {
 	/**
@@ -45,7 +46,7 @@ function getLambdaDefaultProps(
  * This is a lambda function construct with sensible defaults for this repo.
  */
 export class SrLambda extends GuLambdaFunction {
-	constructor(scope: SrStack, id: string, props: SrLambdaProps) {
+	constructor(scope: SrStack, props: SrLambdaProps) {
 		const defaultGuLambdaFunctionProps = getLambdaDefaultProps(
 			scope,
 			props.nameSuffix,
@@ -59,7 +60,17 @@ export class SrLambda extends GuLambdaFunction {
 			},
 		};
 
-		super(scope, id, guLambdaFunctionProps);
+		super(
+			scope,
+			[scope.app, props.nameSuffix, 'lambda']
+				.filter((a) => a !== undefined)
+				.join('-'),
+			guLambdaFunctionProps,
+		);
+	}
+
+	addPolicies(...policies: GuPolicy[]) {
+		policies.forEach((p) => this.role!.attachInlinePolicy(p));
 	}
 }
 

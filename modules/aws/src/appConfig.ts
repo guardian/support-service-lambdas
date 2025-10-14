@@ -1,8 +1,9 @@
-import type { z } from 'zod';
+import { z } from 'zod';
 import { GetParametersByPathCommand, SSMClient } from '@aws-sdk/client-ssm';
 import { awsConfig } from '../src/config';
 import { groupMap, mapValues, partition } from '../../arrayFunctions';
 import { fetchAllPages } from './fetchAllPages';
+import { logger } from '@modules/routing/logger';
 
 /**
  * App config uses the guardian-standard SSM keys to load config.  The GU CDK lambda
@@ -20,10 +21,30 @@ export const loadConfig = async <O>(
 	schema: z.ZodType<O, z.ZodTypeDef, any>,
 ): Promise<O> => {
 	const configRoot = '/' + [stage, stack, app].join('/');
-	console.log('getting app config from SSM', configRoot);
+	logger.log('getting app config from SSM', configRoot);
+	return await loadCustomConfig(configRoot, schema);
+};
+
+export const accountIdsSchema = z.object({
+	baton: z.string(),
+	mobile: z.string(),
+	targeting: z.string(),
+});
+export type AccountIds = z.infer<typeof accountIdsSchema>;
+
+// need permissions to get this
+export const loadAccountIds = async (): Promise<AccountIds> => {
+	const configRoot = '/accountIds';
+	logger.log('getting account ids from SSM', configRoot);
+	return await loadCustomConfig(configRoot, accountIdsSchema);
+};
+async function loadCustomConfig<O>(
+	configRoot: string,
+	schema: z.ZodType<O, z.ZodTypeDef, any>,
+) {
 	const configFlat: SSMKeyValuePairs = await readAllRecursive(configRoot);
 	return parseSSMConfigToObject(configFlat, configRoot, schema);
-};
+}
 
 export type SSMKeyValuePairs = Record<string, string>[];
 

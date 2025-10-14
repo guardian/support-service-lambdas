@@ -1,8 +1,8 @@
 import { Duration } from 'aws-cdk-lib';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
-import type { SrLambdaAlarmProps } from './sr-lambda-alarm';
-import { SrLambdaAlarm } from './sr-lambda-alarm';
-import type { SrStack } from './sr-stack';
+import type { SrLambdaAlarmProps } from './SrLambdaAlarm';
+import { SrLambdaAlarm } from './SrLambdaAlarm';
+import type { SrStack } from './SrStack';
 
 export type SrApiGateway5xxAlarmProps = {
 	/**

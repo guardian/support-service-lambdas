@@ -1,7 +1,7 @@
 import { handlerWithStage } from '../src/index';
 import type { SQSEvent } from 'aws-lambda';
 import { buildCloudwatch } from '../src/cloudwatch';
-import { loadConfig } from '@modules/aws/appConfig';
+import { loadAccountIds, loadConfig } from '@modules/aws/appConfig';
 import { ConfigSchema } from '../src/configSchema';
 
 // to run this, get credentials for membership
@@ -26,12 +26,15 @@ export const handlerTestEvent: SQSEvent = {
 	],
 } as SQSEvent;
 
-loadConfig('CODE', 'support', 'alarms-handler', ConfigSchema)
-	.then((config) => {
+Promise.all([
+	loadConfig('CODE', 'support', 'alarms-handler', ConfigSchema),
+	loadAccountIds(),
+])
+	.then(([config, accountIds]) => {
 		return handlerWithStage(
 			handlerTestEvent,
 			config.webhookUrls,
-			buildCloudwatch(config.accounts).getTags,
+			buildCloudwatch(config.accounts, accountIds).getTags,
 		);
 	})
 	.then(console.log);

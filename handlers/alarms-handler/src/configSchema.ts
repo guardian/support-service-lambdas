@@ -11,7 +11,6 @@ export const WebhookUrlsSchema = z.object({
 export type WebhookUrls = z.infer<typeof WebhookUrlsSchema>;
 
 export const AccountSchema = z.object({
-	id: z.string(),
 	roleArn: z.string(),
 });
 export type Account = z.infer<typeof AccountSchema>;

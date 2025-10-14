@@ -3,8 +3,8 @@ import { App } from 'aws-cdk-lib';
 import { AlarmsHandler } from '../lib/alarms-handler';
 import { BatchEmailSender } from '../lib/batch-email-sender';
 import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
-import type { SrStageNames } from '../lib/cdk/sr-stack';
-import { stages } from '../lib/cdk/sr-stack';
+import type { SrStageNames } from '../lib/cdk/SrStack';
+import { stages } from '../lib/cdk/SrStack';
 import {
 	membershipApisDomain,
 	membershipCertificateId,
@@ -133,6 +133,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	MetricPushApi,
 	PressReaderEntitlements,
 	UserBenefits,
+	AlarmsHandler,
 ];
 
 // generate all stacks for all stages
@@ -225,14 +226,6 @@ new StripeWebhookEndpoints(
 	stripeWebhookEndpointsProdProps,
 );
 
-new AlarmsHandler(app, 'alarms-handler-CODE', {
-	stack: 'support',
-	stage: 'CODE',
-});
-new AlarmsHandler(app, 'alarms-handler-PROD', {
-	stack: 'support',
-	stage: 'PROD',
-});
 new SalesforceDisasterRecoveryHealthCheck(
 	app,
 	'salesforce-disaster-recovery-health-check-CODE',

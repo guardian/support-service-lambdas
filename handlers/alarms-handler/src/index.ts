@@ -1,4 +1,4 @@
-import { loadConfig } from '@modules/aws/appConfig';
+import { loadAccountIds, loadConfig } from '@modules/aws/appConfig';
 import { Lazy } from '@modules/lazy';
 import type { SNSEventRecord, SQSEvent, SQSRecord } from 'aws-lambda';
 import { z } from 'zod';
@@ -32,13 +32,19 @@ export const lazyConfig = new Lazy(async () => {
 	const stage = getEnv('STAGE');
 	const stack = getEnv('STACK');
 	const app = getEnv('APP');
-	return await loadConfig(stage, stack, app, ConfigSchema);
+	return {
+		appConfig: await loadConfig(stage, stack, app, ConfigSchema),
+		accountIds: await loadAccountIds(),
+	};
 }, 'load config from SSM');
 
 export const handler = async (event: SQSEvent): Promise<void> => {
 	const config = await lazyConfig.get();
-	const getTags = buildCloudwatch(config.accounts).getTags;
-	await handlerWithStage(event, config.webhookUrls, getTags);
+	const getTags = buildCloudwatch(
+		config.appConfig.accounts,
+		config.accountIds,
+	).getTags;
+	await handlerWithStage(event, config.appConfig.webhookUrls, getTags);
 };
 
 export const handlerWithStage = async (

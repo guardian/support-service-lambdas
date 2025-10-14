@@ -4,10 +4,10 @@ import { Duration, Fn } from 'aws-cdk-lib';
 import { UsagePlan } from 'aws-cdk-lib/aws-apigateway';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { allowedOriginsForStage } from '../../handlers/user-benefits/src/cors';
-import { SrLambda } from './cdk/sr-lambda';
-import { SrRestDomain } from './cdk/sr-rest-domain';
-import type { SrStageNames } from './cdk/sr-stack';
-import { SrStack } from './cdk/sr-stack';
+import { SrLambda } from './cdk/SrLambda';
+import { SrRestDomain } from './cdk/SrRestDomain';
+import type { SrStageNames } from './cdk/SrStack';
+import { SrStack } from './cdk/SrStack';
 
 export class UserBenefits extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
@@ -28,7 +28,7 @@ export class UserBenefits extends SrStack {
 			initialPolicy: [supporterProductDataTablePolicy],
 			timeout: Duration.seconds(300),
 		};
-		const userBenefitsMeLambda = new SrLambda(this, `user-benefits-me-lambda`, {
+		const userBenefitsMeLambda = new SrLambda(this, {
 			nameSuffix: 'me',
 			lambdaOverrides: {
 				description:
@@ -37,32 +37,24 @@ export class UserBenefits extends SrStack {
 				...commonLambdaProps,
 			},
 		});
-		const userBenefitsIdentityIdLambda = new SrLambda(
-			this,
-			`user-benefits-identity-id-lambda`,
-			{
-				nameSuffix: 'identity-id',
-				lambdaOverrides: {
-					description:
-						'An API Gateway triggered lambda to get the benefits of the user identified in the request path',
-					handler: 'index.benefitsIdentityIdHandler',
-					...commonLambdaProps,
-				},
+		const userBenefitsIdentityIdLambda = new SrLambda(this, {
+			nameSuffix: 'identity-id',
+			lambdaOverrides: {
+				description:
+					'An API Gateway triggered lambda to get the benefits of the user identified in the request path',
+				handler: 'index.benefitsIdentityIdHandler',
+				...commonLambdaProps,
 			},
-		);
-		const userBenefitsListLambda = new SrLambda(
-			this,
-			`user-benefits-list-lambda`,
-			{
-				nameSuffix: 'list',
-				lambdaOverrides: {
-					description:
-						'An API Gateway triggered lambda to return the full list of benefits for each product in html or json format',
-					handler: 'index.benefitsListHandler',
-					...commonLambdaProps,
-				},
+		});
+		const userBenefitsListLambda = new SrLambda(this, {
+			nameSuffix: 'list',
+			lambdaOverrides: {
+				description:
+					'An API Gateway triggered lambda to return the full list of benefits for each product in html or json format',
+				handler: 'index.benefitsListHandler',
+				...commonLambdaProps,
 			},
-		);
+		});
 		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {
 			app,
 			targets: [
