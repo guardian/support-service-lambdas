@@ -14,7 +14,7 @@ import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { Bucket, EventType } from 'aws-cdk-lib/aws-s3';
 import { LambdaDestination } from 'aws-cdk-lib/aws-s3-notifications';
 import { metricNamespace } from '../../modules/aws/src/cloudwatch';
-import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
+import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
 import { nodeVersion } from './node-version';
 
 export const productCatalogBucketName = 'gu-product-catalog';

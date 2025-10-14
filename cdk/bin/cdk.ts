@@ -3,8 +3,8 @@ import { App } from 'aws-cdk-lib';
 import { AlarmsHandler } from '../lib/alarms-handler';
 import { BatchEmailSender } from '../lib/batch-email-sender';
 import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
-import type { SrStageNames } from '../lib/cdk/sr-stack';
-import { stages } from '../lib/cdk/sr-stack';
+import type { SrStageNames } from '../lib/cdk/SrStack';
+import { stages } from '../lib/cdk/SrStack';
 import {
 	membershipApisDomain,
 	membershipCertificateId,

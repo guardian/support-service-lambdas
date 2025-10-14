@@ -4,10 +4,10 @@ import { Duration, Fn } from 'aws-cdk-lib';
 import { UsagePlan } from 'aws-cdk-lib/aws-apigateway';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { allowedOriginsForStage } from '../../handlers/user-benefits/src/cors';
-import { SrLambda } from './cdk/sr-lambda';
-import { SrRestDomain } from './cdk/sr-rest-domain';
-import type { SrStageNames } from './cdk/sr-stack';
-import { SrStack } from './cdk/sr-stack';
+import { SrLambda } from './cdk/SrLambda';
+import { SrRestDomain } from './cdk/SrRestDomain';
+import type { SrStageNames } from './cdk/SrStack';
+import { SrStack } from './cdk/SrStack';
 
 export class UserBenefits extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
