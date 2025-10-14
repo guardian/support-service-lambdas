@@ -75,7 +75,6 @@ export class DiscountExpiryNotifier extends GuStack {
 				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
-					Stage: this.stage,
 					DAYS_UNTIL_DISCOUNT_EXPIRY_DATE: '32',
 				},
 				handler: 'getExpiringDiscounts.handler',
@@ -96,7 +95,6 @@ export class DiscountExpiryNotifier extends GuStack {
 				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
-					Stage: this.stage,
 					FILTER_BY_REGIONS: 'US,USA,United States,United States of America',
 				},
 				handler: 'filterRecords.handler',
@@ -114,9 +112,6 @@ export class DiscountExpiryNotifier extends GuStack {
 				functionName: `${appName}-get-sub-status-${this.stage}`,
 				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
-				environment: {
-					Stage: this.stage,
-				},
 				handler: 'getSubStatus.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
@@ -139,9 +134,6 @@ export class DiscountExpiryNotifier extends GuStack {
 				functionName: `${appName}-get-old-payment-amount-${this.stage}`,
 				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
-				environment: {
-					Stage: this.stage,
-				},
 				handler: 'getOldPaymentAmount.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
@@ -163,9 +155,6 @@ export class DiscountExpiryNotifier extends GuStack {
 				functionName: `${appName}-get-new-payment-amount-${this.stage}`,
 				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
-				environment: {
-					Stage: this.stage,
-				},
 				handler: 'getNewPaymentAmount.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
@@ -186,7 +175,6 @@ export class DiscountExpiryNotifier extends GuStack {
 			loggingFormat: LoggingFormat.TEXT,
 			runtime: nodeVersion,
 			environment: {
-				Stage: this.stage,
 				S3_BUCKET: bucket.bucketName,
 			},
 			handler: 'sendEmail.handler',
@@ -203,7 +191,6 @@ export class DiscountExpiryNotifier extends GuStack {
 				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
-					Stage: this.stage,
 					S3_BUCKET: bucket.bucketName,
 				},
 				handler: 'saveResults.handler',
@@ -227,9 +214,6 @@ export class DiscountExpiryNotifier extends GuStack {
 				functionName: `${appName}-alarm-on-failures-${this.stage}`,
 				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
-				environment: {
-					Stage: this.stage,
-				},
 				handler: 'alarmOnFailures.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,

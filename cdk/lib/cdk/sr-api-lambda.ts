@@ -1,5 +1,4 @@
 import type { NoMonitoring } from '@guardian/cdk/lib/constructs/cloudwatch';
-import type { Identity } from '@guardian/cdk/lib/constructs/core';
 import type { GuPolicy } from '@guardian/cdk/lib/constructs/iam/policies/base-policy';
 import { Duration } from 'aws-cdk-lib';
 import { ApiKeySourceType, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
@@ -38,21 +37,9 @@ type SrApiLambdaProps = SrLambdaProps & {
 	srRestDomainProps?: SrRestDomainProps;
 };
 
-function getApiLambdaDefaultProps(scope: Identity) {
-	const deprecatedVars = {
-		// for some reason we often use these instead of the upper case STACK/STAGE/APP added by GuCDK
-		// https://github.com/guardian/cdk/blob/5569c749211b518001666cffb558fe403ff0539c/src/constructs/lambda/lambda.ts#L134-L138
-		App: scope.app,
-		Stack: scope.stack,
-		Stage: scope.stage,
-	};
-	return {
-		timeout: Duration.seconds(300),
-		environment: {
-			...deprecatedVars,
-		},
-	};
-}
+const defaultProps = {
+	timeout: Duration.seconds(300),
+};
 
 /**
  * This creates a lambda with an API gateway in front, and makes it available on a suitable URL, according to SR standards.
@@ -61,16 +48,11 @@ export class SrApiLambda extends SrLambda {
 	public readonly api: LambdaRestApi;
 	readonly domain: SrRestDomain;
 	constructor(scope: SrStack, props: SrApiLambdaProps) {
-		const defaultProps = getApiLambdaDefaultProps(scope);
 		const finalProps = {
 			nameSuffix: props.nameSuffix,
 			lambdaOverrides: {
 				...defaultProps,
 				...props.lambdaOverrides,
-				environment: {
-					...defaultProps.environment,
-					...props.lambdaOverrides.environment,
-				},
 			},
 		};
 

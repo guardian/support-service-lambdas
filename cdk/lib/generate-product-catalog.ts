@@ -32,12 +32,6 @@ export class GenerateProductCatalog extends GuStack {
 		const app = 'generate-product-catalog';
 		const nameWithStage = `${app}-${this.stage}`;
 
-		const commonEnvironmentVariables = {
-			App: app,
-			Stack: this.stack,
-			Stage: this.stage,
-		};
-
 		const lambda = new GuLambdaFunction(this, `${app}-lambda`, {
 			description:
 				'A lambda to generate the Guardian product catalog from the Zuora catalog',
@@ -48,7 +42,6 @@ export class GenerateProductCatalog extends GuStack {
 			runtime: nodeVersion,
 			memorySize: 1232,
 			timeout: Duration.seconds(300),
-			environment: commonEnvironmentVariables,
 			app: app,
 		});
 

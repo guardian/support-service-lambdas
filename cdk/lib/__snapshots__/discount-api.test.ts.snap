@@ -232,12 +232,9 @@ exports[`The Discount API stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "discount-api",
-            "App": "discount-api",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
-            "Stack": "support",
-            "Stage": "CODE",
           },
         },
         "FunctionName": "discount-api-CODE",
@@ -1254,12 +1251,9 @@ exports[`The Discount API stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "discount-api",
-            "App": "discount-api",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
-            "Stack": "support",
-            "Stage": "PROD",
           },
         },
         "FunctionName": "discount-api-PROD",

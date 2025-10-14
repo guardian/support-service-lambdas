@@ -226,12 +226,9 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "metric-push-api",
-            "App": "metric-push-api",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
-            "Stack": "support",
-            "Stage": "CODE",
           },
         },
         "FunctionName": "metric-push-api-CODE",
@@ -1149,12 +1146,9 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "metric-push-api",
-            "App": "metric-push-api",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
-            "Stack": "support",
-            "Stage": "PROD",
           },
         },
         "FunctionName": "metric-push-api-PROD",

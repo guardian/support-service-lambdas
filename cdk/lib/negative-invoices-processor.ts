@@ -76,9 +76,6 @@ export class NegativeInvoicesProcessor extends GuStack {
 				functionName: `${appName}-get-invoices-${this.stage}`,
 				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
-				environment: {
-					Stage: this.stage,
-				},
 				handler: 'getInvoices.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
@@ -96,9 +93,6 @@ export class NegativeInvoicesProcessor extends GuStack {
 				functionName: `${appName}-check-for-active-sub-${this.stage}`,
 				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
-				environment: {
-					Stage: this.stage,
-				},
 				handler: 'checkForActiveSub.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
@@ -121,9 +115,6 @@ export class NegativeInvoicesProcessor extends GuStack {
 				functionName: `${appName}-get-payment-methods-${this.stage}`,
 				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
-				environment: {
-					Stage: this.stage,
-				},
 				handler: 'getPaymentMethods.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
@@ -146,9 +137,6 @@ export class NegativeInvoicesProcessor extends GuStack {
 				functionName: `${appName}-apply-credit-to-account-balance-${this.stage}`,
 				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
-				environment: {
-					Stage: this.stage,
-				},
 				handler: 'applyCreditToAccountBalance.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
@@ -171,9 +159,6 @@ export class NegativeInvoicesProcessor extends GuStack {
 				functionName: `${appName}-do-credit-balance-refund-${this.stage}`,
 				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
-				environment: {
-					Stage: this.stage,
-				},
 				handler: 'doCreditBalanceRefund.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
@@ -197,7 +182,6 @@ export class NegativeInvoicesProcessor extends GuStack {
 				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
 				environment: {
-					Stage: this.stage,
 					S3_BUCKET: bucket.bucketName,
 				},
 				handler: 'saveResults.handler',
@@ -221,9 +205,6 @@ export class NegativeInvoicesProcessor extends GuStack {
 				functionName: `${appName}-detect-failures-${this.stage}`,
 				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
-				environment: {
-					Stage: this.stage,
-				},
 				handler: 'detectFailures.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,

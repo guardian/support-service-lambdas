@@ -397,7 +397,6 @@ def sort_filter_rules(json_obj):
             "ObserverNewspaperSubscribersFolder": "Observer_newspaper_subscribers",
             "STACK": "support",
             "STAGE": "CODE",
-            "Stage": "CODE",
             "UnifidaPublicRsaKeyFilePath": "Public_keys/unifida_public_rsa_key.pem",
             "UnifidaSharedBucketName": {
               "Ref": "Bucket83908E77",
@@ -2203,7 +2202,6 @@ def sort_filter_rules(json_obj):
             "ObserverNewspaperSubscribersFolder": "Observer_newspaper_subscribers",
             "STACK": "support",
             "STAGE": "PROD",
-            "Stage": "PROD",
             "UnifidaPublicRsaKeyFilePath": "Public_keys/unifida_public_rsa_key.pem",
             "UnifidaSharedBucketName": {
               "Ref": "Bucket83908E77",

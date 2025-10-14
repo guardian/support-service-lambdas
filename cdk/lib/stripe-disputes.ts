@@ -75,9 +75,6 @@ export class StripeDisputes extends GuStack {
 		});
 
 		const commonEnvironmentVariables = {
-			App: app,
-			Stack: this.stack,
-			Stage: this.stage,
 			DISPUTE_EVENTS_QUEUE_URL: disputeEventsQueue.queueUrl,
 		};
 

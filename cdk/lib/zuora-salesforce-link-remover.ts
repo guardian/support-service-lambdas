@@ -41,9 +41,6 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 				functionName: `${appName}-get-billing-accounts-${this.stage}`,
 				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
-				environment: {
-					Stage: this.stage,
-				},
 				handler: 'getBillingAccounts.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
@@ -70,9 +67,6 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 				functionName: `${appName}-update-zuora-billing-account-${this.stage}`,
 				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
-				environment: {
-					Stage: this.stage,
-				},
 				handler: 'updateZuoraBillingAccount.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,
@@ -97,9 +91,6 @@ export class ZuoraSalesforceLinkRemover extends GuStack {
 				functionName: `${appName}-update-sf-billing-accounts-${this.stage}`,
 				loggingFormat: LoggingFormat.TEXT,
 				runtime: nodeVersion,
-				environment: {
-					Stage: this.stage,
-				},
 				handler: 'updateSfBillingAccounts.handler',
 				fileName: `${appName}.zip`,
 				architecture: Architecture.ARM_64,

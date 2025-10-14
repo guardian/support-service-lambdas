@@ -84,7 +84,7 @@ describe('writeOffInvoices', () => {
 			invoiceItems,
 		});
 
-		process.env = { Stage: 'CODE' };
+		process.env = { STAGE: 'CODE' };
 	});
 
 	it('credits invoice items in correct order until balance is zero', async () => {

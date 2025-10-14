@@ -1159,12 +1159,9 @@ exports[`The User benefits stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "user-benefits",
-            "App": "user-benefits",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
-            "Stack": "support",
-            "Stage": "CODE",
           },
         },
         "FunctionName": "user-benefits-identity-id-CODE",
@@ -1382,12 +1379,9 @@ exports[`The User benefits stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "user-benefits",
-            "App": "user-benefits",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
-            "Stack": "support",
-            "Stage": "CODE",
           },
         },
         "FunctionName": "user-benefits-list-CODE",
@@ -1605,12 +1599,9 @@ exports[`The User benefits stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "user-benefits",
-            "App": "user-benefits",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
-            "Stack": "support",
-            "Stage": "CODE",
           },
         },
         "FunctionName": "user-benefits-me-CODE",
@@ -2975,12 +2966,9 @@ exports[`The User benefits stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "user-benefits",
-            "App": "user-benefits",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
-            "Stack": "support",
-            "Stage": "PROD",
           },
         },
         "FunctionName": "user-benefits-identity-id-PROD",
@@ -3198,12 +3186,9 @@ exports[`The User benefits stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "user-benefits",
-            "App": "user-benefits",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
-            "Stack": "support",
-            "Stage": "PROD",
           },
         },
         "FunctionName": "user-benefits-list-PROD",
@@ -3421,12 +3406,9 @@ exports[`The User benefits stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "user-benefits",
-            "App": "user-benefits",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
-            "Stack": "support",
-            "Stage": "PROD",
           },
         },
         "FunctionName": "user-benefits-me-PROD",
