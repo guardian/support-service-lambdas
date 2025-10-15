@@ -133,6 +133,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	MetricPushApi,
 	PressReaderEntitlements,
 	UserBenefits,
+	AlarmsHandler,
 ];
 
 // generate all stacks for all stages
@@ -225,14 +226,6 @@ new StripeWebhookEndpoints(
 	stripeWebhookEndpointsProdProps,
 );
 
-new AlarmsHandler(app, 'alarms-handler-CODE', {
-	stack: 'support',
-	stage: 'CODE',
-});
-new AlarmsHandler(app, 'alarms-handler-PROD', {
-	stack: 'support',
-	stage: 'PROD',
-});
 new SalesforceDisasterRecoveryHealthCheck(
 	app,
 	'salesforce-disaster-recovery-health-check-CODE',

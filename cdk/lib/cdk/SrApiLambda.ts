@@ -1,5 +1,4 @@
 import type { NoMonitoring } from '@guardian/cdk/lib/constructs/cloudwatch';
-import type { GuPolicy } from '@guardian/cdk/lib/constructs/iam/policies/base-policy';
 import { Duration } from 'aws-cdk-lib';
 import { ApiKeySourceType, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { SrApiGateway5xxAlarm } from './SrApiGateway5xxAlarm';
@@ -56,7 +55,7 @@ export class SrApiLambda extends SrLambda {
 			},
 		};
 
-		super(scope, `${scope.app}-lambda`, finalProps);
+		super(scope, finalProps);
 
 		this.api = new LambdaRestApi(
 			this,
@@ -112,9 +111,5 @@ export class SrApiLambda extends SrLambda {
 				overrides: props.monitoring,
 			});
 		}
-	}
-
-	addPolicies(...policies: GuPolicy[]) {
-		policies.forEach((p) => this.role!.attachInlinePolicy(p));
 	}
 }

@@ -4,15 +4,8 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
-      "GuStringParameter",
-      "GuStringParameter",
-      "GuStringParameter",
-      "GuStringParameter",
-      "GuStringParameter",
+      "GuAllowPolicy",
       "GuDistributionBucketParameter",
-      "GuLambdaFunction",
-      "GuAlarm",
-      "GuScheduledLambda",
       "GuLambdaErrorPercentageAlarm",
     ],
     "gu:cdk:version": "TEST",
@@ -23,29 +16,34 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "alarmshandlerbackupemailaddress": {
-      "Description": "Alarm email address to use if the alarms handler itself fails",
-      "Type": "String",
+    "appConfigaccountsMOBILEid": {
+      "Default": "/CODE/support/alarms-handler/accounts/MOBILE/id",
+      "Description": "parameter to look up accounts/MOBILE/id from SSM",
+      "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "alarmshandlermobileaccountrolearn": {
+    "appConfigaccountsMOBILEroleArn": {
+      "Default": "/CODE/support/alarms-handler/accounts/MOBILE/roleArn",
       "Description": "ARN of role in the mobile account which allows cloudwatch:ListTagsForResource",
-      "Type": "String",
+      "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "alarmshandlermobileawsaccount": {
-      "Description": "ID of the mobile aws account",
-      "Type": "String",
+    "appConfigaccountsTARGETINGid": {
+      "Default": "/CODE/support/alarms-handler/accounts/TARGETING/id",
+      "Description": "parameter to look up accounts/TARGETING/id from SSM",
+      "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "alarmshandlertargetingaccountrolearn": {
+    "appConfigaccountsTARGETINGroleArn": {
+      "Default": "/CODE/support/alarms-handler/accounts/TARGETING/roleArn",
       "Description": "ARN of role in the targeting account which allows cloudwatch:ListTagsForResource",
-      "Type": "String",
+      "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "alarmshandlertargetingawsaccount": {
-      "Description": "ID of the targeting aws account",
-      "Type": "String",
+    "appConfigbackupEmail": {
+      "Default": "/CODE/support/alarms-handler/backupEmail",
+      "Description": "Alarm email address to use if the alarms handler itself fails",
+      "Type": "AWS::SSM::Parameter::Value<String>",
     },
   },
   "Resources": {
-    "alarmshandleralarm5F97F469": {
+    "alarm99114523": {
       "Properties": {
         "ActionsEnabled": false,
         "AlarmActions": [
@@ -72,8 +70,21 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
             ],
           },
         ],
-        "AlarmDescription": "There was an error in the lambda function that handles CloudWatch alarms.",
-        "AlarmName": "CODE: Failed to handle CloudWatch alarm",
+        "AlarmDescription": "alarms-handler could not process a message and it ended up on the DLQ search the logs below for "error" for more information. Impact: could not send an alarm notification to a chat channel",
+        "AlarmName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Fn::GetAtt": [
+                  "deadlettersalarmshandlerqueueC7A67616",
+                  "QueueName",
+                ],
+              },
+              " has messages",
+            ],
+          ],
+        },
         "ComparisonOperator": "GreaterThanThreshold",
         "Dimensions": [
           {
@@ -86,12 +97,30 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
             },
           },
         ],
-        "EvaluationPeriods": 24,
+        "EvaluationPeriods": 1,
         "MetricName": "ApproximateNumberOfMessagesVisible",
         "Namespace": "AWS/SQS",
         "Period": 60,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "alarmshandlerlambda383D2BAA",
+                  },
+                ],
+              ],
+            },
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -102,7 +131,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -112,6 +141,37 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
         "Threshold": 0,
       },
       "Type": "AWS::CloudWatch::Alarm",
+    },
+    "alarmshandlerassumerolepolicyA9C0D8AA": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Ref": "appConfigaccountsMOBILEroleArn",
+                },
+                {
+                  "Ref": "appConfigaccountsTARGETINGroleArn",
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "alarmshandlerassumerolepolicyA9C0D8AA",
+        "Roles": [
+          {
+            "Ref": "alarmshandlerlambdaServiceRole3953DF7F",
+          },
+          {
+            "Ref": "alarmshandlerscheduledlambdaServiceRole62346D7A",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "alarmshandlercloudwatchpolicy7746710B": {
       "Properties": {
@@ -130,6 +190,9 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
           {
             "Ref": "alarmshandlerlambdaServiceRole3953DF7F",
           },
+          {
+            "Ref": "alarmshandlerscheduledlambdaServiceRole62346D7A",
+          },
         ],
       },
       "Type": "AWS::IAM::Policy",
@@ -137,6 +200,10 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
     "alarmshandleremailtopic52F6F612": {
       "Properties": {
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -147,7 +214,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -161,7 +228,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
     "alarmshandleremailtopicTokenSubscription191C59777": {
       "Properties": {
         "Endpoint": {
-          "Ref": "alarmshandlerbackupemailaddress",
+          "Ref": "appConfigbackupEmail",
         },
         "Protocol": "email",
         "TopicArn": {
@@ -180,12 +247,13 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/CODE/alarms-handler/alarms-handler.zip",
+          "S3Key": "support/CODE/alarms-handler/alarms-handler.zip",
         },
         "Environment": {
           "Variables": {
             "APP": "alarms-handler",
-            "STACK": "membership",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
             "STAGE": "CODE",
           },
         },
@@ -217,7 +285,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -271,7 +339,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -285,22 +353,6 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       "Properties": {
         "PolicyDocument": {
           "Statement": [
-            {
-              "Action": [
-                "sqs:ReceiveMessage",
-                "sqs:ChangeMessageVisibility",
-                "sqs:GetQueueUrl",
-                "sqs:DeleteMessage",
-                "sqs:GetQueueAttributes",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "alarmshandlerqueue255509D6",
-                  "Arn",
-                ],
-              },
-            },
             {
               "Action": [
                 "s3:GetObject*",
@@ -336,7 +388,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/CODE/alarms-handler/alarms-handler.zip",
+                      "/support/CODE/alarms-handler/alarms-handler.zip",
                     ],
                   ],
                 },
@@ -357,7 +409,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/alarms-handler",
+                    ":parameter/CODE/support/alarms-handler",
                   ],
                 ],
               },
@@ -380,22 +432,26 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/alarms-handler/*",
+                    ":parameter/CODE/support/alarms-handler/*",
                   ],
                 ],
               },
             },
             {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Ref": "alarmshandlermobileaccountrolearn",
-                },
-                {
-                  "Ref": "alarmshandlertargetingaccountrolearn",
-                },
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
               ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "alarmshandlerqueue255509D6",
+                  "Arn",
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
@@ -409,7 +465,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "alarmshandlerlambdaSqsEventSourcealarmshandlerCODEalarmshandlerqueue16858B0A6ACA8CB7": {
+    "alarmshandlerlambdaSqsEventSourcealarmshandlerCODEqueueB091B1E7E064DEC2": {
       "Properties": {
         "EventSourceArn": {
           "Fn::GetAtt": [
@@ -435,7 +491,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -460,6 +516,10 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
         },
         "Tags": [
           {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -469,7 +529,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -480,7 +540,405 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
     },
-    "alarmshandlerqueuePolicy2451CBBF": {
+    "alarmshandlerscheduledcloudwatchpolicy4140AFEC": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "cloudwatch:DescribeAlarms",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "alarmshandlerscheduledcloudwatchpolicy4140AFEC",
+        "Roles": [
+          {
+            "Ref": "alarmshandlerscheduledlambdaServiceRole62346D7A",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "alarmshandlerscheduledlambdaB0DE9B60": {
+      "DependsOn": [
+        "alarmshandlerscheduledlambdaServiceRoleDefaultPolicy2CDBB3F4",
+        "alarmshandlerscheduledlambdaServiceRole62346D7A",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/CODE/alarms-handler/alarms-handler.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "APP": "alarms-handler",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
+            "STAGE": "CODE",
+          },
+        },
+        "FunctionName": "alarms-handler-scheduled-CODE",
+        "Handler": "indexScheduled.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "alarmshandlerscheduledlambdaServiceRole62346D7A",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Timeout": 15,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "alarmshandlerscheduledlambdaServiceRole62346D7A": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "alarmshandlerscheduledlambdaServiceRoleDefaultPolicy2CDBB3F4": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/CODE/alarms-handler/alarms-handler.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/alarms-handler",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/CODE/support/alarms-handler/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "alarmshandlerscheduledlambdaServiceRoleDefaultPolicy2CDBB3F4",
+        "Roles": [
+          {
+            "Ref": "alarmshandlerscheduledlambdaServiceRole62346D7A",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "alarmshandlerscheduledlambdascheduledlambdacron08MONFRI0AllowEventRulealarmshandlerCODEalarmshandlerscheduledlambda657C4C5A944E9D3D": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "alarmshandlerscheduledlambdaB0DE9B60",
+            "Arn",
+          ],
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "alarmshandlerscheduledlambdascheduledlambdacron08MONFRI0CFD573D7",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "alarmshandlerscheduledlambdascheduledlambdacron08MONFRI0CFD573D7": {
+      "Properties": {
+        "Description": "notify about alarms in Alarm state every morning",
+        "ScheduleExpression": "cron(0 8 ? * MON-FRI *)",
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "alarmshandlerscheduledlambdaB0DE9B60",
+                "Arn",
+              ],
+            },
+            "Id": "Target0",
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "alarmshandlertopic003C974E": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "TopicName": "alarms-handler-topic-CODE",
+      },
+      "Type": "AWS::SNS::Topic",
+    },
+    "alarmshandlertopicPolicy7401CE24": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sns:Publish",
+              "Condition": {
+                "ArnLike": {
+                  "aws:SourceArn": [
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:cloudwatch:eu-west-1:",
+                          {
+                            "Ref": "appConfigaccountsMOBILEid",
+                          },
+                          ":alarm:*",
+                        ],
+                      ],
+                    },
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:cloudwatch:eu-west-1:",
+                          {
+                            "Ref": "appConfigaccountsTARGETINGid",
+                          },
+                          ":alarm:*",
+                        ],
+                      ],
+                    },
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:cloudwatch:eu-west-1:",
+                          {
+                            "Ref": "AWS::AccountId",
+                          },
+                          ":alarm:*",
+                        ],
+                      ],
+                    },
+                  ],
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": "*",
+              },
+              "Resource": {
+                "Ref": "alarmshandlertopic003C974E",
+              },
+              "Sid": "0",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Topics": [
+          {
+            "Ref": "alarmshandlertopic003C974E",
+          },
+        ],
+      },
+      "Type": "AWS::SNS::TopicPolicy",
+    },
+    "deadlettersalarmshandlerqueueC7A67616": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "alarms-handler-dlq-CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "queuePolicy09B5701B": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -515,9 +973,9 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       },
       "Type": "AWS::SQS::QueuePolicy",
     },
-    "alarmshandlerqueuealarmshandlerCODEalarmshandlertopic53848409AA067E1C": {
+    "queuealarmshandlerCODEalarmshandlertopic53848409F91057D0": {
       "DependsOn": [
-        "alarmshandlerqueuePolicy2451CBBF",
+        "queuePolicy09B5701B",
       ],
       "Properties": {
         "Endpoint": {
@@ -533,91 +991,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       },
       "Type": "AWS::SNS::Subscription",
     },
-    "alarmshandlerscheduledcloudwatchpolicy4140AFEC": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "cloudwatch:ListTagsForResource",
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-            {
-              "Action": "cloudwatch:DescribeAlarms",
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "alarmshandlerscheduledcloudwatchpolicy4140AFEC",
-        "Roles": [
-          {
-            "Ref": "alarmshandlerscheduledlambdaServiceRole62346D7A",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "alarmshandlerscheduledlambdaB0DE9B60": {
-      "DependsOn": [
-        "alarmshandlerscheduledlambdaServiceRoleDefaultPolicy2CDBB3F4",
-        "alarmshandlerscheduledlambdaServiceRole62346D7A",
-      ],
-      "Properties": {
-        "Code": {
-          "S3Bucket": {
-            "Ref": "DistributionBucketName",
-          },
-          "S3Key": "membership/CODE/alarms-handler/alarms-handler.zip",
-        },
-        "Environment": {
-          "Variables": {
-            "APP": "alarms-handler",
-            "STACK": "membership",
-            "STAGE": "CODE",
-          },
-        },
-        "FunctionName": "alarms-handler-scheduled-CODE",
-        "Handler": "indexScheduled.handler",
-        "LoggingConfig": {
-          "LogFormat": "Text",
-        },
-        "MemorySize": 1024,
-        "Role": {
-          "Fn::GetAtt": [
-            "alarmshandlerscheduledlambdaServiceRole62346D7A",
-            "Arn",
-          ],
-        },
-        "Runtime": "nodejs20.x",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "alarms-handler",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "Timeout": 15,
-      },
-      "Type": "AWS::Lambda::Function",
-    },
-    "alarmshandlerscheduledlambdaErrorPercentageAlarmForLambda513D2105": {
+    "scheduledErrorPercentageAlarmForLambda520EA245": {
       "Properties": {
         "ActionsEnabled": false,
         "AlarmActions": [
@@ -728,57 +1102,6 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
         ],
         "Tags": [
           {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "Threshold": 0,
-        "TreatMissingData": "notBreaching",
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
-    "alarmshandlerscheduledlambdaServiceRole62346D7A": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
             "Key": "App",
             "Value": "alarms-handler",
           },
@@ -792,284 +1115,17 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
             "Value": "CODE",
           },
         ],
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching",
       },
-      "Type": "AWS::IAM::Role",
-    },
-    "alarmshandlerscheduledlambdaServiceRoleDefaultPolicy2CDBB3F4": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "s3:GetObject*",
-                "s3:GetBucket*",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                      "/membership/CODE/alarms-handler/alarms-handler.zip",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": "ssm:GetParametersByPath",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/CODE/membership/alarms-handler",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "ssm:GetParameters",
-                "ssm:GetParameter",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/CODE/membership/alarms-handler/*",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Ref": "alarmshandlermobileaccountrolearn",
-                },
-                {
-                  "Ref": "alarmshandlertargetingaccountrolearn",
-                },
-              ],
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "alarmshandlerscheduledlambdaServiceRoleDefaultPolicy2CDBB3F4",
-        "Roles": [
-          {
-            "Ref": "alarmshandlerscheduledlambdaServiceRole62346D7A",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "alarmshandlerscheduledlambdaalarmshandlerscheduledlambdacron08MONFRI05D79D892": {
-      "Properties": {
-        "Description": "notify about alarms in Alarm state every morning",
-        "ScheduleExpression": "cron(0 8 ? * MON-FRI *)",
-        "State": "ENABLED",
-        "Targets": [
-          {
-            "Arn": {
-              "Fn::GetAtt": [
-                "alarmshandlerscheduledlambdaB0DE9B60",
-                "Arn",
-              ],
-            },
-            "Id": "Target0",
-          },
-        ],
-      },
-      "Type": "AWS::Events::Rule",
-    },
-    "alarmshandlerscheduledlambdaalarmshandlerscheduledlambdacron08MONFRI0AllowEventRulealarmshandlerCODEalarmshandlerscheduledlambda657C4C5AAB8684EC": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "alarmshandlerscheduledlambdaB0DE9B60",
-            "Arn",
-          ],
-        },
-        "Principal": "events.amazonaws.com",
-        "SourceArn": {
-          "Fn::GetAtt": [
-            "alarmshandlerscheduledlambdaalarmshandlerscheduledlambdacron08MONFRI05D79D892",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "alarmshandlertopic003C974E": {
-      "Properties": {
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "TopicName": "alarms-handler-topic-CODE",
-      },
-      "Type": "AWS::SNS::Topic",
-    },
-    "alarmshandlertopicPolicy7401CE24": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sns:Publish",
-              "Condition": {
-                "ArnLike": {
-                  "aws:SourceArn": [
-                    {
-                      "Fn::Join": [
-                        "",
-                        [
-                          "arn:aws:cloudwatch:eu-west-1:",
-                          {
-                            "Ref": "alarmshandlermobileawsaccount",
-                          },
-                          ":alarm:*",
-                        ],
-                      ],
-                    },
-                    {
-                      "Fn::Join": [
-                        "",
-                        [
-                          "arn:aws:cloudwatch:eu-west-1:",
-                          {
-                            "Ref": "alarmshandlertargetingawsaccount",
-                          },
-                          ":alarm:*",
-                        ],
-                      ],
-                    },
-                    {
-                      "Fn::Join": [
-                        "",
-                        [
-                          "arn:aws:cloudwatch:eu-west-1:",
-                          {
-                            "Ref": "AWS::AccountId",
-                          },
-                          ":alarm:*",
-                        ],
-                      ],
-                    },
-                  ],
-                },
-              },
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": "*",
-              },
-              "Resource": {
-                "Ref": "alarmshandlertopic003C974E",
-              },
-              "Sid": "0",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "Topics": [
-          {
-            "Ref": "alarmshandlertopic003C974E",
-          },
-        ],
-      },
-      "Type": "AWS::SNS::TopicPolicy",
-    },
-    "deadlettersalarmshandlerqueueC7A67616": {
-      "DeletionPolicy": "Delete",
-      "Properties": {
-        "MessageRetentionPeriod": 1209600,
-        "QueueName": "dead-letters-alarms-handler-queue-CODE",
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::SQS::Queue",
-      "UpdateReplacePolicy": "Delete",
+      "Type": "AWS::CloudWatch::Alarm",
     },
   },
 }
@@ -1079,15 +1135,8 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
-      "GuStringParameter",
-      "GuStringParameter",
-      "GuStringParameter",
-      "GuStringParameter",
-      "GuStringParameter",
+      "GuAllowPolicy",
       "GuDistributionBucketParameter",
-      "GuLambdaFunction",
-      "GuAlarm",
-      "GuScheduledLambda",
       "GuLambdaErrorPercentageAlarm",
     ],
     "gu:cdk:version": "TEST",
@@ -1098,29 +1147,34 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "alarmshandlerbackupemailaddress": {
-      "Description": "Alarm email address to use if the alarms handler itself fails",
-      "Type": "String",
+    "appConfigaccountsMOBILEid": {
+      "Default": "/PROD/support/alarms-handler/accounts/MOBILE/id",
+      "Description": "parameter to look up accounts/MOBILE/id from SSM",
+      "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "alarmshandlermobileaccountrolearn": {
+    "appConfigaccountsMOBILEroleArn": {
+      "Default": "/PROD/support/alarms-handler/accounts/MOBILE/roleArn",
       "Description": "ARN of role in the mobile account which allows cloudwatch:ListTagsForResource",
-      "Type": "String",
+      "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "alarmshandlermobileawsaccount": {
-      "Description": "ID of the mobile aws account",
-      "Type": "String",
+    "appConfigaccountsTARGETINGid": {
+      "Default": "/PROD/support/alarms-handler/accounts/TARGETING/id",
+      "Description": "parameter to look up accounts/TARGETING/id from SSM",
+      "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "alarmshandlertargetingaccountrolearn": {
+    "appConfigaccountsTARGETINGroleArn": {
+      "Default": "/PROD/support/alarms-handler/accounts/TARGETING/roleArn",
       "Description": "ARN of role in the targeting account which allows cloudwatch:ListTagsForResource",
-      "Type": "String",
+      "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "alarmshandlertargetingawsaccount": {
-      "Description": "ID of the targeting aws account",
-      "Type": "String",
+    "appConfigbackupEmail": {
+      "Default": "/PROD/support/alarms-handler/backupEmail",
+      "Description": "Alarm email address to use if the alarms handler itself fails",
+      "Type": "AWS::SSM::Parameter::Value<String>",
     },
   },
   "Resources": {
-    "alarmshandleralarm5F97F469": {
+    "alarm99114523": {
       "Properties": {
         "ActionsEnabled": true,
         "AlarmActions": [
@@ -1147,8 +1201,21 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "There was an error in the lambda function that handles CloudWatch alarms.",
-        "AlarmName": "PROD: Failed to handle CloudWatch alarm",
+        "AlarmDescription": "alarms-handler could not process a message and it ended up on the DLQ search the logs below for "error" for more information. Impact: could not send an alarm notification to a chat channel",
+        "AlarmName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Fn::GetAtt": [
+                  "deadlettersalarmshandlerqueueC7A67616",
+                  "QueueName",
+                ],
+              },
+              " has messages",
+            ],
+          ],
+        },
         "ComparisonOperator": "GreaterThanThreshold",
         "Dimensions": [
           {
@@ -1161,12 +1228,30 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
             },
           },
         ],
-        "EvaluationPeriods": 24,
+        "EvaluationPeriods": 1,
         "MetricName": "ApproximateNumberOfMessagesVisible",
         "Namespace": "AWS/SQS",
         "Period": 60,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "alarmshandlerlambda383D2BAA",
+                  },
+                ],
+              ],
+            },
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -1177,7 +1262,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1187,6 +1272,37 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
         "Threshold": 0,
       },
       "Type": "AWS::CloudWatch::Alarm",
+    },
+    "alarmshandlerassumerolepolicyA9C0D8AA": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Ref": "appConfigaccountsMOBILEroleArn",
+                },
+                {
+                  "Ref": "appConfigaccountsTARGETINGroleArn",
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "alarmshandlerassumerolepolicyA9C0D8AA",
+        "Roles": [
+          {
+            "Ref": "alarmshandlerlambdaServiceRole3953DF7F",
+          },
+          {
+            "Ref": "alarmshandlerscheduledlambdaServiceRole62346D7A",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "alarmshandlercloudwatchpolicy7746710B": {
       "Properties": {
@@ -1205,6 +1321,9 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
           {
             "Ref": "alarmshandlerlambdaServiceRole3953DF7F",
           },
+          {
+            "Ref": "alarmshandlerscheduledlambdaServiceRole62346D7A",
+          },
         ],
       },
       "Type": "AWS::IAM::Policy",
@@ -1212,6 +1331,10 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
     "alarmshandleremailtopic52F6F612": {
       "Properties": {
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -1222,7 +1345,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1236,7 +1359,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
     "alarmshandleremailtopicTokenSubscription191C59777": {
       "Properties": {
         "Endpoint": {
-          "Ref": "alarmshandlerbackupemailaddress",
+          "Ref": "appConfigbackupEmail",
         },
         "Protocol": "email",
         "TopicArn": {
@@ -1255,12 +1378,13 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/PROD/alarms-handler/alarms-handler.zip",
+          "S3Key": "support/PROD/alarms-handler/alarms-handler.zip",
         },
         "Environment": {
           "Variables": {
             "APP": "alarms-handler",
-            "STACK": "membership",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
             "STAGE": "PROD",
           },
         },
@@ -1292,7 +1416,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1346,7 +1470,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1360,22 +1484,6 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       "Properties": {
         "PolicyDocument": {
           "Statement": [
-            {
-              "Action": [
-                "sqs:ReceiveMessage",
-                "sqs:ChangeMessageVisibility",
-                "sqs:GetQueueUrl",
-                "sqs:DeleteMessage",
-                "sqs:GetQueueAttributes",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "alarmshandlerqueue255509D6",
-                  "Arn",
-                ],
-              },
-            },
             {
               "Action": [
                 "s3:GetObject*",
@@ -1411,7 +1519,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/PROD/alarms-handler/alarms-handler.zip",
+                      "/support/PROD/alarms-handler/alarms-handler.zip",
                     ],
                   ],
                 },
@@ -1432,7 +1540,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/alarms-handler",
+                    ":parameter/PROD/support/alarms-handler",
                   ],
                 ],
               },
@@ -1455,22 +1563,26 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/alarms-handler/*",
+                    ":parameter/PROD/support/alarms-handler/*",
                   ],
                 ],
               },
             },
             {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Ref": "alarmshandlermobileaccountrolearn",
-                },
-                {
-                  "Ref": "alarmshandlertargetingaccountrolearn",
-                },
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
               ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "alarmshandlerqueue255509D6",
+                  "Arn",
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
@@ -1484,7 +1596,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Policy",
     },
-    "alarmshandlerlambdaSqsEventSourcealarmshandlerPRODalarmshandlerqueue21D5C3E59ECCFD65": {
+    "alarmshandlerlambdaSqsEventSourcealarmshandlerPRODqueueAA5FF8207F55C0C1": {
       "Properties": {
         "EventSourceArn": {
           "Fn::GetAtt": [
@@ -1510,7 +1622,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1535,6 +1647,10 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
         },
         "Tags": [
           {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1544,7 +1660,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1555,7 +1671,405 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
     },
-    "alarmshandlerqueuePolicy2451CBBF": {
+    "alarmshandlerscheduledcloudwatchpolicy4140AFEC": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "cloudwatch:DescribeAlarms",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "alarmshandlerscheduledcloudwatchpolicy4140AFEC",
+        "Roles": [
+          {
+            "Ref": "alarmshandlerscheduledlambdaServiceRole62346D7A",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "alarmshandlerscheduledlambdaB0DE9B60": {
+      "DependsOn": [
+        "alarmshandlerscheduledlambdaServiceRoleDefaultPolicy2CDBB3F4",
+        "alarmshandlerscheduledlambdaServiceRole62346D7A",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "DistributionBucketName",
+          },
+          "S3Key": "support/PROD/alarms-handler/alarms-handler.zip",
+        },
+        "Environment": {
+          "Variables": {
+            "APP": "alarms-handler",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
+            "STAGE": "PROD",
+          },
+        },
+        "FunctionName": "alarms-handler-scheduled-PROD",
+        "Handler": "indexScheduled.handler",
+        "LoggingConfig": {
+          "LogFormat": "Text",
+        },
+        "MemorySize": 1024,
+        "Role": {
+          "Fn::GetAtt": [
+            "alarmshandlerscheduledlambdaServiceRole62346D7A",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Timeout": 15,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "alarmshandlerscheduledlambdaServiceRole62346D7A": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "alarmshandlerscheduledlambdaServiceRoleDefaultPolicy2CDBB3F4": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                    ],
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "DistributionBucketName",
+                      },
+                      "/support/PROD/alarms-handler/alarms-handler.zip",
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              "Action": "ssm:GetParametersByPath",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/alarms-handler",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "ssm:GetParameters",
+                "ssm:GetParameter",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:ssm:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":parameter/PROD/support/alarms-handler/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "alarmshandlerscheduledlambdaServiceRoleDefaultPolicy2CDBB3F4",
+        "Roles": [
+          {
+            "Ref": "alarmshandlerscheduledlambdaServiceRole62346D7A",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "alarmshandlerscheduledlambdascheduledlambdacron08MONFRI0AllowEventRulealarmshandlerPRODalarmshandlerscheduledlambda3FE085C9B9A8DA95": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "alarmshandlerscheduledlambdaB0DE9B60",
+            "Arn",
+          ],
+        },
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "alarmshandlerscheduledlambdascheduledlambdacron08MONFRI0CFD573D7",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "alarmshandlerscheduledlambdascheduledlambdacron08MONFRI0CFD573D7": {
+      "Properties": {
+        "Description": "notify about alarms in Alarm state every morning",
+        "ScheduleExpression": "cron(0 8 ? * MON-FRI *)",
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "alarmshandlerscheduledlambdaB0DE9B60",
+                "Arn",
+              ],
+            },
+            "Id": "Target0",
+          },
+        ],
+      },
+      "Type": "AWS::Events::Rule",
+    },
+    "alarmshandlertopic003C974E": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "TopicName": "alarms-handler-topic-PROD",
+      },
+      "Type": "AWS::SNS::Topic",
+    },
+    "alarmshandlertopicPolicy7401CE24": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sns:Publish",
+              "Condition": {
+                "ArnLike": {
+                  "aws:SourceArn": [
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:cloudwatch:eu-west-1:",
+                          {
+                            "Ref": "appConfigaccountsMOBILEid",
+                          },
+                          ":alarm:*",
+                        ],
+                      ],
+                    },
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:cloudwatch:eu-west-1:",
+                          {
+                            "Ref": "appConfigaccountsTARGETINGid",
+                          },
+                          ":alarm:*",
+                        ],
+                      ],
+                    },
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:cloudwatch:eu-west-1:",
+                          {
+                            "Ref": "AWS::AccountId",
+                          },
+                          ":alarm:*",
+                        ],
+                      ],
+                    },
+                  ],
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": "*",
+              },
+              "Resource": {
+                "Ref": "alarmshandlertopic003C974E",
+              },
+              "Sid": "0",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Topics": [
+          {
+            "Ref": "alarmshandlertopic003C974E",
+          },
+        ],
+      },
+      "Type": "AWS::SNS::TopicPolicy",
+    },
+    "deadlettersalarmshandlerqueueC7A67616": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "MessageRetentionPeriod": 1209600,
+        "QueueName": "alarms-handler-dlq-PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "queuePolicy09B5701B": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -1590,9 +2104,9 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       },
       "Type": "AWS::SQS::QueuePolicy",
     },
-    "alarmshandlerqueuealarmshandlerPRODalarmshandlertopic952FCC2B727BB750": {
+    "queuealarmshandlerPRODalarmshandlertopic952FCC2BCB581279": {
       "DependsOn": [
-        "alarmshandlerqueuePolicy2451CBBF",
+        "queuePolicy09B5701B",
       ],
       "Properties": {
         "Endpoint": {
@@ -1608,91 +2122,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       },
       "Type": "AWS::SNS::Subscription",
     },
-    "alarmshandlerscheduledcloudwatchpolicy4140AFEC": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "cloudwatch:ListTagsForResource",
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-            {
-              "Action": "cloudwatch:DescribeAlarms",
-              "Effect": "Allow",
-              "Resource": "*",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "alarmshandlerscheduledcloudwatchpolicy4140AFEC",
-        "Roles": [
-          {
-            "Ref": "alarmshandlerscheduledlambdaServiceRole62346D7A",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "alarmshandlerscheduledlambdaB0DE9B60": {
-      "DependsOn": [
-        "alarmshandlerscheduledlambdaServiceRoleDefaultPolicy2CDBB3F4",
-        "alarmshandlerscheduledlambdaServiceRole62346D7A",
-      ],
-      "Properties": {
-        "Code": {
-          "S3Bucket": {
-            "Ref": "DistributionBucketName",
-          },
-          "S3Key": "membership/PROD/alarms-handler/alarms-handler.zip",
-        },
-        "Environment": {
-          "Variables": {
-            "APP": "alarms-handler",
-            "STACK": "membership",
-            "STAGE": "PROD",
-          },
-        },
-        "FunctionName": "alarms-handler-scheduled-PROD",
-        "Handler": "indexScheduled.handler",
-        "LoggingConfig": {
-          "LogFormat": "Text",
-        },
-        "MemorySize": 1024,
-        "Role": {
-          "Fn::GetAtt": [
-            "alarmshandlerscheduledlambdaServiceRole62346D7A",
-            "Arn",
-          ],
-        },
-        "Runtime": "nodejs20.x",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "alarms-handler",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "Timeout": 15,
-      },
-      "Type": "AWS::Lambda::Function",
-    },
-    "alarmshandlerscheduledlambdaErrorPercentageAlarmForLambda513D2105": {
+    "scheduledErrorPercentageAlarmForLambda520EA245": {
       "Properties": {
         "ActionsEnabled": true,
         "AlarmActions": [
@@ -1803,57 +2233,6 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
         ],
         "Tags": [
           {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "Threshold": 0,
-        "TreatMissingData": "notBreaching",
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
-    "alarmshandlerscheduledlambdaServiceRole62346D7A": {
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "lambda.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
             "Key": "App",
             "Value": "alarms-handler",
           },
@@ -1867,284 +2246,17 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
             "Value": "PROD",
           },
         ],
+        "Threshold": 0,
+        "TreatMissingData": "notBreaching",
       },
-      "Type": "AWS::IAM::Role",
-    },
-    "alarmshandlerscheduledlambdaServiceRoleDefaultPolicy2CDBB3F4": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "s3:GetObject*",
-                "s3:GetBucket*",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                    ],
-                  ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      "arn:",
-                      {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      {
-                        "Ref": "DistributionBucketName",
-                      },
-                      "/membership/PROD/alarms-handler/alarms-handler.zip",
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              "Action": "ssm:GetParametersByPath",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/PROD/membership/alarms-handler",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": [
-                "ssm:GetParameters",
-                "ssm:GetParameter",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:ssm:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":parameter/PROD/membership/alarms-handler/*",
-                  ],
-                ],
-              },
-            },
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Resource": [
-                {
-                  "Ref": "alarmshandlermobileaccountrolearn",
-                },
-                {
-                  "Ref": "alarmshandlertargetingaccountrolearn",
-                },
-              ],
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "alarmshandlerscheduledlambdaServiceRoleDefaultPolicy2CDBB3F4",
-        "Roles": [
-          {
-            "Ref": "alarmshandlerscheduledlambdaServiceRole62346D7A",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "alarmshandlerscheduledlambdaalarmshandlerscheduledlambdacron08MONFRI05D79D892": {
-      "Properties": {
-        "Description": "notify about alarms in Alarm state every morning",
-        "ScheduleExpression": "cron(0 8 ? * MON-FRI *)",
-        "State": "ENABLED",
-        "Targets": [
-          {
-            "Arn": {
-              "Fn::GetAtt": [
-                "alarmshandlerscheduledlambdaB0DE9B60",
-                "Arn",
-              ],
-            },
-            "Id": "Target0",
-          },
-        ],
-      },
-      "Type": "AWS::Events::Rule",
-    },
-    "alarmshandlerscheduledlambdaalarmshandlerscheduledlambdacron08MONFRI0AllowEventRulealarmshandlerPRODalarmshandlerscheduledlambda3FE085C9159D4A00": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "alarmshandlerscheduledlambdaB0DE9B60",
-            "Arn",
-          ],
-        },
-        "Principal": "events.amazonaws.com",
-        "SourceArn": {
-          "Fn::GetAtt": [
-            "alarmshandlerscheduledlambdaalarmshandlerscheduledlambdacron08MONFRI05D79D892",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "alarmshandlertopic003C974E": {
-      "Properties": {
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "TopicName": "alarms-handler-topic-PROD",
-      },
-      "Type": "AWS::SNS::Topic",
-    },
-    "alarmshandlertopicPolicy7401CE24": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sns:Publish",
-              "Condition": {
-                "ArnLike": {
-                  "aws:SourceArn": [
-                    {
-                      "Fn::Join": [
-                        "",
-                        [
-                          "arn:aws:cloudwatch:eu-west-1:",
-                          {
-                            "Ref": "alarmshandlermobileawsaccount",
-                          },
-                          ":alarm:*",
-                        ],
-                      ],
-                    },
-                    {
-                      "Fn::Join": [
-                        "",
-                        [
-                          "arn:aws:cloudwatch:eu-west-1:",
-                          {
-                            "Ref": "alarmshandlertargetingawsaccount",
-                          },
-                          ":alarm:*",
-                        ],
-                      ],
-                    },
-                    {
-                      "Fn::Join": [
-                        "",
-                        [
-                          "arn:aws:cloudwatch:eu-west-1:",
-                          {
-                            "Ref": "AWS::AccountId",
-                          },
-                          ":alarm:*",
-                        ],
-                      ],
-                    },
-                  ],
-                },
-              },
-              "Effect": "Allow",
-              "Principal": {
-                "AWS": "*",
-              },
-              "Resource": {
-                "Ref": "alarmshandlertopic003C974E",
-              },
-              "Sid": "0",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "Topics": [
-          {
-            "Ref": "alarmshandlertopic003C974E",
-          },
-        ],
-      },
-      "Type": "AWS::SNS::TopicPolicy",
-    },
-    "deadlettersalarmshandlerqueueC7A67616": {
-      "DeletionPolicy": "Delete",
-      "Properties": {
-        "MessageRetentionPeriod": 1209600,
-        "QueueName": "dead-letters-alarms-handler-queue-PROD",
-        "Tags": [
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "membership",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::SQS::Queue",
-      "UpdateReplacePolicy": "Delete",
+      "Type": "AWS::CloudWatch::Alarm",
     },
   },
 }
