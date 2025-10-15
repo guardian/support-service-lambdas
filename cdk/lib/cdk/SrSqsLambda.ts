@@ -3,8 +3,9 @@ import { Duration } from 'aws-cdk-lib';
 import { ComparisonOperator } from 'aws-cdk-lib/aws-cloudwatch';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
+import type { Construct } from 'constructs';
 import type { SrLambdaProps } from './SrLambda';
-import { getId, getNameWithStage, SrLambda } from './SrLambda';
+import { getNameWithStage, SrLambda } from './SrLambda';
 import type { SrLambdaAlarmProps } from './SrLambdaAlarm';
 import { SrLambdaAlarm } from './SrLambdaAlarm';
 import type { SrStack } from './SrStack';
@@ -28,29 +29,25 @@ type SrSqsLambdaProps = SrLambdaProps & {
  *
  * It comes with a default queue, dlq and alarm.
  */
-export class SrSqsLambda extends SrLambda {
+export class SrSqsLambda extends SrLambda implements Construct {
 	readonly inputQueue: Queue;
 	readonly inputDeadLetterQueue: Queue;
-	constructor(scope: SrStack, props: SrSqsLambdaProps) {
+	constructor(scope: SrStack, id: string, props: SrSqsLambdaProps) {
 		const finalProps = {
 			nameSuffix: props.nameSuffix,
 			lambdaOverrides: props.lambdaOverrides,
 		};
 
-		super(scope, finalProps);
+		super(scope, id, finalProps);
 
 		const dlqName = getNameWithStage(scope, props.nameSuffix, 'dlq');
-		this.inputDeadLetterQueue = new Queue(
-			scope,
-			getId(props.nameSuffix, 'dlq'),
-			{
-				queueName: dlqName,
-				retentionPeriod: Duration.days(14),
-			},
-		);
+		this.inputDeadLetterQueue = new Queue(scope, 'DLQ', {
+			queueName: dlqName,
+			retentionPeriod: Duration.days(14),
+		});
 
 		const queueName = getNameWithStage(scope, props.nameSuffix, 'queue');
-		this.inputQueue = new Queue(scope, getId(props.nameSuffix, 'queue'), {
+		this.inputQueue = new Queue(scope, 'Queue', {
 			queueName,
 			deadLetterQueue: {
 				queue: this.inputDeadLetterQueue,
@@ -61,7 +58,7 @@ export class SrSqsLambda extends SrLambda {
 		super.addEventSource(new SqsEventSource(this.inputQueue));
 
 		if (!props.monitoring?.noMonitoring) {
-			new SrLambdaAlarm(scope, getId(props.nameSuffix, 'alarm'), {
+			new SrLambdaAlarm(scope, 'Alarm', {
 				lambdaFunctionNames: this.functionName,
 				app: scope.app,
 				alarmName: this.inputDeadLetterQueue.queueName + ' has messages',

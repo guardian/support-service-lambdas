@@ -1,5 +1,5 @@
 import { GuAllowPolicy } from '@guardian/cdk/lib/constructs/iam';
-import type { App, CfnResource } from 'aws-cdk-lib';
+import type { App } from 'aws-cdk-lib';
 import { Schedule } from 'aws-cdk-lib/aws-events';
 import {
 	AnyPrincipal,
@@ -13,6 +13,7 @@ import {
 	SqsSubscription,
 } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { SrAppConfigKey } from './cdk/SrAppConfigKey';
+import { getNameWithStage } from './cdk/SrLambda';
 import { SrScheduledLambda } from './cdk/SrScheduledLambda';
 import { SrSqsLambda } from './cdk/SrSqsLambda';
 import type { SrStageNames } from './cdk/SrStack';
@@ -46,8 +47,8 @@ export class AlarmsHandler extends SrStack {
 			'Alarm email address to use if the alarms handler itself fails',
 		);
 
-		const backupEmailTopic = new Topic(this, `${app}-email-topic`, {
-			topicName: `${app}-email-topic-${this.stage}`,
+		const backupEmailTopic = new Topic(this, 'EmailTopic', {
+			topicName: getNameWithStage(this, 'email-topic'),
 		});
 
 		backupEmailTopic.addSubscription(
@@ -63,22 +64,16 @@ export class AlarmsHandler extends SrStack {
 			),
 		];
 
-		const triggeredLambda = new SrSqsLambda(this, {
+		const triggeredLambda = new SrSqsLambda(this, 'TriggeredLambda', {
 			errorImpact: 'could not send an alarm notification to a chat channel',
 			monitoring: {
 				snsTopicName: backupEmailTopic.topicName, // we don't send to our own topic to avoid a loop
 			},
 		});
-		(
-			triggeredLambda.inputQueue.node.defaultChild as CfnResource
-		).overrideLogicalId('alarmshandlerqueue255509D6');
-		(
-			triggeredLambda.inputDeadLetterQueue.node.defaultChild as CfnResource
-		).overrideLogicalId('deadlettersalarmshandlerqueueC7A67616');
 
 		triggeredLambda.addPolicies(...commonPolicies);
 
-		const triggerSnsTopic = new Topic(this, `${app}-topic`, {
+		const triggerSnsTopic = new Topic(this, 'Topic', {
 			topicName: `${app}-topic-${this.stage}`,
 		});
 
@@ -95,7 +90,7 @@ export class AlarmsHandler extends SrStack {
 			),
 		);
 
-		const scheduledLambda = new SrScheduledLambda(this, {
+		const scheduledLambda = new SrScheduledLambda(this, 'ScheduledLambda', {
 			nameSuffix: 'scheduled',
 			rules: [
 				{
@@ -120,7 +115,7 @@ export class AlarmsHandler extends SrStack {
 }
 
 function alarmTagFetchingPolicy(scope: SrStack) {
-	return new Policy(scope, `${scope.app}-cloudwatch-policy`, {
+	return new Policy(scope, 'CloudwatchPolicy', {
 		statements: [
 			new PolicyStatement({
 				actions: ['cloudwatch:ListTagsForResource'],
@@ -135,14 +130,14 @@ function crossAccountAlarmTagFetchingPolicy(
 	mobileAccountRoleArn: string,
 	targetingAccountRoleArn: string,
 ) {
-	return new GuAllowPolicy(scope, `${scope.app}-assume-role-policy`, {
+	return new GuAllowPolicy(scope, `AssumeRolePolicy`, {
 		actions: ['sts:AssumeRole'],
 		resources: [mobileAccountRoleArn, targetingAccountRoleArn],
 	});
 }
 
 function describeAlarmsPolicy(scope: SrStack) {
-	return new Policy(scope, `${scope.app}-scheduled-cloudwatch-policy`, {
+	return new Policy(scope, `ScheduledCloudwatchPolicy`, {
 		statements: [
 			new PolicyStatement({
 				actions: ['cloudwatch:DescribeAlarms'],

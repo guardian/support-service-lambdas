@@ -1,6 +1,6 @@
 import { GuStringParameter } from '@guardian/cdk/lib/constructs/core';
-import type { SrStack } from './SrStack';
 import { getId } from './SrLambda';
+import type { SrStack } from './SrStack';
 
 /**
  * Looks up a specific piece of app config from SSM to be used in the CFN.
@@ -14,7 +14,7 @@ export class SrAppConfigKey extends GuStringParameter {
 	constructor(scope: SrStack, configKey: string, description?: string) {
 		const appIdentitySSMPrefix =
 			'/' + [scope.stage, scope.stack, scope.app].join('/') + '/';
-		super(scope, getId(undefined, 'appConfig', ...configKey.split('/')), {
+		super(scope, getId('appConfig', ...configKey.split('/')), {
 			description: description ?? `parameter to look up ${configKey} from SSM`,
 			fromSSM: true,
 			default: appIdentitySSMPrefix + configKey,

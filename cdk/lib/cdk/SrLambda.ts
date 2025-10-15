@@ -46,7 +46,7 @@ function getLambdaDefaultProps(
  * This is a lambda function construct with sensible defaults for this repo.
  */
 export class SrLambda extends GuLambdaFunction {
-	constructor(scope: SrStack, props: SrLambdaProps) {
+	constructor(scope: SrStack, id: string, props: SrLambdaProps) {
 		const defaultGuLambdaFunctionProps = getLambdaDefaultProps(
 			scope,
 			props.nameSuffix,
@@ -60,13 +60,7 @@ export class SrLambda extends GuLambdaFunction {
 			},
 		};
 
-		super(
-			scope,
-			[scope.app, props.nameSuffix, 'lambda']
-				.filter((a) => a !== undefined)
-				.join('-'),
-			guLambdaFunctionProps,
-		);
+		super(scope, id, guLambdaFunctionProps);
 	}
 
 	addPolicies(...policies: GuPolicy[]) {
@@ -93,17 +87,12 @@ export function getNameWithStage(
 }
 
 /**
- * produces a readable, predictable and stack-unique id of the form nameSuffix-item
+ * produces a readable, predictable and stack-unique id of the form ResourceName-Item
  * used for when things need to be unique within the stack
  *
- * @param nameSuffix if multiple lambdas are in the app, adds my-api-nameSuffix-PROD
- * @param resourceName e.g. "queue" or "lambda"
+ * @param resourceName e.g. "Queue" or "Lambda"
  * @param items any extended information to include
  */
-export function getId(
-	nameSuffix: string | undefined,
-	resourceName: string,
-	...items: string[]
-) {
-	return `${nameSuffix ? nameSuffix + '-' : ''}${resourceName}-${items.join('-')}`;
+export function getId(resourceName: string, ...items: string[]) {
+	return `${resourceName}-${items.join('-')}`;
 }

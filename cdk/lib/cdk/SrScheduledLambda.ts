@@ -1,10 +1,15 @@
 import type { GuScheduledLambdaProps } from '@guardian/cdk';
 import type { NoMonitoring } from '@guardian/cdk/lib/constructs/cloudwatch';
 import { GuLambdaErrorPercentageAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
+import type {
+	AppIdentity,
+	StackStageIdentity,
+} from '@guardian/cdk/lib/constructs/core';
 import { Rule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
+import type { Construct } from 'constructs';
 import type { SrLambdaProps } from './SrLambda';
-import { getId, SrLambda } from './SrLambda';
+import { SrLambda } from './SrLambda';
 import type { SrLambdaAlarmProps } from './SrLambdaAlarm';
 import type { SrStack } from './SrStack';
 
@@ -21,40 +26,33 @@ type SrScheduledLambdaProps = SrLambdaProps & {
 		| (Partial<SrLambdaAlarmProps> & { noMonitoring?: false });
 };
 
+export type SrConstruct = Construct & AppIdentity & StackStageIdentity;
+
 /**
  * This creates a lambda running on a schedule, according to SR standards.
  */
-export class SrScheduledLambda extends SrLambda {
-	constructor(scope: SrStack, props: SrScheduledLambdaProps) {
+export class SrScheduledLambda extends SrLambda implements Construct {
+	constructor(scope: SrStack, id: string, props: SrScheduledLambdaProps) {
 		const finalProps = {
 			nameSuffix: props.nameSuffix,
 			lambdaOverrides: props.lambdaOverrides,
 		};
 
-		super(scope, finalProps);
+		super(scope, id, finalProps);
 
 		props.rules.forEach((rule, index) => {
-			new Rule(
-				this,
-				getId(
-					props.nameSuffix,
-					'lambda',
-					rule.schedule.expressionString,
-					`${index}`,
-				),
-				{
-					schedule: rule.schedule,
-					targets: [new LambdaFunction(this, { event: rule.input })],
-					...(rule.description && { description: rule.description }),
-					enabled: true,
-				},
-			);
+			new Rule(this, `Rule${index}`, {
+				schedule: rule.schedule,
+				targets: [new LambdaFunction(this, { event: rule.input })],
+				...(rule.description && { description: rule.description }),
+				enabled: true,
+			});
 		});
 
 		if (!props.monitoring?.noMonitoring) {
 			new GuLambdaErrorPercentageAlarm(
 				scope,
-				getId(props.nameSuffix, `ErrorPercentageAlarmForLambda`),
+				`${this.node.id}ErrorPercentageAlarmForLambda`, // have to add the id as scope is stack
 				{
 					snsTopicName: `alarms-handler-topic-${scope.stage}`,
 					actionsEnabled: scope.stage == 'PROD',

@@ -28,7 +28,7 @@ export class UserBenefits extends SrStack {
 			initialPolicy: [supporterProductDataTablePolicy],
 			timeout: Duration.seconds(300),
 		};
-		const userBenefitsMeLambda = new SrLambda(this, {
+		const userBenefitsMeLambda = new SrLambda(this, 'MeLambda', {
 			nameSuffix: 'me',
 			lambdaOverrides: {
 				description:
@@ -37,7 +37,7 @@ export class UserBenefits extends SrStack {
 				...commonLambdaProps,
 			},
 		});
-		const userBenefitsIdentityIdLambda = new SrLambda(this, {
+		const userBenefitsIdentityIdLambda = new SrLambda(this, 'BenefitsLambda', {
 			nameSuffix: 'identity-id',
 			lambdaOverrides: {
 				description:
@@ -46,7 +46,7 @@ export class UserBenefits extends SrStack {
 				...commonLambdaProps,
 			},
 		});
-		const userBenefitsListLambda = new SrLambda(this, {
+		const userBenefitsListLambda = new SrLambda(this, 'ListLambda', {
 			nameSuffix: 'list',
 			lambdaOverrides: {
 				description:
