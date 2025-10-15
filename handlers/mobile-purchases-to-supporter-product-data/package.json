@@ -16,10 +16,10 @@
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.848.0",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "dayjs": "^1.11.13"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.147",
-    "dayjs": "^1.11.13"
+    "@types/aws-lambda": "^8.10.147"
   }
 }

@@ -96,10 +96,10 @@ const mobilePurchasesToSupporterProductData: HandlerDefinition = {
 	dependencies: {
 		...dep['@aws-sdk/client-dynamodb'],
 		...dep.zod,
+		...dep.dayjs,
 	},
 	devDependencies: {
 		...dep['@types/aws-lambda'],
-		...dep.dayjs,
 	},
 };
 
