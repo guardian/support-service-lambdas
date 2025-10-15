@@ -9,14 +9,14 @@ exports[`The Discount API stack matches the snapshot 1`] = `
     "gu:cdk:version": "TEST",
   },
   "Outputs": {
-    "discountapilambdadiscountapiCODEEndpointB74B96D0": {
+    "LambdaRestApiEndpoint7EDBC694": {
       "Value": {
         "Fn::Join": [
           "",
           [
             "https://",
             {
-              "Ref": "discountapilambdadiscountapiCODEE1E5C869",
+              "Ref": "LambdaRestApi687C4D83",
             },
             ".execute-api.",
             {
@@ -28,7 +28,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
             },
             "/",
             {
-              "Ref": "discountapilambdadiscountapiCODEDeploymentStageCODEDCC6DFA9",
+              "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
             },
             "/",
           ],
@@ -50,10 +50,10 @@ exports[`The Discount API stack matches the snapshot 1`] = `
           "Ref": "DomainName",
         },
         "RestApiId": {
-          "Ref": "discountapilambdadiscountapiCODEE1E5C869",
+          "Ref": "LambdaRestApi687C4D83",
         },
         "Stage": {
-          "Ref": "discountapilambdadiscountapiCODEDeploymentStageCODEDCC6DFA9",
+          "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
         },
       },
       "Type": "AWS::ApiGateway::BasePathMapping",
@@ -120,106 +120,10 @@ exports[`The Discount API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
-    "S3catalogreadpolicyE18911B4": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-CODE/*",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "S3catalogreadpolicyE18911B4",
-        "Roles": [
-          {
-            "Ref": "discountapilambdaServiceRole4CB5B1F4",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "SQSsendpolicy967EA932": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "sqs:GetQueueUrl",
-                "sqs:SendMessage",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:sqs:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":braze-emails-CODE",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "SQSsendpolicy967EA932",
-        "Roles": [
-          {
-            "Ref": "discountapilambdaServiceRole4CB5B1F4",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "ZuoraOAuthSecretsManagerpolicy5448D99B": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "secretsmanager:GetSecretValue",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:secretsmanager:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":secret:CODE/Zuora-OAuth/SupportServiceLambdas-*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "ZuoraOAuthSecretsManagerpolicy5448D99B",
-        "Roles": [
-          {
-            "Ref": "discountapilambdaServiceRole4CB5B1F4",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "discountapilambda972ABED6": {
+    "LambdaD247545B": {
       "DependsOn": [
-        "discountapilambdaServiceRoleDefaultPolicy91B9A9BA",
-        "discountapilambdaServiceRole4CB5B1F4",
+        "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "LambdaServiceRoleA8ED4D3B",
       ],
       "Properties": {
         "Code": {
@@ -245,7 +149,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "discountapilambdaServiceRole4CB5B1F4",
+            "LambdaServiceRoleA8ED4D3B",
             "Arn",
           ],
         },
@@ -276,7 +180,506 @@ exports[`The Discount API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "discountapilambdaServiceRole4CB5B1F4": {
+    "LambdaRestApi687C4D83": {
+      "Properties": {
+        "ApiKeySourceType": "HEADER",
+        "Description": "API Gateway created by CDK",
+        "Name": "discount-api-CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "discount-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "LambdaRestApiANYApiPermissionTestdiscountapiCODELambdaRestApi5127E0F1ANY9DFFEA83": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/test-invoke-stage/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiANYApiPermissiondiscountapiCODELambdaRestApi5127E0F1ANY3BAA18D2": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/",
+              {
+                "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
+              },
+              "/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiANYC3C9D364": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "LambdaD247545B",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "LambdaRestApi687C4D83",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "LambdaRestApiAccount4E23441E": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "LambdaRestApi687C4D83",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "LambdaRestApiCloudWatchRole73082DF6",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "LambdaRestApiApiKeyB5CCCA11": {
+      "Properties": {
+        "Enabled": true,
+        "Name": "discount-api-key-CODE",
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "LambdaRestApi687C4D83",
+            },
+            "StageName": {
+              "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "discount-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
+    "LambdaRestApiCloudWatchRole73082DF6": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "discount-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "LambdaRestApiDeployment9531908905a7198248e012cdbe2f3f4ca6ddd688": {
+      "DependsOn": [
+        "LambdaRestApiproxyANY486C4D1F",
+        "LambdaRestApiproxy22103CFD",
+        "LambdaRestApiANYC3C9D364",
+      ],
+      "Properties": {
+        "Description": "API Gateway created by CDK",
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "LambdaRestApiDeploymentStageCODECCF2AEE8": {
+      "DependsOn": [
+        "LambdaRestApiAccount4E23441E",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "LambdaRestApiDeployment9531908905a7198248e012cdbe2f3f4ca6ddd688",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+        "StageName": "CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "discount-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "LambdaRestApiUsagePlanD8F7DB8D": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "LambdaRestApi687C4D83",
+            },
+            "Stage": {
+              "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Description": "REST endpoints for discount-api",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "discount-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "UsagePlanName": "discount-api-CODE",
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "LambdaRestApiUsagePlanUsagePlanKeyResourcediscountapiCODELambdaRestApiApiKey797E076AF778646E": {
+      "Properties": {
+        "KeyId": {
+          "Ref": "LambdaRestApiApiKeyB5CCCA11",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "LambdaRestApiUsagePlanD8F7DB8D",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "LambdaRestApiproxy22103CFD": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "LambdaRestApi687C4D83",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "LambdaRestApiproxyANY486C4D1F": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "LambdaD247545B",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "LambdaRestApiproxy22103CFD",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "LambdaRestApiproxyANYApiPermissionTestdiscountapiCODELambdaRestApi5127E0F1ANYproxyA99FD115": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/test-invoke-stage/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiproxyANYApiPermissiondiscountapiCODELambdaRestApi5127E0F1ANYproxyC6DCF0AB": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/",
+              {
+                "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
+              },
+              "/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaServiceRoleA8ED4D3B": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -329,7 +732,7 @@ exports[`The Discount API stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "discountapilambdaServiceRoleDefaultPolicy91B9A9BA": {
+    "LambdaServiceRoleDefaultPolicyDAE46E21": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -420,513 +823,110 @@ exports[`The Discount API stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "discountapilambdaServiceRoleDefaultPolicy91B9A9BA",
+        "PolicyName": "LambdaServiceRoleDefaultPolicyDAE46E21",
         "Roles": [
           {
-            "Ref": "discountapilambdaServiceRole4CB5B1F4",
+            "Ref": "LambdaServiceRoleA8ED4D3B",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "discountapilambdadiscountapiCODEANY827A81C0": {
+    "S3catalogreadpolicyE18911B4": {
       "Properties": {
-        "ApiKeyRequired": true,
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "discountapilambda972ABED6",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Fn::GetAtt": [
-            "discountapilambdadiscountapiCODEE1E5C869",
-            "RootResourceId",
-          ],
-        },
-        "RestApiId": {
-          "Ref": "discountapilambdadiscountapiCODEE1E5C869",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "discountapilambdadiscountapiCODEANYApiPermissionTestdiscountapiCODEdiscountapilambdadiscountapiCODED838DA36ANY16D9E550": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "discountapilambda972ABED6",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "discountapilambdadiscountapiCODEE1E5C869",
-              },
-              "/test-invoke-stage/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "discountapilambdadiscountapiCODEANYApiPermissiondiscountapiCODEdiscountapilambdadiscountapiCODED838DA36ANYCB9FC3A2": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "discountapilambda972ABED6",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "discountapilambdadiscountapiCODEE1E5C869",
-              },
-              "/",
-              {
-                "Ref": "discountapilambdadiscountapiCODEDeploymentStageCODEDCC6DFA9",
-              },
-              "/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "discountapilambdadiscountapiCODEAccountA5347E04": {
-      "DeletionPolicy": "Retain",
-      "DependsOn": [
-        "discountapilambdadiscountapiCODEE1E5C869",
-      ],
-      "Properties": {
-        "CloudWatchRoleArn": {
-          "Fn::GetAtt": [
-            "discountapilambdadiscountapiCODECloudWatchRoleC5981708",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::ApiGateway::Account",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "discountapilambdadiscountapiCODECloudWatchRoleC5981708": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
+        "PolicyDocument": {
           "Statement": [
             {
-              "Action": "sts:AssumeRole",
+              "Action": "s3:GetObject",
               "Effect": "Allow",
-              "Principal": {
-                "Service": "apigateway.amazonaws.com",
+              "Resource": "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-CODE/*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "S3catalogreadpolicyE18911B4",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "SQSsendpolicy967EA932": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:SendMessage",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":braze-emails-CODE",
+                  ],
+                ],
               },
             },
           ],
           "Version": "2012-10-17",
         },
-        "ManagedPolicyArns": [
+        "PolicyName": "SQSsendpolicy967EA932",
+        "Roles": [
           {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "discount-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
+            "Ref": "LambdaServiceRoleA8ED4D3B",
           },
         ],
       },
-      "Type": "AWS::IAM::Role",
-      "UpdateReplacePolicy": "Retain",
+      "Type": "AWS::IAM::Policy",
     },
-    "discountapilambdadiscountapiCODEDeployment15948B74139e7a767282d0dfb798f074a3a4f3f6": {
-      "DependsOn": [
-        "discountapilambdadiscountapiCODEproxyANY3023C5CD",
-        "discountapilambdadiscountapiCODEproxyDA26EBF1",
-        "discountapilambdadiscountapiCODEANY827A81C0",
-      ],
+    "ZuoraOAuthSecretsManagerpolicy5448D99B": {
       "Properties": {
-        "Description": "API Gateway created by CDK",
-        "RestApiId": {
-          "Ref": "discountapilambdadiscountapiCODEE1E5C869",
-        },
-      },
-      "Type": "AWS::ApiGateway::Deployment",
-    },
-    "discountapilambdadiscountapiCODEDeploymentStageCODEDCC6DFA9": {
-      "DependsOn": [
-        "discountapilambdadiscountapiCODEAccountA5347E04",
-      ],
-      "Properties": {
-        "DeploymentId": {
-          "Ref": "discountapilambdadiscountapiCODEDeployment15948B74139e7a767282d0dfb798f074a3a4f3f6",
-        },
-        "RestApiId": {
-          "Ref": "discountapilambdadiscountapiCODEE1E5C869",
-        },
-        "StageName": "CODE",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "discount-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::Stage",
-    },
-    "discountapilambdadiscountapiCODEE1E5C869": {
-      "Properties": {
-        "ApiKeySourceType": "HEADER",
-        "Description": "API Gateway created by CDK",
-        "Name": "discount-api-CODE",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "discount-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::RestApi",
-    },
-    "discountapilambdadiscountapiCODEUsagePlanA450E53C": {
-      "Properties": {
-        "ApiStages": [
-          {
-            "ApiId": {
-              "Ref": "discountapilambdadiscountapiCODEE1E5C869",
-            },
-            "Stage": {
-              "Ref": "discountapilambdadiscountapiCODEDeploymentStageCODEDCC6DFA9",
-            },
-            "Throttle": {},
-          },
-        ],
-        "Description": "REST endpoints for discount-api",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "discount-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "UsagePlanName": "discount-api-CODE",
-      },
-      "Type": "AWS::ApiGateway::UsagePlan",
-    },
-    "discountapilambdadiscountapiCODEUsagePlanUsagePlanKeyResourcediscountapiCODEdiscountapilambdadiscountapiCODEdiscountapikeyCODE79A377D3268125D6": {
-      "Properties": {
-        "KeyId": {
-          "Ref": "discountapilambdadiscountapiCODEdiscountapikeyCODED9ED34AC",
-        },
-        "KeyType": "API_KEY",
-        "UsagePlanId": {
-          "Ref": "discountapilambdadiscountapiCODEUsagePlanA450E53C",
-        },
-      },
-      "Type": "AWS::ApiGateway::UsagePlanKey",
-    },
-    "discountapilambdadiscountapiCODEdiscountapikeyCODED9ED34AC": {
-      "Properties": {
-        "Enabled": true,
-        "Name": "discount-api-key-CODE",
-        "StageKeys": [
-          {
-            "RestApiId": {
-              "Ref": "discountapilambdadiscountapiCODEE1E5C869",
-            },
-            "StageName": {
-              "Ref": "discountapilambdadiscountapiCODEDeploymentStageCODEDCC6DFA9",
-            },
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "discount-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::ApiKey",
-    },
-    "discountapilambdadiscountapiCODEproxyANY3023C5CD": {
-      "Properties": {
-        "ApiKeyRequired": true,
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "discountapilambda972ABED6",
-                    "Arn",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:CODE/Zuora-OAuth/SupportServiceLambdas-*",
                   ],
-                },
-                "/invocations",
-              ],
-            ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ZuoraOAuthSecretsManagerpolicy5448D99B",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
           },
-        },
-        "ResourceId": {
-          "Ref": "discountapilambdadiscountapiCODEproxyDA26EBF1",
-        },
-        "RestApiId": {
-          "Ref": "discountapilambdadiscountapiCODEE1E5C869",
-        },
+        ],
       },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "discountapilambdadiscountapiCODEproxyANYApiPermissionTestdiscountapiCODEdiscountapilambdadiscountapiCODED838DA36ANYproxy857B2C35": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "discountapilambda972ABED6",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "discountapilambdadiscountapiCODEE1E5C869",
-              },
-              "/test-invoke-stage/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "discountapilambdadiscountapiCODEproxyANYApiPermissiondiscountapiCODEdiscountapilambdadiscountapiCODED838DA36ANYproxyF796F806": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "discountapilambda972ABED6",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "discountapilambdadiscountapiCODEE1E5C869",
-              },
-              "/",
-              {
-                "Ref": "discountapilambdadiscountapiCODEDeploymentStageCODEDCC6DFA9",
-              },
-              "/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "discountapilambdadiscountapiCODEproxyDA26EBF1": {
-      "Properties": {
-        "ParentId": {
-          "Fn::GetAtt": [
-            "discountapilambdadiscountapiCODEE1E5C869",
-            "RootResourceId",
-          ],
-        },
-        "PathPart": "{proxy+}",
-        "RestApiId": {
-          "Ref": "discountapilambdadiscountapiCODEE1E5C869",
-        },
-      },
-      "Type": "AWS::ApiGateway::Resource",
+      "Type": "AWS::IAM::Policy",
     },
   },
 }
@@ -941,14 +941,14 @@ exports[`The Discount API stack matches the snapshot 2`] = `
     "gu:cdk:version": "TEST",
   },
   "Outputs": {
-    "discountapilambdadiscountapiPRODEndpoint341D3591": {
+    "LambdaRestApiEndpoint7EDBC694": {
       "Value": {
         "Fn::Join": [
           "",
           [
             "https://",
             {
-              "Ref": "discountapilambdadiscountapiPROD4E9716BA",
+              "Ref": "LambdaRestApi687C4D83",
             },
             ".execute-api.",
             {
@@ -960,7 +960,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
             },
             "/",
             {
-              "Ref": "discountapilambdadiscountapiPRODDeploymentStagePROD7923EEA6",
+              "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
             },
             "/",
           ],
@@ -1003,7 +1003,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
             "",
             [
               {
-                "Ref": "discountapilambda972ABED6",
+                "Ref": "LambdaD247545B",
               },
               " 5XX errors",
             ],
@@ -1014,7 +1014,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           {
             "Name": "ApiName",
             "Value": {
-              "Ref": "discountapilambda972ABED6",
+              "Ref": "LambdaD247545B",
             },
           },
         ],
@@ -1036,7 +1036,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
                 [
                   "lambda:",
                   {
-                    "Ref": "discountapilambda972ABED6",
+                    "Ref": "LambdaD247545B",
                   },
                 ],
               ],
@@ -1069,10 +1069,10 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           "Ref": "DomainName",
         },
         "RestApiId": {
-          "Ref": "discountapilambdadiscountapiPROD4E9716BA",
+          "Ref": "LambdaRestApi687C4D83",
         },
         "Stage": {
-          "Ref": "discountapilambdadiscountapiPRODDeploymentStagePROD7923EEA6",
+          "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
         },
       },
       "Type": "AWS::ApiGateway::BasePathMapping",
@@ -1139,106 +1139,10 @@ exports[`The Discount API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
-    "S3catalogreadpolicyE18911B4": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-PROD/*",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "S3catalogreadpolicyE18911B4",
-        "Roles": [
-          {
-            "Ref": "discountapilambdaServiceRole4CB5B1F4",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "SQSsendpolicy967EA932": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "sqs:GetQueueUrl",
-                "sqs:SendMessage",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:sqs:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":braze-emails-PROD",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "SQSsendpolicy967EA932",
-        "Roles": [
-          {
-            "Ref": "discountapilambdaServiceRole4CB5B1F4",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "ZuoraOAuthSecretsManagerpolicy5448D99B": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "secretsmanager:GetSecretValue",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:secretsmanager:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":secret:PROD/Zuora-OAuth/SupportServiceLambdas-*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "ZuoraOAuthSecretsManagerpolicy5448D99B",
-        "Roles": [
-          {
-            "Ref": "discountapilambdaServiceRole4CB5B1F4",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "discountapilambda972ABED6": {
+    "LambdaD247545B": {
       "DependsOn": [
-        "discountapilambdaServiceRoleDefaultPolicy91B9A9BA",
-        "discountapilambdaServiceRole4CB5B1F4",
+        "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "LambdaServiceRoleA8ED4D3B",
       ],
       "Properties": {
         "Code": {
@@ -1264,7 +1168,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "discountapilambdaServiceRole4CB5B1F4",
+            "LambdaServiceRoleA8ED4D3B",
             "Arn",
           ],
         },
@@ -1295,7 +1199,506 @@ exports[`The Discount API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "discountapilambdaServiceRole4CB5B1F4": {
+    "LambdaRestApi687C4D83": {
+      "Properties": {
+        "ApiKeySourceType": "HEADER",
+        "Description": "API Gateway created by CDK",
+        "Name": "discount-api-PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "discount-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "LambdaRestApiANYApiPermissionTestdiscountapiPRODLambdaRestApi1264AB48ANY9934640E": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/test-invoke-stage/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiANYApiPermissiondiscountapiPRODLambdaRestApi1264AB48ANY59117E83": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/",
+              {
+                "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
+              },
+              "/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiANYC3C9D364": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "LambdaD247545B",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "LambdaRestApi687C4D83",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "LambdaRestApiAccount4E23441E": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "LambdaRestApi687C4D83",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "LambdaRestApiCloudWatchRole73082DF6",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "LambdaRestApiApiKeyB5CCCA11": {
+      "Properties": {
+        "Enabled": true,
+        "Name": "discount-api-key-PROD",
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "LambdaRestApi687C4D83",
+            },
+            "StageName": {
+              "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "discount-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
+    "LambdaRestApiCloudWatchRole73082DF6": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "discount-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "LambdaRestApiDeployment953190899ee5b8587f5b56df4472be205d642d9d": {
+      "DependsOn": [
+        "LambdaRestApiproxyANY486C4D1F",
+        "LambdaRestApiproxy22103CFD",
+        "LambdaRestApiANYC3C9D364",
+      ],
+      "Properties": {
+        "Description": "API Gateway created by CDK",
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "LambdaRestApiDeploymentStagePROD95065FBD": {
+      "DependsOn": [
+        "LambdaRestApiAccount4E23441E",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "LambdaRestApiDeployment953190899ee5b8587f5b56df4472be205d642d9d",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+        "StageName": "PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "discount-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "LambdaRestApiUsagePlanD8F7DB8D": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "LambdaRestApi687C4D83",
+            },
+            "Stage": {
+              "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Description": "REST endpoints for discount-api",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "discount-api",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "UsagePlanName": "discount-api-PROD",
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "LambdaRestApiUsagePlanUsagePlanKeyResourcediscountapiPRODLambdaRestApiApiKeyB98112B000F8460B": {
+      "Properties": {
+        "KeyId": {
+          "Ref": "LambdaRestApiApiKeyB5CCCA11",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "LambdaRestApiUsagePlanD8F7DB8D",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "LambdaRestApiproxy22103CFD": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "LambdaRestApi687C4D83",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "LambdaRestApiproxyANY486C4D1F": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "LambdaD247545B",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "LambdaRestApiproxy22103CFD",
+        },
+        "RestApiId": {
+          "Ref": "LambdaRestApi687C4D83",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "LambdaRestApiproxyANYApiPermissionTestdiscountapiPRODLambdaRestApi1264AB48ANYproxy41103322": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/test-invoke-stage/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaRestApiproxyANYApiPermissiondiscountapiPRODLambdaRestApi1264AB48ANYproxy4B75FFA7": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "LambdaD247545B",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "LambdaRestApi687C4D83",
+              },
+              "/",
+              {
+                "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
+              },
+              "/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "LambdaServiceRoleA8ED4D3B": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -1348,7 +1751,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "discountapilambdaServiceRoleDefaultPolicy91B9A9BA": {
+    "LambdaServiceRoleDefaultPolicyDAE46E21": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -1439,513 +1842,110 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "discountapilambdaServiceRoleDefaultPolicy91B9A9BA",
+        "PolicyName": "LambdaServiceRoleDefaultPolicyDAE46E21",
         "Roles": [
           {
-            "Ref": "discountapilambdaServiceRole4CB5B1F4",
+            "Ref": "LambdaServiceRoleA8ED4D3B",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "discountapilambdadiscountapiPROD4E9716BA": {
+    "S3catalogreadpolicyE18911B4": {
       "Properties": {
-        "ApiKeySourceType": "HEADER",
-        "Description": "API Gateway created by CDK",
-        "Name": "discount-api-PROD",
-        "Tags": [
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:GetObject",
+              "Effect": "Allow",
+              "Resource": "arn:aws:s3:::gu-zuora-catalog/PROD/Zuora-PROD/*",
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "S3catalogreadpolicyE18911B4",
+        "Roles": [
           {
-            "Key": "App",
-            "Value": "discount-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
+            "Ref": "LambdaServiceRoleA8ED4D3B",
           },
         ],
       },
-      "Type": "AWS::ApiGateway::RestApi",
+      "Type": "AWS::IAM::Policy",
     },
-    "discountapilambdadiscountapiPRODANY1101E911": {
+    "SQSsendpolicy967EA932": {
       "Properties": {
-        "ApiKeyRequired": true,
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "discountapilambda972ABED6",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Fn::GetAtt": [
-            "discountapilambdadiscountapiPROD4E9716BA",
-            "RootResourceId",
-          ],
-        },
-        "RestApiId": {
-          "Ref": "discountapilambdadiscountapiPROD4E9716BA",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "discountapilambdadiscountapiPRODANYApiPermissionTestdiscountapiPRODdiscountapilambdadiscountapiPROD571B732AANY9D5AC707": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "discountapilambda972ABED6",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "discountapilambdadiscountapiPROD4E9716BA",
-              },
-              "/test-invoke-stage/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "discountapilambdadiscountapiPRODANYApiPermissiondiscountapiPRODdiscountapilambdadiscountapiPROD571B732AANYD38D41FE": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "discountapilambda972ABED6",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "discountapilambdadiscountapiPROD4E9716BA",
-              },
-              "/",
-              {
-                "Ref": "discountapilambdadiscountapiPRODDeploymentStagePROD7923EEA6",
-              },
-              "/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "discountapilambdadiscountapiPRODAccount4DA1D227": {
-      "DeletionPolicy": "Retain",
-      "DependsOn": [
-        "discountapilambdadiscountapiPROD4E9716BA",
-      ],
-      "Properties": {
-        "CloudWatchRoleArn": {
-          "Fn::GetAtt": [
-            "discountapilambdadiscountapiPRODCloudWatchRole3CC6EB11",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::ApiGateway::Account",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "discountapilambdadiscountapiPRODCloudWatchRole3CC6EB11": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
+        "PolicyDocument": {
           "Statement": [
             {
-              "Action": "sts:AssumeRole",
+              "Action": [
+                "sqs:GetQueueUrl",
+                "sqs:SendMessage",
+              ],
               "Effect": "Allow",
-              "Principal": {
-                "Service": "apigateway.amazonaws.com",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:sqs:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":braze-emails-PROD",
+                  ],
+                ],
               },
             },
           ],
           "Version": "2012-10-17",
         },
-        "ManagedPolicyArns": [
+        "PolicyName": "SQSsendpolicy967EA932",
+        "Roles": [
           {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "discount-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
+            "Ref": "LambdaServiceRoleA8ED4D3B",
           },
         ],
       },
-      "Type": "AWS::IAM::Role",
-      "UpdateReplacePolicy": "Retain",
+      "Type": "AWS::IAM::Policy",
     },
-    "discountapilambdadiscountapiPRODDeploymentF304491Bf7b2b1cff83efc29228377b8f600efcb": {
-      "DependsOn": [
-        "discountapilambdadiscountapiPRODproxyANY177F9076",
-        "discountapilambdadiscountapiPRODproxy2CE9F043",
-        "discountapilambdadiscountapiPRODANY1101E911",
-      ],
+    "ZuoraOAuthSecretsManagerpolicy5448D99B": {
       "Properties": {
-        "Description": "API Gateway created by CDK",
-        "RestApiId": {
-          "Ref": "discountapilambdadiscountapiPROD4E9716BA",
-        },
-      },
-      "Type": "AWS::ApiGateway::Deployment",
-    },
-    "discountapilambdadiscountapiPRODDeploymentStagePROD7923EEA6": {
-      "DependsOn": [
-        "discountapilambdadiscountapiPRODAccount4DA1D227",
-      ],
-      "Properties": {
-        "DeploymentId": {
-          "Ref": "discountapilambdadiscountapiPRODDeploymentF304491Bf7b2b1cff83efc29228377b8f600efcb",
-        },
-        "RestApiId": {
-          "Ref": "discountapilambdadiscountapiPROD4E9716BA",
-        },
-        "StageName": "PROD",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "discount-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::Stage",
-    },
-    "discountapilambdadiscountapiPRODUsagePlan2FAE5187": {
-      "Properties": {
-        "ApiStages": [
-          {
-            "ApiId": {
-              "Ref": "discountapilambdadiscountapiPROD4E9716BA",
-            },
-            "Stage": {
-              "Ref": "discountapilambdadiscountapiPRODDeploymentStagePROD7923EEA6",
-            },
-            "Throttle": {},
-          },
-        ],
-        "Description": "REST endpoints for discount-api",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "discount-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "UsagePlanName": "discount-api-PROD",
-      },
-      "Type": "AWS::ApiGateway::UsagePlan",
-    },
-    "discountapilambdadiscountapiPRODUsagePlanUsagePlanKeyResourcediscountapiPRODdiscountapilambdadiscountapiPRODdiscountapikeyPRODAC63086E69120D8D": {
-      "Properties": {
-        "KeyId": {
-          "Ref": "discountapilambdadiscountapiPRODdiscountapikeyPROD0198BD73",
-        },
-        "KeyType": "API_KEY",
-        "UsagePlanId": {
-          "Ref": "discountapilambdadiscountapiPRODUsagePlan2FAE5187",
-        },
-      },
-      "Type": "AWS::ApiGateway::UsagePlanKey",
-    },
-    "discountapilambdadiscountapiPRODdiscountapikeyPROD0198BD73": {
-      "Properties": {
-        "Enabled": true,
-        "Name": "discount-api-key-PROD",
-        "StageKeys": [
-          {
-            "RestApiId": {
-              "Ref": "discountapilambdadiscountapiPROD4E9716BA",
-            },
-            "StageName": {
-              "Ref": "discountapilambdadiscountapiPRODDeploymentStagePROD7923EEA6",
-            },
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "discount-api",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::ApiKey",
-    },
-    "discountapilambdadiscountapiPRODproxy2CE9F043": {
-      "Properties": {
-        "ParentId": {
-          "Fn::GetAtt": [
-            "discountapilambdadiscountapiPROD4E9716BA",
-            "RootResourceId",
-          ],
-        },
-        "PathPart": "{proxy+}",
-        "RestApiId": {
-          "Ref": "discountapilambdadiscountapiPROD4E9716BA",
-        },
-      },
-      "Type": "AWS::ApiGateway::Resource",
-    },
-    "discountapilambdadiscountapiPRODproxyANY177F9076": {
-      "Properties": {
-        "ApiKeyRequired": true,
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "discountapilambda972ABED6",
-                    "Arn",
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "secretsmanager:GetSecretValue",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:secretsmanager:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":secret:PROD/Zuora-OAuth/SupportServiceLambdas-*",
                   ],
-                },
-                "/invocations",
-              ],
-            ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "ZuoraOAuthSecretsManagerpolicy5448D99B",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
           },
-        },
-        "ResourceId": {
-          "Ref": "discountapilambdadiscountapiPRODproxy2CE9F043",
-        },
-        "RestApiId": {
-          "Ref": "discountapilambdadiscountapiPROD4E9716BA",
-        },
+        ],
       },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "discountapilambdadiscountapiPRODproxyANYApiPermissionTestdiscountapiPRODdiscountapilambdadiscountapiPROD571B732AANYproxy0E5E46FA": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "discountapilambda972ABED6",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "discountapilambdadiscountapiPROD4E9716BA",
-              },
-              "/test-invoke-stage/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "discountapilambdadiscountapiPRODproxyANYApiPermissiondiscountapiPRODdiscountapilambdadiscountapiPROD571B732AANYproxy04B39808": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "discountapilambda972ABED6",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "discountapilambdadiscountapiPROD4E9716BA",
-              },
-              "/",
-              {
-                "Ref": "discountapilambdadiscountapiPRODDeploymentStagePROD7923EEA6",
-              },
-              "/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
+      "Type": "AWS::IAM::Policy",
     },
   },
 }

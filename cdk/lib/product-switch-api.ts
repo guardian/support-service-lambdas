@@ -14,7 +14,7 @@ export class ProductSwitchApi extends SrStack {
 
 		const app = this.app;
 
-		const lambda = new SrApiLambda(this, {
+		const lambda = new SrApiLambda(this, 'Lambda', {
 			lambdaOverrides: {
 				description:
 					'An API Gateway triggered lambda for carrying out product switches. Code is in the support-service-lambdas repo',

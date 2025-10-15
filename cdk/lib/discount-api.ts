@@ -12,7 +12,7 @@ export class DiscountApi extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
 		super(scope, { stage, app: 'discount-api' });
 
-		const lambda = new SrApiLambda(this, {
+		const lambda = new SrApiLambda(this, 'Lambda', {
 			lambdaOverrides: {
 				description:
 					'A lambda that enables the addition of discounts to existing subscriptions',

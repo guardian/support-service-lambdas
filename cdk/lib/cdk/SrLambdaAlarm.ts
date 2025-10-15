@@ -5,7 +5,13 @@ import { Tags } from 'aws-cdk-lib';
 
 export interface SrLambdaAlarmProps
 	extends Omit<GuAlarmProps, 'snsTopicName' | 'actionsEnabled'> {
+	/**
+	 * lambda(s) that cause this alarm, this is used to generate a log link on the alarm
+	 */
 	lambdaFunctionNames: string | string[];
+	/**
+	 * if you wish to override the default actionsEnabled
+	 */
 	actionsEnabled?: boolean; // defaults to PROD only
 }
 

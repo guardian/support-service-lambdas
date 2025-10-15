@@ -15,7 +15,7 @@ export class PressReaderEntitlements extends SrStack {
 		const app = this.app;
 		const nameWithStage = `${app}-${this.stage}`;
 
-		const lambda = new SrApiLambda(this, {
+		const lambda = new SrApiLambda(this, 'Lambda', {
 			lambdaOverrides: {
 				description:
 					'An API Gateway triggered lambda generated in the support-service-lambdas repo',

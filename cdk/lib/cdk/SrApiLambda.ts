@@ -47,7 +47,7 @@ const defaultProps = {
 export class SrApiLambda extends SrLambda {
 	public readonly api: LambdaRestApi;
 	readonly domain: SrRestDomain;
-	constructor(scope: SrStack, props: SrApiLambdaProps) {
+	constructor(scope: SrStack, id: string, props: SrApiLambdaProps) {
 		const finalProps = {
 			nameSuffix: props.nameSuffix,
 			lambdaOverrides: {
@@ -56,31 +56,26 @@ export class SrApiLambda extends SrLambda {
 			},
 		};
 
-		super(scope, `${scope.app}-lambda`, finalProps);
+		super(scope, id, finalProps);
 
-		this.api = new LambdaRestApi(
-			this,
-			getNameWithStage(scope, props.nameSuffix),
-			{
-				handler: this,
+		this.api = new LambdaRestApi(this, 'RestApi', {
+			handler: this,
 
-				restApiName: getNameWithStage(scope, props.nameSuffix),
-				description:
-					props.apiDescriptionOverride ?? 'API Gateway created by CDK',
-				proxy: true,
-				deployOptions: {
-					stageName: scope.stage,
-				},
-				...(props.isPublic
-					? {}
-					: {
-							apiKeySourceType: ApiKeySourceType.HEADER,
-							defaultMethodOptions: {
-								apiKeyRequired: true,
-							},
-						}),
+			restApiName: getNameWithStage(scope, props.nameSuffix),
+			description: props.apiDescriptionOverride ?? 'API Gateway created by CDK',
+			proxy: true,
+			deployOptions: {
+				stageName: scope.stage,
 			},
-		);
+			...(props.isPublic
+				? {}
+				: {
+						apiKeySourceType: ApiKeySourceType.HEADER,
+						defaultMethodOptions: {
+							apiKeyRequired: true,
+						},
+					}),
+		});
 
 		if (!props.isPublic) {
 			const usagePlan = this.api.addUsagePlan('UsagePlan', {
@@ -95,7 +90,7 @@ export class SrApiLambda extends SrLambda {
 			});
 
 			// create api key
-			const apiKey = this.api.addApiKey(`${scope.app}-key-${scope.stage}`, {
+			const apiKey = this.api.addApiKey('ApiKey', {
 				apiKeyName: `${scope.app}-key-${scope.stage}`,
 			});
 
