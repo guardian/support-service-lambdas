@@ -1,5 +1,5 @@
 import { loadConfig } from '@modules/aws/appConfig';
-import { getIfDefined } from '@modules/nullAndUndefined';
+import { logger } from '@modules/routing/logger';
 import { z } from 'zod';
 
 const configSchema = z.object({
@@ -8,12 +8,14 @@ const configSchema = z.object({
 
 export type Config = z.infer<typeof configSchema>;
 
-export const getEnv = (env: string): string =>
-	getIfDefined(process.env[env], `${env} environment variable not set`);
+export const getEnv = (env: string, defaultValue: string): string =>
+	process.env[env] ?? defaultValue;
 
 export const getConfig = async () => {
-	const stage = getEnv('STAGE');
-	const stack = getEnv('STACK');
-	const app = getEnv('APP');
-	return await loadConfig(stage, stack, app, configSchema);
+	const stage = getEnv('STAGE', 'CODE');
+	const stack = getEnv('STACK', 'support');
+	const app = getEnv('APP', 'mobile-purchases-to-supporter-product-data');
+	const config = await loadConfig(stage, stack, app, configSchema);
+	logger.log('info', `Successfully loaded config`);
+	return config;
 };
