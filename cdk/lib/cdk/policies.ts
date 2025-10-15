@@ -70,3 +70,14 @@ export class AllowSupporterProductDataQueryPolicy extends GuAllowPolicy {
 		});
 	}
 }
+
+export class ReadAccountIdsPolicy extends GuAllowPolicy {
+	constructor(scope: GuStack) {
+		super(scope, 'Read account ids from SSM', {
+			actions: ['ssm:GetParametersByPath'],
+			resources: [
+				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/accountIds`,
+			],
+		});
+	}
+}

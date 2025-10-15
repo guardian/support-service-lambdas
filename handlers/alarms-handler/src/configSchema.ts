@@ -1,4 +1,3 @@
-import { getIfDefined } from '@modules/nullAndUndefined';
 import { z } from 'zod';
 
 export const WebhookUrlsSchema = z.object({
@@ -11,7 +10,6 @@ export const WebhookUrlsSchema = z.object({
 export type WebhookUrls = z.infer<typeof WebhookUrlsSchema>;
 
 export const AccountSchema = z.object({
-	id: z.string(),
 	roleArn: z.string(),
 });
 export type Account = z.infer<typeof AccountSchema>;
@@ -27,6 +25,3 @@ export const ConfigSchema = z.object({
 	accounts: AccountsSchema,
 });
 export type ConfigSchema = z.infer<typeof ConfigSchema>;
-
-export const getEnv = (env: string): string =>
-	getIfDefined(process.env[env], `${env} environment variable not set`);

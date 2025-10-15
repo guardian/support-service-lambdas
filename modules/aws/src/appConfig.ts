@@ -1,8 +1,31 @@
-import type { z } from 'zod';
+import { z } from 'zod';
 import { GetParametersByPathCommand, SSMClient } from '@aws-sdk/client-ssm';
 import { awsConfig } from '../src/config';
 import { groupMap, mapValues, partition } from '../../arrayFunctions';
 import { fetchAllPages } from './fetchAllPages';
+import { logger } from '@modules/routing/logger';
+import { Lazy } from '@modules/lazy';
+import { getIfDefined } from '@modules/nullAndUndefined';
+
+type AppIdentity = { stage: string; stack: string; app: string };
+
+export const whoAmI: Lazy<AppIdentity> = new Lazy(async () => {
+	return { stage: getEnv('STAGE'), stack: getEnv('STACK'), app: getEnv('APP') };
+}, 'read lambda identity env vars');
+
+const getEnv = (env: string): string =>
+	getIfDefined(process.env[env], `${env} environment variable not set`);
+
+export const loadLazyConfig =
+	<O>(schema: z.ZodType<O, z.ZodTypeDef, any>) =>
+	async ({ stage, stack, app }: AppIdentity) => ({
+		stage,
+		appConfig: new Lazy(
+			() => loadConfig(stage, stack, app, schema),
+			'load app config from SSM',
+		),
+		accountIds: new Lazy(() => loadAccountIds(), 'load account ids from SSM'),
+	});
 
 /**
  * App config uses the guardian-standard SSM keys to load config.  The GU CDK lambda
@@ -20,10 +43,32 @@ export const loadConfig = async <O>(
 	schema: z.ZodType<O, z.ZodTypeDef, any>,
 ): Promise<O> => {
 	const configRoot = '/' + [stage, stack, app].join('/');
-	console.log('getting app config from SSM', configRoot);
+	logger.log('getting app config from SSM', configRoot);
+	return await loadCustomConfig(configRoot, schema);
+};
+
+export const accountIdsSchema = z.object({
+	baton: z.string(),
+	mobile: z.string(),
+	targeting: z.string(),
+});
+export type AccountIds = z.infer<typeof accountIdsSchema>;
+
+/**
+ * Get a list of AWS account ids, the lambda needs ReadAccountIdsPolicy to use this
+ */
+export const loadAccountIds = async (): Promise<AccountIds> => {
+	const configRoot = '/accountIds';
+	logger.log('getting account ids from SSM', configRoot);
+	return await loadCustomConfig(configRoot, accountIdsSchema);
+};
+async function loadCustomConfig<O>(
+	configRoot: string,
+	schema: z.ZodType<O, z.ZodTypeDef, any>,
+) {
 	const configFlat: SSMKeyValuePairs = await readAllRecursive(configRoot);
 	return parseSSMConfigToObject(configFlat, configRoot, schema);
-};
+}
 
 export type SSMKeyValuePairs = Record<string, string>[];
 

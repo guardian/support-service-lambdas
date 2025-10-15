@@ -6,6 +6,7 @@ import {
 } from '@aws-sdk/client-cloudwatch';
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
 import { flatten } from '@modules/arrayFunctions';
+import type { AccountIds } from '@modules/aws/appConfig';
 import { awsConfig, getAwsConfig, isRunningLocally } from '@modules/aws/config';
 import { fetchAllPages } from '@modules/aws/fetchAllPages';
 import { Lazy } from '@modules/lazy';
@@ -39,7 +40,7 @@ export type Cloudwatch = {
 	getAllAlarmsInAlarm: () => Promise<AlarmWithTags[]>;
 };
 
-export const buildCloudwatch = (config: Accounts) => {
+export const buildCloudwatch = (config: Accounts, accountIds: AccountIds) => {
 	const { MOBILE, TARGETING } = config;
 	const cloudwatchClients: CloudWatchClients = {
 		membership: new CloudWatchClient(awsConfig),
@@ -52,11 +53,10 @@ export const buildCloudwatch = (config: Accounts) => {
 
 	// Use the awsAccountId of the alarm to decide which credentials are needed to fetch the alarm's tags
 	const buildCloudwatchClient = (awsAccountId: string): CloudWatchClient => {
-		const accountIds = {
-			[config.MOBILE.id]: 'mobile',
-			[config.TARGETING.id]: 'targeting',
-		} as const;
-		return cloudwatchClients[accountIds[awsAccountId] ?? 'membership'];
+		const accountNamesForId = Object.fromEntries(
+			Object.entries(accountIds).map(([a, b]) => [b, a]),
+		) as Record<string, Exclude<keyof typeof accountIds, 'baton'>>;
+		return cloudwatchClients[accountNamesForId[awsAccountId] ?? 'membership'];
 	};
 
 	return {
