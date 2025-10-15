@@ -42,7 +42,7 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 1`
         "EventPattern": {
           "detail": {
             "eventSource": [
-              "aws.dynamodb",
+              "aws:dynamodb",
             ],
           },
         },
@@ -320,7 +320,7 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 2`
         "EventPattern": {
           "detail": {
             "eventSource": [
-              "aws.dynamodb",
+              "aws:dynamodb",
             ],
           },
         },
