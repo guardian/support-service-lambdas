@@ -11,3 +11,4 @@ packages:
 catalog:
   zod: ^3.23.8
   typescript: ^5.6.3
+  "@aws-sdk/client-ssm": ^3.848.0,
