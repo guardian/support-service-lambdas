@@ -34,7 +34,7 @@ export class MobilePurchasesToSupporterProductData extends SrStack {
 				eventBus: mobilePurchasesBus,
 				eventPattern: {
 					detail: {
-						eventSource: ['aws.dynamodb'],
+						eventSource: ['aws:dynamodb'],
 					},
 				},
 			},
