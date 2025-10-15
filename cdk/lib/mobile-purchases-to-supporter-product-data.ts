@@ -33,8 +33,9 @@ export class MobilePurchasesToSupporterProductData extends SrStack {
 					'Forward DynamoDB stream purchase events to supporter product data lambda',
 				eventBus: mobilePurchasesBus,
 				eventPattern: {
-					source: ['aws.dynamodb'],
-					detailType: ['DynamoDB Streams Record'],
+					detail: {
+						eventSource: ['aws.dynamodb'],
+					},
 				},
 			},
 		);

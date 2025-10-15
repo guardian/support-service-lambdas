@@ -40,12 +40,11 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 1`
         "Description": "Forward DynamoDB stream purchase events to supporter product data lambda",
         "EventBusName": "mobile-purchases-dynamo-stream-CODE",
         "EventPattern": {
-          "detail-type": [
-            "DynamoDB Streams Record",
-          ],
-          "source": [
-            "aws.dynamodb",
-          ],
+          "detail": {
+            "eventSource": [
+              "aws.dynamodb",
+            ],
+          },
         },
         "State": "ENABLED",
         "Targets": [
@@ -319,12 +318,11 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 2`
         "Description": "Forward DynamoDB stream purchase events to supporter product data lambda",
         "EventBusName": "mobile-purchases-dynamo-stream-PROD",
         "EventPattern": {
-          "detail-type": [
-            "DynamoDB Streams Record",
-          ],
-          "source": [
-            "aws.dynamodb",
-          ],
+          "detail": {
+            "eventSource": [
+              "aws.dynamodb",
+            ],
+          },
         },
         "State": "ENABLED",
         "Targets": [
