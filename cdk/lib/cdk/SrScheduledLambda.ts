@@ -53,7 +53,7 @@ export class SrScheduledLambda extends SrLambda implements Construct {
 		if (!props.monitoring?.noMonitoring) {
 			new GuLambdaErrorPercentageAlarm(
 				scope,
-				`${this.node.id}ErrorPercentageAlarmForLambda`, // have to add the id as scope is stack
+				`${this.node.id}ErrorPercentageAlarm`, // have to add the id as scope is stack
 				{
 					snsTopicName: `alarms-handler-topic-${scope.stage}`,
 					actionsEnabled: scope.stage == 'PROD',

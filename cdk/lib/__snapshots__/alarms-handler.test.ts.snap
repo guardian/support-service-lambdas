@@ -420,7 +420,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "ScheduledLambdaErrorPercentageAlarmForLambda9348E0F4": {
+    "ScheduledLambdaErrorPercentageAlarmDC4EDC52": {
       "Properties": {
         "ActionsEnabled": false,
         "AlarmActions": [
@@ -1531,7 +1531,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "ScheduledLambdaErrorPercentageAlarmForLambda9348E0F4": {
+    "ScheduledLambdaErrorPercentageAlarmDC4EDC52": {
       "Properties": {
         "ActionsEnabled": true,
         "AlarmActions": [
