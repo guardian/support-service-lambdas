@@ -27,6 +27,7 @@ export const handler: Handler = async (event: InputEvent) => {
 		logger.log('Skipping REMOVE event');
 		return;
 	}
+	console.log('Event type is', event.detail.eventName);
 	await fetchSubscriptionAndDoUpdate(stage, await lazyConfig.get(), event);
 };
 
