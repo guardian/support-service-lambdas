@@ -11,14 +11,14 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
     "gu:cdk:version": "TEST",
   },
   "Outputs": {
-    "LambdaRestApiEndpoint7EDBC694": {
+    "pressreaderentitlementslambdapressreaderentitlementsCODEEndpoint27926FF8": {
       "Value": {
         "Fn::Join": [
           "",
           [
             "https://",
             {
-              "Ref": "LambdaRestApi687C4D83",
+              "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
             },
             ".execute-api.",
             {
@@ -30,7 +30,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
             },
             "/",
             {
-              "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
+              "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODEDeploymentStageCODECC968CC0",
             },
             "/",
           ],
@@ -94,7 +94,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
                 [
                   "lambda:",
                   {
-                    "Ref": "LambdaD247545B",
+                    "Ref": "pressreaderentitlementslambda849A2923",
                   },
                 ],
               ],
@@ -222,10 +222,10 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
           "Ref": "DomainName",
         },
         "RestApiId": {
-          "Ref": "LambdaRestApi687C4D83",
+          "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
         },
         "Stage": {
-          "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
+          "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODEDeploymentStageCODECC968CC0",
         },
       },
       "Type": "AWS::ApiGateway::BasePathMapping",
@@ -292,10 +292,45 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
-    "LambdaD247545B": {
+    "NS1DNSentryforpressreaderentitlementscodedevguardianapiscom": {
+      "Properties": {
+        "Name": "press-reader-entitlements.code.dev-guardianapis.com",
+        "RecordType": "CNAME",
+        "ResourceRecords": [
+          "dualstack.guardian.map.fastly.net",
+        ],
+        "Stage": "CODE",
+        "TTL": 3600,
+      },
+      "Type": "Guardian::DNS::RecordSet",
+    },
+    "SupporterProductDataTablequeryaccess7665F484": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "dynamodb:Query",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "supporter-product-data-tables-CODE-SupporterProductDataTable",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SupporterProductDataTablequeryaccess7665F484",
+        "Roles": [
+          {
+            "Ref": "pressreaderentitlementslambdaServiceRole94C17F23",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "pressreaderentitlementslambda849A2923": {
       "DependsOn": [
-        "LambdaServiceRoleDefaultPolicyDAE46E21",
-        "LambdaServiceRoleA8ED4D3B",
+        "pressreaderentitlementslambdaServiceRoleDefaultPolicyE75EB370",
+        "pressreaderentitlementslambdaServiceRole94C17F23",
       ],
       "Properties": {
         "Code": {
@@ -321,7 +356,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "LambdaServiceRoleA8ED4D3B",
+            "pressreaderentitlementslambdaServiceRole94C17F23",
             "Arn",
           ],
         },
@@ -352,506 +387,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "LambdaRestApi687C4D83": {
-      "Properties": {
-        "ApiKeySourceType": "HEADER",
-        "Description": "API Gateway created by CDK",
-        "Name": "press-reader-entitlements-CODE",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "press-reader-entitlements",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::RestApi",
-    },
-    "LambdaRestApiANYApiPermissionTestpressreaderentitlementsCODELambdaRestApi5952FF5DANY9C683763": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "LambdaD247545B",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "LambdaRestApi687C4D83",
-              },
-              "/test-invoke-stage/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "LambdaRestApiANYApiPermissionpressreaderentitlementsCODELambdaRestApi5952FF5DANYFDEEF103": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "LambdaD247545B",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "LambdaRestApi687C4D83",
-              },
-              "/",
-              {
-                "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
-              },
-              "/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "LambdaRestApiANYC3C9D364": {
-      "Properties": {
-        "ApiKeyRequired": true,
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "LambdaD247545B",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Fn::GetAtt": [
-            "LambdaRestApi687C4D83",
-            "RootResourceId",
-          ],
-        },
-        "RestApiId": {
-          "Ref": "LambdaRestApi687C4D83",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "LambdaRestApiAccount4E23441E": {
-      "DeletionPolicy": "Retain",
-      "DependsOn": [
-        "LambdaRestApi687C4D83",
-      ],
-      "Properties": {
-        "CloudWatchRoleArn": {
-          "Fn::GetAtt": [
-            "LambdaRestApiCloudWatchRole73082DF6",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::ApiGateway::Account",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "LambdaRestApiApiKeyB5CCCA11": {
-      "Properties": {
-        "Enabled": true,
-        "Name": "press-reader-entitlements-key-CODE",
-        "StageKeys": [
-          {
-            "RestApiId": {
-              "Ref": "LambdaRestApi687C4D83",
-            },
-            "StageName": {
-              "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
-            },
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "press-reader-entitlements",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::ApiKey",
-    },
-    "LambdaRestApiCloudWatchRole73082DF6": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "apigateway.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "press-reader-entitlements",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "LambdaRestApiDeployment953190890372bfbd6995c903948323c3d10deff4": {
-      "DependsOn": [
-        "LambdaRestApiproxyANY486C4D1F",
-        "LambdaRestApiproxy22103CFD",
-        "LambdaRestApiANYC3C9D364",
-      ],
-      "Properties": {
-        "Description": "API Gateway created by CDK",
-        "RestApiId": {
-          "Ref": "LambdaRestApi687C4D83",
-        },
-      },
-      "Type": "AWS::ApiGateway::Deployment",
-    },
-    "LambdaRestApiDeploymentStageCODECCF2AEE8": {
-      "DependsOn": [
-        "LambdaRestApiAccount4E23441E",
-      ],
-      "Properties": {
-        "DeploymentId": {
-          "Ref": "LambdaRestApiDeployment953190890372bfbd6995c903948323c3d10deff4",
-        },
-        "RestApiId": {
-          "Ref": "LambdaRestApi687C4D83",
-        },
-        "StageName": "CODE",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "press-reader-entitlements",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::Stage",
-    },
-    "LambdaRestApiUsagePlanD8F7DB8D": {
-      "Properties": {
-        "ApiStages": [
-          {
-            "ApiId": {
-              "Ref": "LambdaRestApi687C4D83",
-            },
-            "Stage": {
-              "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
-            },
-            "Throttle": {},
-          },
-        ],
-        "Description": "REST endpoints for press-reader-entitlements",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "press-reader-entitlements",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "UsagePlanName": "press-reader-entitlements-CODE",
-      },
-      "Type": "AWS::ApiGateway::UsagePlan",
-    },
-    "LambdaRestApiUsagePlanUsagePlanKeyResourcepressreaderentitlementsCODELambdaRestApiApiKey5C6944B6EDAA7D0E": {
-      "Properties": {
-        "KeyId": {
-          "Ref": "LambdaRestApiApiKeyB5CCCA11",
-        },
-        "KeyType": "API_KEY",
-        "UsagePlanId": {
-          "Ref": "LambdaRestApiUsagePlanD8F7DB8D",
-        },
-      },
-      "Type": "AWS::ApiGateway::UsagePlanKey",
-    },
-    "LambdaRestApiproxy22103CFD": {
-      "Properties": {
-        "ParentId": {
-          "Fn::GetAtt": [
-            "LambdaRestApi687C4D83",
-            "RootResourceId",
-          ],
-        },
-        "PathPart": "{proxy+}",
-        "RestApiId": {
-          "Ref": "LambdaRestApi687C4D83",
-        },
-      },
-      "Type": "AWS::ApiGateway::Resource",
-    },
-    "LambdaRestApiproxyANY486C4D1F": {
-      "Properties": {
-        "ApiKeyRequired": true,
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "LambdaD247545B",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Ref": "LambdaRestApiproxy22103CFD",
-        },
-        "RestApiId": {
-          "Ref": "LambdaRestApi687C4D83",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "LambdaRestApiproxyANYApiPermissionTestpressreaderentitlementsCODELambdaRestApi5952FF5DANYproxyBBF1D873": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "LambdaD247545B",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "LambdaRestApi687C4D83",
-              },
-              "/test-invoke-stage/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "LambdaRestApiproxyANYApiPermissionpressreaderentitlementsCODELambdaRestApi5952FF5DANYproxy2AA76EAE": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "LambdaD247545B",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "LambdaRestApi687C4D83",
-              },
-              "/",
-              {
-                "Ref": "LambdaRestApiDeploymentStageCODECCF2AEE8",
-              },
-              "/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "LambdaServiceRoleA8ED4D3B": {
+    "pressreaderentitlementslambdaServiceRole94C17F23": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -904,7 +440,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "LambdaServiceRoleDefaultPolicyDAE46E21": {
+    "pressreaderentitlementslambdaServiceRoleDefaultPolicyE75EB370": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -995,49 +531,513 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "PolicyName": "pressreaderentitlementslambdaServiceRoleDefaultPolicyE75EB370",
         "Roles": [
           {
-            "Ref": "LambdaServiceRoleA8ED4D3B",
+            "Ref": "pressreaderentitlementslambdaServiceRole94C17F23",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "NS1DNSentryforpressreaderentitlementscodedevguardianapiscom": {
+    "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320": {
       "Properties": {
-        "Name": "press-reader-entitlements.code.dev-guardianapis.com",
-        "RecordType": "CNAME",
-        "ResourceRecords": [
-          "dualstack.guardian.map.fastly.net",
+        "ApiKeySourceType": "HEADER",
+        "Description": "API Gateway created by CDK",
+        "Name": "press-reader-entitlements-CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "press-reader-entitlements",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
         ],
-        "Stage": "CODE",
-        "TTL": 3600,
       },
-      "Type": "Guardian::DNS::RecordSet",
+      "Type": "AWS::ApiGateway::RestApi",
     },
-    "SupporterProductDataTablequeryaccess7665F484": {
+    "pressreaderentitlementslambdapressreaderentitlementsCODEANYApiPermissionTestpressreaderentitlementsCODEpressreaderentitlementslambdapressreaderentitlementsCODE7D056EE0ANY74606790": {
       "Properties": {
-        "PolicyDocument": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "pressreaderentitlementslambda849A2923",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
+              },
+              "/test-invoke-stage/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "pressreaderentitlementslambdapressreaderentitlementsCODEANYApiPermissionpressreaderentitlementsCODEpressreaderentitlementslambdapressreaderentitlementsCODE7D056EE0ANYCBFBAA0B": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "pressreaderentitlementslambda849A2923",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
+              },
+              "/",
+              {
+                "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODEDeploymentStageCODECC968CC0",
+              },
+              "/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "pressreaderentitlementslambdapressreaderentitlementsCODEANYBCD0DFF3": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "pressreaderentitlementslambda849A2923",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "pressreaderentitlementslambdapressreaderentitlementsCODEAccount58595882": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "pressreaderentitlementslambdapressreaderentitlementsCODECloudWatchRoleCD886C4B",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "pressreaderentitlementslambdapressreaderentitlementsCODECloudWatchRoleCD886C4B": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
           "Statement": [
             {
-              "Action": "dynamodb:Query",
+              "Action": "sts:AssumeRole",
               "Effect": "Allow",
-              "Resource": {
-                "Fn::ImportValue": "supporter-product-data-tables-CODE-SupporterProductDataTable",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
               },
             },
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SupporterProductDataTablequeryaccess7665F484",
-        "Roles": [
+        "ManagedPolicyArns": [
           {
-            "Ref": "LambdaServiceRoleA8ED4D3B",
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "press-reader-entitlements",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
           },
         ],
       },
-      "Type": "AWS::IAM::Policy",
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "pressreaderentitlementslambdapressreaderentitlementsCODEDeploymentAF63E253d4c9f2ae469a8e1ea64845d04c7ca59b": {
+      "DependsOn": [
+        "pressreaderentitlementslambdapressreaderentitlementsCODEproxyANY94DA2830",
+        "pressreaderentitlementslambdapressreaderentitlementsCODEproxyC7B8C5A6",
+        "pressreaderentitlementslambdapressreaderentitlementsCODEANYBCD0DFF3",
+      ],
+      "Properties": {
+        "Description": "API Gateway created by CDK",
+        "RestApiId": {
+          "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "pressreaderentitlementslambdapressreaderentitlementsCODEDeploymentStageCODECC968CC0": {
+      "DependsOn": [
+        "pressreaderentitlementslambdapressreaderentitlementsCODEAccount58595882",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODEDeploymentAF63E253d4c9f2ae469a8e1ea64845d04c7ca59b",
+        },
+        "RestApiId": {
+          "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
+        },
+        "StageName": "CODE",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "press-reader-entitlements",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "pressreaderentitlementslambdapressreaderentitlementsCODEUsagePlan67DAEFF0": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
+            },
+            "Stage": {
+              "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODEDeploymentStageCODECC968CC0",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Description": "REST endpoints for press-reader-entitlements",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "press-reader-entitlements",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "UsagePlanName": "press-reader-entitlements-CODE",
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "pressreaderentitlementslambdapressreaderentitlementsCODEUsagePlanUsagePlanKeyResourcepressreaderentitlementsCODEpressreaderentitlementslambdapressreaderentitlementsCODEpressreaderentitlementskeyCODECB615F12622657CE": {
+      "Properties": {
+        "KeyId": {
+          "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODEpressreaderentitlementskeyCODE9FF4AE4F",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODEUsagePlan67DAEFF0",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "pressreaderentitlementslambdapressreaderentitlementsCODEpressreaderentitlementskeyCODE9FF4AE4F": {
+      "Properties": {
+        "Enabled": true,
+        "Name": "press-reader-entitlements-key-CODE",
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
+            },
+            "StageName": {
+              "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODEDeploymentStageCODECC968CC0",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "press-reader-entitlements",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
+    "pressreaderentitlementslambdapressreaderentitlementsCODEproxyANY94DA2830": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "pressreaderentitlementslambda849A2923",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODEproxyC7B8C5A6",
+        },
+        "RestApiId": {
+          "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "pressreaderentitlementslambdapressreaderentitlementsCODEproxyANYApiPermissionTestpressreaderentitlementsCODEpressreaderentitlementslambdapressreaderentitlementsCODE7D056EE0ANYproxyB8CECD42": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "pressreaderentitlementslambda849A2923",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
+              },
+              "/test-invoke-stage/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "pressreaderentitlementslambdapressreaderentitlementsCODEproxyANYApiPermissionpressreaderentitlementsCODEpressreaderentitlementslambdapressreaderentitlementsCODE7D056EE0ANYproxyDB078E55": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "pressreaderentitlementslambda849A2923",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
+              },
+              "/",
+              {
+                "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODEDeploymentStageCODECC968CC0",
+              },
+              "/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "pressreaderentitlementslambdapressreaderentitlementsCODEproxyC7B8C5A6": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
     },
   },
 }
@@ -1054,14 +1054,14 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
     "gu:cdk:version": "TEST",
   },
   "Outputs": {
-    "LambdaRestApiEndpoint7EDBC694": {
+    "pressreaderentitlementslambdapressreaderentitlementsPRODEndpointC96D7D91": {
       "Value": {
         "Fn::Join": [
           "",
           [
             "https://",
             {
-              "Ref": "LambdaRestApi687C4D83",
+              "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
             },
             ".execute-api.",
             {
@@ -1073,7 +1073,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
             },
             "/",
             {
-              "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
+              "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDeploymentStagePROD6E99A268",
             },
             "/",
           ],
@@ -1137,7 +1137,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
                 [
                   "lambda:",
                   {
-                    "Ref": "LambdaD247545B",
+                    "Ref": "pressreaderentitlementslambda849A2923",
                   },
                 ],
               ],
@@ -1265,10 +1265,10 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
           "Ref": "DomainName",
         },
         "RestApiId": {
-          "Ref": "LambdaRestApi687C4D83",
+          "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
         },
         "Stage": {
-          "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
+          "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDeploymentStagePROD6E99A268",
         },
       },
       "Type": "AWS::ApiGateway::BasePathMapping",
@@ -1335,10 +1335,45 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
-    "LambdaD247545B": {
+    "NS1DNSentryforpressreaderentitlementsguardianapiscom": {
+      "Properties": {
+        "Name": "press-reader-entitlements.guardianapis.com",
+        "RecordType": "CNAME",
+        "ResourceRecords": [
+          "dualstack.guardian.map.fastly.net",
+        ],
+        "Stage": "PROD",
+        "TTL": 3600,
+      },
+      "Type": "Guardian::DNS::RecordSet",
+    },
+    "SupporterProductDataTablequeryaccess7665F484": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "dynamodb:Query",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "supporter-product-data-tables-PROD-SupporterProductDataTable",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SupporterProductDataTablequeryaccess7665F484",
+        "Roles": [
+          {
+            "Ref": "pressreaderentitlementslambdaServiceRole94C17F23",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "pressreaderentitlementslambda849A2923": {
       "DependsOn": [
-        "LambdaServiceRoleDefaultPolicyDAE46E21",
-        "LambdaServiceRoleA8ED4D3B",
+        "pressreaderentitlementslambdaServiceRoleDefaultPolicyE75EB370",
+        "pressreaderentitlementslambdaServiceRole94C17F23",
       ],
       "Properties": {
         "Code": {
@@ -1364,7 +1399,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "LambdaServiceRoleA8ED4D3B",
+            "pressreaderentitlementslambdaServiceRole94C17F23",
             "Arn",
           ],
         },
@@ -1395,506 +1430,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "LambdaRestApi687C4D83": {
-      "Properties": {
-        "ApiKeySourceType": "HEADER",
-        "Description": "API Gateway created by CDK",
-        "Name": "press-reader-entitlements-PROD",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "press-reader-entitlements",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::RestApi",
-    },
-    "LambdaRestApiANYApiPermissionTestpressreaderentitlementsPRODLambdaRestApi74F551E1ANY4346160E": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "LambdaD247545B",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "LambdaRestApi687C4D83",
-              },
-              "/test-invoke-stage/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "LambdaRestApiANYApiPermissionpressreaderentitlementsPRODLambdaRestApi74F551E1ANYF19FDEED": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "LambdaD247545B",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "LambdaRestApi687C4D83",
-              },
-              "/",
-              {
-                "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
-              },
-              "/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "LambdaRestApiANYC3C9D364": {
-      "Properties": {
-        "ApiKeyRequired": true,
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "LambdaD247545B",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Fn::GetAtt": [
-            "LambdaRestApi687C4D83",
-            "RootResourceId",
-          ],
-        },
-        "RestApiId": {
-          "Ref": "LambdaRestApi687C4D83",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "LambdaRestApiAccount4E23441E": {
-      "DeletionPolicy": "Retain",
-      "DependsOn": [
-        "LambdaRestApi687C4D83",
-      ],
-      "Properties": {
-        "CloudWatchRoleArn": {
-          "Fn::GetAtt": [
-            "LambdaRestApiCloudWatchRole73082DF6",
-            "Arn",
-          ],
-        },
-      },
-      "Type": "AWS::ApiGateway::Account",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "LambdaRestApiApiKeyB5CCCA11": {
-      "Properties": {
-        "Enabled": true,
-        "Name": "press-reader-entitlements-key-PROD",
-        "StageKeys": [
-          {
-            "RestApiId": {
-              "Ref": "LambdaRestApi687C4D83",
-            },
-            "StageName": {
-              "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
-            },
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "press-reader-entitlements",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::ApiKey",
-    },
-    "LambdaRestApiCloudWatchRole73082DF6": {
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "apigateway.amazonaws.com",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "ManagedPolicyArns": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
-              ],
-            ],
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "press-reader-entitlements",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Role",
-      "UpdateReplacePolicy": "Retain",
-    },
-    "LambdaRestApiDeployment9531908984d7cc0158189d951b19d44153fa8332": {
-      "DependsOn": [
-        "LambdaRestApiproxyANY486C4D1F",
-        "LambdaRestApiproxy22103CFD",
-        "LambdaRestApiANYC3C9D364",
-      ],
-      "Properties": {
-        "Description": "API Gateway created by CDK",
-        "RestApiId": {
-          "Ref": "LambdaRestApi687C4D83",
-        },
-      },
-      "Type": "AWS::ApiGateway::Deployment",
-    },
-    "LambdaRestApiDeploymentStagePROD95065FBD": {
-      "DependsOn": [
-        "LambdaRestApiAccount4E23441E",
-      ],
-      "Properties": {
-        "DeploymentId": {
-          "Ref": "LambdaRestApiDeployment9531908984d7cc0158189d951b19d44153fa8332",
-        },
-        "RestApiId": {
-          "Ref": "LambdaRestApi687C4D83",
-        },
-        "StageName": "PROD",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "press-reader-entitlements",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::Stage",
-    },
-    "LambdaRestApiUsagePlanD8F7DB8D": {
-      "Properties": {
-        "ApiStages": [
-          {
-            "ApiId": {
-              "Ref": "LambdaRestApi687C4D83",
-            },
-            "Stage": {
-              "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
-            },
-            "Throttle": {},
-          },
-        ],
-        "Description": "REST endpoints for press-reader-entitlements",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "press-reader-entitlements",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "UsagePlanName": "press-reader-entitlements-PROD",
-      },
-      "Type": "AWS::ApiGateway::UsagePlan",
-    },
-    "LambdaRestApiUsagePlanUsagePlanKeyResourcepressreaderentitlementsPRODLambdaRestApiApiKey080DE6C7F9421BC5": {
-      "Properties": {
-        "KeyId": {
-          "Ref": "LambdaRestApiApiKeyB5CCCA11",
-        },
-        "KeyType": "API_KEY",
-        "UsagePlanId": {
-          "Ref": "LambdaRestApiUsagePlanD8F7DB8D",
-        },
-      },
-      "Type": "AWS::ApiGateway::UsagePlanKey",
-    },
-    "LambdaRestApiproxy22103CFD": {
-      "Properties": {
-        "ParentId": {
-          "Fn::GetAtt": [
-            "LambdaRestApi687C4D83",
-            "RootResourceId",
-          ],
-        },
-        "PathPart": "{proxy+}",
-        "RestApiId": {
-          "Ref": "LambdaRestApi687C4D83",
-        },
-      },
-      "Type": "AWS::ApiGateway::Resource",
-    },
-    "LambdaRestApiproxyANY486C4D1F": {
-      "Properties": {
-        "ApiKeyRequired": true,
-        "AuthorizationType": "NONE",
-        "HttpMethod": "ANY",
-        "Integration": {
-          "IntegrationHttpMethod": "POST",
-          "Type": "AWS_PROXY",
-          "Uri": {
-            "Fn::Join": [
-              "",
-              [
-                "arn:",
-                {
-                  "Ref": "AWS::Partition",
-                },
-                ":apigateway:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":lambda:path/2015-03-31/functions/",
-                {
-                  "Fn::GetAtt": [
-                    "LambdaD247545B",
-                    "Arn",
-                  ],
-                },
-                "/invocations",
-              ],
-            ],
-          },
-        },
-        "ResourceId": {
-          "Ref": "LambdaRestApiproxy22103CFD",
-        },
-        "RestApiId": {
-          "Ref": "LambdaRestApi687C4D83",
-        },
-      },
-      "Type": "AWS::ApiGateway::Method",
-    },
-    "LambdaRestApiproxyANYApiPermissionTestpressreaderentitlementsPRODLambdaRestApi74F551E1ANYproxy68FB410E": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "LambdaD247545B",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "LambdaRestApi687C4D83",
-              },
-              "/test-invoke-stage/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "LambdaRestApiproxyANYApiPermissionpressreaderentitlementsPRODLambdaRestApi74F551E1ANYproxy002D53B0": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "LambdaD247545B",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "LambdaRestApi687C4D83",
-              },
-              "/",
-              {
-                "Ref": "LambdaRestApiDeploymentStagePROD95065FBD",
-              },
-              "/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "LambdaServiceRoleA8ED4D3B": {
+    "pressreaderentitlementslambdaServiceRole94C17F23": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -1947,7 +1483,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "LambdaServiceRoleDefaultPolicyDAE46E21": {
+    "pressreaderentitlementslambdaServiceRoleDefaultPolicyE75EB370": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -2038,49 +1574,513 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "PolicyName": "pressreaderentitlementslambdaServiceRoleDefaultPolicyE75EB370",
         "Roles": [
           {
-            "Ref": "LambdaServiceRoleA8ED4D3B",
+            "Ref": "pressreaderentitlementslambdaServiceRole94C17F23",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "NS1DNSentryforpressreaderentitlementsguardianapiscom": {
+    "pressreaderentitlementslambdapressreaderentitlementsPRODANYA19F1CF4": {
       "Properties": {
-        "Name": "press-reader-entitlements.guardianapis.com",
-        "RecordType": "CNAME",
-        "ResourceRecords": [
-          "dualstack.guardian.map.fastly.net",
-        ],
-        "Stage": "PROD",
-        "TTL": 3600,
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "pressreaderentitlementslambda849A2923",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Fn::GetAtt": [
+            "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+            "RootResourceId",
+          ],
+        },
+        "RestApiId": {
+          "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+        },
       },
-      "Type": "Guardian::DNS::RecordSet",
+      "Type": "AWS::ApiGateway::Method",
     },
-    "SupporterProductDataTablequeryaccess7665F484": {
+    "pressreaderentitlementslambdapressreaderentitlementsPRODANYApiPermissionTestpressreaderentitlementsPRODpressreaderentitlementslambdapressreaderentitlementsPROD471B412CANY7D865E46": {
       "Properties": {
-        "PolicyDocument": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "pressreaderentitlementslambda849A2923",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+              },
+              "/test-invoke-stage/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "pressreaderentitlementslambdapressreaderentitlementsPRODANYApiPermissionpressreaderentitlementsPRODpressreaderentitlementslambdapressreaderentitlementsPROD471B412CANY87E6A018": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "pressreaderentitlementslambda849A2923",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+              },
+              "/",
+              {
+                "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDeploymentStagePROD6E99A268",
+              },
+              "/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "pressreaderentitlementslambdapressreaderentitlementsPRODAccount54D83A30": {
+      "DeletionPolicy": "Retain",
+      "DependsOn": [
+        "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+      ],
+      "Properties": {
+        "CloudWatchRoleArn": {
+          "Fn::GetAtt": [
+            "pressreaderentitlementslambdapressreaderentitlementsPRODCloudWatchRoleB26A4812",
+            "Arn",
+          ],
+        },
+      },
+      "Type": "AWS::ApiGateway::Account",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "pressreaderentitlementslambdapressreaderentitlementsPRODCloudWatchRoleB26A4812": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
           "Statement": [
             {
-              "Action": "dynamodb:Query",
+              "Action": "sts:AssumeRole",
               "Effect": "Allow",
-              "Resource": {
-                "Fn::ImportValue": "supporter-product-data-tables-PROD-SupporterProductDataTable",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com",
               },
             },
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "SupporterProductDataTablequeryaccess7665F484",
-        "Roles": [
+        "ManagedPolicyArns": [
           {
-            "Ref": "LambdaServiceRoleA8ED4D3B",
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs",
+              ],
+            ],
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "press-reader-entitlements",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
           },
         ],
       },
-      "Type": "AWS::IAM::Policy",
+      "Type": "AWS::IAM::Role",
+      "UpdateReplacePolicy": "Retain",
+    },
+    "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA": {
+      "Properties": {
+        "ApiKeySourceType": "HEADER",
+        "Description": "API Gateway created by CDK",
+        "Name": "press-reader-entitlements-PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "press-reader-entitlements",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "pressreaderentitlementslambdapressreaderentitlementsPRODDeploymentD4B736714318e1b97b03f9c6682b90368e7ee55c": {
+      "DependsOn": [
+        "pressreaderentitlementslambdapressreaderentitlementsPRODproxyANY3A6E2187",
+        "pressreaderentitlementslambdapressreaderentitlementsPRODproxyA619485E",
+        "pressreaderentitlementslambdapressreaderentitlementsPRODANYA19F1CF4",
+      ],
+      "Properties": {
+        "Description": "API Gateway created by CDK",
+        "RestApiId": {
+          "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+        },
+      },
+      "Type": "AWS::ApiGateway::Deployment",
+    },
+    "pressreaderentitlementslambdapressreaderentitlementsPRODDeploymentStagePROD6E99A268": {
+      "DependsOn": [
+        "pressreaderentitlementslambdapressreaderentitlementsPRODAccount54D83A30",
+      ],
+      "Properties": {
+        "DeploymentId": {
+          "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDeploymentD4B736714318e1b97b03f9c6682b90368e7ee55c",
+        },
+        "RestApiId": {
+          "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+        },
+        "StageName": "PROD",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "press-reader-entitlements",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::Stage",
+    },
+    "pressreaderentitlementslambdapressreaderentitlementsPRODUsagePlan38E9853E": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+            },
+            "Stage": {
+              "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDeploymentStagePROD6E99A268",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Description": "REST endpoints for press-reader-entitlements",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "press-reader-entitlements",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "UsagePlanName": "press-reader-entitlements-PROD",
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "pressreaderentitlementslambdapressreaderentitlementsPRODUsagePlanUsagePlanKeyResourcepressreaderentitlementsPRODpressreaderentitlementslambdapressreaderentitlementsPRODpressreaderentitlementskeyPRODCE66A9513BA32151": {
+      "Properties": {
+        "KeyId": {
+          "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODpressreaderentitlementskeyPROD67D1169B",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODUsagePlan38E9853E",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "pressreaderentitlementslambdapressreaderentitlementsPRODpressreaderentitlementskeyPROD67D1169B": {
+      "Properties": {
+        "Enabled": true,
+        "Name": "press-reader-entitlements-key-PROD",
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+            },
+            "StageName": {
+              "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDeploymentStagePROD6E99A268",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "press-reader-entitlements",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
+    "pressreaderentitlementslambdapressreaderentitlementsPRODproxyA619485E": {
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+            "RootResourceId",
+          ],
+        },
+        "PathPart": "{proxy+}",
+        "RestApiId": {
+          "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+        },
+      },
+      "Type": "AWS::ApiGateway::Resource",
+    },
+    "pressreaderentitlementslambdapressreaderentitlementsPRODproxyANY3A6E2187": {
+      "Properties": {
+        "ApiKeyRequired": true,
+        "AuthorizationType": "NONE",
+        "HttpMethod": "ANY",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "pressreaderentitlementslambda849A2923",
+                    "Arn",
+                  ],
+                },
+                "/invocations",
+              ],
+            ],
+          },
+        },
+        "ResourceId": {
+          "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODproxyA619485E",
+        },
+        "RestApiId": {
+          "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+        },
+      },
+      "Type": "AWS::ApiGateway::Method",
+    },
+    "pressreaderentitlementslambdapressreaderentitlementsPRODproxyANYApiPermissionTestpressreaderentitlementsPRODpressreaderentitlementslambdapressreaderentitlementsPROD471B412CANYproxy24006336": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "pressreaderentitlementslambda849A2923",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+              },
+              "/test-invoke-stage/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "pressreaderentitlementslambdapressreaderentitlementsPRODproxyANYApiPermissionpressreaderentitlementsPRODpressreaderentitlementslambdapressreaderentitlementsPROD471B412CANYproxyF59FA99A": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "pressreaderentitlementslambda849A2923",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+              },
+              "/",
+              {
+                "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDeploymentStagePROD6E99A268",
+              },
+              "/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
     },
   },
 }

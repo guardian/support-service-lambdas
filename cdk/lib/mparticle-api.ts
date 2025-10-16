@@ -51,7 +51,8 @@ export class MParticleApi extends SrStack {
 		});
 
 		// TODO combine this and `apiGateway` to a GuApiLambda (or SR version of)
-		const httpLambda = new SrLambda(this, 'Http', {
+		const httpLambda = new SrLambda(this, 'HttpLambda', {
+			legacyId: `${app}-http-lambda`,
 			nameSuffix: 'http',
 			lambdaOverrides: {
 				handler: 'index.handlerHttp',
@@ -59,7 +60,8 @@ export class MParticleApi extends SrStack {
 			},
 		});
 
-		const batonLambda = new SrLambda(this, 'Baton', {
+		const batonLambda = new SrLambda(this, 'BatonLambda', {
+			legacyId: `${app}-baton-lambda`,
 			nameSuffix: 'baton',
 			lambdaOverrides: {
 				handler: 'index.handlerBaton',

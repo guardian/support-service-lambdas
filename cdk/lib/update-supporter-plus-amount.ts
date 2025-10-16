@@ -15,6 +15,7 @@ export class UpdateSupporterPlusAmount extends SrStack {
 		});
 
 		const lambda = new SrApiLambda(this, 'Lambda', {
+			legacyId: `${this.app}-lambda`,
 			lambdaOverrides: {
 				description:
 					'An API Gateway triggered lambda to carry out supporter plus amount updates',

@@ -65,6 +65,7 @@ export class AlarmsHandler extends SrStack {
 		];
 
 		const triggeredLambda = new SrSqsLambda(this, 'TriggeredLambda', {
+			legacyId: `${app}-lambda`,
 			errorImpact: 'could not send an alarm notification to a chat channel',
 			monitoring: {
 				snsTopicName: backupEmailTopic.topicName, // we don't send to our own topic to avoid a loop
@@ -91,6 +92,7 @@ export class AlarmsHandler extends SrStack {
 		);
 
 		const scheduledLambda = new SrScheduledLambda(this, 'ScheduledLambda', {
+			legacyId: `${app}-scheduled-lambda`,
 			nameSuffix: 'scheduled',
 			rules: [
 				{

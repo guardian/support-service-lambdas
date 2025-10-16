@@ -1,5 +1,4 @@
 import { GuStringParameter } from '@guardian/cdk/lib/constructs/core';
-import { getId } from './SrLambda';
 import type { SrStack } from './SrStack';
 
 /**
@@ -20,4 +19,8 @@ export class SrAppConfigKey extends GuStringParameter {
 			default: appIdentitySSMPrefix + configKey,
 		});
 	}
+}
+
+function getId(resourceName: string, ...items: string[]) {
+	return `${resourceName}-${items.join('-')}`;
 }

@@ -36,6 +36,7 @@ export class SrSqsLambda extends SrLambda implements Construct {
 		const finalProps = {
 			nameSuffix: props.nameSuffix,
 			lambdaOverrides: props.lambdaOverrides,
+			legacyId: props.legacyId,
 		};
 
 		super(scope, id, finalProps);

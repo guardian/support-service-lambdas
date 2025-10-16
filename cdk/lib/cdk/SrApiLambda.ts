@@ -53,28 +53,34 @@ export class SrApiLambda extends SrLambda {
 				...defaultProps,
 				...props.lambdaOverrides,
 			},
+			legacyId: props.legacyId,
 		};
 
 		super(scope, id, finalProps);
 
-		this.api = new LambdaRestApi(this, 'RestApi', {
-			handler: this,
+		this.api = new LambdaRestApi(
+			this,
+			props.legacyId ? getNameWithStage(scope, props.nameSuffix) : 'RestApi',
+			{
+				handler: this,
 
-			restApiName: getNameWithStage(scope, props.nameSuffix),
-			description: props.apiDescriptionOverride ?? 'API Gateway created by CDK',
-			proxy: true,
-			deployOptions: {
-				stageName: scope.stage,
+				restApiName: getNameWithStage(scope, props.nameSuffix),
+				description:
+					props.apiDescriptionOverride ?? 'API Gateway created by CDK',
+				proxy: true,
+				deployOptions: {
+					stageName: scope.stage,
+				},
+				...(props.isPublic
+					? {}
+					: {
+							apiKeySourceType: ApiKeySourceType.HEADER,
+							defaultMethodOptions: {
+								apiKeyRequired: true,
+							},
+						}),
 			},
-			...(props.isPublic
-				? {}
-				: {
-						apiKeySourceType: ApiKeySourceType.HEADER,
-						defaultMethodOptions: {
-							apiKeyRequired: true,
-						},
-					}),
-		});
+		);
 
 		if (!props.isPublic) {
 			const usagePlan = this.api.addUsagePlan('UsagePlan', {
@@ -89,9 +95,12 @@ export class SrApiLambda extends SrLambda {
 			});
 
 			// create api key
-			const apiKey = this.api.addApiKey('ApiKey', {
-				apiKeyName: `${scope.app}-key-${scope.stage}`,
-			});
+			const apiKey = this.api.addApiKey(
+				props.legacyId ? `${scope.app}-key-${scope.stage}` : 'ApiKey',
+				{
+					apiKeyName: `${scope.app}-key-${scope.stage}`,
+				},
+			);
 
 			// associate api key to plan
 			usagePlan.addApiKey(apiKey);

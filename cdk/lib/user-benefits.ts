@@ -29,6 +29,7 @@ export class UserBenefits extends SrStack {
 			timeout: Duration.seconds(300),
 		};
 		const userBenefitsMeLambda = new SrLambda(this, 'MeLambda', {
+			legacyId: 'user-benefits-me-lambda',
 			nameSuffix: 'me',
 			lambdaOverrides: {
 				description:
@@ -38,6 +39,7 @@ export class UserBenefits extends SrStack {
 			},
 		});
 		const userBenefitsIdentityIdLambda = new SrLambda(this, 'BenefitsLambda', {
+			legacyId: 'user-benefits-identity-id-lambda',
 			nameSuffix: 'identity-id',
 			lambdaOverrides: {
 				description:
@@ -47,6 +49,7 @@ export class UserBenefits extends SrStack {
 			},
 		});
 		const userBenefitsListLambda = new SrLambda(this, 'ListLambda', {
+			legacyId: 'user-benefits-list-lambda',
 			nameSuffix: 'list',
 			lambdaOverrides: {
 				description:
