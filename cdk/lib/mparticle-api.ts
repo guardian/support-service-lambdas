@@ -10,8 +10,6 @@ import {
 	ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
-import { Topic } from 'aws-cdk-lib/aws-sns';
-import { SqsSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { SrLambda } from './cdk/sr-lambda';
@@ -41,11 +39,11 @@ export class MParticleApi extends SrStack {
 			`/${this.stage}/${this.stack}/${app}/sarResultsBucket`,
 		).stringValue;
 
-		const mmaUserDeletionRequestsTopicArn =
+		const identityMmaSnsDeletionRequestTopicArn =
 			StringParameter.fromStringParameterName(
 				this,
-				'MmaUserDeletionRequestsTopicArn',
-				`/${this.stage}/${this.stack}/${app}/MmaUserDeletionRequestsTopicArn`,
+				'IdentityMmaSnsDeletionRequestTopicArn',
+				`/${this.stage}/${this.stack}/${app}/IdentityMmaSnsDeletionRequestTopicArn`,
 			).stringValue;
 
 		const sarS3BaseKey = 'mparticle-results/'; // this must be the same as used in the code
@@ -123,15 +121,6 @@ export class MParticleApi extends SrStack {
 			}),
 		);
 
-		const mmaUserDeletionRequestsTopic = Topic.fromTopicArn(
-			this,
-			'MmaUserDeletionRequestsTopic',
-			mmaUserDeletionRequestsTopicArn,
-		);
-		mmaUserDeletionRequestsTopic.addSubscription(
-			new SqsSubscription(mmaUserDeletionRequestsQueue),
-		);
-
 		mmaUserDeletionRequestsQueue.addToResourcePolicy(
 			new PolicyStatement({
 				effect: Effect.ALLOW,
@@ -140,7 +129,7 @@ export class MParticleApi extends SrStack {
 				resources: [mmaUserDeletionRequestsQueue.queueArn],
 				conditions: {
 					ArnEquals: {
-						'aws:SourceArn': mmaUserDeletionRequestsTopicArn,
+						'aws:SourceArn': identityMmaSnsDeletionRequestTopicArn,
 					},
 				},
 			}),
