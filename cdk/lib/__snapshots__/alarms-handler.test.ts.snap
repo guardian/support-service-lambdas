@@ -4,7 +4,6 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
-      "GuAllowPolicy",
       "GuDistributionBucketParameter",
       "GuLambdaErrorPercentageAlarm",
     ],
@@ -142,10 +141,15 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
-    "AssumeRolePolicy49AB12C9": {
+    "CloudwatchPolicyFEF3FFD1": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
+            {
+              "Action": "cloudwatch:ListTagsForResource",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
             {
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
@@ -157,30 +161,6 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
                   "Ref": "appConfigaccountsTARGETINGroleArn",
                 },
               ],
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "AssumeRolePolicy49AB12C9",
-        "Roles": [
-          {
-            "Ref": "TriggeredLambdaServiceRoleBB080110",
-          },
-          {
-            "Ref": "ScheduledLambdaServiceRoleC946C6E8",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "CloudwatchPolicyFEF3FFD1": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "cloudwatch:ListTagsForResource",
-              "Effect": "Allow",
-              "Resource": "*",
             },
           ],
           "Version": "2012-10-17",
@@ -1135,7 +1115,6 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
-      "GuAllowPolicy",
       "GuDistributionBucketParameter",
       "GuLambdaErrorPercentageAlarm",
     ],
@@ -1273,10 +1252,15 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
-    "AssumeRolePolicy49AB12C9": {
+    "CloudwatchPolicyFEF3FFD1": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
+            {
+              "Action": "cloudwatch:ListTagsForResource",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
             {
               "Action": "sts:AssumeRole",
               "Effect": "Allow",
@@ -1288,30 +1272,6 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
                   "Ref": "appConfigaccountsTARGETINGroleArn",
                 },
               ],
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "AssumeRolePolicy49AB12C9",
-        "Roles": [
-          {
-            "Ref": "TriggeredLambdaServiceRoleBB080110",
-          },
-          {
-            "Ref": "ScheduledLambdaServiceRoleC946C6E8",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "CloudwatchPolicyFEF3FFD1": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "cloudwatch:ListTagsForResource",
-              "Effect": "Allow",
-              "Resource": "*",
             },
           ],
           "Version": "2012-10-17",

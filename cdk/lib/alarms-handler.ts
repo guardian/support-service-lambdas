@@ -1,4 +1,3 @@
-import { GuAllowPolicy } from '@guardian/cdk/lib/constructs/iam';
 import type { App } from 'aws-cdk-lib';
 import { Schedule } from 'aws-cdk-lib/aws-events';
 import {
@@ -55,14 +54,11 @@ export class AlarmsHandler extends SrStack {
 			new EmailSubscription(backupEmailAddress.valueAsString),
 		);
 
-		const commonPolicies = [
-			alarmTagFetchingPolicy(this),
-			crossAccountAlarmTagFetchingPolicy(
-				this,
-				mobileAccountRoleArn.valueAsString,
-				targetingAccountRoleArn.valueAsString,
-			),
-		];
+		const alarmTagFetchingPolicy = buildAlarmTagFetchingPolicy(
+			this,
+			mobileAccountRoleArn.valueAsString,
+			targetingAccountRoleArn.valueAsString,
+		);
 
 		const triggeredLambda = new SrSqsLambda(this, 'TriggeredLambda', {
 			errorImpact: 'could not send an alarm notification to a chat channel',
@@ -71,7 +67,7 @@ export class AlarmsHandler extends SrStack {
 			},
 		});
 
-		triggeredLambda.addPolicies(...commonPolicies);
+		triggeredLambda.addPolicies(alarmTagFetchingPolicy);
 
 		const triggerSnsTopic = new Topic(this, 'Topic', {
 			topicName: `${app}-topic-${this.stage}`,
@@ -110,29 +106,29 @@ export class AlarmsHandler extends SrStack {
 			},
 		});
 
-		scheduledLambda.addPolicies(describeAlarmsPolicy(this), ...commonPolicies);
+		scheduledLambda.addPolicies(
+			describeAlarmsPolicy(this),
+			alarmTagFetchingPolicy,
+		);
 	}
 }
 
-function alarmTagFetchingPolicy(scope: SrStack) {
+function buildAlarmTagFetchingPolicy(
+	scope: SrStack,
+	mobileAccountRoleArn: string,
+	targetingAccountRoleArn: string,
+) {
 	return new Policy(scope, 'CloudwatchPolicy', {
 		statements: [
 			new PolicyStatement({
 				actions: ['cloudwatch:ListTagsForResource'],
 				resources: ['*'],
 			}),
+			new PolicyStatement({
+				actions: ['sts:AssumeRole'],
+				resources: [mobileAccountRoleArn, targetingAccountRoleArn],
+			}),
 		],
-	});
-}
-
-function crossAccountAlarmTagFetchingPolicy(
-	scope: SrStack,
-	mobileAccountRoleArn: string,
-	targetingAccountRoleArn: string,
-) {
-	return new GuAllowPolicy(scope, `AssumeRolePolicy`, {
-		actions: ['sts:AssumeRole'],
-		resources: [mobileAccountRoleArn, targetingAccountRoleArn],
 	});
 }
 
