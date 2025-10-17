@@ -29,8 +29,9 @@ export class MobilePurchasesToSupporterProductData extends SrStack {
 			this,
 			'ForwardMobilePurchasesToSupporterProductData',
 			{
+				ruleName: `forward-mobile-purchases-to-lambda-${this.stage}`,
 				description:
-					'Forward DynamoDB stream purchase events to supporter product data lambda',
+					'Forward DynamoDB stream purchase events to mobile-purchases-to-supporter-product-data-lambda',
 				eventBus: mobilePurchasesBus,
 				eventPattern: {
 					detail: {
