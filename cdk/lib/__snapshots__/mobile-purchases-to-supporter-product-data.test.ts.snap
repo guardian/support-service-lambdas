@@ -37,7 +37,7 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 1`
     },
     "ForwardMobilePurchasesToSupporterProductDataBA6447A8": {
       "Properties": {
-        "Description": "Forward DynamoDB stream purchase events to supporter product data lambda",
+        "Description": "Forward DynamoDB stream purchase events to mobile-purchases-to-supporter-product-data-lambda",
         "EventBusName": "mobile-purchases-dynamo-stream-CODE",
         "EventPattern": {
           "detail": {
@@ -46,6 +46,7 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 1`
             ],
           },
         },
+        "Name": "forward-mobile-purchases-to-lambda-CODE",
         "State": "ENABLED",
         "Targets": [
           {
@@ -315,7 +316,7 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 2`
     },
     "ForwardMobilePurchasesToSupporterProductDataBA6447A8": {
       "Properties": {
-        "Description": "Forward DynamoDB stream purchase events to supporter product data lambda",
+        "Description": "Forward DynamoDB stream purchase events to mobile-purchases-to-supporter-product-data-lambda",
         "EventBusName": "mobile-purchases-dynamo-stream-PROD",
         "EventPattern": {
           "detail": {
@@ -324,6 +325,7 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 2`
             ],
           },
         },
+        "Name": "forward-mobile-purchases-to-lambda-PROD",
         "State": "ENABLED",
         "Targets": [
           {
