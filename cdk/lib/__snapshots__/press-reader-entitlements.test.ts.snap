@@ -5,7 +5,6 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuCname",
       "GuApiGateway5xxPercentageAlarm",
     ],
     "gu:cdk:version": "TEST",
@@ -1048,7 +1047,6 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuCname",
       "GuApiGateway5xxPercentageAlarm",
     ],
     "gu:cdk:version": "TEST",

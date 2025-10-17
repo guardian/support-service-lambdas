@@ -5,8 +5,6 @@ exports[`The generate product catalog stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuLambdaFunction",
-      "GuCname",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -147,6 +145,10 @@ def sort_filter_rules(json_obj):
         "Runtime": "python3.11",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "generate-product-catalog",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -156,7 +158,7 @@ def sort_filter_rules(json_obj):
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -197,6 +199,10 @@ def sort_filter_rules(json_obj):
         ],
         "Tags": [
           {
+            "Key": "App",
+            "Value": "generate-product-catalog",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -206,7 +212,7 @@ def sort_filter_rules(json_obj):
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -263,8 +269,28 @@ def sort_filter_rules(json_obj):
             ],
           },
         ],
-        "AlarmDescription": "This means the product catalog may not be up to date in S3. This lambda runs on a regular schedule so action will only be necessary if the alarm is triggered continuously",
-        "AlarmName": "The generate-product-catalog-CODE Lambda has failed",
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "generateproductcataloglambda1E6192C7",
+              },
+              " failed. Search the logs below for "error" for more information. Impact: This means the product catalog may not be up to date in S3. This lambda runs on a regular schedule so action will only be necessary if the alarm is triggered continuously",
+            ],
+          ],
+        },
+        "AlarmName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "generateproductcataloglambda1E6192C7",
+              },
+              " Lambda has failed",
+            ],
+          ],
+        },
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
@@ -277,9 +303,13 @@ def sort_filter_rules(json_obj):
         "EvaluationPeriods": 1,
         "MetricName": "Errors",
         "Namespace": "AWS/Lambda",
-        "Period": 300,
+        "Period": 60,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "generate-product-catalog",
+          },
           {
             "Key": "DiagnosticLinks",
             "Value": {
@@ -304,7 +334,7 @@ def sort_filter_rules(json_obj):
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -312,6 +342,7 @@ def sort_filter_rules(json_obj):
           },
         ],
         "Threshold": 1,
+        "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
@@ -320,7 +351,7 @@ def sort_filter_rules(json_obj):
         "Name": "product-catalog.code.dev-guardianapis.com",
         "RecordType": "CNAME",
         "ResourceRecords": [
-          "guardian.map.fastly.net",
+          "dualstack.guardian.map.fastly.net",
         ],
         "Stage": "CODE",
         "TTL": 3600,
@@ -361,7 +392,7 @@ def sort_filter_rules(json_obj):
               "Action": "s3:GetObject",
               "Effect": "Allow",
               "Resource": [
-                "arn:aws:s3::*:membership-dist/membership/CODE/generate-product-catalog/",
+                "arn:aws:s3::*:membership-dist/support/CODE/generate-product-catalog/",
                 "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-CODE/*",
               ],
             },
@@ -436,6 +467,10 @@ Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
         "Statistic": "Sum",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "generate-product-catalog",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -445,7 +480,7 @@ Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -467,13 +502,14 @@ Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/CODE/generate-product-catalog/generate-product-catalog.zip",
+          "S3Key": "support/CODE/generate-product-catalog/generate-product-catalog.zip",
         },
         "Description": "A lambda to generate the Guardian product catalog from the Zuora catalog",
         "Environment": {
           "Variables": {
             "APP": "generate-product-catalog",
-            "STACK": "membership",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
             "STAGE": "CODE",
           },
         },
@@ -505,14 +541,14 @@ Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
             "Value": "CODE",
           },
         ],
-        "Timeout": 300,
+        "Timeout": 15,
       },
       "Type": "AWS::Lambda::Function",
     },
@@ -559,7 +595,7 @@ Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -608,7 +644,7 @@ Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/CODE/generate-product-catalog/generate-product-catalog.zip",
+                      "/support/CODE/generate-product-catalog/generate-product-catalog.zip",
                     ],
                   ],
                 },
@@ -629,7 +665,7 @@ Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/generate-product-catalog",
+                    ":parameter/CODE/support/generate-product-catalog",
                   ],
                 ],
               },
@@ -652,7 +688,7 @@ Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/generate-product-catalog/*",
+                    ":parameter/CODE/support/generate-product-catalog/*",
                   ],
                 ],
               },
@@ -748,8 +784,6 @@ exports[`The generate product catalog stack matches the snapshot 2`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuLambdaFunction",
-      "GuCname",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -890,6 +924,10 @@ def sort_filter_rules(json_obj):
         "Runtime": "python3.11",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "generate-product-catalog",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -899,7 +937,7 @@ def sort_filter_rules(json_obj):
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -940,6 +978,10 @@ def sort_filter_rules(json_obj):
         ],
         "Tags": [
           {
+            "Key": "App",
+            "Value": "generate-product-catalog",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -949,7 +991,7 @@ def sort_filter_rules(json_obj):
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1006,8 +1048,28 @@ def sort_filter_rules(json_obj):
             ],
           },
         ],
-        "AlarmDescription": "This means the product catalog may not be up to date in S3. This lambda runs on a regular schedule so action will only be necessary if the alarm is triggered continuously",
-        "AlarmName": "The generate-product-catalog-PROD Lambda has failed",
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "generateproductcataloglambda1E6192C7",
+              },
+              " failed. Search the logs below for "error" for more information. Impact: This means the product catalog may not be up to date in S3. This lambda runs on a regular schedule so action will only be necessary if the alarm is triggered continuously",
+            ],
+          ],
+        },
+        "AlarmName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "generateproductcataloglambda1E6192C7",
+              },
+              " Lambda has failed",
+            ],
+          ],
+        },
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
@@ -1020,9 +1082,13 @@ def sort_filter_rules(json_obj):
         "EvaluationPeriods": 1,
         "MetricName": "Errors",
         "Namespace": "AWS/Lambda",
-        "Period": 300,
+        "Period": 60,
         "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "generate-product-catalog",
+          },
           {
             "Key": "DiagnosticLinks",
             "Value": {
@@ -1047,7 +1113,7 @@ def sort_filter_rules(json_obj):
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1055,6 +1121,7 @@ def sort_filter_rules(json_obj):
           },
         ],
         "Threshold": 1,
+        "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
@@ -1063,7 +1130,7 @@ def sort_filter_rules(json_obj):
         "Name": "product-catalog.guardianapis.com",
         "RecordType": "CNAME",
         "ResourceRecords": [
-          "guardian.map.fastly.net",
+          "dualstack.guardian.map.fastly.net",
         ],
         "Stage": "PROD",
         "TTL": 3600,
@@ -1104,7 +1171,7 @@ def sort_filter_rules(json_obj):
               "Action": "s3:GetObject",
               "Effect": "Allow",
               "Resource": [
-                "arn:aws:s3::*:membership-dist/membership/PROD/generate-product-catalog/",
+                "arn:aws:s3::*:membership-dist/support/PROD/generate-product-catalog/",
                 "arn:aws:s3::*:gu-zuora-catalog/PROD/Zuora-PROD/*",
               ],
             },
@@ -1179,6 +1246,10 @@ Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
         "Statistic": "Sum",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "generate-product-catalog",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1188,7 +1259,7 @@ Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1210,13 +1281,14 @@ Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/PROD/generate-product-catalog/generate-product-catalog.zip",
+          "S3Key": "support/PROD/generate-product-catalog/generate-product-catalog.zip",
         },
         "Description": "A lambda to generate the Guardian product catalog from the Zuora catalog",
         "Environment": {
           "Variables": {
             "APP": "generate-product-catalog",
-            "STACK": "membership",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
             "STAGE": "PROD",
           },
         },
@@ -1248,14 +1320,14 @@ Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
             "Value": "PROD",
           },
         ],
-        "Timeout": 300,
+        "Timeout": 15,
       },
       "Type": "AWS::Lambda::Function",
     },
@@ -1302,7 +1374,7 @@ Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1351,7 +1423,7 @@ Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/PROD/generate-product-catalog/generate-product-catalog.zip",
+                      "/support/PROD/generate-product-catalog/generate-product-catalog.zip",
                     ],
                   ],
                 },
@@ -1372,7 +1444,7 @@ Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/generate-product-catalog",
+                    ":parameter/PROD/support/generate-product-catalog",
                   ],
                 ],
               },
@@ -1395,7 +1467,7 @@ Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/generate-product-catalog/*",
+                    ":parameter/PROD/support/generate-product-catalog/*",
                   ],
                 ],
               },

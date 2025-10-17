@@ -134,6 +134,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	PressReaderEntitlements,
 	UserBenefits,
 	AlarmsHandler,
+	GenerateProductCatalog,
 ];
 
 // generate all stacks for all stages
@@ -188,16 +189,6 @@ new SalesforceDisasterRecovery(app, 'salesforce-disaster-recovery-PROD', {
 	salesforceOauthSecretName:
 		'events!connection/salesforce-disaster-recovery-PROD-salesforce-api/583f9d1a-7244-453e-9bb9-ca2639ef27d3',
 	salesforceQueryWaitSeconds: 30,
-});
-new GenerateProductCatalog(app, 'generate-product-catalog-CODE', {
-	stack: 'support',
-	stage: 'CODE',
-	domainName: 'product-catalog.code.dev-guardianapis.com',
-});
-new GenerateProductCatalog(app, 'generate-product-catalog-PROD', {
-	stack: 'support',
-	stage: 'PROD',
-	domainName: 'product-catalog.guardianapis.com',
 });
 
 export const stripeWebhookEndpointsCodeProps: StripeWebhookEndpointsProps = {

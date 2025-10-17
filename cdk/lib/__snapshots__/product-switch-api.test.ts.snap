@@ -1010,7 +1010,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "product-switch-api returned a 5XX response search the logs below for "error" for more information. Impact: readers could not get through the switch journey in MMA",
+        "AlarmDescription": "product-switch-api returned a 5XX response. Search the logs below for "error" for more information. Impact: readers could not get through the switch journey in MMA",
         "AlarmName": {
           "Fn::Join": [
             "",
@@ -1073,6 +1073,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
           },
         ],
         "Threshold": 1,
+        "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
     },

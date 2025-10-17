@@ -103,6 +103,8 @@ export class AlarmsHandler extends SrStack {
 			},
 			monitoring: {
 				snsTopicName: backupEmailTopic.topicName, // we don't send to our own topic to avoid a loop
+				errorImpact:
+					'daily alarm summary will not be sent to the team chat channels',
 			},
 		});
 

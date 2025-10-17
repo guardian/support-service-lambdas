@@ -23,7 +23,15 @@ export class PressReaderEntitlements extends SrStack {
 			},
 			errorImpact: 'some users would not be able to access ???',
 			monitoring: { noMonitoring: true }, // we use the GuCDK 5xx alarm instead, see below
-			srRestDomainProps: { publicDomain: true },
+			srRestDomainProps: {
+				publicDomain: true,
+				domainIdOverride: `NS1 DNS entry for ${
+					app +
+					(this.stage === 'PROD'
+						? `.guardianapis.com`
+						: `.code.dev-guardianapis.com`)
+				}`,
+			},
 		});
 		new GuApiGateway5xxPercentageAlarm(this, {
 			app: this.app,

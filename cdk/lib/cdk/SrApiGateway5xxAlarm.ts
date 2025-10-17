@@ -1,5 +1,9 @@
 import { Duration } from 'aws-cdk-lib';
-import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
+import {
+	ComparisonOperator,
+	Metric,
+	TreatMissingData,
+} from 'aws-cdk-lib/aws-cloudwatch';
 import type { SrLambdaAlarmProps } from './SrLambdaAlarm';
 import { SrLambdaAlarm } from './SrLambdaAlarm';
 import type { SrStack } from './SrStack';
@@ -28,12 +32,13 @@ function getDefaultProps(
 		alarmName: props.functionName + ' 5XX errors',
 		alarmDescription:
 			scope.app +
-			' returned a 5XX response search the logs below for "error" for more information. Impact: ' +
+			' returned a 5XX response. Search the logs below for "error" for more information. Impact: ' +
 			props.errorImpact,
 		evaluationPeriods: 1,
 		threshold: 1,
 		lambdaFunctionNames: props.functionName,
 		comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+		treatMissingData: TreatMissingData.NOT_BREACHING,
 		metric: new Metric({
 			metricName: '5XXError',
 			namespace: 'AWS/ApiGateway',
