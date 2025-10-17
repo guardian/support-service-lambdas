@@ -1,6 +1,6 @@
 import { GuCname } from '@guardian/cdk/lib/constructs/dns';
-import type { SrStack } from './SrStack';
 import { Duration } from 'aws-cdk-lib';
+import type { SrStack } from './SrStack';
 
 type SrFastlyDomainProps = {
 	prefixOverride?: string;

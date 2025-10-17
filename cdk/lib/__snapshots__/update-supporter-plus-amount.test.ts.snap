@@ -994,7 +994,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "update-supporter-plus-amount returned a 5XX response search the logs below for "error" for more information. Impact: a user could not update the contribution amount of their supporter plus subscription",
+        "AlarmDescription": "update-supporter-plus-amount returned a 5XX response. Search the logs below for "error" for more information. Impact: a user could not update the contribution amount of their supporter plus subscription",
         "AlarmName": {
           "Fn::Join": [
             "",

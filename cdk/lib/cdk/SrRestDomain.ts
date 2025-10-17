@@ -1,10 +1,10 @@
-import { GuCname } from '@guardian/cdk/lib/constructs/dns';
+import type { GuCname } from '@guardian/cdk/lib/constructs/dns';
 import type { LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { CfnBasePathMapping, CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { certForStack } from '../constants';
-import type { SrStack } from './SrStack';
 import { SrFastlyDomain } from './SrFastlyDomain';
+import type { SrStack } from './SrStack';
 
 export type SrRestDomainProps = {
 	suffixProdDomain?: boolean;

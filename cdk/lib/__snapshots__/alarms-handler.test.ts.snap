@@ -68,7 +68,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
             ],
           },
         ],
-        "AlarmDescription": "alarms-handler could not process a message and it ended up on the DLQ search the logs below for "error" for more information. Impact: could not send an alarm notification to a chat channel",
+        "AlarmDescription": "alarms-handler could not process a message and it ended up on the DLQ. Search the logs below for "error" for more information. Impact: could not send an alarm notification to a chat channel",
         "AlarmName": {
           "Fn::Join": [
             "",
@@ -453,7 +453,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
               {
                 "Ref": "ScheduledLambda68819433",
               },
-              " failed search the logs below for "error" for more information. Impact: daily alarm summary will not be sent to the team chat channels",
+              " failed. Search the logs below for "error" for more information. Impact: daily alarm summary will not be sent to the team chat channels",
             ],
           ],
         },
@@ -1146,7 +1146,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "alarms-handler could not process a message and it ended up on the DLQ search the logs below for "error" for more information. Impact: could not send an alarm notification to a chat channel",
+        "AlarmDescription": "alarms-handler could not process a message and it ended up on the DLQ. Search the logs below for "error" for more information. Impact: could not send an alarm notification to a chat channel",
         "AlarmName": {
           "Fn::Join": [
             "",
@@ -1531,7 +1531,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
               {
                 "Ref": "ScheduledLambda68819433",
               },
-              " failed search the logs below for "error" for more information. Impact: daily alarm summary will not be sent to the team chat channels",
+              " failed. Search the logs below for "error" for more information. Impact: daily alarm summary will not be sent to the team chat channels",
             ],
           ],
         },

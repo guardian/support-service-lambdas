@@ -32,7 +32,7 @@ function getDefaultProps(
 		alarmName: props.functionName + ' 5XX errors',
 		alarmDescription:
 			scope.app +
-			' returned a 5XX response search the logs below for "error" for more information. Impact: ' +
+			' returned a 5XX response. Search the logs below for "error" for more information. Impact: ' +
 			props.errorImpact,
 		evaluationPeriods: 1,
 		threshold: 1,

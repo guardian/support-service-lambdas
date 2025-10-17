@@ -276,7 +276,7 @@ def sort_filter_rules(json_obj):
               {
                 "Ref": "generateproductcataloglambda1E6192C7",
               },
-              " failed search the logs below for "error" for more information. Impact: This means the product catalog may not be up to date in S3. This lambda runs on a regular schedule so action will only be necessary if the alarm is triggered continuously",
+              " failed. Search the logs below for "error" for more information. Impact: This means the product catalog may not be up to date in S3. This lambda runs on a regular schedule so action will only be necessary if the alarm is triggered continuously",
             ],
           ],
         },
@@ -1055,7 +1055,7 @@ def sort_filter_rules(json_obj):
               {
                 "Ref": "generateproductcataloglambda1E6192C7",
               },
-              " failed search the logs below for "error" for more information. Impact: This means the product catalog may not be up to date in S3. This lambda runs on a regular schedule so action will only be necessary if the alarm is triggered continuously",
+              " failed. Search the logs below for "error" for more information. Impact: This means the product catalog may not be up to date in S3. This lambda runs on a regular schedule so action will only be necessary if the alarm is triggered continuously",
             ],
           ],
         },

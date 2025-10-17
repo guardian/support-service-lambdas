@@ -65,7 +65,7 @@ export class SrSqsLambda extends SrLambda implements Construct {
 				alarmName: this.inputDeadLetterQueue.queueName + ' has messages',
 				alarmDescription:
 					scope.app +
-					' could not process a message and it ended up on the DLQ search the logs below for "error" for more information. Impact: ' +
+					' could not process a message and it ended up on the DLQ. Search the logs below for "error" for more information. Impact: ' +
 					props.errorImpact,
 				metric: this.inputDeadLetterQueue
 					.metric('ApproximateNumberOfMessagesVisible')

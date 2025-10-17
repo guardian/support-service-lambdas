@@ -4,11 +4,11 @@ import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Bucket, EventType } from 'aws-cdk-lib/aws-s3';
 import { LambdaDestination } from 'aws-cdk-lib/aws-s3-notifications';
 import { metricNamespace } from '../../modules/aws/src/cloudwatch';
+import { SrFastlyDomain } from './cdk/SrFastlyDomain';
 import { SrLambda } from './cdk/SrLambda';
 import { SrLambdaErrorAlarm } from './cdk/SrLambdaErrorAlarm';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
-import { SrFastlyDomain } from './cdk/SrFastlyDomain';
 
 export const productCatalogBucketName = 'gu-product-catalog';
 export const failedSchemaValidationMetricName = 'failed-schema-validation';

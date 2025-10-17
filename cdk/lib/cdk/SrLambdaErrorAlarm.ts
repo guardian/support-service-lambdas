@@ -32,7 +32,7 @@ export class SrLambdaErrorAlarm extends SrLambdaAlarm {
 			alarmName: `${props.lambdaFunctionName} Lambda has failed`,
 			alarmDescription:
 				props.lambdaFunctionName +
-				' failed search the logs below for "error" for more information. Impact: ' +
+				' failed. Search the logs below for "error" for more information. Impact: ' +
 				props.errorImpact,
 			evaluationPeriods: 1,
 			threshold: 1,
