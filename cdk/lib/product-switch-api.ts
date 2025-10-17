@@ -21,7 +21,9 @@ export class ProductSwitchApi extends SrStack {
 					'An API Gateway triggered lambda for carrying out product switches. Code is in the support-service-lambdas repo',
 			},
 			apiDescriptionOverride: `API Gateway endpoint for the ${app}-${this.stage} lambda`,
-			errorImpact: 'readers could not get through the switch journey in MMA',
+			monitoring: {
+				errorImpact: 'readers could not get through the switch journey in MMA',
+			},
 		});
 
 		lambda.addPolicies(

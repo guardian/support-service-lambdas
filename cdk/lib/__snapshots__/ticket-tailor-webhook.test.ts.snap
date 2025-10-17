@@ -5,8 +5,6 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuLambdaFunction",
-      "GuApiGatewayWithLambdaByPath",
       "GuPutCloudwatchMetricsPolicy",
     ],
     "gu:cdk:version": "TEST",
@@ -47,7 +45,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
-    "ApiGatewayToSqsRole590217A3": {
+    "ApiGatewayToSqsRole04C1917A": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -63,6 +61,10 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
         },
         "Tags": [
           {
+            "Key": "App",
+            "Value": "ticket-tailor-webhook",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -72,7 +74,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -82,7 +84,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "ApiGatewayToSqsRoleDefaultPolicy4DC2F8A9": {
+    "ApiGatewayToSqsRoleDefaultPolicyB06A361D": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -103,10 +105,10 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "ApiGatewayToSqsRoleDefaultPolicy4DC2F8A9",
+        "PolicyName": "ApiGatewayToSqsRoleDefaultPolicyB06A361D",
         "Roles": [
           {
-            "Ref": "ApiGatewayToSqsRole590217A3",
+            "Ref": "ApiGatewayToSqsRole04C1917A",
           },
         ],
       },
@@ -135,8 +137,12 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
     },
     "RestApi0C43BF4B": {
       "Properties": {
-        "Name": "membership-CODE-ticket-tailor-webhook",
+        "Name": "support-CODE-ticket-tailor-webhook",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "ticket-tailor-webhook",
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -147,7 +153,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -204,6 +210,10 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
         ],
         "Tags": [
           {
+            "Key": "App",
+            "Value": "ticket-tailor-webhook",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -213,7 +223,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -224,7 +234,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC5039d3d4ee670b9b15fc6cbe4ecf73efd3f": {
+    "RestApiDeployment180EC50338b570e3161b49f556bd3c1f1c8ea9ed": {
       "DependsOn": [
         "RestApiPOSTEF2EB351",
       ],
@@ -242,13 +252,17 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC5039d3d4ee670b9b15fc6cbe4ecf73efd3f",
+          "Ref": "RestApiDeployment180EC50338b570e3161b49f556bd3c1f1c8ea9ed",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
         },
         "StageName": "prod",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "ticket-tailor-webhook",
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -259,7 +273,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -276,7 +290,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
         "Integration": {
           "Credentials": {
             "Fn::GetAtt": [
-              "ApiGatewayToSqsRole590217A3",
+              "ApiGatewayToSqsRole04C1917A",
               "Arn",
             ],
           },
@@ -340,27 +354,6 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "S3inlinepolicy3B07399A": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/membership/CODE/ticket-tailor-webhook/",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "S3inlinepolicy3B07399A",
-        "Roles": [
-          {
-            "Ref": "tickettailorwebhooklambdaServiceRole8D9E481D",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
     "Secretmanageraccesspolicy79659139": {
       "Properties": {
         "PolicyDocument": {
@@ -422,6 +415,10 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
         "QueueName": "ticket-tailor-webhook-dlq-CODE",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "ticket-tailor-webhook",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -431,7 +428,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -452,13 +449,14 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/CODE/ticket-tailor-webhook/ticket-tailor-webhook.zip",
+          "S3Key": "support/CODE/ticket-tailor-webhook/ticket-tailor-webhook.zip",
         },
         "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
         "Environment": {
           "Variables": {
             "APP": "ticket-tailor-webhook",
-            "STACK": "membership",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
             "STAGE": "CODE",
           },
         },
@@ -490,7 +488,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -544,7 +542,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -558,22 +556,6 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
       "Properties": {
         "PolicyDocument": {
           "Statement": [
-            {
-              "Action": [
-                "sqs:ReceiveMessage",
-                "sqs:ChangeMessageVisibility",
-                "sqs:GetQueueUrl",
-                "sqs:DeleteMessage",
-                "sqs:GetQueueAttributes",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "tickettailorwebhookqueueCODEBF7A5727",
-                  "Arn",
-                ],
-              },
-            },
             {
               "Action": [
                 "s3:GetObject*",
@@ -609,7 +591,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/CODE/ticket-tailor-webhook/ticket-tailor-webhook.zip",
+                      "/support/CODE/ticket-tailor-webhook/ticket-tailor-webhook.zip",
                     ],
                   ],
                 },
@@ -630,7 +612,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/ticket-tailor-webhook",
+                    ":parameter/CODE/support/ticket-tailor-webhook",
                   ],
                 ],
               },
@@ -653,8 +635,24 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/membership/ticket-tailor-webhook/*",
+                    ":parameter/CODE/support/ticket-tailor-webhook/*",
                   ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "tickettailorwebhookqueueCODEBF7A5727",
+                  "Arn",
                 ],
               },
             },
@@ -681,9 +679,6 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
         "FunctionName": {
           "Ref": "tickettailorwebhooklambdaEF743C00",
         },
-        "FunctionResponseTypes": [
-          "ReportBatchItemFailures",
-        ],
         "Tags": [
           {
             "Key": "App",
@@ -699,7 +694,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -724,6 +719,10 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
         },
         "Tags": [
           {
+            "Key": "App",
+            "Value": "ticket-tailor-webhook",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -733,7 +732,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 1`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -754,9 +753,6 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuLambdaFunction",
-      "GuApiGatewayWithLambdaByPath",
-      "GuApiGateway5xxPercentageAlarm",
       "GuPutCloudwatchMetricsPolicy",
     ],
     "gu:cdk:version": "TEST",
@@ -797,7 +793,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
-    "ApiGatewayHigh5xxPercentageAlarmTickettailorwebhook77367DFB": {
+    "Alarm7103F465": {
       "Properties": {
         "ActionsEnabled": true,
         "AlarmActions": [
@@ -818,54 +814,57 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "ticket-tailor-webhook exceeded 0% error rate",
-        "AlarmName": "High 5XX error percentage from ticket-tailor-webhook (ApiGateway) in PROD",
+        "AlarmDescription": "ticket-tailor-webhook could not process a message and it ended up on the DLQ. Search the logs below for "error" for more information. Impact: unknown",
+        "AlarmName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Fn::GetAtt": [
+                  "tickettailorwebhookdlqPRODC8AAF6D6",
+                  "QueueName",
+                ],
+              },
+              " has messages",
+            ],
+          ],
+        },
         "ComparisonOperator": "GreaterThanThreshold",
-        "EvaluationPeriods": 1,
-        "Metrics": [
+        "Dimensions": [
           {
-            "Expression": "100*m1/m2",
-            "Id": "expr_1",
-            "Label": "% of 5XX responses served for ticket-tailor-webhook",
-          },
-          {
-            "Id": "m1",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "membership-PROD-ticket-tailor-webhook",
-                  },
-                ],
-                "MetricName": "5XXError",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "Sum",
+            "Name": "QueueName",
+            "Value": {
+              "Fn::GetAtt": [
+                "tickettailorwebhookdlqPRODC8AAF6D6",
+                "QueueName",
+              ],
             },
-            "ReturnData": false,
-          },
-          {
-            "Id": "m2",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "membership-PROD-ticket-tailor-webhook",
-                  },
-                ],
-                "MetricName": "Count",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "SampleCount",
-            },
-            "ReturnData": false,
           },
         ],
+        "EvaluationPeriods": 1,
+        "MetricName": "ApproximateNumberOfMessagesVisible",
+        "Namespace": "AWS/SQS",
+        "Period": 60,
+        "Statistic": "Sum",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "ticket-tailor-webhook",
+          },
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "tickettailorwebhooklambdaEF743C00",
+                  },
+                ],
+              ],
+            },
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -876,7 +875,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -884,11 +883,76 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
           },
         ],
         "Threshold": 0,
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
+    "ApiGateway5XXAlarmCDK11905206": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": "ticket-tailor-webhook returned a 5XX response. Search the logs below for "error" for more information. Impact: unknown",
+        "AlarmName": "support-PROD-ticket-tailor-webhook 5XX errors",
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "ApiName",
+            "Value": "support-PROD-ticket-tailor-webhook",
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "5XXError",
+        "Namespace": "AWS/ApiGateway",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "ticket-tailor-webhook",
+          },
+          {
+            "Key": "DiagnosticLinks",
+            "Value": "",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
         "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
-    "ApiGatewayToSqsRole590217A3": {
+    "ApiGatewayToSqsRole04C1917A": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -904,6 +968,10 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
         },
         "Tags": [
           {
+            "Key": "App",
+            "Value": "ticket-tailor-webhook",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -913,7 +981,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -923,7 +991,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "ApiGatewayToSqsRoleDefaultPolicy4DC2F8A9": {
+    "ApiGatewayToSqsRoleDefaultPolicyB06A361D": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -944,10 +1012,10 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "ApiGatewayToSqsRoleDefaultPolicy4DC2F8A9",
+        "PolicyName": "ApiGatewayToSqsRoleDefaultPolicyB06A361D",
         "Roles": [
           {
-            "Ref": "ApiGatewayToSqsRole590217A3",
+            "Ref": "ApiGatewayToSqsRole04C1917A",
           },
         ],
       },
@@ -976,8 +1044,12 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
     },
     "RestApi0C43BF4B": {
       "Properties": {
-        "Name": "membership-PROD-ticket-tailor-webhook",
+        "Name": "support-PROD-ticket-tailor-webhook",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "ticket-tailor-webhook",
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -988,7 +1060,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1045,6 +1117,10 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
         ],
         "Tags": [
           {
+            "Key": "App",
+            "Value": "ticket-tailor-webhook",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1054,7 +1130,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1065,7 +1141,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "RestApiDeployment180EC503246f600003669b6f801a03df1c4d1821": {
+    "RestApiDeployment180EC503135ae40138db18799f369bc6de8d0edc": {
       "DependsOn": [
         "RestApiPOSTEF2EB351",
       ],
@@ -1083,13 +1159,17 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "RestApiDeployment180EC503246f600003669b6f801a03df1c4d1821",
+          "Ref": "RestApiDeployment180EC503135ae40138db18799f369bc6de8d0edc",
         },
         "RestApiId": {
           "Ref": "RestApi0C43BF4B",
         },
         "StageName": "prod",
         "Tags": [
+          {
+            "Key": "App",
+            "Value": "ticket-tailor-webhook",
+          },
           {
             "Key": "gu:cdk:version",
             "Value": "TEST",
@@ -1100,7 +1180,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1117,7 +1197,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
         "Integration": {
           "Credentials": {
             "Fn::GetAtt": [
-              "ApiGatewayToSqsRole590217A3",
+              "ApiGatewayToSqsRole04C1917A",
               "Arn",
             ],
           },
@@ -1181,27 +1261,6 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "S3inlinepolicy3B07399A": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3::*:membership-dist/membership/PROD/ticket-tailor-webhook/",
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "S3inlinepolicy3B07399A",
-        "Roles": [
-          {
-            "Ref": "tickettailorwebhooklambdaServiceRole8D9E481D",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
     "Secretmanageraccesspolicy79659139": {
       "Properties": {
         "PolicyDocument": {
@@ -1263,6 +1322,10 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
         "QueueName": "ticket-tailor-webhook-dlq-PROD",
         "Tags": [
           {
+            "Key": "App",
+            "Value": "ticket-tailor-webhook",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1272,7 +1335,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1293,13 +1356,14 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "membership/PROD/ticket-tailor-webhook/ticket-tailor-webhook.zip",
+          "S3Key": "support/PROD/ticket-tailor-webhook/ticket-tailor-webhook.zip",
         },
         "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
         "Environment": {
           "Variables": {
             "APP": "ticket-tailor-webhook",
-            "STACK": "membership",
+            "NODE_OPTIONS": "--enable-source-maps",
+            "STACK": "support",
             "STAGE": "PROD",
           },
         },
@@ -1331,7 +1395,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1385,7 +1449,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1399,22 +1463,6 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
       "Properties": {
         "PolicyDocument": {
           "Statement": [
-            {
-              "Action": [
-                "sqs:ReceiveMessage",
-                "sqs:ChangeMessageVisibility",
-                "sqs:GetQueueUrl",
-                "sqs:DeleteMessage",
-                "sqs:GetQueueAttributes",
-              ],
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::GetAtt": [
-                  "tickettailorwebhookqueuePRODDAE73271",
-                  "Arn",
-                ],
-              },
-            },
             {
               "Action": [
                 "s3:GetObject*",
@@ -1450,7 +1498,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/membership/PROD/ticket-tailor-webhook/ticket-tailor-webhook.zip",
+                      "/support/PROD/ticket-tailor-webhook/ticket-tailor-webhook.zip",
                     ],
                   ],
                 },
@@ -1471,7 +1519,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/ticket-tailor-webhook",
+                    ":parameter/PROD/support/ticket-tailor-webhook",
                   ],
                 ],
               },
@@ -1494,8 +1542,24 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/membership/ticket-tailor-webhook/*",
+                    ":parameter/PROD/support/ticket-tailor-webhook/*",
                   ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:ChangeMessageVisibility",
+                "sqs:GetQueueUrl",
+                "sqs:DeleteMessage",
+                "sqs:GetQueueAttributes",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "tickettailorwebhookqueuePRODDAE73271",
+                  "Arn",
                 ],
               },
             },
@@ -1522,9 +1586,6 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
         "FunctionName": {
           "Ref": "tickettailorwebhooklambdaEF743C00",
         },
-        "FunctionResponseTypes": [
-          "ReportBatchItemFailures",
-        ],
         "Tags": [
           {
             "Key": "App",
@@ -1540,7 +1601,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",
@@ -1565,6 +1626,10 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
         },
         "Tags": [
           {
+            "Key": "App",
+            "Value": "ticket-tailor-webhook",
+          },
+          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
@@ -1574,7 +1639,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
           },
           {
             "Key": "Stack",
-            "Value": "membership",
+            "Value": "support",
           },
           {
             "Key": "Stage",

@@ -61,10 +61,11 @@ export class AlarmsHandler extends SrStack {
 		);
 
 		const triggeredLambda = new SrSqsLambda(this, 'TriggeredLambda', {
-			errorImpact: 'could not send an alarm notification to a chat channel',
 			monitoring: {
+				errorImpact: 'could not send an alarm notification to a chat channel',
 				snsTopicName: backupEmailTopic.topicName, // we don't send to our own topic to avoid a loop
 			},
+			maxReceiveCount: 3,
 		});
 
 		triggeredLambda.addPolicies(alarmTagFetchingPolicy);

@@ -1011,24 +1011,12 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
           },
         ],
         "AlarmDescription": "product-switch-api returned a 5XX response. Search the logs below for "error" for more information. Impact: readers could not get through the switch journey in MMA",
-        "AlarmName": {
-          "Fn::Join": [
-            "",
-            [
-              {
-                "Ref": "productswitchapilambdaDA3EBA76",
-              },
-              " 5XX errors",
-            ],
-          ],
-        },
+        "AlarmName": "product-switch-api-PROD 5XX errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
             "Name": "ApiName",
-            "Value": {
-              "Ref": "productswitchapilambdaDA3EBA76",
-            },
+            "Value": "product-switch-api-PROD",
           },
         ],
         "EvaluationPeriods": 1,

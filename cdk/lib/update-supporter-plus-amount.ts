@@ -20,8 +20,10 @@ export class UpdateSupporterPlusAmount extends SrStack {
 				description:
 					'An API Gateway triggered lambda to carry out supporter plus amount updates',
 			},
-			errorImpact:
-				'a user could not update the contribution amount of their supporter plus subscription',
+			monitoring: {
+				errorImpact:
+					'a user could not update the contribution amount of their supporter plus subscription',
+			},
 		});
 
 		lambda.addPolicies(

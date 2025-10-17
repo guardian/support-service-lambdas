@@ -47,7 +47,7 @@ export class SrScheduledLambda extends SrLambda implements Construct {
 			});
 		});
 
-		if (!props.monitoring.noMonitoring) {
+		if (scope.stage === 'PROD' && !props.monitoring.noMonitoring) {
 			new SrLambdaErrorAlarm(
 				scope,
 				`${this.node.id}ErrorPercentageAlarm`, // have to add the id as scope is stack

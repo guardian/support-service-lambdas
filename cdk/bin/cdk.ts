@@ -135,6 +135,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	UserBenefits,
 	AlarmsHandler,
 	GenerateProductCatalog,
+	TicketTailorWebhook,
 ];
 
 // generate all stacks for all stages
@@ -240,14 +241,6 @@ new ZuoraSalesforceLinkRemover(app, 'zuora-salesforce-link-remover-CODE', {
 });
 new ZuoraSalesforceLinkRemover(app, 'zuora-salesforce-link-remover-PROD', {
 	stack: 'membership',
-	stage: 'PROD',
-});
-new TicketTailorWebhook(app, 'ticket-tailor-webhook-CODE', {
-	stack: 'support',
-	stage: 'CODE',
-});
-new TicketTailorWebhook(app, 'ticket-tailor-webhook-PROD', {
-	stack: 'support',
 	stage: 'PROD',
 });
 
