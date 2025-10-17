@@ -1060,6 +1060,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           },
         ],
         "Threshold": 1,
+        "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
     },

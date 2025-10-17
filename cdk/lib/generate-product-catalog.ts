@@ -1,48 +1,31 @@
-import type { GuStackProps } from '@guardian/cdk/lib/constructs/core';
-import { GuStack } from '@guardian/cdk/lib/constructs/core';
-import { GuCname } from '@guardian/cdk/lib/constructs/dns';
-import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda/lambda';
 import type { App } from 'aws-cdk-lib';
-import { Duration } from 'aws-cdk-lib';
-import {
-	CfnAlarm,
-	ComparisonOperator,
-	Metric,
-} from 'aws-cdk-lib/aws-cloudwatch';
+import { CfnAlarm } from 'aws-cdk-lib/aws-cloudwatch';
 import { Effect, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { LoggingFormat } from 'aws-cdk-lib/aws-lambda';
 import { Bucket, EventType } from 'aws-cdk-lib/aws-s3';
 import { LambdaDestination } from 'aws-cdk-lib/aws-s3-notifications';
 import { metricNamespace } from '../../modules/aws/src/cloudwatch';
-import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
-import { nodeVersion } from './node-version';
+import { SrLambda } from './cdk/SrLambda';
+import { SrLambdaErrorAlarm } from './cdk/SrLambdaErrorAlarm';
+import type { SrStageNames } from './cdk/SrStack';
+import { SrStack } from './cdk/SrStack';
+import { SrFastlyDomain } from './cdk/SrFastlyDomain';
 
 export const productCatalogBucketName = 'gu-product-catalog';
 export const failedSchemaValidationMetricName = 'failed-schema-validation';
-export interface GenerateProductCatalogProps extends GuStackProps {
-	stack: string;
-	stage: string;
-	domainName: string;
-}
 
-export class GenerateProductCatalog extends GuStack {
-	constructor(scope: App, id: string, props: GenerateProductCatalogProps) {
-		super(scope, id, props);
+export class GenerateProductCatalog extends SrStack {
+	constructor(scope: App, stage: SrStageNames) {
+		super(scope, { app: 'generate-product-catalog', stage });
 
-		const app = 'generate-product-catalog';
-		const nameWithStage = `${app}-${this.stage}`;
+		const app = this.app;
 
-		const lambda = new GuLambdaFunction(this, `${app}-lambda`, {
-			description:
-				'A lambda to generate the Guardian product catalog from the Zuora catalog',
-			functionName: nameWithStage,
-			loggingFormat: LoggingFormat.TEXT,
-			fileName: `${app}.zip`,
-			handler: 'index.handler',
-			runtime: nodeVersion,
-			memorySize: 1232,
-			timeout: Duration.seconds(300),
-			app: app,
+		const lambda = new SrLambda(this, 'Lambda', {
+			legacyId: `${app}-lambda`,
+			lambdaOverrides: {
+				description:
+					'A lambda to generate the Guardian product catalog from the Zuora catalog',
+				memorySize: 1232,
+			},
 		});
 
 		const zuoraCatalogBucketName = 'gu-zuora-catalog';
@@ -100,15 +83,10 @@ export class GenerateProductCatalog extends GuStack {
 			],
 		});
 
-		lambda.role?.attachInlinePolicy(putMetricPolicy);
+		lambda.addPolicies(putMetricPolicy, s3InlinePolicy);
 
-		lambda.role?.attachInlinePolicy(s3InlinePolicy);
-
-		new GuCname(this, 'NS1 DNS entry', {
-			app: app,
-			domainName: props.domainName,
-			ttl: Duration.hours(1),
-			resourceRecord: 'guardian.map.fastly.net',
+		new SrFastlyDomain(this, 'NS1 DNS entry', {
+			prefixOverride: 'product-catalog',
 		});
 
 		const logsUrl = `https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fgenerate-product-catalog-${this.stage}`;
@@ -143,25 +121,10 @@ export class GenerateProductCatalog extends GuStack {
 			treatMissingData: 'notBreaching',
 		});
 
-		new SrLambdaAlarm(this, `FailedProductCatalogLambdaAlarm`, {
-			app,
-			alarmName: `The ${nameWithStage} Lambda has failed`,
-			alarmDescription:
+		new SrLambdaErrorAlarm(this, `FailedProductCatalogLambdaAlarm`, {
+			errorImpact:
 				'This means the product catalog may not be up to date in S3. This lambda runs on a regular schedule so action will only be necessary if the alarm is triggered continuously',
-			evaluationPeriods: 1,
-			threshold: 1,
-			actionsEnabled: this.stage === 'PROD',
-			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-			metric: new Metric({
-				metricName: 'Errors',
-				namespace: 'AWS/Lambda',
-				statistic: 'Sum',
-				period: Duration.seconds(300),
-				dimensionsMap: {
-					FunctionName: lambda.functionName,
-				},
-			}),
-			lambdaFunctionNames: lambda.functionName,
+			lambdaFunctionName: lambda.functionName,
 		});
 	}
 }

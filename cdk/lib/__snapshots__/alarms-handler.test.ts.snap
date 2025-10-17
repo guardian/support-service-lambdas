@@ -5,7 +5,6 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuLambdaErrorPercentageAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -454,7 +453,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
               {
                 "Ref": "ScheduledLambda68819433",
               },
-              " exceeded 0% error rate",
+              " failed search the logs below for "error" for more information. Impact: daily alarm summary will not be sent to the team chat channels",
             ],
           ],
         },
@@ -462,77 +461,45 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
           "Fn::Join": [
             "",
             [
-              "High error percentage from ",
               {
                 "Ref": "ScheduledLambda68819433",
               },
-              " lambda in CODE",
+              " Lambda has failed",
             ],
           ],
         },
-        "ComparisonOperator": "GreaterThanThreshold",
-        "EvaluationPeriods": 1,
-        "Metrics": [
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
           {
-            "Expression": "100*m1/m2",
-            "Id": "expr_1",
-            "Label": {
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "ScheduledLambda68819433",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
               "Fn::Join": [
                 "",
                 [
-                  "Error % of ",
+                  "lambda:",
                   {
                     "Ref": "ScheduledLambda68819433",
                   },
                 ],
               ],
             },
-          },
-          {
-            "Id": "m1",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "FunctionName",
-                    "Value": {
-                      "Ref": "ScheduledLambda68819433",
-                    },
-                  },
-                ],
-                "MetricName": "Errors",
-                "Namespace": "AWS/Lambda",
-              },
-              "Period": 60,
-              "Stat": "Sum",
-            },
-            "ReturnData": false,
-          },
-          {
-            "Id": "m2",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "FunctionName",
-                    "Value": {
-                      "Ref": "ScheduledLambda68819433",
-                    },
-                  },
-                ],
-                "MetricName": "Invocations",
-                "Namespace": "AWS/Lambda",
-              },
-              "Period": 60,
-              "Stat": "Sum",
-            },
-            "ReturnData": false,
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "alarms-handler",
           },
           {
             "Key": "gu:cdk:version",
@@ -551,7 +518,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
             "Value": "CODE",
           },
         ],
-        "Threshold": 0,
+        "Threshold": 1,
         "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
@@ -1116,7 +1083,6 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuLambdaErrorPercentageAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
@@ -1565,7 +1531,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
               {
                 "Ref": "ScheduledLambda68819433",
               },
-              " exceeded 0% error rate",
+              " failed search the logs below for "error" for more information. Impact: daily alarm summary will not be sent to the team chat channels",
             ],
           ],
         },
@@ -1573,77 +1539,45 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
           "Fn::Join": [
             "",
             [
-              "High error percentage from ",
               {
                 "Ref": "ScheduledLambda68819433",
               },
-              " lambda in PROD",
+              " Lambda has failed",
             ],
           ],
         },
-        "ComparisonOperator": "GreaterThanThreshold",
-        "EvaluationPeriods": 1,
-        "Metrics": [
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
           {
-            "Expression": "100*m1/m2",
-            "Id": "expr_1",
-            "Label": {
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "ScheduledLambda68819433",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "alarms-handler",
+          },
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
               "Fn::Join": [
                 "",
                 [
-                  "Error % of ",
+                  "lambda:",
                   {
                     "Ref": "ScheduledLambda68819433",
                   },
                 ],
               ],
             },
-          },
-          {
-            "Id": "m1",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "FunctionName",
-                    "Value": {
-                      "Ref": "ScheduledLambda68819433",
-                    },
-                  },
-                ],
-                "MetricName": "Errors",
-                "Namespace": "AWS/Lambda",
-              },
-              "Period": 60,
-              "Stat": "Sum",
-            },
-            "ReturnData": false,
-          },
-          {
-            "Id": "m2",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "FunctionName",
-                    "Value": {
-                      "Ref": "ScheduledLambda68819433",
-                    },
-                  },
-                ],
-                "MetricName": "Invocations",
-                "Namespace": "AWS/Lambda",
-              },
-              "Period": 60,
-              "Stat": "Sum",
-            },
-            "ReturnData": false,
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "alarms-handler",
           },
           {
             "Key": "gu:cdk:version",
@@ -1662,7 +1596,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
             "Value": "PROD",
           },
         ],
-        "Threshold": 0,
+        "Threshold": 1,
         "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",

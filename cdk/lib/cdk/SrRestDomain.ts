@@ -1,10 +1,10 @@
 import { GuCname } from '@guardian/cdk/lib/constructs/dns';
-import { Duration } from 'aws-cdk-lib';
 import type { LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { CfnBasePathMapping, CfnDomainName } from 'aws-cdk-lib/aws-apigateway';
 import { CfnRecordSet } from 'aws-cdk-lib/aws-route53';
 import { certForStack } from '../constants';
 import type { SrStack } from './SrStack';
+import { SrFastlyDomain } from './SrFastlyDomain';
 
 export type SrRestDomainProps = {
 	suffixProdDomain?: boolean;
@@ -49,20 +49,9 @@ export class SrRestDomain {
 		});
 
 		if (props?.publicDomain) {
-			const domainName =
-				app +
-				(scope.stage === 'PROD'
-					? `.guardianapis.com`
-					: `.code.dev-guardianapis.com`);
-			this.domainName = new GuCname(
+			this.domainName = new SrFastlyDomain(
 				scope,
-				props.domainIdOverride ?? `NS1 DNS entry for ${domainName}`,
-				{
-					app,
-					domainName,
-					ttl: Duration.hours(1),
-					resourceRecord: 'dualstack.guardian.map.fastly.net',
-				},
+				props.domainIdOverride ?? 'FastlyCname',
 			);
 		}
 	}

@@ -1073,6 +1073,7 @@ exports[`The Product switch api stack matches the snapshot 2`] = `
           },
         ],
         "Threshold": 1,
+        "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
