@@ -15,7 +15,8 @@ export class MetricPushApi extends SrStack {
 		super(scope, { stage, app: 'metric-push-api' });
 		const app = this.app;
 
-		const lambda = new SrApiLambda(this, {
+		const lambda = new SrApiLambda(this, 'Lambda', {
+			legacyId: `${this.app}-lambda`,
 			lambdaOverrides: {
 				description:
 					'API triggered lambda to push a metric to cloudwatch so we can alarm on errors',

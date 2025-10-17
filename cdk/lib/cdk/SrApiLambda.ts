@@ -1,5 +1,4 @@
 import type { NoMonitoring } from '@guardian/cdk/lib/constructs/cloudwatch';
-import type { GuPolicy } from '@guardian/cdk/lib/constructs/iam/policies/base-policy';
 import { Duration } from 'aws-cdk-lib';
 import { ApiKeySourceType, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { SrApiGateway5xxAlarm } from './SrApiGateway5xxAlarm';
@@ -47,20 +46,21 @@ const defaultProps = {
 export class SrApiLambda extends SrLambda {
 	public readonly api: LambdaRestApi;
 	readonly domain: SrRestDomain;
-	constructor(scope: SrStack, props: SrApiLambdaProps) {
+	constructor(scope: SrStack, id: string, props: SrApiLambdaProps) {
 		const finalProps = {
 			nameSuffix: props.nameSuffix,
 			lambdaOverrides: {
 				...defaultProps,
 				...props.lambdaOverrides,
 			},
+			legacyId: props.legacyId,
 		};
 
-		super(scope, `${scope.app}-lambda`, finalProps);
+		super(scope, id, finalProps);
 
 		this.api = new LambdaRestApi(
 			this,
-			getNameWithStage(scope, props.nameSuffix),
+			props.legacyId ? getNameWithStage(scope, props.nameSuffix) : 'RestApi',
 			{
 				handler: this,
 
@@ -95,9 +95,12 @@ export class SrApiLambda extends SrLambda {
 			});
 
 			// create api key
-			const apiKey = this.api.addApiKey(`${scope.app}-key-${scope.stage}`, {
-				apiKeyName: `${scope.app}-key-${scope.stage}`,
-			});
+			const apiKey = this.api.addApiKey(
+				props.legacyId ? `${scope.app}-key-${scope.stage}` : 'ApiKey',
+				{
+					apiKeyName: `${scope.app}-key-${scope.stage}`,
+				},
+			);
 
 			// associate api key to plan
 			usagePlan.addApiKey(apiKey);
@@ -112,9 +115,5 @@ export class SrApiLambda extends SrLambda {
 				overrides: props.monitoring,
 			});
 		}
-	}
-
-	addPolicies(...policies: GuPolicy[]) {
-		policies.forEach((p) => this.role!.attachInlinePolicy(p));
 	}
 }

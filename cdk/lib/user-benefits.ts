@@ -28,7 +28,8 @@ export class UserBenefits extends SrStack {
 			initialPolicy: [supporterProductDataTablePolicy],
 			timeout: Duration.seconds(300),
 		};
-		const userBenefitsMeLambda = new SrLambda(this, `user-benefits-me-lambda`, {
+		const userBenefitsMeLambda = new SrLambda(this, 'MeLambda', {
+			legacyId: 'user-benefits-me-lambda',
 			nameSuffix: 'me',
 			lambdaOverrides: {
 				description:
@@ -37,32 +38,26 @@ export class UserBenefits extends SrStack {
 				...commonLambdaProps,
 			},
 		});
-		const userBenefitsIdentityIdLambda = new SrLambda(
-			this,
-			`user-benefits-identity-id-lambda`,
-			{
-				nameSuffix: 'identity-id',
-				lambdaOverrides: {
-					description:
-						'An API Gateway triggered lambda to get the benefits of the user identified in the request path',
-					handler: 'index.benefitsIdentityIdHandler',
-					...commonLambdaProps,
-				},
+		const userBenefitsIdentityIdLambda = new SrLambda(this, 'BenefitsLambda', {
+			legacyId: 'user-benefits-identity-id-lambda',
+			nameSuffix: 'identity-id',
+			lambdaOverrides: {
+				description:
+					'An API Gateway triggered lambda to get the benefits of the user identified in the request path',
+				handler: 'index.benefitsIdentityIdHandler',
+				...commonLambdaProps,
 			},
-		);
-		const userBenefitsListLambda = new SrLambda(
-			this,
-			`user-benefits-list-lambda`,
-			{
-				nameSuffix: 'list',
-				lambdaOverrides: {
-					description:
-						'An API Gateway triggered lambda to return the full list of benefits for each product in html or json format',
-					handler: 'index.benefitsListHandler',
-					...commonLambdaProps,
-				},
+		});
+		const userBenefitsListLambda = new SrLambda(this, 'ListLambda', {
+			legacyId: 'user-benefits-list-lambda',
+			nameSuffix: 'list',
+			lambdaOverrides: {
+				description:
+					'An API Gateway triggered lambda to return the full list of benefits for each product in html or json format',
+				handler: 'index.benefitsListHandler',
+				...commonLambdaProps,
 			},
-		);
+		});
 		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {
 			app,
 			targets: [

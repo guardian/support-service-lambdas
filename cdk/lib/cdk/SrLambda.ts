@@ -1,4 +1,5 @@
 import type { Identity } from '@guardian/cdk/lib/constructs/core';
+import type { GuPolicy } from '@guardian/cdk/lib/constructs/iam/policies/base-policy';
 import type { GuFunctionProps } from '@guardian/cdk/lib/constructs/lambda';
 import { GuLambdaFunction } from '@guardian/cdk/lib/constructs/lambda';
 import { Duration } from 'aws-cdk-lib';
@@ -15,7 +16,11 @@ export type SrLambdaProps = {
 	/**
 	 * if you want to set any non-SR-standard values on GuLambdaFunction
 	 */
-	lambdaOverrides: GuLambdaOverrides;
+	lambdaOverrides?: GuLambdaOverrides;
+	/**
+	 * legacy ID, to avoid having to drop and recreate an existing stack
+	 */
+	legacyId?: string;
 };
 
 type DefaultProps = ReturnType<typeof getLambdaDefaultProps>;
@@ -55,11 +60,15 @@ export class SrLambda extends GuLambdaFunction {
 			...props.lambdaOverrides,
 			environment: {
 				...defaultGuLambdaFunctionProps.environment,
-				...props.lambdaOverrides.environment,
+				...props.lambdaOverrides?.environment,
 			},
 		};
 
-		super(scope, id, guLambdaFunctionProps);
+		super(scope, props.legacyId ?? id, guLambdaFunctionProps);
+	}
+
+	addPolicies(...policies: GuPolicy[]) {
+		policies.forEach((p) => this.role!.attachInlinePolicy(p));
 	}
 }
 
@@ -69,10 +78,14 @@ export class SrLambda extends GuLambdaFunction {
  *
  * @param identity pass in the srStack here
  * @param nameSuffix if multiple lambdas are in the app, adds my-api-nameSuffix-PROD
+ * @param resourceName e.g. "queue" or "lambda"
  */
 export function getNameWithStage(
 	identity: Identity,
-	nameSuffix: string | undefined,
+	nameSuffix?: string | undefined,
+	resourceName?: string,
 ) {
-	return `${identity.app}${nameSuffix ? '-' + nameSuffix : ''}-${identity.stage}`;
+	return [identity.app, nameSuffix, resourceName, identity.stage]
+		.filter((s) => s !== undefined)
+		.join('-');
 }
