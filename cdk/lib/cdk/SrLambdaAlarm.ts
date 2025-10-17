@@ -1,4 +1,7 @@
-import type { GuAlarmProps } from '@guardian/cdk/lib/constructs/cloudwatch';
+import type {
+	GuAlarmProps,
+	NoMonitoring,
+} from '@guardian/cdk/lib/constructs/cloudwatch';
 import { GuAlarm } from '@guardian/cdk/lib/constructs/cloudwatch';
 import type { GuStack } from '@guardian/cdk/lib/constructs/core';
 import { Tags } from 'aws-cdk-lib';
@@ -36,3 +39,14 @@ export class SrLambdaAlarm extends GuAlarm {
 		Tags.of(this).add('DiagnosticLinks', diagnosticLinksValue);
 	}
 }
+
+export type SrMonitoring =
+	| NoMonitoring
+	| (Partial<SrLambdaAlarmProps> & {
+			noMonitoring?: false;
+			/**
+			 * If there is an error, what will the negative impact be on a user or our system.
+			 * This is important as it is used in alarms for triaging issues.
+			 */
+			errorImpact: string;
+	  });

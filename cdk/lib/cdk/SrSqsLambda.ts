@@ -1,4 +1,3 @@
-import type { NoMonitoring } from '@guardian/cdk/lib/constructs/cloudwatch';
 import { Duration } from 'aws-cdk-lib';
 import { ComparisonOperator } from 'aws-cdk-lib/aws-cloudwatch';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
@@ -6,22 +5,36 @@ import { Queue } from 'aws-cdk-lib/aws-sqs';
 import type { Construct } from 'constructs';
 import type { SrLambdaProps } from './SrLambda';
 import { getNameWithStage, SrLambda } from './SrLambda';
-import type { SrLambdaAlarmProps } from './SrLambdaAlarm';
+import type { SrMonitoring } from './SrLambdaAlarm';
 import { SrLambdaAlarm } from './SrLambdaAlarm';
 import type { SrStack } from './SrStack';
 
 type SrSqsLambdaProps = SrLambdaProps & {
 	/**
-	 * If something ends up on the DLQ, what will the negative impact be on a user or our system.
-	 * This is important as it is used in alarms for triaging issues.
-	 */
-	errorImpact: string;
-	/**
 	 * do we want to disable standard SrCDK alarm or override any properties?
 	 */
-	monitoring?:
-		| NoMonitoring
-		| (Partial<SrLambdaAlarmProps> & { noMonitoring?: false });
+	monitoring: SrMonitoring;
+	/**
+	 * The number of times a message can be unsuccessfully dequeued before being moved to the dead-letter queue.
+	 */
+	readonly maxReceiveCount: number;
+	/**
+	 * Timeout of processing a single message.
+	 *
+	 * After dequeuing, the processor has this much time to handle the message
+	 * and delete it from the queue before it becomes visible again for dequeueing
+	 * by another processor.
+	 *
+	 * Values must be from 0 to 43200 seconds (12 hours). If you don't specify
+	 * a value, AWS CloudFormation uses the default value of 30 seconds.
+	 *
+	 * @default Duration.seconds(30)
+	 */
+	readonly visibilityTimeout?: Duration;
+	/**
+	 * legacy IDs, to avoid having to drop and recreate an existing stack
+	 */
+	legacyQueueIds?: { queue: string; dlq: string };
 };
 
 /**
@@ -42,23 +55,28 @@ export class SrSqsLambda extends SrLambda implements Construct {
 		super(scope, id, finalProps);
 
 		const dlqName = getNameWithStage(scope, props.nameSuffix, 'dlq');
-		this.inputDeadLetterQueue = new Queue(scope, 'DLQ', {
-			queueName: dlqName,
-			retentionPeriod: Duration.days(14),
-		});
+		this.inputDeadLetterQueue = new Queue(
+			scope,
+			props.legacyQueueIds?.dlq ?? 'DLQ',
+			{
+				queueName: dlqName,
+				retentionPeriod: Duration.days(14),
+			},
+		);
 
 		const queueName = getNameWithStage(scope, props.nameSuffix, 'queue');
-		this.inputQueue = new Queue(scope, 'Queue', {
+		this.inputQueue = new Queue(scope, props.legacyQueueIds?.queue ?? 'Queue', {
 			queueName,
 			deadLetterQueue: {
 				queue: this.inputDeadLetterQueue,
-				maxReceiveCount: 3,
+				maxReceiveCount: props.maxReceiveCount,
 			},
+			visibilityTimeout: props.visibilityTimeout,
 		});
 
 		super.addEventSource(new SqsEventSource(this.inputQueue));
 
-		if (!props.monitoring?.noMonitoring) {
+		if (scope.stage === 'PROD' && !props.monitoring.noMonitoring) {
 			new SrLambdaAlarm(scope, 'Alarm', {
 				lambdaFunctionNames: this.functionName,
 				app: scope.app,
@@ -66,7 +84,7 @@ export class SrSqsLambda extends SrLambda implements Construct {
 				alarmDescription:
 					scope.app +
 					' could not process a message and it ended up on the DLQ. Search the logs below for "error" for more information. Impact: ' +
-					props.errorImpact,
+					props.monitoring.errorImpact,
 				metric: this.inputDeadLetterQueue
 					.metric('ApproximateNumberOfMessagesVisible')
 					.with({ statistic: 'Sum', period: Duration.minutes(1) }),

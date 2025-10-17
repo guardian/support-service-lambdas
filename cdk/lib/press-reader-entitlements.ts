@@ -21,8 +21,9 @@ export class PressReaderEntitlements extends SrStack {
 				description:
 					'An API Gateway triggered lambda generated in the support-service-lambdas repo',
 			},
-			errorImpact: 'some users would not be able to access ???',
-			monitoring: { noMonitoring: true }, // we use the GuCDK 5xx alarm instead, see below
+			monitoring: {
+				noMonitoring: true,
+			}, // we use the GuCDK 5xx alarm instead, see below
 			srRestDomainProps: {
 				publicDomain: true,
 				domainIdOverride: `NS1 DNS entry for ${

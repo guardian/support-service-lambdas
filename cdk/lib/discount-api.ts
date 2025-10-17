@@ -18,8 +18,10 @@ export class DiscountApi extends SrStack {
 				description:
 					'A lambda that enables the addition of discounts to existing subscriptions',
 			},
-			errorImpact:
-				'an eligible user may not have been offered a discount during the cancellation flow',
+			monitoring: {
+				errorImpact:
+					'an eligible user may not have been offered a discount during the cancellation flow',
+			},
 		});
 
 		lambda.addPolicies(

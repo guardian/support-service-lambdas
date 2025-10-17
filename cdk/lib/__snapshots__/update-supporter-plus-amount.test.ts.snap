@@ -995,24 +995,12 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
           },
         ],
         "AlarmDescription": "update-supporter-plus-amount returned a 5XX response. Search the logs below for "error" for more information. Impact: a user could not update the contribution amount of their supporter plus subscription",
-        "AlarmName": {
-          "Fn::Join": [
-            "",
-            [
-              {
-                "Ref": "updatesupporterplusamountlambda0DA9A4CB",
-              },
-              " 5XX errors",
-            ],
-          ],
-        },
+        "AlarmName": "update-supporter-plus-amount-PROD 5XX errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
             "Name": "ApiName",
-            "Value": {
-              "Ref": "updatesupporterplusamountlambda0DA9A4CB",
-            },
+            "Value": "update-supporter-plus-amount-PROD",
           },
         ],
         "EvaluationPeriods": 1,

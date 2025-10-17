@@ -1,10 +1,9 @@
-import type { NoMonitoring } from '@guardian/cdk/lib/constructs/cloudwatch';
 import { Duration } from 'aws-cdk-lib';
 import { ApiKeySourceType, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { SrApiGateway5xxAlarm } from './SrApiGateway5xxAlarm';
 import type { SrLambdaProps } from './SrLambda';
 import { getNameWithStage, SrLambda } from './SrLambda';
-import type { SrLambdaAlarmProps } from './SrLambdaAlarm';
+import type { SrMonitoring } from './SrLambdaAlarm';
 import type { SrRestDomainProps } from './SrRestDomain';
 import { SrRestDomain } from './SrRestDomain';
 import type { SrStack } from './SrStack';
@@ -19,16 +18,9 @@ type SrApiLambdaProps = SrLambdaProps & {
 	 */
 	isPublic?: boolean;
 	/**
-	 * If this lambda fails, what will the negative impact be on a user or our system.
-	 * This is important as it is used in alarms for triaging issues.
-	 */
-	errorImpact: string;
-	/**
 	 * do we want to disable standard SrCDK 5xx alarm or override any properties?
 	 */
-	monitoring?:
-		| NoMonitoring
-		| (Partial<SrLambdaAlarmProps> & { noMonitoring?: false }); // standard alarm is on a single 5xx alarms due to low traffic
+	monitoring: SrMonitoring;
 	/**
 	 * By default, you get a ssl enabled url e.g. https://discount-api.support.guardianapis.com/, but you can override aspects
 	 * of it here or add a public facing fastly enabled domain.
@@ -108,10 +100,11 @@ export class SrApiLambda extends SrLambda {
 
 		this.domain = new SrRestDomain(scope, this.api, props.srRestDomainProps);
 
-		if (scope.stage === 'PROD' && !props.monitoring?.noMonitoring) {
+		if (scope.stage === 'PROD' && !props.monitoring.noMonitoring) {
 			new SrApiGateway5xxAlarm(scope, {
-				functionName: this.functionName,
-				errorImpact: props.errorImpact,
+				lambdaFunctionNames: [this.functionName],
+				restApi: this.api,
+				errorImpact: props.monitoring.errorImpact,
 				overrides: props.monitoring,
 			});
 		}
