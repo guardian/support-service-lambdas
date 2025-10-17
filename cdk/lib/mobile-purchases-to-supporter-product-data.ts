@@ -1,6 +1,7 @@
 import type { App } from 'aws-cdk-lib';
 import { EventBus, Rule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
+import { AllowSupporterProductDataPutItemPolicy } from './cdk/policies';
 import { SrLambda } from './cdk/SrLambda';
 import { SrStack, type SrStageNames } from './cdk/SrStack';
 
@@ -18,6 +19,7 @@ export class MobilePurchasesToSupporterProductData extends SrStack {
 				},
 			},
 		);
+		lambda.addPolicies(new AllowSupporterProductDataPutItemPolicy(this));
 
 		const mobilePurchasesBus = EventBus.fromEventBusName(
 			this,
@@ -42,10 +44,5 @@ export class MobilePurchasesToSupporterProductData extends SrStack {
 		);
 
 		forwardMobilePurchasesRule.addTarget(new LambdaFunction(lambda));
-		// lambda.addPolicies(
-		// 	new AllowS3CatalogReadPolicy(this),
-		// 	new AllowZuoraOAuthSecretsPolicy(this),
-		// 	new AllowSqsSendPolicy(this, `braze-emails`),
-		// );
 	}
 }
