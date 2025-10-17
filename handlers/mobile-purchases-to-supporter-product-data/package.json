@@ -1,0 +1,25 @@
+{
+  "name": "mobile-purchases-to-supporter-product-data",
+  "scripts": {
+    "cdk:test": "pnpm --filter cdk test mobile-purchases-to-supporter-product-data",
+    "cdk:test-update": "pnpm --filter cdk test-update mobile-purchases-to-supporter-product-data",
+    "test": "jest --group=-integration",
+    "it-test": "jest --group=integration",
+    "type-check": "tsc --noEmit",
+    "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/index.ts --sourcemap",
+    "lint": "eslint --cache --cache-location /tmp/eslintcache/ src/**/*.ts test/**/*.ts",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr mobile-purchases-to-supporter-product-data.zip ./*.js.map ./*.js",
+    "check-formatting": "prettier --check \"**/*.ts\"",
+    "fix-formatting": "prettier --write \"**/*.ts\""
+  },
+  "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
+  "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.848.0",
+    "zod": "catalog:",
+    "dayjs": "^1.11.13"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.147"
+  }
+}

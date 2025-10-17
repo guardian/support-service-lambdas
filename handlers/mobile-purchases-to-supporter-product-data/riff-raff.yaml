@@ -1,0 +1,26 @@
+# MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/riff-raff.yaml.ts
+stacks:
+  - support
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  mobile-purchases-to-supporter-product-data-cloudformation:
+    type: cloud-formation
+    app: mobile-purchases-to-supporter-product-data
+    parameters:
+      templateStagePaths:
+        CODE: mobile-purchases-to-supporter-product-data-CODE.template.json
+        PROD: mobile-purchases-to-supporter-product-data-PROD.template.json
+  mobile-purchases-to-supporter-product-data:
+    type: aws-lambda
+    parameters:
+      fileName: mobile-purchases-to-supporter-product-data.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - mobile-purchases-to-supporter-product-data-
+    dependencies:
+      - mobile-purchases-to-supporter-product-data-cloudformation
