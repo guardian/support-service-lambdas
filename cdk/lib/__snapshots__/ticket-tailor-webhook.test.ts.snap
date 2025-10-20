@@ -927,10 +927,6 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
             "Value": "ticket-tailor-webhook",
           },
           {
-            "Key": "DiagnosticLinks",
-            "Value": "",
-          },
-          {
             "Key": "gu:cdk:version",
             "Value": "TEST",
           },
