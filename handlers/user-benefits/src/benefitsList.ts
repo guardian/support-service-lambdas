@@ -1,9 +1,9 @@
 import { productBenefitMapping } from '@modules/product-benefits/productBenefit';
 import {
-    getCustomerFacingName,
-    getTermsAndConditionsName,
-    getTermsAndConditionsURL,
-    getZuoraCatalogName
+	getCustomerFacingName,
+	getTermsAndConditionsName,
+	getTermsAndConditionsURL,
+	getZuoraCatalogName,
 } from '@modules/product-catalog/productCatalog';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
@@ -72,9 +72,13 @@ const getHtmlBody = (): string => {
 								([key, value]) =>
 									`<tr>` +
 									`<td>${key}</td>` +
-                                    `<td>${getZuoraCatalogName(key)}</td>` +
+									`<td>${getZuoraCatalogName(key)}</td>` +
 									`<td>${getCustomerFacingName(key)}</td>` +
-                                    `<td><a href="${getTermsAndConditionsURL(key)}">${getTermsAndConditionsName(key)}</a></td>` +
+									`<td>` +
+									`<a href="${getTermsAndConditionsURL(key)}">` +
+									`${getTermsAndConditionsName(key)}` +
+									`</a>` +
+									`</td>` +
 									`<td>${value.join(', ')}</td>` +
 									`</tr>`,
 							)
