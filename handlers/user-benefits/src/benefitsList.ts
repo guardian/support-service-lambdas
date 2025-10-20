@@ -1,5 +1,10 @@
 import { productBenefitMapping } from '@modules/product-benefits/productBenefit';
-import { getCustomerFacingName } from '@modules/product-catalog/productCatalog';
+import {
+    getCustomerFacingName,
+    getTermsAndConditionsName,
+    getTermsAndConditionsURL,
+    getZuoraCatalogName
+} from '@modules/product-catalog/productCatalog';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 export const benefitsListHandler = async (
@@ -57,15 +62,19 @@ const getHtmlBody = (): string => {
 				<table>
 				<tbody>
 					<tr>
-						<th>Zuora Product</th>
+						<th>Middleware Product Key</th>
+						<th>Zuora Product Catalog Name</th>
 						<th>Customer Facing Name</th>
+						<th>Terms & Conditions Name</th>
 						<th>Benefits</th>
 						${Object.entries(productBenefitMapping)
 							.map(
 								([key, value]) =>
 									`<tr>` +
 									`<td>${key}</td>` +
+                                    `<td>${getZuoraCatalogName(key)}</td>` +
 									`<td>${getCustomerFacingName(key)}</td>` +
+                                    `<td><a href="${getTermsAndConditionsURL(key)}">${getTermsAndConditionsName(key)}</a></td>` +
 									`<td>${value.join(', ')}</td>` +
 									`</tr>`,
 							)

@@ -1,7 +1,7 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { TermType } from '@modules/product-catalog/productCatalog';
 
-const zuoraCatalogToProductKey: Record<string, string> = {
+export const zuoraCatalogToProductKey: Record<string, string> = {
 	'Guardian Ad-Lite': 'GuardianAdLite',
 	Contributor: 'Contribution',
 	'Supporter Plus': 'SupporterPlus',
