@@ -33,10 +33,12 @@ export class SrLambdaAlarm extends GuAlarm {
 			typeof props.lambdaFunctionNames === 'string'
 				? [props.lambdaFunctionNames]
 				: props.lambdaFunctionNames;
-		const diagnosticLinksValue = lambdaFunctionNames
-			.map((lambdaFunctionName) => `lambda:${lambdaFunctionName}`)
-			.join(' ');
-		Tags.of(this).add('DiagnosticLinks', diagnosticLinksValue);
+		if (lambdaFunctionNames.length !== 0) {
+			const diagnosticLinksValue = lambdaFunctionNames
+				.map((lambdaFunctionName) => `lambda:${lambdaFunctionName}`)
+				.join(' ');
+			Tags.of(this).add('DiagnosticLinks', diagnosticLinksValue);
+		}
 	}
 }
 
