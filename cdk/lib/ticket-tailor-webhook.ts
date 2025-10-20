@@ -11,8 +11,10 @@ export class TicketTailorWebhook extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
 		super(scope, { app: 'ticket-tailor-webhook', stage });
 
+		const errorImpact = 'TODO add the end user impact of webhook failure';
+
 		const lambda = new SrSqsLambda(this, 'Lambda', {
-			monitoring: { errorImpact: 'unknown' },
+			monitoring: { errorImpact },
 			lambdaOverrides: {
 				description:
 					'An API Gateway triggered lambda generated in the support-service-lambdas repo',
@@ -36,6 +38,7 @@ export class TicketTailorWebhook extends SrStack {
 		new ApiGatewayToSqs(this, 'ApiGatewayToSqs', {
 			queue: lambda.inputQueue,
 			includeHeaderNames: ['tickettailor-webhook-signature'],
+			monitoring: { errorImpact },
 		});
 	}
 }

@@ -814,7 +814,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "ticket-tailor-webhook could not process a message and it ended up on the DLQ. Search the logs below for "error" for more information. Impact: unknown",
+        "AlarmDescription": "ticket-tailor-webhook could not process a message and it ended up on the DLQ. Search the logs below for "error" for more information. Impact: TODO add the end user impact of webhook failure",
         "AlarmName": {
           "Fn::Join": [
             "",
@@ -907,7 +907,7 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "ticket-tailor-webhook returned a 5XX response. Search the logs below for "error" for more information. Impact: unknown",
+        "AlarmDescription": "ticket-tailor-webhook returned a 5XX response. Search the logs below for "error" for more information. Impact: TODO add the end user impact of webhook failure",
         "AlarmName": "support-PROD-ticket-tailor-webhook 5XX errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [

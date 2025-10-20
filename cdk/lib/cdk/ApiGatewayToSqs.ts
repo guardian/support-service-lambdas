@@ -3,11 +3,21 @@ import { Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import type { Queue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 import { SrApiGateway5xxAlarm } from './SrApiGateway5xxAlarm';
+import type { SrMonitoring } from './SrLambdaAlarm';
 import type { SrStack } from './SrStack';
 
 type ApiGatewayToSqsProps = {
 	queue: Queue;
+	/**
+	 * header names to pull from the request into SQS attributes.
+	 *
+	 * FIXME if a header is missing, the requester still gets a 200 and the message is silently dropped!
+	 */
 	includeHeaderNames: string[];
+	/**
+	 * do we want to disable standard SrCDK 5xx alarm or override any properties?
+	 */
+	monitoring: SrMonitoring;
 };
 
 /**
@@ -65,12 +75,11 @@ export class ApiGatewayToSqs extends Construct {
 
 		const apiGateway = new RestApi(scope, 'RestApi', {
 			restApiName: `${scope.stack}-${scope.stage}-${scope.app}`,
-			...props,
 		});
 
-		if (scope.stage == 'PROD') {
+		if (scope.stage === 'PROD' && !props.monitoring.noMonitoring) {
 			new SrApiGateway5xxAlarm(scope, {
-				errorImpact: 'unknown',
+				errorImpact: props.monitoring.errorImpact,
 				restApi: apiGateway,
 				lambdaFunctionNames: [],
 			});
