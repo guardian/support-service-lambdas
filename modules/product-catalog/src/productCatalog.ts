@@ -85,8 +85,8 @@ export function getCustomerFacingName(productKey: unknown): string {
 
 export function getZuoraCatalogName(productKey: unknown): string {
     return Object.entries(zuoraCatalogToProductKey).find(
-        ([_, value]) => value === productKey
-    )?.[0] || '**Not in Zuora**';
+        ([, value]) => value === productKey
+    )?.[0] ?? '**Not in Zuora**';
 }
 
 const termsAndConditionsNameMapping: Record<ProductKey, string> = {
