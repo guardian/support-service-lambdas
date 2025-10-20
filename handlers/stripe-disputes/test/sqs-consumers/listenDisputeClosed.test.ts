@@ -118,7 +118,8 @@ describe('handleListenDisputeClosed', () => {
 				'du_test456',
 			);
 
-			expect(result.success).toBe(true);
+			expect(result).not.toBeNull();
+			expect(result!.success).toBe(true);
 
 			// Verify subscription retrieval
 			expect(mockGetSubscription).toHaveBeenCalledWith(
@@ -161,7 +162,8 @@ describe('handleListenDisputeClosed', () => {
 			);
 
 			expect(result).toBeDefined();
-			expect(result.success).toBe(true);
+			expect(result).not.toBeNull();
+			expect(result!.success).toBe(true);
 		});
 
 		it('should throw error when Zuora operations fail', async () => {
@@ -199,8 +201,38 @@ describe('handleListenDisputeClosed', () => {
 				'du_test456',
 			);
 
-			expect(result.success).toBe(true);
+			expect(result).not.toBeNull();
+			expect(result!.success).toBe(true);
 			expect(mockRejectPayment).not.toHaveBeenCalled();
+		});
+
+		it('should skip processing SEPA disputes without payment_method_details', async () => {
+			const sepaWebhookData: ListenDisputeClosedRequestBody = {
+				...mockWebhookData,
+				data: {
+					object: {
+						...mockWebhookData.data.object,
+						payment_method_details: undefined as any,
+					},
+				},
+			};
+
+			const mockGetSubscription = jest.mocked(
+				require('../../src/services/getSubscriptionService')
+					.getSubscriptionService,
+			);
+
+			const result = await handleListenDisputeClosed(
+				mockLogger,
+				sepaWebhookData,
+				'du_test456',
+			);
+
+			expect(result).toBeNull();
+			expect(mockLogger.log).toHaveBeenCalledWith(
+				'Skipping dispute du_test456 - no payment_method_details (likely SEPA payment)',
+			);
+			expect(mockGetSubscription).not.toHaveBeenCalled();
 		});
 	});
 });
