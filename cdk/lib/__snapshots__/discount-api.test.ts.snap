@@ -998,24 +998,12 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           },
         ],
         "AlarmDescription": "discount-api returned a 5XX response. Search the logs below for "error" for more information. Impact: an eligible user may not have been offered a discount during the cancellation flow",
-        "AlarmName": {
-          "Fn::Join": [
-            "",
-            [
-              {
-                "Ref": "discountapilambda972ABED6",
-              },
-              " 5XX errors",
-            ],
-          ],
-        },
+        "AlarmName": "discount-api-PROD 5XX errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
             "Name": "ApiName",
-            "Value": {
-              "Ref": "discountapilambda972ABED6",
-            },
+            "Value": "discount-api-PROD",
           },
         ],
         "EvaluationPeriods": 1,
