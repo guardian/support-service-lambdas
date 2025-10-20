@@ -11,7 +11,8 @@ export class TicketTailorWebhook extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
 		super(scope, { app: 'ticket-tailor-webhook', stage });
 
-		const errorImpact = 'TODO add the end user impact of webhook failure';
+		const errorImpact =
+			'guardian events users have not had guest identity accounts created';
 
 		const lambda = new SrSqsLambda(this, 'Lambda', {
 			monitoring: { errorImpact },
