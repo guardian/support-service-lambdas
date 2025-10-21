@@ -17,7 +17,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.147",
+    "@types/aws-lambda": "^8.10.156",
     "@types/stripe": "^8.0.417"
   }
 }
