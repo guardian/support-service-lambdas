@@ -81,5 +81,8 @@ export const fetchSubscriptionAndDoUpdate = async (
 		'info',
 		`Successfully updated supporter product data with item ${prettyPrint(supporterProductDataItem)}`,
 	);
-	return Promise.resolve();
+	// Testing alarms
+	throw new Error('Testing error alarms');
+	// End testing alarms
+	//return Promise.resolve();
 };
