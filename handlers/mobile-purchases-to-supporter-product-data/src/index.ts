@@ -22,7 +22,7 @@ export const lazyConfig = new Lazy(
 );
 
 export const handler: Handler = async (event: InputEvent) => {
-	console.log(`Input is ${JSON.stringify(event, null, 2)}`);
+	logger.log(`Input is ${JSON.stringify(event, null, 2)}`);
 	if (event.detail.eventName === 'REMOVE') {
 		logger.log('Skipping REMOVE event');
 		return;
@@ -44,7 +44,7 @@ export const fetchSubscriptionAndDoUpdate = async (
 		event.detail.dynamodb?.NewImage?.subscriptionId?.S,
 		'Subscription ID was not present in the event',
 	);
-	console.log(`Fetching subscription for identityId ${identityId}`);
+	logger.log(`Fetching subscription for identityId ${identityId}`);
 	const subscription = await fetchSubscription(
 		stage,
 		config.mobilePurchasesApiKey,
@@ -59,7 +59,7 @@ export const fetchSubscriptionAndDoUpdate = async (
 		);
 		return;
 	}
-	console.log('Fetched subscription', subscription);
+	logger.log('Fetched subscription', subscription);
 	if (subscription.to.isBefore(dayjs())) {
 		logger.log(
 			'info',

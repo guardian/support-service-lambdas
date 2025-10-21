@@ -74,115 +74,10 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 1`
       },
       "Type": "AWS::Events::Rule",
     },
-    "Queue4A7E3555": {
-      "DeletionPolicy": "Delete",
-      "Properties": {
-        "QueueName": "mobile-purchases-to-supporter-product-data-queue-CODE",
-        "RedrivePolicy": {
-          "deadLetterTargetArn": {
-            "Fn::GetAtt": [
-              "DLQ581697C4",
-              "Arn",
-            ],
-          },
-          "maxReceiveCount": 3,
-        },
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "mobile-purchases-to-supporter-product-data",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "VisibilityTimeout": 300,
-      },
-      "Type": "AWS::SQS::Queue",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "QueuePolicy25439813": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "sqs:SendMessage",
-                "sqs:GetQueueAttributes",
-                "sqs:GetQueueUrl",
-              ],
-              "Condition": {
-                "ArnEquals": {
-                  "aws:SourceArn": {
-                    "Fn::GetAtt": [
-                      "ForwardMobilePurchasesToSupporterProductDataBA6447A8",
-                      "Arn",
-                    ],
-                  },
-                },
-              },
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "events.amazonaws.com",
-              },
-              "Resource": {
-                "Fn::GetAtt": [
-                  "Queue4A7E3555",
-                  "Arn",
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "Queues": [
-          {
-            "Ref": "Queue4A7E3555",
-          },
-        ],
-      },
-      "Type": "AWS::SQS::QueuePolicy",
-    },
-    "SupporterProductDataTablewriteaccess7DC65A9E": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "dynamodb:PutItem",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::ImportValue": "supporter-product-data-tables-CODE-SupporterProductDataTable",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "SupporterProductDataTablewriteaccess7DC65A9E",
-        "Roles": [
-          {
-            "Ref": "mobilepurchasestosupporterproductdatalambdaServiceRole499F7137",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "mobilepurchasestosupporterproductdatalambdaC3CC84DF": {
+    "LambdaD247545B": {
       "DependsOn": [
-        "mobilepurchasestosupporterproductdatalambdaServiceRoleDefaultPolicy660F159E",
-        "mobilepurchasestosupporterproductdatalambdaServiceRole499F7137",
+        "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "LambdaServiceRoleA8ED4D3B",
       ],
       "Properties": {
         "Code": {
@@ -208,7 +103,7 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 1`
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "mobilepurchasestosupporterproductdatalambdaServiceRole499F7137",
+            "LambdaServiceRoleA8ED4D3B",
             "Arn",
           ],
         },
@@ -239,7 +134,7 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 1`
       },
       "Type": "AWS::Lambda::Function",
     },
-    "mobilepurchasestosupporterproductdatalambdaServiceRole499F7137": {
+    "LambdaServiceRoleA8ED4D3B": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -292,7 +187,7 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 1`
       },
       "Type": "AWS::IAM::Role",
     },
-    "mobilepurchasestosupporterproductdatalambdaServiceRoleDefaultPolicy660F159E": {
+    "LambdaServiceRoleDefaultPolicyDAE46E21": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -399,16 +294,16 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 1`
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "mobilepurchasestosupporterproductdatalambdaServiceRoleDefaultPolicy660F159E",
+        "PolicyName": "LambdaServiceRoleDefaultPolicyDAE46E21",
         "Roles": [
           {
-            "Ref": "mobilepurchasestosupporterproductdatalambdaServiceRole499F7137",
+            "Ref": "LambdaServiceRoleA8ED4D3B",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "mobilepurchasestosupporterproductdatalambdaSqsEventSourcemobilepurchasestosupporterproductdataCODEQueue0679A09EBF6D52D4": {
+    "LambdaSqsEventSourcemobilepurchasestosupporterproductdataCODEQueue0679A09E7C9AF9A5": {
       "Properties": {
         "EventSourceArn": {
           "Fn::GetAtt": [
@@ -417,7 +312,7 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 1`
           ],
         },
         "FunctionName": {
-          "Ref": "mobilepurchasestosupporterproductdatalambdaC3CC84DF",
+          "Ref": "LambdaD247545B",
         },
         "Tags": [
           {
@@ -443,6 +338,111 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 1`
         ],
       },
       "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "Queue4A7E3555": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "QueueName": "mobile-purchases-to-supporter-product-data-queue-CODE",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "DLQ581697C4",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 3,
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "mobile-purchases-to-supporter-product-data",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "VisibilityTimeout": 300,
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "QueuePolicy25439813": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "ForwardMobilePurchasesToSupporterProductDataBA6447A8",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "Queue4A7E3555",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "Queue4A7E3555",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
+    "SupporterProductDataTablewriteaccess7DC65A9E": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "dynamodb:PutItem",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "supporter-product-data-tables-CODE-SupporterProductDataTable",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SupporterProductDataTablewriteaccess7DC65A9E",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
   },
 }
@@ -530,7 +530,7 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 2`
                 [
                   "lambda:",
                   {
-                    "Ref": "mobilepurchasestosupporterproductdatalambdaC3CC84DF",
+                    "Ref": "LambdaD247545B",
                   },
                 ],
               ],
@@ -615,115 +615,10 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 2`
       },
       "Type": "AWS::Events::Rule",
     },
-    "Queue4A7E3555": {
-      "DeletionPolicy": "Delete",
-      "Properties": {
-        "QueueName": "mobile-purchases-to-supporter-product-data-queue-PROD",
-        "RedrivePolicy": {
-          "deadLetterTargetArn": {
-            "Fn::GetAtt": [
-              "DLQ581697C4",
-              "Arn",
-            ],
-          },
-          "maxReceiveCount": 3,
-        },
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "mobile-purchases-to-supporter-product-data",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "VisibilityTimeout": 300,
-      },
-      "Type": "AWS::SQS::Queue",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "QueuePolicy25439813": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": [
-                "sqs:SendMessage",
-                "sqs:GetQueueAttributes",
-                "sqs:GetQueueUrl",
-              ],
-              "Condition": {
-                "ArnEquals": {
-                  "aws:SourceArn": {
-                    "Fn::GetAtt": [
-                      "ForwardMobilePurchasesToSupporterProductDataBA6447A8",
-                      "Arn",
-                    ],
-                  },
-                },
-              },
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "events.amazonaws.com",
-              },
-              "Resource": {
-                "Fn::GetAtt": [
-                  "Queue4A7E3555",
-                  "Arn",
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "Queues": [
-          {
-            "Ref": "Queue4A7E3555",
-          },
-        ],
-      },
-      "Type": "AWS::SQS::QueuePolicy",
-    },
-    "SupporterProductDataTablewriteaccess7DC65A9E": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "dynamodb:PutItem",
-              "Effect": "Allow",
-              "Resource": {
-                "Fn::ImportValue": "supporter-product-data-tables-PROD-SupporterProductDataTable",
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "PolicyName": "SupporterProductDataTablewriteaccess7DC65A9E",
-        "Roles": [
-          {
-            "Ref": "mobilepurchasestosupporterproductdatalambdaServiceRole499F7137",
-          },
-        ],
-      },
-      "Type": "AWS::IAM::Policy",
-    },
-    "mobilepurchasestosupporterproductdatalambdaC3CC84DF": {
+    "LambdaD247545B": {
       "DependsOn": [
-        "mobilepurchasestosupporterproductdatalambdaServiceRoleDefaultPolicy660F159E",
-        "mobilepurchasestosupporterproductdatalambdaServiceRole499F7137",
+        "LambdaServiceRoleDefaultPolicyDAE46E21",
+        "LambdaServiceRoleA8ED4D3B",
       ],
       "Properties": {
         "Code": {
@@ -749,7 +644,7 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 2`
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "mobilepurchasestosupporterproductdatalambdaServiceRole499F7137",
+            "LambdaServiceRoleA8ED4D3B",
             "Arn",
           ],
         },
@@ -780,7 +675,7 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 2`
       },
       "Type": "AWS::Lambda::Function",
     },
-    "mobilepurchasestosupporterproductdatalambdaServiceRole499F7137": {
+    "LambdaServiceRoleA8ED4D3B": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -833,7 +728,7 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 2`
       },
       "Type": "AWS::IAM::Role",
     },
-    "mobilepurchasestosupporterproductdatalambdaServiceRoleDefaultPolicy660F159E": {
+    "LambdaServiceRoleDefaultPolicyDAE46E21": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -940,16 +835,16 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 2`
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "mobilepurchasestosupporterproductdatalambdaServiceRoleDefaultPolicy660F159E",
+        "PolicyName": "LambdaServiceRoleDefaultPolicyDAE46E21",
         "Roles": [
           {
-            "Ref": "mobilepurchasestosupporterproductdatalambdaServiceRole499F7137",
+            "Ref": "LambdaServiceRoleA8ED4D3B",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "mobilepurchasestosupporterproductdatalambdaSqsEventSourcemobilepurchasestosupporterproductdataPRODQueue0869CF61665F6D5A": {
+    "LambdaSqsEventSourcemobilepurchasestosupporterproductdataPRODQueue0869CF6178C2271C": {
       "Properties": {
         "EventSourceArn": {
           "Fn::GetAtt": [
@@ -958,7 +853,7 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 2`
           ],
         },
         "FunctionName": {
-          "Ref": "mobilepurchasestosupporterproductdatalambdaC3CC84DF",
+          "Ref": "LambdaD247545B",
         },
         "Tags": [
           {
@@ -984,6 +879,111 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 2`
         ],
       },
       "Type": "AWS::Lambda::EventSourceMapping",
+    },
+    "Queue4A7E3555": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "QueueName": "mobile-purchases-to-supporter-product-data-queue-PROD",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "DLQ581697C4",
+              "Arn",
+            ],
+          },
+          "maxReceiveCount": 3,
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "mobile-purchases-to-supporter-product-data",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "VisibilityTimeout": 300,
+      },
+      "Type": "AWS::SQS::Queue",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "QueuePolicy25439813": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Condition": {
+                "ArnEquals": {
+                  "aws:SourceArn": {
+                    "Fn::GetAtt": [
+                      "ForwardMobilePurchasesToSupporterProductDataBA6447A8",
+                      "Arn",
+                    ],
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::GetAtt": [
+                  "Queue4A7E3555",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "Queues": [
+          {
+            "Ref": "Queue4A7E3555",
+          },
+        ],
+      },
+      "Type": "AWS::SQS::QueuePolicy",
+    },
+    "SupporterProductDataTablewriteaccess7DC65A9E": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "dynamodb:PutItem",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "supporter-product-data-tables-PROD-SupporterProductDataTable",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SupporterProductDataTablewriteaccess7DC65A9E",
+        "Roles": [
+          {
+            "Ref": "LambdaServiceRoleA8ED4D3B",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
   },
 }
