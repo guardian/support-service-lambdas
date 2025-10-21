@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -x
 
 # This script will build the cdk for the provided project and then call update-stack with the AWS Cli.
 # It will fail if the stack does not already exist, in this case use create-stack
@@ -16,7 +16,8 @@ fi
 PROJECT_NAME="$1"
 echo "Updating stack $PROJECT_NAME"
 
-pnpm --filter cdk test-update && pnpm --filter cdk package
+pnpm --filter cdk test-update $PROJECT_NAME
+pnpm --filter cdk package $PROJECT_NAME
 
 aws cloudformation update-stack \
   --capabilities '["CAPABILITY_AUTO_EXPAND", "CAPABILITY_NAMED_IAM", "CAPABILITY_IAM"]'  \

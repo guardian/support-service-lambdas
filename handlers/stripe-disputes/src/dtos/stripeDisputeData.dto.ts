@@ -15,10 +15,12 @@ export const stripeDisputeDataSchema = z.object({
 			due_by: z.number(),
 			has_evidence: z.boolean(),
 		}),
-		payment_method_details: z.object({
-			card: z.object({
-				network_reason_code: z.string(),
-			}),
-		}),
+		payment_method_details: z
+			.object({
+				card: z.object({
+					network_reason_code: z.string(),
+				}),
+			})
+			.optional(),
 	}),
 });

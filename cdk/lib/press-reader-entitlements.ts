@@ -1,11 +1,12 @@
+import { GuApiGateway5xxPercentageAlarm } from '@guardian/cdk/lib/constructs/cloudwatch/api-gateway-alarms';
 import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import { ComparisonOperator, Metric } from 'aws-cdk-lib/aws-cloudwatch';
 import { AllowSupporterProductDataQueryPolicy } from './cdk/policies';
-import { SrApiLambda } from './cdk/sr-api-lambda';
-import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
-import type { SrStageNames } from './cdk/sr-stack';
-import { SrStack } from './cdk/sr-stack';
+import { SrApiLambda } from './cdk/SrApiLambda';
+import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
+import type { SrStageNames } from './cdk/SrStack';
+import { SrStack } from './cdk/SrStack';
 
 export class PressReaderEntitlements extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
@@ -14,18 +15,30 @@ export class PressReaderEntitlements extends SrStack {
 		const app = this.app;
 		const nameWithStage = `${app}-${this.stage}`;
 
-		const lambda = new SrApiLambda(this, {
+		const lambda = new SrApiLambda(this, 'Lambda', {
+			legacyId: `${this.app}-lambda`,
 			lambdaOverrides: {
 				description:
 					'An API Gateway triggered lambda generated in the support-service-lambdas repo',
-				// use the GuCDK alarm
-				monitoringConfiguration: {
-					http5xxAlarm: { tolerated5xxPercentage: 5 },
-					snsTopicName: `alarms-handler-topic-${this.stage}`,
-				},
 			},
-			errorImpact: 'some users would not be able to access ???',
-			srRestDomainOverrides: { publicDomain: true },
+			monitoring: {
+				noMonitoring: true,
+			}, // we use the GuCDK 5xx alarm instead, see below
+			srRestDomainProps: {
+				publicDomain: true,
+				domainIdOverride: `NS1 DNS entry for ${
+					app +
+					(this.stage === 'PROD'
+						? `.guardianapis.com`
+						: `.code.dev-guardianapis.com`)
+				}`,
+			},
+		});
+		new GuApiGateway5xxPercentageAlarm(this, {
+			app: this.app,
+			apiGatewayInstance: lambda.api,
+			snsTopicName: `alarms-handler-topic-${this.stage}`,
+			tolerated5xxPercentage: 5,
 		});
 
 		lambda.addPolicies(new AllowSupporterProductDataQueryPolicy(this));

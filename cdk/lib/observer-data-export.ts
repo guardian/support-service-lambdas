@@ -22,7 +22,7 @@ import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Bucket, EventType } from 'aws-cdk-lib/aws-s3';
 import { SqsDestination } from 'aws-cdk-lib/aws-s3-notifications';
 import { Queue } from 'aws-cdk-lib/aws-sqs';
-import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
+import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
 import { nodeVersion } from './node-version';
 
 export class ObserverDataExport extends GuStack {
@@ -174,7 +174,6 @@ export class ObserverDataExport extends GuStack {
 			{
 				...lambdaDefaultConfig,
 				environment: {
-					Stage: this.stage,
 					UnifidaSharedBucketName: sharedBucket.bucketName,
 					UnifidaPublicRsaKeyFilePath: unifidaPublicRsaKeyFilePath,
 					ObserverNewspaperSubscribersFolder:

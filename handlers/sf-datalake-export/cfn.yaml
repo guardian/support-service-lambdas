@@ -17,7 +17,7 @@ Mappings:
       destBuckets: "arn:aws:s3:::gu-salesforce-export-code*"
       localbucketName : "gu-salesforce-export-code"
     PROD:
-      destBuckets: "arn:aws:s3:::gu-salesforce-export-prod*"
+      destBuckets: ["arn:aws:s3:::gu-salesforce-export-prod*", "arn:aws:s3:::ophan-raw-salesforce-*"]
       localbucketName: "gu-salesforce-export-prod"
 Resources:
   localBucket:

@@ -3,6 +3,7 @@ package com.com.gu.sf_datalake_export
 import com.gu.effects.{BucketName, S3Path}
 import com.gu.sf_datalake_export.handlers.StartJobHandler.ShouldUploadToDataLake
 import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams
+import com.gu.sf_datalake_export.salesforce_bulk_api.BulkApiParams.ObjectName
 import com.gu.sf_datalake_export.util.ExportS3Path
 import com.gu.util.config.Stage
 import org.scalatest.flatspec.AnyFlatSpec
@@ -34,6 +35,12 @@ class ExportS3PathTest extends AnyFlatSpec with Matchers {
     val cardExpiryName = BulkApiParams.cardExpiry.objectName
     val actualBasePath = ExportS3Path(Stage("PROD"))(cardExpiryName, ShouldUploadToDataLake(true))
     actualBasePath shouldBe S3Path(BucketName("ophan-raw-salesforce-card-expiry"), None)
+  }
+
+  it should "convert object name of Case to casev2 in ophan raw bucket name" in {
+    val caseObjectName = ObjectName("Case")
+    val actualBasePathforCase = ExportS3Path(Stage("PROD"))(caseObjectName, ShouldUploadToDataLake(true))
+    actualBasePathforCase shouldBe S3Path(BucketName("ophan-raw-salesforce-casev2"), None)
   }
 
 }

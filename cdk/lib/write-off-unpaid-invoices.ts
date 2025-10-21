@@ -27,7 +27,7 @@ import {
 	TaskInput,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
-import { SrLambdaAlarm } from './cdk/sr-lambda-alarm';
+import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
 import { nodeVersion } from './node-version';
 
 export class WriteOffUnpaidInvoices extends GuStack {
@@ -83,14 +83,13 @@ export class WriteOffUnpaidInvoices extends GuStack {
 
 		const lambdaDefaultConfig: Pick<
 			GuFunctionProps,
-			'app' | 'memorySize' | 'fileName' | 'runtime' | 'timeout' | 'environment'
+			'app' | 'memorySize' | 'fileName' | 'runtime' | 'timeout'
 		> = {
 			app,
 			memorySize: 1024,
 			fileName: `${app}.zip`,
 			runtime: nodeVersion,
 			timeout: Duration.minutes(3),
-			environment: { Stage: this.stage },
 		};
 
 		const getUnpaidInvoices = new LambdaInvoke(
@@ -100,7 +99,6 @@ export class WriteOffUnpaidInvoices extends GuStack {
 				lambdaFunction: new GuLambdaFunction(this, 'GetUnpaidInvoicesLambda', {
 					...lambdaDefaultConfig,
 					environment: {
-						...lambdaDefaultConfig.environment,
 						GCP_CREDENTIALS_CONFIG_PARAMETER_NAME: `/${app}/${this.stage}/gcp-credentials-config`,
 						GCP_PROJECT_ID: `datatech-platform-${this.stage.toLowerCase()}`,
 						BUCKET_NAME: bucket.bucketName,

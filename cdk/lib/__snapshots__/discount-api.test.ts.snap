@@ -232,12 +232,9 @@ exports[`The Discount API stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "discount-api",
-            "App": "discount-api",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
-            "Stack": "support",
-            "Stage": "CODE",
           },
         },
         "FunctionName": "discount-api-CODE",
@@ -1000,7 +997,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "discount-api returned a 5XX response search the logs below for "error" for more information. Impact: an eligible user may not have been offered a discount during the cancellation flow",
+        "AlarmDescription": "discount-api returned a 5XX response. Search the logs below for "error" for more information. Impact: an eligible user may not have been offered a discount during the cancellation flow",
         "AlarmName": "discount-api-PROD 5XX errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
@@ -1051,6 +1048,7 @@ exports[`The Discount API stack matches the snapshot 2`] = `
           },
         ],
         "Threshold": 1,
+        "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
@@ -1242,12 +1240,9 @@ exports[`The Discount API stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "discount-api",
-            "App": "discount-api",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
-            "Stack": "support",
-            "Stage": "PROD",
           },
         },
         "FunctionName": "discount-api-PROD",
