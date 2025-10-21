@@ -21,6 +21,7 @@ export interface TicketTailorRequest {
 async function processValidSqsRecord(sqsRecord: ApiGatewayToSqsEvent) {
 	const ticketTailorRequest = JSON.parse(sqsRecord.body) as TicketTailorRequest;
 	const email = ticketTailorRequest.payload.buyer_details.email;
+	logger.mutableAddContext(email);
 	const userTypeResponse = await fetchUserType(email);
 
 	if (userTypeResponse.userType === 'new') {
@@ -35,6 +36,7 @@ async function processValidSqsRecord(sqsRecord: ApiGatewayToSqsEvent) {
 export const handler = async (event: SQSEvent): Promise<void> => {
 	const eventualEnsuredIdentityAccount = event.Records.flatMap(
 		async (sqsRecord) => {
+			logger.resetContext();
 			logger.log(
 				`Processing TT Webhook. SQS Message id is: ${sqsRecord.messageId}`,
 			);
