@@ -15,7 +15,7 @@ export const getTimestampAndSignature = (
 
 	if (!signatureWithTs) {
 		logger.error(
-			'No valid value found for MessgeAttritbute: tickettailor-webhook-signature on incoming request.',
+			'No valid value found for MessageAttribute: tickettailor-webhook-signature on incoming request.',
 		);
 		return;
 	}
