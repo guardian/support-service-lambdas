@@ -2,6 +2,12 @@ name: CI-Typescript
 on:
   pull_request:
   workflow_dispatch:
+    inputs:
+      force_build_all:
+        description: 'Force build all lambdas (ignore change detection)'
+        type: boolean
+        default: false
+        required: false
   push:
     branches:
       - main
@@ -14,12 +20,231 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  common:
+  detect-changes:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write
       contents: read
-      pull-requests: write
+    outputs:
+      global-changes: ${{ steps.filter.outputs.global-changes }}
+      individual-lambdas-changed: ${{ steps.filter.outputs.changes }}
+      any-lambda-changed: ${{ steps.check-lambdas.outputs.any-changed }}
+      lambdas-to-build: ${{ steps.check-lambdas.outputs.lambdas-to-build }}
+      all-typescript-lambdas: ${{ steps.discover-lambdas.outputs.lambdas }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Discover TypeScript lambdas
+        id: discover-lambdas
+        run: |
+          # Find all directories in handlers/ that contain package.json (TypeScript lambdas)
+          typescript_lambdas=()
+          for dir in handlers/*/; do
+            if [[ -f "$dir/package.json" ]]; then
+              # Extract directory name without handlers/ prefix and trailing /
+              lambda_name=$(basename "$dir")
+              typescript_lambdas+=("$lambda_name")
+            fi
+          done
+          
+          echo "DEBUG: Found ${#typescript_lambdas[@]} TypeScript lambdas: ${typescript_lambdas[*]}"
+          
+          # Convert to compact JSON array using jq - with multiple fallbacks
+          if [ ${#typescript_lambdas[@]} -eq 0 ]; then
+            lambdas_json="[]"
+            echo "INFO: No TypeScript lambdas found"
+          else
+            # Primary method: use jq
+            if command -v jq >/dev/null 2>&1; then
+              lambdas_json=$(printf '%s\n' "${typescript_lambdas[@]}" | jq -R . | jq -s -c .)
+              echo "DEBUG: jq generated: $lambdas_json"
+              
+              # Validate the generated JSON
+              if echo "$lambdas_json" | jq . >/dev/null 2>&1; then
+                echo "SUCCESS: Valid JSON generated with jq"
+              else
+                echo "ERROR: jq generated invalid JSON, using fallback"
+                lambdas_json="[]"
+              fi
+            else
+              echo "ERROR: jq not available, using fallback"
+              lambdas_json="[]"
+            fi
+          fi
+          
+          echo "lambdas=$lambdas_json" >> $GITHUB_OUTPUT
+          echo "INFO: Final output: $lambdas_json"
+      - name: Generate dynamic paths filter
+        id: generate-filter
+        run: |
+          # Get discovered lambdas from the previous step
+          all_typescript_lambdas='${{ steps.discover-lambdas.outputs.lambdas }}'
+          
+          echo "DEBUG: Raw lambdas JSON: $all_typescript_lambdas"
+          
+          # Write base filter config
+          cat > /tmp/filters.yml << 'EOF'
+          global-changes:
+            - '**'
+            - '!handlers/**'
+            - '!README.md'
+            - '!docs/**'
+            - '!*.md'
+            - '!.gitignore'
+            - '!.nvmrc'
+          EOF
+          
+          # Add each TypeScript lambda as a filter - parse JSON properly
+          if [[ "$all_typescript_lambdas" != "[]" ]]; then
+            echo "$all_typescript_lambdas" | jq -r '.[]' | while read -r lambda_name; do
+              echo "DEBUG: Adding filter for lambda: $lambda_name"
+              cat >> /tmp/filters.yml << EOF
+          ${lambda_name}:
+            - 'handlers/${lambda_name}/**'
+          EOF
+            done
+          fi
+          
+          echo "Generated filter config:"
+          cat /tmp/filters.yml
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: /tmp/filters.yml
+      - name: Check if any lambda changed
+        id: check-lambdas
+        run: |
+          global_changes="${{ steps.filter.outputs.global-changes }}"
+          all_filter_changes="${{ steps.filter.outputs.changes }}"
+          force_build_all="${{ github.event.inputs.force_build_all || 'false' }}"
+          all_typescript_lambdas="${{ steps.discover-lambdas.outputs.lambdas }}"
+          
+          echo "DEBUG: force-build-all: $force_build_all"
+          echo "DEBUG: all-typescript-lambdas: $all_typescript_lambdas"
+          echo "DEBUG: all-filter-changes (raw): $all_filter_changes"
+          echo "DEBUG: global-changes: $global_changes"
+          
+          # Parse the changes from dorny/paths-filter and filter out 'global-changes'
+          individual_lambdas_changed="[]"
+          if [[ -n "$all_filter_changes" ]] && [[ "$all_filter_changes" != "[]" ]]; then
+            # Handle bracket-enclosed format like [global-changes,mparticle-api]
+            if [[ "$all_filter_changes" =~ ^\[.*\]$ ]]; then
+              # Remove brackets and split by comma, then use jq to create proper JSON
+              changes_without_brackets="${all_filter_changes:1:-1}"  # Remove [ and ]
+              IFS=',' read -ra changes_array <<< "$changes_without_brackets"
+              
+              # Create a temp array for processing with jq
+              temp_array=()
+              for change in "${changes_array[@]}"; do
+                # Trim whitespace and exclude global-changes
+                change=$(echo "$change" | xargs)
+                if [[ "$change" != "global-changes" ]]; then
+                  temp_array+=("$change")
+                fi
+              done
+              
+              # Use jq to create proper JSON array
+              if [ ${#temp_array[@]} -eq 0 ]; then
+                individual_lambdas_changed="[]"
+              else
+                individual_lambdas_changed=$(printf '%s\n' "${temp_array[@]}" | jq -R . | jq -s -c .)
+              fi
+            else
+              # Check if it's valid JSON first
+              if echo "$all_filter_changes" | jq . >/dev/null 2>&1; then
+                # Remove 'global-changes' from the JSON array using jq
+                individual_lambdas_changed=$(echo "$all_filter_changes" | jq -c '. - ["global-changes"]')
+              else
+                # Fallback: treat as space-separated list and use jq to create JSON
+                temp_array=()
+                for change in $all_filter_changes; do
+                  if [[ "$change" != "global-changes" ]]; then
+                    temp_array+=("$change")
+                  fi
+                done
+                
+                if [ ${#temp_array[@]} -eq 0 ]; then
+                  individual_lambdas_changed="[]"
+                else
+                  individual_lambdas_changed=$(printf '%s\n' "${temp_array[@]}" | jq -R . | jq -s -c .)
+                fi
+              fi
+            fi
+          fi
+          
+          echo "DEBUG: individual-lambdas-changed: $individual_lambdas_changed"
+          
+          # EXCLUSION LOGIC: Build ALL lambdas if:
+          # 1. Manual override is enabled, OR
+          # 2. ANY changes outside handler directories are detected
+          if [[ "$force_build_all" == "true" ]] || [[ "$global_changes" == "true" ]]; then
+            echo "any-changed=true" >> $GITHUB_OUTPUT
+            # Set all lambdas to be built using dynamically discovered list
+            if [[ "$force_build_all" == "true" ]]; then
+              echo "INFO: Force build all enabled - building all lambdas"
+            else
+              echo "INFO: Global changes detected outside handler directories - building all lambdas (failsafe)"
+            fi
+            
+            # Convert all_typescript_lambdas to proper JSON format
+            if echo "$all_typescript_lambdas" | jq . >/dev/null 2>&1; then
+              # Already valid JSON
+              lambdas_to_build_json="$all_typescript_lambdas"
+            elif [[ "$all_typescript_lambdas" =~ ^\[.*\]$ ]]; then
+              # Handle bracket format [item1,item2,...] - convert to proper JSON
+              values_without_brackets="${all_typescript_lambdas:1:-1}"  # Remove [ and ]
+              IFS=',' read -ra lambda_array <<< "$values_without_brackets"
+              
+              # Create proper JSON array using jq
+              fixed_json_array=()
+              for lambda_name in "${lambda_array[@]}"; do
+                lambda_name=$(echo "$lambda_name" | xargs)  # Trim whitespace
+                fixed_json_array+=("$lambda_name")
+              done
+              
+              if [ ${#fixed_json_array[@]} -eq 0 ]; then
+                lambdas_to_build_json="[]"
+              else
+                lambdas_to_build_json=$(printf '%s\n' "${fixed_json_array[@]}" | jq -R . | jq -s -c .)
+              fi
+            else
+              # Fallback for unexpected format
+              lambdas_to_build_json="[]"
+            fi
+            
+            echo "lambdas-to-build=$lambdas_to_build_json" >> $GITHUB_OUTPUT
+          elif [[ "$individual_lambdas_changed" != "[]" ]]; then
+            echo "any-changed=true" >> $GITHUB_OUTPUT
+            echo "INFO: Only handler-specific changes detected - building individual lambdas"
+            
+            # Validate JSON before setting output
+            if echo "$individual_lambdas_changed" | jq . >/dev/null 2>&1; then
+              echo "lambdas-to-build=$individual_lambdas_changed" >> $GITHUB_OUTPUT
+            else
+              echo "ERROR: individual_lambdas_changed is not valid JSON: $individual_lambdas_changed"
+              echo "lambdas-to-build=[]" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "any-changed=false" >> $GITHUB_OUTPUT
+            echo "INFO: No relevant changes detected - skipping builds"
+            echo "lambdas-to-build=[]" >> $GITHUB_OUTPUT
+          fi
+          
+          # Debug: Verify all outputs are set
+          echo "DEBUG: Final outputs:"
+          echo "DEBUG: - any-changed: $(grep 'any-changed=' <<< $(cat $GITHUB_OUTPUT | tail -20) || echo 'NOT SET')"
+          echo "DEBUG: - lambdas-to-build: $(grep 'lambdas-to-build=' <<< $(cat $GITHUB_OUTPUT | tail -20) || echo 'NOT SET')"
+          
+          # Ensure lambdas-to-build is always set to valid JSON
+          if ! grep -q "lambdas-to-build=" $GITHUB_OUTPUT; then
+            echo "WARNING: lambdas-to-build not set, setting to empty array"
+            echo "lambdas-to-build=[]" >> $GITHUB_OUTPUT
+          fi
+
+  common:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.any-lambda-changed == 'true'
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v5
       - run: npm install --global corepack@0.31.0
@@ -40,30 +265,12 @@ jobs:
       - run: pnpm --filter "./modules/**" test
 
   gu-cdk-build:
-    needs: common
+    needs: [common, detect-changes]
+    if: needs.detect-changes.outputs.any-lambda-changed == 'true' && needs.detect-changes.outputs.lambdas-to-build != '[]'
     strategy:
       fail-fast: false
       matrix:
-        subproject:
-          - user-benefits
-          - press-reader-entitlements
-          - ticket-tailor-webhook
-          - update-supporter-plus-amount
-          - product-switch-api
-          - generate-product-catalog
-          - alarms-handler
-          - discount-api
-          - stripe-disputes
-          - discount-expiry-notifier
-          - salesforce-disaster-recovery
-          - salesforce-disaster-recovery-health-check
-          - salesforce-event-bus
-          - zuora-salesforce-link-remover
-          - metric-push-api
-          - observer-data-export
-          - negative-invoices-processor
-          - write-off-unpaid-invoices
-          - mparticle-api
+        subproject: ${{ fromJson(needs.detect-changes.outputs.lambdas-to-build) }}
     runs-on: ubuntu-latest
     permissions:
       id-token: write
