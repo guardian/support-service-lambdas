@@ -1,4 +1,3 @@
-import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
 import dayjs from 'dayjs';
 import { z } from 'zod';
@@ -49,11 +48,7 @@ export const fetchSubscription = async (
 	subscriptionId: string,
 ) => {
 	const data = await fetchAllSubscriptionsForUser(stage, apiKey, identityId);
-	const subscription = data.subscriptions.find(
+	return data.subscriptions.find(
 		(sub) => sub.subscriptionId === subscriptionId,
-	);
-	return getIfDefined(
-		subscription,
-		`Subscription with ID ${subscriptionId} not found for user ${identityId}`,
 	);
 };

@@ -52,6 +52,14 @@ export const fetchSubscriptionAndDoUpdate = async (
 		identityId,
 		subscriptionId,
 	);
+	if (subscription === undefined) {
+		// There are a large number of records user subscriptions table that do not have a corresponding subscription.
+		// Until we work out exactly why and fix it, we will just log and return.
+		logger.log(
+			`Subscription with ID ${subscriptionId} not found for user ${identityId}`,
+		);
+		return;
+	}
 	console.log('Fetched subscription', subscription);
 	if (subscription.to.isBefore(dayjs())) {
 		logger.log(
