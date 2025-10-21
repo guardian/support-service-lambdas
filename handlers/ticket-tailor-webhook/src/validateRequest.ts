@@ -1,7 +1,8 @@
 import { createHmac, timingSafeEqual } from 'crypto';
+import { logger } from '@modules/routing/logger';
 import { getSecretValue } from '@modules/secrets-manager/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
-import { ApiGatewayToSqsEvent } from './index';
+import type { ApiGatewayToSqsEvent } from './apiGatewayToSqsEvent';
 
 export type HmacKey = {
 	secret: string;
@@ -13,7 +14,7 @@ export const getTimestampAndSignature = (
 	const signatureWithTs = record.headers['tickettailor-webhook-signature'];
 
 	if (!signatureWithTs) {
-		console.error(
+		logger.error(
 			'No valid value found for MessgeAttritbute: tickettailor-webhook-signature on incoming request.',
 		);
 		return;
@@ -23,7 +24,7 @@ export const getTimestampAndSignature = (
 	const signature = signatureWithTs.split(',')[1]?.split('v1=')[1];
 
 	if (!(timestamp && signature) || isNaN(Number(timestamp))) {
-		console.error(
+		logger.error(
 			`Invalid formatting of header 'tickettailor-webhook-signature': '${signatureWithTs}'. Missing or incorrectly formatted timestamp or signature.`,
 		);
 		return;
@@ -42,7 +43,7 @@ export const isWithinTimeWindow = (
 	const currentEpochSeconds = Math.floor(currentDateTime.valueOf() / 1000);
 	const timeDiff = currentEpochSeconds - timestampEpochSeconds;
 	if (timeDiff < 0) {
-		console.error(
+		logger.error(
 			`Invalid Webhook Signature: timeStamp ${timestamp} is later than current time. Check it is not using EpochMillis.`,
 		);
 		return false;
@@ -62,15 +63,15 @@ export const hasMatchingSignature = (
 		.digest('hex');
 
 	try {
-		console.log('Comparing generated hash and signature from request');
+		logger.log('Comparing generated hash and signature from request');
 		return timingSafeEqual(Buffer.from(hash), Buffer.from(signature));
 	} catch (e) {
 		if (e instanceof Error) {
-			console.error(
+			logger.error(
 				`Hash and signature comparison failed with the following error message: ${e.message}`,
 			);
 		} else {
-			console.error(`Hash and signature comparison failed for Unknown reason.`);
+			logger.error(`Hash and signature comparison failed for Unknown reason.`);
 		}
 
 		return false;
@@ -107,12 +108,12 @@ export const validateRequest = async (
 	);
 
 	if (!signatureMatches) {
-		console.warn(
+		logger.log(
 			'Signatures do not match - check Ticket Tailor signing secret matches the one stored in AWS. Webhook will not be processed.',
 		);
 	}
 	if (!withinTimeWindow) {
-		console.warn(
+		logger.log(
 			`Webhook Signature timestamp ${timestamp} is older than ${maxValidTimeWindowSeconds} seconds. Webhook will not be processed.`,
 		);
 	}
