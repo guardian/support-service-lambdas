@@ -13,8 +13,16 @@ export async function handleListenDisputeCreated(
 	logger: Logger,
 	webhookData: ListenDisputeCreatedRequestBody,
 	disputeId: string,
-): Promise<SalesforceUpsertResponse> {
+): Promise<SalesforceUpsertResponse | null> {
 	logger.log(`Processing dispute creation for dispute ${disputeId}`);
+
+	// Skip SEPA payment disputes (they don't have payment_method_details)
+	if (!webhookData.data.object.payment_method_details) {
+		logger.log(
+			`Skipping dispute ${disputeId} - no payment_method_details (likely SEPA payment)`,
+		);
+		return null;
+	}
 
 	const paymentId = webhookData.data.object.charge;
 	logger.log(`Payment ID from dispute: ${paymentId}`);

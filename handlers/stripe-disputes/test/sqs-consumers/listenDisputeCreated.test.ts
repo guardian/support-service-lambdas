@@ -276,5 +276,30 @@ describe('handleListenDisputeCreated', () => {
 
 			expect(result).toEqual(customResponse);
 		});
+
+		it('should skip processing SEPA disputes without payment_method_details', async () => {
+			const sepaWebhookData: ListenDisputeCreatedRequestBody = {
+				...mockWebhookData,
+				data: {
+					object: {
+						...mockWebhookData.data.object,
+						payment_method_details: undefined as any,
+					},
+				},
+			};
+
+			const result = await handleListenDisputeCreated(
+				mockLogger,
+				sepaWebhookData,
+				'du_test123',
+			);
+
+			expect(result).toBeNull();
+			expect(mockLogger.log).toHaveBeenCalledWith(
+				'Skipping dispute du_test123 - no payment_method_details (likely SEPA payment)',
+			);
+			expect(mockUpsertSalesforceObject).not.toHaveBeenCalled();
+			expect(mockZuoraGetInvoice).not.toHaveBeenCalled();
+		});
 	});
 });
