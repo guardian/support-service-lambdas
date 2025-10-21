@@ -81,6 +81,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'metric-push-api',
 		'press-reader-entitlements',
 		'user-benefits',
+		'mobile-purchases-to-supporter-product-data',
 	],
 	PLATFORM: [
 		// fulfilment
