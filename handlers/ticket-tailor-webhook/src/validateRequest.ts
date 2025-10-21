@@ -1,19 +1,18 @@
 import { createHmac, timingSafeEqual } from 'crypto';
 import { getSecretValue } from '@modules/secrets-manager/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
-import type { SQSRecord } from 'aws-lambda';
+import { ApiGatewayToSqsEvent } from './index';
 
 export type HmacKey = {
 	secret: string;
 };
 
 export const getTimestampAndSignature = (
-	record: SQSRecord,
+	record: ApiGatewayToSqsEvent,
 ): [string, string] | undefined => {
-	const signatureWithTs =
-		record.messageAttributes['tickettailor-webhook-signature']?.stringValue;
+	const signatureWithTs = record.headers['tickettailor-webhook-signature'];
 
-	if (!(typeof signatureWithTs === 'string')) {
+	if (!signatureWithTs) {
 		console.error(
 			'No valid value found for MessgeAttritbute: tickettailor-webhook-signature on incoming request.',
 		);
@@ -25,7 +24,7 @@ export const getTimestampAndSignature = (
 
 	if (!(timestamp && signature) || isNaN(Number(timestamp))) {
 		console.error(
-			`Invalid formatting of MessageAttribute 'tickettailor-webhook-signature': ${signatureWithTs}. Missing or incorrectly formatted timestamp or signature.`,
+			`Invalid formatting of header 'tickettailor-webhook-signature': '${signatureWithTs}'. Missing or incorrectly formatted timestamp or signature.`,
 		);
 		return;
 	}
@@ -55,7 +54,7 @@ export const isWithinTimeWindow = (
 export const hasMatchingSignature = (
 	timestamp: string,
 	signature: string,
-	record: SQSRecord,
+	record: ApiGatewayToSqsEvent,
 	validationSecret: HmacKey,
 ): boolean => {
 	const hash = createHmac('sha256', validationSecret.secret)
@@ -80,7 +79,9 @@ export const hasMatchingSignature = (
 
 export const maxValidTimeWindowSeconds = 300;
 
-export const validateRequest = async (record: SQSRecord): Promise<boolean> => {
+export const validateRequest = async (
+	record: ApiGatewayToSqsEvent,
+): Promise<boolean> => {
 	const validationSecret = await getSecretValue<HmacKey>(
 		`${stageFromEnvironment()}/TicketTailor/Webhook-validation`,
 	);
