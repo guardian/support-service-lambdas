@@ -16,6 +16,104 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 1`
     },
   },
   "Resources": {
+    "FailedMobilePurchasesToSupporterProductDataLambdaAlarmF8151C42": {
+      "Properties": {
+        "ActionsEnabled": false,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-CODE",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "mobilepurchasestosupporterproductdatalambdaC3CC84DF",
+              },
+              " failed. Search the logs below for "error" for more information. Impact: This means the the Supporter Product Data table is not being updated with mobile purchase data, which could result in users not receiving the correct benefits associated with their purchase.",
+            ],
+          ],
+        },
+        "AlarmName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "mobilepurchasestosupporterproductdatalambdaC3CC84DF",
+              },
+              " Lambda has failed",
+            ],
+          ],
+        },
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "mobilepurchasestosupporterproductdatalambdaC3CC84DF",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "mobile-purchases-to-supporter-product-data",
+          },
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "mobilepurchasestosupporterproductdatalambdaC3CC84DF",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
     "ForwardMobilePurchasesToSupporterProductDataAllowEventRulemobilepurchasestosupporterproductdataCODEmobilepurchasestosupporterproductdatalambda8483822015D451A7": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
@@ -318,6 +416,104 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 2`
     },
   },
   "Resources": {
+    "FailedMobilePurchasesToSupporterProductDataLambdaAlarmF8151C42": {
+      "Properties": {
+        "ActionsEnabled": true,
+        "AlarmActions": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:aws:sns:",
+                {
+                  "Ref": "AWS::Region",
+                },
+                ":",
+                {
+                  "Ref": "AWS::AccountId",
+                },
+                ":alarms-handler-topic-PROD",
+              ],
+            ],
+          },
+        ],
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "mobilepurchasestosupporterproductdatalambdaC3CC84DF",
+              },
+              " failed. Search the logs below for "error" for more information. Impact: This means the the Supporter Product Data table is not being updated with mobile purchase data, which could result in users not receiving the correct benefits associated with their purchase.",
+            ],
+          ],
+        },
+        "AlarmName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "mobilepurchasestosupporterproductdatalambdaC3CC84DF",
+              },
+              " Lambda has failed",
+            ],
+          ],
+        },
+        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+        "Dimensions": [
+          {
+            "Name": "FunctionName",
+            "Value": {
+              "Ref": "mobilepurchasestosupporterproductdatalambdaC3CC84DF",
+            },
+          },
+        ],
+        "EvaluationPeriods": 1,
+        "MetricName": "Errors",
+        "Namespace": "AWS/Lambda",
+        "Period": 60,
+        "Statistic": "Sum",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "mobile-purchases-to-supporter-product-data",
+          },
+          {
+            "Key": "DiagnosticLinks",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "lambda:",
+                  {
+                    "Ref": "mobilepurchasestosupporterproductdatalambdaC3CC84DF",
+                  },
+                ],
+              ],
+            },
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "Threshold": 1,
+        "TreatMissingData": "notBreaching",
+      },
+      "Type": "AWS::CloudWatch::Alarm",
+    },
     "ForwardMobilePurchasesToSupporterProductDataAllowEventRulemobilepurchasestosupporterproductdataPRODmobilepurchasestosupporterproductdatalambdaF9674256F2C10C35": {
       "Properties": {
         "Action": "lambda:InvokeFunction",

@@ -3,6 +3,7 @@ import { EventBus, Rule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { AllowSupporterProductDataPutItemPolicy } from './cdk/policies';
 import { SrLambda } from './cdk/SrLambda';
+import { SrLambdaErrorAlarm } from './cdk/SrLambdaErrorAlarm';
 import { SrStack, type SrStageNames } from './cdk/SrStack';
 
 export class MobilePurchasesToSupporterProductData extends SrStack {
@@ -20,6 +21,16 @@ export class MobilePurchasesToSupporterProductData extends SrStack {
 			},
 		);
 		lambda.addPolicies(new AllowSupporterProductDataPutItemPolicy(this));
+
+		new SrLambdaErrorAlarm(
+			this,
+			`FailedMobilePurchasesToSupporterProductDataLambdaAlarm`,
+			{
+				errorImpact:
+					'This means the the Supporter Product Data table is not being updated with mobile purchase data, which could result in users not receiving the correct benefits associated with their purchase.',
+				lambdaFunctionName: lambda.functionName,
+			},
+		);
 
 		const mobilePurchasesBus = EventBus.fromEventBusName(
 			this,
