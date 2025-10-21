@@ -101,18 +101,18 @@ export class MParticleApi extends SrStack {
 			},
 		});
 
-		const mmaUserDeletionLambda = new SrLambda(
-			this,
-			`${app}-mma-user-deletion-lambda`,
-			{
+	const mmaUserDeletionLambda = new SrLambda(
+		this,
+		`${app}-mma-user-deletion-lambda`,
+		{
+			nameSuffix: 'deletion',
+			lambdaOverrides: {
 				handler: 'index.handlerDeletion',
 				timeout: Duration.seconds(300),
 				initialPolicy: [s3BatonReadAndWritePolicy],
 			},
-			{ nameSuffix: 'deletion' },
-		);
-
-		// Add SQS event source mapping separately since SrLambda doesn't accept events in constructor
+		},
+	);		// Add SQS event source mapping separately since SrLambda doesn't accept events in constructor
 		mmaUserDeletionLambda.addEventSource(
 			new SqsEventSource(mmaUserDeletionRequestsQueue, {
 				reportBatchItemFailures: true,
