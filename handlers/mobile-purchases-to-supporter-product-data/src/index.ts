@@ -6,7 +6,7 @@ import type { Stage } from '@modules/stage';
 import { stageFromEnvironment } from '@modules/stage';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import { putSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
-import type { DynamoDBRecord, Handler } from 'aws-lambda';
+import type { DynamoDBRecord, Handler, SQSEvent } from 'aws-lambda';
 import dayjs from 'dayjs';
 import type { Config } from './config';
 import { getConfig } from './config';
@@ -21,14 +21,20 @@ export const lazyConfig = new Lazy(
 	'load config from SSM',
 );
 
-export const handler: Handler = async (event: InputEvent) => {
+export const handler: Handler = async (event: SQSEvent) => {
 	logger.log(`Input is ${JSON.stringify(event, null, 2)}`);
-	if (event.detail.eventName === 'REMOVE') {
-		logger.log('Skipping REMOVE event');
-		return;
-	}
 	const stage = stageFromEnvironment();
-	await fetchSubscriptionAndDoUpdate(stage, await lazyConfig.get(), event);
+	const config = await lazyConfig.get();
+	await Promise.all(
+		event.Records.map(
+			async (record) =>
+				await fetchSubscriptionAndDoUpdate(
+					stage,
+					config,
+					JSON.parse(record.body) as InputEvent,
+				),
+		),
+	);
 };
 
 export const fetchSubscriptionAndDoUpdate = async (
@@ -36,6 +42,10 @@ export const fetchSubscriptionAndDoUpdate = async (
 	config: Config,
 	event: InputEvent,
 ) => {
+	if (event.detail.eventName === 'REMOVE') {
+		logger.log('Skipping REMOVE event');
+		return;
+	}
 	const identityId = getIfDefined(
 		event.detail.dynamodb?.NewImage?.userId?.S,
 		'Identity ID was not present in the event',
