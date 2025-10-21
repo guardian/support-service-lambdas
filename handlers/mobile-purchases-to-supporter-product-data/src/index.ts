@@ -23,12 +23,11 @@ export const lazyConfig = new Lazy(
 
 export const handler: Handler = async (event: InputEvent) => {
 	console.log(`Input is ${JSON.stringify(event, null, 2)}`);
-	const stage = stageFromEnvironment();
 	if (event.detail.eventName === 'REMOVE') {
 		logger.log('Skipping REMOVE event');
 		return;
 	}
-	console.log('Event type is', event.detail.eventName);
+	const stage = stageFromEnvironment();
 	await fetchSubscriptionAndDoUpdate(stage, await lazyConfig.get(), event);
 };
 
@@ -66,7 +65,7 @@ export const fetchSubscriptionAndDoUpdate = async (
 			'info',
 			`Subscription ${subscription.subscriptionId} for identityId ${identityId} is expired, skipping`,
 		);
-		return Promise.resolve();
+		return;
 	}
 	const supporterProductDataItem: SupporterRatePlanItem = {
 		identityId: identityId,
@@ -81,8 +80,4 @@ export const fetchSubscriptionAndDoUpdate = async (
 		'info',
 		`Successfully updated supporter product data with item ${prettyPrint(supporterProductDataItem)}`,
 	);
-	// Testing alarms
-	throw new Error('Testing error alarms');
-	// End testing alarms
-	//return Promise.resolve();
 };
