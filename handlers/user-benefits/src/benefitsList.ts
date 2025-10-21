@@ -68,6 +68,7 @@ const getHtmlBody = (): string => {
 						<th>Terms & Conditions Name</th>
 						<th>Benefits</th>
 						${Object.entries(productBenefitMapping)
+							.sort(([key1], [key2]) => key1.localeCompare(key2))
 							.map(
 								([key, value]) =>
 									`<tr>` +
@@ -79,7 +80,7 @@ const getHtmlBody = (): string => {
 									`${getTermsAndConditionsName(key)}` +
 									`</a>` +
 									`</td>` +
-									`<td>${value.join(', ')}</td>` +
+									`<td>${value.sort().join(', ')}</td>` +
 									`</tr>`,
 							)
 							.join('')}
