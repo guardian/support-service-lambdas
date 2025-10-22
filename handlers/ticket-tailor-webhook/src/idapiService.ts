@@ -1,3 +1,4 @@
+import { logger } from '@modules/routing/logger';
 import { getSecretValue } from '@modules/secrets-manager/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
 import { z } from 'zod';
@@ -33,7 +34,7 @@ export const fetchUserType = async (
 		`${stageFromEnvironment()}/TicketTailor/IdApi-token`,
 	);
 
-	console.log(`Fetching user type for provided email.`);
+	logger.log(`Fetching user type for provided email.`);
 	const bearerToken = `Bearer ${idapiSecret.token}`;
 
 	const userTypeResponse = await fetch(
@@ -48,17 +49,17 @@ export const fetchUserType = async (
 	);
 	if (!userTypeResponse.ok) {
 		const errorMessage = `Get userType request failed with status: ${userTypeResponse.statusText}. Response body is: ${JSON.stringify(userTypeResponse.body)}`;
-		console.error(errorMessage);
+		logger.error(errorMessage);
 		throw new Error(errorMessage);
 	}
 	const responseJson = await userTypeResponse.json();
 	const validationResult = UserTypeResponseSchema.safeParse(responseJson);
 	if (!validationResult.success) {
 		const errorMessage = `UserType request returned invalid data. Response body is: ${JSON.stringify(userTypeResponse.body)}`;
-		console.error(errorMessage);
+		logger.error(errorMessage);
 		throw new Error(errorMessage);
 	}
-	console.log(`Request ok. User type is: ${validationResult.data.userType}`);
+	logger.log(`Request ok. User type is: ${validationResult.data.userType}`);
 	return validationResult.data;
 };
 
@@ -76,7 +77,7 @@ export const createGuestAccount = async (email: string): Promise<void> => {
 		},
 		body: JSON.stringify({ primaryEmailAddress: email }),
 	});
-	console.log(`Create Guest Account response status: ${response.statusText}`);
+	logger.log(`Create Guest Account response status: ${response.statusText}`);
 	if (!response.ok) {
 		throw new Error(
 			`Guest account failed with status ${JSON.stringify(response)}.`,

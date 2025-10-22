@@ -7,9 +7,9 @@ import {
 	validateRequest,
 } from '../src/validateRequest';
 import {
-	invalidSignatureSQSRecord,
-	invalidTimestampSQSRecord,
-	validSQSRecord,
+	invalidSignatureSQSBody,
+	invalidTimestampSQSBody,
+	validSQSBody,
 	validSQSRecordTimestamp,
 } from './testFixtures';
 
@@ -38,7 +38,7 @@ const invalidSignature =
 
 //Tests for getTimestampAndSignature()
 test('getTimestampAndSignature() called on an SQSRecord returns the correct values', () => {
-	const timestampAndSignature = getTimestampAndSignature(validSQSRecord);
+	const timestampAndSignature = getTimestampAndSignature(validSQSBody);
 	if (!timestampAndSignature) {
 		throw new Error('Test Data missing timestamp and signature');
 	}
@@ -54,7 +54,7 @@ test('If the SQS event has a valid signature, hasMatchingSignature() will return
 	const signatureCheckResult = hasMatchingSignature(
 		validSQSRecordTimestamp,
 		validSQSRecordSignature,
-		validSQSRecord,
+		validSQSBody,
 		mockKey,
 	);
 
@@ -65,7 +65,7 @@ test('If the SQS event has an invalid signature, hasMatchingSignature() will log
 	const signatureCheckResult = hasMatchingSignature(
 		validSQSRecordTimestamp,
 		invalidSignature,
-		invalidSignatureSQSRecord,
+		invalidSignatureSQSBody,
 		mockKey,
 	);
 
@@ -76,7 +76,7 @@ test('If the SQS event has a valid signature but an invalid value for timestamp,
 	const signatureCheckResult = hasMatchingSignature(
 		invalidTimestamp,
 		validSQSRecordSignature,
-		invalidTimestampSQSRecord,
+		invalidTimestampSQSBody,
 		mockKey,
 	);
 
@@ -123,13 +123,13 @@ const validEpochSeconds =
 test('If a request has an invalid signature, validateRequest() will log warning and return false', async () => {
 	jest.useFakeTimers().setSystemTime(new Date(validEpochSeconds * 1000)); //Date works in Epoch milli
 
-	expect(await validateRequest(invalidSignatureSQSRecord)).toBe(false);
+	expect(await validateRequest(invalidSignatureSQSBody)).toBe(false);
 });
 
 test('If a request has a valid signature and timestamp, and the timestamp is within the allowed time window, validateRequest() will return true', async () => {
 	jest.useFakeTimers().setSystemTime(new Date(validEpochSeconds * 1000)); //Date works in Epoch milli
 
-	expect(await validateRequest(validSQSRecord)).toBe(true);
+	expect(await validateRequest(validSQSBody)).toBe(true);
 });
 
 const invalidEpochSeconds =
@@ -137,11 +137,11 @@ const invalidEpochSeconds =
 test('If a request has a valid signature and timestamp, but the timestamp is more than 1 second outside the allowed time window, validateRequest() will return false', async () => {
 	jest.useFakeTimers().setSystemTime(new Date(invalidEpochSeconds * 1000)); //Date works in Epoch milli
 
-	expect(await validateRequest(validSQSRecord)).toBe(false);
+	expect(await validateRequest(validSQSBody)).toBe(false);
 });
 
 test('If a request has a valid signature and timestamp, but the timestamp is later than the current date, validateRequest() will return false', async () => {
 	jest.useFakeTimers().setSystemTime(new Date(invalidEpochSeconds * 1000)); //Date works in Epoch milli
 
-	expect(await validateRequest(validSQSRecord)).toBe(false);
+	expect(await validateRequest(validSQSBody)).toBe(false);
 });
