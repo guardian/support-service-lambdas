@@ -15,6 +15,7 @@ export interface HandlerDefinition {
 	extraScripts?: Record<string, string>;
 	dependencies?: Record<string, string>;
 	devDependencies?: Record<string, string>;
+	tsConfigExtra?: Record<string, unknown>;
 }
 
 const alarmsHandler: HandlerDefinition = {
@@ -98,6 +99,11 @@ const mobilePurchasesToSupporterProductData: HandlerDefinition = {
 	},
 	devDependencies: {
 		...dep['@types/aws-lambda'],
+	},
+	tsConfigExtra: {
+		'ts-node': {
+			require: ['tsconfig-paths/register'],
+		},
 	},
 };
 
