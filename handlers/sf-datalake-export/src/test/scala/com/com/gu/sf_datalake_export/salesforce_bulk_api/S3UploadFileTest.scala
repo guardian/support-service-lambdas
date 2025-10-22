@@ -20,7 +20,6 @@ class S3UploadFileTest extends AnyFlatSpec with Matchers {
   private def fakeS3Write(putRequest: PutObjectRequest, body: RequestBody): Try[PutObjectResponse] = {
     numberOfS3Writes = numberOfS3Writes + 1
     putRequest.bucket shouldBe testPath.bucketName.value
-    putRequest.acl shouldBe ObjectCannedACL.BUCKET_OWNER_READ
     val fileContent = Source.fromInputStream(body.contentStreamProvider.newStream()).mkString
     fileContent shouldBe testFile.content.value
     successS3Result

@@ -30,9 +30,6 @@ export class SalesforceDisasterRecoveryHealthCheck extends GuStack {
 			runtime: nodeVersion,
 			timeout: Duration.minutes(5),
 			environment: {
-				APP: app,
-				STACK: this.stack,
-				STAGE: this.stage,
 				REGION: this.region,
 				SNS_TOPIC_ARN: snsTopicArn,
 				STATE_MACHINE_ARN: stateMachine.stateMachineArn,

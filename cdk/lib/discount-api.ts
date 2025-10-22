@@ -15,10 +15,10 @@ import {
 	AllowZuoraOAuthSecretsPolicy,
 	ReadRepoConfig,
 } from './cdk/policies';
-import { SrApiLambda } from './cdk/sr-api-lambda';
+import { SrApiLambda } from './cdk/SrApiLambda';
 import { domainForStack } from './cdk/sr-rest-domain';
-import type { SrStageNames } from './cdk/sr-stack';
-import { SrStack } from './cdk/sr-stack';
+import type { SrStageNames } from './cdk/SrStack';
+import { SrStack } from './cdk/SrStack';
 
 // CDK and handler have to match these values
 export const docsPath = 'docs';
@@ -93,7 +93,8 @@ export class DiscountApi extends SrStack {
 
 		userPoolClient.node.addDependency(googleProvider);
 
-		const lambda = new SrApiLambda(this, {
+		const lambda = new SrApiLambda(this, 'Lambda', {
+			legacyId: `${this.app}-lambda`,
 			lambdaOverrides: {
 				description:
 					'A lambda that enables the addition of discounts to existing subscriptions',
@@ -103,8 +104,10 @@ export class DiscountApi extends SrStack {
 					COGNITO_DOMAIN: userPoolDomain.domainName,
 				},
 			},
-			errorImpact:
-				'an eligible user may not have been offered a discount during the cancellation flow',
+			monitoring: {
+				errorImpact:
+					'an eligible user may not have been offered a discount during the cancellation flow',
+			},
 		});
 
 		lambda.addPolicies(

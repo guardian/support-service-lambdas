@@ -845,14 +845,11 @@ DLQ: https://",
         "Environment": {
           "Variables": {
             "APP": "stripe-disputes",
-            "App": "stripe-disputes",
             "DISPUTE_EVENTS_QUEUE_URL": {
               "Ref": "stripedisputeseventsqueueF268BDE0",
             },
             "STACK": "membership",
             "STAGE": "CODE",
-            "Stack": "membership",
-            "Stage": "CODE",
           },
         },
         "FunctionName": "stripe-disputes-consumer-CODE",
@@ -1117,14 +1114,11 @@ DLQ: https://",
         "Environment": {
           "Variables": {
             "APP": "stripe-disputes",
-            "App": "stripe-disputes",
             "DISPUTE_EVENTS_QUEUE_URL": {
               "Ref": "stripedisputeseventsqueueF268BDE0",
             },
             "STACK": "membership",
             "STAGE": "CODE",
-            "Stack": "membership",
-            "Stage": "CODE",
           },
         },
         "FunctionName": "stripe-disputes-producer-CODE",
@@ -2613,14 +2607,11 @@ DLQ: https://",
         "Environment": {
           "Variables": {
             "APP": "stripe-disputes",
-            "App": "stripe-disputes",
             "DISPUTE_EVENTS_QUEUE_URL": {
               "Ref": "stripedisputeseventsqueueF268BDE0",
             },
             "STACK": "membership",
             "STAGE": "PROD",
-            "Stack": "membership",
-            "Stage": "PROD",
           },
         },
         "FunctionName": "stripe-disputes-consumer-PROD",
@@ -2885,14 +2876,11 @@ DLQ: https://",
         "Environment": {
           "Variables": {
             "APP": "stripe-disputes",
-            "App": "stripe-disputes",
             "DISPUTE_EVENTS_QUEUE_URL": {
               "Ref": "stripedisputeseventsqueueF268BDE0",
             },
             "STACK": "membership",
             "STAGE": "PROD",
-            "Stack": "membership",
-            "Stage": "PROD",
           },
         },
         "FunctionName": "stripe-disputes-producer-PROD",

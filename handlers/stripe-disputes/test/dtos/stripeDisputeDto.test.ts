@@ -70,8 +70,23 @@ describe('Stripe Dispute DTOs', () => {
 			if (result.success) {
 				expect(result.data.object.evidence_details.has_evidence).toBe(false);
 				expect(
-					result.data.object.payment_method_details.card.network_reason_code,
+					result.data.object.payment_method_details?.card.network_reason_code,
 				).toBe('4855');
+			}
+		});
+
+		it('should validate SEPA disputes without payment_method_details', () => {
+			const sepaDisputeObject = {
+				...validStripeDisputeObject,
+			};
+			delete (sepaDisputeObject as any).payment_method_details;
+
+			const validData = { object: sepaDisputeObject };
+			const result = stripeDisputeDataSchema.safeParse(validData);
+
+			expect(result.success).toBe(true);
+			if (result.success) {
+				expect(result.data.object.payment_method_details).toBeUndefined();
 			}
 		});
 	});

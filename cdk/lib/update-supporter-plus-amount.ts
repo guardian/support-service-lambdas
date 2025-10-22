@@ -3,9 +3,9 @@ import {
 	AllowSqsSendPolicy,
 	AllowZuoraOAuthSecretsPolicy,
 } from './cdk/policies';
-import { SrApiLambda } from './cdk/sr-api-lambda';
-import type { SrStageNames } from './cdk/sr-stack';
-import { SrStack } from './cdk/sr-stack';
+import { SrApiLambda } from './cdk/SrApiLambda';
+import type { SrStageNames } from './cdk/SrStack';
+import { SrStack } from './cdk/SrStack';
 
 export class UpdateSupporterPlusAmount extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
@@ -14,13 +14,16 @@ export class UpdateSupporterPlusAmount extends SrStack {
 			app: 'update-supporter-plus-amount',
 		});
 
-		const lambda = new SrApiLambda(this, {
+		const lambda = new SrApiLambda(this, 'Lambda', {
+			legacyId: `${this.app}-lambda`,
 			lambdaOverrides: {
 				description:
 					'An API Gateway triggered lambda to carry out supporter plus amount updates',
 			},
-			errorImpact:
-				'a user could not update the contribution amount of their supporter plus subscription',
+			monitoring: {
+				errorImpact:
+					'a user could not update the contribution amount of their supporter plus subscription',
+			},
 		});
 
 		lambda.addPolicies(

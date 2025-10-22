@@ -229,12 +229,9 @@ exports[`The Update supporter plus amount stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "update-supporter-plus-amount",
-            "App": "update-supporter-plus-amount",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
-            "Stack": "support",
-            "Stage": "CODE",
           },
         },
         "FunctionName": "update-supporter-plus-amount-CODE",
@@ -997,7 +994,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "update-supporter-plus-amount returned a 5XX response search the logs below for "error" for more information. Impact: a user could not update the contribution amount of their supporter plus subscription",
+        "AlarmDescription": "update-supporter-plus-amount returned a 5XX response. Search the logs below for "error" for more information. Impact: a user could not update the contribution amount of their supporter plus subscription",
         "AlarmName": "update-supporter-plus-amount-PROD 5XX errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
@@ -1048,6 +1045,7 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
           },
         ],
         "Threshold": 1,
+        "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
     },
@@ -1236,12 +1234,9 @@ exports[`The Update supporter plus amount stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "update-supporter-plus-amount",
-            "App": "update-supporter-plus-amount",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
-            "Stack": "support",
-            "Stage": "PROD",
           },
         },
         "FunctionName": "update-supporter-plus-amount-PROD",

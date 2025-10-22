@@ -1,6 +1,11 @@
-import { DynamoDBClient, QueryCommand } from '@aws-sdk/client-dynamodb';
+import {
+	DynamoDBClient,
+	PutItemCommand,
+	QueryCommand,
+} from '@aws-sdk/client-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { awsConfig } from '@modules/aws/config';
+import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 
 const dynamoClient = new DynamoDBClient(awsConfig);
@@ -32,4 +37,26 @@ export const getSupporterProductData = async (
 	const data = await dynamoClient.send(new QueryCommand(input));
 	console.log(`Query returned ${JSON.stringify(data)}`);
 	return data.Items?.map((item) => unmarshall(item) as SupporterRatePlanItem);
+};
+
+export const putSupporterProductData = async (
+	stage: Stage,
+	items: SupporterRatePlanItem[],
+): Promise<void> => {
+	const tableName = `SupporterProductData-${stage}`;
+	for (const item of items) {
+		const cmd = new PutItemCommand({
+			TableName: tableName,
+			Item: {
+				identityId: { S: item.identityId },
+				subscriptionName: { S: item.subscriptionName },
+				productRatePlanId: { S: item.productRatePlanId },
+				productRatePlanName: { S: item.productRatePlanName },
+				termEndDate: { S: item.termEndDate },
+				contractEffectiveDate: { S: item.contractEffectiveDate },
+			},
+		});
+		logger.log(`Putting item into ${tableName}: ${JSON.stringify(item)}`);
+		await dynamoClient.send(cmd);
+	}
 };
