@@ -50,7 +50,7 @@ export type Discount = {
 	discountPercentage: number;
 	// end fields that match the zuora catalog
 	emailIdentifier: DataExtensionName;
-	eligibilityCheckForRatePlan?: EligibilityCheck;
+	eligibilityCheckForRatePlan: EligibilityCheck;
 };
 
 export const catalog = {
@@ -159,7 +159,9 @@ const Discounts = (stage: Stage) => {
 	} as const satisfies { [K in string]: Discount };
 };
 
-function ProductToDiscountMapping(stage: Stage): Record<string, Discount> {
+export function ProductToDiscountMapping(
+	stage: Stage,
+): Record<string, Discount> {
 	const catalogForStage = catalog[stage];
 	const DiscountsForStage = Discounts(stage);
 

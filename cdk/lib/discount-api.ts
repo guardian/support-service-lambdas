@@ -29,5 +29,7 @@ export class DiscountApi extends SrStack {
 			new AllowZuoraOAuthSecretsPolicy(this),
 			new AllowSqsSendPolicy(this, `braze-emails`),
 		);
+
+		lambda.addPublicPath('docs');
 	}
 }
