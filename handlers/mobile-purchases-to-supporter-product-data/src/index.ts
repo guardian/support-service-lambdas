@@ -28,7 +28,7 @@ export const handler: Handler = async (event: SQSEvent) => {
 	await Promise.all(
 		event.Records.map(
 			async (record) =>
-				await fetchSubscriptionAndDoUpdate(
+				await updateFromInputEvent(
 					stage,
 					config,
 					JSON.parse(record.body) as InputEvent,
@@ -37,7 +37,7 @@ export const handler: Handler = async (event: SQSEvent) => {
 	);
 };
 
-export const fetchSubscriptionAndDoUpdate = async (
+export const updateFromInputEvent = async (
 	stage: Stage,
 	config: Config,
 	event: InputEvent,
@@ -54,7 +54,16 @@ export const fetchSubscriptionAndDoUpdate = async (
 		event.detail.dynamodb?.NewImage?.subscriptionId?.S,
 		'Subscription ID was not present in the event',
 	);
-	logger.log(`Fetching subscription for identityId ${identityId}`);
+	await updateFromIds(stage, config, identityId, subscriptionId);
+};
+
+export const updateFromIds = async (
+	stage: Stage,
+	config: Config,
+	identityId: string,
+	subscriptionId: string,
+) => {
+	//logger.log(`Fetching subscription for identityId ${identityId}`);
 	const subscription = await fetchSubscription(
 		stage,
 		config.mobilePurchasesApiKey,
@@ -69,7 +78,7 @@ export const fetchSubscriptionAndDoUpdate = async (
 		);
 		return;
 	}
-	logger.log('Fetched subscription', subscription);
+	//logger.log('Fetched subscription', subscription);
 	if (subscription.to.isBefore(dayjs())) {
 		logger.log(
 			'info',
@@ -82,8 +91,8 @@ export const fetchSubscriptionAndDoUpdate = async (
 		subscriptionName: subscription.subscriptionId,
 		productRatePlanId: 'in_app_purchase',
 		productRatePlanName: subscription.productId,
-		termEndDate: subscription.to.toISOString(),
-		contractEffectiveDate: subscription.from.toISOString(),
+		termEndDate: subscription.to.toDate().toISOString(),
+		contractEffectiveDate: subscription.from.toDate().toISOString(),
 	};
 	await sendToSupporterProductData(stage, supporterProductDataItem);
 	logger.log(

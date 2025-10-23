@@ -99,11 +99,13 @@ const mobilePurchasesToSupporterProductData: HandlerDefinition = {
 	},
 	devDependencies: {
 		...dep['@types/aws-lambda'],
+		...dep['csv-parse'],
+		...dep['ts-node'],
+		...dep['tsconfig-paths'],
 	},
-	tsConfigExtra: {
-		'ts-node': {
-			require: ['tsconfig-paths/register'],
-		},
+	extraScripts: {
+		runFullSync:
+			'ts-node  -r tsconfig-paths/register --project ../../tsconfig.json src/fullSyncCommand.ts',
 	},
 };
 

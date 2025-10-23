@@ -12,6 +12,9 @@ export const dep = separateDepRecords({
 	'source-map-support': '^0.5.21',
 	'@peculiar/x509': '^1.12.3',
 	'@faker-js/faker': '^9.8.0',
+	'csv-parse': '^5.6.0',
+	'ts-node': 'catalog:',
+	'tsconfig-paths': 'catalog:',
 	...awsClients([
 		'client-cloudwatch',
 		'credential-providers',
