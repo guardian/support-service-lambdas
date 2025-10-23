@@ -30,11 +30,11 @@ const getHttpResponse = (
 };
 
 export function getZuoraCatalogName(productKey: unknown): string {
-    return (
-        Object.entries(zuoraCatalogToProductKey).find(
-            ([, value]) => value === productKey,
-        )?.[0] ?? '** Not in Zuora **'
-    );
+	return (
+		Object.entries(zuoraCatalogToProductKey).find(
+			([, value]) => value === productKey,
+		)?.[0] ?? '** Not in Zuora **'
+	);
 }
 
 const getHtmlBody = (): string => {
