@@ -1,0 +1,26 @@
+# MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/riff-raff.yaml.ts
+stacks:
+  - support
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  staff-access-cloudformation:
+    type: cloud-formation
+    app: staff-access
+    parameters:
+      templateStagePaths:
+        CODE: staff-access-CODE.template.json
+        PROD: staff-access-PROD.template.json
+  staff-access:
+    type: aws-lambda
+    parameters:
+      fileName: staff-access.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - staff-access-
+    dependencies:
+      - staff-access-cloudformation

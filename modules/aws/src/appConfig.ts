@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import { z } from 'zod';
 import { GetParametersByPathCommand, SSMClient } from '@aws-sdk/client-ssm';
 import { awsConfig } from '../src/config';
 import { groupMap, mapValues, partition } from '../../arrayFunctions';
@@ -21,9 +21,16 @@ export const loadConfig = async <O>(
 ): Promise<O> => {
 	const configRoot = '/' + [stage, stack, app].join('/');
 	console.log('getting app config from SSM', configRoot);
+	return await loadCustomConfig(configRoot, schema);
+};
+
+async function loadCustomConfig<O>(
+	configRoot: string,
+	schema: z.ZodType<O, z.ZodTypeDef, any>,
+) {
 	const configFlat: SSMKeyValuePairs = await readAllRecursive(configRoot);
 	return parseSSMConfigToObject(configFlat, configRoot, schema);
-};
+}
 
 export type SSMKeyValuePairs = Record<string, string>[];
 
