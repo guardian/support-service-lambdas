@@ -1,4 +1,5 @@
 import { Duration } from 'aws-cdk-lib';
+import type { CognitoUserPoolsAuthorizer } from 'aws-cdk-lib/aws-apigateway';
 import { ApiKeySourceType, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
 import { SrApiGateway5xxAlarm } from './SrApiGateway5xxAlarm';
 import type { SrLambdaProps } from './SrLambda';
@@ -26,6 +27,10 @@ type SrApiLambdaProps = SrLambdaProps & {
 	 * of it here or add a public facing fastly enabled domain.
 	 */
 	srRestDomainProps?: SrRestDomainProps;
+	/**
+	 * Set this to false to skip adding the main proxy endpoint
+	 */
+	proxy?: boolean;
 };
 
 const defaultProps = {
@@ -59,7 +64,7 @@ export class SrApiLambda extends SrLambda {
 				restApiName: getNameWithStage(scope, props.nameSuffix),
 				description:
 					props.apiDescriptionOverride ?? 'API Gateway created by CDK',
-				proxy: true,
+				proxy: false, // add proxy method later, to allow public paths
 				deployOptions: {
 					stageName: scope.stage,
 				},
@@ -73,6 +78,12 @@ export class SrApiLambda extends SrLambda {
 						}),
 			},
 		);
+
+		if (props.proxy !== false) {
+			// by doing these explicitly rather than using proxy:true, we can later add specific public resources
+			this.api.root.addMethod('ANY');
+			this.api.root.addResource('{proxy+}').addMethod('ANY');
+		}
 
 		if (!props.isPublic) {
 			const usagePlan = this.api.addUsagePlan('UsagePlan', {
@@ -108,5 +119,17 @@ export class SrApiLambda extends SrLambda {
 				overrides: props.monitoring,
 			});
 		}
+	}
+
+	addStaffPath(path: string, authorizer: CognitoUserPoolsAuthorizer) {
+		const protectedResource = this.api.root.addResource(path);
+		protectedResource.addMethod('GET', undefined, {
+			apiKeyRequired: false,
+			authorizer,
+		});
+		protectedResource.addResource('{proxy+}').addMethod('GET', undefined, {
+			apiKeyRequired: false,
+			authorizer,
+		});
 	}
 }

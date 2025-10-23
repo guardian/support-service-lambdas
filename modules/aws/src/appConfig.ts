@@ -24,20 +24,6 @@ export const loadConfig = async <O>(
 	return await loadCustomConfig(configRoot, schema);
 };
 
-export const repoConfigSchema = z.object({
-	cognitoClientSecret: z.string(),
-	googleOAuthClientId: z.string(),
-	googleOAuthClientSecret: z.string(),
-});
-export type RepoConfig = z.infer<typeof repoConfigSchema>;
-
-// need permissions to get this
-export const loadRepoConfig = async (stage: string): Promise<RepoConfig> => {
-	const configRoot = '/' + [stage, 'support-service-lambdas'].join('/');
-	console.log('getting repo config from SSM', configRoot);
-	return await loadCustomConfig(configRoot, repoConfigSchema);
-};
-
 async function loadCustomConfig<O>(
 	configRoot: string,
 	schema: z.ZodType<O, z.ZodTypeDef, any>,

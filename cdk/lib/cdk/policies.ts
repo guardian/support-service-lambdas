@@ -4,7 +4,6 @@ import {
 	GuGetS3ObjectsPolicy,
 } from '@guardian/cdk/lib/constructs/iam';
 import { Fn } from 'aws-cdk-lib';
-import type { SrStack } from './sr-stack';
 
 class AllowGetSecretValuePolicy extends GuAllowPolicy {
 	constructor(scope: GuStack, id: string, key: string) {
@@ -80,17 +79,6 @@ export class AllowSupporterProductDataPutItemPolicy extends GuAllowPolicy {
 				Fn.importValue(
 					`supporter-product-data-tables-${scope.stage}-SupporterProductDataTable`,
 				),
-			],
-		});
-	}
-}
-
-export class ReadRepoConfig extends GuAllowPolicy {
-	constructor(scope: SrStack) {
-		super(scope, 'read repo config', {
-			actions: ['ssm:GetParametersByPath'],
-			resources: [
-				`arn:aws:ssm:${scope.region}:${scope.account}:parameter/${scope.stage}/support-service-lambdas`,
 			],
 		});
 	}

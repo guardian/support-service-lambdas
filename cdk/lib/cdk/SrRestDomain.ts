@@ -25,7 +25,6 @@ export class SrRestDomain {
 	readonly basePathMapping: CfnBasePathMapping;
 	readonly domainName: GuCname | undefined;
 	constructor(scope: SrStack, api: LambdaRestApi, props?: SrRestDomainProps) {
-		const app = scope.app;
 		const { cert, domainName } = domainForStack(scope, props?.suffixProdDomain);
 
 		const certificateArn = `arn:aws:acm:eu-west-1:${scope.account}:certificate/${cert.certificateId}`;
