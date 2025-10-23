@@ -4,7 +4,6 @@ import type {
 	termTypeSchema,
 } from '@modules/product-catalog/productCatalogSchema';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
-import { zuoraCatalogToProductKey } from '@modules/product-catalog/zuoraToProductNameMappings';
 
 type ProductBillingSystem = 'stripe' | 'zuora';
 
@@ -81,14 +80,6 @@ const customerFacingNameMapping: Record<ProductKey, string> = {
 
 export function getCustomerFacingName(productKey: unknown): string {
 	return customerFacingNameMapping[productKey as ProductKey];
-}
-
-export function getZuoraCatalogName(productKey: unknown): string {
-	return (
-		Object.entries(zuoraCatalogToProductKey).find(
-			([, value]) => value === productKey,
-		)?.[0] ?? '**Not in Zuora**'
-	);
 }
 
 const termsAndConditionsNameMapping: Record<ProductKey, string> = {

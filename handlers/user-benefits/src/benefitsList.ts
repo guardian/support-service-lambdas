@@ -1,10 +1,6 @@
 import { productBenefitMapping } from '@modules/product-benefits/productBenefit';
-import {
-	getCustomerFacingName,
-	getTermsAndConditionsName,
-	getTermsAndConditionsURL,
-	getZuoraCatalogName,
-} from '@modules/product-catalog/productCatalog';
+import { getCustomerFacingName } from '@modules/product-catalog/productCatalog';
+import { zuoraCatalogToProductKey } from '@modules/product-catalog/zuoraToProductNameMappings';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 export const benefitsListHandler = async (
@@ -32,6 +28,14 @@ const getHttpResponse = (
 		body,
 	});
 };
+
+export function getZuoraCatalogName(productKey: unknown): string {
+    return (
+        Object.entries(zuoraCatalogToProductKey).find(
+            ([, value]) => value === productKey,
+        )?.[0] ?? '** Not in Zuora **'
+    );
+}
 
 const getHtmlBody = (): string => {
 	return `
@@ -62,10 +66,9 @@ const getHtmlBody = (): string => {
 				<table>
 				<tbody>
 					<tr>
-						<th>Middleware Product Key</th>
-						<th>Zuora Product Catalog Name</th>
+						<th>Product Catalog Key</th>
+						<th>Zuora Catalog Name</th>
 						<th>Customer Facing Name</th>
-						<th>Terms & Conditions Name</th>
 						<th>Benefits</th>
 						${Object.entries(productBenefitMapping)
 							.sort(([key1], [key2]) => key1.localeCompare(key2))
@@ -75,11 +78,6 @@ const getHtmlBody = (): string => {
 									`<td>${key}</td>` +
 									`<td>${getZuoraCatalogName(key)}</td>` +
 									`<td>${getCustomerFacingName(key)}</td>` +
-									`<td>` +
-									`<a href="${getTermsAndConditionsURL(key)}">` +
-									`${getTermsAndConditionsName(key)}` +
-									`</a>` +
-									`</td>` +
 									`<td>${value.sort().join(', ')}</td>` +
 									`</tr>`,
 							)
