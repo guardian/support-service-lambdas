@@ -9,7 +9,7 @@ jest.mock('@modules/zuora/subscription');
 describe('getSubStatus handler', () => {
 	beforeEach(() => {
 		jest.resetAllMocks();
-		process.env.Stage = 'CODE';
+		process.env.STAGE = 'CODE';
 	});
 
 	it('should return subscription status when event is valid', async () => {

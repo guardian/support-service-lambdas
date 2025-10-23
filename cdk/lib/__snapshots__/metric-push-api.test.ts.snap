@@ -226,12 +226,9 @@ exports[`The MetricPushApi stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "metric-push-api",
-            "App": "metric-push-api",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
-            "Stack": "support",
-            "Stage": "CODE",
           },
         },
         "FunctionName": "metric-push-api-CODE",
@@ -902,7 +899,7 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "metric-push-api returned a 5XX response search the logs below for "error" for more information. Impact: client side errors are not being recorded",
+        "AlarmDescription": "metric-push-api returned a 5XX response. Search the logs below for "error" for more information. Impact: client side errors are not being recorded",
         "AlarmName": "metric-push-api-PROD 5XX errors",
         "ComparisonOperator": "GreaterThanThreshold",
         "Dimensions": [
@@ -1137,12 +1134,9 @@ exports[`The MetricPushApi stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "metric-push-api",
-            "App": "metric-push-api",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
-            "Stack": "support",
-            "Stage": "PROD",
           },
         },
         "FunctionName": "metric-push-api-PROD",

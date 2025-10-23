@@ -3,8 +3,8 @@ import { App } from 'aws-cdk-lib';
 import { AlarmsHandler } from '../lib/alarms-handler';
 import { BatchEmailSender } from '../lib/batch-email-sender';
 import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
-import type { SrStageNames } from '../lib/cdk/sr-stack';
-import { stages } from '../lib/cdk/sr-stack';
+import type { SrStageNames } from '../lib/cdk/SrStack';
+import { stages } from '../lib/cdk/SrStack';
 import {
 	membershipApisDomain,
 	membershipCertificateId,
@@ -17,6 +17,7 @@ import { DiscountApi } from '../lib/discount-api';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
 import { GenerateProductCatalog } from '../lib/generate-product-catalog';
 import { MetricPushApi } from '../lib/metric-push-api';
+import { MobilePurchasesToSupporterProductData } from '../lib/mobile-purchases-to-supporter-product-data';
 import { MParticleApi } from '../lib/mparticle-api';
 import { NegativeInvoicesProcessor } from '../lib/negative-invoices-processor';
 import type { NewProductApiProps } from '../lib/new-product-api';
@@ -133,6 +134,10 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	MetricPushApi,
 	PressReaderEntitlements,
 	UserBenefits,
+	AlarmsHandler,
+	GenerateProductCatalog,
+	TicketTailorWebhook,
+	MobilePurchasesToSupporterProductData,
 ];
 
 // generate all stacks for all stages
@@ -188,16 +193,6 @@ new SalesforceDisasterRecovery(app, 'salesforce-disaster-recovery-PROD', {
 		'events!connection/salesforce-disaster-recovery-PROD-salesforce-api/583f9d1a-7244-453e-9bb9-ca2639ef27d3',
 	salesforceQueryWaitSeconds: 30,
 });
-new GenerateProductCatalog(app, 'generate-product-catalog-CODE', {
-	stack: 'support',
-	stage: 'CODE',
-	domainName: 'product-catalog.code.dev-guardianapis.com',
-});
-new GenerateProductCatalog(app, 'generate-product-catalog-PROD', {
-	stack: 'support',
-	stage: 'PROD',
-	domainName: 'product-catalog.guardianapis.com',
-});
 
 export const stripeWebhookEndpointsCodeProps: StripeWebhookEndpointsProps = {
 	stack: 'membership',
@@ -225,14 +220,6 @@ new StripeWebhookEndpoints(
 	stripeWebhookEndpointsProdProps,
 );
 
-new AlarmsHandler(app, 'alarms-handler-CODE', {
-	stack: 'support',
-	stage: 'CODE',
-});
-new AlarmsHandler(app, 'alarms-handler-PROD', {
-	stack: 'support',
-	stage: 'PROD',
-});
 new SalesforceDisasterRecoveryHealthCheck(
 	app,
 	'salesforce-disaster-recovery-health-check-CODE',
@@ -256,14 +243,6 @@ new ZuoraSalesforceLinkRemover(app, 'zuora-salesforce-link-remover-CODE', {
 });
 new ZuoraSalesforceLinkRemover(app, 'zuora-salesforce-link-remover-PROD', {
 	stack: 'membership',
-	stage: 'PROD',
-});
-new TicketTailorWebhook(app, 'ticket-tailor-webhook-CODE', {
-	stack: 'support',
-	stage: 'CODE',
-});
-new TicketTailorWebhook(app, 'ticket-tailor-webhook-PROD', {
-	stack: 'support',
 	stage: 'PROD',
 });
 

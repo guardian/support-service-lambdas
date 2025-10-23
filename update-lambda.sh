@@ -8,15 +8,24 @@
 # Exit if any of these commands fail
 set -e
 
+cd "$(dirname "$0")"
+
 if [ $# -lt 1 ]; then
-  echo "please provide the project name as an argument, eg. ./update-lambda.sh discount-api"
+  echo "please provide the project name as an argument, eg. ./update-lambda.sh discount-api [--quick]"
   exit 2
 fi
 
 PROJECT_NAME="$1"
 echo "Updating lambda $PROJECT_NAME"
 
-pnpm --filter $PROJECT_NAME package
+if [ "$2" = "--quick" ]; then
+  pushd "handlers/$PROJECT_NAME"
+  pnpm build
+  cd target && zip -qr "$PROJECT_NAME.zip" ./*.js.map ./*.js
+  popd
+else
+  pnpm --filter "$PROJECT_NAME" package
+fi
 
 s3Bucket=`aws ssm get-parameter --name /account/services/artifact.bucket --query "Parameter.Value" --output text --profile membership --region eu-west-1`
 s3Path="support/CODE/$PROJECT_NAME/$PROJECT_NAME.zip"

@@ -3,9 +3,9 @@ import {
 	AllowSqsSendPolicy,
 	AllowZuoraOAuthSecretsPolicy,
 } from './cdk/policies';
-import { SrApiLambda } from './cdk/sr-api-lambda';
-import type { SrStageNames } from './cdk/sr-stack';
-import { SrStack } from './cdk/sr-stack';
+import { SrApiLambda } from './cdk/SrApiLambda';
+import type { SrStageNames } from './cdk/SrStack';
+import { SrStack } from './cdk/SrStack';
 
 export class ProductSwitchApi extends SrStack {
 	readonly app: string;
@@ -14,13 +14,16 @@ export class ProductSwitchApi extends SrStack {
 
 		const app = this.app;
 
-		const lambda = new SrApiLambda(this, {
+		const lambda = new SrApiLambda(this, 'Lambda', {
+			legacyId: `${this.app}-lambda`,
 			lambdaOverrides: {
 				description:
 					'An API Gateway triggered lambda for carrying out product switches. Code is in the support-service-lambdas repo',
 			},
 			apiDescriptionOverride: `API Gateway endpoint for the ${app}-${this.stage} lambda`,
-			errorImpact: 'readers could not get through the switch journey in MMA',
+			monitoring: {
+				errorImpact: 'readers could not get through the switch journey in MMA',
+			},
 		});
 
 		lambda.addPolicies(

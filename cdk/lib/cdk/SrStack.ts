@@ -20,5 +20,6 @@ export class SrStack extends GuStack implements AppIdentity {
 	constructor(scope: App, props: SrStackProps) {
 		super(scope, `${props.app}-${props.stage}`, { stack: 'support', ...props });
 		this.app = props.app;
+		this.stack = 'support';
 	}
 }

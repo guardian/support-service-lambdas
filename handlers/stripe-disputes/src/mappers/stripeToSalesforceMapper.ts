@@ -31,7 +31,7 @@ export function mapStripeDisputeToSalesforce(
 		),
 		Payment_Intent_ID__c: dispute.payment_intent,
 		Network_Reason_Code__c:
-			dispute.payment_method_details.card.network_reason_code,
+			dispute.payment_method_details?.card.network_reason_code ?? '',
 		Is_Charge_Refundable__c: dispute.is_charge_refundable,
 		Created_Date__c: timestampToSalesforceDateTime(dispute.created),
 		Has_Evidence__c: dispute.evidence_details.has_evidence,

@@ -4,21 +4,24 @@ import {
 	AllowSqsSendPolicy,
 	AllowZuoraOAuthSecretsPolicy,
 } from './cdk/policies';
-import { SrApiLambda } from './cdk/sr-api-lambda';
-import type { SrStageNames } from './cdk/sr-stack';
-import { SrStack } from './cdk/sr-stack';
+import { SrApiLambda } from './cdk/SrApiLambda';
+import type { SrStageNames } from './cdk/SrStack';
+import { SrStack } from './cdk/SrStack';
 
 export class DiscountApi extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
 		super(scope, { stage, app: 'discount-api' });
 
-		const lambda = new SrApiLambda(this, {
+		const lambda = new SrApiLambda(this, 'Lambda', {
+			legacyId: `${this.app}-lambda`,
 			lambdaOverrides: {
 				description:
 					'A lambda that enables the addition of discounts to existing subscriptions',
 			},
-			errorImpact:
-				'an eligible user may not have been offered a discount during the cancellation flow',
+			monitoring: {
+				errorImpact:
+					'an eligible user may not have been offered a discount during the cancellation flow',
+			},
 		});
 
 		lambda.addPolicies(

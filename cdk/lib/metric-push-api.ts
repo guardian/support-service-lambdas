@@ -6,16 +6,17 @@ import {
 	Metric,
 	TreatMissingData,
 } from 'aws-cdk-lib/aws-cloudwatch';
-import { SrApiLambda } from './cdk/sr-api-lambda';
-import type { SrStageNames } from './cdk/sr-stack';
-import { SrStack } from './cdk/sr-stack';
+import { SrApiLambda } from './cdk/SrApiLambda';
+import type { SrStageNames } from './cdk/SrStack';
+import { SrStack } from './cdk/SrStack';
 
 export class MetricPushApi extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
 		super(scope, { stage, app: 'metric-push-api' });
 		const app = this.app;
 
-		const lambda = new SrApiLambda(this, {
+		const lambda = new SrApiLambda(this, 'Lambda', {
+			legacyId: `${this.app}-lambda`,
 			lambdaOverrides: {
 				description:
 					'API triggered lambda to push a metric to cloudwatch so we can alarm on errors',
@@ -23,13 +24,13 @@ export class MetricPushApi extends SrStack {
 			},
 			apiDescriptionOverride: `API Gateway endpoint for the ${app}-${this.stage} lambda`,
 			isPublic: true,
-			errorImpact: 'client side errors are not being recorded',
-			alarmOverrides: {
+			monitoring: {
+				errorImpact: 'client side errors are not being recorded',
 				threshold: 2,
 				treatMissingData: TreatMissingData.NOT_BREACHING,
 				comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
 			},
-			srRestDomainOverrides: {
+			srRestDomainProps: {
 				suffixProdDomain: true,
 			},
 		});
