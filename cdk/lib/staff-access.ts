@@ -115,8 +115,6 @@ export class StaffAccess extends SrStack {
 			.resourceForPath('/auth/token')
 			.addMethod('GET', undefined, { apiKeyRequired: false });
 
-		// TODO: delete comment - Add protected path for docs with Cognito auth
-		// lambda.addStaffPath(docsPath);
 		new CfnOutput(this, 'UserPoolId', {
 			value: userPool.userPoolId,
 			exportName: `UserPoolId-${stage}`,

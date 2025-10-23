@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -x
 
 # This script will build the cdk for the provided project and then call update-stack with the AWS Cli.
 # It will fail if the stack does not already exist, in this case use create-stack

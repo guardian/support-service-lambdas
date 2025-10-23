@@ -1,7 +1,8 @@
 import { mapPartition, zipAll } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z, ZodTypeDef } from 'zod';
+import type { ZodTypeDef } from 'zod';
+import { z } from 'zod';
 import { logger } from '@modules/routing/logger';
 
 export type HttpMethod =
@@ -44,18 +45,12 @@ function matchPath(
 	const routeParts = routePath.split('/').filter(Boolean);
 	const eventParts = eventPath.split('/').filter(Boolean);
 
-	logger.log('route parts: ' + routeParts.join(' '));
-	logger.log('event parts: ' + eventParts.join(' '));
-
 	const lastRoutePart = routeParts[routeParts.length - 1]!;
-	logger.log('lastRoutePart: ' + lastRoutePart);
 	const routeIsGreedy = lastRoutePart.endsWith('+}');
 	let adjustedEventParts: string[];
 	if (routeIsGreedy && routeParts.length < eventParts.length) {
 		const excessParts = eventParts.slice(routeParts.length - 1);
-		logger.log('excessParts: ' + excessParts.join(' '));
 		const joinedGreedyValue = excessParts.join('/');
-		logger.log('joinedGreedyValue: ' + joinedGreedyValue);
 		adjustedEventParts = [
 			...eventParts.slice(0, routeParts.length - 1),
 			joinedGreedyValue,
@@ -63,8 +58,6 @@ function matchPath(
 	} else {
 		adjustedEventParts = eventParts;
 	}
-
-	logger.log('adjustedEventParts: ' + adjustedEventParts.join(' '));
 
 	if (routeParts.length !== adjustedEventParts.length) {
 		return undefined;
@@ -83,7 +76,6 @@ function matchPath(
 	if (literals.some(([routePart, eventPart]) => routePart !== eventPart)) {
 		return undefined;
 	}
-	logger.log('matchers', matchers);
 	return { params: Object.fromEntries(matchers) };
 }
 
