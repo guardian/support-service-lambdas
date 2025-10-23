@@ -64,7 +64,12 @@ class SubscriptionCancelEndpointSteps(
           // we found that contrary to the docs, if effectiveStartDate and effectiveEndDate are today,
           // zuora still returns it as a current-segment, so we need to ignore it
           val hasCharges = ratePlan.ratePlanCharges.exists(_.effectiveEndDate != today)
-          !isDiscount && hasCharges
+          // Exclude future amendments (e.g., pending price increases)
+          // When a subscription has a pending amendment, it will have two rate plans:
+          // 1. Current plan with lastChangeType="Remove" (or None for no pending changes)
+          // 2. Future plan with lastChangeType="Add" (the pending amendment)
+          val isFutureAmendment = ratePlan.lastChangeType.contains("Add")
+          !isDiscount && hasCharges && !isFutureAmendment
         },
         "ratePlan",
       )
