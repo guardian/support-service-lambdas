@@ -1190,7 +1190,7 @@ exports[`The Staff Access stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Policy",
     },
     "UserPool6BA7E5F2": {
-      "DeletionPolicy": "Retain",
+      "DeletionPolicy": "Delete",
       "Properties": {
         "AccountRecoverySetting": {
           "RecoveryMechanisms": [
@@ -1232,7 +1232,7 @@ exports[`The Staff Access stack matches the snapshot 1`] = `
         },
       },
       "Type": "AWS::Cognito::UserPool",
-      "UpdateReplacePolicy": "Retain",
+      "UpdateReplacePolicy": "Delete",
     },
     "UserPoolClient2F5918F7": {
       "DependsOn": [
@@ -2543,7 +2543,7 @@ exports[`The Staff Access stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Policy",
     },
     "UserPool6BA7E5F2": {
-      "DeletionPolicy": "Retain",
+      "DeletionPolicy": "Delete",
       "Properties": {
         "AccountRecoverySetting": {
           "RecoveryMechanisms": [
@@ -2585,7 +2585,7 @@ exports[`The Staff Access stack matches the snapshot 2`] = `
         },
       },
       "Type": "AWS::Cognito::UserPool",
-      "UpdateReplacePolicy": "Retain",
+      "UpdateReplacePolicy": "Delete",
     },
     "UserPoolClient2F5918F7": {
       "DependsOn": [

@@ -1,4 +1,5 @@
-import { App, CfnOutput, RemovalPolicy, SecretValue } from 'aws-cdk-lib';
+import type { App } from 'aws-cdk-lib';
+import { CfnOutput, RemovalPolicy, SecretValue } from 'aws-cdk-lib';
 import {
 	ProviderAttribute,
 	UserPool,
