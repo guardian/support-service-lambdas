@@ -1,7 +1,7 @@
 import { mapPartition, zipAll } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z } from 'zod';
+import { z, ZodTypeDef } from 'zod';
 import { logger } from '@modules/routing/logger';
 
 export type HttpMethod =
@@ -21,8 +21,8 @@ export type Route<TPath, TBody> = {
 		parsed: { path: TPath; body: TBody },
 	) => Promise<APIGatewayProxyResult>;
 	parser?: {
-		path?: z.Schema<TPath>;
-		body?: z.Schema<TBody>;
+		path?: z.Schema<TPath, ZodTypeDef, unknown>;
+		body?: z.Schema<TBody, ZodTypeDef, unknown>;
 	};
 };
 
@@ -44,15 +44,37 @@ function matchPath(
 	const routeParts = routePath.split('/').filter(Boolean);
 	const eventParts = eventPath.split('/').filter(Boolean);
 
-	if (routeParts.length !== eventParts.length) {
+	logger.log('route parts: ' + routeParts.join(' '));
+	logger.log('event parts: ' + eventParts.join(' '));
+
+	const lastRoutePart = routeParts[routeParts.length - 1]!;
+	logger.log('lastRoutePart: ' + lastRoutePart);
+	const routeIsGreedy = lastRoutePart.endsWith('+}');
+	let adjustedEventParts: string[];
+	if (routeIsGreedy && routeParts.length < eventParts.length) {
+		const excessParts = eventParts.slice(routeParts.length - 1);
+		logger.log('excessParts: ' + excessParts.join(' '));
+		const joinedGreedyValue = excessParts.join('/');
+		logger.log('joinedGreedyValue: ' + joinedGreedyValue);
+		adjustedEventParts = [
+			...eventParts.slice(0, routeParts.length - 1),
+			joinedGreedyValue,
+		];
+	} else {
+		adjustedEventParts = eventParts;
+	}
+
+	logger.log('adjustedEventParts: ' + adjustedEventParts.join(' '));
+
+	if (routeParts.length !== adjustedEventParts.length) {
 		return undefined;
 	}
 
-	const routeEventPairs = zipAll(routeParts, eventParts, '', '');
+	const routeEventPairs = zipAll(routeParts, adjustedEventParts, '', '');
 	const [matchers, literals] = mapPartition(
 		routeEventPairs,
 		([routePart, eventPart]) => {
-			const maybeParamName = routePart.match(/^\{(.*)}$/)?.[1];
+			const maybeParamName = routePart.match(/^\{([^+}]*)\+?}$/)?.[1];
 			return maybeParamName
 				? ([maybeParamName, eventPart] as const)
 				: undefined;
@@ -61,6 +83,7 @@ function matchPath(
 	if (literals.some(([routePart, eventPart]) => routePart !== eventPart)) {
 		return undefined;
 	}
+	logger.log('matchers', matchers);
 	return { params: Object.fromEntries(matchers) };
 }
 

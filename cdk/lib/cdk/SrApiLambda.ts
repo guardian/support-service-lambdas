@@ -27,10 +27,6 @@ type SrApiLambdaProps = SrLambdaProps & {
 	 * of it here or add a public facing fastly enabled domain.
 	 */
 	srRestDomainProps?: SrRestDomainProps;
-	/**
-	 * Set this to false to skip adding the main proxy endpoint
-	 */
-	proxy?: boolean;
 };
 
 const defaultProps = {
@@ -79,11 +75,9 @@ export class SrApiLambda extends SrLambda {
 			},
 		);
 
-		if (props.proxy !== false) {
-			// by doing these explicitly rather than using proxy:true, we can later add specific public resources
-			this.api.root.addMethod('ANY');
-			this.api.root.addResource('{proxy+}').addMethod('ANY');
-		}
+		// by doing these explicitly rather than using proxy:true, we can later add specific public resources
+		this.api.root.addMethod('ANY');
+		this.api.root.addResource('{proxy+}').addMethod('ANY');
 
 		if (!props.isPublic) {
 			const usagePlan = this.api.addUsagePlan('UsagePlan', {

@@ -26,7 +26,7 @@ export class StaffAccess extends SrStack {
 			'oauth for staff only access, set up in https://console.cloud.google.com/apis/credentials',
 		).valueAsString;
 
-		// should be a secret parameter - need to check with devx
+		// this auth system can't be used for anything critical as this is not a SecureString
 		const googleOAuthClientSecret = new SrAppConfigKey(
 			this,
 			'googleOAuthClientSecret',
@@ -67,12 +67,15 @@ export class StaffAccess extends SrStack {
 
 		const userPoolClient = new UserPoolClient(this, 'UserPoolClient', {
 			userPool,
-			generateSecret: true, // you have to manually write to SSM so the lambda can read it
+			/**
+			 * the secret is generated but needs to be manually added to parameter store
+			 * /stage/stack/app/cognitoClientSecret
+			 *
+			 * This could in theory be done in CDK but userPoolClient.userPoolClientSecret requires a CDK lambda asset
+			 * which is missing (not to mention it couldn't be stored as a SecureString for the same reason)
+			 */
+			generateSecret: true,
 			oAuth: {
-				// flows: {
-				// 	authorizationCodeGrant: true,
-				// },
-				// scopes: [OAuthScope.EMAIL, OAuthScope.PROFILE, OAuthScope.OPENID],
 				callbackUrls: [
 					// this is where cognito is prepared to redirect browsers after oauth
 					`https://${domainForStack(this).domainName}/oauth2callback`,
@@ -99,14 +102,8 @@ export class StaffAccess extends SrStack {
 				errorImpact:
 					'staff are getting errors when viewing docs served by our API layer',
 			},
-			proxy: false,
+			isPublic: true,
 		});
-
-		// keep path variables in step with app code
-		lambda.api.root
-			.addResource('{targetApp}')
-			.addResource('{targetPath+}')
-			.addMethod('GET', undefined, { apiKeyRequired: false });
 
 		lambda.api.root
 			.addResource('oauth2callback')
