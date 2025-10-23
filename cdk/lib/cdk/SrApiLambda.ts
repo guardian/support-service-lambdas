@@ -1,6 +1,10 @@
-import { Duration } from 'aws-cdk-lib';
-import type { CognitoUserPoolsAuthorizer } from 'aws-cdk-lib/aws-apigateway';
-import { ApiKeySourceType, LambdaRestApi } from 'aws-cdk-lib/aws-apigateway';
+import { Duration, Fn } from 'aws-cdk-lib';
+import {
+	ApiKeySourceType,
+	CognitoUserPoolsAuthorizer,
+	LambdaRestApi,
+} from 'aws-cdk-lib/aws-apigateway';
+import { UserPool } from 'aws-cdk-lib/aws-cognito';
 import { SrApiGateway5xxAlarm } from './SrApiGateway5xxAlarm';
 import type { SrLambdaProps } from './SrLambda';
 import { getNameWithStage, SrLambda } from './SrLambda';
@@ -39,6 +43,8 @@ const defaultProps = {
 export class SrApiLambda extends SrLambda {
 	public readonly api: LambdaRestApi;
 	readonly domain: SrRestDomain;
+	private authorizer: CognitoUserPoolsAuthorizer | undefined = undefined;
+	private stage: string;
 	constructor(scope: SrStack, id: string, props: SrApiLambdaProps) {
 		const finalProps = {
 			nameSuffix: props.nameSuffix,
@@ -50,6 +56,7 @@ export class SrApiLambda extends SrLambda {
 		};
 
 		super(scope, id, finalProps);
+		this.stage = scope.stage;
 
 		this.api = new LambdaRestApi(
 			this,
@@ -115,15 +122,32 @@ export class SrApiLambda extends SrLambda {
 		}
 	}
 
-	addStaffPath(path: string, authorizer: CognitoUserPoolsAuthorizer) {
+	addStaffPath(path: string) {
+		if (this.authorizer === undefined) {
+			const userPoolId = Fn.importValue(`UserPoolId-${this.stage}`);
+
+			const userPool = UserPool.fromUserPoolId(
+				this,
+				'ImportedUserPool',
+				userPoolId,
+			);
+
+			this.authorizer = new CognitoUserPoolsAuthorizer(
+				this,
+				'CognitoAuthorizer',
+				{
+					cognitoUserPools: [userPool],
+				},
+			);
+		}
 		const protectedResource = this.api.root.addResource(path);
 		protectedResource.addMethod('GET', undefined, {
 			apiKeyRequired: false,
-			authorizer,
+			authorizer: this.authorizer,
 		});
 		protectedResource.addResource('{proxy+}').addMethod('GET', undefined, {
 			apiKeyRequired: false,
-			authorizer,
+			authorizer: this.authorizer,
 		});
 	}
 }

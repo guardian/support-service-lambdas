@@ -1,7 +1,4 @@
 import type { App } from 'aws-cdk-lib';
-import { Fn } from 'aws-cdk-lib';
-import { CognitoUserPoolsAuthorizer } from 'aws-cdk-lib/aws-apigateway';
-import { UserPool } from 'aws-cdk-lib/aws-cognito';
 import {
 	AllowS3CatalogReadPolicy,
 	AllowSqsSendPolicy,
@@ -36,21 +33,6 @@ export class DiscountApi extends SrStack {
 			new AllowSqsSendPolicy(this, `braze-emails`),
 		);
 
-		const userPoolId = Fn.importValue(`UserPoolId-${stage}`);
-
-		const userPool = UserPool.fromUserPoolId(
-			this,
-			'ImportedUserPool',
-			userPoolId,
-		);
-
-		const cognitoAuthorizer = new CognitoUserPoolsAuthorizer(
-			this,
-			'CognitoAuthorizer',
-			{
-				cognitoUserPools: [userPool],
-			},
-		);
-		lambda.addStaffPath(docsPath, cognitoAuthorizer);
+		lambda.addStaffPath(docsPath);
 	}
 }
