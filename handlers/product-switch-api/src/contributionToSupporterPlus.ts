@@ -1,4 +1,5 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
+import { sendToSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
 import type {
 	ChangePlanOrderAction,
 	OrderAction,
@@ -35,7 +36,7 @@ import {
 	zuoraPreviewResponseSchema,
 	zuoraSwitchResponseSchema,
 } from './schemas';
-import { sendToSupporterProductData } from './supporterProductData';
+import { supporterRatePlanItemFromSwitchInformation } from './supporterProductData';
 import type { SwitchInformation } from './switchInformation';
 
 export interface SwitchDiscountResponse {
@@ -77,7 +78,10 @@ export const switchToSupporterPlus = async (
 	await Promise.allSettled([
 		sendThankYouEmail(paidAmount, productSwitchInformation),
 		sendSalesforceTracking(paidAmount, productSwitchInformation),
-		sendToSupporterProductData(productSwitchInformation),
+		sendToSupporterProductData(
+			productSwitchInformation.stage,
+			supporterRatePlanItemFromSwitchInformation(productSwitchInformation),
+		),
 	]);
 	return {
 		message: `Product move completed successfully with subscription number ${productSwitchInformation.subscription.subscriptionNumber} and switch type recurring-contribution-to-supporter-plus`,
