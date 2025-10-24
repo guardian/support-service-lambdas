@@ -1,63 +1,86 @@
-import {
-	BatchWriteItemCommand,
-	DynamoDBClient,
-} from '@aws-sdk/client-dynamodb';
+import { chunkArray } from '@modules/arrayFunctions';
+import { sendBatchMessagesToQueue } from '@modules/aws/sqs';
+import { getIfDefined } from '@modules/nullAndUndefined';
+import { prettyPrint } from '@modules/prettyPrint';
 import { logger } from '@modules/routing/logger';
 import { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 import { parse } from 'csv-parse/sync';
+import dayjs from 'dayjs';
 import * as fs from 'node:fs';
-import { getConfig } from './config';
-import { updateFromIds } from './index';
+
+// This controls which DynamoDB table and SQS queue we write to
+const stage = 'PROD';
+
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-const syncMobilePurchasesToSupporterProductData = async () => {
-	// CSV with columns user_id and subscription_id
+
+export const syncMobilePurchasesToSupporterProductData = async () => {
 	const identityIdAndSubscriptionIdsCsv =
-		'/Users/rupert_bates/Downloads/bq-results-20251022-133858-1761140418036.csv';
+		'/Users/rupert_bates/Downloads/bq-results-20251024-125919-1761310770184.csv';
 	const ids = parse(fs.readFileSync(identityIdAndSubscriptionIdsCsv, 'utf-8'), {
 		columns: true,
 		skip_empty_lines: true,
 	});
+
 	console.log(`Parsed ${ids.length} rows`);
-	const config = await getConfig({
-		stage: 'PROD',
-		stack: 'support',
-		app: 'mobile-purchases-to-supporter-product-data',
-	});
+
+	const batchedRows = chunkArray(ids, 10);
+
 	let count = 0;
-	for (const idRow of ids) {
-		const identityId = idRow['user_id'];
-		const subscriptionId = idRow['subscription_id'];
-		const productId = idRow['product_id'];
-		const contractEffectiveDate = idRow['start_timestamp'];
-		const termEndDate = idRow['end_timestamp'];
-		const supporterProductDataItem: SupporterRatePlanItem = {
-			identityId: identityId,
-			subscriptionName: subscriptionId,
-			productRatePlanId: 'in_app_purchase',
-			productRatePlanName: productId,
-			termEndDate: termEndDate,
-			contractEffectiveDate: contractEffectiveDate,
-		};
-		console.log(
-			`Processing identityId=${identityId} subscriptionId=${subscriptionId} productId=${productId}`,
+	for (const batch of batchedRows) {
+		const supporterRatePlanItems = batch.map((idRow) =>
+			createSupporterRatePlanItem(idRow as Record<string, string>),
 		);
-		await updateFromIds('PROD', config, identityId, subscriptionId);
+		await sendToSupporterProductData(supporterRatePlanItems);
+		count += batch.length;
 		logger.log(
-			`\n----------------------------\nProcessed ${++count} of ${ids.length}\n----------------------------`,
+			`----------------------------
+			Processed ${count} of ${ids.length}
+			----------------------------`,
 		);
 		await sleep(50);
 	}
 };
 
-const writeBatchToDynamo = async () => {
-	const resp = await new DynamoDBClient({}).send(
-		new BatchWriteItemCommand({ RequestItems: requestItems }),
-	);
+const createSupporterRatePlanItem = (
+	idRow: Record<string, string>,
+): SupporterRatePlanItem => {
+	const identityId = idRow['user_id'];
+	const subscriptionId = idRow['subscription_id'];
+	const productId = idRow['product_id'];
+	const contractEffectiveDate = idRow['start_timestamp'];
+	const termEndDate = idRow['end_timestamp'];
+	return {
+		identityId: getIfDefined(identityId, 'identityId missing from CSV row'),
+		subscriptionName: getIfDefined(
+			subscriptionId,
+			'subscriptionId missing from CSV row',
+		),
+		productRatePlanId: 'in_app_purchase',
+		productRatePlanName: getIfDefined(
+			productId,
+			'productRatePlanName missing from CSV row',
+		),
+		termEndDate: zuoraDateFormat(dayjs(termEndDate)),
+		contractEffectiveDate: zuoraDateFormat(dayjs(contractEffectiveDate)),
+	};
+};
 
-	logger.log(
-		'info',
-		`Received BatchWriteItem response batchIndex=${bIndex} attempt=${attempt} body=${JSON.stringify(resp)}`,
-	);
+export const sendToSupporterProductData = async (
+	supporterRatePlanItems: SupporterRatePlanItem[],
+) => {
+	const queueName = `supporter-product-data-${stage}`;
+	const messages = supporterRatePlanItems.map((item, index) => {
+		return {
+			id: item.identityId + '-' + index,
+			body: prettyPrint(item),
+		};
+	});
+
+	return await sendBatchMessagesToQueue({
+		queueName,
+		messages,
+	});
 };
 
 void (async function () {

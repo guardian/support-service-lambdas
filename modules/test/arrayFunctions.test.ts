@@ -1,4 +1,5 @@
 import {
+	chunkArray,
 	groupBy,
 	groupMap,
 	intersection,
@@ -92,5 +93,38 @@ describe('intersection', () => {
 	test('removes duplicates', () => {
 		expect(intersection([1, 2, 2, 3], [2, 3, 3])).toEqual([2, 3]);
 		expect(intersection([2, 3, 3], [1, 2, 2, 3])).toEqual([2, 3]);
+	});
+});
+
+describe('chunkArray', () => {
+	test('splits array into chunks of given size', () => {
+		expect(chunkArray([1, 2, 3, 4, 5], 2)).toEqual([[1, 2], [3, 4], [5]]);
+	});
+
+	test('returns empty array for empty input', () => {
+		expect(chunkArray([], 3)).toEqual([]);
+	});
+
+	test('returns single chunk if size >= array length', () => {
+		expect(chunkArray([1, 2], 5)).toEqual([[1, 2]]);
+	});
+
+	test('throws error if size is zero', () => {
+		expect(() => chunkArray([1, 2, 3], 0)).toThrow(
+			'Size must be greater than 0',
+		);
+	});
+
+	test('throws error if size is negative', () => {
+		expect(() => chunkArray([1, 2, 3], -1)).toThrow(
+			'Size must be greater than 0',
+		);
+	});
+
+	test('works with non-number types', () => {
+		expect(chunkArray(['a', 'b', 'c', 'd'], 2)).toEqual([
+			['a', 'b'],
+			['c', 'd'],
+		]);
 	});
 });
