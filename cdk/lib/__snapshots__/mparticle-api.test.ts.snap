@@ -185,6 +185,9 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
         "Environment": {
           "Variables": {
             "APP": "mparticle-api",
+            "MMA_USER_DELETION_DLQ_URL": {
+              "Ref": "DLQ581697C4",
+            },
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
@@ -414,6 +417,20 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
               "Resource": {
                 "Fn::GetAtt": [
                   "Queue4A7E3555",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "DLQ581697C4",
                   "Arn",
                 ],
               },
@@ -1924,6 +1941,9 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
         "Environment": {
           "Variables": {
             "APP": "mparticle-api",
+            "MMA_USER_DELETION_DLQ_URL": {
+              "Ref": "DLQ581697C4",
+            },
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
@@ -2153,6 +2173,20 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
               "Resource": {
                 "Fn::GetAtt": [
                   "Queue4A7E3555",
+                  "Arn",
+                ],
+              },
+            },
+            {
+              "Action": [
+                "sqs:SendMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "DLQ581697C4",
                   "Arn",
                 ],
               },
