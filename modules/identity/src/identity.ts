@@ -82,16 +82,16 @@ export class OktaTokenHelper {
 			const jwt = await this.verifyAccessToken(authHeader);
 			console.log('Successfully verified access token');
 
-			const claims = jwtClaimsSchema.safeParse(jwt.claims);
-			if (!claims.success) {
+			const parsedClaims = jwtClaimsSchema.safeParse(jwt.claims);
+			if (!parsedClaims.success) {
 				console.log(
-					`Failed to parse JWT claims: ${JSON.stringify(claims)} because of error ${JSON.stringify(claims.error)}`,
+					`Failed to parse JWT claims: ${JSON.stringify(jwt.claims)} because of error ${JSON.stringify(parsedClaims.error)}`,
 				);
 				throw new InvalidTokenError('JWT claims are invalid');
 			}
 			return {
-				identityId: claims.data.legacy_identity_id,
-				email: claims.data.sub,
+				identityId: parsedClaims.data.legacy_identity_id,
+				email: parsedClaims.data.sub,
 			};
 		} catch (err) {
 			console.log(`Failed to verify access token: ${String(err)}`);

@@ -6,7 +6,7 @@ import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import { stageFromEnvironment } from '@modules/stage';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { buildHttpResponse } from './response';
+import { buildErrorResponse, buildHttpResponse } from './response';
 import { getTrialInformation } from './trials';
 
 const stage = stageFromEnvironment();
@@ -38,26 +38,29 @@ export const benefitsIdentityIdHandler = async (
 	event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
 	console.log(`Input is ${JSON.stringify(event)}`);
+	try {
+		const identityId = event.pathParameters?.identityId;
+		if (!identityId) {
+			return {
+				statusCode: 400,
+				body: JSON.stringify({
+					message: 'Identity ID missing from request path',
+				}),
+			};
+		}
 
-	const identityId = event.pathParameters?.identityId;
-	if (!identityId) {
-		return {
-			statusCode: 400,
-			body: JSON.stringify({
-				message: 'Identity ID missing from request path',
-			}),
-		};
+		const userBenefitsResponse = await getUserBenefitsResponse(
+			stage,
+			await productCatalogHelper.get(),
+			identityId,
+		);
+
+		return buildHttpResponse(
+			stage,
+			event.headers['origin'],
+			userBenefitsResponse,
+		);
+	} catch (error) {
+		return buildErrorResponse(error);
 	}
-
-	const userBenefitsResponse = await getUserBenefitsResponse(
-		stage,
-		await productCatalogHelper.get(),
-		identityId,
-	);
-
-	return buildHttpResponse(
-		stage,
-		event.headers['origin'],
-		userBenefitsResponse,
-	);
 };

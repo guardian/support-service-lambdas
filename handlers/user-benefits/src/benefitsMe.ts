@@ -1,4 +1,3 @@
-import { ValidationError } from '@modules/errors';
 import { buildAuthenticate } from '@modules/identity/apiGateway';
 import type { IdentityUserDetails } from '@modules/identity/identity';
 import { Lazy } from '@modules/lazy';
@@ -9,7 +8,7 @@ import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import { stageFromEnvironment } from '@modules/stage';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { buildHttpResponse } from './response';
+import { buildErrorResponse, buildHttpResponse } from './response';
 import { getTrialInformation } from './trials';
 
 const stage = stageFromEnvironment();
@@ -60,16 +59,6 @@ export const benefitsMeHandler = async (
 			userBenefitsResponse,
 		);
 	} catch (error) {
-		console.log('Caught exception with message: ', error);
-		if (error instanceof ValidationError) {
-			return {
-				body: error.message,
-				statusCode: 400,
-			};
-		}
-		return {
-			body: 'Internal server error',
-			statusCode: 500,
-		};
+		return buildErrorResponse(error);
 	}
 };
