@@ -96,6 +96,17 @@ export class MParticleApi extends SrStack {
 			},
 		);
 
+		// Add DLQ URL as environment variable after lambda creation
+		mmaUserDeletionLambda.addEnvironment(
+			'MMA_USER_DELETION_DLQ_URL',
+			mmaUserDeletionLambda.inputDeadLetterQueue.queueUrl,
+		);
+
+		// Grant the lambda permission to send messages to the DLQ
+		mmaUserDeletionLambda.inputDeadLetterQueue.grantSendMessages(
+			mmaUserDeletionLambda,
+		);
+
 		mmaUserDeletionLambda.inputQueue.addToResourcePolicy(
 			new PolicyStatement({
 				effect: Effect.ALLOW,
