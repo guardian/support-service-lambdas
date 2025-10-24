@@ -190,10 +190,6 @@ export class MParticleApi extends SrStack {
 				evaluationPeriods: 1,
 				lambdaFunctionNames: batonLambda.functionName,
 			});
-
-			// Note: SrSqsLambda automatically creates alarms for:
-			// - Lambda errors
-			// - DLQ messages
 		}
 
 		const domain = new SrRestDomain(this, apiGateway.api);
