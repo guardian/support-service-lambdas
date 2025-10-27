@@ -10,7 +10,7 @@ import { zuoraDateFormat } from '@modules/zuora/utils';
 import { parse } from 'csv-parse/sync';
 import dayjs from 'dayjs';
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const syncMobilePurchasesToSupporterProductData = async (
 	stage: Stage,
