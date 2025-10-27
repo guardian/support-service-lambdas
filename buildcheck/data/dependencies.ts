@@ -13,7 +13,7 @@ export const dep = separateDepRecords({
 	'@peculiar/x509': '^1.12.3',
 	'@faker-js/faker': '^9.8.0',
 	'csv-parse': '^5.6.0',
-	'ts-node': 'catalog:',
+	'ts-node': '^10.9.1',
 	'tsconfig-paths': 'catalog:',
 	...awsClients([
 		'client-cloudwatch',

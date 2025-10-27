@@ -1,3 +1,7 @@
+/**
+ * @group integration
+ */
+
 import {
 	getSupporterProductData,
 	sendToSupporterProductData,

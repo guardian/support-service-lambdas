@@ -1,26 +1,25 @@
+import * as fs from 'node:fs';
 import { chunkArray } from '@modules/arrayFunctions';
 import { sendBatchMessagesToQueue } from '@modules/aws/sqs';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
 import { logger } from '@modules/routing/logger';
-import { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
+import type { Stage } from '@modules/stage';
+import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import { parse } from 'csv-parse/sync';
 import dayjs from 'dayjs';
-import * as fs from 'node:fs';
-
-// This controls which DynamoDB table and SQS queue we write to
-const stage = 'PROD';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-export const syncMobilePurchasesToSupporterProductData = async () => {
-	const identityIdAndSubscriptionIdsCsv =
-		'/Users/rupert_bates/Downloads/bq-results-20251024-125919-1761310770184.csv';
-	const ids = parse(fs.readFileSync(identityIdAndSubscriptionIdsCsv, 'utf-8'), {
+export const syncMobilePurchasesToSupporterProductData = async (
+	stage: Stage,
+	csvFile: string,
+) => {
+	const ids = parse(fs.readFileSync(csvFile, 'utf-8'), {
 		columns: true,
 		skip_empty_lines: true,
-	});
+	}) as Array<Record<string, string>>;
 
 	console.log(`Parsed ${ids.length} rows`);
 
@@ -29,9 +28,9 @@ export const syncMobilePurchasesToSupporterProductData = async () => {
 	let count = 0;
 	for (const batch of batchedRows) {
 		const supporterRatePlanItems = batch.map((idRow) =>
-			createSupporterRatePlanItem(idRow as Record<string, string>),
+			createSupporterRatePlanItem(idRow),
 		);
-		await sendToSupporterProductData(supporterRatePlanItems);
+		await sendToSupporterProductData(stage, supporterRatePlanItems);
 		count += batch.length;
 		logger.log(
 			`----------------------------
@@ -67,6 +66,7 @@ const createSupporterRatePlanItem = (
 };
 
 export const sendToSupporterProductData = async (
+	stage: Stage,
 	supporterRatePlanItems: SupporterRatePlanItem[],
 ) => {
 	const queueName = `supporter-product-data-${stage}`;
@@ -84,5 +84,19 @@ export const sendToSupporterProductData = async (
 };
 
 void (async function () {
-	await syncMobilePurchasesToSupporterProductData();
+	const stage = process.argv[2];
+	if (stage !== 'CODE' && stage !== 'PROD') {
+		console.log(
+			'Please provide a valid stage. This will control which Dynamo table and SQS queue are used. Valid options are CODE and PROD',
+		);
+		return;
+	}
+	const csvFile = process.argv[3];
+	if (!csvFile) {
+		console.log(
+			'Please provide an absolute path to a CSV file containing the records to sync',
+		);
+		return;
+	}
+	await syncMobilePurchasesToSupporterProductData(stage, csvFile);
 })();

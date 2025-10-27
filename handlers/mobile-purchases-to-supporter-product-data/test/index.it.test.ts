@@ -3,7 +3,8 @@
  *
  * @group integration
  */
-import { InputEvent, updateFromInputEvent } from '../src';
+import type { InputEvent } from '../src';
+import { fetchSubscriptionAndDoUpdate } from '../src';
 import { getConfig } from '../src/config';
 
 const input: InputEvent = {
@@ -44,6 +45,6 @@ test('fetchSubscriptionAndDoUpdate succeeds', async () => {
 		stack: 'support',
 		app: 'mobile-purchases-to-supporter-product-data',
 	});
-	const result = await updateFromInputEvent('CODE', config, input);
+	const result = await fetchSubscriptionAndDoUpdate('CODE', config, input);
 	expect(result).toBe(undefined);
 });

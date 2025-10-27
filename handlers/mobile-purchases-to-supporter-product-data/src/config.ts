@@ -1,7 +1,7 @@
 import { loadConfig } from '@modules/aws/appConfig';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { logger } from '@modules/routing/logger';
-import { Stage } from '@modules/stage';
+import type { Stage } from '@modules/stage';
 import { z } from 'zod';
 
 const configSchema = z.object({
