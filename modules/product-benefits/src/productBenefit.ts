@@ -1,6 +1,7 @@
 import type { ProductKey } from '@modules/product-catalog/productCatalog';
 import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supporterProductData';
 import dayjs from 'dayjs';
+import type { InAppPurchaseProductKey } from '@modules/product-benefits/inAppPurchase';
 import type { ProductBenefit } from './schemas';
 import { productBenefitListSchema } from './schemas';
 
@@ -20,7 +21,10 @@ export const digitalSubscriptionBenefits = supporterPlusBenefits.concat([
 	'newspaperArchive',
 ]);
 
-export const productBenefitMapping: Record<ProductKey, ProductBenefit[]> = {
+export const productBenefitMapping: Record<
+	ProductKey | InAppPurchaseProductKey,
+	ProductBenefit[]
+> = {
 	GuardianAdLite: ['allowRejectAll'],
 	SupporterPlus: supporterPlusBenefits,
 	DigitalSubscription: digitalSubscriptionBenefits,
@@ -40,6 +44,7 @@ export const productBenefitMapping: Record<ProductKey, ProductBenefit[]> = {
 	GuardianWeeklyZoneC: ['hideSupportMessaging'],
 	Contribution: ['hideSupportMessaging'],
 	OneTimeContribution: ['hideSupportMessaging'],
+	InAppPurchase: ['hideSupportMessaging'],
 };
 
 const itemIsLessThanThreeMonthsOld = (item: SupporterRatePlanItem) =>

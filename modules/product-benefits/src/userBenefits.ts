@@ -9,6 +9,11 @@ import type { SupporterRatePlanItem } from '@modules/supporter-product-data/supp
 import { getSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
 import dayjs from 'dayjs';
 import {
+	inAppPurchaseProductKey,
+	isInAppPurchase,
+} from '@modules/product-benefits/inAppPurchase';
+import type { InAppPurchaseProductKey } from '@modules/product-benefits/inAppPurchase';
+import {
 	allProductBenefits,
 	itemIsValidForProduct,
 	productBenefitMapping,
@@ -19,7 +24,7 @@ export const getUserProducts = async (
 	stage: Stage,
 	productCatalogHelper: ProductCatalogHelper,
 	identityId: string,
-): Promise<ProductKey[]> => {
+): Promise<Array<ProductKey | InAppPurchaseProductKey>> => {
 	const supporterProductDataItems = await getSupporterProductData(
 		stage,
 		identityId,
@@ -34,10 +39,15 @@ export const getUserProducts = async (
 export const getValidUserProducts = (
 	productCatalogHelper: ProductCatalogHelper,
 	supporterProductDataItems: SupporterRatePlanItem[],
-): ProductKey[] =>
+): Array<ProductKey | InAppPurchaseProductKey> =>
 	supporterProductDataItems
 		.filter((item) => dayjs(item.termEndDate) >= dayjs().startOf('day'))
 		.flatMap((item) => {
+			// In app purchases are not currently in the product catalog so we need to handle them separately
+			if (isInAppPurchase(item.productRatePlanId)) {
+				return inAppPurchaseProductKey;
+			}
+
 			const product = productCatalogHelper.findProductDetails(
 				item.productRatePlanId,
 			)?.zuoraProduct;
@@ -82,6 +92,6 @@ export const getUserBenefits = (
 };
 
 export const getUserBenefitsFromUserProducts = (
-	userProducts: ProductKey[],
+	userProducts: Array<ProductKey | InAppPurchaseProductKey>,
 ): ProductBenefit[] =>
 	distinct(userProducts.flatMap((product) => productBenefitMapping[product]));
