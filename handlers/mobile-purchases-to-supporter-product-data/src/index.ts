@@ -1,6 +1,7 @@
 import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { prettyPrint } from '@modules/prettyPrint';
+import { inAppPurchaseProductRatePlanId } from '@modules/product-benefits/inAppPurchase';
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import { stageFromEnvironment } from '@modules/stage';
@@ -62,7 +63,7 @@ export const fetchSubscriptionAndDoUpdate = async (
 		subscriptionId,
 	);
 	if (subscription === undefined) {
-		// There are a large number of records user subscriptions table that do not have a corresponding subscription.
+		// There are a large number of records in the user subscriptions table that do not have a corresponding subscription.
 		// Until we work out exactly why and fix it, we will just log and return.
 		logger.log(
 			`Subscription with ID ${subscriptionId} not found for user ${identityId}`,
@@ -80,7 +81,7 @@ export const fetchSubscriptionAndDoUpdate = async (
 	const supporterProductDataItem: SupporterRatePlanItem = {
 		identityId: identityId,
 		subscriptionName: subscription.subscriptionId,
-		productRatePlanId: 'in_app_purchase',
+		productRatePlanId: inAppPurchaseProductRatePlanId,
 		productRatePlanName: subscription.productId,
 		termEndDate: subscription.to.toISOString(),
 		contractEffectiveDate: subscription.from.toISOString(),
