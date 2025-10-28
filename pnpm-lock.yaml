@@ -6,6 +6,9 @@ settings:
 
 catalogs:
   default:
+    tsconfig-paths:
+      specifier: ^4.2.0
+      version: 4.2.0
     typescript:
       specifier: ^5.6.3
       version: 5.9.2
@@ -213,6 +216,15 @@ importers:
       '@types/aws-lambda':
         specifier: ^8.10.147
         version: 8.10.155
+      csv-parse:
+        specifier: ^5.6.0
+        version: 5.6.0
+      ts-node:
+        specifier: ^10.9.1
+        version: 10.9.2(@types/node@24.7.2)(typescript@5.9.3)
+      tsconfig-paths:
+        specifier: 'catalog:'
+        version: 4.2.0
 
   handlers/mparticle-api:
     dependencies:
