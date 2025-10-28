@@ -86,6 +86,18 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92c0f957220b5d0157299c97a60bbd",
+          },
+        },
+        "id": "2c92c0f85721ff7c01572942235b6d7a",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Monthly": {
         "billingPeriod": "Month",
         "charges": {
@@ -229,6 +241,18 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92c0f957220b5d0157299c97a60bbd",
+          },
+        },
+        "id": "2c92c0f85721ff7c01572942235b6d7a",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Monthly": {
         "billingPeriod": "Month",
         "charges": {
@@ -328,6 +352,18 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92c0f957220b5d0157299c97a60bbd",
+          },
+        },
+        "id": "2c92c0f85721ff7c01572942235b6d7a",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Monthly": {
         "billingPeriod": "Month",
         "charges": {
@@ -412,6 +448,18 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92c0f957220b5d0157299c97a60bbd",
+          },
+        },
+        "id": "2c92c0f85721ff7c01572942235b6d7a",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Quarterly": {
         "billingPeriod": "Quarter",
         "charges": {
@@ -452,6 +500,18 @@ exports[`code Generated product catalog matches snapshot 1`] = `
           "NZD": 392,
           "USD": 240,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92c0f957220b5d0157299c97a60bbd",
+          },
+        },
+        "id": "2c92c0f85721ff7c01572942235b6d7a",
+        "pricing": {},
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
@@ -501,6 +561,18 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92c0f957220b5d0157299c97a60bbd",
+          },
+        },
+        "id": "2c92c0f85721ff7c01572942235b6d7a",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Quarterly": {
         "billingPeriod": "Quarter",
         "charges": {
@@ -528,6 +600,18 @@ exports[`code Generated product catalog matches snapshot 1`] = `
     "customerFacingName": "Newspaper Home Delivery",
     "isDeliveryProduct": true,
     "ratePlans": {
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92c0f957220b5d0157299c97a60bbd",
+          },
+        },
+        "id": "2c92c0f85721ff7c01572942235b6d7a",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Everyday": {
         "billingPeriod": "Month",
         "charges": {
@@ -763,6 +847,18 @@ exports[`code Generated product catalog matches snapshot 1`] = `
     "customerFacingName": "Newspaper Home Delivery",
     "isDeliveryProduct": true,
     "ratePlans": {
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92c0f957220b5d0157299c97a60bbd",
+          },
+        },
+        "id": "2c92c0f85721ff7c01572942235b6d7a",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Everyday": {
         "billingPeriod": "Month",
         "charges": {
@@ -936,6 +1032,18 @@ exports[`code Generated product catalog matches snapshot 1`] = `
     "customerFacingName": "Newspaper Voucher",
     "isDeliveryProduct": true,
     "ratePlans": {
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92c0f957220b5d0157299c97a60bbd",
+          },
+        },
+        "id": "2c92c0f85721ff7c01572942235b6d7a",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Everyday": {
         "billingPeriod": "Month",
         "charges": {
@@ -1208,6 +1316,18 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92c0f957220b5d0157299c97a60bbd",
+          },
+        },
+        "id": "2c92c0f85721ff7c01572942235b6d7a",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Monthly": {
         "billingPeriod": "Month",
         "charges": {
@@ -1272,6 +1392,18 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92c0f957220b5d0157299c97a60bbd",
+          },
+        },
+        "id": "2c92c0f85721ff7c01572942235b6d7a",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Monthly": {
         "billingPeriod": "Month",
         "charges": {
@@ -1322,6 +1454,18 @@ exports[`code Generated product catalog matches snapshot 1`] = `
     "customerFacingName": "Newspaper Subscription Card",
     "isDeliveryProduct": true,
     "ratePlans": {
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92c0f957220b5d0157299c97a60bbd",
+          },
+        },
+        "id": "2c92c0f85721ff7c01572942235b6d7a",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Everyday": {
         "billingPeriod": "Month",
         "charges": {
@@ -1578,6 +1722,18 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92c0f957220b5d0157299c97a60bbd",
+          },
+        },
+        "id": "2c92c0f85721ff7c01572942235b6d7a",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Monthly": {
         "billingPeriod": "Month",
         "charges": {
@@ -1690,6 +1846,18 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92c0f957220b5d0157299c97a60bbd",
+          },
+        },
+        "id": "2c92c0f85721ff7c01572942235b6d7a",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "GuardianWeeklyDomesticMonthly": {
         "billingPeriod": "Month",
         "charges": {
@@ -1799,6 +1967,18 @@ exports[`code Generated product catalog matches snapshot 1`] = `
     "customerFacingName": "Digital + print",
     "isDeliveryProduct": true,
     "ratePlans": {
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92c0f957220b5d0157299c97a60bbd",
+          },
+        },
+        "id": "2c92c0f85721ff7c01572942235b6d7a",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "DomesticAnnual": {
         "billingPeriod": "Annual",
         "charges": {
@@ -2062,6 +2242,18 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92a0fd5345efa10153559e97bb76c6",
+          },
+        },
+        "id": "2c92a0ff5345f9220153559d915d5c26",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Monthly": {
         "billingPeriod": "Month",
         "charges": {
@@ -2205,6 +2397,18 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92a0fd5345efa10153559e97bb76c6",
+          },
+        },
+        "id": "2c92a0ff5345f9220153559d915d5c26",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Monthly": {
         "billingPeriod": "Month",
         "charges": {
@@ -2304,6 +2508,18 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92a0fd5345efa10153559e97bb76c6",
+          },
+        },
+        "id": "2c92a0ff5345f9220153559d915d5c26",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Monthly": {
         "billingPeriod": "Month",
         "charges": {
@@ -2387,6 +2603,18 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92a0fd5345efa10153559e97bb76c6",
+          },
+        },
+        "id": "2c92a0ff5345f9220153559d915d5c26",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Quarterly": {
         "billingPeriod": "Quarter",
         "charges": {
@@ -2426,6 +2654,18 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
           "NZD": 392,
           "USD": 240,
         },
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92a0fd5345efa10153559e97bb76c6",
+          },
+        },
+        "id": "2c92a0ff5345f9220153559d915d5c26",
+        "pricing": {},
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
@@ -2475,6 +2715,18 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92a0fd5345efa10153559e97bb76c6",
+          },
+        },
+        "id": "2c92a0ff5345f9220153559d915d5c26",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Quarterly": {
         "billingPeriod": "Quarter",
         "charges": {
@@ -2502,6 +2754,18 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
     "customerFacingName": "Newspaper Home Delivery",
     "isDeliveryProduct": true,
     "ratePlans": {
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92a0fd5345efa10153559e97bb76c6",
+          },
+        },
+        "id": "2c92a0ff5345f9220153559d915d5c26",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Everyday": {
         "billingPeriod": "Month",
         "charges": {
@@ -2737,6 +3001,18 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
     "customerFacingName": "Newspaper Home Delivery",
     "isDeliveryProduct": true,
     "ratePlans": {
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92a0fd5345efa10153559e97bb76c6",
+          },
+        },
+        "id": "2c92a0ff5345f9220153559d915d5c26",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Everyday": {
         "billingPeriod": "Month",
         "charges": {
@@ -2910,6 +3186,18 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
     "customerFacingName": "Newspaper Voucher",
     "isDeliveryProduct": true,
     "ratePlans": {
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92a0fd5345efa10153559e97bb76c6",
+          },
+        },
+        "id": "2c92a0ff5345f9220153559d915d5c26",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Everyday": {
         "billingPeriod": "Month",
         "charges": {
@@ -3179,6 +3467,18 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92a0fd5345efa10153559e97bb76c6",
+          },
+        },
+        "id": "2c92a0ff5345f9220153559d915d5c26",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Monthly": {
         "billingPeriod": "Month",
         "charges": {
@@ -3243,6 +3543,18 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92a0fd5345efa10153559e97bb76c6",
+          },
+        },
+        "id": "2c92a0ff5345f9220153559d915d5c26",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Monthly": {
         "billingPeriod": "Month",
         "charges": {
@@ -3293,6 +3605,18 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
     "customerFacingName": "Newspaper Subscription Card",
     "isDeliveryProduct": true,
     "ratePlans": {
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92a0fd5345efa10153559e97bb76c6",
+          },
+        },
+        "id": "2c92a0ff5345f9220153559d915d5c26",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Everyday": {
         "billingPeriod": "Month",
         "charges": {
@@ -3546,6 +3870,18 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92a0fd5345efa10153559e97bb76c6",
+          },
+        },
+        "id": "2c92a0ff5345f9220153559d915d5c26",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Monthly": {
         "billingPeriod": "Month",
         "charges": {
@@ -3658,6 +3994,18 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         "termLengthInMonths": 12,
         "termType": "Recurring",
       },
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92a0fd5345efa10153559e97bb76c6",
+          },
+        },
+        "id": "2c92a0ff5345f9220153559d915d5c26",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "Monthly": {
         "billingPeriod": "Month",
         "charges": {
@@ -3745,6 +4093,18 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
     "customerFacingName": "Digital + print",
     "isDeliveryProduct": true,
     "ratePlans": {
+      "Discount": {
+        "billingPeriod": "Month",
+        "charges": {
+          "Percentage": {
+            "id": "2c92a0fd5345efa10153559e97bb76c6",
+          },
+        },
+        "id": "2c92a0ff5345f9220153559d915d5c26",
+        "pricing": {},
+        "termLengthInMonths": 12,
+        "termType": "Recurring",
+      },
       "DomesticAnnual": {
         "billingPeriod": "Annual",
         "charges": {

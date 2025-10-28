@@ -55,6 +55,14 @@ export function isDeliveryProductPurchase(
 	return isDeliveryProduct(productPurchase.product);
 }
 
+export const supportsPromotions = (productKey: ProductKey) => {
+	return (
+		productKey != 'Contribution' &&
+		productKey != 'OneTimeContribution' &&
+		productKey != 'GuardianAdLite'
+	);
+};
+
 // Eventually all but OneTimeContribution will come from a custom field in Zuora's Product Catalog
 const customerFacingNameMapping: Record<ProductKey, string> = {
 	GuardianAdLite: 'Guardian Ad-Lite',
