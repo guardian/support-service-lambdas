@@ -64,7 +64,7 @@ export type PromotionInputFields = {
 	discountProductRatePlanChargeId: string;
 };
 
-function getPromotionInputFields(
+export function getPromotionInputFields(
 	appliedPromotion: AppliedPromotion | undefined,
 	promotions: Promotion[],
 	productRatePlanId: string,
