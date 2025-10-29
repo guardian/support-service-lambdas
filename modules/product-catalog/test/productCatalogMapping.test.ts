@@ -75,6 +75,7 @@ test('All Zuora product rate plan ids are unique', () => {
 		.getAllProductDetailsForBillingSystem('zuora')
 		.concat(prodCatalogHelper.getAllProductDetailsForBillingSystem('zuora'));
 	const productRatePlanIds = allProducts
+		.filter((product) => product.productRatePlan != 'Discount')
 		.map((product) => {
 			return product.id;
 		})
