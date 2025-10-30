@@ -1,68 +1,30 @@
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import { getSubscription } from '@modules/zuora/subscription';
+import { getProductCatalogFromApi } from '@modules/product-catalog/api';
+import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
+
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import { getIfDefined } from '@modules/nullAndUndefined';
 import {
 	frequencyChangeResponseSchema,
 	type FrequencyChangeRequestBody,
-	type FrequencyChangeResponse,
 } from './schemas';
 import { prettyPrint } from '@modules/prettyPrint';
 
 /**
- * Raw billing period string from Zuora charge (can include other values e.g. Quarter) – we filter.
- * @param raw Value to normalize
- * @returns Normalized billing period or undefined
+ * Get the appropriate product rate plan ID for the target billing period
+ * @param rp Rate plan object containing both annual and monthly product rate plan IDs
+ * @param targetBillingPeriod Target billing period
+ * @returns Product rate plan ID for the target billing period
  */
-const normalizeBillingPeriod = (
-	raw?: string,
-): 'Month' | 'Annual' | undefined =>
-	raw === 'Month' || raw === 'Annual' ? raw : undefined;
-
-const performChange = (
-	mode: 'preview' | 'execute',
-	currentRawBillingPeriod: string,
+function getAnnualOrMonthlyRatePlanId(
+	rp: any,
 	targetBillingPeriod: 'Month' | 'Annual',
-): FrequencyChangeResponse => {
-	const currentBillingPeriod = normalizeBillingPeriod(currentRawBillingPeriod);
-
-	if (!currentBillingPeriod) {
-		return {
-			success: false,
-			mode,
-			currentBillingPeriod: 'Month', // Fallback since schema demands a value;
-			targetBillingPeriod: targetBillingPeriod,
-			reasons: [
-				{
-					message: `Unsupported current billing period '${currentRawBillingPeriod}'`,
-				},
-			],
-		};
-	}
-
-	if (currentBillingPeriod === targetBillingPeriod) {
-		return {
-			success: false, // No-op: already on requested billing period.
-			mode,
-			currentBillingPeriod: currentBillingPeriod,
-			targetBillingPeriod: targetBillingPeriod,
-			reasons: [
-				{ message: 'Subscription already on requested billing period' },
-			],
-		};
-	}
-
-	// TODO: Implement actual preview and execute logic with Zuora API calls.
-
-	return {
-		success: true,
-		mode,
-		currentBillingPeriod: currentBillingPeriod,
-		targetBillingPeriod: targetBillingPeriod,
-	};
-};
+) {
+	if (targetBillingPeriod === 'Annual') return rp.annualProductRatePlanId;
+	return rp.monthlyProductRatePlanId;
+}
 
 export const frequencyChangeHandler =
 	(stage: Stage, today: dayjs.Dayjs) =>
@@ -75,15 +37,22 @@ export const frequencyChangeHandler =
 	) => {
 		logger.mutableAddContext(parsed.path.subscriptionNumber);
 		logger.log(`Frequency change request body ${prettyPrint(parsed.body)}`);
+		const todayDate = today.toDate();
 
 		const zuoraClient = await ZuoraClient.create(stage);
 		const subscription = await getSubscription(
 			zuoraClient,
 			parsed.path.subscriptionNumber,
 		);
+		const productCatalog = await getProductCatalogFromApi(stage);
+		const productCatalogHelper = new ProductCatalogHelper(productCatalog);
 
-		const todayDate = today.toDate();
+		logger.log(
+			`Subscription rate plans: ${prettyPrint(subscription.ratePlans)}`,
+		);
 		const candidateCharges = subscription.ratePlans
+			// First, filter to active rate plans only
+			.filter((rp) => rp.lastChangeType !== 'Remove')
 			// Pair each charge with its rate plan for potential future disambiguation (e.g., productName).
 			.flatMap((rp) => rp.ratePlanCharges.map((c) => ({ rp, c })))
 			// Only recurring charges define ongoing billing periods relevant to frequency changes.
@@ -101,29 +70,66 @@ export const frequencyChangeHandler =
 			.filter(
 				({ c }) => c.billingPeriod === 'Month' || c.billingPeriod === 'Annual',
 			);
-		// Simple disambiguation: if multiple, prefer one without discountPercentage; else first.
-		const preferred =
-			candidateCharges.find(({ c }) => !c.discountPercentage) ||
-			candidateCharges[0];
-		const rawBillingPeriod = getIfDefined(
-			preferred?.c.billingPeriod || undefined,
-			'Unable to determine current billing period',
+		if (candidateCharges.length === 0) {
+			logger.log('No candidate charges found for frequency change.');
+			throw new Error(
+				'No active recurring charges eligible for frequency change.',
+			);
+		}
+		if (candidateCharges.length > 1) {
+			logger.log(
+				'Multiple eligible charges found; cannot safely change frequency.',
+				candidateCharges,
+			);
+			throw new Error(
+				'Multiple eligible charges found; cannot safely change frequency.',
+			);
+		}
+
+		const { rp, c } = candidateCharges[0];
+
+		if (c.billingPeriod === parsed.body.targetBillingPeriod) {
+			logger.log(
+				`Charge ${c.id} already has billing period ${c.billingPeriod}, no change needed.`,
+			);
+			return { message: 'Charge already matches target billing period.' };
+		}
+
+		const amendmentBody = {
+			amendments: [
+				{
+					Name: `Switch Billing Frequency: Remove ${c.billingPeriod} plan`,
+					Type: 'RemoveProduct',
+					ContractEffectiveDate: rp.termEndDate || todayDate,
+					CustomerAcceptanceDate: rp.termEndDate || todayDate,
+					ServiceActivationDate: rp.termEndDate || todayDate,
+					RatePlanId: rp.ratePlanId,
+				},
+				{
+					Name: `Switch Billing Frequency: Add ${parsed.body.targetBillingPeriod} plan`,
+					Type: 'NewProduct',
+					ContractEffectiveDate: rp.termEndDate || todayDate,
+					CustomerAcceptanceDate: rp.termEndDate || todayDate,
+					ServiceActivationDate: rp.termEndDate || todayDate,
+					RatePlanData: {
+						RatePlan: {
+							ProductRatePlanId: getAnnualOrMonthlyRatePlanId(
+								rp,
+								parsed.body.targetBillingPeriod,
+							),
+						},
+					},
+				},
+			],
+		};
+		logger.log(
+			`Preparing frequency change from ${c.billingPeriod} to ${parsed.body.targetBillingPeriod} for charge ${c.id} in rate plan ${rp.id}`,
+			amendmentBody,
 		);
 
-		const base = performChange(
-			parsed.body.preview ? 'preview' : 'execute',
-			rawBillingPeriod,
-			parsed.body.targetBillingPeriod,
-		);
-		const enriched: FrequencyChangeResponse =
-			base.mode === 'preview'
-				? {
-						...base,
-						previewInvoices: base.success ? [] : undefined,
-					}
-				: { ...base, invoiceIds: base.success ? [] : undefined };
+		// TODO: Complete the frequency change
 
-		const response = frequencyChangeResponseSchema.parse(enriched);
+		const response = frequencyChangeResponseSchema.parse({} as any);
 		logger.log(
 			`Frequency change ${response.mode} response ${prettyPrint(response)}`,
 		);
