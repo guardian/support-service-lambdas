@@ -20,12 +20,7 @@ export async function upsertPaymentDisputeInSalesforce(
 	try {
 		const url = buildSalesforceUpsertUrl(authResponse, paymentDispute);
 
-		const { Dispute_ID__c, ...paymentDisputeBody } = paymentDispute;
-
-		const options = buildSalesforceUpsertOptions(
-			authResponse,
-			paymentDisputeBody,
-		);
+		const options = buildSalesforceUpsertOptions(authResponse, paymentDispute);
 
 		const response = await fetch(url, options);
 
