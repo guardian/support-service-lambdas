@@ -1,6 +1,5 @@
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
-import { getAccount } from '@modules/zuora/account';
 import { getSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
@@ -10,46 +9,58 @@ import {
 	type FrequencyChangeRequestBody,
 	type FrequencyChangeResponse,
 } from './schemas';
+import { prettyPrint } from '@modules/prettyPrint';
 
-const normaliseBillingPeriod = (
+/**
+ * Raw billing period string from Zuora charge (can include other values e.g. Quarter) – we filter.
+ * @param raw Value to normalize
+ * @returns Normalized billing period or undefined
+ */
+const normalizeBillingPeriod = (
 	raw?: string,
 ): 'Month' | 'Annual' | undefined =>
 	raw === 'Month' || raw === 'Annual' ? raw : undefined;
 
-const buildBaseResponse = (
+const performChange = (
 	mode: 'preview' | 'execute',
-	currentRaw: string,
-	target: 'Month' | 'Annual',
+	currentRawBillingPeriod: string,
+	targetBillingPeriod: 'Month' | 'Annual',
 ): FrequencyChangeResponse => {
-	const current = normaliseBillingPeriod(currentRaw);
-	if (!current) {
+	const currentBillingPeriod = normalizeBillingPeriod(currentRawBillingPeriod);
+
+	if (!currentBillingPeriod) {
 		return {
 			success: false,
 			mode,
-			// default currentBillingPeriod required by schema although unsupported; choose 'Month'
-			currentBillingPeriod: 'Month',
-			targetBillingPeriod: target,
+			currentBillingPeriod: 'Month', // Fallback since schema demands a value;
+			targetBillingPeriod: targetBillingPeriod,
 			reasons: [
-				{ message: `Unsupported current billing period '${currentRaw}'` },
+				{
+					message: `Unsupported current billing period '${currentRawBillingPeriod}'`,
+				},
 			],
 		};
 	}
-	if (current === target) {
+
+	if (currentBillingPeriod === targetBillingPeriod) {
 		return {
-			success: false,
+			success: false, // No-op: already on requested billing period.
 			mode,
-			currentBillingPeriod: current,
-			targetBillingPeriod: target,
+			currentBillingPeriod: currentBillingPeriod,
+			targetBillingPeriod: targetBillingPeriod,
 			reasons: [
 				{ message: 'Subscription already on requested billing period' },
 			],
 		};
 	}
+
+	// TODO: Implement actual preview and execute logic with Zuora API calls.
+
 	return {
 		success: true,
 		mode,
-		currentBillingPeriod: current,
-		targetBillingPeriod: target,
+		currentBillingPeriod: currentBillingPeriod,
+		targetBillingPeriod: targetBillingPeriod,
 	};
 };
 
@@ -63,18 +74,43 @@ export const frequencyChangeHandler =
 		},
 	) => {
 		logger.mutableAddContext(parsed.path.subscriptionNumber);
-		logger.log(`Frequency change request body ${JSON.stringify(parsed.body)}`);
+		logger.log(`Frequency change request body ${prettyPrint(parsed.body)}`);
+
 		const zuoraClient = await ZuoraClient.create(stage);
 		const subscription = await getSubscription(
 			zuoraClient,
 			parsed.path.subscriptionNumber,
 		);
-		await getAccount(zuoraClient, subscription.accountNumber);
+
+		const todayDate = today.toDate();
+		const candidateCharges = subscription.ratePlans
+			// Pair each charge with its rate plan for potential future disambiguation (e.g., productName).
+			.flatMap((rp) => rp.ratePlanCharges.map((c) => ({ rp, c })))
+			// Only recurring charges define ongoing billing periods relevant to frequency changes.
+			.filter(({ c }) => c.type === 'Recurring')
+			// Charge is currently effective.
+			.filter(
+				({ c }) =>
+					c.effectiveStartDate <= todayDate && c.effectiveEndDate >= todayDate,
+			)
+			// Exclude charges whose chargedThroughDate is before today (fully billed/expired).
+			.filter(
+				({ c }) => !c.chargedThroughDate || c.chargedThroughDate >= todayDate,
+			)
+			// Restrict to supported target billing periods.
+			.filter(
+				({ c }) => c.billingPeriod === 'Month' || c.billingPeriod === 'Annual',
+			);
+		// Simple disambiguation: if multiple, prefer one without discountPercentage; else first.
+		const preferred =
+			candidateCharges.find(({ c }) => !c.discountPercentage) ||
+			candidateCharges[0];
 		const rawBillingPeriod = getIfDefined(
-			subscription.ratePlans[0]?.ratePlanCharges[0]?.billingPeriod,
+			preferred?.c.billingPeriod || undefined,
 			'Unable to determine current billing period',
 		);
-		const base = buildBaseResponse(
+
+		const base = performChange(
 			parsed.body.preview ? 'preview' : 'execute',
 			rawBillingPeriod,
 			parsed.body.targetBillingPeriod,
@@ -86,11 +122,10 @@ export const frequencyChangeHandler =
 						previewInvoices: base.success ? [] : undefined,
 					}
 				: { ...base, invoiceIds: base.success ? [] : undefined };
+
 		const response = frequencyChangeResponseSchema.parse(enriched);
 		logger.log(
-			`Frequency change ${response.mode} response ${JSON.stringify(response)}`,
+			`Frequency change ${response.mode} response ${prettyPrint(response)}`,
 		);
-		// today currently unused in stub; retained for future amendment effective date logic
-		void today;
 		return { statusCode: 200, body: JSON.stringify(response) };
 	};
