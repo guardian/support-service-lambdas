@@ -34,6 +34,7 @@
 	},
 	"pnpm": {
 		"overrides": {
+			"typescript-eslint": "^8.46.2",
 			"micromatch>braces": "^3.0.3",
 			"cross-spawn": "^7.0.6",
 			"@babel/helpers@<7.26.10": ">=7.26.10",
