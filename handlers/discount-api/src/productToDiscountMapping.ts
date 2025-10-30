@@ -156,7 +156,7 @@ const Discounts = (stage: Stage) => {
 			'NoRepeats',
 			DataExtensionNames.supporterPlusAnnualDiscountConfirmationEmail,
 		),
-	} as const satisfies { [K in string]: Discount };
+	} as const satisfies Record<string, Discount>;
 };
 
 function ProductToDiscountMapping(stage: Stage): Record<string, Discount> {

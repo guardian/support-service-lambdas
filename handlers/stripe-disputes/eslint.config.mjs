@@ -1,10 +1,10 @@
-import tseslint from 'typescript-eslint';
+import guardian from '@guardian/eslint-config';
 import { defineConfig } from 'eslint/config';
 
 export default defineConfig([
-	tseslint.configs.recommended,
+	guardian.configs.recommended,
 	{
-		extends: [tseslint.configs.recommended],
+		extends: [guardian.configs.recommended],
 		files: ['test/**/*.ts', '**/*.test.ts'],
 		rules: {
 			'@typescript-eslint/no-explicit-any': 'off',

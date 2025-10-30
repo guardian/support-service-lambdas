@@ -14,7 +14,7 @@ export const isSupportedCurrency = (
 	return (CurrencyValues as readonly string[]).includes(maybeCurrency);
 };
 
-const currencyToGlyphMapping: { [C in IsoCurrency]: string } = {
+const currencyToGlyphMapping: Record<IsoCurrency, string> = {
 	GBP: '£',
 	EUR: '€',
 	AUD: 'AU$',
