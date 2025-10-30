@@ -75,12 +75,12 @@ export function getPromotionInputFields(
 		? validatePromotion(promotions, appliedPromotion, productRatePlanId)
 		: undefined;
 
-	if (validatedPromotion !== undefined) {
-		console.log(`Validated promotion is `, validatedPromotion);
-	} else {
+	if (!validatedPromotion) {
 		console.log('No promotion applied');
 		return;
 	}
+	console.log(`Validated promotion is `, validatedPromotion);
+
 	const promotionProductRatePlan = getIfDefined(
 		getDiscountRatePlanFromCatalog(productCatalog, productKey),
 		'No promotion rate plan found in product catalog for product ' + productKey,
