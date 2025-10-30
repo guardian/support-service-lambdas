@@ -75,3 +75,28 @@ export const zuoraGetAmendmentResponseSchema = z.object({
 export type ZuoraGetAmendmentResponse = z.infer<
 	typeof zuoraGetAmendmentResponseSchema
 >;
+
+// Frequency change (monthly <-> annual) request schema.
+export const frequencyChangeRequestSchema = z.object({
+	preview: z.boolean(),
+	targetBillingPeriod: z.enum(['Month', 'Annual'], {
+		description: 'Desired billing period for the subscription after the change',
+	}),
+	csrUserId: z.optional(z.string()),
+	caseId: z.optional(z.string()),
+});
+
+export type FrequencyChangeRequestBody = z.infer<typeof frequencyChangeRequestSchema>;
+
+// Simplified response used for both preview and execution paths of frequency change.
+export const frequencyChangeResponseSchema = z.object({
+	success: z.boolean(),
+	mode: z.enum(['preview', 'execute']),
+	currentBillingPeriod: z.enum(['Month', 'Annual']),
+	targetBillingPeriod: z.enum(['Month', 'Annual']),
+	invoiceIds: z.optional(z.array(z.string())),
+	previewInvoices: z.optional(z.array(zuoraPreviewResponseInvoiceSchema)),
+	reasons: z.optional(z.array(z.object({ message: z.string() }))),
+});
+
+export type FrequencyChangeResponse = z.infer<typeof frequencyChangeResponseSchema>;
