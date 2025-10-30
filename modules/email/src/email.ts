@@ -61,5 +61,4 @@ export const sendEmail = async (
 	});
 	log(`Response from email send was ${prettyPrint(response)}`);
 	return response;
-	console.log('blah');
 };
