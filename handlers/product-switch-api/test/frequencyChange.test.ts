@@ -1,4 +1,7 @@
-import { frequencyChangeRequestSchema, frequencyChangeResponseSchema } from '../src/schemas';
+import {
+	frequencyChangeRequestSchema,
+	frequencyChangeResponseSchema,
+} from '../src/schemas';
 
 describe('frequency change schemas', () => {
 	it('valid preview request', () => {
@@ -10,7 +13,12 @@ describe('frequency change schemas', () => {
 	});
 
 	it('rejects invalid billing period', () => {
-		expect(() => frequencyChangeRequestSchema.parse({ preview: true, targetBillingPeriod: 'Weekly' })).toThrow();
+		expect(() =>
+			frequencyChangeRequestSchema.parse({
+				preview: true,
+				targetBillingPeriod: 'Weekly',
+			}),
+		).toThrow();
 	});
 
 	it('response schema minimal success', () => {

@@ -86,7 +86,9 @@ export const frequencyChangeRequestSchema = z.object({
 	caseId: z.optional(z.string()),
 });
 
-export type FrequencyChangeRequestBody = z.infer<typeof frequencyChangeRequestSchema>;
+export type FrequencyChangeRequestBody = z.infer<
+	typeof frequencyChangeRequestSchema
+>;
 
 // Simplified response used for both preview and execution paths of frequency change.
 export const frequencyChangeResponseSchema = z.object({
@@ -100,4 +102,6 @@ export const frequencyChangeResponseSchema = z.object({
 	reasons: z.optional(z.array(z.object({ message: z.string() }))),
 });
 
-export type FrequencyChangeResponse = z.infer<typeof frequencyChangeResponseSchema>;
+export type FrequencyChangeResponse = z.infer<
+	typeof frequencyChangeResponseSchema
+>;
