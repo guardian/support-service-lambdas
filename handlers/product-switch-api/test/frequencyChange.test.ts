@@ -10,7 +10,6 @@ describe('frequency change schemas', () => {
 	});
 
 	it('rejects invalid billing period', () => {
-		// @ts-expect-error invalid value
 		expect(() => frequencyChangeRequestSchema.parse({ preview: true, targetBillingPeriod: 'Weekly' })).toThrow();
 	});
 
