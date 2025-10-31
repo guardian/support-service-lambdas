@@ -1,18 +1,14 @@
+import { prettyPrint } from '@modules/prettyPrint';
+import { getProductCatalogFromApi } from '@modules/product-catalog/api';
+import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import { getSubscription } from '@modules/zuora/subscription';
-import { getProductCatalogFromApi } from '@modules/product-catalog/api';
-import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
-
-import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import dayjs from 'dayjs';
-import {
-	frequencyChangeResponseSchema,
-	type FrequencyChangeRequestBody,
-} from './schemas';
-import { prettyPrint } from '@modules/prettyPrint';
 import type { RatePlan } from '@modules/zuora/types/objects/subscription';
-import { APIGatewayProxyResult } from 'aws-lambda';
+import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type dayjs from 'dayjs';
+import { frequencyChangeResponseSchema } from './schemas';
+import type { FrequencyChangeRequestBody } from './schemas';
 
 /**
  * Get the appropriate product rate plan Id for the target billing period
@@ -43,14 +39,14 @@ function getTargetRatePlanId(
 	}
 	logger.log(`Found product details: ${prettyPrint(productDetails)}`);
 
-	// const targetRatePlanKey: 'Monthly' | 'Annual' =
-	// 	targetBillingPeriod === 'Month' ? 'Monthly' : 'Annual';
+	// TODO:delete comment - Derive target rate plan key based on requested billing period
+	const targetRatePlanKey: 'Monthly' | 'Annual' =
+		targetBillingPeriod === 'Month' ? 'Monthly' : 'Annual';
+	logger.log(
+		`Determined target rate plan key ${targetRatePlanKey} for requested billing period ${targetBillingPeriod}`,
+	);
 
-	// const targetProductRatePlan = productCatalogHelper.getProductRatePlan(
-	// 	productDetails.id,
-	// 	'Monthly',
-	// );
-	// return targetProductRatePlan.id;
+	// TODO:delete comment - Placeholder implementation until catalog logic added
 	return '000-000';
 }
 
@@ -62,7 +58,7 @@ export const frequencyChangeHandler =
 			path: { subscriptionNumber: string };
 			body: FrequencyChangeRequestBody;
 		},
-	): Promise<APIGatewayProxyResult> => {
+	): Promise<{ statusCode: number; body: string }> => {
 		logger.mutableAddContext(parsed.path.subscriptionNumber);
 		logger.log(`Frequency change request body ${prettyPrint(parsed.body)}`);
 		const todayDate = today.toDate();

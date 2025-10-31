@@ -3,10 +3,16 @@ import type { Stage } from '@modules/stage';
 import type { Handler } from 'aws-lambda';
 import dayjs from 'dayjs';
 import { z } from 'zod';
-import { contributionToSupporterPlusEndpoint } from './productSwitchEndpoint';
 import { frequencyChangeHandler } from './frequencyChange';
-import type { ProductSwitchRequestBody, FrequencyChangeRequestBody } from './schemas';
-import { productSwitchRequestSchema, frequencyChangeRequestSchema } from './schemas';
+import { contributionToSupporterPlusEndpoint } from './productSwitchEndpoint';
+import type {
+	FrequencyChangeRequestBody,
+	ProductSwitchRequestBody,
+} from './schemas';
+import {
+	frequencyChangeRequestSchema,
+	productSwitchRequestSchema,
+} from './schemas';
 
 const stage = process.env.STAGE as Stage;
 
