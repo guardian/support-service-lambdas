@@ -13,7 +13,7 @@
 		"watch": "chokidar 'src/**/*.ts' -c 'pnpm fix-formatting'"
 	},
 	"devDependencies": {
-		"@types/aws-lambda": "^8.10.147",
+		"@types/aws-lambda": "^8.10.157",
 		"@types/aws-sdk": "^2.7.4"
 	},
 	"dependencies": {

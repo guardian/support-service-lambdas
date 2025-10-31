@@ -12,6 +12,6 @@
 		"fix-formatting": "prettier --write **.ts"
 	},
 	"dependencies": {
-		"@types/aws-lambda": "^8.10.147"
+		"@types/aws-lambda": "^8.10.157"
 	}
 }
