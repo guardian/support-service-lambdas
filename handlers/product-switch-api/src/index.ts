@@ -3,9 +3,16 @@ import type { Stage } from '@modules/stage';
 import type { Handler } from 'aws-lambda';
 import dayjs from 'dayjs';
 import { z } from 'zod';
+import { frequencyChangeHandler } from './frequencyChange';
 import { contributionToSupporterPlusEndpoint } from './productSwitchEndpoint';
-import type { ProductSwitchRequestBody } from './schemas';
-import { productSwitchRequestSchema } from './schemas';
+import type {
+	FrequencyChangeRequestBody,
+	ProductSwitchRequestBody,
+} from './schemas';
+import {
+	frequencyChangeRequestSchema,
+	productSwitchRequestSchema,
+} from './schemas';
 
 const stage = process.env.STAGE as Stage;
 
@@ -29,6 +36,15 @@ export const handler: Handler = Router([
 		parser: {
 			path: pathParserSchema,
 			body: productSwitchRequestSchema,
+		},
+	}),
+	createRoute<PathParser, FrequencyChangeRequestBody>({
+		httpMethod: 'POST',
+		path: '/product-switch/frequency/{subscriptionNumber}',
+		handler: frequencyChangeHandler(stage, dayjs()),
+		parser: {
+			path: pathParserSchema,
+			body: frequencyChangeRequestSchema,
 		},
 	}),
 ]);
