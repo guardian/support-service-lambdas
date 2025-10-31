@@ -7,27 +7,23 @@ import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import {
-	frequencyChangeResponseSchema,
 	type FrequencyChangeRequestBody,
 } from './schemas';
 import { prettyPrint } from '@modules/prettyPrint';
 import type { RatePlan } from '@modules/zuora/types/objects/subscription';
-import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 
 /**
- * Get the appropriate product rate plan ID for the target billing period
+ * Get the appropriate product rate plan Id for the target billing period
  * Maps billing period to the corresponding rate plan key in the product catalog
- * and retrieves the product rate plan ID for that billing period.
+ * and retrieves the product rate plan Id for that billing period.
  *
- * @param productCatalog The product catalog
  * @param productCatalogHelper Helper to find product details
  * @param currentRatePlan Current rate plan from the subscription
  * @param targetBillingPeriod Target billing period ('Month' or 'Annual')
- * @returns Product rate plan ID for the target billing period
+ * @returns Product rate plan Id for the target billing period
  * @throws Error if product details cannot be found or target rate plan doesn't exist
  */
-function getAnnualOrMonthlyRatePlanId(
-	productCatalog: ProductCatalog,
+function getTargetRatePlanId(
 	productCatalogHelper: ProductCatalogHelper,
 	currentRatePlan: RatePlan,
 	targetBillingPeriod: 'Month' | 'Annual',
@@ -35,27 +31,25 @@ function getAnnualOrMonthlyRatePlanId(
 	const productDetails = productCatalogHelper.findProductDetails(
 		currentRatePlan.productRatePlanId,
 	);
-
 	if (!productDetails) {
+		logger.log(
+			`Product details not found for product rate plan Id: ${currentRatePlan.productRatePlanId}`,
+		);
 		throw new Error(
-			`Product details not found for rate plan ID: ${currentRatePlan.productRatePlanId}`,
+			`Product details not found for product rate plan Id: ${currentRatePlan.productRatePlanId}`,
 		);
 	}
+	logger.log(`Found product details: ${prettyPrint(productDetails)}`);
 
-	const targetRatePlanKey = targetBillingPeriod === 'Month' ? 'Monthly' : 'Annual';
-	const product = productCatalog[productDetails.zuoraProduct];
-	
-	if (!(targetRatePlanKey in product.ratePlans)) {
-		throw new Error(
-			`Target rate plan ${targetRatePlanKey} not found for product ${productDetails.zuoraProduct}`,
-		);
-	}
+	// const targetRatePlanKey: 'Monthly' | 'Annual' =
+	// 	targetBillingPeriod === 'Month' ? 'Monthly' : 'Annual';
 
-	const targetRatePlan = product.ratePlans[
-		targetRatePlanKey as keyof typeof product.ratePlans
-	] as { id: string };
-	
-	return targetRatePlan.id;
+	// const targetProductRatePlan = productCatalogHelper.getProductRatePlan(
+	// 	productDetails.id,
+	// 	'Monthly',
+	// );
+	// return targetProductRatePlan.id;
+	return '000-000';
 }
 
 export const frequencyChangeHandler =
@@ -86,21 +80,26 @@ export const frequencyChangeHandler =
 			// First, filter to active rate plans only
 			.filter((rp) => rp.lastChangeType !== 'Remove')
 			// Pair each charge with its rate plan for potential future disambiguation (e.g., productName).
-			.flatMap((rp) => rp.ratePlanCharges.map((c) => ({ ratePlan: rp, charge: c })))
+			.flatMap((rp) =>
+				rp.ratePlanCharges.map((c) => ({ ratePlan: rp, charge: c })),
+			)
 			// Only recurring charges define ongoing billing periods relevant to frequency changes.
 			.filter(({ charge }) => charge.type === 'Recurring')
 			// Charge is currently effective.
 			.filter(
 				({ charge }) =>
-					charge.effectiveStartDate <= todayDate && charge.effectiveEndDate >= todayDate,
+					charge.effectiveStartDate <= todayDate &&
+					charge.effectiveEndDate >= todayDate,
 			)
 			// Exclude charges whose chargedThroughDate is before today (fully billed/expired).
 			.filter(
-				({ charge }) => !charge.chargedThroughDate || charge.chargedThroughDate >= todayDate,
+				({ charge }) =>
+					!charge.chargedThroughDate || charge.chargedThroughDate >= todayDate,
 			)
 			// Restrict to supported target billing periods.
 			.filter(
-				({ charge }) => charge.billingPeriod === 'Month' || charge.billingPeriod === 'Annual',
+				({ charge }) =>
+					charge.billingPeriod === 'Month' || charge.billingPeriod === 'Annual',
 			);
 		if (candidateCharges.length === 0) {
 			logger.log('No candidate charges found for frequency change.');
@@ -147,8 +146,7 @@ export const frequencyChangeHandler =
 					ServiceActivationDate: subscription.termEndDate,
 					RatePlanData: {
 						RatePlan: {
-							ProductRatePlanId: getAnnualOrMonthlyRatePlanId(
-								productCatalog,
+							ProductRatePlanId: getTargetRatePlanId(
 								productCatalogHelper,
 								ratePlan,
 								parsed.body.targetBillingPeriod,
@@ -165,9 +163,10 @@ export const frequencyChangeHandler =
 
 		// TODO: Complete the frequency change
 
-		const response = frequencyChangeResponseSchema.parse({} as any);
-		logger.log(
-			`Frequency change ${response.mode} response ${prettyPrint(response)}`,
-		);
-		return { statusCode: 200, body: JSON.stringify(response) };
+		// const response = frequencyChangeResponseSchema.parse({} as any);
+		// logger.log(
+		// 	`Frequency change ${response.mode} response ${prettyPrint(response)}`,
+		// );
+		// return { statusCode: 200, body: JSON.stringify(response) };
+		return { statusCode: 200, body: JSON.stringify({ msg: 'ok' }) };
 	};
