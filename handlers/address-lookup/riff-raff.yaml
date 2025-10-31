@@ -1,0 +1,25 @@
+stacks:
+- support
+regions:
+- eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  address-lookup-cloudformation:
+    type: cloud-formation
+    app: address-lookup
+    parameters:
+      templateStagePaths:
+        CODE: address-lookup-CODE.template.json
+        PROD: address-lookup-PROD.template.json
+
+  address-lookup:
+    type: aws-lambda
+    parameters:
+      fileName: address-lookup.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+      - address-lookup-
+    dependencies: [address-lookup-cloudformation]

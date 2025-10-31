@@ -45,6 +45,7 @@ jobs:
       fail-fast: false
       matrix:
         subproject:
+          - address-lookup
           - user-benefits
           - press-reader-entitlements
           - ticket-tailor-webhook

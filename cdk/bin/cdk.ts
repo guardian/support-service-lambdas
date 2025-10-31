@@ -1,5 +1,6 @@
 import 'source-map-support/register';
 import { App } from 'aws-cdk-lib';
+import { AddressLookup } from '../lib/address-lookup';
 import { AlarmsHandler } from '../lib/alarms-handler';
 import { BatchEmailSender } from '../lib/batch-email-sender';
 import { CancellationSfCasesApi } from '../lib/cancellation-sf-cases-api';
@@ -138,6 +139,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	GenerateProductCatalog,
 	TicketTailorWebhook,
 	MobilePurchasesToSupporterProductData,
+	AddressLookup,
 ];
 
 // generate all stacks for all stages
