@@ -33,7 +33,7 @@ Each lambda is a separate [pnpm workspace](https://pnpm.io/workspaces) which all
 dependencies for all projects, add dependencies between projects build all projects at once and generally facilitates 
 the management of a monorepo
 
-Linting rules (`.eslintrc.json`), formatting rules (`.prettierrc`) and Typescript configuration (`tsconfig.json`) are all defined at the root
+Linting rules (`.eslint.config.mjs`), formatting rules (`.prettierrc`) and Typescript configuration (`tsconfig.json`) are all defined at the root
 of the repository and use standard Guardian configuration where available. 
 
 These can also be overridden at a per workspace level,

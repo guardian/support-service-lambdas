@@ -1,11 +1,10 @@
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import type { ProductBillingPeriod } from '@modules/product-catalog/productBillingPeriods';
 
-export const supporterPlusAmountBands: {
-	[C in IsoCurrency]: {
-		[K in ProductBillingPeriod<'SupporterPlus'>]: { min: number; max: number };
-	};
-} = {
+export const supporterPlusAmountBands: Record<
+	IsoCurrency,
+	Record<ProductBillingPeriod<'SupporterPlus'>, { min: number; max: number }>
+> = {
 	GBP: {
 		Month: { min: 10, max: 166 },
 		Annual: { min: 95, max: 2000 },
