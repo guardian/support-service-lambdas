@@ -19,18 +19,19 @@ import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
  * Maps billing period to the corresponding rate plan key in the product catalog
  * and retrieves the product rate plan ID for that billing period.
  *
- * @param productCatalogHelper Helper to access the product catalog
+ * @param productCatalog The product catalog
+ * @param productCatalogHelper Helper to find product details
  * @param currentRatePlan Current rate plan from the subscription
  * @param targetBillingPeriod Target billing period ('Month' or 'Annual')
  * @returns Product rate plan ID for the target billing period
  * @throws Error if product details cannot be found or target rate plan doesn't exist
  */
 function getAnnualOrMonthlyRatePlanId(
+	productCatalog: ProductCatalog,
 	productCatalogHelper: ProductCatalogHelper,
 	currentRatePlan: RatePlan,
 	targetBillingPeriod: 'Month' | 'Annual',
 ): string {
-	// Find the product details from the current rate plan's productRatePlanId
 	const productDetails = productCatalogHelper.findProductDetails(
 		currentRatePlan.productRatePlanId,
 	);
@@ -41,20 +42,19 @@ function getAnnualOrMonthlyRatePlanId(
 		);
 	}
 
-	// Map billing period to rate plan key: 'Month' -> 'Monthly', 'Annual' -> 'Annual'
 	const targetRatePlanKey = targetBillingPeriod === 'Month' ? 'Monthly' : 'Annual';
-
-	// Get the target rate plan from the catalog using the product and rate plan key
-	const productCatalog = (productCatalogHelper as any).catalogData as ProductCatalog;
 	const product = productCatalog[productDetails.zuoraProduct];
 	
-	if (!product || !product.ratePlans || !(targetRatePlanKey in product.ratePlans)) {
+	if (!(targetRatePlanKey in product.ratePlans)) {
 		throw new Error(
 			`Target rate plan ${targetRatePlanKey} not found for product ${productDetails.zuoraProduct}`,
 		);
 	}
 
-	const targetRatePlan = product.ratePlans[targetRatePlanKey as keyof typeof product.ratePlans] as { id: string };
+	const targetRatePlan = product.ratePlans[
+		targetRatePlanKey as keyof typeof product.ratePlans
+	] as { id: string };
+	
 	return targetRatePlan.id;
 }
 
@@ -148,6 +148,7 @@ export const frequencyChangeHandler =
 					RatePlanData: {
 						RatePlan: {
 							ProductRatePlanId: getAnnualOrMonthlyRatePlanId(
+								productCatalog,
 								productCatalogHelper,
 								ratePlan,
 								parsed.body.targetBillingPeriod,
