@@ -82,7 +82,7 @@ export class SrLambda extends GuLambdaFunction {
  */
 export function getNameWithStage(
 	identity: Identity,
-	nameSuffix?: string | undefined,
+	nameSuffix?: string,
 	resourceName?: string,
 ) {
 	return [identity.app, nameSuffix, resourceName, identity.stage]
