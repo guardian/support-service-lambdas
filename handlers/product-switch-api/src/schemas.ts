@@ -92,8 +92,9 @@ export type FrequencyChangeRequestBody = z.infer<typeof frequencyChangeRequestSc
 export const frequencyChangeResponseSchema = z.object({
 	success: z.boolean(),
 	mode: z.enum(['preview', 'execute']),
-	currentBillingPeriod: z.enum(['Month', 'Annual']),
-	targetBillingPeriod: z.enum(['Month', 'Annual']),
+	previousBillingPeriod: z.enum(['Month', 'Annual']),
+	newBillingPeriod: z.enum(['Month', 'Annual']),
+	//
 	invoiceIds: z.optional(z.array(z.string())),
 	previewInvoices: z.optional(z.array(zuoraPreviewResponseInvoiceSchema)),
 	reasons: z.optional(z.array(z.object({ message: z.string() }))),

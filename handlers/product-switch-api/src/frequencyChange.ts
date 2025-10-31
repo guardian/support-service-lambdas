@@ -7,10 +7,12 @@ import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import {
+	frequencyChangeResponseSchema,
 	type FrequencyChangeRequestBody,
 } from './schemas';
 import { prettyPrint } from '@modules/prettyPrint';
 import type { RatePlan } from '@modules/zuora/types/objects/subscription';
+import { APIGatewayProxyResult } from 'aws-lambda';
 
 /**
  * Get the appropriate product rate plan Id for the target billing period
@@ -60,7 +62,7 @@ export const frequencyChangeHandler =
 			path: { subscriptionNumber: string };
 			body: FrequencyChangeRequestBody;
 		},
-	) => {
+	): Promise<APIGatewayProxyResult> => {
 		logger.mutableAddContext(parsed.path.subscriptionNumber);
 		logger.log(`Frequency change request body ${prettyPrint(parsed.body)}`);
 		const todayDate = today.toDate();
@@ -125,7 +127,12 @@ export const frequencyChangeHandler =
 			logger.log(
 				`Charge ${charge.id} already has billing period ${charge.billingPeriod}, no change needed.`,
 			);
-			return { message: 'Charge already matches target billing period.' };
+			return {
+				statusCode: 205,
+				body: JSON.stringify({
+					message: 'Charge already matches target billing period.',
+				}),
+			};
 		}
 
 		const amendmentBody = {
@@ -161,12 +168,17 @@ export const frequencyChangeHandler =
 			amendmentBody,
 		);
 
-		// TODO: Complete the frequency change
+		// TODO: Execute the frequency change OR preview
 
-		// const response = frequencyChangeResponseSchema.parse({} as any);
-		// logger.log(
-		// 	`Frequency change ${response.mode} response ${prettyPrint(response)}`,
-		// );
-		// return { statusCode: 200, body: JSON.stringify(response) };
-		return { statusCode: 200, body: JSON.stringify({ msg: 'ok' }) };
+		const response = {
+			success: true,
+			mode: parsed.body.preview ? 'preview' : 'execute',
+			currentBillingPeriod: charge.billingPeriod,
+			targetBillingPeriod: parsed.body.targetBillingPeriod,
+		};
+		frequencyChangeResponseSchema.parse(response);
+		logger.log(
+			`Frequency change ${response.mode} response ${prettyPrint(response)}`,
+		);
+		return { statusCode: 201, body: JSON.stringify(response) };
 	};
