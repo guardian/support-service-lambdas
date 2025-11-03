@@ -276,6 +276,7 @@ lazy val `google-bigquery` = library(
 )
   .settings(
     libraryDependencies ++= Seq(googleBigQuery, playJson) ++ logging,
+    dependencyOverrides += grpcNettyOverride,
   )
 
 lazy val `zuora-baton` = library(
