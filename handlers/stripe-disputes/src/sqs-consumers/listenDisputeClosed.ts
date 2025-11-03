@@ -1,5 +1,6 @@
 import type { Logger } from '@modules/routing/logger';
 import { stageFromEnvironment } from '@modules/stage';
+import { ZuoraError } from '@modules/zuora/errors';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ListenDisputeClosedRequestBody } from '../dtos';
 import type { ZuoraInvoiceFromStripeChargeIdResult } from '../interfaces';
@@ -71,8 +72,21 @@ export async function handleListenDisputeClosed(
 			await cancelSubscriptionService(logger, zuoraClient, subscription);
 		}
 	} catch (zuoraError) {
-		logger.error('Error during Zuora operations:', zuoraError);
-		throw zuoraError;
+		// Check if this is the "transaction already processed" error
+		// This happens when the payment was already refunded before the dispute
+		if (
+			zuoraError instanceof ZuoraError &&
+			zuoraError.zuoraErrorDetails.some((detail) => detail.code === '66000030')
+		) {
+			logger.log(
+				`Payment or invoice already processed for dispute ${disputeId}. This is expected when a refund was issued before the dispute. Salesforce case has been created. Skipping remaining Zuora operations.`,
+			);
+			// Don't throw - the Salesforce case was already created successfully
+			// This is valid customer behavior (refund requested, then bank dispute)
+		} else {
+			logger.error('Error during Zuora operations:', zuoraError);
+			throw zuoraError;
+		}
 	}
 
 	logger.log(`Successfully processed dispute closure for dispute ${disputeId}`);
