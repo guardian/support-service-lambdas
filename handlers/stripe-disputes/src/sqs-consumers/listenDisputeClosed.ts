@@ -48,45 +48,56 @@ export async function handleListenDisputeClosed(
 		JSON.stringify(upsertSalesforceObjectResponse),
 	);
 
-	try {
-		const subscription = await getSubscriptionService(
-			logger,
-			zuoraClient,
-			invoiceFromZuora.SubscriptionNumber,
-		);
+	const subscription = await getSubscriptionService(
+		logger,
+		zuoraClient,
+		invoiceFromZuora.SubscriptionNumber,
+	);
 
-		if (subscription) {
+	if (subscription) {
+		// Try to reject payment - may fail if already refunded
+		try {
 			await rejectPaymentService(
 				logger,
 				zuoraClient,
 				invoiceFromZuora.paymentPaymentNumber,
 			);
+		} catch (error) {
+			if (
+				error instanceof ZuoraError &&
+				error.zuoraErrorDetails.some((detail) => detail.code === '66000030')
+			) {
+				logger.log(
+					`Payment already processed (likely refunded before dispute). Continuing with remaining operations.`,
+				);
+			} else {
+				throw error;
+			}
+		}
 
+		// Try to write off invoice - may fail if already processed
+		try {
 			await writeOffInvoiceService(
 				logger,
 				zuoraClient,
 				invoiceFromZuora.InvoiceId,
 				disputeId,
 			);
+		} catch (error) {
+			if (
+				error instanceof ZuoraError &&
+				error.zuoraErrorDetails.some((detail) => detail.code === '66000030')
+			) {
+				logger.log(
+					`Invoice already processed (likely written off before dispute). Continuing with remaining operations.`,
+				);
+			} else {
+				throw error;
+			}
+		}
 
-			await cancelSubscriptionService(logger, zuoraClient, subscription);
-		}
-	} catch (zuoraError) {
-		// Check if this is the "transaction already processed" error
-		// This happens when the payment was already refunded before the dispute
-		if (
-			zuoraError instanceof ZuoraError &&
-			zuoraError.zuoraErrorDetails.some((detail) => detail.code === '66000030')
-		) {
-			logger.log(
-				`Payment or invoice already processed for dispute ${disputeId}. This is expected when a refund was issued before the dispute. Salesforce case has been created. Skipping remaining Zuora operations.`,
-			);
-			// Don't throw - the Salesforce case was already created successfully
-			// This is valid customer behavior (refund requested, then bank dispute)
-		} else {
-			logger.error('Error during Zuora operations:', zuoraError);
-			throw zuoraError;
-		}
+		// Always cancel subscription for disputes, even if payment/invoice already processed
+		await cancelSubscriptionService(logger, zuoraClient, subscription);
 	}
 
 	logger.log(`Successfully processed dispute closure for dispute ${disputeId}`);
