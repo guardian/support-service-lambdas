@@ -55,6 +55,8 @@ export async function handleListenDisputeClosed(
 	);
 
 	if (subscription) {
+		let shouldWriteOffInvoice = true;
+
 		// Try to reject payment - may fail if already refunded
 		try {
 			await rejectPaymentService(
@@ -68,35 +70,26 @@ export async function handleListenDisputeClosed(
 				error.zuoraErrorDetails.some((detail) => detail.code === '66000030')
 			) {
 				logger.log(
-					`Payment already processed (likely refunded before dispute). Continuing with remaining operations.`,
+					`Payment already processed (likely refunded before dispute). Skipping invoice write-off.`,
 				);
+				// Skip writeOffInvoice - it will fail because there's no rejected payment
+				shouldWriteOffInvoice = false;
 			} else {
 				throw error;
 			}
 		}
 
-		// Try to write off invoice - may fail if already processed
-		try {
+		// Only write off invoice if payment rejection succeeded
+		if (shouldWriteOffInvoice) {
 			await writeOffInvoiceService(
 				logger,
 				zuoraClient,
 				invoiceFromZuora.InvoiceId,
 				disputeId,
 			);
-		} catch (error) {
-			if (
-				error instanceof ZuoraError &&
-				error.zuoraErrorDetails.some((detail) => detail.code === '66000030')
-			) {
-				logger.log(
-					`Invoice already processed (likely written off before dispute). Continuing with remaining operations.`,
-				);
-			} else {
-				throw error;
-			}
 		}
 
-		// Always cancel subscription for disputes, even if payment/invoice already processed
+		// Always cancel subscription for disputes, even if payment already processed
 		await cancelSubscriptionService(logger, zuoraClient, subscription);
 	}
 

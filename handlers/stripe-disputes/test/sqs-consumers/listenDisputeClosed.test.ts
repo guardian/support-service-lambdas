@@ -236,6 +236,10 @@ describe('handleListenDisputeClosed', () => {
 			const mockRejectPayment = jest.mocked(
 				require('../../src/services/rejectPaymentService').rejectPaymentService,
 			);
+			const mockWriteOffInvoice = jest.mocked(
+				require('../../src/services/writeOffInvoiceService')
+					.writeOffInvoiceService,
+			);
 			const mockCancelSubscription = jest.mocked(
 				require('../../src/services/cancelSubscriptionService')
 					.cancelSubscriptionService,
@@ -261,8 +265,10 @@ describe('handleListenDisputeClosed', () => {
 			expect(result).not.toBeNull();
 			expect(result!.success).toBe(true);
 			expect(mockLogger.log).toHaveBeenCalledWith(
-				'Payment already processed (likely refunded before dispute). Continuing with remaining operations.',
+				'Payment already processed (likely refunded before dispute). Skipping invoice write-off.',
 			);
+			// Should NOT try to write off invoice (would fail anyway)
+			expect(mockWriteOffInvoice).not.toHaveBeenCalled();
 			// Most important: subscription should still be cancelled
 			expect(mockCancelSubscription).toHaveBeenCalled();
 		});
