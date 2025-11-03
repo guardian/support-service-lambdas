@@ -634,13 +634,13 @@ lazy val `product-move-api` = lambdaProject(
     awsSQS,
     scalatest,
     "com.softwaremill.sttp.client3" %% "zio-json" % sttpVersion,
-    "dev.zio" %% "zio-logging-slf4j" % "2.5.0",
+    "dev.zio" %% "zio-logging-slf4j" % "2.5.1",
     "dev.zio" %% "zio-test" % zio2Version % Test,
     "dev.zio" %% "zio-test-sbt" % zio2Version % Test,
     "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
     "com.softwaremill.sttp.tapir" %% "tapir-json-zio" % tapirVersion,
     "com.softwaremill.sttp.tapir" %% "tapir-aws-lambda" % tapirVersion,
-    "com.softwaremill.sttp.tapir" %% "tapir-aws-lambda-zio" % tapirVersion exclude("com.lihaoyi", "unroll-annotation_3"),// unroll built into scala 3.7+ https://github.com/scala/scala3/pull/21693
+    "com.softwaremill.sttp.tapir" %% "tapir-aws-lambda-zio" % tapirVersion exclude ("com.lihaoyi", "unroll-annotation_3"), // unroll built into scala 3.7+ https://github.com/scala/scala3/pull/21693
     "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapirVersion,
     awsSecretsManager,
     upickle,
