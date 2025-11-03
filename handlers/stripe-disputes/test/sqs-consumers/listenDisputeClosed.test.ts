@@ -177,11 +177,6 @@ describe('handleListenDisputeClosed', () => {
 			await expect(
 				handleListenDisputeClosed(mockLogger, mockWebhookData, 'du_test456'),
 			).rejects.toThrow('Failed to reject payment in Zuora');
-
-			expect(mockLogger.error).toHaveBeenCalledWith(
-				'Error during Zuora operations:',
-				expect.any(Error),
-			);
 		});
 
 		it('should skip Zuora operations when no subscription', async () => {
@@ -233,6 +228,49 @@ describe('handleListenDisputeClosed', () => {
 				'Skipping dispute du_test456 - no payment_method_details (likely SEPA payment)',
 			);
 			expect(mockGetSubscription).not.toHaveBeenCalled();
+		});
+
+		it('should still cancel subscription even when payment rejection fails with already processed error', async () => {
+			const { ZuoraError } = require('@modules/zuora/errors');
+
+			const mockRejectPayment = jest.mocked(
+				require('../../src/services/rejectPaymentService').rejectPaymentService,
+			);
+			const mockWriteOffInvoice = jest.mocked(
+				require('../../src/services/writeOffInvoiceService')
+					.writeOffInvoiceService,
+			);
+			const mockCancelSubscription = jest.mocked(
+				require('../../src/services/cancelSubscriptionService')
+					.cancelSubscriptionService,
+			);
+
+			// Simulate Zuora error 66000030 (payment already processed/refunded)
+			const zuoraError = new ZuoraError('Transaction already processed', 200, [
+				{
+					code: '66000030',
+					message:
+						'Another transaction has already been entered for this transaction',
+				},
+			]);
+
+			mockRejectPayment.mockRejectedValueOnce(zuoraError);
+
+			const result = await handleListenDisputeClosed(
+				mockLogger,
+				mockWebhookData,
+				'du_test456',
+			);
+
+			expect(result).not.toBeNull();
+			expect(result!.success).toBe(true);
+			expect(mockLogger.log).toHaveBeenCalledWith(
+				'Payment already processed (likely refunded before dispute). Skipping invoice write-off.',
+			);
+			// Should NOT try to write off invoice (would fail anyway)
+			expect(mockWriteOffInvoice).not.toHaveBeenCalled();
+			// Most important: subscription should still be cancelled
+			expect(mockCancelSubscription).toHaveBeenCalled();
 		});
 	});
 });
