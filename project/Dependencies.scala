@@ -16,7 +16,7 @@ object Dependencies {
 
   val logging: Seq[ModuleID] = Seq(
     "ch.qos.logback" % "logback-classic" % "1.5.20",
-    "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.9.6",
   )
 
   // AWS
