@@ -37,8 +37,7 @@ object ProductMoveEndpointTypes {
   sealed trait OutputBody
   case class Success(
       @description("Success message.") message: String,
-  ) extends OutputBody
-      derives JsonCodec
+  ) extends OutputBody derives JsonCodec
   case class PreviewResult(
       @description("The amount payable by the customer today") amountPayableToday: BigDecimal,
       @description(
@@ -49,8 +48,7 @@ object ProductMoveEndpointTypes {
       @description(
         "The next payment date of the new supporter plus subscription, i.e.: the second payment date",
       ) nextPaymentDate: LocalDate,
-  ) extends OutputBody
-      derives JsonCodec
+  ) extends OutputBody derives JsonCodec
 
   case class BadRequest(@description("Error message.") message: String) extends ErrorResponse derives JsonCodec
 

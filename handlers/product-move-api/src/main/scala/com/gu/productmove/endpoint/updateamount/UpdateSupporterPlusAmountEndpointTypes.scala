@@ -17,8 +17,7 @@ object UpdateSupporterPlusAmountEndpointTypes {
   sealed trait OutputBody derives JsonCodec
   case class Success(
       @description("Success message.") message: String,
-  ) extends OutputBody
-      derives JsonCodec
+  ) extends OutputBody derives JsonCodec
 
   given Schema[Success] = inlineSchema(Schema.derived)
 

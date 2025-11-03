@@ -8,15 +8,15 @@ object Dependencies {
 
   val awsSdkVersion = "2.32.33"
 
-  val circeVersion = "0.14.13"
+  val circeVersion = "0.14.15"
   val sttpVersion = "3.11.0"
-  val http4sVersion = "0.22.15" // keep version 0.22.15, later versions pull in cats effect 3 which is not compatible
+  val http4sVersion = "0.23.33" // keep version 0.23.33, later versions pull in cats effect 3 which is not compatible
   val catsVersion = "2.13.0"
-  val catsEffectVersion = "2.5.5"
+  val catsEffectVersion = "3.6.3"
 
   val logging: Seq[ModuleID] = Seq(
-    "ch.qos.logback" % "logback-classic" % "1.5.18",
-    "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
+    "ch.qos.logback" % "logback-classic" % "1.5.20",
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.9.6",
   )
 
   // AWS
@@ -51,8 +51,8 @@ object Dependencies {
   // JSON libraries
   val circe = "io.circe" %% "circe-generic" % circeVersion
   val circeParser = "io.circe" %% "circe-parser" % circeVersion
-  val circeConfig = "io.circe" %% "circe-config" % "0.10.1"
-  val playJson = "org.playframework" %% "play-json" % "3.0.4"
+  val circeConfig = "io.circe" %% "circe-config" % "0.10.2"
+  val playJson = "org.playframework" %% "play-json" % "3.0.6"
 
   // upickle here is a temporary redundancy of circe while we are migrating to it
   val upickle = "com.lihaoyi" %% "upickle" % "3.1.0"
@@ -66,7 +66,7 @@ object Dependencies {
 
   val sttpOkhttpBackend =
     "com.softwaremill.sttp.client3" %% "okhttp-backend" % sttpVersion
-  val okhttp3 = "com.squareup.okhttp3" % "okhttp" % "4.12.0"
+  val okhttp3 = "com.squareup.okhttp3" % "okhttp" % "5.3.0"
   val scalajHttp = "org.scalaj" %% "scalaj-http" % "2.4.2"
 
   // HTTP4S
@@ -81,27 +81,27 @@ object Dependencies {
     "com.gu" %% "support-internationalisation" % "0.16"
 
   // Other
-  val zio = "dev.zio" %% "zio" % "1.0.18"
-  val zio2Version = "2.1.18"
+  val zio = "dev.zio" %% "zio" % "2.1.22"
+  val zio2Version = "2.1.22"
   val zio2 = "dev.zio" %% "zio" % zio2Version
   val tapirVersion =
-    "1.11.33" // stick with 1.11.33 for now as later versions indirectly pull in netty-codec-base which duplicates netty-codec content
-  val enumeratum = "com.beachape" %% "enumeratum" % "1.7.6"
+    "1.11.50" // stick with 1.11.33 for now as later versions indirectly pull in netty-codec-base which duplicates netty-codec content
+  val enumeratum = "com.beachape" %% "enumeratum" % "1.9.0"
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.4.0"
-  val stripe = "com.stripe" % "stripe-java" % "29.1.0"
+  val stripe = "com.stripe" % "stripe-java" % "29.5.0"
   val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0"
-  val commonsIO = "commons-io" % "commons-io" % "2.19.0"
+  val commonsIO = "commons-io" % "commons-io" % "2.20.0"
   val jodaTime = "joda-time" % "joda-time" % "2.14.0"
-  val typesafeConfig = "com.typesafe" % "config" % "1.4.3"
+  val typesafeConfig = "com.typesafe" % "config" % "1.4.5"
 
   // Testing
   val diffx = "com.softwaremill.diffx" %% "diffx-scalatest-should" % "0.9.0" % Test
   val scalatest = "org.scalatest" %% "scalatest" % "3.2.19" % Test
-  val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.18.1" % Test
-  val scalaMock = "org.scalamock" %% "scalamock" % "7.3.2" % Test
-  val mockito = "org.mockito" % "mockito-core" % "5.14.2" % Test
+  val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.19.0" % Test
+  val scalaMock = "org.scalamock" %% "scalamock" % "7.3.3" % Test
+  val mockito = "org.mockito" % "mockito-core" % "5.20.0" % Test
   // play-json still uses an old version of jackson-core which has a vulnerability - https://security.snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-7569538
-  val jacksonVersion = "2.17.3"
+  val jacksonVersion = "2.20"
 
   val jacksonDependencies: Seq[ModuleID] = Seq(
     "com.fasterxml.jackson.core" % "jackson-core" % jacksonVersion,

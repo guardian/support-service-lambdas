@@ -36,7 +36,9 @@ class PaperAddressValidatorTest extends AnyFlatSpec with Matchers {
 
   it should "fail if postcode is not provided for home delivery plan" in {
     val noPostCodeAddress = testAddress.copy(postcode = None)
-    PaperAddressValidator(HomeDeliveryWeekendPlus, noPostCodeAddress) shouldBe Failed("Delivery postcode is missing in Zuora, check mailing address")
+    PaperAddressValidator(HomeDeliveryWeekendPlus, noPostCodeAddress) shouldBe Failed(
+      "Delivery postcode is missing in Zuora, check mailing address",
+    )
   }
 
   it should "fail if postcode is not within the m25 for home delivery plan" in {
