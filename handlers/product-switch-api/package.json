@@ -4,7 +4,7 @@
     "cdk:test": "pnpm --filter cdk test product-switch-api",
     "cdk:test-update": "pnpm --filter cdk test-update product-switch-api",
     "test": "jest --group=-integration",
-    "it-test": "jest --group=integration",
+    "it-test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --group=-integration",
     "type-check": "tsc --noEmit",
     "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/index.ts --sourcemap",
     "lint": "eslint --cache --cache-location /tmp/eslintcache/ src/**/*.ts test/**/*.ts",

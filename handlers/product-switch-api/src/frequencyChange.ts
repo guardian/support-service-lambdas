@@ -37,6 +37,99 @@ import type {
 } from './schemas';
 
 /**
+ * Select the single candidate rate plan and charge eligible for a frequency change.
+ * Logic matches the handler implementation so tests can exercise preview/execute flows without duplicating filtering rules.
+ */
+export function selectCandidateSubscriptionCharge(
+	subscription: Awaited<ReturnType<typeof getSubscription>>,
+	today: Date,
+): { ratePlan: RatePlan; charge: RatePlanCharge } {
+	const candidateCharges = subscription.ratePlans
+		.filter((rp) => rp.lastChangeType !== 'Remove')
+		.flatMap((rp) =>
+			rp.ratePlanCharges.map((c) => ({ ratePlan: rp, charge: c })),
+		)
+		.filter(({ charge }) => charge.name === 'Subscription')
+		.filter(({ charge }) => charge.type === 'Recurring')
+		.filter(
+			({ charge }) =>
+				charge.effectiveStartDate <= today && charge.effectiveEndDate >= today,
+		)
+		.filter(
+			({ charge }) =>
+				!charge.chargedThroughDate || charge.chargedThroughDate >= today,
+		)
+		.filter(
+			({ charge }) =>
+				charge.billingPeriod === 'Month' || charge.billingPeriod === 'Annual',
+		);
+
+	if (candidateCharges.length === 0) {
+		throw new Error(
+			'No active recurring charges eligible for frequency change.',
+		);
+	}
+	if (candidateCharges.length > 1) {
+		throw new Error(
+			'Multiple eligible charges found; cannot safely change frequency.',
+		);
+	}
+	return candidateCharges[0]!;
+}
+
+/**
+ * Preview a frequency change for a subscription. Mirrors processFrequencyChange with preview=true.
+ */
+export async function previewFrequencyChange(
+	zuoraClient: ZuoraClient,
+	subscription: Awaited<ReturnType<typeof getSubscription>>,
+	productCatalog: ProductCatalog,
+	targetBillingPeriod: 'Month' | 'Annual',
+	today: dayjs.Dayjs = dayjs(),
+): Promise<FrequencyChangePreviewResponse> {
+	const { ratePlan, charge } = selectCandidateSubscriptionCharge(
+		subscription,
+		today.toDate(),
+	);
+	const result = await processFrequencyChange(
+		zuoraClient,
+		subscription,
+		ratePlan,
+		charge,
+		productCatalog,
+		targetBillingPeriod,
+		true,
+	);
+	return frequencyChangePreviewResponseSchema.parse(result);
+}
+
+/**
+ * Execute a frequency change (non-preview). Mirrors processFrequencyChange with preview=false.
+ */
+export async function executeFrequencyChange(
+	zuoraClient: ZuoraClient,
+	subscription: Awaited<ReturnType<typeof getSubscription>>,
+	productCatalog: ProductCatalog,
+	targetBillingPeriod: 'Month' | 'Annual',
+	today: dayjs.Dayjs = dayjs(),
+): Promise<FrequencyChangeSwitchResponse> {
+	const { ratePlan, charge } = selectCandidateSubscriptionCharge(
+		subscription,
+		today.toDate(),
+	);
+	const result = await processFrequencyChange(
+		zuoraClient,
+		subscription,
+		ratePlan,
+		charge,
+		productCatalog,
+		targetBillingPeriod,
+		false,
+	);
+	return frequencyChangeSwitchResponseSchema.parse(result);
+}
+
+/**
  * Get the appropriate product rate plan Id for the target billing period
  * Uses the productRatePlanId to look up the product in the catalog (more reliable than productName)
  * and retrieves the product rate plan Id for the target billing period.
