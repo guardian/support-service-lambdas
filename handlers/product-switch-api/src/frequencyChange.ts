@@ -122,7 +122,7 @@ async function processFrequencyChange(
 			targetBillingPeriod,
 		);
 		const targetRatePlanKey = getCatalogBillingPeriod(targetBillingPeriod);
-		
+
 		// Check if product exists in catalog before accessing
 		const productName = currentRatePlan.productName;
 		if (!(productName in productCatalog)) {
@@ -130,9 +130,10 @@ async function processFrequencyChange(
 				`Product '${productName}' not found in product catalog during order construction`,
 			);
 		}
-		
-		const targetProduct = productCatalog[productName as keyof typeof productCatalog];
-		
+
+		const targetProduct =
+			productCatalog[productName as keyof typeof productCatalog];
+
 		const rawTargetRatePlan = targetProduct.ratePlans[
 			targetRatePlanKey as keyof typeof targetProduct.ratePlans
 		] as {
