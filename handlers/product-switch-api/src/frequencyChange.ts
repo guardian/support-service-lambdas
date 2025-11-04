@@ -1,6 +1,7 @@
 import { prettyPrint } from '@modules/prettyPrint';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
+import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import { singleTriggerDate } from '@modules/zuora/orders/orderActions';
@@ -35,11 +36,11 @@ import type {
 
 /**
  * Get the appropriate product rate plan Id for the target billing period
- * Maps billing period to the corresponding rate plan key in the product catalog
- * and retrieves the product rate plan Id for that billing period.
+ * Uses the productRatePlanId to look up the product in the catalog (more reliable than productName)
+ * and retrieves the product rate plan Id for the target billing period.
  *
  * @param productCatalog Product catalog to look up rate plans
- * @param currentRatePlan Current rate plan from the subscription (contains productName)
+ * @param currentRatePlan Current rate plan from the subscription (contains productRatePlanId)
  * @param targetBillingPeriod Target billing period ('Month' or 'Annual')
  * @returns Product rate plan Id for the target billing period
  * @throws Error if product details cannot be found or target rate plan doesn't exist
@@ -49,37 +50,35 @@ function getTargetRatePlanId(
 	currentRatePlan: RatePlan,
 	targetBillingPeriod: 'Month' | 'Annual',
 ): string {
+	const productCatalogHelper = new ProductCatalogHelper(productCatalog);
+	
 	logger.log(
-		`Finding target rate plan for product: ${currentRatePlan.productName}`,
+		`Finding target rate plan for productRatePlanId: ${currentRatePlan.productRatePlanId}`,
 	);
+
+	const productDetails = productCatalogHelper.findProductDetails(
+		currentRatePlan.productRatePlanId,
+	);
+
+	if (!productDetails) {
+		throw new Error(
+			`Product rate plan ID '${currentRatePlan.productRatePlanId}' not found in product catalog`,
+		);
+	}
 
 	const targetRatePlanKey = getCatalogBillingPeriod(targetBillingPeriod);
 	logger.log(
 		`Determined target rate plan key '${targetRatePlanKey}' for requested billing period '${targetBillingPeriod}'`,
 	);
 
-	// Check if product exists in catalog before accessing
-	const productName = currentRatePlan.productName;
-	if (!(productName in productCatalog)) {
-		logger.log(
-			`Available products in catalog: ${Object.keys(productCatalog).join(', ')}`,
-		);
-		throw new Error(
-			`Product '${productName}' not found in product catalog. Available products: ${Object.keys(productCatalog).join(', ')}`,
-		);
-	}
-
-	// Access catalog directly using the runtime string keys
-	// This works because ratePlans is a Record<string, ...>
-	const product = productCatalog[productName as keyof typeof productCatalog];
-
+	const product = productCatalog[productDetails.zuoraProduct];
 	const ratePlan = product.ratePlans[
 		targetRatePlanKey as keyof typeof product.ratePlans
 	] as { id: string } | undefined;
 
 	if (!ratePlan) {
 		throw new Error(
-			`Rate plan ${targetRatePlanKey} not found for product ${currentRatePlan.productName}`,
+			`Rate plan ${targetRatePlanKey} not found for product ${productDetails.zuoraProduct}`,
 		);
 	}
 
@@ -123,16 +122,18 @@ async function processFrequencyChange(
 		);
 		const targetRatePlanKey = getCatalogBillingPeriod(targetBillingPeriod);
 
-		// Check if product exists in catalog before accessing
-		const productName = currentRatePlan.productName;
-		if (!(productName in productCatalog)) {
+		const productCatalogHelper = new ProductCatalogHelper(productCatalog);
+		const productDetails = productCatalogHelper.findProductDetails(
+			currentRatePlan.productRatePlanId,
+		);
+
+		if (!productDetails) {
 			throw new Error(
-				`Product '${productName}' not found in product catalog during order construction`,
+				`Product rate plan ID '${currentRatePlan.productRatePlanId}' not found in product catalog during order construction`,
 			);
 		}
 
-		const targetProduct =
-			productCatalog[productName as keyof typeof productCatalog];
+		const targetProduct = productCatalog[productDetails.zuoraProduct];
 
 		const rawTargetRatePlan = targetProduct.ratePlans[
 			targetRatePlanKey as keyof typeof targetProduct.ratePlans
