@@ -51,7 +51,7 @@ function getTargetRatePlanId(
 	targetBillingPeriod: 'Month' | 'Annual',
 ): string {
 	const productCatalogHelper = new ProductCatalogHelper(productCatalog);
-	
+
 	logger.log(
 		`Finding target rate plan for productRatePlanId: ${currentRatePlan.productRatePlanId}`,
 	);
