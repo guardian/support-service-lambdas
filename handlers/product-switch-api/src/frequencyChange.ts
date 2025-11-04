@@ -5,8 +5,8 @@ import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import { singleTriggerDate } from '@modules/zuora/orders/orderActions';
 import type { OrderAction } from '@modules/zuora/orders/orderActions';
-import { previewOrderRequest } from '@modules/zuora/orders/orderRequests';
-import type { PreviewOrderRequest } from '@modules/zuora/orders/orderRequests';
+import { executeOrderRequest, previewOrderRequest } from '@modules/zuora/orders/orderRequests';
+import type { CreateOrderRequest, PreviewOrderRequest } from '@modules/zuora/orders/orderRequests';
 import { getSubscription } from '@modules/zuora/subscription';
 import type {
 	RatePlan,
@@ -16,8 +16,8 @@ import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { getCatalogBillingPeriod } from './catalogInformation';
-import { frequencyChangeResponseSchema, zuoraPreviewResponseSchema } from './schemas';
-import type { ZuoraPreviewResponse } from './schemas';
+import { frequencyChangeResponseSchema, zuoraPreviewResponseSchema, zuoraSwitchResponseSchema } from './schemas';
+import type { ZuoraPreviewResponse, ZuoraSwitchResponse } from './schemas';
 import type {
 	FrequencyChangeRequestBody,
 	FrequencyChangeResponse,
@@ -68,24 +68,30 @@ function getTargetRatePlanId(
 }
 
 /**
- * Preview the billing impact of a frequency change using Zuora Orders preview.
- *
- * Generate an authoritative preview by constructing a ChangePlan order
- * (effective at the subscription term end) and calling `/v1/orders/preview`.
- * This returns invoice detail including tax, discounts, proration (if any) from
- * Zuora itself instead of synthesising a local estimate.
+ * Process a frequency change using Zuora Orders API.
+ * 
+ * @param zuoraClient Zuora API client
+ * @param subscription Subscription to change
+ * @param currentRatePlan Current rate plan of the subscription
+ * @param currentCharge Current charge of the subscription
+ * @param productCatalog Product catalog for rate plan lookups
+ * @param targetBillingPeriod Target billing period ('Month' or 'Annual')
+ * @param preview Whether to preview or execute the change
+ * @returns Frequency change response indicating success/failure and details
  */
-async function previewFrequencyChangeAuthoritative(
+async function processFrequencyChange(
 	zuoraClient: ZuoraClient,
 	subscription: Awaited<ReturnType<typeof getSubscription>>,
 	currentRatePlan: RatePlan,
 	currentCharge: RatePlanCharge,
 	productCatalog: ProductCatalog,
 	targetBillingPeriod: 'Month' | 'Annual',
+	preview: boolean,
 ): Promise<FrequencyChangeResponse> {
 	const currentBillingPeriod = currentCharge.billingPeriod as 'Month' | 'Annual';
+	const mode = preview ? 'preview' : 'execute';
 	logger.log(
-		`Authoritative preview (Orders API) for frequency change from ${currentBillingPeriod} to ${targetBillingPeriod}`,
+		`${preview ? 'Previewing' : 'Executing'} frequency change (Orders API) from ${currentBillingPeriod} to ${targetBillingPeriod}`,
 	);
 
 	try {
@@ -132,58 +138,102 @@ async function previewFrequencyChangeAuthoritative(
 			},
 		}];
 
-		const orderRequest: PreviewOrderRequest = {
-			previewOptions: {
-				previewThruType: 'SpecificDate',
-				previewTypes: ['BillingDocs'],
-				specificPreviewThruDate: zuoraDateFormat(dayjs(subscription.termEndDate)),
-			},
-			orderDate: zuoraDateFormat(dayjs(subscription.termEndDate)),
-			existingAccountNumber: subscription.accountNumber,
-			subscriptions: [
-				{
-					subscriptionNumber: subscription.subscriptionNumber,
-					orderActions,
+		if (preview) {
+			const orderRequest: PreviewOrderRequest = {
+				previewOptions: {
+					previewThruType: 'SpecificDate',
+					previewTypes: ['BillingDocs'],
+					specificPreviewThruDate: zuoraDateFormat(dayjs(subscription.termEndDate)),
+				},
+				orderDate: zuoraDateFormat(dayjs(subscription.termEndDate)),
+				existingAccountNumber: subscription.accountNumber,
+				subscriptions: [
+					{
+						subscriptionNumber: subscription.subscriptionNumber,
+						orderActions,
 					},
 				],
-		};
+			};
 
-		const zuoraPreview: ZuoraPreviewResponse = await previewOrderRequest(
-			zuoraClient,
-			orderRequest,
-			zuoraPreviewResponseSchema,
-		);
+			const zuoraPreview: ZuoraPreviewResponse = await previewOrderRequest(
+				zuoraClient,
+				orderRequest,
+				zuoraPreviewResponseSchema,
+			);
 
-		if (!zuoraPreview.success) {
-			logger.log('Orders preview returned unsuccessful response', zuoraPreview);
+			if (!zuoraPreview.success) {
+				logger.log('Orders preview returned unsuccessful response', zuoraPreview);
+				return {
+					success: false,
+					mode: 'preview',
+					previousBillingPeriod: currentBillingPeriod,
+					newBillingPeriod: targetBillingPeriod,
+					previewInvoices: [],
+					reasons:
+						zuoraPreview.reasons?.map((r: { message: string }) => ({ message: r.message })) ?? [
+							{ message: 'Unknown error from Zuora preview' },
+						],
+				};
+			}
+
 			return {
-				success: false,
+				success: true,
 				mode: 'preview',
 				previousBillingPeriod: currentBillingPeriod,
 				newBillingPeriod: targetBillingPeriod,
-				previewInvoices: [],
-				reasons:
-					zuoraPreview.reasons?.map((r: { message: string }) => ({ message: r.message })) ?? [
-						{ message: 'Unknown error from Zuora preview' },
-					],
+				previewInvoices: zuoraPreview.previewResult?.invoices ?? [],
+			};
+		} else {
+			const orderRequest: CreateOrderRequest = {
+				processingOptions: {
+					runBilling: true,
+					collectPayment: false,
+				},
+				orderDate: zuoraDateFormat(dayjs(subscription.termEndDate)),
+				existingAccountNumber: subscription.accountNumber,
+				subscriptions: [
+					{
+						subscriptionNumber: subscription.subscriptionNumber,
+						orderActions,
+					},
+				],
+			};
+
+			const zuoraResponse: ZuoraSwitchResponse = await executeOrderRequest(
+				zuoraClient,
+				orderRequest,
+				zuoraSwitchResponseSchema,
+			);
+
+			if (!zuoraResponse.success) {
+				logger.log('Orders execution returned unsuccessful response', zuoraResponse);
+				return {
+					success: false,
+					mode: 'execute',
+					previousBillingPeriod: currentBillingPeriod,
+					newBillingPeriod: targetBillingPeriod,
+					reasons:
+						zuoraResponse.reasons?.map((r: { message: string }) => ({ message: r.message })) ?? [
+							{ message: 'Unknown error from Zuora execution' },
+						],
+				};
+			}
+
+			return {
+				success: true,
+				mode: 'execute',
+				previousBillingPeriod: currentBillingPeriod,
+				newBillingPeriod: targetBillingPeriod,
+				invoiceIds: zuoraResponse.invoiceIds,
 			};
 		}
-
-		return {
-			success: true,
-			mode: 'preview',
-			previousBillingPeriod: currentBillingPeriod,
-			newBillingPeriod: targetBillingPeriod,
-			previewInvoices: zuoraPreview.previewResult?.invoices ?? [],
-		};
 	} catch (error) {
-		logger.log('Error during Orders API frequency change preview', error);
+		logger.log(`Error during Orders API frequency change ${mode}`, error);
 		return {
 			success: false,
-			mode: 'preview',
+			mode,
 			previousBillingPeriod: currentBillingPeriod,
 			newBillingPeriod: targetBillingPeriod,
-			previewInvoices: [],
 			reasons: [
 				{ message: (error instanceof Error ? error.message : 'Unknown error') },
 			],
@@ -191,6 +241,13 @@ async function previewFrequencyChangeAuthoritative(
 	}
 }
 
+/**
+ * Frequency change handler
+ * 
+ * @param stage Stage to execute in
+ * @param today Today's date
+ * @returns Http handler function for status code and body return
+ */
 export const frequencyChangeHandler =
 	(stage: Stage, today: dayjs.Dayjs) =>
 	async (
@@ -280,63 +337,22 @@ export const frequencyChangeHandler =
 			};
 		}
 
-		const amendmentBody = {
-			amendments: [
-				{
-					Name: `Switch Billing Frequency: Remove ${charge.billingPeriod} plan`,
-					Type: 'RemoveProduct',
-					ContractEffectiveDate: subscription.termEndDate,
-					CustomerAcceptanceDate: subscription.termEndDate,
-					ServiceActivationDate: subscription.termEndDate,
-					RatePlanId: ratePlan.id,
-				},
-				{
-					Name: `Switch Billing Frequency: Add ${parsed.body.targetBillingPeriod} plan`,
-					Type: 'NewProduct',
-					ContractEffectiveDate: subscription.termEndDate,
-					CustomerAcceptanceDate: subscription.termEndDate,
-					ServiceActivationDate: subscription.termEndDate,
-					RatePlanData: {
-						RatePlan: {
-							ProductRatePlanId: getTargetRatePlanId(
-								productCatalog,
-								ratePlan,
-								parsed.body.targetBillingPeriod,
-							),
-						},
-					},
-				},
-			],
-		};
-		logger.log(
-			`Preparing frequency change from ${charge.billingPeriod} to ${parsed.body.targetBillingPeriod} for charge ${charge.id} in rate plan ${ratePlan.id}`,
-			amendmentBody,
+		// Process the frequency change using Orders API (preview or execute)
+		const response = await processFrequencyChange(
+			zuoraClient,
+			subscription,
+			ratePlan,
+			charge,
+			productCatalog,
+			parsed.body.targetBillingPeriod,
+			parsed.body.preview,
 		);
-
-		if (parsed.body.preview) {
-			const previewResponse = await previewFrequencyChangeAuthoritative(
-				zuoraClient,
-				subscription,
-				ratePlan,
-				charge,
-				productCatalog,
-				parsed.body.targetBillingPeriod,
-			);
-			logger.log(
-				`Frequency change authoritative preview response ${prettyPrint(previewResponse)}`,
-			);
-			return { statusCode: 200, body: JSON.stringify(previewResponse) };
-		}
-
-		const response = {
-			success: true,
-			mode: 'execute' as const,
-			previousBillingPeriod: charge.billingPeriod as 'Month' | 'Annual',
-			newBillingPeriod: parsed.body.targetBillingPeriod,
-		};
+		
 		frequencyChangeResponseSchema.parse(response);
 		logger.log(
 			`Frequency change ${response.mode} response ${prettyPrint(response)}`,
 		);
-		return { statusCode: 201, body: JSON.stringify(response) };
+		
+		const statusCode = response.success ? (parsed.body.preview ? 200 : 201) : 400;
+		return { statusCode, body: JSON.stringify(response) };
 	};
