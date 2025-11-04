@@ -1,7 +1,6 @@
 import { prettyPrint } from '@modules/prettyPrint';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
-import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import { getSubscription } from '@modules/zuora/subscription';
@@ -18,30 +17,19 @@ import type { FrequencyChangeRequestBody } from './schemas';
  * and retrieves the product rate plan Id for that billing period.
  *
  * @param productCatalog Product catalog to look up rate plans
- * @param productCatalogHelper Helper to find product details
- * @param currentRatePlan Current rate plan from the subscription
+ * @param currentRatePlan Current rate plan from the subscription (contains productName)
  * @param targetBillingPeriod Target billing period ('Month' or 'Annual')
  * @returns Product rate plan Id for the target billing period
  * @throws Error if product details cannot be found or target rate plan doesn't exist
  */
 function getTargetRatePlanId(
 	productCatalog: ProductCatalog,
-	productCatalogHelper: ProductCatalogHelper,
 	currentRatePlan: RatePlan,
 	targetBillingPeriod: 'Month' | 'Annual',
 ): string {
-	const productDetails = productCatalogHelper.findProductDetails(
-		currentRatePlan.productRatePlanId,
+	logger.log(
+		`Finding target rate plan for product: ${currentRatePlan.productName}`,
 	);
-	if (!productDetails) {
-		logger.log(
-			`Product details not found for product rate plan Id: ${currentRatePlan.productRatePlanId}`,
-		);
-		throw new Error(
-			`Product details not found for product rate plan Id: ${currentRatePlan.productRatePlanId}`,
-		);
-	}
-	logger.log(`Found product details: ${prettyPrint(productDetails)}`);
 
 	const targetRatePlanKey = getCatalogBillingPeriod(targetBillingPeriod);
 	logger.log(
@@ -50,14 +38,17 @@ function getTargetRatePlanId(
 
 	// Access catalog directly using the runtime string keys
 	// This works because ratePlans is a Record<string, ...>
-	const product = productCatalog[productDetails.zuoraProduct];
+	const product = productCatalog[
+		currentRatePlan.productName as keyof typeof productCatalog
+	];
+
 	const ratePlan = product.ratePlans[
 		targetRatePlanKey as keyof typeof product.ratePlans
 	] as { id: string } | undefined;
 
 	if (!ratePlan) {
 		throw new Error(
-			`Rate plan ${targetRatePlanKey} not found for product ${productDetails.zuoraProduct}`,
+			`Rate plan ${targetRatePlanKey} not found for product ${currentRatePlan.productName}`,
 		);
 	}
 
@@ -83,7 +74,6 @@ export const frequencyChangeHandler =
 			parsed.path.subscriptionNumber,
 		);
 		const productCatalog = await getProductCatalogFromApi(stage);
-		const productCatalogHelper = new ProductCatalogHelper(productCatalog);
 
 		logger.log(
 			`Subscription rate plans: ${prettyPrint(subscription.ratePlans)}`,
@@ -174,7 +164,6 @@ export const frequencyChangeHandler =
 						RatePlan: {
 							ProductRatePlanId: getTargetRatePlanId(
 								productCatalog,
-								productCatalogHelper,
 								ratePlan,
 								parsed.body.targetBillingPeriod,
 							),
