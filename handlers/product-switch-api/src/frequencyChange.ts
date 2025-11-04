@@ -236,12 +236,36 @@ async function processFrequencyChange(
 					),
 				})) ?? [];
 
+			// Calculate savings based on the target billing period
+			const currentPrice = currentCharge.price ?? 0;
+			let savingsAmount: number;
+			let savingsPeriod: 'year' | 'month';
+
+			if (targetBillingPeriod === 'Annual') {
+				// Monthly → Annual: show annual savings
+				const currentAnnualCost = currentPrice * 12;
+				const targetAnnualCost = targetPrice;
+				savingsAmount = currentAnnualCost - targetAnnualCost;
+				savingsPeriod = 'year';
+			} else {
+				// Annual → Monthly: show monthly savings
+				const currentMonthlyCost = currentPrice / 12;
+				const targetMonthlyCost = targetPrice;
+				savingsAmount = currentMonthlyCost - targetMonthlyCost;
+				savingsPeriod = 'month';
+			}
+
 			return {
 				success: true,
 				mode: 'preview',
 				previousBillingPeriod: currentBillingPeriod,
 				newBillingPeriod: targetBillingPeriod,
 				previewInvoices: cleanedInvoices,
+				savings: {
+					amount: savingsAmount,
+					currency,
+					period: savingsPeriod,
+				},
 			};
 		} else {
 			const orderRequest: CreateOrderRequest = {

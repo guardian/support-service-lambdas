@@ -96,10 +96,20 @@ export const frequencyChangeResponseSchema = z.object({
 	mode: z.enum(['preview', 'execute']),
 	previousBillingPeriod: z.enum(['Month', 'Annual']),
 	newBillingPeriod: z.enum(['Month', 'Annual']),
-	//
-	invoiceIds: z.optional(z.array(z.string())),
+
+	// Preview
 	previewInvoices: z.optional(z.array(zuoraPreviewResponseInvoiceSchema)),
 	reasons: z.optional(z.array(z.object({ message: z.string() }))),
+	savings: z.optional(
+		z.object({
+			amount: z.number(),
+			currency: z.string(),
+			period: z.enum(['year', 'month']),
+		}),
+	),
+
+	// Execute
+	invoiceIds: z.optional(z.array(z.string())),
 });
 
 export type FrequencyChangeResponse = z.infer<
