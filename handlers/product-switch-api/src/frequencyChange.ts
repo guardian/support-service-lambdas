@@ -5,8 +5,14 @@ import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import { singleTriggerDate } from '@modules/zuora/orders/orderActions';
 import type { OrderAction } from '@modules/zuora/orders/orderActions';
-import { executeOrderRequest, previewOrderRequest } from '@modules/zuora/orders/orderRequests';
-import type { CreateOrderRequest, PreviewOrderRequest } from '@modules/zuora/orders/orderRequests';
+import {
+	executeOrderRequest,
+	previewOrderRequest,
+} from '@modules/zuora/orders/orderRequests';
+import type {
+	CreateOrderRequest,
+	PreviewOrderRequest,
+} from '@modules/zuora/orders/orderRequests';
 import { getSubscription } from '@modules/zuora/subscription';
 import type {
 	RatePlan,
@@ -16,7 +22,11 @@ import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { getCatalogBillingPeriod } from './catalogInformation';
-import { frequencyChangeResponseSchema, zuoraPreviewResponseSchema, zuoraSwitchResponseSchema } from './schemas';
+import {
+	frequencyChangeResponseSchema,
+	zuoraPreviewResponseSchema,
+	zuoraSwitchResponseSchema,
+} from './schemas';
 import type { ZuoraPreviewResponse, ZuoraSwitchResponse } from './schemas';
 import type {
 	FrequencyChangeRequestBody,
@@ -50,9 +60,8 @@ function getTargetRatePlanId(
 
 	// Access catalog directly using the runtime string keys
 	// This works because ratePlans is a Record<string, ...>
-	const product = productCatalog[
-		currentRatePlan.productName as keyof typeof productCatalog
-	];
+	const product =
+		productCatalog[currentRatePlan.productName as keyof typeof productCatalog];
 
 	const ratePlan = product.ratePlans[
 		targetRatePlanKey as keyof typeof product.ratePlans
@@ -69,7 +78,7 @@ function getTargetRatePlanId(
 
 /**
  * Process a frequency change using Zuora Orders API.
- * 
+ *
  * @param zuoraClient Zuora API client
  * @param subscription Subscription to change
  * @param currentRatePlan Current rate plan of the subscription
@@ -88,7 +97,9 @@ async function processFrequencyChange(
 	targetBillingPeriod: 'Month' | 'Annual',
 	preview: boolean,
 ): Promise<FrequencyChangeResponse> {
-	const currentBillingPeriod = currentCharge.billingPeriod as 'Month' | 'Annual';
+	const currentBillingPeriod = currentCharge.billingPeriod as
+		| 'Month'
+		| 'Annual';
 	const mode = preview ? 'preview' : 'execute';
 	logger.log(
 		`${preview ? 'Previewing' : 'Executing'} frequency change (Orders API) from ${currentBillingPeriod} to ${targetBillingPeriod}`,
@@ -101,9 +112,10 @@ async function processFrequencyChange(
 			targetBillingPeriod,
 		);
 		const targetRatePlanKey = getCatalogBillingPeriod(targetBillingPeriod);
-		const targetProduct = productCatalog[
-			currentRatePlan.productName as keyof typeof productCatalog
-		];
+		const targetProduct =
+			productCatalog[
+				currentRatePlan.productName as keyof typeof productCatalog
+			];
 		const rawTargetRatePlan = targetProduct.ratePlans[
 			targetRatePlanKey as keyof typeof targetProduct.ratePlans
 		] as {
@@ -118,32 +130,39 @@ async function processFrequencyChange(
 		}
 		const targetSubscriptionChargeId: string = targetSubscriptionChargeIdRaw;
 		const currency: string = currentCharge.currency;
-		const targetPrice = rawTargetRatePlan.pricing?.[currency] ?? currentCharge.price ?? 0;
+		const targetPrice =
+			rawTargetRatePlan.pricing?.[currency] ?? currentCharge.price ?? 0;
 
 		// Build ChangePlan order action at term end (when we intend to switch)
 		const triggerDates = singleTriggerDate(dayjs(subscription.termEndDate));
-		const orderActions: OrderAction[] = [{
-			type: 'ChangePlan',
-			triggerDates,
-			changePlan: {
-				productRatePlanId: currentRatePlan.productRatePlanId,
-				subType: 'Upgrade',
-				newProductRatePlan: {
-					productRatePlanId: targetRatePlanId,
-					chargeOverrides: [{
-						productRatePlanChargeId: targetSubscriptionChargeId,
-						pricing: { recurringFlatFee: { listPrice: targetPrice } },
-					}],
+		const orderActions: OrderAction[] = [
+			{
+				type: 'ChangePlan',
+				triggerDates,
+				changePlan: {
+					productRatePlanId: currentRatePlan.productRatePlanId,
+					subType: 'Upgrade',
+					newProductRatePlan: {
+						productRatePlanId: targetRatePlanId,
+						chargeOverrides: [
+							{
+								productRatePlanChargeId: targetSubscriptionChargeId,
+								pricing: { recurringFlatFee: { listPrice: targetPrice } },
+							},
+						],
+					},
 				},
 			},
-		}];
+		];
 
 		if (preview) {
 			const orderRequest: PreviewOrderRequest = {
 				previewOptions: {
 					previewThruType: 'SpecificDate',
 					previewTypes: ['BillingDocs'],
-					specificPreviewThruDate: zuoraDateFormat(dayjs(subscription.termEndDate)),
+					specificPreviewThruDate: zuoraDateFormat(
+						dayjs(subscription.termEndDate),
+					),
 				},
 				orderDate: zuoraDateFormat(dayjs(subscription.termEndDate)),
 				existingAccountNumber: subscription.accountNumber,
@@ -162,17 +181,19 @@ async function processFrequencyChange(
 			);
 
 			if (!zuoraPreview.success) {
-				logger.log('Orders preview returned unsuccessful response', zuoraPreview);
+				logger.log(
+					'Orders preview returned unsuccessful response',
+					zuoraPreview,
+				);
 				return {
 					success: false,
 					mode: 'preview',
 					previousBillingPeriod: currentBillingPeriod,
 					newBillingPeriod: targetBillingPeriod,
 					previewInvoices: [],
-					reasons:
-						zuoraPreview.reasons?.map((r: { message: string }) => ({ message: r.message })) ?? [
-							{ message: 'Unknown error from Zuora preview' },
-						],
+					reasons: zuoraPreview.reasons?.map((r: { message: string }) => ({
+						message: r.message,
+					})) ?? [{ message: 'Unknown error from Zuora preview' }],
 				};
 			}
 
@@ -206,16 +227,18 @@ async function processFrequencyChange(
 			);
 
 			if (!zuoraResponse.success) {
-				logger.log('Orders execution returned unsuccessful response', zuoraResponse);
+				logger.log(
+					'Orders execution returned unsuccessful response',
+					zuoraResponse,
+				);
 				return {
 					success: false,
 					mode: 'execute',
 					previousBillingPeriod: currentBillingPeriod,
 					newBillingPeriod: targetBillingPeriod,
-					reasons:
-						zuoraResponse.reasons?.map((r: { message: string }) => ({ message: r.message })) ?? [
-							{ message: 'Unknown error from Zuora execution' },
-						],
+					reasons: zuoraResponse.reasons?.map((r: { message: string }) => ({
+						message: r.message,
+					})) ?? [{ message: 'Unknown error from Zuora execution' }],
 				};
 			}
 
@@ -235,7 +258,7 @@ async function processFrequencyChange(
 			previousBillingPeriod: currentBillingPeriod,
 			newBillingPeriod: targetBillingPeriod,
 			reasons: [
-				{ message: (error instanceof Error ? error.message : 'Unknown error') },
+				{ message: error instanceof Error ? error.message : 'Unknown error' },
 			],
 		};
 	}
@@ -243,7 +266,7 @@ async function processFrequencyChange(
 
 /**
  * Frequency change handler
- * 
+ *
  * @param stage Stage to execute in
  * @param today Today's date
  * @returns Http handler function for status code and body return
@@ -347,12 +370,16 @@ export const frequencyChangeHandler =
 			parsed.body.targetBillingPeriod,
 			parsed.body.preview,
 		);
-		
+
 		frequencyChangeResponseSchema.parse(response);
 		logger.log(
 			`Frequency change ${response.mode} response ${prettyPrint(response)}`,
 		);
-		
-		const statusCode = response.success ? (parsed.body.preview ? 200 : 201) : 400;
+
+		const statusCode = response.success
+			? parsed.body.preview
+				? 200
+				: 201
+			: 400;
 		return { statusCode, body: JSON.stringify(response) };
 	};
