@@ -214,6 +214,8 @@ async function processFrequencyChange(
 						message: r.message,
 					})) ?? [{ message: 'Unknown error from Zuora preview' }],
 				};
+			} else {
+				logger.log('Orders preview returned successful response', zuoraPreview);
 			}
 
 			return {
