@@ -4,12 +4,19 @@ import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import { getSubscription } from '@modules/zuora/subscription';
-import type { RatePlan } from '@modules/zuora/types/objects/subscription';
+import type {
+	RatePlan,
+	RatePlanCharge,
+} from '@modules/zuora/types/objects/subscription';
+import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type dayjs from 'dayjs';
+import dayjs from 'dayjs';
 import { getCatalogBillingPeriod } from './catalogInformation';
 import { frequencyChangeResponseSchema } from './schemas';
-import type { FrequencyChangeRequestBody } from './schemas';
+import type {
+	FrequencyChangeRequestBody,
+	FrequencyChangeResponse,
+} from './schemas';
 
 /**
  * Get the appropriate product rate plan Id for the target billing period
@@ -53,6 +60,121 @@ function getTargetRatePlanId(
 	}
 
 	return ratePlan.id;
+}
+
+/**
+ * Preview the billing impact of a frequency change using catalog-based pricing.
+ * 
+ * Unlike the orders API which has `/v1/orders/preview`, 
+ * Zuora's amendment API doesn't have a built-in preview mode. 
+ * This implementation uses custom logic based on catalog rate plan pricing to
+ * calculate what the new billing would be after the frequency change.
+ *
+ * @param productCatalog Product catalog to look up target pricing
+ * @param currentRatePlan Current rate plan from the subscription
+ * @param currentCharge Current subscription charge
+ * @param subscriptionNumber Subscription number for the preview
+ * @param termEndDate When the frequency change will take effect
+ * @param targetBillingPeriod Target billing period ('Month' or 'Annual')
+ * @returns Preview response with billing information
+ */
+function previewFrequencyChange(
+	productCatalog: ProductCatalog,
+	currentRatePlan: RatePlan,
+	currentCharge: RatePlanCharge,
+	subscriptionNumber: string,
+	termEndDate: Date,
+	targetBillingPeriod: 'Month' | 'Annual',
+): FrequencyChangeResponse {
+	const currentBillingPeriod = currentCharge.billingPeriod as 'Month' | 'Annual';
+	
+	logger.log(
+		`Previewing frequency change from ${currentBillingPeriod} to ${targetBillingPeriod}`,
+	);
+
+	try {
+		// Look up the target rate plan from the catalog
+		const targetRatePlanKey = getCatalogBillingPeriod(targetBillingPeriod);
+		
+		const product = productCatalog[
+			currentRatePlan.productName as keyof typeof productCatalog
+		];
+
+		const targetRatePlan = product.ratePlans[
+			targetRatePlanKey as keyof typeof product.ratePlans
+		] as { id: string; pricing?: Record<string, number> } | undefined;
+
+		if (!targetRatePlan) {
+			throw new Error(
+				`Target rate plan ${targetRatePlanKey} not found for product ${currentRatePlan.productName}`,
+			);
+		}
+
+		// Get the pricing from the catalog for the currency
+		// If pricing is not available in catalog (e.g., for custom pricing), fall back to current price
+		const currency = currentCharge.currency;
+		let newPrice = currentCharge.price ?? 0;
+		
+		if (targetRatePlan.pricing && currency in targetRatePlan.pricing) {
+			const catalogPrice = targetRatePlan.pricing[currency];
+			if (catalogPrice !== undefined) {
+				newPrice = catalogPrice;
+			}
+		}
+
+		// Calculate service dates based on the target billing period
+		const serviceStartDate = dayjs(termEndDate);
+		const serviceEndDate = serviceStartDate.add(
+			1,
+			targetBillingPeriod === 'Month' ? 'month' : 'year',
+		);
+
+		// Create preview invoice item showing what the new charge would be
+		// Note: We're not including tax calculation here as that would require additional API calls
+		const invoiceItems = [
+			{
+				serviceStartDate: zuoraDateFormat(serviceStartDate),
+				serviceEndDate: zuoraDateFormat(serviceEndDate),
+				amountWithoutTax: newPrice,
+				taxAmount: 0, // TODO: Tax calculation would require additional logic
+				chargeName: currentCharge.name,
+				processingType: 'Charge',
+				productName: currentRatePlan.productName,
+				productRatePlanChargeId: currentCharge.productRatePlanChargeId,
+				unitPrice: newPrice,
+				subscriptionNumber,
+			},
+		];
+
+		const previewInvoices = [
+			{
+				amount: newPrice,
+				amountWithoutTax: newPrice,
+				taxAmount: 0,
+				targetDate: zuoraDateFormat(serviceStartDate),
+				invoiceItems,
+			},
+		];
+
+		const response: FrequencyChangeResponse = {
+			success: true,
+			mode: 'preview',
+			previousBillingPeriod: currentBillingPeriod,
+			newBillingPeriod: targetBillingPeriod,
+			previewInvoices,
+		};
+
+		return response;
+	} catch (error) {
+		logger.log('Error creating frequency change preview', error);
+		return {
+			success: false,
+			mode: 'preview',
+			previousBillingPeriod: currentBillingPeriod,
+			newBillingPeriod: targetBillingPeriod,
+			previewInvoices: [],
+		};
+	}
 }
 
 export const frequencyChangeHandler =
@@ -177,13 +299,26 @@ export const frequencyChangeHandler =
 			amendmentBody,
 		);
 
-		// TODO: Execute the frequency change OR preview
+		if (parsed.body.preview) {
+			const previewResponse = previewFrequencyChange(
+				productCatalog,
+				ratePlan,
+				charge,
+				subscription.subscriptionNumber,
+				subscription.termEndDate,
+				parsed.body.targetBillingPeriod,
+			);
+			logger.log(
+				`Frequency change preview response ${prettyPrint(previewResponse)}`,
+			);
+			return { statusCode: 200, body: JSON.stringify(previewResponse) };
+		}
 
 		const response = {
 			success: true,
-			mode: parsed.body.preview ? 'preview' : 'execute',
-			currentBillingPeriod: charge.billingPeriod,
-			targetBillingPeriod: parsed.body.targetBillingPeriod,
+			mode: 'execute' as const,
+			previousBillingPeriod: charge.billingPeriod as 'Month' | 'Annual',
+			newBillingPeriod: parsed.body.targetBillingPeriod,
 		};
 		frequencyChangeResponseSchema.parse(response);
 		logger.log(
