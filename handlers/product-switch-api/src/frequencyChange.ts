@@ -449,59 +449,28 @@ export const frequencyChangeHandler =
 		logger.log(
 			`Subscription rate plans: ${prettyPrint(subscription.ratePlans)}`,
 		);
-		const candidateCharges = subscription.ratePlans
-			// First, filter to active rate plans only
-			.filter((rp) => rp.lastChangeType !== 'Remove')
-			// Pair each charge with its rate plan for potential future disambiguation (e.g., productName).
-			.flatMap((rp) =>
-				rp.ratePlanCharges.map((c) => ({ ratePlan: rp, charge: c })),
-			)
-			// Only Subscription rate plans charges
-			.filter(({ charge }) => charge.name === 'Subscription')
-			// Only recurring charges define ongoing billing periods relevant to frequency changes.
-			.filter(({ charge }) => charge.type === 'Recurring')
-			// Charge is currently effective.
-			.filter(
-				({ charge }) =>
-					charge.effectiveStartDate <= todayDate &&
-					charge.effectiveEndDate >= todayDate,
-			)
-			// Exclude charges whose chargedThroughDate is before today (fully billed/expired).
-			.filter(
-				({ charge }) =>
-					!charge.chargedThroughDate || charge.chargedThroughDate >= todayDate,
-			)
-			// Restrict to supported target billing periods.
-			.filter(
-				({ charge }) =>
-					charge.billingPeriod === 'Month' || charge.billingPeriod === 'Annual',
+
+		// Use selectCandidateSubscriptionCharge to validate and find the eligible charge
+		let candidateCharge: { ratePlan: RatePlan; charge: RatePlanCharge };
+		try {
+			candidateCharge = selectCandidateSubscriptionCharge(
+				subscription,
+				todayDate,
 			);
-		if (candidateCharges.length === 0) {
-			logger.log('No candidate charges found for frequency change.');
-			return {
-				statusCode: 400,
-				body: JSON.stringify({
-					message: 'No active recurring charges eligible for frequency change.',
-				}),
-			};
-		}
-		if (candidateCharges.length > 1) {
+		} catch (error) {
 			logger.log(
-				'Multiple eligible charges found; cannot safely change frequency.',
-				candidateCharges,
+				'Failed to select candidate charge for frequency change.',
+				error,
 			);
 			return {
 				statusCode: 400,
 				body: JSON.stringify({
-					message:
-						'Multiple eligible charges found; cannot safely change frequency.',
+					message: error instanceof Error ? error.message : 'Unknown error',
 				}),
 			};
 		}
 
-		const candidateCharge = candidateCharges[0]!;
-		const ratePlan = candidateCharge.ratePlan;
-		const charge = candidateCharge.charge;
+		const { charge } = candidateCharge;
 
 		if (charge.billingPeriod === parsed.body.targetBillingPeriod) {
 			logger.log(
@@ -515,23 +484,22 @@ export const frequencyChangeHandler =
 			};
 		}
 
-		// Process the frequency change using Orders API (preview or execute)
-		const response = await processFrequencyChange(
-			zuoraClient,
-			subscription,
-			ratePlan,
-			charge,
-			productCatalog,
-			parsed.body.targetBillingPeriod,
-			parsed.body.preview,
-		);
-
-		// Validate response based on mode
-		if (parsed.body.preview) {
-			frequencyChangePreviewResponseSchema.parse(response);
-		} else {
-			frequencyChangeSwitchResponseSchema.parse(response);
-		}
+		// Use the appropriate wrapper function for preview or execute
+		const response = parsed.body.preview
+			? await previewFrequencyChange(
+					zuoraClient,
+					subscription,
+					productCatalog,
+					parsed.body.targetBillingPeriod,
+					today,
+			  )
+			: await executeFrequencyChange(
+					zuoraClient,
+					subscription,
+					productCatalog,
+					parsed.body.targetBillingPeriod,
+					today,
+			  )
 
 		logger.log(
 			`Frequency change ${parsed.body.preview ? 'preview' : 'execute'} response ${prettyPrint(response)}`,
