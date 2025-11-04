@@ -175,12 +175,16 @@ async function processFrequencyChange(
 		];
 
 		if (preview) {
+			const numberOfMonthsToPreview = 13;
 			const orderRequest: PreviewOrderRequest = {
 				previewOptions: {
 					previewThruType: 'SpecificDate',
 					previewTypes: ['BillingDocs'],
 					specificPreviewThruDate: zuoraDateFormat(
-						dayjs(subscription.termEndDate),
+						dayjs(subscription.termEndDate).add(
+							numberOfMonthsToPreview,
+							'month',
+						),
 					),
 				},
 				orderDate: zuoraDateFormat(dayjs(subscription.termEndDate)),
