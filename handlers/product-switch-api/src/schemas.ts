@@ -90,14 +90,10 @@ export type FrequencyChangeRequestBody = z.infer<
 	typeof frequencyChangeRequestSchema
 >;
 
-// Simplified response used for both preview and execution paths of frequency change.
-export const frequencyChangeResponseSchema = z.object({
+export const frequencyChangePreviewResponseSchema = z.object({
 	success: z.boolean(),
-	mode: z.enum(['preview', 'execute']),
 	previousBillingPeriod: z.enum(['Month', 'Annual']),
 	newBillingPeriod: z.enum(['Month', 'Annual']),
-
-	// Preview
 	previewInvoices: z.optional(z.array(zuoraPreviewResponseInvoiceSchema)),
 	reasons: z.optional(z.array(z.object({ message: z.string() }))),
 	savings: z.optional(
@@ -107,11 +103,20 @@ export const frequencyChangeResponseSchema = z.object({
 			period: z.enum(['year', 'month']),
 		}),
 	),
-
-	// Execute
-	invoiceIds: z.optional(z.array(z.string())),
 });
 
-export type FrequencyChangeResponse = z.infer<
-	typeof frequencyChangeResponseSchema
+export type FrequencyChangePreviewResponse = z.infer<
+	typeof frequencyChangePreviewResponseSchema
+>;
+
+export const frequencyChangeSwitchResponseSchema = z.object({
+	success: z.boolean(),
+	previousBillingPeriod: z.enum(['Month', 'Annual']),
+	newBillingPeriod: z.enum(['Month', 'Annual']),
+	invoiceIds: z.optional(z.array(z.string())),
+	reasons: z.optional(z.array(z.object({ message: z.string() }))),
+});
+
+export type FrequencyChangeSwitchResponse = z.infer<
+	typeof frequencyChangeSwitchResponseSchema
 >;

@@ -24,14 +24,16 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { getCatalogBillingPeriod } from './catalogInformation';
 import {
-	frequencyChangeResponseSchema,
+	frequencyChangePreviewResponseSchema,
+	frequencyChangeSwitchResponseSchema,
 	zuoraPreviewResponseSchema,
 	zuoraSwitchResponseSchema,
 } from './schemas';
 import type { ZuoraPreviewResponse, ZuoraSwitchResponse } from './schemas';
 import type {
+	FrequencyChangePreviewResponse,
 	FrequencyChangeRequestBody,
-	FrequencyChangeResponse,
+	FrequencyChangeSwitchResponse,
 } from './schemas';
 
 /**
@@ -105,11 +107,10 @@ async function processFrequencyChange(
 	productCatalog: ProductCatalog,
 	targetBillingPeriod: 'Month' | 'Annual',
 	preview: boolean,
-): Promise<FrequencyChangeResponse> {
+): Promise<FrequencyChangePreviewResponse | FrequencyChangeSwitchResponse> {
 	const currentBillingPeriod = currentCharge.billingPeriod as
 		| 'Month'
 		| 'Annual';
-	const mode = preview ? 'preview' : 'execute';
 	logger.log(
 		`${preview ? 'Previewing' : 'Executing'} frequency change (Orders API) from ${currentBillingPeriod} to ${targetBillingPeriod}`,
 	);
@@ -210,7 +211,6 @@ async function processFrequencyChange(
 				);
 				return {
 					success: false,
-					mode: 'preview',
 					previousBillingPeriod: currentBillingPeriod,
 					newBillingPeriod: targetBillingPeriod,
 					previewInvoices: [],
@@ -257,7 +257,6 @@ async function processFrequencyChange(
 
 			return {
 				success: true,
-				mode: 'preview',
 				previousBillingPeriod: currentBillingPeriod,
 				newBillingPeriod: targetBillingPeriod,
 				previewInvoices: cleanedInvoices,
@@ -296,7 +295,6 @@ async function processFrequencyChange(
 				);
 				return {
 					success: false,
-					mode: 'execute',
 					previousBillingPeriod: currentBillingPeriod,
 					newBillingPeriod: targetBillingPeriod,
 					reasons: zuoraResponse.reasons?.map((r: { message: string }) => ({
@@ -307,17 +305,18 @@ async function processFrequencyChange(
 
 			return {
 				success: true,
-				mode: 'execute',
 				previousBillingPeriod: currentBillingPeriod,
 				newBillingPeriod: targetBillingPeriod,
 				invoiceIds: zuoraResponse.invoiceIds,
 			};
 		}
 	} catch (error) {
-		logger.log(`Error during Orders API frequency change ${mode}`, error);
+		logger.log(
+			`Error during Orders API frequency change ${preview ? 'preview' : 'execute'}`,
+			error,
+		);
 		return {
 			success: false,
-			mode,
 			previousBillingPeriod: currentBillingPeriod,
 			newBillingPeriod: targetBillingPeriod,
 			reasons: [
@@ -434,9 +433,15 @@ export const frequencyChangeHandler =
 			parsed.body.preview,
 		);
 
-		frequencyChangeResponseSchema.parse(response);
+		// Validate response based on mode
+		if (parsed.body.preview) {
+			frequencyChangePreviewResponseSchema.parse(response);
+		} else {
+			frequencyChangeSwitchResponseSchema.parse(response);
+		}
+
 		logger.log(
-			`Frequency change ${response.mode} response ${prettyPrint(response)}`,
+			`Frequency change ${parsed.body.preview ? 'preview' : 'execute'} response ${prettyPrint(response)}`,
 		);
 
 		const statusCode = response.success
