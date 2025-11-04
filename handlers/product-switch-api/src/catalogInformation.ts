@@ -16,7 +16,9 @@ export type CatalogInformation = {
 	};
 };
 
-const getCatalogBillingPeriod = (billingPeriod: BillingPeriod) => {
+export const getCatalogBillingPeriod = (
+	billingPeriod: BillingPeriod,
+): 'Monthly' | 'Annual' => {
 	if (billingPeriod == 'Annual') {
 		return 'Annual';
 	} else if (billingPeriod == 'Month') {

@@ -8,6 +8,7 @@ import { getSubscription } from '@modules/zuora/subscription';
 import type { RatePlan } from '@modules/zuora/types/objects/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type dayjs from 'dayjs';
+import { getCatalogBillingPeriod } from './catalogInformation';
 import { frequencyChangeResponseSchema } from './schemas';
 import type { FrequencyChangeRequestBody } from './schemas';
 
@@ -42,9 +43,7 @@ function getTargetRatePlanId(
 	}
 	logger.log(`Found product details: ${prettyPrint(productDetails)}`);
 
-	// Map billing period to rate plan key (Month -> Monthly, Annual -> Annual)
-	const targetRatePlanKey: 'Monthly' | 'Annual' =
-		targetBillingPeriod === 'Month' ? 'Monthly' : 'Annual';
+	const targetRatePlanKey = getCatalogBillingPeriod(targetBillingPeriod);
 	logger.log(
 		`Determined target rate plan key '${targetRatePlanKey}' for requested billing period '${targetBillingPeriod}'`,
 	);
