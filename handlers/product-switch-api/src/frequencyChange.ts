@@ -152,9 +152,8 @@ async function processFrequencyChange(
 		const targetPrice =
 			rawTargetRatePlan.pricing?.[currency] ?? currentCharge.price ?? 0;
 
-		// For preview: use today's date to see immediate billing impact
-		// For execution: use term end date to schedule the change
-		// Zuora doesn't generate billing docs for future-dated amendments in preview
+		// For preview: use today to get Zuora to generate billing docs
+		// For execution: use term end date to schedule the change correctly
 		const effectiveDate = preview ? dayjs() : dayjs(subscription.termEndDate);
 		const triggerDates = singleTriggerDate(effectiveDate);
 		const orderActions: OrderAction[] = [
@@ -178,15 +177,14 @@ async function processFrequencyChange(
 		];
 
 		if (preview) {
-			// Preview just needs to show the next invoice under the new billing frequency
-			// Both monthly and annual will return 1 invoice, but annual needs a longer preview window
-			const previewPeriod = 1; // targetBillingPeriod === 'Month' ? 1 : 12;
+			// Preview with today's date to get Zuora to generate invoices
+			// Then filter to show only the new billing period charges (exclude credits/prorations)
 			const orderRequest: PreviewOrderRequest = {
 				previewOptions: {
 					previewThruType: 'SpecificDate',
 					previewTypes: ['BillingDocs'],
 					specificPreviewThruDate: zuoraDateFormat(
-						effectiveDate.add(previewPeriod, 'month'),
+						effectiveDate.add(1, 'month'),
 					),
 				},
 				orderDate: zuoraDateFormat(effectiveDate),
@@ -220,16 +218,30 @@ async function processFrequencyChange(
 						message: r.message,
 					})) ?? [{ message: 'Unknown error from Zuora preview' }],
 				};
-			} else {
-				logger.log('Orders preview returned successful response', zuoraPreview);
 			}
+
+			logger.log('Orders preview returned successful response', zuoraPreview);
+
+			// Filter invoice items to show only the new billing period charges
+			// Exclude credits/prorations from the old billing period
+			const cleanedInvoices =
+				zuoraPreview.previewResult?.invoices.map((invoice) => ({
+					...invoice,
+					invoiceItems: invoice.invoiceItems.filter(
+						(item) =>
+							// Keep items with positive amounts (new charges)
+							// or items matching the target rate plan charge
+							item.amountWithoutTax >= 0 &&
+							item.productRatePlanChargeId === targetSubscriptionChargeId,
+					),
+				})) ?? [];
 
 			return {
 				success: true,
 				mode: 'preview',
 				previousBillingPeriod: currentBillingPeriod,
 				newBillingPeriod: targetBillingPeriod,
-				previewInvoices: zuoraPreview.previewResult?.invoices ?? [],
+				previewInvoices: cleanedInvoices,
 			};
 		} else {
 			const orderRequest: CreateOrderRequest = {
