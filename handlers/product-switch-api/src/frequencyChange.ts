@@ -178,13 +178,15 @@ async function processFrequencyChange(
 		];
 
 		if (preview) {
-			const numberOfMonthsToPreview = 13;
+			// Preview just needs to show the next invoice under the new billing frequency
+			// Both monthly and annual will return 1 invoice, but annual needs a longer preview window
+			const previewPeriod = 1; // targetBillingPeriod === 'Month' ? 1 : 12;
 			const orderRequest: PreviewOrderRequest = {
 				previewOptions: {
 					previewThruType: 'SpecificDate',
 					previewTypes: ['BillingDocs'],
 					specificPreviewThruDate: zuoraDateFormat(
-						effectiveDate.add(numberOfMonthsToPreview, 'month'),
+						effectiveDate.add(previewPeriod, 'month'),
 					),
 				},
 				orderDate: zuoraDateFormat(effectiveDate),
