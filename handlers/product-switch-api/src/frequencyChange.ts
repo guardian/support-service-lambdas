@@ -1,5 +1,6 @@
 import { prettyPrint } from '@modules/prettyPrint';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
+import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
@@ -15,6 +16,7 @@ import type { FrequencyChangeRequestBody } from './schemas';
  * Maps billing period to the corresponding rate plan key in the product catalog
  * and retrieves the product rate plan Id for that billing period.
  *
+ * @param productCatalog Product catalog to look up rate plans
  * @param productCatalogHelper Helper to find product details
  * @param currentRatePlan Current rate plan from the subscription
  * @param targetBillingPeriod Target billing period ('Month' or 'Annual')
@@ -22,6 +24,7 @@ import type { FrequencyChangeRequestBody } from './schemas';
  * @throws Error if product details cannot be found or target rate plan doesn't exist
  */
 function getTargetRatePlanId(
+	productCatalog: ProductCatalog,
 	productCatalogHelper: ProductCatalogHelper,
 	currentRatePlan: RatePlan,
 	targetBillingPeriod: 'Month' | 'Annual',
@@ -39,15 +42,27 @@ function getTargetRatePlanId(
 	}
 	logger.log(`Found product details: ${prettyPrint(productDetails)}`);
 
-	// TODO:delete comment - Derive target rate plan key based on requested billing period
+	// Map billing period to rate plan key (Month -> Monthly, Annual -> Annual)
 	const targetRatePlanKey: 'Monthly' | 'Annual' =
 		targetBillingPeriod === 'Month' ? 'Monthly' : 'Annual';
 	logger.log(
-		`Determined target rate plan key ${targetRatePlanKey} for requested billing period ${targetBillingPeriod}`,
+		`Determined target rate plan key '${targetRatePlanKey}' for requested billing period '${targetBillingPeriod}'`,
 	);
 
-	// TODO:delete comment - Placeholder implementation until catalog logic added
-	return '000-000';
+	// Access catalog directly using the runtime string keys
+	// This works because ratePlans is a Record<string, ...>
+	const product = productCatalog[productDetails.zuoraProduct];
+	const ratePlan = product.ratePlans[
+		targetRatePlanKey as keyof typeof product.ratePlans
+	] as { id: string } | undefined;
+
+	if (!ratePlan) {
+		throw new Error(
+			`Rate plan ${targetRatePlanKey} not found for product ${productDetails.zuoraProduct}`,
+		);
+	}
+
+	return ratePlan.id;
 }
 
 export const frequencyChangeHandler =
@@ -159,6 +174,7 @@ export const frequencyChangeHandler =
 					RatePlanData: {
 						RatePlan: {
 							ProductRatePlanId: getTargetRatePlanId(
+								productCatalog,
 								productCatalogHelper,
 								ratePlan,
 								parsed.body.targetBillingPeriod,
