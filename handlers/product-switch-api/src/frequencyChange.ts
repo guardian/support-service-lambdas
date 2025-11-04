@@ -58,10 +58,20 @@ function getTargetRatePlanId(
 		`Determined target rate plan key '${targetRatePlanKey}' for requested billing period '${targetBillingPeriod}'`,
 	);
 
+	// Check if product exists in catalog before accessing
+	const productName = currentRatePlan.productName;
+	if (!(productName in productCatalog)) {
+		logger.log(
+			`Available products in catalog: ${Object.keys(productCatalog).join(', ')}`,
+		);
+		throw new Error(
+			`Product '${productName}' not found in product catalog. Available products: ${Object.keys(productCatalog).join(', ')}`,
+		);
+	}
+
 	// Access catalog directly using the runtime string keys
 	// This works because ratePlans is a Record<string, ...>
-	const product =
-		productCatalog[currentRatePlan.productName as keyof typeof productCatalog];
+	const product = productCatalog[productName as keyof typeof productCatalog];
 
 	const ratePlan = product.ratePlans[
 		targetRatePlanKey as keyof typeof product.ratePlans
@@ -112,10 +122,17 @@ async function processFrequencyChange(
 			targetBillingPeriod,
 		);
 		const targetRatePlanKey = getCatalogBillingPeriod(targetBillingPeriod);
-		const targetProduct =
-			productCatalog[
-				currentRatePlan.productName as keyof typeof productCatalog
-			];
+		
+		// Check if product exists in catalog before accessing
+		const productName = currentRatePlan.productName;
+		if (!(productName in productCatalog)) {
+			throw new Error(
+				`Product '${productName}' not found in product catalog during order construction`,
+			);
+		}
+		
+		const targetProduct = productCatalog[productName as keyof typeof productCatalog];
+		
 		const rawTargetRatePlan = targetProduct.ratePlans[
 			targetRatePlanKey as keyof typeof targetProduct.ratePlans
 		] as {
