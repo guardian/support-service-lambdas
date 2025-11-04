@@ -152,8 +152,11 @@ async function processFrequencyChange(
 		const targetPrice =
 			rawTargetRatePlan.pricing?.[currency] ?? currentCharge.price ?? 0;
 
-		// Build ChangePlan order action at term end (when we intend to switch)
-		const triggerDates = singleTriggerDate(dayjs(subscription.termEndDate));
+		// For preview: use today's date to see immediate billing impact
+		// For execution: use term end date to schedule the change
+		// Zuora doesn't generate billing docs for future-dated amendments in preview
+		const effectiveDate = preview ? dayjs() : dayjs(subscription.termEndDate);
+		const triggerDates = singleTriggerDate(effectiveDate);
 		const orderActions: OrderAction[] = [
 			{
 				type: 'ChangePlan',
@@ -181,13 +184,10 @@ async function processFrequencyChange(
 					previewThruType: 'SpecificDate',
 					previewTypes: ['BillingDocs'],
 					specificPreviewThruDate: zuoraDateFormat(
-						dayjs(subscription.termEndDate).add(
-							numberOfMonthsToPreview,
-							'month',
-						),
+						effectiveDate.add(numberOfMonthsToPreview, 'month'),
 					),
 				},
-				orderDate: zuoraDateFormat(dayjs(subscription.termEndDate)),
+				orderDate: zuoraDateFormat(effectiveDate),
 				existingAccountNumber: subscription.accountNumber,
 				subscriptions: [
 					{
