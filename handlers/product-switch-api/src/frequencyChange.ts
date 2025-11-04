@@ -81,6 +81,8 @@ export const frequencyChangeHandler =
 			.flatMap((rp) =>
 				rp.ratePlanCharges.map((c) => ({ ratePlan: rp, charge: c })),
 			)
+			// Only Subscription rate plans charges
+			.filter(({ charge }) => charge.name === 'Subscription')
 			// Only recurring charges define ongoing billing periods relevant to frequency changes.
 			.filter(({ charge }) => charge.type === 'Recurring')
 			// Charge is currently effective.
@@ -101,18 +103,25 @@ export const frequencyChangeHandler =
 			);
 		if (candidateCharges.length === 0) {
 			logger.log('No candidate charges found for frequency change.');
-			throw new Error(
-				'No active recurring charges eligible for frequency change.',
-			);
+			return {
+				statusCode: 400,
+				body: JSON.stringify({
+					message: 'No active recurring charges eligible for frequency change.',
+				}),
+			};
 		}
 		if (candidateCharges.length > 1) {
 			logger.log(
 				'Multiple eligible charges found; cannot safely change frequency.',
 				candidateCharges,
 			);
-			throw new Error(
-				'Multiple eligible charges found; cannot safely change frequency.',
-			);
+			return {
+				statusCode: 400,
+				body: JSON.stringify({
+					message:
+						'Multiple eligible charges found; cannot safely change frequency.',
+				}),
+			};
 		}
 
 		const candidateCharge = candidateCharges[0]!;
