@@ -23,11 +23,8 @@ Once rotated, they can be added to parameter store (in the usual place - for COD
 The cognito client secret if changed needs manually adding to parameter store, due to security
 limitations.
 
-## TODO
-- add tests
-- tidy up "client"s to return sensible data types
-- add some runManual for local/CODE where appropriate
-- review for any security holes
-- make sure nothing can be forwarded inappropriately by the proxy, e.g. the auth cookie to an untrusted backend
-- check the cookie settings (secure, httponly)
+## TODO (in later PRs)
 - consider to add a neater fastly domain https://staff-access.guardianapis.com/discount-api/docs
+- some kind of index so we can find all the endpoints
+- make the google client secret a securestring if possible (not easy as it's needed in the CFN)
+- serve protected swagger UIs for each lambda (consider adding scopes (access-token) instead of using the id token)
