@@ -340,13 +340,4 @@ describe('frequency change behaviour', () => {
 			1000 * 60,
 		);
 	});
-
-	describe('error handling', () => {
-		it('handles subscription with no eligible charges gracefully', () => {
-			// Create a subscription then try to change frequency on an ineligible one
-			// This test would need a subscription without proper charges
-			// For now, we'll test that the error handling exists in unit tests
-			expect(true).toBe(true);
-		});
-	});
 });
