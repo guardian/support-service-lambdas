@@ -24,8 +24,8 @@ export class <%= PascalCase %> extends SrStack {
         				errorImpact:
         					'an eligible user may not have been offered a discount during the cancellation flow',
         			},
-        			<% if (includeApiKey === 'Y'){ %>
-        			isPublic: true,
+        			<% if (includeApiKey !== 'Y'){ %>
+        			isPublic: true, // Don't create an API Key for this lambda
         			<% } %>
         		});
     }
