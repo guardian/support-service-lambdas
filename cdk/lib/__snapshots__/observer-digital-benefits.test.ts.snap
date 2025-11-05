@@ -120,6 +120,29 @@ exports[`The Observer digital benefits stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::DomainName",
     },
+    "SupporterProductDataTablequeryaccess7665F484": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "dynamodb:Query",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "supporter-product-data-tables-CODE-SupporterProductDataTable",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SupporterProductDataTablequeryaccess7665F484",
+        "Roles": [
+          {
+            "Ref": "observerdigitalbenefitslambdaServiceRole184268EE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
     "observerdigitalbenefitslambdaFD43C7C9": {
       "DependsOn": [
         "observerdigitalbenefitslambdaServiceRoleDefaultPolicy3A2D2C16",
@@ -1031,6 +1054,29 @@ exports[`The Observer digital benefits stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::ApiGateway::DomainName",
+    },
+    "SupporterProductDataTablequeryaccess7665F484": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "dynamodb:Query",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::ImportValue": "supporter-product-data-tables-PROD-SupporterProductDataTable",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "SupporterProductDataTablequeryaccess7665F484",
+        "Roles": [
+          {
+            "Ref": "observerdigitalbenefitslambdaServiceRole184268EE",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
     },
     "observerdigitalbenefitslambdaFD43C7C9": {
       "DependsOn": [
