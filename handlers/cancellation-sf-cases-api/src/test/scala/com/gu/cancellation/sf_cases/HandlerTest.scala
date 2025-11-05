@@ -33,9 +33,9 @@ class HandlerTest extends AnyFlatSpec with Matchers {
       ContactId = ContactId(contactId.Id),
       Product__c = product.value,
       Subscription_Name__c = subName,
-      Journey__c = "SV - At Risk - MB",
-      Enquiry_Type__c = reason.value,
-      Case_Closure_Reason__c = gaData.value,
+      Category__c = "Retentions",
+      Self_Serve_Cancel_Reason__c = reason.value,
+      Case_Journey__c = "Self Service",
       Status = "Closed",
       Subject = CaseSubject(STARTING_CASE_SUBJECT),
     )
