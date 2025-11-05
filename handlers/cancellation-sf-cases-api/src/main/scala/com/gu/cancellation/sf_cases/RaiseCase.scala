@@ -51,9 +51,9 @@ object RaiseCase {
       ContactId = ContactId(sfContactIdContainer.Id),
       Product__c = raiseCaseDetail.product.value,
       Subscription_Name__c = subscriptionName,
-      Journey__c = "SV - At Risk - MB",
-      Enquiry_Type__c = raiseCaseDetail.reason.value,
-      Case_Closure_Reason__c = raiseCaseDetail.gaData.value,
+      Category__c = "Retentions",
+      Self_Serve_Cancel_Reason__c = raiseCaseDetail.reason.value,
+      Case_Journey__c = "Self Service"
       Status = "Closed",
       Subject = CaseSubject(STARTING_CASE_SUBJECT),
     )
@@ -63,7 +63,7 @@ object RaiseCase {
   )(
       reason: Reason,
       sfCase: CaseWithId,
-  ): ClientFailableOp[Unit] = sfUpdateOp(sfCase.id, JsObject(Map("Enquiry_Type__c" -> JsString(reason.value))))
+  ): ClientFailableOp[Unit] = sfUpdateOp(sfCase.id, JsObject(Map("Self_Serve_Cancel_Reason__c" -> JsString(reason.value))))
 
   type TNewOrResumeCase = (ContactIdContainer, SubscriptionName, Option[CaseWithId]) => ApiGatewayOp[CaseWithId]
 
