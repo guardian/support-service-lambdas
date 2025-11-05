@@ -492,14 +492,14 @@ export const frequencyChangeHandler =
 					productCatalog,
 					parsed.body.targetBillingPeriod,
 					today,
-			  )
+				)
 			: await executeFrequencyChange(
 					zuoraClient,
 					subscription,
 					productCatalog,
 					parsed.body.targetBillingPeriod,
 					today,
-			  )
+				);
 
 		logger.log(
 			`Frequency change ${parsed.body.preview ? 'preview' : 'execute'} response ${prettyPrint(response)}`,
