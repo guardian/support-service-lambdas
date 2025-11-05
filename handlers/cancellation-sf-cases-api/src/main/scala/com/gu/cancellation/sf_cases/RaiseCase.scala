@@ -53,7 +53,7 @@ object RaiseCase {
       Subscription_Name__c = subscriptionName,
       Category__c = "Retentions",
       Self_Serve_Cancel_Reason__c = raiseCaseDetail.reason.value,
-      Case_Journey__c = "Self Service"
+      Case_Journey__c = "Self Service",
       Status = "Closed",
       Subject = CaseSubject(STARTING_CASE_SUBJECT),
     )
