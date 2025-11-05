@@ -275,6 +275,10 @@ importers:
         version: 8.10.155
 
   handlers/observer-digital-benefits:
+    dependencies:
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.129
