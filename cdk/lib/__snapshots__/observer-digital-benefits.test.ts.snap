@@ -335,6 +335,7 @@ exports[`The Observer digital benefits stack matches the snapshot 1`] = `
     },
     "observerdigitalbenefitslambdaobserverdigitalbenefitsCODE18E5AD33": {
       "Properties": {
+        "ApiKeySourceType": "HEADER",
         "Description": "API Gateway created by CDK",
         "Name": "observer-digital-benefits-CODE",
         "Tags": [
@@ -364,6 +365,7 @@ exports[`The Observer digital benefits stack matches the snapshot 1`] = `
     },
     "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEANY139FEC55": {
       "Properties": {
+        "ApiKeyRequired": true,
         "AuthorizationType": "NONE",
         "HttpMethod": "ANY",
         "Integration": {
@@ -554,7 +556,7 @@ exports[`The Observer digital benefits stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEDeployment760627562a93489525a7a4972010ef354f67ee60": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEDeployment760627567bc71d84578265f6abac18c2194b9ca5": {
       "DependsOn": [
         "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEproxyANYD379DFAC",
         "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEproxyF9553C39",
@@ -574,7 +576,7 @@ exports[`The Observer digital benefits stack matches the snapshot 1`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEDeployment760627562a93489525a7a4972010ef354f67ee60",
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEDeployment760627567bc71d84578265f6abac18c2194b9ca5",
         },
         "RestApiId": {
           "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODE18E5AD33",
@@ -604,6 +606,97 @@ exports[`The Observer digital benefits stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::ApiGateway::Stage",
+    },
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEUsagePlanCA3F70D9": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODE18E5AD33",
+            },
+            "Stage": {
+              "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEDeploymentStageCODE875A82C7",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Description": "REST endpoints for observer-digital-benefits",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "observer-digital-benefits",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+        "UsagePlanName": "observer-digital-benefits-CODE",
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEUsagePlanUsagePlanKeyResourceobserverdigitalbenefitsCODEobserverdigitalbenefitslambdaobserverdigitalbenefitsCODEobserverdigitalbenefitskeyCODEDDA3664BC382DB74": {
+      "Properties": {
+        "KeyId": {
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEobserverdigitalbenefitskeyCODEDA1EA448",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEUsagePlanCA3F70D9",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEobserverdigitalbenefitskeyCODEDA1EA448": {
+      "Properties": {
+        "Enabled": true,
+        "Name": "observer-digital-benefits-key-CODE",
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODE18E5AD33",
+            },
+            "StageName": {
+              "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEDeploymentStageCODE875A82C7",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "observer-digital-benefits",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
     },
     "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEproxyANYApiPermissionTestobserverdigitalbenefitsCODEobserverdigitalbenefitslambdaobserverdigitalbenefitsCODEF9094BA7ANYproxy746FD151": {
       "Properties": {
@@ -685,6 +778,7 @@ exports[`The Observer digital benefits stack matches the snapshot 1`] = `
     },
     "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEproxyANYD379DFAC": {
       "Properties": {
+        "ApiKeyRequired": true,
         "AuthorizationType": "NONE",
         "HttpMethod": "ANY",
         "Integration": {
@@ -1153,6 +1247,7 @@ exports[`The Observer digital benefits stack matches the snapshot 2`] = `
     },
     "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODANY206BDEFD": {
       "Properties": {
+        "ApiKeyRequired": true,
         "AuthorizationType": "NONE",
         "HttpMethod": "ANY",
         "Integration": {
@@ -1343,7 +1438,7 @@ exports[`The Observer digital benefits stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODDeploymentB3E63E2257169dc7b1f6fc16c382ee5e4df68920": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODDeploymentB3E63E2248dac15827bcba0bc40d15dbdd023867": {
       "DependsOn": [
         "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODproxyANYA79F9B8D",
         "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODproxy760F363F",
@@ -1363,7 +1458,7 @@ exports[`The Observer digital benefits stack matches the snapshot 2`] = `
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODDeploymentB3E63E2257169dc7b1f6fc16c382ee5e4df68920",
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODDeploymentB3E63E2248dac15827bcba0bc40d15dbdd023867",
         },
         "RestApiId": {
           "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODE3B12D45",
@@ -1396,6 +1491,7 @@ exports[`The Observer digital benefits stack matches the snapshot 2`] = `
     },
     "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODE3B12D45": {
       "Properties": {
+        "ApiKeySourceType": "HEADER",
         "Description": "API Gateway created by CDK",
         "Name": "observer-digital-benefits-PROD",
         "Tags": [
@@ -1423,6 +1519,97 @@ exports[`The Observer digital benefits stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::RestApi",
     },
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODUsagePlan7C5536AB": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODE3B12D45",
+            },
+            "Stage": {
+              "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODDeploymentStagePROD2B69E4CF",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Description": "REST endpoints for observer-digital-benefits",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "observer-digital-benefits",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "UsagePlanName": "observer-digital-benefits-PROD",
+      },
+      "Type": "AWS::ApiGateway::UsagePlan",
+    },
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODUsagePlanUsagePlanKeyResourceobserverdigitalbenefitsPRODobserverdigitalbenefitslambdaobserverdigitalbenefitsPRODobserverdigitalbenefitskeyPROD40E5B24CCA26983E": {
+      "Properties": {
+        "KeyId": {
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODobserverdigitalbenefitskeyPRODABC61343",
+        },
+        "KeyType": "API_KEY",
+        "UsagePlanId": {
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODUsagePlan7C5536AB",
+        },
+      },
+      "Type": "AWS::ApiGateway::UsagePlanKey",
+    },
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODobserverdigitalbenefitskeyPRODABC61343": {
+      "Properties": {
+        "Enabled": true,
+        "Name": "observer-digital-benefits-key-PROD",
+        "StageKeys": [
+          {
+            "RestApiId": {
+              "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODE3B12D45",
+            },
+            "StageName": {
+              "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODDeploymentStagePROD2B69E4CF",
+            },
+          },
+        ],
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "observer-digital-benefits",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::ApiGateway::ApiKey",
+    },
     "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODproxy760F363F": {
       "Properties": {
         "ParentId": {
@@ -1440,6 +1627,7 @@ exports[`The Observer digital benefits stack matches the snapshot 2`] = `
     },
     "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODproxyANYA79F9B8D": {
       "Properties": {
+        "ApiKeyRequired": true,
         "AuthorizationType": "NONE",
         "HttpMethod": "ANY",
         "Integration": {

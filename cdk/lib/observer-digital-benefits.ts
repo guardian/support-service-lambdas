@@ -18,7 +18,7 @@ export class ObserverDigitalBenefits extends SrStack {
 					'an eligible user may not have been offered a discount during the cancellation flow',
 			},
 
-			isPublic: true,
+			isPublic: false,
 		});
 	}
 }
