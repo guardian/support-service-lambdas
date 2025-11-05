@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "build": "tsc --noEmit",
-    "lint": "eslint src/**/*.ts test/**/*.ts"
+    "lint": "eslint src/**/*.ts test/**/*.ts",
+    "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --group=-integration"
   },
   "devDependencies": {
     "@aws-sdk/client-dynamodb": "^3.848.0",

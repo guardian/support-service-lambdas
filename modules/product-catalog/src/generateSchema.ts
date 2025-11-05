@@ -1,12 +1,16 @@
 import { distinct } from '@modules/arrayFunctions';
-import { isNotNull } from '@modules/nullAndUndefined';
+import { getIfDefined, isNotNull } from '@modules/nullAndUndefined';
 import type {
 	CatalogProduct,
 	ZuoraCatalog,
 	ZuoraProductRatePlan,
 	ZuoraProductRatePlanCharge,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
-import { isDeliveryProduct } from '@modules/product-catalog/productCatalog';
+import {
+	isDeliveryProduct,
+	supportsPromotions,
+} from '@modules/product-catalog/productCatalog';
+import { productKeySchema } from '@modules/product-catalog/productCatalogSchema';
 import { stripeProductsSchema } from '@modules/product-catalog/stripeProducts';
 import {
 	getProductRatePlanChargeKey,
@@ -29,12 +33,14 @@ export const generateSchema = (catalog: ZuoraCatalog): string => {
 		isSupportedProduct(product.name),
 	);
 
+	const discountRatePlan: ZuoraProductRatePlan = findDiscountRatePlan(catalog);
+
 	const productKeys = supportedZuoraProducts
 		.map((product) => getZuoraProductKey(product.name))
 		.sort();
 
 	const zuoraProductsSchema = supportedZuoraProducts
-		.map((product) => generateZuoraProductSchema(product))
+		.map((product) => generateZuoraProductSchema(product, discountRatePlan))
 		.join(',\n');
 
 	return `${header}
@@ -48,22 +54,49 @@ export const generateSchema = (catalog: ZuoraCatalog): string => {
 		${footer}`;
 };
 
-const generateZuoraProductSchema = (product: CatalogProduct) => {
-	const productName = getZuoraProductKey(product.name);
+export function findDiscountRatePlan(
+	catalog: ZuoraCatalog,
+): ZuoraProductRatePlan {
+	return getIfDefined(
+		catalog.products
+			.find((product) => product.name === 'Discounts')
+			?.productRatePlans.find((ratePlan) => ratePlan.name === 'Percentage'),
+		'Discount rate plan not found in Zuora catalog',
+	);
+}
+
+function getRatePlanSchema(
+	product: CatalogProduct,
+	discountRatePlan: ZuoraProductRatePlan,
+) {
+	const productSupportsDiscounts = supportsPromotions(
+		productKeySchema.parse(getZuoraProductKey(product.name)),
+	);
 	const supportedRatePlans = product.productRatePlans.filter(
 		(productRatePlan) => isSupportedProductRatePlan(productRatePlan.name),
 	);
-	const ratePlanSchema = supportedRatePlans.map((productRatePlan) =>
-		generateProductRatePlanSchema(productRatePlan),
-	);
+	const allRatePlans = productSupportsDiscounts
+		? [...supportedRatePlans, discountRatePlan]
+		: supportedRatePlans;
+	return allRatePlans
+		.map((productRatePlan) => generateProductRatePlanSchema(productRatePlan))
+		.join(',\n');
+}
 
-	return `${productName}: z.object({
+const generateZuoraProductSchema = (
+	product: CatalogProduct,
+	discountRatePlan: ZuoraProductRatePlan,
+) => {
+	const productKey = getZuoraProductKey(product.name);
+	const ratePlanSchema = getRatePlanSchema(product, discountRatePlan);
+
+	return `${productKey}: z.object({
 		billingSystem: z.literal('zuora'),
 		active: z.boolean(),
 		customerFacingName: z.string(),
-		isDeliveryProduct: z.literal(${isDeliveryProduct(productName)}),
+		isDeliveryProduct: z.literal(${isDeliveryProduct(productKey)}),
 		ratePlans: z.object({
-			${ratePlanSchema.join(',\n')},
+			${ratePlanSchema},
 		}),
 	})`;
 };
@@ -90,6 +123,9 @@ const generateProductRatePlanSchema = (
 };
 
 const generatePricingSchema = (productRatePlan: ZuoraProductRatePlan) => {
+	if (productRatePlan.name === 'Percentage') {
+		return 'z.object({})';
+	}
 	const currencies = distinct(
 		productRatePlan.productRatePlanCharges.flatMap((charge) =>
 			charge.pricing.map((price) => price.currency),

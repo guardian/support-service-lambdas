@@ -4,31 +4,31 @@
  * @group integration
  */
 
+import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 import { IsoCurrency } from '@modules/internationalisation/currency';
-import dayjs from 'dayjs';
-import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { getIfDefined } from '@modules/nullAndUndefined';
+import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
+import { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
+import { getPromotions } from '@modules/promotions/getPromotions';
+import { Promotion } from '@modules/promotions/schema';
 import {
 	createSubscription,
 	CreateSubscriptionInputFields,
 } from '@modules/zuora/createSubscription/createSubscription';
 import {
+	previewCreateSubscription,
+	PreviewCreateSubscriptionInputFields,
+} from '@modules/zuora/createSubscription/previewCreateSubscription';
+import { getInvoice } from '@modules/zuora/invoice';
+import {
 	CreditCardReferenceTransaction,
 	DirectDebit,
 	PaymentGateway,
 } from '@modules/zuora/orders/paymentMethods';
-import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
-import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
-import {
-	previewCreateSubscription,
-	PreviewCreateSubscriptionInputFields,
-} from '@modules/zuora/createSubscription/previewCreateSubscription';
-import { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
-import { Promotion } from '@modules/promotions/schema';
-import { getInvoice } from '@modules/zuora/invoice';
-import { getIfDefined } from '@modules/nullAndUndefined';
-import { SupportRegionId } from '@modules/internationalisation/countryGroup';
-import { getPromotions } from '@modules/promotions/getPromotions';
 import { getSubscription } from '@modules/zuora/subscription';
+import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import dayjs from 'dayjs';
+import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
 
 describe('createSubscription integration', () => {
 	const productCatalog = generateProductCatalog(code);
@@ -61,7 +61,6 @@ describe('createSubscription integration', () => {
 		type: 'Bacs',
 	};
 	const createInputFields: CreateSubscriptionInputFields<DirectDebit> = {
-		stage: 'CODE',
 		accountName: 'Test Account',
 		createdRequestId: 'REQUEST-ID' + new Date().getTime(),
 		salesforceAccountId: 'CRM-ID',

@@ -2,7 +2,7 @@
   "name": "product-catalog",
   "version": "1.0.0",
   "scripts": {
-    "generateFiles": "ts-node src/generateSchemaCommand.ts",
+    "generateFiles": "ts-node -r tsconfig-paths/register --project ../../tsconfig.json src/generateSchemaCommand.ts",
     "validateSchema": "prettier --write src/productCatalogSchema.ts && pnpm run sortSchemaKeys",
     "sortSchemaKeys": "for i in {1..3}; do eslint --fix src/productCatalogSchema.ts; done",
     "validateBillingPeriods": "prettier --write src/productBillingPeriods.ts && pnpm run sortBillingPeriodKeys",

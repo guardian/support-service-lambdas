@@ -55,6 +55,26 @@ export function isDeliveryProductPurchase(
 	return isDeliveryProduct(productPurchase.product);
 }
 
+// Products which do not support promotions
+const promotionExcludedKeys = [
+	'Contribution',
+	'OneTimeContribution',
+	'GuardianAdLite',
+	'GuardianPatron',
+] as const;
+
+type PromotionExcludedKey = (typeof promotionExcludedKeys)[number];
+
+export type PromotionSupportedProductKey = Exclude<
+	ProductKey,
+	PromotionExcludedKey
+>;
+
+export const supportsPromotions = (
+	productKey: string,
+): productKey is PromotionSupportedProductKey =>
+	!promotionExcludedKeys.includes(productKey as PromotionExcludedKey);
+
 // Eventually all but OneTimeContribution will come from a custom field in Zuora's Product Catalog
 const customerFacingNameMapping: Record<ProductKey, string> = {
 	GuardianAdLite: 'Guardian Ad-Lite',

@@ -2,7 +2,7 @@ import type { App } from 'aws-cdk-lib';
 import { Duration } from 'aws-cdk-lib';
 import { EventBus, Rule } from 'aws-cdk-lib/aws-events';
 import { SqsQueue } from 'aws-cdk-lib/aws-events-targets';
-import { AllowSupporterProductDataPutItemPolicy } from './cdk/policies';
+import { AllowSqsSendPolicy } from './cdk/policies';
 import { SrSqsLambda } from './cdk/SrSqsLambda';
 import { SrStack, type SrStageNames } from './cdk/SrStack';
 
@@ -23,7 +23,7 @@ export class MobilePurchasesToSupporterProductData extends SrStack {
 			// This must be >= the lambda timeout
 			visibilityTimeout: Duration.minutes(5),
 		});
-		lambda.addPolicies(new AllowSupporterProductDataPutItemPolicy(this));
+		lambda.addPolicies(new AllowSqsSendPolicy(this, 'supporter-product-data'));
 
 		const mobilePurchasesBus = EventBus.fromEventBusName(
 			this,

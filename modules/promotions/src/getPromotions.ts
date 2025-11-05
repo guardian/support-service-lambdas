@@ -1,6 +1,11 @@
 import { DynamoDBClient, ScanCommand } from '@aws-sdk/client-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { awsConfig } from '@modules/aws/config';
+import type {
+	ProductCatalog,
+	ProductKey,
+} from '@modules/product-catalog/productCatalog';
+import { supportsPromotions } from '@modules/product-catalog/productCatalog';
 import type { Stage } from '@modules/stage';
 import { type Promotion, promotionSchema } from './schema';
 
@@ -39,4 +44,14 @@ export const getPromotionByCode = (promotions: Promotion[], code: string) => {
 		const allCodes = Object.values(promo.codes).flat();
 		return allCodes.includes(code);
 	});
+};
+
+export const getDiscountRatePlanFromCatalog = (
+	productCatalog: ProductCatalog,
+	productKey: ProductKey,
+) => {
+	if (supportsPromotions(productKey)) {
+		return productCatalog[productKey].ratePlans.Discount;
+	}
+	return;
 };
