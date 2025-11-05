@@ -6,12 +6,24 @@ other lambdas, setting downstream and using upstream the relevant staff token co
 IMPORTANT: It is not intended at this stage to control anything sensitive, particularly it must not authenticate any
 access to PII whatsoever!
 
-CODE https://staff-access-code.support.guardianapis.com/discount-api/docs
-PROD https://staff-access.support.guardianapis.com/discount-api/docs
+- CODE https://staff-access-code.support.guardianapis.com/discount-api/docs
+- PROD https://staff-access.support.guardianapis.com/discount-api/docs
 
-# Getting started
+## Adding google auth to a new endpoint
 
-TODO
+
+## Developing
+
+Rotating google auth credentials needs access to the google developer console, they are under the "meeting-reminder-bot" (aka daily-churn-email) project.
+
+https://console.cloud.google.com/auth/clients?project=daily-churn-email
+
+Once rotated, they can be added to parameter store (in the usual place - for CODE under /CODE/support/staff-access)
+
+The cognito client secret if changed needs manually adding to parameter store, due to security
+limitations.
+
+## TODO
 - add tests
 - tidy up "client"s to return sensible data types
 - add some runManual for local/CODE where appropriate

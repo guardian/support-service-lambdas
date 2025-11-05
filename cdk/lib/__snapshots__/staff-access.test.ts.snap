@@ -50,14 +50,14 @@ exports[`The Staff Access stack matches the snapshot 1`] = `
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "appConfiggoogleOAuthClientId": {
-      "Default": "/CODE/support/staff-access/googleOAuthClientId",
+    "appConfiggoogleOAuthclientId": {
+      "Default": "/CODE/support/staff-access/googleOAuth/clientId",
       "Description": "oauth for staff only access, set up in https://console.cloud.google.com/apis/credentials",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "appConfiggoogleOAuthClientSecret": {
-      "Default": "/CODE/support/staff-access/googleOAuthClientSecret",
-      "Description": "parameter to look up googleOAuthClientSecret from SSM",
+    "appConfiggoogleOAuthclientSecret": {
+      "Default": "/CODE/support/staff-access/googleOAuth/clientSecret",
+      "Description": "parameter to look up googleOAuth/clientSecret from SSM",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
   },
@@ -146,10 +146,10 @@ exports[`The Staff Access stack matches the snapshot 1`] = `
         "ProviderDetails": {
           "authorize_scopes": "email",
           "client_id": {
-            "Ref": "appConfiggoogleOAuthClientId",
+            "Ref": "appConfiggoogleOAuthclientId",
           },
           "client_secret": {
-            "Ref": "appConfiggoogleOAuthClientSecret",
+            "Ref": "appConfiggoogleOAuthclientSecret",
           },
         },
         "ProviderName": "Google",
@@ -1343,14 +1343,14 @@ exports[`The Staff Access stack matches the snapshot 2`] = `
       "Description": "SSM parameter containing the S3 bucket name holding distribution artifacts",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "appConfiggoogleOAuthClientId": {
-      "Default": "/PROD/support/staff-access/googleOAuthClientId",
+    "appConfiggoogleOAuthclientId": {
+      "Default": "/PROD/support/staff-access/googleOAuth/clientId",
       "Description": "oauth for staff only access, set up in https://console.cloud.google.com/apis/credentials",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "appConfiggoogleOAuthClientSecret": {
-      "Default": "/PROD/support/staff-access/googleOAuthClientSecret",
-      "Description": "parameter to look up googleOAuthClientSecret from SSM",
+    "appConfiggoogleOAuthclientSecret": {
+      "Default": "/PROD/support/staff-access/googleOAuth/clientSecret",
+      "Description": "parameter to look up googleOAuth/clientSecret from SSM",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
   },
@@ -1515,10 +1515,10 @@ exports[`The Staff Access stack matches the snapshot 2`] = `
         "ProviderDetails": {
           "authorize_scopes": "email",
           "client_id": {
-            "Ref": "appConfiggoogleOAuthClientId",
+            "Ref": "appConfiggoogleOAuthclientId",
           },
           "client_secret": {
-            "Ref": "appConfiggoogleOAuthClientSecret",
+            "Ref": "appConfiggoogleOAuthclientSecret",
           },
         },
         "ProviderName": "Google",

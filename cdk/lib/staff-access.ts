@@ -22,14 +22,14 @@ export class StaffAccess extends SrStack {
 
 		const googleOAuthClientId = new SrAppConfigKey(
 			this,
-			'googleOAuthClientId',
+			'googleOAuth/clientId',
 			'oauth for staff only access, set up in https://console.cloud.google.com/apis/credentials',
 		).valueAsString;
 
 		// this auth system can't be used for anything critical as this is not a SecureString
 		const googleOAuthClientSecret = new SrAppConfigKey(
 			this,
-			'googleOAuthClientSecret',
+			'googleOAuth/clientSecret',
 		).valueAsString;
 
 		const userPool = new UserPool(this, 'UserPool', {

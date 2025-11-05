@@ -108,9 +108,7 @@ const getEnv = (env: string): string =>
 	getIfDefined(process.env[env], `${env} environment variable not set`);
 
 export const repoConfigSchema = z.object({
-	cognitoClientSecret: z.string(),
-	googleOAuthClientId: z.string(),
-	googleOAuthClientSecret: z.string(),
+	cognito: z.object({ clientSecret: z.string() }),
 });
 export type RepoConfig = z.infer<typeof repoConfigSchema>;
 
@@ -126,7 +124,7 @@ export async function createCognitoClientFromConfig() {
 		app,
 		repoConfigSchema,
 	);
-	const clientSecret = config.cognitoClientSecret;
+	const clientSecret = config.cognito.clientSecret;
 	return {
 		stage,
 		cognitoClient: new CognitoClient({
