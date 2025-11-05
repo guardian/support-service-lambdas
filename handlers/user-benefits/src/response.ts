@@ -1,3 +1,5 @@
+import { ValidationError } from '@modules/errors';
+import { prettyPrint } from '@modules/prettyPrint';
 import type { UserBenefitsResponse } from '@modules/product-benefits/schemas';
 import type { Stage } from '@modules/stage';
 import type { APIGatewayProxyResult } from 'aws-lambda';
@@ -29,5 +31,24 @@ export const buildHttpResponse = (
 			...buildCorsHeaders(origin, stage),
 		},
 		statusCode: 200,
+	};
+};
+
+export const buildErrorResponse = (error: unknown): APIGatewayProxyResult => {
+	if (error instanceof ValidationError) {
+		console.log(
+			`Handler returned 400 response due to validation error: ${prettyPrint(error)}`,
+		);
+		return {
+			body: error.message,
+			statusCode: 400,
+		};
+	}
+	console.log(
+		`Handler returned 500 response due to unexpected error: ${prettyPrint(error)}`,
+	);
+	return {
+		body: 'Internal server error',
+		statusCode: 500,
 	};
 };

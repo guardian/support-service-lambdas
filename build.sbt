@@ -275,7 +275,7 @@ lazy val `google-bigquery` = library(
   Seq(testDep, `config-core`, `effects-s3` % "test", handler % "test"),
 )
   .settings(
-    libraryDependencies ++= Seq(googleBigQuery, playJson) ++ logging,
+    libraryDependencies ++= Seq(googleBigQuery, grpcNettyOverride, playJson) ++ logging,
   )
 
 lazy val `zuora-baton` = library(

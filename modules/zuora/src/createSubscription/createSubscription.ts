@@ -1,9 +1,14 @@
 import type { IsoCurrency } from '@modules/internationalisation/currency';
-import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
+import { getIfDefined } from '@modules/nullAndUndefined';
+import type {
+	ProductCatalog,
+	ProductKey,
+} from '@modules/product-catalog/productCatalog';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
+import { getDiscountRatePlanFromCatalog } from '@modules/promotions/getPromotions';
 import type { AppliedPromotion, Promotion } from '@modules/promotions/schema';
+import type { ValidatedPromotion } from '@modules/promotions/validatePromotion';
 import { validatePromotion } from '@modules/promotions/validatePromotion';
-import type { Stage } from '@modules/stage';
 import dayjs from 'dayjs';
 import { z } from 'zod';
 import { getChargeOverride } from '@modules/zuora/createSubscription/chargeOverride';
@@ -37,7 +42,6 @@ export type CreateSubscriptionResponse = z.infer<
 >;
 
 export type CreateSubscriptionInputFields<T extends PaymentMethod> = {
-	stage: Stage;
 	accountName: string;
 	createdRequestId: string;
 	salesforceAccountId: string;
@@ -54,11 +58,45 @@ export type CreateSubscriptionInputFields<T extends PaymentMethod> = {
 	collectPayment?: boolean;
 };
 
+export type PromotionInputFields = {
+	validatedPromotion: ValidatedPromotion;
+	discountProductRatePlanId: string;
+	discountProductRatePlanChargeId: string;
+};
+
+export function getPromotionInputFields(
+	appliedPromotion: AppliedPromotion | undefined,
+	promotions: Promotion[],
+	productRatePlanId: string,
+	productCatalog: ProductCatalog,
+	productKey: ProductKey,
+): PromotionInputFields | undefined {
+	const validatedPromotion = appliedPromotion
+		? validatePromotion(promotions, appliedPromotion, productRatePlanId)
+		: undefined;
+
+	if (!validatedPromotion) {
+		console.log('No promotion applied');
+		return;
+	}
+	console.log(`Validated promotion is `, validatedPromotion);
+
+	const promotionProductRatePlan = getIfDefined(
+		getDiscountRatePlanFromCatalog(productCatalog, productKey),
+		'No promotion rate plan found in product catalog for product ' + productKey,
+	);
+	return {
+		validatedPromotion,
+		discountProductRatePlanId: promotionProductRatePlan.id,
+		discountProductRatePlanChargeId:
+			promotionProductRatePlan.charges.Percentage.id,
+	};
+}
+
 export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 	productCatalog: ProductCatalog,
 	promotions: Promotion[],
 	{
-		stage,
 		accountName,
 		createdRequestId,
 		salesforceAccountId,
@@ -110,22 +148,20 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 			: ReaderType.Direct;
 
 	const productRatePlan = getProductRatePlan(productCatalog, productPurchase);
-	const validatedPromotion = appliedPromotion
-		? validatePromotion(promotions, appliedPromotion, productRatePlan.id)
-		: undefined;
-	if (validatedPromotion !== undefined) {
-		console.log(`Validated promotion is `, validatedPromotion);
-	} else {
-		console.log('No promotion applied');
-	}
+	const promotionInputFields = getPromotionInputFields(
+		appliedPromotion,
+		promotions,
+		productRatePlan.id,
+		productCatalog,
+		productPurchase.product,
+	);
 
 	const createSubscriptionOrderAction = buildCreateSubscriptionOrderAction({
-		stage: stage,
 		productRatePlanId: productRatePlan.id,
 		contractEffectiveDate: contractEffectiveDate,
 		customerAcceptanceDate: customerAcceptanceDate,
 		chargeOverride: chargeOverride,
-		validatedPromotion: validatedPromotion,
+		promotionInputFields: promotionInputFields,
 		termType: productRatePlan.termType,
 		termLengthInMonths: productRatePlan.termLengthInMonths,
 	});

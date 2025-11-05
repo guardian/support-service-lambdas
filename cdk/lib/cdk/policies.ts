@@ -70,16 +70,3 @@ export class AllowSupporterProductDataQueryPolicy extends GuAllowPolicy {
 		});
 	}
 }
-
-export class AllowSupporterProductDataPutItemPolicy extends GuAllowPolicy {
-	constructor(scope: GuStack) {
-		super(scope, 'SupporterProductDataTable write access', {
-			actions: ['dynamodb:PutItem'],
-			resources: [
-				Fn.importValue(
-					`supporter-product-data-tables-${scope.stage}-SupporterProductDataTable`,
-				),
-			],
-		});
-	}
-}

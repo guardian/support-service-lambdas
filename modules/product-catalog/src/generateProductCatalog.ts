@@ -5,11 +5,14 @@ import type {
 	ZuoraProductRatePlan,
 	ZuoraProductRatePlanCharge,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
+import { findDiscountRatePlan } from '@modules/product-catalog/generateSchema';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import {
 	getCustomerFacingName,
 	isDeliveryProduct,
+	supportsPromotions,
 } from '@modules/product-catalog/productCatalog';
+import { productKeySchema } from '@modules/product-catalog/productCatalogSchema';
 import { stripeProducts } from '@modules/product-catalog/stripeProducts';
 import {
 	activeProducts,
@@ -91,39 +94,38 @@ const getBillingPeriod = (productRatePlan: ZuoraProductRatePlan) => {
 };
 
 const getZuoraProduct = (
-	isActive: boolean,
-	customerFacingName: string,
-	isDeliveryProduct: boolean,
+	productName: string,
 	productRatePlans: ZuoraProductRatePlan[],
+	discountRatePlan: ZuoraProductRatePlan,
 ) => {
+	const supportedProductRatePlans = productRatePlans.filter((productRatePlan) =>
+		isSupportedProductRatePlan(productRatePlan.name),
+	);
+	const allRatePlans = supportsPromotions(productKeySchema.parse(productName))
+		? [...supportedProductRatePlans, discountRatePlan]
+		: supportedProductRatePlans;
 	return {
 		billingSystem: 'zuora',
-		active: isActive,
-		customerFacingName,
-		isDeliveryProduct,
+		active: activeProducts.includes(productName),
+		customerFacingName: getCustomerFacingName(productName),
+		isDeliveryProduct: isDeliveryProduct(productName),
 		ratePlans: arrayToObject(
-			productRatePlans
-				.filter((productRatePlan) =>
-					isSupportedProductRatePlan(productRatePlan.name),
-				)
-				.map((productRatePlan) => {
-					const billingPeriod = getBillingPeriod(productRatePlan);
-					const productRatePlanKey = getProductRatePlanKey(
-						productRatePlan.name,
-					);
-					return {
-						[productRatePlanKey]: {
-							id: productRatePlan.id,
-							pricing: getPricingObject(productRatePlan.productRatePlanCharges),
-							charges: getProductRatePlanCharges(
-								productRatePlan.productRatePlanCharges,
-							),
-							termType: getTermTypeName(productRatePlan.TermType__c),
-							termLengthInMonths: getTermLength(productRatePlan.DefaultTerm__c),
-							...(billingPeriod && { billingPeriod }),
-						},
-					};
-				}),
+			allRatePlans.map((productRatePlan) => {
+				const billingPeriod = getBillingPeriod(productRatePlan);
+				const productRatePlanKey = getProductRatePlanKey(productRatePlan.name);
+				return {
+					[productRatePlanKey]: {
+						id: productRatePlan.id,
+						pricing: getPricingObject(productRatePlan.productRatePlanCharges),
+						charges: getProductRatePlanCharges(
+							productRatePlan.productRatePlanCharges,
+						),
+						termType: getTermTypeName(productRatePlan.TermType__c),
+						termLengthInMonths: getTermLength(productRatePlan.DefaultTerm__c),
+						...(billingPeriod && { billingPeriod }),
+					},
+				};
+			}),
 		),
 	};
 };
@@ -134,15 +136,16 @@ export const generateProductCatalog = (
 		isSupportedProduct(product.name),
 	);
 
+	const discountRatePlan = findDiscountRatePlan(catalog);
+
 	const result = arrayToObject(
 		supportedProducts.map((product) => {
 			const productName = getZuoraProductKey(product.name);
 			return {
 				[productName]: getZuoraProduct(
-					activeProducts.includes(productName),
-					getCustomerFacingName(productName),
-					isDeliveryProduct(productName),
+					productName,
 					product.productRatePlans,
+					discountRatePlan,
 				),
 			};
 		}),

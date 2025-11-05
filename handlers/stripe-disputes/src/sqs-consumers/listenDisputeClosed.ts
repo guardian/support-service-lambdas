@@ -1,5 +1,6 @@
 import type { Logger } from '@modules/routing/logger';
 import { stageFromEnvironment } from '@modules/stage';
+import { ZuoraError } from '@modules/zuora/errors';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { ListenDisputeClosedRequestBody } from '../dtos';
 import type { ZuoraInvoiceFromStripeChargeIdResult } from '../interfaces';
@@ -47,32 +48,49 @@ export async function handleListenDisputeClosed(
 		JSON.stringify(upsertSalesforceObjectResponse),
 	);
 
-	try {
-		const subscription = await getSubscriptionService(
-			logger,
-			zuoraClient,
-			invoiceFromZuora.SubscriptionNumber,
-		);
+	const subscription = await getSubscriptionService(
+		logger,
+		zuoraClient,
+		invoiceFromZuora.SubscriptionNumber,
+	);
 
-		if (subscription) {
+	if (subscription) {
+		let shouldWriteOffInvoice = true;
+
+		// Try to reject payment - may fail if already refunded
+		try {
 			await rejectPaymentService(
 				logger,
 				zuoraClient,
 				invoiceFromZuora.paymentPaymentNumber,
 			);
+		} catch (error) {
+			if (
+				error instanceof ZuoraError &&
+				error.zuoraErrorDetails.some((detail) => detail.code === '66000030')
+			) {
+				logger.log(
+					`Payment already processed (likely refunded before dispute). Skipping invoice write-off.`,
+				);
+				// Skip writeOffInvoice - it will fail because there's no rejected payment
+				shouldWriteOffInvoice = false;
+			} else {
+				throw error;
+			}
+		}
 
+		// Only write off invoice if payment rejection succeeded
+		if (shouldWriteOffInvoice) {
 			await writeOffInvoiceService(
 				logger,
 				zuoraClient,
 				invoiceFromZuora.InvoiceId,
 				disputeId,
 			);
-
-			await cancelSubscriptionService(logger, zuoraClient, subscription);
 		}
-	} catch (zuoraError) {
-		logger.error('Error during Zuora operations:', zuoraError);
-		throw zuoraError;
+
+		// Always cancel subscription for disputes, even if payment already processed
+		await cancelSubscriptionService(logger, zuoraClient, subscription);
 	}
 
 	logger.log(`Successfully processed dispute closure for dispute ${disputeId}`);

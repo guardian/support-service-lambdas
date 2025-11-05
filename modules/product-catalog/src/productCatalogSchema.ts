@@ -109,6 +109,18 @@ export const productCatalogSchema = z.object({
 					USD: z.number(),
 				}),
 			}),
+			Discount: z.object({
+				billingPeriod: z.literal('Month'),
+				charges: z.object({
+					Percentage: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
 			Monthly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
@@ -223,6 +235,18 @@ export const productCatalogSchema = z.object({
 					USD: z.number(),
 				}),
 			}),
+			Discount: z.object({
+				billingPeriod: z.literal('Month'),
+				charges: z.object({
+					Percentage: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
 			Monthly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
@@ -302,6 +326,18 @@ export const productCatalogSchema = z.object({
 				}),
 				pricing: z.object({ GBP: z.number(), USD: z.number() }),
 			}),
+			Discount: z.object({
+				billingPeriod: z.literal('Month'),
+				charges: z.object({
+					Percentage: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
 			Monthly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
@@ -353,6 +389,18 @@ export const productCatalogSchema = z.object({
 				}),
 				pricing: z.object({ GBP: z.number(), USD: z.number() }),
 			}),
+			Discount: z.object({
+				billingPeriod: z.literal('Month'),
+				charges: z.object({
+					Percentage: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
 			Quarterly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Quarter'),
 				charges: z.object({
@@ -383,6 +431,18 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+			}),
+			Discount: z.object({
+				billingPeriod: z.literal('Month'),
+				charges: z.object({
+					Percentage: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Quarterly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Quarter'),
@@ -421,6 +481,20 @@ export const productCatalogSchema = z.object({
 					NZD: z.number(),
 					USD: z.number(),
 				}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
+			Discount: z.object({
+				billingPeriod: z.literal('Month'),
+				charges: z.object({
+					Percentage: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
 			}),
 			Quarterly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Quarter'),
@@ -444,6 +518,18 @@ export const productCatalogSchema = z.object({
 		billingSystem: z.literal('zuora'),
 		isDeliveryProduct: z.literal(true),
 		ratePlans: z.object({
+			Discount: z.object({
+				billingPeriod: z.literal('Month'),
+				charges: z.object({
+					Percentage: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
 			Everyday: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
@@ -657,6 +743,18 @@ export const productCatalogSchema = z.object({
 		billingSystem: z.literal('zuora'),
 		isDeliveryProduct: z.literal(true),
 		ratePlans: z.object({
+			Discount: z.object({
+				billingPeriod: z.literal('Month'),
+				charges: z.object({
+					Percentage: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
 			Everyday: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
@@ -816,6 +914,18 @@ export const productCatalogSchema = z.object({
 		billingSystem: z.literal('zuora'),
 		isDeliveryProduct: z.literal(true),
 		ratePlans: z.object({
+			Discount: z.object({
+				billingPeriod: z.literal('Month'),
+				charges: z.object({
+					Percentage: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
 			Everyday: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
@@ -1056,6 +1166,18 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
+			Discount: z.object({
+				billingPeriod: z.literal('Month'),
+				charges: z.object({
+					Percentage: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
 			Monthly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
@@ -1110,6 +1232,18 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
+			Discount: z.object({
+				billingPeriod: z.literal('Month'),
+				charges: z.object({
+					Percentage: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
 			Monthly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
@@ -1152,6 +1286,18 @@ export const productCatalogSchema = z.object({
 		billingSystem: z.literal('zuora'),
 		isDeliveryProduct: z.literal(true),
 		ratePlans: z.object({
+			Discount: z.object({
+				billingPeriod: z.literal('Month'),
+				charges: z.object({
+					Percentage: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
 			Everyday: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
@@ -1383,6 +1529,18 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
+			Discount: z.object({
+				billingPeriod: z.literal('Month'),
+				charges: z.object({
+					Percentage: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
 			Monthly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
@@ -1489,6 +1647,18 @@ export const productCatalogSchema = z.object({
 				termLengthInMonths: z.number(),
 				termType: termTypeSchema,
 			}),
+			Discount: z.object({
+				billingPeriod: z.literal('Month'),
+				charges: z.object({
+					Percentage: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
 			Monthly: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Month'),
 				charges: z.object({
@@ -1574,6 +1744,18 @@ export const productCatalogSchema = z.object({
 		billingSystem: z.literal('zuora'),
 		isDeliveryProduct: z.literal(true),
 		ratePlans: z.object({
+			Discount: z.object({
+				billingPeriod: z.literal('Month'),
+				charges: z.object({
+					Percentage: z.object({
+						id: z.string(),
+					}),
+				}),
+				id: z.string(),
+				pricing: z.object({}),
+				termLengthInMonths: z.number(),
+				termType: termTypeSchema,
+			}),
 			DomesticAnnual: baseRatePlanSchema.extend({
 				billingPeriod: z.literal('Annual'),
 				charges: z.object({
