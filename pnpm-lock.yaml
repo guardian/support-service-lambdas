@@ -274,6 +274,12 @@ importers:
         specifier: ^8.10.147
         version: 8.10.155
 
+  handlers/observer-digital-benefits:
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.129
+        version: 8.10.155
+
   handlers/press-reader-entitlements:
     dependencies:
       '@aws-sdk/client-dynamodb':

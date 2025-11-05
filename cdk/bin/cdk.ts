@@ -23,6 +23,7 @@ import { NegativeInvoicesProcessor } from '../lib/negative-invoices-processor';
 import type { NewProductApiProps } from '../lib/new-product-api';
 import { NewProductApi } from '../lib/new-product-api';
 import { ObserverDataExport } from '../lib/observer-data-export';
+import { ObserverDigitalBenefits } from '../lib/observer-digital-benefits';
 import { PressReaderEntitlements } from '../lib/press-reader-entitlements';
 import { ProductSwitchApi } from '../lib/product-switch-api';
 import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery';
@@ -127,6 +128,7 @@ new SingleContributionSalesforceWrites(
 );
 
 const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
+	ObserverDigitalBenefits,
 	DiscountApi,
 	ProductSwitchApi,
 	UpdateSupporterPlusAmount,
