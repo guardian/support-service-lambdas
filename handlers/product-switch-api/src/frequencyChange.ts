@@ -83,14 +83,11 @@ export function selectCandidateSubscriptionCharge(
 export async function previewFrequencyChange(
 	zuoraClient: ZuoraClient,
 	subscription: Awaited<ReturnType<typeof getSubscription>>,
+	candidateCharge: { ratePlan: RatePlan; charge: RatePlanCharge },
 	productCatalog: ProductCatalog,
 	targetBillingPeriod: 'Month' | 'Annual',
-	today: dayjs.Dayjs = dayjs(),
 ): Promise<FrequencyChangePreviewResponse> {
-	const { ratePlan, charge } = selectCandidateSubscriptionCharge(
-		subscription,
-		today.toDate(),
-	);
+	const { ratePlan, charge } = candidateCharge;
 	const result = await processFrequencyChange(
 		zuoraClient,
 		subscription,
@@ -109,14 +106,11 @@ export async function previewFrequencyChange(
 export async function executeFrequencyChange(
 	zuoraClient: ZuoraClient,
 	subscription: Awaited<ReturnType<typeof getSubscription>>,
+	candidateCharge: { ratePlan: RatePlan; charge: RatePlanCharge },
 	productCatalog: ProductCatalog,
 	targetBillingPeriod: 'Month' | 'Annual',
-	today: dayjs.Dayjs = dayjs(),
 ): Promise<FrequencyChangeSwitchResponse> {
-	const { ratePlan, charge } = selectCandidateSubscriptionCharge(
-		subscription,
-		today.toDate(),
-	);
+	const { ratePlan, charge } = candidateCharge;
 	const result = await processFrequencyChange(
 		zuoraClient,
 		subscription,
@@ -489,16 +483,16 @@ export const frequencyChangeHandler =
 			? await previewFrequencyChange(
 					zuoraClient,
 					subscription,
+					candidateCharge,
 					productCatalog,
 					parsed.body.targetBillingPeriod,
-					today,
 				)
 			: await executeFrequencyChange(
 					zuoraClient,
 					subscription,
+					candidateCharge,
 					productCatalog,
 					parsed.body.targetBillingPeriod,
-					today,
 				);
 
 		logger.log(

@@ -15,6 +15,7 @@ import type { ContributionTestAdditionalOptions } from '../../../modules/zuora/t
 import {
 	executeFrequencyChange,
 	previewFrequencyChange,
+	selectCandidateSubscriptionCharge,
 } from '../src/frequencyChange';
 import type {
 	FrequencyChangePreviewResponse,
@@ -77,13 +78,17 @@ describe('frequency change behaviour', () => {
 				await createTestSubscriptionForFrequencyChange('Month', monthlyPrice);
 
 			const productCatalog = await getProductCatalogFromApi(stage);
+			const candidateCharge = selectCandidateSubscriptionCharge(
+				subscription,
+				dayjs().toDate(),
+			);
 			const result: FrequencyChangePreviewResponse =
 				await previewFrequencyChange(
 					zuoraClient,
 					subscription,
+					candidateCharge,
 					productCatalog,
 					'Annual',
-					dayjs(),
 				);
 
 			expect(result.success).toBe(true);
@@ -106,13 +111,17 @@ describe('frequency change behaviour', () => {
 				await createTestSubscriptionForFrequencyChange('Annual', annualPrice);
 
 			const productCatalog = await getProductCatalogFromApi(stage);
+			const candidateCharge = selectCandidateSubscriptionCharge(
+				subscription,
+				dayjs().toDate(),
+			);
 			const result: FrequencyChangePreviewResponse =
 				await previewFrequencyChange(
 					zuoraClient,
 					subscription,
+					candidateCharge,
 					productCatalog,
 					'Month',
-					dayjs(),
 				);
 
 			expect(result.success).toBe(true);
@@ -135,13 +144,17 @@ describe('frequency change behaviour', () => {
 					await createTestSubscriptionForFrequencyChange('Month', monthlyPrice);
 
 				const productCatalog = await getProductCatalogFromApi(stage);
+				const candidateCharge = selectCandidateSubscriptionCharge(
+					subscription,
+					dayjs().toDate(),
+				);
 				const result: FrequencyChangePreviewResponse =
 					await previewFrequencyChange(
 						zuoraClient,
 						subscription,
+						candidateCharge,
 						productCatalog,
 						'Annual',
-						dayjs(),
 					);
 
 				expect(result.success).toBe(true);
@@ -173,13 +186,17 @@ describe('frequency change behaviour', () => {
 					);
 
 				const productCatalog = await getProductCatalogFromApi(stage);
+				const candidateCharge = selectCandidateSubscriptionCharge(
+					subscription,
+					dayjs().toDate(),
+				);
 				const result: FrequencyChangePreviewResponse =
 					await previewFrequencyChange(
 						zuoraClient,
 						subscription,
+						candidateCharge,
 						productCatalog,
 						'Annual',
-						dayjs(),
 					);
 
 				expect(result.success).toBe(true);
@@ -203,13 +220,17 @@ describe('frequency change behaviour', () => {
 					await createTestSubscriptionForFrequencyChange('Month', monthlyPrice);
 
 				const productCatalog = await getProductCatalogFromApi(stage);
+				const candidateCharge = selectCandidateSubscriptionCharge(
+					subscription,
+					dayjs().toDate(),
+				);
 				const result: FrequencyChangeSwitchResponse =
 					await executeFrequencyChange(
 						zuoraClient,
 						subscription,
+						candidateCharge,
 						productCatalog,
 						'Annual',
-						dayjs(),
 					);
 
 				expect(result.success).toBe(true);
@@ -229,13 +250,17 @@ describe('frequency change behaviour', () => {
 					await createTestSubscriptionForFrequencyChange('Annual', annualPrice);
 
 				const productCatalog = await getProductCatalogFromApi(stage);
+				const candidateCharge = selectCandidateSubscriptionCharge(
+					subscription,
+					dayjs().toDate(),
+				);
 				const result: FrequencyChangeSwitchResponse =
 					await executeFrequencyChange(
 						zuoraClient,
 						subscription,
+						candidateCharge,
 						productCatalog,
 						'Month',
-						dayjs(),
 					);
 
 				expect(result.success).toBe(true);
@@ -254,15 +279,18 @@ describe('frequency change behaviour', () => {
 					await createTestSubscriptionForFrequencyChange('Month', monthlyPrice);
 
 				const productCatalog = await getProductCatalogFromApi(stage);
-				const today = dayjs();
+				const candidateCharge = selectCandidateSubscriptionCharge(
+					subscription,
+					dayjs().toDate(),
+				);
 
 				const result: FrequencyChangeSwitchResponse =
 					await executeFrequencyChange(
 						zuoraClient,
 						subscription,
+						candidateCharge,
 						productCatalog,
 						'Annual',
-						today,
 					);
 
 				expect(result.success).toBe(true);
@@ -292,13 +320,17 @@ describe('frequency change behaviour', () => {
 					);
 
 				const productCatalog = await getProductCatalogFromApi(stage);
+				const candidateCharge = selectCandidateSubscriptionCharge(
+					subscription,
+					dayjs().toDate(),
+				);
 				const result: FrequencyChangeSwitchResponse =
 					await executeFrequencyChange(
 						zuoraClient,
 						subscription,
+						candidateCharge,
 						productCatalog,
 						'Annual',
-						dayjs(),
 					);
 
 				expect(result.success).toBe(true);
