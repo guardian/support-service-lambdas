@@ -14,6 +14,8 @@
     "@types/aws-lambda": "^8.10.129"
   },
   "dependencies": {
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@aws-sdk/client-dynamodb": "^3.848.0",
+    "dayjs": "catalog:"
   }
 }
