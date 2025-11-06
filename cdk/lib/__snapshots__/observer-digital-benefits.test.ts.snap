@@ -173,7 +173,7 @@ exports[`The Observer digital benefits stack matches the snapshot 1`] = `
           },
           "S3Key": "support/CODE/observer-digital-benefits/observer-digital-benefits.zip",
         },
-        "Description": "A lambda that enables the addition of discounts to existing subscriptions",
+        "Description": "A lambda that which advises Tortoise Media systems that a user has an active “Observer” or “Blended” Guardian subscription",
         "Environment": {
           "Variables": {
             "APP": "observer-digital-benefits",
@@ -942,7 +942,7 @@ exports[`The Observer digital benefits stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "observer-digital-benefits returned a 5XX response. Search the logs below for "error" for more information. Impact: an eligible user may not have been offered a discount during the cancellation flow",
+        "AlarmDescription": "observer-digital-benefits returned a 5XX response. Search the logs below for "error" for more information. Impact: an eligible user may not be able to access Observer digital benefits",
         "AlarmName": "observer-digital-benefits-PROD 5XX errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
@@ -1126,7 +1126,7 @@ exports[`The Observer digital benefits stack matches the snapshot 2`] = `
           },
           "S3Key": "support/PROD/observer-digital-benefits/observer-digital-benefits.zip",
         },
-        "Description": "A lambda that enables the addition of discounts to existing subscriptions",
+        "Description": "A lambda that which advises Tortoise Media systems that a user has an active “Observer” or “Blended” Guardian subscription",
         "Environment": {
           "Variables": {
             "APP": "observer-digital-benefits",

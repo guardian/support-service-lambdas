@@ -12,11 +12,11 @@ export class ObserverDigitalBenefits extends SrStack {
 			legacyId: `${this.app}-lambda`,
 			lambdaOverrides: {
 				description:
-					'A lambda that enables the addition of discounts to existing subscriptions',
+					'A lambda that which advises Tortoise Media systems that a user has an active “Observer” or “Blended” Guardian subscription',
 			},
 			monitoring: {
 				errorImpact:
-					'an eligible user may not have been offered a discount during the cancellation flow',
+					'an eligible user may not be able to access Observer digital benefits',
 			},
 
 			isPublic: false,
