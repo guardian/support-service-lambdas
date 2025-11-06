@@ -66,6 +66,7 @@ export class AllowSupporterProductDataQueryPolicy extends GuAllowPolicy {
 				Fn.importValue(
 					`supporter-product-data-tables-${scope.stage}-SupporterProductDataTable`,
 				),
+				`arn:aws:dynamodb:${scope.region}:${scope.account}:table/SupporterProductData-${scope.stage}/index/subscriptionName-index`,
 			],
 		});
 	}

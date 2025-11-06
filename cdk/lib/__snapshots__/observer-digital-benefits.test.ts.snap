@@ -127,9 +127,27 @@ exports[`The Observer digital benefits stack matches the snapshot 1`] = `
             {
               "Action": "dynamodb:Query",
               "Effect": "Allow",
-              "Resource": {
-                "Fn::ImportValue": "supporter-product-data-tables-CODE-SupporterProductDataTable",
-              },
+              "Resource": [
+                {
+                  "Fn::ImportValue": "supporter-product-data-tables-CODE-SupporterProductDataTable",
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:dynamodb:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":table/SupporterProductData-CODE/index/subscriptionName-index",
+                    ],
+                  ],
+                },
+              ],
             },
           ],
           "Version": "2012-10-17",
@@ -1062,9 +1080,27 @@ exports[`The Observer digital benefits stack matches the snapshot 2`] = `
             {
               "Action": "dynamodb:Query",
               "Effect": "Allow",
-              "Resource": {
-                "Fn::ImportValue": "supporter-product-data-tables-PROD-SupporterProductDataTable",
-              },
+              "Resource": [
+                {
+                  "Fn::ImportValue": "supporter-product-data-tables-PROD-SupporterProductDataTable",
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:aws:dynamodb:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":table/SupporterProductData-PROD/index/subscriptionName-index",
+                    ],
+                  ],
+                },
+              ],
             },
           ],
           "Version": "2012-10-17",

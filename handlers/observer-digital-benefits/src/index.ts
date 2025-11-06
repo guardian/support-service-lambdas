@@ -70,9 +70,9 @@ async function handleRequest(
 	const subscriptionNumber = parsed.path.subscriptionNumber;
 	logger.mutableAddContext(subscriptionNumber);
 
-	console.log(`Checking subscription status`);
+	logger.log(`Checking subscription status`);
 	const subscription = await getSubscription(stage, subscriptionNumber);
-	console.log(`Found subscription: ${JSON.stringify(subscription)}`);
+	logger.log(`Found subscription: ${JSON.stringify(subscription)}`);
 
 	const productDetails = (await productCatalogHelper.get()).findProductDetails(
 		getIfDefined(
@@ -81,10 +81,10 @@ async function handleRequest(
 		),
 	);
 	if (!productDetails) {
-		console.log(`No product details found for subscription`);
+		logger.log(`No product details found for subscription`);
 		return buildResponse(false);
 	}
-	console.log(`Product details: ${JSON.stringify(productDetails)}`);
+	logger.log(`Product details: ${JSON.stringify(productDetails)}`);
 	if (hasObserverDigitalBenefits(productDetails)) {
 		return buildResponse(
 			true,
