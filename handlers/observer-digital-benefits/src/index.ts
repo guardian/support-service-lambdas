@@ -14,12 +14,12 @@ import { logger } from '@modules/routing/logger';
 import { createRoute, Router } from '@modules/routing/router';
 import { stageFromEnvironment } from '@modules/stage';
 import { getSubscription } from '@modules/supporter-product-data/supporterProductData';
+import { zuoraDateFormat } from '@modules/zuora/utils';
 import type {
 	APIGatewayProxyEvent,
 	APIGatewayProxyResult,
 	Handler,
 } from 'aws-lambda';
-import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import minMax from 'dayjs/plugin/minMax';
 import z from 'zod';
@@ -104,23 +104,26 @@ async function handleRequest(
 	return buildResponse(false);
 }
 
-function validUntilDateFromTermEndDate(termEndDate: string): Dayjs {
+function validUntilDateFromTermEndDate(termEndDate: string): string {
 	// The term end date is a year from acquisition or renewal but the user can cancel
 	// at any point during that term so for the purpose of granting benefits we should
 	// check at least once a month
 	dayjs.extend(minMax);
 	const maxValidDate = dayjs().add(1, 'months');
-	return dayjs.min(dayjs(termEndDate), maxValidDate);
+	return zuoraDateFormat(dayjs.min(dayjs(termEndDate), maxValidDate));
 }
 
-function buildResponse(
+export function buildResponse(
 	hasBenefits: boolean,
-	validUntil?: Dayjs,
+	termEndDate?: string,
 ): APIGatewayProxyResult {
+	const validUntil = termEndDate
+		? { validUntil: validUntilDateFromTermEndDate(termEndDate) }
+		: undefined;
 	return {
 		body: JSON.stringify({
 			hasObserverDigitalBenefits: hasBenefits,
-			validUntil: validUntil ? validUntil.toDate().toISOString() : null,
+			...validUntil,
 		}),
 		statusCode: 200,
 	};
