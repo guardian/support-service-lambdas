@@ -30,23 +30,23 @@ const productCatalogHelper = new Lazy(
 	'Fetching product catalog',
 );
 
-const pathSchema = z.object({
-	subscriptionNumber: z
+const bodySchema = z.object({
+	subscriptionId: z
 		.string()
 		.regex(
 			/^A-S\d+$/,
 			'Subscription number must start with A-S and be followed by digits',
 		),
 });
-type ParsedPath = z.infer<typeof pathSchema>;
+type RequestBody = z.infer<typeof bodySchema>;
 
 export const handler: Handler = Router([
 	createRoute({
-		httpMethod: 'GET',
-		path: '/status/{subscriptionNumber}',
+		httpMethod: 'POST',
+		path: '/is-active',
 		handler: handleRequest,
 		parser: {
-			path: pathSchema,
+			body: bodySchema,
 		},
 	}),
 ]);
@@ -74,10 +74,10 @@ export function hasObserverDigitalBenefits<P extends ProductKey>(
 async function handleRequest(
 	event: APIGatewayProxyEvent,
 	parsed: {
-		path: ParsedPath;
+		body: RequestBody;
 	},
 ): Promise<APIGatewayProxyResult> {
-	const subscriptionNumber = parsed.path.subscriptionNumber;
+	const subscriptionNumber = parsed.body.subscriptionId;
 	logger.mutableAddContext(subscriptionNumber);
 
 	logger.log(`Checking subscription status`);
