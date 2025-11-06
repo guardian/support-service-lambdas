@@ -122,7 +122,7 @@ export function buildResponse(
 		: undefined;
 	return {
 		body: JSON.stringify({
-			hasObserverDigitalBenefits: hasBenefits,
+			active: hasBenefits,
 			...validUntil,
 		}),
 		statusCode: 200,

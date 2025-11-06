@@ -50,7 +50,7 @@ describe('buildResponse', () => {
 		expect(buildResponse(true, isoDateString)).toStrictEqual({
 			statusCode: 200,
 			body: JSON.stringify({
-				hasObserverDigitalBenefits: true,
+				active: true,
 				validUntil: isoDateString,
 			}),
 		});
@@ -63,7 +63,7 @@ describe('buildResponse', () => {
 		expect(buildResponse(true, farIsoDateString)).toStrictEqual({
 			statusCode: 200,
 			body: JSON.stringify({
-				hasObserverDigitalBenefits: true,
+				active: true,
 				validUntil: cappedIsoDateString,
 			}),
 		});
@@ -72,7 +72,7 @@ describe('buildResponse', () => {
 		expect(buildResponse(false)).toStrictEqual({
 			statusCode: 200,
 			body: JSON.stringify({
-				hasObserverDigitalBenefits: false,
+				active: false,
 			}),
 		});
 	});
