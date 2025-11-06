@@ -125,10 +125,10 @@ export type ZuoraProductRatePlanKey<P extends ZuoraProductKey> =
 
 export type TermType = z.infer<typeof termTypeSchema>;
 
-export type ProductDetails = {
-	zuoraProduct: ProductKey;
+export type ProductDetails<P extends ProductKey> = {
+	zuoraProduct: P;
 	billingSystem: ProductBillingSystem;
-	productRatePlan: ProductRatePlanKey<ProductKey>;
+	productRatePlan: ProductRatePlanKey<P>;
 	id: string;
 };
 
@@ -160,7 +160,7 @@ export class ProductCatalogHelper {
 			(productDetail) => productDetail.billingSystem === billingSystem,
 		);
 
-	getAllProductDetails = (): ProductDetails[] => {
+	getAllProductDetails = (): Array<ProductDetails<ProductKey>> => {
 		const stageMapping = this.catalogData;
 		const zuoraProductKeys = Object.keys(stageMapping) as Array<
 			keyof typeof stageMapping
@@ -184,7 +184,7 @@ export class ProductCatalogHelper {
 	};
 	findProductDetails = (
 		productRatePlanId: string,
-	): ProductDetails | undefined => {
+	): ProductDetails<ProductKey> | undefined => {
 		const allProducts = this.getAllProductDetails();
 		return allProducts.find((product) => product.id === productRatePlanId);
 	};

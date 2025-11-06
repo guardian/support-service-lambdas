@@ -1,7 +1,11 @@
 import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
-import type { ProductDetails } from '@modules/product-catalog/productCatalog';
+import type {
+	ProductDetails,
+	ProductKey,
+	ProductRatePlanKey,
+} from '@modules/product-catalog/productCatalog';
 import {
 	isNewspaperProduct,
 	ProductCatalogHelper,
@@ -47,17 +51,23 @@ export const handler: Handler = Router([
 	}),
 ]);
 
-function hasObserverDigitalBenefits(productDetail: ProductDetails) {
+const blendedRatePlans: Array<ProductRatePlanKey<'HomeDelivery'>> = [
+	'Everyday',
+	'EverydayPlus',
+	'WeekendPlus',
+	'Weekend',
+	'SundayPlus',
+	'Sunday',
+];
+
+export function hasObserverDigitalBenefits<P extends ProductKey>(
+	productDetail: ProductDetails<P>,
+) {
 	return (
 		isNewspaperProduct(productDetail.zuoraProduct) &&
-		[
-			'EveryDay',
-			'EveryDayPlus',
-			'WeekendPlus',
-			'Weekend',
-			'SundayPlus',
-			'Sunday',
-		].includes(productDetail.productRatePlan)
+		blendedRatePlans.includes(
+			productDetail.productRatePlan as ProductRatePlanKey<'HomeDelivery'>,
+		)
 	);
 }
 
