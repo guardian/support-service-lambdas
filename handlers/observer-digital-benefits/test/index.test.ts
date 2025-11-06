@@ -1,7 +1,3 @@
-/**
- * This is a unit test, it can be run by the `pnpm test` command, and will be run by the CI/CD pipeline
- *
- */
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import dayjs from 'dayjs';
 import { buildResponse, hasObserverDigitalBenefits } from '../src';
