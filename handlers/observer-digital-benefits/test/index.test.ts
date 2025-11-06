@@ -64,7 +64,7 @@ describe('buildResponse', () => {
 			}),
 		});
 	});
-	test('subscription without benefits returns null validUntil', () => {
+	test('subscription without benefits has no validUntil date', () => {
 		expect(buildResponse(false)).toStrictEqual({
 			statusCode: 200,
 			body: JSON.stringify({
