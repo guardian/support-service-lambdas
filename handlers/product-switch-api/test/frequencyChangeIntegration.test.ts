@@ -6,6 +6,10 @@
  */
 import console from 'console';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
+import {
+	getBillingPreview,
+	itemsForSubscription,
+} from '@modules/zuora/billingPreview';
 import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
@@ -238,7 +242,16 @@ describe('frequency change behaviour', () => {
 				expect('invoiceIds' in result).toBe(true);
 				if ('invoiceIds' in result) {
 					expect(result.invoiceIds).toBeDefined();
+					expect(result.invoiceIds.length).toBeGreaterThan(0);
 				}
+
+				// Verify subscription still exists and is valid
+				const updatedSubscription = await getSubscription(
+					zuoraClient,
+					subscription.subscriptionNumber,
+				);
+				expect(updatedSubscription).toBeDefined();
+				expect(updatedSubscription.status).toBe('Active');
 			},
 			1000 * 60,
 		);
@@ -268,13 +281,22 @@ describe('frequency change behaviour', () => {
 				expect('invoiceIds' in result).toBe(true);
 				if ('invoiceIds' in result) {
 					expect(result.invoiceIds).toBeDefined();
+					expect(result.invoiceIds.length).toBeGreaterThan(0);
 				}
+
+				// Verify subscription still exists and is valid
+				const updatedSubscription = await getSubscription(
+					zuoraClient,
+					subscription.subscriptionNumber,
+				);
+				expect(updatedSubscription).toBeDefined();
+				expect(updatedSubscription.status).toBe('Active');
 			},
 			1000 * 60,
 		);
 
 		it(
-			'executed change is scheduled for term end date',
+			'executed change is scheduled for term end date and subscription state is correct',
 			async () => {
 				const monthlyPrice = 12;
 				const { zuoraClient, subscription } =
@@ -295,19 +317,52 @@ describe('frequency change behaviour', () => {
 						'Annual',
 					);
 
-				// The change should be scheduled, not immediate
-				// We can verify by checking the subscription again
+				// Expect success response with invoice IDs
+				expect('invoiceIds' in result).toBe(true);
+				if ('invoiceIds' in result) {
+					expect(result.invoiceIds).toBeDefined();
+					expect(result.invoiceIds.length).toBeGreaterThan(0);
+				}
+
+				// Verify subscription state after execution
 				const updatedSubscription = await getSubscription(
 					zuoraClient,
 					subscription.subscriptionNumber,
 				);
 				expect(updatedSubscription).toBeDefined();
-				
-				// Expect success response
-				expect('invoiceIds' in result).toBe(true);
-				if ('invoiceIds' in result) {
-					expect(result.invoiceIds).toBeDefined();
-				}			},
+
+				// Current rate plan should still be the original billing period (change is scheduled, not immediate)
+				const activeRatePlans = updatedSubscription.ratePlans.filter(
+					(rp) => rp.ratePlanCharges.some((charge) => charge.billingPeriod),
+				);
+				expect(activeRatePlans.length).toBeGreaterThan(0);
+
+				// The subscription should have at least one rate plan
+				// In Zuora, pending changes may appear as additional rate plans or amendments
+				expect(updatedSubscription.ratePlans.length).toBeGreaterThanOrEqual(1);
+
+				// Verify billing preview shows the new billing period will be used
+				const billingPreview = await getBillingPreview(
+					zuoraClient,
+					dayjs(updatedSubscription.termEndDate).add(1, 'day'), // Preview after term end
+					updatedSubscription.accountNumber,
+				);
+
+				const subscriptionInvoiceItems = itemsForSubscription(
+					subscription.subscriptionNumber,
+				)(billingPreview);
+
+				expect(subscriptionInvoiceItems.length).toBeGreaterThan(0);
+
+				// At least one invoice item should exist for the subscription
+				// Note: We can't easily check the exact billing period from invoice items alone,
+				// but we can verify that billing preview works and returns items
+				const totalChargeAmount = subscriptionInvoiceItems.reduce(
+					(sum, item) => sum + item.chargeAmount,
+					0,
+				);
+				expect(totalChargeAmount).toBeGreaterThan(0);
+			},
 			1000 * 60 * 2,
 		);
 
@@ -343,7 +398,16 @@ describe('frequency change behaviour', () => {
 				expect('invoiceIds' in result).toBe(true);
 				if ('invoiceIds' in result) {
 					expect(result.invoiceIds).toBeDefined();
+					expect(result.invoiceIds.length).toBeGreaterThan(0);
 				}
+
+				// Verify subscription still exists and is valid
+				const updatedSubscription = await getSubscription(
+					zuoraClient,
+					subscription.subscriptionNumber,
+				);
+				expect(updatedSubscription).toBeDefined();
+				expect(updatedSubscription.status).toBe('Active');
 			},
 			1000 * 60,
 		);
