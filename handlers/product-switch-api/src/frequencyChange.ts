@@ -460,10 +460,16 @@ async function processFrequencyChange(
 		`Error during Orders API frequency change ${preview ? 'preview' : 'execute'}`,
 		error,
 	);
+	// Only return ValidationError messages to clients for security
+	if (error instanceof ValidationError) {
+		return {
+			reasons: [{ message: error.message }],
+		};
+	}
+	// Log unexpected errors but don't expose details to client
+	logger.log('Unexpected error type in frequency change processing', error);
 	return {
-		reasons: [
-			{ message: error instanceof Error ? error.message : 'Unknown error' },
-		],
+		reasons: [{ message: 'An unexpected error occurred while processing your request' }],
 	};
 }
 }
@@ -533,15 +539,21 @@ export const frequencyChangeHandler =
 				'Failed to select candidate charge for frequency change.',
 				error,
 			);
+			// Only return ValidationError messages to clients for security
+			if (error instanceof ValidationError) {
+				return {
+					statusCode: 400,
+					body: JSON.stringify({
+						reasons: [{ message: error.message }],
+					}),
+				};
+			}
+			// Log unexpected errors but don't expose details to client
+			logger.log('Unexpected error type in candidate charge selection', error);
 			return {
-				statusCode: 400,
+				statusCode: 500,
 				body: JSON.stringify({
-					reasons: [
-						{
-							message:
-								error instanceof Error ? error.message : 'Unknown error',
-						},
-					],
+					reasons: [{ message: 'An unexpected error occurred while processing your request' }],
 				}),
 			};
 		}
