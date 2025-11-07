@@ -589,10 +589,6 @@ export const frequencyChangeHandler =
 					parsed.body.targetBillingPeriod,
 		);
 
-	logger.log(
-		`Frequency change ${parsed.body.preview ? 'preview' : 'execute'} response ${prettyPrint(response)}`,
-	);
-
 	// Type guard to check if response is an error
 	const isErrorResponse = 'reasons' in response;
 	const statusCode = isErrorResponse
