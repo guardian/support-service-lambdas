@@ -1,3 +1,4 @@
+import { ValidationError } from '@modules/errors';
 import { prettyPrint } from '@modules/prettyPrint';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
@@ -40,12 +41,54 @@ import {
 } from './schemas';
 
 /**
+ * Validation requirements for frequency change eligibility.
+ * Each requirement includes a description of what must pass and details about why.
+ */
+export const frequencyChangeValidationRequirements = {
+	subscriptionActive: 'subscription status is active',
+	zeroAccountBalance: 'account balance is zero',
+	hasEligibleCharges:
+		'subscription has at least one active recurring charge eligible for frequency change',
+	singleEligibleCharge:
+		'subscription has exactly one eligible charge (multiple charges cannot be safely changed)',
+};
+
+/**
+ * Assert that a condition is valid for frequency change eligibility.
+ * Throws ValidationError if condition fails, capturing the requirement and actual value.
+ *
+ * @param isValid Whether the validation passed
+ * @param requirement Description of the requirement from frequencyChangeValidationRequirements
+ * @param actual The actual value that failed validation
+ * @throws ValidationError with formatted message including requirement and actual value
+ */
+function assertValidState(
+	isValid: boolean,
+	requirement: string,
+	actual: string,
+): asserts isValid {
+	logger.log(`Asserting <${requirement}>`);
+	if (!isValid) {
+		const message = `subscription did not meet precondition <${requirement}> (was ${actual})`;
+		logger.log(`FAILED: ${message}`);
+		throw new ValidationError(message);
+	}
+}
+
+/**
  * Select the single candidate rate plan and charge eligible for a frequency change.
  * Logic matches the handler implementation so tests can exercise preview/execute flows without duplicating filtering rules.
  *
  * Validates that the subscription is eligible:
  * - Must be Active status
  * - Must not have outstanding unpaid invoices (totalInvoiceBalance must be 0)
+ * - Must have exactly one recurring subscription charge with valid dates and billing period
+ *
+ * @param subscription The subscription to validate
+ * @param today Today's date for filtering active charges
+ * @param account Optional account data for additional validations
+ * @returns The selected rate plan and charge eligible for frequency change
+ * @throws ValidationError if subscription fails any validation checks
  */
 export function selectCandidateSubscriptionCharge(
 	subscription: Awaited<ReturnType<typeof getSubscription>>,
@@ -53,16 +96,20 @@ export function selectCandidateSubscriptionCharge(
 	account?: Awaited<ReturnType<typeof getAccount>>,
 ): { ratePlan: RatePlan; charge: RatePlanCharge } {
 	// Check subscription status if account is provided
-	if (account && subscription.status !== 'Active') {
-		throw new Error(
-			`Subscription status is not Active: ${subscription.status}`,
+	if (account) {
+		assertValidState(
+			subscription.status === 'Active',
+			frequencyChangeValidationRequirements.subscriptionActive,
+			subscription.status,
 		);
 	}
 
 	// Check for outstanding unpaid invoices if account is provided
-	if (account && account.metrics.totalInvoiceBalance > 0) {
-		throw new Error(
-			`Cannot change frequency while account has outstanding invoice balance of ${account.metrics.totalInvoiceBalance} ${account.metrics.currency}`,
+	if (account) {
+		assertValidState(
+			account.metrics.totalInvoiceBalance === 0,
+			frequencyChangeValidationRequirements.zeroAccountBalance,
+			`${account.metrics.totalInvoiceBalance} ${account.metrics.currency}`,
 		);
 	}
 
@@ -86,16 +133,18 @@ export function selectCandidateSubscriptionCharge(
 				charge.billingPeriod === 'Month' || charge.billingPeriod === 'Annual',
 		);
 
-	if (candidateCharges.length === 0) {
-		throw new Error(
-			'No active recurring charges eligible for frequency change.',
-		);
-	}
-	if (candidateCharges.length > 1) {
-		throw new Error(
-			'Multiple eligible charges found; cannot safely change frequency.',
-		);
-	}
+	assertValidState(
+		candidateCharges.length > 0,
+		frequencyChangeValidationRequirements.hasEligibleCharges,
+		`${candidateCharges.length} charges found`,
+	);
+
+	assertValidState(
+		candidateCharges.length === 1,
+		frequencyChangeValidationRequirements.singleEligibleCharge,
+		`${candidateCharges.length} charges found`,
+	);
+
 	return candidateCharges[0]!;
 }
 
