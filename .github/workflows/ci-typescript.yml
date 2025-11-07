@@ -45,6 +45,7 @@ jobs:
       fail-fast: false
       matrix:
         subproject:
+          - observer-digital-benefits
           - user-benefits
           - press-reader-entitlements
           - ticket-tailor-webhook

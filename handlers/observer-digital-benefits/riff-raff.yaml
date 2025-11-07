@@ -1,0 +1,25 @@
+stacks:
+- support
+regions:
+- eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  observer-digital-benefits-cloudformation:
+    type: cloud-formation
+    app: observer-digital-benefits
+    parameters:
+      templateStagePaths:
+        CODE: observer-digital-benefits-CODE.template.json
+        PROD: observer-digital-benefits-PROD.template.json
+
+  observer-digital-benefits:
+    type: aws-lambda
+    parameters:
+      fileName: observer-digital-benefits.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+      - observer-digital-benefits-
+    dependencies: [observer-digital-benefits-cloudformation]

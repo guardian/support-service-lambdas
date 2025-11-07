@@ -1,23 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`The Press reader entitlements stack matches the snapshot 1`] = `
+exports[`The Observer digital benefits stack matches the snapshot 1`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuApiGateway5xxPercentageAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
   "Outputs": {
-    "pressreaderentitlementslambdapressreaderentitlementsCODEEndpoint27926FF8": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEEndpointDF70D454": {
       "Value": {
         "Fn::Join": [
           "",
           [
             "https://",
             {
-              "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
+              "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODE18E5AD33",
             },
             ".execute-api.",
             {
@@ -29,7 +28,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
             },
             "/",
             {
-              "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODEDeploymentStageCODECC968CC0",
+              "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEDeploymentStageCODE875A82C7",
             },
             "/",
           ],
@@ -45,186 +44,16 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
-    "ApiGateway4XXAlarmCDKC83EACCA": {
-      "Properties": {
-        "ActionsEnabled": false,
-        "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-CODE",
-              ],
-            ],
-          },
-        ],
-        "AlarmDescription": "Impact - Press reader entitlements received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
-        "AlarmName": "press-reader-entitlements-CODE API gateway 4XX response",
-        "ComparisonOperator": "GreaterThanOrEqualToThreshold",
-        "Dimensions": [
-          {
-            "Name": "ApiName",
-            "Value": "press-reader-entitlements-CODE",
-          },
-        ],
-        "EvaluationPeriods": 1,
-        "MetricName": "4XXError",
-        "Namespace": "AWS/ApiGateway",
-        "Period": 300,
-        "Statistic": "Sum",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "press-reader-entitlements",
-          },
-          {
-            "Key": "DiagnosticLinks",
-            "Value": {
-              "Fn::Join": [
-                "",
-                [
-                  "lambda:",
-                  {
-                    "Ref": "pressreaderentitlementslambda849A2923",
-                  },
-                ],
-              ],
-            },
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "Threshold": 10,
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
-    "ApiGatewayHigh5xxPercentageAlarmPressreaderentitlements39081247": {
-      "Properties": {
-        "ActionsEnabled": true,
-        "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-CODE",
-              ],
-            ],
-          },
-        ],
-        "AlarmDescription": "press-reader-entitlements exceeded 5% error rate",
-        "AlarmName": "High 5XX error percentage from press-reader-entitlements (ApiGateway) in CODE",
-        "ComparisonOperator": "GreaterThanThreshold",
-        "EvaluationPeriods": 1,
-        "Metrics": [
-          {
-            "Expression": "100*m1/m2",
-            "Id": "expr_1",
-            "Label": "% of 5XX responses served for press-reader-entitlements",
-          },
-          {
-            "Id": "m1",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "press-reader-entitlements-CODE",
-                  },
-                ],
-                "MetricName": "5XXError",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "Sum",
-            },
-            "ReturnData": false,
-          },
-          {
-            "Id": "m2",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "press-reader-entitlements-CODE",
-                  },
-                ],
-                "MetricName": "Count",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "SampleCount",
-            },
-            "ReturnData": false,
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "press-reader-entitlements",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "CODE",
-          },
-        ],
-        "Threshold": 5,
-        "TreatMissingData": "notBreaching",
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
     "BasePathMapping": {
       "Properties": {
         "DomainName": {
           "Ref": "DomainName",
         },
         "RestApiId": {
-          "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODE18E5AD33",
         },
         "Stage": {
-          "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODEDeploymentStageCODECC968CC0",
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEDeploymentStageCODE875A82C7",
         },
       },
       "Type": "AWS::ApiGateway::BasePathMapping",
@@ -232,7 +61,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
     "DNSRecord": {
       "Properties": {
         "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "press-reader-entitlements-code.support.guardianapis.com",
+        "Name": "observer-digital-benefits-code.support.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -248,7 +77,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
     },
     "DomainName": {
       "Properties": {
-        "DomainName": "press-reader-entitlements-code.support.guardianapis.com",
+        "DomainName": "observer-digital-benefits-code.support.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -269,7 +98,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "press-reader-entitlements",
+            "Value": "observer-digital-benefits",
           },
           {
             "Key": "gu:cdk:version",
@@ -290,18 +119,6 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::ApiGateway::DomainName",
-    },
-    "NS1DNSentryforpressreaderentitlementscodedevguardianapiscom": {
-      "Properties": {
-        "Name": "press-reader-entitlements.code.dev-guardianapis.com",
-        "RecordType": "CNAME",
-        "ResourceRecords": [
-          "dualstack.guardian.map.fastly.net",
-        ],
-        "Stage": "CODE",
-        "TTL": 3600,
-      },
-      "Type": "Guardian::DNS::RecordSet",
     },
     "SupporterProductDataTablequeryaccess7665F484": {
       "Properties": {
@@ -338,34 +155,34 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
         "PolicyName": "SupporterProductDataTablequeryaccess7665F484",
         "Roles": [
           {
-            "Ref": "pressreaderentitlementslambdaServiceRole94C17F23",
+            "Ref": "observerdigitalbenefitslambdaServiceRole184268EE",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "pressreaderentitlementslambda849A2923": {
+    "observerdigitalbenefitslambdaFD43C7C9": {
       "DependsOn": [
-        "pressreaderentitlementslambdaServiceRoleDefaultPolicyE75EB370",
-        "pressreaderentitlementslambdaServiceRole94C17F23",
+        "observerdigitalbenefitslambdaServiceRoleDefaultPolicy3A2D2C16",
+        "observerdigitalbenefitslambdaServiceRole184268EE",
       ],
       "Properties": {
         "Code": {
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "support/CODE/press-reader-entitlements/press-reader-entitlements.zip",
+          "S3Key": "support/CODE/observer-digital-benefits/observer-digital-benefits.zip",
         },
-        "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
+        "Description": "A lambda that which advises Tortoise Media systems that a user has an active “Observer” or “Blended” Guardian subscription",
         "Environment": {
           "Variables": {
-            "APP": "press-reader-entitlements",
+            "APP": "observer-digital-benefits",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "CODE",
           },
         },
-        "FunctionName": "press-reader-entitlements-CODE",
+        "FunctionName": "observer-digital-benefits-CODE",
         "Handler": "index.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
@@ -373,7 +190,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "pressreaderentitlementslambdaServiceRole94C17F23",
+            "observerdigitalbenefitslambdaServiceRole184268EE",
             "Arn",
           ],
         },
@@ -381,7 +198,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "press-reader-entitlements",
+            "Value": "observer-digital-benefits",
           },
           {
             "Key": "gu:cdk:version",
@@ -404,7 +221,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "pressreaderentitlementslambdaServiceRole94C17F23": {
+    "observerdigitalbenefitslambdaServiceRole184268EE": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -435,7 +252,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "press-reader-entitlements",
+            "Value": "observer-digital-benefits",
           },
           {
             "Key": "gu:cdk:version",
@@ -457,7 +274,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "pressreaderentitlementslambdaServiceRoleDefaultPolicyE75EB370": {
+    "observerdigitalbenefitslambdaServiceRoleDefaultPolicy3A2D2C16": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -496,7 +313,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/support/CODE/press-reader-entitlements/press-reader-entitlements.zip",
+                      "/support/CODE/observer-digital-benefits/observer-digital-benefits.zip",
                     ],
                   ],
                 },
@@ -517,7 +334,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/support/press-reader-entitlements",
+                    ":parameter/CODE/support/observer-digital-benefits",
                   ],
                 ],
               },
@@ -540,7 +357,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/CODE/support/press-reader-entitlements/*",
+                    ":parameter/CODE/support/observer-digital-benefits/*",
                   ],
                 ],
               },
@@ -548,24 +365,24 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "pressreaderentitlementslambdaServiceRoleDefaultPolicyE75EB370",
+        "PolicyName": "observerdigitalbenefitslambdaServiceRoleDefaultPolicy3A2D2C16",
         "Roles": [
           {
-            "Ref": "pressreaderentitlementslambdaServiceRole94C17F23",
+            "Ref": "observerdigitalbenefitslambdaServiceRole184268EE",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsCODE18E5AD33": {
       "Properties": {
         "ApiKeySourceType": "HEADER",
         "Description": "API Gateway created by CDK",
-        "Name": "press-reader-entitlements-CODE",
+        "Name": "observer-digital-benefits-CODE",
         "Tags": [
           {
             "Key": "App",
-            "Value": "press-reader-entitlements",
+            "Value": "observer-digital-benefits",
           },
           {
             "Key": "gu:cdk:version",
@@ -587,85 +404,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::RestApi",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsCODEANYApiPermissionTestpressreaderentitlementsCODEpressreaderentitlementslambdapressreaderentitlementsCODE7D056EE0ANY74606790": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "pressreaderentitlementslambda849A2923",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
-              },
-              "/test-invoke-stage/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "pressreaderentitlementslambdapressreaderentitlementsCODEANYApiPermissionpressreaderentitlementsCODEpressreaderentitlementslambdapressreaderentitlementsCODE7D056EE0ANYCBFBAA0B": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "pressreaderentitlementslambda849A2923",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
-              },
-              "/",
-              {
-                "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODEDeploymentStageCODECC968CC0",
-              },
-              "/*/",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "pressreaderentitlementslambdapressreaderentitlementsCODEANYBCD0DFF3": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEANY139FEC55": {
       "Properties": {
         "ApiKeyRequired": true,
         "AuthorizationType": "NONE",
@@ -688,7 +427,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
                 ":lambda:path/2015-03-31/functions/",
                 {
                   "Fn::GetAtt": [
-                    "pressreaderentitlementslambda849A2923",
+                    "observerdigitalbenefitslambdaFD43C7C9",
                     "Arn",
                   ],
                 },
@@ -699,25 +438,103 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
         },
         "ResourceId": {
           "Fn::GetAtt": [
-            "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
+            "observerdigitalbenefitslambdaobserverdigitalbenefitsCODE18E5AD33",
             "RootResourceId",
           ],
         },
         "RestApiId": {
-          "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODE18E5AD33",
         },
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsCODEAccount58595882": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEANYApiPermissionTestobserverdigitalbenefitsCODEobserverdigitalbenefitslambdaobserverdigitalbenefitsCODEF9094BA7ANYA48DE386": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "observerdigitalbenefitslambdaFD43C7C9",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODE18E5AD33",
+              },
+              "/test-invoke-stage/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEANYApiPermissionobserverdigitalbenefitsCODEobserverdigitalbenefitslambdaobserverdigitalbenefitsCODEF9094BA7ANYACE4E889": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "observerdigitalbenefitslambdaFD43C7C9",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODE18E5AD33",
+              },
+              "/",
+              {
+                "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEDeploymentStageCODE875A82C7",
+              },
+              "/*/",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEAccount39F58E7E": {
       "DeletionPolicy": "Retain",
       "DependsOn": [
-        "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
+        "observerdigitalbenefitslambdaobserverdigitalbenefitsCODE18E5AD33",
       ],
       "Properties": {
         "CloudWatchRoleArn": {
           "Fn::GetAtt": [
-            "pressreaderentitlementslambdapressreaderentitlementsCODECloudWatchRoleCD886C4B",
+            "observerdigitalbenefitslambdaobserverdigitalbenefitsCODECloudWatchRole767EDA3E",
             "Arn",
           ],
         },
@@ -725,7 +542,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
       "Type": "AWS::ApiGateway::Account",
       "UpdateReplacePolicy": "Retain",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsCODECloudWatchRoleCD886C4B": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsCODECloudWatchRole767EDA3E": {
       "DeletionPolicy": "Retain",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -757,7 +574,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "press-reader-entitlements",
+            "Value": "observer-digital-benefits",
           },
           {
             "Key": "gu:cdk:version",
@@ -780,36 +597,36 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsCODEDeploymentAF63E253d4c9f2ae469a8e1ea64845d04c7ca59b": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEDeployment760627567bc71d84578265f6abac18c2194b9ca5": {
       "DependsOn": [
-        "pressreaderentitlementslambdapressreaderentitlementsCODEproxyANY94DA2830",
-        "pressreaderentitlementslambdapressreaderentitlementsCODEproxyC7B8C5A6",
-        "pressreaderentitlementslambdapressreaderentitlementsCODEANYBCD0DFF3",
+        "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEproxyANYD379DFAC",
+        "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEproxyF9553C39",
+        "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEANY139FEC55",
       ],
       "Properties": {
         "Description": "API Gateway created by CDK",
         "RestApiId": {
-          "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODE18E5AD33",
         },
       },
       "Type": "AWS::ApiGateway::Deployment",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsCODEDeploymentStageCODECC968CC0": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEDeploymentStageCODE875A82C7": {
       "DependsOn": [
-        "pressreaderentitlementslambdapressreaderentitlementsCODEAccount58595882",
+        "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEAccount39F58E7E",
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODEDeploymentAF63E253d4c9f2ae469a8e1ea64845d04c7ca59b",
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEDeployment760627567bc71d84578265f6abac18c2194b9ca5",
         },
         "RestApiId": {
-          "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODE18E5AD33",
         },
         "StageName": "CODE",
         "Tags": [
           {
             "Key": "App",
-            "Value": "press-reader-entitlements",
+            "Value": "observer-digital-benefits",
           },
           {
             "Key": "gu:cdk:version",
@@ -831,24 +648,24 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::Stage",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsCODEUsagePlan67DAEFF0": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEUsagePlanCA3F70D9": {
       "Properties": {
         "ApiStages": [
           {
             "ApiId": {
-              "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
+              "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODE18E5AD33",
             },
             "Stage": {
-              "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODEDeploymentStageCODECC968CC0",
+              "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEDeploymentStageCODE875A82C7",
             },
             "Throttle": {},
           },
         ],
-        "Description": "REST endpoints for press-reader-entitlements",
+        "Description": "REST endpoints for observer-digital-benefits",
         "Tags": [
           {
             "Key": "App",
-            "Value": "press-reader-entitlements",
+            "Value": "observer-digital-benefits",
           },
           {
             "Key": "gu:cdk:version",
@@ -867,40 +684,40 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
             "Value": "CODE",
           },
         ],
-        "UsagePlanName": "press-reader-entitlements-CODE",
+        "UsagePlanName": "observer-digital-benefits-CODE",
       },
       "Type": "AWS::ApiGateway::UsagePlan",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsCODEUsagePlanUsagePlanKeyResourcepressreaderentitlementsCODEpressreaderentitlementslambdapressreaderentitlementsCODEpressreaderentitlementskeyCODECB615F12622657CE": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEUsagePlanUsagePlanKeyResourceobserverdigitalbenefitsCODEobserverdigitalbenefitslambdaobserverdigitalbenefitsCODEobserverdigitalbenefitskeyCODEDDA3664BC382DB74": {
       "Properties": {
         "KeyId": {
-          "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODEpressreaderentitlementskeyCODE9FF4AE4F",
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEobserverdigitalbenefitskeyCODEDA1EA448",
         },
         "KeyType": "API_KEY",
         "UsagePlanId": {
-          "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODEUsagePlan67DAEFF0",
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEUsagePlanCA3F70D9",
         },
       },
       "Type": "AWS::ApiGateway::UsagePlanKey",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsCODEpressreaderentitlementskeyCODE9FF4AE4F": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEobserverdigitalbenefitskeyCODEDA1EA448": {
       "Properties": {
         "Enabled": true,
-        "Name": "press-reader-entitlements-key-CODE",
+        "Name": "observer-digital-benefits-key-CODE",
         "StageKeys": [
           {
             "RestApiId": {
-              "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
+              "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODE18E5AD33",
             },
             "StageName": {
-              "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODEDeploymentStageCODECC968CC0",
+              "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEDeploymentStageCODE875A82C7",
             },
           },
         ],
         "Tags": [
           {
             "Key": "App",
-            "Value": "press-reader-entitlements",
+            "Value": "observer-digital-benefits",
           },
           {
             "Key": "gu:cdk:version",
@@ -922,7 +739,85 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
       },
       "Type": "AWS::ApiGateway::ApiKey",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsCODEproxyANY94DA2830": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEproxyANYApiPermissionTestobserverdigitalbenefitsCODEobserverdigitalbenefitslambdaobserverdigitalbenefitsCODEF9094BA7ANYproxy746FD151": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "observerdigitalbenefitslambdaFD43C7C9",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODE18E5AD33",
+              },
+              "/test-invoke-stage/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEproxyANYApiPermissionobserverdigitalbenefitsCODEobserverdigitalbenefitslambdaobserverdigitalbenefitsCODEF9094BA7ANYproxy142E1E63": {
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "observerdigitalbenefitslambdaFD43C7C9",
+            "Arn",
+          ],
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition",
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":",
+              {
+                "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODE18E5AD33",
+              },
+              "/",
+              {
+                "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEDeploymentStageCODE875A82C7",
+              },
+              "/*/*",
+            ],
+          ],
+        },
+      },
+      "Type": "AWS::Lambda::Permission",
+    },
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEproxyANYD379DFAC": {
       "Properties": {
         "ApiKeyRequired": true,
         "AuthorizationType": "NONE",
@@ -945,7 +840,7 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
                 ":lambda:path/2015-03-31/functions/",
                 {
                   "Fn::GetAtt": [
-                    "pressreaderentitlementslambda849A2923",
+                    "observerdigitalbenefitslambdaFD43C7C9",
                     "Arn",
                   ],
                 },
@@ -955,103 +850,25 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
           },
         },
         "ResourceId": {
-          "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODEproxyC7B8C5A6",
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEproxyF9553C39",
         },
         "RestApiId": {
-          "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODE18E5AD33",
         },
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsCODEproxyANYApiPermissionTestpressreaderentitlementsCODEpressreaderentitlementslambdapressreaderentitlementsCODE7D056EE0ANYproxyB8CECD42": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "pressreaderentitlementslambda849A2923",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
-              },
-              "/test-invoke-stage/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "pressreaderentitlementslambdapressreaderentitlementsCODEproxyANYApiPermissionpressreaderentitlementsCODEpressreaderentitlementslambdapressreaderentitlementsCODE7D056EE0ANYproxyDB078E55": {
-      "Properties": {
-        "Action": "lambda:InvokeFunction",
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "pressreaderentitlementslambda849A2923",
-            "Arn",
-          ],
-        },
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition",
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":",
-              {
-                "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
-              },
-              "/",
-              {
-                "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODEDeploymentStageCODECC968CC0",
-              },
-              "/*/*",
-            ],
-          ],
-        },
-      },
-      "Type": "AWS::Lambda::Permission",
-    },
-    "pressreaderentitlementslambdapressreaderentitlementsCODEproxyC7B8C5A6": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsCODEproxyF9553C39": {
       "Properties": {
         "ParentId": {
           "Fn::GetAtt": [
-            "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
+            "observerdigitalbenefitslambdaobserverdigitalbenefitsCODE18E5AD33",
             "RootResourceId",
           ],
         },
         "PathPart": "{proxy+}",
         "RestApiId": {
-          "Ref": "pressreaderentitlementslambdapressreaderentitlementsCODE7DEC1320",
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsCODE18E5AD33",
         },
       },
       "Type": "AWS::ApiGateway::Resource",
@@ -1060,24 +877,23 @@ exports[`The Press reader entitlements stack matches the snapshot 1`] = `
 }
 `;
 
-exports[`The Press reader entitlements stack matches the snapshot 2`] = `
+exports[`The Observer digital benefits stack matches the snapshot 2`] = `
 {
   "Metadata": {
     "gu:cdk:constructs": [
       "GuDistributionBucketParameter",
-      "GuApiGateway5xxPercentageAlarm",
     ],
     "gu:cdk:version": "TEST",
   },
   "Outputs": {
-    "pressreaderentitlementslambdapressreaderentitlementsPRODEndpointC96D7D91": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODEndpointB0B4F52F": {
       "Value": {
         "Fn::Join": [
           "",
           [
             "https://",
             {
-              "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+              "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODE3B12D45",
             },
             ".execute-api.",
             {
@@ -1089,7 +905,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
             },
             "/",
             {
-              "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDeploymentStagePROD6E99A268",
+              "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODDeploymentStagePROD2B69E4CF",
             },
             "/",
           ],
@@ -1105,7 +921,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
-    "ApiGateway4XXAlarmCDKC83EACCA": {
+    "ApiGateway5XXAlarmCDK11905206": {
       "Properties": {
         "ActionsEnabled": true,
         "AlarmActions": [
@@ -1126,24 +942,24 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "Impact - Press reader entitlements received an invalid request. Follow the process in https://docs.google.com/document/d/1_3El3cly9d7u_jPgTcRjLxmdG2e919zCLvmcFCLOYAk/edit",
-        "AlarmName": "press-reader-entitlements-PROD API gateway 4XX response",
+        "AlarmDescription": "observer-digital-benefits returned a 5XX response. Search the logs below for "error" for more information. Impact: an eligible user may not be able to access Observer digital benefits",
+        "AlarmName": "observer-digital-benefits-PROD 5XX errors",
         "ComparisonOperator": "GreaterThanOrEqualToThreshold",
         "Dimensions": [
           {
             "Name": "ApiName",
-            "Value": "press-reader-entitlements-PROD",
+            "Value": "observer-digital-benefits-PROD",
           },
         ],
         "EvaluationPeriods": 1,
-        "MetricName": "4XXError",
+        "MetricName": "5XXError",
         "Namespace": "AWS/ApiGateway",
-        "Period": 300,
+        "Period": 60,
         "Statistic": "Sum",
         "Tags": [
           {
             "Key": "App",
-            "Value": "press-reader-entitlements",
+            "Value": "observer-digital-benefits",
           },
           {
             "Key": "DiagnosticLinks",
@@ -1153,7 +969,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
                 [
                   "lambda:",
                   {
-                    "Ref": "pressreaderentitlementslambda849A2923",
+                    "Ref": "observerdigitalbenefitslambdaFD43C7C9",
                   },
                 ],
               ],
@@ -1176,101 +992,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
             "Value": "PROD",
           },
         ],
-        "Threshold": 10,
-      },
-      "Type": "AWS::CloudWatch::Alarm",
-    },
-    "ApiGatewayHigh5xxPercentageAlarmPressreaderentitlements39081247": {
-      "Properties": {
-        "ActionsEnabled": true,
-        "AlarmActions": [
-          {
-            "Fn::Join": [
-              "",
-              [
-                "arn:aws:sns:",
-                {
-                  "Ref": "AWS::Region",
-                },
-                ":",
-                {
-                  "Ref": "AWS::AccountId",
-                },
-                ":alarms-handler-topic-PROD",
-              ],
-            ],
-          },
-        ],
-        "AlarmDescription": "press-reader-entitlements exceeded 5% error rate",
-        "AlarmName": "High 5XX error percentage from press-reader-entitlements (ApiGateway) in PROD",
-        "ComparisonOperator": "GreaterThanThreshold",
-        "EvaluationPeriods": 1,
-        "Metrics": [
-          {
-            "Expression": "100*m1/m2",
-            "Id": "expr_1",
-            "Label": "% of 5XX responses served for press-reader-entitlements",
-          },
-          {
-            "Id": "m1",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "press-reader-entitlements-PROD",
-                  },
-                ],
-                "MetricName": "5XXError",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "Sum",
-            },
-            "ReturnData": false,
-          },
-          {
-            "Id": "m2",
-            "MetricStat": {
-              "Metric": {
-                "Dimensions": [
-                  {
-                    "Name": "ApiName",
-                    "Value": "press-reader-entitlements-PROD",
-                  },
-                ],
-                "MetricName": "Count",
-                "Namespace": "AWS/ApiGateway",
-              },
-              "Period": 60,
-              "Stat": "SampleCount",
-            },
-            "ReturnData": false,
-          },
-        ],
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "press-reader-entitlements",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-        "Threshold": 5,
+        "Threshold": 1,
         "TreatMissingData": "notBreaching",
       },
       "Type": "AWS::CloudWatch::Alarm",
@@ -1281,10 +1003,10 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
           "Ref": "DomainName",
         },
         "RestApiId": {
-          "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODE3B12D45",
         },
         "Stage": {
-          "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDeploymentStagePROD6E99A268",
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODDeploymentStagePROD2B69E4CF",
         },
       },
       "Type": "AWS::ApiGateway::BasePathMapping",
@@ -1292,7 +1014,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
     "DNSRecord": {
       "Properties": {
         "HostedZoneId": "Z3KO35ELNWZMSX",
-        "Name": "press-reader-entitlements.support.guardianapis.com",
+        "Name": "observer-digital-benefits.support.guardianapis.com",
         "ResourceRecords": [
           {
             "Fn::GetAtt": [
@@ -1308,7 +1030,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
     },
     "DomainName": {
       "Properties": {
-        "DomainName": "press-reader-entitlements.support.guardianapis.com",
+        "DomainName": "observer-digital-benefits.support.guardianapis.com",
         "EndpointConfiguration": {
           "Types": [
             "REGIONAL",
@@ -1329,7 +1051,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "press-reader-entitlements",
+            "Value": "observer-digital-benefits",
           },
           {
             "Key": "gu:cdk:version",
@@ -1350,18 +1072,6 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
         ],
       },
       "Type": "AWS::ApiGateway::DomainName",
-    },
-    "NS1DNSentryforpressreaderentitlementsguardianapiscom": {
-      "Properties": {
-        "Name": "press-reader-entitlements.guardianapis.com",
-        "RecordType": "CNAME",
-        "ResourceRecords": [
-          "dualstack.guardian.map.fastly.net",
-        ],
-        "Stage": "PROD",
-        "TTL": 3600,
-      },
-      "Type": "Guardian::DNS::RecordSet",
     },
     "SupporterProductDataTablequeryaccess7665F484": {
       "Properties": {
@@ -1398,34 +1108,34 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
         "PolicyName": "SupporterProductDataTablequeryaccess7665F484",
         "Roles": [
           {
-            "Ref": "pressreaderentitlementslambdaServiceRole94C17F23",
+            "Ref": "observerdigitalbenefitslambdaServiceRole184268EE",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "pressreaderentitlementslambda849A2923": {
+    "observerdigitalbenefitslambdaFD43C7C9": {
       "DependsOn": [
-        "pressreaderentitlementslambdaServiceRoleDefaultPolicyE75EB370",
-        "pressreaderentitlementslambdaServiceRole94C17F23",
+        "observerdigitalbenefitslambdaServiceRoleDefaultPolicy3A2D2C16",
+        "observerdigitalbenefitslambdaServiceRole184268EE",
       ],
       "Properties": {
         "Code": {
           "S3Bucket": {
             "Ref": "DistributionBucketName",
           },
-          "S3Key": "support/PROD/press-reader-entitlements/press-reader-entitlements.zip",
+          "S3Key": "support/PROD/observer-digital-benefits/observer-digital-benefits.zip",
         },
-        "Description": "An API Gateway triggered lambda generated in the support-service-lambdas repo",
+        "Description": "A lambda that which advises Tortoise Media systems that a user has an active “Observer” or “Blended” Guardian subscription",
         "Environment": {
           "Variables": {
-            "APP": "press-reader-entitlements",
+            "APP": "observer-digital-benefits",
             "NODE_OPTIONS": "--enable-source-maps",
             "STACK": "support",
             "STAGE": "PROD",
           },
         },
-        "FunctionName": "press-reader-entitlements-PROD",
+        "FunctionName": "observer-digital-benefits-PROD",
         "Handler": "index.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
@@ -1433,7 +1143,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
         "MemorySize": 1024,
         "Role": {
           "Fn::GetAtt": [
-            "pressreaderentitlementslambdaServiceRole94C17F23",
+            "observerdigitalbenefitslambdaServiceRole184268EE",
             "Arn",
           ],
         },
@@ -1441,7 +1151,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "press-reader-entitlements",
+            "Value": "observer-digital-benefits",
           },
           {
             "Key": "gu:cdk:version",
@@ -1464,7 +1174,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "pressreaderentitlementslambdaServiceRole94C17F23": {
+    "observerdigitalbenefitslambdaServiceRole184268EE": {
       "Properties": {
         "AssumeRolePolicyDocument": {
           "Statement": [
@@ -1495,7 +1205,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "press-reader-entitlements",
+            "Value": "observer-digital-benefits",
           },
           {
             "Key": "gu:cdk:version",
@@ -1517,7 +1227,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
       },
       "Type": "AWS::IAM::Role",
     },
-    "pressreaderentitlementslambdaServiceRoleDefaultPolicyE75EB370": {
+    "observerdigitalbenefitslambdaServiceRoleDefaultPolicy3A2D2C16": {
       "Properties": {
         "PolicyDocument": {
           "Statement": [
@@ -1556,7 +1266,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
                       {
                         "Ref": "DistributionBucketName",
                       },
-                      "/support/PROD/press-reader-entitlements/press-reader-entitlements.zip",
+                      "/support/PROD/observer-digital-benefits/observer-digital-benefits.zip",
                     ],
                   ],
                 },
@@ -1577,7 +1287,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/support/press-reader-entitlements",
+                    ":parameter/PROD/support/observer-digital-benefits",
                   ],
                 ],
               },
@@ -1600,7 +1310,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":parameter/PROD/support/press-reader-entitlements/*",
+                    ":parameter/PROD/support/observer-digital-benefits/*",
                   ],
                 ],
               },
@@ -1608,16 +1318,16 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "pressreaderentitlementslambdaServiceRoleDefaultPolicyE75EB370",
+        "PolicyName": "observerdigitalbenefitslambdaServiceRoleDefaultPolicy3A2D2C16",
         "Roles": [
           {
-            "Ref": "pressreaderentitlementslambdaServiceRole94C17F23",
+            "Ref": "observerdigitalbenefitslambdaServiceRole184268EE",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsPRODANYA19F1CF4": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODANY206BDEFD": {
       "Properties": {
         "ApiKeyRequired": true,
         "AuthorizationType": "NONE",
@@ -1640,7 +1350,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
                 ":lambda:path/2015-03-31/functions/",
                 {
                   "Fn::GetAtt": [
-                    "pressreaderentitlementslambda849A2923",
+                    "observerdigitalbenefitslambdaFD43C7C9",
                     "Arn",
                   ],
                 },
@@ -1651,22 +1361,22 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
         },
         "ResourceId": {
           "Fn::GetAtt": [
-            "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+            "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODE3B12D45",
             "RootResourceId",
           ],
         },
         "RestApiId": {
-          "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODE3B12D45",
         },
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsPRODANYApiPermissionTestpressreaderentitlementsPRODpressreaderentitlementslambdapressreaderentitlementsPROD471B412CANY7D865E46": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODANYApiPermissionTestobserverdigitalbenefitsPRODobserverdigitalbenefitslambdaobserverdigitalbenefitsPROD19E4B2C2ANY6523DEB0": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
           "Fn::GetAtt": [
-            "pressreaderentitlementslambda849A2923",
+            "observerdigitalbenefitslambdaFD43C7C9",
             "Arn",
           ],
         },
@@ -1689,7 +1399,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
               },
               ":",
               {
-                "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+                "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODE3B12D45",
               },
               "/test-invoke-stage/*/",
             ],
@@ -1698,12 +1408,12 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsPRODANYApiPermissionpressreaderentitlementsPRODpressreaderentitlementslambdapressreaderentitlementsPROD471B412CANY87E6A018": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODANYApiPermissionobserverdigitalbenefitsPRODobserverdigitalbenefitslambdaobserverdigitalbenefitsPROD19E4B2C2ANY7B244323": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
           "Fn::GetAtt": [
-            "pressreaderentitlementslambda849A2923",
+            "observerdigitalbenefitslambdaFD43C7C9",
             "Arn",
           ],
         },
@@ -1726,11 +1436,11 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
               },
               ":",
               {
-                "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+                "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODE3B12D45",
               },
               "/",
               {
-                "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDeploymentStagePROD6E99A268",
+                "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODDeploymentStagePROD2B69E4CF",
               },
               "/*/",
             ],
@@ -1739,15 +1449,15 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsPRODAccount54D83A30": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODAccount5085075E": {
       "DeletionPolicy": "Retain",
       "DependsOn": [
-        "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+        "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODE3B12D45",
       ],
       "Properties": {
         "CloudWatchRoleArn": {
           "Fn::GetAtt": [
-            "pressreaderentitlementslambdapressreaderentitlementsPRODCloudWatchRoleB26A4812",
+            "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODCloudWatchRoleDB786F96",
             "Arn",
           ],
         },
@@ -1755,7 +1465,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
       "Type": "AWS::ApiGateway::Account",
       "UpdateReplacePolicy": "Retain",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsPRODCloudWatchRoleB26A4812": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODCloudWatchRoleDB786F96": {
       "DeletionPolicy": "Retain",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -1787,7 +1497,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
         "Tags": [
           {
             "Key": "App",
-            "Value": "press-reader-entitlements",
+            "Value": "observer-digital-benefits",
           },
           {
             "Key": "gu:cdk:version",
@@ -1810,66 +1520,36 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
       "Type": "AWS::IAM::Role",
       "UpdateReplacePolicy": "Retain",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA": {
-      "Properties": {
-        "ApiKeySourceType": "HEADER",
-        "Description": "API Gateway created by CDK",
-        "Name": "press-reader-entitlements-PROD",
-        "Tags": [
-          {
-            "Key": "App",
-            "Value": "press-reader-entitlements",
-          },
-          {
-            "Key": "gu:cdk:version",
-            "Value": "TEST",
-          },
-          {
-            "Key": "gu:repo",
-            "Value": "guardian/support-service-lambdas",
-          },
-          {
-            "Key": "Stack",
-            "Value": "support",
-          },
-          {
-            "Key": "Stage",
-            "Value": "PROD",
-          },
-        ],
-      },
-      "Type": "AWS::ApiGateway::RestApi",
-    },
-    "pressreaderentitlementslambdapressreaderentitlementsPRODDeploymentD4B736714318e1b97b03f9c6682b90368e7ee55c": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODDeploymentB3E63E2248dac15827bcba0bc40d15dbdd023867": {
       "DependsOn": [
-        "pressreaderentitlementslambdapressreaderentitlementsPRODproxyANY3A6E2187",
-        "pressreaderentitlementslambdapressreaderentitlementsPRODproxyA619485E",
-        "pressreaderentitlementslambdapressreaderentitlementsPRODANYA19F1CF4",
+        "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODproxyANYA79F9B8D",
+        "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODproxy760F363F",
+        "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODANY206BDEFD",
       ],
       "Properties": {
         "Description": "API Gateway created by CDK",
         "RestApiId": {
-          "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODE3B12D45",
         },
       },
       "Type": "AWS::ApiGateway::Deployment",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsPRODDeploymentStagePROD6E99A268": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODDeploymentStagePROD2B69E4CF": {
       "DependsOn": [
-        "pressreaderentitlementslambdapressreaderentitlementsPRODAccount54D83A30",
+        "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODAccount5085075E",
       ],
       "Properties": {
         "DeploymentId": {
-          "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDeploymentD4B736714318e1b97b03f9c6682b90368e7ee55c",
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODDeploymentB3E63E2248dac15827bcba0bc40d15dbdd023867",
         },
         "RestApiId": {
-          "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODE3B12D45",
         },
         "StageName": "PROD",
         "Tags": [
           {
             "Key": "App",
-            "Value": "press-reader-entitlements",
+            "Value": "observer-digital-benefits",
           },
           {
             "Key": "gu:cdk:version",
@@ -1891,24 +1571,15 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::Stage",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsPRODUsagePlan38E9853E": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODE3B12D45": {
       "Properties": {
-        "ApiStages": [
-          {
-            "ApiId": {
-              "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
-            },
-            "Stage": {
-              "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDeploymentStagePROD6E99A268",
-            },
-            "Throttle": {},
-          },
-        ],
-        "Description": "REST endpoints for press-reader-entitlements",
+        "ApiKeySourceType": "HEADER",
+        "Description": "API Gateway created by CDK",
+        "Name": "observer-digital-benefits-PROD",
         "Tags": [
           {
             "Key": "App",
-            "Value": "press-reader-entitlements",
+            "Value": "observer-digital-benefits",
           },
           {
             "Key": "gu:cdk:version",
@@ -1927,40 +1598,79 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
             "Value": "PROD",
           },
         ],
-        "UsagePlanName": "press-reader-entitlements-PROD",
+      },
+      "Type": "AWS::ApiGateway::RestApi",
+    },
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODUsagePlan7C5536AB": {
+      "Properties": {
+        "ApiStages": [
+          {
+            "ApiId": {
+              "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODE3B12D45",
+            },
+            "Stage": {
+              "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODDeploymentStagePROD2B69E4CF",
+            },
+            "Throttle": {},
+          },
+        ],
+        "Description": "REST endpoints for observer-digital-benefits",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "observer-digital-benefits",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+        "UsagePlanName": "observer-digital-benefits-PROD",
       },
       "Type": "AWS::ApiGateway::UsagePlan",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsPRODUsagePlanUsagePlanKeyResourcepressreaderentitlementsPRODpressreaderentitlementslambdapressreaderentitlementsPRODpressreaderentitlementskeyPRODCE66A9513BA32151": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODUsagePlanUsagePlanKeyResourceobserverdigitalbenefitsPRODobserverdigitalbenefitslambdaobserverdigitalbenefitsPRODobserverdigitalbenefitskeyPROD40E5B24CCA26983E": {
       "Properties": {
         "KeyId": {
-          "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODpressreaderentitlementskeyPROD67D1169B",
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODobserverdigitalbenefitskeyPRODABC61343",
         },
         "KeyType": "API_KEY",
         "UsagePlanId": {
-          "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODUsagePlan38E9853E",
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODUsagePlan7C5536AB",
         },
       },
       "Type": "AWS::ApiGateway::UsagePlanKey",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsPRODpressreaderentitlementskeyPROD67D1169B": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODobserverdigitalbenefitskeyPRODABC61343": {
       "Properties": {
         "Enabled": true,
-        "Name": "press-reader-entitlements-key-PROD",
+        "Name": "observer-digital-benefits-key-PROD",
         "StageKeys": [
           {
             "RestApiId": {
-              "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+              "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODE3B12D45",
             },
             "StageName": {
-              "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDeploymentStagePROD6E99A268",
+              "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODDeploymentStagePROD2B69E4CF",
             },
           },
         ],
         "Tags": [
           {
             "Key": "App",
-            "Value": "press-reader-entitlements",
+            "Value": "observer-digital-benefits",
           },
           {
             "Key": "gu:cdk:version",
@@ -1982,22 +1692,22 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
       },
       "Type": "AWS::ApiGateway::ApiKey",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsPRODproxyA619485E": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODproxy760F363F": {
       "Properties": {
         "ParentId": {
           "Fn::GetAtt": [
-            "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+            "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODE3B12D45",
             "RootResourceId",
           ],
         },
         "PathPart": "{proxy+}",
         "RestApiId": {
-          "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODE3B12D45",
         },
       },
       "Type": "AWS::ApiGateway::Resource",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsPRODproxyANY3A6E2187": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODproxyANYA79F9B8D": {
       "Properties": {
         "ApiKeyRequired": true,
         "AuthorizationType": "NONE",
@@ -2020,7 +1730,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
                 ":lambda:path/2015-03-31/functions/",
                 {
                   "Fn::GetAtt": [
-                    "pressreaderentitlementslambda849A2923",
+                    "observerdigitalbenefitslambdaFD43C7C9",
                     "Arn",
                   ],
                 },
@@ -2030,20 +1740,20 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
           },
         },
         "ResourceId": {
-          "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODproxyA619485E",
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODproxy760F363F",
         },
         "RestApiId": {
-          "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+          "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODE3B12D45",
         },
       },
       "Type": "AWS::ApiGateway::Method",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsPRODproxyANYApiPermissionTestpressreaderentitlementsPRODpressreaderentitlementslambdapressreaderentitlementsPROD471B412CANYproxy24006336": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODproxyANYApiPermissionTestobserverdigitalbenefitsPRODobserverdigitalbenefitslambdaobserverdigitalbenefitsPROD19E4B2C2ANYproxy53DDA930": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
           "Fn::GetAtt": [
-            "pressreaderentitlementslambda849A2923",
+            "observerdigitalbenefitslambdaFD43C7C9",
             "Arn",
           ],
         },
@@ -2066,7 +1776,7 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
               },
               ":",
               {
-                "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+                "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODE3B12D45",
               },
               "/test-invoke-stage/*/*",
             ],
@@ -2075,12 +1785,12 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Permission",
     },
-    "pressreaderentitlementslambdapressreaderentitlementsPRODproxyANYApiPermissionpressreaderentitlementsPRODpressreaderentitlementslambdapressreaderentitlementsPROD471B412CANYproxyF59FA99A": {
+    "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODproxyANYApiPermissionobserverdigitalbenefitsPRODobserverdigitalbenefitslambdaobserverdigitalbenefitsPROD19E4B2C2ANYproxy58A084A8": {
       "Properties": {
         "Action": "lambda:InvokeFunction",
         "FunctionName": {
           "Fn::GetAtt": [
-            "pressreaderentitlementslambda849A2923",
+            "observerdigitalbenefitslambdaFD43C7C9",
             "Arn",
           ],
         },
@@ -2103,11 +1813,11 @@ exports[`The Press reader entitlements stack matches the snapshot 2`] = `
               },
               ":",
               {
-                "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDEDF38DA",
+                "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODE3B12D45",
               },
               "/",
               {
-                "Ref": "pressreaderentitlementslambdapressreaderentitlementsPRODDeploymentStagePROD6E99A268",
+                "Ref": "observerdigitalbenefitslambdaobserverdigitalbenefitsPRODDeploymentStagePROD2B69E4CF",
               },
               "/*/*",
             ],

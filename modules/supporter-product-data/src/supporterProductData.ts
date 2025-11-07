@@ -37,6 +37,30 @@ export const getSupporterProductData = async (
 	return data.Items?.map((item) => unmarshall(item) as SupporterRatePlanItem);
 };
 
+export const getSubscription = async (
+	stage: Stage,
+	subscriptionName: string,
+): Promise<SupporterRatePlanItem | undefined> => {
+	const tableName = `SupporterProductData-${stage}`;
+	const input = {
+		TableName: tableName,
+		IndexName: 'subscriptionName-index',
+		KeyConditionExpression: 'subscriptionName = :v1',
+		ExpressionAttributeValues: {
+			':v1': {
+				S: subscriptionName,
+			},
+		},
+	};
+	console.log(`Querying ${tableName} for subscriptionName ${subscriptionName}`);
+	const data = await dynamoClient.send(new QueryCommand(input));
+	console.log(`Query returned ${JSON.stringify(data)}`);
+	const items = data.Items?.map(
+		(item) => unmarshall(item) as SupporterRatePlanItem,
+	);
+	return items ? items[0] : undefined;
+};
+
 // We insert into the SupporterProductData table via an SQS queue to keep all the logic around formatting and TTLs in one place
 // This is the lambda that ultimately does the writing:
 // https://github.com/guardian/support-frontend/blob/main/supporter-product-data/src/main/scala/com/gu/lambdas/ProcessSupporterRatePlanItemLambda.scala#L24
