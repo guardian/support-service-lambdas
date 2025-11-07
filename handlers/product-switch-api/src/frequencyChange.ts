@@ -593,8 +593,6 @@ export const frequencyChangeHandler =
 	const isErrorResponse = 'reasons' in response;
 	const statusCode = isErrorResponse
 		? 400
-		: parsed.body.preview
-			? 200
-			: 201;
+		: 200;
 	return { statusCode, body: JSON.stringify(response) };
 };
