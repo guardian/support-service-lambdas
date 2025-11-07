@@ -22,7 +22,7 @@ import type {
 import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import { getCatalogBillingPeriod } from './catalogInformation';
+import { getCatalogRatePlanName } from './catalogInformation';
 import type {
 	FrequencyChangePreviewResponse,
 	FrequencyChangeRequestBody,
@@ -157,7 +157,7 @@ function getTargetRatePlanId(
 		);
 	}
 
-	const targetRatePlanKey = getCatalogBillingPeriod(targetBillingPeriod);
+	const targetRatePlanKey = getCatalogRatePlanName(targetBillingPeriod);
 	logger.log(
 		`Determined target rate plan key '${targetRatePlanKey}' for requested billing period '${targetBillingPeriod}'`,
 	);
@@ -210,7 +210,7 @@ async function processFrequencyChange(
 			currentRatePlan,
 			targetBillingPeriod,
 		);
-		const targetRatePlanKey = getCatalogBillingPeriod(targetBillingPeriod);
+		const targetRatePlanKey = getCatalogRatePlanName(targetBillingPeriod);
 
 		const productCatalogHelper = new ProductCatalogHelper(productCatalog);
 		const productDetails = productCatalogHelper.findProductDetails(

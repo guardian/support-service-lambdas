@@ -4,7 +4,7 @@
  */
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import dayjs from 'dayjs';
-import { getCatalogBillingPeriod } from '../src/catalogInformation';
+import { getCatalogRatePlanName } from '../src/catalogInformation';
 import { selectCandidateSubscriptionCharge } from '../src/frequencyChange';
 
 /**
@@ -226,18 +226,18 @@ describe('selectCandidateSubscriptionCharge', () => {
 	});
 });
 
-describe('getCatalogBillingPeriod', () => {
+describe('getCatalogRatePlanName', () => {
 	test('converts "Month" to "Monthly"', () => {
-		expect(getCatalogBillingPeriod('Month')).toBe('Monthly');
+		expect(getCatalogRatePlanName('Month')).toBe('Monthly');
 	});
 
 	test('converts "Annual" to "Annual"', () => {
-		expect(getCatalogBillingPeriod('Annual')).toBe('Annual');
+		expect(getCatalogRatePlanName('Annual')).toBe('Annual');
 	});
 
 	test('throws error for unsupported billing period', () => {
 		const invalidPeriod = 'Quarter' as unknown as 'Month' | 'Annual';
-		expect(() => getCatalogBillingPeriod(invalidPeriod)).toThrow(
+		expect(() => getCatalogRatePlanName(invalidPeriod)).toThrow(
 			'Unsupported billing period Quarter',
 		);
 	});

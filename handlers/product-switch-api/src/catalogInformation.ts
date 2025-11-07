@@ -16,7 +16,7 @@ export type CatalogInformation = {
 	};
 };
 
-export const getCatalogBillingPeriod = (
+export const getCatalogRatePlanName = (
 	billingPeriod: BillingPeriod,
 ): 'Monthly' | 'Annual' => {
 	if (billingPeriod == 'Annual') {
@@ -32,7 +32,7 @@ export const getCatalogInformation = (
 	billingPeriod: BillingPeriod,
 	currency: IsoCurrency,
 ): CatalogInformation => {
-	const catalogBillingPeriod = getCatalogBillingPeriod(billingPeriod);
+	const catalogBillingPeriod = getCatalogRatePlanName(billingPeriod);
 	const price = getIfDefined(
 		productCatalog.SupporterPlus.ratePlans[catalogBillingPeriod].pricing[
 			currency
