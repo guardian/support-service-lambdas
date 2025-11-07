@@ -27,7 +27,7 @@ To run these you will need fresh Janus credentials, then you can run `pnpm --fil
 
 ## Frequency change endpoint (experimental)
 
-POST `/product-switch/frequency/{subscriptionNumber}`
+POST `/product-switch/billing-frequency/{subscriptionNumber}`
 
 Body:
 ```

@@ -36,7 +36,7 @@ export const handler: Handler = Router([
 	}),
 	createRoute<PathParser, FrequencyChangeRequestBody>({
 		httpMethod: 'POST',
-		path: '/product-switch/frequency/{subscriptionNumber}',
+		path: '/product-switch/billing-frequency/{subscriptionNumber}',
 		handler: frequencyChangeHandler(stage, dayjs()),
 		parser: {
 			path: pathParserSchema,
