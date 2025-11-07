@@ -441,7 +441,11 @@ export const frequencyChangeHandler =
 			return {
 				statusCode: 403,
 				body: JSON.stringify({
-					message: `Subscription ${parsed.path.subscriptionNumber} does not belong to the currently logged-in user`,
+					reasons: [
+						{
+							message: `Subscription ${parsed.path.subscriptionNumber} does not belong to the currently logged-in user`,
+						},
+					],
 				}),
 			};
 		}
@@ -467,7 +471,12 @@ export const frequencyChangeHandler =
 			return {
 				statusCode: 400,
 				body: JSON.stringify({
-					message: error instanceof Error ? error.message : 'Unknown error',
+					reasons: [
+						{
+							message:
+								error instanceof Error ? error.message : 'Unknown error',
+						},
+					],
 				}),
 			};
 		}
