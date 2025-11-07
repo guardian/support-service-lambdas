@@ -362,19 +362,19 @@ async function processFrequencyChange(
 				zuoraPreviewResponseSchema,
 			);
 
-		if (!zuoraPreview.success) {
-			logger.log(
-				'Orders preview returned unsuccessful response',
-				zuoraPreview,
-			);
-			return {
-				reasons: zuoraPreview.reasons?.map((r: { message: string }) => ({
-					message: r.message,
-				})) ?? [{ message: 'Unknown error from Zuora preview' }],
-			};
-		}
-		
-		logger.log('Orders preview returned successful response', zuoraPreview);
+			if (!zuoraPreview.success) {
+				logger.log(
+					'Orders preview returned unsuccessful response',
+					zuoraPreview,
+				);
+				return {
+					reasons: zuoraPreview.reasons?.map((r: { message: string }) => ({
+						message: r.message,
+					})) ?? [{ message: 'Unknown error from Zuora preview' }],
+				};
+			}
+
+			logger.log('Orders preview returned successful response', zuoraPreview);
 
 			// Filter invoice items to show only the new billing period charges
 			// Exclude credits/prorations from the old billing period
@@ -433,45 +433,49 @@ async function processFrequencyChange(
 				],
 			};
 
-		const zuoraResponse: ZuoraSwitchResponse = await executeOrderRequest(
-			zuoraClient,
-			orderRequest,
-			zuoraSwitchResponseSchema,
-		);
-
-		if (!zuoraResponse.success) {
-			logger.log(
-				'Orders execution returned unsuccessful response',
-				zuoraResponse,
+			const zuoraResponse: ZuoraSwitchResponse = await executeOrderRequest(
+				zuoraClient,
+				orderRequest,
+				zuoraSwitchResponseSchema,
 			);
+
+			if (!zuoraResponse.success) {
+				logger.log(
+					'Orders execution returned unsuccessful response',
+					zuoraResponse,
+				);
+				return {
+					reasons: zuoraResponse.reasons?.map((r: { message: string }) => ({
+						message: r.message,
+					})) ?? [{ message: 'Unknown error from Zuora execution' }],
+				};
+			}
+
 			return {
-				reasons: zuoraResponse.reasons?.map((r: { message: string }) => ({
-					message: r.message,
-				})) ?? [{ message: 'Unknown error from Zuora execution' }],
+				invoiceIds: zuoraResponse.invoiceIds ?? [],
 			};
 		}
-
+	} catch (error) {
+		logger.log(
+			`Error during Orders API frequency change ${preview ? 'preview' : 'execute'}`,
+			error,
+		);
+		// Only return ValidationError messages to clients for security
+		if (error instanceof ValidationError) {
+			return {
+				reasons: [{ message: error.message }],
+			};
+		}
+		// Log unexpected errors but don't expose details to client
+		logger.log('Unexpected error type in frequency change processing', error);
 		return {
-			invoiceIds: zuoraResponse.invoiceIds ?? [],
+			reasons: [
+				{
+					message: 'An unexpected error occurred while processing your request',
+				},
+			],
 		};
 	}
-} catch (error) {
-	logger.log(
-		`Error during Orders API frequency change ${preview ? 'preview' : 'execute'}`,
-		error,
-	);
-	// Only return ValidationError messages to clients for security
-	if (error instanceof ValidationError) {
-		return {
-			reasons: [{ message: error.message }],
-		};
-	}
-	// Log unexpected errors but don't expose details to client
-	logger.log('Unexpected error type in frequency change processing', error);
-	return {
-		reasons: [{ message: 'An unexpected error occurred while processing your request' }],
-	};
-}
 }
 
 /**
@@ -505,10 +509,7 @@ export const frequencyChangeHandler =
 		).headers?.['x-identity-id'];
 		const account = await getAccount(zuoraClient, subscription.accountNumber);
 
-		if (
-			identityId &&
-			account.basicInfo.identityId !== identityId
-		) {
+		if (identityId && account.basicInfo.identityId !== identityId) {
 			logger.log(
 				`Subscription ${parsed.path.subscriptionNumber} does not belong to identity ID ${identityId}`,
 			);
@@ -553,7 +554,12 @@ export const frequencyChangeHandler =
 			return {
 				statusCode: 500,
 				body: JSON.stringify({
-					reasons: [{ message: 'An unexpected error occurred while processing your request' }],
+					reasons: [
+						{
+							message:
+								'An unexpected error occurred while processing your request',
+						},
+					],
 				}),
 			};
 		}
@@ -587,12 +593,10 @@ export const frequencyChangeHandler =
 					candidateCharge,
 					productCatalog,
 					parsed.body.targetBillingPeriod,
-		);
+				);
 
-	// Type guard to check if response is an error
-	const isErrorResponse = 'reasons' in response;
-	const statusCode = isErrorResponse
-		? 400
-		: 200;
-	return { statusCode, body: JSON.stringify(response) };
-};
+		// Type guard to check if response is an error
+		const isErrorResponse = 'reasons' in response;
+		const statusCode = isErrorResponse ? 400 : 200;
+		return { statusCode, body: JSON.stringify(response) };
+	};

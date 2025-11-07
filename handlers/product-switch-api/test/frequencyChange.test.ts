@@ -262,11 +262,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 		subscription.status = 'Suspended';
 		const account = makeAccount();
 		expect(() =>
-			selectCandidateSubscriptionCharge(
-				subscription,
-				now.toDate(),
-				account,
-			),
+			selectCandidateSubscriptionCharge(subscription, now.toDate(), account),
 		).toThrow('Subscription status is not Active: Suspended');
 	});
 
@@ -275,11 +271,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 		const subscription = makeSubscriptionWithSingleCharge('Month', 10);
 		const account = makeAccount({ totalInvoiceBalance: 50 });
 		expect(() =>
-			selectCandidateSubscriptionCharge(
-				subscription,
-				now.toDate(),
-				account,
-			),
+			selectCandidateSubscriptionCharge(subscription, now.toDate(), account),
 		).toThrow(
 			'Cannot change frequency while account has outstanding invoice balance of 50 GBP',
 		);
@@ -314,11 +306,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 		subscription.status = 'Cancelled';
 		const account = makeAccount();
 		expect(() =>
-			selectCandidateSubscriptionCharge(
-				subscription,
-				now.toDate(),
-				account,
-			),
+			selectCandidateSubscriptionCharge(subscription, now.toDate(), account),
 		).toThrow('Subscription status is not Active: Cancelled');
 	});
 });
