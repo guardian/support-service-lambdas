@@ -452,10 +452,6 @@ export const frequencyChangeHandler =
 
 		const productCatalog = await getProductCatalogFromApi(stage);
 
-		logger.log(
-			`Subscription rate plans: ${prettyPrint(subscription.ratePlans)}`,
-		);
-
 		// Use selectCandidateSubscriptionCharge to validate and find the eligible charge
 		let candidateCharge: { ratePlan: RatePlan; charge: RatePlanCharge };
 		try {
