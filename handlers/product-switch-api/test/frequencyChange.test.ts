@@ -152,7 +152,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 		};
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, new Date()),
-		).toThrow('No active recurring charges eligible for frequency change.');
+		).toThrow('subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)');
 	});
 
 	test('throws when multiple eligible charges exist', () => {
@@ -171,7 +171,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, new Date()),
 		).toThrow(
-			'Multiple eligible charges found; cannot safely change frequency.',
+			'subscription did not meet precondition <subscription has exactly one eligible charge (multiple charges cannot be safely changed)> (was 2 charges found)',
 		);
 	});
 
@@ -181,7 +181,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 		});
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, new Date()),
-		).toThrow('No active recurring charges eligible for frequency change.');
+		).toThrow('subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)');
 	});
 
 	test('excludes charges that are not named "Subscription"', () => {
@@ -190,7 +190,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 		});
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, new Date()),
-		).toThrow('No active recurring charges eligible for frequency change.');
+		).toThrow('subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)');
 	});
 
 	test('excludes charges that are not type "Recurring"', () => {
@@ -199,7 +199,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 		});
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, new Date()),
-		).toThrow('No active recurring charges eligible for frequency change.');
+		).toThrow('subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)');
 	});
 
 	test('excludes charges not yet effective (effectiveStartDate in future)', () => {
@@ -209,7 +209,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 		});
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, now.toDate()),
-		).toThrow('No active recurring charges eligible for frequency change.');
+		).toThrow('subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)');
 	});
 
 	test('excludes charges that have ended (effectiveEndDate in past)', () => {
@@ -219,7 +219,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 		});
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, now.toDate()),
-		).toThrow('No active recurring charges eligible for frequency change.');
+		).toThrow('subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)');
 	});
 
 	test('excludes charges with chargedThroughDate in the past', () => {
@@ -229,7 +229,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 		});
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, now.toDate()),
-		).toThrow('No active recurring charges eligible for frequency change.');
+		).toThrow('subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)');
 	});
 
 	test('includes charges with chargedThroughDate in the future', () => {
@@ -263,7 +263,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 		const account = makeAccount();
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, now.toDate(), account),
-		).toThrow('Subscription status is not Active: Suspended');
+		).toThrow('subscription did not meet precondition <subscription status is active> (was Suspended)');
 	});
 
 	test('throws when account has outstanding invoice balance', () => {
@@ -273,7 +273,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, now.toDate(), account),
 		).toThrow(
-			'Cannot change frequency while account has outstanding invoice balance of 50 GBP',
+			'subscription did not meet precondition <account balance is zero> (was 50 GBP)',
 		);
 	});
 
@@ -307,7 +307,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 		const account = makeAccount();
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, now.toDate(), account),
-		).toThrow('Subscription status is not Active: Cancelled');
+		).toThrow('subscription did not meet precondition <subscription status is active> (was Cancelled)');
 	});
 });
 
