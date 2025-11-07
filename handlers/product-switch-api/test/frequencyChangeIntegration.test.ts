@@ -95,14 +95,13 @@ describe('frequency change behaviour', () => {
 		expect('previewInvoices' in result).toBe(true);
 		if ('previewInvoices' in result) {
 			expect(result.previewInvoices).toBeDefined();
-			expect(result.savings).toBeDefined();
 
 			// Verify savings calculation (monthly -> annual shows annual savings)
-				expect(result.savings.period).toBe('year');
-				expect(result.savings.currency).toBe('GBP');
-				// Annual savings = (monthly price * 12) - annual price
-				expect(result.savings.amount).toBeGreaterThan(0);
-			}
+			expect(result.savings.period).toBe('year');
+			expect(result.savings.currency).toBe('GBP');
+			// Annual savings = (monthly price * 12) - annual price
+			expect(result.savings.amount).toBeGreaterThan(0);
+		}
 		});
 
 		it('can preview an annual to monthly frequency change', async () => {
@@ -128,12 +127,11 @@ describe('frequency change behaviour', () => {
 		expect('previewInvoices' in result).toBe(true);
 		if ('previewInvoices' in result) {
 			expect(result.previewInvoices).toBeDefined();
-			expect(result.savings).toBeDefined();
 
 			// Verify savings calculation (annual -> monthly shows monthly savings)
-				expect(result.savings.period).toBe('month');
-				expect(result.savings.currency).toBe('GBP');
-			}
+			expect(result.savings.period).toBe('month');
+			expect(result.savings.currency).toBe('GBP');
+		}
 		});
 
 		it(
@@ -206,7 +204,6 @@ describe('frequency change behaviour', () => {
 				expect('previewInvoices' in result).toBe(true);
 				if ('previewInvoices' in result) {
 					expect(result.previewInvoices).toBeDefined();
-					expect(result.savings).toBeDefined();
 
 					expect(result.savings.currency).toBe('EUR');
 				}
