@@ -416,7 +416,6 @@ export const frequencyChangeHandler =
 		},
 	): Promise<{ statusCode: number; body: string }> => {
 		logger.mutableAddContext(parsed.path.subscriptionNumber);
-		logger.log(`Frequency change request body ${prettyPrint(parsed.body)}`);
 		const todayDate = today.toDate();
 
 		const zuoraClient = await ZuoraClient.create(stage);
