@@ -4,6 +4,7 @@ import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
+import { getAccount } from '@modules/zuora/account';
 import { singleTriggerDate } from '@modules/zuora/orders/orderActions';
 import type { OrderAction } from '@modules/zuora/orders/orderActions';
 import {
@@ -409,7 +410,7 @@ async function processFrequencyChange(
 export const frequencyChangeHandler =
 	(stage: Stage, today: dayjs.Dayjs) =>
 	async (
-		_event: unknown,
+		event: unknown,
 		parsed: {
 			path: { subscriptionNumber: string };
 			body: FrequencyChangeRequestBody;
@@ -423,6 +424,28 @@ export const frequencyChangeHandler =
 			zuoraClient,
 			parsed.path.subscriptionNumber,
 		);
+
+		// Extract identity ID from headers and validate ownership
+		const identityId = (
+			event as { headers?: Record<string, string | undefined> }
+		).headers?.['x-identity-id'];
+		const account = await getAccount(zuoraClient, subscription.accountNumber);
+
+		if (
+			identityId &&
+			account.basicInfo.identityId !== identityId
+		) {
+			logger.log(
+				`Subscription ${parsed.path.subscriptionNumber} does not belong to identity ID ${identityId}`,
+			);
+			return {
+				statusCode: 403,
+				body: JSON.stringify({
+					message: `Subscription ${parsed.path.subscriptionNumber} does not belong to the currently logged-in user`,
+				}),
+			};
+		}
+
 		const productCatalog = await getProductCatalogFromApi(stage);
 
 		logger.log(
