@@ -488,7 +488,7 @@ export const frequencyChangeHandler =
 				`Charge ${charge.id} already has billing period ${charge.billingPeriod}, no change needed.`,
 			);
 			return {
-				statusCode: 205,
+				statusCode: 400,
 				body: JSON.stringify({
 					message: 'Charge already matches target billing period.',
 				}),
