@@ -18,7 +18,6 @@ export type FrequencyChangeRequestBody = z.infer<
 export const frequencyChangePreviewResponseSchema = z.object({
 	success: z.boolean(),
 	previousBillingPeriod: z.enum(['Month', 'Annual']),
-	newBillingPeriod: z.enum(['Month', 'Annual']),
 	previewInvoices: z.optional(z.array(zuoraPreviewResponseInvoiceSchema)),
 	reasons: z.optional(z.array(z.object({ message: z.string() }))),
 	savings: z.optional(
@@ -37,7 +36,6 @@ export type FrequencyChangePreviewResponse = z.infer<
 export const frequencyChangeSwitchResponseSchema = z.object({
 	success: z.boolean(),
 	previousBillingPeriod: z.enum(['Month', 'Annual']),
-	newBillingPeriod: z.enum(['Month', 'Annual']),
 	invoiceIds: z.optional(z.array(z.string())),
 	reasons: z.optional(z.array(z.object({ message: z.string() }))),
 });
