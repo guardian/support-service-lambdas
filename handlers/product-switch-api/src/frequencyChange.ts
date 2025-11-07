@@ -300,7 +300,6 @@ async function processFrequencyChange(
 				);
 				return {
 					success: false,
-					previousBillingPeriod: currentBillingPeriod,
 					previewInvoices: [],
 					reasons: zuoraPreview.reasons?.map((r: { message: string }) => ({
 						message: r.message,
@@ -345,7 +344,6 @@ async function processFrequencyChange(
 
 			return {
 				success: true,
-				previousBillingPeriod: currentBillingPeriod,
 				previewInvoices: cleanedInvoices,
 				savings: {
 					amount: savingsAmount,
@@ -382,7 +380,6 @@ async function processFrequencyChange(
 				);
 				return {
 					success: false,
-					previousBillingPeriod: currentBillingPeriod,
 					reasons: zuoraResponse.reasons?.map((r: { message: string }) => ({
 						message: r.message,
 					})) ?? [{ message: 'Unknown error from Zuora execution' }],
@@ -391,7 +388,6 @@ async function processFrequencyChange(
 
 			return {
 				success: true,
-				previousBillingPeriod: currentBillingPeriod,
 				invoiceIds: zuoraResponse.invoiceIds,
 			};
 		}
@@ -402,7 +398,6 @@ async function processFrequencyChange(
 		);
 		return {
 			success: false,
-			previousBillingPeriod: currentBillingPeriod,
 			reasons: [
 				{ message: error instanceof Error ? error.message : 'Unknown error' },
 			],
