@@ -293,21 +293,20 @@ async function processFrequencyChange(
 				zuoraPreviewResponseSchema,
 			);
 
-			if (!zuoraPreview.success) {
-				logger.log(
-					'Orders preview returned unsuccessful response',
-					zuoraPreview,
-				);
-				return {
-					success: false,
-					previewInvoices: [],
-					reasons: zuoraPreview.reasons?.map((r: { message: string }) => ({
-						message: r.message,
-					})) ?? [{ message: 'Unknown error from Zuora preview' }],
-				};
-			}
-
-			logger.log('Orders preview returned successful response', zuoraPreview);
+		if (!zuoraPreview.success) {
+			logger.log(
+				'Orders preview returned unsuccessful response',
+				zuoraPreview,
+			);
+			return {
+				previewInvoices: [],
+				reasons: zuoraPreview.reasons?.map((r: { message: string }) => ({
+					message: r.message,
+				})) ?? [{ message: 'Unknown error from Zuora preview' }],
+			};
+		}
+		
+		logger.log('Orders preview returned successful response', zuoraPreview);
 
 			// Filter invoice items to show only the new billing period charges
 			// Exclude credits/prorations from the old billing period
@@ -343,7 +342,7 @@ async function processFrequencyChange(
 			}
 
 			return {
-				success: true,
+				
 				previewInvoices: cleanedInvoices,
 				savings: {
 					amount: savingsAmount,
@@ -367,42 +366,39 @@ async function processFrequencyChange(
 				],
 			};
 
-			const zuoraResponse: ZuoraSwitchResponse = await executeOrderRequest(
-				zuoraClient,
-				orderRequest,
-				zuoraSwitchResponseSchema,
+		const zuoraResponse: ZuoraSwitchResponse = await executeOrderRequest(
+			zuoraClient,
+			orderRequest,
+			zuoraSwitchResponseSchema,
+		);
+
+		if (!zuoraResponse.success) {
+			logger.log(
+				'Orders execution returned unsuccessful response',
+				zuoraResponse,
 			);
-
-			if (!zuoraResponse.success) {
-				logger.log(
-					'Orders execution returned unsuccessful response',
-					zuoraResponse,
-				);
-				return {
-					success: false,
-					reasons: zuoraResponse.reasons?.map((r: { message: string }) => ({
-						message: r.message,
-					})) ?? [{ message: 'Unknown error from Zuora execution' }],
-				};
-			}
-
 			return {
-				success: true,
-				invoiceIds: zuoraResponse.invoiceIds,
+				reasons: zuoraResponse.reasons?.map((r: { message: string }) => ({
+					message: r.message,
+				})) ?? [{ message: 'Unknown error from Zuora execution' }],
 			};
 		}
-	} catch (error) {
-		logger.log(
-			`Error during Orders API frequency change ${preview ? 'preview' : 'execute'}`,
-			error,
-		);
+
 		return {
-			success: false,
-			reasons: [
-				{ message: error instanceof Error ? error.message : 'Unknown error' },
-			],
+			invoiceIds: zuoraResponse.invoiceIds,
 		};
 	}
+} catch (error) {
+	logger.log(
+		`Error during Orders API frequency change ${preview ? 'preview' : 'execute'}`,
+		error,
+	);
+	return {
+		reasons: [
+			{ message: error instanceof Error ? error.message : 'Unknown error' },
+		],
+	};
+}
 }
 
 /**
@@ -485,16 +481,16 @@ export const frequencyChangeHandler =
 					candidateCharge,
 					productCatalog,
 					parsed.body.targetBillingPeriod,
-				);
-
-		logger.log(
-			`Frequency change ${parsed.body.preview ? 'preview' : 'execute'} response ${prettyPrint(response)}`,
 		);
 
-		const statusCode = response.success
-			? parsed.body.preview
-				? 200
-				: 201
-			: 400;
-		return { statusCode, body: JSON.stringify(response) };
-	};
+	logger.log(
+		`Frequency change ${parsed.body.preview ? 'preview' : 'execute'} response ${prettyPrint(response)}`,
+	);
+
+	const statusCode = response.reasons
+		? 400
+		: parsed.body.preview
+			? 200
+			: 201;
+	return { statusCode, body: JSON.stringify(response) };
+};
