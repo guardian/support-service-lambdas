@@ -299,7 +299,6 @@ async function processFrequencyChange(
 				zuoraPreview,
 			);
 			return {
-				previewInvoices: [],
 				reasons: zuoraPreview.reasons?.map((r: { message: string }) => ({
 					message: r.message,
 				})) ?? [{ message: 'Unknown error from Zuora preview' }],
@@ -342,7 +341,6 @@ async function processFrequencyChange(
 			}
 
 			return {
-				
 				previewInvoices: cleanedInvoices,
 				savings: {
 					amount: savingsAmount,
@@ -385,7 +383,7 @@ async function processFrequencyChange(
 		}
 
 		return {
-			invoiceIds: zuoraResponse.invoiceIds,
+			invoiceIds: zuoraResponse.invoiceIds ?? [],
 		};
 	}
 } catch (error) {
@@ -487,7 +485,9 @@ export const frequencyChangeHandler =
 		`Frequency change ${parsed.body.preview ? 'preview' : 'execute'} response ${prettyPrint(response)}`,
 	);
 
-	const statusCode = response.reasons
+	// Type guard to check if response is an error
+	const isErrorResponse = 'reasons' in response;
+	const statusCode = isErrorResponse
 		? 400
 		: parsed.body.preview
 			? 200

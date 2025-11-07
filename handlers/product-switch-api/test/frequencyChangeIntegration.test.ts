@@ -91,10 +91,13 @@ describe('frequency change behaviour', () => {
 				'Annual',
 			);
 
-		expect(result.previewInvoices).toBeDefined();
+		// Expect success response
+		expect('previewInvoices' in result).toBe(true);
+		if ('previewInvoices' in result) {
+			expect(result.previewInvoices).toBeDefined();
+			expect(result.savings).toBeDefined();
 
-		// Verify savings calculation (monthly -> annual shows annual savings)
-		if (result.savings) {
+			// Verify savings calculation (monthly -> annual shows annual savings)
 				expect(result.savings.period).toBe('year');
 				expect(result.savings.currency).toBe('GBP');
 				// Annual savings = (monthly price * 12) - annual price
@@ -121,10 +124,13 @@ describe('frequency change behaviour', () => {
 				'Month',
 			);
 
-		expect(result.previewInvoices).toBeDefined();
+		// Expect success response
+		expect('previewInvoices' in result).toBe(true);
+		if ('previewInvoices' in result) {
+			expect(result.previewInvoices).toBeDefined();
+			expect(result.savings).toBeDefined();
 
-		// Verify savings calculation (annual -> monthly shows monthly savings)
-		if (result.savings) {
+			// Verify savings calculation (annual -> monthly shows monthly savings)
 				expect(result.savings.period).toBe('month');
 				expect(result.savings.currency).toBe('GBP');
 			}
@@ -151,14 +157,18 @@ describe('frequency change behaviour', () => {
 						'Annual',
 					);
 
-				expect(result.previewInvoices).toBeDefined();
-				if (result.previewInvoices && result.previewInvoices.length > 0) {
+				// Expect success response
+				expect('previewInvoices' in result).toBe(true);
+				if ('previewInvoices' in result) {
+					expect(result.previewInvoices).toBeDefined();
+					if (result.previewInvoices.length > 0) {
 					// Preview should contain invoice items
 					const invoice = result.previewInvoices[0];
 					expect(invoice).toBeDefined();
 					if (invoice) {
 						expect(invoice.invoiceItems.length).toBeGreaterThan(0);
 					}
+				}
 				}
 			},
 			1000 * 60,
@@ -192,9 +202,12 @@ describe('frequency change behaviour', () => {
 						'Annual',
 					);
 
-				expect(result.previewInvoices).toBeDefined();
+				// Expect success response
+				expect('previewInvoices' in result).toBe(true);
+				if ('previewInvoices' in result) {
+					expect(result.previewInvoices).toBeDefined();
+					expect(result.savings).toBeDefined();
 
-				if (result.savings) {
 					expect(result.savings.currency).toBe('EUR');
 				}
 			},
@@ -224,8 +237,11 @@ describe('frequency change behaviour', () => {
 						'Annual',
 					);
 
-				// Execution should generate invoice IDs
-				expect(result.invoiceIds).toBeDefined();
+				// Expect success response
+				expect('invoiceIds' in result).toBe(true);
+				if ('invoiceIds' in result) {
+					expect(result.invoiceIds).toBeDefined();
+				}
 			},
 			1000 * 60,
 		);
@@ -251,7 +267,11 @@ describe('frequency change behaviour', () => {
 						'Month',
 					);
 
-				expect(result.invoiceIds).toBeDefined();
+				// Expect success response
+				expect('invoiceIds' in result).toBe(true);
+				if ('invoiceIds' in result) {
+					expect(result.invoiceIds).toBeDefined();
+				}
 			},
 			1000 * 60,
 		);
@@ -285,7 +305,12 @@ describe('frequency change behaviour', () => {
 					subscription.subscriptionNumber,
 				);
 				expect(updatedSubscription).toBeDefined();
-expect(result).toBeDefined();			},
+				
+				// Expect success response
+				expect('invoiceIds' in result).toBe(true);
+				if ('invoiceIds' in result) {
+					expect(result.invoiceIds).toBeDefined();
+				}			},
 			1000 * 60 * 2,
 		);
 
@@ -317,7 +342,11 @@ expect(result).toBeDefined();			},
 						'Annual',
 					);
 
-				expect(result.invoiceIds).toBeDefined();
+				// Expect success response
+				expect('invoiceIds' in result).toBe(true);
+				if ('invoiceIds' in result) {
+					expect(result.invoiceIds).toBeDefined();
+				}
 			},
 			1000 * 60,
 		);
