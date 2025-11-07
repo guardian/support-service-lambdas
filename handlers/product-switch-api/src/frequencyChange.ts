@@ -42,11 +42,30 @@ import {
 /**
  * Select the single candidate rate plan and charge eligible for a frequency change.
  * Logic matches the handler implementation so tests can exercise preview/execute flows without duplicating filtering rules.
+ *
+ * Validates that the subscription is eligible:
+ * - Must be Active status
+ * - Must not have outstanding unpaid invoices (totalInvoiceBalance must be 0)
  */
 export function selectCandidateSubscriptionCharge(
 	subscription: Awaited<ReturnType<typeof getSubscription>>,
 	today: Date,
+	account?: Awaited<ReturnType<typeof getAccount>>,
 ): { ratePlan: RatePlan; charge: RatePlanCharge } {
+	// Check subscription status if account is provided
+	if (account && subscription.status !== 'Active') {
+		throw new Error(
+			`Subscription status is not Active: ${subscription.status}`,
+		);
+	}
+
+	// Check for outstanding unpaid invoices if account is provided
+	if (account && account.metrics.totalInvoiceBalance > 0) {
+		throw new Error(
+			`Cannot change frequency while account has outstanding invoice balance of ${account.metrics.totalInvoiceBalance} ${account.metrics.currency}`,
+		);
+	}
+
 	const candidateCharges = subscription.ratePlans
 		.filter((rp) => rp.lastChangeType !== 'Remove')
 		.flatMap((rp) =>
@@ -458,6 +477,7 @@ export const frequencyChangeHandler =
 			candidateCharge = selectCandidateSubscriptionCharge(
 				subscription,
 				todayDate,
+				account,
 			);
 		} catch (error) {
 			logger.log(

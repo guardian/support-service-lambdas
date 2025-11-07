@@ -8,6 +8,37 @@ import { getCatalogRatePlanName } from '../src/catalogInformation';
 import { selectCandidateSubscriptionCharge } from '../src/frequencyChange';
 
 /**
+ * Creates a minimal mock account object for testing payment status checks
+ */
+function makeAccount(overrides?: {
+	totalInvoiceBalance?: number;
+	creditBalance?: number;
+	currency?: string;
+}) {
+	return {
+		success: true,
+		basicInfo: {
+			id: 'basic-info-id',
+			identityId: 'identity-123',
+		},
+		billingAndPayment: {
+			currency: overrides?.currency ?? 'GBP',
+			defaultPaymentMethodId: 'payment-method-123',
+		},
+		billToContact: {
+			firstName: 'Test',
+			lastName: 'Customer',
+			workEmail: 'test@example.com',
+		},
+		metrics: {
+			totalInvoiceBalance: overrides?.totalInvoiceBalance ?? 0,
+			creditBalance: overrides?.creditBalance ?? 0,
+			currency: overrides?.currency ?? 'GBP',
+		},
+	};
+}
+
+/**
  * Creates a minimal mock subscription object for testing frequency changes
  */
 function makeSubscriptionWithSingleCharge(
@@ -223,6 +254,72 @@ describe('selectCandidateSubscriptionCharge', () => {
 			now.toDate(),
 		);
 		expect(charge.id).toBe('subChargeId');
+	});
+
+	test('throws when subscription status is not Active (account provided)', () => {
+		const now = dayjs();
+		const subscription = makeSubscriptionWithSingleCharge('Month', 10);
+		subscription.status = 'Suspended';
+		const account = makeAccount();
+		expect(() =>
+			selectCandidateSubscriptionCharge(
+				subscription,
+				now.toDate(),
+				account,
+			),
+		).toThrow('Subscription status is not Active: Suspended');
+	});
+
+	test('throws when account has outstanding invoice balance', () => {
+		const now = dayjs();
+		const subscription = makeSubscriptionWithSingleCharge('Month', 10);
+		const account = makeAccount({ totalInvoiceBalance: 50 });
+		expect(() =>
+			selectCandidateSubscriptionCharge(
+				subscription,
+				now.toDate(),
+				account,
+			),
+		).toThrow(
+			'Cannot change frequency while account has outstanding invoice balance of 50 GBP',
+		);
+	});
+
+	test('succeeds when account has zero balance', () => {
+		const now = dayjs();
+		const subscription = makeSubscriptionWithSingleCharge('Month', 10);
+		const account = makeAccount({ totalInvoiceBalance: 0 });
+		const { charge } = selectCandidateSubscriptionCharge(
+			subscription,
+			now.toDate(),
+			account,
+		);
+		expect(charge.id).toBe('subChargeId');
+	});
+
+	test('does not require account parameter for backward compatibility', () => {
+		const now = dayjs();
+		const subscription = makeSubscriptionWithSingleCharge('Month', 10);
+		// Should not throw when account is undefined
+		const { charge } = selectCandidateSubscriptionCharge(
+			subscription,
+			now.toDate(),
+		);
+		expect(charge.id).toBe('subChargeId');
+	});
+
+	test('throws when account status is Cancelled (account provided)', () => {
+		const now = dayjs();
+		const subscription = makeSubscriptionWithSingleCharge('Month', 10);
+		subscription.status = 'Cancelled';
+		const account = makeAccount();
+		expect(() =>
+			selectCandidateSubscriptionCharge(
+				subscription,
+				now.toDate(),
+				account,
+			),
+		).toThrow('Subscription status is not Active: Cancelled');
 	});
 });
 

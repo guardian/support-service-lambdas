@@ -12,6 +12,7 @@
  */
 import console from 'console';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
+import { getAccount } from '@modules/zuora/account';
 import {
 	getBillingPreview,
 	itemsForSubscription,
@@ -90,9 +91,11 @@ describe('frequency change behaviour', () => {
 					await createTestSubscriptionForFrequencyChange('Month', monthlyPrice);
 
 				const productCatalog = await getProductCatalogFromApi(stage);
+				const account = await getAccount(zuoraClient, subscription.accountNumber);
 				const candidateCharge = selectCandidateSubscriptionCharge(
 					subscription,
 					dayjs().toDate(),
+					account,
 				);
 				const result: FrequencyChangePreviewResponse =
 					await previewFrequencyChange(
@@ -135,9 +138,11 @@ describe('frequency change behaviour', () => {
 					await createTestSubscriptionForFrequencyChange('Annual', annualPrice);
 
 				const productCatalog = await getProductCatalogFromApi(stage);
+				const account = await getAccount(zuoraClient, subscription.accountNumber);
 				const candidateCharge = selectCandidateSubscriptionCharge(
 					subscription,
 					dayjs().toDate(),
+					account,
 				);
 				const result: FrequencyChangePreviewResponse =
 					await previewFrequencyChange(
@@ -176,9 +181,11 @@ describe('frequency change behaviour', () => {
 					);
 
 				const productCatalog = await getProductCatalogFromApi(stage);
+				const account = await getAccount(zuoraClient, subscription.accountNumber);
 				const candidateCharge = selectCandidateSubscriptionCharge(
 					subscription,
 					dayjs().toDate(),
+					account,
 				);
 				const result: FrequencyChangePreviewResponse =
 					await previewFrequencyChange(
@@ -210,9 +217,11 @@ describe('frequency change behaviour', () => {
 					await createTestSubscriptionForFrequencyChange('Month', monthlyPrice);
 
 				const productCatalog = await getProductCatalogFromApi(stage);
+				const account = await getAccount(zuoraClient, subscription.accountNumber);
 				const candidateCharge = selectCandidateSubscriptionCharge(
 					subscription,
 					dayjs().toDate(),
+					account,
 				);
 				const result: FrequencyChangeSwitchResponse =
 					await executeFrequencyChange(
@@ -281,9 +290,11 @@ describe('frequency change behaviour', () => {
 					await createTestSubscriptionForFrequencyChange('Annual', annualPrice);
 
 				const productCatalog = await getProductCatalogFromApi(stage);
+				const account = await getAccount(zuoraClient, subscription.accountNumber);
 				const candidateCharge = selectCandidateSubscriptionCharge(
 					subscription,
 					dayjs().toDate(),
+					account,
 				);
 				const result: FrequencyChangeSwitchResponse =
 					await executeFrequencyChange(
@@ -343,9 +354,11 @@ describe('frequency change behaviour', () => {
 					});
 
 				const productCatalog = await getProductCatalogFromApi(stage);
+				const eurAccount = await getAccount(eurClient, eurSubscription.accountNumber);
 				const eurCandidateCharge = selectCandidateSubscriptionCharge(
 					eurSubscription,
 					dayjs().toDate(),
+					eurAccount,
 				);
 				const eurResult: FrequencyChangeSwitchResponse =
 					await executeFrequencyChange(
@@ -377,9 +390,11 @@ describe('frequency change behaviour', () => {
 						paymentMethod: 'visaCard',
 					});
 
+				const usdAccount = await getAccount(usdClient, usdSubscription.accountNumber);
 				const usdCandidateCharge = selectCandidateSubscriptionCharge(
 					usdSubscription,
 					dayjs().toDate(),
+					usdAccount,
 				);
 				const usdResult: FrequencyChangeSwitchResponse =
 					await executeFrequencyChange(
