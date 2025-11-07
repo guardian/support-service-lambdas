@@ -4,15 +4,11 @@ import type { Handler } from 'aws-lambda';
 import dayjs from 'dayjs';
 import { z } from 'zod';
 import { frequencyChangeHandler } from './frequencyChange';
+import type { FrequencyChangeRequestBody } from './frequencySchemas';
+import { frequencyChangeRequestSchema } from './frequencySchemas';
 import { contributionToSupporterPlusEndpoint } from './productSwitchEndpoint';
-import type {
-	FrequencyChangeRequestBody,
-	ProductSwitchRequestBody,
-} from './schemas';
-import {
-	frequencyChangeRequestSchema,
-	productSwitchRequestSchema,
-} from './schemas';
+import type { ProductSwitchRequestBody } from './schemas';
+import { productSwitchRequestSchema } from './schemas';
 
 const stage = process.env.STAGE as Stage;
 

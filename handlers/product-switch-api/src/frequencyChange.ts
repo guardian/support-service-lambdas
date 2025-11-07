@@ -23,17 +23,19 @@ import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { getCatalogBillingPeriod } from './catalogInformation';
-import {
-	frequencyChangePreviewResponseSchema,
-	frequencyChangeSwitchResponseSchema,
-	zuoraPreviewResponseSchema,
-	zuoraSwitchResponseSchema,
-} from './schemas';
-import type { ZuoraPreviewResponse, ZuoraSwitchResponse } from './schemas';
 import type {
 	FrequencyChangePreviewResponse,
 	FrequencyChangeRequestBody,
 	FrequencyChangeSwitchResponse,
+} from './frequencySchemas';
+import {
+	frequencyChangePreviewResponseSchema,
+	frequencyChangeSwitchResponseSchema,
+} from './frequencySchemas';
+import type { ZuoraPreviewResponse, ZuoraSwitchResponse } from './schemas';
+import {
+	zuoraPreviewResponseSchema,
+	zuoraSwitchResponseSchema,
 } from './schemas';
 
 /**
