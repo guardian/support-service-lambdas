@@ -152,7 +152,9 @@ describe('selectCandidateSubscriptionCharge', () => {
 		};
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, new Date()),
-		).toThrow('subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)');
+		).toThrow(
+			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)',
+		);
 	});
 
 	test('throws when multiple eligible charges exist', () => {
@@ -181,7 +183,9 @@ describe('selectCandidateSubscriptionCharge', () => {
 		});
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, new Date()),
-		).toThrow('subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)');
+		).toThrow(
+			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)',
+		);
 	});
 
 	test('excludes charges that are not named "Subscription"', () => {
@@ -190,7 +194,9 @@ describe('selectCandidateSubscriptionCharge', () => {
 		});
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, new Date()),
-		).toThrow('subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)');
+		).toThrow(
+			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)',
+		);
 	});
 
 	test('excludes charges that are not type "Recurring"', () => {
@@ -199,7 +205,9 @@ describe('selectCandidateSubscriptionCharge', () => {
 		});
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, new Date()),
-		).toThrow('subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)');
+		).toThrow(
+			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)',
+		);
 	});
 
 	test('excludes charges not yet effective (effectiveStartDate in future)', () => {
@@ -209,7 +217,9 @@ describe('selectCandidateSubscriptionCharge', () => {
 		});
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, now.toDate()),
-		).toThrow('subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)');
+		).toThrow(
+			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)',
+		);
 	});
 
 	test('excludes charges that have ended (effectiveEndDate in past)', () => {
@@ -219,7 +229,9 @@ describe('selectCandidateSubscriptionCharge', () => {
 		});
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, now.toDate()),
-		).toThrow('subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)');
+		).toThrow(
+			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)',
+		);
 	});
 
 	test('excludes charges with chargedThroughDate in the past', () => {
@@ -229,7 +241,9 @@ describe('selectCandidateSubscriptionCharge', () => {
 		});
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, now.toDate()),
-		).toThrow('subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)');
+		).toThrow(
+			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)',
+		);
 	});
 
 	test('includes charges with chargedThroughDate in the future', () => {
@@ -263,7 +277,9 @@ describe('selectCandidateSubscriptionCharge', () => {
 		const account = makeAccount();
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, now.toDate(), account),
-		).toThrow('subscription did not meet precondition <subscription status is active> (was Suspended)');
+		).toThrow(
+			'subscription did not meet precondition <subscription status is active> (was Suspended)',
+		);
 	});
 
 	test('throws when account has outstanding invoice balance', () => {
@@ -307,7 +323,9 @@ describe('selectCandidateSubscriptionCharge', () => {
 		const account = makeAccount();
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, now.toDate(), account),
-		).toThrow('subscription did not meet precondition <subscription status is active> (was Cancelled)');
+		).toThrow(
+			'subscription did not meet precondition <subscription status is active> (was Cancelled)',
+		);
 	});
 });
 
