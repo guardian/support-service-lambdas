@@ -15,7 +15,6 @@ export class <%= PascalCase %> extends SrStack {
 		super(scope, { stage, app: '<%= lambdaName %>' });
 
 		new SrApiLambda(this, 'Lambda', {
-        			legacyId: `${this.app}-lambda`,
         			lambdaOverrides: {
         				description:
         					'A lambda that enables the addition of discounts to existing subscriptions',
