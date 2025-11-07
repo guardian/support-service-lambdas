@@ -56,7 +56,7 @@ export function selectCandidateSubscriptionCharge(
 		.filter(({ charge }) => charge.type === 'Recurring')
 		.filter(
 			({ charge }) =>
-				charge.effectiveStartDate <= today && charge.effectiveEndDate >= today,
+				charge.effectiveStartDate <= today && charge.effectiveEndDate > today,
 		)
 		.filter(
 			({ charge }) =>
