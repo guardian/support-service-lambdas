@@ -2,6 +2,12 @@
  * Integration tests for frequency change functionality.
  * Tests actual frequency changes (monthly <-> annual) using real Zuora API calls.
  *
+ * Test Coverage:
+ * - Preview: 3 tests (monthly→annual, annual→monthly, non-GBP)
+ * - Execute: 3 tests (monthly→annual with comprehensive verification, annual→monthly with verification, non-GBP currencies)
+ * - Total: 6 integration tests creating real Zuora subscriptions
+ * - Expected runtime: ~6-8 minutes (each test creates a real subscription in CODE environment)
+ *
  * @group integration
  */
 import console from 'console';
@@ -76,72 +82,10 @@ const createTestSubscriptionForFrequencyChange = async (
 
 describe('frequency change behaviour', () => {
 	describe('preview functionality', () => {
-		it('can preview a monthly to annual frequency change', async () => {
-			const monthlyPrice = 10;
-			const { zuoraClient, subscription } =
-				await createTestSubscriptionForFrequencyChange('Month', monthlyPrice);
-
-			const productCatalog = await getProductCatalogFromApi(stage);
-			const candidateCharge = selectCandidateSubscriptionCharge(
-				subscription,
-				dayjs().toDate(),
-			);
-		const result: FrequencyChangePreviewResponse =
-			await previewFrequencyChange(
-				zuoraClient,
-				subscription,
-				candidateCharge,
-				productCatalog,
-				'Annual',
-			);
-
-		// Expect success response
-		expect('previewInvoices' in result).toBe(true);
-		if ('previewInvoices' in result) {
-			expect(result.previewInvoices).toBeDefined();
-
-			// Verify savings calculation (monthly -> annual shows annual savings)
-			expect(result.savings.period).toBe('year');
-			expect(result.savings.currency).toBe('GBP');
-			// Annual savings = (monthly price * 12) - annual price
-			expect(result.savings.amount).toBeGreaterThan(0);
-		}
-		});
-
-		it('can preview an annual to monthly frequency change', async () => {
-			const annualPrice = 120;
-			const { zuoraClient, subscription } =
-				await createTestSubscriptionForFrequencyChange('Annual', annualPrice);
-
-			const productCatalog = await getProductCatalogFromApi(stage);
-			const candidateCharge = selectCandidateSubscriptionCharge(
-				subscription,
-				dayjs().toDate(),
-			);
-		const result: FrequencyChangePreviewResponse =
-			await previewFrequencyChange(
-				zuoraClient,
-				subscription,
-				candidateCharge,
-				productCatalog,
-				'Month',
-			);
-
-		// Expect success response
-		expect('previewInvoices' in result).toBe(true);
-		if ('previewInvoices' in result) {
-			expect(result.previewInvoices).toBeDefined();
-
-			// Verify savings calculation (annual -> monthly shows monthly savings)
-			expect(result.savings.period).toBe('month');
-			expect(result.savings.currency).toBe('GBP');
-		}
-		});
-
 		it(
-			'preview returns invoices with new billing period charges',
+			'previews monthly to annual frequency change with savings calculation and invoice items',
 			async () => {
-				const monthlyPrice = 15;
+				const monthlyPrice = 10;
 				const { zuoraClient, subscription } =
 					await createTestSubscriptionForFrequencyChange('Month', monthlyPrice);
 
@@ -163,21 +107,62 @@ describe('frequency change behaviour', () => {
 				expect('previewInvoices' in result).toBe(true);
 				if ('previewInvoices' in result) {
 					expect(result.previewInvoices).toBeDefined();
-					if (result.previewInvoices.length > 0) {
+
+					// Verify savings calculation (monthly -> annual shows annual savings)
+					expect(result.savings.period).toBe('year');
+					expect(result.savings.currency).toBe('GBP');
+					// Annual savings = (monthly price * 12) - annual price
+					expect(result.savings.amount).toBeGreaterThan(0);
+
 					// Preview should contain invoice items
-					const invoice = result.previewInvoices[0];
-					expect(invoice).toBeDefined();
-					if (invoice) {
-						expect(invoice.invoiceItems.length).toBeGreaterThan(0);
+					if (result.previewInvoices.length > 0) {
+						const invoice = result.previewInvoices[0];
+						expect(invoice).toBeDefined();
+						if (invoice) {
+							expect(invoice.invoiceItems.length).toBeGreaterThan(0);
+						}
 					}
-				}
 				}
 			},
 			1000 * 60,
 		);
 
 		it(
-			'preview for non-UK subscription (EUR currency)',
+			'previews annual to monthly frequency change with correct savings period',
+			async () => {
+				const annualPrice = 120;
+				const { zuoraClient, subscription } =
+					await createTestSubscriptionForFrequencyChange('Annual', annualPrice);
+
+				const productCatalog = await getProductCatalogFromApi(stage);
+				const candidateCharge = selectCandidateSubscriptionCharge(
+					subscription,
+					dayjs().toDate(),
+				);
+				const result: FrequencyChangePreviewResponse =
+					await previewFrequencyChange(
+						zuoraClient,
+						subscription,
+						candidateCharge,
+						productCatalog,
+						'Month',
+					);
+
+				// Expect success response
+				expect('previewInvoices' in result).toBe(true);
+				if ('previewInvoices' in result) {
+					expect(result.previewInvoices).toBeDefined();
+
+					// Verify savings calculation (annual -> monthly shows monthly savings)
+					expect(result.savings.period).toBe('month');
+					expect(result.savings.currency).toBe('GBP');
+				}
+			},
+			1000 * 60,
+		);
+
+		it(
+			'preview works for non-GBP subscription (EUR currency)',
 			async () => {
 				const monthlyPrice = 10;
 				const { zuoraClient, subscription } =
@@ -208,8 +193,8 @@ describe('frequency change behaviour', () => {
 				expect('previewInvoices' in result).toBe(true);
 				if ('previewInvoices' in result) {
 					expect(result.previewInvoices).toBeDefined();
-
 					expect(result.savings.currency).toBe('EUR');
+					expect(result.savings.period).toBe('year');
 				}
 			},
 			1000 * 60,
@@ -218,7 +203,7 @@ describe('frequency change behaviour', () => {
 
 	describe('execute functionality', () => {
 		it(
-			'can execute a monthly to annual frequency change',
+			'executes monthly to annual frequency change with comprehensive verification',
 			async () => {
 				const monthlyPrice = 10;
 				const { zuoraClient, subscription } =
@@ -229,85 +214,6 @@ describe('frequency change behaviour', () => {
 					subscription,
 					dayjs().toDate(),
 				);
-				const result: FrequencyChangeSwitchResponse =
-					await executeFrequencyChange(
-						zuoraClient,
-						subscription,
-						candidateCharge,
-						productCatalog,
-						'Annual',
-					);
-
-				// Expect success response
-				expect('invoiceIds' in result).toBe(true);
-				if ('invoiceIds' in result) {
-					expect(result.invoiceIds).toBeDefined();
-					expect(result.invoiceIds.length).toBeGreaterThan(0);
-				}
-
-				// Verify subscription still exists and is valid
-				const updatedSubscription = await getSubscription(
-					zuoraClient,
-					subscription.subscriptionNumber,
-				);
-				expect(updatedSubscription).toBeDefined();
-				expect(updatedSubscription.status).toBe('Active');
-			},
-			1000 * 60,
-		);
-
-		it(
-			'can execute an annual to monthly frequency change',
-			async () => {
-				const annualPrice = 120;
-				const { zuoraClient, subscription } =
-					await createTestSubscriptionForFrequencyChange('Annual', annualPrice);
-
-				const productCatalog = await getProductCatalogFromApi(stage);
-				const candidateCharge = selectCandidateSubscriptionCharge(
-					subscription,
-					dayjs().toDate(),
-				);
-				const result: FrequencyChangeSwitchResponse =
-					await executeFrequencyChange(
-						zuoraClient,
-						subscription,
-						candidateCharge,
-						productCatalog,
-						'Month',
-					);
-
-				// Expect success response
-				expect('invoiceIds' in result).toBe(true);
-				if ('invoiceIds' in result) {
-					expect(result.invoiceIds).toBeDefined();
-					expect(result.invoiceIds.length).toBeGreaterThan(0);
-				}
-
-				// Verify subscription still exists and is valid
-				const updatedSubscription = await getSubscription(
-					zuoraClient,
-					subscription.subscriptionNumber,
-				);
-				expect(updatedSubscription).toBeDefined();
-				expect(updatedSubscription.status).toBe('Active');
-			},
-			1000 * 60,
-		);
-
-		it(
-			'executed change is scheduled for term end date and subscription state is correct',
-			async () => {
-				const monthlyPrice = 12;
-				const { zuoraClient, subscription } =
-					await createTestSubscriptionForFrequencyChange('Month', monthlyPrice);
-
-				const productCatalog = await getProductCatalogFromApi(stage);
-				const candidateCharge = selectCandidateSubscriptionCharge(
-					subscription,
-					dayjs().toDate(),
-				);
-
 				const result: FrequencyChangeSwitchResponse =
 					await executeFrequencyChange(
 						zuoraClient,
@@ -330,6 +236,7 @@ describe('frequency change behaviour', () => {
 					subscription.subscriptionNumber,
 				);
 				expect(updatedSubscription).toBeDefined();
+				expect(updatedSubscription.status).toBe('Active');
 
 				// Current rate plan should still be the original billing period (change is scheduled, not immediate)
 				const activeRatePlans = updatedSubscription.ratePlans.filter(
@@ -367,18 +274,11 @@ describe('frequency change behaviour', () => {
 		);
 
 		it(
-			'executed frequency change for non-UK subscription',
+			'executes annual to monthly frequency change with comprehensive verification',
 			async () => {
-				const monthlyPrice = 10;
+				const annualPrice = 120;
 				const { zuoraClient, subscription } =
-					await createTestSubscriptionForFrequencyChange(
-						'Month',
-						monthlyPrice,
-						{
-							billingCountry: 'United States',
-							paymentMethod: 'visaCard',
-						},
-					);
+					await createTestSubscriptionForFrequencyChange('Annual', annualPrice);
 
 				const productCatalog = await getProductCatalogFromApi(stage);
 				const candidateCharge = selectCandidateSubscriptionCharge(
@@ -391,25 +291,119 @@ describe('frequency change behaviour', () => {
 						subscription,
 						candidateCharge,
 						productCatalog,
-						'Annual',
+						'Month',
 					);
 
-				// Expect success response
+				// Expect success response with invoice IDs
 				expect('invoiceIds' in result).toBe(true);
 				if ('invoiceIds' in result) {
 					expect(result.invoiceIds).toBeDefined();
 					expect(result.invoiceIds.length).toBeGreaterThan(0);
 				}
 
-				// Verify subscription still exists and is valid
+				// Verify subscription state after execution
 				const updatedSubscription = await getSubscription(
 					zuoraClient,
 					subscription.subscriptionNumber,
 				);
 				expect(updatedSubscription).toBeDefined();
 				expect(updatedSubscription.status).toBe('Active');
+				expect(updatedSubscription.ratePlans.length).toBeGreaterThanOrEqual(1);
+
+				// Verify billing preview for future billing
+				const billingPreview = await getBillingPreview(
+					zuoraClient,
+					dayjs(updatedSubscription.termEndDate).add(1, 'day'),
+					updatedSubscription.accountNumber,
+				);
+
+				const subscriptionInvoiceItems = itemsForSubscription(
+					subscription.subscriptionNumber,
+				)(billingPreview);
+
+				expect(subscriptionInvoiceItems.length).toBeGreaterThan(0);
+				const totalChargeAmount = subscriptionInvoiceItems.reduce(
+					(sum, item) => sum + item.chargeAmount,
+					0,
+				);
+				expect(totalChargeAmount).toBeGreaterThan(0);
 			},
-			1000 * 60,
+			1000 * 60 * 2,
+		);
+
+		it(
+			'executes frequency change for non-GBP subscriptions (EUR and USD)',
+			async () => {
+				// Test with EUR subscription
+				const eurPrice = 10;
+				const { zuoraClient: eurClient, subscription: eurSubscription } =
+					await createTestSubscriptionForFrequencyChange('Month', eurPrice, {
+						billingCountry: 'Germany',
+						paymentMethod: 'visaCard',
+					});
+
+				const productCatalog = await getProductCatalogFromApi(stage);
+				const eurCandidateCharge = selectCandidateSubscriptionCharge(
+					eurSubscription,
+					dayjs().toDate(),
+				);
+				const eurResult: FrequencyChangeSwitchResponse =
+					await executeFrequencyChange(
+						eurClient,
+						eurSubscription,
+						eurCandidateCharge,
+						productCatalog,
+						'Annual',
+					);
+
+				expect('invoiceIds' in eurResult).toBe(true);
+				if ('invoiceIds' in eurResult) {
+					expect(eurResult.invoiceIds).toBeDefined();
+					expect(eurResult.invoiceIds.length).toBeGreaterThan(0);
+				}
+
+				const updatedEurSubscription = await getSubscription(
+					eurClient,
+					eurSubscription.subscriptionNumber,
+				);
+				expect(updatedEurSubscription).toBeDefined();
+				expect(updatedEurSubscription.status).toBe('Active');
+
+				// Test with USD subscription
+				const usdPrice = 10;
+				const { zuoraClient: usdClient, subscription: usdSubscription } =
+					await createTestSubscriptionForFrequencyChange('Month', usdPrice, {
+						billingCountry: 'United States',
+						paymentMethod: 'visaCard',
+					});
+
+				const usdCandidateCharge = selectCandidateSubscriptionCharge(
+					usdSubscription,
+					dayjs().toDate(),
+				);
+				const usdResult: FrequencyChangeSwitchResponse =
+					await executeFrequencyChange(
+						usdClient,
+						usdSubscription,
+						usdCandidateCharge,
+						productCatalog,
+						'Annual',
+					);
+
+				expect('invoiceIds' in usdResult).toBe(true);
+				if ('invoiceIds' in usdResult) {
+					expect(usdResult.invoiceIds).toBeDefined();
+					expect(usdResult.invoiceIds.length).toBeGreaterThan(0);
+				}
+
+				const updatedUsdSubscription = await getSubscription(
+					usdClient,
+					usdSubscription.subscriptionNumber,
+				);
+				expect(updatedUsdSubscription).toBeDefined();
+				expect(updatedUsdSubscription.status).toBe('Active');
+			},
+			1000 * 60 * 3,
 		);
 	});
 });
