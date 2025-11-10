@@ -7,7 +7,7 @@ import type { CognitoClient } from './cognitoClient';
 import { createCognitoClientFromConfig } from './cognitoClient';
 import { oAuth2CallbackHandler } from './oAuth2CallbackHandler';
 import { proxyHandler } from './proxy';
-import type { ProxyTarget } from './proxyClient';
+import type { ProxyTarget } from './upstreamApiClient';
 
 const cognitoClient: Lazy<{ stage: Stage; cognitoClient: CognitoClient }> =
 	new Lazy(

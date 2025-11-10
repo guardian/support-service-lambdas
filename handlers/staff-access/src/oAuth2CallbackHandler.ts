@@ -24,29 +24,34 @@ export function oAuth2CallbackHandler(
 		const result = await (
 			await services.get()
 		).cognitoClient.getToken(event.queryStringParameters.code);
-		logger.log('token response', result);
-		const auth = (
-			JSON.parse(result.body) as { id_token: string; access_token: string }
-		).id_token; //TODO types (currently use id_token because we're not using scopes)
-
-		// carefully redirect to original url
+		const auth = result.id_token; // currently use id_token because we're not using scopes
 
 		const ourBaseUrl = getAppBaseUrl((await services.get()).stage, app);
 		// note - this state has potentially come from an untrusted source
+		// however if they redirect elsewhere, the cookie won't be set
 		const untrustedRelativePath = event.queryStringParameters.state;
 		const Location = untrustedRelativePath
 			? ourBaseUrl + '/' + untrustedRelativePath
 			: undefined;
+		const sendWithGetRequestsOnly = `SameSite=Lax`;
+		const hideFromClientSide = `HttpOnly`;
+		const setCookie = [
+			`${cookieName}=${auth}`,
+			'Secure',
+			hideFromClientSide,
+			sendWithGetRequestsOnly,
+			'Path=/',
+		];
 		return {
 			statusCode: Location ? 302 : 200,
 			headers: {
 				...(Location ? { Location } : {}),
 				'Cache-Control': 'no-cache, private',
-				'Set-Cookie': cookieName + '=' + auth, // TODO set params correctly eg secure, httpOnly, expiry
+				'Set-Cookie': setCookie.join('; '),
 			},
 			body:
 				'Successfully logged in - ' +
 				(Location ?? 'no onwards redirect url in the state'),
-		} as APIGatewayProxyResult;
+		} satisfies APIGatewayProxyResult;
 	};
 }

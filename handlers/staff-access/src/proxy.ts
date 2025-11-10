@@ -1,11 +1,11 @@
+import { filterKeys } from '@modules/arrayFunctions';
 import type { Lazy } from '@modules/lazy';
-import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import type { CognitoClient } from './cognitoClient';
 import { cookieName } from './oAuth2CallbackHandler';
-import type { ProxyTarget } from './proxyClient';
-import { createDocsClient } from './proxyClient';
+import type { ProxyTarget } from './upstreamApiClient';
+import { UpstreamApiClient } from './upstreamApiClient';
 
 function getCookies(headers: Record<string, string | undefined>) {
 	const normalised = Object.fromEntries(
@@ -21,6 +21,8 @@ function getCookies(headers: Record<string, string | undefined>) {
 	);
 	return cookies;
 }
+
+const allowedHeaders = new Set(['content-type', 'content-length']);
 
 export function proxyHandler(
 	services: Lazy<{ stage: Stage; cognitoClient: CognitoClient }>,
@@ -44,30 +46,24 @@ export function proxyHandler(
 			);
 		}
 
-		// TODO: delete comment - Call the external docs endpoint via HTTP
-		const upstreamClient = createDocsClient((await services.get()).stage);
-		const upstreamResponse = await upstreamClient.get(parsed.path, {
-			Authorization: `Bearer ${auth}`,
-		});
+		const upstreamClient = new UpstreamApiClient(
+			(await services.get()).stage,
+			parsed.path.targetApp,
+			auth,
+		);
 
-		if (
-			upstreamResponse.statusCode === 401 ||
-			upstreamResponse.statusCode === 403
-		) {
-			logger.log('Authentication error from upstream endpoint', {
-				statusCode: upstreamResponse.statusCode,
-			});
+		const { statusCode, headers, body } =
+			await upstreamClient.fetchUpstreamResource(parsed.path.targetPath);
+		if (statusCode === 401 || statusCode === 403) {
 			return cognitoRedirect('auth error from upstream');
 		}
-
 		return {
-			statusCode: upstreamResponse.statusCode,
+			statusCode,
 			headers: {
-				'Content-Type': upstreamResponse.headers['content-type'] ?? 'text/html',
-				'Cache-Control':
-					upstreamResponse.headers['cache-control'] ?? 'max-age=60',
+				...filterKeys(headers, allowedHeaders.has.bind(allowedHeaders)),
+				'Cache-Control': headers['cache-control'] ?? 'max-age=60',
 			},
-			body: upstreamResponse.body,
+			body,
 		};
 	};
 }

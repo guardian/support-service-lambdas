@@ -1,7 +1,7 @@
 import { loadConfig } from '@modules/aws/appConfig';
 import { getIfDefined } from '@modules/nullAndUndefined';
-import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
+import { RestClient } from '@modules/zuora/restClient';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
 import { app, getAppBaseUrl } from './getAppBaseUrl';
@@ -18,15 +18,20 @@ function encodeParams(urlParams: Record<string, string>) {
 		.map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
 		.join('&');
 }
+const tokenResponseSchema = z.object({
+	id_token: z.string(),
+	access_token: z.string(),
+});
+type TokenResponseBody = z.infer<typeof tokenResponseSchema>;
 
-export class CognitoClient {
+export class CognitoClient extends RestClient {
 	private readonly redirectUri: string;
-	private readonly cognitoBaseUrl: string;
 	private readonly clientId: string;
 	private readonly authHeader: string;
+
 	constructor(props: CognitoClientProps) {
+		super(`https://${props.cognitoDomain}.auth.eu-west-1.amazoncognito.com`);
 		this.redirectUri = getAppBaseUrl(props.stage, app) + '/oauth2callback';
-		this.cognitoBaseUrl = `https://${props.cognitoDomain}.auth.eu-west-1.amazoncognito.com`;
 		this.clientId = props.clientId;
 		const authorizationEncoded = Buffer.from(
 			`${props.clientId}:${props.clientSecret}`,
@@ -34,18 +39,13 @@ export class CognitoClient {
 		this.authHeader = `Basic ${authorizationEncoded}`;
 	}
 
-	getToken = logger.wrapFn(
-		this.getWithoutLogging.bind(this),
-		() => `HTTP ${this.cognitoBaseUrl} ${this.clientId}`,
-		this.getWithoutLogging.toString(),
-		2,
-		logger.getCallerInfo(),
-	);
-
-	private async getWithoutLogging(code: string) {
-		const url = this.cognitoBaseUrl + `/oauth2/token`;
-		const requestHeaders = {
+	protected getAuthHeaders = (): Promise<Record<string, string>> =>
+		Promise.resolve({
 			Authorization: this.authHeader,
+		});
+
+	getToken: (code: string) => Promise<TokenResponseBody> = async (code) => {
+		const requestHeaders = {
 			'Content-Type': 'application/x-www-form-urlencoded',
 		};
 		const requestBody = encodeParams({
@@ -55,33 +55,17 @@ export class CognitoClient {
 			redirect_uri: this.redirectUri,
 		});
 
-		const fetchInput = {
-			method: 'POST',
-			body: requestBody,
-			headers: requestHeaders,
-		};
-
-		logger.log('Request: ' + url, fetchInput);
-
-		const response = await fetch(url, fetchInput);
-
-		const responseBody = await response.text();
-		const responseHeaders = Object.fromEntries(response.headers.entries());
-		const statusCode = response.status;
-		if (!`${statusCode}`.startsWith('2')) {
-			throw new Error(
-				'HTTP call failed: ' + statusCode + ' body: ' + responseBody,
-			);
-		}
-
-		return { body: responseBody, statusCode, headers: responseHeaders };
-	}
+		return await this.post(
+			`oauth2/token`,
+			requestBody,
+			tokenResponseSchema,
+			requestHeaders,
+		);
+	};
 
 	createCognitoRedirect =
 		(state: string | undefined) =>
 		(reason: string): APIGatewayProxyResult => {
-			logger.log('redirecting - ' + reason);
-
 			const urlParams = {
 				response_type: 'code',
 				client_id: this.clientId,
@@ -92,14 +76,14 @@ export class CognitoClient {
 			};
 
 			const cognitoUrl =
-				this.cognitoBaseUrl + `/oauth2/authorize?` + encodeParams(urlParams);
+				this.restServerUrl + `/oauth2/authorize?` + encodeParams(urlParams);
 
 			return {
 				statusCode: 302,
 				headers: {
 					Location: cognitoUrl,
 				},
-				body: reason,
+				body: 'redirecting to cognito due to <' + reason + '>',
 			};
 		};
 }
