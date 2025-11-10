@@ -101,7 +101,7 @@ case class SFApiCreateDeliveryProblemCase(
     ContactId: Option[String],
     SF_Subscription__r: SF_Subscription_ByName,
     Origin: String = "Self Service",
-    Case_Journey__c = "Self Service",
+    Case_Journey__c: String = "Self Service",
     Status: String,
     Priority: Option[String],
     Subject: String,
