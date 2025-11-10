@@ -71,11 +71,11 @@ class SFApiCreateDeliveryProblemTest extends AnyFlatSpec with Matchers {
          |          "Name" : "A-S123456"
          |        },
          |        "Origin" : "Self Service",
+         |        "Case_Journey__c" : "Self Service",
          |        "Status" : "New",
          |        "Priority" : null,
          |        "Subject" : "[Self Service] Delivery Problem : No delivery (Guardian Weekly - A-S123456)",
          |        "Description" : "description",
-         |        "Case_Journey__c" : "Self Service",
          |        "Product__c" : "Guardian Weekly",
          |        "Category__c" : "Delivery & Fulfilment",
          |        "Sub_Category__c" : "No delivery",
