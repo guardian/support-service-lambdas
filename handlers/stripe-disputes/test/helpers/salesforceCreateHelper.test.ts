@@ -69,7 +69,7 @@ describe('Salesforce Create Helper', () => {
 			};
 
 			const { Dispute_ID__c, ...paymentDisputeRecordWithoutDisputeId } =
-                paymentDisputeRecord;
+				paymentDisputeRecord;
 
 			const result = buildSalesforceUpsertOptions(
 				mockAuthResponse,

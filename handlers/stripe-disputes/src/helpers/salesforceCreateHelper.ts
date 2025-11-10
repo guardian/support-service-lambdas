@@ -14,7 +14,7 @@ export function buildSalesforceUpsertOptions(
 	paymentDisputeRecord: PaymentDisputeRecord,
 ) {
 	const { Dispute_ID__c, ...body } = paymentDisputeRecord as any; //Dispute_ID__c will be in the request URL, so should not be included in the request body
-	
+
 	return {
 		method: 'PATCH',
 		headers: {
