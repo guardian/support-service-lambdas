@@ -32,6 +32,13 @@ which would manage your cookie and login status accordingly.
 
 ## Developing
 
+### How to test
+
+Since this is a thin google oauth wrapper with few dependencies, there are few tests and manual runners.
+The recommended way to test is to run `pnpm update-stack` and `pnpm update-lambda` as needed, then try it in CODE.
+
+### Rotating credentials
+
 Rotating google auth credentials needs access to the google developer console, they are under the "meeting-reminder-bot" (aka daily-churn-email) project.
 
 https://console.cloud.google.com/auth/clients?project=daily-churn-email

@@ -13,7 +13,7 @@ class MockZuoraClient extends ZuoraClient {
 			.mockResolvedValue('mock-token');
 
 		super('stage' as Stage, mockTokenProvider);
-		// @ts-ignore override for the test
+		// @ts-expect-error override for the test
 		this.restServerUrl = 'https://mock.zuora.com';
 	}
 

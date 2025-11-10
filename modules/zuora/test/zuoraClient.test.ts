@@ -48,15 +48,18 @@ describe('ZuoraClient fetch method error handling', () => {
 				ok: false,
 				status: 400,
 				statusText: 'Bad Request',
-				json: jest.fn().mockResolvedValue({
-					Errors: [
-						{
-							Message: errorMessage,
-							Code: 'INVALID_VALUE',
-						},
-					],
-					Success: false,
-				}),
+				headers: { entries: () => [] },
+				text: jest.fn().mockResolvedValue(
+					JSON.stringify({
+						Errors: [
+							{
+								Message: errorMessage,
+								Code: 'INVALID_VALUE',
+							},
+						],
+						Success: false,
+					}),
+				),
 			};
 
 			(fetch as jest.Mock).mockResolvedValue(mockResponse);
@@ -87,10 +90,13 @@ describe('ZuoraClient fetch method error handling', () => {
 				ok: false,
 				status: 400,
 				statusText: 'Bad Request',
-				json: jest.fn().mockResolvedValue({
-					FaultCode: 'INVALID_FIELD',
-					FaultMessage: errorMessage,
-				}),
+				headers: { entries: () => [] },
+				text: jest.fn().mockResolvedValue(
+					JSON.stringify({
+						FaultCode: 'INVALID_FIELD',
+						FaultMessage: errorMessage,
+					}),
+				),
 			};
 
 			(fetch as jest.Mock).mockResolvedValue(mockResponse);
@@ -113,10 +119,13 @@ describe('ZuoraClient fetch method error handling', () => {
 				ok: false,
 				status: 400,
 				statusText: 'Bad Request',
-				json: jest.fn().mockResolvedValue({
-					code: 'ClientError',
-					message: errorMessage,
-				}),
+				headers: { entries: () => [] },
+				text: jest.fn().mockResolvedValue(
+					JSON.stringify({
+						code: 'ClientError',
+						message: errorMessage,
+					}),
+				),
 			};
 
 			(fetch as jest.Mock).mockResolvedValue(mockResponse);
@@ -141,15 +150,18 @@ describe('ZuoraClient fetch method error handling', () => {
 				ok: false,
 				status: 401,
 				statusText: 'Unauthorized',
-				json: jest.fn().mockResolvedValue({
-					success: false,
-					reasons: [
-						{
-							code: '90000011',
-							message: errorMessage,
-						},
-					],
-				}),
+				headers: { entries: () => [] },
+				text: jest.fn().mockResolvedValue(
+					JSON.stringify({
+						success: false,
+						reasons: [
+							{
+								code: '90000011',
+								message: errorMessage,
+							},
+						],
+					}),
+				),
 			};
 
 			(fetch as jest.Mock).mockResolvedValue(mockResponse);
@@ -181,17 +193,20 @@ describe('ZuoraClient fetch method error handling', () => {
 				ok: true, // Zuora responds with HTTP 200 but logical error exists
 				status: 200,
 				statusText: 'OK',
-				json: jest.fn().mockResolvedValue({
-					success: false,
-					processId: '8CF944C78E50988F',
-					reasons: [
-						{
-							code: 50000040,
-							message: "Cannot find entity by key: 'xxx'.",
-						},
-					],
-					requestId: 'dd76fba7-330c-4b7f-ad08-bc42fa69bf3e',
-				}),
+				headers: { entries: () => [] },
+				text: jest.fn().mockResolvedValue(
+					JSON.stringify({
+						success: false,
+						processId: '8CF944C78E50988F',
+						reasons: [
+							{
+								code: 50000040,
+								message: "Cannot find entity by key: 'xxx'.",
+							},
+						],
+						requestId: 'dd76fba7-330c-4b7f-ad08-bc42fa69bf3e',
+					}),
+				),
 			};
 
 			(fetch as jest.Mock).mockResolvedValue(mockResponse);
@@ -210,18 +225,21 @@ describe('ZuoraClient fetch method error handling', () => {
 				ok: true, // Zuora responds with HTTP 200 but logical error exists
 				status: 200,
 				statusText: 'OK',
-				json: jest.fn().mockResolvedValue({
-					success: false,
-					processId: '0D252DA3B536A5E4',
-					reasons: [
-						{
-							code: 50000040,
-							message:
-								'The endpoint /v1/accounts/8ad09b7d83a313110183a8769afd1bf3/payment-methods1 does not exist. Please check the URL or refer to the API documentation.',
-						},
-					],
-					requestId: 'e0f3c178-4369-4d0f-9d60-8a9c23d5a0f4',
-				}),
+				headers: { entries: () => [] },
+				text: jest.fn().mockResolvedValue(
+					JSON.stringify({
+						success: false,
+						processId: '0D252DA3B536A5E4',
+						reasons: [
+							{
+								code: 50000040,
+								message:
+									'The endpoint /v1/accounts/8ad09b7d83a313110183a8769afd1bf3/payment-methods1 does not exist. Please check the URL or refer to the API documentation.',
+							},
+						],
+						requestId: 'e0f3c178-4369-4d0f-9d60-8a9c23d5a0f4',
+					}),
+				),
 			};
 
 			(fetch as jest.Mock).mockResolvedValue(mockResponse);
@@ -247,11 +265,13 @@ describe('ZuoraClient fetch method error handling', () => {
 					['x-ratelimit-limit', '1000'],
 					['x-ratelimit-remaining', '0'],
 				]),
-				json: jest.fn().mockResolvedValue({
-					success: false,
-					code: 'RATE_LIMIT_EXCEEDED',
-					message: errorMessage,
-				}),
+				text: jest.fn().mockResolvedValue(
+					JSON.stringify({
+						success: false,
+						code: 'RATE_LIMIT_EXCEEDED',
+						message: errorMessage,
+					}),
+				),
 			};
 
 			(fetch as jest.Mock).mockResolvedValue(mockResponse);
@@ -284,9 +304,12 @@ describe('ZuoraClient fetch method error handling', () => {
 				ok: true,
 				status: 200,
 				statusText: 'OK',
-				json: jest.fn().mockResolvedValue({
-					success: true,
-				}),
+				headers: { entries: () => [] },
+				text: jest.fn().mockResolvedValue(
+					JSON.stringify({
+						success: true,
+					}),
+				),
 			};
 
 			(fetch as jest.Mock).mockResolvedValue(mockResponse);

@@ -11,11 +11,13 @@ export function oAuth2CallbackHandler(
 	services: Lazy<{ stage: Stage; cognitoClient: CognitoClient }>,
 ) {
 	return async (event: APIGatewayProxyEvent) => {
-		const cognitoRedirect = (
-			await services.get()
-		).cognitoClient.createCognitoRedirect(undefined);
+		// note - this state has potentially come from an untrusted source
+		// however if they redirect elsewhere, the cookie won't be set
+		const untrustedRelativePath = event.queryStringParameters?.state;
 		if (!event.queryStringParameters?.code) {
-			return cognitoRedirect('no code in url params');
+			return (await services.get()).cognitoClient.createCognitoRedirect(
+				untrustedRelativePath,
+			)('no code in url params');
 		}
 		logger.log(
 			'got a code, need to check it with cogito and set a cookie',
@@ -27,9 +29,6 @@ export function oAuth2CallbackHandler(
 		const auth = result.id_token; // currently use id_token because we're not using scopes
 
 		const ourBaseUrl = getAppBaseUrl((await services.get()).stage, app);
-		// note - this state has potentially come from an untrusted source
-		// however if they redirect elsewhere, the cookie won't be set
-		const untrustedRelativePath = event.queryStringParameters.state;
 		const Location = untrustedRelativePath
 			? ourBaseUrl + '/' + untrustedRelativePath
 			: undefined;
