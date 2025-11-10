@@ -22,10 +22,7 @@ export async function upsertPaymentDisputeInSalesforce(
 
 		const options = buildSalesforceUpsertOptions(authResponse, paymentDispute);
 
-		logger.log(
-			'Payment Dispute record options:',
-			JSON.stringify(options),
-		);
+		logger.log('Payment Dispute record options:', JSON.stringify(options));
 
 		const response = await fetch(url, options);
 
