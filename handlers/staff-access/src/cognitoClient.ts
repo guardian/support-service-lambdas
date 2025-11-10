@@ -22,7 +22,7 @@ const tokenResponseSchema = z.object({
 	id_token: z.string(),
 	access_token: z.string(),
 });
-type TokenResponseBody = z.infer<typeof tokenResponseSchema>;
+export type TokenResponseBody = z.infer<typeof tokenResponseSchema>;
 
 export class CognitoClient extends RestClient {
 	private readonly redirectUri: string;
