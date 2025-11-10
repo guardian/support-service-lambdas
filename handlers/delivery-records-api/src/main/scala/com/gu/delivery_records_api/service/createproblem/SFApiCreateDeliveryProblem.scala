@@ -29,9 +29,10 @@ object SFApiCreateDeliveryProblem {
           Subject =
             s"[Self Service] Delivery Problem : ${detail.problemType} (${detail.productName} - $subscriptionNumber)",
           Description = detail.description,
-          Case_Closure_Reason__c = detail.problemType,
+          Case_Journey__c = "Self Service",
           Product__c = detail.productName,
-          Journey__c = s"CS - ${detail.productName} Support",
+          Category__c = "Delivery & Fulfilment",
+          Sub_Category__c = detail.problemType,
           Contact = contact match {
             case IdentityId(identityId) => Some(Contact_ByIdentityId(identityId))
             case _ => None
@@ -80,9 +81,9 @@ case class SFApiDeliveryProblemCase(
     CaseNumber: String,
     Subject: Option[String],
     Description: Option[String],
-    Case_Closure_Reason__c: Option[
+    Sub_Category__c: Option[
       String,
-    ], // this is actually the case sub-category (e.g. 'No Delivery', 'Damaged Delivery' etc.)
+    ],
 )
 
 case class Contact_ByIdentityId(
@@ -100,14 +101,14 @@ case class SFApiCreateDeliveryProblemCase(
     ContactId: Option[String],
     SF_Subscription__r: SF_Subscription_ByName,
     Origin: String = "Self Service",
+    Case_Journey__c = "Self Service",
     Status: String,
     Priority: Option[String],
     Subject: String,
     Description: Option[String],
     Product__c: String,
-    Journey__c: String,
-    Enquiry_Type__c: String = "Delivery issues",
-    Case_Closure_Reason__c: String,
+    Category__c: String = "Delivery & Fulfilment",
+    Sub_Category__c: String,
     Repeat_Delivery_Issue__c: Boolean,
 ) extends SFApiCompositePartBody
 
