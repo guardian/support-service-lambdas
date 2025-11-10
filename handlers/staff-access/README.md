@@ -9,8 +9,26 @@ access to PII whatsoever!
 - CODE https://staff-access-code.support.guardianapis.com/discount-api/docs
 - PROD https://staff-access.support.guardianapis.com/discount-api/docs
 
-## Adding google auth to a new endpoint
+## Quick start - adding google auth to a new endpoint
 
+1. Open your CDK, and check that you are using SrApiLambda
+1. add the following line: `lambda.addStaffPath('<endpoint>');`
+1. push and deploy (or run `pnpm update-stack` to update CODE directly)
+
+Once you deploy it, that path will use google auth instead of an API key.
+Access would be via the above form of URL for CODE and PROD.
+
+For example, if your endpoint was `show-status`, the underlying url might be
+
+- CODE https://dummy-lambda-code.support.guardianapis.com/show-status
+- PROD https://dummy-lambda.support.guardianapis.com/show-status
+
+If you access it directly, you would get an unauthorised error.  You would access it via
+
+- CODE https://staff-access-code.support.guardianapis.com/dummy-lambda/show-status
+- PROD https://staff-access.support.guardianapis.com/dummy-lambda/show-status
+
+which would manage your cookie and login status accordingly.
 
 ## Developing
 
@@ -28,3 +46,4 @@ limitations.
 - some kind of index so we can find all the endpoints
 - make the google client secret a securestring if possible (not easy as it's needed in the CFN)
 - serve protected swagger UIs for each lambda (consider adding scopes (access-token) instead of using the id token)
+- let people log out/clear the cookie
