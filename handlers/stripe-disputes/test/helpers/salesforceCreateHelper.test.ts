@@ -68,6 +68,7 @@ describe('Salesforce Create Helper', () => {
 				InvoiceId__c: 'invoice-789',
 			};
 
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Extracting Dispute_ID__c to create expected test value without this field
 			const { Dispute_ID__c, ...paymentDisputeRecordWithoutDisputeId } =
 				paymentDisputeRecord;
 
