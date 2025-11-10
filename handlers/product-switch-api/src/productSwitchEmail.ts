@@ -2,7 +2,7 @@ import type { BillingPeriod } from '@modules/billingPeriod';
 import type { EmailMessageWithUserId } from '@modules/email/email';
 import { DataExtensionNames, sendEmail } from '@modules/email/email';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
-import { getCurrencyGlyph } from '@modules/internationalisation/currency';
+import { getCurrencyInfo } from '@modules/internationalisation/currency';
 import dayjs from 'dayjs';
 import type { SwitchInformation } from './switchInformation';
 
@@ -27,7 +27,7 @@ export const buildEmailMessage = (
 				SubscriberAttributes: {
 					first_name: firstName,
 					last_name: lastName,
-					currency: getCurrencyGlyph(currency),
+					currency: getCurrencyInfo(currency).extendedGlyph,
 					price: productPrice.toFixed(2),
 					first_payment_amount: first.amount.toFixed(2),
 					date_of_first_payment: first.date.format('DD MMMM YYYY'),
