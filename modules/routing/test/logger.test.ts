@@ -205,6 +205,7 @@ describe('Logger.joinLines', () => {
 			t: 'h',
 		};
 		const error = new Error('Test error');
+		error.cause = 'john john';
 
 		const result = [
 			...primitives,
@@ -274,8 +275,9 @@ describe('Logger.joinLines', () => {
   r: "j",
   s: "i",
   t: "h"
-}\n` +
-				error.stack,
+}
+${error.stack}
+{ cause: "john john" }`,
 		);
 	});
 });

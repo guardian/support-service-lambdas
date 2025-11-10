@@ -45,6 +45,14 @@ const discountApi: HandlerDefinition = {
 	},
 };
 
+const staffAccess: HandlerDefinition = {
+	name: 'staff-access',
+	dependencies: {
+		...dep['source-map-support'],
+		...dep.zod,
+	},
+};
+
 const updateSupporterPlusAmount: HandlerDefinition = {
 	name: 'update-supporter-plus-amount',
 	dependencies: {
@@ -112,6 +120,7 @@ const mobilePurchasesToSupporterProductData: HandlerDefinition = {
 export const build: HandlerDefinition[] = [
 	alarmsHandler,
 	discountApi,
+	staffAccess,
 	updateSupporterPlusAmount,
 	productSwitchApi,
 	mparticleApi,

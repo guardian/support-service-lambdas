@@ -13,7 +13,8 @@ class MockZuoraClient extends ZuoraClient {
 			.mockResolvedValue('mock-token');
 
 		super('stage' as Stage, mockTokenProvider);
-		this.zuoraServerUrl = 'https://mock.zuora.com';
+		// @ts-expect-error override for the test
+		this.restServerUrl = 'https://mock.zuora.com';
 	}
 
 	get = jest.fn();
