@@ -22,7 +22,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.147",
+    "@types/aws-lambda": "^8.10.157",
     "dayjs": "^1.11.13"
   }
 }
