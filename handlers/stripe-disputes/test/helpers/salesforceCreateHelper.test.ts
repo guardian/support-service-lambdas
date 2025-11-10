@@ -49,8 +49,9 @@ describe('Salesforce Create Helper', () => {
 
 	describe('buildSalesforceUpsertOptions', () => {
 		it('should build correct fetch options', () => {
-			const paymentDisputeBody = {
+			const paymentDisputeRecord = {
 				attributes: { type: 'Payment_Dispute__c' },
+				Dispute_ID__c: 'du_test123',
 				Charge_ID__c: 'ch_test123',
 				Reason__c: 'fraudulent',
 				Status__c: 'needs_response',
@@ -67,9 +68,12 @@ describe('Salesforce Create Helper', () => {
 				InvoiceId__c: 'invoice-789',
 			};
 
+			const { Dispute_ID__c, ...paymentDisputeRecordWithoutDisputeId } =
+                paymentDisputeRecord;
+
 			const result = buildSalesforceUpsertOptions(
 				mockAuthResponse,
-				paymentDisputeBody,
+				paymentDisputeRecord,
 			);
 
 			expect(result).toEqual({
@@ -78,7 +82,7 @@ describe('Salesforce Create Helper', () => {
 					Authorization: 'Bearer mock_token',
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify(paymentDisputeBody),
+				body: JSON.stringify(paymentDisputeRecordWithoutDisputeId),
 			});
 		});
 	});
