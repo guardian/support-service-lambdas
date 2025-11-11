@@ -40,6 +40,18 @@ export const DataExtensionNames = {
 		'supporter-plus-annual-discount-confirmation-email',
 	discountExpiryNotificationEmail: 'discount-expiry-email',
 	stripeDisputeCancellation: 'stripe-dispute-cancellation',
+	// Day 0 thank you emails, sent by support-workers
+	supporterPlusDay0Email: 'supporter-plus',
+	recurringContributionDay0Email: 'regular-contribution-thank-you',
+	digitalSubscriptionDay0Email: 'digipack',
+	guardianAdLiteDay0Email: 'guardian-ad-lite',
+	guardianWeeklyDay0Email: 'guardian-weekly',
+	homeDeliveryObserverDay0Email: 'sunday-paper-delivery',
+	homeDeliveryDay0Email: 'paper-delivery',
+	subscriptionCardObserverDay0Email: 'sunday-paper-subscription-card',
+	subscriptionCardDay0Email: 'paper-subscription-card',
+	nationalDeliveryDay0Email: 'paper-national-delivery',
+	tierThreeDay0Email: 'tier-three',
 } as const;
 
 export type DataExtensionName =
