@@ -31,7 +31,7 @@ so that it is built in Github
 You can test this has worked by pushing your branch and deploying to code (take note of important deployment note above).
 You should then be able to call your lambda with cUrl 
 ```shell
-curl --location 'https://my-new-lambda-code.membership.guardianapis.com/prod'
+curl --location 'https://my-new-lambda-code.support.guardianapis.com/prod'
 ```
 and receive a 200 response with the body 'Hello World'.
 
