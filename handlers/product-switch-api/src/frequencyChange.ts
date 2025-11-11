@@ -389,23 +389,29 @@ async function processFrequencyChange(
 					),
 				})) ?? [];
 
-			// Calculate savings based on the target billing period
+			// Calculate savings and new price based on the target billing period
 			const currentPrice = currentCharge.price ?? 0;
 			let savingsAmount: number;
 			let savingsPeriod: 'year' | 'month';
+			let newPriceAmount: number;
+			let newPricePeriod: 'year' | 'month';
 
 			if (targetBillingPeriod === 'Annual') {
-				// Monthly → Annual: show annual savings
+				// Monthly → Annual: show annual savings and annual price
 				const currentAnnualCost = currentPrice * 12;
 				const targetAnnualCost = targetPrice;
 				savingsAmount = currentAnnualCost - targetAnnualCost;
 				savingsPeriod = 'year';
+				newPriceAmount = targetAnnualCost;
+				newPricePeriod = 'year';
 			} else {
-				// Annual → Monthly: show monthly savings
+				// Annual → Monthly: show monthly savings and monthly price
 				const currentMonthlyCost = currentPrice / 12;
 				const targetMonthlyCost = targetPrice;
 				savingsAmount = currentMonthlyCost - targetMonthlyCost;
 				savingsPeriod = 'month';
+				newPriceAmount = targetMonthlyCost;
+				newPricePeriod = 'month';
 			}
 
 			return {
@@ -414,6 +420,11 @@ async function processFrequencyChange(
 					amount: savingsAmount,
 					currency,
 					period: savingsPeriod,
+				},
+				newPrice: {
+					amount: newPriceAmount,
+					currency,
+					period: newPricePeriod,
 				},
 			};
 		} else {

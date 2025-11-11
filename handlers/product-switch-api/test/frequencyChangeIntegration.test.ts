@@ -120,6 +120,11 @@ describe('frequency change behaviour', () => {
 					// Annual savings = (monthly price * 12) - annual price
 					expect(result.savings.amount).toBeGreaterThan(0);
 
+					// Verify new price calculation (new annual price)
+					expect(result.newPrice.period).toBe('year');
+					expect(result.newPrice.currency).toBe('GBP');
+					expect(result.newPrice.amount).toBeGreaterThan(0);
+
 					// Preview should contain invoice items
 					if (result.previewInvoices.length > 0) {
 						const invoice = result.previewInvoices[0];
@@ -167,6 +172,11 @@ describe('frequency change behaviour', () => {
 					// Verify savings calculation (annual -> monthly shows monthly savings)
 					expect(result.savings.period).toBe('month');
 					expect(result.savings.currency).toBe('GBP');
+
+					// Verify new price calculation (new monthly price)
+					expect(result.newPrice.period).toBe('month');
+					expect(result.newPrice.currency).toBe('GBP');
+					expect(result.newPrice.amount).toBeGreaterThan(0);
 				}
 			},
 			1000 * 60,
@@ -211,6 +221,11 @@ describe('frequency change behaviour', () => {
 					expect(result.previewInvoices).toBeDefined();
 					expect(result.savings.currency).toBe('EUR');
 					expect(result.savings.period).toBe('year');
+
+					// Verify new price also has correct currency and period
+					expect(result.newPrice.currency).toBe('EUR');
+					expect(result.newPrice.period).toBe('year');
+					expect(result.newPrice.amount).toBeGreaterThan(0);
 				}
 			},
 			1000 * 60,
