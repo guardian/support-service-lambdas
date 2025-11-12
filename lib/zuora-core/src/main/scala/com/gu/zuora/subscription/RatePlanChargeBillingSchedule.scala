@@ -4,9 +4,9 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.time.temporal.{ChronoUnit, TemporalAdjusters}
 import java.time.LocalDate
-
 import cats.data.NonEmptyList
 import cats.syntax.all._
+import com.gu.zuora.subscription.GetBillingPreview.BillingPreview
 
 import scala.annotation.tailrec
 
@@ -64,6 +64,7 @@ object RatePlanChargeBillingSchedule {
       subscription: Subscription,
       ratePlanCharge: RatePlanCharge,
       account: ZuoraAccount,
+//      billingPreview: BillingPreview,
   ): Either[ZuoraApiFailure, RatePlanChargeBillingSchedule] = {
     apply(
       subscription.customerAcceptanceDate,
@@ -72,7 +73,6 @@ object RatePlanChargeBillingSchedule {
       ratePlanCharge.triggerEvent,
       ratePlanCharge.triggerDate,
       ratePlanCharge.processedThroughDate,
-      ratePlanCharge.chargedThroughDate,
       account.billingAndPayment.billCycleDay,
       ratePlanCharge.upToPeriodsType,
       ratePlanCharge.upToPeriods,
@@ -90,7 +90,6 @@ object RatePlanChargeBillingSchedule {
       triggerEvent: Option[String],
       triggerDate: Option[LocalDate],
       processedThroughDate: Option[LocalDate],
-      chargedThroughDate: Option[LocalDate],
       billCycleDay: Int,
       upToPeriodType: Option[String],
       upToPeriods: Option[Int],
@@ -158,6 +157,7 @@ object RatePlanChargeBillingSchedule {
       ratePlanStartDate: LocalDate,
       ratePlanEndDate: Option[LocalDate],
       billingPeriod: BillingPeriod,
+//    billingPreview: BillingPreview,
   ): RatePlanChargeBillingSchedule = {
     new RatePlanChargeBillingSchedule {
       override def isDateCoveredBySchedule(date: LocalDate): Boolean = {
@@ -170,6 +170,7 @@ object RatePlanChargeBillingSchedule {
       override def billDatesCoveringDate(date: LocalDate): Either[ZuoraApiFailure, BillDates] = {
         if (isDateCoveredBySchedule(date)) {
           billDatesCoveringDate(date, ratePlanStartDate, 0)
+          //billingPreview.invoiceItems.map(invoiceItem => invoiceItem.chargeId)
         } else {
           ZuoraApiFailure(s"Billing schedule does not cover date $date").asLeft
         }

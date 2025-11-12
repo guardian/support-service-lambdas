@@ -46,7 +46,7 @@ class SalesforceHolidayStopRequestEndToEndEffectsTest extends AnyFlatSpec with M
       fakeSubscription: Subscription = Fixtures.mkGuardianWeeklySubscription()
 
       publicationDatesToBeStopped = SubscriptionData(fakeSubscription, Fixtures.mkAccount())
-        .map(_.issueDataForPeriod(startDate, endDate))
+        .map(_.subscriptionIssueData.issueDataForPeriod(startDate, endDate))
         .toOption
         .get
 
