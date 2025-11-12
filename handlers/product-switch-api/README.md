@@ -42,6 +42,6 @@ Body:
 Notes:
 - When `preview=true` no amendment is currently performed (stub implementation) and an empty `previewInvoices` array is returned for success.
 - When `preview=false` the handler returns a stub success with an empty `invoiceIds` array (actual Zuora amendment logic to be added in a follow-up change).
-- Returns `success=false` with a reason if the subscription is already on the requested billing period or the current billing period is unsupported.
+- Returns status 400 with a reason if the subscription is already on the requested billing period or the current billing period is unsupported.
 
 This endpoint is a scaffold to enable UI integration; it will later be enhanced to perform a real Zuora rate plan amendment and billing preview.
