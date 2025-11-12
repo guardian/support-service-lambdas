@@ -491,13 +491,6 @@ async function processFrequencyChange(
 	}
 }
 
-/**
- * Frequency change handler
- *
- * @param stage Stage to execute in
- * @param today Today's date
- * @returns Http handler function for status code and body return
- */
 export const frequencyChangeHandler =
 	(stage: Stage, today: dayjs.Dayjs) =>
 	async (
