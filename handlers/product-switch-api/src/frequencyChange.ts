@@ -245,18 +245,6 @@ function getTargetRatePlanId(
 	return ratePlan.id;
 }
 
-/**
- * Process a frequency change using Zuora Orders API.
- *
- * @param zuoraClient Zuora API client
- * @param subscription Subscription to change
- * @param currentRatePlan Current rate plan of the subscription
- * @param currentCharge Current charge of the subscription
- * @param productCatalog Product catalog for rate plan lookups
- * @param targetBillingPeriod Target billing period ('Month' or 'Annual')
- * @param preview Whether to preview or execute the change
- * @returns Frequency change response indicating success/failure and details
- */
 async function processFrequencyChange(
 	zuoraClient: ZuoraClient,
 	subscription: Awaited<ReturnType<typeof getSubscription>>,
