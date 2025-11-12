@@ -19,6 +19,7 @@ import { getSubscription } from '@modules/zuora/subscription';
 import type {
 	RatePlan,
 	RatePlanCharge,
+	ZuoraSubscription,
 } from '@modules/zuora/types/objects/subscription';
 import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
@@ -91,7 +92,7 @@ function assertValidState(
  * @throws ValidationError if subscription fails any validation checks
  */
 export function selectCandidateSubscriptionCharge(
-	subscription: Awaited<ReturnType<typeof getSubscription>>,
+	subscription: ZuoraSubscription,
 	today: Date,
 	account?: Awaited<ReturnType<typeof getAccount>>,
 ): { ratePlan: RatePlan; charge: RatePlanCharge } {
@@ -153,7 +154,7 @@ export function selectCandidateSubscriptionCharge(
  */
 export async function previewFrequencyChange(
 	zuoraClient: ZuoraClient,
-	subscription: Awaited<ReturnType<typeof getSubscription>>,
+	subscription: ZuoraSubscription,
 	candidateCharge: { ratePlan: RatePlan; charge: RatePlanCharge },
 	productCatalog: ProductCatalog,
 	targetBillingPeriod: 'Month' | 'Annual',
@@ -176,7 +177,7 @@ export async function previewFrequencyChange(
  */
 export async function executeFrequencyChange(
 	zuoraClient: ZuoraClient,
-	subscription: Awaited<ReturnType<typeof getSubscription>>,
+	subscription: ZuoraSubscription,
 	candidateCharge: { ratePlan: RatePlan; charge: RatePlanCharge },
 	productCatalog: ProductCatalog,
 	targetBillingPeriod: 'Month' | 'Annual',
@@ -247,7 +248,7 @@ function getTargetRatePlanId(
 
 async function processFrequencyChange(
 	zuoraClient: ZuoraClient,
-	subscription: Awaited<ReturnType<typeof getSubscription>>,
+	subscription: ZuoraSubscription,
 	currentRatePlan: RatePlan,
 	currentCharge: RatePlanCharge,
 	productCatalog: ProductCatalog,
