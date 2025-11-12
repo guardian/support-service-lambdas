@@ -30,6 +30,7 @@ import type {
 	FrequencyChangeSwitchResponse,
 } from './frequencySchemas';
 import {
+	frequencyChangeErrorResponseSchema,
 	frequencyChangePreviewResponseSchema,
 	frequencyChangeSwitchResponseSchema,
 } from './frequencySchemas';
@@ -590,7 +591,6 @@ export const frequencyChangeHandler =
 			};
 		}
 
-		// Use the appropriate wrapper function for preview or execute
 		const response = parsed.body.preview
 			? await previewFrequencyChange(
 					zuoraClient,
@@ -607,8 +607,8 @@ export const frequencyChangeHandler =
 					parsed.body.targetBillingPeriod,
 				);
 
-		// Type guard to check if response is an error
-		const isErrorResponse = 'reasons' in response;
+		const isErrorResponse =
+			frequencyChangeErrorResponseSchema.safeParse(response).success;
 		const statusCode = isErrorResponse ? 400 : 200;
 		return { statusCode, body: JSON.stringify(response) };
 	};
