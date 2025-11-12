@@ -1,3 +1,4 @@
+import { assertValueIn } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
@@ -259,9 +260,11 @@ async function processFrequencyChange(
 	targetBillingPeriod: 'Month' | 'Annual',
 	preview: boolean,
 ): Promise<FrequencyChangePreviewResponse | FrequencyChangeSwitchResponse> {
-	const currentBillingPeriod = currentCharge.billingPeriod as
-		| 'Month'
-		| 'Annual';
+	const currentBillingPeriod = assertValueIn(
+		currentCharge.billingPeriod,
+		['Month', 'Annual'] as const,
+		'billingPeriod',
+	);
 	logger.log(
 		`${preview ? 'Previewing' : 'Executing'} frequency change (Orders API) from ${currentBillingPeriod} to ${targetBillingPeriod}`,
 	);
