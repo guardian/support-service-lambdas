@@ -232,18 +232,22 @@ function getTargetRatePlanId(
 		`Determined target rate plan key '${targetRatePlanKey}' for requested billing period '${targetBillingPeriod}'`,
 	);
 
-	const product = productCatalog[productDetails.zuoraProduct];
-	const ratePlan = product.ratePlans[
-		targetRatePlanKey as keyof typeof product.ratePlans
-	] as { id: string } | undefined;
+	// Use getAllProductDetails to find the target rate plan with proper type checking
+	const targetRatePlanDetail = productCatalogHelper
+		.getAllProductDetails()
+		.find(
+			(detail) =>
+				detail.zuoraProduct === productDetails.zuoraProduct &&
+				detail.productRatePlan === targetRatePlanKey,
+		);
 
-	if (!ratePlan) {
+	if (!targetRatePlanDetail) {
 		throw new Error(
 			`Rate plan ${targetRatePlanKey} not found for product ${productDetails.zuoraProduct}`,
 		);
 	}
 
-	return ratePlan.id;
+	return targetRatePlanDetail.id;
 }
 
 async function processFrequencyChange(
