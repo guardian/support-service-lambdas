@@ -311,8 +311,10 @@ async function processFrequencyChange(
 			rawTargetRatePlan.pricing?.[currency] ?? currentCharge.price ?? 0;
 
 		// For preview: use today to get Zuora to generate billing docs
-		// For execution: use term end date to schedule the change correctly
-		const effectiveDate = preview ? dayjs() : dayjs(subscription.termEndDate);
+		// For execution: use charged through date so change takes effect at next renewal
+		const effectiveDate = preview
+			? dayjs()
+			: dayjs(currentCharge.chargedThroughDate ?? subscription.termEndDate);
 		const triggerDates = singleTriggerDate(effectiveDate);
 		const orderActions: OrderAction[] = [
 			{
@@ -433,7 +435,7 @@ async function processFrequencyChange(
 					runBilling: true,
 					collectPayment: false,
 				},
-				orderDate: zuoraDateFormat(dayjs(subscription.termEndDate)),
+				orderDate: zuoraDateFormat(effectiveDate),
 				existingAccountNumber: subscription.accountNumber,
 				subscriptions: [
 					{
