@@ -562,19 +562,9 @@ export const frequencyChangeHandler =
 					}),
 				};
 			}
-			// Log unexpected errors but don't expose details to client
-			logger.log('Unexpected error type in candidate charge selection', error);
-			return {
-				statusCode: 500,
-				body: JSON.stringify({
-					reasons: [
-						{
-							message:
-								'An unexpected error occurred while processing your request',
-						},
-					],
-				}),
-			};
+
+			// The router will do log-and-500 for free
+			throw error;
 		}
 
 		const { charge } = candidateCharge;
