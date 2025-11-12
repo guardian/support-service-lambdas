@@ -29,7 +29,7 @@ object SFApiCreateDeliveryProblem {
           Subject =
             s"[Self Service] Delivery Problem : ${detail.problemType} (${detail.productName} - $subscriptionNumber)",
           Description = detail.description,
-          Case_Journey__c = detail.status == "Closed" ? "Self Service" : "Assisted",
+          Case_Journey__c = if (detail.status == "Closed") "Self Service" else "Assisted",
           Case_Product__c = detail.productName,
           Category__c = "Delivery & Fulfilment",
           Sub_Category__c = detail.problemType,
