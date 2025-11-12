@@ -29,7 +29,7 @@ object SFApiCreateDeliveryProblem {
           Subject =
             s"[Self Service] Delivery Problem : ${detail.problemType} (${detail.productName} - $subscriptionNumber)",
           Description = detail.description,
-          Case_Journey__c = "Self Service",
+          Case_Journey__c = detail.status == "Closed" ? "Self Service" : "Assisted",
           Case_Product__c = detail.productName,
           Category__c = "Delivery & Fulfilment",
           Sub_Category__c = detail.problemType,
@@ -101,7 +101,7 @@ case class SFApiCreateDeliveryProblemCase(
     ContactId: Option[String],
     SF_Subscription__r: SF_Subscription_ByName,
     Origin: String = "Self Service",
-    Case_Journey__c: String = "Self Service",
+    Case_Journey__c: String,
     Status: String,
     Priority: Option[String],
     Subject: String,
