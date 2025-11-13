@@ -111,9 +111,11 @@ describe('selectCandidateSubscriptionCharge', () => {
 	test('finds single active monthly recurring subscription charge', () => {
 		const subscription = makeSubscriptionWithSingleCharge('Month', 10);
 		const today = dayjs();
+		const account = makeAccount();
 		const { charge, ratePlan } = selectCandidateSubscriptionCharge(
 			subscription,
 			today.toDate(),
+			account,
 		);
 		expect(charge.name).toBe('Subscription');
 		expect(charge.billingPeriod).toBe('Month');
@@ -124,9 +126,11 @@ describe('selectCandidateSubscriptionCharge', () => {
 	test('finds single active annual recurring subscription charge', () => {
 		const subscription = makeSubscriptionWithSingleCharge('Annual', 120);
 		const today = dayjs();
+		const account = makeAccount();
 		const { charge } = selectCandidateSubscriptionCharge(
 			subscription,
 			today.toDate(),
+			account,
 		);
 		expect(charge.name).toBe('Subscription');
 		expect(charge.billingPeriod).toBe('Annual');
@@ -150,8 +154,9 @@ describe('selectCandidateSubscriptionCharge', () => {
 			termEndDate: now.add(11, 'months').toDate(),
 			ratePlans: [],
 		};
+		const account = makeAccount();
 		expect(() =>
-			selectCandidateSubscriptionCharge(subscription, new Date()),
+			selectCandidateSubscriptionCharge(subscription, new Date(), account),
 		).toThrow(
 			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)',
 		);
@@ -170,8 +175,9 @@ describe('selectCandidateSubscriptionCharge', () => {
 				},
 			],
 		});
+		const account = makeAccount();
 		expect(() =>
-			selectCandidateSubscriptionCharge(subscription, new Date()),
+			selectCandidateSubscriptionCharge(subscription, new Date(), account),
 		).toThrow(
 			'subscription did not meet precondition <subscription has exactly one eligible charge (multiple charges cannot be safely changed)> (was 2 charges found)',
 		);
@@ -181,8 +187,9 @@ describe('selectCandidateSubscriptionCharge', () => {
 		const subscription = makeSubscriptionWithSingleCharge('Month', 10, {
 			lastChangeType: 'Remove',
 		});
+		const account = makeAccount();
 		expect(() =>
-			selectCandidateSubscriptionCharge(subscription, new Date()),
+			selectCandidateSubscriptionCharge(subscription, new Date(), account),
 		).toThrow(
 			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)',
 		);
@@ -192,8 +199,9 @@ describe('selectCandidateSubscriptionCharge', () => {
 		const subscription = makeSubscriptionWithSingleCharge('Month', 10, {
 			chargeName: 'Contribution',
 		});
+		const account = makeAccount();
 		expect(() =>
-			selectCandidateSubscriptionCharge(subscription, new Date()),
+			selectCandidateSubscriptionCharge(subscription, new Date(), account),
 		).toThrow(
 			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)',
 		);
@@ -203,8 +211,9 @@ describe('selectCandidateSubscriptionCharge', () => {
 		const subscription = makeSubscriptionWithSingleCharge('Month', 10, {
 			chargeType: 'OneTime',
 		});
+		const account = makeAccount();
 		expect(() =>
-			selectCandidateSubscriptionCharge(subscription, new Date()),
+			selectCandidateSubscriptionCharge(subscription, new Date(), account),
 		).toThrow(
 			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)',
 		);
@@ -215,8 +224,9 @@ describe('selectCandidateSubscriptionCharge', () => {
 		const subscription = makeSubscriptionWithSingleCharge('Month', 10, {
 			effectiveStartDate: now.add(1, 'month').toDate(),
 		});
+		const account = makeAccount();
 		expect(() =>
-			selectCandidateSubscriptionCharge(subscription, now.toDate()),
+			selectCandidateSubscriptionCharge(subscription, now.toDate(), account),
 		).toThrow(
 			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)',
 		);
@@ -227,8 +237,9 @@ describe('selectCandidateSubscriptionCharge', () => {
 		const subscription = makeSubscriptionWithSingleCharge('Month', 10, {
 			effectiveEndDate: now.subtract(1, 'day').toDate(),
 		});
+		const account = makeAccount();
 		expect(() =>
-			selectCandidateSubscriptionCharge(subscription, now.toDate()),
+			selectCandidateSubscriptionCharge(subscription, now.toDate(), account),
 		).toThrow(
 			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)',
 		);
@@ -239,8 +250,9 @@ describe('selectCandidateSubscriptionCharge', () => {
 		const subscription = makeSubscriptionWithSingleCharge('Month', 10, {
 			chargedThroughDate: now.subtract(1, 'day').toDate(),
 		});
+		const account = makeAccount();
 		expect(() =>
-			selectCandidateSubscriptionCharge(subscription, now.toDate()),
+			selectCandidateSubscriptionCharge(subscription, now.toDate(), account),
 		).toThrow(
 			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)',
 		);
@@ -251,9 +263,11 @@ describe('selectCandidateSubscriptionCharge', () => {
 		const subscription = makeSubscriptionWithSingleCharge('Month', 10, {
 			chargedThroughDate: now.add(1, 'month').toDate(),
 		});
+		const account = makeAccount();
 		const { charge } = selectCandidateSubscriptionCharge(
 			subscription,
 			now.toDate(),
+			account,
 		);
 		expect(charge.id).toBe('subChargeId');
 	});
@@ -263,9 +277,11 @@ describe('selectCandidateSubscriptionCharge', () => {
 		const subscription = makeSubscriptionWithSingleCharge('Month', 10, {
 			chargedThroughDate: null,
 		});
+		const account = makeAccount();
 		const { charge } = selectCandidateSubscriptionCharge(
 			subscription,
 			now.toDate(),
+			account,
 		);
 		expect(charge.id).toBe('subChargeId');
 	});
@@ -301,17 +317,6 @@ describe('selectCandidateSubscriptionCharge', () => {
 			subscription,
 			now.toDate(),
 			account,
-		);
-		expect(charge.id).toBe('subChargeId');
-	});
-
-	test('does not require account parameter for backward compatibility', () => {
-		const now = dayjs();
-		const subscription = makeSubscriptionWithSingleCharge('Month', 10);
-		// Should not throw when account is undefined
-		const { charge } = selectCandidateSubscriptionCharge(
-			subscription,
-			now.toDate(),
 		);
 		expect(charge.id).toBe('subChargeId');
 	});

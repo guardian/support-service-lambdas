@@ -17,6 +17,7 @@ import type {
 	PreviewOrderRequest,
 } from '@modules/zuora/orders/orderRequests';
 import { getSubscription } from '@modules/zuora/subscription';
+import type { ZuoraAccount } from '@modules/zuora/types';
 import type {
 	RatePlan,
 	RatePlanCharge,
@@ -95,25 +96,21 @@ function assertValidState(
 export function selectCandidateSubscriptionCharge(
 	subscription: ZuoraSubscription,
 	today: Date,
-	account?: Awaited<ReturnType<typeof getAccount>>,
+	account: ZuoraAccount,
 ): { ratePlan: RatePlan; charge: RatePlanCharge } {
 	// Check subscription status if account is provided
-	if (account) {
-		assertValidState(
-			subscription.status === 'Active',
-			frequencyChangeValidationRequirements.subscriptionActive,
-			subscription.status,
-		);
-	}
+	assertValidState(
+		subscription.status === 'Active',
+		frequencyChangeValidationRequirements.subscriptionActive,
+		subscription.status,
+	);
 
 	// Check for outstanding unpaid invoices if account is provided
-	if (account) {
-		assertValidState(
-			account.metrics.totalInvoiceBalance === 0,
-			frequencyChangeValidationRequirements.zeroAccountBalance,
-			`${account.metrics.totalInvoiceBalance} ${account.metrics.currency}`,
-		);
-	}
+	assertValidState(
+		account.metrics.totalInvoiceBalance === 0,
+		frequencyChangeValidationRequirements.zeroAccountBalance,
+		`${account.metrics.totalInvoiceBalance} ${account.metrics.currency}`,
+	);
 
 	// Log diagnostic info about which charges are being filtered
 	const initialCharges = subscription.ratePlans
