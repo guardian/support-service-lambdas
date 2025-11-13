@@ -466,6 +466,11 @@ async function processFrequencyChange(
 				newPricePeriod = 'month';
 			}
 
+			// Calculate current contribution
+			const currentContributionAmount = currentRatePlan.ratePlanCharges
+				.filter((c) => c.name === 'Contribution' && c.type === 'Recurring')
+				.reduce((total, c) => total + (c.price ?? 0), 0);
+
 			return {
 				previewInvoices: cleanedInvoices,
 				savings: {
@@ -477,6 +482,11 @@ async function processFrequencyChange(
 					amount: newPriceAmount,
 					currency,
 					period: newPricePeriod,
+				},
+				currentContribution: {
+					amount: currentContributionAmount,
+					currency,
+					period: currentBillingPeriod === 'Annual' ? 'year' : 'month',
 				},
 			};
 		} else {
