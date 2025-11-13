@@ -115,7 +115,7 @@ export function selectCandidateSubscriptionCharge(
 		);
 	}
 
-	// TODO:delete comment - Log diagnostic info about which charges are being filtered
+	// Log diagnostic info about which charges are being filtered
 	const initialCharges = subscription.ratePlans
 		.filter((rp) => rp.lastChangeType !== 'Remove')
 		.flatMap((rp) =>
