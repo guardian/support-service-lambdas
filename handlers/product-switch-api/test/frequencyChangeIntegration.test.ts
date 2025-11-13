@@ -107,6 +107,7 @@ describe('frequency change behaviour', () => {
 						candidateCharge,
 						productCatalog,
 						'Annual',
+						dayjs(),
 					);
 
 				// Expect success response
@@ -162,6 +163,7 @@ describe('frequency change behaviour', () => {
 						candidateCharge,
 						productCatalog,
 						'Month',
+						dayjs(),
 					);
 
 				// Expect success response
@@ -213,6 +215,7 @@ describe('frequency change behaviour', () => {
 						candidateCharge,
 						productCatalog,
 						'Annual',
+						dayjs(),
 					);
 
 				// Expect success response
@@ -257,6 +260,7 @@ describe('frequency change behaviour', () => {
 						candidateCharge,
 						productCatalog,
 						'Annual',
+						dayjs(),
 					);
 
 				// Expect success response with invoice IDs
@@ -333,6 +337,7 @@ describe('frequency change behaviour', () => {
 						candidateCharge,
 						productCatalog,
 						'Month',
+						dayjs(),
 					);
 
 				// Expect success response with invoice IDs
@@ -400,6 +405,7 @@ describe('frequency change behaviour', () => {
 						eurCandidateCharge,
 						productCatalog,
 						'Annual',
+						dayjs(),
 					);
 
 				expect('invoiceIds' in eurResult).toBe(true);
@@ -439,6 +445,7 @@ describe('frequency change behaviour', () => {
 						usdCandidateCharge,
 						productCatalog,
 						'Annual',
+						dayjs(),
 					);
 
 				expect('invoiceIds' in usdResult).toBe(true);
