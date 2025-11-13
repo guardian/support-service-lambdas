@@ -1,7 +1,7 @@
-import type { z } from 'zod';
 import { GetParametersByPathCommand, SSMClient } from '@aws-sdk/client-ssm';
+import type { z } from 'zod';
+import { groupMap, mapValues, partitionByType } from '../../arrayFunctions';
 import { awsConfig } from '../src/config';
-import { groupMap, mapValues, partition } from '../../arrayFunctions';
 import { fetchAllPages } from './fetchAllPages';
 
 /**
@@ -25,7 +25,7 @@ export const loadConfig = async <O>(
 	return parseSSMConfigToObject(configFlat, configRoot, schema);
 };
 
-export type SSMKeyValuePairs = Record<string, string>[];
+export type SSMKeyValuePairs = Array<Record<string, string>>;
 
 async function readAllRecursive(configRoot: string): Promise<SSMKeyValuePairs> {
 	const ssm = new SSMClient(awsConfig);
@@ -110,7 +110,7 @@ export const getTreeFromPaths = (paths: PathArrayWithValue[]): ConfigTree => {
 };
 
 function merge(singleItemTreesOrStringItem: ConfigTree[]): ConfigTree {
-	const [stringValues, singleItemTrees] = partition(
+	const [stringValues, singleItemTrees] = partitionByType(
 		singleItemTreesOrStringItem,
 		(configTree) => typeof configTree === 'string',
 	);
@@ -125,8 +125,13 @@ function merge(singleItemTreesOrStringItem: ConfigTree[]): ConfigTree {
 	);
 	const hasTree = singleItemTrees.length > 0;
 	const hasStringValue = thisNode !== undefined;
-	if (hasTree && hasStringValue) return { ...subTree, thisNode };
-	else if (hasTree) return subTree;
-	else if (hasStringValue) return thisNode;
-	else throw new Error('no config: merge called with empty list');
+	if (hasTree && hasStringValue) {
+		return { ...subTree, thisNode };
+	} else if (hasTree) {
+		return subTree;
+	} else if (hasStringValue) {
+		return thisNode;
+	} else {
+		throw new Error('no config: merge called with empty list');
+	}
 }
