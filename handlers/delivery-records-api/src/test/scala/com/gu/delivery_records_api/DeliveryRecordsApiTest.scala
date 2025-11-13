@@ -58,7 +58,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
     CaseNumber = "123456",
     Subject = Some("subject"),
     Description = Some("blah blah"),
-    Case_Closure_Reason__c = Some("Paper Damaged"),
+    Sub_Category__c = Some("Paper Damaged"),
   )
   val creditAmount = 1.23
   val invoiceDate: LocalDate = LocalDate.of(2019, 12, 10)
@@ -177,7 +177,7 @@ class DeliveryRecordsApiTest extends AnyFlatSpec with Matchers with EitherValues
         ref = sfProblemCase.CaseNumber,
         subject = sfProblemCase.Subject,
         description = sfProblemCase.Description,
-        problemType = sfProblemCase.Case_Closure_Reason__c,
+        problemType = sfProblemCase.Sub_Category__c,
       ),
     ),
     contactNumbers.copy(MobilePhone = None),

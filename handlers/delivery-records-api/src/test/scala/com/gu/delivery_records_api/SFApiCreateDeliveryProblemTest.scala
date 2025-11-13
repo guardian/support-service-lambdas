@@ -71,14 +71,14 @@ class SFApiCreateDeliveryProblemTest extends AnyFlatSpec with Matchers {
          |          "Name" : "A-S123456"
          |        },
          |        "Origin" : "Self Service",
+         |        "Case_Journey__c" : "Assisted",
          |        "Status" : "New",
          |        "Priority" : null,
          |        "Subject" : "[Self Service] Delivery Problem : No delivery (Guardian Weekly - A-S123456)",
          |        "Description" : "description",
-         |        "Product__c" : "Guardian Weekly",
-         |        "Journey__c" : "CS - Guardian Weekly Support",
-         |        "Enquiry_Type__c" : "Delivery issues",
-         |        "Case_Closure_Reason__c" : "No delivery",
+         |        "Case_Product__c" : "Guardian Weekly",
+         |        "Category__c" : "Delivery & Fulfilment",
+         |        "Sub_Category__c" : "No delivery",
          |        "Repeat_Delivery_Issue__c" : true
          |      }
          |    },
