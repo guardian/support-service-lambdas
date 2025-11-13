@@ -59,7 +59,7 @@ export class SrApiLambda extends SrLambda {
 				restApiName: getNameWithStage(scope, props.nameSuffix),
 				description:
 					props.apiDescriptionOverride ?? 'API Gateway created by CDK',
-				proxy: true,
+				proxy: false,
 				deployOptions: {
 					stageName: scope.stage,
 				},
@@ -73,6 +73,10 @@ export class SrApiLambda extends SrLambda {
 						}),
 			},
 		);
+
+		// by doing these explicitly rather than using proxy:true, we can later add specific public resources
+		this.api.root.addMethod('ANY');
+		this.api.root.addResource('{proxy+}').addMethod('ANY');
 
 		if (!props.isPublic) {
 			const usagePlan = this.api.addUsagePlan('UsagePlan', {
@@ -108,5 +112,15 @@ export class SrApiLambda extends SrLambda {
 				overrides: props.monitoring,
 			});
 		}
+	}
+
+	addPublicPath(path: string) {
+		const publicResource = this.api.root.addResource(path);
+		publicResource.addMethod('GET', undefined, {
+			apiKeyRequired: false,
+		});
+		publicResource.addResource('{proxy+}').addMethod('GET', undefined, {
+			apiKeyRequired: false,
+		});
 	}
 }
