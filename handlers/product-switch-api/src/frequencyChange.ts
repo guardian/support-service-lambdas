@@ -6,6 +6,12 @@ import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import { getAccount } from '@modules/zuora/account';
+import {
+	getBillingPreview,
+	getNextNonFreePaymentDate,
+	itemsForSubscription,
+	toSimpleInvoiceItems,
+} from '@modules/zuora/billingPreview';
 import { singleTriggerDate } from '@modules/zuora/orders/orderActions';
 import type { OrderAction } from '@modules/zuora/orders/orderActions';
 import {
@@ -209,6 +215,7 @@ export async function previewFrequencyChange(
 	candidateCharge: { ratePlan: RatePlan; charge: RatePlanCharge },
 	productCatalog: ProductCatalog,
 	targetBillingPeriod: 'Month' | 'Annual',
+	today: dayjs.Dayjs,
 ): Promise<FrequencyChangePreviewResponse> {
 	const { ratePlan, charge } = candidateCharge;
 	const result = await processFrequencyChange(
@@ -219,6 +226,7 @@ export async function previewFrequencyChange(
 		productCatalog,
 		targetBillingPeriod,
 		true,
+		today,
 	);
 	return frequencyChangePreviewResponseSchema.parse(result);
 }
@@ -232,6 +240,7 @@ export async function executeFrequencyChange(
 	candidateCharge: { ratePlan: RatePlan; charge: RatePlanCharge },
 	productCatalog: ProductCatalog,
 	targetBillingPeriod: 'Month' | 'Annual',
+	today: dayjs.Dayjs,
 ): Promise<FrequencyChangeSwitchResponse> {
 	const { ratePlan, charge } = candidateCharge;
 	const result = await processFrequencyChange(
@@ -242,6 +251,7 @@ export async function executeFrequencyChange(
 		productCatalog,
 		targetBillingPeriod,
 		false,
+		today,
 	);
 	return frequencyChangeSwitchResponseSchema.parse(result);
 }
@@ -309,6 +319,7 @@ async function processFrequencyChange(
 	productCatalog: ProductCatalog,
 	targetBillingPeriod: 'Month' | 'Annual',
 	preview: boolean,
+	today: dayjs.Dayjs,
 ): Promise<FrequencyChangePreviewResponse | FrequencyChangeSwitchResponse> {
 	const currentBillingPeriod = assertValueIn(
 		currentCharge.billingPeriod,
@@ -358,10 +369,26 @@ async function processFrequencyChange(
 			rawTargetRatePlan.pricing?.[currency] ?? currentCharge.price ?? 0;
 
 		// For preview: use today to get Zuora to generate billing docs
-		// For execution: use charged through date so change takes effect at next renewal
-		const effectiveDate = preview
-			? dayjs()
-			: dayjs(currentCharge.chargedThroughDate ?? subscription.termEndDate);
+		// For execution: use the next non-free payment date (respects promotional periods)
+		// This ensures the frequency change applies after any free periods end
+		let effectiveDate: dayjs.Dayjs;
+		if (preview) {
+			effectiveDate = today;
+		} else {
+			// Get billing preview to find when the next actual payment will occur
+			const billingPreview = await getBillingPreview(
+				zuoraClient,
+				today.add(13, 'months'), // 13 months gives us minimum 2 payments even on an Annual sub
+				subscription.accountNumber,
+			);
+
+			const subscriptionItems = toSimpleInvoiceItems(
+				itemsForSubscription(subscription.subscriptionNumber)(billingPreview),
+			);
+
+			const nextPaymentDate = getNextNonFreePaymentDate(subscriptionItems);
+			effectiveDate = dayjs(nextPaymentDate);
+		}
 		const triggerDates = singleTriggerDate(effectiveDate);
 		const orderActions: OrderAction[] = [
 			{
@@ -637,6 +664,7 @@ export const frequencyChangeHandler =
 					candidateCharge,
 					productCatalog,
 					parsed.body.targetBillingPeriod,
+					today,
 				)
 			: await executeFrequencyChange(
 					zuoraClient,
@@ -644,6 +672,7 @@ export const frequencyChangeHandler =
 					candidateCharge,
 					productCatalog,
 					parsed.body.targetBillingPeriod,
+					today,
 				);
 
 		const isErrorResponse =
