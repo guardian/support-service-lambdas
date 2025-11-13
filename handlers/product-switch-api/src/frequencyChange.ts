@@ -115,25 +115,78 @@ export function selectCandidateSubscriptionCharge(
 		);
 	}
 
-	const candidateCharges = subscription.ratePlans
+	// TODO:delete comment - Log diagnostic info about which charges are being filtered
+	const initialCharges = subscription.ratePlans
 		.filter((rp) => rp.lastChangeType !== 'Remove')
 		.flatMap((rp) =>
 			rp.ratePlanCharges.map((c) => ({ ratePlan: rp, charge: c })),
-		)
-		.filter(({ charge }) => charge.name === 'Subscription')
-		.filter(({ charge }) => charge.type === 'Recurring')
-		.filter(
-			({ charge }) =>
-				charge.effectiveStartDate <= today && charge.effectiveEndDate > today,
-		)
-		.filter(
-			({ charge }) =>
-				!charge.chargedThroughDate || charge.chargedThroughDate >= today,
-		)
-		.filter(
-			({ charge }) =>
-				charge.billingPeriod === 'Month' || charge.billingPeriod === 'Annual',
 		);
+
+	logger.log(
+		`Found ${initialCharges.length} rate plan charges before filtering`,
+	);
+
+	const candidateCharges = initialCharges
+		.filter(({ charge }) => {
+			if (charge.name !== 'Subscription') {
+				logger.log(
+					`Filtering out charge ${charge.id}: name is "${charge.name}", not "Subscription"`,
+				);
+				return false;
+			}
+			return true;
+		})
+		.filter(({ charge }) => {
+			if (charge.type !== 'Recurring') {
+				logger.log(
+					`Filtering out charge ${charge.id}: type is "${charge.type}", not "Recurring"`,
+				);
+				return false;
+			}
+			return true;
+		})
+		.filter(({ charge }) => {
+			if (charge.effectiveStartDate > today) {
+				logger.log(
+					`Filtering out charge ${charge.id}: effectiveStartDate ${charge.effectiveStartDate.toISOString()} is in the future`,
+				);
+				return false;
+			}
+			if (charge.effectiveEndDate <= today) {
+				logger.log(
+					`Filtering out charge ${charge.id}: effectiveEndDate ${charge.effectiveEndDate.toISOString()} is in the past`,
+				);
+				return false;
+			}
+			return true;
+		})
+		.filter(({ charge }) => {
+			if (charge.chargedThroughDate && charge.chargedThroughDate < today) {
+				logger.log(
+					`Filtering out charge ${charge.id}: chargedThroughDate ${charge.chargedThroughDate.toISOString()} is in the past`,
+				);
+				return false;
+			}
+			return true;
+		})
+		.filter(({ charge }) => {
+			if (
+				charge.billingPeriod !== 'Month' &&
+				charge.billingPeriod !== 'Annual'
+			) {
+				logger.log(
+					`Filtering out charge ${charge.id}: billingPeriod is "${charge.billingPeriod}", not "Month" or "Annual"`,
+				);
+				return false;
+			}
+			return true;
+		});
+
+	if (candidateCharges.length === 0) {
+		logger.log(
+			`No eligible charges found after filtering. Initial count: ${initialCharges.length}`,
+		);
+	}
 
 	assertValidState(
 		candidateCharges.length > 0,
