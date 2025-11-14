@@ -59,7 +59,7 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 		jest.clearAllMocks();
 	});
 
-	test('preview=true does not preview term changes as zuora wont allow it', async () => {
+	test('preview=true doesnt preview term changes as zuora wont allow it', async () => {
 		mockZuoraClient.post.mockResolvedValueOnce({
 			success: true,
 			previewResult: {
