@@ -27,11 +27,11 @@ import {
 	executeFrequencySwitch,
 	previewFrequencySwitch,
 	selectCandidateSubscriptionCharge,
-} from '../src/frequencyChange';
+} from '../src/frequencySwitchEndpoint';
 import type {
 	FrequencySwitchPreviewResponse,
 	FrequencySwitchResponse,
-} from '../src/frequencySchemas';
+} from '../src/frequencySwitchSchemas';
 
 interface FrequencySwitchTestSetup {
 	zuoraClient: ZuoraClient;

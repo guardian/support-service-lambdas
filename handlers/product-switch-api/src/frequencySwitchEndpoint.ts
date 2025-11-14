@@ -37,12 +37,12 @@ import type {
 	FrequencySwitchPreviewResponse,
 	FrequencySwitchRequestBody,
 	FrequencySwitchResponse,
-} from './frequencySchemas';
+} from './frequencySwitchSchemas';
 import {
 	frequencySwitchErrorResponseSchema,
 	frequencySwitchPreviewResponseSchema,
 	frequencySwitchResponseSchema,
-} from './frequencySchemas';
+} from './frequencySwitchSchemas';
 import type { ZuoraPreviewResponse, ZuoraSwitchResponse } from './schemas';
 import {
 	zuoraPreviewResponseSchema,

@@ -5,7 +5,7 @@
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import dayjs from 'dayjs';
 import { getCatalogRatePlanName } from '../src/catalogInformation';
-import { selectCandidateSubscriptionCharge } from '../src/frequencyChange';
+import { selectCandidateSubscriptionCharge } from '../src/frequencySwitchEndpoint';
 
 /**
  * Creates a minimal mock account object for testing payment status checks
