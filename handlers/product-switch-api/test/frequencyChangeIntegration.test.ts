@@ -1,6 +1,6 @@
 /**
- * Integration tests for frequency change functionality.
- * Tests actual frequency changes (monthly <-> annual) using real Zuora API calls.
+ * Integration tests for frequency switch functionality.
+ * Tests actual frequency switches (monthly <-> annual) using real Zuora API calls.
  *
  * Test Coverage:
  * - Preview: 3 tests (monthly→annual, annual→monthly, non-GBP)
@@ -24,16 +24,16 @@ import dayjs from 'dayjs';
 import { createContribution } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import type { ContributionTestAdditionalOptions } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import {
-	executeFrequencyChange,
-	previewFrequencyChange,
+	executeFrequencySwitch,
+	previewFrequencySwitch,
 	selectCandidateSubscriptionCharge,
 } from '../src/frequencyChange';
 import type {
-	FrequencyChangePreviewResponse,
-	FrequencyChangeSwitchResponse,
+	FrequencySwitchPreviewResponse,
+	FrequencySwitchResponse,
 } from '../src/frequencySchemas';
 
-interface FrequencyChangeTestSetup {
+interface FrequencySwitchTestSetup {
 	zuoraClient: ZuoraClient;
 	subscription: ZuoraSubscription;
 	currentBillingPeriod: 'Month' | 'Annual';
@@ -50,20 +50,20 @@ afterEach(() => {
 const stage = 'CODE';
 
 /**
- * Creates a test contribution subscription that can be used for frequency change testing
+ * Creates a test contribution subscription that can be used for frequency switch testing
  */
-const createTestSubscriptionForFrequencyChange = async (
+const createTestSubscriptionForFrequencySwitch = async (
 	billingPeriod: 'Month' | 'Annual',
 	price: number,
 	additionalOptions?: Omit<
 		ContributionTestAdditionalOptions,
 		'billingPeriod' | 'price'
 	>,
-): Promise<FrequencyChangeTestSetup> => {
+): Promise<FrequencySwitchTestSetup> => {
 	const zuoraClient = await ZuoraClient.create(stage);
 
 	console.log(
-		`Creating a new ${billingPeriod} contribution at price ${price} for frequency change testing`,
+		`Creating a new ${billingPeriod} contribution at price ${price} for frequency switch testing`,
 	);
 
 	const subscriptionNumber = await createContribution(zuoraClient, {
@@ -81,14 +81,14 @@ const createTestSubscriptionForFrequencyChange = async (
 	};
 };
 
-describe('frequency change behaviour', () => {
+describe('frequency switch behaviour', () => {
 	describe('preview functionality', () => {
 		it(
-			'previews monthly to annual frequency change with savings calculation and invoice items',
+			'previews monthly to annual frequency switch with savings calculation and invoice items',
 			async () => {
 				const monthlyPrice = 10;
 				const { zuoraClient, subscription } =
-					await createTestSubscriptionForFrequencyChange('Month', monthlyPrice);
+					await createTestSubscriptionForFrequencySwitch('Month', monthlyPrice);
 
 				const productCatalog = await getProductCatalogFromApi(stage);
 				const account = await getAccount(
@@ -100,8 +100,8 @@ describe('frequency change behaviour', () => {
 					dayjs().toDate(),
 					account,
 				);
-				const result: FrequencyChangePreviewResponse =
-					await previewFrequencyChange(
+				const result: FrequencySwitchPreviewResponse =
+					await previewFrequencySwitch(
 						zuoraClient,
 						subscription,
 						candidateCharge,
@@ -140,11 +140,11 @@ describe('frequency change behaviour', () => {
 		);
 
 		it(
-			'previews annual to monthly frequency change with correct savings period',
+			'previews annual to monthly frequency switch with correct savings period',
 			async () => {
 				const annualPrice = 120;
 				const { zuoraClient, subscription } =
-					await createTestSubscriptionForFrequencyChange('Annual', annualPrice);
+					await createTestSubscriptionForFrequencySwitch('Annual', annualPrice);
 
 				const productCatalog = await getProductCatalogFromApi(stage);
 				const account = await getAccount(
@@ -156,8 +156,8 @@ describe('frequency change behaviour', () => {
 					dayjs().toDate(),
 					account,
 				);
-				const result: FrequencyChangePreviewResponse =
-					await previewFrequencyChange(
+				const result: FrequencySwitchPreviewResponse =
+					await previewFrequencySwitch(
 						zuoraClient,
 						subscription,
 						candidateCharge,
@@ -189,7 +189,7 @@ describe('frequency change behaviour', () => {
 			async () => {
 				const monthlyPrice = 10;
 				const { zuoraClient, subscription } =
-					await createTestSubscriptionForFrequencyChange(
+					await createTestSubscriptionForFrequencySwitch(
 						'Month',
 						monthlyPrice,
 						{
@@ -208,8 +208,8 @@ describe('frequency change behaviour', () => {
 					dayjs().toDate(),
 					account,
 				);
-				const result: FrequencyChangePreviewResponse =
-					await previewFrequencyChange(
+				const result: FrequencySwitchPreviewResponse =
+					await previewFrequencySwitch(
 						zuoraClient,
 						subscription,
 						candidateCharge,
@@ -237,11 +237,11 @@ describe('frequency change behaviour', () => {
 
 	describe('execute functionality', () => {
 		it(
-			'executes monthly to annual frequency change with comprehensive verification',
+			'executes monthly to annual frequency switch with comprehensive verification',
 			async () => {
 				const monthlyPrice = 10;
 				const { zuoraClient, subscription } =
-					await createTestSubscriptionForFrequencyChange('Month', monthlyPrice);
+					await createTestSubscriptionForFrequencySwitch('Month', monthlyPrice);
 
 				const productCatalog = await getProductCatalogFromApi(stage);
 				const account = await getAccount(
@@ -253,15 +253,14 @@ describe('frequency change behaviour', () => {
 					dayjs().toDate(),
 					account,
 				);
-				const result: FrequencyChangeSwitchResponse =
-					await executeFrequencyChange(
-						zuoraClient,
-						subscription,
-						candidateCharge,
-						productCatalog,
-						'Annual',
-						dayjs(),
-					);
+				const result: FrequencySwitchResponse = await executeFrequencySwitch(
+					zuoraClient,
+					subscription,
+					candidateCharge,
+					productCatalog,
+					'Annual',
+					dayjs(),
+				);
 
 				// Expect success response with invoice IDs
 				expect('invoiceIds' in result).toBe(true);
@@ -278,7 +277,7 @@ describe('frequency change behaviour', () => {
 				expect(updatedSubscription).toBeDefined();
 				expect(updatedSubscription.status).toBe('Active');
 
-				// Current rate plan should still be the original billing period (change is scheduled, not immediate)
+				// Current rate plan should still be the original billing period (switch is scheduled, not immediate)
 				const activeRatePlans = updatedSubscription.ratePlans.filter((rp) =>
 					rp.ratePlanCharges.some((charge) => charge.billingPeriod),
 				);
@@ -314,11 +313,11 @@ describe('frequency change behaviour', () => {
 		);
 
 		it(
-			'executes annual to monthly frequency change with comprehensive verification',
+			'executes annual to monthly frequency switch with comprehensive verification',
 			async () => {
 				const annualPrice = 120;
 				const { zuoraClient, subscription } =
-					await createTestSubscriptionForFrequencyChange('Annual', annualPrice);
+					await createTestSubscriptionForFrequencySwitch('Annual', annualPrice);
 
 				const productCatalog = await getProductCatalogFromApi(stage);
 				const account = await getAccount(
@@ -330,15 +329,14 @@ describe('frequency change behaviour', () => {
 					dayjs().toDate(),
 					account,
 				);
-				const result: FrequencyChangeSwitchResponse =
-					await executeFrequencyChange(
-						zuoraClient,
-						subscription,
-						candidateCharge,
-						productCatalog,
-						'Month',
-						dayjs(),
-					);
+				const result: FrequencySwitchResponse = await executeFrequencySwitch(
+					zuoraClient,
+					subscription,
+					candidateCharge,
+					productCatalog,
+					'Month',
+					dayjs(),
+				);
 
 				// Expect success response with invoice IDs
 				expect('invoiceIds' in result).toBe(true);
@@ -378,12 +376,12 @@ describe('frequency change behaviour', () => {
 		);
 
 		it(
-			'executes frequency change for non-GBP subscriptions (EUR and USD)',
+			'executes frequency switch for non-GBP subscriptions (EUR and USD)',
 			async () => {
 				// Test with EUR subscription
 				const eurPrice = 10;
 				const { zuoraClient: eurClient, subscription: eurSubscription } =
-					await createTestSubscriptionForFrequencyChange('Month', eurPrice, {
+					await createTestSubscriptionForFrequencySwitch('Month', eurPrice, {
 						billingCountry: 'Germany',
 						paymentMethod: 'visaCard',
 					});
@@ -398,15 +396,14 @@ describe('frequency change behaviour', () => {
 					dayjs().toDate(),
 					eurAccount,
 				);
-				const eurResult: FrequencyChangeSwitchResponse =
-					await executeFrequencyChange(
-						eurClient,
-						eurSubscription,
-						eurCandidateCharge,
-						productCatalog,
-						'Annual',
-						dayjs(),
-					);
+				const eurResult: FrequencySwitchResponse = await executeFrequencySwitch(
+					eurClient,
+					eurSubscription,
+					eurCandidateCharge,
+					productCatalog,
+					'Annual',
+					dayjs(),
+				);
 
 				expect('invoiceIds' in eurResult).toBe(true);
 				if ('invoiceIds' in eurResult) {
@@ -424,7 +421,7 @@ describe('frequency change behaviour', () => {
 				// Test with USD subscription
 				const usdPrice = 10;
 				const { zuoraClient: usdClient, subscription: usdSubscription } =
-					await createTestSubscriptionForFrequencyChange('Month', usdPrice, {
+					await createTestSubscriptionForFrequencySwitch('Month', usdPrice, {
 						billingCountry: 'United States',
 						paymentMethod: 'visaCard',
 					});
@@ -438,15 +435,14 @@ describe('frequency change behaviour', () => {
 					dayjs().toDate(),
 					usdAccount,
 				);
-				const usdResult: FrequencyChangeSwitchResponse =
-					await executeFrequencyChange(
-						usdClient,
-						usdSubscription,
-						usdCandidateCharge,
-						productCatalog,
-						'Annual',
-						dayjs(),
-					);
+				const usdResult: FrequencySwitchResponse = await executeFrequencySwitch(
+					usdClient,
+					usdSubscription,
+					usdCandidateCharge,
+					productCatalog,
+					'Annual',
+					dayjs(),
+				);
 
 				expect('invoiceIds' in usdResult).toBe(true);
 				if ('invoiceIds' in usdResult) {

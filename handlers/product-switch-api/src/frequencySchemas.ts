@@ -1,28 +1,28 @@
 import { z } from 'zod';
 import { zuoraPreviewResponseInvoiceSchema } from './schemas';
 
-export const frequencyChangeRequestSchema = z.object({
+export const frequencySwitchRequestSchema = z.object({
 	preview: z.boolean(),
 	targetBillingPeriod: z.enum(['Month', 'Annual'], {
-		description: 'Desired billing period for the subscription after the change',
+		description: 'Desired billing period for the subscription after the switch',
 	}),
 	csrUserId: z.optional(z.string()),
 	caseId: z.optional(z.string()),
 });
 
-export type FrequencyChangeRequestBody = z.infer<
-	typeof frequencyChangeRequestSchema
+export type FrequencySwitchRequestBody = z.infer<
+	typeof frequencySwitchRequestSchema
 >;
 
-export const frequencyChangeErrorResponseSchema = z.object({
+export const frequencySwitchErrorResponseSchema = z.object({
 	reasons: z.array(z.object({ message: z.string() })),
 });
 
-export type FrequencyChangeErrorResponse = z.infer<
-	typeof frequencyChangeErrorResponseSchema
+export type FrequencySwitchErrorResponse = z.infer<
+	typeof frequencySwitchErrorResponseSchema
 >;
 
-export const frequencyChangePreviewSuccessResponseSchema = z.object({
+export const frequencySwitchPreviewSuccessResponseSchema = z.object({
 	previewInvoices: z.array(zuoraPreviewResponseInvoiceSchema),
 	savings: z.object({
 		amount: z.number(),
@@ -41,32 +41,32 @@ export const frequencyChangePreviewSuccessResponseSchema = z.object({
 	}),
 });
 
-export type FrequencyChangePreviewSuccessResponse = z.infer<
-	typeof frequencyChangePreviewSuccessResponseSchema
+export type FrequencySwitchPreviewSuccessResponse = z.infer<
+	typeof frequencySwitchPreviewSuccessResponseSchema
 >;
 
-export const frequencyChangeSwitchSuccessResponseSchema = z.object({
+export const frequencySwitchSuccessResponseSchema = z.object({
 	invoiceIds: z.array(z.string()),
 });
 
-export type FrequencyChangeSwitchSuccessResponse = z.infer<
-	typeof frequencyChangeSwitchSuccessResponseSchema
+export type FrequencySwitchSuccessResponse = z.infer<
+	typeof frequencySwitchSuccessResponseSchema
 >;
 
-export const frequencyChangePreviewResponseSchema = z.union([
-	frequencyChangePreviewSuccessResponseSchema,
-	frequencyChangeErrorResponseSchema,
+export const frequencySwitchPreviewResponseSchema = z.union([
+	frequencySwitchPreviewSuccessResponseSchema,
+	frequencySwitchErrorResponseSchema,
 ]);
 
-export type FrequencyChangePreviewResponse = z.infer<
-	typeof frequencyChangePreviewResponseSchema
+export type FrequencySwitchPreviewResponse = z.infer<
+	typeof frequencySwitchPreviewResponseSchema
 >;
 
-export const frequencyChangeSwitchResponseSchema = z.union([
-	frequencyChangeSwitchSuccessResponseSchema,
-	frequencyChangeErrorResponseSchema,
+export const frequencySwitchResponseSchema = z.union([
+	frequencySwitchSuccessResponseSchema,
+	frequencySwitchErrorResponseSchema,
 ]);
 
-export type FrequencyChangeSwitchResponse = z.infer<
-	typeof frequencyChangeSwitchResponseSchema
+export type FrequencySwitchResponse = z.infer<
+	typeof frequencySwitchResponseSchema
 >;

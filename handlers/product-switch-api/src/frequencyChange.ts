@@ -34,14 +34,14 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { getCatalogRatePlanName } from './catalogInformation';
 import type {
-	FrequencyChangePreviewResponse,
-	FrequencyChangeRequestBody,
-	FrequencyChangeSwitchResponse,
+	FrequencySwitchPreviewResponse,
+	FrequencySwitchRequestBody,
+	FrequencySwitchResponse,
 } from './frequencySchemas';
 import {
-	frequencyChangeErrorResponseSchema,
-	frequencyChangePreviewResponseSchema,
-	frequencyChangeSwitchResponseSchema,
+	frequencySwitchErrorResponseSchema,
+	frequencySwitchPreviewResponseSchema,
+	frequencySwitchResponseSchema,
 } from './frequencySchemas';
 import type { ZuoraPreviewResponse, ZuoraSwitchResponse } from './schemas';
 import {
@@ -50,24 +50,24 @@ import {
 } from './schemas';
 
 /**
- * Validation requirements for frequency change eligibility.
+ * Validation requirements for frequency switch eligibility.
  * Each requirement includes a description of what must pass and details about why.
  */
-export const frequencyChangeValidationRequirements = {
+export const frequencySwitchValidationRequirements = {
 	subscriptionActive: 'subscription status is active',
 	zeroAccountBalance: 'account balance is zero',
 	hasEligibleCharges:
-		'subscription has at least one active recurring charge eligible for frequency change',
+		'subscription has at least one active recurring charge eligible for frequency switch',
 	singleEligibleCharge:
-		'subscription has exactly one eligible charge (multiple charges cannot be safely changed)',
+		'subscription has exactly one eligible charge (multiple charges cannot be safely switched)',
 };
 
 /**
- * Assert that a condition is valid for frequency change eligibility.
+ * Assert that a condition is valid for frequency switch eligibility.
  * Throws ValidationError if condition fails, capturing the requirement and actual value.
  *
  * @param isValid Whether the validation passed
- * @param requirement Description of the requirement from frequencyChangeValidationRequirements
+ * @param requirement Description of the requirement from frequencySwitchValidationRequirements
  * @param actual The actual value that failed validation
  * @throws ValidationError with formatted message including requirement and actual value
  */
@@ -85,7 +85,7 @@ function assertValidState(
 }
 
 /**
- * Select the single candidate rate plan and charge eligible for a frequency change.
+ * Select the single candidate rate plan and charge eligible for a frequency switch.
  * Logic matches the handler implementation so tests can exercise preview/execute flows without duplicating filtering rules.
  *
  * Validates that the subscription is eligible:
@@ -96,7 +96,7 @@ function assertValidState(
  * @param subscription The subscription to validate
  * @param today Today's date for filtering active charges
  * @param account Optional account data for additional validations
- * @returns The selected rate plan and charge eligible for frequency change
+ * @returns The selected rate plan and charge eligible for frequency switch
  * @throws ValidationError if subscription fails any validation checks
  */
 export function selectCandidateSubscriptionCharge(
@@ -107,14 +107,14 @@ export function selectCandidateSubscriptionCharge(
 	// Check subscription status if account is provided
 	assertValidState(
 		subscription.status === 'Active',
-		frequencyChangeValidationRequirements.subscriptionActive,
+		frequencySwitchValidationRequirements.subscriptionActive,
 		subscription.status,
 	);
 
 	// Check for outstanding unpaid invoices if account is provided
 	assertValidState(
 		account.metrics.totalInvoiceBalance === 0,
-		frequencyChangeValidationRequirements.zeroAccountBalance,
+		frequencySwitchValidationRequirements.zeroAccountBalance,
 		`${account.metrics.totalInvoiceBalance} ${account.metrics.currency}`,
 	);
 
@@ -193,13 +193,13 @@ export function selectCandidateSubscriptionCharge(
 
 	assertValidState(
 		candidateCharges.length > 0,
-		frequencyChangeValidationRequirements.hasEligibleCharges,
+		frequencySwitchValidationRequirements.hasEligibleCharges,
 		`${candidateCharges.length} charges found`,
 	);
 
 	assertValidState(
 		candidateCharges.length === 1,
-		frequencyChangeValidationRequirements.singleEligibleCharge,
+		frequencySwitchValidationRequirements.singleEligibleCharge,
 		`${candidateCharges.length} charges found`,
 	);
 
@@ -207,18 +207,18 @@ export function selectCandidateSubscriptionCharge(
 }
 
 /**
- * Preview a frequency change for a subscription. Mirrors processFrequencyChange with preview=true.
+ * Preview a frequency switch for a subscription. Mirrors processFrequencySwitch with preview=true.
  */
-export async function previewFrequencyChange(
+export async function previewFrequencySwitch(
 	zuoraClient: ZuoraClient,
 	subscription: ZuoraSubscription,
 	candidateCharge: { ratePlan: RatePlan; charge: RatePlanCharge },
 	productCatalog: ProductCatalog,
 	targetBillingPeriod: 'Month' | 'Annual',
 	today: dayjs.Dayjs,
-): Promise<FrequencyChangePreviewResponse> {
+): Promise<FrequencySwitchPreviewResponse> {
 	const { ratePlan, charge } = candidateCharge;
-	const result = await processFrequencyChange(
+	const result = await processFrequencySwitch(
 		zuoraClient,
 		subscription,
 		ratePlan,
@@ -228,22 +228,22 @@ export async function previewFrequencyChange(
 		true,
 		today,
 	);
-	return frequencyChangePreviewResponseSchema.parse(result);
+	return frequencySwitchPreviewResponseSchema.parse(result);
 }
 
 /**
- * Execute a frequency change (non-preview). Mirrors processFrequencyChange with preview=false.
+ * Execute a frequency switch (non-preview). Mirrors processFrequencySwitch with preview=false.
  */
-export async function executeFrequencyChange(
+export async function executeFrequencySwitch(
 	zuoraClient: ZuoraClient,
 	subscription: ZuoraSubscription,
 	candidateCharge: { ratePlan: RatePlan; charge: RatePlanCharge },
 	productCatalog: ProductCatalog,
 	targetBillingPeriod: 'Month' | 'Annual',
 	today: dayjs.Dayjs,
-): Promise<FrequencyChangeSwitchResponse> {
+): Promise<FrequencySwitchResponse> {
 	const { ratePlan, charge } = candidateCharge;
-	const result = await processFrequencyChange(
+	const result = await processFrequencySwitch(
 		zuoraClient,
 		subscription,
 		ratePlan,
@@ -253,7 +253,7 @@ export async function executeFrequencyChange(
 		false,
 		today,
 	);
-	return frequencyChangeSwitchResponseSchema.parse(result);
+	return frequencySwitchResponseSchema.parse(result);
 }
 
 /**
@@ -311,7 +311,7 @@ function getTargetRatePlanId(
 	return targetRatePlanDetail.id;
 }
 
-async function processFrequencyChange(
+async function processFrequencySwitch(
 	zuoraClient: ZuoraClient,
 	subscription: ZuoraSubscription,
 	currentRatePlan: RatePlan,
@@ -320,14 +320,14 @@ async function processFrequencyChange(
 	targetBillingPeriod: 'Month' | 'Annual',
 	preview: boolean,
 	today: dayjs.Dayjs,
-): Promise<FrequencyChangePreviewResponse | FrequencyChangeSwitchResponse> {
+): Promise<FrequencySwitchPreviewResponse | FrequencySwitchResponse> {
 	const currentBillingPeriod = assertValueIn(
 		currentCharge.billingPeriod,
 		['Month', 'Annual'] as const,
 		'billingPeriod',
 	);
 	logger.log(
-		`${preview ? 'Previewing' : 'Executing'} frequency change (Orders API) from ${currentBillingPeriod} to ${targetBillingPeriod}`,
+		`${preview ? 'Previewing' : 'Executing'} frequency switch (Orders API) from ${currentBillingPeriod} to ${targetBillingPeriod}`,
 	);
 
 	try {
@@ -370,7 +370,7 @@ async function processFrequencyChange(
 
 		// For preview: use today to get Zuora to generate billing docs
 		// For execution: use the next non-free payment date (respects promotional periods)
-		// This ensures the frequency change applies after any free periods end
+		// This ensures the frequency switch applies after any free periods end
 		let effectiveDate: dayjs.Dayjs;
 		if (preview) {
 			effectiveDate = today;
@@ -553,7 +553,7 @@ async function processFrequencyChange(
 		}
 	} catch (error) {
 		logger.log(
-			`Error during Orders API frequency change ${preview ? 'preview' : 'execute'}`,
+			`Error during Orders API frequency switch ${preview ? 'preview' : 'execute'}`,
 			error,
 		);
 		// Only return ValidationError messages to clients for security
@@ -563,7 +563,7 @@ async function processFrequencyChange(
 			};
 		}
 		// Log unexpected errors but don't expose details to client
-		logger.log('Unexpected error type in frequency change processing', error);
+		logger.log('Unexpected error type in frequency switch processing', error);
 		return {
 			reasons: [
 				{
@@ -574,13 +574,13 @@ async function processFrequencyChange(
 	}
 }
 
-export const frequencyChangeHandler =
+export const frequencySwitchHandler =
 	(stage: Stage, today: dayjs.Dayjs) =>
 	async (
 		event: unknown,
 		parsed: {
 			path: { subscriptionNumber: string };
-			body: FrequencyChangeRequestBody;
+			body: FrequencySwitchRequestBody;
 		},
 	): Promise<{ statusCode: number; body: string }> => {
 		logger.mutableAddContext(parsed.path.subscriptionNumber);
@@ -626,7 +626,7 @@ export const frequencyChangeHandler =
 			);
 		} catch (error) {
 			logger.log(
-				'Failed to select candidate charge for frequency change.',
+				'Failed to select candidate charge for frequency switch.',
 				error,
 			);
 			// Only return ValidationError messages to clients for security
@@ -647,7 +647,7 @@ export const frequencyChangeHandler =
 
 		if (charge.billingPeriod === parsed.body.targetBillingPeriod) {
 			logger.log(
-				`Charge ${charge.id} already has billing period ${charge.billingPeriod}, no change needed.`,
+				`Charge ${charge.id} already has billing period ${charge.billingPeriod}, no switch needed.`,
 			);
 			return {
 				statusCode: 400,
@@ -658,7 +658,7 @@ export const frequencyChangeHandler =
 		}
 
 		const response = parsed.body.preview
-			? await previewFrequencyChange(
+			? await previewFrequencySwitch(
 					zuoraClient,
 					subscription,
 					candidateCharge,
@@ -666,7 +666,7 @@ export const frequencyChangeHandler =
 					parsed.body.targetBillingPeriod,
 					today,
 				)
-			: await executeFrequencyChange(
+			: await executeFrequencySwitch(
 					zuoraClient,
 					subscription,
 					candidateCharge,
@@ -676,7 +676,7 @@ export const frequencyChangeHandler =
 				);
 
 		const isErrorResponse =
-			frequencyChangeErrorResponseSchema.safeParse(response).success;
+			frequencySwitchErrorResponseSchema.safeParse(response).success;
 		const statusCode = isErrorResponse ? 400 : 200;
 		return { statusCode, body: JSON.stringify(response) };
 	};

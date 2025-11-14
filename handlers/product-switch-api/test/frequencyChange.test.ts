@@ -1,5 +1,5 @@
 /**
- * Unit tests for frequency change functionality.
+ * Unit tests for frequency switch functionality.
  * Tests the candidate selection logic and edge cases without external API calls.
  */
 import type { ZuoraSubscription } from '@modules/zuora/types';
@@ -39,7 +39,7 @@ function makeAccount(overrides?: {
 }
 
 /**
- * Creates a minimal mock subscription object for testing frequency changes
+ * Creates a minimal mock subscription object for testing frequency switch
  */
 function makeSubscriptionWithSingleCharge(
 	billingPeriod: 'Month' | 'Annual',
@@ -158,7 +158,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, new Date(), account),
 		).toThrow(
-			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)',
+			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency switch> (was 0 charges found)',
 		);
 	});
 
@@ -179,7 +179,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, new Date(), account),
 		).toThrow(
-			'subscription did not meet precondition <subscription has exactly one eligible charge (multiple charges cannot be safely changed)> (was 2 charges found)',
+			'subscription did not meet precondition <subscription has exactly one eligible charge (multiple charges cannot be safely switched)> (was 2 charges found)',
 		);
 	});
 
@@ -191,7 +191,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, new Date(), account),
 		).toThrow(
-			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)',
+			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency switch> (was 0 charges found)',
 		);
 	});
 
@@ -203,7 +203,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, new Date(), account),
 		).toThrow(
-			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)',
+			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency switch> (was 0 charges found)',
 		);
 	});
 
@@ -215,7 +215,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, new Date(), account),
 		).toThrow(
-			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)',
+			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency switch> (was 0 charges found)',
 		);
 	});
 
@@ -228,7 +228,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, now.toDate(), account),
 		).toThrow(
-			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)',
+			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency switch> (was 0 charges found)',
 		);
 	});
 
@@ -241,7 +241,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, now.toDate(), account),
 		).toThrow(
-			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)',
+			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency switch> (was 0 charges found)',
 		);
 	});
 
@@ -254,7 +254,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 		expect(() =>
 			selectCandidateSubscriptionCharge(subscription, now.toDate(), account),
 		).toThrow(
-			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency change> (was 0 charges found)',
+			'subscription did not meet precondition <subscription has at least one active recurring charge eligible for frequency switch> (was 0 charges found)',
 		);
 	});
 
