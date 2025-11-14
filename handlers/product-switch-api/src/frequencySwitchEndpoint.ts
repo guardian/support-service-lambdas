@@ -495,6 +495,56 @@ async function processFrequencySwitch(
 				.filter((c) => c.name === 'Contribution' && c.type === 'Recurring')
 				.reduce((total, c) => total + (c.price ?? 0), 0);
 
+			// Calculate current discount from all active Percentage discount charges
+			const activeDiscountCharges = subscription.ratePlans
+				.filter((rp) => rp.lastChangeType !== 'Remove')
+				.filter((rp) => rp.productName === 'Discounts')
+				.flatMap((rp) => rp.ratePlanCharges)
+				.filter((charge) => {
+					// Filter to active percentage discounts within the effective period
+					return (
+						charge.name === 'Percentage' &&
+						charge.type === 'Recurring' &&
+						charge.effectiveStartDate <= today.toDate() &&
+						charge.effectiveEndDate > today.toDate() &&
+						(!charge.chargedThroughDate ||
+							charge.chargedThroughDate >= today.toDate())
+					);
+				});
+
+			// Calculate the total annual discount value considering the duration of each discount
+			const currentDiscountAmount = activeDiscountCharges.reduce(
+				(total, discountCharge) => {
+					const discountPercentage = discountCharge.discountPercentage ?? 0;
+					const subscriptionPrice = currentCharge.price ?? 0;
+					
+					// Calculate discount per period (month or year)
+					const discountPerPeriod = Math.abs(
+						subscriptionPrice * (discountPercentage / 100),
+					);
+					
+					// Calculate how many periods this discount applies for
+					const discountStartDate = dayjs(discountCharge.effectiveStartDate);
+					const discountEndDate = dayjs(discountCharge.effectiveEndDate);
+					
+					let annualizedDiscountValue: number;
+					
+					if (currentBillingPeriod === 'Month') {
+						// For monthly billing, calculate months and annualize
+						const discountMonths = discountEndDate.diff(discountStartDate, 'month', true);
+						// Annual value = (discount per month) * (number of months discounted)
+						annualizedDiscountValue = discountPerPeriod * discountMonths;
+					} else {
+						// For annual billing, calculate years
+						const discountYears = discountEndDate.diff(discountStartDate, 'year', true);
+						annualizedDiscountValue = discountPerPeriod * discountYears;
+					}
+					
+					return total + annualizedDiscountValue;
+				},
+				0,
+			);
+
 			return {
 				previewInvoices: cleanedInvoices,
 				savings: {
@@ -509,6 +559,11 @@ async function processFrequencySwitch(
 				},
 				currentContribution: {
 					amount: currentContributionAmount,
+					currency,
+					period: currentBillingPeriod === 'Annual' ? 'year' : 'month',
+				},
+				currentDiscount: {
+					amount: currentDiscountAmount,
 					currency,
 					period: currentBillingPeriod === 'Annual' ? 'year' : 'month',
 				},

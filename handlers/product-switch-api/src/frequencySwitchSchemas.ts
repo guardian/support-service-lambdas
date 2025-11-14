@@ -39,6 +39,11 @@ export const frequencySwitchPreviewSuccessResponseSchema = z.object({
 		currency: z.string(),
 		period: z.enum(['year', 'month']),
 	}),
+	currentDiscount: z.object({
+		amount: z.number(),
+		currency: z.string(),
+		period: z.enum(['year', 'month']),
+	}),
 });
 
 export type FrequencySwitchPreviewSuccessResponse = z.infer<
