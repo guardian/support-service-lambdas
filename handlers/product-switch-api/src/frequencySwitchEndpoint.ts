@@ -571,7 +571,7 @@ async function processFrequencySwitch(
 					period: currentBillingPeriod === 'Annual' ? 'year' : 'month',
 				},
 				currentDiscount: {
-					amount: currentDiscountAmount,
+					amount: Math.round(currentDiscountAmount * 100) / 100,
 					currency,
 					period: 'year',
 				},
