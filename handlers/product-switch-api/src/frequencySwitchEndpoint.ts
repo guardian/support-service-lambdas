@@ -573,7 +573,7 @@ async function processFrequencySwitch(
 				currentDiscount: {
 					amount: currentDiscountAmount,
 					currency,
-					period: currentBillingPeriod === 'Annual' ? 'year' : 'month',
+					period: 'year',
 				},
 			};
 		} else {
