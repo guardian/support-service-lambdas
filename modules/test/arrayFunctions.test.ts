@@ -1,4 +1,5 @@
 import {
+	assertValueIn,
 	chunkArray,
 	groupBy,
 	groupMap,
@@ -136,5 +137,44 @@ describe('chunkArray', () => {
 			['a', 'b'],
 			['c', 'd'],
 		]);
+	});
+});
+
+describe('assertValueIn', () => {
+	test('returns value when it is in the allowed list', () => {
+		expect(assertValueIn('Month', ['Month', 'Annual'])).toBe('Month');
+		expect(assertValueIn('Annual', ['Month', 'Annual'])).toBe('Annual');
+	});
+
+	test('throws error when value is not in the allowed list', () => {
+		expect(() => assertValueIn('Quarter', ['Month', 'Annual'])).toThrow(
+			'Value "Quarter" is not one of the allowed values',
+		);
+	});
+
+	test('throws error with context when provided', () => {
+		expect(() =>
+			assertValueIn('Quarter', ['Month', 'Annual'], 'billingPeriod'),
+		).toThrow('Value "Quarter" is not one of the allowed values for billingPeriod');
+	});
+
+	test('throws error for null value', () => {
+		expect(() =>
+			assertValueIn(null, ['Month', 'Annual'], 'billingPeriod'),
+		).toThrow('Value "null" is not one of the allowed values for billingPeriod');
+	});
+
+	test('throws error for undefined value', () => {
+		expect(() =>
+			assertValueIn(undefined, ['Month', 'Annual'], 'billingPeriod'),
+		).toThrow(
+			'Value "undefined" is not one of the allowed values for billingPeriod',
+		);
+	});
+
+	test('works with string, number, and mixed literal types', () => {
+		expect(assertValueIn('success', ['success', 'error'])).toBe('success');
+		expect(assertValueIn(200, [200, 201, 400, 500])).toBe(200);
+		expect(assertValueIn('active', ['active', 1, 'inactive'])).toBe('active');
 	});
 });
