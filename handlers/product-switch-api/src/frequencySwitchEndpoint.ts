@@ -517,29 +517,37 @@ async function processFrequencySwitch(
 				(total, discountCharge) => {
 					const discountPercentage = discountCharge.discountPercentage ?? 0;
 					const subscriptionPrice = currentCharge.price ?? 0;
-					
+
 					// Calculate discount per period (month or year)
 					const discountPerPeriod = Math.abs(
 						subscriptionPrice * (discountPercentage / 100),
 					);
-					
+
 					// Calculate how many periods this discount applies for
 					const discountStartDate = dayjs(discountCharge.effectiveStartDate);
 					const discountEndDate = dayjs(discountCharge.effectiveEndDate);
-					
+
 					let annualizedDiscountValue: number;
-					
+
 					if (currentBillingPeriod === 'Month') {
 						// For monthly billing, calculate months and annualize
-						const discountMonths = discountEndDate.diff(discountStartDate, 'month', true);
+						const discountMonths = discountEndDate.diff(
+							discountStartDate,
+							'month',
+							true,
+						);
 						// Annual value = (discount per month) * (number of months discounted)
 						annualizedDiscountValue = discountPerPeriod * discountMonths;
 					} else {
 						// For annual billing, calculate years
-						const discountYears = discountEndDate.diff(discountStartDate, 'year', true);
+						const discountYears = discountEndDate.diff(
+							discountStartDate,
+							'year',
+							true,
+						);
 						annualizedDiscountValue = discountPerPeriod * discountYears;
 					}
-					
+
 					return total + annualizedDiscountValue;
 				},
 				0,
