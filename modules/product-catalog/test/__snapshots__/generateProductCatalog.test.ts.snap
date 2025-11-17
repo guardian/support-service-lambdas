@@ -64,7 +64,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
   "DigitalSubscription": {
     "active": true,
     "billingSystem": "zuora",
-    "customerFacingName": "The Guardian Digital Edition",
+    "customerFacingName": "Digital plus",
     "isDeliveryProduct": false,
     "ratePlans": {
       "Annual": {
@@ -2220,7 +2220,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
   "DigitalSubscription": {
     "active": true,
     "billingSystem": "zuora",
-    "customerFacingName": "The Guardian Digital Edition",
+    "customerFacingName": "Digital plus",
     "isDeliveryProduct": false,
     "ratePlans": {
       "Annual": {
