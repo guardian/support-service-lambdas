@@ -1,8 +1,8 @@
-import type { z } from 'zod';
-import type {
-	productCatalogSchema,
-	termTypeSchema,
-} from '@modules/product-catalog/productCatalogSchema';
+import { isInList } from '@modules/arrayFunctions';
+import { objectKeys, objectKeysNonEmpty } from '@modules/objectFunctions';
+import { z } from 'zod';
+import type { termTypeSchema } from '@modules/product-catalog/productCatalogSchema';
+import { productCatalogSchema } from '@modules/product-catalog/productCatalogSchema';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 
 type ProductBillingSystem = 'stripe' | 'zuora';
@@ -11,6 +11,9 @@ export type ProductCatalog = z.infer<typeof productCatalogSchema>;
 
 // -------- Product --------
 export type ProductKey = keyof ProductCatalog;
+export const isProductKey = isInList(
+	objectKeysNonEmpty(productCatalogSchema._def.shape()),
+);
 
 export type ZuoraProductKey = {
 	[K in ProductKey]: ProductCatalog[K]['billingSystem'] extends 'zuora'
@@ -40,11 +43,7 @@ export function requiresDeliveryInstructions(productKey: unknown): boolean {
 
 export type DeliveryProductKey = (typeof deliveryProducts)[number];
 
-export function isDeliveryProduct(
-	productKey: unknown,
-): productKey is DeliveryProductKey {
-	return deliveryProducts.includes(productKey as DeliveryProductKey);
-}
+export const isDeliveryProduct = isInList(deliveryProducts);
 
 export function isDeliveryProductPurchase(
 	productPurchase: ProductPurchase,
@@ -70,10 +69,16 @@ export type PromotionSupportedProductKey = Exclude<
 	PromotionExcludedKey
 >;
 
-export const supportsPromotions = (
-	productKey: string,
-): productKey is PromotionSupportedProductKey =>
-	!promotionExcludedKeys.includes(productKey as PromotionExcludedKey);
+function isNotInList<T extends string>(values: readonly [string, ...string[]]) {
+	return (productKey: string): productKey is T => {
+		const promotionExcludedKeysSchema = z.enum(values);
+		return !promotionExcludedKeysSchema.safeParse(productKey).success;
+	};
+}
+
+export const supportsPromotions = isNotInList<PromotionSupportedProductKey>(
+	promotionExcludedKeys,
+);
 
 // Eventually all but OneTimeContribution will come from a custom field in Zuora's Product Catalog
 const customerFacingNameMapping: Record<ProductKey, string> = {
@@ -98,8 +103,8 @@ const customerFacingNameMapping: Record<ProductKey, string> = {
 	OneTimeContribution: 'Support just once',
 };
 
-export function getCustomerFacingName(productKey: unknown): string {
-	return customerFacingNameMapping[productKey as ProductKey];
+export function getCustomerFacingName(productKey: ProductKey): string {
+	return customerFacingNameMapping[productKey];
 }
 
 export type Product<P extends ProductKey> = ProductCatalog[P];
@@ -127,17 +132,11 @@ export class ProductCatalogHelper {
 		productKey: P,
 		productRatePlanKey: PRP,
 	): ProductRatePlan<P, PRP> => {
-		const product: Product<P> = this.catalogData[productKey];
-		if (productRatePlanKey in product.ratePlans) {
-			// Use type assertion to help TypeScript understand this is safe
-			return product.ratePlans[
-				productRatePlanKey as keyof typeof product.ratePlans
-			] as ProductRatePlan<P, PRP>;
-		}
-		throw new Error(
-			'Product rate plan not found, this should never happen if the types system works',
-		);
+		const ratePlans: ProductCatalog[P]['ratePlans'] =
+			this.catalogData[productKey].ratePlans;
+		return ratePlans[productRatePlanKey];
 	};
+
 	getAllProductDetailsForBillingSystem = (
 		billingSystem: ProductBillingSystem,
 	) =>
@@ -147,15 +146,12 @@ export class ProductCatalogHelper {
 
 	getAllProductDetails = () => {
 		const stageMapping = this.catalogData;
-		const zuoraProductKeys = Object.keys(stageMapping) as Array<
-			keyof typeof stageMapping
-		>;
+		const zuoraProductKeys = objectKeysNonEmpty(stageMapping);
 		return zuoraProductKeys.flatMap((zuoraProduct) => {
 			const billingSystem = stageMapping[zuoraProduct].billingSystem;
 			const productRatePlans = stageMapping[zuoraProduct].ratePlans;
-			const productRatePlanKeys = Object.keys(productRatePlans) as Array<
-				keyof typeof productRatePlans
-			>;
+			// the type checker thinks the following is empty/never due to there being no intersection between all ratePlans
+			const productRatePlanKeys = objectKeys(productRatePlans);
 			return productRatePlanKeys.flatMap((productRatePlan) => {
 				const { id } = this.getProductRatePlan(zuoraProduct, productRatePlan);
 				return {

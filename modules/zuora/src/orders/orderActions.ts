@@ -239,8 +239,8 @@ export function buildCreateSubscriptionOrderAction({
 
 	const [initialPeriodLength, initialPeriodType, autoRenew] =
 		termType === 'Recurring'
-			? [12, 'Month', true]
-			: [
+			? ([12, 'Month', true] as const)
+			: ([
 					initialTermInDays(
 						contractEffectiveDate,
 						customerAcceptanceDate,
@@ -248,20 +248,20 @@ export function buildCreateSubscriptionOrderAction({
 					),
 					'Day',
 					false,
-				];
+				] as const);
 
 	const terms = {
 		autoRenew: autoRenew,
 		initialTerm: {
 			period: initialPeriodLength,
-			periodType: initialPeriodType as BillingPeriod,
+			periodType: initialPeriodType,
 			termType: 'TERMED' as const,
 		},
 		renewalSetting: 'RENEW_WITH_SPECIFIC_TERM' as const,
 		renewalTerms: [
 			{
 				period: termLengthInMonths,
-				periodType: 'Month' as BillingPeriod,
+				periodType: 'Month' as const,
 			},
 		],
 	};

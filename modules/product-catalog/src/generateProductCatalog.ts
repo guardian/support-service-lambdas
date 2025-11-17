@@ -6,7 +6,10 @@ import type {
 	ZuoraProductRatePlanCharge,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import { findDiscountRatePlan } from '@modules/product-catalog/generateSchema';
-import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
+import type {
+	ProductCatalog,
+	ProductKey,
+} from '@modules/product-catalog/productCatalog';
 import {
 	getCustomerFacingName,
 	isDeliveryProduct,
@@ -94,7 +97,7 @@ const getBillingPeriod = (productRatePlan: ZuoraProductRatePlan) => {
 };
 
 const getZuoraProduct = (
-	productName: string,
+	productName: ProductKey,
 	productRatePlans: ZuoraProductRatePlan[],
 	discountRatePlan: ZuoraProductRatePlan,
 ) => {
@@ -154,5 +157,6 @@ export const generateProductCatalog = (
 		...stripeProducts,
 		...result,
 	};
+	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo use zod - we're parsing zuora catalog to guardian catalog which may fail
 	return productCatalog as ProductCatalog;
 };
