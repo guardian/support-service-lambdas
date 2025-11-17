@@ -80,7 +80,7 @@ const customerFacingNameMapping: Record<ProductKey, string> = {
 	GuardianAdLite: 'Guardian Ad-Lite',
 	SupporterPlus: 'All-access digital',
 	TierThree: 'Digital + print',
-	DigitalSubscription: 'The Guardian Digital Edition',
+	DigitalSubscription: 'Digital plus',
 	HomeDelivery: 'Newspaper Home Delivery',
 	NationalDelivery: 'Newspaper Home Delivery',
 	NewspaperVoucher: 'Newspaper Voucher',
