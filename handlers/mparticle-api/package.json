@@ -22,7 +22,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@faker-js/faker": "^9.8.0",
+    "@faker-js/faker": "^10.1.0",
     "@types/aws-lambda": "^8.10.147",
     "@aws-sdk/client-s3": "^3.848.0"
   }
