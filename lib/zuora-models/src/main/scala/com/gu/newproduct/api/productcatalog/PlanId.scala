@@ -193,12 +193,12 @@ object PlanId {
   )
 
   val enabledNationalDeliveryPlans = List(
-    NationalDeliverySixday,
-    NationalDeliveryEveryday,
-    NationalDeliveryWeekend,
-    NationalDeliverySixdayPlus,
     NationalDeliveryEverydayPlus,
+    NationalDeliverySixdayPlus,
     NationalDeliveryWeekendPlus,
+    NationalDeliveryEveryday,
+    NationalDeliverySixday,
+    NationalDeliveryWeekend,
   )
 
   val enabledTierThreePlans = List(
