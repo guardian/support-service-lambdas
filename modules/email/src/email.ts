@@ -41,17 +41,17 @@ export const DataExtensionNames = {
 	discountExpiryNotificationEmail: 'discount-expiry-email',
 	stripeDisputeCancellation: 'stripe-dispute-cancellation',
 	// Day 0 thank you emails, sent by support-workers
-	supporterPlusDay0Email: 'supporter-plus',
-	recurringContributionDay0Email: 'regular-contribution-thank-you',
-	digitalSubscriptionDay0Email: 'digipack',
-	guardianAdLiteDay0Email: 'guardian-ad-lite',
-	guardianWeeklyDay0Email: 'guardian-weekly',
-	homeDeliveryObserverDay0Email: 'sunday-paper-delivery',
-	homeDeliveryDay0Email: 'paper-delivery',
-	subscriptionCardObserverDay0Email: 'sunday-paper-subscription-card',
-	subscriptionCardDay0Email: 'paper-subscription-card',
-	nationalDeliveryDay0Email: 'paper-national-delivery',
-	tierThreeDay0Email: 'tier-three',
+	supporterPlusDay0Email: 'supporter-plus', // SV_SP_WelcomeDay0
+	recurringContributionDay0Email: 'regular-contribution-thank-you', // SV_RC_WelcomeDay0
+	digitalSubscriptionDay0Email: 'digipack', // SV_DP_WelcomeDay0v2 (PROD), SV_DP_WelcomeDay0 (CODE)
+	guardianAdLiteDay0Email: 'guardian-ad-lite', // SV_CorP_WelcomeDay0
+	guardianWeeklyDay0Email: 'guardian-weekly', // SV_GW_WelcomeDay0
+	homeDeliveryObserverDay0Email: 'sunday-paper-delivery', // SV_HD_ObserverWelcomeDay0
+	homeDeliveryDay0Email: 'paper-delivery', // SV_HD_WelcomeDay0
+	subscriptionCardObserverDay0Email: 'sunday-paper-subscription-card', // SV_SC_ObserverWelcomeDay0
+	subscriptionCardDay0Email: 'paper-subscription-card', // SV_SC_WelcomeDay0
+	nationalDeliveryDay0Email: 'paper-national-delivery', // SV_ND_WelcomeDay0
+	tierThreeDay0Email: 'tier-three', // SV_T3_WelcomeDay0
 } as const;
 
 export type DataExtensionName =
