@@ -552,23 +552,6 @@
   }, {
     "label" : "Voucher",
     "plans" : [ {
-      "id" : "voucher_everyday",
-      "label" : "Everyday",
-      "startDateRules" : {
-        "daysOfWeek" : [ "Monday" ],
-        "selectableWindow" : {
-          "startDate" : "2020-03-01",
-          "sizeInDays" : 35
-        }
-      },
-      "paymentPlans" : [ {
-        "currencyCode" : "GBP",
-        "amount" : 47.62,
-        "billingPeriod" : "Monthly",
-        "description" : "GBP 47.62 every month"
-      } ],
-      "paymentPlan" : "GBP 47.62 every month"
-    }, {
       "id" : "voucher_everyday_plus",
       "label" : "Everyday+",
       "startDateRules" : {
@@ -585,57 +568,6 @@
         "description" : "GBP 51.96 every month"
       } ],
       "paymentPlan" : "GBP 51.96 every month"
-    }, {
-      "id" : "voucher_saturday",
-      "label" : "Saturday",
-      "startDateRules" : {
-        "daysOfWeek" : [ "Saturday" ],
-        "selectableWindow" : {
-          "startDate" : "2020-03-02",
-          "sizeInDays" : 35
-        }
-      },
-      "paymentPlans" : [ {
-        "currencyCode" : "GBP",
-        "amount" : 10.36,
-        "billingPeriod" : "Monthly",
-        "description" : "GBP 10.36 every month"
-      } ],
-      "paymentPlan" : "GBP 10.36 every month"
-    }, {
-      "id" : "voucher_saturday_plus",
-      "label" : "Saturday+",
-      "startDateRules" : {
-        "daysOfWeek" : [ "Saturday" ],
-        "selectableWindow" : {
-          "startDate" : "2020-03-02",
-          "sizeInDays" : 35
-        }
-      },
-      "paymentPlans" : [ {
-        "currencyCode" : "GBP",
-        "amount" : 21.62,
-        "billingPeriod" : "Monthly",
-        "description" : "GBP 21.62 every month"
-      } ],
-      "paymentPlan" : "GBP 21.62 every month"
-    }, {
-      "id" : "voucher_sixday",
-      "label" : "Sixday",
-      "startDateRules" : {
-        "daysOfWeek" : [ "Monday" ],
-        "selectableWindow" : {
-          "startDate" : "2020-03-01",
-          "sizeInDays" : 35
-        }
-      },
-      "paymentPlans" : [ {
-        "currencyCode" : "GBP",
-        "amount" : 41.12,
-        "billingPeriod" : "Monthly",
-        "description" : "GBP 41.12 every month"
-      } ],
-      "paymentPlan" : "GBP 41.12 every month"
     }, {
       "id" : "voucher_sixday_plus",
       "label" : "Sixday+",
@@ -654,22 +586,39 @@
       } ],
       "paymentPlan" : "GBP 47.62 every month"
     }, {
-      "id" : "voucher_sunday",
-      "label" : "Sunday",
+      "id" : "voucher_weekend_plus",
+      "label" : "Weekend+",
       "startDateRules" : {
-        "daysOfWeek" : [ "Sunday" ],
+        "daysOfWeek" : [ "Saturday" ],
         "selectableWindow" : {
-          "startDate" : "2020-03-03",
+          "startDate" : "2020-03-02",
           "sizeInDays" : 35
         }
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
-        "amount" : 10.79,
+        "amount" : 29.42,
         "billingPeriod" : "Monthly",
-        "description" : "GBP 10.79 every month"
+        "description" : "GBP 29.42 every month"
       } ],
-      "paymentPlan" : "GBP 10.79 every month"
+      "paymentPlan" : "GBP 29.42 every month"
+    }, {
+      "id" : "voucher_saturday_plus",
+      "label" : "Saturday+",
+      "startDateRules" : {
+        "daysOfWeek" : [ "Saturday" ],
+        "selectableWindow" : {
+          "startDate" : "2020-03-02",
+          "sizeInDays" : 35
+        }
+      },
+      "paymentPlans" : [ {
+        "currencyCode" : "GBP",
+        "amount" : 21.62,
+        "billingPeriod" : "Monthly",
+        "description" : "GBP 21.62 every month"
+      } ],
+      "paymentPlan" : "GBP 21.62 every month"
     }, {
       "id" : "voucher_sunday_plus",
       "label" : "Sunday+",
@@ -688,6 +637,40 @@
       } ],
       "paymentPlan" : "GBP 22.06 every month"
     }, {
+      "id" : "voucher_everyday",
+      "label" : "Everyday",
+      "startDateRules" : {
+        "daysOfWeek" : [ "Monday" ],
+        "selectableWindow" : {
+          "startDate" : "2020-03-01",
+          "sizeInDays" : 35
+        }
+      },
+      "paymentPlans" : [ {
+        "currencyCode" : "GBP",
+        "amount" : 47.62,
+        "billingPeriod" : "Monthly",
+        "description" : "GBP 47.62 every month"
+      } ],
+      "paymentPlan" : "GBP 47.62 every month"
+    }, {
+      "id" : "voucher_sixday",
+      "label" : "Sixday",
+      "startDateRules" : {
+        "daysOfWeek" : [ "Monday" ],
+        "selectableWindow" : {
+          "startDate" : "2020-03-01",
+          "sizeInDays" : 35
+        }
+      },
+      "paymentPlans" : [ {
+        "currencyCode" : "GBP",
+        "amount" : 41.12,
+        "billingPeriod" : "Monthly",
+        "description" : "GBP 41.12 every month"
+      } ],
+      "paymentPlan" : "GBP 41.12 every month"
+    }, {
       "id" : "voucher_weekend",
       "label" : "Weekend",
       "startDateRules" : {
@@ -705,8 +688,8 @@
       } ],
       "paymentPlan" : "GBP 20.76 every month"
     }, {
-      "id" : "voucher_weekend_plus",
-      "label" : "Weekend+",
+      "id" : "voucher_saturday",
+      "label" : "Saturday",
       "startDateRules" : {
         "daysOfWeek" : [ "Saturday" ],
         "selectableWindow" : {
@@ -716,11 +699,28 @@
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
-        "amount" : 29.42,
+        "amount" : 10.36,
         "billingPeriod" : "Monthly",
-        "description" : "GBP 29.42 every month"
+        "description" : "GBP 10.36 every month"
       } ],
-      "paymentPlan" : "GBP 29.42 every month"
+      "paymentPlan" : "GBP 10.36 every month"
+    },  {
+      "id" : "voucher_sunday",
+      "label" : "Sunday",
+      "startDateRules" : {
+        "daysOfWeek" : [ "Sunday" ],
+        "selectableWindow" : {
+          "startDate" : "2020-03-03",
+          "sizeInDays" : 35
+        }
+      },
+      "paymentPlans" : [ {
+        "currencyCode" : "GBP",
+        "amount" : 10.79,
+        "billingPeriod" : "Monthly",
+        "description" : "GBP 10.79 every month"
+      } ],
+      "paymentPlan" : "GBP 10.79 every month"
     } ]
   }, {
     "label" : "Digital + Print (Tier Three)",
