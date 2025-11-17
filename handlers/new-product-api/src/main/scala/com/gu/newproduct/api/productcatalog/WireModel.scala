@@ -215,16 +215,16 @@ object WireModel {
 
       val availableProductsAndPlans = {
         val unfiltered = List(
-          supporterPlusProduct,
           contributionProduct,
-          voucherProduct,
-          homeDeliveryProduct,
+          supporterPlusProduct,
           digipackProduct,
+          homeDeliveryProduct,
+          nationalDelivery,
+          digitalVoucher,
+          voucherProduct,
+          tierThree,
           guardianWeeklyDomestic,
           guardianWeeklyROW,
-          digitalVoucher,
-          nationalDelivery,
-          tierThree,
         )
         unfiltered.filter(_.plans.nonEmpty)
       }
