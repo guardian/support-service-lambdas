@@ -160,13 +160,13 @@ object WireModel {
       )
 
       val supporterPlusProduct = WireProduct(
-        label = "Supporter Plus",
+        label = "All Access Digital (Supporter Plus)",
         plans = PlanId.enabledSupporterPlusPlans.map(wirePlanForPlanId),
         enabledForDeliveryCountries = None,
       )
 
       val contributionProduct = WireProduct(
-        label = "Contribution",
+        label = "Support (Recurring Contribution)",
         plans = PlanId.enabledContributionPlans.map(wirePlanForPlanId),
         enabledForDeliveryCountries = None,
       )
@@ -178,7 +178,7 @@ object WireModel {
       )
 
       val digipackProduct = WireProduct(
-        label = "Digital Pack",
+        label = "Digital Plus",
         plans = PlanId.enabledDigipackPlans.map(wirePlanForPlanId),
         enabledForDeliveryCountries = None,
       )
@@ -208,7 +208,7 @@ object WireModel {
       )
 
       val tierThree = WireProduct(
-        label = "Tier Three",
+        label = "Digital + Print (Tier Three)",
         plans = PlanId.enabledTierThreePlans.map(wirePlanForPlanId),
         enabledForDeliveryCountries = Some(List(Country.UK.name)),
       )

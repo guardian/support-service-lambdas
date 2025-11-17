@@ -1,6 +1,6 @@
 {
   "products" : [ {
-    "label" : "Supporter Plus",
+    "label" : "All Access Digital (Supporter Plus)",
     "plans" : [ {
       "id" : "monthly_supporter_plus",
       "label" : "Monthly",
@@ -25,7 +25,7 @@
       "paymentPlans" : [ ]
     } ]
   }, {
-    "label" : "Contribution",
+    "label" : "Support (Recurring Contribution)",
     "plans" : [ {
       "id" : "monthly_contribution",
       "label" : "Monthly",
@@ -396,7 +396,7 @@
       "paymentPlan" : "GBP 22.22 every month"
     } ]
   }, {
-    "label" : "Digital Pack",
+    "label" : "Digital Plus",
     "plans" : [ {
       "id" : "digipack_annual",
       "label" : "Annual",
@@ -863,7 +863,7 @@
     } ],
     "enabledForDeliveryCountries" : [ "United Kingdom" ]
   }, {
-    "label" : "Tier Three",
+    "label" : "Digital + Print (Tier Three)",
     "plans" : [ {
       "id" : "tier_three_domestic_monthly",
       "label" : "Tier Three - Monthly - Domestic",
