@@ -150,16 +150,16 @@ object PlanId {
   )
 
   val enabledHomeDeliveryPlans = List(
-    HomeDeliveryEveryDay,
     HomeDeliveryEveryDayPlus,
-    HomeDeliverySaturday,
-    HomeDeliverySaturdayPlus,
-    HomeDeliverySixDay,
     HomeDeliverySixDayPlus,
-    HomeDeliverySunday,
-    HomeDeliverySundayPlus,
-    HomeDeliveryWeekend,
     HomeDeliveryWeekendPlus,
+    HomeDeliverySaturdayPlus,
+    HomeDeliverySundayPlus,
+    HomeDeliveryEveryDay,
+    HomeDeliverySixDay,
+    HomeDeliveryWeekend,
+    HomeDeliverySaturday,
+    HomeDeliverySunday,
   )
 
   val enabledDigipackPlans = List(

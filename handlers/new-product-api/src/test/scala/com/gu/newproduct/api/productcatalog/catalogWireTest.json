@@ -99,23 +99,6 @@
   }, {
     "label" : "Home Delivery",
     "plans" : [ {
-      "id" : "home_delivery_everyday",
-      "label" : "Everyday",
-      "startDateRules" : {
-        "daysOfWeek" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ],
-        "selectableWindow" : {
-          "startDate" : "2020-02-01",
-          "sizeInDays" : 28
-        }
-      },
-      "paymentPlans" : [ {
-        "currencyCode" : "GBP",
-        "amount" : 1.23,
-        "billingPeriod" : "Monthly",
-        "description" : "GBP 1.23 every month"
-      } ],
-      "paymentPlan" : "GBP 1.23 every month"
-    }, {
       "id" : "home_delivery_everyday_plus",
       "label" : "Everyday+",
       "startDateRules" : {
@@ -132,57 +115,6 @@
         "description" : "GBP 9.99 every month"
       } ],
       "paymentPlan" : "GBP 9.99 every month"
-    }, {
-      "id" : "home_delivery_saturday",
-      "label" : "Saturday",
-      "startDateRules" : {
-        "daysOfWeek" : [ "Saturday" ],
-        "selectableWindow" : {
-          "startDate" : "2020-02-03",
-          "sizeInDays" : 28
-        }
-      },
-      "paymentPlans" : [ {
-        "currencyCode" : "GBP",
-        "amount" : 4.56,
-        "billingPeriod" : "Monthly",
-        "description" : "GBP 4.56 every month"
-      } ],
-      "paymentPlan" : "GBP 4.56 every month"
-    }, {
-      "id" : "home_delivery_saturday_plus",
-      "label" : "Saturday+",
-      "startDateRules" : {
-        "daysOfWeek" : [ "Saturday" ],
-        "selectableWindow" : {
-          "startDate" : "2020-02-03",
-          "sizeInDays" : 28
-        }
-      },
-      "paymentPlans" : [ {
-        "currencyCode" : "GBP",
-        "amount" : 6.78,
-        "billingPeriod" : "Monthly",
-        "description" : "GBP 6.78 every month"
-      } ],
-      "paymentPlan" : "GBP 6.78 every month"
-    }, {
-      "id" : "home_delivery_sixday",
-      "label" : "Sixday",
-      "startDateRules" : {
-        "daysOfWeek" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" ],
-        "selectableWindow" : {
-          "startDate" : "2020-02-02",
-          "sizeInDays" : 28
-        }
-      },
-      "paymentPlans" : [ {
-        "currencyCode" : "GBP",
-        "amount" : 7.77,
-        "billingPeriod" : "Monthly",
-        "description" : "GBP 7.77 every month"
-      } ],
-      "paymentPlan" : "GBP 7.77 every month"
     }, {
       "id" : "home_delivery_sixday_plus",
       "label" : "Sixday+",
@@ -201,22 +133,39 @@
       } ],
       "paymentPlan" : "GBP 11.11 every month"
     }, {
-      "id" : "home_delivery_sunday",
-      "label" : "Sunday",
+      "id" : "home_delivery_weekend_plus",
+      "label" : "Weekend+",
       "startDateRules" : {
-        "daysOfWeek" : [ "Sunday" ],
+        "daysOfWeek" : [ "Saturday", "Sunday" ],
         "selectableWindow" : {
-          "startDate" : "2020-02-04",
+          "startDate" : "2020-02-05",
           "sizeInDays" : 28
         }
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
-        "amount" : 3.21,
+        "amount" : 22.22,
         "billingPeriod" : "Monthly",
-        "description" : "GBP 3.21 every month"
+        "description" : "GBP 22.22 every month"
       } ],
-      "paymentPlan" : "GBP 3.21 every month"
+      "paymentPlan" : "GBP 22.22 every month"
+    }, {
+      "id" : "home_delivery_saturday_plus",
+      "label" : "Saturday+",
+      "startDateRules" : {
+        "daysOfWeek" : [ "Saturday" ],
+        "selectableWindow" : {
+          "startDate" : "2020-02-03",
+          "sizeInDays" : 28
+        }
+      },
+      "paymentPlans" : [ {
+        "currencyCode" : "GBP",
+        "amount" : 6.78,
+        "billingPeriod" : "Monthly",
+        "description" : "GBP 6.78 every month"
+      } ],
+      "paymentPlan" : "GBP 6.78 every month"
     }, {
       "id" : "home_delivery_sunday_plus",
       "label" : "Sunday+",
@@ -235,6 +184,40 @@
       } ],
       "paymentPlan" : "GBP 10.10 every month"
     }, {
+      "id" : "home_delivery_everyday",
+      "label" : "Everyday",
+      "startDateRules" : {
+        "daysOfWeek" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" ],
+        "selectableWindow" : {
+          "startDate" : "2020-02-01",
+          "sizeInDays" : 28
+        }
+      },
+      "paymentPlans" : [ {
+        "currencyCode" : "GBP",
+        "amount" : 1.23,
+        "billingPeriod" : "Monthly",
+        "description" : "GBP 1.23 every month"
+      } ],
+      "paymentPlan" : "GBP 1.23 every month"
+    }, {
+      "id" : "home_delivery_sixday",
+      "label" : "Sixday",
+      "startDateRules" : {
+        "daysOfWeek" : [ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" ],
+        "selectableWindow" : {
+          "startDate" : "2020-02-02",
+          "sizeInDays" : 28
+        }
+      },
+      "paymentPlans" : [ {
+        "currencyCode" : "GBP",
+        "amount" : 7.77,
+        "billingPeriod" : "Monthly",
+        "description" : "GBP 7.77 every month"
+      } ],
+      "paymentPlan" : "GBP 7.77 every month"
+    }, {
       "id" : "home_delivery_weekend",
       "label" : "Weekend",
       "startDateRules" : {
@@ -252,22 +235,39 @@
       } ],
       "paymentPlan" : "GBP 8.88 every month"
     }, {
-      "id" : "home_delivery_weekend_plus",
-      "label" : "Weekend+",
+      "id" : "home_delivery_saturday",
+      "label" : "Saturday",
       "startDateRules" : {
-        "daysOfWeek" : [ "Saturday", "Sunday" ],
+        "daysOfWeek" : [ "Saturday" ],
         "selectableWindow" : {
-          "startDate" : "2020-02-05",
+          "startDate" : "2020-02-03",
           "sizeInDays" : 28
         }
       },
       "paymentPlans" : [ {
         "currencyCode" : "GBP",
-        "amount" : 22.22,
+        "amount" : 4.56,
         "billingPeriod" : "Monthly",
-        "description" : "GBP 22.22 every month"
+        "description" : "GBP 4.56 every month"
       } ],
-      "paymentPlan" : "GBP 22.22 every month"
+      "paymentPlan" : "GBP 4.56 every month"
+    }, {
+      "id" : "home_delivery_sunday",
+      "label" : "Sunday",
+      "startDateRules" : {
+        "daysOfWeek" : [ "Sunday" ],
+        "selectableWindow" : {
+          "startDate" : "2020-02-04",
+          "sizeInDays" : 28
+        }
+      },
+      "paymentPlans" : [ {
+        "currencyCode" : "GBP",
+        "amount" : 3.21,
+        "billingPeriod" : "Monthly",
+        "description" : "GBP 3.21 every month"
+      } ],
+      "paymentPlan" : "GBP 3.21 every month"
     } ]
   }, {
     "label" : "National Delivery",
