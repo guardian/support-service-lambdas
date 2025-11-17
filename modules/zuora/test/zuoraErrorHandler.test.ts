@@ -1,5 +1,5 @@
-import { generateZuoraError } from '@modules/zuora/errors/zuoraErrorHandler';
 import { ZuoraError } from '@modules/zuora/errors';
+import { generateZuoraError } from '@modules/zuora/errors/zuoraErrorHandler';
 
 function mockResponse(status: number, body: unknown): Response {
 	return {

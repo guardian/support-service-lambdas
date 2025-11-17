@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 import {
 	cancelSubscription,
 	getSubscription,
@@ -7,14 +6,15 @@ import {
 } from '@modules/zuora/subscription';
 import {
 	zuoraResponseSchema,
-	zuoraSubscriptionsFromAccountSchema,
 	zuoraSubscriptionResponseSchema,
+	zuoraSubscriptionsFromAccountSchema,
 } from '@modules/zuora/types';
 import type {
 	ZuoraResponse,
 	ZuoraSubscription,
 	ZuoraSubscriptionsFromAccountResponse,
 } from '@modules/zuora/types';
+import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 
 jest.mock('@modules/zuora/zuoraClient');
 
@@ -49,8 +49,8 @@ describe('subscription', () => {
 
 			// Verify the request body contains expected properties
 			const requestBody = JSON.parse(
-				(mockZuoraClient.put as jest.Mock).mock.calls[0][1],
-			);
+				(mockZuoraClient.put.mock.calls[0] as string[])[1] as string,
+			) as Record<string, string | boolean>;
 			expect(requestBody).toMatchObject({
 				cancellationEffectiveDate: '2025-08-01',
 				cancellationPolicy: 'SpecificDate',
@@ -84,8 +84,8 @@ describe('subscription', () => {
 
 			// Verify the request body contains expected properties
 			const requestBody = JSON.parse(
-				(mockZuoraClient.put as jest.Mock).mock.calls[0][1],
-			);
+				(mockZuoraClient.put.mock.calls[0] as string[])[1] as string,
+			) as Record<string, string | boolean>;
 			expect(requestBody).toMatchObject({
 				cancellationEffectiveDate: '2025-08-02',
 				cancellationPolicy: 'SpecificDate',
@@ -118,8 +118,8 @@ describe('subscription', () => {
 
 			// Verify the request body for EndOfLastInvoicePeriod
 			const requestBody = JSON.parse(
-				(mockZuoraClient.put as jest.Mock).mock.calls[0][1],
-			);
+				(mockZuoraClient.put.mock.calls[0] as string[])[1] as string,
+			) as Record<string, string | boolean>;
 			expect(requestBody).toMatchObject({
 				cancellationPolicy: 'EndOfLastInvoicePeriod',
 				runBilling: false,

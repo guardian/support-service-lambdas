@@ -1,6 +1,6 @@
-import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 import { z } from 'zod';
 import { doQuery } from '../src/query';
+import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 
 jest.mock('@modules/zuora/zuoraClient');
 

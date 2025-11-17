@@ -1,4 +1,9 @@
 import { faker } from '@faker-js/faker';
+import { handleSarStatus } from '../src/routers/baton/access/handleStatus';
+import type {
+	GUID,
+	InitiationReference,
+} from '../src/routers/baton/initiationReference';
 import type { BatonS3Writer } from '../src/services/batonS3Writer';
 import type { AppConfig } from '../src/services/config';
 import type {
@@ -13,11 +18,6 @@ import {
 	mockFetchResponse,
 	mockSetUserAttributesResponse,
 } from './mockFetch';
-import {
-	GUID,
-	InitiationReference,
-} from '../src/routers/baton/initiationReference';
-import { handleSarStatus } from '../src/routers/baton/access/handleStatus';
 
 jest.mock('../../../modules/aws/src/s3');
 
@@ -168,6 +168,7 @@ describe('mparticle-api Baton tests', () => {
 			requestId,
 		);
 
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- we want to exclude message from this check
 		const { message, ...resultWithoutMessage } = result;
 		expect(resultWithoutMessage).toEqual({
 			requestType: 'SAR',

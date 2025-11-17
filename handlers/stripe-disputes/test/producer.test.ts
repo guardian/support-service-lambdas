@@ -1,4 +1,5 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
+import { handler } from '../src/producer';
 
 const mockLogger = {
 	log: jest.fn(),
@@ -43,8 +44,6 @@ jest.mock('stripe', () => {
 jest.mock('../src/services', () => ({
 	handleStripeWebhook: jest.fn(() => jest.fn()),
 }));
-
-import { handler } from '../src/producer';
 
 describe('Producer Handler', () => {
 	const createMockApiGatewayEvent = (
@@ -210,7 +209,7 @@ describe('Producer Handler', () => {
 			const event = createMockApiGatewayEvent(
 				'/',
 				'POST',
-				null as any,
+				null as unknown as string,
 				'valid_signature',
 			);
 
@@ -258,7 +257,7 @@ describe('Producer Handler', () => {
 			);
 
 			mockStripeWebhooksConstructEvent.mockImplementation(() => {
-				throw 'String error';
+				throw new Error('String error');
 			});
 
 			const result = await handler(event);

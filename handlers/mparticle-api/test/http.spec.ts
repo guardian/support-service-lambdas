@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { faker } from '@faker-js/faker';
-
 import type { AppConfig } from '../src/services/config';
 import { invokeHttpHandler } from './invoke-http-handler';
 import { mockFetchJsonResponse, mockFetchResponse } from './mockFetch';
