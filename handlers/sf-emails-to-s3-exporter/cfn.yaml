@@ -254,7 +254,7 @@ Resources:
           Stage: !Ref Stage
           bucketName: !Sub emails-from-sf-${Stage}
           sfApiVersion: v50.0
-          JAVA_TOOL_OPTIONS: --add-opens java.base/sun.net.www.protocol.https=ALL-UNNAMED
+          JAVA_TOOL_OPTIONS: "-Djdk.httpclient.allowRestrictedHeaders=host --add-opens=java.base/sun.net.www.protocol.https=ALL-UNNAMED"
       Policies:
         - Statement:
           - Effect: Allow
