@@ -180,16 +180,16 @@ object PlanId {
   )
 
   val enabledDigitalVoucherPlans = List(
-    DigitalVoucherWeekend,
-    DigitalVoucherWeekendPlus,
-    DigitalVoucherEveryday,
     DigitalVoucherEverydayPlus,
-    DigitalVoucherSaturday,
-    DigitalVoucherSaturdayPlus,
-    DigitalVoucherSunday,
-    DigitalVoucherSundayPlus,
-    DigitalVoucherSixday,
     DigitalVoucherSixdayPlus,
+    DigitalVoucherWeekendPlus,
+    DigitalVoucherSaturdayPlus,
+    DigitalVoucherSundayPlus,
+    DigitalVoucherEveryday,
+    DigitalVoucherSixday,
+    DigitalVoucherWeekend,
+    DigitalVoucherSaturday,
+    DigitalVoucherSunday,
   )
 
   val enabledNationalDeliveryPlans = List(
