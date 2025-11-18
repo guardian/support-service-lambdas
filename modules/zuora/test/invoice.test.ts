@@ -1,29 +1,28 @@
+import dayjs from 'dayjs';
+import { z } from 'zod';
 import {
-	writeOffInvoice,
+	creditInvoice,
 	getInvoice,
 	getInvoiceItems,
-	creditInvoice,
+	writeOffInvoice,
 } from '@modules/zuora/invoice';
-import {
-	zuoraResponseSchema,
-	getInvoiceSchema,
-	getInvoiceItemsSchema,
-	invoiceItemAdjustmentResultSchema,
-	InvoiceItemAdjustmentType,
+import type {
 	InvoiceItemAdjustmentSourceType,
+	InvoiceItemAdjustmentType,
+} from '@modules/zuora/types';
+import {
+	getInvoiceItemsSchema,
+	getInvoiceSchema,
+	invoiceItemAdjustmentResultSchema,
+	zuoraResponseSchema,
 } from '@modules/zuora/types';
 import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
-import { z } from 'zod';
-import dayjs from 'dayjs';
 
 jest.mock('@modules/zuora/zuoraClient');
 jest.mock('dayjs', () => {
-	const actualDayjs = jest.requireActual('dayjs');
-	const mockedDayjs = () => ({
+	return () => ({
 		format: jest.fn(() => '2023-11-04'),
 	});
-	mockedDayjs.tz = actualDayjs.tz;
-	return mockedDayjs;
 });
 
 describe('invoice', () => {

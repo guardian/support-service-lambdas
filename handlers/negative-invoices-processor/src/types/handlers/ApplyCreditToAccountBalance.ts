@@ -1,8 +1,8 @@
-import { z } from 'zod';
+import type { z } from 'zod';
 import {
 	ApplyCreditToAccountBalanceResultSchema,
-	InvoiceSchema,
 	type InvoiceRecord,
+	InvoiceSchema,
 } from '../shared';
 
 const ApplyCreditToAccountBalanceInputSchema = InvoiceSchema;

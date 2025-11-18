@@ -11,7 +11,7 @@
     "generate": "bash src/dynamic/generate-template-list.sh",
     "test": "pnpm generate && jest",
     "type-check": "pnpm generate && tsc --noEmit",
-    "lint": "pnpm generate && eslint src/**/*.ts test/**/*.ts",
+    "lint": "pnpm generate && eslint 'src/**/*.ts' 'test/**/*.ts'",
     "check-formatting": "pnpm generate && prettier --check **.ts",
     "fix-formatting": "pnpm generate && prettier --write **.ts"
   },

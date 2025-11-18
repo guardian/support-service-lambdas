@@ -104,8 +104,8 @@ export const submitDataSubjectRequest = async (
 		// Check if this is specifically a duplicate request error before attempting fallback
 		const isDuplicateRequestError =
 			'code' in response.error &&
-			response.error?.code === 400 &&
-			response.error?.message?.includes('Subject request already exists');
+			response.error.code === 400 &&
+			response.error.message.includes('Subject request already exists');
 
 		if (isDuplicateRequestError) {
 			/**

@@ -1,9 +1,25 @@
 import { getPaymentMethods } from '@modules/zuora/paymentMethod';
 import { zuoraResponseSchema } from '@modules/zuora/types';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 describe('getPaymentMethods', () => {
 	const mockGet = jest.fn();
-	const mockZuoraClient = { get: mockGet } as any;
+
+	function buildMockZuoraClient(): jest.Mocked<ZuoraClient> {
+		return {
+			zuoraServerUrl: 'https://zuora.example',
+			tokenProvider: {
+				getToken: jest.fn().mockResolvedValue('test-token'),
+			},
+			get: mockGet,
+			post: jest.fn(),
+			put: jest.fn(),
+			delete: jest.fn(),
+			fetch: jest.fn(),
+		} as unknown as jest.Mocked<ZuoraClient>;
+	}
+
+	const mockZuoraClient = buildMockZuoraClient();
 
 	const accountId = 'test-account-id';
 	const mockResponse = { some: 'response' };

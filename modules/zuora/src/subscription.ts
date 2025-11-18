@@ -1,9 +1,9 @@
 import type { Dayjs } from 'dayjs';
-import type { ZuoraSubscription } from './types';
 import { zuoraSubscriptionResponseSchema } from './types';
 import { zuoraResponseSchema } from './types';
-import type { ZuoraResponse } from './types';
 import { zuoraSubscriptionsFromAccountSchema } from './types';
+import type { ZuoraResponse } from './types';
+import type { ZuoraSubscription } from './types';
 import type { ZuoraSubscriptionsFromAccountResponse } from './types';
 import { zuoraDateFormat } from './utils';
 import type { ZuoraClient } from './zuoraClient';
@@ -19,22 +19,24 @@ export const cancelSubscription = async (
 		| 'EndOfLastInvoicePeriod' = 'SpecificDate',
 ): Promise<ZuoraResponse> => {
 	const path = `/v1/subscriptions/${subscriptionNumber}/cancel`;
-	const requestBody: any = {
-		cancellationPolicy,
-		runBilling,
-	};
 
 	// Only include cancellationEffectiveDate for SpecificDate policy
-	if (cancellationPolicy === 'SpecificDate') {
-		requestBody.cancellationEffectiveDate = zuoraDateFormat(
-			contractEffectiveDate,
-		);
-	}
+	const cancellationEffectiveDate =
+		cancellationPolicy === 'SpecificDate'
+			? {
+					cancellationEffectiveDate: zuoraDateFormat(contractEffectiveDate),
+				}
+			: undefined;
 
 	// Only include collect if it's not undefined
-	if (collect !== undefined) {
-		requestBody.collect = collect;
-	}
+	const collectField = collect !== undefined ? { collect: collect } : undefined;
+
+	const requestBody = {
+		cancellationPolicy,
+		runBilling,
+		...cancellationEffectiveDate,
+		...collectField,
+	};
 
 	const body = JSON.stringify(requestBody);
 	return zuoraClient.put(path, body, zuoraResponseSchema, {
@@ -65,7 +67,7 @@ export const getSubscriptionsByAccountNumber = async (
 export const updateSubscription = async (
 	zuoraClient: ZuoraClient,
 	subscriptionNumber: string,
-	fields: Record<string, any>,
+	fields: Record<string, string | number | boolean>,
 ): Promise<ZuoraResponse> => {
 	const path = `v1/subscriptions/${subscriptionNumber}`;
 	const body = JSON.stringify(fields);
