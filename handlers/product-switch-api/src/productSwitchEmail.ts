@@ -53,11 +53,10 @@ export const sendThankYouEmail = async (
 	const { subscriptionNumber, currency, billingPeriod } =
 		switchInformation.subscription;
 
-	const [billingPeriodAmount, billingPeriodLength] = {
-		Month: [1, 'month'] as const,
-		Quarter: [3, 'month'] as const,
-		Annual: [12, 'month'] as const,
-		Day: [1, 'day'] as const,
+	const billingPeriodMonths: number = {
+		Month: 1,
+		Quarter: 3,
+		Annual: 12,
 	}[switchInformation.subscription.billingPeriod];
 
 	const emailMessage: EmailMessageWithUserId = buildEmailMessage(
@@ -67,7 +66,7 @@ export const sendThankYouEmail = async (
 				amount: firstPaymentAmount,
 			},
 			next: {
-				date: dayjs().add(billingPeriodAmount, billingPeriodLength),
+				date: dayjs().add(billingPeriodMonths, 'month'),
 				amount: switchInformation.actualTotalPrice,
 			},
 		},

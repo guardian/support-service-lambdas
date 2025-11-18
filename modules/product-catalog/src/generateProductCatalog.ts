@@ -15,7 +15,10 @@ import {
 	isDeliveryProduct,
 	supportsPromotions,
 } from '@modules/product-catalog/productCatalog';
-import { productKeySchema } from '@modules/product-catalog/productCatalogSchema';
+import {
+	productCatalogSchema,
+	productKeySchema,
+} from '@modules/product-catalog/productCatalogSchema';
 import { stripeProducts } from '@modules/product-catalog/stripeProducts';
 import {
 	activeProducts,
@@ -157,6 +160,5 @@ export const generateProductCatalog = (
 		...stripeProducts,
 		...result,
 	};
-	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo use zod - we're parsing zuora catalog to guardian catalog which may fail
-	return productCatalog as ProductCatalog;
+	return productCatalogSchema.parse(productCatalog);
 };
