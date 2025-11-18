@@ -39,10 +39,10 @@ export class MParticleApi extends SrStack {
 			`/${this.stage}/${this.stack}/${app}/sarResultsBucket`,
 		).stringValue;
 
-		const identityMmaSnsDeletionRequestTopicArn = new SrAppConfigKey(
-			this,
-			'IdentityMmaSnsDeletionRequestTopicArn',
-		).valueAsString;
+		// const identityMmaSnsDeletionRequestTopicArn = new SrAppConfigKey(
+		// 	this,
+		// 	'IdentityMmaSnsDeletionRequestTopicArn',
+		// ).valueAsString;
 
 		const sarS3BaseKey = 'mparticle-results/'; // this must be the same as used in the code
 
@@ -104,7 +104,8 @@ export class MParticleApi extends SrStack {
 				resources: [mmaUserDeletionLambda.inputQueue.queueArn],
 				conditions: {
 					ArnEquals: {
-						'aws:SourceArn': identityMmaSnsDeletionRequestTopicArn,
+						//'aws:SourceArn': identityMmaSnsDeletionRequestTopicArn, --- This will be uncommented when testing is complete ---
+						'aws:SourceArn': "AAAAAAAAAAAA"
 					},
 				},
 			}),
