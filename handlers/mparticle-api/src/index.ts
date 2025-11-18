@@ -1,18 +1,16 @@
+import { logger } from '@modules/routing/logger';
 import type {
 	APIGatewayProxyEvent,
 	APIGatewayProxyResult,
 	Handler,
 } from 'aws-lambda';
+import type { BatonEventRequest, BatonEventResponse } from './routers/baton';
+import { batonRerRouter } from './routers/baton';
 import { httpRouter } from './routers/http';
-import {
-	BatonEventRequest,
-	BatonEventResponse,
-	batonRerRouter,
-} from './routers/baton';
-import { AppConfig, getAppConfig, getEnv } from './services/config';
-import { MParticleClient } from './services/mparticleClient';
 import { BatonS3WriterImpl } from './services/batonS3Writer';
-import { logger } from '@modules/routing/logger';
+import type { AppConfig } from './services/config';
+import { getAppConfig, getEnv } from './services/config';
+import { MParticleClient } from './services/mparticleClient';
 
 export const handlerHttp: Handler<
 	APIGatewayProxyEvent,

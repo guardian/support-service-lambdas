@@ -1,8 +1,8 @@
+import { uploadAnEventBatch } from '../../apis/events/uploadAnEventBatch';
 import type {
 	EventsAPI,
 	MParticleClient,
 } from '../../services/mparticleClient';
-import { uploadAnEventBatch } from '../../apis/events/uploadAnEventBatch';
 
 // "If you wish to remove users from audiences or from event forwarding during the waiting period, set a user attribute
 // and apply audience criteria and/or forwarding rules to exclude them."

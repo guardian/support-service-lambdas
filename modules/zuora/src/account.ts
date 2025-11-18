@@ -1,9 +1,9 @@
 import { z } from 'zod';
-import type { ZuoraClient } from './zuoraClient';
 import { zuoraResponseSchema } from './types';
-import type { ZuoraResponse } from './types';
 import { zuoraAccountSchema } from './types';
+import type { ZuoraResponse } from './types';
 import type { ZuoraAccount } from './types';
+import type { ZuoraClient } from './zuoraClient';
 
 export const getAccount = async (
 	zuoraClient: ZuoraClient,

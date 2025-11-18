@@ -1,6 +1,6 @@
 import { zuoraResponseSchema } from '@modules/zuora/types';
 import { z } from 'zod';
-import { PaymentMethodSchema } from '.';
+import { PaymentMethodSchema } from './paymentMethod';
 
 export const RefundResponseSchema = zuoraResponseSchema.extend({
 	Id: z.string().optional(),

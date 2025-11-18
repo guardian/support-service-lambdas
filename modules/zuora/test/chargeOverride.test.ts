@@ -1,8 +1,8 @@
-import prod from '../../zuora-catalog/test/fixtures/catalog-prod.json';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
+import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 import { getChargeOverride } from '@modules/zuora/createSubscription/chargeOverride';
+import prod from '../../zuora-catalog/test/fixtures/catalog-prod.json';
 import { deliveryContact } from './fixtures/createSubscriptionFixtures';
-import { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 
 describe('getChargeOverride', () => {
 	const productCatalog = generateProductCatalog(prod);

@@ -1,18 +1,18 @@
+import { z } from 'zod';
+import type { DataSubjectRequestState } from '../../../apis/dataSubjectRequests/getStatus';
 import {
-	DataSubjectAPI,
-	MParticleClient,
-} from '../../../services/mparticleClient';
-import {
-	DataSubjectRequestState,
 	DataSubjectRequestStatus,
 	getStatusOfDataSubjectRequest,
 } from '../../../apis/dataSubjectRequests/getStatus';
-import { z } from 'zod';
+import type {
+	DataSubjectAPI,
+	MParticleClient,
+} from '../../../services/mparticleClient';
+import { InitiationReferenceSchema } from '../initiationReference';
 import {
 	BatonRerEventRequestBaseSchema,
 	BatonRerEventResponseBaseSchema,
 } from './schema';
-import { InitiationReferenceSchema } from '../initiationReference';
 
 export const BatonRerEventStatusRequestSchema =
 	BatonRerEventRequestBaseSchema.extend({

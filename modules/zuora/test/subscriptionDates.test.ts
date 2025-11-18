@@ -1,7 +1,7 @@
+import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 import dayjs from 'dayjs';
 import { getSubscriptionDates } from '@modules/zuora/createSubscription/subscriptionDates';
 import { deliveryContact } from './fixtures/createSubscriptionFixtures';
-import { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 
 describe('getSubscriptionDates', () => {
 	const now = dayjs('2024-06-01T12:00:00Z');

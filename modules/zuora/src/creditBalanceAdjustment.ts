@@ -1,6 +1,6 @@
-import { z } from 'zod';
-import type { ZuoraClient } from './zuoraClient';
+import type { z } from 'zod';
 import { zuoraResponseSchema } from './types';
+import type { ZuoraClient } from './zuoraClient';
 
 export const applyCreditToAccountBalance = async <
 	T extends z.ZodType = typeof zuoraResponseSchema,

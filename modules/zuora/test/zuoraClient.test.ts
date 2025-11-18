@@ -1,7 +1,7 @@
-import { BearerTokenProvider } from '@modules/zuora/auth';
+import { z } from 'zod';
+import type { BearerTokenProvider } from '@modules/zuora/auth';
 import { ZuoraError } from '@modules/zuora/errors';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { z } from 'zod';
 
 // Mock fetch globally
 global.fetch = jest.fn();
@@ -35,7 +35,7 @@ describe('ZuoraClient fetch method error handling', () => {
 			getBearerToken: jest
 				.fn()
 				.mockResolvedValue({ access_token: 'test_token' }),
-		} as any;
+		} as unknown as jest.Mocked<BearerTokenProvider>;
 
 		zuoraClient = new ZuoraClient('CODE', mockTokenProvider);
 	});

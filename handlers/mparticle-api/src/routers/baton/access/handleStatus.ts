@@ -1,22 +1,20 @@
+import { z } from 'zod';
+import type { DataSubjectRequestState } from '../../../apis/dataSubjectRequests/getStatus';
 import {
-	DataSubjectAPI,
-	MParticleClient,
-} from '../../../services/mparticleClient';
-import { BatonS3Writer } from '../../../services/batonS3Writer';
-import {
-	DataSubjectRequestState,
 	DataSubjectRequestStatus,
 	getStatusOfDataSubjectRequest,
 } from '../../../apis/dataSubjectRequests/getStatus';
-import { z } from 'zod';
+import type { BatonS3Writer } from '../../../services/batonS3Writer';
+import type {
+	DataSubjectAPI,
+	MParticleClient,
+} from '../../../services/mparticleClient';
+import type { InitiationReference } from '../initiationReference';
+import { InitiationReferenceSchema } from '../initiationReference';
 import {
 	BatonSarEventRequestBaseSchema,
 	BatonSarEventResponseBaseSchema,
 } from './schema';
-import {
-	InitiationReference,
-	InitiationReferenceSchema,
-} from '../initiationReference';
 
 function mapStatus(
 	requestStatus: DataSubjectRequestStatus,
