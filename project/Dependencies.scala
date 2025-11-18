@@ -90,7 +90,7 @@ object Dependencies {
   val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "2.4.0"
   val stripe = "com.stripe" % "stripe-java" % "29.1.0"
   val parallelCollections = "org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0"
-  val commonsIO = "commons-io" % "commons-io" % "2.19.0"
+  val commonsIO = "commons-io" % "commons-io" % "2.21.0"
   val jodaTime = "joda-time" % "joda-time" % "2.14.0"
   val typesafeConfig = "com.typesafe" % "config" % "1.4.3"
 
