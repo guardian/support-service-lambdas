@@ -7,7 +7,6 @@ import type {
 	DataSubjectAPI,
 	MParticleClient,
 } from '../../../services/mparticleClient';
-import type { InitiationReference } from '../initiationReference';
 import { InitiationReferenceSchema } from '../initiationReference';
 import {
 	BatonSarEventRequestBaseSchema,
@@ -55,8 +54,7 @@ export async function handleSarInitiate(
 		requestType: 'SAR' as const,
 		action: 'initiate' as const,
 		status: 'pending' as const,
-		initiationReference:
-			dataSubjectRequestSubmissionResponse.requestId as InitiationReference,
+		initiationReference: dataSubjectRequestSubmissionResponse.requestId,
 		message: `mParticle Request Id: "${dataSubjectRequestSubmissionResponse.requestId}". Expected completion time: ${dataSubjectRequestSubmissionResponse.expectedCompletionTime.toISOString()}.`,
 	};
 
