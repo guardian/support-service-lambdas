@@ -309,7 +309,10 @@ lazy val `zuora-models` = library(
   scala3Settings,
 )
   .settings(
-    libraryDependencies += "com.gu" %% "support-internationalisation" % "0.16" exclude ("com.typesafe.scala-logging", "scala-logging_2.13"),
+    libraryDependencies += "com.gu" %% "support-internationalisation" % "0.16" exclude (
+      "com.typesafe.scala-logging",
+      "scala-logging_2.13",
+    ),
   )
 
 lazy val `credit-processor` = library(
@@ -629,7 +632,10 @@ lazy val `product-move-api` = lambdaProject(
     ) exclude ("com.typesafe.scala-logging", "scala-logging_2.13"),
     awsEvents,
     awsLambda,
-    "com.softwaremill.sttp.client3" %% "zio" % sttpVersion exclude ("org.scala-lang.modules", "scala-collection-compat_2.13"),
+    "com.softwaremill.sttp.client3" %% "zio" % sttpVersion exclude (
+      "org.scala-lang.modules",
+      "scala-collection-compat_2.13",
+    ),
     awsS3,
     awsSQS,
     scalatest,
@@ -640,7 +646,10 @@ lazy val `product-move-api` = lambdaProject(
     "com.softwaremill.sttp.tapir" %% "tapir-core" % tapirVersion,
     "com.softwaremill.sttp.tapir" %% "tapir-json-zio" % tapirVersion,
     "com.softwaremill.sttp.tapir" %% "tapir-aws-lambda" % tapirVersion,
-    "com.softwaremill.sttp.tapir" %% "tapir-aws-lambda-zio" % tapirVersion exclude("com.lihaoyi", "unroll-annotation_3"),// unroll built into scala 3.7+ https://github.com/scala/scala3/pull/21693
+    "com.softwaremill.sttp.tapir" %% "tapir-aws-lambda-zio" % tapirVersion exclude (
+      "com.lihaoyi",
+      "unroll-annotation_3",
+    ), // unroll built into scala 3.7+ https://github.com/scala/scala3/pull/21693
     "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapirVersion,
     awsSecretsManager,
     upickle,
