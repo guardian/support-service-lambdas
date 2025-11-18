@@ -8,7 +8,7 @@
 		"test": "sh -c 'jest ${1:+--testPathPattern=\"$1\"}' --",
 		"test-update": "sh -c 'jest -u ${1:+--testPathPattern=\"$1\"}' --",
 		"check-formatting": "prettier --check **.ts",
-		"lint": "eslint --cache --cache-location /tmp/eslintcache/ lib/** bin/** --ext .ts --no-error-on-unmatched-pattern",
+		"lint": "eslint --cache --cache-location /tmp/eslintcache/ 'lib/**' 'bin/**'",
 		"synth": "cdk synth --path-metadata false --version-reporting false",
 		"diff": "cdk diff --path-metadata false --version-reporting false",
 		"package": "sh -c 'pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test $1 && pnpm synth' --",

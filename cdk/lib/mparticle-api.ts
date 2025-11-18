@@ -105,7 +105,7 @@ export class MParticleApi extends SrStack {
 				conditions: {
 					ArnEquals: {
 						//'aws:SourceArn': identityMmaSnsDeletionRequestTopicArn, --- This will be uncommented when testing is complete ---
-						'aws:SourceArn': "AAAAAAAAAAAA"
+						'aws:SourceArn': 'AAAAAAAAAAAA',
 					},
 				},
 			}),
