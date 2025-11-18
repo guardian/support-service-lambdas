@@ -51,11 +51,6 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
       "Default": "/CODE/support/mparticle-api/sarResultsBucket",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "appConfigIdentityMmaSnsDeletionRequestTopicArn": {
-      "Default": "/CODE/support/mparticle-api/IdentityMmaSnsDeletionRequestTopicArn",
-      "Description": "parameter to look up IdentityMmaSnsDeletionRequestTopicArn from SSM",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-    },
   },
   "Resources": {
     "BatonInvokeRoleF250FA62": {
@@ -590,9 +585,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
               "Action": "sqs:SendMessage",
               "Condition": {
                 "ArnEquals": {
-                  "aws:SourceArn": {
-                    "Ref": "appConfigIdentityMmaSnsDeletionRequestTopicArn",
-                  },
+                  "aws:SourceArn": "AAAAAAAAAAAA",
                 },
               },
               "Effect": "Allow",
@@ -1468,11 +1461,6 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
       "Default": "/PROD/support/mparticle-api/sarResultsBucket",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
-    "appConfigIdentityMmaSnsDeletionRequestTopicArn": {
-      "Default": "/PROD/support/mparticle-api/IdentityMmaSnsDeletionRequestTopicArn",
-      "Description": "parameter to look up IdentityMmaSnsDeletionRequestTopicArn from SSM",
-      "Type": "AWS::SSM::Parameter::Value<String>",
-    },
   },
   "Resources": {
     "Alarm7103F465": {
@@ -2329,9 +2317,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
               "Action": "sqs:SendMessage",
               "Condition": {
                 "ArnEquals": {
-                  "aws:SourceArn": {
-                    "Ref": "appConfigIdentityMmaSnsDeletionRequestTopicArn",
-                  },
+                  "aws:SourceArn": "AAAAAAAAAAAA",
                 },
               },
               "Effect": "Allow",
