@@ -69,16 +69,12 @@ export type PromotionSupportedProductKey = Exclude<
 	PromotionExcludedKey
 >;
 
-function isNotInList<T extends string>(values: readonly [string, ...string[]]) {
-	return (productKey: string): productKey is T => {
-		const promotionExcludedKeysSchema = z.enum(values);
-		return !promotionExcludedKeysSchema.safeParse(productKey).success;
-	};
-}
-
-export const supportsPromotions = isNotInList<PromotionSupportedProductKey>(
-	promotionExcludedKeys,
-);
+export const supportsPromotions = (
+	productKey: ProductKey,
+): productKey is PromotionSupportedProductKey => {
+	const promotionExcludedKeysSchema = z.enum(promotionExcludedKeys);
+	return !promotionExcludedKeysSchema.safeParse(productKey).success;
+};
 
 // Eventually all but OneTimeContribution will come from a custom field in Zuora's Product Catalog
 const customerFacingNameMapping: Record<ProductKey, string> = {
