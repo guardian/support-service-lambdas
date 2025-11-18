@@ -1,24 +1,19 @@
 import { randomUUID } from 'crypto';
-
-import {
+import { z } from 'zod';
+import type { DataSubjectRequestSubmission } from '../../../apis/dataSubjectRequests/submit';
+import { submitDataSubjectRequest } from '../../../apis/dataSubjectRequests/submit';
+import type {
 	DataSubjectAPI,
 	EventsAPI,
 	MParticleClient,
 } from '../../../services/mparticleClient';
 import { addErasureExclusionAttributes } from '../../shared/addErasureExclusionAttributes';
-import {
-	DataSubjectRequestSubmission,
-	submitDataSubjectRequest,
-} from '../../../apis/dataSubjectRequests/submit';
-import { z } from 'zod';
+import type { InitiationReference } from '../initiationReference';
+import { InitiationReferenceSchema } from '../initiationReference';
 import {
 	BatonRerEventRequestBaseSchema,
 	BatonRerEventResponseBaseSchema,
 } from './schema';
-import {
-	InitiationReference,
-	InitiationReferenceSchema,
-} from '../initiationReference';
 
 export const BatonRerEventInitiateRequestSchema =
 	BatonRerEventRequestBaseSchema.extend({

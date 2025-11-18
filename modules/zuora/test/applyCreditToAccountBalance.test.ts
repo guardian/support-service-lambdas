@@ -1,7 +1,7 @@
-import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
+import { z } from 'zod';
 import { applyCreditToAccountBalance } from '@modules/zuora/creditBalanceAdjustment';
 import { zuoraResponseSchema } from '@modules/zuora/types';
-import { z } from 'zod';
+import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 
 jest.mock('@modules/zuora/zuoraClient');
 

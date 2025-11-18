@@ -30,6 +30,17 @@ export const groupMap = <T, R>(
 	);
 };
 
+export const chunkArray = <T>(array: T[], chunkSize: number): T[][] => {
+	if (chunkSize <= 0) {
+		throw new Error('Chunk size must be greater than 0');
+	}
+	const result: T[][] = [];
+	for (let i = 0; i < array.length; i += chunkSize) {
+		result.push(array.slice(i, i + chunkSize));
+	}
+	return result;
+};
+
 export const mapValues = <V, O>(
 	obj: Record<string, V>,
 	fn: (v: V) => O,
@@ -38,14 +49,29 @@ export const mapValues = <V, O>(
 		Object.entries(obj).map(([key, value]) => [key, fn(value)]),
 	);
 
-export const partition = <T, U extends T>(
+export const partition = <T>(
+	array: T[],
+	predicate: (item: T) => boolean,
+): [T[], T[]] => {
+	const pass: T[] = [];
+	const fail: T[] = [];
+	for (const item of array) {
+		(predicate(item) ? pass : fail).push(item);
+	}
+	return [pass, fail];
+};
+
+export const partitionByType = <T, U extends T>(
 	arr: T[],
 	fn: (t: T) => t is U,
-): [U[], Exclude<T, U>[]] =>
-	arr.reduce<[U[], Exclude<T, U>[]]>(
+): [U[], Array<Exclude<T, U>>] =>
+	arr.reduce<[U[], Array<Exclude<T, U>>]>(
 		(acc, val) => {
-			if (fn(val)) acc[0].push(val);
-			else acc[1].push(val as Exclude<T, U>);
+			if (fn(val)) {
+				acc[0].push(val);
+			} else {
+				acc[1].push(val as Exclude<T, U>);
+			}
 			return acc;
 		},
 		[[], []],
@@ -55,9 +81,13 @@ export const sortBy = <T>(array: T[], fn: (item: T) => string): T[] => {
 	return array.sort((posGT, negGT) => {
 		const posGTKey = fn(posGT);
 		const negGTKey = fn(negGT);
-		if (posGTKey > negGTKey) return 1;
-		else if (posGTKey < negGTKey) return -1;
-		else return 0;
+		if (posGTKey > negGTKey) {
+			return 1;
+		} else if (posGTKey < negGTKey) {
+			return -1;
+		} else {
+			return 0;
+		}
 	});
 };
 
@@ -106,8 +136,11 @@ export const mapPartition = <U, T>(array: T[], fn: (t: T) => U | undefined) =>
 	array.reduce<[U[], T[]]>(
 		(acc, val) => {
 			const res = fn(val);
-			if (res) acc[0].push(res);
-			else acc[1].push(val);
+			if (res) {
+				acc[0].push(res);
+			} else {
+				acc[1].push(val);
+			}
 			return acc;
 		},
 		[[], []],

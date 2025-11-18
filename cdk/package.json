@@ -12,7 +12,8 @@
 		"synth": "cdk synth --path-metadata false --version-reporting false",
 		"diff": "cdk diff --path-metadata false --version-reporting false",
 		"package": "sh -c 'pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test $1 && pnpm synth' --",
-		"fix-formatting": "prettier --write **.ts"
+		"fix-formatting": "prettier --write **.ts",
+		"update-stack": "../update-stack.sh"
 	},
 	"devDependencies": {
 		"@guardian/cdk": "61.11.1",

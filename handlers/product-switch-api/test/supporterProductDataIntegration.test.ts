@@ -2,7 +2,8 @@
  * @group integration
  */
 
-import { sendToSupporterProductData } from '../src/supporterProductData';
+import { sendToSupporterProductData } from '@modules/supporter-product-data/supporterProductData';
+import { supporterRatePlanItemFromSwitchInformation } from '../src/supporterProductData';
 import type { SwitchInformation } from '../src/switchInformation';
 
 test('supporter product data', async () => {
@@ -45,7 +46,10 @@ test('supporter product data', async () => {
 		},
 	};
 
-	const result = await sendToSupporterProductData(switchInformation);
+	const result = await sendToSupporterProductData(
+		'CODE',
+		supporterRatePlanItemFromSwitchInformation(switchInformation),
+	);
 
 	console.log(result);
 	expect(result.$metadata.httpStatusCode).toEqual(200);

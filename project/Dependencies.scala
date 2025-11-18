@@ -6,7 +6,7 @@ import sbtassembly.PathList
 
 object Dependencies {
 
-  val awsSdkVersion = "2.32.33"
+  val awsSdkVersion = "2.37.5"
 
   val circeVersion = "0.14.13"
   val sttpVersion = "3.11.0"
@@ -41,7 +41,8 @@ object Dependencies {
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
   // GCP
-  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.43.3"
+  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.55.3"
+  val grpcNettyOverride = "io.grpc" % "grpc-netty-shaded" % "1.76.0"
 
   // Cats
   val catsCore = "org.typelevel" %% "cats-core" % catsVersion

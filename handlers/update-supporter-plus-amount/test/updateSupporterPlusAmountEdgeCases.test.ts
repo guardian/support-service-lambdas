@@ -51,7 +51,7 @@ describe('Supporter Plus Amount Update - term renewal variations', () => {
 
 			// Verify the request structure
 			expect(orderRequest.subscriptions[0]?.orderActions).toHaveLength(1);
-			expect(orderRequest.subscriptions[0]?.orderActions?.[0]?.type).toBe(
+			expect(orderRequest.subscriptions[0]?.orderActions[0]?.type).toBe(
 				'UpdateProduct',
 			);
 
@@ -82,7 +82,7 @@ describe('Supporter Plus Amount Update - term renewal variations', () => {
 			});
 
 			expect(orderRequest.subscriptions[0]?.orderActions).toHaveLength(2);
-			expect(orderRequest.subscriptions[0]?.orderActions?.[1]?.type).toBe(
+			expect(orderRequest.subscriptions[0]?.orderActions[1]?.type).toBe(
 				'RenewSubscription',
 			);
 			expect(shouldExtendTerm).toBe(true);

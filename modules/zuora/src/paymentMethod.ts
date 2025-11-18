@@ -1,4 +1,4 @@
-import z from 'zod';
+import type z from 'zod';
 import { DefaultPaymentMethodResponseSchema } from './types';
 import type { ZuoraClient } from './zuoraClient';
 

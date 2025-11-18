@@ -1,8 +1,8 @@
+import { z } from 'zod';
 import type {
 	EventsAPI,
 	MParticleClient,
 } from '../../services/mparticleClient';
-import { z } from 'zod';
 
 /**
  * Event Batch

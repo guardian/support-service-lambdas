@@ -1,6 +1,6 @@
-import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
-import { createPayment, rejectPayment } from '../src/payment';
 import dayjs from 'dayjs';
+import { createPayment, rejectPayment } from '../src/payment';
+import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 
 jest.mock('@modules/zuora/zuoraClient');
 
@@ -99,8 +99,12 @@ describe('payment', () => {
 				expect.any(Object),
 			);
 
-			const callArgs = (mockZuoraClient.post as jest.Mock).mock.calls[0];
-			const requestBody = JSON.parse(callArgs[1] as string);
+			const callArgs = mockZuoraClient.post.mock.calls[0] as string;
+			const requestBody = JSON.parse(callArgs[1] ?? '') as Record<
+				string,
+				string
+			>;
+
 			expect(requestBody.gatewayReconciliationReason).toBe(
 				'insufficient_funds',
 			);
@@ -137,8 +141,11 @@ describe('payment', () => {
 
 			await rejectPayment(mockZuoraClient, 'P-12345', 'fraud');
 
-			const callArgs = (mockZuoraClient.post as jest.Mock).mock.calls[0];
-			const requestBody = JSON.parse(callArgs[1] as string);
+			const callArgs = mockZuoraClient.post.mock.calls[0] as string;
+			const requestBody = JSON.parse(callArgs[1] ?? '') as Record<
+				string,
+				string
+			>;
 
 			expect(requestBody).toHaveProperty(
 				'gatewayReconciliationStatus',

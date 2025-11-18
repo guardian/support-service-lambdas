@@ -1,9 +1,11 @@
 import {
+	chunkArray,
 	groupBy,
 	groupMap,
 	intersection,
 	mapValues,
 	partition,
+	partitionByType,
 	sortBy,
 } from '../arrayFunctions';
 
@@ -66,8 +68,17 @@ test('mapValues should map correctly', () => {
 });
 
 test('partition should separate accordingly', () => {
+	const data = [1, 2, 3, 4, 5, 6];
+	const actual = partition(data, (item) => item < 4);
+	expect(actual).toEqual([
+		[1, 2, 3],
+		[4, 5, 6],
+	]);
+});
+
+test('partitionByType should separate accordingly', () => {
 	const data = ['hello', 12, 23, 'hello', 'world', 12];
-	const actual = partition(data, (item) => typeof item == 'number');
+	const actual = partitionByType(data, (item) => typeof item == 'number');
 	expect(actual).toEqual([
 		[12, 23, 12],
 		['hello', 'hello', 'world'],
@@ -92,5 +103,38 @@ describe('intersection', () => {
 	test('removes duplicates', () => {
 		expect(intersection([1, 2, 2, 3], [2, 3, 3])).toEqual([2, 3]);
 		expect(intersection([2, 3, 3], [1, 2, 2, 3])).toEqual([2, 3]);
+	});
+});
+
+describe('chunkArray', () => {
+	test('splits array into chunks of given size', () => {
+		expect(chunkArray([1, 2, 3, 4, 5], 2)).toEqual([[1, 2], [3, 4], [5]]);
+	});
+
+	test('returns empty array for empty input', () => {
+		expect(chunkArray([], 3)).toEqual([]);
+	});
+
+	test('returns single chunk if size >= array length', () => {
+		expect(chunkArray([1, 2], 5)).toEqual([[1, 2]]);
+	});
+
+	test('throws error if size is zero', () => {
+		expect(() => chunkArray([1, 2, 3], 0)).toThrow(
+			'Size must be greater than 0',
+		);
+	});
+
+	test('throws error if size is negative', () => {
+		expect(() => chunkArray([1, 2, 3], -1)).toThrow(
+			'Size must be greater than 0',
+		);
+	});
+
+	test('works with non-number types', () => {
+		expect(chunkArray(['a', 'b', 'c', 'd'], 2)).toEqual([
+			['a', 'b'],
+			['c', 'd'],
+		]);
 	});
 });
