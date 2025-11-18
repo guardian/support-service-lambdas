@@ -1,6 +1,6 @@
 import { logger } from '@modules/routing/logger';
 import { ZuoraError } from '@modules/zuora/errors/zuoraError';
-import { zuoraResponseSchema } from '@modules/zuora/types';
+import { zuoraSuccessSchema } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
@@ -54,7 +54,7 @@ export const removePendingUpdateAmendments = async (
 		);
 		await zuoraClient.delete(
 			`v1/object/amendment/${lastAmendment?.id}`,
-			zuoraResponseSchema,
+			zuoraSuccessSchema,
 		);
 		return await removePendingUpdateAmendments(
 			zuoraClient,
