@@ -41,7 +41,7 @@ object Dependencies {
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
   // GCP
-  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.55.3"
+  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.56.0"
   val grpcNettyOverride = "io.grpc" % "grpc-netty-shaded" % "1.76.0"
 
   // Cats
