@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { ZuoraError } from '@modules/zuora/errors/zuoraError';
 import {
 	cancelSubscription,
 	getSubscription,
@@ -222,7 +223,6 @@ describe('subscription', () => {
 
 			const mockResponse: ZuoraSubscriptionsFromAccountResponse = {
 				subscriptions: mockSubscriptions,
-				success: true,
 			};
 
 			mockZuoraClient.get = jest.fn().mockResolvedValue(mockResponse);
@@ -239,25 +239,20 @@ describe('subscription', () => {
 			expect(result).toEqual(mockSubscriptions);
 		});
 
-		it('should return empty array when no subscriptions in response', async () => {
-			const mockResponse: ZuoraSubscriptionsFromAccountResponse = {
-				success: false,
-				reasons: [
-					{
-						code: 50000040,
-						message:
-							"Cannot find entity by key: '8ad09b7d83a313110183a8769afd1bf31'.",
-					},
-				],
-			};
-			mockZuoraClient.get = jest.fn().mockResolvedValue(mockResponse);
+		it('should throw if the account number does not exist', async () => {
+			mockZuoraClient.get = jest.fn().mockImplementation(() => {
+				throw new ZuoraError(
+					"Cannot find entity by key: '8ad09b7d83a313110183a8769afd1bf31'.",
+					50000040,
+					[],
+				);
+			});
 
-			const result = await getSubscriptionsByAccountNumber(
-				mockZuoraClient,
-				'ACC-EMPTY',
+			await expect(
+				getSubscriptionsByAccountNumber(mockZuoraClient, 'ACC-EMPTY'),
+			).rejects.toThrow(
+				"Cannot find entity by key: '8ad09b7d83a313110183a8769afd1bf31'.",
 			);
-
-			expect(result).toEqual([]);
 		});
 
 		it('returns the response from zuoraClient.get', async () => {

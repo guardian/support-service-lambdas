@@ -1,8 +1,7 @@
 import type { OrderAction } from '@modules/zuora/orders/orderActions';
 import { singleTriggerDate } from '@modules/zuora/orders/orderActions';
 import type { OrderRequest } from '@modules/zuora/orders/orderRequests';
-import type { ZuoraResponse } from '@modules/zuora/types';
-import { zuoraResponseSchema } from '@modules/zuora/types';
+import { zuoraSuccessSchema } from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { Dayjs } from 'dayjs';
@@ -28,15 +27,11 @@ export const doUpdate = async ({
 		accountNumber,
 		...rest,
 	});
-	const response: ZuoraResponse = await zuoraClient.post(
+	await zuoraClient.post(
 		'/v1/orders',
 		JSON.stringify(orderRequest),
-		zuoraResponseSchema,
+		zuoraSuccessSchema,
 	);
-	if (!response.success) {
-		const errorMessage = response.reasons?.at(0)?.message;
-		throw Error(errorMessage ?? `Unknown error updating subscription`);
-	}
 };
 
 const updateAmount = (

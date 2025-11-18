@@ -1,7 +1,6 @@
 import { z } from 'zod';
-import { zuoraResponseSchema } from '../httpResponse';
 
-export const getInvoiceItemsSchema = zuoraResponseSchema.extend({
+export const getInvoiceItemsSchema = z.object({
 	invoiceItems: z.array(
 		z.object({
 			id: z.string(),

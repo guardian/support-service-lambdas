@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { zuoraResponseSchema } from '../httpResponse';
 
 // Common fields for all payment methods
 export const BasePaymentMethodSchema = z.object({
@@ -103,7 +102,7 @@ const BankTransferPaymentMethodSchema = BasePaymentMethodSchema.extend({
 });
 
 // Main payment method response schema
-export const DefaultPaymentMethodResponseSchema = zuoraResponseSchema.extend({
+export const DefaultPaymentMethodResponseSchema = z.object({
 	defaultPaymentMethodId: z.string(),
 	paymentGateway: z.string(),
 	creditcard: z.array(CreditCardPaymentMethodSchema).optional(),

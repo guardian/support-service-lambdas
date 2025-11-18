@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { zuoraResponseSchema } from '../httpResponse';
 import { zuoraSubscriptionSchema } from './subscription';
 
 export const zuoraAccountBasicInfoSchema = z
@@ -28,7 +27,7 @@ export const billingAndPaymentSchema = z.object({
 	defaultPaymentMethodId: z.string(),
 });
 
-export const zuoraAccountSchema = zuoraResponseSchema.extend({
+export const zuoraAccountSchema = z.object({
 	basicInfo: zuoraAccountBasicInfoSchema,
 	billingAndPayment: billingAndPaymentSchema,
 	billToContact: billToContactSchema,
@@ -37,7 +36,7 @@ export const zuoraAccountSchema = zuoraResponseSchema.extend({
 
 export type ZuoraAccount = z.infer<typeof zuoraAccountSchema>;
 
-export const zuoraSubscriptionsFromAccountSchema = zuoraResponseSchema.extend({
+export const zuoraSubscriptionsFromAccountSchema = z.object({
 	subscriptions: z.array(zuoraSubscriptionSchema).optional(),
 });
 

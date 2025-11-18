@@ -279,7 +279,7 @@ describe('product-switching behaviour', () => {
 				'8ad08e1a858672180185880566606fad',
 			);
 
-			expect(response.Success).toBe(true);
+			expect(response.Id).toBeDefined();
 		},
 		1000 * 60,
 	);
