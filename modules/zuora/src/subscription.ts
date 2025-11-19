@@ -4,7 +4,7 @@ import type {
 	ZuoraSubscriptionsFromAccountResponse,
 } from './types';
 import {
-	zuoraLowerCaseSuccessSchema,
+	voidSchema,
 	zuoraSubscriptionSchema,
 	zuoraSubscriptionsFromAccountSchema,
 } from './types';
@@ -42,7 +42,7 @@ export const cancelSubscription = async (
 	};
 
 	const body = JSON.stringify(requestBody);
-	await zuoraClient.put(path, body, zuoraLowerCaseSuccessSchema, {
+	await zuoraClient.put(path, body, voidSchema, {
 		'zuora-version': '211.0',
 	});
 };
@@ -74,5 +74,5 @@ export const updateSubscription = async (
 ): Promise<void> => {
 	const path = `v1/subscriptions/${subscriptionNumber}`;
 	const body = JSON.stringify(fields);
-	await zuoraClient.put(path, body, zuoraLowerCaseSuccessSchema);
+	await zuoraClient.put(path, body, voidSchema);
 };

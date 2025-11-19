@@ -1,6 +1,6 @@
 import type { Dayjs } from 'dayjs';
 import type { AddDiscountPreview } from './types';
-import { addDiscountPreviewSchema, zuoraLowerCaseSuccessSchema } from './types';
+import { addDiscountPreviewSchema, voidSchema } from './types';
 import { zuoraDateFormat } from './utils';
 import type { ZuoraClient } from './zuoraClient';
 
@@ -32,7 +32,7 @@ export const addDiscount = async (
 		],
 		...newTermLengthIfRequired,
 	});
-	await zuoraClient.put(path, body, zuoraLowerCaseSuccessSchema);
+	await zuoraClient.put(path, body, voidSchema);
 };
 
 export const getNewTermLengthIfRequired = (

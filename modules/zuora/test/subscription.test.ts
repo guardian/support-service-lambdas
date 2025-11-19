@@ -11,7 +11,7 @@ import type {
 	ZuoraSubscriptionsFromAccountResponse,
 } from '@modules/zuora/types';
 import {
-	zuoraLowerCaseSuccessSchema,
+	voidSchema,
 	zuoraSubscriptionSchema,
 	zuoraSubscriptionsFromAccountSchema,
 } from '@modules/zuora/types';
@@ -44,7 +44,7 @@ describe('subscription', () => {
 			expect(mockZuoraClient.put).toHaveBeenCalledWith(
 				'/v1/subscriptions/SUB-12345/cancel',
 				expect.stringContaining('"cancellationEffectiveDate":"2025-08-01"'),
-				zuoraLowerCaseSuccessSchema,
+				voidSchema,
 				{ 'zuora-version': '211.0' },
 			);
 
@@ -78,7 +78,7 @@ describe('subscription', () => {
 			expect(mockZuoraClient.put).toHaveBeenCalledWith(
 				'/v1/subscriptions/SUB-12345/cancel',
 				expect.stringContaining('"cancellationEffectiveDate":"2025-08-02"'),
-				zuoraLowerCaseSuccessSchema,
+				voidSchema,
 				{ 'zuora-version': '211.0' },
 			);
 
@@ -112,7 +112,7 @@ describe('subscription', () => {
 			expect(mockZuoraClient.put).toHaveBeenCalledWith(
 				'/v1/subscriptions/SUB-12345/cancel',
 				expect.not.stringContaining('cancellationEffectiveDate'),
-				zuoraLowerCaseSuccessSchema,
+				voidSchema,
 				{ 'zuora-version': '211.0' },
 			);
 

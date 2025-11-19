@@ -1,5 +1,5 @@
 import { stageFromEnvironment } from '@modules/stage';
-import { zuoraLowerCaseSuccessSchema } from '@modules/zuora/types';
+import { voidSchema } from '@modules/zuora/types';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 export async function updateBillingAccountInZuora(
@@ -15,5 +15,5 @@ export async function updateBillingAccountInZuora(
 		crmId: '',
 	});
 
-	await zuoraClient.put(path, body, zuoraLowerCaseSuccessSchema);
+	await zuoraClient.put(path, body, voidSchema);
 }

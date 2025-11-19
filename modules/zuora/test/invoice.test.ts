@@ -9,11 +9,11 @@ import type {
 	InvoiceItemAdjustmentSourceType,
 	InvoiceItemAdjustmentType,
 } from '@modules/zuora/types';
-import { zuoraLowerCaseSuccessSchema } from '@modules/zuora/types';
 import {
 	getInvoiceItemsSchema,
 	getInvoiceSchema,
 	invoiceItemAdjustmentResultSchema,
+	voidSchema,
 } from '@modules/zuora/types';
 import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 
@@ -109,7 +109,7 @@ describe('invoice', () => {
 					memoDate: '2023-11-04',
 					reasonCode: 'Write-off',
 				}),
-				zuoraLowerCaseSuccessSchema,
+				voidSchema,
 			);
 		});
 
@@ -126,7 +126,7 @@ describe('invoice', () => {
 			expect(mockZuoraClient.put).toHaveBeenCalledWith(
 				'/v1/invoices/8a8082c17f2b9b24017f2b9b3b4e0015/write-off',
 				expect.any(String),
-				zuoraLowerCaseSuccessSchema,
+				voidSchema,
 			);
 		});
 

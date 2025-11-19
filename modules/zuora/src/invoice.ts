@@ -12,7 +12,7 @@ import {
 	getInvoiceItemsSchema,
 	getInvoiceSchema,
 	invoiceItemAdjustmentResultSchema,
-	zuoraLowerCaseSuccessSchema,
+	voidSchema,
 } from './types';
 import { zuoraDateFormat } from './utils';
 
@@ -75,5 +75,5 @@ export const writeOffInvoice = async (
 		memoDate: dayjs().format('YYYY-MM-DD'),
 		reasonCode: 'Write-off',
 	});
-	await zuoraClient.put(path, body, zuoraLowerCaseSuccessSchema);
+	await zuoraClient.put(path, body, voidSchema);
 };

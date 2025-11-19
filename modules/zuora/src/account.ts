@@ -1,5 +1,5 @@
 import type { ZuoraAccount } from './types';
-import { zuoraAccountSchema, zuoraLowerCaseSuccessSchema } from './types';
+import { voidSchema, zuoraAccountSchema } from './types';
 import type { ZuoraClient } from './zuoraClient';
 
 export const getAccount = async (
@@ -15,7 +15,7 @@ export const deleteAccount = async (
 	accountNumber: string,
 ): Promise<void> => {
 	const path = `/v1/accounts/${accountNumber}`;
-	await zuoraClient.delete(path, zuoraLowerCaseSuccessSchema);
+	await zuoraClient.delete(path, voidSchema);
 };
 
 export const updateAccount = async (
@@ -28,5 +28,5 @@ export const updateAccount = async (
 ): Promise<void> => {
 	const path = `/v1/accounts/${accountNumber}`;
 	const body = JSON.stringify(payload);
-	await zuoraClient.put(path, body, zuoraLowerCaseSuccessSchema);
+	await zuoraClient.put(path, body, voidSchema);
 };

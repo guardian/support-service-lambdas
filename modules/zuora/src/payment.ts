@@ -1,8 +1,5 @@
 import type { Dayjs } from 'dayjs';
-import {
-	zuoraLowerCaseSuccessSchema,
-	zuoraUpperCaseSuccessSchema,
-} from './types';
+import { voidSchema } from './types';
 import { zuoraDateFormat } from './utils';
 import type { ZuoraClient } from './zuoraClient';
 
@@ -30,7 +27,7 @@ export const createPayment = async (
 			Type: 'Electronic',
 			Status: 'Processed',
 		}),
-		zuoraUpperCaseSuccessSchema,
+		voidSchema,
 	);
 };
 
@@ -50,5 +47,5 @@ export const rejectPayment = async (
 		gatewayResponseCode: '4855',
 	});
 
-	await zuoraClient.post(path, body, zuoraLowerCaseSuccessSchema);
+	await zuoraClient.post(path, body, voidSchema);
 };
