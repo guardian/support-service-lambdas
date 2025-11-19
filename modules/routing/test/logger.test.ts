@@ -176,6 +176,32 @@ describe('Logger.joinLines', () => {
 		expect(actual).toEqual(`msg`);
 	});
 
+	test('should pretty print errors correctly', () => {
+		const logger = new Logger();
+		const error = new Error('Test error', {
+			cause: new MyError('another error'),
+		});
+
+		const actual = logger.prettyPrint(error);
+
+		const actualWithoutStackLines = actual
+			.split('\n')
+			.filter((s) => !s.startsWith('    at'));
+		expect(actualWithoutStackLines).toEqual([
+			'Error: Test error',
+			'{ }',
+			'Caused by: MyError: my error',
+			'{ custom: "another error", name: "MyError" }',
+		]);
+	});
+
+	class MyError extends Error {
+		constructor(public custom: string) {
+			super('my error');
+			this.name = 'MyError';
+		}
+	}
+
 	test('should join primitive types, arrays, objects, and errors with compact or pretty JSON formatting without quotes around keys', () => {
 		const logger = new Logger();
 		const primitives = [42, 'hello', true, null, undefined];
@@ -204,8 +230,9 @@ describe('Logger.joinLines', () => {
 			s: 'i',
 			t: 'h',
 		};
-		const error = new Error('Test error');
-		error.cause = 'john john';
+		const error = new Error('Test error', {
+			cause: new MyError('another error'),
+		});
 
 		const result = [
 			...primitives,
@@ -277,7 +304,9 @@ describe('Logger.joinLines', () => {
   t: "h"
 }
 ${error.stack}
-{ cause: "john john" }`,
+{ }
+Caused by: ${(error.cause as Error).stack}
+{ custom: "another error", name: "MyError" }`,
 		);
 	});
 });
