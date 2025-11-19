@@ -5,16 +5,16 @@ import {
 	getSubscription,
 	getSubscriptionsByAccountNumber,
 } from '@modules/zuora/subscription';
-import {
-	zuoraResponseSchema,
-	zuoraSubscriptionResponseSchema,
-	zuoraSubscriptionsFromAccountSchema,
-} from '@modules/zuora/types';
 import type {
 	ZuoraResponse,
 	ZuoraSubscription,
 	ZuoraSubscriptionsFromAccountResponse,
 } from '@modules/zuora/types';
+import {
+	zuoraLowerCaseSuccessSchema,
+	zuoraSubscriptionSchema,
+} from '@modules/zuora/types';
+import { zuoraSubscriptionsFromAccountSchema } from '@modules/zuora/types';
 import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 
 jest.mock('@modules/zuora/zuoraClient');
@@ -44,7 +44,7 @@ describe('subscription', () => {
 			expect(mockZuoraClient.put).toHaveBeenCalledWith(
 				'/v1/subscriptions/SUB-12345/cancel',
 				expect.stringContaining('"cancellationEffectiveDate":"2025-08-01"'),
-				zuoraResponseSchema,
+				zuoraLowerCaseSuccessSchema,
 				{ 'zuora-version': '211.0' },
 			);
 
@@ -79,7 +79,7 @@ describe('subscription', () => {
 			expect(mockZuoraClient.put).toHaveBeenCalledWith(
 				'/v1/subscriptions/SUB-12345/cancel',
 				expect.stringContaining('"cancellationEffectiveDate":"2025-08-02"'),
-				zuoraResponseSchema,
+				zuoraLowerCaseSuccessSchema,
 				{ 'zuora-version': '211.0' },
 			);
 
@@ -113,7 +113,7 @@ describe('subscription', () => {
 			expect(mockZuoraClient.put).toHaveBeenCalledWith(
 				'/v1/subscriptions/SUB-12345/cancel',
 				expect.not.stringContaining('cancellationEffectiveDate'),
-				zuoraResponseSchema,
+				zuoraLowerCaseSuccessSchema,
 				{ 'zuora-version': '211.0' },
 			);
 
@@ -171,7 +171,7 @@ describe('subscription', () => {
 
 			expect(mockZuoraClient.get).toHaveBeenCalledWith(
 				'v1/subscriptions/SUB-12345',
-				zuoraSubscriptionResponseSchema,
+				zuoraSubscriptionSchema,
 			);
 			expect(result).toEqual(mockSubscription);
 		});

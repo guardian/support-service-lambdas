@@ -1,10 +1,14 @@
 import type { Dayjs } from 'dayjs';
-import { zuoraSubscriptionResponseSchema } from './types';
-import { zuoraResponseSchema } from './types';
-import { zuoraSubscriptionsFromAccountSchema } from './types';
-import type { ZuoraResponse } from './types';
-import type { ZuoraSubscription } from './types';
-import type { ZuoraSubscriptionsFromAccountResponse } from './types';
+import type {
+	ZuoraResponse,
+	ZuoraSubscription,
+	ZuoraSubscriptionsFromAccountResponse,
+} from './types';
+import {
+	zuoraLowerCaseSuccessSchema,
+	zuoraSubscriptionSchema,
+	zuoraSubscriptionsFromAccountSchema,
+} from './types';
 import { zuoraDateFormat } from './utils';
 import type { ZuoraClient } from './zuoraClient';
 
@@ -39,7 +43,7 @@ export const cancelSubscription = async (
 	};
 
 	const body = JSON.stringify(requestBody);
-	return zuoraClient.put(path, body, zuoraResponseSchema, {
+	return zuoraClient.put(path, body, zuoraLowerCaseSuccessSchema, {
 		'zuora-version': '211.0',
 	});
 };
@@ -49,7 +53,7 @@ export const getSubscription = async (
 	subscriptionNumber: string,
 ): Promise<ZuoraSubscription> => {
 	const path = `v1/subscriptions/${subscriptionNumber}`;
-	return zuoraClient.get(path, zuoraSubscriptionResponseSchema);
+	return zuoraClient.get(path, zuoraSubscriptionSchema);
 };
 
 export const getSubscriptionsByAccountNumber = async (
@@ -71,5 +75,5 @@ export const updateSubscription = async (
 ): Promise<ZuoraResponse> => {
 	const path = `v1/subscriptions/${subscriptionNumber}`;
 	const body = JSON.stringify(fields);
-	return zuoraClient.put(path, body, zuoraResponseSchema);
+	return zuoraClient.put(path, body, zuoraLowerCaseSuccessSchema);
 };
