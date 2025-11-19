@@ -46,11 +46,11 @@ export function zipRouteWithEventPath(
 	routeParts: string[],
 	eventParts: string[],
 ) {
-	const lastRoutePart: string | undefined = routeParts[routeParts.length - 1]!;
+	const lastRoutePart: string | undefined = routeParts[routeParts.length - 1];
 	const routeIsGreedy = lastRoutePart?.endsWith('+}');
 	let adjustedEventParts;
 	let adjustedRouteParts;
-	if (routeIsGreedy && routeParts.length < eventParts.length) {
+	if (lastRoutePart && routeIsGreedy && routeParts.length < eventParts.length) {
 		const excessParts = eventParts.slice(routeParts.length - 1);
 		const joinedGreedyValue = excessParts.join('/');
 		adjustedEventParts = [
@@ -86,7 +86,7 @@ function matchPath(
 	const [matchers, literals] = mapPartition(
 		routeEventPairs,
 		([routePart, eventPart]) => {
-			const maybeParamName = routePart.match(/^\{([^+}]*)\+?}$/)?.[1];
+			const maybeParamName = routePart.match(/^\{(.*)}$/)?.[1];
 			return maybeParamName
 				? ([maybeParamName, eventPart] as const)
 				: undefined;

@@ -137,11 +137,12 @@ describe('RestClient', () => {
 			const schema = z.object({ id: z.string() });
 
 			const errorBody = { error: 'Not found' };
+			const headers: Record<string, string> = { 'x-request-id': 'abc123' };
 			mockFetchResponse({
 				ok: false,
 				status: 404,
 				body: errorBody,
-				headers: { 'x-request-id': 'abc123' },
+				headers: headers,
 			});
 
 			await expect(client.get('/users/999', schema)).rejects.toMatchObject({
@@ -149,6 +150,7 @@ describe('RestClient', () => {
 				message: 'http call failed',
 				statusCode: 404,
 				body: JSON.stringify(errorBody),
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- any is ok in a test
 				headers: expect.objectContaining({ 'x-request-id': 'abc123' }),
 			});
 		});
