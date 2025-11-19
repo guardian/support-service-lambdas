@@ -39,6 +39,38 @@ export const NotFoundResponse = {
 	statusCode: 404,
 };
 
+/**
+ * if routeParts ends with a greedy `+`, batch together the last eventsParts accordingly
+ */
+export function zipRouteWithEventPath(
+	routeParts: string[],
+	eventParts: string[],
+) {
+	const lastRoutePart: string | undefined = routeParts[routeParts.length - 1];
+	const routeIsGreedy = lastRoutePart?.endsWith('+}');
+	let adjustedEventParts;
+	let adjustedRouteParts;
+	if (lastRoutePart && routeIsGreedy && routeParts.length < eventParts.length) {
+		const excessParts = eventParts.slice(routeParts.length - 1);
+		const joinedGreedyValue = excessParts.join('/');
+		adjustedEventParts = [
+			...eventParts.slice(0, routeParts.length - 1),
+			joinedGreedyValue,
+		];
+		const adjustedLastRoutePart = lastRoutePart.replace(/\+}/, '}');
+		adjustedRouteParts = [
+			...routeParts.slice(0, routeParts.length - 1),
+			adjustedLastRoutePart,
+		];
+	} else if (routeParts.length === eventParts.length) {
+		adjustedEventParts = eventParts;
+		adjustedRouteParts = routeParts;
+	} else {
+		return undefined;
+	}
+	return zipAll(adjustedRouteParts, adjustedEventParts, '', '');
+}
+
 function matchPath(
 	routePath: string,
 	eventPath: string,
@@ -46,29 +78,15 @@ function matchPath(
 	const routeParts = routePath.split('/').filter(Boolean);
 	const eventParts = eventPath.split('/').filter(Boolean);
 
-	const lastRoutePart = routeParts[routeParts.length - 1]!;
-	const routeIsGreedy = lastRoutePart.endsWith('+}');
-	let adjustedEventParts: string[];
-	if (routeIsGreedy && routeParts.length < eventParts.length) {
-		const excessParts = eventParts.slice(routeParts.length - 1);
-		const joinedGreedyValue = excessParts.join('/');
-		adjustedEventParts = [
-			...eventParts.slice(0, routeParts.length - 1),
-			joinedGreedyValue,
-		];
-	} else {
-		adjustedEventParts = eventParts;
-	}
-
-	if (routeParts.length !== adjustedEventParts.length) {
+	const routeEventPairs = zipRouteWithEventPath(routeParts, eventParts);
+	if (routeEventPairs === undefined) {
 		return undefined;
 	}
 
-	const routeEventPairs = zipAll(routeParts, adjustedEventParts, '', '');
 	const [matchers, literals] = mapPartition(
 		routeEventPairs,
 		([routePart, eventPart]) => {
-			const maybeParamName = routePart.match(/^\{([^+}]*)\+?}$/)?.[1];
+			const maybeParamName = routePart.match(/^\{(.*)}$/)?.[1];
 			return maybeParamName
 				? ([maybeParamName, eventPart] as const)
 				: undefined;

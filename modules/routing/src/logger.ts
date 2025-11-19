@@ -80,7 +80,12 @@ export class Logger {
 			return String(value);
 		}
 		if (value instanceof Error) {
-			return (value.stack ?? '') + '\n' + this.objectToPrettyString(value);
+			return (
+				(value.stack ?? '') +
+				'\n' +
+				this.objectToPrettyString(value) +
+				(value.cause ? '\nCaused by: ' + this.prettyPrint(value.cause) : '')
+			);
 		}
 		if (typeof value === 'object' || Array.isArray(value)) {
 			return this.objectToPrettyString(value);
@@ -88,7 +93,7 @@ export class Logger {
 		return String(value);
 	};
 
-	private objectToPrettyString(object: any) {
+	private objectToPrettyString(object: unknown) {
 		try {
 			const jsonString = JSON.stringify(object)
 				.replace(/"([^"]+)":/g, ' $1: ') // Remove quotes around keys
@@ -97,7 +102,8 @@ export class Logger {
 				return jsonString;
 			}
 			return JSON.stringify(object, null, 2).replace(/"([^"]+)":/g, '$1:');
-		} catch {
+		} catch (e) {
+			console.error('caught error when trying to serialise log line', e);
 			return String(object);
 		}
 	}
