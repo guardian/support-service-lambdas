@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import type { InitiationReference } from '../../routers/baton/initiationReference';
+import { InitiationReferenceSchema } from '../../routers/baton/initiationReference';
 import type {
 	DataSubjectAPI,
 	MParticleClient,
@@ -37,7 +39,7 @@ export interface DataSubjectRequestSubmission {
 	/**
 	 * The controller-provided identifier of the request in a GUID v4 format.
 	 */
-	requestId: string;
+	requestId: InitiationReference;
 
 	/**
 	 * A unique ID representing the data controller. mParticles sets this to the workspace ID.
@@ -47,7 +49,7 @@ export interface DataSubjectRequestSubmission {
 
 const schema = z.object({
 	expected_completion_time: z.string().transform((val) => new Date(val)),
-	subject_request_id: z.string(),
+	subject_request_id: InitiationReferenceSchema,
 	controller_id: z.string(),
 });
 

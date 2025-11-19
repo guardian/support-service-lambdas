@@ -10,6 +10,6 @@ export const applyCreditToAccountBalance = async <
 	schema?: T,
 ): Promise<z.infer<T>> => {
 	const path = `/v1/object/credit-balance-adjustment`;
-	const finalSchema = (schema ?? zuoraResponseSchema) as T;
+	const finalSchema = schema ?? zuoraResponseSchema;
 	return zuoraClient.post(path, body, finalSchema);
 };

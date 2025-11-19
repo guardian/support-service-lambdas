@@ -32,6 +32,7 @@ export const handler: Handler = async (event: SQSEvent) => {
 				await fetchSubscriptionAndDoUpdate(
 					stage,
 					config,
+					// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo use zod
 					JSON.parse(record.body) as InputEvent,
 				),
 		),

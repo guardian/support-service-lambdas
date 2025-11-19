@@ -77,6 +77,6 @@ export const writeOffInvoice = async <
 		memoDate: dayjs().format('YYYY-MM-DD'),
 		reasonCode: 'Write-off',
 	});
-	const finalSchema = (schema ?? zuoraResponseSchema) as T;
+	const finalSchema = schema ?? zuoraResponseSchema;
 	return zuoraClient.put(path, body, finalSchema);
 };

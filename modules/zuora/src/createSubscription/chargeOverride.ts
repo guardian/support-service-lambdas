@@ -1,5 +1,7 @@
 import { ValidationError } from '@modules/errors';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
+import { getIfDefined } from '@modules/nullAndUndefined';
+import { objectEntries } from '@modules/objectFunctions';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 import { getProductRatePlan } from '@modules/zuora/createSubscription/getProductRatePlan';
@@ -50,11 +52,10 @@ function getBaseProductPrice(
 	productPurchase: ProductPurchase,
 	currency: IsoCurrency,
 ) {
-	const productRatePlan = getProductRatePlan(productCatalog, productPurchase);
-	if (!(currency in productRatePlan.pricing)) {
-		throw new ValidationError(`Currency ${currency} not supported in pricing`);
-	}
-	return productRatePlan.pricing[
-		currency as keyof typeof productRatePlan.pricing
-	];
+	return getIfDefined(
+		objectEntries(
+			getProductRatePlan(productCatalog, productPurchase).pricing,
+		).find(([ratePlanCurrency]) => ratePlanCurrency === currency),
+		`Currency ${currency} not supported in pricing`,
+	)[1];
 }
