@@ -11405,11 +11405,21 @@
               "model": "FlatFee",
               "uom": null,
               "pricingSummary": [
-                "GBP5"
+                "GBP5",
+                "EUR5"
               ],
               "pricing": [
                 {
                   "currency": "GBP",
+                  "price": 5,
+                  "tiers": null,
+                  "includedUnits": null,
+                  "overagePrice": null,
+                  "discountPercentage": null,
+                  "discountAmount": null
+                },
+                {
+                  "currency": "EUR",
                   "price": 5,
                   "tiers": null,
                   "includedUnits": null,
