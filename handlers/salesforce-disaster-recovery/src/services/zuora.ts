@@ -83,17 +83,23 @@ export const updateZuoraAccount = async ({
 		return {
 			...accountRow,
 			Success: response.success,
-			Errors:
-				response.reasons?.map((reason) => ({
-					Message: reason.message,
-					Code: String(reason.code),
-				})) ?? [],
+			Errors: [],
 		};
 	} catch (error) {
 		console.error(error);
 
-		if (error instanceof ZuoraError && error.code === 429) {
-			throw error;
+		if (error instanceof ZuoraError) {
+			if (error.code === 429) {
+				throw error;
+			}
+			return {
+				...accountRow,
+				Success: false,
+				Errors: error.zuoraErrorDetails.map((reason) => ({
+					Message: reason.message,
+					Code: String(reason.code),
+				})),
+			};
 		}
 
 		return {

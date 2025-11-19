@@ -1,8 +1,6 @@
 import type { Dayjs } from 'dayjs';
-import { zuoraResponseSchema } from './types';
-import { addDiscountPreviewSchema } from './types';
-import type { ZuoraResponse } from './types';
 import type { AddDiscountPreview } from './types';
+import { addDiscountPreviewSchema, zuoraLowerCaseSuccessSchema } from './types';
 import { zuoraDateFormat } from './utils';
 import type { ZuoraClient } from './zuoraClient';
 
@@ -13,7 +11,7 @@ export const addDiscount = async (
 	termEndDate: Dayjs,
 	contractEffectiveDate: Dayjs,
 	discountProductRatePlanId: string,
-): Promise<ZuoraResponse> => {
+): Promise<void> => {
 	// If the next billing date is outside the current term, we will need to extend it as you can't add a rate plan
 	// after the end of the current term. As digital subscriptions have their customer acceptance date (when first
 	// payment is taken therefore billing date) 14 days after the contract effective date (acquisition date/when the
@@ -34,7 +32,7 @@ export const addDiscount = async (
 		],
 		...newTermLengthIfRequired,
 	});
-	return zuoraClient.put(path, body, zuoraResponseSchema);
+	await zuoraClient.put(path, body, zuoraLowerCaseSuccessSchema);
 };
 
 export const getNewTermLengthIfRequired = (

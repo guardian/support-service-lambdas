@@ -1,8 +1,5 @@
-import { z } from 'zod';
-import { zuoraResponseSchema } from './types';
-import { zuoraAccountSchema } from './types';
-import type { ZuoraResponse } from './types';
-import type { ZuoraAccount } from './types';
+import type { ZuoraAccount, ZuoraLowerCaseSuccess } from './types';
+import { zuoraAccountSchema, zuoraLowerCaseSuccessSchema } from './types';
 import type { ZuoraClient } from './zuoraClient';
 
 export const getAccount = async (
@@ -16,19 +13,10 @@ export const getAccount = async (
 export const deleteAccount = async (
 	zuoraClient: ZuoraClient,
 	accountNumber: string,
-): Promise<ZuoraResponse> => {
+): Promise<ZuoraLowerCaseSuccess> => {
 	const path = `/v1/accounts/${accountNumber}`;
-	return zuoraClient.delete(path, zuoraResponseSchema);
+	return zuoraClient.delete(path, zuoraLowerCaseSuccessSchema);
 };
-
-const responseSchema = z.object({
-	success: z.boolean(),
-	reasons: z.optional(
-		z.array(z.object({ code: z.number(), message: z.string() })),
-	),
-});
-
-export type UpdateAccountResponse = z.infer<typeof responseSchema>;
 
 export const updateAccount = async (
 	zuoraClient: ZuoraClient,
@@ -37,8 +25,8 @@ export const updateAccount = async (
 		crmId?: string;
 		sfContactId__c?: string;
 	},
-): Promise<UpdateAccountResponse> => {
+): Promise<ZuoraLowerCaseSuccess> => {
 	const path = `/v1/accounts/${accountNumber}`;
 	const body = JSON.stringify(payload);
-	return zuoraClient.put(path, body, responseSchema);
+	return zuoraClient.put(path, body, zuoraLowerCaseSuccessSchema);
 };

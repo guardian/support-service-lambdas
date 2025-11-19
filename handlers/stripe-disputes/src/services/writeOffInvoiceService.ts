@@ -1,6 +1,5 @@
 import type { Logger } from '@modules/routing/logger';
 import { writeOffInvoice } from '@modules/zuora/invoice';
-import type { ZuoraResponse } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 export async function writeOffInvoiceService(
@@ -15,13 +14,13 @@ export async function writeOffInvoiceService(
 	}
 
 	logger.log(`Writing off invoice: ${invoiceId}`);
-	const writeOffResponse: ZuoraResponse = await writeOffInvoice(
+	await writeOffInvoice(
 		zuoraClient,
 		invoiceId,
 		`Invoice write-off due to Stripe dispute closure. Dispute ID: ${disputeId}`,
 	);
 
-	logger.log('Invoice write-off response:', JSON.stringify(writeOffResponse));
+	logger.log('Invoice write-off succeeded');
 
 	return true;
 }

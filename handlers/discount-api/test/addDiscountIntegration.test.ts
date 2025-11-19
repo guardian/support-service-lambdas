@@ -50,7 +50,7 @@ test('createPriceRiseSubscription', async () => {
 	expect(priceRisen.success).toEqual(true);
 
 	console.log('Apply a discount to the subscription');
-	const discounted = await addDiscount(
+	await addDiscount(
 		zuoraClient,
 		subscriptionNumber,
 		dayjs(subscription.termStartDate),
@@ -58,6 +58,4 @@ test('createPriceRiseSubscription', async () => {
 		nextBillingDate,
 		'8ad09be48b23d33f018b23e53afd522d',
 	);
-
-	expect(discounted.success).toEqual(true);
 }, 30000);

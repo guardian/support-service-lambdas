@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import { z } from 'zod';
 import {
 	creditInvoice,
 	getInvoice,
@@ -10,11 +9,11 @@ import type {
 	InvoiceItemAdjustmentSourceType,
 	InvoiceItemAdjustmentType,
 } from '@modules/zuora/types';
+import { zuoraLowerCaseSuccessSchema } from '@modules/zuora/types';
 import {
 	getInvoiceItemsSchema,
 	getInvoiceSchema,
 	invoiceItemAdjustmentResultSchema,
-	zuoraResponseSchema,
 } from '@modules/zuora/types';
 import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 
@@ -98,15 +97,10 @@ describe('invoice', () => {
 
 	describe('writeOffInvoice', () => {
 		it('should write off invoice with comment and current date', async () => {
-			const mockResponse = { Success: true, Id: 'memo_123' };
-			mockZuoraClient.put = jest.fn().mockResolvedValue(mockResponse);
+			mockZuoraClient.put = jest.fn();
 
 			const comment = 'Dispute closure write-off';
-			const result = await writeOffInvoice(
-				mockZuoraClient,
-				'INV-12345',
-				comment,
-			);
+			await writeOffInvoice(mockZuoraClient, 'INV-12345', comment);
 
 			expect(mockZuoraClient.put).toHaveBeenCalledWith(
 				'/v1/invoices/INV-12345/write-off',
@@ -115,9 +109,8 @@ describe('invoice', () => {
 					memoDate: '2023-11-04',
 					reasonCode: 'Write-off',
 				}),
-				zuoraResponseSchema,
+				zuoraLowerCaseSuccessSchema,
 			);
-			expect(result).toEqual(mockResponse);
 		});
 
 		it('should handle invoice numbers and IDs', async () => {
@@ -133,7 +126,7 @@ describe('invoice', () => {
 			expect(mockZuoraClient.put).toHaveBeenCalledWith(
 				'/v1/invoices/8a8082c17f2b9b24017f2b9b3b4e0015/write-off',
 				expect.any(String),
-				zuoraResponseSchema,
+				zuoraLowerCaseSuccessSchema,
 			);
 		});
 
@@ -144,85 +137,6 @@ describe('invoice', () => {
 			await expect(
 				writeOffInvoice(mockZuoraClient, 'INV-12345', 'Test comment'),
 			).rejects.toThrow('Invoice not found');
-		});
-
-		describe('dynamic typing', () => {
-			it('should use default zuoraResponseSchema when no schema provided', async () => {
-				const mockResponse = { success: true, code: 'SUCCESS' };
-				mockZuoraClient.put = jest.fn().mockResolvedValue(mockResponse);
-
-				const comment = 'Test write-off';
-				const result = await writeOffInvoice(
-					mockZuoraClient,
-					'INV-12345',
-					comment,
-				);
-
-				expect(mockZuoraClient.put).toHaveBeenCalledWith(
-					'/v1/invoices/INV-12345/write-off',
-					JSON.stringify({
-						comment,
-						memoDate: '2023-11-04',
-						reasonCode: 'Write-off',
-					}),
-					zuoraResponseSchema,
-				);
-				expect(result).toEqual(mockResponse);
-			});
-
-			it('should use custom schema when provided', async () => {
-				const customSchema = z.object({
-					customField: z.string(),
-					amount: z.number(),
-				});
-				const mockResponse = { customField: 'test', amount: 10 };
-				mockZuoraClient.put = jest.fn().mockResolvedValue(mockResponse);
-
-				const comment = 'Custom write-off';
-				const result = await writeOffInvoice(
-					mockZuoraClient,
-					'INV-12345',
-					comment,
-					customSchema,
-				);
-
-				expect(mockZuoraClient.put).toHaveBeenCalledWith(
-					'/v1/invoices/INV-12345/write-off',
-					JSON.stringify({
-						comment,
-						memoDate: '2023-11-04',
-						reasonCode: 'Write-off',
-					}),
-					customSchema,
-				);
-				expect(result).toEqual(mockResponse);
-			});
-
-			it('should maintain type safety with custom schemas', async () => {
-				const strictSchema = z
-					.object({
-						writeOffId: z.string(),
-						status: z.literal('COMPLETED'),
-					})
-					.strict();
-
-				const mockResponse = {
-					writeOffId: 'WO-123',
-					status: 'COMPLETED' as const,
-				};
-				mockZuoraClient.put = jest.fn().mockResolvedValue(mockResponse);
-
-				const comment = 'Strict write-off';
-				const result = await writeOffInvoice(
-					mockZuoraClient,
-					'INV-12345',
-					comment,
-					strictSchema,
-				);
-
-				expect(result.writeOffId).toBe('WO-123');
-				expect(result.status).toBe('COMPLETED');
-			});
 		});
 	});
 });

@@ -1,6 +1,9 @@
 import { z } from 'zod';
 import { applyCreditToAccountBalance } from '@modules/zuora/creditBalanceAdjustment';
-import { zuoraResponseSchema } from '@modules/zuora/types';
+import {
+	zuoraResponseSchema,
+	zuoraUpperCaseSuccessSchema,
+} from '@modules/zuora/types';
 import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 
 jest.mock('@modules/zuora/zuoraClient');
@@ -86,7 +89,7 @@ describe('applyCreditToAccountBalance', () => {
 			expect(mockZuoraClient.post).toHaveBeenCalledWith(
 				'/v1/object/credit-balance-adjustment',
 				body,
-				zuoraResponseSchema,
+				zuoraUpperCaseSuccessSchema,
 			);
 			expect(result).toEqual(mockResponse);
 		});

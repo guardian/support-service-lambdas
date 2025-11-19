@@ -1,11 +1,10 @@
 import { stageFromEnvironment } from '@modules/stage';
-import { zuoraResponseSchema } from '@modules/zuora/types';
-import type { ZuoraResponse } from '@modules/zuora/types';
+import { zuoraLowerCaseSuccessSchema } from '@modules/zuora/types';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 export async function updateBillingAccountInZuora(
 	zuoraBillingAccountId: string,
-): Promise<ZuoraResponse> {
+): Promise<void> {
 	console.log(
 		`removing crmId from Billing Account ${zuoraBillingAccountId}...`,
 	);
@@ -16,8 +15,5 @@ export async function updateBillingAccountInZuora(
 		crmId: '',
 	});
 
-	const zuoraBillingAccountUpdateResponse: ZuoraResponse =
-		await zuoraClient.put(path, body, zuoraResponseSchema);
-
-	return zuoraBillingAccountUpdateResponse;
+	await zuoraClient.put(path, body, zuoraLowerCaseSuccessSchema);
 }
