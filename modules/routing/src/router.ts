@@ -42,18 +42,33 @@ export const NotFoundResponse = {
 /**
  * if routeParts ends with a greedy `+`, batch together the last eventsParts accordingly
  */
-function groupedEventsParts(routeParts: string[], eventParts: string[]) {
-	const lastRoutePart = routeParts[routeParts.length - 1]!;
-	const routeIsGreedy = lastRoutePart.endsWith('+}');
+export function zipRouteWithEventPath(
+	routeParts: string[],
+	eventParts: string[],
+) {
+	const lastRoutePart: string | undefined = routeParts[routeParts.length - 1]!;
+	const routeIsGreedy = lastRoutePart?.endsWith('+}');
+	let adjustedEventParts;
+	let adjustedRouteParts;
 	if (routeIsGreedy && routeParts.length < eventParts.length) {
 		const excessParts = eventParts.slice(routeParts.length - 1);
 		const joinedGreedyValue = excessParts.join('/');
-		return [...eventParts.slice(0, routeParts.length - 1), joinedGreedyValue];
-	} else if (routeParts.length !== eventParts.length) {
-		return undefined;
+		adjustedEventParts = [
+			...eventParts.slice(0, routeParts.length - 1),
+			joinedGreedyValue,
+		];
+		const adjustedLastRoutePart = lastRoutePart.replace(/\+}/, '}');
+		adjustedRouteParts = [
+			...routeParts.slice(0, routeParts.length - 1),
+			adjustedLastRoutePart,
+		];
+	} else if (routeParts.length === eventParts.length) {
+		adjustedEventParts = eventParts;
+		adjustedRouteParts = routeParts;
 	} else {
-		return eventParts;
+		return undefined;
 	}
+	return zipAll(adjustedRouteParts, adjustedEventParts, '', '');
 }
 
 function matchPath(
@@ -63,12 +78,11 @@ function matchPath(
 	const routeParts = routePath.split('/').filter(Boolean);
 	const eventParts = eventPath.split('/').filter(Boolean);
 
-	const adjustedEventParts = groupedEventsParts(routeParts, eventParts);
-	if (adjustedEventParts === undefined) {
+	const routeEventPairs = zipRouteWithEventPath(routeParts, eventParts);
+	if (routeEventPairs === undefined) {
 		return undefined;
 	}
 
-	const routeEventPairs = zipAll(routeParts, adjustedEventParts, '', '');
 	const [matchers, literals] = mapPartition(
 		routeEventPairs,
 		([routePart, eventPart]) => {
