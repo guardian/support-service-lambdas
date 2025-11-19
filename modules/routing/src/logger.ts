@@ -80,23 +80,27 @@ export class Logger {
 			return String(value);
 		}
 		if (value instanceof Error) {
-			return value.stack ?? '';
+			return (value.stack ?? '') + '\n' + this.objectToPrettyString(value);
 		}
 		if (typeof value === 'object' || Array.isArray(value)) {
-			try {
-				const jsonString = JSON.stringify(value)
-					.replace(/"([^"]+)":/g, ' $1: ') // Remove quotes around keys
-					.replace(/}$/, ' }');
-				if (jsonString.length <= 80) {
-					return jsonString;
-				}
-				return JSON.stringify(value, null, 2).replace(/"([^"]+)":/g, '$1:');
-			} catch {
-				return String(value);
-			}
+			return this.objectToPrettyString(value);
 		}
 		return String(value);
 	};
+
+	private objectToPrettyString(object: any) {
+		try {
+			const jsonString = JSON.stringify(object)
+				.replace(/"([^"]+)":/g, ' $1: ') // Remove quotes around keys
+				.replace(/}$/, ' }');
+			if (jsonString.length <= 80) {
+				return jsonString;
+			}
+			return JSON.stringify(object, null, 2).replace(/"([^"]+)":/g, '$1:');
+		} catch {
+			return String(object);
+		}
+	}
 
 	/* eslint-enable @typescript-eslint/no-explicit-any */
 	/* eslint-enable @typescript-eslint/no-unsafe-argument */
