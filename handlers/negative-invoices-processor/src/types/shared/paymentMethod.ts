@@ -1,8 +1,6 @@
-import {
-	BasePaymentMethodSchema,
-	zuoraResponseSchema,
-} from '@modules/zuora/types';
+import { BasePaymentMethodSchema } from '@modules/zuora/types';
 import { z } from 'zod';
+import { successOrFailureSchema } from './successOrFailureSchema';
 
 export const PaymentMethodSchema = z.object({
 	...BasePaymentMethodSchema.pick({
@@ -15,7 +13,7 @@ export const PaymentMethodSchema = z.object({
 
 export type PaymentMethod = z.infer<typeof PaymentMethodSchema>;
 
-export const PaymentMethodResponseSchema = zuoraResponseSchema.extend({
+export const PaymentMethodResponseSchema = successOrFailureSchema.extend({
 	creditcard: z.array(PaymentMethodSchema).optional(),
 	creditcardreferencetransaction: z.array(PaymentMethodSchema).optional(),
 	banktransfer: z.array(PaymentMethodSchema).optional(),

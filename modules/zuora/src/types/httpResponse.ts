@@ -48,20 +48,6 @@ export type ZuoraUpperCaseSuccess = z.infer<typeof zuoraUpperCaseSuccessSchema>;
 
 export const voidSchema = z.any().transform<void>(() => undefined);
 
-export const zuoraResponseSchema = z.object({
-	// Success indicators (some endpoints use different casing)
-	success: z.boolean().optional(),
-	Success: z.boolean().optional(),
-	// Error details in various formats
-	reasons: z.array(zuoraReasonSchema).optional(),
-	Errors: z.array(zuoraErrorItemSchema).optional(),
-	FaultCode: z.string().optional(),
-	FaultMessage: z.string().optional(),
-	code: z.string().optional(),
-	message: z.string().optional(),
-});
-export type ZuoraResponse = z.infer<typeof zuoraResponseSchema>;
-
 export const createQueryResponseSchema = <T extends z.ZodRawShape>(
 	recordShape: T,
 ) => {
