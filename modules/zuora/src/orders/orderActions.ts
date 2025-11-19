@@ -1,8 +1,11 @@
-import type { BillingPeriod } from '@modules/billingPeriod';
 import type { TermType } from '@modules/product-catalog/productCatalog';
 import type { Dayjs } from 'dayjs';
 import type { PromotionInputFields } from '@modules/zuora/createSubscription/createSubscription';
 import { zuoraDateFormat } from '../utils/common';
+
+// https://developer.zuora.com/v1-api-reference/api/operation/POST_Order/
+// subscriptions->orderActions->createSubscription->terms->intialTerm->periodType
+export type PeriodType = 'Month' | 'Year' | 'Day' | 'Week';
 
 export type TriggerDates = [
 	{
@@ -119,13 +122,13 @@ export type CreateSubscriptionOrderAction = BaseOrderAction & {
 			autoRenew: boolean;
 			initialTerm: {
 				period: number;
-				periodType: BillingPeriod;
+				periodType: PeriodType;
 				termType: 'TERMED';
 			};
 			renewalSetting: 'RENEW_WITH_SPECIFIC_TERM';
 			renewalTerms: Array<{
 				period: number;
-				periodType: BillingPeriod;
+				periodType: PeriodType;
 			}>;
 		};
 		subscribeToRatePlans: SubscribeToRatePlan[];
@@ -239,8 +242,8 @@ export function buildCreateSubscriptionOrderAction({
 
 	const [initialPeriodLength, initialPeriodType, autoRenew] =
 		termType === 'Recurring'
-			? [12, 'Month', true]
-			: [
+			? ([12, 'Month', true] as const)
+			: ([
 					initialTermInDays(
 						contractEffectiveDate,
 						customerAcceptanceDate,
@@ -248,20 +251,20 @@ export function buildCreateSubscriptionOrderAction({
 					),
 					'Day',
 					false,
-				];
+				] as const);
 
-	const terms = {
+	const terms: CreateSubscriptionOrderAction['createSubscription']['terms'] = {
 		autoRenew: autoRenew,
 		initialTerm: {
 			period: initialPeriodLength,
-			periodType: initialPeriodType as BillingPeriod,
+			periodType: initialPeriodType,
 			termType: 'TERMED' as const,
 		},
 		renewalSetting: 'RENEW_WITH_SPECIFIC_TERM' as const,
 		renewalTerms: [
 			{
 				period: termLengthInMonths,
-				periodType: 'Month' as BillingPeriod,
+				periodType: 'Month' as const,
 			},
 		],
 	};
@@ -288,5 +291,5 @@ export function buildCreateSubscriptionOrderAction({
 				...discountRatePlan,
 			],
 		},
-	};
+	} satisfies CreateSubscriptionOrderAction;
 }

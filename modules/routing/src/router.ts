@@ -30,6 +30,7 @@ export type Route<TPath, TBody> = {
 export function createRoute<TPath, TBody>(
 	route: Route<TPath, TBody>,
 ): Route<unknown, unknown> {
+	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo see if it's fixable
 	return route as Route<unknown, unknown>;
 }
 

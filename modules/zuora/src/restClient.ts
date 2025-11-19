@@ -1,5 +1,5 @@
 import { logger } from '@modules/routing/logger';
-import z from 'zod';
+import type z from 'zod';
 
 export class RestClientError extends Error {
 	constructor(
@@ -98,16 +98,18 @@ export abstract class RestClient {
 			body,
 		);
 
-		const json = JSON.parse(result.responseBody);
-		if (!this.isLogicalSuccess || (await this.isLogicalSuccess(json))) {
+		const json: unknown = JSON.parse(result.responseBody);
+		if (!this.isLogicalSuccess || this.isLogicalSuccess(json)) {
 			return schema.parse(json);
 		} else {
-			throw await this.onFailure(result);
+			throw this.onFailure(result);
 		}
 	}
 
-	private async onFailure(result: RestResult) {
-		if (this.generateError) return this.generateError(result);
+	private onFailure(result: RestResult) {
+		if (this.generateError) {
+			return this.generateError(result);
+		}
 
 		return new RestClientError(
 			'http call failed',
@@ -133,7 +135,7 @@ export abstract class RestClient {
 		headers?: Record<string, string>,
 		body?: string,
 	) {
-		const authHeaders = this.getAuthHeaders ? await this.getAuthHeaders() : {};
+		const authHeaders = await this.getAuthHeaders();
 		const pathWithoutLeadingSlash = path.replace(/^\//, '');
 		const url = `${this.restServerUrl}/${pathWithoutLeadingSlash}`;
 		const response = await fetch(url, {
@@ -152,7 +154,7 @@ export abstract class RestClient {
 		);
 		const result: RestResult = { response, responseBody, responseHeaders };
 		if (!response.ok) {
-			throw await this.onFailure(result);
+			throw this.onFailure(result);
 		}
 
 		return result;
@@ -172,7 +174,7 @@ export abstract class RestClient {
 	 * @param json
 	 * @protected
 	 */
-	protected isLogicalSuccess?: (json: Promise<unknown>) => Promise<boolean>;
+	protected isLogicalSuccess?: (json: unknown) => boolean;
 
 	/**
 	 * Provide any Authorization headers via this method.  They will be sent but not logged.

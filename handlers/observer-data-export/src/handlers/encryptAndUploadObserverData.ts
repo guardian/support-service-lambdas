@@ -6,6 +6,7 @@ export const handler = async (event: SQSEvent) => {
 	console.log(JSON.stringify(event, null, 2));
 
 	for (const sqsRecord of event.Records) {
+		// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo use zod
 		const body = JSON.parse(sqsRecord.body) as S3Event;
 
 		for (const s3Record of body.Records) {

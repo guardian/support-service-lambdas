@@ -53,7 +53,7 @@ class GetDeliveryRecordsServiceImpl[F[_]: Monad](salesforceClient: SalesforceCli
               ref = problemCase.CaseNumber,
               subject = problemCase.Subject,
               description = problemCase.Description,
-              problemType = problemCase.Case_Closure_Reason__c,
+              problemType = problemCase.Sub_Category__c,
             ),
           ),
         )
@@ -130,7 +130,7 @@ object GetDeliveryRecordsServiceImpl {
        |    SELECT Id, Delivery_Date__c, Delivery_Address__c, Delivery_Instructions__c, Has_Holiday_Stop__c,
        |           Holiday_Stop_Request_Detail__r.Holiday_Stop_Request__r.Bulk_Suspension_Reason__c,
        |           Address_Line_1__c,Address_Line_2__c, Address_Line_3__c, Address_Town__c, Address_Country__c, Address_Postcode__c,
-       |           Case__c, Case__r.Id, Case__r.CaseNumber, Case__r.Subject, Case__r.Description, Case__r.Case_Closure_Reason__c,
+       |           Case__c, Case__r.Id, Case__r.CaseNumber, Case__r.Subject, Case__r.Description, Case__r.Sub_Category__c,
        |           Credit_Amount__c, Is_Actioned__c, Invoice_Date__c
        |    FROM Delivery_Records__r
        |    ${deliveryDateFilter(optionalStartDate, optionalEndDate, optionalCancellationEffectiveDate)}

@@ -18,7 +18,7 @@
     "check-formatting": "prettier --check **.ts",
     "fix-formatting": "prettier --write **.ts",
     "build": "tsc --noEmit",
-    "lint": "eslint src/**/*.ts test/**/*.ts"
+    "lint": "eslint 'src/**/*.ts' 'test/**/*.ts'"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",

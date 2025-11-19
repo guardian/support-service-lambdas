@@ -97,8 +97,11 @@ export const repoConfigSchema = z.object({
 export type RepoConfig = z.infer<typeof repoConfigSchema>;
 
 export async function createCognitoClientFromConfig() {
+	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo fix in next refactor
 	const stage = getEnv('STAGE') as Stage; // pass stuff in
+	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo fix in next refactor
 	const stack = getEnv('STACK') as Stage; // pass stuff in
+	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo fix in next refactor
 	const app = getEnv('APP') as Stage; // pass stuff in
 	const cognitoDomain = getEnv('COGNITO_DOMAIN');
 	const clientId = getEnv('COGNITO_CLIENT_ID');

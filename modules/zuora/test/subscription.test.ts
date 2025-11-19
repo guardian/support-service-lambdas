@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
+import { ZuoraError } from '@modules/zuora/errors/zuoraError';
 import {
 	cancelSubscription,
 	getSubscription,
@@ -7,14 +7,15 @@ import {
 } from '@modules/zuora/subscription';
 import {
 	zuoraResponseSchema,
-	zuoraSubscriptionsFromAccountSchema,
 	zuoraSubscriptionResponseSchema,
+	zuoraSubscriptionsFromAccountSchema,
 } from '@modules/zuora/types';
 import type {
 	ZuoraResponse,
 	ZuoraSubscription,
 	ZuoraSubscriptionsFromAccountResponse,
 } from '@modules/zuora/types';
+import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 
 jest.mock('@modules/zuora/zuoraClient');
 
@@ -49,8 +50,8 @@ describe('subscription', () => {
 
 			// Verify the request body contains expected properties
 			const requestBody = JSON.parse(
-				(mockZuoraClient.put as jest.Mock).mock.calls[0][1],
-			);
+				(mockZuoraClient.put.mock.calls[0] as string[])[1] as string,
+			) as Record<string, string | boolean>;
 			expect(requestBody).toMatchObject({
 				cancellationEffectiveDate: '2025-08-01',
 				cancellationPolicy: 'SpecificDate',
@@ -84,8 +85,8 @@ describe('subscription', () => {
 
 			// Verify the request body contains expected properties
 			const requestBody = JSON.parse(
-				(mockZuoraClient.put as jest.Mock).mock.calls[0][1],
-			);
+				(mockZuoraClient.put.mock.calls[0] as string[])[1] as string,
+			) as Record<string, string | boolean>;
 			expect(requestBody).toMatchObject({
 				cancellationEffectiveDate: '2025-08-02',
 				cancellationPolicy: 'SpecificDate',
@@ -118,8 +119,8 @@ describe('subscription', () => {
 
 			// Verify the request body for EndOfLastInvoicePeriod
 			const requestBody = JSON.parse(
-				(mockZuoraClient.put as jest.Mock).mock.calls[0][1],
-			);
+				(mockZuoraClient.put.mock.calls[0] as string[])[1] as string,
+			) as Record<string, string | boolean>;
 			expect(requestBody).toMatchObject({
 				cancellationPolicy: 'EndOfLastInvoicePeriod',
 				runBilling: false,
@@ -222,7 +223,6 @@ describe('subscription', () => {
 
 			const mockResponse: ZuoraSubscriptionsFromAccountResponse = {
 				subscriptions: mockSubscriptions,
-				success: true,
 			};
 
 			mockZuoraClient.get = jest.fn().mockResolvedValue(mockResponse);
@@ -239,25 +239,20 @@ describe('subscription', () => {
 			expect(result).toEqual(mockSubscriptions);
 		});
 
-		it('should return empty array when no subscriptions in response', async () => {
-			const mockResponse: ZuoraSubscriptionsFromAccountResponse = {
-				success: false,
-				reasons: [
-					{
-						code: 50000040,
-						message:
-							"Cannot find entity by key: '8ad09b7d83a313110183a8769afd1bf31'.",
-					},
-				],
-			};
-			mockZuoraClient.get = jest.fn().mockResolvedValue(mockResponse);
+		it('should throw if the account number does not exist', async () => {
+			mockZuoraClient.get = jest.fn().mockImplementation(() => {
+				throw new ZuoraError(
+					"Cannot find entity by key: '8ad09b7d83a313110183a8769afd1bf31'.",
+					50000040,
+					[],
+				);
+			});
 
-			const result = await getSubscriptionsByAccountNumber(
-				mockZuoraClient,
-				'ACC-EMPTY',
+			await expect(
+				getSubscriptionsByAccountNumber(mockZuoraClient, 'ACC-EMPTY'),
+			).rejects.toThrow(
+				"Cannot find entity by key: '8ad09b7d83a313110183a8769afd1bf31'.",
 			);
-
-			expect(result).toEqual([]);
 		});
 
 		it('returns the response from zuoraClient.get', async () => {

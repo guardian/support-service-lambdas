@@ -1,19 +1,19 @@
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import { z } from 'zod';
-import { getInvoiceItemsSchema } from './types';
-import type { GetInvoiceItemsResponse } from './types';
-import {
+import type { z } from 'zod';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type {
+	GetInvoiceItemsResponse,
 	InvoiceItemAdjustmentResult,
-	invoiceItemAdjustmentResultSchema,
 	InvoiceItemAdjustmentSourceType,
 	InvoiceItemAdjustmentType,
 } from './types';
-import { getInvoiceSchema } from './types';
 import type { GetInvoiceResponse } from './types';
+import { getInvoiceItemsSchema } from './types';
+import { invoiceItemAdjustmentResultSchema } from './types';
+import { getInvoiceSchema } from './types';
 import { zuoraResponseSchema } from './types';
 import { zuoraDateFormat } from './utils';
-import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 export const getInvoice = async (
 	zuoraClient: ZuoraClient,
@@ -77,6 +77,6 @@ export const writeOffInvoice = async <
 		memoDate: dayjs().format('YYYY-MM-DD'),
 		reasonCode: 'Write-off',
 	});
-	const finalSchema = (schema ?? zuoraResponseSchema) as T;
+	const finalSchema = schema ?? zuoraResponseSchema;
 	return zuoraClient.put(path, body, finalSchema);
 };

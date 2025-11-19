@@ -5,6 +5,7 @@ import {
 	intersection,
 	mapValues,
 	partition,
+	partitionByType,
 	sortBy,
 } from '../arrayFunctions';
 
@@ -67,8 +68,17 @@ test('mapValues should map correctly', () => {
 });
 
 test('partition should separate accordingly', () => {
+	const data = [1, 2, 3, 4, 5, 6];
+	const actual = partition(data, (item) => item < 4);
+	expect(actual).toEqual([
+		[1, 2, 3],
+		[4, 5, 6],
+	]);
+});
+
+test('partitionByType should separate accordingly', () => {
 	const data = ['hello', 12, 23, 'hello', 'world', 12];
-	const actual = partition(data, (item) => typeof item == 'number');
+	const actual = partitionByType(data, (item) => typeof item == 'number');
 	expect(actual).toEqual([
 		[12, 23, 12],
 		['hello', 'hello', 'world'],
