@@ -1,5 +1,5 @@
 import type { Dayjs } from 'dayjs';
-import type { ZuoraResponse } from './types';
+import type { ZuoraLowerCaseSuccess } from './types';
 import {
 	zuoraLowerCaseSuccessSchema,
 	zuoraUpperCaseSuccessSchema,
@@ -39,7 +39,7 @@ export const rejectPayment = async (
 	zuoraClient: ZuoraClient,
 	paymentNumber: string,
 	rejectionReason: string = 'chargeback',
-): Promise<ZuoraResponse> => {
+): Promise<ZuoraLowerCaseSuccess> => {
 	console.log(
 		`Rejecting payment ${paymentNumber} with reason: ${rejectionReason}`,
 	);

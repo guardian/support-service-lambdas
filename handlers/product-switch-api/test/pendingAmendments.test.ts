@@ -5,7 +5,7 @@ import type { OrderRequest } from '@modules/zuora/orders/orderRequests';
 import type { GetInvoiceResponse, ZuoraResponse } from '@modules/zuora/types';
 import {
 	zuoraAccountSchema,
-	zuoraSubscriptionResponseSchema,
+	zuoraSubscriptionSchema,
 } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
@@ -27,9 +27,7 @@ const mockZuoraClient = {
 
 const productCatalog = generateProductCatalog(zuoraCatalogFixture);
 
-const subscription = zuoraSubscriptionResponseSchema.parse(
-	pendingAmendmentsJson,
-);
+const subscription = zuoraSubscriptionSchema.parse(pendingAmendmentsJson);
 const account = zuoraAccountSchema.parse(accountJson);
 
 const today = dayjs('2024-12-05T22:42:06');

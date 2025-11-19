@@ -1,7 +1,7 @@
-import { zuoraUpperCaseSuccessSchema } from '@modules/zuora/types';
+import { zuoraResponseSchema } from '@modules/zuora/types';
 import { z } from 'zod';
 
-export const SubscriptionResponseSchema = zuoraUpperCaseSuccessSchema;
+export const SubscriptionResponseSchema = zuoraResponseSchema;
 export type SubscriptionResponse = z.infer<typeof SubscriptionResponseSchema>;
 
 export const ActiveSubscriptionResultSchema = z.object({
