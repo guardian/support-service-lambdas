@@ -39,6 +39,23 @@ export const NotFoundResponse = {
 	statusCode: 404,
 };
 
+/**
+ * if routeParts ends with a greedy `+`, batch together the last eventsParts accordingly
+ */
+function groupedEventsParts(routeParts: string[], eventParts: string[]) {
+	const lastRoutePart = routeParts[routeParts.length - 1]!;
+	const routeIsGreedy = lastRoutePart.endsWith('+}');
+	if (routeIsGreedy && routeParts.length < eventParts.length) {
+		const excessParts = eventParts.slice(routeParts.length - 1);
+		const joinedGreedyValue = excessParts.join('/');
+		return [...eventParts.slice(0, routeParts.length - 1), joinedGreedyValue];
+	} else if (routeParts.length !== eventParts.length) {
+		return undefined;
+	} else {
+		return eventParts;
+	}
+}
+
 function matchPath(
 	routePath: string,
 	eventPath: string,
@@ -46,21 +63,8 @@ function matchPath(
 	const routeParts = routePath.split('/').filter(Boolean);
 	const eventParts = eventPath.split('/').filter(Boolean);
 
-	const lastRoutePart = routeParts[routeParts.length - 1]!;
-	const routeIsGreedy = lastRoutePart.endsWith('+}');
-	let adjustedEventParts: string[];
-	if (routeIsGreedy && routeParts.length < eventParts.length) {
-		const excessParts = eventParts.slice(routeParts.length - 1);
-		const joinedGreedyValue = excessParts.join('/');
-		adjustedEventParts = [
-			...eventParts.slice(0, routeParts.length - 1),
-			joinedGreedyValue,
-		];
-	} else {
-		adjustedEventParts = eventParts;
-	}
-
-	if (routeParts.length !== adjustedEventParts.length) {
+	const adjustedEventParts = groupedEventsParts(routeParts, eventParts);
+	if (adjustedEventParts === undefined) {
 		return undefined;
 	}
 
