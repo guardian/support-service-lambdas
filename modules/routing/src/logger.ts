@@ -93,7 +93,7 @@ export class Logger {
 		return String(value);
 	};
 
-	private objectToPrettyString(object: any) {
+	private objectToPrettyString(object: unknown) {
 		try {
 			const jsonString = JSON.stringify(object)
 				.replace(/"([^"]+)":/g, ' $1: ') // Remove quotes around keys
@@ -103,7 +103,7 @@ export class Logger {
 			}
 			return JSON.stringify(object, null, 2).replace(/"([^"]+)":/g, '$1:');
 		} catch (e) {
-			console.log('caught error when trying to serialise log line', e);
+			console.error('caught error when trying to serialise log line', e);
 			return String(object);
 		}
 	}
