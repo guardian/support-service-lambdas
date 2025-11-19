@@ -2,7 +2,10 @@ import { Lazy } from '@modules/lazy';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { OrderAction } from '@modules/zuora/orders/orderActions';
 import type { OrderRequest } from '@modules/zuora/orders/orderRequests';
-import type { GetInvoiceResponse, ZuoraResponse } from '@modules/zuora/types';
+import type {
+	GetInvoiceResponse,
+	ZuoraUpperCaseSuccess,
+} from '@modules/zuora/types';
 import {
 	zuoraAccountSchema,
 	zuoraSubscriptionSchema,
@@ -187,7 +190,7 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 		// createPayment
 		mockZuoraClient.post.mockResolvedValueOnce({
 			Success: true,
-		} as ZuoraResponse);
+		} as ZuoraUpperCaseSuccess);
 
 		const takePaymentOrAdjustInvoice = jest.fn().mockResolvedValue(75);
 		const sendThankYouEmail = jest.fn().mockResolvedValue(undefined);

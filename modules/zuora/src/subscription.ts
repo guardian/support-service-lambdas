@@ -1,6 +1,5 @@
 import type { Dayjs } from 'dayjs';
 import type {
-	ZuoraResponse,
 	ZuoraSubscription,
 	ZuoraSubscriptionsFromAccountResponse,
 } from './types';
@@ -21,7 +20,7 @@ export const cancelSubscription = async (
 	cancellationPolicy:
 		| 'SpecificDate'
 		| 'EndOfLastInvoicePeriod' = 'SpecificDate',
-): Promise<ZuoraResponse> => {
+): Promise<void> => {
 	const path = `/v1/subscriptions/${subscriptionNumber}/cancel`;
 
 	// Only include cancellationEffectiveDate for SpecificDate policy
@@ -43,7 +42,7 @@ export const cancelSubscription = async (
 	};
 
 	const body = JSON.stringify(requestBody);
-	return zuoraClient.put(path, body, zuoraLowerCaseSuccessSchema, {
+	await zuoraClient.put(path, body, zuoraLowerCaseSuccessSchema, {
 		'zuora-version': '211.0',
 	});
 };
@@ -72,8 +71,8 @@ export const updateSubscription = async (
 	zuoraClient: ZuoraClient,
 	subscriptionNumber: string,
 	fields: Record<string, string | number | boolean>,
-): Promise<ZuoraResponse> => {
+): Promise<void> => {
 	const path = `v1/subscriptions/${subscriptionNumber}`;
 	const body = JSON.stringify(fields);
-	return zuoraClient.put(path, body, zuoraLowerCaseSuccessSchema);
+	await zuoraClient.put(path, body, zuoraLowerCaseSuccessSchema);
 };

@@ -41,13 +41,7 @@ test('createPriceRiseSubscription', async () => {
 	const subscription = await getSubscription(zuoraClient, subscriptionNumber);
 
 	console.log('Updating the subscription to trigger a price rise');
-	const priceRisen = await doPriceRise(
-		zuoraClient,
-		subscription,
-		nextBillingDate,
-	);
-
-	expect(priceRisen.success).toEqual(true);
+	await doPriceRise(zuoraClient, subscription, nextBillingDate);
 
 	console.log('Apply a discount to the subscription');
 	await addDiscount(
