@@ -5,8 +5,29 @@ import type { Product } from '@modules/product-catalog/productCatalog';
 import { getCustomerFacingName } from '@modules/product-catalog/productCatalog';
 
 export type StripeProductKey = 'GuardianPatron' | 'OneTimeContribution';
+
+export type StripeProduct = {
+	billingSystem: 'stripe';
+	active: true;
+	customerFacingName: string;
+	isDeliveryProduct: false;
+	ratePlans: Record<
+		string,
+		{
+			id: string;
+			// Pricing on Patrons is complicated and we don't use the product catalog to manage it
+			pricing: Record<never, unknown>;
+			// Stripe doesn't have charges in the same way as Zuora
+			charges: Record<string, { id: string }>;
+			billingPeriod: 'Month' | 'OneTime';
+			termType: 'Recurring' | 'FixedTerm';
+			termLengthInMonths: number;
+		}
+	>;
+};
+
 export const stripeProducts: Partial<
-	Record<StripeProductKey, Product<StripeProductKey>>
+	Record<StripeProductKey, Product<StripeProductKey> & StripeProduct>
 > = {
 	GuardianPatron: {
 		billingSystem: 'stripe',

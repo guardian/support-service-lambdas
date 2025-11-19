@@ -1,3 +1,5 @@
+import { objectEntries } from '@modules/objectFunctions';
+
 type Team = 'VALUE' | 'GROWTH' | 'PORTFOLIO' | 'PLATFORM' | 'SRE';
 
 const mobilePurchasesApps = [
@@ -139,10 +141,10 @@ const buildAppToTeamMappings = (
 ): Record<string, Team[]> => {
 	const mappings: Record<string, Team[]> = {};
 
-	for (const [team, apps] of Object.entries(theMappings)) {
+	for (const [team, apps] of objectEntries(theMappings)) {
 		for (const app of apps) {
 			const teams = mappings[app] ?? [];
-			teams.push(team as Team);
+			teams.push(team);
 
 			mappings[app] = teams;
 		}

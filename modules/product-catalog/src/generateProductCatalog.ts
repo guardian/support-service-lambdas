@@ -6,13 +6,19 @@ import type {
 	ZuoraProductRatePlanCharge,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
 import { findDiscountRatePlan } from '@modules/product-catalog/generateSchema';
-import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
+import type {
+	ProductCatalog,
+	ProductKey,
+} from '@modules/product-catalog/productCatalog';
 import {
 	getCustomerFacingName,
 	isDeliveryProduct,
 	supportsPromotions,
 } from '@modules/product-catalog/productCatalog';
-import { productKeySchema } from '@modules/product-catalog/productCatalogSchema';
+import {
+	productCatalogSchema,
+	productKeySchema,
+} from '@modules/product-catalog/productCatalogSchema';
 import { stripeProducts } from '@modules/product-catalog/stripeProducts';
 import {
 	activeProducts,
@@ -94,7 +100,7 @@ const getBillingPeriod = (productRatePlan: ZuoraProductRatePlan) => {
 };
 
 const getZuoraProduct = (
-	productName: string,
+	productName: ProductKey,
 	productRatePlans: ZuoraProductRatePlan[],
 	discountRatePlan: ZuoraProductRatePlan,
 ) => {
@@ -154,5 +160,5 @@ export const generateProductCatalog = (
 		...stripeProducts,
 		...result,
 	};
-	return productCatalog as ProductCatalog;
+	return productCatalogSchema.parse(productCatalog);
 };

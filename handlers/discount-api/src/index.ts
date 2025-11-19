@@ -28,6 +28,7 @@ import { stringify } from './stringify';
 const getEnv = (env: string): string =>
 	getIfDefined(process.env[env], `${env} environment variable not set`);
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo fix in next refactor
 const stage = getEnv('STAGE') as Stage;
 
 // main entry point from AWS

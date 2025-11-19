@@ -7,11 +7,14 @@ import {
 	Policy,
 	PolicyStatement,
 	Role,
+	ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
+// import { SrAppConfigKey } from './cdk/SrAppConfigKey'; // Commented out for initial deployment - will be needed when SNS subscription is enabled
 import { SrLambda } from './cdk/SrLambda';
 import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
 import { SrRestDomain } from './cdk/SrRestDomain';
+import { SrSqsLambda } from './cdk/SrSqsLambda';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
 
@@ -36,8 +39,12 @@ export class MParticleApi extends SrStack {
 			`/${this.stage}/${this.stack}/${app}/sarResultsBucket`,
 		).stringValue;
 
-		// this must be the same as used in the code
-		const sarS3BaseKey = 'mparticle-results/';
+		// const identityMmaSnsDeletionRequestTopicArn = new SrAppConfigKey(
+		// 	this,
+		// 	'IdentityMmaSnsDeletionRequestTopicArn',
+		// ).valueAsString;
+
+		const sarS3BaseKey = 'mparticle-results/'; // this must be the same as used in the code
 
 		// make sure our lambdas can write to and list objects in the central baton bucket
 		// https://github.com/guardian/baton/?tab=readme-ov-file#:~:text=The%20convention%20is%20to%20write%20these%20to%20the%20gu%2Dbaton%2Dresults%20bucket%20that%20is%20hosted%20in%20the%20baton%20AWS%20account.
@@ -69,6 +76,40 @@ export class MParticleApi extends SrStack {
 				initialPolicy: [s3BatonReadAndWritePolicy],
 			},
 		});
+
+		const mmaUserDeletionLambda = new SrSqsLambda(
+			this,
+			'MmaUserDeletionLambda',
+			{
+				nameSuffix: 'mma-user-deletion',
+				lambdaOverrides: {
+					handler: 'index.handlerDeletion',
+					timeout: Duration.seconds(300),
+					initialPolicy: [s3BatonReadAndWritePolicy],
+				},
+				maxReceiveCount: 3,
+				visibilityTimeout: Duration.seconds(300),
+				monitoring: {
+					errorImpact:
+						'an mma user deletion request may not have been processed successfully',
+				},
+			},
+		);
+
+		mmaUserDeletionLambda.inputQueue.addToResourcePolicy(
+			new PolicyStatement({
+				effect: Effect.ALLOW,
+				principals: [new ServicePrincipal('sns.amazonaws.com')],
+				actions: ['sqs:SendMessage'],
+				resources: [mmaUserDeletionLambda.inputQueue.queueArn],
+				conditions: {
+					ArnEquals: {
+						//'aws:SourceArn': identityMmaSnsDeletionRequestTopicArn, --- This will be uncommented when testing is complete ---
+						'aws:SourceArn': 'AAAAAAAAAAAA',
+					},
+				},
+			}),
+		);
 
 		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {
 			app: app,

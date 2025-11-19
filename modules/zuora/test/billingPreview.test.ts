@@ -1,10 +1,10 @@
+import { billingPreviewSchema } from '@modules/zuora/types';
 import {
-	toSimpleInvoiceItems,
 	getNextInvoiceTotal,
 	getNextNonFreePaymentDate,
 	itemsForSubscription,
+	toSimpleInvoiceItems,
 } from '../src/billingPreview';
-import { billingPreviewSchema } from '@modules/zuora/types';
 import billingPreview from './fixtures/billing-preview-with-discount.json';
 import multiSubBillingPreview from './fixtures/multi-sub-billing-preview.json';
 

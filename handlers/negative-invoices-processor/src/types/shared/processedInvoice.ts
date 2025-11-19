@@ -1,6 +1,6 @@
-import { z } from 'zod';
-import { ApplyCreditToAccountBalanceResultSchema } from '.';
-import { InvoiceSchema } from '.';
+import type { z } from 'zod';
+import { ApplyCreditToAccountBalanceResultSchema } from './applyCreditToAccountBalance';
+import { InvoiceSchema } from './invoiceSchemas';
 import { PaymentMethodResultSchema } from './paymentMethod';
 import { RefundResultSchema } from './refund';
 import { ActiveSubscriptionResultSchema } from './subscription';

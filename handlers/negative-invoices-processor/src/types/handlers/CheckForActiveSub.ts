@@ -1,9 +1,7 @@
-import { z } from 'zod';
-import {
-	ApplyCreditToAccountBalanceOutput,
-	ApplyCreditToAccountBalanceOutputSchema,
-} from './ApplyCreditToAccountBalance';
+import type { z } from 'zod';
 import { ActiveSubscriptionResultSchema } from '../shared';
+import type { ApplyCreditToAccountBalanceOutput } from './ApplyCreditToAccountBalance';
+import { ApplyCreditToAccountBalanceOutputSchema } from './ApplyCreditToAccountBalance';
 
 export const CheckForActiveSubInputSchema =
 	ApplyCreditToAccountBalanceOutputSchema;

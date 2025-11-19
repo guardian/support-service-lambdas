@@ -1,13 +1,18 @@
 import { Logger } from '@modules/routing/logger';
 import { Router } from '@modules/routing/router';
-import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { handleStripeWebhook } from './services';
 import { getSecretValue } from '@modules/secrets-manager/getSecret';
-import { StripeCredentials } from './types';
 import { stageFromEnvironment } from '@modules/stage';
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import Stripe from 'stripe';
+import { z } from 'zod';
+import { handleStripeWebhook } from './services';
+import type { StripeCredentials } from './types';
 
 const logger = new Logger();
+
+const bodyWithTypeSchema = z.object({
+	type: z.string(),
+});
 
 const router = Router([
 	{
@@ -15,7 +20,7 @@ const router = Router([
 		path: '/',
 		handler: async (event: APIGatewayProxyEvent) => {
 			// Parse the webhook body to determine the event type
-			const body = JSON.parse(event.body || '{}');
+			const body = bodyWithTypeSchema.parse(JSON.parse(event.body ?? '{}'));
 			const eventType = body.type;
 
 			logger.log(`Received webhook event type: ${eventType}`);
@@ -108,7 +113,7 @@ export const handler = async (
 
 	// If both failed, return error
 	if (!verifiedEvent) {
-		const errorMessage = lastError?.message || 'Unknown error';
+		const errorMessage = lastError?.message ?? 'Unknown error';
 		logger.error(`Error verifying Stripe webhook signature: ${errorMessage}`);
 		return {
 			statusCode: 403,
