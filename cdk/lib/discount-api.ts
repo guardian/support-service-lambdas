@@ -8,6 +8,9 @@ import { SrApiLambda } from './cdk/SrApiLambda';
 import type { SrStageNames } from './cdk/SrStack';
 import { SrStack } from './cdk/SrStack';
 
+// CDK and handler have to match these values
+export const docsPath = 'docs';
+
 export class DiscountApi extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
 		super(scope, { stage, app: 'discount-api' });
@@ -30,6 +33,6 @@ export class DiscountApi extends SrStack {
 			new AllowSqsSendPolicy(this, `braze-emails`),
 		);
 
-		lambda.addPublicPath('docs');
+		lambda.addPublicPath(docsPath);
 	}
 }

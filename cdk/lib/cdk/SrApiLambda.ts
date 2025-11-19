@@ -59,7 +59,7 @@ export class SrApiLambda extends SrLambda {
 				restApiName: getNameWithStage(scope, props.nameSuffix),
 				description:
 					props.apiDescriptionOverride ?? 'API Gateway created by CDK',
-				proxy: false,
+				proxy: false, // add proxy method later, to allow public paths
 				deployOptions: {
 					stageName: scope.stage,
 				},

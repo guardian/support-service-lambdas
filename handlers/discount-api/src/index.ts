@@ -31,6 +31,9 @@ const getEnv = (env: string): string =>
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo fix in next refactor
 const stage = getEnv('STAGE') as Stage;
 
+// CDK and handler have to match these values
+export const docsPath = 'docs';
+
 // main entry point from AWS
 export const handler: Handler = Router([
 	{
@@ -45,7 +48,7 @@ export const handler: Handler = Router([
 	},
 	{
 		httpMethod: 'GET',
-		path: '/docs',
+		path: '/' + docsPath,
 		handler: () => docsHandler(stage),
 	},
 ]);
