@@ -1,15 +1,20 @@
-type Success<A> = { success: true } & Try<A>;
-type Failure<A> = {
-	success: false;
-	failure: Error;
-} & Try<A>;
-export type Try<A> = {
-	success: boolean;
+type TryBase<A> = {
 	get: () => A;
 	getOrElse: (v: A) => A;
 	flatMap: <B>(fn: (a: A) => Try<B>) => Try<B>;
 	mapError: (fn: (err: Error) => Error) => Try<A>;
 };
+
+export type Success<A> = TryBase<A> & {
+	success: true;
+};
+
+export type Failure<A> = TryBase<A> & {
+	success: false;
+	failure: Error;
+};
+
+export type Try<A> = Success<A> | Failure<A>;
 
 export function Success<A>(get: A): Success<A> {
 	return {
