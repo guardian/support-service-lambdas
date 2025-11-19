@@ -1,6 +1,6 @@
 import {
 	BasePaymentMethodSchema,
-	zuoraResponseSchema,
+	zuoraUpperCaseSuccessSchema,
 } from '@modules/zuora/types';
 import { z } from 'zod';
 
@@ -15,7 +15,7 @@ export const PaymentMethodSchema = z.object({
 
 export type PaymentMethod = z.infer<typeof PaymentMethodSchema>;
 
-export const PaymentMethodResponseSchema = zuoraResponseSchema.extend({
+export const PaymentMethodResponseSchema = zuoraUpperCaseSuccessSchema.extend({
 	creditcard: z.array(PaymentMethodSchema).optional(),
 	creditcardreferencetransaction: z.array(PaymentMethodSchema).optional(),
 	banktransfer: z.array(PaymentMethodSchema).optional(),

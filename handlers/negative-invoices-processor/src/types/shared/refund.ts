@@ -1,8 +1,8 @@
-import { zuoraResponseSchema } from '@modules/zuora/types';
+import { zuoraUpperCaseSuccessSchema } from '@modules/zuora/types';
 import { z } from 'zod';
 import { PaymentMethodSchema } from './paymentMethod';
 
-export const RefundResponseSchema = zuoraResponseSchema.extend({
+export const RefundResponseSchema = zuoraUpperCaseSuccessSchema.extend({
 	Id: z.string().optional(),
 });
 

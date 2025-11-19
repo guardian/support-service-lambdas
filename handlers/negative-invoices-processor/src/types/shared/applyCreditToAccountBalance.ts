@@ -1,8 +1,8 @@
-import { zuoraResponseSchema } from '@modules/zuora/types';
+import { zuoraUpperCaseSuccessSchema } from '@modules/zuora/types';
 import { z } from 'zod';
 
 export const ApplyCreditToAccountBalanceResponseSchema =
-	zuoraResponseSchema.extend({
+	zuoraUpperCaseSuccessSchema.extend({
 		Id: z.string().optional(),
 	});
 
