@@ -4,7 +4,7 @@ import type { Stage } from '@modules/stage';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import type { CognitoClient } from './cognitoClient';
 import { cookieName } from './oAuth2CallbackHandler';
-import type { ProxyTarget } from './upstreamApiClient';
+import type { UpstreamApiTarget } from './upstreamApiClient';
 import { UpstreamApiClient } from './upstreamApiClient';
 
 function getCookies(headers: Record<string, string | undefined>) {
@@ -29,7 +29,7 @@ export function proxyHandler(
 ) {
 	return async (
 		event: APIGatewayProxyEvent,
-		parsed: { path: ProxyTarget },
+		parsed: { path: UpstreamApiTarget },
 	): Promise<APIGatewayProxyResult> => {
 		const userRequestedPath =
 			parsed.path.targetApp + '/' + parsed.path.targetPath;
@@ -52,8 +52,9 @@ export function proxyHandler(
 			auth,
 		);
 
-		const { statusCode, headers, body } =
-			await upstreamClient.fetchUpstreamResource(parsed.path.targetPath);
+		const { statusCode, headers, body } = await upstreamClient.getResource(
+			parsed.path.targetPath,
+		);
 		if (statusCode === 401 || statusCode === 403) {
 			return cognitoRedirect('auth error from upstream');
 		}

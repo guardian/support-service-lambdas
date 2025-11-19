@@ -3,14 +3,14 @@ import type { RestResult } from '@modules/zuora/restClient';
 import { RestClient, RestClientError } from '@modules/zuora/restClient';
 import { getAppBaseUrl } from './getAppBaseUrl';
 
-export interface DocsResponse {
+export interface UpstreamApiResponse {
 	body: string;
 	statusCode: number;
 	headers: Record<string, string>;
 }
 
 // keep in step with cdk resource extractors
-export type ProxyTarget = { targetApp: string; targetPath: string };
+export type UpstreamApiTarget = { targetApp: string; targetPath: string };
 
 export class UpstreamApiClient extends RestClient {
 	constructor(
@@ -26,7 +26,7 @@ export class UpstreamApiClient extends RestClient {
 			Authorization: `Bearer ${this.auth}`,
 		});
 
-	fetchUpstreamResource: (path: string) => Promise<DocsResponse> = async (
+	getResource: (path: string) => Promise<UpstreamApiResponse> = async (
 		path: string,
 	) => {
 		let result: RestResult;
@@ -42,7 +42,7 @@ export class UpstreamApiClient extends RestClient {
 					body: e.body,
 					statusCode: e.statusCode,
 					headers: e.headers,
-				} satisfies DocsResponse;
+				} satisfies UpstreamApiResponse;
 			}
 			throw e;
 		}
@@ -51,6 +51,6 @@ export class UpstreamApiClient extends RestClient {
 			body: responseBody,
 			statusCode: response.status, // non 2xx will get thrown as 5xx errors
 			headers: responseHeaders,
-		} satisfies DocsResponse;
+		} satisfies UpstreamApiResponse;
 	};
 }

@@ -7,7 +7,7 @@ import type { CognitoClient } from './cognitoClient';
 import { createCognitoClientFromConfig } from './cognitoClient';
 import { oAuth2CallbackHandler } from './oAuth2CallbackHandler';
 import { proxyHandler } from './proxy';
-import type { ProxyTarget } from './upstreamApiClient';
+import type { UpstreamApiTarget } from './upstreamApiClient';
 
 const cognitoClient: Lazy<{ stage: Stage; cognitoClient: CognitoClient }> =
 	new Lazy(
@@ -22,7 +22,7 @@ export const handler: Handler = Router([
 		path: '/oauth2callback',
 		handler: oAuth2CallbackHandler(cognitoClient),
 	}),
-	createRoute<ProxyTarget, unknown>({
+	createRoute<UpstreamApiTarget, unknown>({
 		httpMethod: 'GET',
 		path: '/{targetApp}/{targetPath+}',
 		handler: proxyHandler(cognitoClient),
