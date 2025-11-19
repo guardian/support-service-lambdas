@@ -1,4 +1,3 @@
-import { objectEntries, objectFromEntries } from '@modules/objectFunctions';
 import type { IsoCountry } from '@modules/internationalisation/country';
 import { gwCountries } from '@modules/internationalisation/gwCountries';
 
@@ -17,8 +16,8 @@ const gwNonDeliverableCountries: Set<IsoCountry> = new Set([
 ]);
 
 export const gwDeliverableCountries: Partial<Record<IsoCountry, string>> =
-	objectFromEntries(
-		objectEntries(gwCountries).filter(
+	Object.fromEntries(
+		(Object.entries(gwCountries) as Array<[IsoCountry, string]>).filter(
 			([countryCode]) => !gwNonDeliverableCountries.has(countryCode),
 		),
 	);

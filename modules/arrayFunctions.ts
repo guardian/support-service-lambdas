@@ -1,11 +1,3 @@
-import { z } from 'zod';
-
-export function isInList<T extends string>(values: readonly [T, ...T[]]) {
-	return (productKey: string): productKey is T => {
-		return z.enum(values).safeParse(productKey).success;
-	};
-}
-
 export const sum = <T>(array: T[], fn: (item: T) => number): number => {
 	return array.reduce((acc, item) => acc + fn(item), 0);
 };
@@ -49,19 +41,13 @@ export const chunkArray = <T>(array: T[], chunkSize: number): T[][] => {
 	return result;
 };
 
-export const mapValues = <
-	T extends object,
-	RES extends { [K in keyof T]: any },
->(
-	obj: T,
-	fn: <K extends keyof T>(v: T[K], k: K) => RES[K],
-): RES => {
-	const res = {} as RES;
-	for (const key in obj) {
-		res[key] = fn(obj[key], key);
-	}
-	return res;
-};
+export const mapValues = <V, O>(
+	obj: Record<string, V>,
+	fn: (v: V) => O,
+): Record<string, O> =>
+	Object.fromEntries(
+		Object.entries(obj).map(([key, value]) => [key, fn(value)]),
+	);
 
 export const partition = <T>(
 	array: T[],

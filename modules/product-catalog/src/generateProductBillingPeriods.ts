@@ -1,14 +1,14 @@
 import { arrayToObject, distinct } from '@modules/arrayFunctions';
-import { objectEntries } from '@modules/objectFunctions';
 import type {
 	ZuoraCatalog,
 	ZuoraProductRatePlan,
 } from '@modules/zuora-catalog/zuoraCatalogSchema';
+import type { Product } from '@modules/product-catalog/productCatalog';
 import {
 	getZuoraProductKey,
 	isSupportedProduct,
 } from '@modules/product-catalog/zuoraToProductNameMappings';
-import type { StripeProduct, StripeProductKey } from './stripeProducts';
+import type { StripeProductKey } from './stripeProducts';
 import { stripeProducts } from './stripeProducts';
 
 const getBillingPeriodsForProduct = (
@@ -23,17 +23,20 @@ const getBillingPeriodsForProduct = (
 			)
 			.filter(
 				(billingPeriod) =>
-					billingPeriod !== null && billingPeriod !== 'Specific_Weeks',
-			),
+					billingPeriod !== null && billingPeriod != 'Specific_Weeks',
+			) as string[],
 	).sort();
 
 const getBillingPeriodsForStripeProduct = (
 	productKey: StripeProductKey,
-	product: StripeProduct,
+	product: Product<StripeProductKey>,
 ): Record<string, string[]> => {
-	const billingPeriods = Object.values(product.ratePlans).map(
-		(ratePlan) => ratePlan.billingPeriod,
-	);
+	const billingPeriods = Object.values(product.ratePlans).map((ratePlan) => {
+		const typed = ratePlan as {
+			billingPeriod: string;
+		};
+		return typed.billingPeriod;
+	});
 	return {
 		[productKey]: distinct(billingPeriods).sort(),
 	};
@@ -52,8 +55,11 @@ export const generateProductBillingPeriods = (catalog: ZuoraCatalog) => {
 		}),
 	);
 	const stripeBillingPeriods = arrayToObject(
-		objectEntries(stripeProducts).map(([productKey, product]) => {
-			return getBillingPeriodsForStripeProduct(productKey, product);
+		Object.entries(stripeProducts).map(([productKey, product]) => {
+			return getBillingPeriodsForStripeProduct(
+				productKey as StripeProductKey,
+				product,
+			);
 		}),
 	);
 	return `

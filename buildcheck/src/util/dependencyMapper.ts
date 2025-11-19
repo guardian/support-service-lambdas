@@ -3,13 +3,11 @@
 export function separateDepRecords<K extends string>(
 	libs: Record<K, string>,
 ): Record<K, Record<string, string>> {
-	return recordKeys(libs)
-		.map((lib: K) => {
-			const depRecord = {
-				[lib]: libs[lib],
-			};
-			return recordFromEntries([[lib, depRecord]]);
-		})
+	return (Object.keys(libs) as K[])
+		.map(
+			(lib) =>
+				({ [lib]: { [lib]: libs[lib] } }) as Record<K, Record<string, string>>,
+		)
 		.reduce((a, b) => ({ ...a, ...b }));
 }
 
@@ -25,18 +23,6 @@ export function withVersion<T extends string>(
 	libs: readonly T[],
 ): Record<T, string> {
 	return libs
-		.map((lib) => recordFromEntries([[lib, awsClientVersion]]))
+		.map((lib) => ({ [lib]: awsClientVersion }) as Record<T, string>)
 		.reduce((a, b) => ({ ...a, ...b }));
-}
-
-export function recordKeys<K extends string>(libs: Record<K, string>): K[] {
-	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- allowed in utility function - get back type lost by Object.keys
-	return Object.keys(libs) as K[];
-}
-
-export function recordFromEntries<K extends string, V>(
-	libs: Array<[K, V]>,
-): Record<K, V> {
-	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- allowed in utility function - get back type lost by Object.keys
-	return Object.fromEntries(libs) as Record<K, V>;
 }

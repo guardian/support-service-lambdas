@@ -30,8 +30,7 @@
 		"jest-runner-groups": "^2.2.0",
 		"prettier": "^3.3.3",
 		"ts-jest": "^29.3.2",
-		"typescript": "catalog:",
-		"zod": "catalog:"
+		"typescript": "catalog:"
 	},
 	"pnpm": {
 		"overrides": {

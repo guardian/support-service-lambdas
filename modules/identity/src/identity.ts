@@ -64,7 +64,7 @@ export class OktaTokenHelper {
 				'scp.includes': requiredScopes,
 			},
 			cacheMaxAge: 24 * 60 * 60 * 1000, // 24 hours
-		} satisfies OktaJwtVerifier.VerifierOptions);
+		} as OktaJwtVerifier.VerifierOptions);
 	}
 	verifyAccessToken = (authHeader: string): Promise<OktaJwtVerifier.Jwt> => {
 		const accessToken = authHeader.replace('Bearer ', '');

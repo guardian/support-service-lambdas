@@ -1,5 +1,3 @@
-import { isInList } from '@modules/arrayFunctions';
-
 export const CurrencyValues = [
 	'GBP',
 	'EUR',
@@ -50,7 +48,11 @@ const currencies: Record<IsoCurrency, CurrencyInfo> = {
 	},
 };
 
-export const isSupportedCurrency = isInList(CurrencyValues);
+export const isSupportedCurrency = (
+	maybeCurrency: string,
+): maybeCurrency is IsoCurrency => {
+	return (CurrencyValues as readonly string[]).includes(maybeCurrency);
+};
 
 export const getCurrencyInfo = (currency: IsoCurrency): CurrencyInfo =>
 	currencies[currency];

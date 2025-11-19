@@ -23,7 +23,6 @@ export const getSecretValue = async <T>({
 			throw new Error('No secret found');
 		}
 
-		// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo use zod
 		const secretValue = JSON.parse(response.SecretString) as T;
 
 		return secretValue;

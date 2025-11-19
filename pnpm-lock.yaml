@@ -71,9 +71,6 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.9.2
-      zod:
-        specifier: 'catalog:'
-        version: 3.25.76
 
   buildcheck:
     dependencies:

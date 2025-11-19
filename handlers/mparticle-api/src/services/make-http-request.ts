@@ -127,11 +127,10 @@ export class RestRequestMaker {
 }
 
 async function extractErrorBody(response: Response) {
-	let errorBody: unknown;
+	let errorBody: string | object | undefined;
 	try {
-		const errorBodyString = await response.text();
-		errorBody = errorBodyString;
-		errorBody = JSON.parse(errorBodyString); // see if we can squeeze json out of it
+		errorBody = await response.text();
+		errorBody = JSON.parse(errorBody) as object; // see if we can squeeze json out of it
 	} catch {
 		/*we tried our best to get something useful*/
 	}

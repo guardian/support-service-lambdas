@@ -24,17 +24,18 @@ export async function doCompositeCallout(
 			);
 		}
 
-		const sfUpdateResponse = SalesforceUpdateResponseArraySchema.safeParse(
-			await response.json(),
-		);
+		const sfUpdateResponse =
+			(await response.json()) as SalesforceUpdateResponse;
+		const parseResponse =
+			SalesforceUpdateResponseArraySchema.safeParse(sfUpdateResponse);
 
-		if (!sfUpdateResponse.success) {
+		if (!parseResponse.success) {
 			throw new Error(
-				`Error parsing response from Salesforce: ${JSON.stringify(sfUpdateResponse.error.format())}`,
+				`Error parsing response from Salesforce: ${JSON.stringify(parseResponse.error.format())}`,
 			);
 		}
 
-		return sfUpdateResponse.data;
+		return parseResponse.data;
 	} catch (error) {
 		const errorTextBase = 'Error executing composite callout to Salesforce';
 		const errorText =

@@ -25,17 +25,14 @@ export const handler = async (event: {
 			filePath: file.Key,
 		});
 
-		// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo use zod
 		const failedBatches = JSON.parse(fileString) as Array<{ Cause: string }>;
 
 		for (const batch of failedBatches) {
-			// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo use zod
 			const batchFailureCause = JSON.parse(batch.Cause) as {
 				errorType: string;
 				errorMessage: string;
 			};
 
-			// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo use zod
 			const failedRowsInBatch = JSON.parse(
 				batchFailureCause.errorMessage,
 			) as AccountRowWithResult[];

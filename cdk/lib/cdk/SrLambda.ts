@@ -31,9 +31,6 @@ function getLambdaDefaultProps(
 	scope: Identity,
 	nameSuffix: string | undefined,
 ) {
-	const environment: Record<string, string> = {
-		NODE_OPTIONS: '--enable-source-maps',
-	};
 	return {
 		app: scope.app,
 		functionName: getNameWithStage(scope, nameSuffix),
@@ -43,7 +40,9 @@ function getLambdaDefaultProps(
 		loggingFormat: LoggingFormat.TEXT,
 		memorySize: 1024,
 		timeout: Duration.seconds(15),
-		environment,
+		environment: {
+			NODE_OPTIONS: '--enable-source-maps',
+		} as Record<string, string>,
 	};
 }
 

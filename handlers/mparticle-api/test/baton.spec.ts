@@ -47,7 +47,7 @@ describe('mparticle-api Baton tests', () => {
 	});
 
 	it('Initiate Right to Erasure Request', async () => {
-		const requestId = faker.string.uuid() as GUID;
+		const requestId = faker.string.uuid();
 		mockFetchResponse(mockSetUserAttributesResponse, 202);
 		mockFetchJsonResponse(
 			getMockCreateDataSubjectRequestResponse(requestId),
@@ -92,7 +92,7 @@ describe('mparticle-api Baton tests', () => {
 	});
 
 	it('Initiate Subject Access Request', async () => {
-		const requestId: InitiationReference = faker.string.uuid() as GUID;
+		const requestId = faker.string.uuid();
 
 		mockFetchJsonResponse(
 			getMockCreateDataSubjectRequestResponse(requestId),

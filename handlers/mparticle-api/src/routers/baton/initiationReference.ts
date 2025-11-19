@@ -7,5 +7,4 @@ export type InitiationReference = GUID;
 export const InitiationReferenceSchema = z
 	.string()
 	.uuid()
-	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- already checked by serialiser
 	.transform((val) => val as InitiationReference);

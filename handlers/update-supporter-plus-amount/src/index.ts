@@ -16,7 +16,6 @@ import { requestBodySchema } from './schema';
 import { createThankYouEmail } from './sendEmail';
 import { updateSupporterPlusAmount } from './updateSupporterPlusAmount';
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo fix in next refactor
 const stage = process.env.STAGE as Stage;
 
 const pathParserSchema = z.object({

@@ -1,8 +1,5 @@
 import { productBenefitMapping } from '@modules/product-benefits/productBenefit';
-import {
-	getCustomerFacingName,
-	isProductKey,
-} from '@modules/product-catalog/productCatalog';
+import { getCustomerFacingName } from '@modules/product-catalog/productCatalog';
 import { zuoraCatalogToProductKey } from '@modules/product-catalog/zuoraToProductNameMappings';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
@@ -80,7 +77,7 @@ const getHtmlBody = (): string => {
 									`<tr>` +
 									`<td>${key}</td>` +
 									`<td>${getZuoraCatalogName(key)}</td>` +
-									`<td>${isProductKey(key) ? getCustomerFacingName(key) : 'n/a'}</td>` +
+									`<td>${getCustomerFacingName(key)}</td>` +
 									`<td>${value.sort().join(', ')}</td>` +
 									`</tr>`,
 							)

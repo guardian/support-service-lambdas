@@ -10,6 +10,6 @@ export const getPaymentMethods = async <
 	schema?: T,
 ): Promise<z.infer<T>> => {
 	const path = `/v1/accounts/${accountId}/payment-methods`;
-	const finalSchema = schema ?? DefaultPaymentMethodResponseSchema;
+	const finalSchema = (schema ?? DefaultPaymentMethodResponseSchema) as T;
 	return zuoraClient.get(path, finalSchema);
 };

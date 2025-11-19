@@ -1,6 +1,4 @@
 import { z } from 'zod';
-import type { InitiationReference } from '../../routers/baton/initiationReference';
-import { InitiationReferenceSchema } from '../../routers/baton/initiationReference';
 import type {
 	DataSubjectAPI,
 	MParticleClient,
@@ -26,7 +24,7 @@ export interface DataSubjectRequestState {
 	/**
 	 * The controller-provided identifier of the request in a GUID v4 format.
 	 */
-	requestId: InitiationReference;
+	requestId: string;
 
 	/**
 	 * A unique ID representing the data controller. mParticles sets this to the workspace ID.
@@ -51,7 +49,7 @@ export interface DataSubjectRequestState {
 export const getRequestsResponseSchema = z.object({
 	controller_id: z.string(),
 	expected_completion_time: z.string().transform((val) => new Date(val)),
-	subject_request_id: InitiationReferenceSchema,
+	subject_request_id: z.string(),
 	request_status: z.enum(['pending', 'in_progress', 'completed', 'cancelled']),
 	results_url: z.string().nullable(),
 });

@@ -10,6 +10,6 @@ export const doRefund = async <
 	schema?: T,
 ): Promise<z.infer<T>> => {
 	const path = `/v1/object/refund`;
-	const finalSchema = schema ?? zuoraResponseSchema;
+	const finalSchema = (schema ?? zuoraResponseSchema) as T;
 	return zuoraClient.post(path, body, finalSchema);
 };

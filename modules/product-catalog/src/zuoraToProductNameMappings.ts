@@ -1,10 +1,7 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
-import type {
-	ProductKey,
-	TermType,
-} from '@modules/product-catalog/productCatalog';
+import type { TermType } from '@modules/product-catalog/productCatalog';
 
-export const zuoraCatalogToProductKey: Record<string, ProductKey> = {
+export const zuoraCatalogToProductKey: Record<string, string> = {
 	'Guardian Ad-Lite': 'GuardianAdLite',
 	Contributor: 'Contribution',
 	'Supporter Plus': 'SupporterPlus',
@@ -183,7 +180,7 @@ const zuoraCatalogToProductRatePlanChargeKey: Record<string, string> = {
 	'Non Founder Patron Membership - Monthly': 'Subscription',
 	Percentage: 'Percentage',
 } as const;
-export const getZuoraProductKey = (product: string): ProductKey => {
+export const getZuoraProductKey = (product: string): string => {
 	return getIfDefined(
 		zuoraCatalogToProductKey[product],
 		`Unexpected product type ${product}`,

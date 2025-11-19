@@ -81,7 +81,6 @@ export async function getChatMessages(
 ): Promise<{ webhookUrls: string[]; text: string } | undefined> {
 	console.log('sqsRecord', record);
 
-	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo fix in next refactor
 	const { Message, MessageAttributes } = JSON.parse(
 		record.body,
 	) as SNSEventRecord['Sns'];

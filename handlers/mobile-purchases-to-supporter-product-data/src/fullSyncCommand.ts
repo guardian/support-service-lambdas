@@ -16,7 +16,6 @@ export const syncMobilePurchasesToSupporterProductData = async (
 	stage: Stage,
 	csvFile: string,
 ) => {
-	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo switch to zod or a type safe cvs lib
 	const ids = parse(fs.readFileSync(csvFile, 'utf-8'), {
 		columns: true,
 		skip_empty_lines: true,
