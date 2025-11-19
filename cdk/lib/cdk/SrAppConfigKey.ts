@@ -1,12 +1,6 @@
 import { GuStringParameter } from '@guardian/cdk/lib/constructs/core';
 import type { SrStack } from './SrStack';
 
-export function buildAppConfigKey(scope: SrStack, configKey: string) {
-	return (
-		'/' + [scope.stage, scope.stack, scope.app].join('/') + '/' + configKey
-	);
-}
-
 /**
  * Looks up a specific piece of app config from SSM to be used in the CFN.
  *
@@ -17,11 +11,12 @@ export function buildAppConfigKey(scope: SrStack, configKey: string) {
  */
 export class SrAppConfigKey extends GuStringParameter {
 	constructor(scope: SrStack, configKey: string, description?: string) {
-		const ssmKey = buildAppConfigKey(scope, configKey);
+		const appIdentitySSMPrefix =
+			'/' + [scope.stage, scope.stack, scope.app].join('/') + '/';
 		super(scope, getId('appConfig', ...configKey.split('/')), {
 			description: description ?? `parameter to look up ${configKey} from SSM`,
 			fromSSM: true,
-			default: ssmKey,
+			default: appIdentitySSMPrefix + configKey,
 		});
 	}
 }
