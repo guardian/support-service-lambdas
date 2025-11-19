@@ -1,12 +1,12 @@
 import { logger } from '@modules/routing/logger';
 import type z from 'zod';
 
-export class RestClientError extends Error {
+export class RestClientError extends Error implements RestResult {
 	constructor(
 		message: string,
 		public statusCode: number,
-		public body: string,
-		public headers: Record<string, string>,
+		public responseBody: string,
+		public responseHeaders: Record<string, string>,
 	) {
 		super(message);
 		this.name = this.constructor.name;
@@ -14,7 +14,7 @@ export class RestClientError extends Error {
 }
 
 export type RestResult = {
-	response: Response;
+	statusCode: number;
 	responseBody: string;
 	responseHeaders: Record<string, string>;
 };
@@ -99,24 +99,7 @@ export abstract class RestClient {
 		);
 
 		const json: unknown = JSON.parse(result.responseBody);
-		if (!this.isLogicalSuccess || this.isLogicalSuccess(json)) {
-			return schema.parse(json);
-		} else {
-			throw this.onFailure(result);
-		}
-	}
-
-	private onFailure(result: RestResult) {
-		if (this.generateError) {
-			return this.generateError(result);
-		}
-
-		return new RestClientError(
-			'http call failed',
-			result.response.status,
-			result.responseBody,
-			result.responseHeaders,
-		);
+		return schema.parse(json);
 	}
 
 	// has to be a function so that the callerInfo is refreshed on every call
@@ -152,29 +135,32 @@ export abstract class RestClient {
 		const responseHeaders: Record<string, string> = Object.fromEntries(
 			[...response.headers.entries()].map(([k, v]) => [k.toLowerCase(), v]),
 		);
-		const result: RestResult = { response, responseBody, responseHeaders };
+		const result: RestResult = {
+			statusCode: response.status,
+			responseBody,
+			responseHeaders,
+		};
+		if (this.assertValidResponse) {
+			this.assertValidResponse(response.ok, result);
+		}
 		if (!response.ok) {
-			throw this.onFailure(result);
+			throw new RestClientError(
+				'http call failed',
+				result.statusCode,
+				result.responseBody,
+				result.responseHeaders,
+			);
 		}
 
 		return result;
 	}
 
 	/**
-	 * if a request is deemed to have failed, you can return a custom Error to be thrown.
-	 * If this method is undefined, the default but verbose RestHttpError will be thrown.
-	 * @param result
-	 * @protected
-	 */
-	protected generateError?: (result: RestResult) => Error;
-
-	/**
-	 * This function, if defined, will get the chance to mark 200 responses as failed
-	 * (therefore send to generateError) based on the json body.
+	 * This function, if defined, will run on all responses and can throw custom errors if needed
 	 * @param json
 	 * @protected
 	 */
-	protected isLogicalSuccess?: (json: unknown) => boolean;
+	protected assertValidResponse?: (ok: boolean, result: RestResult) => void;
 
 	/**
 	 * Provide any Authorization headers via this method.  They will be sent but not logged.

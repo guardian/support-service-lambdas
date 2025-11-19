@@ -149,9 +149,9 @@ describe('RestClient', () => {
 				name: 'RestClientError',
 				message: 'http call failed',
 				statusCode: 404,
-				body: JSON.stringify(errorBody),
+				responseBody: JSON.stringify(errorBody),
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- any is ok in a test
-				headers: expect.objectContaining({ 'x-request-id': 'abc123' }),
+				responseHeaders: expect.objectContaining({ 'x-request-id': 'abc123' }),
 			});
 		});
 
@@ -168,9 +168,11 @@ describe('RestClient', () => {
 			await expect(client.get('/users/123', schema)).rejects.toThrow(ZodError);
 		});
 
-		it('should use custom generateError when provided', async () => {
+		it('should use assertValidResponse to throw custom errors', async () => {
 			const customError = new Error('Custom error');
-			client['generateError'] = () => customError;
+			client['assertValidResponse'] = () => {
+				throw customError;
+			};
 
 			mockFetchResponse({
 				ok: false,
@@ -182,10 +184,19 @@ describe('RestClient', () => {
 			await expect(client.getRaw('/error')).rejects.toThrow('Custom error');
 		});
 
-		it('should use isLogicalSuccess to determine failure', async () => {
+		it('should use assertValidResponse to determine logical failure', async () => {
 			const schema = z.object({ status: z.string(), data: z.string() });
-			client['isLogicalSuccess'] = (json: unknown) =>
-				(json as { status: string }).status === 'success';
+			client['assertValidResponse'] = (ok, result) => {
+				const json = JSON.parse(result.responseBody) as { status: string };
+				if (json.status !== 'success') {
+					throw new RestClientError(
+						'Logical failure',
+						result.statusCode,
+						result.responseBody,
+						result.responseHeaders,
+					);
+				}
+			};
 
 			mockFetchResponse({
 				ok: true,

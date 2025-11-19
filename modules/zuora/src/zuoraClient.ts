@@ -1,7 +1,8 @@
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
+import { Failure, Success, Try } from '@modules/try';
 import type { RestResult } from '@modules/zuora/restClient';
-import { RestClient } from '@modules/zuora/restClient';
+import { RestClient, RestClientError } from '@modules/zuora/restClient';
 import { BearerTokenProvider } from './auth/bearerTokenProvider';
 import { getOAuthClientCredentials } from './auth/oAuthCredentials';
 import { generateZuoraError } from './errors/zuoraErrorHandler';
@@ -14,6 +15,7 @@ export class ZuoraClient extends RestClient {
 		const bearerTokenProvider = new BearerTokenProvider(stage, credentials);
 		return new ZuoraClient(stage, bearerTokenProvider);
 	}
+
 	constructor(
 		stage: Stage,
 		private tokenProvider: BearerTokenProvider,
@@ -21,22 +23,33 @@ export class ZuoraClient extends RestClient {
 		super(zuoraServerUrl(stage).replace(/\/$/, '')); // remove trailing slash
 	}
 
-	protected generateError = (result: RestResult) => {
+	protected assertValidResponse = (ok: boolean, result: RestResult) => {
 		// When Zuora returns a 429 status, the response headers typically contain important rate limiting information
-		if (result.response.status === 429) {
+		if (result.statusCode === 429) {
 			logger.log(
 				`Received a 429 rate limit response with response headers ${JSON.stringify(result.responseHeaders)}`,
 			);
 		}
-		return generateZuoraError(JSON.parse(result.responseBody), result.response);
-	};
-
-	protected isLogicalSuccess = (json: unknown) => {
-		try {
-			return isLogicalSuccess(json);
-		} catch {
-			return false;
-		}
+		const failableValid: Try<void> = Try<unknown>(() =>
+			JSON.parse(result.responseBody),
+		)
+			.mapError(
+				() =>
+					new RestClientError(
+						'zuora call failed, response was not valid JSON',
+						result.statusCode,
+						result.responseBody,
+						result.responseHeaders,
+					),
+			)
+			.flatMap((json: unknown) => {
+				if (ok && Try(() => isLogicalSuccess(json)).getOrElse(false)) {
+					return Success<void>(undefined);
+				} else {
+					return Failure(generateZuoraError(json, result));
+				}
+			});
+		return failableValid.get();
 	};
 
 	protected getAuthHeaders = async () => {
