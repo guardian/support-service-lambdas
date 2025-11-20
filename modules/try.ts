@@ -1,6 +1,6 @@
 type TryBase<A> = {
 	get: () => A;
-	getOrElse: (v: A) => A;
+	getOrElse: <N>(v: N) => A | N;
 	flatMap: <B>(fn: (a: A) => Try<B>) => Try<B>;
 	mapError: (fn: (err: Error) => Error) => Try<A>;
 };
@@ -50,3 +50,14 @@ export const Try: <A>(fn: () => A) => Try<A> = <A>(fn: () => A) => {
 		throw error;
 	}
 };
+
+export function sequenceTry<A>(promise: Promise<A>): Promise<Try<A>> {
+	return promise
+		.then((value) => Success(value))
+		.catch((error) => {
+			if (error instanceof Error) {
+				return Failure<A>(error);
+			}
+			return Failure<A>(new Error(String(error)));
+		});
+}
