@@ -11,7 +11,20 @@ fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-aws s3 cp s3://gu-zuora-catalog/PROD/Zuora-CODE/catalog.json - --profile membership | jq '.products |= sort_by(.name)' > "$SCRIPT_DIR/../test/fixtures/catalog-code.json"
-aws s3 cp s3://gu-zuora-catalog/PROD/Zuora-PROD/catalog.json - --profile membership | jq '.products |= sort_by(.name)' > "$SCRIPT_DIR/../test/fixtures/catalog-prod.json"
+# The guardian product catalog uses zuoraCatalogToProductKey and so on, so we can't match that order
+# therefore we can use the name fields as a proxy to get things determinstic
+JQ_FILTER='
+  .products |= (sort_by(.name) | map(
+    .productRatePlans |= (sort_by(.name) | map(
+      .productRatePlanCharges |= (sort_by(.name) | map(
+        .pricing |= sort_by(.currency) |
+        .pricingSummary |= sort
+      ))
+    ))
+  ))
+'
+
+aws s3 cp s3://gu-zuora-catalog/PROD/Zuora-CODE/catalog.json - --profile membership | jq "$JQ_FILTER" > "$SCRIPT_DIR/../test/fixtures/catalog-code.json"
+aws s3 cp s3://gu-zuora-catalog/PROD/Zuora-PROD/catalog.json - --profile membership | jq "$JQ_FILTER" > "$SCRIPT_DIR/../test/fixtures/catalog-prod.json"
 
 echo "Completed: Updated catalog-code.json and catalog-prod.json from s3://gu-zuora-catalog/PROD"
