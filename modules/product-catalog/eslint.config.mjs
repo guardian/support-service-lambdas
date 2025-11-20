@@ -4,7 +4,11 @@ import sortKeysFix from 'eslint-plugin-sort-keys-fix';
 export default [
 	...guardian.configs.recommended,
 	{
-		files: ['src/productCatalogSchema.ts', 'src/productBillingPeriods.ts'],
+		files: [
+			'src/productCatalogSchema.ts',
+			'src/productBillingPeriods.ts',
+			'src/productPurchaseSchema.ts',
+		],
 		plugins: {
 			'sort-keys-fix': sortKeysFix,
 		},
