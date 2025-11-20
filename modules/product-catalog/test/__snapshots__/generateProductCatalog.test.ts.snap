@@ -189,6 +189,7 @@ exports[`code Generated product catalog matches snapshot 1`] = `
         },
         "id": "71a1bebf6be9444afad446c5ebaf0019",
         "pricing": {
+          "EUR": 5,
           "GBP": 5,
         },
         "termLengthInMonths": 12,
@@ -2315,6 +2316,7 @@ exports[`prod Generated product catalog matches snapshot 1`] = `
         },
         "id": "8a1285e294443da501944b04cb692c9e",
         "pricing": {
+          "EUR": 5,
           "GBP": 5,
         },
         "termLengthInMonths": 12,
