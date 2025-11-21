@@ -1,3 +1,4 @@
+import * as console from 'node:console';
 import type { Stage } from '@modules/stage';
 import OktaJwtVerifier from '@okta/jwt-verifier';
 import { z } from 'zod';
@@ -63,7 +64,7 @@ export class OktaTokenHelper {
 				'scp.includes': requiredScopes,
 			},
 			cacheMaxAge: 24 * 60 * 60 * 1000, // 24 hours
-		} as OktaJwtVerifier.VerifierOptions);
+		} satisfies OktaJwtVerifier.VerifierOptions);
 	}
 	verifyAccessToken = (authHeader: string): Promise<OktaJwtVerifier.Jwt> => {
 		const accessToken = authHeader.replace('Bearer ', '');
@@ -80,10 +81,17 @@ export class OktaTokenHelper {
 		try {
 			const jwt = await this.verifyAccessToken(authHeader);
 			console.log('Successfully verified access token');
-			const claims = jwtClaimsSchema.parse(jwt.claims);
+
+			const parsedClaims = jwtClaimsSchema.safeParse(jwt.claims);
+			if (!parsedClaims.success) {
+				console.log(
+					`Failed to parse JWT claims: ${JSON.stringify(jwt.claims)} because of error ${JSON.stringify(parsedClaims.error)}`,
+				);
+				throw new InvalidTokenError('JWT claims are invalid');
+			}
 			return {
-				identityId: claims.legacy_identity_id,
-				email: claims.sub,
+				identityId: parsedClaims.data.legacy_identity_id,
+				email: parsedClaims.data.sub,
 			};
 		} catch (err) {
 			console.log(`Failed to verify access token: ${String(err)}`);

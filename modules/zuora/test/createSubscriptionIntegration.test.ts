@@ -4,31 +4,27 @@
  * @group integration
  */
 
-import { IsoCurrency } from '@modules/internationalisation/currency';
+import { SupportRegionId } from '@modules/internationalisation/countryGroup';
+import type { IsoCurrency } from '@modules/internationalisation/currency';
+import { getIfDefined } from '@modules/nullAndUndefined';
+import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
+import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
+import { getPromotions } from '@modules/promotions/getPromotions';
+import type { Promotion } from '@modules/promotions/schema';
 import dayjs from 'dayjs';
-import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import {
-	createSubscription,
-	CreateSubscriptionInputFields,
-} from '@modules/zuora/createSubscription/createSubscription';
-import {
+import type { CreateSubscriptionInputFields } from '@modules/zuora/createSubscription/createSubscription';
+import { createSubscription } from '@modules/zuora/createSubscription/createSubscription';
+import type { PreviewCreateSubscriptionInputFields } from '@modules/zuora/createSubscription/previewCreateSubscription';
+import { previewCreateSubscription } from '@modules/zuora/createSubscription/previewCreateSubscription';
+import { getInvoice } from '@modules/zuora/invoice';
+import type {
 	CreditCardReferenceTransaction,
 	DirectDebit,
 	PaymentGateway,
 } from '@modules/zuora/orders/paymentMethods';
-import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
-import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
-import {
-	previewCreateSubscription,
-	PreviewCreateSubscriptionInputFields,
-} from '@modules/zuora/createSubscription/previewCreateSubscription';
-import { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
-import { Promotion } from '@modules/promotions/schema';
-import { getInvoice } from '@modules/zuora/invoice';
-import { getIfDefined } from '@modules/nullAndUndefined';
-import { SupportRegionId } from '@modules/internationalisation/countryGroup';
-import { getPromotions } from '@modules/promotions/getPromotions';
 import { getSubscription } from '@modules/zuora/subscription';
+import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
 
 describe('createSubscription integration', () => {
 	const productCatalog = generateProductCatalog(code);
@@ -61,7 +57,6 @@ describe('createSubscription integration', () => {
 		type: 'Bacs',
 	};
 	const createInputFields: CreateSubscriptionInputFields<DirectDebit> = {
-		stage: 'CODE',
 		accountName: 'Test Account',
 		createdRequestId: 'REQUEST-ID' + new Date().getTime(),
 		salesforceAccountId: 'CRM-ID',

@@ -1,5 +1,9 @@
 import { productBenefitMapping } from '@modules/product-benefits/productBenefit';
-import { getCustomerFacingName } from '@modules/product-catalog/productCatalog';
+import {
+	getCustomerFacingName,
+	isProductKey,
+} from '@modules/product-catalog/productCatalog';
+import { zuoraCatalogToProductKey } from '@modules/product-catalog/zuoraToProductNameMappings';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
 export const benefitsListHandler = async (
@@ -27,6 +31,14 @@ const getHttpResponse = (
 		body,
 	});
 };
+
+export function getZuoraCatalogName(productKey: unknown): string {
+	return (
+		Object.entries(zuoraCatalogToProductKey).find(
+			([, value]) => value === productKey,
+		)?.[0] ?? '** Not in Zuora **'
+	);
+}
 
 const getHtmlBody = (): string => {
 	return `
@@ -57,16 +69,19 @@ const getHtmlBody = (): string => {
 				<table>
 				<tbody>
 					<tr>
-						<th>Zuora Product</th>
+						<th>Product Catalog Key</th>
+						<th>Zuora Catalog Name</th>
 						<th>Customer Facing Name</th>
 						<th>Benefits</th>
 						${Object.entries(productBenefitMapping)
+							.sort(([key1], [key2]) => key1.localeCompare(key2))
 							.map(
 								([key, value]) =>
 									`<tr>` +
 									`<td>${key}</td>` +
-									`<td>${getCustomerFacingName(key)}</td>` +
-									`<td>${value.join(', ')}</td>` +
+									`<td>${getZuoraCatalogName(key)}</td>` +
+									`<td>${isProductKey(key) ? getCustomerFacingName(key) : 'n/a'}</td>` +
+									`<td>${value.sort().join(', ')}</td>` +
 									`</tr>`,
 							)
 							.join('')}

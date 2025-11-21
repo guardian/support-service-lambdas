@@ -4,14 +4,14 @@ import {
 } from '@modules/zuora/types/httpResponse';
 
 describe('Schema validation for HTTP responses', () => {
-	test('should validate successful lower case response', async () => {
+	test('should validate successful lower case response', () => {
 		expect(
 			zuoraSuccessSchema.safeParse({
 				success: true,
 			}).success,
 		).toBe(true);
 	});
-	test('should validate successful upper case response', async () => {
+	test('should validate successful upper case response', () => {
 		expect(
 			zuoraSuccessSchema.safeParse({
 				Success: true,

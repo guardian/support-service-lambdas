@@ -1,6 +1,5 @@
-import { z } from 'zod';
 import { BillingPeriodValues } from '@modules/billingPeriod';
-import { zuoraResponseSchema } from '../httpResponse';
+import { z } from 'zod';
 
 export const zuoraSubscriptionSchema = z.object({
 	id: z.string(),
@@ -51,10 +50,6 @@ export const zuoraSubscriptionSchema = z.object({
 		}),
 	),
 });
-
-export const zuoraSubscriptionResponseSchema = zuoraResponseSchema.merge(
-	zuoraSubscriptionSchema,
-);
 
 export type ZuoraSubscription = z.infer<typeof zuoraSubscriptionSchema>;
 

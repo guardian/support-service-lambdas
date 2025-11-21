@@ -1,9 +1,7 @@
-import { z } from 'zod';
-import {
-	CheckForActiveSubOutput,
-	CheckForActiveSubOutputSchema,
-} from './CheckForActiveSub';
+import type { z } from 'zod';
 import { PaymentMethodResultSchema } from '../shared';
+import type { CheckForActiveSubOutput } from './CheckForActiveSub';
+import { CheckForActiveSubOutputSchema } from './CheckForActiveSub';
 
 export const GetPaymentMethodsInputSchema = CheckForActiveSubOutputSchema;
 export type GetPaymentMethodsInput = CheckForActiveSubOutput;

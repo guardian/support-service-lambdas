@@ -19,6 +19,7 @@ export interface TicketTailorRequest {
 }
 
 async function processValidSqsRecord(sqsRecord: ApiGatewayToSqsEvent) {
+	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo use zod
 	const ticketTailorRequest = JSON.parse(sqsRecord.body) as TicketTailorRequest;
 	const email = ticketTailorRequest.payload.buyer_details.email;
 	logger.mutableAddContext(email);

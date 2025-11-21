@@ -1,13 +1,18 @@
 import { Logger } from '@modules/routing/logger';
 import { Router } from '@modules/routing/router';
-import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { handleStripeWebhook } from './services';
 import { getSecretValue } from '@modules/secrets-manager/getSecret';
-import { StripeCredentials } from './types';
 import { stageFromEnvironment } from '@modules/stage';
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import Stripe from 'stripe';
+import { z } from 'zod';
+import { handleStripeWebhook } from './services';
+import type { StripeCredentials } from './types';
 
 const logger = new Logger();
+
+const bodyWithTypeSchema = z.object({
+	type: z.string(),
+});
 
 const router = Router([
 	{
@@ -15,7 +20,7 @@ const router = Router([
 		path: '/',
 		handler: async (event: APIGatewayProxyEvent) => {
 			// Parse the webhook body to determine the event type
-			const body = JSON.parse(event.body || '{}');
+			const body = bodyWithTypeSchema.parse(JSON.parse(event.body ?? '{}'));
 			const eventType = body.type;
 
 			logger.log(`Received webhook event type: ${eventType}`);
@@ -70,23 +75,55 @@ export const handler = async (
 			`${stageFromEnvironment()}/Stripe/ConnectedApp/StripeDisputeWebhooks`,
 		);
 
+	// Try to verify with both Stripe accounts (main and Australian)
+	// Doc: https://docs.stripe.com/identity/handle-verification-outcomes#create-webhook
+	let verifiedEvent: Stripe.Event | null = null;
+	let lastError: Error | null = null;
+
+	const stripe = new Stripe(endpointSecretObject.secret_key);
+
+	// Try main account first
 	try {
-		// Doc: https://docs.stripe.com/identity/handle-verification-outcomes#create-webhook
-		new Stripe(endpointSecretObject.secret_key).webhooks.constructEvent(
+		verifiedEvent = stripe.webhooks.constructEvent(
 			event.body,
 			stripeSignature,
 			endpointSecretObject.webhook_endpoint_secret,
 		);
-		logger.log('Processing API Gateway webhook event');
-		const response: APIGatewayProxyResult = await router(event);
-		logger.log(`Webhook response: ${JSON.stringify(response)}`);
-		return response;
+		logger.log('Webhook verified with main Stripe account');
 	} catch (err) {
-		const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+		logger.log('Failed to verify with main account, trying Australian account');
+		lastError = err instanceof Error ? err : new Error('Unknown error');
+
+		// Try Australian account
+		try {
+			const stripeAustralia = new Stripe(
+				endpointSecretObject.secret_key_autralia,
+			);
+			verifiedEvent = stripeAustralia.webhooks.constructEvent(
+				event.body,
+				stripeSignature,
+				endpointSecretObject.webhook_endpoint_secret_autralia,
+			);
+			logger.log('Webhook verified with Australian Stripe account');
+		} catch (errAu) {
+			lastError = errAu instanceof Error ? errAu : new Error('Unknown error');
+			logger.error('Failed to verify with both accounts');
+		}
+	}
+
+	// If both failed, return error
+	if (!verifiedEvent) {
+		const errorMessage = lastError?.message ?? 'Unknown error';
 		logger.error(`Error verifying Stripe webhook signature: ${errorMessage}`);
 		return {
 			statusCode: 403,
 			body: JSON.stringify({ message: `Webhook Error: ${errorMessage}` }),
 		};
 	}
+
+	// Continue with verified event
+	logger.log('Processing API Gateway webhook event');
+	const response: APIGatewayProxyResult = await router(event);
+	logger.log(`Webhook response: ${JSON.stringify(response)}`);
+	return response;
 };

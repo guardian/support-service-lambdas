@@ -3,8 +3,8 @@ import { prettyPrint } from '@modules/prettyPrint';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { getSubscription } from '@modules/zuora/subscription';
-import { zuoraResponseSchema } from '@modules/zuora/types';
 import type { ZuoraSubscription } from '@modules/zuora/types';
+import { zuoraSuccessSchema } from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
@@ -81,7 +81,7 @@ void (async () => {
 		runBilling: true,
 		notes: 'Updated amount from support-service-lambdas test-users project',
 	});
-	return zuoraClient.put(path, body, zuoraResponseSchema, {
+	return zuoraClient.put(path, body, zuoraSuccessSchema, {
 		'zuora-version': '211.0',
 	});
 })();

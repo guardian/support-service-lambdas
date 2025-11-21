@@ -74,7 +74,7 @@ export class RestRequestMaker {
 			([k]) => k.toLowerCase(),
 			([, v]) => v,
 		);
-		const contentType = headers['content-type']?.[0]?.split('; ')?.[0];
+		const contentType = headers['content-type']?.[0]?.split('; ')[0];
 
 		const responseText = await response.text();
 		try {
@@ -127,10 +127,11 @@ export class RestRequestMaker {
 }
 
 async function extractErrorBody(response: Response) {
-	let errorBody: string | object | undefined;
+	let errorBody: unknown;
 	try {
-		errorBody = await response.text();
-		errorBody = JSON.parse(errorBody) as object; // see if we can squeeze json out of it
+		const errorBodyString = await response.text();
+		errorBody = errorBodyString;
+		errorBody = JSON.parse(errorBodyString); // see if we can squeeze json out of it
 	} catch {
 		/*we tried our best to get something useful*/
 	}

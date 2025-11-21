@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/order -- the other import must come after the mocks
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 
 const mockLogger = {
@@ -44,6 +45,7 @@ jest.mock('../src/services', () => ({
 	handleStripeWebhook: jest.fn(() => jest.fn()),
 }));
 
+// eslint-disable-next-line import/first -- this must come after the mocks
 import { handler } from '../src/producer';
 
 describe('Producer Handler', () => {
@@ -210,7 +212,7 @@ describe('Producer Handler', () => {
 			const event = createMockApiGatewayEvent(
 				'/',
 				'POST',
-				null as any,
+				null as unknown as string,
 				'valid_signature',
 			);
 
@@ -258,6 +260,7 @@ describe('Producer Handler', () => {
 			);
 
 			mockStripeWebhooksConstructEvent.mockImplementation(() => {
+				// eslint-disable-next-line @typescript-eslint/only-throw-error -- we are testing non-Error throws
 				throw 'String error';
 			});
 

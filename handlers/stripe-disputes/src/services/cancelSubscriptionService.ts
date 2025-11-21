@@ -30,7 +30,7 @@ export async function cancelSubscriptionService(
 		`Canceling active subscription: ${subscription.subscriptionNumber}`,
 	);
 
-	const cancelResponse = await cancelSubscription(
+	await cancelSubscription(
 		zuoraClient,
 		subscription.subscriptionNumber,
 		dayjs(),
@@ -39,25 +39,15 @@ export async function cancelSubscriptionService(
 		'EndOfLastInvoicePeriod',
 	);
 
-	logger.log(
-		'Subscription cancellation response:',
-		JSON.stringify(cancelResponse),
-	);
+	logger.log('Subscription cancellation succeeded');
 
 	// Update subscription with cancellation reason
 	try {
 		logger.log('Updating subscription with cancellation reason');
-		const updateResponse = await updateSubscription(
-			zuoraClient,
-			subscription.subscriptionNumber,
-			{
-				CancellationReason__c: 'Disputed Payment',
-			},
-		);
-		logger.log(
-			'Subscription cancellation reason update response:',
-			JSON.stringify(updateResponse),
-		);
+		await updateSubscription(zuoraClient, subscription.subscriptionNumber, {
+			CancellationReason__c: 'Disputed Payment',
+		});
+		logger.log('Subscription cancellation reason update succeeded');
 	} catch (updateError) {
 		logger.error('Failed to update cancellation reason:', updateError);
 		// Don't throw - the cancellation succeeded even if the update failed

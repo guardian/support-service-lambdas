@@ -15,6 +15,7 @@ export interface HandlerDefinition {
 	extraScripts?: Record<string, string>;
 	dependencies?: Record<string, string>;
 	devDependencies?: Record<string, string>;
+	tsConfigExtra?: Record<string, unknown>;
 }
 
 const alarmsHandler: HandlerDefinition = {
@@ -88,10 +89,31 @@ const mparticleApi: HandlerDefinition = {
 	},
 };
 
+const mobilePurchasesToSupporterProductData: HandlerDefinition = {
+	name: 'mobile-purchases-to-supporter-product-data',
+	testTimeoutSeconds: 15,
+	dependencies: {
+		...dep['@aws-sdk/client-dynamodb'],
+		...dep.zod,
+		...dep.dayjs,
+	},
+	devDependencies: {
+		...dep['@types/aws-lambda'],
+		...dep['csv-parse'],
+		...dep['ts-node'],
+		...dep['tsconfig-paths'],
+	},
+	extraScripts: {
+		runFullSync:
+			'ts-node  -r tsconfig-paths/register --project ../../tsconfig.json src/fullSyncCommand.ts',
+	},
+};
+
 export const build: HandlerDefinition[] = [
 	alarmsHandler,
 	discountApi,
 	updateSupporterPlusAmount,
 	productSwitchApi,
 	mparticleApi,
+	mobilePurchasesToSupporterProductData,
 ];

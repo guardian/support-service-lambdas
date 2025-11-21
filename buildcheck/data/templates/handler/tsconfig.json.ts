@@ -1,3 +1,8 @@
-export default {
-	extends: '../../tsconfig.json',
+import { HandlerDefinition } from '../../build';
+
+export default (pkg: HandlerDefinition) => {
+	return {
+		extends: '../../tsconfig.json',
+		...pkg.tsConfigExtra,
+	};
 };

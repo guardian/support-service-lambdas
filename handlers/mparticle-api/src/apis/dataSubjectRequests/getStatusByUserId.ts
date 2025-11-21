@@ -1,11 +1,10 @@
+import { z } from 'zod';
 import type {
 	DataSubjectAPI,
 	MParticleClient,
 } from '../../services/mparticleClient';
-
-import { z } from 'zod';
+import type { DataSubjectRequestState } from './getStatus';
 import {
-	DataSubjectRequestState,
 	getRequestsResponseSchema,
 	parseDataSubjectRequestStatus,
 } from './getStatus';

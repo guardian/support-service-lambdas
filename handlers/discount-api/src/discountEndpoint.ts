@@ -122,7 +122,7 @@ export const applyDiscountEndpoint = async (
 		today,
 	);
 	logger.log('Apply a discount to the subscription');
-	const discounted = await addDiscount(
+	await addDiscount(
 		zuoraClient,
 		subscriptionNumber,
 		dayjs(subscription.termStartDate),
@@ -130,11 +130,6 @@ export const applyDiscountEndpoint = async (
 		dayjs(dateToApply),
 		discount.productRatePlanId,
 	);
-
-	if (!discounted.success) {
-		throw new Error('discount was not applied: ' + JSON.stringify(discounted));
-	}
-
 	logger.log('Discount applied successfully');
 
 	const billingPreviewAfter = await getBillingPreview(
