@@ -43,15 +43,15 @@ const AccountHolderInfoSchema = z.object({
 
 // Mandate info schema
 const MandateInfoSchema = z.object({
-	mitProfileAction: z.string().optional(),
-	mitProfileType: z.string().optional(),
-	mitConsentAgreementSrc: z.string().optional(),
-	mitConsentAgreementRef: z.string().optional(),
-	mitTransactionId: z.string().optional(),
-	mitProfileAgreedOn: z.string().optional(),
+	mitProfileAction: z.string().nullish(),
+	mitProfileType: z.string().nullish(),
+	mitConsentAgreementSrc: z.string().nullish(),
+	mitConsentAgreementRef: z.string().nullish(),
+	mitTransactionId: z.string().nullish(),
+	mitProfileAgreedOn: z.string().nullish(),
 	mandateStatus: z.string().nullable(),
 	mandateReason: z.string().nullable(),
-	mandateId: z.string(),
+	mandateId: z.string().nullable(),
 	mandateReceivedStatus: z.string().nullish(),
 	existingMandateStatus: z.string().nullish(),
 	mandateCreationDate: z.string().nullish(),
