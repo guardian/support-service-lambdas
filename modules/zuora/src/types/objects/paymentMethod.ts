@@ -43,19 +43,19 @@ const AccountHolderInfoSchema = z.object({
 
 // Mandate info schema
 const MandateInfoSchema = z.object({
-	mitProfileAction: z.string().nullable(),
-	mitProfileType: z.string().nullable(),
-	mitConsentAgreementSrc: z.string().nullable(),
-	mitConsentAgreementRef: z.string().nullable(),
-	mitTransactionId: z.string().nullable(),
-	mitProfileAgreedOn: z.string().nullable(),
+	mitProfileAction: z.string().optional(),
+	mitProfileType: z.string().optional(),
+	mitConsentAgreementSrc: z.string().optional(),
+	mitConsentAgreementRef: z.string().optional(),
+	mitTransactionId: z.string().optional(),
+	mitProfileAgreedOn: z.string().optional(),
 	mandateStatus: z.string().nullable(),
 	mandateReason: z.string().nullable(),
-	mandateId: z.string().nullable(),
-	mandateReceivedStatus: z.string().nullable().optional(),
-	existingMandateStatus: z.string().nullable().optional(),
-	mandateCreationDate: z.string().nullable().optional(),
-	mandateUpdateDate: z.string().nullable().optional(),
+	mandateId: z.string(),
+	mandateReceivedStatus: z.string().nullish(),
+	existingMandateStatus: z.string().nullish(),
+	mandateCreationDate: z.string().nullish(),
+	mandateUpdateDate: z.string().nullish(),
 });
 
 // Credit card payment method
