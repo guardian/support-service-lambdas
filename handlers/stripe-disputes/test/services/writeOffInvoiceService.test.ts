@@ -35,10 +35,7 @@ describe('writeOffInvoiceService', () => {
 		expect(mockLogger.log).toHaveBeenCalledWith(
 			'Writing off invoice: INV-12345',
 		);
-		expect(mockLogger.log).toHaveBeenCalledWith(
-			'Invoice write-off response:',
-			JSON.stringify(mockResponse),
-		);
+		expect(mockLogger.log).toHaveBeenCalledWith('Invoice write-off succeeded');
 		expect(writeOffInvoice).toHaveBeenCalledWith(
 			mockZuoraClient,
 			'INV-12345',

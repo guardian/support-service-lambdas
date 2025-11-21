@@ -10,7 +10,7 @@ import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import {
 	zuoraAccountSchema,
-	zuoraSubscriptionResponseSchema,
+	zuoraSubscriptionSchema,
 } from '@modules/zuora/types';
 import dayjs from 'dayjs';
 import zuoraCatalogFixture from '../../../modules/zuora-catalog/test/fixtures/catalog-prod.json';
@@ -35,7 +35,7 @@ export const getProductCatalogFromFixture = (): ProductCatalog =>
 
 test('startNewTerm is only true when the termStartDate is before today', async () => {
 	const today = dayjs('2024-05-09T23:10:10.663+01:00');
-	const subscription = zuoraSubscriptionResponseSchema.parse(subscriptionJson);
+	const subscription = zuoraSubscriptionSchema.parse(subscriptionJson);
 	const account = zuoraAccountSchema.parse(accountJson);
 	const productCatalog = getProductCatalogFromFixture();
 
@@ -54,7 +54,7 @@ test('startNewTerm is only true when the termStartDate is before today', async (
 
 test('owner check is bypassed for salesforce calls', async () => {
 	const today = dayjs('2024-05-09T23:10:10.663+01:00');
-	const subscription = zuoraSubscriptionResponseSchema.parse(subscriptionJson);
+	const subscription = zuoraSubscriptionSchema.parse(subscriptionJson);
 	const account = zuoraAccountSchema.parse(accountJson);
 	const productCatalog = getProductCatalogFromFixture();
 
@@ -73,7 +73,7 @@ test('owner check is bypassed for salesforce calls', async () => {
 
 test("owner check doesn't allow incorrect owner", async () => {
 	const today = dayjs('2024-05-09T23:10:10.663+01:00');
-	const subscription = zuoraSubscriptionResponseSchema.parse(subscriptionJson);
+	const subscription = zuoraSubscriptionSchema.parse(subscriptionJson);
 	const account = zuoraAccountSchema.parse(accountJson);
 	const productCatalog = getProductCatalogFromFixture();
 
@@ -92,8 +92,7 @@ test("owner check doesn't allow incorrect owner", async () => {
 });
 
 test('preview amounts are correct', () => {
-	const subscription =
-		zuoraSubscriptionResponseSchema.parse(alreadySwitchedJson);
+	const subscription = zuoraSubscriptionSchema.parse(alreadySwitchedJson);
 
 	const apiResponse = {
 		success: true,
@@ -213,7 +212,7 @@ test('handleMissingRefundAmount() called on the charge-through-date for a subscr
 			chargeId: '2c92a0fc5e1dc084015e37f58c7b0f35',
 		},
 	};
-	const subscription: ZuoraSubscription = zuoraSubscriptionResponseSchema.parse(
+	const subscription: ZuoraSubscription = zuoraSubscriptionSchema.parse(
 		zuoraSubscriptionWithMonthlyContribution,
 	);
 
@@ -244,7 +243,7 @@ test('handleMissingRefundAmount() called on a date that is not the charge-throug
 			chargeId: '2c92a0fc5e1dc084015e37f58c7b0f35',
 		},
 	};
-	const subscription = zuoraSubscriptionResponseSchema.parse(
+	const subscription = zuoraSubscriptionSchema.parse(
 		zuoraSubscriptionWithMonthlyContribution,
 	);
 
@@ -306,8 +305,7 @@ test('Email message body is correct', () => {
 
 test('We can tell when a subscription has already been switched to Supporter Plus', () => {
 	const productCatalog = getProductCatalogFromFixture();
-	const subscription =
-		zuoraSubscriptionResponseSchema.parse(alreadySwitchedJson);
+	const subscription = zuoraSubscriptionSchema.parse(alreadySwitchedJson);
 	expect(
 		subscriptionHasAlreadySwitchedToSupporterPlus(productCatalog, subscription),
 	).toEqual(true);
@@ -315,8 +313,7 @@ test('We can tell when a subscription has already been switched to Supporter Plu
 
 test('We throw a validation error (converts to 400) when trying to switch an already switched subscription', () => {
 	const productCatalog = getProductCatalogFromFixture();
-	const subscription =
-		zuoraSubscriptionResponseSchema.parse(alreadySwitchedJson);
+	const subscription = zuoraSubscriptionSchema.parse(alreadySwitchedJson);
 	expect(() =>
 		getFirstContributionRatePlan(productCatalog, subscription),
 	).toThrow(ValidationError);
@@ -324,9 +321,7 @@ test('We throw a validation error (converts to 400) when trying to switch an alr
 
 test('We throw a reference error (converts to 500) if a subscription has no contribution charge', () => {
 	const productCatalog = getProductCatalogFromFixture();
-	const subscription = zuoraSubscriptionResponseSchema.parse(
-		jsonWithNoContribution,
-	);
+	const subscription = zuoraSubscriptionSchema.parse(jsonWithNoContribution);
 	expect(() =>
 		getFirstContributionRatePlan(productCatalog, subscription),
 	).toThrow(ReferenceError);
@@ -334,7 +329,7 @@ test('We throw a reference error (converts to 500) if a subscription has no cont
 
 test('We can successfully find the contribution charge on a valid subscription', () => {
 	const productCatalog = getProductCatalogFromFixture();
-	const subscription = zuoraSubscriptionResponseSchema.parse(subscriptionJson);
+	const subscription = zuoraSubscriptionSchema.parse(subscriptionJson);
 	expect(() =>
 		getFirstContributionRatePlan(productCatalog, subscription),
 	).toBeDefined();
@@ -342,7 +337,7 @@ test('We can successfully find the contribution charge on a valid subscription',
 
 test('When newAmount is specified, it calculates contribution based on newAmount instead of previousAmount', async () => {
 	const productCatalog = getProductCatalogFromFixture();
-	const subscription = zuoraSubscriptionResponseSchema.parse(subscriptionJson);
+	const subscription = zuoraSubscriptionSchema.parse(subscriptionJson);
 	const account = zuoraAccountSchema.parse(accountJson);
 	const today = dayjs();
 
@@ -366,7 +361,7 @@ test('When newAmount is specified, it calculates contribution based on newAmount
 
 test('When newAmount is not specified, use the old amount with the base price as a floor', async () => {
 	const productCatalog = getProductCatalogFromFixture();
-	const subscription = zuoraSubscriptionResponseSchema.parse(subscriptionJson);
+	const subscription = zuoraSubscriptionSchema.parse(subscriptionJson);
 	const account = zuoraAccountSchema.parse(accountJson);
 	const today = dayjs();
 
@@ -390,7 +385,7 @@ test('When newAmount is not specified, use the old amount with the base price as
 
 test('When newAmount is less than base Supporter Plus price, it throws a validation error', async () => {
 	const productCatalog = getProductCatalogFromFixture();
-	const subscription = zuoraSubscriptionResponseSchema.parse(subscriptionJson);
+	const subscription = zuoraSubscriptionSchema.parse(subscriptionJson);
 	const account = zuoraAccountSchema.parse(accountJson);
 	const today = dayjs();
 
