@@ -5,6 +5,7 @@ export type ZuoraErrorDetail = {
 export class ZuoraError extends Error {
 	constructor(
 		message: string,
+		public code: number,
 		public zuoraErrorDetails: ZuoraErrorDetail[],
 	) {
 		super(message);

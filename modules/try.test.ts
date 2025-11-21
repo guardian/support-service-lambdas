@@ -37,6 +37,23 @@ describe('Success', () => {
 		expect(mapped.success).toBe(true);
 		expect(mapped.get()).toBe(42);
 	});
+
+	it('should map to a new Success', () => {
+		const result = Success(42);
+		const mapped = result.map((n) => n * 2);
+		expect(mapped.success).toBe(true);
+		expect(mapped.get()).toBe(84);
+	});
+
+	it('should map to a Failure if mapper throws', () => {
+		const result = Success(42);
+		const error = new Error('map error');
+		const mapped = result.map(() => {
+			throw error;
+		});
+		expect(mapped.success).toBe(false);
+		expect((mapped as Failure<number>).failure).toBe(error);
+	});
 });
 
 describe('Failure', () => {
@@ -79,6 +96,13 @@ describe('Failure', () => {
 		const finalFailure = (mapped as Failure<number>).failure;
 		expect(finalFailure.message).toBe(wrapperMessage);
 		expect(finalFailure.cause).toBe(error);
+	});
+
+	it('should not execute map', () => {
+		const result = Failure<number>(error);
+		const mapped = result.map((n) => n * 2);
+		expect(mapped.success).toBe(false);
+		expect((mapped as Failure<number>).failure).toBe(error);
 	});
 });
 

@@ -1,5 +1,14 @@
 import { ZuoraError } from '@modules/zuora/errors';
 import { generateZuoraError } from '@modules/zuora/errors/zuoraErrorHandler';
+import type { RestResult } from '@modules/zuora/restClient';
+
+function mockResponse(status: number, body: unknown): RestResult {
+	return {
+		statusCode: status,
+		responseBody: JSON.stringify(body),
+		responseHeaders: {},
+	};
+}
 
 describe('generateZuoraError', () => {
 	it('parses lowerCaseZuoraErrorSchema format', () => {
@@ -13,7 +22,8 @@ describe('generateZuoraError', () => {
 				},
 			],
 		};
-		const error = generateZuoraError(body);
+		const response = mockResponse(401, body);
+		const error = generateZuoraError(body, response);
 
 		expect(error).toBeInstanceOf(ZuoraError);
 
@@ -33,7 +43,8 @@ describe('generateZuoraError', () => {
 			],
 			Success: false,
 		};
-		const error = generateZuoraError(body);
+		const response = mockResponse(400, body);
+		const error = generateZuoraError(body, response);
 
 		expect(error.message).toBe(errorMessage);
 		expect(error.zuoraErrorDetails[0]?.code).toBe('INVALID_VALUE');
@@ -45,7 +56,8 @@ describe('generateZuoraError', () => {
 			FaultCode: 'INVALID_FIELD',
 			FaultMessage: errorMessage,
 		};
-		const error = generateZuoraError(body);
+		const response = mockResponse(400, body);
+		const error = generateZuoraError(body, response);
 
 		expect(error.message).toBe(errorMessage);
 		expect(error.zuoraErrorDetails[0]?.code).toBe('INVALID_FIELD');
@@ -57,7 +69,8 @@ describe('generateZuoraError', () => {
 			code: 'ClientError',
 			message: errorMessage,
 		};
-		const error = generateZuoraError(body);
+		const response = mockResponse(400, body);
+		const error = generateZuoraError(body, response);
 
 		expect(error.message).toBe(errorMessage);
 		expect(error.zuoraErrorDetails[0]?.code).toBe('ClientError');
@@ -65,7 +78,8 @@ describe('generateZuoraError', () => {
 
 	it('returns default error if no schema matches', () => {
 		const json = { unexpected: 'data' };
-		const error = generateZuoraError(json);
+		const response = mockResponse(418, "I'm a teapot");
+		const error = generateZuoraError(json, response);
 
 		expect(error.message).toBe('Zuora API Error');
 		expect(error.zuoraErrorDetails).toEqual([]);

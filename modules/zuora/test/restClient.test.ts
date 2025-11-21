@@ -1,5 +1,5 @@
 import { z, ZodError } from 'zod';
-import { RestClientImpl } from '../src/restClient';
+import { RestClientError, RestClientImpl } from '../src/restClient';
 
 class TestRestClient extends RestClientImpl<void> {
 	constructor(baseUrl: string, authHeaders: Record<string, string> = {}) {
@@ -158,7 +158,12 @@ describe('RestClient', () => {
 				headers: {},
 			});
 
-			await expect(client.get('/users/123', schema)).rejects.toThrow(ZodError);
+			try {
+				await client.get('/users/123', schema);
+			} catch (err) {
+				expect(err).toBeInstanceOf(RestClientError);
+				expect((err as Error).cause).toBeInstanceOf(ZodError);
+			}
 		});
 	});
 

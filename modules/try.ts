@@ -2,6 +2,8 @@ type TryBase<A> = {
 	get: () => A;
 	getOrElse: <N>(v: N) => A | N;
 	flatMap: <B>(fn: (a: A) => Try<B>) => Try<B>;
+	map: <B>(fn: (a: A) => B) => Try<B>;
+	forEach: (fn: (a: A) => void) => void;
 	mapError: (fn: (err: Error) => Error) => Try<A>;
 };
 
@@ -22,6 +24,8 @@ export function Success<A>(get: A): Success<A> {
 		get: () => get,
 		getOrElse: (): A => get,
 		flatMap: (fn) => fn(get),
+		map: (fn) => Try(() => fn(get)),
+		forEach: (fn) => fn(get),
 		mapError: () => Success(get),
 	} as const;
 }
@@ -35,6 +39,8 @@ export function Failure<A>(error: Error): Failure<A> {
 		failure: error,
 		getOrElse: (v) => v,
 		flatMap: () => Failure(error),
+		map: () => Failure(error),
+		forEach: () => undefined,
 		mapError: (fn) => Failure(fn(error)),
 	} as const;
 }

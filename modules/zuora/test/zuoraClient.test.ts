@@ -30,7 +30,7 @@ describe('ZuoraClient fetch method error handling', () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 
-		zuoraClient = createZuoraClientWithHeaders('https://mock.zuora.com', () =>
+		zuoraClient = createZuoraClientWithHeaders('CODE', () =>
 			Promise.resolve({ Authorization: 'Bearer mock-token' }),
 		);
 	});

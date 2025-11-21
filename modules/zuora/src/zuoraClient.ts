@@ -11,31 +11,27 @@ import { generateZuoraError } from './errors/zuoraErrorHandler';
 import { zuoraErrorSchema, zuoraSuccessSchema } from './types/httpResponse';
 import { zuoraServerUrl } from './utils';
 
-// *** zuora client is a bit special - example of what a more normal one would look like
-export declare const Stripe: unique symbol;
-export type StripeClient = RestClient<typeof Stripe>;
-
-export const StripeClient = {
-	create(): StripeClient {
-		const getAuthHeaders = () => Promise.resolve({});
-		return new RestClientImpl(
-			'https://theguardian.com',
-			getAuthHeaders,
-			Stripe,
-		);
-	},
-};
-// *** end example
-
 export declare const Zuora: unique symbol;
 export type ZuoraClient = RestClient<typeof Zuora>;
 
+export const ZuoraClient = {
+	async create(stage: Stage): Promise<ZuoraClient> {
+		const credentials = await getOAuthClientCredentials(stage);
+		const bearerTokenProvider = new BearerTokenProvider(stage, credentials);
+		const getAuthHeaders = () =>
+			bearerTokenProvider.getBearerToken().then((bearerToken) => ({
+				Authorization: `Bearer ${bearerToken.access_token}`,
+			}));
+		return createZuoraClientWithHeaders(stage, getAuthHeaders);
+	},
+};
+
 export function createZuoraClientWithHeaders(
-	baseUrl: string,
+	stage: Stage,
 	getAuthHeaders: () => Promise<{ Authorization: string }>,
 ): ZuoraClient {
 	const baseRestClient: RestClient<void> = new RestClientImpl(
-		baseUrl,
+		zuoraServerUrl(stage).replace(/\/$/, ''),
 		getAuthHeaders,
 		undefined,
 	);
@@ -63,19 +59,6 @@ export function createZuoraClientWithHeaders(
 	};
 }
 
-export const ZuoraClient = {
-	async create(stage: Stage): Promise<ZuoraClient> {
-		const credentials = await getOAuthClientCredentials(stage);
-		const bearerTokenProvider = new BearerTokenProvider(stage, credentials);
-		const baseUrl = zuoraServerUrl(stage).replace(/\/$/, '');
-		const getAuthHeaders = () =>
-			bearerTokenProvider.getBearerToken().then((bearerToken) => ({
-				Authorization: `Bearer ${bearerToken.access_token}`,
-			}));
-		return createZuoraClientWithHeaders(baseUrl, getAuthHeaders);
-	},
-};
-
 function wrapSchemaWithSuccessCheck<
 	I,
 	O,
@@ -85,26 +68,24 @@ function wrapSchemaWithSuccessCheck<
 		if (Try(() => isLogicalSuccess(input)).getOrElse(false)) {
 			return schema.parse(input);
 		} else {
-			throw generateZuoraError(input);
+			return undefined; // causes ZodError parsing failure
 		}
 	});
 }
 
 function handleZuoraFailure(e: Error | RestClientError) {
-	return (
-		e instanceof RestClientError ? Success(e) : Failure<RestClientError>(e)
-	)
-		.flatMap((e) => {
-			// When Zuora returns a 429 status, the response headers typically contain important rate limiting information
-			if (e.statusCode === 429) {
-				logger.log(
-					`Received a 429 rate limit response with response headers ${JSON.stringify(e.responseHeaders)}`,
-				);
-			}
-			return Success(e);
-		})
-		.flatMap((e) => Try((): unknown => JSON.parse(e.responseBody)))
-		.flatMap((json) => Success(generateZuoraError(json)))
+	const maybeRestClientError =
+		e instanceof RestClientError ? Success(e) : Failure<RestClientError>(e);
+	maybeRestClientError.forEach((e) => {
+		// When Zuora returns a 429 status, the response headers typically contain important rate limiting information
+		if (e.statusCode === 429) {
+			logger.log(
+				`Received a 429 rate limit response with response headers ${JSON.stringify(e.responseHeaders)}`,
+			);
+		}
+	});
+	return maybeRestClientError
+		.map((e) => generateZuoraError(JSON.parse(e.responseBody), e))
 		.getOrElse(e);
 }
 
