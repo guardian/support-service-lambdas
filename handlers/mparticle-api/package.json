@@ -19,7 +19,8 @@
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
     "@peculiar/x509": "^1.12.3",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@aws-sdk/client-sqs": "^3.848.0"
   },
   "devDependencies": {
     "@faker-js/faker": "^9.8.0",
