@@ -305,6 +305,7 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 1`
     },
     "LambdaSqsEventSourcemobilepurchasestosupporterproductdataCODEQueue0679A09E7C9AF9A5": {
       "Properties": {
+        "BatchSize": 1,
         "EventSourceArn": {
           "Fn::GetAtt": [
             "Queue4A7E3555",
@@ -501,7 +502,37 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 2`
             ],
           },
         ],
-        "AlarmDescription": "mobile-purchases-to-supporter-product-data could not process a message and it ended up on the DLQ. Search the logs below for "error" for more information. Impact: Supporter Product Data table is not being updated with mobile purchase data, which could result in users not receiving the correct benefits associated with their in app purchase.",
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "mobile-purchases-to-supporter-product-data could not process a message and it ended up on the DLQ. Search the logs below for "error" for more information. Impact: Supporter Product Data table is not being updated with mobile purchase data, which could result in users not receiving the correct benefits associated with their in app purchase.
+DLQ: https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/sqs/v2/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#/queues/https%3A%2F%2Fsqs.",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".amazonaws.com%2F",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              "%2F",
+              {
+                "Fn::GetAtt": [
+                  "DLQ581697C4",
+                  "QueueName",
+                ],
+              },
+            ],
+          ],
+        },
         "AlarmName": {
           "Fn::Join": [
             "",
@@ -862,6 +893,7 @@ exports[`The MobilePurchasesToSupporterProductData stack matches the snapshot 2`
     },
     "LambdaSqsEventSourcemobilepurchasestosupporterproductdataPRODQueue0869CF6178C2271C": {
       "Properties": {
+        "BatchSize": 1,
         "EventSourceArn": {
           "Fn::GetAtt": [
             "Queue4A7E3555",

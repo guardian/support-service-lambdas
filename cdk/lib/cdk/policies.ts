@@ -5,7 +5,7 @@ import {
 } from '@guardian/cdk/lib/constructs/iam';
 import { Fn } from 'aws-cdk-lib';
 
-class AllowGetSecretValuePolicy extends GuAllowPolicy {
+export class AllowGetSecretValuePolicy extends GuAllowPolicy {
 	constructor(scope: GuStack, id: string, key: string) {
 		super(scope, id, {
 			actions: ['secretsmanager:GetSecretValue'],

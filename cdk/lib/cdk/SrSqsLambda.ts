@@ -11,6 +11,10 @@ import type { SrStack } from './SrStack';
 
 type SrSqsLambdaProps = SrLambdaProps & {
 	/**
+	 * Custom name for the queue, defaults to $app-$namePrefix.  It will have e.g. -queue-CODE or -dlq-CODE appended.
+	 */
+	queueNameBase?: string;
+	/**
 	 * do we want to disable standard SrCDK alarm or override any properties?
 	 */
 	monitoring: SrMonitoring;
@@ -34,7 +38,7 @@ type SrSqsLambdaProps = SrLambdaProps & {
 	/**
 	 * legacy IDs, to avoid having to drop and recreate an existing stack
 	 */
-	legacyQueueIds?: { queue: string; dlq: string };
+	legacyQueueIds?: { queue: string; dlq: string; dlqNameOverride?: string };
 };
 
 /**
@@ -54,7 +58,10 @@ export class SrSqsLambda extends SrLambda implements Construct {
 
 		super(scope, id, finalProps);
 
-		const dlqName = getNameWithStage(scope, props.nameSuffix, 'dlq');
+		const dlqName =
+			(props.legacyQueueIds?.dlqNameOverride ?? props.queueNameBase)
+				? props.queueNameBase + '-dlq-' + scope.stage
+				: getNameWithStage(scope, props.nameSuffix, 'dlq');
 		this.inputDeadLetterQueue = new Queue(
 			scope,
 			props.legacyQueueIds?.dlq ?? 'DLQ',
@@ -64,7 +71,9 @@ export class SrSqsLambda extends SrLambda implements Construct {
 			},
 		);
 
-		const queueName = getNameWithStage(scope, props.nameSuffix, 'queue');
+		const queueName = props.queueNameBase
+			? props.queueNameBase + '-queue-' + scope.stage
+			: getNameWithStage(scope, props.nameSuffix, 'queue');
 		this.inputQueue = new Queue(scope, props.legacyQueueIds?.queue ?? 'Queue', {
 			queueName,
 			deadLetterQueue: {
@@ -74,7 +83,7 @@ export class SrSqsLambda extends SrLambda implements Construct {
 			visibilityTimeout: props.visibilityTimeout,
 		});
 
-		super.addEventSource(new SqsEventSource(this.inputQueue));
+		super.addEventSource(new SqsEventSource(this.inputQueue, { batchSize: 1 }));
 
 		if (scope.stage === 'PROD' && !props.monitoring.noMonitoring) {
 			new SrLambdaAlarm(scope, 'Alarm', {
@@ -84,7 +93,9 @@ export class SrSqsLambda extends SrLambda implements Construct {
 				alarmDescription:
 					scope.app +
 					' could not process a message and it ended up on the DLQ. Search the logs below for "error" for more information. Impact: ' +
-					props.monitoring.errorImpact,
+					props.monitoring.errorImpact +
+					`\nDLQ: https://${scope.region}.console.aws.amazon.com/sqs/v2/home?region=${scope.region}#/queues/https%3A%2F%2Fsqs.${scope.region}.amazonaws.com%2F${scope.account}%2F${this.inputDeadLetterQueue.queueName}`,
+
 				metric: this.inputDeadLetterQueue
 					.metric('ApproximateNumberOfMessagesVisible')
 					.with({ statistic: 'Sum', period: Duration.minutes(1) }),

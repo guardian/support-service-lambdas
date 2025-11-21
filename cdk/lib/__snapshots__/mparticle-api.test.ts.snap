@@ -427,6 +427,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
     },
     "MmaUserDeletionLambdaSqsEventSourcemparticleapiCODEQueue936999ED54883CA7": {
       "Properties": {
+        "BatchSize": 1,
         "EventSourceArn": {
           "Fn::GetAtt": [
             "Queue4A7E3555",
@@ -1484,7 +1485,37 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "mparticle-api could not process a message and it ended up on the DLQ. Search the logs below for "error" for more information. Impact: an mma user deletion request may not have been processed successfully",
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "mparticle-api could not process a message and it ended up on the DLQ. Search the logs below for "error" for more information. Impact: an mma user deletion request may not have been processed successfully
+DLQ: https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/sqs/v2/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#/queues/https%3A%2F%2Fsqs.",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".amazonaws.com%2F",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              "%2F",
+              {
+                "Fn::GetAtt": [
+                  "DLQ581697C4",
+                  "QueueName",
+                ],
+              },
+            ],
+          ],
+        },
         "AlarmName": {
           "Fn::Join": [
             "",
@@ -2159,6 +2190,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
     },
     "MmaUserDeletionLambdaSqsEventSourcemparticleapiPRODQueueC3FFAA06852150F8": {
       "Properties": {
+        "BatchSize": 1,
         "EventSourceArn": {
           "Fn::GetAtt": [
             "Queue4A7E3555",
