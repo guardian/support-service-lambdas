@@ -46,7 +46,7 @@ export const zuoraSuccessSchema = z.union([
 export type ZuoraLowerCaseSuccess = z.infer<typeof zuoraLowerCaseSuccessSchema>;
 export type ZuoraUpperCaseSuccess = z.infer<typeof zuoraUpperCaseSuccessSchema>;
 
-export const voidSchema = z.any();
+export const voidSchema = z.any().transform<void>(() => undefined);
 
 export const zuoraResponseSchema = z.object({
 	// Success indicators (some endpoints use different casing)
