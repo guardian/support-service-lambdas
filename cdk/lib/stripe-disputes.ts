@@ -26,12 +26,11 @@ export class StripeDisputes extends SrStack {
 		const lambdaConsumer = new SrSqsLambda(this, 'ConsumerLambda', {
 			legacyId: `${app}-lambda-consumer`,
 			nameSuffix: 'consumer',
+			queueNameSuffix: `events`,
 			lambdaOverrides: {
 				description: 'A lambda that handles stripe disputes SQS events',
-				functionName: `${app}-consumer-${this.stage}`,
 				handler: 'consumer.handler',
 			},
-			queueNameBase: `${app}-events`,
 			monitoring: {
 				errorImpact:
 					`There are one or more failed dispute webhook events in the ${app} dead letter queue (DLQ). ` +
@@ -53,7 +52,6 @@ export class StripeDisputes extends SrStack {
 			lambdaOverrides: {
 				description:
 					'A lambda that handles stripe disputes webhook events and processes SQS events',
-				functionName: `${app}-producer-${this.stage}`,
 				handler: 'producer.handler',
 				environment: {
 					DISPUTE_EVENTS_QUEUE_URL: lambdaConsumer.inputQueue.queueUrl,
@@ -68,38 +66,17 @@ export class StripeDisputes extends SrStack {
 			},
 		});
 
-		const disputeEventsQueuePolicy = new GuAllowPolicy(
-			this,
-			'Allow SQS SendMessage and GetQueueAttributes to Dispute Events Queue',
-			{
-				actions: ['sqs:SendMessage', 'sqs:GetQueueAttributes'],
-				resources: [lambdaConsumer.inputQueue.queueArn],
-			},
-		);
-
 		lambdaProducer.addPolicies(
-			new AllowGetSecretValuePolicy(
-				this,
-				'Stripe Webhooks Secrets Manager policy',
-				'Salesforce/ConnectedApp/StripeDisputeWebhooks-*',
-			),
-			disputeEventsQueuePolicy,
+			getStripeSecretPolicy(this),
+			getQueueSendPolicy(this, lambdaConsumer),
 		);
 
 		lambdaConsumer.addPolicies(
 			new AllowZuoraOAuthSecretsPolicy(this),
-			new AllowGetSecretValuePolicy(
-				this,
-				'Salesforce Secrets Manager policy',
-				'Salesforce/ConnectedApp/StripeDisputeWebhooks-*',
-			),
+			getSalesforceSecretPolicy(this),
 			new AllowSqsSendPolicy(this, 'braze-emails'),
-			disputeEventsQueuePolicy,
 		);
 
-		// ---- Extra Alarms ---- //
-
-		// Consumer Lambda Error Rate Alarm
 		new SrLambdaAlarm(this, 'ConsumerLambdaErrorAlarm', {
 			app: app,
 			alarmName: `${this.stage} ${app} - Consumer Lambda high error rate`,
@@ -118,7 +95,6 @@ export class StripeDisputes extends SrStack {
 			treatMissingData: TreatMissingData.NOT_BREACHING,
 		});
 
-		// Producer API Gateway 4XX Alarm (high rate)
 		new SrLambdaAlarm(this, 'ProducerApiGateway4XXAlarm', {
 			app: app,
 			alarmName: `${this.stage} ${app} - Producer API high 4XX error rate`,
@@ -137,7 +113,6 @@ export class StripeDisputes extends SrStack {
 			treatMissingData: TreatMissingData.NOT_BREACHING,
 		});
 
-		// SQS Message Age Alarm
 		const fiveMinutes = 5 * 60 * 1000;
 		new GuAlarm(this, 'SQSMessageAgeAlarm', {
 			app: app,
@@ -156,4 +131,31 @@ export class StripeDisputes extends SrStack {
 			actionsEnabled: this.stage === 'PROD',
 		});
 	}
+}
+
+function getQueueSendPolicy(scope: SrStack, lambdaConsumer: SrSqsLambda) {
+	return new GuAllowPolicy(
+		scope,
+		'Allow SQS SendMessage and GetQueueAttributes to Dispute Events Queue',
+		{
+			actions: ['sqs:SendMessage', 'sqs:GetQueueAttributes'],
+			resources: [lambdaConsumer.inputQueue.queueArn],
+		},
+	);
+}
+
+function getStripeSecretPolicy(scope: SrStack) {
+	return new AllowGetSecretValuePolicy(
+		scope,
+		'Stripe Webhooks Secrets Manager policy',
+		'Stripe/ConnectedApp/StripeDisputeWebhooks-*',
+	);
+}
+
+function getSalesforceSecretPolicy(scope: SrStack) {
+	return new AllowGetSecretValuePolicy(
+		scope,
+		'Salesforce Secrets Manager policy',
+		'Salesforce/ConnectedApp/StripeDisputeWebhooks-*',
+	);
 }

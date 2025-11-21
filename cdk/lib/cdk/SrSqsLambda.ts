@@ -11,9 +11,11 @@ import type { SrStack } from './SrStack';
 
 type SrSqsLambdaProps = SrLambdaProps & {
 	/**
-	 * Custom name for the queue, defaults to $app-$namePrefix.  It will have e.g. -queue-CODE or -dlq-CODE appended.
+	 * Optional name insert for the queue, defaults to the lambda's namePrefix, if any.
+	 *
+	 * The resulting name will be e.g. $app-$queueNameSuffix-queue-CODE or $app-$queueNameSuffix-dlq-CODE.
 	 */
-	queueNameBase?: string;
+	queueNameSuffix?: string;
 	/**
 	 * do we want to disable standard SrCDK alarm or override any properties?
 	 */
@@ -59,9 +61,8 @@ export class SrSqsLambda extends SrLambda implements Construct {
 		super(scope, id, finalProps);
 
 		const dlqName =
-			(props.legacyQueueIds?.dlqNameOverride ?? props.queueNameBase)
-				? props.queueNameBase + '-dlq-' + scope.stage
-				: getNameWithStage(scope, props.nameSuffix, 'dlq');
+			props.legacyQueueIds?.dlqNameOverride ??
+			getNameWithStage(scope, props.queueNameSuffix ?? props.nameSuffix, 'dlq');
 		this.inputDeadLetterQueue = new Queue(
 			scope,
 			props.legacyQueueIds?.dlq ?? 'DLQ',
@@ -71,9 +72,11 @@ export class SrSqsLambda extends SrLambda implements Construct {
 			},
 		);
 
-		const queueName = props.queueNameBase
-			? props.queueNameBase + '-queue-' + scope.stage
-			: getNameWithStage(scope, props.nameSuffix, 'queue');
+		const queueName = getNameWithStage(
+			scope,
+			props.queueNameSuffix ?? props.nameSuffix,
+			'queue',
+		);
 		this.inputQueue = new Queue(scope, props.legacyQueueIds?.queue ?? 'Queue', {
 			queueName,
 			deadLetterQueue: {
