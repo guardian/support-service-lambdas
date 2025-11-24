@@ -225,7 +225,8 @@ describe('createSubscription integration', () => {
 		);
 		expect(response.subscriptionNumbers.length).toEqual(1);
 		const subscriptionWithPromotionSchema = zuoraSubscriptionSchema.extend({
-			InitialPromotionCode__c: z.string(),
+			InitialPromotionCode__c: z.string().nullable(),
+			PromotionCode__c: z.string().nullable(),
 		});
 		const subscription = await getSubscription(
 			client,
@@ -236,6 +237,7 @@ describe('createSubscription integration', () => {
 		expect(subscription.InitialPromotionCode__c).toEqual(
 			'E2E_TEST_SPLUS_MONTHLY',
 		);
+		expect(subscription.PromotionCode__c).toEqual('E2E_TEST_SPLUS_MONTHLY');
 	}, 10000);
 	test('We can preview a subscription with a discount promotion', async () => {
 		const inputFields: PreviewCreateSubscriptionInputFields = {
