@@ -1,4 +1,5 @@
 import type { Dayjs } from 'dayjs';
+import type { z } from 'zod';
 import type {
 	ZuoraSubscription,
 	ZuoraSubscriptionsFromAccountResponse,
@@ -47,12 +48,16 @@ export const cancelSubscription = async (
 	});
 };
 
-export const getSubscription = async (
+export const getSubscription = async <
+	T extends z.ZodType = typeof zuoraSubscriptionSchema,
+>(
 	zuoraClient: ZuoraClient,
 	subscriptionNumber: string,
-): Promise<ZuoraSubscription> => {
+	schema?: T,
+): Promise<z.infer<T>> => {
 	const path = `v1/subscriptions/${subscriptionNumber}`;
-	return zuoraClient.get(path, zuoraSubscriptionSchema);
+	const finalSchema = schema ?? zuoraSubscriptionSchema;
+	return zuoraClient.get(path, finalSchema);
 };
 
 export const getSubscriptionsByAccountNumber = async (
