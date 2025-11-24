@@ -48,7 +48,6 @@ export const cancelSubscription = async (
 	});
 };
 
-// TODO:delete comment - Fixes type incompatibility by using a single generic for output type
 export const getSubscription = async <
 	T extends z.ZodType = typeof zuoraSubscriptionSchema,
 >(
