@@ -37,12 +37,13 @@ export type MessageAttributes = z.infer<typeof MessageAttributesSchema>;
 /**
  * SQS Message Attributes format (AWS SDK structure)
  */
-export interface SQSMessageAttributes {
-	[key: string]: {
+export type SQSMessageAttributes = Record<
+	string,
+	{
 		dataType: string;
 		stringValue?: string;
-	};
-}
+	}
+>;
 
 /**
  * Helper to convert SQS message attributes to our typed format
@@ -51,9 +52,9 @@ export function parseMessageAttributes(
 	sqsAttributes?: SQSMessageAttributes,
 ): MessageAttributes {
 	const rawAttributes = {
-		mParticleDeleted: sqsAttributes?.mParticleDeleted?.stringValue || 'false',
-		brazeDeleted: sqsAttributes?.brazeDeleted?.stringValue || 'false',
-		attemptCount: sqsAttributes?.attemptCount?.stringValue || '0',
+		mParticleDeleted: sqsAttributes?.mParticleDeleted?.stringValue ?? 'false',
+		brazeDeleted: sqsAttributes?.brazeDeleted?.stringValue ?? 'false',
+		attemptCount: sqsAttributes?.attemptCount?.stringValue ?? '0',
 	};
 	return MessageAttributesSchema.parse(rawAttributes);
 }

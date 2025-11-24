@@ -1,13 +1,13 @@
 import { processUserDeletion } from '../../../src/apis/dataSubjectRequests/deleteUser';
-import { BrazeClient } from '../../../src/services/brazeClient';
-import { MParticleClient } from '../../../src/services/mparticleClient';
+import type { BrazeClient } from '../../../src/services/brazeClient';
+import { deleteBrazeUser } from '../../../src/services/brazeClient';
+import type { MParticleClient } from '../../../src/services/mparticleClient';
+import { deleteMParticleUser } from '../../../src/services/mparticleDeletion';
 import { SQSService } from '../../../src/services/sqsService';
-import {
+import type {
 	DeletionRequestBody,
 	MessageAttributes,
 } from '../../../src/types/deletionMessage';
-import { deleteMParticleUser } from '../../../src/services/mparticleDeletion';
-import { deleteBrazeUser } from '../../../src/services/brazeClient';
 
 // Mock the modules
 jest.mock('../../../src/services/mparticleDeletion');
@@ -18,7 +18,7 @@ describe('processUserDeletion', () => {
 	const mockDeleteMParticleUser = deleteMParticleUser as jest.Mock;
 	const mockDeleteBrazeUser = deleteBrazeUser as jest.Mock;
 	const mockSendToDLQ = jest.fn();
-	
+
 	const mockMParticleClient = {} as MParticleClient;
 	const mockBrazeClient = {} as BrazeClient;
 	const dlqUrl = 'https://sqs.eu-west-1.amazonaws.com/123456789/test-dlq';
@@ -132,15 +132,11 @@ describe('processUserDeletion', () => {
 				brazeDeleted: false,
 				allSucceeded: false,
 			});
-			expect(mockSendToDLQ).toHaveBeenCalledWith(
-				dlqUrl,
-				body,
-				{
-					mParticleDeleted: true,
-					brazeDeleted: false,
-					attemptCount: 1,
-				},
-			);
+			expect(mockSendToDLQ).toHaveBeenCalledWith(dlqUrl, body, {
+				mParticleDeleted: true,
+				brazeDeleted: false,
+				attemptCount: 1,
+			});
 		});
 	});
 
@@ -172,15 +168,11 @@ describe('processUserDeletion', () => {
 				brazeDeleted: true,
 				allSucceeded: false,
 			});
-			expect(mockSendToDLQ).toHaveBeenCalledWith(
-				dlqUrl,
-				body,
-				{
-					mParticleDeleted: false,
-					brazeDeleted: true,
-					attemptCount: 1,
-				},
-			);
+			expect(mockSendToDLQ).toHaveBeenCalledWith(dlqUrl, body, {
+				mParticleDeleted: false,
+				brazeDeleted: true,
+				attemptCount: 1,
+			});
 		});
 	});
 
@@ -216,15 +208,11 @@ describe('processUserDeletion', () => {
 				brazeDeleted: false,
 				allSucceeded: false,
 			});
-			expect(mockSendToDLQ).toHaveBeenCalledWith(
-				dlqUrl,
-				body,
-				{
-					mParticleDeleted: false,
-					brazeDeleted: false,
-					attemptCount: 1,
-				},
-			);
+			expect(mockSendToDLQ).toHaveBeenCalledWith(dlqUrl, body, {
+				mParticleDeleted: false,
+				brazeDeleted: false,
+				attemptCount: 1,
+			});
 		});
 	});
 
@@ -287,15 +275,11 @@ describe('processUserDeletion', () => {
 			expect(result.mParticleDeleted).toBe(true);
 			expect(result.brazeDeleted).toBe(false);
 
-			expect(mockSendToDLQ).toHaveBeenCalledWith(
-				dlqUrl,
-				body,
-				{
-					mParticleDeleted: true,
-					brazeDeleted: false,
-					attemptCount: 3,
-				},
-			);
+			expect(mockSendToDLQ).toHaveBeenCalledWith(dlqUrl, body, {
+				mParticleDeleted: true,
+				brazeDeleted: false,
+				attemptCount: 3,
+			});
 		});
 	});
 

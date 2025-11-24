@@ -1,12 +1,17 @@
 import { logger } from '@modules/routing/logger';
-import type { DeletionResult } from '../types/deletionMessage';
-import { RestRequestMaker, HttpError, type HttpResponse } from './make-http-request';
 import { z } from 'zod';
+import type { DeletionResult } from '../types/deletionMessage';
+import {
+	HttpError,
+	type HttpResponse,
+	RestRequestMaker,
+} from './make-http-request';
 
 /**
  * Braze User Delete API Request Schema
  * API Documentation: https://www.braze.com/docs/api/endpoints/user_data/post_user_delete/
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Used for type inference
 const BrazeDeleteRequestSchema = z.object({
 	external_ids: z.array(z.string()),
 });
@@ -37,7 +42,7 @@ export class BrazeClient {
 		this.rest = new RestRequestMaker(
 			apiUrl,
 			{
-				'Authorization': `Bearer ${apiKey}`,
+				Authorization: `Bearer ${apiKey}`,
 				'Content-Type': 'application/json',
 			},
 			fetch,

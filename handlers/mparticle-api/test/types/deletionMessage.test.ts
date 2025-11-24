@@ -1,7 +1,7 @@
+import type { MessageAttributes } from '../../src/types/deletionMessage';
 import {
 	parseMessageAttributes,
 	toSQSMessageAttributes,
-	MessageAttributes,
 } from '../../src/types/deletionMessage';
 
 describe('deletionMessage', () => {
@@ -91,17 +91,17 @@ describe('deletionMessage', () => {
 			const result = toSQSMessageAttributes(attributes);
 
 			expect(result.mParticleDeleted).toEqual({
-dataType: 'String',
-stringValue: 'true',
-});
+				dataType: 'String',
+				stringValue: 'true',
+			});
 			expect(result.brazeDeleted).toEqual({
-dataType: 'String',
-stringValue: 'false',
-});
+				dataType: 'String',
+				stringValue: 'false',
+			});
 			expect(result.attemptCount).toEqual({
-dataType: 'String',
-stringValue: '3',
-});
+				dataType: 'String',
+				stringValue: '3',
+			});
 		});
 
 		it('should handle all false values', () => {

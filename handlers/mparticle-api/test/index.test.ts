@@ -1,31 +1,33 @@
-import { SQSEvent, Context } from 'aws-lambda';
-import { handlerDeletion } from '../src/index';
+import type { Context, SQSEvent } from 'aws-lambda';
 import { processUserDeletion } from '../src/apis/dataSubjectRequests/deleteUser';
+import { handlerDeletion } from '../src/index';
 
 jest.mock('../src/apis/dataSubjectRequests/deleteUser');
 jest.mock('../src/services/config', () => ({
-getAppConfig: jest.fn().mockResolvedValue({
-workspace: {
-id: 'test-workspace',
-environment: 'test',
-accountId: '12345',
-mpApiKey: 'test-key',
-mpApiSecret: 'test-secret',
-},
-braze: {
-apiUrl: 'https://api.braze.com',
-apiKey: 'test-braze-key',
-},
-mmaUserDeletionDlqUrl: 'https://sqs.eu-west-1.amazonaws.com/123456789/test-dlq',
-}),
+	getAppConfig: jest.fn().mockResolvedValue({
+		workspace: {
+			id: 'test-workspace',
+			environment: 'test',
+			accountId: '12345',
+			mpApiKey: 'test-key',
+			mpApiSecret: 'test-secret',
+		},
+		braze: {
+			apiUrl: 'https://api.braze.com',
+			apiKey: 'test-braze-key',
+		},
+		mmaUserDeletionDlqUrl:
+			'https://sqs.eu-west-1.amazonaws.com/123456789/test-dlq',
+	}),
 	getEnv: jest.fn().mockReturnValue('test'),
 }));
 
 jest.mock('@modules/routing/logger', () => ({
-logger: {
-log: jest.fn(),
+	logger: {
+		log: jest.fn(),
 		error: jest.fn(),
 		getCallerInfo: jest.fn(() => 'index.test.ts'),
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-return -- Mock wrapper function
 		wrapFn: jest.fn((fn) => fn),
 	},
 }));
@@ -48,9 +50,9 @@ describe('handlerDeletion', () => {
 					messageId: 'test-message-1',
 					receiptHandle: 'test-receipt-1',
 					body: JSON.stringify({
-userId: 'user-123',
-email: 'user@example.com',
-}),
+						userId: 'user-123',
+						email: 'user@example.com',
+					}),
 					attributes: {
 						ApproximateReceiveCount: '1',
 						SentTimestamp: '1234567890',
@@ -80,18 +82,18 @@ email: 'user@example.com',
 		};
 
 		mockProcessUserDeletion.mockResolvedValue({
-mParticleDeleted: true,
-brazeDeleted: true,
-allSucceeded: true,
-});
+			mParticleDeleted: true,
+			brazeDeleted: true,
+			allSucceeded: true,
+		});
 
 		await handlerDeletion(event, mockContext, mockCallback);
 
 		expect(mockProcessUserDeletion).toHaveBeenCalledTimes(1);
 		expect(mockProcessUserDeletion).toHaveBeenCalledWith(
-{ userId: 'user-123', email: 'user@example.com' },
-{ mParticleDeleted: false, brazeDeleted: false, attemptCount: 0 },
-expect.anything(),
+			{ userId: 'user-123', email: 'user@example.com' },
+			{ mParticleDeleted: false, brazeDeleted: false, attemptCount: 0 },
+			expect.anything(),
 			expect.anything(),
 			'https://sqs.eu-west-1.amazonaws.com/123456789/test-dlq',
 		);
@@ -104,9 +106,9 @@ expect.anything(),
 					messageId: 'test-message-1',
 					receiptHandle: 'test-receipt-1',
 					body: JSON.stringify({
-userId: 'user-123',
-email: 'user1@example.com',
-}),
+						userId: 'user-123',
+						email: 'user1@example.com',
+					}),
 					attributes: {
 						ApproximateReceiveCount: '1',
 						SentTimestamp: '1234567890',
@@ -123,9 +125,9 @@ email: 'user1@example.com',
 					messageId: 'test-message-2',
 					receiptHandle: 'test-receipt-2',
 					body: JSON.stringify({
-userId: 'user-456',
-email: 'user2@example.com',
-}),
+						userId: 'user-456',
+						email: 'user2@example.com',
+					}),
 					attributes: {
 						ApproximateReceiveCount: '1',
 						SentTimestamp: '1234567890',
@@ -142,10 +144,10 @@ email: 'user2@example.com',
 		};
 
 		mockProcessUserDeletion.mockResolvedValue({
-mParticleDeleted: true,
-brazeDeleted: true,
-allSucceeded: true,
-});
+			mParticleDeleted: true,
+			brazeDeleted: true,
+			allSucceeded: true,
+		});
 
 		await handlerDeletion(event, mockContext, mockCallback);
 
@@ -159,9 +161,9 @@ allSucceeded: true,
 					messageId: 'test-message-1',
 					receiptHandle: 'test-receipt-1',
 					body: JSON.stringify({
-userId: 'user-789',
-email: 'user@example.com',
-}),
+						userId: 'user-789',
+						email: 'user@example.com',
+					}),
 					attributes: {
 						ApproximateReceiveCount: '1',
 						SentTimestamp: '1234567890',
@@ -191,17 +193,17 @@ email: 'user@example.com',
 		};
 
 		mockProcessUserDeletion.mockResolvedValue({
-mParticleDeleted: true,
-brazeDeleted: true,
-allSucceeded: true,
-});
+			mParticleDeleted: true,
+			brazeDeleted: true,
+			allSucceeded: true,
+		});
 
 		await handlerDeletion(event, mockContext, mockCallback);
 
 		expect(mockProcessUserDeletion).toHaveBeenCalledWith(
-{ userId: 'user-789', email: 'user@example.com' },
-{ mParticleDeleted: true, brazeDeleted: false, attemptCount: 2 },
-expect.anything(),
+			{ userId: 'user-789', email: 'user@example.com' },
+			{ mParticleDeleted: true, brazeDeleted: false, attemptCount: 2 },
+			expect.anything(),
 			expect.anything(),
 			'https://sqs.eu-west-1.amazonaws.com/123456789/test-dlq',
 		);
@@ -214,9 +216,9 @@ expect.anything(),
 					messageId: 'test-message-1',
 					receiptHandle: 'test-receipt-1',
 					body: JSON.stringify({
-userId: 'user-fail',
-email: 'fail@example.com',
-}),
+						userId: 'user-fail',
+						email: 'fail@example.com',
+					}),
 					attributes: {
 						ApproximateReceiveCount: '1',
 						SentTimestamp: '1234567890',
@@ -234,7 +236,9 @@ email: 'fail@example.com',
 
 		mockProcessUserDeletion.mockRejectedValue(new Error('Processing failed'));
 
-		await expect(handlerDeletion(event, mockContext, mockCallback)).rejects.toThrow('Processing failed');
+		await expect(
+			handlerDeletion(event, mockContext, mockCallback),
+		).rejects.toThrow('Processing failed');
 
 		expect(mockProcessUserDeletion).toHaveBeenCalledTimes(1);
 	});
@@ -272,16 +276,16 @@ email: 'fail@example.com',
 		};
 
 		mockProcessUserDeletion.mockResolvedValue({
-mParticleDeleted: true,
-brazeDeleted: true,
-allSucceeded: true,
-});
+			mParticleDeleted: true,
+			brazeDeleted: true,
+			allSucceeded: true,
+		});
 
 		await handlerDeletion(event, mockContext, mockCallback);
 
 		expect(mockProcessUserDeletion).toHaveBeenCalledWith(
-{ userId: 'json-user', email: 'json@example.com' },
-expect.anything(),
+			{ userId: 'json-user', email: 'json@example.com' },
+			expect.anything(),
 			expect.anything(),
 			expect.anything(),
 			expect.anything(),

@@ -1,13 +1,14 @@
 import { logger } from '@modules/routing/logger';
-import type { DeletionResult } from '../types/deletionMessage';
-import type { MParticleClient } from './mparticleClient';
 import { z } from 'zod';
+import type { DeletionResult } from '../types/deletionMessage';
 import { HttpError } from './make-http-request';
+import type { MParticleClient } from './mparticleClient';
 
 /**
  * mParticle Bulk Profile Deletion API Request Schema
  * API Documentation: https://docs.mparticle.com/developers/apis/bulk-profile-deletion-api/
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Used for type inference
 const BulkDeletionRequestSchema = z.object({
 	user_identities: z.array(
 		z.object({
@@ -91,7 +92,10 @@ export async function deleteMParticleUser(
 			};
 		}
 	} catch (error) {
-		logger.error(`Unexpected error deleting user ${userId} from mParticle`, error);
+		logger.error(
+			`Unexpected error deleting user ${userId} from mParticle`,
+			error,
+		);
 		return {
 			success: false,
 			error: error instanceof Error ? error : new Error(String(error)),

@@ -1,13 +1,14 @@
 import { logger } from '@modules/routing/logger';
+import type { BrazeClient } from '../../services/brazeClient';
+import { deleteBrazeUser } from '../../services/brazeClient';
+import type { MParticleClient } from '../../services/mparticleClient';
+import { deleteMParticleUser } from '../../services/mparticleDeletion';
+import { SQSService } from '../../services/sqsService';
 import type {
 	DeletionRequestBody,
-	MessageAttributes,
 	DeletionStatus,
+	MessageAttributes,
 } from '../../types/deletionMessage';
-import { deleteMParticleUser } from '../../services/mparticleDeletion';
-import { deleteBrazeUser, BrazeClient } from '../../services/brazeClient';
-import type { MParticleClient } from '../../services/mparticleClient';
-import { SQSService } from '../../services/sqsService';
 
 /**
  * Process a user deletion request
@@ -60,7 +61,9 @@ export async function processUserDeletion(
 			);
 		}
 	} else {
-		logger.log(`Skipping mParticle deletion - already deleted for user ${userId}`);
+		logger.log(
+			`Skipping mParticle deletion - already deleted for user ${userId}`,
+		);
 	}
 
 	// Only call Braze API if not already deleted

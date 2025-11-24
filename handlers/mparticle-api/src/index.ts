@@ -6,19 +6,19 @@ import type {
 	SQSEvent,
 	SQSRecord,
 } from 'aws-lambda';
+import { processUserDeletion } from './apis/dataSubjectRequests/deleteUser';
 import type { BatonEventRequest, BatonEventResponse } from './routers/baton';
 import { batonRerRouter } from './routers/baton';
 import { httpRouter } from './routers/http';
 import { BatonS3WriterImpl } from './services/batonS3Writer';
 import { BrazeClient } from './services/brazeClient';
-import { processUserDeletion } from './apis/dataSubjectRequests/deleteUser';
+import type { AppConfig } from './services/config';
+import { getAppConfig, getEnv } from './services/config';
+import { MParticleClient } from './services/mparticleClient';
 import {
 	DeletionRequestBodySchema,
 	parseMessageAttributes,
 } from './types/deletionMessage';
-import type { AppConfig } from './services/config';
-import { getAppConfig, getEnv } from './services/config';
-import { MParticleClient } from './services/mparticleClient';
 
 export const handlerHttp: Handler<
 	APIGatewayProxyEvent,
@@ -75,9 +75,13 @@ export const handlerDeletion: Handler<SQSEvent, void> = async (
 		logger.log(`Processing ${event.Records.length} deletion messages`);
 
 		const config: AppConfig = await getAppConfig();
-		const mParticleClient =
-			MParticleClient.createMParticleDataSubjectClient(config.workspace);
-		const brazeClient = new BrazeClient(config.braze.apiUrl, config.braze.apiKey);
+		const mParticleClient = MParticleClient.createMParticleDataSubjectClient(
+			config.workspace,
+		);
+		const brazeClient = new BrazeClient(
+			config.braze.apiUrl,
+			config.braze.apiKey,
+		);
 
 		// Process each record independently
 		// SQS will retry failed messages automatically

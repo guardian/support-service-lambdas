@@ -1,22 +1,28 @@
-import { SQSService } from '../../src/services/sqsService';
 import { SendMessageCommand } from '@aws-sdk/client-sqs';
-import { DeletionRequestBody, MessageAttributes } from '../../src/types/deletionMessage';
+import { SQSService } from '../../src/services/sqsService';
+import type {
+	DeletionRequestBody,
+	MessageAttributes,
+} from '../../src/types/deletionMessage';
 
 jest.mock('@modules/routing/logger', () => ({
-logger: {
-log: jest.fn(),
+	logger: {
+		log: jest.fn(),
 		error: jest.fn(),
 		getCallerInfo: jest.fn(() => 'sqsService.test.ts'),
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-return -- Mock wrapper
 		wrapFn: jest.fn((fn) => fn),
 	},
 }));
 
 jest.mock('@aws-sdk/client-sqs', () => {
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Mock setup
 	const actualModule = jest.requireActual('@aws-sdk/client-sqs');
+	// eslint-disable-next-line @typescript-eslint/no-unsafe-return -- Mock module
 	return {
 		...actualModule,
 		SQSClient: jest.fn().mockImplementation(() => ({
-send: jest.fn(),
+			send: jest.fn(),
 		})),
 	};
 });
@@ -29,11 +35,12 @@ describe('SQSService', () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		sqsService = new SQSService('eu-west-1');
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access -- Test mock access
 		mockSend = (sqsService as any).client.send as jest.Mock;
 		mockSend.mockResolvedValue({
-MessageId: 'test-message-id',
-$metadata: {},
-});
+			MessageId: 'test-message-id',
+			$metadata: {},
+		});
 	});
 
 	describe('sendToDLQ', () => {
@@ -52,6 +59,7 @@ $metadata: {},
 			await sqsService.sendToDLQ(dlqUrl, body, attributes);
 
 			expect(mockSend).toHaveBeenCalledTimes(1);
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- Test mock calls
 			const command = mockSend.mock.calls[0][0] as SendMessageCommand;
 			expect(command).toBeInstanceOf(SendMessageCommand);
 			expect(command.input.QueueUrl).toBe(dlqUrl);
@@ -67,21 +75,22 @@ $metadata: {},
 
 			await sqsService.sendToDLQ(dlqUrl, body, attributes);
 
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- Test mock calls
 			const command = mockSend.mock.calls[0][0] as SendMessageCommand;
 			const msgAttributes = command.input.MessageAttributes;
 
 			expect(msgAttributes?.mParticleDeleted).toEqual({
-DataType: 'String',
-StringValue: 'true',
-});
+				DataType: 'String',
+				StringValue: 'true',
+			});
 			expect(msgAttributes?.brazeDeleted).toEqual({
-DataType: 'String',
-StringValue: 'false',
-});
+				DataType: 'String',
+				StringValue: 'false',
+			});
 			expect(msgAttributes?.attemptCount).toEqual({
-DataType: 'String',
-StringValue: '2',
-});
+				DataType: 'String',
+				StringValue: '2',
+			});
 		});
 
 		it('should handle partial deletion states correctly', async () => {
@@ -93,6 +102,7 @@ StringValue: '2',
 
 			await sqsService.sendToDLQ(dlqUrl, body, attributes);
 
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- Test mock calls
 			const command = mockSend.mock.calls[0][0] as SendMessageCommand;
 			const msgAttributes = command.input.MessageAttributes;
 
@@ -111,9 +121,9 @@ StringValue: '2',
 			const error = new Error('SQS send failed');
 			mockSend.mockRejectedValueOnce(error);
 
-			await expect(sqsService.sendToDLQ(dlqUrl, body, attributes)).rejects.toThrow(
-'SQS send failed',
-);
+			await expect(
+				sqsService.sendToDLQ(dlqUrl, body, attributes),
+			).rejects.toThrow('SQS send failed');
 		});
 
 		it('should handle high attempt counts', async () => {
@@ -125,8 +135,11 @@ StringValue: '2',
 
 			await sqsService.sendToDLQ(dlqUrl, body, attributes);
 
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- Test mock calls
 			const command = mockSend.mock.calls[0][0] as SendMessageCommand;
-			expect(command.input.MessageAttributes?.attemptCount?.StringValue).toBe('10');
+			expect(command.input.MessageAttributes?.attemptCount?.StringValue).toBe(
+				'10',
+			);
 		});
 	});
 });

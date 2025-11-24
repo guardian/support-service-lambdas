@@ -7,6 +7,7 @@ jest.mock('@modules/routing/logger', () => ({
 		log: jest.fn(),
 		error: jest.fn(),
 		getCallerInfo: jest.fn(() => 'brazeClient.test.ts'),
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-return -- Mock wrapper
 		wrapFn: jest.fn((fn) => fn),
 	},
 }));
@@ -45,10 +46,13 @@ describe('BrazeClient', () => {
 
 			it('should return success when deleted count is 1', async () => {
 				mockFetch.mockResolvedValue(
-					new Response(JSON.stringify({ deleted: 1, message: 'User deleted' }), {
-						status: 200,
-						headers: { 'content-type': 'application/json' },
-					}),
+					new Response(
+						JSON.stringify({ deleted: 1, message: 'User deleted' }),
+						{
+							status: 200,
+							headers: { 'content-type': 'application/json' },
+						},
+					),
 				);
 
 				const client = new BrazeClient(apiUrl, apiKey);
@@ -112,11 +116,14 @@ describe('BrazeClient', () => {
 
 			it('should mark 503 errors as retryable', async () => {
 				mockFetch.mockResolvedValue(
-					new Response(JSON.stringify({ message: 'Service temporarily unavailable' }), {
-						status: 503,
-						statusText: 'Service Unavailable',
-						headers: { 'content-type': 'application/json' },
-					}),
+					new Response(
+						JSON.stringify({ message: 'Service temporarily unavailable' }),
+						{
+							status: 503,
+							statusText: 'Service Unavailable',
+							headers: { 'content-type': 'application/json' },
+						},
+					),
 				);
 
 				const client = new BrazeClient(apiUrl, apiKey);

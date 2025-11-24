@@ -1,4 +1,4 @@
-import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
+import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 import { logger } from '@modules/routing/logger';
 import type {
 	DeletionRequestBody,
@@ -50,7 +50,10 @@ export class SQSService {
 				`Successfully sent message to DLQ. MessageId: ${response.MessageId}`,
 			);
 		} catch (error) {
-			logger.error(`Failed to send message to DLQ for user ${body.userId}`, error);
+			logger.error(
+				`Failed to send message to DLQ for user ${body.userId}`,
+				error,
+			);
 			throw error;
 		}
 	}

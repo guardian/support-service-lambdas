@@ -1,12 +1,13 @@
-import { deleteMParticleUser } from '../../src/services/mparticleDeletion';
-import { MParticleClient } from '../../src/services/mparticleClient';
 import { HttpError } from '../../src/services/make-http-request';
+import type { MParticleClient } from '../../src/services/mparticleClient';
+import { deleteMParticleUser } from '../../src/services/mparticleDeletion';
 
 jest.mock('@modules/routing/logger', () => ({
-logger: {
-log: jest.fn(),
+	logger: {
+		log: jest.fn(),
 		error: jest.fn(),
 		getCallerInfo: jest.fn(() => 'mparticleDeletion.test.ts'),
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-return -- Mock wrapper
 		wrapFn: jest.fn((fn) => fn),
 	},
 }));
@@ -118,7 +119,9 @@ describe('deleteMParticleUser', () => {
 
 		await deleteMParticleUser(mockClient, userId);
 
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Test mock calls
 		const callArgs = mockPost.mock.calls[0];
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- Test mock args
 		expect(callArgs[1]).toEqual({
 			user_identities: [
 				{
