@@ -20,6 +20,22 @@ type ApiGatewayToSqsProps = {
 	monitoring: SrMonitoring;
 };
 
+function iterateParam(targetName: string, sourceName: string) {
+	return `#set($json = $json + """${targetName}"":{")
+#set($allHeaders = $${sourceName})
+#foreach($header in $allHeaders.keySet())
+#set($json = $json + """$header"":""$util.escapeJavaScript($allHeaders.get($header)).replaceAll(""\\\\'"",""'"")""")
+#if($foreach.hasNext)
+#set($json = $json + ",")
+#end
+#end
+#set($json = $json + "},")`;
+}
+
+function insertSingleProp(targetName: string, sourceName: string) {
+	return `#set($json = $json + """${targetName}"":""$util.escapeJavaScript($${sourceName}).replaceAll(""\\\\'"",""'"")"",")`;
+}
+
 /**
  * this takes incoming http requests and puts them on a queue, responding with a 200 OK
  *
@@ -46,27 +62,31 @@ export class ApiGatewayToSqs extends Construct {
 				},
 				requestTemplates: {
 					'application/json': [
-						...Object.entries({
-							Action: 'SendMessage',
-							MessageBody: '$util.urlEncode($input.body)',
-						}),
-						...props.includeHeaderNames.flatMap((headerName, index) => [
-							[`MessageAttribute.${index + 1}.Name`, headerName],
-							[`MessageAttribute.${index + 1}.Value.DataType`, 'String'],
-							[
-								`MessageAttribute.${index + 1}.Value.StringValue`,
-								`$method.request.header.${headerName}`,
-							],
-						]),
-					]
-						.map(([k, v]) => k + '=' + v)
-						.join('&'),
+						// this replicates the key fields of APIGatewayProxyEvent
+						'#set($json = "{")',
+						iterateParam(`pathParameters`, `input.params().path`),
+						iterateParam(`headers`, `input.params().header`),
+						iterateParam(`queryStringParameters`, `input.params().querystring`),
+						insertSingleProp(`body`, `input.body`),
+						insertSingleProp('httpMethod', 'context.httpMethod'),
+						insertSingleProp('path', 'context.path'),
+						`#set($json = $json + """mappingSource"": ""SrCDK""}")`, // docs and to get the commas right
+						`Action=SendMessage&MessageBody=$util.urlEncode($json)`,
+					].join('\n'),
 				},
 				integrationResponses: [
 					{
+						selectionPattern: '2\\d{2}',
 						statusCode: '200',
 						responseTemplates: {
 							'application/json': '{ "status": "accepted" }',
+						},
+					},
+					{
+						statusCode: '500',
+						responseTemplates: {
+							'application/json':
+								'{ "message": "Internal Server Error - could not queue message" }',
 						},
 					},
 				],
@@ -91,6 +111,9 @@ export class ApiGatewayToSqs extends Construct {
 				methodResponses: [
 					{
 						statusCode: '200',
+					},
+					{
+						statusCode: '500',
 					},
 				],
 			});

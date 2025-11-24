@@ -13,12 +13,13 @@ export const handler = async (event: {
 }): Promise<AccountRowWithResult[]> => {
 	const { Items } = event;
 
+	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo fix in next refactor
 	const stage = getIfDefined<string>(
 		process.env.STAGE,
 		'STAGE environment variable not set',
-	);
+	) as Stage;
 
-	const zuoraClient = await ZuoraClient.create(stage as Stage);
+	const zuoraClient = await ZuoraClient.create(stage);
 
 	const batchUpdateResults: AccountRowWithResult[] = [];
 

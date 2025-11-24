@@ -34,6 +34,7 @@ export const getSupporterProductData = async (
 	console.log(`Querying ${tableName} for identityId ${identityId}`);
 	const data = await dynamoClient.send(new QueryCommand(input));
 	console.log(`Query returned ${JSON.stringify(data)}`);
+	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo use zod
 	return data.Items?.map((item) => unmarshall(item) as SupporterRatePlanItem);
 };
 

@@ -1,5 +1,8 @@
 import { putMetric } from '@modules/aws/cloudwatch';
-import type { SQSEvent, SQSRecord } from 'aws-lambda';
+import { logger } from '@modules/routing/logger';
+import type { SQSEvent } from 'aws-lambda';
+import type { ApiGatewayToSqsEvent } from './apiGatewayToSqsEvent';
+import { apiGatewayToSqsEventSchema } from './apiGatewayToSqsEvent';
 import { createGuestAccount, fetchUserType } from './idapiService';
 import { validateRequest } from './validateRequest';
 
@@ -15,15 +18,17 @@ export interface TicketTailorRequest {
 	};
 }
 
-async function processValidSqsRecord(sqsRecord: SQSRecord) {
+async function processValidSqsRecord(sqsRecord: ApiGatewayToSqsEvent) {
+	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo use zod
 	const ticketTailorRequest = JSON.parse(sqsRecord.body) as TicketTailorRequest;
 	const email = ticketTailorRequest.payload.buyer_details.email;
+	logger.mutableAddContext(email);
 	const userTypeResponse = await fetchUserType(email);
 
 	if (userTypeResponse.userType === 'new') {
 		await createGuestAccount(email);
 	} else {
-		console.log(
+		logger.log(
 			`Skipping guest creation as account of type ${userTypeResponse.userType} already exists for user.`,
 		);
 	}
@@ -32,15 +37,19 @@ async function processValidSqsRecord(sqsRecord: SQSRecord) {
 export const handler = async (event: SQSEvent): Promise<void> => {
 	const eventualEnsuredIdentityAccount = event.Records.flatMap(
 		async (sqsRecord) => {
-			console.log(
+			logger.resetContext();
+			logger.log(
 				`Processing TT Webhook. SQS Message id is: ${sqsRecord.messageId}`,
 			);
+			logger.log('record body', sqsRecord.body);
+			const parsedEvent: ApiGatewayToSqsEvent =
+				apiGatewayToSqsEventSchema.parse(JSON.parse(sqsRecord.body));
 
-			const validRequest = await validateRequest(sqsRecord);
+			const validRequest = await validateRequest(parsedEvent);
 			if (validRequest) {
-				await processValidSqsRecord(sqsRecord);
+				await processValidSqsRecord(parsedEvent);
 			} else {
-				console.error('Request failed validation. Processing terminated.');
+				logger.error('Request failed validation. Processing terminated.');
 				await putMetric('ticket-tailor-webhook-validation-failure');
 				return;
 			}

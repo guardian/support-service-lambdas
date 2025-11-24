@@ -180,13 +180,14 @@ const getAdjustableItems = ({
 	const invoiceDetailAndTaxItems = invoiceItems.flatMap((invoiceItem) => {
 		const invoiceEntry = {
 			id: invoiceItem.id,
-			sourceType: 'InvoiceDetail' as InvoiceItemAdjustmentSourceType,
+			sourceType:
+				'InvoiceDetail' as const satisfies InvoiceItemAdjustmentSourceType,
 			availableToCreditAmount: invoiceItem.availableToCreditAmount,
 		};
 
 		const taxationEntries = invoiceItem.taxationItems.data.map((taxItem) => ({
 			id: taxItem.id,
-			sourceType: 'Tax' as InvoiceItemAdjustmentSourceType,
+			sourceType: 'Tax' as const satisfies InvoiceItemAdjustmentSourceType,
 			availableToCreditAmount: taxItem.availableToCreditAmount,
 		}));
 

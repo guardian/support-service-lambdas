@@ -7,6 +7,7 @@ import { contributionToSupporterPlusEndpoint } from './productSwitchEndpoint';
 import type { ProductSwitchRequestBody } from './schemas';
 import { productSwitchRequestSchema } from './schemas';
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo fix in next refactor
 const stage = process.env.STAGE as Stage;
 
 const pathParserSchema = z.object({

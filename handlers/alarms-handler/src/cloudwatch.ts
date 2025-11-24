@@ -10,6 +10,7 @@ import { awsConfig, getAwsConfig, isRunningLocally } from '@modules/aws/config';
 import { fetchAllPages } from '@modules/aws/fetchAllPages';
 import { Lazy } from '@modules/lazy';
 import { getIfDefined } from '@modules/nullAndUndefined';
+import { objectFromEntries } from '@modules/objectFunctions';
 import type { Accounts } from './configSchema';
 
 const buildCrossAccountCloudwatchClient = (
@@ -82,9 +83,9 @@ const getTags = async (
 	const response = await client.send(request);
 	const tags = response.Tags ?? [];
 	const entries = tags.flatMap((tag: Tag) =>
-		tag.Key && tag.Value ? [[tag.Key, tag.Value]] : [],
+		tag.Key && tag.Value ? [[tag.Key, tag.Value] as const] : [],
 	);
-	return Object.fromEntries(entries) as Tags;
+	return objectFromEntries(entries);
 };
 
 export async function getAllAlarmsInAlarm(

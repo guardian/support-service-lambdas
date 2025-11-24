@@ -5,15 +5,15 @@ import {
 	getSubscription,
 	getSubscriptionsByAccountNumber,
 } from '@modules/zuora/subscription';
-import {
-	zuoraResponseSchema,
-	zuoraSubscriptionResponseSchema,
-	zuoraSubscriptionsFromAccountSchema,
-} from '@modules/zuora/types';
 import type {
-	ZuoraResponse,
+	ZuoraLowerCaseSuccess,
 	ZuoraSubscription,
 	ZuoraSubscriptionsFromAccountResponse,
+} from '@modules/zuora/types';
+import {
+	voidSchema,
+	zuoraSubscriptionSchema,
+	zuoraSubscriptionsFromAccountSchema,
 } from '@modules/zuora/types';
 import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 
@@ -26,14 +26,14 @@ describe('subscription', () => {
 
 	describe('cancelSubscription', () => {
 		it('should cancel subscription with correct parameters', async () => {
-			const mockResponse: ZuoraResponse = {
+			const mockResponse: ZuoraLowerCaseSuccess = {
 				success: true,
 			};
 
 			mockZuoraClient.put = jest.fn().mockResolvedValue(mockResponse);
 
 			const contractEffectiveDate = dayjs('2025-08-01');
-			const result = await cancelSubscription(
+			await cancelSubscription(
 				mockZuoraClient,
 				'SUB-12345',
 				contractEffectiveDate,
@@ -44,7 +44,7 @@ describe('subscription', () => {
 			expect(mockZuoraClient.put).toHaveBeenCalledWith(
 				'/v1/subscriptions/SUB-12345/cancel',
 				expect.stringContaining('"cancellationEffectiveDate":"2025-08-01"'),
-				zuoraResponseSchema,
+				voidSchema,
 				{ 'zuora-version': '211.0' },
 			);
 
@@ -58,11 +58,10 @@ describe('subscription', () => {
 				runBilling: true,
 				collect: false,
 			});
-			expect(result).toEqual(mockResponse);
 		});
 
 		it('should handle undefined collect parameter', async () => {
-			const mockResponse: ZuoraResponse = {
+			const mockResponse: ZuoraLowerCaseSuccess = {
 				success: true,
 			};
 
@@ -79,7 +78,7 @@ describe('subscription', () => {
 			expect(mockZuoraClient.put).toHaveBeenCalledWith(
 				'/v1/subscriptions/SUB-12345/cancel',
 				expect.stringContaining('"cancellationEffectiveDate":"2025-08-02"'),
-				zuoraResponseSchema,
+				voidSchema,
 				{ 'zuora-version': '211.0' },
 			);
 
@@ -101,7 +100,7 @@ describe('subscription', () => {
 			mockZuoraClient.put.mockResolvedValue(mockResponse);
 			const contractEffectiveDate = dayjs('2025-08-03');
 
-			const result = await cancelSubscription(
+			await cancelSubscription(
 				mockZuoraClient,
 				'SUB-12345',
 				contractEffectiveDate,
@@ -113,7 +112,7 @@ describe('subscription', () => {
 			expect(mockZuoraClient.put).toHaveBeenCalledWith(
 				'/v1/subscriptions/SUB-12345/cancel',
 				expect.not.stringContaining('cancellationEffectiveDate'),
-				zuoraResponseSchema,
+				voidSchema,
 				{ 'zuora-version': '211.0' },
 			);
 
@@ -128,7 +127,6 @@ describe('subscription', () => {
 			});
 			// Should not include cancellationEffectiveDate
 			expect(requestBody).not.toHaveProperty('cancellationEffectiveDate');
-			expect(result).toEqual(mockResponse);
 		});
 
 		it('should throw if zuoraClient.put rejects', async () => {
@@ -171,7 +169,7 @@ describe('subscription', () => {
 
 			expect(mockZuoraClient.get).toHaveBeenCalledWith(
 				'v1/subscriptions/SUB-12345',
-				zuoraSubscriptionResponseSchema,
+				zuoraSubscriptionSchema,
 			);
 			expect(result).toEqual(mockSubscription);
 		});

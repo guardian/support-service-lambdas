@@ -67,8 +67,6 @@ describe('cancelSubscriptionService', () => {
 
 	it('should cancel active subscription successfully', async () => {
 		const mockSubscription = createMockSubscription('Active');
-		const mockCancelResponse = { Success: true, Id: 'cancel_123' };
-		(cancelSubscription as jest.Mock).mockResolvedValue(mockCancelResponse);
 
 		const result = await cancelSubscriptionService(
 			mockLogger,
@@ -81,8 +79,7 @@ describe('cancelSubscriptionService', () => {
 			'Canceling active subscription: SUB-12345',
 		);
 		expect(mockLogger.log).toHaveBeenCalledWith(
-			'Subscription cancellation response:',
-			JSON.stringify(mockCancelResponse),
+			'Canceling active subscription: SUB-12345',
 		);
 		expect(cancelSubscription).toHaveBeenCalledWith(
 			mockZuoraClient,
@@ -271,9 +268,7 @@ describe('cancelSubscriptionService', () => {
 
 		it('should return false when billToContact has no workEmail field', async () => {
 			const mockSubscription = createMockSubscription('Active');
-			const mockCancelResponse = { Success: true, Id: 'cancel_123' };
 
-			(cancelSubscription as jest.Mock).mockResolvedValue(mockCancelResponse);
 			(getAccount as jest.Mock).mockResolvedValue({
 				billToContact: {
 					// billToContact exists but has no workEmail field
@@ -300,11 +295,7 @@ describe('cancelSubscriptionService', () => {
 			);
 			// Should still log cancellation success messages (cancellation happened, but we return false)
 			expect(mockLogger.log).toHaveBeenCalledWith(
-				'Canceling active subscription: SUB-12345',
-			);
-			expect(mockLogger.log).toHaveBeenCalledWith(
-				'Subscription cancellation response:',
-				JSON.stringify(mockCancelResponse),
+				'Subscription cancellation succeeded',
 			);
 		});
 

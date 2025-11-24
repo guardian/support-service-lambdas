@@ -20,6 +20,7 @@ export async function getSecretValue<T>(secretName: string): Promise<T> {
 			throw new Error(`No secret found with name: ${secretName}`);
 		}
 
+		// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo use zod
 		return JSON.parse(response.SecretString) as T;
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);

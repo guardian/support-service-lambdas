@@ -27,6 +27,7 @@ export const generateSalesforceAccessToken = async ({
 			body: formData,
 		});
 
+		// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo use zod
 		const json = (await response.json()) as { access_token: string };
 
 		return json.access_token;

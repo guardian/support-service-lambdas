@@ -29,7 +29,7 @@ export const handler = async (
 			...parsedEvent,
 			activePaymentMethodResult: {
 				checkForActivePaymentMethodAttempt: {
-					Success: paymentMethods.success,
+					Success: true,
 				},
 				hasActivePaymentMethod,
 				activePaymentMethods,

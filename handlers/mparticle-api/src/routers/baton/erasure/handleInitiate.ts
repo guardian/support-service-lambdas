@@ -8,7 +8,6 @@ import type {
 	MParticleClient,
 } from '../../../services/mparticleClient';
 import { addErasureExclusionAttributes } from '../../shared/addErasureExclusionAttributes';
-import type { InitiationReference } from '../initiationReference';
 import { InitiationReferenceSchema } from '../initiationReference';
 import {
 	BatonRerEventRequestBaseSchema,
@@ -77,8 +76,7 @@ export async function handleRerInitiate(
 		requestType: 'RER' as const,
 		action: 'initiate' as const,
 		status: 'pending' as const,
-		initiationReference:
-			dataSubjectRequestSubmissionResponse.requestId as InitiationReference,
+		initiationReference: dataSubjectRequestSubmissionResponse.requestId,
 		message: `mParticle Request Id: "${dataSubjectRequestSubmissionResponse.requestId}". Expected completion time: ${dataSubjectRequestSubmissionResponse.expectedCompletionTime.toISOString()}.`,
 	};
 

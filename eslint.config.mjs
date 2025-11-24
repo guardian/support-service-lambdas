@@ -5,4 +5,20 @@ export default [
 	...guardian.configs.jest,
 	...guardian.configs.react,
 	...guardian.configs.storybook,
+	{
+		rules: {
+			'@typescript-eslint/consistent-type-assertions': [
+				'error',
+				{
+					assertionStyle: 'never',
+				},
+			],
+		},
+	},
+	{
+		files: ['**/test/**/*.{ts,tsx,js,jsx}'],
+		rules: {
+			'@typescript-eslint/consistent-type-assertions': 'off',
+		},
+	},
 ];

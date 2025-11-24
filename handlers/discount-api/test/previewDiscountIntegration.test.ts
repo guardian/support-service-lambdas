@@ -34,13 +34,12 @@ test("Subscriptions which don't belong to the provided identity Id are not eligi
 	}).rejects.toThrow('does not belong to identity ID');
 
 	console.log('Cancelling the subscription');
-	const cancellationResult = await cancelSubscription(
+	await cancelSubscription(
 		zuoraClient,
 		subscriptionNumber,
 		dayjs().add(1, 'month'),
 		true,
 	);
-	expect(cancellationResult.success).toEqual(true);
 }, 30000);
 test('Subscriptions on the old price are not eligible', async () => {
 	const zuoraClient = await ZuoraClient.create(stage);
@@ -58,13 +57,12 @@ test('Subscriptions on the old price are not eligible', async () => {
 	}).rejects.toThrow(validationRequirements.atLeastCatalogPrice);
 
 	console.log('Cancelling the subscription');
-	const cancellationResult = await cancelSubscription(
+	await cancelSubscription(
 		zuoraClient,
 		subscriptionNumber,
 		dayjs().add(1, 'month'),
 		true,
 	);
-	expect(cancellationResult.success).toEqual(true);
 }, 30000);
 
 test('Subscriptions on the new price are eligible', async () => {
@@ -103,13 +101,12 @@ test('Subscriptions on the new price are eligible', async () => {
 	expect(eligibilityCheckResult).toEqual(expected);
 
 	console.log('Cancelling the subscription');
-	const cancellationResult = await cancelSubscription(
+	await cancelSubscription(
 		zuoraClient,
 		subscriptionNumber,
 		dayjs().add(1, 'month'),
 		true,
 	);
-	expect(cancellationResult.success).toEqual(true);
 }, 30000);
 
 test('Supporter Plus subscriptions are eligible', async () => {
@@ -144,11 +141,10 @@ test('Supporter Plus subscriptions are eligible', async () => {
 	expect(eligibilityCheckResult).toEqual(expected);
 
 	console.log('Cancelling the subscription');
-	const cancellationResult = await cancelSubscription(
+	await cancelSubscription(
 		zuoraClient,
 		subscriptionNumber,
 		dayjs().add(1, 'month'),
 		true,
 	);
-	expect(cancellationResult.success).toEqual(true);
 }, 30000);

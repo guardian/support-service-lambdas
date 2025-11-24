@@ -15,7 +15,10 @@ import { awsConfig } from '@modules/aws/config';
 import { getFileFromS3 } from '@modules/aws/s3';
 import type { GetRequestsResponse } from '../../src/apis/dataSubjectRequests/getStatus';
 import { handleSarStatus } from '../../src/routers/baton/access/handleStatus';
-import type { InitiationReference } from '../../src/routers/baton/initiationReference';
+import type {
+	GUID,
+	InitiationReference,
+} from '../../src/routers/baton/initiationReference';
 import type { BatonS3Writer } from '../../src/services/batonS3Writer';
 import { BatonS3WriterImpl } from '../../src/services/batonS3Writer';
 import type {
@@ -110,7 +113,7 @@ function createRealServicesToTestEndpoints(
 ) {
 	const mockSARStatusResponse: GetRequestsResponse = {
 		expected_completion_time: new Date(),
-		subject_request_id: 'subject_request_idsubject_request_id',
+		subject_request_id: 'subject_request_idsubject_request_id' as GUID,
 		request_status: 'completed',
 		results_url: baseURL + realPath,
 		controller_id: 'controller_idcontroller_id',

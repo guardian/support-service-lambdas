@@ -71,29 +71,31 @@ export const updateZuoraAccount = async ({
 	accountRow: AccountRow;
 }): Promise<AccountRowWithResult> => {
 	try {
-		const response = await updateAccount(
-			zuoraClient,
-			accountRow.Zuora__Zuora_Id__c,
-			{
-				crmId: accountRow.Zuora__Account__c,
-				sfContactId__c: accountRow.Contact__c,
-			},
-		);
+		await updateAccount(zuoraClient, accountRow.Zuora__Zuora_Id__c, {
+			crmId: accountRow.Zuora__Account__c,
+			sfContactId__c: accountRow.Contact__c,
+		});
 
 		return {
 			...accountRow,
-			Success: response.success,
-			Errors:
-				response.reasons?.map((reason) => ({
-					Message: reason.message,
-					Code: String(reason.code),
-				})) ?? [],
+			Success: true,
+			Errors: [],
 		};
 	} catch (error) {
 		console.error(error);
 
-		if (error instanceof ZuoraError && error.code === 429) {
-			throw error;
+		if (error instanceof ZuoraError) {
+			if (error.code === 429) {
+				throw error;
+			}
+			return {
+				...accountRow,
+				Success: false,
+				Errors: error.zuoraErrorDetails.map((reason) => ({
+					Message: reason.message,
+					Code: String(reason.code),
+				})),
+			};
 		}
 
 		return {

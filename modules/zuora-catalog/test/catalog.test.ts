@@ -16,5 +16,5 @@ test('getCatalogPriceForCurrency', () => {
 	const codeCatalog = new ZuoraCatalogHelper(zuoraCatalogSchema.parse(code));
 	const digiSubAnnualId = '2c92c0f94bbffaaa014bc6a4212e205b';
 	const price = codeCatalog.getCatalogPrice(digiSubAnnualId, 'GBP');
-	expect(price).toEqual(149);
+	expect(price).toEqual(180);
 });

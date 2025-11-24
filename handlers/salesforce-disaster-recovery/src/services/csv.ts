@@ -1,4 +1,8 @@
-export const convertArrayToCsv = <T>({ arr }: { arr: T[] }) => {
+export const convertArrayToCsv = <T extends Record<string, unknown>>({
+	arr,
+}: {
+	arr: T[];
+}) => {
 	if (!arr[0]) {
 		return '';
 	}
@@ -10,9 +14,7 @@ export const convertArrayToCsv = <T>({ arr }: { arr: T[] }) => {
 	const dataRows = arr.map((row) => {
 		return headers
 			.map((header) => {
-				const cellValue = String(
-					(row as Record<string, unknown>)[header],
-				).replace(/,/g, '');
+				const cellValue = String(row[header]).replace(/,/g, '');
 				return `"${cellValue}"`;
 			})
 			.join(',');

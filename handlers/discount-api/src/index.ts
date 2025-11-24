@@ -24,6 +24,7 @@ import {
 	previewDiscountResponseSchema,
 } from './responseSchema';
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo fix in next refactor
 const stage = process.env.STAGE as Stage;
 
 // main entry point from AWS

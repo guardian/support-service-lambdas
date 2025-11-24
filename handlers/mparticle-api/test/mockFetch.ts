@@ -1,13 +1,14 @@
 import { faker } from '@faker-js/faker';
 import type { GetRequestsResponse } from '../src/apis/dataSubjectRequests/getStatus';
 import type { PostRequestsResponse } from '../src/apis/dataSubjectRequests/submit';
+import type { InitiationReference } from '../src/routers/baton/initiationReference';
 
 export const mockSetUserAttributesResponse = '';
 
 export const mockRegisterEventResponse = '';
 
 export function getMockCreateDataSubjectRequestResponse(
-	requestId: string,
+	requestId: InitiationReference,
 ): PostRequestsResponse {
 	return {
 		expected_completion_time: faker.date.soon(),
@@ -17,7 +18,7 @@ export function getMockCreateDataSubjectRequestResponse(
 }
 
 export function getMockGetSubjectRequestByIdResponse(
-	requestId: string,
+	requestId: InitiationReference,
 ): GetRequestsResponse {
 	return {
 		expected_completion_time: faker.date.soon(),

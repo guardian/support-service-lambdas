@@ -40,6 +40,7 @@ export function parseArguments(argv: string[]): ParsedArgs {
 	}
 
 	return {
+		// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo use zod above
 		mode: mode.substring(2) as 'generate' | 'clean',
 		repoRoot,
 	};

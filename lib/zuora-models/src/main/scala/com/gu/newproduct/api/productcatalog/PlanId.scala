@@ -127,16 +127,16 @@ object PlanId {
   case object NationalDeliverySixdayPlus extends PlanId("national_delivery_sixday_plus") with NationalDeliveryPlanId
 
   val enabledVoucherPlans = List(
-    VoucherEveryDay,
     VoucherEveryDayPlus,
-    VoucherSaturday,
-    VoucherSaturdayPlus,
-    VoucherSixDay,
     VoucherSixDayPlus,
-    VoucherSunday,
-    VoucherSundayPlus,
-    VoucherWeekend,
     VoucherWeekendPlus,
+    VoucherSaturdayPlus,
+    VoucherSundayPlus,
+    VoucherEveryDay,
+    VoucherSixDay,
+    VoucherWeekend,
+    VoucherSaturday,
+    VoucherSunday,
   )
 
   val enabledContributionPlans = List(
@@ -150,16 +150,16 @@ object PlanId {
   )
 
   val enabledHomeDeliveryPlans = List(
-    HomeDeliveryEveryDay,
     HomeDeliveryEveryDayPlus,
-    HomeDeliverySaturday,
-    HomeDeliverySaturdayPlus,
-    HomeDeliverySixDay,
     HomeDeliverySixDayPlus,
-    HomeDeliverySunday,
-    HomeDeliverySundayPlus,
-    HomeDeliveryWeekend,
     HomeDeliveryWeekendPlus,
+    HomeDeliverySaturdayPlus,
+    HomeDeliverySundayPlus,
+    HomeDeliveryEveryDay,
+    HomeDeliverySixDay,
+    HomeDeliveryWeekend,
+    HomeDeliverySaturday,
+    HomeDeliverySunday,
   )
 
   val enabledDigipackPlans = List(
@@ -180,25 +180,25 @@ object PlanId {
   )
 
   val enabledDigitalVoucherPlans = List(
-    DigitalVoucherWeekend,
-    DigitalVoucherWeekendPlus,
-    DigitalVoucherEveryday,
     DigitalVoucherEverydayPlus,
-    DigitalVoucherSaturday,
-    DigitalVoucherSaturdayPlus,
-    DigitalVoucherSunday,
-    DigitalVoucherSundayPlus,
-    DigitalVoucherSixday,
     DigitalVoucherSixdayPlus,
+    DigitalVoucherWeekendPlus,
+    DigitalVoucherSaturdayPlus,
+    DigitalVoucherSundayPlus,
+    DigitalVoucherEveryday,
+    DigitalVoucherSixday,
+    DigitalVoucherWeekend,
+    DigitalVoucherSaturday,
+    DigitalVoucherSunday,
   )
 
   val enabledNationalDeliveryPlans = List(
-    NationalDeliverySixday,
-    NationalDeliveryEveryday,
-    NationalDeliveryWeekend,
-    NationalDeliverySixdayPlus,
     NationalDeliveryEverydayPlus,
+    NationalDeliverySixdayPlus,
     NationalDeliveryWeekendPlus,
+    NationalDeliveryEveryday,
+    NationalDeliverySixday,
+    NationalDeliveryWeekend,
   )
 
   val enabledTierThreePlans = List(

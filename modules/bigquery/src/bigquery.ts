@@ -10,6 +10,7 @@ export const buildAuthClient = async (
 	clientConfig: string,
 ): Promise<BaseExternalAccountClient> => {
 	try {
+		// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo use zod
 		const parsedConfig = JSON.parse(
 			clientConfig,
 		) as ExternalAccountClientOptions;
@@ -21,6 +22,7 @@ export const buildAuthClient = async (
 
 		return await Promise.resolve(authClient);
 	} catch (error) {
+		// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo fix in next refactor
 		throw new Error(`Error building auth client: ${(error as Error).message}`);
 	}
 };

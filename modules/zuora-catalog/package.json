@@ -1,16 +1,17 @@
 {
-  "name": "catalog",
-  "version": "1.0.0",
-  "scripts": {
-    "test": "jest --group=-integration",
-    "it-test": "jest --group=integration",
-    "check-formatting": "prettier --check **.ts",
-    "fix-formatting": "prettier --write **.ts",
-    "build": "tsc --noEmit",
-    "lint": "eslint 'src/**/*.ts' 'test/**/*.ts'"
-  },
-  "dependencies": {
-    "@aws-sdk/client-s3": "^3.873.0",
-    "zod": "catalog:"
-  }
+	"name": "catalog",
+	"version": "1.0.0",
+	"scripts": {
+		"test": "jest --group=-integration",
+		"it-test": "jest --group=integration",
+		"check-formatting": "prettier --check **.ts",
+		"fix-formatting": "prettier --write **.ts",
+		"build": "tsc --noEmit",
+		"lint": "eslint 'src/**/*.ts' 'test/**/*.ts'",
+		"update-catalog-fixtures": "bash runManual/updateCatalogFixtures.sh"
+	},
+	"dependencies": {
+		"@aws-sdk/client-s3": "^3.873.0",
+		"zod": "catalog:"
+	}
 }

@@ -1,6 +1,5 @@
 import type { Dayjs } from 'dayjs';
-import { zuoraResponseSchema } from './types';
-import type { ZuoraResponse } from './types';
+import { voidSchema } from './types';
 import { zuoraDateFormat } from './utils';
 import type { ZuoraClient } from './zuoraClient';
 
@@ -15,7 +14,7 @@ export const createPayment = async (
 	console.log(
 		`Creating payment of ${paymentAmount} for invoice ${invoiceId}, on account ${accountId} with payment method ${paymentMethodId}`,
 	);
-	const result: ZuoraResponse = await zuoraClient.post(
+	await zuoraClient.post(
 		'/v1/object/payment',
 		JSON.stringify({
 			AccountId: accountId,
@@ -28,19 +27,15 @@ export const createPayment = async (
 			Type: 'Electronic',
 			Status: 'Processed',
 		}),
-		zuoraResponseSchema,
+		voidSchema,
 	);
-
-	if (!result.Success) {
-		throw new Error('An error occurred while creating the payment');
-	}
 };
 
 export const rejectPayment = async (
 	zuoraClient: ZuoraClient,
 	paymentNumber: string,
 	rejectionReason: string = 'chargeback',
-): Promise<ZuoraResponse> => {
+): Promise<void> => {
 	console.log(
 		`Rejecting payment ${paymentNumber} with reason: ${rejectionReason}`,
 	);
@@ -52,5 +47,5 @@ export const rejectPayment = async (
 		gatewayResponseCode: '4855',
 	});
 
-	return zuoraClient.post(path, body, zuoraResponseSchema);
+	await zuoraClient.post(path, body, voidSchema);
 };
