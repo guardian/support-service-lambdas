@@ -170,6 +170,7 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		DeliveryAgent__c: deliveryAgent.toString(),
 		ReaderType__c: readerType,
 		LastPlanAddedDate__c: zuoraDateFormat(contractEffectiveDate),
+		InitialPromotionCode__c: appliedPromotion?.promoCode,
 	};
 	return {
 		newAccount: newAccount,
