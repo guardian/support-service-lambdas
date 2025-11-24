@@ -53,12 +53,20 @@ export class BrazeClient {
 			external_ids: [userId],
 		};
 
-		return await this.rest.makeRESTRequest(logger.getCallerInfo(1))(
-			'POST',
-			'/users/delete',
-			BrazeDeleteResponseSchema,
-			requestBody,
-		);
+		try {
+			return await this.rest.makeRESTRequest(logger.getCallerInfo(1))(
+				'POST',
+				'/users/delete',
+				BrazeDeleteResponseSchema,
+				requestBody,
+			);
+		} catch (error) {
+			// Catch HttpError thrown by rawHttpRequest when response is not ok
+			if (error instanceof HttpError) {
+				return { success: false, error };
+			}
+			throw error;
+		}
 	}
 }
 
@@ -82,9 +90,17 @@ export async function deleteBrazeUser(
 		const response = await client.deleteUser(userId);
 
 		if (response.success) {
-			logger.log(
-				`Successfully deleted user ${userId} from Braze. Deleted count: ${response.data.deleted}`,
-			);
+			// Braze may return deleted=0 for non-existent users - treat as idempotent success
+			const deletedCount = response.data.deleted ?? 1;
+			if (deletedCount === 0) {
+				logger.log(
+					`User ${userId} not found in Braze (deleted=0) - treating as successful deletion`,
+				);
+			} else {
+				logger.log(
+					`Successfully deleted user ${userId} from Braze. Deleted count: ${deletedCount}`,
+				);
+			}
 			return { success: true };
 		} else {
 			const error = response.error;
@@ -93,22 +109,6 @@ export async function deleteBrazeUser(
 			if (error instanceof HttpError && error.statusCode === 404) {
 				logger.log(
 					`User ${userId} not found in Braze (404) - treating as successful deletion`,
-				);
-				return { success: true };
-			}
-
-			// Braze may also return success=true with deleted=0 for non-existent users
-			// This is also idempotent success
-			if (
-				error instanceof HttpError &&
-				error.statusCode === 200 &&
-				typeof error.body === 'object' &&
-				error.body !== null &&
-				'deleted' in error.body &&
-				error.body.deleted === 0
-			) {
-				logger.log(
-					`User ${userId} not found in Braze (deleted=0) - treating as successful deletion`,
 				);
 				return { success: true };
 			}
@@ -146,14 +146,13 @@ export async function deleteBrazeUser(
 function isRetryableError(error: Error | HttpError): boolean {
 	if (error instanceof HttpError) {
 		const statusCode = error.statusCode;
-		// 404 is handled separately as success
-		// 4xx client errors are not retryable
-		if (statusCode >= 400 && statusCode < 500) {
-			return false;
-		}
 		// 5xx server errors are retryable
 		if (statusCode >= 500) {
 			return true;
+		}
+		// 4xx client errors are not retryable
+		if (statusCode >= 400 && statusCode < 500) {
+			return false;
 		}
 	}
 	// Network errors and other exceptions are retryable
