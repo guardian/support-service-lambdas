@@ -109,6 +109,19 @@ const mobilePurchasesToSupporterProductData: HandlerDefinition = {
 	},
 };
 
+const userBenefits: HandlerDefinition = {
+	name: 'user-benefits',
+	functionNames: [
+		'user-benefits-me-',
+		'user-benefits-identity-id-',
+		'user-benefits-list-',
+	],
+	dependencies: {},
+	devDependencies: {
+		...dep['@types/aws-lambda'],
+	},
+};
+
 export const build: HandlerDefinition[] = [
 	alarmsHandler,
 	discountApi,
@@ -116,4 +129,5 @@ export const build: HandlerDefinition[] = [
 	productSwitchApi,
 	mparticleApi,
 	mobilePurchasesToSupporterProductData,
+	userBenefits,
 ];
