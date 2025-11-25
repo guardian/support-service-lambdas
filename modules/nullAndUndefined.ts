@@ -12,7 +12,7 @@ export const getIfDefined = <T>(
 /**
  * Returns the value if it is defined and satisfies the predicate; otherwise, throws a ReferenceError with the provided error message.
  * @param value
- * @param predicate
+ * @param isValid
  * @param errorMessage
  *
  * example usage:
@@ -24,11 +24,10 @@ export const getIfDefined = <T>(
  */
 export const getIfDefinedAndValid = <T>(
 	value: unknown,
-	predicate: (value: unknown) => value is T,
+	isValid: (value: unknown) => value is T,
 	errorMessage: string,
 ): T => {
-
-	if (!getIfDefined(value, errorMessage) || !predicate(value)) {
+	if (!getIfDefined(value, errorMessage) || !isValid(value)) {
 		throw new ReferenceError(errorMessage);
 	}
 	return value;
