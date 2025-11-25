@@ -72,9 +72,16 @@ export class StripeDisputes extends SrStack {
 		);
 
 		lambdaConsumer.addPolicies(
-			new AllowZuoraOAuthSecretsPolicy(this),
+			new AllowZuoraOAuthSecretsPolicy(
+				this,
+				'Allow Secrets Manager Zuora policy',
+			),
 			getSalesforceSecretPolicy(this),
-			new AllowSqsSendPolicy(this, 'braze-emails'),
+			AllowSqsSendPolicy.createWithId(
+				this,
+				'Allow SQS SendMessage to Braze Emails Queue',
+				'braze-emails',
+			),
 		);
 
 		new SrLambdaAlarm(this, 'ConsumerLambdaErrorAlarm', {
@@ -147,7 +154,7 @@ function getQueueSendPolicy(scope: SrStack, lambdaConsumer: SrSqsLambda) {
 function getStripeSecretPolicy(scope: SrStack) {
 	return new AllowGetSecretValuePolicy(
 		scope,
-		'Stripe Webhooks Secrets Manager policy',
+		'Allow Secrets Manager Stripe Webhooks policy',
 		'Stripe/ConnectedApp/StripeDisputeWebhooks-*',
 	);
 }
@@ -155,7 +162,7 @@ function getStripeSecretPolicy(scope: SrStack) {
 function getSalesforceSecretPolicy(scope: SrStack) {
 	return new AllowGetSecretValuePolicy(
 		scope,
-		'Salesforce Secrets Manager policy',
+		'Allow Secrets Manager Salesforce policy',
 		'Salesforce/ConnectedApp/StripeDisputeWebhooks-*',
 	);
 }
