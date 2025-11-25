@@ -30,6 +30,7 @@ export class StripeDisputes extends SrStack {
 			lambdaOverrides: {
 				description: 'A lambda that handles stripe disputes SQS events',
 				handler: 'consumer.handler',
+				timeout: Duration.seconds(300),
 			},
 			monitoring: {
 				errorImpact:
