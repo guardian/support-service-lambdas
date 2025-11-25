@@ -38,7 +38,6 @@ export class TicketTailorWebhook extends SrStack {
 
 		new ApiGatewayToSqs(this, 'ApiGatewayToSqs', {
 			queue: lambda.inputQueue,
-			includeHeaderNames: ['tickettailor-webhook-signature'],
 			monitoring: { errorImpact },
 		});
 	}
