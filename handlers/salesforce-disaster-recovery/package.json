@@ -1,23 +1,28 @@
 {
-	"name": "salesforce-disaster-recovery",
-	"description": "A state machine that updates the Zuora accounts with the new Salesforce IDs restored in the event of a disaster.",
-	"scripts": {
-		"test": "jest --group=-integration",
-		"it-test": "jest --group=integration",
-		"build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/handlers/*.ts --sourcemap",
-		"lint": "eslint 'src/**/*.ts' 'test/**/*.ts'",
-		"package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr salesforce-disaster-recovery.zip ./*.js.map ./*.js",
-		"type-check": "tsc --noEmit",
-		"check-formatting": "prettier --check **.ts",
-		"fix-formatting": "prettier --write **.ts"
-	},
-	"devDependencies": {
-		"@types/aws-lambda": "^8.10.147",
-		"aws-sdk-client-mock": "4.1.0"
-	},
-	"dependencies": {
-		"@aws-sdk/client-s3": "^3.873.0",
-		"@aws-sdk/client-secrets-manager": "^3.908.0",
-		"csv-parse": "^5.6.0"
-	}
+  "name": "salesforce-disaster-recovery",
+  "scripts": {
+    "cdk:test": "pnpm --filter cdk test salesforce-disaster-recovery",
+    "cdk:test-update": "pnpm --filter cdk test-update salesforce-disaster-recovery",
+    "test": "jest --group=-integration",
+    "it-test": "jest --group=integration",
+    "type-check": "tsc --noEmit",
+    "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/handlers/*.ts --sourcemap",
+    "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr salesforce-disaster-recovery.zip ./*.js.map ./*.js",
+    "check-formatting": "prettier --check \"**/*.ts\"",
+    "fix-formatting": "prettier --write \"**/*.ts\"",
+    "update-lambda": "../../update-lambda.sh \"salesforce-disaster-recovery\"",
+    "update-stack": "../../update-stack.sh \"salesforce-disaster-recovery\""
+  },
+  "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
+  "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.848.0",
+    "@aws-sdk/client-secrets-manager": "^3.848.0",
+    "csv-parse": "^5.6.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.147",
+    "aws-sdk-client-mock": "4.1.0"
+  }
 }
