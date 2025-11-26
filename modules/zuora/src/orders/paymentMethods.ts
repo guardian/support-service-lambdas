@@ -25,7 +25,10 @@ type PayPal = {
 
 type PayPalCompletePayments = {
 	type: 'PayPalCP';
-	BAID: string;
+	tokens: {
+		gatewayType: 'PayPalCP';
+		tokenId: string;
+	};
 	email: string;
 };
 
