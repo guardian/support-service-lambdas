@@ -23,10 +23,20 @@ type PayPal = {
 	email: string;
 };
 
+type PayPalCompletePayments = {
+	type: 'PayPalCP';
+	tokens: {
+		gatewayType: 'PayPalCP';
+		tokenId: string;
+	};
+	email: string;
+};
+
 export type PaymentMethod =
 	| CreditCardReferenceTransaction
 	| DirectDebit
-	| PayPal;
+	| PayPal
+	| PayPalCompletePayments;
 
 //Gateway names need to match to those set in Zuora
 //See: https://apisandbox.zuora.com/apps/NewGatewaySetting.do?method=list
@@ -36,6 +46,8 @@ type StripePaymentGateway =
 	| 'Stripe - Observer - Tortoise Media';
 
 type PayPalPaymentGateway = 'PayPal Express';
+
+type PayPalCompletePaymentsPaymentGateway = 'PayPal Complete Payments';
 
 type GoCardlessPaymentGateway =
 	| 'GoCardless'
@@ -48,4 +60,6 @@ export type PaymentGateway<T extends PaymentMethod> =
 			? GoCardlessPaymentGateway
 			: T extends PayPal
 				? PayPalPaymentGateway
-				: never;
+				: T extends PayPalCompletePayments
+					? PayPalCompletePaymentsPaymentGateway
+					: never;
