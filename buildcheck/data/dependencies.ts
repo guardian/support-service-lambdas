@@ -53,6 +53,6 @@ export const deprecatedDeps = separateDepRecords({
 });
 
 function awsClients<T extends string>(ids: T[]) {
-	const awsClientVersion = '^3.848.0';
+	const awsClientVersion = '^3.940.0';
 	return withVersion(awsClientVersion, withPrefix('@aws-sdk/', ids));
 }
