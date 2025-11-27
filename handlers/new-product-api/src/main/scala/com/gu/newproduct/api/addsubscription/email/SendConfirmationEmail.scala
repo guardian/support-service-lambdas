@@ -45,7 +45,8 @@ object SendConfirmationEmail extends Logging {
 
   private def dataExtensionFor(plan: Plan): DataExtensionName = DataExtensionName(
     plan.id match {
-      case DigitalVoucherSunday => "sunday-paper-subscription-card" // SV_HD_ObserverWelcomeDay0 for Sunday-only rate plans
+      case DigitalVoucherSunday =>
+        "sunday-paper-subscription-card" // SV_HD_ObserverWelcomeDay0 for Sunday-only rate plans
       case _: DigitalVoucherPlanId => "paper-subscription-card" // SV_SC_WelcomeDay0
       case VoucherSunday => "sunday-paper-voucher" // SV_VO_ObserverWelcomeDay0 for Sunday-only rate plans
       case _: VoucherPlanId => "paper-voucher"

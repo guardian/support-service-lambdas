@@ -27,48 +27,49 @@ object Handler extends LazyLogging {
   def handleRequest(): Unit = {
     (for {
       config <- SoftOptInConfig(sys.env.get("Stage"), sys.env.get("sfApiVersion"))
-    } yield for {
-      sfConnector <- SalesforceConnector(config.sfConfig, config.sfApiVersion)
+    } yield
+      for {
+        sfConnector <- SalesforceConnector(config.sfConfig, config.sfApiVersion)
 
-      _ = logger.info(s"About to fetch subs to process from Salesforce")
-      allSubs <- sfConnector.getSubsToProcess()
-      _ = logger.info(
-        s"Successfully fetched ${allSubs.records.length} subs from Salesforce",
-      )
+        _ = logger.info(s"About to fetch subs to process from Salesforce")
+        allSubs <- sfConnector.getSubsToProcess()
+        _ = logger.info(
+          s"Successfully fetched ${allSubs.records.length} subs from Salesforce",
+        )
 
-      identityConnector = new IdentityConnector(config.identityConfig)
-      consentsCalculator = new ConsentsCalculator(ConsentsMapping.consentsMapping)
+        identityConnector = new IdentityConnector(config.identityConfig)
+        consentsCalculator = new ConsentsCalculator(ConsentsMapping.consentsMapping)
 
-      acqSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessAcquisitionStatus))
-      _ <- markAcquiredSubsProcessed(acqSubs, sfConnector.updateSubs)
+        acqSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessAcquisitionStatus))
+        _ <- markAcquiredSubsProcessed(acqSubs, sfConnector.updateSubs)
 
-      cancelledSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessCancellationStatus))
-      cancelledSubsIdentityIds = cancelledSubs.map(sub => sub.Buyer__r.IdentityID__c)
+        cancelledSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyToProcessCancellationStatus))
+        cancelledSubsIdentityIds = cancelledSubs.map(sub => sub.Buyer__r.IdentityID__c)
 
-      productSwitchSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyProcessSwitchStatus))
-      productSwitchSubIdentityIds = productSwitchSubs.map(sub => sub.Buyer__r.IdentityID__c)
+        productSwitchSubs = allSubs.records.filter(_.Soft_Opt_in_Status__c.equals(readyProcessSwitchStatus))
+        productSwitchSubIdentityIds = productSwitchSubs.map(sub => sub.Buyer__r.IdentityID__c)
 
-      _ = logger.info(s"About to fetch active subs from Salesforce")
-      activeSubs <- sfConnector.getActiveSubs((cancelledSubsIdentityIds ++ productSwitchSubIdentityIds).distinct)
-      _ = logger.info(s"Successfully fetched ${activeSubs.records.length} active subs from Salesforce")
+        _ = logger.info(s"About to fetch active subs from Salesforce")
+        activeSubs <- sfConnector.getActiveSubs((cancelledSubsIdentityIds ++ productSwitchSubIdentityIds).distinct)
+        _ = logger.info(s"Successfully fetched ${activeSubs.records.length} active subs from Salesforce")
 
-      _ <- processProductSwitchSubs(
-        productSwitchSubs,
-        activeSubs,
-        identityConnector.sendConsentsReq,
-        sfConnector.updateSubs,
-        consentsCalculator,
-      )
+        _ <- processProductSwitchSubs(
+          productSwitchSubs,
+          activeSubs,
+          identityConnector.sendConsentsReq,
+          sfConnector.updateSubs,
+          consentsCalculator,
+        )
 
-      _ <- processCancelledSubs(
-        cancelledSubs,
-        activeSubs,
-        identityConnector.sendConsentsReq,
-        sfConnector.updateSubs,
-        consentsCalculator,
-      )
-      _ = Metrics.put(event = "successful_run")
-    } yield ()).flatten.left
+        _ <- processCancelledSubs(
+          cancelledSubs,
+          activeSubs,
+          identityConnector.sendConsentsReq,
+          sfConnector.updateSubs,
+          consentsCalculator,
+        )
+        _ = Metrics.put(event = "successful_run")
+      } yield ()).flatten.left
       .foreach(error => {
         Metrics.put(event = "failed_run")
         logger.error(s"${error.getMessage}")

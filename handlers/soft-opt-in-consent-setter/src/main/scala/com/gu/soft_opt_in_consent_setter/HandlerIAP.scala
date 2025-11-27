@@ -137,10 +137,11 @@ object HandlerIAP extends LazyLogging with RequestHandler[SQSEvent, Unit] {
     for {
       body <- inputRecords
       _ = logger.info(s"Raw SQS body:\n$body")
-      failableMaybeMessageBody = for {
-        wireMessageBody <- circeDecode[WireMessageBody](body).left.map(wrapParserError(_, body)).toTry
-        maybeMessageBody <- MessageBody.parseWireMessageBody(wireMessageBody)
-      } yield maybeMessageBody
+      failableMaybeMessageBody =
+        for {
+          wireMessageBody <- circeDecode[WireMessageBody](body).left.map(wrapParserError(_, body)).toTry
+          maybeMessageBody <- MessageBody.parseWireMessageBody(wireMessageBody)
+        } yield maybeMessageBody
       failableMessageBody <- failableMaybeMessageBody.sequence // sequence does Try[Option[A]] => Option[Try[A]]
     } yield failableMessageBody
 
