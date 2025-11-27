@@ -6,6 +6,9 @@ settings:
 
 catalogs:
   default:
+    dayjs:
+      specifier: ^1.11.7
+      version: 1.11.18
     tsconfig-paths:
       specifier: ^4.2.0
       version: 4.2.0
@@ -273,6 +276,22 @@ importers:
       '@types/aws-lambda':
         specifier: ^8.10.147
         version: 8.10.158
+
+  handlers/observer-digital-benefits:
+    dependencies:
+      '@aws-sdk/client-dynamodb':
+        specifier: ^3.848.0
+        version: 3.908.0
+      dayjs:
+        specifier: 'catalog:'
+        version: 1.11.18
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.129
+        version: 8.10.155
 
   handlers/press-reader-entitlements:
     dependencies:

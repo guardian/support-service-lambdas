@@ -27,6 +27,14 @@ export const newspaperProducts = [
 	'SubscriptionCard',
 	'NewspaperVoucher',
 ] as const;
+export type NewspaperProductKey = (typeof newspaperProducts)[number];
+
+export function isNewspaperProduct(
+	productKey: unknown,
+): productKey is NewspaperProductKey {
+	return newspaperProducts.includes(productKey as NewspaperProductKey);
+}
+
 export const deliveryProducts = [
 	...newspaperProducts,
 	'TierThree',
@@ -118,6 +126,13 @@ export type ZuoraProductRatePlanKey<P extends ZuoraProductKey> =
 
 export type TermType = z.infer<typeof termTypeSchema>;
 
+export type ProductDetails<P extends ProductKey> = {
+	zuoraProduct: P;
+	billingSystem: ProductBillingSystem;
+	productRatePlan: ProductRatePlanKey<P>;
+	id: string;
+};
+
 export class ProductCatalogHelper {
 	constructor(private catalogData: ProductCatalog) {}
 
@@ -140,7 +155,7 @@ export class ProductCatalogHelper {
 			(productDetail) => productDetail.billingSystem === billingSystem,
 		);
 
-	getAllProductDetails = () => {
+	getAllProductDetails = (): Array<ProductDetails<ProductKey>> => {
 		const stageMapping = this.catalogData;
 		const zuoraProductKeys = objectKeysNonEmpty(stageMapping);
 		return zuoraProductKeys.flatMap((zuoraProduct) => {
@@ -159,7 +174,9 @@ export class ProductCatalogHelper {
 			});
 		});
 	};
-	findProductDetails = (productRatePlanId: string) => {
+	findProductDetails = (
+		productRatePlanId: string,
+	): ProductDetails<ProductKey> | undefined => {
 		const allProducts = this.getAllProductDetails();
 		return allProducts.find((product) => product.id === productRatePlanId);
 	};
