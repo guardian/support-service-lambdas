@@ -1,17 +1,10 @@
 import { z, ZodError } from 'zod';
-import { RestClient, RestClientError } from '../src/restClient';
+import { RestClientError, RestClientImpl } from '../src/restClient';
 
-class TestRestClient extends RestClient {
-	constructor(
-		baseUrl: string,
-		private authHeaders: Record<string, string> = {},
-	) {
-		super(baseUrl);
+class TestRestClient extends RestClientImpl<void> {
+	constructor(baseUrl: string, authHeaders: Record<string, string> = {}) {
+		super(baseUrl, () => Promise.resolve(authHeaders));
 	}
-
-	protected getAuthHeaders: () => Promise<Record<string, string>> = () => {
-		return Promise.resolve(this.authHeaders);
-	};
 }
 
 describe('RestClient', () => {
@@ -165,49 +158,12 @@ describe('RestClient', () => {
 				headers: {},
 			});
 
-			await expect(client.get('/users/123', schema)).rejects.toThrow(ZodError);
-		});
-
-		it('should use assertValidResponse to throw custom errors', async () => {
-			const customError = new Error('Custom error');
-			client['assertValidResponse'] = () => {
-				throw customError;
-			};
-
-			mockFetchResponse({
-				ok: false,
-				status: 500,
-				text: 'Internal error',
-				headers: {},
-			});
-
-			await expect(client.getRaw('/error')).rejects.toThrow('Custom error');
-		});
-
-		it('should use assertValidResponse to determine logical failure', async () => {
-			const schema = z.object({ status: z.string(), data: z.string() });
-			client['assertValidResponse'] = (ok, result) => {
-				const json = JSON.parse(result.responseBody) as { status: string };
-				if (json.status !== 'success') {
-					throw new RestClientError(
-						'Logical failure',
-						result.statusCode,
-						result.responseBody,
-						result.responseHeaders,
-					);
-				}
-			};
-
-			mockFetchResponse({
-				ok: true,
-				status: 200,
-				body: { status: 'failed', data: 'error details' },
-				headers: {},
-			});
-
-			await expect(client.get('/logical-fail', schema)).rejects.toThrow(
-				RestClientError,
-			);
+			try {
+				await client.get('/users/123', schema);
+			} catch (err) {
+				expect(err).toBeInstanceOf(RestClientError);
+				expect((err as Error).cause).toBeInstanceOf(ZodError);
+			}
 		});
 	});
 

@@ -4,10 +4,6 @@
  * @group integration
  */
 
-import {
-	BearerTokenProvider,
-	getOAuthClientCredentials,
-} from '@modules/zuora/auth';
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import { zuoraSubscriptionResponseSchema } from '@modules/zuora/types';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
@@ -15,9 +11,7 @@ import { ZuoraClient } from '@modules/zuora/zuoraClient';
 test('ZuoraClient', async () => {
 	const stage = 'CODE';
 	const subscriptionNumber = 'A-S00737600';
-	const credentials = await getOAuthClientCredentials(stage);
-	const bearerTokenProvider = new BearerTokenProvider(stage, credentials);
-	const zuoraClient = new ZuoraClient(stage, bearerTokenProvider);
+	const zuoraClient = await ZuoraClient.create(stage);
 	const path = `v1/subscriptions/${subscriptionNumber}`;
 	const subscription: ZuoraSubscription = await zuoraClient.get(
 		path,

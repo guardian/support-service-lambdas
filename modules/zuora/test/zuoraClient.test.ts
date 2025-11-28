@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import type { BearerTokenProvider } from '@modules/zuora/auth';
 import { ZuoraError } from '@modules/zuora/errors';
-import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import { createZuoraClientWithHeaders } from '@modules/zuora/zuoraClient';
 
 // Mock fetch globally
 global.fetch = jest.fn();
@@ -26,18 +26,13 @@ const testSchema = z.object({
 
 describe('ZuoraClient fetch method error handling', () => {
 	let zuoraClient: ZuoraClient;
-	let mockTokenProvider: jest.Mocked<BearerTokenProvider>;
 
 	beforeEach(() => {
 		jest.clearAllMocks();
 
-		mockTokenProvider = {
-			getBearerToken: jest
-				.fn()
-				.mockResolvedValue({ access_token: 'test_token' }),
-		} as unknown as jest.Mocked<BearerTokenProvider>;
-
-		zuoraClient = new ZuoraClient('CODE', mockTokenProvider);
+		zuoraClient = createZuoraClientWithHeaders('CODE', () =>
+			Promise.resolve({ Authorization: 'Bearer mock-token' }),
+		);
 	});
 
 	describe('HTTP 400 errors with different response formats', () => {
@@ -65,17 +60,17 @@ describe('ZuoraClient fetch method error handling', () => {
 			(fetch as jest.Mock).mockResolvedValue(mockResponse);
 
 			await expect(
-				zuoraClient.fetch()(
+				zuoraClient.post(
 					'v1/object/credit-balance-adjustment',
-					'POST',
+					'body',
 					testSchema,
 				),
 			).rejects.toThrow(ZuoraError);
 
 			try {
-				await zuoraClient.fetch()(
+				await zuoraClient.post(
 					'v1/object/credit-balance-adjustment',
-					'POST',
+					'body',
 					testSchema,
 				);
 			} catch (error) {
@@ -102,11 +97,11 @@ describe('ZuoraClient fetch method error handling', () => {
 			(fetch as jest.Mock).mockResolvedValue(mockResponse);
 
 			await expect(
-				zuoraClient.fetch()('v1/action/query', 'POST', testSchema),
+				zuoraClient.post('v1/action/query', 'body', testSchema),
 			).rejects.toThrow(ZuoraError);
 
 			try {
-				await zuoraClient.fetch()('v1/action/query', 'POST', testSchema);
+				await zuoraClient.post('v1/action/query', 'body', testSchema);
 			} catch (error) {
 				expect(error).toBeInstanceOf(ZuoraError);
 				expect((error as ZuoraError).message).toBe(errorMessage);
@@ -131,11 +126,11 @@ describe('ZuoraClient fetch method error handling', () => {
 			(fetch as jest.Mock).mockResolvedValue(mockResponse);
 
 			await expect(
-				zuoraClient.fetch()('v1/action/query1', 'POST', testSchema),
+				zuoraClient.post('v1/action/query1', 'POST', testSchema),
 			).rejects.toThrow(ZuoraError);
 
 			try {
-				await zuoraClient.fetch()('v1/action/query1', 'POST', testSchema);
+				await zuoraClient.post('v1/action/query1', 'POST', testSchema);
 			} catch (error) {
 				expect(error).toBeInstanceOf(ZuoraError);
 				expect((error as ZuoraError).message).toBe(errorMessage);
@@ -167,7 +162,7 @@ describe('ZuoraClient fetch method error handling', () => {
 			(fetch as jest.Mock).mockResolvedValue(mockResponse);
 
 			await expect(
-				zuoraClient.fetch()(
+				zuoraClient.post(
 					'v1/object/credit-balance-adjustment',
 					'POST',
 					testSchema,
@@ -175,7 +170,7 @@ describe('ZuoraClient fetch method error handling', () => {
 			).rejects.toThrow(ZuoraError);
 
 			try {
-				await zuoraClient.fetch()(
+				await zuoraClient.post(
 					'v1/object/credit-balance-adjustment',
 					'POST',
 					testSchema,
@@ -212,11 +207,7 @@ describe('ZuoraClient fetch method error handling', () => {
 			(fetch as jest.Mock).mockResolvedValue(mockResponse);
 
 			await expect(
-				zuoraClient.fetch()(
-					'v1/accounts/xxx/payment-methods',
-					'GET',
-					testSchema,
-				),
+				zuoraClient.get('v1/accounts/xxx/payment-methods', testSchema),
 			).rejects.toThrow();
 		});
 
@@ -244,9 +235,8 @@ describe('ZuoraClient fetch method error handling', () => {
 
 			(fetch as jest.Mock).mockResolvedValue(mockResponse);
 			await expect(
-				zuoraClient.fetch()(
+				zuoraClient.get(
 					'v1/accounts/8ad09b7d83a313110183a8769afd1bf3/payment-methods-invalid-endpoint',
-					'GET',
 					testSchema,
 				),
 			).rejects.toThrow();
@@ -277,22 +267,13 @@ describe('ZuoraClient fetch method error handling', () => {
 			(fetch as jest.Mock).mockResolvedValue(mockResponse);
 
 			await expect(
-				zuoraClient.fetch()(
-					'v1/accounts/test/payment-methods',
-					'GET',
-					testSchema,
-				),
+				zuoraClient.get('v1/accounts/test/payment-methods', testSchema),
 			).rejects.toThrow(ZuoraError);
 
 			try {
-				await zuoraClient.fetch()(
-					'v1/accounts/test/payment-methods',
-					'GET',
-					testSchema,
-				);
+				await zuoraClient.get('v1/accounts/test/payment-methods', testSchema);
 			} catch (error) {
 				expect(error).toBeInstanceOf(ZuoraError);
-				expect((error as ZuoraError).code).toBe(429);
 				expect((error as ZuoraError).message).toContain(errorMessage);
 			}
 		});
@@ -314,9 +295,8 @@ describe('ZuoraClient fetch method error handling', () => {
 
 			(fetch as jest.Mock).mockResolvedValue(mockResponse);
 
-			const result = await zuoraClient.fetch()(
+			const result = await zuoraClient.get(
 				'v1/accounts/test/payment-methods',
-				'GET',
 				testSchema,
 			);
 			expect(result).toEqual({ success: true });

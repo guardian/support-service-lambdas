@@ -1,4 +1,5 @@
 import { logger } from '@modules/routing/logger';
+import { Try } from '@modules/try';
 import type z from 'zod';
 
 export class RestClientError extends Error implements RestResult {
@@ -7,8 +8,9 @@ export class RestClientError extends Error implements RestResult {
 		public statusCode: number,
 		public responseBody: string,
 		public responseHeaders: Record<string, string>,
+		cause?: Error,
 	) {
-		super(message);
+		super(message, { cause });
 		this.name = this.constructor.name;
 	}
 }
@@ -19,8 +21,42 @@ export type RestResult = {
 	responseHeaders: Record<string, string>;
 };
 
-export abstract class RestClient {
-	protected constructor(readonly restServerUrl: string) {}
+export interface RestClient<U> {
+	get<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
+		path: string,
+		schema: T,
+	): Promise<O>;
+
+	getRaw(path: string): Promise<RestResult>;
+
+	post<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
+		path: string,
+		body: string,
+		schema: T,
+		headers?: Record<string, string>,
+	): Promise<O>;
+
+	put<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
+		path: string,
+		body: string,
+		schema: T,
+		headers?: Record<string, string>,
+	): Promise<O>;
+
+	delete<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
+		path: string,
+		schema: T,
+	): Promise<O>;
+
+	__brand: U;
+}
+
+export class RestClientImpl<U> implements RestClient<U> {
+	public constructor(
+		readonly restServerUrl: string,
+		readonly getAuthHeaders: () => Promise<Record<string, string>>,
+		readonly __brand: U,
+	) {}
 
 	public async get<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
@@ -98,8 +134,19 @@ export abstract class RestClient {
 			body,
 		);
 
-		const json: unknown = JSON.parse(result.responseBody);
-		return schema.parse(json);
+		return Try((): unknown => JSON.parse(result.responseBody))
+			.map((json) => schema.parse(json))
+			.mapError(
+				(e) =>
+					new RestClientError(
+						'parsing failure',
+						result.statusCode,
+						result.responseBody,
+						result.responseHeaders,
+						e,
+					),
+			)
+			.get();
 	}
 
 	// has to be a function so that the callerInfo is refreshed on every call
@@ -140,9 +187,6 @@ export abstract class RestClient {
 			responseBody,
 			responseHeaders,
 		};
-		if (this.assertValidResponse) {
-			this.assertValidResponse(response.ok, result);
-		}
 		if (!response.ok) {
 			throw new RestClientError(
 				'http call failed',
@@ -154,17 +198,4 @@ export abstract class RestClient {
 
 		return result;
 	}
-
-	/**
-	 * This function, if defined, will run on all responses and can throw custom errors if needed
-	 * @param json
-	 * @protected
-	 */
-	protected assertValidResponse?: (ok: boolean, result: RestResult) => void;
-
-	/**
-	 * Provide any Authorization headers via this method.  They will be sent but not logged.
-	 * @protected
-	 */
-	protected abstract getAuthHeaders: () => Promise<Record<string, string>>;
 }

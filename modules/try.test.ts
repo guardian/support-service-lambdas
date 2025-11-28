@@ -1,4 +1,4 @@
-import { Try, Success, Failure } from './try';
+import { Try, Success, Failure, sequenceTry } from './try';
 
 describe('Success', () => {
 	it('should return the value with get', () => {
@@ -36,6 +36,23 @@ describe('Success', () => {
 		const mapped = result.mapError(() => new Error('should not be called'));
 		expect(mapped.success).toBe(true);
 		expect(mapped.get()).toBe(42);
+	});
+
+	it('should map to a new Success', () => {
+		const result = Success(42);
+		const mapped = result.map((n) => n * 2);
+		expect(mapped.success).toBe(true);
+		expect(mapped.get()).toBe(84);
+	});
+
+	it('should map to a Failure if mapper throws', () => {
+		const result = Success(42);
+		const error = new Error('map error');
+		const mapped = result.map(() => {
+			throw error;
+		});
+		expect(mapped.success).toBe(false);
+		expect((mapped as Failure<number>).failure).toBe(error);
 	});
 });
 
@@ -80,6 +97,13 @@ describe('Failure', () => {
 		expect(finalFailure.message).toBe(wrapperMessage);
 		expect(finalFailure.cause).toBe(error);
 	});
+
+	it('should not execute map', () => {
+		const result = Failure<number>(error);
+		const mapped = result.map((n) => n * 2);
+		expect(mapped.success).toBe(false);
+		expect((mapped as Failure<number>).failure).toBe(error);
+	});
 });
 
 describe('Try', () => {
@@ -105,5 +129,41 @@ describe('Try', () => {
 
 		expect(result.success).toBe(true);
 		expect(result.get()).toBe(25);
+	});
+});
+
+describe('sequenceTry', () => {
+	it('should return Success for resolved promise', async () => {
+		const promise = Promise.resolve(42);
+		const result = await sequenceTry(promise);
+		expect(result.success).toBe(true);
+		expect(result.get()).toBe(42);
+	});
+
+	it('should return Failure for rejected promise', async () => {
+		const error = new Error('promise failed');
+		const promise = Promise.reject(error);
+		const result = await sequenceTry(promise);
+		expect(result.success).toBe(false);
+		expect((result as Failure<never>).failure).toBe(error);
+	});
+
+	it('should handle non-Error rejections', async () => {
+		const promise = Promise.reject('string error');
+		const result = await sequenceTry(promise);
+		expect(result.success).toBe(false);
+		const failure = result as Failure<never>;
+		expect(failure.failure.message).toBe('string error');
+	});
+
+	it('should chain operations after Promise Try', async () => {
+		const promise = Promise.resolve(10);
+		const result = await sequenceTry(promise);
+		const chained = result
+			.flatMap((n) => Success(n * 2))
+			.flatMap((n) => Success(n + 5));
+
+		expect(chained.success).toBe(true);
+		expect(chained.get()).toBe(25);
 	});
 });
