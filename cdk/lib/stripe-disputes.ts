@@ -30,7 +30,7 @@ export class StripeDisputes extends SrStack {
 			lambdaOverrides: {
 				description: 'A lambda that handles stripe disputes SQS events',
 				handler: 'consumer.handler',
-				timeout: Duration.seconds(300),
+				timeout: Duration.minutes(5),
 			},
 			monitoring: {
 				errorImpact:
@@ -121,7 +121,6 @@ export class StripeDisputes extends SrStack {
 			treatMissingData: TreatMissingData.NOT_BREACHING,
 		});
 
-		const fiveMinutes = 5 * 60 * 1000;
 		new GuAlarm(this, 'SQSMessageAgeAlarm', {
 			app: app,
 			alarmName: `${this.stage} ${app} - SQS messages taking too long to process`,
@@ -131,7 +130,7 @@ export class StripeDisputes extends SrStack {
 				`Check for Lambda throttling or processing errors. ` +
 				`Queue: https://${this.region}.console.aws.amazon.com/sqs/v2/home?region=${this.region}#/queues/https%3A%2F%2Fsqs.${this.region}.amazonaws.com%2F${this.account}%2F${lambdaConsumer.inputQueue.queueName}`,
 			metric: lambdaConsumer.inputQueue.metricApproximateAgeOfOldestMessage(),
-			threshold: fiveMinutes,
+			threshold: Duration.minutes(5).toSeconds(),
 			evaluationPeriods: 1,
 			comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
 			treatMissingData: TreatMissingData.NOT_BREACHING,

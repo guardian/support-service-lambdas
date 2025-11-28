@@ -25,7 +25,6 @@ describe('The stripe disputes webhook API stack', () => {
 
 		it('should create Consumer Lambda Error alarm', () => {
 			template.hasResourceProperties('AWS::CloudWatch::Alarm', {
-				// AlarmName: 'PROD stripe-disputes - Consumer Lambda high error rate',
 				MetricName: 'Errors',
 				Namespace: 'AWS/Lambda',
 				Statistic: 'Sum',
@@ -37,7 +36,6 @@ describe('The stripe disputes webhook API stack', () => {
 
 		it('should create Producer API Gateway 5XX alarm', () => {
 			template.hasResourceProperties('AWS::CloudWatch::Alarm', {
-				// AlarmName: 'PROD stripe-disputes - Producer API 5XX errors',
 				MetricName: '5XXError',
 				Namespace: 'AWS/ApiGateway',
 				Statistic: 'Sum',
@@ -63,14 +61,13 @@ describe('The stripe disputes webhook API stack', () => {
 					'PROD stripe-disputes - SQS messages taking too long to process',
 				MetricName: 'ApproximateAgeOfOldestMessage',
 				Namespace: 'AWS/SQS',
-				Threshold: 300000,
+				Threshold: 5 * 60,
 				ComparisonOperator: 'GreaterThanThreshold',
 			});
 		});
 
 		it('should create DLQ alarm with correct properties', () => {
 			template.hasResourceProperties('AWS::CloudWatch::Alarm', {
-				// AlarmName: 'PROD stripe-disputes - Failed to process dispute webhook',
 				MetricName: 'ApproximateNumberOfMessagesVisible',
 				Namespace: 'AWS/SQS',
 				Threshold: 0,
