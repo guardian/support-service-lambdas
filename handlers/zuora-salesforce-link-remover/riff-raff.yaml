@@ -1,3 +1,4 @@
+# MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/riff-raff.yaml.ts
 stacks:
   - membership
 regions:
@@ -23,4 +24,5 @@ deployments:
         - zuora-salesforce-link-remover-get-billing-accounts-
         - zuora-salesforce-link-remover-update-zuora-billing-account-
         - zuora-salesforce-link-remover-update-sf-billing-accounts-
-    dependencies: [zuora-salesforce-link-remover-cloudformation]
+    dependencies:
+      - zuora-salesforce-link-remover-cloudformation
