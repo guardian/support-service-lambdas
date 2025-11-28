@@ -58,13 +58,12 @@ test('Supporter Plus subscriptions can have a discount and get an email', async 
 	expect(emailPayload).toEqual(expectedEmail);
 
 	console.log('Cancelling the subscription');
-	const cancellationResult = await cancelSubscription(
+	await cancelSubscription(
 		zuoraClient,
 		subscriptionNumber,
 		dayjs().add(1, 'month'),
 		true,
 	);
-	expect(cancellationResult.success).toEqual(true);
 }, 30000);
 
 test('digi subs can have a discount but dont get an email', async () => {
@@ -111,11 +110,10 @@ test('digi subs can have a discount but dont get an email', async () => {
 	expect(emailPayload).toEqual(expectedEmail);
 
 	console.log('Cancelling the subscription');
-	const cancellationResult = await cancelSubscription(
+	await cancelSubscription(
 		zuoraClient,
 		subscriptionNumber,
 		dayjs().add(1, 'month'),
 		true,
 	);
-	expect(cancellationResult.success).toEqual(true);
 }, 30000);

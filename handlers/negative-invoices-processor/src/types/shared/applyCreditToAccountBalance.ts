@@ -1,8 +1,8 @@
-import { zuoraResponseSchema } from '@modules/zuora/types';
 import { z } from 'zod';
+import { successOrFailureSchema } from './successOrFailureSchema';
 
 export const ApplyCreditToAccountBalanceResponseSchema =
-	zuoraResponseSchema.extend({
+	successOrFailureSchema.extend({
 		Id: z.string().optional(),
 	});
 

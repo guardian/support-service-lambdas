@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { ZuoraError } from '@modules/zuora/errors/zuoraError';
 import { createPayment, rejectPayment } from '../src/payment';
 import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 
@@ -32,8 +33,13 @@ describe('payment', () => {
 		});
 
 		it('should throw error when payment creation fails', async () => {
-			const mockResponse = { Success: false, errors: ['Payment failed'] };
-			mockZuoraClient.post = jest.fn().mockResolvedValue(mockResponse);
+			mockZuoraClient.post = jest.fn().mockImplementation(() => {
+				throw new ZuoraError(
+					'An error occurred while creating the payment',
+					123,
+					[],
+				);
+			});
 			const effectiveDate = dayjs('2023-11-04');
 
 			await expect(
@@ -71,7 +77,7 @@ describe('payment', () => {
 			const mockResponse = { Success: true, Id: 'rejection_123' };
 			mockZuoraClient.post = jest.fn().mockResolvedValue(mockResponse);
 
-			const result = await rejectPayment(mockZuoraClient, 'P-12345');
+			await rejectPayment(mockZuoraClient, 'P-12345');
 
 			expect(mockZuoraClient.post).toHaveBeenCalledWith(
 				'/v1/gateway-settlement/payments/P-12345/reject',
@@ -83,8 +89,6 @@ describe('payment', () => {
 				}),
 				expect.any(Object),
 			);
-
-			expect(result).toEqual(mockResponse);
 		});
 
 		it('should reject payment with custom reason', async () => {

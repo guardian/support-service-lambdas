@@ -1,36 +1,93 @@
 import { logger } from '@modules/routing/logger';
 import type z from 'zod';
 
-export class RestClientError extends Error {
+export class RestClientError extends Error implements RestResult {
+	static create = (message: string, result: RestResult, e?: unknown) =>
+		new RestClientError(
+			message,
+			result.statusCode,
+			result.responseBody,
+			result.responseHeaders,
+			e === undefined || e instanceof Error
+				? e
+				: new Error('value thrown that was not an Error', { cause: e }),
+		);
+
 	constructor(
 		message: string,
 		public statusCode: number,
-		public body: string,
-		public headers: Record<string, string>,
+		public responseBody: string,
+		public responseHeaders: Record<string, string>,
+		cause?: Error,
 	) {
-		super(message);
+		super(message, { cause });
 		this.name = this.constructor.name;
 	}
 }
 
 export type RestResult = {
-	response: Response;
+	statusCode: number;
 	responseBody: string;
 	responseHeaders: Record<string, string>;
 };
 
-export abstract class RestClient {
-	protected constructor(readonly restServerUrl: string) {}
+export interface RestClient<U extends string> {
+	get<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
+		path: string,
+		schema: T,
+	): Promise<O>;
+
+	getRaw(path: string): Promise<RestResult>;
+
+	post<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
+		path: string,
+		body: string,
+		schema: T,
+		headers?: Record<string, string>,
+	): Promise<O>;
+
+	put<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
+		path: string,
+		body: string,
+		schema: T,
+		headers?: Record<string, string>,
+	): Promise<O>;
+
+	delete<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
+		path: string,
+		schema: T,
+	): Promise<O>;
+
+	__brand: U;
+}
+
+export class RestClientImpl<U extends string> implements RestClient<U> {
+	private readonly extraFrames: number;
+	public constructor(
+		readonly restServerUrl: string,
+		readonly getAuthHeaders: () => Promise<Record<string, string>>,
+		readonly __brand: U,
+		extraFrames: number = 0,
+	) {
+		this.extraFrames = extraFrames + 1;
+	}
 
 	public async get<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
 		schema: T,
 	): Promise<O> {
-		return await this.fetch(logger.getCallerInfo(1))(path, 'GET', schema);
+		return await this.fetch(logger.getCallerInfo(this.extraFrames))(
+			path,
+			'GET',
+			schema,
+		);
 	}
 
 	public async getRaw(path: string): Promise<RestResult> {
-		return await this.fetchRawBody(logger.getCallerInfo(1))(path, 'GET');
+		return await this.fetchRawBody(logger.getCallerInfo(this.extraFrames))(
+			path,
+			'GET',
+		);
 	}
 
 	public async post<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
@@ -39,7 +96,7 @@ export abstract class RestClient {
 		schema: T,
 		headers?: Record<string, string>,
 	): Promise<O> {
-		return await this.fetch(logger.getCallerInfo(1))(
+		return await this.fetch(logger.getCallerInfo(this.extraFrames))(
 			path,
 			'POST',
 			schema,
@@ -54,7 +111,7 @@ export abstract class RestClient {
 		schema: T,
 		headers?: Record<string, string>,
 	): Promise<O> {
-		return await this.fetch(logger.getCallerInfo(1))(
+		return await this.fetch(logger.getCallerInfo(this.extraFrames))(
 			path,
 			'PUT',
 			schema,
@@ -67,7 +124,11 @@ export abstract class RestClient {
 		path: string,
 		schema: T,
 	): Promise<O> {
-		return await this.fetch(logger.getCallerInfo(1))(path, 'DELETE', schema);
+		return await this.fetch(logger.getCallerInfo(this.extraFrames))(
+			path,
+			'DELETE',
+			schema,
+		);
 	}
 
 	// has to be a function so that the callerInfo is refreshed on every call
@@ -98,25 +159,12 @@ export abstract class RestClient {
 			body,
 		);
 
-		const json: unknown = JSON.parse(result.responseBody);
-		if (!this.isLogicalSuccess || this.isLogicalSuccess(json)) {
+		try {
+			const json: unknown = JSON.parse(result.responseBody);
 			return schema.parse(json);
-		} else {
-			throw this.onFailure(result);
+		} catch (e) {
+			throw RestClientError.create('parsing failure', result, e);
 		}
-	}
-
-	private onFailure(result: RestResult) {
-		if (this.generateError) {
-			return this.generateError(result);
-		}
-
-		return new RestClientError(
-			'http call failed',
-			result.response.status,
-			result.responseBody,
-			result.responseHeaders,
-		);
 	}
 
 	// has to be a function so that the callerInfo is refreshed on every call
@@ -152,33 +200,15 @@ export abstract class RestClient {
 		const responseHeaders: Record<string, string> = Object.fromEntries(
 			[...response.headers.entries()].map(([k, v]) => [k.toLowerCase(), v]),
 		);
-		const result: RestResult = { response, responseBody, responseHeaders };
+		const result: RestResult = {
+			statusCode: response.status,
+			responseBody,
+			responseHeaders,
+		};
 		if (!response.ok) {
-			throw this.onFailure(result);
+			throw RestClientError.create('http call failed', result);
 		}
 
 		return result;
 	}
-
-	/**
-	 * if a request is deemed to have failed, you can return a custom Error to be thrown.
-	 * If this method is undefined, the default but verbose RestHttpError will be thrown.
-	 * @param result
-	 * @protected
-	 */
-	protected generateError?: (result: RestResult) => Error;
-
-	/**
-	 * This function, if defined, will get the chance to mark 200 responses as failed
-	 * (therefore send to generateError) based on the json body.
-	 * @param json
-	 * @protected
-	 */
-	protected isLogicalSuccess?: (json: unknown) => boolean;
-
-	/**
-	 * Provide any Authorization headers via this method.  They will be sent but not logged.
-	 * @protected
-	 */
-	protected abstract getAuthHeaders: () => Promise<Record<string, string>>;
 }

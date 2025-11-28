@@ -5,7 +5,7 @@ import {
 } from '@modules/zuora/billingPreview';
 import {
 	billingPreviewSchema,
-	zuoraSubscriptionResponseSchema,
+	zuoraSubscriptionSchema,
 } from '@modules/zuora/types';
 import { ZuoraCatalogHelper } from '@modules/zuora-catalog/zuoraCatalog';
 import { zuoraCatalogSchema } from '@modules/zuora-catalog/zuoraCatalogSchema';
@@ -41,7 +41,7 @@ function asLazy<T>(value: T): () => Promise<T> {
 }
 
 test('Eligibility check fails for a Supporter plus which has already had the offer', async () => {
-	const sub = zuoraSubscriptionResponseSchema.parse(subscriptionJson1);
+	const sub = zuoraSubscriptionSchema.parse(subscriptionJson1);
 	const billingPreview = loadBillingPreview('A-S00898839', billingPreviewJson1);
 	const discount = getDiscountFromSubscription('CODE', sub);
 	const after2Months = dayjs(sub.contractEffectiveDate)
@@ -70,7 +70,7 @@ test('Eligibility check fails for a Supporter plus which has already had the off
 });
 
 test('Eligibility check fails where the next payment is zero (i.e. a contribution set to 0 amount)', async () => {
-	const sub = zuoraSubscriptionResponseSchema.parse(subscriptionJson1);
+	const sub = zuoraSubscriptionSchema.parse(subscriptionJson1);
 	const billingPreview = loadBillingPreview(
 		sub.subscriptionNumber,
 		zeroContributionPreview,
@@ -89,7 +89,7 @@ test('Eligibility check fails where the next payment is zero (i.e. a contributio
 });
 
 test('Eligibility check fails for a S+ subscription which is on a reduced price', async () => {
-	const sub = zuoraSubscriptionResponseSchema.parse(subscriptionJson3);
+	const sub = zuoraSubscriptionSchema.parse(subscriptionJson3);
 	const billingPreview = loadBillingPreview(
 		sub.subscriptionNumber,
 		billingPreviewJson1,
@@ -119,7 +119,7 @@ test('Eligibility check fails for a S+ subscription which is on a reduced price'
 });
 
 test('Eligibility check fails for a subscription which hasnt been running long', () => {
-	const sub = zuoraSubscriptionResponseSchema.parse(subSupporterPlusFullPrice);
+	const sub = zuoraSubscriptionSchema.parse(subSupporterPlusFullPrice);
 	const discount = getDiscountFromSubscription('CODE', sub);
 	const nearlyLongEnough = dayjs(sub.contractEffectiveDate).add(2, 'months');
 
@@ -134,7 +134,7 @@ test('Eligibility check fails for a subscription which hasnt been running long',
 });
 
 test('Eligibility check works for a price risen subscription', async () => {
-	const sub = zuoraSubscriptionResponseSchema.parse(subscriptionJson2);
+	const sub = zuoraSubscriptionSchema.parse(subscriptionJson2);
 	const billingPreview = loadBillingPreview(
 		sub.subscriptionNumber,
 		billingPreviewJson2,
@@ -157,7 +157,7 @@ test('Eligibility check works for a price risen subscription', async () => {
 });
 
 test('Eligibility check works for supporter plus with 2 rate plans', async () => {
-	const sub = zuoraSubscriptionResponseSchema.parse(subSupporterPlusFullPrice);
+	const sub = zuoraSubscriptionSchema.parse(subSupporterPlusFullPrice);
 	const billingPreview = loadBillingPreview(
 		sub.subscriptionNumber,
 		billingPreviewSupporterPlusFullPrice,
@@ -182,7 +182,7 @@ test('Eligibility check works for supporter plus with 2 rate plans', async () =>
 });
 
 test('Eligibility check fails for a subscription which is cancelled', async () => {
-	const sub = zuoraSubscriptionResponseSchema.parse(subSupporterPlusFullPrice);
+	const sub = zuoraSubscriptionSchema.parse(subSupporterPlusFullPrice);
 	sub.status = 'Cancelled';
 	expect(subSupporterPlusFullPrice.status).toEqual('Active');
 

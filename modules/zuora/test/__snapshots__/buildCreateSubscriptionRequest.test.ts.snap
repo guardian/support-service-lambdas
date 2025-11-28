@@ -41,7 +41,9 @@ exports[`the buildCreateSubscriptionRequest function builds request with applied
     {
       "customFields": {
         "DeliveryAgent__c": "",
+        "InitialPromotionCode__c": "PROMO10",
         "LastPlanAddedDate__c": "2025-09-01",
+        "PromotionCode__c": "PROMO10",
         "ReaderType__c": "Direct",
       },
       "orderActions": [
@@ -164,7 +166,9 @@ exports[`the buildCreateSubscriptionRequest function builds request with gift re
     {
       "customFields": {
         "DeliveryAgent__c": "",
+        "InitialPromotionCode__c": undefined,
         "LastPlanAddedDate__c": "2025-09-01",
+        "PromotionCode__c": undefined,
         "ReaderType__c": "Gift",
       },
       "orderActions": [
@@ -251,7 +255,9 @@ exports[`the buildCreateSubscriptionRequest function builds request without prom
     {
       "customFields": {
         "DeliveryAgent__c": "",
+        "InitialPromotionCode__c": undefined,
         "LastPlanAddedDate__c": "2025-09-01",
+        "PromotionCode__c": undefined,
         "ReaderType__c": "Direct",
       },
       "orderActions": [

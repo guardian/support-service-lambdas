@@ -1,49 +1,85 @@
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
-import type { RestResult } from '@modules/zuora/restClient';
-import { RestClient } from '@modules/zuora/restClient';
+import type { ZodTypeDef } from 'zod';
+import { z } from 'zod';
+import type { RestClient } from '@modules/zuora/restClient';
+import { RestClientError, RestClientImpl } from '@modules/zuora/restClient';
 import { BearerTokenProvider } from './auth/bearerTokenProvider';
 import { getOAuthClientCredentials } from './auth/oAuthCredentials';
 import { generateZuoraError } from './errors/zuoraErrorHandler';
 import { zuoraErrorSchema, zuoraSuccessSchema } from './types/httpResponse';
 import { zuoraServerUrl } from './utils';
 
-export class ZuoraClient extends RestClient {
-	static async create(stage: Stage) {
+export type ZuoraClient = RestClient<'ZuoraClient'>;
+
+export const ZuoraClient = {
+	async create(stage: Stage): Promise<ZuoraClient> {
 		const credentials = await getOAuthClientCredentials(stage);
 		const bearerTokenProvider = new BearerTokenProvider(stage, credentials);
-		return new ZuoraClient(stage, bearerTokenProvider);
-	}
-	constructor(
-		stage: Stage,
-		private tokenProvider: BearerTokenProvider,
-	) {
-		super(zuoraServerUrl(stage).replace(/\/$/, '')); // remove trailing slash
-	}
+		const getAuthHeaders = () =>
+			bearerTokenProvider.getBearerToken().then((bearerToken) => ({
+				Authorization: `Bearer ${bearerToken.access_token}`,
+			}));
+		return createZuoraClientWithHeaders(stage, getAuthHeaders);
+	},
+};
 
-	protected generateError = (result: RestResult) => {
+export function createZuoraClientWithHeaders(
+	stage: Stage,
+	getAuthHeaders: () => Promise<{ Authorization: string }>,
+): ZuoraClient {
+	const baseRestClient = new RestClientImpl(
+		zuoraServerUrl(stage).replace(/\/$/, ''),
+		getAuthHeaders,
+		'underlyingZuoraClient',
+		2, // align logging to the line that calls zuoraClient.get/post
+	);
+
+	return {
+		get(path, schema) {
+			return wrap((s) => baseRestClient.get(path, s), schema);
+		},
+		post(path, body, schema, headers) {
+			return wrap((s) => baseRestClient.post(path, body, s, headers), schema);
+		},
+		put(path, body, schema, headers) {
+			return wrap((s) => baseRestClient.put(path, body, s, headers), schema);
+		},
+		delete(path, schema) {
+			return wrap((s) => baseRestClient.delete(path, s), schema);
+		},
+		getRaw() {
+			return Promise.reject(
+				new Error('getRaw is not yet supported for zuora client'),
+			);
+		},
+		__brand: 'ZuoraClient',
+	};
+}
+
+function handleZuoraFailure(e: unknown) {
+	if (e instanceof RestClientError) {
 		// When Zuora returns a 429 status, the response headers typically contain important rate limiting information
-		if (result.response.status === 429) {
+		if (e.statusCode === 429) {
 			logger.log(
-				`Received a 429 rate limit response with response headers ${JSON.stringify(result.responseHeaders)}`,
+				`Received a 429 rate limit response with response headers ${JSON.stringify(e.responseHeaders)}`,
 			);
 		}
-		return generateZuoraError(JSON.parse(result.responseBody), result.response);
-	};
+		return generateZuoraError(JSON.parse(e.responseBody), e);
+	}
+	return new Error('value thrown that was not an Error', { cause: e });
+}
 
-	protected isLogicalSuccess = (json: unknown) => {
-		try {
-			return isLogicalSuccess(json);
-		} catch {
-			return false;
-		}
-	};
-
-	protected getAuthHeaders = async () => {
-		const bearerToken = await this.tokenProvider.getBearerToken();
-
-		return { Authorization: `Bearer ${bearerToken.access_token}` };
-	};
+async function wrap<I, O, T extends z.ZodType<O, ZodTypeDef, I>>(
+	getRestResponse: (t: z.ZodType<O, z.ZodTypeDef, I>) => Promise<O>,
+	schema: T,
+) {
+	const schemaWithSuccessCheck = z.any().refine(isLogicalSuccess).pipe(schema);
+	try {
+		return await getRestResponse(schemaWithSuccessCheck);
+	} catch (e) {
+		throw handleZuoraFailure(e);
+	}
 }
 
 const isLogicalSuccess = (json: unknown): boolean => {
