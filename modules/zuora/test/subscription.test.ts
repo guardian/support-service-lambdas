@@ -241,7 +241,7 @@ describe('subscription', () => {
 			mockZuoraClient.get = jest.fn().mockImplementation(() => {
 				throw new ZuoraError(
 					"Cannot find entity by key: '8ad09b7d83a313110183a8769afd1bf31'.",
-					50000040,
+					200,
 					[],
 				);
 			});
