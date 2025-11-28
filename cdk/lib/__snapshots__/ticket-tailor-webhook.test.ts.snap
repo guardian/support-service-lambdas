@@ -712,6 +712,7 @@ Action=SendMessage&MessageBody=$util.urlEncode($json)",
     },
     "tickettailorwebhooklambdaSqsEventSourcetickettailorwebhookCODEtickettailorwebhookqueueCODE887B0D2D9C295CD4": {
       "Properties": {
+        "BatchSize": 1,
         "EventSourceArn": {
           "Fn::GetAtt": [
             "tickettailorwebhookqueueCODEBF7A5727",
@@ -856,7 +857,37 @@ exports[`The Ticket tailor webhook stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "ticket-tailor-webhook could not process a message and it ended up on the DLQ. Search the logs below for "error" for more information. Impact: guardian events users have not had guest identity accounts created",
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "ticket-tailor-webhook could not process a message and it ended up on the DLQ. Search the logs below for "error" for more information. Impact: guardian events users have not had guest identity accounts created
+DLQ: https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/sqs/v2/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#/queues/https%3A%2F%2Fsqs.",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".amazonaws.com%2F",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              "%2F",
+              {
+                "Fn::GetAtt": [
+                  "tickettailorwebhookdlqPRODC8AAF6D6",
+                  "QueueName",
+                ],
+              },
+            ],
+          ],
+        },
         "AlarmName": {
           "Fn::Join": [
             "",
@@ -1657,6 +1688,7 @@ Action=SendMessage&MessageBody=$util.urlEncode($json)",
     },
     "tickettailorwebhooklambdaSqsEventSourcetickettailorwebhookPRODtickettailorwebhookqueuePRODFBF666F3E22E29AD": {
       "Properties": {
+        "BatchSize": 1,
         "EventSourceArn": {
           "Fn::GetAtt": [
             "tickettailorwebhookqueuePRODDAE73271",
