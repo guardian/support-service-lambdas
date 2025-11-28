@@ -30,10 +30,10 @@ export function createZuoraClientWithHeaders(
 	stage: Stage,
 	getAuthHeaders: () => Promise<{ Authorization: string }>,
 ): ZuoraClient {
-	const baseRestClient: RestClient<void> = new RestClientImpl(
+	const baseRestClient: RestClient<void> = new RestClientImpl<void>(
 		zuoraServerUrl(stage).replace(/\/$/, ''),
 		getAuthHeaders,
-		undefined,
+		2, // align logging to the line that calls zuoraClient.get/post
 	);
 
 	return {
@@ -54,23 +54,19 @@ export function createZuoraClientWithHeaders(
 				new Error('getRaw is not yet supported for zuora client'),
 			);
 		},
-
-		__brand: Zuora,
 	};
+}
+
+function isSafeLogicalSuccess(input: unknown) {
+	return Try(() => isLogicalSuccess(input)).getOrElse(false);
 }
 
 function wrapSchemaWithSuccessCheck<
 	I,
 	O,
 	T extends z.ZodType<O, ZodTypeDef, I>,
->(schema: T): z.ZodType<O, ZodTypeDef, O> {
-	return z.custom<O>((input: unknown) => {
-		if (Try(() => isLogicalSuccess(input)).getOrElse(false)) {
-			return schema.parse(input);
-		} else {
-			return undefined; // causes ZodError parsing failure
-		}
-	});
+>(schema: T): z.ZodType<O, ZodTypeDef, I> {
+	return z.any().refine(isSafeLogicalSuccess).pipe(schema);
 }
 
 function handleZuoraFailure(e: Error | RestClientError) {
@@ -90,7 +86,7 @@ function handleZuoraFailure(e: Error | RestClientError) {
 }
 
 async function wrap<I, O, T extends z.ZodType<O, ZodTypeDef, I>>(
-	getRestResponse: (t: z.ZodType<O, z.ZodTypeDef, O>) => Promise<O>,
+	getRestResponse: (t: z.ZodType<O, z.ZodTypeDef, I>) => Promise<O>,
 	schema: T,
 ) {
 	const schemaWithSuccessCheck = wrapSchemaWithSuccessCheck<I, O, T>(schema);

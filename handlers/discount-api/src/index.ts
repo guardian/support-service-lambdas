@@ -32,58 +32,62 @@ export const handler: Handler = Router([
 	{
 		httpMethod: 'POST',
 		path: '/apply-discount',
-		handler: applyDiscountHandler,
+		handler: applyDiscountHandler(stage),
 	},
 	{
 		httpMethod: 'POST',
 		path: '/preview-discount',
-		handler: previewDiscountHandler,
+		handler: previewDiscountHandler(stage),
 	},
 ]);
 
-async function applyDiscountHandler(
-	event: APIGatewayProxyEvent,
-): Promise<APIGatewayProxyResult> {
-	const subscriptionNumber = applyDiscountSchema.parse(
-		JSON.parse(getIfDefined(event.body, 'No body was provided')),
-	).subscriptionNumber;
-	logger.mutableAddContext(subscriptionNumber);
-	const { response, emailPayload } = await applyDiscountEndpoint(
-		stage,
-		event.headers,
-		subscriptionNumber,
-		dayjs(),
-	);
-	await sendEmail(stage, emailPayload);
-	return {
-		body: stringify<ApplyDiscountResponseBody>(
-			response,
-			applyDiscountResponseSchema,
-		),
-		statusCode: 200,
+export function applyDiscountHandler(stage: Stage) {
+	return async (
+		event: APIGatewayProxyEvent,
+	): Promise<APIGatewayProxyResult> => {
+		const subscriptionNumber = applyDiscountSchema.parse(
+			JSON.parse(getIfDefined(event.body, 'No body was provided')),
+		).subscriptionNumber;
+		logger.mutableAddContext(subscriptionNumber);
+		const { response, emailPayload } = await applyDiscountEndpoint(
+			stage,
+			event.headers,
+			subscriptionNumber,
+			dayjs(),
+		);
+		await sendEmail(stage, emailPayload);
+		return {
+			body: stringify<ApplyDiscountResponseBody>(
+				response,
+				applyDiscountResponseSchema,
+			),
+			statusCode: 200,
+		};
 	};
 }
 
-async function previewDiscountHandler(
-	event: APIGatewayProxyEvent,
-): Promise<APIGatewayProxyResult> {
-	const subscriptionNumber = applyDiscountSchema.parse(
-		JSON.parse(getIfDefined(event.body, 'No body was provided')),
-	).subscriptionNumber;
-	logger.mutableAddContext(subscriptionNumber);
-	logger.log('Previewing discount');
-	const result = await previewDiscountEndpoint(
-		stage,
-		event.headers,
-		subscriptionNumber,
-		dayjs(),
-	);
-	return {
-		body: stringify<EligibilityCheckResponseBody>(
-			result,
-			previewDiscountResponseSchema,
-		),
-		statusCode: 200,
+export function previewDiscountHandler(stage: Stage) {
+	return async (
+		event: APIGatewayProxyEvent,
+	): Promise<APIGatewayProxyResult> => {
+		const subscriptionNumber = applyDiscountSchema.parse(
+			JSON.parse(getIfDefined(event.body, 'No body was provided')),
+		).subscriptionNumber;
+		logger.mutableAddContext(subscriptionNumber);
+		logger.log('Previewing discount');
+		const result = await previewDiscountEndpoint(
+			stage,
+			event.headers,
+			subscriptionNumber,
+			dayjs(),
+		);
+		return {
+			body: stringify<EligibilityCheckResponseBody>(
+				result,
+				previewDiscountResponseSchema,
+			),
+			statusCode: 200,
+		};
 	};
 }
 

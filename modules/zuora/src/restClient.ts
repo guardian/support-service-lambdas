@@ -21,6 +21,7 @@ export type RestResult = {
 	responseHeaders: Record<string, string>;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- generic type parameter U is used to tag different clients at compile time
 export interface RestClient<U> {
 	get<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
@@ -47,26 +48,24 @@ export interface RestClient<U> {
 		path: string,
 		schema: T,
 	): Promise<O>;
-
-	__brand: U;
 }
 
 export class RestClientImpl<U> implements RestClient<U> {
 	public constructor(
 		readonly restServerUrl: string,
 		readonly getAuthHeaders: () => Promise<Record<string, string>>,
-		readonly __brand: U,
+		private readonly extraFrames: number = 0,
 	) {}
 
 	public async get<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
 		schema: T,
 	): Promise<O> {
-		return await this.fetch(logger.getCallerInfo(1))(path, 'GET', schema);
+		return await this.fetch(this.getCallerInfo())(path, 'GET', schema);
 	}
 
 	public async getRaw(path: string): Promise<RestResult> {
-		return await this.fetchRawBody(logger.getCallerInfo(1))(path, 'GET');
+		return await this.fetchRawBody(this.getCallerInfo())(path, 'GET');
 	}
 
 	public async post<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
@@ -75,7 +74,7 @@ export class RestClientImpl<U> implements RestClient<U> {
 		schema: T,
 		headers?: Record<string, string>,
 	): Promise<O> {
-		return await this.fetch(logger.getCallerInfo(1))(
+		return await this.fetch(this.getCallerInfo())(
 			path,
 			'POST',
 			schema,
@@ -84,13 +83,17 @@ export class RestClientImpl<U> implements RestClient<U> {
 		);
 	}
 
+	private getCallerInfo() {
+		return logger.getCallerInfo(2 + this.extraFrames);
+	}
+
 	public async put<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
 		body: string,
 		schema: T,
 		headers?: Record<string, string>,
 	): Promise<O> {
-		return await this.fetch(logger.getCallerInfo(1))(
+		return await this.fetch(this.getCallerInfo())(
 			path,
 			'PUT',
 			schema,
@@ -103,7 +106,7 @@ export class RestClientImpl<U> implements RestClient<U> {
 		path: string,
 		schema: T,
 	): Promise<O> {
-		return await this.fetch(logger.getCallerInfo(1))(path, 'DELETE', schema);
+		return await this.fetch(this.getCallerInfo())(path, 'DELETE', schema);
 	}
 
 	// has to be a function so that the callerInfo is refreshed on every call
