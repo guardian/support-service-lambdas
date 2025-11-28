@@ -1,7 +1,8 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { z } from 'zod';
 import type { HttpMethod } from '@modules/routing/router';
-import { createRoute, NotFoundResponse, Router } from '@modules/routing/router';
+import { NotFoundResponse, Router } from '@modules/routing/router';
+import { withBodyParser, withPathParser } from '@modules/routing/withParsers';
 
 const successResponse = {
 	body: 'Success',
@@ -16,73 +17,75 @@ const router = Router([
 			return Promise.resolve(successResponse);
 		},
 	},
-	createRoute({
+	{
 		httpMethod: 'POST',
 		path: '/benefits/{benefitId}/users',
-		parser: {
-			path: z.object({
+		handler: withPathParser(
+			z.object({
 				benefitId: z.string(),
 			}),
-		},
-		handler: (event, parsed) => {
-			return Promise.resolve({
-				statusCode: 200,
-				body: JSON.stringify(parsed),
-			});
-		},
-	}),
-	createRoute({
+			(event, parsed) => {
+				return Promise.resolve({
+					statusCode: 200,
+					body: JSON.stringify(parsed),
+				});
+			},
+		),
+	},
+	{
 		httpMethod: 'PATCH',
 		path: '/benefits/enabled/{flag}',
-		handler: (event, parsed) => {
-			return Promise.resolve({
-				statusCode: 200,
-				body: JSON.stringify(parsed),
-			});
-		},
-		parser: {
-			path: z.object({
+		handler: withPathParser(
+			z.object({
 				flag: z.enum(['on', 'off']),
 			}),
-		},
-	}),
-	createRoute({
+			(event, parsed) => {
+				return Promise.resolve({
+					statusCode: 200,
+					body: JSON.stringify(parsed),
+				});
+			},
+		),
+	},
+	{
 		httpMethod: 'POST',
 		path: '/benefits',
-		handler: (event, parsed) => {
-			return Promise.resolve({
-				statusCode: 200,
-				body: JSON.stringify(parsed),
-			});
-		},
-		parser: {
-			body: z.object({
+		handler: withBodyParser(
+			z.object({
 				name: z.string(),
 				age: z.number(),
 				isActive: z.boolean(),
 			}),
-		},
-	}),
-	createRoute({
+			(event, parsed) => {
+				return Promise.resolve({
+					statusCode: 200,
+					body: JSON.stringify(parsed),
+				});
+			},
+		),
+	},
+	{
 		httpMethod: 'PUT',
 		path: '/benefits/{benefitId}',
-		handler: (event, parsed) => {
-			return Promise.resolve({
-				statusCode: 200,
-				body: JSON.stringify(parsed),
-			});
-		},
-		parser: {
-			path: z.object({
-				benefitId: z.string(),
-			}),
-			body: z.object({
+		handler: withBodyParser(
+			z.object({
 				name: z.string(),
 				age: z.number(),
 				isActive: z.boolean(),
 			}),
-		},
-	}),
+			withPathParser(
+				z.object({
+					benefitId: z.string(),
+				}),
+				(event, parsed) => {
+					return Promise.resolve({
+						statusCode: 200,
+						body: JSON.stringify(parsed),
+					});
+				},
+			),
+		),
+	},
 ]);
 
 describe('Router', () => {
@@ -172,7 +175,7 @@ describe('Router', () => {
 				message: string;
 			}>;
 		};
-		expect(payload.error).toEqual('Invalid request');
+		expect(payload.error).toEqual('Invalid request body');
 		expect(payload.details[0]?.message).toEqual(
 			'Expected string, received number',
 		);

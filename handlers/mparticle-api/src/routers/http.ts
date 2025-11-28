@@ -1,10 +1,10 @@
-import { createRoute, Router } from '@modules/routing/router';
+import { Router } from '@modules/routing/router';
+import { withParsers } from '@modules/routing/withParsers';
 import type { BatonS3Writer } from '../services/batonS3Writer';
 import type {
 	DataSubjectAPI,
 	MParticleClient,
 } from '../services/mparticleClient';
-import type { DataSubjectRequestCallback } from './http/dataSubjectRequestCallback/data-subject-request-callback';
 import {
 	dataSubjectRequestCallbackHandler,
 	dataSubjectRequestCallbackParser,
@@ -15,13 +15,15 @@ export const httpRouter = (
 	batonS3Writer: BatonS3Writer,
 ) =>
 	Router([
-		createRoute<{ requestId: string }, DataSubjectRequestCallback>({
+		{
 			httpMethod: 'POST',
 			path: '/data-subject-requests/{requestId}/callback',
-			handler: dataSubjectRequestCallbackHandler(
-				mParticleDataSubjectClient,
-				batonS3Writer,
+			handler: withParsers(
+				dataSubjectRequestCallbackParser,
+				dataSubjectRequestCallbackHandler(
+					mParticleDataSubjectClient,
+					batonS3Writer,
+				),
 			),
-			parser: dataSubjectRequestCallbackParser,
-		}),
+		},
 	]);
