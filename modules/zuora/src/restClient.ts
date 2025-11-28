@@ -3,15 +3,15 @@ import type z from 'zod';
 
 export class RestClientError extends Error implements RestResult {
 	static create = (message: string, result: RestResult, e?: unknown) =>
-		e instanceof Error
-			? new RestClientError(
-					message,
-					result.statusCode,
-					result.responseBody,
-					result.responseHeaders,
-					e,
-				)
-			: e;
+		new RestClientError(
+			message,
+			result.statusCode,
+			result.responseBody,
+			result.responseHeaders,
+			e === undefined || e instanceof Error
+				? e
+				: new Error('value thrown that was not an Error', { cause: e }),
+		);
 
 	constructor(
 		message: string,

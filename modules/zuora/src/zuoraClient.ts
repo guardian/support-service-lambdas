@@ -67,7 +67,7 @@ function handleZuoraFailure(e: unknown) {
 		}
 		return generateZuoraError(JSON.parse(e.responseBody), e);
 	}
-	return e;
+	return new Error('value thrown that was not an Error', { cause: e });
 }
 
 async function wrap<I, O, T extends z.ZodType<O, ZodTypeDef, I>>(
