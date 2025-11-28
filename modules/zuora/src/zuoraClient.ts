@@ -1,6 +1,5 @@
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
-import { Failure, Success, TryFromPromise } from '@modules/try';
 import type { ZodTypeDef } from 'zod';
 import { z } from 'zod';
 import type { RestClient } from '@modules/zuora/restClient';
@@ -58,20 +57,17 @@ export function createZuoraClientWithHeaders(
 	};
 }
 
-function handleZuoraFailure(e: Error | RestClientError) {
-	const maybeRestClientError =
-		e instanceof RestClientError ? Success(e) : Failure<RestClientError>(e);
-	maybeRestClientError.forEach((e) => {
+function handleZuoraFailure(e: unknown) {
+	if (e instanceof RestClientError) {
 		// When Zuora returns a 429 status, the response headers typically contain important rate limiting information
 		if (e.statusCode === 429) {
 			logger.log(
 				`Received a 429 rate limit response with response headers ${JSON.stringify(e.responseHeaders)}`,
 			);
 		}
-	});
-	return maybeRestClientError
-		.map((e) => generateZuoraError(JSON.parse(e.responseBody), e))
-		.getOrElse(e);
+		return generateZuoraError(JSON.parse(e.responseBody), e);
+	}
+	return e;
 }
 
 async function wrap<I, O, T extends z.ZodType<O, ZodTypeDef, I>>(
@@ -79,10 +75,11 @@ async function wrap<I, O, T extends z.ZodType<O, ZodTypeDef, I>>(
 	schema: T,
 ) {
 	const schemaWithSuccessCheck = z.any().refine(isLogicalSuccess).pipe(schema);
-	const failableResponse = await TryFromPromise(
-		getRestResponse(schemaWithSuccessCheck),
-	);
-	return failableResponse.mapError(handleZuoraFailure).get();
+	try {
+		return await getRestResponse(schemaWithSuccessCheck);
+	} catch (e) {
+		throw handleZuoraFailure(e);
+	}
 }
 
 const isLogicalSuccess = (json: unknown): boolean => {

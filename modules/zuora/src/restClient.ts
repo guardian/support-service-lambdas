@@ -1,16 +1,17 @@
 import { logger } from '@modules/routing/logger';
-import { Try } from '@modules/try';
 import type z from 'zod';
 
 export class RestClientError extends Error implements RestResult {
-	static create = (message: string, result: RestResult, e?: Error) =>
-		new RestClientError(
-			message,
-			result.statusCode,
-			result.responseBody,
-			result.responseHeaders,
-			e,
-		);
+	static create = (message: string, result: RestResult, e?: unknown) =>
+		e instanceof Error
+			? new RestClientError(
+					message,
+					result.statusCode,
+					result.responseBody,
+					result.responseHeaders,
+					e,
+				)
+			: e;
 
 	constructor(
 		message: string,
@@ -158,10 +159,12 @@ export class RestClientImpl<U extends string> implements RestClient<U> {
 			body,
 		);
 
-		return Try((): unknown => JSON.parse(result.responseBody))
-			.map((json) => schema.parse(json))
-			.mapError((e) => RestClientError.create('parsing failure', result, e))
-			.get();
+		try {
+			const json: unknown = JSON.parse(result.responseBody);
+			return schema.parse(json);
+		} catch (e) {
+			throw RestClientError.create('parsing failure', result, e);
+		}
 	}
 
 	// has to be a function so that the callerInfo is refreshed on every call
