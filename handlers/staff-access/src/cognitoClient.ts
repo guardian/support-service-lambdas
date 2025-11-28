@@ -1,7 +1,7 @@
 import { loadConfig } from '@modules/aws/appConfig';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { Stage } from '@modules/stage';
-import { RestClient } from '@modules/zuora/restClient';
+import { RestClientImpl } from '@modules/zuora/restClient';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
 import { app, getAppBaseUrl } from './getAppBaseUrl';
@@ -24,25 +24,27 @@ const tokenResponseSchema = z.object({
 });
 export type TokenResponseBody = z.infer<typeof tokenResponseSchema>;
 
-export class CognitoClient extends RestClient {
+export class CognitoClient {
 	private readonly redirectUri: string;
 	private readonly clientId: string;
-	private readonly authHeader: string;
+	private readonly restClient: RestClientImpl<'CognitoClient'>;
 
 	constructor(props: CognitoClientProps) {
-		super(`https://${props.cognitoDomain}.auth.eu-west-1.amazoncognito.com`);
+		const baseUrl = `https://${props.cognitoDomain}.auth.eu-west-1.amazoncognito.com`;
 		this.redirectUri = getAppBaseUrl(props.stage, app) + '/oauth2callback';
 		this.clientId = props.clientId;
 		const authorizationEncoded = Buffer.from(
 			`${props.clientId}:${props.clientSecret}`,
 		).toString('base64');
-		this.authHeader = `Basic ${authorizationEncoded}`;
+		const authHeader = {
+			Authorization: `Basic ${authorizationEncoded}`,
+		};
+		this.restClient = new RestClientImpl(
+			baseUrl,
+			() => Promise.resolve(authHeader),
+			'CognitoClient',
+		);
 	}
-
-	protected getAuthHeaders = (): Promise<Record<string, string>> =>
-		Promise.resolve({
-			Authorization: this.authHeader,
-		});
 
 	getToken: (code: string) => Promise<TokenResponseBody> = async (code) => {
 		const requestHeaders = {
@@ -55,7 +57,7 @@ export class CognitoClient extends RestClient {
 			redirect_uri: this.redirectUri,
 		});
 
-		return await this.post(
+		return await this.restClient.post(
 			`oauth2/token`,
 			requestBody,
 			tokenResponseSchema,
@@ -76,7 +78,9 @@ export class CognitoClient extends RestClient {
 			};
 
 			const cognitoUrl =
-				this.restServerUrl + `/oauth2/authorize?` + encodeParams(urlParams);
+				this.restClient.restServerUrl +
+				`/oauth2/authorize?` +
+				encodeParams(urlParams);
 
 			return {
 				statusCode: 302,

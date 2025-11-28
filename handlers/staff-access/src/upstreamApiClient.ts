@@ -1,6 +1,8 @@
 import type { Stage } from '@modules/stage';
 import type { RestResult } from '@modules/zuora/restClient';
-import { RestClient, RestClientError } from '@modules/zuora/restClient';
+import type { RestClient } from '@modules/zuora/restClient';
+import { RestClientImpl } from '@modules/zuora/restClient';
+import { RestClientError } from '@modules/zuora/restClient';
 import { getAppBaseUrl } from './getAppBaseUrl';
 
 export interface UpstreamApiResponse {
@@ -12,13 +14,21 @@ export interface UpstreamApiResponse {
 // keep in step with cdk resource extractors
 export type UpstreamApiTarget = { targetApp: string; targetPath: string };
 
-export class UpstreamApiClient extends RestClient {
+export class UpstreamApiClient {
+	private readonly restClient: RestClient<'UpstreamApiClient'>;
 	constructor(
 		stage: Stage,
 		app: string,
 		private auth: string,
 	) {
-		super(getAppBaseUrl(stage, app));
+		this.restClient = new RestClientImpl(
+			getAppBaseUrl(stage, app),
+			() =>
+				Promise.resolve({
+					Authorization: `Bearer ${this.auth}`,
+				}),
+			'UpstreamApiClient',
+		);
 	}
 
 	getAuthHeaders = async () =>
@@ -31,7 +41,7 @@ export class UpstreamApiClient extends RestClient {
 	) => {
 		let result: RestResult;
 		try {
-			result = await this.getRaw(path);
+			result = await this.restClient.getRaw(path);
 		} catch (e) {
 			// all 4xx/5xx are thrown by default - however unauthenticated is actually a valid case for our clients
 			if (
@@ -39,17 +49,17 @@ export class UpstreamApiClient extends RestClient {
 				(e.statusCode === 401 || e.statusCode === 403)
 			) {
 				return {
-					body: e.body,
+					body: e.responseBody,
 					statusCode: e.statusCode,
-					headers: e.headers,
+					headers: e.responseHeaders,
 				} satisfies UpstreamApiResponse;
 			}
 			throw e;
 		}
-		const { response, responseBody, responseHeaders } = result;
+		const { statusCode, responseBody, responseHeaders } = result;
 		return {
 			body: responseBody,
-			statusCode: response.status, // non 2xx will get thrown as 5xx errors
+			statusCode: statusCode, // non 2xx will get thrown as 5xx errors
 			headers: responseHeaders,
 		} satisfies UpstreamApiResponse;
 	};

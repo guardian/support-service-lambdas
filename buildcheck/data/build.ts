@@ -229,6 +229,9 @@ const staffAccess: HandlerDefinition = {
 	dependencies: {
 		...dep.zod,
 	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
 };
 
 const stripeDisputes: HandlerDefinition = {

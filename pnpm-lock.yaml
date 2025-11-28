@@ -348,12 +348,13 @@ importers:
 
   handlers/staff-access:
     dependencies:
-      source-map-support:
-        specifier: ^0.5.21
-        version: 0.5.21
       zod:
         specifier: 'catalog:'
         version: 3.25.76
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.147
+        version: 8.10.158
 
   handlers/stripe-disputes:
     dependencies:
