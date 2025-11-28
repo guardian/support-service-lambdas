@@ -224,6 +224,16 @@ const salesforceDisasterRecoveryHealthCheck: HandlerDefinition = {
 	},
 };
 
+const staffAccess: HandlerDefinition = {
+	name: 'staff-access',
+	dependencies: {
+		...dep.zod,
+	},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+};
+
 const stripeDisputes: HandlerDefinition = {
 	name: 'stripe-disputes',
 	functionNames: ['stripe-disputes-producer-', 'stripe-disputes-consumer-'],
@@ -320,6 +330,7 @@ export const build: HandlerDefinition[] = [
 	productSwitchApi,
 	salesforceDisasterRecovery,
 	salesforceDisasterRecoveryHealthCheck,
+	staffAccess,
 	stripeDisputes,
 	ticketTailorWebhook,
 	updateSupporterPlusAmount,

@@ -33,6 +33,6 @@ export class DiscountApi extends SrStack {
 			new AllowSqsSendPolicy(this, `braze-emails`),
 		);
 
-		lambda.addPublicPath(docsPath);
+		lambda.addStaffPath(docsPath);
 	}
 }

@@ -33,6 +33,7 @@ import {
 	SingleContributionSalesforceWrites,
 } from '../lib/single-contribution-salesforce-writes';
 import { SoftOptInConsentSetter } from '../lib/soft-opt-in-consent-setter';
+import { StaffAccess } from '../lib/staff-access';
 import { StripeDisputes } from '../lib/stripe-disputes';
 import type { StripeWebhookEndpointsProps } from '../lib/stripe-webhook-endpoints';
 import { StripeWebhookEndpoints } from '../lib/stripe-webhook-endpoints';
@@ -138,6 +139,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	GenerateProductCatalog,
 	TicketTailorWebhook,
 	MobilePurchasesToSupporterProductData,
+	StaffAccess,
 ];
 
 // generate all stacks for all stages
