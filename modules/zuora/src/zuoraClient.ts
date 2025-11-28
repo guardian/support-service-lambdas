@@ -11,8 +11,7 @@ import { generateZuoraError } from './errors/zuoraErrorHandler';
 import { zuoraErrorSchema, zuoraSuccessSchema } from './types/httpResponse';
 import { zuoraServerUrl } from './utils';
 
-export declare const Zuora: unique symbol;
-export type ZuoraClient = RestClient<typeof Zuora>;
+export type ZuoraClient = RestClient<'ZuoraClient'>;
 
 export const ZuoraClient = {
 	async create(stage: Stage): Promise<ZuoraClient> {
@@ -30,9 +29,10 @@ export function createZuoraClientWithHeaders(
 	stage: Stage,
 	getAuthHeaders: () => Promise<{ Authorization: string }>,
 ): ZuoraClient {
-	const baseRestClient: RestClient<void> = new RestClientImpl<void>(
+	const baseRestClient = new RestClientImpl(
 		zuoraServerUrl(stage).replace(/\/$/, ''),
 		getAuthHeaders,
+		'underlyingZuoraClient',
 		2, // align logging to the line that calls zuoraClient.get/post
 	);
 
@@ -54,6 +54,7 @@ export function createZuoraClientWithHeaders(
 				new Error('getRaw is not yet supported for zuora client'),
 			);
 		},
+		__brand: 'ZuoraClient',
 	};
 }
 

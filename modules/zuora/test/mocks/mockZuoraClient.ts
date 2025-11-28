@@ -1,6 +1,5 @@
 import type { RestResult } from '@modules/zuora/restClient';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { Zuora } from '@modules/zuora/zuoraClient';
 import { BearerTokenProvider } from '../../src/auth/bearerTokenProvider';
 
 class MockZuoraClient implements ZuoraClient {
@@ -16,7 +15,7 @@ class MockZuoraClient implements ZuoraClient {
 	getRaw(): Promise<RestResult> {
 		throw new Error('Method not implemented.');
 	}
-	__brand: typeof Zuora = Zuora;
+	__brand = 'ZuoraClient' as const;
 
 	get = jest.fn();
 	post = jest.fn();

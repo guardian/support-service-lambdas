@@ -1,9 +1,9 @@
 import { z, ZodError } from 'zod';
 import { RestClientError, RestClientImpl } from '../src/restClient';
 
-class TestRestClient extends RestClientImpl<void> {
+class TestRestClient extends RestClientImpl<'ZuoraClient'> {
 	constructor(baseUrl: string, authHeaders: Record<string, string> = {}) {
-		super(baseUrl, () => Promise.resolve(authHeaders));
+		super(baseUrl, () => Promise.resolve(authHeaders), 'ZuoraClient');
 	}
 }
 

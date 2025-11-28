@@ -21,8 +21,7 @@ export type RestResult = {
 	responseHeaders: Record<string, string>;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- generic type parameter U is used to tag different clients at compile time
-export interface RestClient<U> {
+export interface RestClient<U extends string> {
 	get<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
 		schema: T,
@@ -48,24 +47,37 @@ export interface RestClient<U> {
 		path: string,
 		schema: T,
 	): Promise<O>;
+
+	__brand: U;
 }
 
-export class RestClientImpl<U> implements RestClient<U> {
+export class RestClientImpl<U extends string> implements RestClient<U> {
+	private readonly extraFrames: number;
 	public constructor(
 		readonly restServerUrl: string,
 		readonly getAuthHeaders: () => Promise<Record<string, string>>,
-		private readonly extraFrames: number = 0,
-	) {}
+		readonly __brand: U,
+		extraFrames: number = 0,
+	) {
+		this.extraFrames = extraFrames + 1;
+	}
 
 	public async get<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
 		schema: T,
 	): Promise<O> {
-		return await this.fetch(this.getCallerInfo())(path, 'GET', schema);
+		return await this.fetch(logger.getCallerInfo(this.extraFrames))(
+			path,
+			'GET',
+			schema,
+		);
 	}
 
 	public async getRaw(path: string): Promise<RestResult> {
-		return await this.fetchRawBody(this.getCallerInfo())(path, 'GET');
+		return await this.fetchRawBody(logger.getCallerInfo(this.extraFrames))(
+			path,
+			'GET',
+		);
 	}
 
 	public async post<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
@@ -74,7 +86,7 @@ export class RestClientImpl<U> implements RestClient<U> {
 		schema: T,
 		headers?: Record<string, string>,
 	): Promise<O> {
-		return await this.fetch(this.getCallerInfo())(
+		return await this.fetch(logger.getCallerInfo(this.extraFrames))(
 			path,
 			'POST',
 			schema,
@@ -83,17 +95,13 @@ export class RestClientImpl<U> implements RestClient<U> {
 		);
 	}
 
-	private getCallerInfo() {
-		return logger.getCallerInfo(2 + this.extraFrames);
-	}
-
 	public async put<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
 		body: string,
 		schema: T,
 		headers?: Record<string, string>,
 	): Promise<O> {
-		return await this.fetch(this.getCallerInfo())(
+		return await this.fetch(logger.getCallerInfo(this.extraFrames))(
 			path,
 			'PUT',
 			schema,
@@ -106,7 +114,11 @@ export class RestClientImpl<U> implements RestClient<U> {
 		path: string,
 		schema: T,
 	): Promise<O> {
-		return await this.fetch(this.getCallerInfo())(path, 'DELETE', schema);
+		return await this.fetch(logger.getCallerInfo(this.extraFrames))(
+			path,
+			'DELETE',
+			schema,
+		);
 	}
 
 	// has to be a function so that the callerInfo is refreshed on every call
