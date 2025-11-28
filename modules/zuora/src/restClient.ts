@@ -3,6 +3,15 @@ import { Try } from '@modules/try';
 import type z from 'zod';
 
 export class RestClientError extends Error implements RestResult {
+	static create = (message: string, result: RestResult, e?: Error) =>
+		new RestClientError(
+			message,
+			result.statusCode,
+			result.responseBody,
+			result.responseHeaders,
+			e,
+		);
+
 	constructor(
 		message: string,
 		public statusCode: number,
@@ -151,16 +160,7 @@ export class RestClientImpl<U extends string> implements RestClient<U> {
 
 		return Try((): unknown => JSON.parse(result.responseBody))
 			.map((json) => schema.parse(json))
-			.mapError(
-				(e) =>
-					new RestClientError(
-						'parsing failure',
-						result.statusCode,
-						result.responseBody,
-						result.responseHeaders,
-						e,
-					),
-			)
+			.mapError((e) => RestClientError.create('parsing failure', result, e))
 			.get();
 	}
 
@@ -203,12 +203,7 @@ export class RestClientImpl<U extends string> implements RestClient<U> {
 			responseHeaders,
 		};
 		if (!response.ok) {
-			throw new RestClientError(
-				'http call failed',
-				result.statusCode,
-				result.responseBody,
-				result.responseHeaders,
-			);
+			throw RestClientError.create('http call failed', result);
 		}
 
 		return result;
