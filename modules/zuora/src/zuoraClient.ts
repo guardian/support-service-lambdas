@@ -58,18 +58,6 @@ export function createZuoraClientWithHeaders(
 	};
 }
 
-function isSafeLogicalSuccess(input: unknown) {
-	return Try(() => isLogicalSuccess(input)).getOrElse(false);
-}
-
-function wrapSchemaWithSuccessCheck<
-	I,
-	O,
-	T extends z.ZodType<O, ZodTypeDef, I>,
->(schema: T): z.ZodType<O, ZodTypeDef, I> {
-	return z.any().refine(isSafeLogicalSuccess).pipe(schema);
-}
-
 function handleZuoraFailure(e: Error | RestClientError) {
 	const maybeRestClientError =
 		e instanceof RestClientError ? Success(e) : Failure<RestClientError>(e);
@@ -90,7 +78,10 @@ async function wrap<I, O, T extends z.ZodType<O, ZodTypeDef, I>>(
 	getRestResponse: (t: z.ZodType<O, z.ZodTypeDef, I>) => Promise<O>,
 	schema: T,
 ) {
-	const schemaWithSuccessCheck = wrapSchemaWithSuccessCheck<I, O, T>(schema);
+	const schemaWithSuccessCheck = z
+		.any()
+		.refine((input) => Try(() => isLogicalSuccess(input)).getOrElse(false))
+		.pipe(schema);
 	const failableResponse = await sequenceTry(
 		getRestResponse(schemaWithSuccessCheck),
 	);
