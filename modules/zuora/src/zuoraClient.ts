@@ -1,6 +1,6 @@
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
-import { Failure, sequenceTry, Success, Try } from '@modules/try';
+import { Failure, Success, TryFromPromise } from '@modules/try';
 import type { ZodTypeDef } from 'zod';
 import { z } from 'zod';
 import type { RestClient } from '@modules/zuora/restClient';
@@ -78,11 +78,8 @@ async function wrap<I, O, T extends z.ZodType<O, ZodTypeDef, I>>(
 	getRestResponse: (t: z.ZodType<O, z.ZodTypeDef, I>) => Promise<O>,
 	schema: T,
 ) {
-	const schemaWithSuccessCheck = z
-		.any()
-		.refine((input) => Try(() => isLogicalSuccess(input)).getOrElse(false))
-		.pipe(schema);
-	const failableResponse = await sequenceTry(
+	const schemaWithSuccessCheck = z.any().refine(isLogicalSuccess).pipe(schema);
+	const failableResponse = await TryFromPromise(
 		getRestResponse(schemaWithSuccessCheck),
 	);
 	return failableResponse.mapError(handleZuoraFailure).get();

@@ -57,7 +57,7 @@ export const Try: <A>(fn: () => A) => Try<A> = <A>(fn: () => A) => {
 	}
 };
 
-export function sequenceTry<A>(promise: Promise<A>): Promise<Try<A>> {
+export function TryFromPromise<A>(promise: Promise<A>): Promise<Try<A>> {
 	return promise
 		.then((value) => Success(value))
 		.catch((error) => {
