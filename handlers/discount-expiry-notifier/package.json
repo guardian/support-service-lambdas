@@ -1,27 +1,31 @@
 {
-	"name": "discount-expiry-notifier",
-	"description": "A state machine that initiates communications to customers whose discounts are about to end.",
-	"scripts": {
-		"test": "jest --group=-integration",
-		"it-test": "jest --group=integration",
-		"build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/handlers/*.ts --sourcemap",
-		"lint": "eslint 'src/**/*.ts' 'test/**/*.ts'",
-		"package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr discount-expiry-notifier.zip ./*.js.map ./*.js",
-		"type-check": "tsc --noEmit",
-		"check-formatting": "prettier --check **.ts",
-		"fix-formatting": "prettier --write **.ts",
-		"watch": "chokidar 'src/**/*.ts' -c 'pnpm fix-formatting'"
-	},
-	"devDependencies": {
-		"@types/aws-lambda": "^8.10.147",
-		"@types/aws-sdk": "^2.7.4"
-	},
-	"dependencies": {
-		"@aws-sdk/client-s3": "^3.873.0",
-		"@google-cloud/bigquery": "^7.9.3",
-		"aws-sdk": "^2.1692.0",
-		"dayjs": "^1.11.13",
-		"google-auth-library": "^9.15.0",
-		"zod": "catalog:"
-	}
+  "name": "discount-expiry-notifier",
+  "scripts": {
+    "cdk:test": "pnpm --filter cdk test discount-expiry-notifier",
+    "cdk:test-update": "pnpm --filter cdk test-update discount-expiry-notifier",
+    "test": "jest --group=-integration",
+    "it-test": "jest --group=integration",
+    "type-check": "tsc --noEmit",
+    "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/handlers/*.ts --sourcemap",
+    "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr discount-expiry-notifier.zip ./*.js.map ./*.js",
+    "check-formatting": "prettier --check \"**/*.ts\"",
+    "fix-formatting": "prettier --write \"**/*.ts\"",
+    "update-lambda": "../../update-lambda.sh \"discount-expiry-notifier\"",
+    "update-stack": "../../update-stack.sh \"discount-expiry-notifier\""
+  },
+  "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
+  "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.940.0",
+    "@google-cloud/bigquery": "^7.9.3",
+    "aws-sdk": "^2.1692.0",
+    "dayjs": "^1.11.13",
+    "google-auth-library": "^9.15.0",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.147",
+    "@types/aws-sdk": "^2.7.4"
+  }
 }

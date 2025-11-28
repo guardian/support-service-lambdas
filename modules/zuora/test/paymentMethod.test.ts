@@ -1,5 +1,5 @@
 import { getPaymentMethods } from '@modules/zuora/paymentMethod';
-import { zuoraResponseSchema } from '@modules/zuora/types';
+import { voidSchema } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 describe('getPaymentMethods', () => {
@@ -31,11 +31,11 @@ describe('getPaymentMethods', () => {
 	it('calls zuoraClient.get with correct path and schema', async () => {
 		mockGet.mockResolvedValue(mockResponse);
 
-		await getPaymentMethods(mockZuoraClient, accountId, zuoraResponseSchema);
+		await getPaymentMethods(mockZuoraClient, accountId, voidSchema);
 
 		expect(mockGet).toHaveBeenCalledWith(
 			`/v1/accounts/${accountId}/payment-methods`,
-			zuoraResponseSchema,
+			voidSchema,
 		);
 	});
 

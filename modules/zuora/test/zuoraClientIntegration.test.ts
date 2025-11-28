@@ -5,7 +5,7 @@
  */
 
 import type { ZuoraSubscription } from '@modules/zuora/types';
-import { zuoraSubscriptionResponseSchema } from '@modules/zuora/types';
+import { zuoraSubscriptionSchema } from '@modules/zuora/types';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 test('ZuoraClient', async () => {
@@ -15,7 +15,7 @@ test('ZuoraClient', async () => {
 	const path = `v1/subscriptions/${subscriptionNumber}`;
 	const subscription: ZuoraSubscription = await zuoraClient.get(
 		path,
-		zuoraSubscriptionResponseSchema,
+		zuoraSubscriptionSchema,
 	);
 	expect(subscription.subscriptionNumber).toBe(subscriptionNumber);
 });
