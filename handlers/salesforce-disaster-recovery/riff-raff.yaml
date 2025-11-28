@@ -1,3 +1,4 @@
+# MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/riff-raff.yaml.ts
 stacks:
   - membership
 regions:
@@ -25,4 +26,5 @@ deployments:
         - save-failed-rows-to-s3-
         - save-salesforce-query-result-to-s3-
         - update-zuora-accounts-
-    dependencies: [salesforce-disaster-recovery-cloudformation]
+    dependencies:
+      - salesforce-disaster-recovery-cloudformation

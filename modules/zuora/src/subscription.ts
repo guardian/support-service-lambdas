@@ -1,10 +1,14 @@
 import type { Dayjs } from 'dayjs';
-import { zuoraSubscriptionResponseSchema } from './types';
-import { zuoraResponseSchema } from './types';
-import { zuoraSubscriptionsFromAccountSchema } from './types';
-import type { ZuoraResponse } from './types';
-import type { ZuoraSubscription } from './types';
-import type { ZuoraSubscriptionsFromAccountResponse } from './types';
+import type { z } from 'zod';
+import type {
+	ZuoraSubscription,
+	ZuoraSubscriptionsFromAccountResponse,
+} from './types';
+import {
+	voidSchema,
+	zuoraSubscriptionSchema,
+	zuoraSubscriptionsFromAccountSchema,
+} from './types';
 import { zuoraDateFormat } from './utils';
 import type { ZuoraClient } from './zuoraClient';
 
@@ -17,7 +21,7 @@ export const cancelSubscription = async (
 	cancellationPolicy:
 		| 'SpecificDate'
 		| 'EndOfLastInvoicePeriod' = 'SpecificDate',
-): Promise<ZuoraResponse> => {
+): Promise<void> => {
 	const path = `/v1/subscriptions/${subscriptionNumber}/cancel`;
 
 	// Only include cancellationEffectiveDate for SpecificDate policy
@@ -39,17 +43,21 @@ export const cancelSubscription = async (
 	};
 
 	const body = JSON.stringify(requestBody);
-	return zuoraClient.put(path, body, zuoraResponseSchema, {
+	await zuoraClient.put(path, body, voidSchema, {
 		'zuora-version': '211.0',
 	});
 };
 
-export const getSubscription = async (
+export const getSubscription = async <
+	T extends z.ZodType = typeof zuoraSubscriptionSchema,
+>(
 	zuoraClient: ZuoraClient,
 	subscriptionNumber: string,
-): Promise<ZuoraSubscription> => {
+	schema?: T,
+): Promise<z.infer<T>> => {
 	const path = `v1/subscriptions/${subscriptionNumber}`;
-	return zuoraClient.get(path, zuoraSubscriptionResponseSchema);
+	const finalSchema = schema ?? zuoraSubscriptionSchema;
+	return zuoraClient.get(path, finalSchema);
 };
 
 export const getSubscriptionsByAccountNumber = async (
@@ -68,8 +76,8 @@ export const updateSubscription = async (
 	zuoraClient: ZuoraClient,
 	subscriptionNumber: string,
 	fields: Record<string, string | number | boolean>,
-): Promise<ZuoraResponse> => {
+): Promise<void> => {
 	const path = `v1/subscriptions/${subscriptionNumber}`;
 	const body = JSON.stringify(fields);
-	return zuoraClient.put(path, body, zuoraResponseSchema);
+	await zuoraClient.put(path, body, voidSchema);
 };

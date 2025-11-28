@@ -196,7 +196,7 @@ export const productCatalogSchema = z.object({
 						id: z.string(),
 					}),
 				}),
-				pricing: z.object({ GBP: z.number() }),
+				pricing: z.object({ EUR: z.number(), GBP: z.number() }),
 			}),
 		}),
 	}),

@@ -1,8 +1,8 @@
-import type { Stage } from '@modules/stage';
-import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { RestResult } from '@modules/zuora/restClient';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { BearerTokenProvider } from '../../src/auth/bearerTokenProvider';
 
-class MockZuoraClient extends ZuoraClient {
+class MockZuoraClient implements ZuoraClient {
 	constructor() {
 		const mockTokenProvider = new BearerTokenProvider('stage', {
 			clientId: 'id',
@@ -11,11 +11,11 @@ class MockZuoraClient extends ZuoraClient {
 		mockTokenProvider.getBearerToken = jest
 			.fn()
 			.mockResolvedValue('mock-token');
-
-		super('stage' as Stage, mockTokenProvider);
-		// @ts-expect-error override for the test
-		this.restServerUrl = 'https://mock.zuora.com';
 	}
+	getRaw(): Promise<RestResult> {
+		throw new Error('Method not implemented.');
+	}
+	__brand = 'ZuoraClient' as const;
 
 	get = jest.fn();
 	post = jest.fn();

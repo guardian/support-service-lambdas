@@ -1,21 +1,21 @@
 import { createHmac, timingSafeEqual } from 'crypto';
+import { logger } from '@modules/routing/logger';
 import { getSecretValue } from '@modules/secrets-manager/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
-import type { SQSRecord } from 'aws-lambda';
+import type { ApiGatewayToSqsEvent } from './apiGatewayToSqsEvent';
 
 export type HmacKey = {
 	secret: string;
 };
 
 export const getTimestampAndSignature = (
-	record: SQSRecord,
+	record: ApiGatewayToSqsEvent,
 ): [string, string] | undefined => {
-	const signatureWithTs =
-		record.messageAttributes['tickettailor-webhook-signature']?.stringValue;
+	const signatureWithTs = record.headers['tickettailor-webhook-signature'];
 
-	if (!(typeof signatureWithTs === 'string')) {
-		console.error(
-			'No valid value found for MessgeAttritbute: tickettailor-webhook-signature on incoming request.',
+	if (!signatureWithTs) {
+		logger.error(
+			'No valid value found for MessageAttribute: tickettailor-webhook-signature on incoming request.',
 		);
 		return;
 	}
@@ -24,8 +24,8 @@ export const getTimestampAndSignature = (
 	const signature = signatureWithTs.split(',')[1]?.split('v1=')[1];
 
 	if (!(timestamp && signature) || isNaN(Number(timestamp))) {
-		console.error(
-			`Invalid formatting of MessageAttribute 'tickettailor-webhook-signature': ${signatureWithTs}. Missing or incorrectly formatted timestamp or signature.`,
+		logger.error(
+			`Invalid formatting of header 'tickettailor-webhook-signature': '${signatureWithTs}'. Missing or incorrectly formatted timestamp or signature.`,
 		);
 		return;
 	}
@@ -43,7 +43,7 @@ export const isWithinTimeWindow = (
 	const currentEpochSeconds = Math.floor(currentDateTime.valueOf() / 1000);
 	const timeDiff = currentEpochSeconds - timestampEpochSeconds;
 	if (timeDiff < 0) {
-		console.error(
+		logger.error(
 			`Invalid Webhook Signature: timeStamp ${timestamp} is later than current time. Check it is not using EpochMillis.`,
 		);
 		return false;
@@ -55,7 +55,7 @@ export const isWithinTimeWindow = (
 export const hasMatchingSignature = (
 	timestamp: string,
 	signature: string,
-	record: SQSRecord,
+	record: ApiGatewayToSqsEvent,
 	validationSecret: HmacKey,
 ): boolean => {
 	const hash = createHmac('sha256', validationSecret.secret)
@@ -63,15 +63,15 @@ export const hasMatchingSignature = (
 		.digest('hex');
 
 	try {
-		console.log('Comparing generated hash and signature from request');
+		logger.log('Comparing generated hash and signature from request');
 		return timingSafeEqual(Buffer.from(hash), Buffer.from(signature));
 	} catch (e) {
 		if (e instanceof Error) {
-			console.error(
+			logger.error(
 				`Hash and signature comparison failed with the following error message: ${e.message}`,
 			);
 		} else {
-			console.error(`Hash and signature comparison failed for Unknown reason.`);
+			logger.error(`Hash and signature comparison failed for Unknown reason.`);
 		}
 
 		return false;
@@ -80,7 +80,9 @@ export const hasMatchingSignature = (
 
 export const maxValidTimeWindowSeconds = 300;
 
-export const validateRequest = async (record: SQSRecord): Promise<boolean> => {
+export const validateRequest = async (
+	record: ApiGatewayToSqsEvent,
+): Promise<boolean> => {
 	const validationSecret = await getSecretValue<HmacKey>(
 		`${stageFromEnvironment()}/TicketTailor/Webhook-validation`,
 	);
@@ -106,12 +108,12 @@ export const validateRequest = async (record: SQSRecord): Promise<boolean> => {
 	);
 
 	if (!signatureMatches) {
-		console.warn(
+		logger.log(
 			'Signatures do not match - check Ticket Tailor signing secret matches the one stored in AWS. Webhook will not be processed.',
 		);
 	}
 	if (!withinTimeWindow) {
-		console.warn(
+		logger.log(
 			`Webhook Signature timestamp ${timestamp} is older than ${maxValidTimeWindowSeconds} seconds. Webhook will not be processed.`,
 		);
 	}
