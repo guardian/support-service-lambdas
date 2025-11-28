@@ -18,7 +18,7 @@ import {
 	switchToSupporterPlus,
 } from '../src/contributionToSupporterPlus';
 import type { ZuoraSwitchResponse } from '../src/schemas';
-import { getSwitchInformationWithOwnerCheck } from '../src/switchInformation';
+import { getSwitchInformation } from '../src/switchInformation';
 import accountJson from './fixtures/account.json';
 import pendingAmendmentsJson from './fixtures/pendingAmendments.json';
 
@@ -35,14 +35,13 @@ const account = zuoraAccountSchema.parse(accountJson);
 
 const today = dayjs('2024-12-05T22:42:06');
 
-const getSwitchInformation = async () =>
-	await getSwitchInformationWithOwnerCheck(
+const getTestSwitchInformation = async () =>
+	await getSwitchInformation(
 		'CODE',
 		{ preview: false },
 		subscription,
 		account,
 		productCatalog,
-		'999999999999',
 		new Lazy(() => Promise.resolve([]), 'test'),
 		today,
 	);
@@ -128,7 +127,7 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 			},
 		});
 
-		const switchInformation = await getSwitchInformation();
+		const switchInformation = await getTestSwitchInformation();
 
 		const result = await preview(
 			mockZuoraClient as unknown as ZuoraClient,
@@ -210,7 +209,7 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 			sendToSupporterProductData,
 		}));
 
-		const switchInformation = await getSwitchInformation();
+		const switchInformation = await getTestSwitchInformation();
 
 		const result = await switchToSupporterPlus(
 			mockZuoraClient as unknown as ZuoraClient,

@@ -1,21 +1,26 @@
 /**
  * @group integration
  */
+import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
 import type { Stage } from '@modules/stage';
 import {
 	createDigitalSubscription,
 	createSupporterPlusSubscription,
 } from '@modules/zuora/../test/it-helpers/createGuardianSubscription';
-import { cancelSubscription } from '@modules/zuora/subscription';
+import { getAccount } from '@modules/zuora/account';
+import {
+	cancelSubscription,
+	getSubscription,
+} from '@modules/zuora/subscription';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
+import { previewDiscountHandler } from '../src';
 import { previewDiscountEndpoint } from '../src/discountEndpoint';
 import { validationRequirements } from '../src/eligibilityChecker';
 import type { EligibilityCheckResponseBody } from '../src/responseSchema';
 
 const stage: Stage = 'CODE';
-const validIdentityId = '200175946';
 const invalidIdentityId = 'qwertyuiop';
 
 test("Subscriptions which don't belong to the provided identity Id are not eligible", async () => {
@@ -25,11 +30,13 @@ test("Subscriptions which don't belong to the provided identity Id are not eligi
 	const subscriptionNumber = await createDigitalSubscription(zuoraClient, true);
 
 	await expect(async () => {
-		await previewDiscountEndpoint(
+		await withMMAIdentityCheck(
 			stage,
-			{ 'x-identity-id': invalidIdentityId },
-			subscriptionNumber,
-			dayjs(),
+			previewDiscountHandler,
+			(parsed) => parsed.body.subscriptionNumber,
+		)(
+			{ headers: { 'x-identity-id': invalidIdentityId } },
+			{ path: undefined, body: { subscriptionNumber } },
 		);
 	}).rejects.toThrow('does not belong to identity ID');
 
@@ -46,12 +53,15 @@ test('Subscriptions on the old price are not eligible', async () => {
 
 	console.log('Creating a new digital subscription');
 	const subscriptionNumber = await createDigitalSubscription(zuoraClient, true);
+	const subscription = await getSubscription(zuoraClient, subscriptionNumber);
+	const account = await getAccount(zuoraClient, subscription.accountNumber);
 
 	await expect(async () => {
 		await previewDiscountEndpoint(
 			stage,
-			{ 'x-identity-id': validIdentityId },
-			subscriptionNumber,
+			zuoraClient,
+			subscription,
+			account,
 			dayjs(),
 		);
 	}).rejects.toThrow(validationRequirements.atLeastCatalogPrice);
@@ -77,10 +87,14 @@ test('Subscriptions on the new price are eligible', async () => {
 		false,
 	);
 
+	const subscription = await getSubscription(zuoraClient, subscriptionNumber);
+	const account = await getAccount(zuoraClient, subscription.accountNumber);
+
 	const result = await previewDiscountEndpoint(
 		stage,
-		{ 'x-identity-id': validIdentityId },
-		subscriptionNumber,
+		zuoraClient,
+		subscription,
+		account,
 		dayjs(),
 	);
 	const eligibilityCheckResult = result as EligibilityCheckResponseBody;
@@ -118,10 +132,14 @@ test('Supporter Plus subscriptions are eligible', async () => {
 	console.log('Creating a new S+ subscription');
 	const subscriptionNumber = await createSupporterPlusSubscription(zuoraClient);
 
+	const subscription = await getSubscription(zuoraClient, subscriptionNumber);
+	const account = await getAccount(zuoraClient, subscription.accountNumber);
+
 	const result = await previewDiscountEndpoint(
 		stage,
-		{ 'x-identity-id': validIdentityId },
-		subscriptionNumber,
+		zuoraClient,
+		subscription,
+		account,
 		today.add(2, 'months').add(1, 'day'),
 	);
 	const eligibilityCheckResult = result as EligibilityCheckResponseBody;

@@ -3,43 +3,35 @@ import { prettyPrint } from '@modules/prettyPrint';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
-import { getAccount } from '@modules/zuora/account';
 import {
 	getBillingPreview,
 	itemsForSubscription,
 	toSimpleInvoiceItems,
 } from '@modules/zuora/billingPreview';
-import { getSubscription } from '@modules/zuora/subscription';
-import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import type { APIGatewayProxyEvent } from 'aws-lambda';
+import type {
+	ZuoraAccount,
+	ZuoraSubscription,
+} from '@modules/zuora/types/objects';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { APIGatewayProxyResult } from 'aws-lambda';
 import dayjs from 'dayjs';
 import { preview, switchToSupporterPlus } from './contributionToSupporterPlus';
 import type { ProductSwitchRequestBody } from './schemas';
-import { getSwitchInformationWithOwnerCheck } from './switchInformation';
+import { getSwitchInformation } from './switchInformation';
 
-export const contributionToSupporterPlusEndpoint =
-	(stage: Stage, today: dayjs.Dayjs) =>
-	async (
-		event: APIGatewayProxyEvent,
-		parsed: {
-			path: { subscriptionNumber: string };
-			body: ProductSwitchRequestBody;
-		},
-	) => {
-		logger.mutableAddContext(parsed.path.subscriptionNumber);
-		const identityId = event.headers['x-identity-id'];
-		const zuoraClient = await ZuoraClient.create(stage);
+export function contributionToSupporterPlusEndpoint(
+	stage: Stage,
+	today: dayjs.Dayjs,
+) {
+	return async (
+		body: ProductSwitchRequestBody,
+		zuoraClient: ZuoraClient,
+		subscription: ZuoraSubscription,
+		account: ZuoraAccount,
+	): Promise<APIGatewayProxyResult> => {
 		logger.log('Loading the product catalog');
 		const productCatalog = await getProductCatalogFromApi(stage);
-		logger.log(`Request body is ${prettyPrint(parsed.body)}`);
-		logger.log('Getting the subscription and account details from Zuora');
-
-		const subscription = await getSubscription(
-			zuoraClient,
-			parsed.path.subscriptionNumber,
-		);
-
-		const account = await getAccount(zuoraClient, subscription.accountNumber);
+		logger.log(`Request body is ${prettyPrint(body)}`);
 
 		// don't get the billing preview until we know the subscription is not cancelled
 		const lazyBillingPreview = new Lazy(
@@ -54,18 +46,17 @@ export const contributionToSupporterPlusEndpoint =
 			.then(itemsForSubscription(subscription.subscriptionNumber))
 			.then(toSimpleInvoiceItems);
 
-		const switchInformation = await getSwitchInformationWithOwnerCheck(
+		const switchInformation = await getSwitchInformation(
 			stage,
-			parsed.body,
+			body,
 			subscription,
 			account,
 			productCatalog,
-			identityId,
 			lazyBillingPreview,
 			today,
 		);
 
-		const response = parsed.body.preview
+		const response = body.preview
 			? await preview(zuoraClient, switchInformation, subscription)
 			: await switchToSupporterPlus(zuoraClient, switchInformation, dayjs());
 
@@ -74,3 +65,4 @@ export const contributionToSupporterPlusEndpoint =
 			statusCode: 200,
 		};
 	};
+}
