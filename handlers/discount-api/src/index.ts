@@ -9,11 +9,11 @@ import type {
 	Handler,
 } from 'aws-lambda';
 import dayjs from 'dayjs';
-import type { ZodType } from 'zod';
 import {
 	applyDiscountEndpoint,
 	previewDiscountEndpoint,
 } from './discountEndpoint';
+import { docsHandler } from './docsHandler';
 import { applyDiscountSchema } from './requestSchema';
 import type {
 	ApplyDiscountResponseBody,
@@ -23,9 +23,16 @@ import {
 	applyDiscountResponseSchema,
 	previewDiscountResponseSchema,
 } from './responseSchema';
+import { stringify } from './stringify';
+
+const getEnv = (env: string): string =>
+	getIfDefined(process.env[env], `${env} environment variable not set`);
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo fix in next refactor
-const stage = process.env.STAGE as Stage;
+const stage = getEnv('STAGE') as Stage;
+
+// CDK and handler have to match these values
+export const docsPath = 'docs';
 
 // main entry point from AWS
 export const handler: Handler = Router([
@@ -38,6 +45,11 @@ export const handler: Handler = Router([
 		httpMethod: 'POST',
 		path: '/preview-discount',
 		handler: previewDiscountHandler(stage),
+	},
+	{
+		httpMethod: 'GET',
+		path: '/' + docsPath,
+		handler: () => docsHandler(stage),
 	},
 ]);
 
@@ -90,7 +102,3 @@ export function previewDiscountHandler(stage: Stage) {
 		};
 	};
 }
-
-// this is a type safe version of stringify
-export const stringify = <T>(t: T, type: ZodType<T>): string =>
-	JSON.stringify(type.parse(t));
