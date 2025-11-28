@@ -1,5 +1,6 @@
 import { Logger } from '@modules/routing/logger';
 import { Router } from '@modules/routing/router';
+import { withBodyParser } from '@modules/routing/withParsers';
 import { getSecretValue } from '@modules/secrets-manager/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
@@ -18,30 +19,32 @@ const router = Router([
 	{
 		httpMethod: 'POST',
 		path: '/',
-		handler: async (event: APIGatewayProxyEvent) => {
-			// Parse the webhook body to determine the event type
-			const body = bodyWithTypeSchema.parse(JSON.parse(event.body ?? '{}'));
-			const eventType = body.type;
+		handler: withBodyParser(
+			bodyWithTypeSchema,
+			async (event: APIGatewayProxyEvent, { body }) => {
+				// Parse the webhook body to determine the event type
+				const eventType = body.type;
 
-			logger.log(`Received webhook event type: ${eventType}`);
+				logger.log(`Received webhook event type: ${eventType}`);
 
-			// Route based on event type
-			switch (eventType) {
-				case 'charge.dispute.created':
-					return handleStripeWebhook(logger, 'dispute.created')(event);
-				case 'charge.dispute.closed':
-					return handleStripeWebhook(logger, 'dispute.closed')(event);
-				default:
-					logger.log(`Unhandled webhook event type: ${eventType}`);
-					return {
-						statusCode: 200,
-						body: JSON.stringify({
-							received: true,
-							message: `Event type ${eventType} not handled`,
-						}),
-					};
-			}
-		},
+				// Route based on event type
+				switch (eventType) {
+					case 'charge.dispute.created':
+						return handleStripeWebhook(logger, 'dispute.created')(event);
+					case 'charge.dispute.closed':
+						return handleStripeWebhook(logger, 'dispute.closed')(event);
+					default:
+						logger.log(`Unhandled webhook event type: ${eventType}`);
+						return {
+							statusCode: 200,
+							body: JSON.stringify({
+								received: true,
+								message: `Event type ${eventType} not handled`,
+							}),
+						};
+				}
+			},
+		),
 	},
 ]);
 
