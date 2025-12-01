@@ -32,21 +32,26 @@ export function createZuoraClientWithHeaders(
 		zuoraServerUrl(stage).replace(/\/$/, ''),
 		getAuthHeaders,
 		'underlyingZuoraClient',
-		2, // align logging to the line that calls zuoraClient.get/post
 	);
 
 	return {
-		get(path, schema) {
-			return wrap((s) => baseRestClient.get(path, s), schema);
+		get(path, schema, callerInfo = logger.getCallerInfo(1)) {
+			return wrap((s) => baseRestClient.get(path, s, callerInfo), schema);
 		},
-		post(path, body, schema, headers) {
-			return wrap((s) => baseRestClient.post(path, body, s, headers), schema);
+		post(path, body, schema, headers, callerInfo = logger.getCallerInfo(1)) {
+			return wrap(
+				(s) => baseRestClient.post(path, body, s, headers, callerInfo),
+				schema,
+			);
 		},
-		put(path, body, schema, headers) {
-			return wrap((s) => baseRestClient.put(path, body, s, headers), schema);
+		put(path, body, schema, headers, callerInfo = logger.getCallerInfo(1)) {
+			return wrap(
+				(s) => baseRestClient.put(path, body, s, headers, callerInfo),
+				schema,
+			);
 		},
-		delete(path, schema) {
-			return wrap((s) => baseRestClient.delete(path, s), schema);
+		delete(path, schema, callerInfo = logger.getCallerInfo(1)) {
+			return wrap((s) => baseRestClient.delete(path, s, callerInfo), schema);
 		},
 		getRaw() {
 			return Promise.reject(

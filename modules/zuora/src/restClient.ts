@@ -35,6 +35,7 @@ export interface RestClient<U extends string> {
 	get<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
 		schema: T,
+		callerInfo?: string,
 	): Promise<O>;
 
 	getRaw(path: string): Promise<RestResult>;
@@ -44,6 +45,7 @@ export interface RestClient<U extends string> {
 		body: string,
 		schema: T,
 		headers?: Record<string, string>,
+		callerInfo?: string,
 	): Promise<O>;
 
 	put<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
@@ -51,43 +53,38 @@ export interface RestClient<U extends string> {
 		body: string,
 		schema: T,
 		headers?: Record<string, string>,
+		callerInfo?: string,
 	): Promise<O>;
 
 	delete<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
 		schema: T,
+		callerInfo?: string,
 	): Promise<O>;
 
 	clientName: U;
 }
 
 export class RestClientImpl<U extends string> implements RestClient<U> {
-	private readonly extraFrames: number;
 	public constructor(
 		readonly restServerUrl: string,
 		readonly getAuthHeaders: () => Promise<Record<string, string>>,
 		readonly clientName: U,
-		extraFrames: number = 0,
-	) {
-		this.extraFrames = extraFrames + 1;
-	}
+	) {}
 
 	public async get<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
 		schema: T,
+		callerInfo: string = logger.getCallerInfo(1),
 	): Promise<O> {
-		return await this.fetch(logger.getCallerInfo(this.extraFrames))(
-			path,
-			'GET',
-			schema,
-		);
+		return await this.fetch(callerInfo)(path, 'GET', schema);
 	}
 
-	public async getRaw(path: string): Promise<RestResult> {
-		return await this.fetchRawBody(logger.getCallerInfo(this.extraFrames))(
-			path,
-			'GET',
-		);
+	public async getRaw(
+		path: string,
+		callerInfo: string = logger.getCallerInfo(1),
+	): Promise<RestResult> {
+		return await this.fetchRawBody(callerInfo)(path, 'GET');
 	}
 
 	public async post<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
@@ -95,14 +92,9 @@ export class RestClientImpl<U extends string> implements RestClient<U> {
 		body: string,
 		schema: T,
 		headers?: Record<string, string>,
+		callerInfo: string = logger.getCallerInfo(1),
 	): Promise<O> {
-		return await this.fetch(logger.getCallerInfo(this.extraFrames))(
-			path,
-			'POST',
-			schema,
-			body,
-			headers,
-		);
+		return await this.fetch(callerInfo)(path, 'POST', schema, body, headers);
 	}
 
 	public async put<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
@@ -110,25 +102,17 @@ export class RestClientImpl<U extends string> implements RestClient<U> {
 		body: string,
 		schema: T,
 		headers?: Record<string, string>,
+		callerInfo: string = logger.getCallerInfo(1),
 	): Promise<O> {
-		return await this.fetch(logger.getCallerInfo(this.extraFrames))(
-			path,
-			'PUT',
-			schema,
-			body,
-			headers,
-		);
+		return await this.fetch(callerInfo)(path, 'PUT', schema, body, headers);
 	}
 
 	public async delete<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
 		schema: T,
+		callerInfo: string = logger.getCallerInfo(1),
 	): Promise<O> {
-		return await this.fetch(logger.getCallerInfo(this.extraFrames))(
-			path,
-			'DELETE',
-			schema,
-		);
+		return await this.fetch(callerInfo)(path, 'DELETE', schema);
 	}
 
 	// has to be a function so that the callerInfo is refreshed on every call
