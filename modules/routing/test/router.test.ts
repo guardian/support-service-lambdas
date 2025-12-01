@@ -9,7 +9,7 @@ const successResponse = {
 	statusCode: 200,
 };
 
-const handler: Handler<unknown, unknown> = (event, path, body) => {
+const handler: Handler<unknown, unknown, unknown> = (event, path, body) => {
 	return Promise.resolve({
 		statusCode: 200,
 		body: JSON.stringify({ path, body }),

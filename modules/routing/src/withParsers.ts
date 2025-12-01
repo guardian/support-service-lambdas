@@ -1,4 +1,3 @@
-import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type { z } from 'zod';
 import type { Handler } from './router';
 
@@ -17,15 +16,11 @@ export function safeJsonParse(
 }
 
 export const withBodyParser =
-	<TPath extends Record<string, string>, TBody>(
+	<E, TPath extends Record<string, string>, TBody>(
 		bodyParser: z.Schema<TBody>,
-		handler: Handler<TPath, TBody>,
-	): Handler<TPath, string | null> =>
-	async (
-		event: APIGatewayProxyEvent,
-		path: TPath,
-		unparsedBody: string | null,
-	) => {
+		handler: Handler<E, TPath, TBody>,
+	): Handler<E, TPath, string | null> =>
+	async (event: E, path: TPath, unparsedBody: string | null) => {
 		if (unparsedBody === null) {
 			return {
 				statusCode: 400,
@@ -58,11 +53,11 @@ export const withBodyParser =
 	};
 
 export const withPathParser =
-	<TPath, TBody>(
+	<E, TPath, TBody>(
 		pathParser: z.Schema<TPath>,
-		handler: Handler<TPath, TBody>,
-	): Handler<unknown, TBody> =>
-	async (event: APIGatewayProxyEvent, path: unknown, body: TBody) => {
+		handler: Handler<E, TPath, TBody>,
+	): Handler<E, unknown, TBody> =>
+	async (event: E, path: unknown, body: TBody) => {
 		const parsedPath = pathParser.safeParse(path);
 		if (!parsedPath.success) {
 			return {
@@ -75,9 +70,9 @@ export const withPathParser =
 		}
 		return await handler(event, parsedPath.data, body);
 	};
-export const withParsers = <TPath, TBody>(
+export const withParsers = <E, TPath, TBody>(
 	path: z.Schema<TPath>,
 	body: z.Schema<TBody>,
-	handler: Handler<TPath, TBody>,
-): Handler<Record<string, string>, string | null> =>
+	handler: Handler<E, TPath, TBody>,
+): Handler<E, Record<string, string>, string | null> =>
 	withBodyParser(body, withPathParser(path, handler));

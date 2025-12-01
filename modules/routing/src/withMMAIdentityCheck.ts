@@ -42,7 +42,7 @@ export const withMMAIdentityCheck =
 			account: ZuoraAccount,
 		) => Promise<APIGatewayProxyResult>,
 		extractSubscriptionNumber: (parsed: { path: TPath; body: TBody }) => string,
-	): Handler<TPath, TBody> =>
+	): Handler<Pick<APIGatewayProxyEvent, 'headers'>, TPath, TBody> =>
 	async (
 		event: Pick<APIGatewayProxyEvent, 'headers'>,
 		path: TPath,

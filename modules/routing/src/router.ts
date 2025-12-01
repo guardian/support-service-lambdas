@@ -12,8 +12,8 @@ export type HttpMethod =
 	| 'OPTIONS'
 	| 'HEAD';
 
-export type Handler<TPath, TBody> = (
-	event: APIGatewayProxyEvent,
+export type Handler<E, TPath, TBody> = (
+	event: E,
 	path: TPath,
 	body: TBody,
 ) => Promise<APIGatewayProxyResult>;
@@ -21,7 +21,7 @@ export type Handler<TPath, TBody> = (
 export type Route<TPath, TBody> = {
 	httpMethod: HttpMethod;
 	path: string;
-	handler: Handler<TPath, TBody>;
+	handler: Handler<APIGatewayProxyEvent, TPath, TBody>;
 };
 
 export const NotFoundResponse = {
