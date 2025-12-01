@@ -1,12 +1,19 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { z } from 'zod';
-import type { HttpMethod } from '@modules/routing/router';
+import type { Handler, HttpMethod } from '@modules/routing/router';
 import { NotFoundResponse, Router } from '@modules/routing/router';
 import { withBodyParser, withPathParser } from '@modules/routing/withParsers';
 
 const successResponse = {
 	body: 'Success',
 	statusCode: 200,
+};
+
+const handler: Handler<unknown, unknown> = (event, path, body) => {
+	return Promise.resolve({
+		statusCode: 200,
+		body: JSON.stringify({ path, body }),
+	});
 };
 
 const router = Router([
@@ -24,12 +31,7 @@ const router = Router([
 			z.object({
 				benefitId: z.string(),
 			}),
-			(event, parsed) => {
-				return Promise.resolve({
-					statusCode: 200,
-					body: JSON.stringify(parsed),
-				});
-			},
+			handler,
 		),
 	},
 	{
@@ -39,12 +41,7 @@ const router = Router([
 			z.object({
 				flag: z.enum(['on', 'off']),
 			}),
-			(event, parsed) => {
-				return Promise.resolve({
-					statusCode: 200,
-					body: JSON.stringify(parsed),
-				});
-			},
+			handler,
 		),
 	},
 	{
@@ -56,12 +53,7 @@ const router = Router([
 				age: z.number(),
 				isActive: z.boolean(),
 			}),
-			(event, parsed) => {
-				return Promise.resolve({
-					statusCode: 200,
-					body: JSON.stringify(parsed),
-				});
-			},
+			handler,
 		),
 	},
 	{
@@ -77,12 +69,7 @@ const router = Router([
 				z.object({
 					benefitId: z.string(),
 				}),
-				(event, parsed) => {
-					return Promise.resolve({
-						statusCode: 200,
-						body: JSON.stringify(parsed),
-					});
-				},
+				handler,
 			),
 		),
 	},
@@ -146,9 +133,11 @@ describe('Router', () => {
 				isActive: boolean;
 			};
 		};
-		expect(payload.body.name).toEqual(request.name);
-		expect(payload.body.age).toEqual(request.age);
-		expect(payload.body.isActive).toEqual(request.isActive);
+		expect(payload.body).toEqual({
+			name: request.name,
+			age: request.age,
+			isActive: request.isActive,
+		});
 	});
 	test('it should validate invalid path params and body payload', async () => {
 		const benefitId = '123';
@@ -175,7 +164,7 @@ describe('Router', () => {
 				message: string;
 			}>;
 		};
-		expect(payload.error).toEqual('Invalid request body');
+		expect(payload.error).toEqual('Invalid request body - wrong type');
 		expect(payload.details[0]?.message).toEqual(
 			'Expected string, received number',
 		);
@@ -184,6 +173,23 @@ describe('Router', () => {
 		);
 		expect(payload.details[2]?.message).toEqual(
 			'Expected boolean, received string',
+		);
+	});
+	test('it should return a suitable error for broken json body', async () => {
+		const benefitId = '123';
+
+		const invalidJsonString = 'invalid json string';
+		const response = await router(
+			buildApiGatewayEvent(`/benefits/${benefitId}`, 'PUT', invalidJsonString),
+		);
+		expect(response.statusCode).toEqual(400);
+		const payload = JSON.parse(response.body) as {
+			error: string;
+			details: string;
+		};
+		expect(payload.error).toEqual('Invalid request body - not json');
+		expect(payload.details).toEqual(
+			`Unexpected token 'i', "${invalidJsonString}" is not valid JSON`,
 		);
 	});
 });

@@ -40,7 +40,7 @@ export const handler: Handler = Router([
 			withMMAIdentityCheck(
 				stage,
 				applyDiscountHandler,
-				(parsed) => parsed.body.subscriptionNumber,
+				({ body }) => body.subscriptionNumber,
 			),
 		),
 	},
@@ -52,7 +52,7 @@ export const handler: Handler = Router([
 			withMMAIdentityCheck(
 				stage,
 				previewDiscountHandler,
-				(parsed) => parsed.body.subscriptionNumber,
+				({ body }) => body.subscriptionNumber,
 			),
 		),
 	},

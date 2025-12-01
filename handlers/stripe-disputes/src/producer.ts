@@ -21,7 +21,7 @@ const router = Router([
 		path: '/',
 		handler: withBodyParser(
 			bodyWithTypeSchema,
-			async (event: APIGatewayProxyEvent, { body }) => {
+			async (event: APIGatewayProxyEvent, path, body) => {
 				// Parse the webhook body to determine the event type
 				const eventType = body.type;
 

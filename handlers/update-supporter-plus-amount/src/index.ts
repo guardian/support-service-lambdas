@@ -36,14 +36,12 @@ export const handler: Handler = Router([
 		httpMethod: 'POST',
 		path: '/update-supporter-plus-amount/{subscriptionNumber}',
 		handler: withParsers(
-			{
-				path: pathParserSchema,
-				body: requestBodySchema,
-			},
+			pathParserSchema,
+			requestBodySchema,
 			withMMAIdentityCheck(
 				stage,
 				handleUpdateAmount,
-				(parsed) => parsed.path.subscriptionNumber,
+				({ path }) => path.subscriptionNumber,
 			),
 		),
 	},

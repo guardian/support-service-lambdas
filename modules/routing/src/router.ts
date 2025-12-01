@@ -1,4 +1,4 @@
-import { mapPartition, zipAll } from '@modules/arrayFunctions';
+import { mapPartition, mapValues, zipAll } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { logger } from '@modules/routing/logger';
@@ -14,7 +14,8 @@ export type HttpMethod =
 
 export type Handler<TPath, TBody> = (
 	event: APIGatewayProxyEvent,
-	parsed: { path: TPath; body: TBody },
+	path: TPath,
+	body: TBody,
 ) => Promise<APIGatewayProxyResult>;
 
 export type Route<TPath, TBody> = {
@@ -55,7 +56,9 @@ function matchPath(
 	return { params: Object.fromEntries(matchers) };
 }
 
-export function Router(routes: ReadonlyArray<Route<unknown, string | null>>) {
+export function Router(
+	routes: ReadonlyArray<Route<Record<string, string>, string | null>>,
+) {
 	const httpRouter = async (
 		event: APIGatewayProxyEvent,
 	): Promise<APIGatewayProxyResult> => {
@@ -69,15 +72,16 @@ export function Router(routes: ReadonlyArray<Route<unknown, string | null>>) {
 					const eventWithParams = {
 						...event,
 						pathParameters: {
-							...(event.pathParameters ?? {}),
+							...mapValues(event.pathParameters ?? {}, (v) => v ?? ''),
 							...matchResult.params,
 						},
 					};
 
-					return await route.handler(eventWithParams, {
-						path: eventWithParams.pathParameters,
-						body: eventWithParams.body,
-					});
+					return await route.handler(
+						eventWithParams,
+						eventWithParams.pathParameters,
+						eventWithParams.body,
+					);
 				}
 			}
 			return NotFoundResponse;

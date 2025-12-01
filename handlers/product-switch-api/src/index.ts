@@ -28,10 +28,8 @@ export const handler: Handler = Router([
 		httpMethod: 'POST',
 		path: '/product-move/recurring-contribution-to-supporter-plus/{subscriptionNumber}',
 		handler: withParsers(
-			{
-				path: pathParserSchema,
-				body: productSwitchRequestSchema,
-			},
+			pathParserSchema,
+			productSwitchRequestSchema,
 			withMMAIdentityCheck(
 				stage,
 				contributionToSupporterPlusEndpoint(stage, dayjs()),

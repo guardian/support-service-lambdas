@@ -13,6 +13,7 @@ import type {
 	APIGatewayProxyResult,
 } from 'aws-lambda';
 import { logger } from '@modules/routing/logger';
+import type { Handler } from '@modules/routing/router';
 
 export function assertIdentityIdMatches(
 	account: ZuoraAccount,
@@ -41,23 +42,21 @@ export const withMMAIdentityCheck =
 			account: ZuoraAccount,
 		) => Promise<APIGatewayProxyResult>,
 		extractSubscriptionNumber: (parsed: { path: TPath; body: TBody }) => string,
-	) =>
+	): Handler<TPath, TBody> =>
 	async (
 		event: Pick<APIGatewayProxyEvent, 'headers'>,
-		parsed: {
-			path: TPath;
-			body: TBody;
-		},
+		path: TPath,
+		body: TBody,
 	): Promise<APIGatewayProxyResult> => {
 		const zuoraClient = await ZuoraClient.create(stage);
 		logger.log('Getting the subscription and account details from Zuora');
 
-		const subscriptionNumber = extractSubscriptionNumber(parsed);
+		const subscriptionNumber = extractSubscriptionNumber({ path, body });
 		const subscription = await getSubscription(zuoraClient, subscriptionNumber);
 
 		const account = await getAccount(zuoraClient, subscription.accountNumber);
 
 		logger.mutableAddContext(subscriptionNumber);
 		assertIdentityIdMatches(account, event.headers);
-		return await handler(parsed.body, zuoraClient, subscription, account);
+		return await handler(body, zuoraClient, subscription, account);
 	};

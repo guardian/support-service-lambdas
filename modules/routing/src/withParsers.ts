@@ -1,17 +1,32 @@
 import type { APIGatewayProxyEvent } from 'aws-lambda';
-import { z } from 'zod';
+import type { z } from 'zod';
 import type { Handler } from './router';
 
+export function safeJsonParse(
+	input: string,
+): { success: true; data: unknown } | { success: false; error: SyntaxError } {
+	try {
+		const data: unknown = JSON.parse(input);
+		return { success: true, data };
+	} catch (error) {
+		if (error instanceof SyntaxError) {
+			return { success: false, error };
+		}
+		throw error;
+	}
+}
+
 export const withBodyParser =
-	<TPath, TBody>(
+	<TPath extends Record<string, string>, TBody>(
 		bodyParser: z.Schema<TBody>,
 		handler: Handler<TPath, TBody>,
 	): Handler<TPath, string | null> =>
 	async (
 		event: APIGatewayProxyEvent,
-		parsed: { path: TPath; body: string | null },
+		path: TPath,
+		unparsedBody: string | null,
 	) => {
-		if (parsed.body === null) {
+		if (unparsedBody === null) {
 			return {
 				statusCode: 400,
 				body: JSON.stringify({
@@ -19,54 +34,50 @@ export const withBodyParser =
 				}),
 			};
 		}
-		let parsedBody;
-		try {
-			parsedBody = bodyParser.parse(JSON.parse(parsed.body));
-		} catch (error) {
-			if (error instanceof z.ZodError) {
-				return {
-					statusCode: 400,
-					body: JSON.stringify({
-						error: 'Invalid request body',
-						details: error.errors,
-					}),
-				};
-			}
-			throw error;
+		const jsonObject = safeJsonParse(unparsedBody);
+		if (!jsonObject.success) {
+			return {
+				statusCode: 400,
+				body: JSON.stringify({
+					error: 'Invalid request body - not json',
+					details: jsonObject.error.message,
+				}),
+			};
 		}
-		return await handler(event, { path: parsed.path, body: parsedBody });
+		const parsedBody = bodyParser.safeParse(jsonObject.data);
+		if (!parsedBody.success) {
+			return {
+				statusCode: 400,
+				body: JSON.stringify({
+					error: 'Invalid request body - wrong type',
+					details: parsedBody.error.errors,
+				}),
+			};
+		}
+		return await handler(event, path, parsedBody.data);
 	};
+
 export const withPathParser =
 	<TPath, TBody>(
 		pathParser: z.Schema<TPath>,
 		handler: Handler<TPath, TBody>,
 	): Handler<unknown, TBody> =>
-	async (
-		event: APIGatewayProxyEvent,
-		parsed: { path: unknown; body: TBody },
-	) => {
-		let parsedPath;
-		try {
-			parsedPath = pathParser.parse(parsed.path);
-		} catch (error) {
-			if (error instanceof z.ZodError) {
-				return {
-					statusCode: 400,
-					body: JSON.stringify({
-						error: 'Invalid request path',
-						details: error.errors,
-					}),
-				};
-			}
-			throw error;
+	async (event: APIGatewayProxyEvent, path: unknown, body: TBody) => {
+		const parsedPath = pathParser.safeParse(path);
+		if (!parsedPath.success) {
+			return {
+				statusCode: 400,
+				body: JSON.stringify({
+					error: 'Invalid request path',
+					details: parsedPath.error.errors,
+				}),
+			};
 		}
-		return await handler(event, { path: parsedPath, body: parsed.body });
+		return await handler(event, parsedPath.data, body);
 	};
 export const withParsers = <TPath, TBody>(
-	parser: {
-		path: z.Schema<TPath>;
-		body: z.Schema<TBody>;
-	},
+	path: z.Schema<TPath>,
+	body: z.Schema<TBody>,
 	handler: Handler<TPath, TBody>,
-): Handler<unknown, string | null> =>
-	withBodyParser(parser.body, withPathParser(parser.path, handler));
+): Handler<Record<string, string>, string | null> =>
+	withBodyParser(body, withPathParser(path, handler));

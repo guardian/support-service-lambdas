@@ -19,7 +19,8 @@ export const httpRouter = (
 			httpMethod: 'POST',
 			path: '/data-subject-requests/{requestId}/callback',
 			handler: withParsers(
-				dataSubjectRequestCallbackParser,
+				dataSubjectRequestCallbackParser.path,
+				dataSubjectRequestCallbackParser.body,
 				dataSubjectRequestCallbackHandler(
 					mParticleDataSubjectClient,
 					batonS3Writer,
