@@ -53,7 +53,7 @@ export function createZuoraClientWithHeaders(
 				new Error('getRaw is not yet supported for zuora client'),
 			);
 		},
-		__brand: 'ZuoraClient',
+		clientName: 'ZuoraClient',
 	};
 }
 

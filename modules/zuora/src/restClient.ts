@@ -58,7 +58,7 @@ export interface RestClient<U extends string> {
 		schema: T,
 	): Promise<O>;
 
-	__brand: U;
+	clientName: U;
 }
 
 export class RestClientImpl<U extends string> implements RestClient<U> {
@@ -66,7 +66,7 @@ export class RestClientImpl<U extends string> implements RestClient<U> {
 	public constructor(
 		readonly restServerUrl: string,
 		readonly getAuthHeaders: () => Promise<Record<string, string>>,
-		readonly __brand: U,
+		readonly clientName: U,
 		extraFrames: number = 0,
 	) {
 		this.extraFrames = extraFrames + 1;

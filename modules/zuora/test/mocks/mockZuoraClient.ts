@@ -15,7 +15,7 @@ class MockZuoraClient implements ZuoraClient {
 	getRaw(): Promise<RestResult> {
 		throw new Error('Method not implemented.');
 	}
-	__brand = 'ZuoraClient' as const;
+	clientName = 'ZuoraClient' as const;
 
 	get = jest.fn();
 	post = jest.fn();
