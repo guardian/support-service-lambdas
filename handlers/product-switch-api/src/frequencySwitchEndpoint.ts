@@ -149,13 +149,13 @@ export function selectCandidateSubscriptionCharge(
 			return true;
 		})
 		.filter(({ charge }) => {
-			if (charge.effectiveStartDate > today) {
+			if (charge.effectiveStartDate >= today) {
 				logger.log(
 					`Filtering out charge ${charge.id}: effectiveStartDate ${charge.effectiveStartDate.toISOString()} is in the future`,
 				);
 				return false;
 			}
-			if (charge.effectiveEndDate <= today) {
+			if (charge.effectiveEndDate < today) {
 				logger.log(
 					`Filtering out charge ${charge.id}: effectiveEndDate ${charge.effectiveEndDate.toISOString()} is in the past`,
 				);
@@ -478,11 +478,11 @@ async function processFrequencySwitch(
 				.flatMap((rp) => rp.ratePlanCharges)
 				.filter((charge) => {
 					// Filter to active percentage discounts within the effective period
-					return (
-						charge.name === 'Percentage' &&
-						charge.type === 'Recurring' &&
-						charge.effectiveStartDate <= today.toDate() &&
-						charge.effectiveEndDate > today.toDate() &&
+				return (
+					charge.name === 'Percentage' &&
+					charge.type === 'Recurring' &&
+					charge.effectiveStartDate <= today.toDate() &&
+					charge.effectiveEndDate >= today.toDate() &&
 						(!charge.chargedThroughDate ||
 							charge.chargedThroughDate >= today.toDate())
 					);
