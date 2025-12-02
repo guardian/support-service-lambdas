@@ -47,7 +47,8 @@ export function dataSubjectRequestCallbackHandler(
 ) {
 	return async (
 		event: APIGatewayProxyEvent,
-		parsed: { path: { requestId: string }; body: DataSubjectRequestCallback },
+		path: { requestId: string },
+		body: DataSubjectRequestCallback,
 	): Promise<APIGatewayProxyResult> => {
 		const getHeader = (key: string): string | undefined =>
 			Object.entries(event.headers).find(
@@ -70,8 +71,8 @@ export function dataSubjectRequestCallbackHandler(
 			statusCode: 202,
 			body: JSON.stringify(
 				await processDataSubjectRequestCallback(
-					parsed.path.requestId,
-					parsed.body,
+					path.requestId,
+					body,
 					dataSubjectAPIMParticleClient,
 					batonS3Writer,
 				),

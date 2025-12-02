@@ -1,19 +1,22 @@
 import { sendEmail } from '@modules/email/email';
-import { getIfDefined } from '@modules/nullAndUndefined';
 import { logger } from '@modules/routing/logger';
 import { Router } from '@modules/routing/router';
+import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
+import { withBodyParser } from '@modules/routing/withParsers';
 import type { Stage } from '@modules/stage';
 import type {
-	APIGatewayProxyEvent,
-	APIGatewayProxyResult,
-	Handler,
-} from 'aws-lambda';
+	ZuoraAccount,
+	ZuoraSubscription,
+} from '@modules/zuora/types/objects';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { APIGatewayProxyResult, Handler } from 'aws-lambda';
 import dayjs from 'dayjs';
 import type { ZodType } from 'zod';
 import {
 	applyDiscountEndpoint,
 	previewDiscountEndpoint,
 } from './discountEndpoint';
+import type { ApplyDiscountRequestBody } from './requestSchema';
 import { applyDiscountSchema } from './requestSchema';
 import type {
 	ApplyDiscountResponseBody,
@@ -32,27 +35,42 @@ export const handler: Handler = Router([
 	{
 		httpMethod: 'POST',
 		path: '/apply-discount',
-		handler: applyDiscountHandler(stage),
+		handler: withBodyParser(
+			applyDiscountSchema,
+			withMMAIdentityCheck(
+				stage,
+				applyDiscountHandler(stage),
+				({ body }) => body.subscriptionNumber,
+			),
+		),
 	},
 	{
 		httpMethod: 'POST',
 		path: '/preview-discount',
-		handler: previewDiscountHandler(stage),
+		handler: withBodyParser(
+			applyDiscountSchema,
+			withMMAIdentityCheck(
+				stage,
+				previewDiscountHandler(stage),
+				({ body }) => body.subscriptionNumber,
+			),
+		),
 	},
 ]);
 
 export function applyDiscountHandler(stage: Stage) {
 	return async (
-		event: APIGatewayProxyEvent,
+		requestBody: ApplyDiscountRequestBody,
+		zuoraClient: ZuoraClient,
+		subscription: ZuoraSubscription,
+		account: ZuoraAccount,
 	): Promise<APIGatewayProxyResult> => {
-		const subscriptionNumber = applyDiscountSchema.parse(
-			JSON.parse(getIfDefined(event.body, 'No body was provided')),
-		).subscriptionNumber;
-		logger.mutableAddContext(subscriptionNumber);
 		const { response, emailPayload } = await applyDiscountEndpoint(
 			stage,
-			event.headers,
-			subscriptionNumber,
+			zuoraClient,
+			subscription,
+			account,
+			subscription.subscriptionNumber,
 			dayjs(),
 		);
 		await sendEmail(stage, emailPayload);
@@ -68,17 +86,17 @@ export function applyDiscountHandler(stage: Stage) {
 
 export function previewDiscountHandler(stage: Stage) {
 	return async (
-		event: APIGatewayProxyEvent,
+		requestBody: ApplyDiscountRequestBody,
+		zuoraClient: ZuoraClient,
+		subscription: ZuoraSubscription,
+		account: ZuoraAccount,
 	): Promise<APIGatewayProxyResult> => {
-		const subscriptionNumber = applyDiscountSchema.parse(
-			JSON.parse(getIfDefined(event.body, 'No body was provided')),
-		).subscriptionNumber;
-		logger.mutableAddContext(subscriptionNumber);
 		logger.log('Previewing discount');
 		const result = await previewDiscountEndpoint(
 			stage,
-			event.headers,
-			subscriptionNumber,
+			zuoraClient,
+			subscription,
+			account,
 			dayjs(),
 		);
 		return {
