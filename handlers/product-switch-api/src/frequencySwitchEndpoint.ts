@@ -578,11 +578,6 @@ async function processFrequencySwitch(
 			};
 		}
 	} catch (error) {
-		logger.log(
-			`Error during Orders API frequency switch ${preview ? 'preview' : 'execute'}`,
-			error,
-		);
-		
 		// Only return ValidationError messages to clients for security
 		if (error instanceof ValidationError) {
 			return {
