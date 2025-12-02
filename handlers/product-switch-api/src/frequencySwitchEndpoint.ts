@@ -445,7 +445,6 @@ async function processFrequencySwitch(
 			const currentPrice = currentCharge.price ?? 0;
 			let savingsAmount: number;
 			let savingsPeriod: 'year' | 'month';
-			let newPriceAmount: number;
 			let newPricePeriod: 'year' | 'month';
 
 			if (targetBillingPeriod === 'Annual') {
@@ -454,7 +453,6 @@ async function processFrequencySwitch(
 				const targetAnnualCost = targetPrice;
 				savingsAmount = currentAnnualCost - targetAnnualCost;
 				savingsPeriod = 'year';
-				newPriceAmount = targetAnnualCost;
 				newPricePeriod = 'year';
 			} else {
 				// Annual → Monthly: show monthly savings and monthly price
@@ -462,11 +460,8 @@ async function processFrequencySwitch(
 				const targetMonthlyCost = targetPrice;
 				savingsAmount = currentMonthlyCost - targetMonthlyCost;
 				savingsPeriod = 'month';
-				newPriceAmount = targetMonthlyCost;
 				newPricePeriod = 'month';
-			}
-
-			// Calculate current contribution
+			} // Calculate current contribution
 			const currentContributionAmount = currentRatePlan.ratePlanCharges
 				.filter((c) => c.name === 'Contribution' && c.type === 'Recurring')
 				.reduce((total, c) => total + (c.price ?? 0), 0);
@@ -478,11 +473,11 @@ async function processFrequencySwitch(
 				.flatMap((rp) => rp.ratePlanCharges)
 				.filter((charge) => {
 					// Filter to active percentage discounts within the effective period
-				return (
-					charge.name === 'Percentage' &&
-					charge.type === 'Recurring' &&
-					charge.effectiveStartDate <= today.toDate() &&
-					charge.effectiveEndDate >= today.toDate() &&
+					return (
+						charge.name === 'Percentage' &&
+						charge.type === 'Recurring' &&
+						charge.effectiveStartDate <= today.toDate() &&
+						charge.effectiveEndDate >= today.toDate() &&
 						(!charge.chargedThroughDate ||
 							charge.chargedThroughDate >= today.toDate())
 					);
@@ -536,7 +531,7 @@ async function processFrequencySwitch(
 					period: savingsPeriod,
 				},
 				newPrice: {
-					amount: newPriceAmount,
+					amount: targetPrice,
 					currency,
 					period: newPricePeriod,
 				},
@@ -584,8 +579,10 @@ async function processFrequencySwitch(
 				reasons: [{ message: error.message }],
 			};
 		}
-		
-		throw new Error('Unexpected error type in frequency switch processing', { cause: error });
+
+		throw new Error('Unexpected error type in frequency switch processing', {
+			cause: error,
+		});
 	}
 }
 
