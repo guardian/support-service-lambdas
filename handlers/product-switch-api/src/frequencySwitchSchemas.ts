@@ -23,28 +23,18 @@ export type FrequencySwitchErrorResponse = z.infer<
 	typeof frequencySwitchErrorResponseSchema
 >;
 
+const priceObjectSchema = z.object({
+	amount: z.number(),
+	currency: isoCurrencySchema,
+	period: z.enum(['year', 'month']),
+});
+
 export const frequencySwitchPreviewSuccessResponseSchema = z.object({
 	previewInvoices: z.array(zuoraPreviewResponseInvoiceSchema),
-	savings: z.object({
-		amount: z.number(),
-		currency: isoCurrencySchema,
-		period: z.enum(['year', 'month']),
-	}),
-	newPrice: z.object({
-		amount: z.number(),
-		currency: isoCurrencySchema,
-		period: z.enum(['year', 'month']),
-	}),
-	currentContribution: z.object({
-		amount: z.number(),
-		currency: isoCurrencySchema,
-		period: z.enum(['year', 'month']),
-	}),
-	currentDiscount: z.object({
-		amount: z.number(),
-		currency: isoCurrencySchema,
-		period: z.enum(['year', 'month']),
-	}),
+	savings: priceObjectSchema,
+	newPrice: priceObjectSchema,
+	currentContribution: priceObjectSchema,
+	currentDiscount: priceObjectSchema,
 });
 
 export type FrequencySwitchPreviewSuccessResponse = z.infer<
