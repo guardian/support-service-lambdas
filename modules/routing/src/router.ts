@@ -29,6 +29,38 @@ export const NotFoundResponse = {
 	statusCode: 404,
 };
 
+/**
+ * if routeParts ends with a greedy `+`, batch together the last eventsParts accordingly
+ */
+export function zipRouteWithEventPath(
+	routeParts: string[],
+	eventParts: string[],
+) {
+	const lastRoutePart: string | undefined = routeParts[routeParts.length - 1];
+	const routeIsGreedy = lastRoutePart?.endsWith('+}');
+	let adjustedEventParts;
+	let adjustedRouteParts;
+	if (lastRoutePart && routeIsGreedy && routeParts.length < eventParts.length) {
+		const excessParts = eventParts.slice(routeParts.length - 1);
+		const joinedGreedyValue = excessParts.join('/');
+		adjustedEventParts = [
+			...eventParts.slice(0, routeParts.length - 1),
+			joinedGreedyValue,
+		];
+		const adjustedLastRoutePart = lastRoutePart.replace(/\+}/, '}');
+		adjustedRouteParts = [
+			...routeParts.slice(0, routeParts.length - 1),
+			adjustedLastRoutePart,
+		];
+	} else if (routeParts.length === eventParts.length) {
+		adjustedEventParts = eventParts;
+		adjustedRouteParts = routeParts;
+	} else {
+		return undefined;
+	}
+	return zipAll(adjustedRouteParts, adjustedEventParts, '', '');
+}
+
 function matchPath(
 	routePath: string,
 	eventPath: string,
@@ -36,11 +68,11 @@ function matchPath(
 	const routeParts = routePath.split('/').filter(Boolean);
 	const eventParts = eventPath.split('/').filter(Boolean);
 
-	if (routeParts.length !== eventParts.length) {
+	const routeEventPairs = zipRouteWithEventPath(routeParts, eventParts);
+	if (routeEventPairs === undefined) {
 		return undefined;
 	}
 
-	const routeEventPairs = zipAll(routeParts, eventParts, '', '');
 	const [matchers, literals] = mapPartition(
 		routeEventPairs,
 		([routePart, eventPart]) => {

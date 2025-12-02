@@ -32,7 +32,7 @@ test("Subscriptions which don't belong to the provided identity Id are not eligi
 	await expect(async () => {
 		await withMMAIdentityCheck(
 			stage,
-			previewDiscountHandler,
+			previewDiscountHandler(stage),
 			(parsed) => parsed.body.subscriptionNumber,
 		)({ headers: { 'x-identity-id': invalidIdentityId } }, undefined, {
 			subscriptionNumber,
