@@ -1,6 +1,7 @@
 import { assertValueIn } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
+import { isNonEmpty } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
@@ -191,7 +192,7 @@ export function selectCandidateSubscriptionCharge(
 	}
 
 	assertValidState(
-		candidateCharges.length > 0,
+		isNonEmpty(candidateCharges),
 		frequencySwitchValidationRequirements.hasEligibleCharges,
 		`${candidateCharges.length} charges found`,
 	);
@@ -202,7 +203,9 @@ export function selectCandidateSubscriptionCharge(
 		`${candidateCharges.length} charges found`,
 	);
 
-	return candidateCharges[0]!;
+	// candidateCharges is narrowed to a non-empty array by isNonEmpty check above
+	const [firstCharge] = candidateCharges;
+	return firstCharge;
 }
 
 /**
