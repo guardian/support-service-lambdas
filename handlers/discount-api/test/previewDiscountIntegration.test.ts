@@ -34,10 +34,9 @@ test("Subscriptions which don't belong to the provided identity Id are not eligi
 			stage,
 			previewDiscountHandler,
 			(parsed) => parsed.body.subscriptionNumber,
-		)(
-			{ headers: { 'x-identity-id': invalidIdentityId } },
-			{ path: undefined, body: { subscriptionNumber } },
-		);
+		)({ headers: { 'x-identity-id': invalidIdentityId } }, undefined, {
+			subscriptionNumber,
+		});
 	}).rejects.toThrow('does not belong to identity ID');
 
 	console.log('Cancelling the subscription');

@@ -1,7 +1,8 @@
 import { sendEmail } from '@modules/email/email';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
-import { createRoute, Router } from '@modules/routing/router';
+import { Router } from '@modules/routing/router';
 import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
+import { withParsers } from '@modules/routing/withParsers';
 import type { Stage } from '@modules/stage';
 import type {
 	ZuoraAccount,
@@ -31,19 +32,19 @@ export type PathParser = z.infer<typeof pathParserSchema>;
 
 // main entry from AWS
 export const handler: Handler = Router([
-	createRoute<PathParser, RequestBody>({
+	{
 		httpMethod: 'POST',
 		path: '/update-supporter-plus-amount/{subscriptionNumber}',
-		handler: withMMAIdentityCheck(
-			stage,
-			handleUpdateAmount,
-			(parsed) => parsed.path.subscriptionNumber,
+		handler: withParsers(
+			pathParserSchema,
+			requestBodySchema,
+			withMMAIdentityCheck(
+				stage,
+				handleUpdateAmount,
+				({ path }) => path.subscriptionNumber,
+			),
 		),
-		parser: {
-			path: pathParserSchema,
-			body: requestBodySchema,
-		},
-	}),
+	},
 ]);
 
 async function handleUpdateAmount(

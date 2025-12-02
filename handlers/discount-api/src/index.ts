@@ -1,7 +1,8 @@
 import { sendEmail } from '@modules/email/email';
 import { logger } from '@modules/routing/logger';
-import { createRoute, Router } from '@modules/routing/router';
+import { Router } from '@modules/routing/router';
 import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
+import { withBodyParser } from '@modules/routing/withParsers';
 import type { Stage } from '@modules/stage';
 import type {
 	ZuoraAccount,
@@ -31,26 +32,30 @@ const stage = process.env.STAGE as Stage;
 
 // main entry point from AWS
 export const handler: Handler = Router([
-	createRoute<unknown, ApplyDiscountRequestBody>({
+	{
 		httpMethod: 'POST',
 		path: '/apply-discount',
-		handler: withMMAIdentityCheck(
-			stage,
-			applyDiscountHandler,
-			(parsed) => parsed.body.subscriptionNumber,
+		handler: withBodyParser(
+			applyDiscountSchema,
+			withMMAIdentityCheck(
+				stage,
+				applyDiscountHandler,
+				({ body }) => body.subscriptionNumber,
+			),
 		),
-		parser: { body: applyDiscountSchema },
-	}),
-	createRoute<unknown, ApplyDiscountRequestBody>({
+	},
+	{
 		httpMethod: 'POST',
 		path: '/preview-discount',
-		handler: withMMAIdentityCheck(
-			stage,
-			previewDiscountHandler,
-			(parsed) => parsed.body.subscriptionNumber,
+		handler: withBodyParser(
+			applyDiscountSchema,
+			withMMAIdentityCheck(
+				stage,
+				previewDiscountHandler,
+				({ body }) => body.subscriptionNumber,
+			),
 		),
-		parser: { body: applyDiscountSchema },
-	}),
+	},
 ]);
 
 async function applyDiscountHandler(

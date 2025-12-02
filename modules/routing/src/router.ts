@@ -1,7 +1,6 @@
-import { mapPartition, zipAll } from '@modules/arrayFunctions';
+import { mapPartition, mapValues, zipAll } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z } from 'zod';
 import { logger } from '@modules/routing/logger';
 
 export type HttpMethod =
@@ -13,25 +12,17 @@ export type HttpMethod =
 	| 'OPTIONS'
 	| 'HEAD';
 
+export type Handler<E, TPath, TBody> = (
+	event: E,
+	path: TPath,
+	body: TBody,
+) => Promise<APIGatewayProxyResult>;
+
 export type Route<TPath, TBody> = {
 	httpMethod: HttpMethod;
 	path: string;
-	handler: (
-		event: APIGatewayProxyEvent,
-		parsed: { path: TPath; body: TBody },
-	) => Promise<APIGatewayProxyResult>;
-	parser?: {
-		path?: z.Schema<TPath>;
-		body?: z.Schema<TBody>;
-	};
+	handler: Handler<APIGatewayProxyEvent, TPath, TBody>;
 };
-
-export function createRoute<TPath, TBody>(
-	route: Route<TPath, TBody>,
-): Route<unknown, unknown> {
-	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo see if it's fixable
-	return route as Route<unknown, unknown>;
-}
 
 export const NotFoundResponse = {
 	body: 'Not Found',
@@ -65,7 +56,9 @@ function matchPath(
 	return { params: Object.fromEntries(matchers) };
 }
 
-export function Router(routes: ReadonlyArray<Route<unknown, unknown>>) {
+export function Router(
+	routes: ReadonlyArray<Route<Record<string, string>, string | null>>,
+) {
 	const httpRouter = async (
 		event: APIGatewayProxyEvent,
 	): Promise<APIGatewayProxyResult> => {
@@ -79,38 +72,16 @@ export function Router(routes: ReadonlyArray<Route<unknown, unknown>>) {
 					const eventWithParams = {
 						...event,
 						pathParameters: {
-							...(event.pathParameters ?? {}),
+							...mapValues(event.pathParameters ?? {}, (v) => v ?? ''),
 							...matchResult.params,
 						},
 					};
 
-					let parsedPath, parsedBody;
-					try {
-						parsedPath = route.parser?.path?.parse(
-							eventWithParams.pathParameters,
-						);
-						parsedBody = route.parser?.body?.parse(
-							eventWithParams.body
-								? JSON.parse(eventWithParams.body)
-								: undefined,
-						);
-					} catch (error) {
-						if (error instanceof z.ZodError) {
-							return {
-								statusCode: 400,
-								body: JSON.stringify({
-									error: 'Invalid request',
-									details: error.errors,
-								}),
-							};
-						}
-						throw error;
-					}
-
-					return await route.handler(eventWithParams, {
-						path: parsedPath,
-						body: parsedBody,
-					});
+					return await route.handler(
+						eventWithParams,
+						eventWithParams.pathParameters,
+						eventWithParams.body,
+					);
 				}
 			}
 			return NotFoundResponse;
