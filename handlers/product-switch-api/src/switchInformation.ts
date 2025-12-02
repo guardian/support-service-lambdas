@@ -129,7 +129,6 @@ const getCurrency = (contributionRatePlan: RatePlan): IsoCurrency => {
 	throw new Error(`Unsupported currency ${currency}`);
 };
 
-// Gets a subscription from Zuora and checks that it is owned by currently logged-in user
 export const getSwitchInformation = async (
 	stage: Stage,
 	input: ProductSwitchRequestBody,
