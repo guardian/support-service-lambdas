@@ -1,3 +1,4 @@
+import { isoCurrencySchema } from '@modules/internationalisation/schemas';
 import { z } from 'zod';
 import { zuoraPreviewResponseInvoiceSchema } from './schemas';
 
@@ -26,22 +27,22 @@ export const frequencySwitchPreviewSuccessResponseSchema = z.object({
 	previewInvoices: z.array(zuoraPreviewResponseInvoiceSchema),
 	savings: z.object({
 		amount: z.number(),
-		currency: z.string(),
+		currency: isoCurrencySchema,
 		period: z.enum(['year', 'month']),
 	}),
 	newPrice: z.object({
 		amount: z.number(),
-		currency: z.string(),
+		currency: isoCurrencySchema,
 		period: z.enum(['year', 'month']),
 	}),
 	currentContribution: z.object({
 		amount: z.number(),
-		currency: z.string(),
+		currency: isoCurrencySchema,
 		period: z.enum(['year', 'month']),
 	}),
 	currentDiscount: z.object({
 		amount: z.number(),
-		currency: z.string(),
+		currency: isoCurrencySchema,
 		period: z.enum(['year', 'month']),
 	}),
 });
