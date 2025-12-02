@@ -582,21 +582,15 @@ async function processFrequencySwitch(
 			`Error during Orders API frequency switch ${preview ? 'preview' : 'execute'}`,
 			error,
 		);
+		
 		// Only return ValidationError messages to clients for security
 		if (error instanceof ValidationError) {
 			return {
 				reasons: [{ message: error.message }],
 			};
 		}
-		// Log unexpected errors but don't expose details to client
-		logger.log('Unexpected error type in frequency switch processing', error);
-		return {
-			reasons: [
-				{
-					message: 'An unexpected error occurred while processing your request',
-				},
-			],
-		};
+		
+		throw new Error('Unexpected error type in frequency switch processing', { cause: error });
 	}
 }
 
