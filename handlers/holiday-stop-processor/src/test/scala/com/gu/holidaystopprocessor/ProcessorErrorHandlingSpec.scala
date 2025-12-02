@@ -186,7 +186,7 @@ class ProcessorErrorHandlingSpec extends AnyFlatSpec with Matchers with OptionVa
     result.flatMap(_.overallFailure) should contain atLeastOneOf (
       OverallFailure("zuora boom 1"),
       OverallFailure("zuora boom 2"),
-      OverallFailure("zuora boom 3")
+      OverallFailure("zuora boom 3"),
     )
   }
 

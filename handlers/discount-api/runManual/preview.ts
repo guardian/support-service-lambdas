@@ -2,6 +2,7 @@ import { previewDiscountHandler } from '../src';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { createSupporterPlusSubscription } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import { APIGatewayProxyEvent } from 'aws-lambda';
+import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
 
 /*
 This is a handy manual script to trigger a preview locally using sandbox zuora.
@@ -19,10 +20,18 @@ async function run() {
 	console.log('Creating a new S+ subscription');
 	const subscriptionNumber = await createSupporterPlusSubscription(zuoraClient);
 
-	return previewDiscountHandler(stage)({
-		body: JSON.stringify({ subscriptionNumber }),
-		headers: { 'x-identity-id': validIdentityId },
-	} as unknown as APIGatewayProxyEvent);
+	return withMMAIdentityCheck(
+		stage,
+		previewDiscountHandler(stage),
+		({ body }) => body.subscriptionNumber,
+	)(
+		{
+			body: JSON.stringify({ subscriptionNumber }),
+			headers: { 'x-identity-id': validIdentityId },
+		} as unknown as APIGatewayProxyEvent,
+		{},
+		{ subscriptionNumber },
+	);
 }
 
 run().then(console.log);

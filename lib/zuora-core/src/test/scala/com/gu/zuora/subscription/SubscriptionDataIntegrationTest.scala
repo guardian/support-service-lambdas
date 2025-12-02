@@ -29,7 +29,8 @@ object SubscriptionDataIntegrationTest extends Matchers {
               actualIssueData should equal(expectedIssueData)
             }
           case None =>
-            Inside.inside(subscriptionData.issueDataForDate(testDate)) { case Left(_) => // pass
+            Inside.inside(subscriptionData.issueDataForDate(testDate)) {
+              case Left(_) => // pass
             }
         }
       }

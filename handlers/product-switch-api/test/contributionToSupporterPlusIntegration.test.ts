@@ -24,7 +24,7 @@ import { createContribution } from '../../../modules/zuora/test/it-helpers/creat
 import { doSwitch, preview } from '../src/contributionToSupporterPlus';
 import { adjustNonCollectedInvoice } from '../src/payment';
 import type { SwitchInformation } from '../src/switchInformation';
-import { getSwitchInformationWithOwnerCheck } from '../src/switchInformation';
+import { getSwitchInformation } from '../src/switchInformation';
 
 interface ContributionCreationDetails {
 	zuoraClient: ZuoraClient;
@@ -41,7 +41,6 @@ afterEach(() => {
 });
 
 const stage = 'CODE';
-const contributionIdentityId = '200175946';
 
 const createTestContribution = async (
 	price: number,
@@ -81,13 +80,12 @@ const createTestContribution = async (
 		.then(itemsForSubscription(subscription.subscriptionNumber))
 		.then(toSimpleInvoiceItems);
 
-	const switchInformation = await getSwitchInformationWithOwnerCheck(
+	const switchInformation = await getSwitchInformation(
 		stage,
 		input,
 		subscription,
 		account,
 		productCatalog,
-		contributionIdentityId,
 		lazyBillingPreview,
 		today,
 	);
