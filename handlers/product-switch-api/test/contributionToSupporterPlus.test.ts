@@ -21,7 +21,7 @@ import {
 import { buildEmailMessage } from '../src/productSwitchEmail';
 import {
 	getFirstContributionRatePlan,
-	getSwitchInformationWithOwnerCheck,
+	getSwitchInformation,
 	subscriptionHasAlreadySwitchedToSupporterPlus,
 } from '../src/switchInformation';
 import accountJson from './fixtures/account.json';
@@ -39,56 +39,16 @@ test('startNewTerm is only true when the termStartDate is before today', async (
 	const account = zuoraAccountSchema.parse(accountJson);
 	const productCatalog = getProductCatalogFromFixture();
 
-	const switchInformation = await getSwitchInformationWithOwnerCheck(
+	const switchInformation = await getSwitchInformation(
 		'CODE',
 		{ preview: false },
 		subscription,
 		account,
 		productCatalog,
-		'999999999999',
 		new Lazy(() => Promise.resolve([]), 'test'),
 		today,
 	);
 	expect(switchInformation.startNewTerm).toEqual(false);
-});
-
-test('owner check is bypassed for salesforce calls', async () => {
-	const today = dayjs('2024-05-09T23:10:10.663+01:00');
-	const subscription = zuoraSubscriptionSchema.parse(subscriptionJson);
-	const account = zuoraAccountSchema.parse(accountJson);
-	const productCatalog = getProductCatalogFromFixture();
-
-	const switchInformation = await getSwitchInformationWithOwnerCheck(
-		'CODE',
-		{ preview: false },
-		subscription,
-		account,
-		productCatalog,
-		undefined, // salesforce doesn't send the header
-		new Lazy(() => Promise.resolve([]), 'test'),
-		today,
-	);
-	expect(switchInformation.startNewTerm).toEqual(false);
-});
-
-test("owner check doesn't allow incorrect owner", async () => {
-	const today = dayjs('2024-05-09T23:10:10.663+01:00');
-	const subscription = zuoraSubscriptionSchema.parse(subscriptionJson);
-	const account = zuoraAccountSchema.parse(accountJson);
-	const productCatalog = getProductCatalogFromFixture();
-
-	await expect(
-		getSwitchInformationWithOwnerCheck(
-			'CODE',
-			{ preview: false },
-			subscription,
-			account,
-			productCatalog,
-			'12345',
-			new Lazy(() => Promise.resolve([]), 'test'),
-			today,
-		),
-	).rejects.toThrow(ValidationError);
 });
 
 test('preview amounts are correct', () => {
@@ -342,13 +302,12 @@ test('When newAmount is specified, it calculates contribution based on newAmount
 	const today = dayjs();
 
 	// User currently pays £50, but wants to increase to £150
-	const switchInformation = await getSwitchInformationWithOwnerCheck(
+	const switchInformation = await getSwitchInformation(
 		'CODE',
 		{ preview: false, newAmount: 150 },
 		subscription,
 		account,
 		productCatalog,
-		'999999999999',
 		new Lazy(() => Promise.resolve([]), 'test'),
 		today,
 	);
@@ -367,13 +326,12 @@ test('When newAmount is not specified, use the old amount with the base price as
 
 	// No newAmount specified - should use previousAmount (£50 from the fixture)
 	// This should work fine to maintain backward compatibility
-	const switchInformation = await getSwitchInformationWithOwnerCheck(
+	const switchInformation = await getSwitchInformation(
 		'CODE',
 		{ preview: false },
 		subscription,
 		account,
 		productCatalog,
-		'999999999999',
 		new Lazy(() => Promise.resolve([]), 'test'),
 		today,
 	);
@@ -391,13 +349,12 @@ test('When newAmount is less than base Supporter Plus price, it throws a validat
 
 	// Base Supporter Plus price is £120, user wants to pay only £80
 	await expect(
-		getSwitchInformationWithOwnerCheck(
+		getSwitchInformation(
 			'CODE',
 			{ preview: false, newAmount: 80 },
 			subscription,
 			account,
 			productCatalog,
-			'999999999999',
 			new Lazy(() => Promise.resolve([]), 'test'),
 			today,
 		),
