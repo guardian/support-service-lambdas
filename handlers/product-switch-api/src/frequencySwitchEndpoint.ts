@@ -1,5 +1,6 @@
 import { assertValueIn } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
+import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
@@ -364,7 +365,7 @@ async function processFrequencySwitch(
 			throw new Error('Unable to determine target subscription charge id');
 		}
 		const targetSubscriptionChargeId: string = targetSubscriptionChargeIdRaw;
-		const currency: string = currentCharge.currency;
+		const currency: IsoCurrency = currentCharge.currency as IsoCurrency;
 		const targetPrice =
 			rawTargetRatePlan.pricing?.[currency] ?? currentCharge.price ?? 0;
 
@@ -436,18 +437,6 @@ async function processFrequencySwitch(
 				orderRequest,
 				zuoraPreviewResponseSchema,
 			);
-
-			if (!zuoraPreview.success) {
-				logger.log(
-					'Orders preview returned unsuccessful response',
-					zuoraPreview,
-				);
-				return {
-					reasons: zuoraPreview.reasons?.map((r: { message: string }) => ({
-						message: r.message,
-					})) ?? [{ message: 'Unknown error from Zuora preview' }],
-				};
-			}
 
 			logger.log('Orders preview returned successful response', zuoraPreview);
 
@@ -582,18 +571,6 @@ async function processFrequencySwitch(
 				orderRequest,
 				zuoraSwitchResponseSchema,
 			);
-
-			if (!zuoraResponse.success) {
-				logger.log(
-					'Orders execution returned unsuccessful response',
-					zuoraResponse,
-				);
-				return {
-					reasons: zuoraResponse.reasons?.map((r: { message: string }) => ({
-						message: r.message,
-					})) ?? [{ message: 'Unknown error from Zuora execution' }],
-				};
-			}
 
 			return {
 				invoiceIds: zuoraResponse.invoiceIds ?? [],
