@@ -105,7 +105,6 @@ export function selectCandidateSubscriptionCharge(
 	today: Date,
 	account: ZuoraAccount,
 ): { ratePlan: RatePlan; charge: RatePlanCharge } {
-	// Check subscription status if account is provided
 	assertValidState(
 		subscription.status === 'Active',
 		frequencySwitchValidationRequirements.subscriptionActive,
