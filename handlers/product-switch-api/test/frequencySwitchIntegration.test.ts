@@ -202,20 +202,20 @@ describe('frequency switch behaviour', () => {
 						candidateCharge,
 						productCatalog,
 						'Annual',
-					dayjs(),
-				);
+						dayjs(),
+					);
 
-			// Expect success response
-			expect('savings' in result).toBe(true);
-			if ('savings' in result) {
-				expect(result.savings.currency).toBe('EUR');
-				expect(result.savings.period).toBe('year');
+				// Expect success response
+				expect('savings' in result).toBe(true);
+				if ('savings' in result) {
+					expect(result.savings.currency).toBe('EUR');
+					expect(result.savings.period).toBe('year');
 
-				// Verify new price also has correct currency and period
-				expect(result.newPrice.currency).toBe('EUR');
-				expect(result.newPrice.period).toBe('year');
-				expect(result.newPrice.amount).toBeGreaterThan(0);
-			}
+					// Verify new price also has correct currency and period
+					expect(result.newPrice.currency).toBe('EUR');
+					expect(result.newPrice.period).toBe('year');
+					expect(result.newPrice.amount).toBeGreaterThan(0);
+				}
 			},
 			1000 * 60,
 		);
