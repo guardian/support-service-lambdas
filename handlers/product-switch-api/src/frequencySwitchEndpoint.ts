@@ -111,7 +111,6 @@ export function selectCandidateSubscriptionCharge(
 		subscription.status,
 	);
 
-	// Check for outstanding unpaid invoices if account is provided
 	assertValidState(
 		account.metrics.totalInvoiceBalance === 0,
 		frequencySwitchValidationRequirements.zeroAccountBalance,
