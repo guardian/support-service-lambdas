@@ -62,6 +62,7 @@ export const frequencySwitchValidationRequirements = {
 		'subscription has at least one active recurring charge eligible for frequency switch',
 	singleEligibleCharge:
 		'subscription has exactly one eligible charge (multiple charges cannot be safely switched)',
+	chargeHasValidPrice: 'eligible charge has a defined price',
 };
 
 /**
@@ -205,6 +206,13 @@ export function selectCandidateSubscriptionCharge(
 
 	// candidateCharges is narrowed to a non-empty array by isNonEmpty check above
 	const [firstCharge] = candidateCharges;
+
+	assertValidState(
+		firstCharge.charge.price !== null,
+		frequencySwitchValidationRequirements.chargeHasValidPrice,
+		`price is ${firstCharge.charge.price}`,
+	);
+
 	return firstCharge;
 }
 
@@ -367,8 +375,9 @@ async function processFrequencySwitch(
 		}
 		const targetSubscriptionChargeId: string = targetSubscriptionChargeIdRaw;
 		const currency: IsoCurrency = currentCharge.currency as IsoCurrency;
+		// currentCharge.price is guaranteed to be non-null by selectCandidateSubscriptionCharge validation
 		const targetPrice =
-			rawTargetRatePlan.pricing?.[currency] ?? currentCharge.price ?? 0;
+			rawTargetRatePlan.pricing?.[currency] ?? (currentCharge.price as number);
 
 		// For preview: use today to get Zuora to generate billing docs
 		// For execution: use the next non-free payment date (respects promotional periods)
@@ -442,7 +451,8 @@ async function processFrequencySwitch(
 			logger.log('Orders preview returned successful response', zuoraPreview);
 
 			// Calculate savings and new price based on the target billing period
-			const currentPrice = currentCharge.price ?? 0;
+			// currentCharge.price is guaranteed to be non-null by selectCandidateSubscriptionCharge validation
+			const currentPrice = currentCharge.price as number;
 			let savingsAmount: number;
 			let savingsPeriod: 'year' | 'month';
 			let newPricePeriod: 'year' | 'month';
@@ -487,7 +497,8 @@ async function processFrequencySwitch(
 			const currentDiscountAmount = activeDiscountCharges.reduce(
 				(total, discountCharge) => {
 					const discountPercentage = discountCharge.discountPercentage ?? 0;
-					const subscriptionPrice = currentCharge.price ?? 0;
+					// currentCharge.price is guaranteed to be non-null by selectCandidateSubscriptionCharge validation
+					const subscriptionPrice = currentCharge.price as number;
 
 					// Calculate discount per period (month or year)
 					const discountPerPeriod = Math.abs(
