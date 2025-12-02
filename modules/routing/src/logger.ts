@@ -1,5 +1,5 @@
 import * as console from 'node:console';
-import { ZodObject } from 'zod';
+import { ZodType } from 'zod';
 
 function extractParamNames(fnString: string) {
 	const paramMatch = fnString.match(/\(([^)]*)\)/);
@@ -196,8 +196,8 @@ export class Logger {
 		return args.map((arg, index) => {
 			const paramName = paramNames[index] ?? `arg${index}`;
 			const value =
-				arg instanceof ZodObject
-					? '(ZodObject not expanded)'
+				arg instanceof ZodType
+					? '(ZodType not expanded)'
 					: this.prettyPrint(arg);
 			return `${paramName}: ${value}`;
 		});
