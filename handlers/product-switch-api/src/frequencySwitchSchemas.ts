@@ -1,6 +1,5 @@
 import { isoCurrencySchema } from '@modules/internationalisation/schemas';
 import { z } from 'zod';
-import { zuoraPreviewResponseInvoiceSchema } from './schemas';
 
 export const frequencySwitchRequestSchema = z.object({
 	preview: z.boolean(),
@@ -30,7 +29,6 @@ const priceObjectSchema = z.object({
 });
 
 export const frequencySwitchPreviewSuccessResponseSchema = z.object({
-	previewInvoices: z.array(zuoraPreviewResponseInvoiceSchema),
 	savings: priceObjectSchema,
 	newPrice: priceObjectSchema,
 	currentContribution: priceObjectSchema,

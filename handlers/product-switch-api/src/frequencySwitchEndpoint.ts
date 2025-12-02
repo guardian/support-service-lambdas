@@ -451,20 +451,6 @@ async function processFrequencySwitch(
 
 			logger.log('Orders preview returned successful response', zuoraPreview);
 
-			// Filter invoice items to show only the new billing period charges
-			// Exclude credits/prorations from the old billing period
-			const cleanedInvoices =
-				zuoraPreview.previewResult?.invoices.map((invoice) => ({
-					...invoice,
-					invoiceItems: invoice.invoiceItems.filter(
-						(item) =>
-							// Keep items with positive amounts (new charges)
-							// or items matching the target rate plan charge
-							item.amountWithoutTax >= 0 &&
-							item.productRatePlanChargeId === targetSubscriptionChargeId,
-					),
-				})) ?? [];
-
 			// Calculate savings and new price based on the target billing period
 			const currentPrice = currentCharge.price ?? 0;
 			let savingsAmount: number;
@@ -554,7 +540,6 @@ async function processFrequencySwitch(
 			);
 
 			return {
-				previewInvoices: cleanedInvoices,
 				savings: {
 					amount: savingsAmount,
 					currency,

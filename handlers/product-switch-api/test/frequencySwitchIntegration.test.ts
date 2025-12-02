@@ -111,10 +111,8 @@ describe('frequency switch behaviour', () => {
 					);
 
 				// Expect success response
-				expect('previewInvoices' in result).toBe(true);
-				if ('previewInvoices' in result) {
-					expect(result.previewInvoices).toBeDefined();
-
+				expect('savings' in result).toBe(true);
+				if ('savings' in result) {
 					// Verify savings calculation (monthly -> annual shows annual savings)
 					expect(result.savings.period).toBe('year');
 					expect(result.savings.currency).toBe('GBP');
@@ -125,15 +123,6 @@ describe('frequency switch behaviour', () => {
 					expect(result.newPrice.period).toBe('year');
 					expect(result.newPrice.currency).toBe('GBP');
 					expect(result.newPrice.amount).toBeGreaterThan(0);
-
-					// Preview should contain invoice items
-					if (result.previewInvoices.length > 0) {
-						const invoice = result.previewInvoices[0];
-						expect(invoice).toBeDefined();
-						if (invoice) {
-							expect(invoice.invoiceItems.length).toBeGreaterThan(0);
-						}
-					}
 				}
 			},
 			1000 * 60,
@@ -167,10 +156,8 @@ describe('frequency switch behaviour', () => {
 					);
 
 				// Expect success response
-				expect('previewInvoices' in result).toBe(true);
-				if ('previewInvoices' in result) {
-					expect(result.previewInvoices).toBeDefined();
-
+				expect('savings' in result).toBe(true);
+				if ('savings' in result) {
 					// Verify savings calculation (annual -> monthly shows monthly savings)
 					expect(result.savings.period).toBe('month');
 					expect(result.savings.currency).toBe('GBP');
@@ -215,21 +202,20 @@ describe('frequency switch behaviour', () => {
 						candidateCharge,
 						productCatalog,
 						'Annual',
-						dayjs(),
-					);
+					dayjs(),
+				);
 
-				// Expect success response
-				expect('previewInvoices' in result).toBe(true);
-				if ('previewInvoices' in result) {
-					expect(result.previewInvoices).toBeDefined();
-					expect(result.savings.currency).toBe('EUR');
-					expect(result.savings.period).toBe('year');
+			// Expect success response
+			expect('savings' in result).toBe(true);
+			if ('savings' in result) {
+				expect(result.savings.currency).toBe('EUR');
+				expect(result.savings.period).toBe('year');
 
-					// Verify new price also has correct currency and period
-					expect(result.newPrice.currency).toBe('EUR');
-					expect(result.newPrice.period).toBe('year');
-					expect(result.newPrice.amount).toBeGreaterThan(0);
-				}
+				// Verify new price also has correct currency and period
+				expect(result.newPrice.currency).toBe('EUR');
+				expect(result.newPrice.period).toBe('year');
+				expect(result.newPrice.amount).toBeGreaterThan(0);
+			}
 			},
 			1000 * 60,
 		);
