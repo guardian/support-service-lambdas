@@ -1,9 +1,14 @@
 import { z, ZodError } from 'zod';
-import { RestClientError, RestClientImpl } from '../src/restClient';
+import type { BearerTokenProvider } from '@modules/zuora/auth';
+import { RestClient, RestClientError } from '../src/restClient';
 
-class TestRestClient extends RestClientImpl<'ZuoraClient'> {
+class TestRestClient extends RestClient {
 	constructor(baseUrl: string, authHeaders: Record<string, string> = {}) {
-		super(baseUrl, () => Promise.resolve(authHeaders), 'ZuoraClient');
+		const mockTokenProvider: jest.Mocked<BearerTokenProvider> = {
+			getAuthHeader: jest.fn().mockResolvedValue(authHeaders),
+		} as unknown as jest.Mocked<BearerTokenProvider>;
+
+		super(baseUrl, mockTokenProvider);
 	}
 }
 
@@ -107,24 +112,6 @@ describe('RestClient', () => {
 		});
 	});
 
-	describe('getRaw', () => {
-		it('should return raw response without parsing', async () => {
-			const responseBody = '<html>HELLO</html>';
-
-			mockFetchResponse({
-				ok: true,
-				status: 200,
-				text: responseBody,
-				headers: { 'content-type': 'text/html' },
-			});
-
-			const result = await client.getRaw('/index.html');
-
-			expect(result.responseBody).toBe(responseBody);
-			expect(result.responseHeaders).toHaveProperty('content-type');
-		});
-	});
-
 	describe('error handling', () => {
 		it('should throw RestClientError on HTTP error', async () => {
 			const schema = z.object({ id: z.string() });
@@ -141,7 +128,7 @@ describe('RestClient', () => {
 			await expect(client.get('/users/999', schema)).rejects.toMatchObject({
 				name: 'RestClientError',
 				message: 'http call failed',
-				statusCode: 404,
+				status: 404,
 				responseBody: JSON.stringify(errorBody),
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- any is ok in a test
 				responseHeaders: expect.objectContaining({ 'x-request-id': 'abc123' }),

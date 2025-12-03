@@ -22,7 +22,7 @@ export class BearerTokenProvider {
 				now.getTime()
 		);
 	};
-	private async getBearerToken(): Promise<ZuoraBearerToken> {
+	public async getBearerToken(): Promise<ZuoraBearerToken> {
 		if (this.bearerToken === null || this.tokenIsExpired()) {
 			this.lastFetchedTime = new Date();
 			this.bearerToken = await this.fetchZuoraBearerToken();

@@ -1,5 +1,6 @@
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
+import type { ZodTypeDef } from 'zod';
 import { z } from 'zod';
 import { RestClient, RestClientError } from '@modules/zuora/restClient';
 import { BearerTokenProvider } from './auth/bearerTokenProvider';
@@ -19,77 +20,37 @@ export class ZuoraClient extends RestClient {
 		super(zuoraServerUrl(stage), tokenProvider);
 	}
 
-	public async get<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
+	/*
+	 * a normal RestClient throws non-2xx responses as Errors.  For Zuora, there are an extra layer of errors that
+	 * come back as 200 responses, and thus need their own special errors thrown.
+	 */
+	override async fetch<I, O, T extends z.ZodType<O, ZodTypeDef, I>>(
 		path: string,
+		method: string,
 		schema: T,
-	): Promise<O> {
-		try {
-			return await super.get(path, withSuccessCheck(schema));
-		} catch (e) {
-			throw handleZuoraFailure(e);
-		}
-	}
-
-	public async post<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
-		path: string,
-		body: string,
-		schema: T,
+		body?: string,
 		headers?: Record<string, string>,
 	): Promise<O> {
 		try {
-			return await super.post(path, body, withSuccessCheck(schema), headers);
+			/*
+			 * since zuora returns a wide variety of unsuccessful responses inside of 200 statuses, we need to check for
+			 * failure and fail parsing if we detect one.  Then handleZuoraFailure will throw a suitable detailed exception.
+			 */
+			const successSchema = z.any().refine(isLogicalSuccess).pipe(schema);
+			return await super.fetch(path, method, successSchema, body, headers);
 		} catch (e) {
-			throw handleZuoraFailure(e);
+			if (e instanceof RestClientError) {
+				// When Zuora returns a 429 status, the response headers typically contain important rate limiting information
+				if (e.status === 429) {
+					logger.log(
+						`Received a 429 rate limit response with response headers ${JSON.stringify(e.responseHeaders)}`,
+					);
+				}
+				throw generateZuoraError(JSON.parse(e.responseBody), e);
+			}
+			throw new Error('unexpected error thrown during REST call', { cause: e });
 		}
 	}
-
-	public async put<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
-		path: string,
-		body: string,
-		schema: T,
-		headers?: Record<string, string>,
-	): Promise<O> {
-		try {
-			return await super.put(path, body, withSuccessCheck(schema), headers);
-		} catch (e) {
-			throw handleZuoraFailure(e);
-		}
-	}
-
-	public async delete<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
-		path: string,
-		schema: T,
-	): Promise<O> {
-		try {
-			return await super.delete(path, withSuccessCheck(schema));
-		} catch (e) {
-			throw handleZuoraFailure(e);
-		}
-	}
-}
-
-/**
- * since zuora returns a wide variety of unsuccessful responses inside of 200 statuses, we need to check for
- * failure and skip parsing if we detect one.  Then handleZuoraFailure will throw a suitable detailed exception.
- * @param successSchema the schema that can parse a successful response
- */
-function withSuccessCheck<T extends z.ZodType<O, z.ZodTypeDef, I>, O, I>(
-	successSchema: T,
-) {
-	return z.any().refine(isLogicalSuccess).pipe(successSchema);
-}
-
-function handleZuoraFailure(e: unknown) {
-	if (e instanceof RestClientError) {
-		// When Zuora returns a 429 status, the response headers typically contain important rate limiting information
-		if (e.status === 429) {
-			logger.log(
-				`Received a 429 rate limit response with response headers ${JSON.stringify(e.responseHeaders)}`,
-			);
-		}
-		return generateZuoraError(JSON.parse(e.responseBody), e);
-	}
-	return new Error('value thrown that was not an Error', { cause: e });
 }
 
 const isLogicalSuccess = (json: unknown): boolean => {

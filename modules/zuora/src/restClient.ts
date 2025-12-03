@@ -1,6 +1,6 @@
 import { logger } from '@modules/routing/logger';
 import type z from 'zod';
-import { BearerTokenProvider } from '@modules/zuora/auth';
+import type { BearerTokenProvider } from '@modules/zuora/auth';
 
 export class RestClientError extends Error implements RestResult {
 	static create = (message: string, result: RestResult, e?: unknown) =>
@@ -45,7 +45,11 @@ export abstract class RestClient {
 		path: string,
 		schema: T,
 	): Promise<O> {
-		return await this.fetch(logger.getCallerInfo(1))(path, 'GET', schema);
+		return await this.fetchWithLogging(logger.getCallerInfo(1))(
+			path,
+			'GET',
+			schema,
+		);
 	}
 
 	public async post<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
@@ -54,7 +58,7 @@ export abstract class RestClient {
 		schema: T,
 		headers?: Record<string, string>,
 	): Promise<O> {
-		return await this.fetch(logger.getCallerInfo(1))(
+		return await this.fetchWithLogging(logger.getCallerInfo(1))(
 			path,
 			'POST',
 			schema,
@@ -69,7 +73,7 @@ export abstract class RestClient {
 		schema: T,
 		headers?: Record<string, string>,
 	): Promise<O> {
-		return await this.fetch(logger.getCallerInfo(1))(
+		return await this.fetchWithLogging(logger.getCallerInfo(1))(
 			path,
 			'PUT',
 			schema,
@@ -82,20 +86,24 @@ export abstract class RestClient {
 		path: string,
 		schema: T,
 	): Promise<O> {
-		return await this.fetch(logger.getCallerInfo(1))(path, 'DELETE', schema);
+		return await this.fetchWithLogging(logger.getCallerInfo(1))(
+			path,
+			'DELETE',
+			schema,
+		);
 	}
 
 	// has to be a function so that the callerInfo is refreshed on every call
-	fetch = (maybeCallerInfo?: string) =>
+	fetchWithLogging = (maybeCallerInfo?: string) =>
 		logger.wrapFn(
-			this.fetchWithoutLogging.bind(this),
+			this.fetch.bind(this),
 			() => 'HTTP ' + this.baseUrl,
-			this.fetchWithoutLogging.toString(),
+			this.fetch.toString(),
 			2,
 			maybeCallerInfo,
 		);
 
-	async fetchWithoutLogging<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
+	protected async fetch<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
 		method: string,
 		schema: T,
