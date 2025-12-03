@@ -2,7 +2,16 @@ import type { OAuthClientCredentials, ZuoraBearerToken } from '../types';
 import { zuoraBearerTokenSchema } from '../types';
 import { zuoraServerUrl } from '../utils';
 
-export class BearerTokenProvider {
+export type Authorisation = {
+	baseUrl: string;
+	authHeaders: Record<string, string>;
+};
+
+export interface BearerTokenProvider {
+	getAuthorisation(): Promise<Authorisation>;
+}
+
+export class ZuoraBearerTokenProvider implements BearerTokenProvider {
 	private bearerToken: ZuoraBearerToken | null = null;
 	private lastFetchedTime: Date | null = null;
 
@@ -52,10 +61,13 @@ export class BearerTokenProvider {
 		return zuoraBearerTokenSchema.parse(json);
 	};
 
-	public async getAuthHeader() {
+	public async getAuthorisation() {
 		const bearerToken = await this.getBearerToken();
 		return {
-			Authorization: `Bearer ${bearerToken.access_token}`,
+			baseUrl: zuoraServerUrl(this.stage),
+			authHeaders: {
+				Authorization: `Bearer ${bearerToken.access_token}`,
+			},
 		};
 	}
 }

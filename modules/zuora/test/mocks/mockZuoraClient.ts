@@ -1,15 +1,15 @@
-import type { Stage } from '@modules/stage';
+import type { BearerTokenProvider } from '@modules/zuora/auth';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 class MockZuoraClient extends ZuoraClient {
 	constructor() {
-		super('stage' as Stage);
-		this.baseUrl = 'https://mock.zuora.com';
+		super('https://mock.zuora.com' as unknown as BearerTokenProvider);
 	}
 
 	get = jest.fn();
 	post = jest.fn();
 	put = jest.fn();
+	patch = jest.fn();
 	delete = jest.fn();
 	fetch = jest.fn();
 }

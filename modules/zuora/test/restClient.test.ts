@@ -1,14 +1,16 @@
 import { z, ZodError } from 'zod';
-import type { BearerTokenProvider } from '@modules/zuora/auth';
+import type { Authorisation, BearerTokenProvider } from '@modules/zuora/auth';
 import { RestClient, RestClientError } from '../src/restClient';
 
 class TestRestClient extends RestClient {
 	constructor(baseUrl: string, authHeaders: Record<string, string> = {}) {
 		const mockTokenProvider: jest.Mocked<BearerTokenProvider> = {
-			getAuthHeader: jest.fn().mockResolvedValue(authHeaders),
+			getAuthorisation: jest
+				.fn()
+				.mockResolvedValue({ baseUrl, authHeaders } satisfies Authorisation),
 		} as unknown as jest.Mocked<BearerTokenProvider>;
 
-		super(baseUrl, mockTokenProvider);
+		super(mockTokenProvider);
 	}
 }
 

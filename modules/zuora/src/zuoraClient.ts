@@ -3,21 +3,19 @@ import type { Stage } from '@modules/stage';
 import type { ZodTypeDef } from 'zod';
 import { z } from 'zod';
 import { RestClient, RestClientError } from '@modules/zuora/restClient';
-import { BearerTokenProvider } from './auth/bearerTokenProvider';
+import { ZuoraBearerTokenProvider } from './auth/bearerTokenProvider';
 import { getOAuthClientCredentials } from './auth/oAuthCredentials';
 import { generateZuoraError } from './errors/zuoraErrorHandler';
 import { zuoraErrorSchema, zuoraSuccessSchema } from './types/httpResponse';
-import { zuoraServerUrl } from './utils';
 
 export class ZuoraClient extends RestClient {
 	static async create(stage: Stage) {
 		const credentials = await getOAuthClientCredentials(stage);
-		const bearerTokenProvider = new BearerTokenProvider(stage, credentials);
-		return new ZuoraClient(stage, bearerTokenProvider);
-	}
-
-	constructor(stage: Stage, tokenProvider?: BearerTokenProvider) {
-		super(zuoraServerUrl(stage), tokenProvider);
+		const bearerTokenProvider = new ZuoraBearerTokenProvider(
+			stage,
+			credentials,
+		);
+		return new ZuoraClient(bearerTokenProvider);
 	}
 
 	/*

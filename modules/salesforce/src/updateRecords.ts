@@ -1,40 +1,18 @@
 import { z } from 'zod';
+import type { SfClient } from '@modules/salesforce/sfClient';
 
 export async function doCompositeCallout(
-	url: string,
-	token: string,
-	body: string,
+	sfClient: SfClient,
+	path: string,
+	body: object,
 ): Promise<SalesforceUpdateResponse[]> {
 	console.log('doing composite callout...');
-
 	try {
-		const options = {
-			method: 'PATCH',
-			headers: {
-				Authorization: `Bearer ${token}`,
-				'Content-Type': 'application/json',
-			},
-			body,
-		};
-
-		const response = await fetch(url, options);
-		if (!response.ok) {
-			throw new Error(
-				`Error updating record(s) in Salesforce: ${response.statusText}`,
-			);
-		}
-
-		const sfUpdateResponse = SalesforceUpdateResponseArraySchema.safeParse(
-			await response.json(),
+		return await sfClient.patch(
+			path,
+			JSON.stringify(body),
+			SalesforceUpdateResponseArraySchema,
 		);
-
-		if (!sfUpdateResponse.success) {
-			throw new Error(
-				`Error parsing response from Salesforce: ${JSON.stringify(sfUpdateResponse.error.format())}`,
-			);
-		}
-
-		return sfUpdateResponse.data;
 	} catch (error) {
 		const errorTextBase = 'Error executing composite callout to Salesforce';
 		const errorText =
@@ -59,7 +37,7 @@ const SalesforceUpdateResponseSchema = z.object({
 export type SalesforceUpdateResponse = z.infer<
 	typeof SalesforceUpdateResponseSchema
 >;
-const SalesforceUpdateResponseArraySchema = z.array(
+export const SalesforceUpdateResponseArraySchema = z.array(
 	SalesforceUpdateResponseSchema,
 );
 export type SalesforceUpdateResponseArray = z.infer<

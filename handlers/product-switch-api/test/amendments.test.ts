@@ -26,7 +26,13 @@ test('should return undefined when subscription has no amendment (code 50000040)
 
 	global.fetch = mockFetch;
 
-	const zuoraClient = new ZuoraClient('CODE');
+	const zuoraClient = new ZuoraClient({
+		getAuthorisation: () =>
+			Promise.resolve({
+				baseUrl: '',
+				authHeaders: {},
+			}),
+	});
 
 	const result = await getLastAmendment(zuoraClient, 'A-S12345');
 	expect(result).toBeUndefined();

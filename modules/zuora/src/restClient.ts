@@ -33,13 +33,7 @@ export type RestResult = {
 };
 
 export abstract class RestClient {
-	public baseUrl: string;
-	protected constructor(
-		restServerUrl: string,
-		readonly tokenProvider?: BearerTokenProvider,
-	) {
-		this.baseUrl = restServerUrl.replace(/\/$/, '');
-	}
+	public constructor(readonly tokenProvider: BearerTokenProvider) {}
 
 	public async get<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
@@ -82,6 +76,21 @@ export abstract class RestClient {
 		);
 	}
 
+	public async patch<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
+		path: string,
+		body: string,
+		schema: T,
+		headers?: Record<string, string>,
+	): Promise<O> {
+		return await this.fetchWithLogging(logger.getCallerInfo(1))(
+			path,
+			'PATCH',
+			schema,
+			body,
+			headers,
+		);
+	}
+
 	public async delete<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
 		schema: T,
@@ -97,7 +106,7 @@ export abstract class RestClient {
 	fetchWithLogging = (maybeCallerInfo?: string) =>
 		logger.wrapFn(
 			this.fetch.bind(this),
-			() => 'HTTP ' + this.baseUrl,
+			() => 'HTTP ' + this.constructor.name,
 			this.fetch.toString(),
 			2,
 			maybeCallerInfo,
@@ -110,15 +119,13 @@ export abstract class RestClient {
 		body?: string,
 		headers?: Record<string, string>,
 	): Promise<O> {
-		const authHeaders = this.tokenProvider
-			? await this.tokenProvider.getAuthHeader()
-			: {};
+		const authorisation = await this.tokenProvider.getAuthorisation();
 		const pathWithoutLeadingSlash = path.replace(/^\//, '');
-		const url = `${this.baseUrl}/${pathWithoutLeadingSlash}`;
+		const url = `${authorisation.baseUrl}/${pathWithoutLeadingSlash}`;
 		const response = await fetch(url, {
 			method,
 			headers: {
-				...authHeaders,
+				...authorisation.authHeaders,
 				'Content-Type': 'application/json',
 				...headers,
 			},
