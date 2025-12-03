@@ -1,4 +1,4 @@
-import { createZuoraClientWithHeaders } from '@modules/zuora/zuoraClient';
+import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getLastAmendment } from '../src/amendments';
 
 test('should return undefined when subscription has no amendment (code 50000040)', async () => {
@@ -26,9 +26,7 @@ test('should return undefined when subscription has no amendment (code 50000040)
 
 	global.fetch = mockFetch;
 
-	const zuoraClient = createZuoraClientWithHeaders('CODE', () =>
-		Promise.resolve({ Authorization: 'Bearer test_token' }),
-	);
+	const zuoraClient = new ZuoraClient('CODE');
 
 	const result = await getLastAmendment(zuoraClient, 'A-S12345');
 	expect(result).toBeUndefined();

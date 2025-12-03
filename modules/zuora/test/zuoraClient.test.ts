@@ -1,7 +1,7 @@
 import { z } from 'zod';
+import type { BearerTokenProvider } from '@modules/zuora/auth';
 import { ZuoraError } from '@modules/zuora/errors';
-import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import { createZuoraClientWithHeaders } from '@modules/zuora/zuoraClient';
+import { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 // Mock fetch globally
 global.fetch = jest.fn();
@@ -26,13 +26,18 @@ const testSchema = z.object({
 
 describe('ZuoraClient fetch method error handling', () => {
 	let zuoraClient: ZuoraClient;
+	let mockTokenProvider: jest.Mocked<BearerTokenProvider>;
 
 	beforeEach(() => {
 		jest.clearAllMocks();
 
-		zuoraClient = createZuoraClientWithHeaders('CODE', () =>
-			Promise.resolve({ Authorization: 'Bearer mock-token' }),
-		);
+		mockTokenProvider = {
+			getAuthHeader: jest
+				.fn()
+				.mockResolvedValue({ Authorization: 'Bearer test_token' }),
+		} as unknown as jest.Mocked<BearerTokenProvider>;
+
+		zuoraClient = new ZuoraClient('CODE', mockTokenProvider);
 	});
 
 	describe('HTTP 400 errors with different response formats', () => {

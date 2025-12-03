@@ -4,7 +4,7 @@ import type { RestResult } from '@modules/zuora/restClient';
 
 function mockResponse(status: number, body: unknown): RestResult {
 	return {
-		statusCode: status,
+		status: status,
 		responseBody: JSON.stringify(body),
 		responseHeaders: {},
 	};

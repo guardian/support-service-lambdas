@@ -21,7 +21,7 @@ export function generateZuoraError(
 		}));
 		return new ZuoraError(
 			`${messageFromErrorDetails(reasons)}`,
-			response.statusCode,
+			response.status,
 			reasons,
 		);
 	}
@@ -35,7 +35,7 @@ export function generateZuoraError(
 		}));
 		return new ZuoraError(
 			`${messageFromErrorDetails(reasons)}`,
-			response.statusCode,
+			response.status,
 			reasons,
 		);
 	}
@@ -45,7 +45,7 @@ export function generateZuoraError(
 	if (faultCodeParseResult.success) {
 		return new ZuoraError(
 			`${faultCodeParseResult.data.FaultMessage}`,
-			response.statusCode,
+			response.status,
 			[
 				{
 					code: faultCodeParseResult.data.FaultCode,
@@ -60,7 +60,7 @@ export function generateZuoraError(
 	if (codeAndMessageParseResult.success) {
 		return new ZuoraError(
 			`${codeAndMessageParseResult.data.message}`,
-			response.statusCode,
+			response.status,
 			[
 				{
 					code: codeAndMessageParseResult.data.code,
@@ -70,7 +70,7 @@ export function generateZuoraError(
 		);
 	}
 	// Fallback: unknown error format
-	return new ZuoraError('Zuora API Error', response.statusCode, []);
+	return new ZuoraError('Zuora API Error', response.status, []);
 }
 
 function messageFromErrorDetails(errorDetails: ZuoraErrorDetail[]): string {

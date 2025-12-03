@@ -22,7 +22,7 @@ export class BearerTokenProvider {
 				now.getTime()
 		);
 	};
-	public async getBearerToken(): Promise<ZuoraBearerToken> {
+	private async getBearerToken(): Promise<ZuoraBearerToken> {
 		if (this.bearerToken === null || this.tokenIsExpired()) {
 			this.lastFetchedTime = new Date();
 			this.bearerToken = await this.fetchZuoraBearerToken();
@@ -51,4 +51,11 @@ export class BearerTokenProvider {
 
 		return zuoraBearerTokenSchema.parse(json);
 	};
+
+	public async getAuthHeader() {
+		const bearerToken = await this.getBearerToken();
+		return {
+			Authorization: `Bearer ${bearerToken.access_token}`,
+		};
+	}
 }

@@ -1,11 +1,12 @@
 import { logger } from '@modules/routing/logger';
 import type z from 'zod';
+import { BearerTokenProvider } from '@modules/zuora/auth';
 
 export class RestClientError extends Error implements RestResult {
 	static create = (message: string, result: RestResult, e?: unknown) =>
 		new RestClientError(
 			message,
-			result.statusCode,
+			result.status,
 			result.responseBody,
 			result.responseHeaders,
 			e === undefined || e instanceof Error
@@ -15,7 +16,7 @@ export class RestClientError extends Error implements RestResult {
 
 	constructor(
 		message: string,
-		public statusCode: number,
+		public status: number,
 		public responseBody: string,
 		public responseHeaders: Record<string, string>,
 		cause?: Error,
@@ -26,65 +27,25 @@ export class RestClientError extends Error implements RestResult {
 }
 
 export type RestResult = {
-	statusCode: number;
+	status: number;
 	responseBody: string;
 	responseHeaders: Record<string, string>;
 };
 
-export interface RestClient<U extends string> {
-	get<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
-		path: string,
-		schema: T,
-		callerInfo?: string,
-	): Promise<O>;
-
-	getRaw(path: string): Promise<RestResult>;
-
-	post<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
-		path: string,
-		body: string,
-		schema: T,
-		headers?: Record<string, string>,
-		callerInfo?: string,
-	): Promise<O>;
-
-	put<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
-		path: string,
-		body: string,
-		schema: T,
-		headers?: Record<string, string>,
-		callerInfo?: string,
-	): Promise<O>;
-
-	delete<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
-		path: string,
-		schema: T,
-		callerInfo?: string,
-	): Promise<O>;
-
-	clientName: U;
-}
-
-export class RestClientImpl<U extends string> implements RestClient<U> {
-	public constructor(
-		readonly restServerUrl: string,
-		readonly getAuthHeaders: () => Promise<Record<string, string>>,
-		readonly clientName: U,
-	) {}
+export abstract class RestClient {
+	public baseUrl: string;
+	protected constructor(
+		restServerUrl: string,
+		readonly tokenProvider?: BearerTokenProvider,
+	) {
+		this.baseUrl = restServerUrl.replace(/\/$/, '');
+	}
 
 	public async get<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
 		schema: T,
-		callerInfo: string = logger.getCallerInfo(1),
 	): Promise<O> {
-		return await this.fetch(callerInfo)(path, 'GET', schema);
-	}
-
-	public async getRaw(
-		path: string,
-		callerInfo: string = logger.getCallerInfo(1),
-	): Promise<RestResult> {
-		return await this.fetchRawBody(callerInfo)(path, 'GET');
+		return await this.fetch(logger.getCallerInfo(1))(path, 'GET', schema);
 	}
 
 	public async post<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
@@ -92,9 +53,14 @@ export class RestClientImpl<U extends string> implements RestClient<U> {
 		body: string,
 		schema: T,
 		headers?: Record<string, string>,
-		callerInfo: string = logger.getCallerInfo(1),
 	): Promise<O> {
-		return await this.fetch(callerInfo)(path, 'POST', schema, body, headers);
+		return await this.fetch(logger.getCallerInfo(1))(
+			path,
+			'POST',
+			schema,
+			body,
+			headers,
+		);
 	}
 
 	public async put<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
@@ -102,74 +68,45 @@ export class RestClientImpl<U extends string> implements RestClient<U> {
 		body: string,
 		schema: T,
 		headers?: Record<string, string>,
-		callerInfo: string = logger.getCallerInfo(1),
 	): Promise<O> {
-		return await this.fetch(callerInfo)(path, 'PUT', schema, body, headers);
+		return await this.fetch(logger.getCallerInfo(1))(
+			path,
+			'PUT',
+			schema,
+			body,
+			headers,
+		);
 	}
 
 	public async delete<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
 		schema: T,
-		callerInfo: string = logger.getCallerInfo(1),
 	): Promise<O> {
-		return await this.fetch(callerInfo)(path, 'DELETE', schema);
+		return await this.fetch(logger.getCallerInfo(1))(path, 'DELETE', schema);
 	}
 
 	// has to be a function so that the callerInfo is refreshed on every call
 	fetch = (maybeCallerInfo?: string) =>
 		logger.wrapFn(
 			this.fetchWithoutLogging.bind(this),
-			() => 'HTTP ' + this.restServerUrl,
+			() => 'HTTP ' + this.baseUrl,
 			this.fetchWithoutLogging.toString(),
 			2,
 			maybeCallerInfo,
 		);
 
-	private async fetchWithoutLogging<
-		I,
-		O,
-		T extends z.ZodType<O, z.ZodTypeDef, I>,
-	>(
+	async fetchWithoutLogging<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
 		method: string,
 		schema: T,
 		body?: string,
 		headers?: Record<string, string>,
 	): Promise<O> {
-		const result = await this.fetchRawBodyWithoutLogging(
-			path,
-			method,
-			headers,
-			body,
-		);
-
-		try {
-			const json: unknown = JSON.parse(result.responseBody);
-			return schema.parse(json);
-		} catch (e) {
-			throw RestClientError.create('parsing failure', result, e);
-		}
-	}
-
-	// has to be a function so that the callerInfo is refreshed on every call
-	fetchRawBody = (maybeCallerInfo?: string) =>
-		logger.wrapFn(
-			this.fetchRawBodyWithoutLogging.bind(this),
-			() => 'HTTP ' + this.restServerUrl,
-			this.fetchRawBodyWithoutLogging.toString(),
-			2,
-			maybeCallerInfo,
-		);
-
-	private async fetchRawBodyWithoutLogging(
-		path: string,
-		method: string,
-		headers?: Record<string, string>,
-		body?: string,
-	) {
-		const authHeaders = await this.getAuthHeaders();
+		const authHeaders = this.tokenProvider
+			? await this.tokenProvider.getAuthHeader()
+			: {};
 		const pathWithoutLeadingSlash = path.replace(/^\//, '');
-		const url = `${this.restServerUrl}/${pathWithoutLeadingSlash}`;
+		const url = `${this.baseUrl}/${pathWithoutLeadingSlash}`;
 		const response = await fetch(url, {
 			method,
 			headers: {
@@ -185,7 +122,7 @@ export class RestClientImpl<U extends string> implements RestClient<U> {
 			[...response.headers.entries()].map(([k, v]) => [k.toLowerCase(), v]),
 		);
 		const result: RestResult = {
-			statusCode: response.status,
+			status: response.status,
 			responseBody,
 			responseHeaders,
 		};
@@ -193,6 +130,11 @@ export class RestClientImpl<U extends string> implements RestClient<U> {
 			throw RestClientError.create('http call failed', result);
 		}
 
-		return result;
+		try {
+			const json: unknown = JSON.parse(result.responseBody);
+			return schema.parse(json);
+		} catch (e) {
+			throw RestClientError.create('parsing failure', result, e);
+		}
 	}
 }
