@@ -113,15 +113,15 @@ describe('frequency switch behaviour', () => {
 				// Expect success response
 				expect('savings' in result).toBe(true);
 				if ('savings' in result) {
+					// Verify currency is at top level
+					expect(result.currency).toBe('GBP');
 					// Verify savings calculation (monthly -> annual shows annual savings)
 					expect(result.savings.period).toBe('year');
-					expect(result.savings.currency).toBe('GBP');
 					// Annual savings = (monthly price * 12) - annual price
 					expect(result.savings.amount).toBeGreaterThan(0);
 
 					// Verify new price calculation (new annual price)
 					expect(result.newPrice.period).toBe('year');
-					expect(result.newPrice.currency).toBe('GBP');
 					expect(result.newPrice.amount).toBeGreaterThan(0);
 				}
 			},
@@ -165,11 +165,11 @@ describe('frequency switch behaviour', () => {
 				// Expect success response
 				expect('savings' in result).toBe(true);
 				if ('savings' in result) {
-					expect(result.savings.currency).toBe('EUR');
+					// Verify currency is at top level
+					expect(result.currency).toBe('EUR');
 					expect(result.savings.period).toBe('year');
 
-					// Verify new price also has correct currency and period
-					expect(result.newPrice.currency).toBe('EUR');
+					// Verify new price has correct period
 					expect(result.newPrice.period).toBe('year');
 					expect(result.newPrice.amount).toBeGreaterThan(0);
 				}

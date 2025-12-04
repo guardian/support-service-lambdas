@@ -25,11 +25,11 @@ export type FrequencySwitchErrorResponse = z.infer<
 
 const priceObjectSchema = z.object({
 	amount: z.number(),
-	currency: isoCurrencySchema,
 	period: z.enum(['year', 'month']),
 });
 
 export const frequencySwitchPreviewSuccessResponseSchema = z.object({
+	currency: isoCurrencySchema,
 	savings: priceObjectSchema,
 	newPrice: priceObjectSchema,
 	currentContribution: priceObjectSchema,

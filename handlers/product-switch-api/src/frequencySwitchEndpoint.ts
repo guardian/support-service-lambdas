@@ -451,24 +451,21 @@ async function processFrequencySwitch(
 			);
 
 			return {
+				currency,
 				savings: {
 					amount: savingsAmount,
-					currency,
 					period: savingsPeriod,
 				},
 				newPrice: {
 					amount: targetPrice,
-					currency,
 					period: newPricePeriod,
 				},
 				currentContribution: {
 					amount: currentContributionAmount,
-					currency,
 					period: 'month',
 				},
 				currentDiscount: {
 					amount: Math.round(currentDiscountAmount * 100) / 100,
-					currency,
 					period: 'year',
 				},
 			};
