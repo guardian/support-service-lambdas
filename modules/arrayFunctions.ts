@@ -171,10 +171,11 @@ export function assertValueIn<const T extends readonly unknown[]>(
 	allowedValues: T,
 	context?: string,
 ): T[number] {
-	if (!(allowedValues as readonly unknown[]).includes(value)) {
+	if (!allowedValues.includes(value)) {
 		const contextStr = context ? ` for ${context}` : '';
+		const valuesStr: string = (allowedValues as readonly string[]).join(', ');
 		throw new Error(
-			`Value "${value}" is not one of the allowed values${contextStr}: ${allowedValues.join(', ')}`,
+			`Value "${String(value)}" is not one of the allowed values${contextStr}: ${valuesStr}`,
 		);
 	}
 	return value as T[number];
