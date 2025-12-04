@@ -7,12 +7,6 @@ import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import { getAccount } from '@modules/zuora/account';
-import {
-	getBillingPreview,
-	getNextNonFreePaymentDate,
-	itemsForSubscription,
-	toSimpleInvoiceItems,
-} from '@modules/zuora/billingPreview';
 import { singleTriggerDate } from '@modules/zuora/orders/orderActions';
 import type { OrderAction } from '@modules/zuora/orders/orderActions';
 import {
@@ -319,28 +313,14 @@ async function processFrequencySwitch(
 		const targetPrice =
 			rawTargetRatePlan.pricing?.[currency] ?? (currentCharge.price as number);
 
-		// For preview: use today to get Zuora to generate billing docs
-		// For execution: use the next non-free payment date (respects promotional periods)
-		// This ensures the frequency switch applies after any free periods end
 		let effectiveDate: dayjs.Dayjs;
 		if (preview) {
 			effectiveDate = today;
 		} else {
-			// Get billing preview to find when the next actual payment will occur
-			// For monthly subscriptions, the next payment is typically within the next month
-			// Look 2 months ahead to account for edge cases with small delays
-			const billingPreview = await getBillingPreview(
-				zuoraClient,
-				today.add(2, 'months'),
-				subscription.accountNumber,
-			);
-
-			const subscriptionItems = toSimpleInvoiceItems(
-				itemsForSubscription(subscription.subscriptionNumber)(billingPreview),
-			);
-
-			const nextPaymentDate = getNextNonFreePaymentDate(subscriptionItems);
-			effectiveDate = dayjs(nextPaymentDate);
+			// Use chargedThroughDate as the effective date - this is when the current billing period ends
+			// and the next payment will be due. Since SupporterPlus subscriptions don't have free periods
+			// (discounts reduce price but don't make invoices free), this avoids an extra billing preview API call.
+			effectiveDate = dayjs(currentCharge.chargedThroughDate ?? today);
 		}
 		const triggerDates = singleTriggerDate(effectiveDate);
 		const orderActions: OrderAction[] = [
