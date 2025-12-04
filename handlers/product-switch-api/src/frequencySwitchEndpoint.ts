@@ -374,9 +374,11 @@ async function processFrequencySwitch(
 			effectiveDate = today;
 		} else {
 			// Get billing preview to find when the next actual payment will occur
+			// For monthly subscriptions, the next payment is typically within the next month
+			// Look 2 months ahead to account for edge cases with small delays
 			const billingPreview = await getBillingPreview(
 				zuoraClient,
-				today.add(13, 'months'), // 13 months gives us minimum 2 payments even on an Annual sub
+				today.add(2, 'months'),
 				subscription.accountNumber,
 			);
 
