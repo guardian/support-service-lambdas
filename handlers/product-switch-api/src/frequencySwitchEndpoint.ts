@@ -1,5 +1,6 @@
 import { ValidationError } from '@modules/errors';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
+import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
@@ -243,57 +244,28 @@ export async function executeFrequencySwitch(
 }
 
 /**
- * Get the appropriate product rate plan Id for the target billing period
- * Uses the productRatePlanId to look up the product in the catalog (more reliable than productName)
- * and retrieves the product rate plan Id for the target billing period.
+ * Get the appropriate product rate plan Id for switching to Annual billing.
+ * Uses an allowlist of valid frequency switches to ensure only supported switches are permitted.
+ * Currently only supports Monthly to Annual switches for SupporterPlus.
  *
  * @param productCatalog Product catalog to look up rate plans
  * @param currentRatePlan Current rate plan from the subscription (contains productRatePlanId)
- * @param targetBillingPeriod Target billing period ('Month' or 'Annual')
- * @returns Product rate plan Id for the target billing period
- * @throws Error if product details cannot be found or target rate plan doesn't exist
+ * @returns Product rate plan Id for the Annual billing period
+ * @throws Error if the switch is not in the allowlist
  */
 function getTargetRatePlanId(
 	productCatalog: ProductCatalog,
 	currentRatePlan: RatePlan,
 ): string {
-	const productCatalogHelper = new ProductCatalogHelper(productCatalog);
+	const validSwitches: Record<string, string> = {
+		[productCatalog.SupporterPlus.ratePlans.Monthly.id]:
+			productCatalog.SupporterPlus.ratePlans.Annual.id,
+	};
 
-	logger.log(
-		`Finding target rate plan for productRatePlanId: ${currentRatePlan.productRatePlanId}`,
+	return getIfDefined(
+		validSwitches[currentRatePlan.productRatePlanId],
+		`Product rate plan ID '${currentRatePlan.productRatePlanId}' does not have a valid switch to Annual billing`,
 	);
-
-	const productDetails = productCatalogHelper.findProductDetails(
-		currentRatePlan.productRatePlanId,
-	);
-
-	if (!productDetails) {
-		throw new Error(
-			`Product rate plan ID '${currentRatePlan.productRatePlanId}' not found in product catalog`,
-		);
-	}
-
-	const targetRatePlanKey = getCatalogRatePlanName('Annual');
-	logger.log(
-		`Determined target rate plan key '${targetRatePlanKey}' for monthly to annual switch`,
-	);
-
-	// Use getAllProductDetails to find the target rate plan with proper type checking
-	const targetRatePlanDetail = productCatalogHelper
-		.getAllProductDetails()
-		.find(
-			(detail) =>
-				detail.zuoraProduct === productDetails.zuoraProduct &&
-				detail.productRatePlan === targetRatePlanKey,
-		);
-
-	if (!targetRatePlanDetail) {
-		throw new Error(
-			`Rate plan ${targetRatePlanKey} not found for product ${productDetails.zuoraProduct}`,
-		);
-	}
-
-	return targetRatePlanDetail.id;
 }
 
 async function processFrequencySwitch(
