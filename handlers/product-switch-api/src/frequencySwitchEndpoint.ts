@@ -522,7 +522,7 @@ async function processFrequencySwitch(
 		} else {
 			const orderRequest: CreateOrderRequest = {
 				processingOptions: {
-					runBilling: true,
+					runBilling: false,
 					collectPayment: false,
 				},
 				orderDate: zuoraDateFormat(effectiveDate),
