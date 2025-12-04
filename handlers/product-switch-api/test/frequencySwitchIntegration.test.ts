@@ -1,12 +1,12 @@
 /**
  * Integration tests for frequency switch functionality.
- * Tests actual frequency switches (monthly <-> annual) using real Zuora API calls.
+ * Tests actual frequency switches (monthly → annual only) using real Zuora API calls.
  *
  * Test Coverage:
- * - Preview: 3 tests (monthly→annual, annual→monthly, non-GBP)
- * - Execute: 3 tests (monthly→annual with comprehensive verification, annual→monthly with verification, non-GBP currencies)
- * - Total: 6 integration tests creating real Zuora subscriptions
- * - Expected runtime: ~6-8 minutes (each test creates a real subscription in CODE environment)
+ * - Preview: 2 tests (monthly→annual, non-GBP)
+ * - Execute: 2 tests (monthly→annual with comprehensive verification, non-GBP currencies)
+ * - Total: 4 integration tests creating real Zuora subscriptions
+ * - Expected runtime: ~4-6 minutes (each test creates a real subscription in CODE environment)
  *
  * @group integration
  */
@@ -100,18 +100,17 @@ describe('frequency switch behaviour', () => {
 					dayjs().toDate(),
 					account,
 				);
-				const result: FrequencySwitchPreviewResponse =
-					await previewFrequencySwitch(
-						zuoraClient,
-						subscription,
-						candidateCharge,
-						productCatalog,
-						'Annual',
-						dayjs(),
-					);
+			const result: FrequencySwitchPreviewResponse =
+				await previewFrequencySwitch(
+					zuoraClient,
+					subscription,
+					candidateCharge,
+					productCatalog,
+					dayjs(),
+				);
 
-				// Expect success response
-				expect('savings' in result).toBe(true);
+			// Expect success response
+			expect('savings' in result).toBe(true);
 				if ('savings' in result) {
 					// Verify savings calculation (monthly -> annual shows annual savings)
 					expect(result.savings.period).toBe('year');
@@ -128,48 +127,7 @@ describe('frequency switch behaviour', () => {
 			1000 * 60,
 		);
 
-		it(
-			'previews annual to monthly frequency switch with correct savings period',
-			async () => {
-				const annualPrice = 120;
-				const { zuoraClient, subscription } =
-					await createTestSubscriptionForFrequencySwitch('Annual', annualPrice);
 
-				const productCatalog = await getProductCatalogFromApi(stage);
-				const account = await getAccount(
-					zuoraClient,
-					subscription.accountNumber,
-				);
-				const candidateCharge = selectCandidateSubscriptionCharge(
-					subscription,
-					dayjs().toDate(),
-					account,
-				);
-				const result: FrequencySwitchPreviewResponse =
-					await previewFrequencySwitch(
-						zuoraClient,
-						subscription,
-						candidateCharge,
-						productCatalog,
-						'Month',
-						dayjs(),
-					);
-
-				// Expect success response
-				expect('savings' in result).toBe(true);
-				if ('savings' in result) {
-					// Verify savings calculation (annual -> monthly shows monthly savings)
-					expect(result.savings.period).toBe('month');
-					expect(result.savings.currency).toBe('GBP');
-
-					// Verify new price calculation (new monthly price)
-					expect(result.newPrice.period).toBe('month');
-					expect(result.newPrice.currency).toBe('GBP');
-					expect(result.newPrice.amount).toBeGreaterThan(0);
-				}
-			},
-			1000 * 60,
-		);
 
 		it(
 			'preview works for non-GBP subscription (EUR currency)',
@@ -201,7 +159,6 @@ describe('frequency switch behaviour', () => {
 						subscription,
 						candidateCharge,
 						productCatalog,
-						'Annual',
 						dayjs(),
 					);
 
@@ -244,7 +201,6 @@ describe('frequency switch behaviour', () => {
 					subscription,
 					candidateCharge,
 					productCatalog,
-					'Annual',
 					dayjs(),
 				);
 
@@ -298,68 +254,7 @@ describe('frequency switch behaviour', () => {
 			1000 * 60 * 2,
 		);
 
-		it(
-			'executes annual to monthly frequency switch with comprehensive verification',
-			async () => {
-				const annualPrice = 120;
-				const { zuoraClient, subscription } =
-					await createTestSubscriptionForFrequencySwitch('Annual', annualPrice);
 
-				const productCatalog = await getProductCatalogFromApi(stage);
-				const account = await getAccount(
-					zuoraClient,
-					subscription.accountNumber,
-				);
-				const candidateCharge = selectCandidateSubscriptionCharge(
-					subscription,
-					dayjs().toDate(),
-					account,
-				);
-				const result: FrequencySwitchResponse = await executeFrequencySwitch(
-					zuoraClient,
-					subscription,
-					candidateCharge,
-					productCatalog,
-					'Month',
-					dayjs(),
-				);
-
-				// Expect success response with invoice IDs
-				expect('invoiceIds' in result).toBe(true);
-				if ('invoiceIds' in result) {
-					expect(result.invoiceIds).toBeDefined();
-					expect(result.invoiceIds.length).toBeGreaterThan(0);
-				}
-
-				// Verify subscription state after execution
-				const updatedSubscription = await getSubscription(
-					zuoraClient,
-					subscription.subscriptionNumber,
-				);
-				expect(updatedSubscription).toBeDefined();
-				expect(updatedSubscription.status).toBe('Active');
-				expect(updatedSubscription.ratePlans.length).toBeGreaterThanOrEqual(1);
-
-				// Verify billing preview for future billing
-				const billingPreview = await getBillingPreview(
-					zuoraClient,
-					dayjs(updatedSubscription.termEndDate).add(1, 'day'),
-					updatedSubscription.accountNumber,
-				);
-
-				const subscriptionInvoiceItems = itemsForSubscription(
-					subscription.subscriptionNumber,
-				)(billingPreview);
-
-				expect(subscriptionInvoiceItems.length).toBeGreaterThan(0);
-				const totalChargeAmount = subscriptionInvoiceItems.reduce(
-					(sum, item) => sum + item.chargeAmount,
-					0,
-				);
-				expect(totalChargeAmount).toBeGreaterThan(0);
-			},
-			1000 * 60 * 2,
-		);
 
 		it(
 			'executes frequency switch for non-GBP subscriptions (EUR and USD)',
@@ -387,7 +282,6 @@ describe('frequency switch behaviour', () => {
 					eurSubscription,
 					eurCandidateCharge,
 					productCatalog,
-					'Annual',
 					dayjs(),
 				);
 
@@ -426,7 +320,6 @@ describe('frequency switch behaviour', () => {
 					usdSubscription,
 					usdCandidateCharge,
 					productCatalog,
-					'Annual',
 					dayjs(),
 				);
 

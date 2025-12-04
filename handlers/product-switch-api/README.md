@@ -33,8 +33,10 @@ Body:
 ```
 {
 	"preview": true | false,
-	"targetBillingPeriod": "Month" | "Annual",
+	"targetBillingPeriod": "Annual",
 	"csrUserId": "optional CSR id",
 	"caseId": "optional Salesforce case id"
 }
 ```
+
+Note: Only monthly to annual switching is supported.

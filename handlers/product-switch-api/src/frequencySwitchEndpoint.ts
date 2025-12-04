@@ -1,4 +1,3 @@
-import { assertValueIn } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { isNonEmpty } from '@modules/nullAndUndefined';
@@ -224,7 +223,6 @@ export async function previewFrequencySwitch(
 	subscription: ZuoraSubscription,
 	candidateCharge: { ratePlan: RatePlan; charge: RatePlanCharge },
 	productCatalog: ProductCatalog,
-	targetBillingPeriod: 'Month' | 'Annual',
 	today: dayjs.Dayjs,
 ): Promise<FrequencySwitchPreviewResponse> {
 	const { ratePlan, charge } = candidateCharge;
@@ -234,7 +232,6 @@ export async function previewFrequencySwitch(
 		ratePlan,
 		charge,
 		productCatalog,
-		targetBillingPeriod,
 		true,
 		today,
 	);
@@ -249,7 +246,6 @@ export async function executeFrequencySwitch(
 	subscription: ZuoraSubscription,
 	candidateCharge: { ratePlan: RatePlan; charge: RatePlanCharge },
 	productCatalog: ProductCatalog,
-	targetBillingPeriod: 'Month' | 'Annual',
 	today: dayjs.Dayjs,
 ): Promise<FrequencySwitchResponse> {
 	const { ratePlan, charge } = candidateCharge;
@@ -259,7 +255,6 @@ export async function executeFrequencySwitch(
 		ratePlan,
 		charge,
 		productCatalog,
-		targetBillingPeriod,
 		false,
 		today,
 	);
@@ -280,7 +275,6 @@ export async function executeFrequencySwitch(
 function getTargetRatePlanId(
 	productCatalog: ProductCatalog,
 	currentRatePlan: RatePlan,
-	targetBillingPeriod: 'Month' | 'Annual',
 ): string {
 	const productCatalogHelper = new ProductCatalogHelper(productCatalog);
 
@@ -298,9 +292,9 @@ function getTargetRatePlanId(
 		);
 	}
 
-	const targetRatePlanKey = getCatalogRatePlanName(targetBillingPeriod);
+	const targetRatePlanKey = getCatalogRatePlanName('Annual');
 	logger.log(
-		`Determined target rate plan key '${targetRatePlanKey}' for requested billing period '${targetBillingPeriod}'`,
+		`Determined target rate plan key '${targetRatePlanKey}' for monthly to annual switch`,
 	);
 
 	// Use getAllProductDetails to find the target rate plan with proper type checking
@@ -327,26 +321,19 @@ async function processFrequencySwitch(
 	currentRatePlan: RatePlan,
 	currentCharge: RatePlanCharge,
 	productCatalog: ProductCatalog,
-	targetBillingPeriod: 'Month' | 'Annual',
 	preview: boolean,
 	today: dayjs.Dayjs,
 ): Promise<FrequencySwitchPreviewResponse | FrequencySwitchResponse> {
-	const currentBillingPeriod = assertValueIn(
-		currentCharge.billingPeriod,
-		['Month', 'Annual'] as const,
-		'billingPeriod',
-	);
 	logger.log(
-		`${preview ? 'Previewing' : 'Executing'} frequency switch (Orders API) from ${currentBillingPeriod} to ${targetBillingPeriod}`,
+		`${preview ? 'Previewing' : 'Executing'} frequency switch (Orders API) from Monthly to Annual`,
 	);
 
 	try {
 		const targetRatePlanId = getTargetRatePlanId(
 			productCatalog,
 			currentRatePlan,
-			targetBillingPeriod,
 		);
-		const targetRatePlanKey = getCatalogRatePlanName(targetBillingPeriod);
+		const targetRatePlanKey = getCatalogRatePlanName('Annual');
 
 		const productCatalogHelper = new ProductCatalogHelper(productCatalog);
 		const productDetails = productCatalogHelper.findProductDetails(
@@ -450,28 +437,14 @@ async function processFrequencySwitch(
 
 			logger.log('Orders preview returned successful response', zuoraPreview);
 
-			// Calculate savings and new price based on the target billing period
+			// Calculate savings and new price for monthly to annual switch
 			// currentCharge.price is guaranteed to be non-null by selectCandidateSubscriptionCharge validation
 			const currentPrice = currentCharge.price as number;
-			let savingsAmount: number;
-			let savingsPeriod: 'year' | 'month';
-			let newPricePeriod: 'year' | 'month';
-
-			if (targetBillingPeriod === 'Annual') {
-				// Monthly → Annual: show annual savings and annual price
-				const currentAnnualCost = currentPrice * 12;
-				const targetAnnualCost = targetPrice;
-				savingsAmount = currentAnnualCost - targetAnnualCost;
-				savingsPeriod = 'year';
-				newPricePeriod = 'year';
-			} else {
-				// Annual → Monthly: show monthly savings and monthly price
-				const currentMonthlyCost = currentPrice / 12;
-				const targetMonthlyCost = targetPrice;
-				savingsAmount = currentMonthlyCost - targetMonthlyCost;
-				savingsPeriod = 'month';
-				newPricePeriod = 'month';
-			} // Calculate current contribution
+			const currentAnnualCost = currentPrice * 12;
+			const targetAnnualCost = targetPrice;
+			const savingsAmount = currentAnnualCost - targetAnnualCost;
+			const savingsPeriod = 'year' as const;
+			const newPricePeriod = 'year' as const; // Calculate current contribution
 			const currentContributionAmount = currentRatePlan.ratePlanCharges
 				.filter((c) => c.name === 'Contribution' && c.type === 'Recurring')
 				.reduce((total, c) => total + (c.price ?? 0), 0);
@@ -500,35 +473,22 @@ async function processFrequencySwitch(
 					// currentCharge.price is guaranteed to be non-null by selectCandidateSubscriptionCharge validation
 					const subscriptionPrice = currentCharge.price as number;
 
-					// Calculate discount per period (month or year)
-					const discountPerPeriod = Math.abs(
+					// Calculate discount per period (month)
+					const discountPerMonth = Math.abs(
 						subscriptionPrice * (discountPercentage / 100),
 					);
 
-					// Calculate how many periods this discount applies for
+					// Calculate how many months this discount applies for
 					const discountStartDate = dayjs(discountCharge.effectiveStartDate);
 					const discountEndDate = dayjs(discountCharge.effectiveEndDate);
+					const discountMonths = discountEndDate.diff(
+						discountStartDate,
+						'month',
+						true,
+					);
 
-					let annualizedDiscountValue: number;
-
-					if (currentBillingPeriod === 'Month') {
-						// For monthly billing, calculate months and annualize
-						const discountMonths = discountEndDate.diff(
-							discountStartDate,
-							'month',
-							true,
-						);
-						// Annual value = (discount per month) * (number of months discounted)
-						annualizedDiscountValue = discountPerPeriod * discountMonths;
-					} else {
-						// For annual billing, calculate years
-						const discountYears = discountEndDate.diff(
-							discountStartDate,
-							'year',
-							true,
-						);
-						annualizedDiscountValue = discountPerPeriod * discountYears;
-					}
+					// Annual value = (discount per month) * (number of months discounted)
+					const annualizedDiscountValue = discountPerMonth * discountMonths;
 
 					return total + annualizedDiscountValue;
 				},
@@ -549,7 +509,7 @@ async function processFrequencySwitch(
 				currentContribution: {
 					amount: currentContributionAmount,
 					currency,
-					period: currentBillingPeriod === 'Annual' ? 'year' : 'month',
+					period: 'month',
 				},
 				currentDiscount: {
 					amount: Math.round(currentDiscountAmount * 100) / 100,
@@ -686,7 +646,6 @@ export const frequencySwitchHandler =
 					subscription,
 					candidateCharge,
 					productCatalog,
-					parsed.body.targetBillingPeriod,
 					today,
 				)
 			: await executeFrequencySwitch(
@@ -694,7 +653,6 @@ export const frequencySwitchHandler =
 					subscription,
 					candidateCharge,
 					productCatalog,
-					parsed.body.targetBillingPeriod,
 					today,
 				);
 
