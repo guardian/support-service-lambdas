@@ -1,6 +1,5 @@
 import { ValidationError } from '@modules/errors';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
-import { isNonEmpty } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
@@ -87,17 +86,20 @@ function assertValidState(
 }
 
 /**
- * Select the single candidate rate plan and charge eligible for a frequency switch.
- * Logic matches the handler implementation so tests can exercise preview/execute flows without duplicating filtering rules.
+ * Select the SupporterPlus Monthly rate plan and its subscription charge eligible for a frequency switch.
+ * Uses the product catalog to find the exact rate plan to switch to, validating both the rate plan
+ * and its charges as a unit. This approach is more deterministic than filtering all charges.
  *
  * Validates that the subscription is eligible:
  * - Must be Active status
  * - Must not have outstanding unpaid invoices (totalInvoiceBalance must be 0)
- * - Must have exactly one recurring subscription charge with valid dates and billing period
+ * - Must have a SupporterPlus Monthly rate plan that is active
+ * - The rate plan must have a valid Subscription charge with valid dates and billing period
  *
  * @param subscription The subscription to validate
  * @param today Today's date for filtering active charges
  * @param account Optional account data for additional validations
+ * @param productCatalog The product catalog for looking up the target rate plan
  * @returns The selected rate plan and charge eligible for frequency switch
  * @throws ValidationError if subscription fails any validation checks
  */
@@ -105,6 +107,7 @@ export function selectCandidateSubscriptionCharge(
 	subscription: ZuoraSubscription,
 	today: Date,
 	account: ZuoraAccount,
+	productCatalog: ProductCatalog,
 ): { ratePlan: RatePlan; charge: RatePlanCharge } {
 	assertValidState(
 		subscription.status === 'Active',
@@ -118,101 +121,79 @@ export function selectCandidateSubscriptionCharge(
 		`${account.metrics.totalInvoiceBalance} ${account.metrics.currency}`,
 	);
 
-	// Log diagnostic info about which charges are being filtered
-	const initialCharges = subscription.ratePlans
-		.filter((rp) => rp.lastChangeType !== 'Remove')
-		.flatMap((rp) =>
-			rp.ratePlanCharges.map((c) => ({ ratePlan: rp, charge: c })),
-		);
+	// Find the SupporterPlus Monthly rate plan using the catalog
+	const supporterPlusMonthlyRatePlanId =
+		productCatalog.SupporterPlus.ratePlans.Monthly.id;
 
-	logger.log(
-		`Found ${initialCharges.length} rate plan charges before filtering`,
+	const supporterPlusMonthlyRatePlan = subscription.ratePlans.find(
+		(ratePlan) =>
+			ratePlan.lastChangeType !== 'Remove' &&
+			supporterPlusMonthlyRatePlanId === ratePlan.productRatePlanId,
 	);
 
-	const candidateCharges = initialCharges
-		.filter(({ charge }) => {
-			if (charge.name !== 'Subscription') {
-				logger.log(
-					`Filtering out charge ${charge.id}: name is "${charge.name}", not "Subscription"`,
-				);
-				return false;
-			}
-			return true;
-		})
-		.filter(({ charge }) => {
-			if (charge.type !== 'Recurring') {
-				logger.log(
-					`Filtering out charge ${charge.id}: type is "${charge.type}", not "Recurring"`,
-				);
-				return false;
-			}
-			return true;
-		})
-		.filter(({ charge }) => {
-			if (charge.effectiveStartDate >= today) {
-				logger.log(
-					`Filtering out charge ${charge.id}: effectiveStartDate ${charge.effectiveStartDate.toISOString()} is in the future`,
-				);
-				return false;
-			}
-			if (charge.effectiveEndDate < today) {
-				logger.log(
-					`Filtering out charge ${charge.id}: effectiveEndDate ${charge.effectiveEndDate.toISOString()} is in the past`,
-				);
-				return false;
-			}
-			return true;
-		})
-		.filter(({ charge }) => {
-			if (charge.chargedThroughDate && charge.chargedThroughDate < today) {
-				logger.log(
-					`Filtering out charge ${charge.id}: chargedThroughDate ${charge.chargedThroughDate.toISOString()} is in the past`,
-				);
-				return false;
-			}
-			return true;
-		})
-		.filter(({ charge }) => {
-			if (
-				charge.billingPeriod !== 'Month' &&
-				charge.billingPeriod !== 'Annual'
-			) {
-				logger.log(
-					`Filtering out charge ${charge.id}: billingPeriod is "${charge.billingPeriod}", not "Month" or "Annual"`,
-				);
-				return false;
-			}
-			return true;
-		});
-
-	if (candidateCharges.length === 0) {
-		logger.log(
-			`No eligible charges found after filtering. Initial count: ${initialCharges.length}`,
-		);
-	}
-
 	assertValidState(
-		isNonEmpty(candidateCharges),
+		supporterPlusMonthlyRatePlan !== undefined,
 		frequencySwitchValidationRequirements.hasEligibleCharges,
-		`${candidateCharges.length} charges found`,
+		'SupporterPlus Monthly rate plan not found',
+	);
+
+	// Find the subscription charge using the catalog's product rate plan charge ID
+	const subscriptionChargeId =
+		productCatalog.SupporterPlus.ratePlans.Monthly.charges.Subscription.id;
+
+	const subscriptionCharge = supporterPlusMonthlyRatePlan.ratePlanCharges.find(
+		(charge) => charge.productRatePlanChargeId === subscriptionChargeId,
 	);
 
 	assertValidState(
-		candidateCharges.length === 1,
-		frequencySwitchValidationRequirements.singleEligibleCharge,
-		`${candidateCharges.length} charges found`,
+		subscriptionCharge !== undefined,
+		frequencySwitchValidationRequirements.hasEligibleCharges,
+		`Subscription charge not found in SupporterPlus Monthly rate plan`,
 	);
 
-	// candidateCharges is narrowed to a non-empty array by isNonEmpty check above
-	const [firstCharge] = candidateCharges;
+	// Validate the charge properties
+	assertValidState(
+		subscriptionCharge.type === 'Recurring',
+		frequencySwitchValidationRequirements.hasEligibleCharges,
+		`charge type is "${subscriptionCharge.type}", not "Recurring"`,
+	);
 
 	assertValidState(
-		firstCharge.charge.price !== null,
+		subscriptionCharge.effectiveStartDate < today,
+		frequencySwitchValidationRequirements.hasEligibleCharges,
+		`effectiveStartDate ${subscriptionCharge.effectiveStartDate.toISOString()} is in the future`,
+	);
+
+	assertValidState(
+		subscriptionCharge.effectiveEndDate >= today,
+		frequencySwitchValidationRequirements.hasEligibleCharges,
+		`effectiveEndDate ${subscriptionCharge.effectiveEndDate.toISOString()} is in the past`,
+	);
+
+	assertValidState(
+		!subscriptionCharge.chargedThroughDate ||
+			subscriptionCharge.chargedThroughDate >= today,
+		frequencySwitchValidationRequirements.hasEligibleCharges,
+		`chargedThroughDate ${subscriptionCharge.chargedThroughDate?.toISOString()} is in the past`,
+	);
+
+	assertValidState(
+		subscriptionCharge.billingPeriod === 'Month' ||
+			subscriptionCharge.billingPeriod === 'Annual',
+		frequencySwitchValidationRequirements.hasEligibleCharges,
+		`billingPeriod is "${subscriptionCharge.billingPeriod}", not "Month" or "Annual"`,
+	);
+
+	assertValidState(
+		subscriptionCharge.price !== null,
 		frequencySwitchValidationRequirements.chargeHasValidPrice,
-		`price is ${firstCharge.charge.price}`,
+		`price is ${subscriptionCharge.price}`,
 	);
 
-	return firstCharge;
+	return {
+		ratePlan: supporterPlusMonthlyRatePlan,
+		charge: subscriptionCharge,
+	};
 }
 
 /**
@@ -608,6 +589,7 @@ export const frequencySwitchHandler =
 				subscription,
 				todayDate,
 				account,
+				productCatalog,
 			);
 		} catch (error) {
 			logger.log(

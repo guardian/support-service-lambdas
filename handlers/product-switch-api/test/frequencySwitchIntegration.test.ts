@@ -99,18 +99,19 @@ describe('frequency switch behaviour', () => {
 					subscription,
 					dayjs().toDate(),
 					account,
-				);
-			const result: FrequencySwitchPreviewResponse =
-				await previewFrequencySwitch(
-					zuoraClient,
-					subscription,
-					candidateCharge,
 					productCatalog,
-					dayjs(),
 				);
+				const result: FrequencySwitchPreviewResponse =
+					await previewFrequencySwitch(
+						zuoraClient,
+						subscription,
+						candidateCharge,
+						productCatalog,
+						dayjs(),
+					);
 
-			// Expect success response
-			expect('savings' in result).toBe(true);
+				// Expect success response
+				expect('savings' in result).toBe(true);
 				if ('savings' in result) {
 					// Verify savings calculation (monthly -> annual shows annual savings)
 					expect(result.savings.period).toBe('year');
@@ -126,8 +127,6 @@ describe('frequency switch behaviour', () => {
 			},
 			1000 * 60,
 		);
-
-
 
 		it(
 			'preview works for non-GBP subscription (EUR currency)',
@@ -152,6 +151,7 @@ describe('frequency switch behaviour', () => {
 					subscription,
 					dayjs().toDate(),
 					account,
+					productCatalog,
 				);
 				const result: FrequencySwitchPreviewResponse =
 					await previewFrequencySwitch(
@@ -195,6 +195,7 @@ describe('frequency switch behaviour', () => {
 					subscription,
 					dayjs().toDate(),
 					account,
+					productCatalog,
 				);
 				const result: FrequencySwitchResponse = await executeFrequencySwitch(
 					zuoraClient,
@@ -254,8 +255,6 @@ describe('frequency switch behaviour', () => {
 			1000 * 60 * 2,
 		);
 
-
-
 		it(
 			'executes frequency switch for non-GBP subscriptions (EUR and USD)',
 			async () => {
@@ -276,6 +275,7 @@ describe('frequency switch behaviour', () => {
 					eurSubscription,
 					dayjs().toDate(),
 					eurAccount,
+					productCatalog,
 				);
 				const eurResult: FrequencySwitchResponse = await executeFrequencySwitch(
 					eurClient,
@@ -314,6 +314,7 @@ describe('frequency switch behaviour', () => {
 					usdSubscription,
 					dayjs().toDate(),
 					usdAccount,
+					productCatalog,
 				);
 				const usdResult: FrequencySwitchResponse = await executeFrequencySwitch(
 					usdClient,

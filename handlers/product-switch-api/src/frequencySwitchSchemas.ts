@@ -4,7 +4,8 @@ import { z } from 'zod';
 export const frequencySwitchRequestSchema = z.object({
 	preview: z.boolean(),
 	targetBillingPeriod: z.enum(['Annual'], {
-		description: 'Target billing period - only Annual is supported (monthly to annual switch)',
+		description:
+			'Target billing period - only Annual is supported (monthly to annual switch)',
 	}),
 	csrUserId: z.optional(z.string()),
 	caseId: z.optional(z.string()),
