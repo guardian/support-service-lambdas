@@ -301,18 +301,10 @@ async function processFrequencySwitch(
 			charges: Record<string, { id: string }>;
 			pricing?: Record<string, number>;
 		};
-		const targetSubscriptionChargeIdRaw =
-			rawTargetRatePlan.charges.Subscription?.id ??
-			Object.values(rawTargetRatePlan.charges)[0]?.id;
-		if (!targetSubscriptionChargeIdRaw) {
-			throw new Error('Unable to determine target subscription charge id');
-		}
-		const targetSubscriptionChargeId: string = targetSubscriptionChargeIdRaw;
 		const currency: IsoCurrency = currentCharge.currency as IsoCurrency;
 		// currentCharge.price is guaranteed to be non-null by selectCandidateSubscriptionCharge validation
 		const targetPrice =
 			rawTargetRatePlan.pricing?.[currency] ?? (currentCharge.price as number);
-
 		let effectiveDate: dayjs.Dayjs;
 		if (preview) {
 			effectiveDate = today;
@@ -378,12 +370,6 @@ async function processFrequencySwitch(
 				subType: 'Upgrade',
 				newProductRatePlan: {
 					productRatePlanId: targetRatePlanId,
-					chargeOverrides: [
-						{
-							productRatePlanChargeId: targetSubscriptionChargeId,
-							pricing: { recurringFlatFee: { listPrice: targetPrice } },
-						},
-					],
 				},
 			},
 		});
@@ -471,7 +457,8 @@ async function processFrequencySwitch(
 
 			// Calculate the annualized discount value
 			// If they currently pay less than the full price monthly, calculate how much they save per year
-			const monthlyDiscountAmount = currentPrice - currentMonthlyAmountWithDiscount;
+			const monthlyDiscountAmount =
+				currentPrice - currentMonthlyAmountWithDiscount;
 			const currentDiscountAmount = monthlyDiscountAmount * 12;
 
 			return {

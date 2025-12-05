@@ -36,16 +36,14 @@ export type ChangePlanOrderAction = BaseOrderAction & {
 		subType: 'Upgrade';
 		newProductRatePlan: {
 			productRatePlanId: string;
-			chargeOverrides: [
-				{
-					productRatePlanChargeId: string;
-					pricing: {
-						recurringFlatFee: {
-							listPrice: number;
-						};
+			chargeOverrides?: Array<{
+				productRatePlanChargeId: string;
+				pricing: {
+					recurringFlatFee: {
+						listPrice: number;
 					};
-				},
-			];
+				};
+			}>;
 		};
 	};
 };
