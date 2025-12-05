@@ -56,6 +56,8 @@ export const frequencySwitchValidationRequirements = {
 	singleEligibleCharge:
 		'subscription has exactly one eligible charge (multiple charges cannot be safely switched)',
 	chargeHasValidPrice: 'eligible charge has a defined price',
+	zeroContributionAmount:
+		'contribution amount is zero (non-zero contributions cannot be preserved during frequency switch)',
 };
 
 /**
@@ -183,6 +185,35 @@ export function selectCandidateSubscriptionCharge(
 		subscriptionCharge.price !== null,
 		frequencySwitchValidationRequirements.chargeHasValidPrice,
 		`price is ${subscriptionCharge.price}`,
+	);
+
+	// Contribution amounts cannot be preserved during frequency switches because
+	// the ChangePlan order action does not include chargeOverrides to maintain the contribution.
+	// If we allowed this, customers who have updated their amount would lose their contribution.
+	const contributionChargeId =
+		productCatalog.SupporterPlus.ratePlans.Monthly.charges.Contribution.id;
+	const contributionCharges =
+		supporterPlusMonthlyRatePlan.ratePlanCharges.filter(
+			(c) => c.productRatePlanChargeId === contributionChargeId,
+		);
+
+	assertValidState(
+		contributionCharges.length === 1,
+		'Expected exactly one Contribution charge in the rate plan',
+		`Found ${contributionCharges.length} charges`,
+	);
+
+	const contributionCharge = contributionCharges[0]!;
+	assertValidState(
+		contributionCharge.price !== null,
+		'Contribution charge price should be defined',
+		`Found null price`,
+	);
+
+	assertValidState(
+		contributionCharge.price === 0,
+		frequencySwitchValidationRequirements.zeroContributionAmount,
+		`contribution amount is ${contributionCharge.price}`,
 	);
 
 	return {

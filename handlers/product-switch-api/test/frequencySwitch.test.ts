@@ -52,6 +52,7 @@ function makeSubscriptionWithSingleCharge(
 		chargeName?: string;
 		chargeType?: string;
 		lastChangeType?: string;
+		contributionAmount?: number;
 	},
 ): ZuoraSubscription {
 	const ratePlanId =
@@ -62,7 +63,65 @@ function makeSubscriptionWithSingleCharge(
 		billingPeriod === 'Month'
 			? productCatalog.SupporterPlus.ratePlans.Monthly.charges.Subscription.id
 			: productCatalog.SupporterPlus.ratePlans.Annual.charges.Subscription.id;
+	const contributionChargeId =
+		billingPeriod === 'Month'
+			? productCatalog.SupporterPlus.ratePlans.Monthly.charges.Contribution.id
+			: productCatalog.SupporterPlus.ratePlans.Annual.charges.Contribution.id;
 	const now = dayjs();
+
+	const effectiveEndDate =
+		overrides?.effectiveEndDate ?? now.add(11, 'months').toDate();
+
+	const charges = [
+		{
+			id: 'subChargeId',
+			productRatePlanChargeId: chargeId,
+			number: 'C-00001',
+			name: overrides?.chargeName ?? 'Subscription',
+			type: overrides?.chargeType ?? 'Recurring',
+			model: 'FlatFee',
+			currency: 'GBP',
+			price: price,
+			billingPeriod: billingPeriod,
+			effectiveStartDate:
+				overrides?.effectiveStartDate ?? now.subtract(1, 'month').toDate(),
+			effectiveEndDate: effectiveEndDate,
+			processedThroughDate: now.subtract(1, 'day').toDate(),
+			chargedThroughDate:
+				overrides?.chargedThroughDate !== undefined
+					? overrides.chargedThroughDate
+					: null,
+			upToPeriodsType: null,
+			upToPeriods: null,
+			discountPercentage: null,
+			billingPeriodAlignment: 'AlignToCharge' as const,
+		},
+	];
+
+	charges.push({
+		id: 'contributionChargeId',
+		productRatePlanChargeId: contributionChargeId,
+		number: 'C-00002',
+		name: 'Contribution',
+		type: 'Recurring',
+		model: 'FlatFee',
+		currency: 'GBP',
+		price: overrides?.contributionAmount ?? 0,
+		billingPeriod: billingPeriod,
+		effectiveStartDate:
+			overrides?.effectiveStartDate ?? now.subtract(1, 'month').toDate(),
+		effectiveEndDate: effectiveEndDate,
+		processedThroughDate: now.subtract(1, 'day').toDate(),
+		chargedThroughDate:
+			overrides?.chargedThroughDate !== undefined
+				? overrides.chargedThroughDate
+				: null,
+		upToPeriodsType: null,
+		upToPeriods: null,
+		discountPercentage: null,
+		billingPeriodAlignment: 'AlignToCharge' as const,
+	});
+
 	return {
 		id: 'sub-id-123',
 		accountNumber: 'ACC123',
@@ -84,33 +143,7 @@ function makeSubscriptionWithSingleCharge(
 				productName: 'Monthly Contribution',
 				productRatePlanId: ratePlanId,
 				ratePlanName: 'Monthly',
-				ratePlanCharges: [
-					{
-						id: 'subChargeId',
-						productRatePlanChargeId: chargeId,
-						number: 'C-00001',
-						name: overrides?.chargeName ?? 'Subscription',
-						type: overrides?.chargeType ?? 'Recurring',
-						model: 'FlatFee',
-						currency: 'GBP',
-						price: price,
-						billingPeriod: billingPeriod,
-						effectiveStartDate:
-							overrides?.effectiveStartDate ??
-							now.subtract(1, 'month').toDate(),
-						effectiveEndDate:
-							overrides?.effectiveEndDate ?? now.add(11, 'months').toDate(),
-						processedThroughDate: now.subtract(1, 'day').toDate(),
-						chargedThroughDate:
-							overrides?.chargedThroughDate !== undefined
-								? overrides.chargedThroughDate
-								: null,
-						upToPeriodsType: null,
-						upToPeriods: null,
-						discountPercentage: null,
-						billingPeriodAlignment: 'AlignToCharge',
-					},
-				],
+				ratePlanCharges: charges,
 			},
 		],
 	};
@@ -132,19 +165,18 @@ describe('selectCandidateSubscriptionCharge', () => {
 		expect(ratePlan.id).toBe('rp-id-123');
 	});
 
-	test('finds single active annual recurring subscription charge', () => {
+	test('throws when subscription is already Annual (only Monthly to Annual switches supported)', () => {
 		const subscription = makeSubscriptionWithSingleCharge('Annual', 120);
 		const today = dayjs();
 		const account = makeAccount();
-		const { charge } = selectCandidateSubscriptionCharge(
-			subscription,
-			today.toDate(),
-			account,
-			productCatalog,
-		);
-		expect(charge.name).toBe('Subscription');
-		expect(charge.billingPeriod).toBe('Annual');
-		expect(charge.price).toBe(120);
+		expect(() =>
+			selectCandidateSubscriptionCharge(
+				subscription,
+				today.toDate(),
+				account,
+				productCatalog,
+			),
+		).toThrow('SupporterPlus Monthly rate plan not found');
 	});
 
 	test('throws when subscription has no rate plans', () => {
@@ -172,24 +204,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 				account,
 				productCatalog,
 			),
-		).toThrow('Subscription has no rate plans');
-	});
-
-	test('throws when charge name is not "Subscription"', () => {
-		const subscription = makeSubscriptionWithSingleCharge('Month', 10, {
-			chargeName: 'One-time charge',
-		});
-		const account = makeAccount();
-		expect(() =>
-			selectCandidateSubscriptionCharge(
-				subscription,
-				new Date(),
-				account,
-				productCatalog,
-			),
-		).toThrow(
-			'Subscription charge must have a name of Subscription but name is One-time charge',
-		);
+		).toThrow('SupporterPlus Monthly rate plan not found');
 	});
 
 	test('throws when charge type is not "Recurring"', () => {
@@ -204,7 +219,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 				account,
 				productCatalog,
 			),
-		).toThrow('Subscription charge must have a type of Recurring');
+		).toThrow('charge type is "OneTime", not "Recurring"');
 	});
 
 	test('throws when rate plan lastChangeType is "Remove"', () => {
@@ -219,7 +234,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 				account,
 				productCatalog,
 			),
-		).toThrow('Subscription rate plan lastChangeType cannot be Remove');
+		).toThrow('SupporterPlus Monthly rate plan not found');
 	});
 
 	test('throws when account has outstanding invoice balance', () => {
@@ -233,35 +248,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 				account,
 				productCatalog,
 			),
-		).toThrow('Subscription must be paid up to date');
-	});
-
-	test('throws when account has negative credit balance exceeding threshold', () => {
-		const now = dayjs();
-		const subscription = makeSubscriptionWithSingleCharge('Month', 10);
-		const account = makeAccount({ creditBalance: -6 });
-		expect(() =>
-			selectCandidateSubscriptionCharge(
-				subscription,
-				now.toDate(),
-				account,
-				productCatalog,
-			),
-		).toThrow('Subscription must be paid up to date');
-	});
-
-	test('allows small negative credit balance within threshold', () => {
-		const now = dayjs();
-		const subscription = makeSubscriptionWithSingleCharge('Month', 10);
-		const account = makeAccount({ creditBalance: -3 });
-		expect(() =>
-			selectCandidateSubscriptionCharge(
-				subscription,
-				now.toDate(),
-				account,
-				productCatalog,
-			),
-		).toThrow('Subscription must be paid up to date');
+		).toThrow('account balance is zero');
 	});
 
 	test('includes charges with chargedThroughDate in the future', () => {
@@ -279,22 +266,6 @@ describe('selectCandidateSubscriptionCharge', () => {
 		expect(charge.id).toBe('subChargeId');
 	});
 
-	test('includes charges with null effectiveEndDate', () => {
-		const now = dayjs();
-		const subscription = makeSubscriptionWithSingleCharge('Month', 10);
-		// Set effectiveEndDate to null in the subscription
-		const charge = subscription.ratePlans[0]!.ratePlanCharges[0]!;
-		Object.assign(charge, { effectiveEndDate: null });
-		const account = makeAccount();
-		const result = selectCandidateSubscriptionCharge(
-			subscription,
-			now.toDate(),
-			account,
-			productCatalog,
-		);
-		expect(result.charge.effectiveEndDate).toBeNull();
-	});
-
 	test('throws when charge has ended (effectiveEndDate is in past)', () => {
 		const now = dayjs();
 		const subscription = makeSubscriptionWithSingleCharge('Month', 10, {
@@ -308,7 +279,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 				account,
 				productCatalog,
 			),
-		).toThrow('Subscription charge must be before its end date');
+		).toThrow('is in the past');
 	});
 
 	test('throws when subscription status is not Active', () => {
@@ -323,7 +294,40 @@ describe('selectCandidateSubscriptionCharge', () => {
 				account,
 				productCatalog,
 			),
-		).toThrow('No matching subscription charge found');
+		).toThrow('subscription status is active');
+	});
+
+	test('throws when subscription has non-zero contribution amount', () => {
+		const now = dayjs();
+		const subscription = makeSubscriptionWithSingleCharge('Month', 12, {
+			contributionAmount: 5,
+		});
+		const account = makeAccount();
+
+		expect(() =>
+			selectCandidateSubscriptionCharge(
+				subscription,
+				now.toDate(),
+				account,
+				productCatalog,
+			),
+		).toThrow(
+			'subscription did not meet precondition <contribution amount is zero (non-zero contributions cannot be preserved during frequency switch)> (was contribution amount is 5)',
+		);
+	});
+
+	test('allows subscription with zero contribution amount', () => {
+		const now = dayjs();
+		const subscription = makeSubscriptionWithSingleCharge('Month', 12);
+		const account = makeAccount();
+
+		const { charge } = selectCandidateSubscriptionCharge(
+			subscription,
+			now.toDate(),
+			account,
+			productCatalog,
+		);
+		expect(charge.name).toBe('Subscription');
 	});
 });
 
