@@ -60,15 +60,14 @@ type GoCardlessPaymentGateway =
 	| 'GoCardless'
 	| 'GoCardless - Observer - Tortoise Media';
 
+type PaymentGatewayMap = {
+	CreditCardReferenceTransaction: StripePaymentGateway;
+	Bacs: GoCardlessPaymentGateway;
+	PayPalNativeEC: PayPalPaymentGateway;
+	PayPalCP: PayPalCompletePaymentsPaymentGateway;
+};
+
 export type PaymentGateway<T extends PaymentMethod> =
-	T extends CreditCardReferenceTransaction
-		? StripePaymentGateway
-		: T extends DirectDebit
-			? GoCardlessPaymentGateway
-			: T extends PayPal
-				? PayPalPaymentGateway
-				: T extends PayPalCompletePaymentsWithPaymentToken
-					? PayPalCompletePaymentsPaymentGateway
-					: T extends PayPalCompletePaymentsWithBAID
-						? PayPalCompletePaymentsPaymentGateway
-						: never;
+	T['type'] extends keyof PaymentGatewayMap
+		? PaymentGatewayMap[T['type']]
+		: never;
