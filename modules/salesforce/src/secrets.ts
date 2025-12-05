@@ -22,15 +22,6 @@ export function getSalesforceSecretNames(stage: Stage): SecretNames {
 	}
 }
 
-export function getZuoraSecretName(stage: 'CODE' | 'PROD'): string {
-	switch (stage) {
-		case 'CODE':
-			return 'CODE/Zuora-OAuth/SupportServiceLambdas';
-		case 'PROD':
-			return 'PROD/Zuora-OAuth/SupportServiceLambdas';
-	}
-}
-
 export type SecretNames = {
 	apiUserSecretName: string;
 	connectedAppSecretName: string;
@@ -47,9 +38,4 @@ export type ApiUserSecret = {
 	username: string;
 	password: string;
 	token: string;
-};
-
-export type ZuoraSecret = {
-	clientId: string;
-	clientSecret: string;
 };

@@ -1,11 +1,13 @@
 import { ZuoraError } from '@modules/zuora/errors';
 import { generateZuoraError } from '@modules/zuora/errors/zuoraErrorHandler';
+import type { RestResult } from '@modules/zuora/restClient';
 
-function mockResponse(status: number, body: unknown): Response {
+function mockResponse(status: number, body: unknown): RestResult {
 	return {
-		status,
-		statusText: typeof body === 'string' ? body : JSON.stringify(body),
-	} as Response;
+		status: status,
+		responseBody: JSON.stringify(body),
+		responseHeaders: {},
+	};
 }
 
 describe('generateZuoraError', () => {
@@ -79,7 +81,7 @@ describe('generateZuoraError', () => {
 		const response = mockResponse(418, "I'm a teapot");
 		const error = generateZuoraError(json, response);
 
-		expect(error.message).toBe("I'm a teapot");
+		expect(error.message).toBe('Zuora API Error');
 		expect(error.zuoraErrorDetails).toEqual([]);
 	});
 });
