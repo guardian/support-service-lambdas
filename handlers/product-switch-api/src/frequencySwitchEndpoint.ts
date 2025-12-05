@@ -396,10 +396,29 @@ async function processFrequencySwitch(
 			const targetAnnualCost = targetPrice;
 			const savingsAmount = currentAnnualCost - targetAnnualCost;
 			const savingsPeriod = 'year' as const;
-			const newPricePeriod = 'year' as const; // Calculate current contribution
-			const currentContributionAmount = currentRatePlan.ratePlanCharges
-				.filter((c) => c.name === 'Contribution' && c.type === 'Recurring')
-				.reduce((total, c) => total + (c.price ?? 0), 0);
+			const newPricePeriod = 'year' as const;
+
+			// Calculate current contribution using catalog ID to identify the charge
+			const contributionChargeId =
+				productCatalog.SupporterPlus.ratePlans.Monthly.charges.Contribution.id;
+			const contributionCharges = currentRatePlan.ratePlanCharges.filter(
+				(c) => c.productRatePlanChargeId === contributionChargeId,
+			);
+
+			assertValidState(
+				contributionCharges.length === 1,
+				'Expected exactly one Contribution charge in the rate plan',
+				`Found ${contributionCharges.length} charges`,
+			);
+
+			const contributionCharge = contributionCharges[0]!;
+			assertValidState(
+				contributionCharge.price !== null,
+				'Contribution charge price should be a number (0 or positive amount)',
+				`Found null price`,
+			);
+
+			const currentContributionAmount = contributionCharge.price;
 
 			// Calculate current discount from all active Percentage discount charges
 			const activeDiscountCharges = subscription.ratePlans
