@@ -3,7 +3,6 @@ import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
-import { ProductCatalogHelper } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import { getAccount } from '@modules/zuora/account';
@@ -27,7 +26,6 @@ import type {
 import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import { getCatalogRatePlanName } from './catalogInformation';
 import type {
 	FrequencySwitchPreviewResponse,
 	FrequencySwitchRequestBody,
@@ -311,35 +309,11 @@ async function processFrequencySwitch(
 			productCatalog,
 			currentRatePlan,
 		);
-		const targetRatePlanKey = getCatalogRatePlanName('Annual');
 
-		const productCatalogHelper = new ProductCatalogHelper(productCatalog);
-		const productDetails = productCatalogHelper.findProductDetails(
-			currentRatePlan.productRatePlanId,
-		);
-
-		if (!productDetails) {
-			throw new Error(
-				`Product rate plan ID '${currentRatePlan.productRatePlanId}' not found in product catalog during order construction`,
-			);
-		}
-
-		const targetProduct = productCatalog[productDetails.zuoraProduct];
-
-		const rawTargetRatePlan = targetProduct.ratePlans[
-			targetRatePlanKey as keyof typeof targetProduct.ratePlans
-		] as {
-			charges: Record<string, { id: string }>;
-			pricing?: Record<string, number>;
-		};
+		// Frequency switches are Supporter Plus specific, so directly access the Annual rate plan
 		const currency: IsoCurrency = currentCharge.currency as IsoCurrency;
-		const targetPrice = rawTargetRatePlan.pricing?.[currency];
-
-		if (targetPrice === undefined) {
-			throw new Error(
-				`No catalog price found for currency ${currency} in rate plan ${targetRatePlanKey}`,
-			);
-		}
+		const targetPrice =
+			productCatalog.SupporterPlus.ratePlans.Annual.pricing[currency];
 
 		let effectiveDate: dayjs.Dayjs;
 		if (preview) {
