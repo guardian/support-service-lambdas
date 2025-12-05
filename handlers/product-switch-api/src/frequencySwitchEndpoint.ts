@@ -333,9 +333,14 @@ async function processFrequencySwitch(
 			pricing?: Record<string, number>;
 		};
 		const currency: IsoCurrency = currentCharge.currency as IsoCurrency;
-		// currentCharge.price is guaranteed to be non-null by selectCandidateSubscriptionCharge validation
-		const targetPrice =
-			rawTargetRatePlan.pricing?.[currency] ?? (currentCharge.price as number);
+		const targetPrice = rawTargetRatePlan.pricing?.[currency];
+
+		if (targetPrice === undefined) {
+			throw new Error(
+				`No catalog price found for currency ${currency} in rate plan ${targetRatePlanKey}`,
+			);
+		}
+
 		let effectiveDate: dayjs.Dayjs;
 		if (preview) {
 			effectiveDate = today;
