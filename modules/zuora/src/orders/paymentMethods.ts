@@ -23,10 +23,27 @@ type PayPal = {
 	email: string;
 };
 
+type PayPalCompletePaymentsWithBAID = {
+	type: 'PayPalCP';
+	BAID: string;
+	email: string;
+};
+
+type PayPalCompletePaymentsWithPaymentToken = {
+	type: 'PayPalCP';
+	tokens: {
+		gatewayType: 'PayPalCP';
+		tokenId: string;
+	};
+	email: string;
+};
+
 export type PaymentMethod =
 	| CreditCardReferenceTransaction
 	| DirectDebit
-	| PayPal;
+	| PayPal
+	| PayPalCompletePaymentsWithPaymentToken
+	| PayPalCompletePaymentsWithBAID;
 
 //Gateway names need to match to those set in Zuora
 //See: https://apisandbox.zuora.com/apps/NewGatewaySetting.do?method=list
@@ -37,15 +54,20 @@ type StripePaymentGateway =
 
 type PayPalPaymentGateway = 'PayPal Express';
 
+type PayPalCompletePaymentsPaymentGateway = 'PayPal Complete Payments';
+
 type GoCardlessPaymentGateway =
 	| 'GoCardless'
 	| 'GoCardless - Observer - Tortoise Media';
 
+type PaymentGatewayMap = {
+	CreditCardReferenceTransaction: StripePaymentGateway;
+	Bacs: GoCardlessPaymentGateway;
+	PayPalNativeEC: PayPalPaymentGateway;
+	PayPalCP: PayPalCompletePaymentsPaymentGateway;
+};
+
 export type PaymentGateway<T extends PaymentMethod> =
-	T extends CreditCardReferenceTransaction
-		? StripePaymentGateway
-		: T extends DirectDebit
-			? GoCardlessPaymentGateway
-			: T extends PayPal
-				? PayPalPaymentGateway
-				: never;
+	T['type'] extends keyof PaymentGatewayMap
+		? PaymentGatewayMap[T['type']]
+		: never;
