@@ -6,6 +6,12 @@ import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import { getAccount } from '@modules/zuora/account';
+import {
+	getBillingPreview,
+	getNextInvoiceItems,
+	itemsForSubscription,
+	toSimpleInvoiceItems,
+} from '@modules/zuora/billingPreview';
 import { singleTriggerDate } from '@modules/zuora/orders/orderActions';
 import type { OrderAction } from '@modules/zuora/orders/orderActions';
 import {
@@ -26,6 +32,7 @@ import type {
 import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
+import { EligibilityChecker } from '../../discount-api/src/eligibilityChecker';
 import type {
 	FrequencySwitchPreviewResponse,
 	FrequencySwitchRequestBody,
@@ -41,14 +48,13 @@ import {
 /**
  * Validation requirements for frequency switch eligibility.
  * Each requirement includes a description of what must pass and details about why.
+ *
+ * Note: Standard eligibility checks (subscription active, zero account balance, no negative invoice items,
+ * next invoice > 0) are performed by EligibilityChecker.assertGenerallyEligible()
  */
 export const frequencySwitchValidationRequirements = {
-	subscriptionActive: 'subscription status is active',
-	zeroAccountBalance: 'account balance is zero',
 	hasEligibleCharges:
 		'subscription has at least one active recurring charge eligible for frequency switch',
-	singleEligibleCharge:
-		'subscription has exactly one eligible charge (multiple charges cannot be safely switched)',
 	chargeHasValidPrice: 'eligible charge has a defined price',
 	zeroContributionAmount:
 		'contribution amount is zero (non-zero contributions cannot be preserved during frequency switch)',
@@ -82,34 +88,46 @@ function assertValidState(
  * and its charges as a unit. This approach is more deterministic than filtering all charges.
  *
  * Validates that the subscription is eligible:
- * - Must be Active status
- * - Must not have outstanding unpaid invoices (totalInvoiceBalance must be 0)
+ * - Standard eligibility via EligibilityChecker.assertGenerallyEligible():
+ *   - Subscription status is Active
+ *   - Account balance is zero (no unpaid invoices)
+ *   - No negative items in next invoice preview (no refunds/discounts expected)
+ *   - Next invoice total is greater than zero
  * - Must have a SupporterPlus Monthly rate plan that is active
  * - The rate plan must have a valid Subscription charge with valid dates and billing period
+ * - Contribution amount must be zero (non-zero contributions cannot be preserved)
  *
  * @param subscription The subscription to validate
  * @param today Today's date for filtering active charges
- * @param account Optional account data for additional validations
+ * @param account Account data for eligibility validations
  * @param productCatalog The product catalog for looking up the target rate plan
+ * @param zuoraClient Zuora client for fetching billing preview data
  * @returns The selected rate plan and charge eligible for frequency switch
  * @throws ValidationError if subscription fails any validation checks
  */
-export function selectCandidateSubscriptionCharge(
+export async function selectCandidateSubscriptionCharge(
 	subscription: ZuoraSubscription,
-	today: Date,
+	today: dayjs.Dayjs,
 	account: ZuoraAccount,
 	productCatalog: ProductCatalog,
-): { ratePlan: RatePlan; charge: RatePlanCharge } {
-	assertValidState(
-		subscription.status === 'Active',
-		frequencySwitchValidationRequirements.subscriptionActive,
-		subscription.status,
-	);
+	zuoraClient: ZuoraClient,
+): Promise<{ ratePlan: RatePlan; charge: RatePlanCharge }> {
+	const eligibilityChecker = new EligibilityChecker();
 
-	assertValidState(
-		account.metrics.totalInvoiceBalance === 0,
-		frequencySwitchValidationRequirements.zeroAccountBalance,
-		`${account.metrics.totalInvoiceBalance} ${account.metrics.currency}`,
+	await eligibilityChecker.assertGenerallyEligible(
+		subscription,
+		account.metrics.totalInvoiceBalance,
+		async () => {
+			const billingPreview = await getBillingPreview(
+				zuoraClient,
+				today.add(13, 'months'),
+				subscription.accountNumber,
+			);
+			const invoiceItems = toSimpleInvoiceItems(
+				itemsForSubscription(subscription.subscriptionNumber)(billingPreview),
+			);
+			return getNextInvoiceItems(invoiceItems);
+		},
 	);
 
 	// Find the SupporterPlus Monthly rate plan using the catalog
@@ -149,21 +167,22 @@ export function selectCandidateSubscriptionCharge(
 		`charge type is "${subscriptionCharge.type}", not "Recurring"`,
 	);
 
+	const todayDate = today.toDate();
 	assertValidState(
-		subscriptionCharge.effectiveStartDate < today,
+		subscriptionCharge.effectiveStartDate < todayDate,
 		frequencySwitchValidationRequirements.hasEligibleCharges,
 		`effectiveStartDate ${subscriptionCharge.effectiveStartDate.toISOString()} is in the future`,
 	);
 
 	assertValidState(
-		subscriptionCharge.effectiveEndDate >= today,
+		subscriptionCharge.effectiveEndDate >= todayDate,
 		frequencySwitchValidationRequirements.hasEligibleCharges,
 		`effectiveEndDate ${subscriptionCharge.effectiveEndDate.toISOString()} is in the past`,
 	);
 
 	assertValidState(
 		!subscriptionCharge.chargedThroughDate ||
-			subscriptionCharge.chargedThroughDate >= today,
+			subscriptionCharge.chargedThroughDate >= todayDate,
 		frequencySwitchValidationRequirements.hasEligibleCharges,
 		`chargedThroughDate ${subscriptionCharge.chargedThroughDate?.toISOString()} is in the past`,
 	);
@@ -577,7 +596,6 @@ export const frequencySwitchHandler =
 		},
 	): Promise<{ statusCode: number; body: string }> => {
 		logger.mutableAddContext(parsed.path.subscriptionNumber);
-		const todayDate = today.toDate();
 
 		const zuoraClient = await ZuoraClient.create(stage);
 		const subscription = await getSubscription(
@@ -612,11 +630,12 @@ export const frequencySwitchHandler =
 		// Use selectCandidateSubscriptionCharge to validate and find the eligible charge
 		let candidateCharge: { ratePlan: RatePlan; charge: RatePlanCharge };
 		try {
-			candidateCharge = selectCandidateSubscriptionCharge(
+			candidateCharge = await selectCandidateSubscriptionCharge(
 				subscription,
-				todayDate,
+				today,
 				account,
 				productCatalog,
+				zuoraClient,
 			);
 		} catch (error) {
 			logger.log(

@@ -3,10 +3,31 @@
  * Tests the candidate selection logic and edge cases without external API calls.
  */
 import type { ZuoraSubscription } from '@modules/zuora/types';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { getCatalogRatePlanName } from '../src/catalogInformation';
 import { selectCandidateSubscriptionCharge } from '../src/frequencySwitchEndpoint';
 import { productCatalog } from './productCatalogFixture';
+
+/**
+ * Creates a mock ZuoraClient for unit tests.
+ * The mock returns a billing preview with a single positive invoice item.
+ */
+function makeMockZuoraClient(): ZuoraClient {
+	return {
+		post: jest.fn().mockResolvedValue({
+			invoiceItems: [
+				{
+					subscriptionNumber: 'A-SUB123',
+					serviceStartDate: '2024-12-01',
+					chargeAmount: 10,
+				},
+			],
+		}),
+		get: jest.fn(),
+		delete: jest.fn(),
+	} as unknown as ZuoraClient;
+}
 
 /**
  * Creates a minimal mock account object for testing payment status checks
@@ -149,15 +170,17 @@ function makeSubscriptionWithSingleCharge(
 	};
 }
 describe('selectCandidateSubscriptionCharge', () => {
-	test('finds single active monthly recurring subscription charge', () => {
+	test('finds single active monthly recurring subscription charge', async () => {
 		const subscription = makeSubscriptionWithSingleCharge('Month', 10);
 		const today = dayjs();
 		const account = makeAccount();
-		const { charge, ratePlan } = selectCandidateSubscriptionCharge(
+		const zuoraClient = makeMockZuoraClient();
+		const { charge, ratePlan } = await selectCandidateSubscriptionCharge(
 			subscription,
-			today.toDate(),
+			today,
 			account,
 			productCatalog,
+			zuoraClient,
 		);
 		expect(charge.name).toBe('Subscription');
 		expect(charge.billingPeriod).toBe('Month');
@@ -165,21 +188,23 @@ describe('selectCandidateSubscriptionCharge', () => {
 		expect(ratePlan.id).toBe('rp-id-123');
 	});
 
-	test('throws when subscription is already Annual (only Monthly to Annual switches supported)', () => {
+	test('throws when subscription is already Annual (only Monthly to Annual switches supported)', async () => {
 		const subscription = makeSubscriptionWithSingleCharge('Annual', 120);
 		const today = dayjs();
 		const account = makeAccount();
-		expect(() =>
+		const zuoraClient = makeMockZuoraClient();
+		await expect(
 			selectCandidateSubscriptionCharge(
 				subscription,
-				today.toDate(),
+				today,
 				account,
 				productCatalog,
+				zuoraClient,
 			),
-		).toThrow('SupporterPlus Monthly rate plan not found');
+		).rejects.toThrow('SupporterPlus Monthly rate plan not found');
 	});
 
-	test('throws when subscription has no rate plans', () => {
+	test('throws when subscription has no rate plans', async () => {
 		const now = dayjs();
 		const subscription: ZuoraSubscription = {
 			id: 'sub-id-123',
@@ -197,135 +222,153 @@ describe('selectCandidateSubscriptionCharge', () => {
 			ratePlans: [],
 		};
 		const account = makeAccount();
-		expect(() =>
+		const zuoraClient = makeMockZuoraClient();
+		await expect(
 			selectCandidateSubscriptionCharge(
 				subscription,
-				new Date(),
+				now,
 				account,
 				productCatalog,
+				zuoraClient,
 			),
-		).toThrow('SupporterPlus Monthly rate plan not found');
+		).rejects.toThrow('SupporterPlus Monthly rate plan not found');
 	});
 
-	test('throws when charge type is not "Recurring"', () => {
+	test('throws when charge type is not "Recurring"', async () => {
 		const subscription = makeSubscriptionWithSingleCharge('Month', 10, {
 			chargeType: 'OneTime',
 		});
 		const account = makeAccount();
-		expect(() =>
+		const zuoraClient = makeMockZuoraClient();
+		await expect(
 			selectCandidateSubscriptionCharge(
 				subscription,
-				new Date(),
+				dayjs(),
 				account,
 				productCatalog,
+				zuoraClient,
 			),
-		).toThrow('charge type is "OneTime", not "Recurring"');
+		).rejects.toThrow('charge type is "OneTime", not "Recurring"');
 	});
 
-	test('throws when rate plan lastChangeType is "Remove"', () => {
+	test('throws when rate plan lastChangeType is "Remove"', async () => {
 		const subscription = makeSubscriptionWithSingleCharge('Month', 10, {
 			lastChangeType: 'Remove',
 		});
 		const account = makeAccount();
-		expect(() =>
+		const zuoraClient = makeMockZuoraClient();
+		await expect(
 			selectCandidateSubscriptionCharge(
 				subscription,
-				new Date(),
+				dayjs(),
 				account,
 				productCatalog,
+				zuoraClient,
 			),
-		).toThrow('SupporterPlus Monthly rate plan not found');
+		).rejects.toThrow('SupporterPlus Monthly rate plan not found');
 	});
 
-	test('throws when account has outstanding invoice balance', () => {
+	test('throws when account has outstanding invoice balance', async () => {
 		const now = dayjs();
 		const subscription = makeSubscriptionWithSingleCharge('Month', 10);
 		const account = makeAccount({ totalInvoiceBalance: 50 });
-		expect(() =>
+		const zuoraClient = makeMockZuoraClient();
+		await expect(
 			selectCandidateSubscriptionCharge(
 				subscription,
-				now.toDate(),
+				now,
 				account,
 				productCatalog,
+				zuoraClient,
 			),
-		).toThrow('account balance is zero');
+		).rejects.toThrow('account balance is zero');
 	});
 
-	test('includes charges with chargedThroughDate in the future', () => {
+	test('includes charges with chargedThroughDate in the future', async () => {
 		const now = dayjs();
 		const subscription = makeSubscriptionWithSingleCharge('Month', 10, {
 			chargedThroughDate: now.add(1, 'month').toDate(),
 		});
 		const account = makeAccount();
-		const { charge } = selectCandidateSubscriptionCharge(
+		const zuoraClient = makeMockZuoraClient();
+		const { charge } = await selectCandidateSubscriptionCharge(
 			subscription,
-			now.toDate(),
+			now,
 			account,
 			productCatalog,
+			zuoraClient,
 		);
 		expect(charge.id).toBe('subChargeId');
 	});
 
-	test('throws when charge has ended (effectiveEndDate is in past)', () => {
+	test('throws when charge has ended (effectiveEndDate is in past)', async () => {
 		const now = dayjs();
 		const subscription = makeSubscriptionWithSingleCharge('Month', 10, {
 			effectiveEndDate: now.subtract(1, 'day').toDate(),
 		});
 		const account = makeAccount();
-		expect(() =>
+		const zuoraClient = makeMockZuoraClient();
+		await expect(
 			selectCandidateSubscriptionCharge(
 				subscription,
-				now.toDate(),
+				now,
 				account,
 				productCatalog,
+				zuoraClient,
 			),
-		).toThrow('is in the past');
+		).rejects.toThrow('is in the past');
 	});
 
-	test('throws when subscription status is not Active', () => {
+	test('throws when subscription status is not Active', async () => {
 		const now = dayjs();
 		const subscription = makeSubscriptionWithSingleCharge('Month', 10);
 		subscription.status = 'Suspended';
 		const account = makeAccount();
-		expect(() =>
+		const zuoraClient = makeMockZuoraClient();
+		await expect(
 			selectCandidateSubscriptionCharge(
 				subscription,
-				now.toDate(),
+				now,
 				account,
 				productCatalog,
+				zuoraClient,
 			),
-		).toThrow('subscription status is active');
+		).rejects.toThrow('subscription status is active');
 	});
 
-	test('throws when subscription has non-zero contribution amount', () => {
+	test('throws when subscription has non-zero contribution amount', async () => {
 		const now = dayjs();
 		const subscription = makeSubscriptionWithSingleCharge('Month', 12, {
 			contributionAmount: 5,
 		});
 		const account = makeAccount();
+		const zuoraClient = makeMockZuoraClient();
 
-		expect(() =>
+		await expect(
 			selectCandidateSubscriptionCharge(
 				subscription,
-				now.toDate(),
+				now,
 				account,
 				productCatalog,
+				zuoraClient,
 			),
-		).toThrow(
+		).rejects.toThrow(
 			'subscription did not meet precondition <contribution amount is zero (non-zero contributions cannot be preserved during frequency switch)> (was contribution amount is 5)',
 		);
 	});
 
-	test('allows subscription with zero contribution amount', () => {
+	test('allows subscription with zero contribution amount', async () => {
 		const now = dayjs();
 		const subscription = makeSubscriptionWithSingleCharge('Month', 12);
 		const account = makeAccount();
+		const zuoraClient = makeMockZuoraClient();
 
-		const { charge } = selectCandidateSubscriptionCharge(
+		const { charge } = await selectCandidateSubscriptionCharge(
 			subscription,
-			now.toDate(),
+			now,
 			account,
 			productCatalog,
+			zuoraClient,
 		);
 		expect(charge.name).toBe('Subscription');
 	});

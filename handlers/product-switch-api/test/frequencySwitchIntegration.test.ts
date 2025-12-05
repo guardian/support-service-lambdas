@@ -95,11 +95,12 @@ describe('frequency switch behaviour', () => {
 					zuoraClient,
 					subscription.accountNumber,
 				);
-				const candidateCharge = selectCandidateSubscriptionCharge(
+				const candidateCharge = await selectCandidateSubscriptionCharge(
 					subscription,
-					dayjs().toDate(),
+					dayjs(),
 					account,
 					productCatalog,
+					zuoraClient,
 				);
 				const result: FrequencySwitchPreviewResponse =
 					await previewFrequencySwitch(
@@ -147,11 +148,12 @@ describe('frequency switch behaviour', () => {
 					zuoraClient,
 					subscription.accountNumber,
 				);
-				const candidateCharge = selectCandidateSubscriptionCharge(
+				const candidateCharge = await selectCandidateSubscriptionCharge(
 					subscription,
-					dayjs().toDate(),
+					dayjs(),
 					account,
 					productCatalog,
+					zuoraClient,
 				);
 				const result: FrequencySwitchPreviewResponse =
 					await previewFrequencySwitch(
@@ -191,11 +193,12 @@ describe('frequency switch behaviour', () => {
 					zuoraClient,
 					subscription.accountNumber,
 				);
-				const candidateCharge = selectCandidateSubscriptionCharge(
+				const candidateCharge = await selectCandidateSubscriptionCharge(
 					subscription,
-					dayjs().toDate(),
+					dayjs(),
 					account,
 					productCatalog,
+					zuoraClient,
 				);
 				const result: FrequencySwitchResponse = await executeFrequencySwitch(
 					zuoraClient,
@@ -271,11 +274,12 @@ describe('frequency switch behaviour', () => {
 					eurClient,
 					eurSubscription.accountNumber,
 				);
-				const eurCandidateCharge = selectCandidateSubscriptionCharge(
+				const eurCandidateCharge = await selectCandidateSubscriptionCharge(
 					eurSubscription,
-					dayjs().toDate(),
+					dayjs(),
 					eurAccount,
 					productCatalog,
+					eurClient,
 				);
 				const eurResult: FrequencySwitchResponse = await executeFrequencySwitch(
 					eurClient,
@@ -310,11 +314,12 @@ describe('frequency switch behaviour', () => {
 					usdClient,
 					usdSubscription.accountNumber,
 				);
-				const usdCandidateCharge = selectCandidateSubscriptionCharge(
+				const usdCandidateCharge = await selectCandidateSubscriptionCharge(
 					usdSubscription,
-					dayjs().toDate(),
+					dayjs(),
 					usdAccount,
 					productCatalog,
+					usdClient,
 				);
 				const usdResult: FrequencySwitchResponse = await executeFrequencySwitch(
 					usdClient,
