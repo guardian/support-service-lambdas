@@ -31,11 +31,7 @@ import type {
 	FrequencySwitchRequestBody,
 	FrequencySwitchResponse,
 } from './frequencySwitchSchemas';
-import {
-	frequencySwitchErrorResponseSchema,
-	frequencySwitchPreviewResponseSchema,
-	frequencySwitchResponseSchema,
-} from './frequencySwitchSchemas';
+import { frequencySwitchErrorResponseSchema } from './frequencySwitchSchemas';
 import type { ZuoraPreviewResponse, ZuoraSwitchResponse } from './schemas';
 import {
 	zuoraPreviewResponseSchema,
@@ -221,7 +217,120 @@ export function selectCandidateSubscriptionCharge(
 }
 
 /**
- * Preview a frequency switch for a subscription. Mirrors processFrequencySwitch with preview=true.
+ * Common information needed for both preview and execute frequency switches.
+ */
+interface FrequencySwitchInfo {
+	targetRatePlanId: string;
+	targetPrice: number;
+	currency: IsoCurrency;
+	effectiveDate: dayjs.Dayjs;
+	orderActions: OrderAction[];
+	currentRatePlan: RatePlan;
+	currentCharge: RatePlanCharge;
+}
+
+/**
+ * Prepare common information for a frequency switch.
+ * Gets target rate plan, price, effective date, and builds order actions including
+ * term renewal (if needed), discount removal, and plan change.
+ *
+ * @param currentRatePlan The current rate plan from the subscription
+ * @param currentCharge The current charge eligible for switching
+ * @param subscription The subscription being switched
+ * @param productCatalog Product catalog for looking up rate plans and pricing
+ * @param effectiveDate The date when the switch should take effect
+ * @param today Today's date for filtering active discounts
+ * @returns Common information needed for preview or execute
+ */
+function prepareFrequencySwitchInfo(
+	currentRatePlan: RatePlan,
+	currentCharge: RatePlanCharge,
+	subscription: ZuoraSubscription,
+	productCatalog: ProductCatalog,
+	effectiveDate: dayjs.Dayjs,
+	today: dayjs.Dayjs,
+): FrequencySwitchInfo {
+	const targetRatePlanId = getTargetRatePlanId(productCatalog, currentRatePlan);
+
+	// Frequency switches are Supporter Plus specific, so directly access the Annual rate plan
+	const currency: IsoCurrency = currentCharge.currency as IsoCurrency;
+	const targetPrice =
+		productCatalog.SupporterPlus.ratePlans.Annual.pricing[currency];
+
+	const triggerDates = singleTriggerDate(effectiveDate);
+
+	// Check if we need term renewal to avoid "cancellation date cannot be later than term end date" error
+	// We need to perform term renewal if the chargedThroughDate (which will be used as the effective date)
+	// extends beyond the current subscription term end date.
+	const termEndDate = dayjs(subscription.termEndDate);
+	const needsTermRenewal = effectiveDate.isAfter(termEndDate);
+
+	// Find active discount rate plans that need to be removed
+	// Discounts must be removed at the switch time to ensure customer ends up on full price
+	const activeDiscountRatePlans = subscription.ratePlans.filter(
+		(rp) =>
+			rp.productName === 'Discounts' &&
+			rp.lastChangeType !== 'Remove' &&
+			rp.ratePlanCharges.some(
+				(charge) =>
+					charge.effectiveStartDate <= today.toDate() &&
+					charge.effectiveEndDate >= today.toDate(),
+			),
+	);
+
+	const orderActions: OrderAction[] = [];
+
+	if (needsTermRenewal) {
+		logger.log(
+			`Adding term renewal because effectiveDate ${effectiveDate.format('YYYY-MM-DD')} is after termEndDate ${termEndDate.format('YYYY-MM-DD')}`,
+		);
+		orderActions.push({
+			type: 'RenewSubscription',
+			triggerDates,
+		});
+	}
+
+	// Remove discount rate plans before changing the billing frequency
+	// This ensures discounts don't carry over to the new billing period
+	for (const discountRatePlan of activeDiscountRatePlans) {
+		logger.log(
+			`Removing discount rate plan ${discountRatePlan.ratePlanName} (${discountRatePlan.id})`,
+		);
+		orderActions.push({
+			type: 'RemoveProduct',
+			triggerDates,
+			removeProduct: {
+				ratePlanId: discountRatePlan.id,
+			},
+		});
+	}
+
+	orderActions.push({
+		type: 'ChangePlan',
+		triggerDates,
+		changePlan: {
+			productRatePlanId: currentRatePlan.productRatePlanId,
+			subType: 'Upgrade',
+			newProductRatePlan: {
+				productRatePlanId: targetRatePlanId,
+			},
+		},
+	});
+
+	return {
+		targetRatePlanId,
+		targetPrice,
+		currency,
+		effectiveDate,
+		orderActions,
+		currentRatePlan,
+		currentCharge,
+	};
+}
+
+/**
+ * Preview a frequency switch for a subscription.
+ * Prepares the switch info and runs a preview order request to calculate savings and new price.
  */
 export async function previewFrequencySwitch(
 	zuoraClient: ZuoraClient,
@@ -231,20 +340,144 @@ export async function previewFrequencySwitch(
 	today: dayjs.Dayjs,
 ): Promise<FrequencySwitchPreviewResponse> {
 	const { ratePlan, charge } = candidateCharge;
-	const result = await processFrequencySwitch(
-		zuoraClient,
-		subscription,
-		ratePlan,
-		charge,
-		productCatalog,
-		true,
-		today,
-	);
-	return frequencySwitchPreviewResponseSchema.parse(result);
+	logger.log('Previewing frequency switch (Orders API) from Monthly to Annual');
+
+	try {
+		// Preview with today's date as effective date
+		const effectiveDate = today;
+
+		const switchInfo = prepareFrequencySwitchInfo(
+			ratePlan,
+			charge,
+			subscription,
+			productCatalog,
+			effectiveDate,
+			today,
+		);
+
+		// Preview with today's date to get Zuora to generate invoices
+		// Then filter to show only the new billing period charges (exclude credits/prorations)
+		const orderRequest: PreviewOrderRequest = {
+			previewOptions: {
+				previewThruType: 'SpecificDate',
+				previewTypes: ['BillingDocs'],
+				specificPreviewThruDate: zuoraDateFormat(
+					switchInfo.effectiveDate.add(1, 'month'),
+				),
+			},
+			orderDate: zuoraDateFormat(switchInfo.effectiveDate),
+			existingAccountNumber: subscription.accountNumber,
+			subscriptions: [
+				{
+					subscriptionNumber: subscription.subscriptionNumber,
+					orderActions: switchInfo.orderActions,
+				},
+			],
+		};
+
+		const zuoraPreview: ZuoraPreviewResponse = await previewOrderRequest(
+			zuoraClient,
+			orderRequest,
+			zuoraPreviewResponseSchema,
+		);
+
+		logger.log('Orders preview returned successful response', zuoraPreview);
+
+		// Extract the invoice from the preview response
+		const invoice = getIfDefined(
+			zuoraPreview.previewResult?.invoices[0],
+			'No invoice found in the preview response',
+		);
+
+		// Calculate savings and new price for monthly to annual switch
+		// currentCharge.price is guaranteed to be non-null by selectCandidateSubscriptionCharge validation
+		const currentPrice = switchInfo.currentCharge.price as number;
+		const currentAnnualCost = currentPrice * 12;
+		const targetAnnualCost = switchInfo.targetPrice;
+		const savingsAmount = currentAnnualCost - targetAnnualCost;
+		const savingsPeriod = 'year' as const;
+		const newPricePeriod = 'year' as const;
+
+		// Calculate current contribution using catalog ID to identify the charge
+		const contributionChargeId =
+			productCatalog.SupporterPlus.ratePlans.Monthly.charges.Contribution.id;
+		const contributionCharges =
+			switchInfo.currentRatePlan.ratePlanCharges.filter(
+				(c) => c.productRatePlanChargeId === contributionChargeId,
+			);
+
+		assertValidState(
+			contributionCharges.length === 1,
+			'Expected exactly one Contribution charge in the rate plan',
+			`Found ${contributionCharges.length} charges`,
+		);
+
+		const contributionCharge = contributionCharges[0]!;
+		assertValidState(
+			contributionCharge.price !== null,
+			'Contribution charge price should be a number (0 or positive amount)',
+			`Found null price`,
+		);
+
+		const currentContributionAmount = contributionCharge.price;
+
+		// Use Zuora's billing preview to calculate the discount amount accurately
+		// This avoids replicating Zuora's complex logic for credits, discounts on specific rate plans,
+		// price rise engine, and other billing variations
+		// Find discount invoice items in the preview - these show the actual discount that would be applied
+		const discountInvoiceItems = invoice.invoiceItems.filter(
+			(item) => item.productName === 'Discounts',
+		);
+
+		// Calculate the current monthly cost with discounts applied
+		// This is what the customer currently pays per month
+		const currentMonthlyAmountWithDiscount = discountInvoiceItems.reduce(
+			(total, item) => total + item.amountWithoutTax,
+			currentPrice,
+		);
+
+		// Calculate the annualized discount value
+		// If they currently pay less than the full price monthly, calculate how much they save per year
+		const monthlyDiscountAmount =
+			currentPrice - currentMonthlyAmountWithDiscount;
+		const currentDiscountAmount = monthlyDiscountAmount * 12;
+
+		return {
+			currency: switchInfo.currency,
+			savings: {
+				amount: savingsAmount,
+				period: savingsPeriod,
+			},
+			newPrice: {
+				amount: switchInfo.targetPrice,
+				period: newPricePeriod,
+			},
+			currentContribution: {
+				amount: currentContributionAmount,
+				period: 'month',
+			},
+			currentDiscount: {
+				amount: Math.round(currentDiscountAmount * 100) / 100,
+				period: 'year',
+			},
+		};
+	} catch (error) {
+		// Only return ValidationError messages to clients for security
+		if (error instanceof ValidationError) {
+			return {
+				reasons: [{ message: error.message }],
+			};
+		}
+
+		throw new Error('Unexpected error type in frequency switch preview', {
+			cause: error,
+		});
+	}
 }
 
 /**
- * Execute a frequency switch (non-preview). Mirrors processFrequencySwitch with preview=false.
+ * Execute a frequency switch (non-preview).
+ * Prepares the switch info and executes the order request to perform the actual switch.
  */
 export async function executeFrequencySwitch(
 	zuoraClient: ZuoraClient,
@@ -254,16 +487,59 @@ export async function executeFrequencySwitch(
 	today: dayjs.Dayjs,
 ): Promise<FrequencySwitchResponse> {
 	const { ratePlan, charge } = candidateCharge;
-	const result = await processFrequencySwitch(
-		zuoraClient,
-		subscription,
-		ratePlan,
-		charge,
-		productCatalog,
-		false,
-		today,
-	);
-	return frequencySwitchResponseSchema.parse(result);
+	logger.log('Executing frequency switch (Orders API) from Monthly to Annual');
+
+	try {
+		// Use chargedThroughDate as the effective date - this is when the current billing period ends
+		// and the next payment will be due. Since SupporterPlus subscriptions don't have free periods
+		// (discounts reduce price but don't make invoices free), this avoids an extra billing preview API call.
+		const effectiveDate = dayjs(charge.chargedThroughDate ?? today);
+
+		const switchInfo = prepareFrequencySwitchInfo(
+			ratePlan,
+			charge,
+			subscription,
+			productCatalog,
+			effectiveDate,
+			today,
+		);
+
+		const orderRequest: CreateOrderRequest = {
+			processingOptions: {
+				runBilling: false,
+				collectPayment: false,
+			},
+			orderDate: zuoraDateFormat(switchInfo.effectiveDate),
+			existingAccountNumber: subscription.accountNumber,
+			subscriptions: [
+				{
+					subscriptionNumber: subscription.subscriptionNumber,
+					orderActions: switchInfo.orderActions,
+				},
+			],
+		};
+
+		const zuoraResponse: ZuoraSwitchResponse = await executeOrderRequest(
+			zuoraClient,
+			orderRequest,
+			zuoraSwitchResponseSchema,
+		);
+
+		return {
+			invoiceIds: zuoraResponse.invoiceIds ?? [],
+		};
+	} catch (error) {
+		// Only return ValidationError messages to clients for security
+		if (error instanceof ValidationError) {
+			return {
+				reasons: [{ message: error.message }],
+			};
+		}
+
+		throw new Error('Unexpected error type in frequency switch execution', {
+			cause: error,
+		});
+	}
 }
 
 /**
@@ -289,245 +565,6 @@ function getTargetRatePlanId(
 		validSwitches[currentRatePlan.productRatePlanId],
 		`Product rate plan ID '${currentRatePlan.productRatePlanId}' does not have a valid switch to Annual billing`,
 	);
-}
-
-async function processFrequencySwitch(
-	zuoraClient: ZuoraClient,
-	subscription: ZuoraSubscription,
-	currentRatePlan: RatePlan,
-	currentCharge: RatePlanCharge,
-	productCatalog: ProductCatalog,
-	preview: boolean,
-	today: dayjs.Dayjs,
-): Promise<FrequencySwitchPreviewResponse | FrequencySwitchResponse> {
-	logger.log(
-		`${preview ? 'Previewing' : 'Executing'} frequency switch (Orders API) from Monthly to Annual`,
-	);
-
-	try {
-		const targetRatePlanId = getTargetRatePlanId(
-			productCatalog,
-			currentRatePlan,
-		);
-
-		// Frequency switches are Supporter Plus specific, so directly access the Annual rate plan
-		const currency: IsoCurrency = currentCharge.currency as IsoCurrency;
-		const targetPrice =
-			productCatalog.SupporterPlus.ratePlans.Annual.pricing[currency];
-
-		let effectiveDate: dayjs.Dayjs;
-		if (preview) {
-			effectiveDate = today;
-		} else {
-			// Use chargedThroughDate as the effective date - this is when the current billing period ends
-			// and the next payment will be due. Since SupporterPlus subscriptions don't have free periods
-			// (discounts reduce price but don't make invoices free), this avoids an extra billing preview API call.
-			effectiveDate = dayjs(currentCharge.chargedThroughDate ?? today);
-		}
-		const triggerDates = singleTriggerDate(effectiveDate);
-
-		// Check if we need term renewal to avoid "cancellation date cannot be later than term end date" error
-		// We need to perform term renewal if the chargedThroughDate (which will be used as the effective date)
-		// extends beyond the current subscription term end date.
-		const termEndDate = dayjs(subscription.termEndDate);
-		const needsTermRenewal = effectiveDate.isAfter(termEndDate);
-
-		// Find active discount rate plans that need to be removed
-		// Discounts must be removed at the switch time to ensure customer ends up on full price
-		const activeDiscountRatePlans = subscription.ratePlans.filter(
-			(rp) =>
-				rp.productName === 'Discounts' &&
-				rp.lastChangeType !== 'Remove' &&
-				rp.ratePlanCharges.some(
-					(charge) =>
-						charge.effectiveStartDate <= today.toDate() &&
-						charge.effectiveEndDate >= today.toDate(),
-				),
-		);
-
-		const orderActions: OrderAction[] = [];
-
-		if (needsTermRenewal) {
-			logger.log(
-				`Adding term renewal because effectiveDate ${effectiveDate.format('YYYY-MM-DD')} is after termEndDate ${termEndDate.format('YYYY-MM-DD')}`,
-			);
-			orderActions.push({
-				type: 'RenewSubscription',
-				triggerDates,
-			});
-		}
-
-		// Remove discount rate plans before changing the billing frequency
-		// This ensures discounts don't carry over to the new billing period
-		for (const discountRatePlan of activeDiscountRatePlans) {
-			logger.log(
-				`Removing discount rate plan ${discountRatePlan.ratePlanName} (${discountRatePlan.id})`,
-			);
-			orderActions.push({
-				type: 'RemoveProduct',
-				triggerDates,
-				removeProduct: {
-					ratePlanId: discountRatePlan.id,
-				},
-			});
-		}
-
-		orderActions.push({
-			type: 'ChangePlan',
-			triggerDates,
-			changePlan: {
-				productRatePlanId: currentRatePlan.productRatePlanId,
-				subType: 'Upgrade',
-				newProductRatePlan: {
-					productRatePlanId: targetRatePlanId,
-				},
-			},
-		});
-
-		if (preview) {
-			// Preview with today's date to get Zuora to generate invoices
-			// Then filter to show only the new billing period charges (exclude credits/prorations)
-			const orderRequest: PreviewOrderRequest = {
-				previewOptions: {
-					previewThruType: 'SpecificDate',
-					previewTypes: ['BillingDocs'],
-					specificPreviewThruDate: zuoraDateFormat(
-						effectiveDate.add(1, 'month'),
-					),
-				},
-				orderDate: zuoraDateFormat(effectiveDate),
-				existingAccountNumber: subscription.accountNumber,
-				subscriptions: [
-					{
-						subscriptionNumber: subscription.subscriptionNumber,
-						orderActions,
-					},
-				],
-			};
-
-			const zuoraPreview: ZuoraPreviewResponse = await previewOrderRequest(
-				zuoraClient,
-				orderRequest,
-				zuoraPreviewResponseSchema,
-			);
-
-			logger.log('Orders preview returned successful response', zuoraPreview);
-
-			// Extract the invoice from the preview response
-			const invoice = getIfDefined(
-				zuoraPreview.previewResult?.invoices[0],
-				'No invoice found in the preview response',
-			);
-
-			// Calculate savings and new price for monthly to annual switch
-			// currentCharge.price is guaranteed to be non-null by selectCandidateSubscriptionCharge validation
-			const currentPrice = currentCharge.price as number;
-			const currentAnnualCost = currentPrice * 12;
-			const targetAnnualCost = targetPrice;
-			const savingsAmount = currentAnnualCost - targetAnnualCost;
-			const savingsPeriod = 'year' as const;
-			const newPricePeriod = 'year' as const;
-
-			// Calculate current contribution using catalog ID to identify the charge
-			const contributionChargeId =
-				productCatalog.SupporterPlus.ratePlans.Monthly.charges.Contribution.id;
-			const contributionCharges = currentRatePlan.ratePlanCharges.filter(
-				(c) => c.productRatePlanChargeId === contributionChargeId,
-			);
-
-			assertValidState(
-				contributionCharges.length === 1,
-				'Expected exactly one Contribution charge in the rate plan',
-				`Found ${contributionCharges.length} charges`,
-			);
-
-			const contributionCharge = contributionCharges[0]!;
-			assertValidState(
-				contributionCharge.price !== null,
-				'Contribution charge price should be a number (0 or positive amount)',
-				`Found null price`,
-			);
-
-			const currentContributionAmount = contributionCharge.price;
-
-			// Use Zuora's billing preview to calculate the discount amount accurately
-			// This avoids replicating Zuora's complex logic for credits, discounts on specific rate plans,
-			// price rise engine, and other billing variations
-			// Find discount invoice items in the preview - these show the actual discount that would be applied
-			const discountInvoiceItems = invoice.invoiceItems.filter(
-				(item) => item.productName === 'Discounts',
-			);
-
-			// Calculate the current monthly cost with discounts applied
-			// This is what the customer currently pays per month
-			const currentMonthlyAmountWithDiscount = discountInvoiceItems.reduce(
-				(total, item) => total + item.amountWithoutTax,
-				currentPrice,
-			);
-
-			// Calculate the annualized discount value
-			// If they currently pay less than the full price monthly, calculate how much they save per year
-			const monthlyDiscountAmount =
-				currentPrice - currentMonthlyAmountWithDiscount;
-			const currentDiscountAmount = monthlyDiscountAmount * 12;
-
-			return {
-				currency,
-				savings: {
-					amount: savingsAmount,
-					period: savingsPeriod,
-				},
-				newPrice: {
-					amount: targetPrice,
-					period: newPricePeriod,
-				},
-				currentContribution: {
-					amount: currentContributionAmount,
-					period: 'month',
-				},
-				currentDiscount: {
-					amount: Math.round(currentDiscountAmount * 100) / 100,
-					period: 'year',
-				},
-			};
-		} else {
-			const orderRequest: CreateOrderRequest = {
-				processingOptions: {
-					runBilling: false,
-					collectPayment: false,
-				},
-				orderDate: zuoraDateFormat(effectiveDate),
-				existingAccountNumber: subscription.accountNumber,
-				subscriptions: [
-					{
-						subscriptionNumber: subscription.subscriptionNumber,
-						orderActions,
-					},
-				],
-			};
-
-			const zuoraResponse: ZuoraSwitchResponse = await executeOrderRequest(
-				zuoraClient,
-				orderRequest,
-				zuoraSwitchResponseSchema,
-			);
-
-			return {
-				invoiceIds: zuoraResponse.invoiceIds ?? [],
-			};
-		}
-	} catch (error) {
-		// Only return ValidationError messages to clients for security
-		if (error instanceof ValidationError) {
-			return {
-				reasons: [{ message: error.message }],
-			};
-		}
-
-		throw new Error('Unexpected error type in frequency switch processing', {
-			cause: error,
-		});
-	}
 }
 
 export const frequencySwitchHandler =
