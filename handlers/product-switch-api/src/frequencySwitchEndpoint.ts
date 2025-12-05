@@ -323,25 +323,42 @@ async function processFrequencySwitch(
 			effectiveDate = dayjs(currentCharge.chargedThroughDate ?? today);
 		}
 		const triggerDates = singleTriggerDate(effectiveDate);
-		const orderActions: OrderAction[] = [
-			{
-				type: 'ChangePlan',
+		
+		// Check if we need term renewal to avoid "cancellation date cannot be later than term end date" error
+		// We need to perform term renewal if the chargedThroughDate (which will be used as the effective date)
+		// extends beyond the current subscription term end date.
+		const termEndDate = dayjs(subscription.termEndDate);
+		const needsTermRenewal = effectiveDate.isAfter(termEndDate);
+		
+		const orderActions: OrderAction[] = [];
+		
+		if (needsTermRenewal) {
+			logger.log(
+				`Adding term renewal because effectiveDate ${effectiveDate.format('YYYY-MM-DD')} is after termEndDate ${termEndDate.format('YYYY-MM-DD')}`,
+			);
+			orderActions.push({
+				type: 'RenewSubscription',
 				triggerDates,
-				changePlan: {
-					productRatePlanId: currentRatePlan.productRatePlanId,
-					subType: 'Upgrade',
-					newProductRatePlan: {
-						productRatePlanId: targetRatePlanId,
-						chargeOverrides: [
-							{
-								productRatePlanChargeId: targetSubscriptionChargeId,
-								pricing: { recurringFlatFee: { listPrice: targetPrice } },
-							},
-						],
-					},
+			});
+		}
+		
+		orderActions.push({
+			type: 'ChangePlan',
+			triggerDates,
+			changePlan: {
+				productRatePlanId: currentRatePlan.productRatePlanId,
+				subType: 'Upgrade',
+				newProductRatePlan: {
+					productRatePlanId: targetRatePlanId,
+					chargeOverrides: [
+						{
+							productRatePlanChargeId: targetSubscriptionChargeId,
+							pricing: { recurringFlatFee: { listPrice: targetPrice } },
+						},
+					],
 				},
 			},
-		];
+		});
 
 		if (preview) {
 			// Preview with today's date to get Zuora to generate invoices
