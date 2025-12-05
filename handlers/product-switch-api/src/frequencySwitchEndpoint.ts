@@ -330,6 +330,19 @@ async function processFrequencySwitch(
 		const termEndDate = dayjs(subscription.termEndDate);
 		const needsTermRenewal = effectiveDate.isAfter(termEndDate);
 
+		// Find active discount rate plans that need to be removed
+		// Discounts must be removed at the switch time to ensure customer ends up on full price
+		const activeDiscountRatePlans = subscription.ratePlans.filter(
+			(rp) =>
+				rp.productName === 'Discounts' &&
+				rp.lastChangeType !== 'Remove' &&
+				rp.ratePlanCharges.some(
+					(charge) =>
+						charge.effectiveStartDate <= today.toDate() &&
+						charge.effectiveEndDate >= today.toDate(),
+				),
+		);
+
 		const orderActions: OrderAction[] = [];
 
 		if (needsTermRenewal) {
@@ -339,6 +352,21 @@ async function processFrequencySwitch(
 			orderActions.push({
 				type: 'RenewSubscription',
 				triggerDates,
+			});
+		}
+
+		// Remove discount rate plans before changing the billing frequency
+		// This ensures discounts don't carry over to the new billing period
+		for (const discountRatePlan of activeDiscountRatePlans) {
+			logger.log(
+				`Removing discount rate plan ${discountRatePlan.ratePlanName} (${discountRatePlan.id})`,
+			);
+			orderActions.push({
+				type: 'RemoveProduct',
+				triggerDates,
+				removeProduct: {
+					ratePlanId: discountRatePlan.id,
+				},
 			});
 		}
 
@@ -389,6 +417,12 @@ async function processFrequencySwitch(
 
 			logger.log('Orders preview returned successful response', zuoraPreview);
 
+			// Extract the invoice from the preview response
+			const invoice = getIfDefined(
+				zuoraPreview.previewResult?.invoices[0],
+				'No invoice found in the preview response',
+			);
+
 			// Calculate savings and new price for monthly to annual switch
 			// currentCharge.price is guaranteed to be non-null by selectCandidateSubscriptionCharge validation
 			const currentPrice = currentCharge.price as number;
@@ -420,49 +454,25 @@ async function processFrequencySwitch(
 
 			const currentContributionAmount = contributionCharge.price;
 
-			// Calculate current discount from all active Percentage discount charges
-			// Note: We don't filter by lastChangeType as removed rate plans can still be in effect
-			const activeDiscountCharges = subscription.ratePlans
-				.filter((rp) => rp.productName === 'Discounts')
-				.flatMap((rp) => rp.ratePlanCharges)
-				.filter((charge) => {
-					// Filter to active percentage discounts within the effective period
-					return (
-						charge.name === 'Percentage' &&
-						charge.type === 'Recurring' &&
-						charge.effectiveStartDate <= today.toDate() &&
-						charge.effectiveEndDate >= today.toDate() &&
-						(!charge.chargedThroughDate ||
-							charge.chargedThroughDate >= today.toDate())
-					);
-				}); // Calculate the total annual discount value considering the duration of each discount
-			const currentDiscountAmount = activeDiscountCharges.reduce(
-				(total, discountCharge) => {
-					const discountPercentage = discountCharge.discountPercentage ?? 0;
-					// currentCharge.price is guaranteed to be non-null by selectCandidateSubscriptionCharge validation
-					const subscriptionPrice = currentCharge.price as number;
-
-					// Calculate discount per period (month)
-					const discountPerMonth = Math.abs(
-						subscriptionPrice * (discountPercentage / 100),
-					);
-
-					// Calculate how many months this discount applies for
-					const discountStartDate = dayjs(discountCharge.effectiveStartDate);
-					const discountEndDate = dayjs(discountCharge.effectiveEndDate);
-					const discountMonths = discountEndDate.diff(
-						discountStartDate,
-						'month',
-						true,
-					);
-
-					// Annual value = (discount per month) * (number of months discounted)
-					const annualizedDiscountValue = discountPerMonth * discountMonths;
-
-					return total + annualizedDiscountValue;
-				},
-				0,
+			// Use Zuora's billing preview to calculate the discount amount accurately
+			// This avoids replicating Zuora's complex logic for credits, discounts on specific rate plans,
+			// price rise engine, and other billing variations
+			// Find discount invoice items in the preview - these show the actual discount that would be applied
+			const discountInvoiceItems = invoice.invoiceItems.filter(
+				(item) => item.productName === 'Discounts',
 			);
+
+			// Calculate the current monthly cost with discounts applied
+			// This is what the customer currently pays per month
+			const currentMonthlyAmountWithDiscount = discountInvoiceItems.reduce(
+				(total, item) => total + item.amountWithoutTax,
+				currentPrice,
+			);
+
+			// Calculate the annualized discount value
+			// If they currently pay less than the full price monthly, calculate how much they save per year
+			const monthlyDiscountAmount = currentPrice - currentMonthlyAmountWithDiscount;
+			const currentDiscountAmount = monthlyDiscountAmount * 12;
 
 			return {
 				currency,
