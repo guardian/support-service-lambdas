@@ -11,6 +11,7 @@ packages:
 catalog:
   zod: ^3.23.8
   typescript: ^5.6.3
+  dayjs: ^1.11.13
   "@aws-sdk/client-ssm": ^3.848.0,
   ts-node: ^10.9.1,
   tsconfig-paths: ^4.2.0

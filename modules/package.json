@@ -7,5 +7,8 @@
     "build": "tsc --noEmit",
     "check-formatting": "prettier --check **.ts",
     "fix-formatting": "prettier --write **.ts"
+  },
+  "dependencies": {
+    "dayjs": "catalog:"
   }
 }

@@ -38,6 +38,7 @@
       "@modules/product-catalog/*": ["./modules/product-catalog/src/*"],
       "@modules/promotions/*": ["./modules/promotions/src/*"],
       "@modules/email/*": ["./modules/email/src/*"],
+      "@modules/eligibility/*": ["./modules/eligibility/src/*"],
       "@modules/internationalisation/*": ["./modules/internationalisation/src/*"],
       "@modules/supporter-product-data/*": ["./modules/supporter-product-data/src/*"],
       "@modules/identity/*": ["./modules/identity/src/*"],
