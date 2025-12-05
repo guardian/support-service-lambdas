@@ -1,0 +1,12 @@
+{
+  "name": "eligibility",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "jest --group=-integration",
+    "lint": "eslint **/*.ts"
+  },
+  "dependencies": {
+    "dayjs": "catalog:"
+  }
+}

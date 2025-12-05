@@ -1,3 +1,5 @@
+import { assertValidState } from '@modules/eligibility/eligibilityChecker';
+import { validationRequirements as sharedValidationRequirements } from '@modules/eligibility/eligibilityChecker';
 import { ValidationError } from '@modules/errors';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { getIfDefined } from '@modules/nullAndUndefined';
@@ -40,11 +42,12 @@ import {
 
 /**
  * Validation requirements for frequency switch eligibility.
- * Each requirement includes a description of what must pass and details about why.
+ * Extends the shared validation requirements with frequency-specific checks.
  */
 export const frequencySwitchValidationRequirements = {
-	subscriptionActive: 'subscription status is active',
-	zeroAccountBalance: 'account balance is zero',
+	// Reuse shared validation requirements for consistency
+	...sharedValidationRequirements,
+	// Frequency-specific validation requirements
 	hasEligibleCharges:
 		'subscription has at least one active recurring charge eligible for frequency switch',
 	singleEligibleCharge:
@@ -53,28 +56,6 @@ export const frequencySwitchValidationRequirements = {
 	zeroContributionAmount:
 		'contribution amount is zero (non-zero contributions cannot be preserved during frequency switch)',
 };
-
-/**
- * Assert that a condition is valid for frequency switch eligibility.
- * Throws ValidationError if condition fails, capturing the requirement and actual value.
- *
- * @param isValid Whether the validation passed
- * @param requirement Description of the requirement from frequencySwitchValidationRequirements
- * @param actual The actual value that failed validation
- * @throws ValidationError with formatted message including requirement and actual value
- */
-function assertValidState(
-	isValid: boolean,
-	requirement: string,
-	actual: string,
-): asserts isValid {
-	logger.log(`Asserting <${requirement}>`);
-	if (!isValid) {
-		const message = `subscription did not meet precondition <${requirement}> (was ${actual})`;
-		logger.log(`FAILED: ${message}`);
-		throw new ValidationError(message);
-	}
-}
 
 /**
  * Select the SupporterPlus Monthly rate plan and its subscription charge eligible for a frequency switch.
@@ -102,7 +83,7 @@ export function selectCandidateSubscriptionCharge(
 ): { ratePlan: RatePlan; charge: RatePlanCharge } {
 	assertValidState(
 		subscription.status === 'Active',
-		frequencySwitchValidationRequirements.subscriptionActive,
+		frequencySwitchValidationRequirements.isActive,
 		subscription.status,
 	);
 
