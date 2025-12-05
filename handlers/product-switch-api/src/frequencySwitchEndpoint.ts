@@ -323,15 +323,15 @@ async function processFrequencySwitch(
 			effectiveDate = dayjs(currentCharge.chargedThroughDate ?? today);
 		}
 		const triggerDates = singleTriggerDate(effectiveDate);
-		
+
 		// Check if we need term renewal to avoid "cancellation date cannot be later than term end date" error
 		// We need to perform term renewal if the chargedThroughDate (which will be used as the effective date)
 		// extends beyond the current subscription term end date.
 		const termEndDate = dayjs(subscription.termEndDate);
 		const needsTermRenewal = effectiveDate.isAfter(termEndDate);
-		
+
 		const orderActions: OrderAction[] = [];
-		
+
 		if (needsTermRenewal) {
 			logger.log(
 				`Adding term renewal because effectiveDate ${effectiveDate.format('YYYY-MM-DD')} is after termEndDate ${termEndDate.format('YYYY-MM-DD')}`,
@@ -341,7 +341,7 @@ async function processFrequencySwitch(
 				triggerDates,
 			});
 		}
-		
+
 		orderActions.push({
 			type: 'ChangePlan',
 			triggerDates,
@@ -421,8 +421,8 @@ async function processFrequencySwitch(
 			const currentContributionAmount = contributionCharge.price;
 
 			// Calculate current discount from all active Percentage discount charges
+			// Note: We don't filter by lastChangeType as removed rate plans can still be in effect
 			const activeDiscountCharges = subscription.ratePlans
-				.filter((rp) => rp.lastChangeType !== 'Remove')
 				.filter((rp) => rp.productName === 'Discounts')
 				.flatMap((rp) => rp.ratePlanCharges)
 				.filter((charge) => {
@@ -435,9 +435,7 @@ async function processFrequencySwitch(
 						(!charge.chargedThroughDate ||
 							charge.chargedThroughDate >= today.toDate())
 					);
-				});
-
-			// Calculate the total annual discount value considering the duration of each discount
+				}); // Calculate the total annual discount value considering the duration of each discount
 			const currentDiscountAmount = activeDiscountCharges.reduce(
 				(total, discountCharge) => {
 					const discountPercentage = discountCharge.discountPercentage ?? 0;
