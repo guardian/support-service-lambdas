@@ -3,315 +3,136 @@ import type { BrazeClient } from '../../../src/services/brazeClient';
 import { deleteBrazeUser } from '../../../src/services/brazeClient';
 import type { MParticleClient } from '../../../src/services/mparticleClient';
 import { deleteMParticleUser } from '../../../src/services/mparticleDeletion';
-import { SQSService } from '../../../src/services/sqsService';
-import type {
-	DeletionRequestBody,
-	MessageAttributes,
-} from '../../../src/types/deletionMessage';
 
 // Mock the modules
 jest.mock('../../../src/services/mparticleDeletion');
 jest.mock('../../../src/services/brazeClient');
-jest.mock('../../../src/services/sqsService');
 
 describe('processUserDeletion', () => {
 	const mockDeleteMParticleUser = deleteMParticleUser as jest.Mock;
 	const mockDeleteBrazeUser = deleteBrazeUser as jest.Mock;
-	const mockSendToDLQ = jest.fn();
 
 	const mockMParticleClient = {} as MParticleClient;
 	const mockBrazeClient = {} as BrazeClient;
-	const dlqUrl = 'https://sqs.eu-west-1.amazonaws.com/123456789/test-dlq';
-
-	const body: DeletionRequestBody = {
-		userId: 'test-user-123',
-		email: 'test@example.com',
-	};
+	const userId = 'test-user-123';
 
 	beforeEach(() => {
 		jest.clearAllMocks();
 		console.log = jest.fn();
 		console.error = jest.fn();
-
-		// Mock SQSService constructor
-		(SQSService as jest.Mock).mockImplementation(() => {
-			return {
-				sendToDLQ: mockSendToDLQ,
-			};
-		});
 	});
 
 	describe('Both deletions succeed', () => {
-		it('should delete from both services and return success', async () => {
-			const attributes: MessageAttributes = {
-				mParticleDeleted: false,
-				brazeDeleted: false,
-				attemptCount: 0,
-			};
-
+		it('should delete from both services successfully', async () => {
 			mockDeleteMParticleUser.mockResolvedValue({ success: true });
 			mockDeleteBrazeUser.mockResolvedValue({ success: true });
 
-			const result = await processUserDeletion(
-				body,
-				attributes,
-				mockMParticleClient,
-				mockBrazeClient,
-				dlqUrl,
-			);
+			await processUserDeletion(userId, mockMParticleClient, mockBrazeClient);
 
-			expect(result).toEqual({
-				mParticleDeleted: true,
-				brazeDeleted: true,
-				allSucceeded: true,
-			});
 			expect(mockDeleteMParticleUser).toHaveBeenCalledWith(
 				mockMParticleClient,
-				'test-user-123',
+				userId,
 			);
-			expect(mockDeleteBrazeUser).toHaveBeenCalledWith(
-				mockBrazeClient,
-				'test-user-123',
-			);
-			expect(mockSendToDLQ).not.toHaveBeenCalled();
+			expect(mockDeleteBrazeUser).toHaveBeenCalledWith(mockBrazeClient, userId);
 		});
 	});
 
-	describe('Both already deleted (skip both)', () => {
-		it('should skip both APIs and return success', async () => {
-			const attributes: MessageAttributes = {
-				mParticleDeleted: true,
-				brazeDeleted: true,
-				attemptCount: 1,
-			};
-
-			const result = await processUserDeletion(
-				body,
-				attributes,
-				mockMParticleClient,
-				mockBrazeClient,
-				dlqUrl,
-			);
-
-			expect(result).toEqual({
-				mParticleDeleted: true,
-				brazeDeleted: true,
-				allSucceeded: true,
+	describe('mParticle fails with retryable error', () => {
+		it('should throw error to trigger SQS retry', async () => {
+			const error = new Error('Network timeout');
+			mockDeleteMParticleUser.mockResolvedValue({
+				success: false,
+				error,
+				retryable: true,
 			});
-			expect(mockDeleteMParticleUser).not.toHaveBeenCalled();
-			expect(mockDeleteBrazeUser).not.toHaveBeenCalled();
-			expect(mockSendToDLQ).not.toHaveBeenCalled();
+			mockDeleteBrazeUser.mockResolvedValue({ success: true });
+
+			await expect(
+				processUserDeletion(userId, mockMParticleClient, mockBrazeClient),
+			).rejects.toThrow('Network timeout');
+
+			expect(mockDeleteMParticleUser).toHaveBeenCalled();
+			expect(mockDeleteBrazeUser).toHaveBeenCalled();
 		});
 	});
 
-	describe('Partial success - mParticle succeeds, Braze fails', () => {
-		it('should send to DLQ with updated attributes', async () => {
-			const attributes: MessageAttributes = {
-				mParticleDeleted: false,
-				brazeDeleted: false,
-				attemptCount: 0,
-			};
-
+	describe('Braze fails with retryable error', () => {
+		it('should throw error to trigger SQS retry', async () => {
+			const error = new Error('Server error');
 			mockDeleteMParticleUser.mockResolvedValue({ success: true });
 			mockDeleteBrazeUser.mockResolvedValue({
 				success: false,
-				error: new Error('Network timeout'),
+				error,
 				retryable: true,
 			});
 
-			const result = await processUserDeletion(
-				body,
-				attributes,
-				mockMParticleClient,
-				mockBrazeClient,
-				dlqUrl,
-			);
-
-			expect(result).toEqual({
-				mParticleDeleted: true,
-				brazeDeleted: false,
-				allSucceeded: false,
-			});
-			expect(mockSendToDLQ).toHaveBeenCalledWith(dlqUrl, body, {
-				mParticleDeleted: true,
-				brazeDeleted: false,
-				attemptCount: 1,
-			});
+			await expect(
+				processUserDeletion(userId, mockMParticleClient, mockBrazeClient),
+			).rejects.toThrow('Server error');
 		});
 	});
 
-	describe('Partial success - mParticle fails, Braze succeeds', () => {
-		it('should send to DLQ with updated attributes', async () => {
-			const attributes: MessageAttributes = {
-				mParticleDeleted: false,
-				brazeDeleted: false,
-				attemptCount: 0,
-			};
+	describe('Both fail with retryable errors', () => {
+		it('should throw mParticle error first', async () => {
+			const mParticleError = new Error('mParticle error');
+			const brazeError = new Error('Braze error');
 
 			mockDeleteMParticleUser.mockResolvedValue({
 				success: false,
-				error: new Error('API Error'),
+				error: mParticleError,
 				retryable: true,
 			});
-			mockDeleteBrazeUser.mockResolvedValue({ success: true });
-
-			const result = await processUserDeletion(
-				body,
-				attributes,
-				mockMParticleClient,
-				mockBrazeClient,
-				dlqUrl,
-			);
-
-			expect(result).toEqual({
-				mParticleDeleted: false,
-				brazeDeleted: true,
-				allSucceeded: false,
+			mockDeleteBrazeUser.mockResolvedValue({
+				success: false,
+				error: brazeError,
+				retryable: true,
 			});
-			expect(mockSendToDLQ).toHaveBeenCalledWith(dlqUrl, body, {
-				mParticleDeleted: false,
-				brazeDeleted: true,
-				attemptCount: 1,
-			});
+
+			await expect(
+				processUserDeletion(userId, mockMParticleClient, mockBrazeClient),
+			).rejects.toThrow('mParticle error');
 		});
 	});
 
-	describe('Both fail', () => {
-		it('should send to DLQ with no completions', async () => {
-			const attributes: MessageAttributes = {
-				mParticleDeleted: false,
-				brazeDeleted: false,
-				attemptCount: 0,
-			};
-
+	describe('Non-retryable errors', () => {
+		it('should not throw if mParticle fails with non-retryable error', async () => {
 			mockDeleteMParticleUser.mockResolvedValue({
 				success: false,
-				error: new Error('mParticle Error'),
-				retryable: true,
+				error: new Error('Invalid request'),
+				retryable: false,
 			});
-			mockDeleteBrazeUser.mockResolvedValue({
-				success: false,
-				error: new Error('Braze Error'),
-				retryable: true,
-			});
-
-			const result = await processUserDeletion(
-				body,
-				attributes,
-				mockMParticleClient,
-				mockBrazeClient,
-				dlqUrl,
-			);
-
-			expect(result).toEqual({
-				mParticleDeleted: false,
-				brazeDeleted: false,
-				allSucceeded: false,
-			});
-			expect(mockSendToDLQ).toHaveBeenCalledWith(dlqUrl, body, {
-				mParticleDeleted: false,
-				brazeDeleted: false,
-				attemptCount: 1,
-			});
-		});
-	});
-
-	describe('mParticle already done, Braze succeeds', () => {
-		it('should skip mParticle and complete Braze', async () => {
-			const attributes: MessageAttributes = {
-				mParticleDeleted: true,
-				brazeDeleted: false,
-				attemptCount: 1,
-			};
-
 			mockDeleteBrazeUser.mockResolvedValue({ success: true });
 
-			const result = await processUserDeletion(
-				body,
-				attributes,
-				mockMParticleClient,
-				mockBrazeClient,
-				dlqUrl,
-			);
+			// Should not throw - message will be removed from queue
+			await processUserDeletion(userId, mockMParticleClient, mockBrazeClient);
 
-			expect(result).toEqual({
-				mParticleDeleted: true,
-				brazeDeleted: true,
-				allSucceeded: true,
-			});
-			expect(mockDeleteMParticleUser).not.toHaveBeenCalled();
-			expect(mockDeleteBrazeUser).toHaveBeenCalledWith(
-				mockBrazeClient,
-				'test-user-123',
-			);
-			expect(mockSendToDLQ).not.toHaveBeenCalled();
+			expect(mockDeleteMParticleUser).toHaveBeenCalled();
+			expect(mockDeleteBrazeUser).toHaveBeenCalled();
 		});
-	});
 
-	describe('Attempt count increments', () => {
-		it('should increment attempt count on retry', async () => {
-			const attributes: MessageAttributes = {
-				mParticleDeleted: true,
-				brazeDeleted: false,
-				attemptCount: 2,
-			};
-
+		it('should not throw if Braze fails with non-retryable error', async () => {
+			mockDeleteMParticleUser.mockResolvedValue({ success: true });
 			mockDeleteBrazeUser.mockResolvedValue({
 				success: false,
-				error: new Error('Still failing'),
-				retryable: true,
+				error: new Error('Invalid API key'),
+				retryable: false,
 			});
 
-			const result = await processUserDeletion(
-				body,
-				attributes,
-				mockMParticleClient,
-				mockBrazeClient,
-				dlqUrl,
-			);
-
-			// Result should indicate mParticle succeeded but Braze failed
-			expect(result.allSucceeded).toBe(false);
-			expect(result.mParticleDeleted).toBe(true);
-			expect(result.brazeDeleted).toBe(false);
-
-			expect(mockSendToDLQ).toHaveBeenCalledWith(dlqUrl, body, {
-				mParticleDeleted: true,
-				brazeDeleted: false,
-				attemptCount: 3,
-			});
+			// Should not throw - message will be removed from queue
+			await processUserDeletion(userId, mockMParticleClient, mockBrazeClient);
 		});
 	});
 
-	describe('Braze already done, mParticle succeeds', () => {
-		it('should skip Braze and complete mParticle', async () => {
-			const attributes: MessageAttributes = {
-				mParticleDeleted: false,
-				brazeDeleted: true,
-				attemptCount: 1,
-			};
+	describe('Idempotency - already deleted (404)', () => {
+		it('should succeed when mParticle returns 404 on retry', async () => {
+			// First call deleted from mParticle, second call gets 404
+			mockDeleteMParticleUser.mockResolvedValue({ success: true }); // 404 treated as success
+			mockDeleteBrazeUser.mockResolvedValue({ success: true });
 
-			mockDeleteMParticleUser.mockResolvedValue({ success: true });
+			await processUserDeletion(userId, mockMParticleClient, mockBrazeClient);
 
-			const result = await processUserDeletion(
-				body,
-				attributes,
-				mockMParticleClient,
-				mockBrazeClient,
-				dlqUrl,
-			);
-
-			expect(result).toEqual({
-				mParticleDeleted: true,
-				brazeDeleted: true,
-				allSucceeded: true,
-			});
-			expect(mockDeleteMParticleUser).toHaveBeenCalledWith(
-				mockMParticleClient,
-				'test-user-123',
-			);
-			expect(mockDeleteBrazeUser).not.toHaveBeenCalled();
-			expect(mockSendToDLQ).not.toHaveBeenCalled();
+			expect(mockDeleteMParticleUser).toHaveBeenCalled();
+			expect(mockDeleteBrazeUser).toHaveBeenCalled();
 		});
 	});
 });

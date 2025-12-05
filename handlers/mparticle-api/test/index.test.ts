@@ -16,8 +16,6 @@ jest.mock('../src/services/config', () => ({
 			apiUrl: 'https://api.braze.com',
 			apiKey: 'test-braze-key',
 		},
-		mmaUserDeletionDlqUrl:
-			'https://sqs.eu-west-1.amazonaws.com/123456789/test-dlq',
 	}),
 	getEnv: jest.fn().mockReturnValue('test'),
 }));
@@ -59,20 +57,7 @@ describe('handlerDeletion', () => {
 						SenderId: 'test-sender',
 						ApproximateFirstReceiveTimestamp: '1234567890',
 					},
-					messageAttributes: {
-						mParticleDeleted: {
-							dataType: 'String',
-							stringValue: 'false',
-						},
-						brazeDeleted: {
-							dataType: 'String',
-							stringValue: 'false',
-						},
-						attemptCount: {
-							dataType: 'String',
-							stringValue: '0',
-						},
-					},
+					messageAttributes: {},
 					md5OfBody: 'test-md5',
 					eventSource: 'aws:sqs',
 					eventSourceARN: 'arn:aws:sqs:eu-west-1:123456789:test-queue',
@@ -81,21 +66,15 @@ describe('handlerDeletion', () => {
 			],
 		};
 
-		mockProcessUserDeletion.mockResolvedValue({
-			mParticleDeleted: true,
-			brazeDeleted: true,
-			allSucceeded: true,
-		});
+		mockProcessUserDeletion.mockResolvedValue(undefined);
 
 		await handlerDeletion(event, mockContext, mockCallback);
 
 		expect(mockProcessUserDeletion).toHaveBeenCalledTimes(1);
 		expect(mockProcessUserDeletion).toHaveBeenCalledWith(
-			{ userId: 'user-123', email: 'user@example.com' },
-			{ mParticleDeleted: false, brazeDeleted: false, attemptCount: 0 },
+			'user-123',
 			expect.anything(),
 			expect.anything(),
-			'https://sqs.eu-west-1.amazonaws.com/123456789/test-dlq',
 		);
 	});
 
@@ -143,70 +122,11 @@ describe('handlerDeletion', () => {
 			],
 		};
 
-		mockProcessUserDeletion.mockResolvedValue({
-			mParticleDeleted: true,
-			brazeDeleted: true,
-			allSucceeded: true,
-		});
+		mockProcessUserDeletion.mockResolvedValue(undefined);
 
 		await handlerDeletion(event, mockContext, mockCallback);
 
 		expect(mockProcessUserDeletion).toHaveBeenCalledTimes(2);
-	});
-
-	it('should handle messages with partial deletion states', async () => {
-		const event: SQSEvent = {
-			Records: [
-				{
-					messageId: 'test-message-1',
-					receiptHandle: 'test-receipt-1',
-					body: JSON.stringify({
-						userId: 'user-789',
-						email: 'user@example.com',
-					}),
-					attributes: {
-						ApproximateReceiveCount: '1',
-						SentTimestamp: '1234567890',
-						SenderId: 'test-sender',
-						ApproximateFirstReceiveTimestamp: '1234567890',
-					},
-					messageAttributes: {
-						mParticleDeleted: {
-							dataType: 'String',
-							stringValue: 'true',
-						},
-						brazeDeleted: {
-							dataType: 'String',
-							stringValue: 'false',
-						},
-						attemptCount: {
-							dataType: 'String',
-							stringValue: '2',
-						},
-					},
-					md5OfBody: 'test-md5',
-					eventSource: 'aws:sqs',
-					eventSourceARN: 'arn:aws:sqs:eu-west-1:123456789:test-queue',
-					awsRegion: 'eu-west-1',
-				},
-			],
-		};
-
-		mockProcessUserDeletion.mockResolvedValue({
-			mParticleDeleted: true,
-			brazeDeleted: true,
-			allSucceeded: true,
-		});
-
-		await handlerDeletion(event, mockContext, mockCallback);
-
-		expect(mockProcessUserDeletion).toHaveBeenCalledWith(
-			{ userId: 'user-789', email: 'user@example.com' },
-			{ mParticleDeleted: true, brazeDeleted: false, attemptCount: 2 },
-			expect.anything(),
-			expect.anything(),
-			'https://sqs.eu-west-1.amazonaws.com/123456789/test-dlq',
-		);
 	});
 
 	it('should throw error if message processing fails', async () => {
@@ -275,18 +195,12 @@ describe('handlerDeletion', () => {
 			],
 		};
 
-		mockProcessUserDeletion.mockResolvedValue({
-			mParticleDeleted: true,
-			brazeDeleted: true,
-			allSucceeded: true,
-		});
+		mockProcessUserDeletion.mockResolvedValue(undefined);
 
 		await handlerDeletion(event, mockContext, mockCallback);
 
 		expect(mockProcessUserDeletion).toHaveBeenCalledWith(
-			{ userId: 'json-user', email: 'json@example.com' },
-			expect.anything(),
-			expect.anything(),
+			'json-user',
 			expect.anything(),
 			expect.anything(),
 		);

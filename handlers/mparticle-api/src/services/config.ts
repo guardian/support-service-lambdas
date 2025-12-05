@@ -17,7 +17,6 @@ export const ConfigSchema = z.object({
 		apiUrl: z.string(),
 		apiKey: z.string(),
 	}),
-	mmaUserDeletionDlqUrl: z.string(),
 });
 export type AppConfig = z.infer<typeof ConfigSchema>;
 

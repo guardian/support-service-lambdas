@@ -3,115 +3,65 @@ import type { BrazeClient } from '../../services/brazeClient';
 import { deleteBrazeUser } from '../../services/brazeClient';
 import type { MParticleClient } from '../../services/mparticleClient';
 import { deleteMParticleUser } from '../../services/mparticleDeletion';
-import { SQSService } from '../../services/sqsService';
-import type {
-	DeletionRequestBody,
-	DeletionStatus,
-	MessageAttributes,
-} from '../../types/deletionMessage';
 
 /**
  * Process a user deletion request
  *
  * This function implements idempotent deletion logic:
- * 1. Reads message attributes to see which APIs have already succeeded
- * 2. Only calls APIs that haven't succeeded yet
- * 3. Treats 404 responses as success (user already deleted)
- * 4. Updates message attributes based on results
- * 5. If all succeed: returns success
- * 6. If any fail: sends updated message to DLQ for retry
+ * 1. Calls both mParticle and Braze deletion APIs
+ * 2. Treats 404 responses as success (user already deleted - idempotent)
+ * 3. If both succeed: message removed from queue
+ * 4. If either fails with retryable error: throws to trigger SQS retry
+ * 5. SQS automatically retries up to maxReceiveCount, then moves to DLQ
  *
- * @param body - The deletion request containing userId
- * @param attributes - Message attributes tracking deletion status
+ * @param userId - The user ID to delete
  * @param mParticleClient - Client for mParticle API
  * @param brazeClient - Client for Braze API
- * @param dlqUrl - URL of the dead letter queue for failed deletions
- * @returns DeletionStatus indicating which APIs succeeded
  */
 export async function processUserDeletion(
-	body: DeletionRequestBody,
-	attributes: MessageAttributes,
+	userId: string,
 	mParticleClient: MParticleClient,
 	brazeClient: BrazeClient,
-	dlqUrl: string,
-): Promise<DeletionStatus> {
-	const { userId } = body;
-	const attemptCount = attributes.attemptCount + 1;
+): Promise<void> {
+	logger.log(`Processing deletion for user ${userId}`);
 
-	logger.log(
-		`Processing deletion for user ${userId}, attempt ${attemptCount}. Current status: mParticle=${attributes.mParticleDeleted}, Braze=${attributes.brazeDeleted}`,
-	);
+	// Call both APIs - they're idempotent (404 = success)
+	const mParticleResult = await deleteMParticleUser(mParticleClient, userId);
+	const brazeResult = await deleteBrazeUser(brazeClient, userId);
 
-	// Track current deletion status
-	let mParticleDeleted = attributes.mParticleDeleted;
-	let brazeDeleted = attributes.brazeDeleted;
-
-	// Only call mParticle API if not already deleted
-	if (!mParticleDeleted) {
-		logger.log(`Calling mParticle deletion API for user ${userId}`);
-		const mParticleResult = await deleteMParticleUser(mParticleClient, userId);
-
-		if (mParticleResult.success) {
-			mParticleDeleted = true;
-			logger.log(`mParticle deletion succeeded for user ${userId}`);
-		} else {
+	// If mParticle failed with retryable error, throw to trigger SQS retry
+	if (!mParticleResult.success) {
+		if (mParticleResult.retryable) {
 			logger.error(
-				`mParticle deletion failed for user ${userId}. Retryable: ${mParticleResult.retryable}`,
+				`mParticle deletion failed for user ${userId} - will retry`,
 				mParticleResult.error,
 			);
-		}
-	} else {
-		logger.log(
-			`Skipping mParticle deletion - already deleted for user ${userId}`,
-		);
-	}
-
-	// Only call Braze API if not already deleted
-	if (!brazeDeleted) {
-		logger.log(`Calling Braze deletion API for user ${userId}`);
-		const brazeResult = await deleteBrazeUser(brazeClient, userId);
-
-		if (brazeResult.success) {
-			brazeDeleted = true;
-			logger.log(`Braze deletion succeeded for user ${userId}`);
+			throw mParticleResult.error;
 		} else {
 			logger.error(
-				`Braze deletion failed for user ${userId}. Retryable: ${brazeResult.retryable}`,
+				`Non-retryable mParticle error for user ${userId} - giving up`,
+				mParticleResult.error,
+			);
+			// Don't throw - message will be removed from queue
+		}
+	}
+
+	// If Braze failed with retryable error, throw to trigger SQS retry
+	if (!brazeResult.success) {
+		if (brazeResult.retryable) {
+			logger.error(
+				`Braze deletion failed for user ${userId} - will retry`,
 				brazeResult.error,
 			);
+			throw brazeResult.error;
+		} else {
+			logger.error(
+				`Non-retryable Braze error for user ${userId} - giving up`,
+				brazeResult.error,
+			);
+			// Don't throw - message will be removed from queue
 		}
-	} else {
-		logger.log(`Skipping Braze deletion - already deleted for user ${userId}`);
 	}
 
-	const allSucceeded = mParticleDeleted && brazeDeleted;
-
-	// If not all succeeded, send updated message to DLQ for retry
-	if (!allSucceeded) {
-		logger.log(
-			`Deletion incomplete for user ${userId}. Sending to DLQ with updated attributes.`,
-		);
-
-		const updatedAttributes: MessageAttributes = {
-			mParticleDeleted,
-			brazeDeleted,
-			attemptCount,
-		};
-
-		const sqsService = new SQSService();
-		await sqsService.sendToDLQ(dlqUrl, body, updatedAttributes);
-
-		logger.log(
-			`Message sent to DLQ for user ${userId} with attributes:`,
-			updatedAttributes,
-		);
-	} else {
-		logger.log(`Successfully deleted user ${userId} from all services`);
-	}
-
-	return {
-		mParticleDeleted,
-		brazeDeleted,
-		allSucceeded,
-	};
+	logger.log(`Successfully deleted user ${userId} from all services`);
 }

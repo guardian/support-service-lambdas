@@ -15,10 +15,7 @@ import { BrazeClient } from './services/brazeClient';
 import type { AppConfig } from './services/config';
 import { getAppConfig, getEnv } from './services/config';
 import { MParticleClient } from './services/mparticleClient';
-import {
-	DeletionRequestBodySchema,
-	parseMessageAttributes,
-} from './types/deletionMessage';
+import { DeletionRequestBodySchema } from './types/deletionMessage';
 
 export const handlerHttp: Handler<
 	APIGatewayProxyEvent,
@@ -86,7 +83,7 @@ export const handlerDeletion: Handler<SQSEvent, void> = async (
 		// Process each record independently
 		// SQS will retry failed messages automatically
 		for (const record of event.Records) {
-			await processSQSRecord(record, mParticleClient, brazeClient, config);
+			await processSQSRecord(record, mParticleClient, brazeClient);
 		}
 
 		logger.log('Finished processing deletion messages');
@@ -103,48 +100,18 @@ async function processSQSRecord(
 	record: SQSRecord,
 	mParticleClient: MParticleClient,
 	brazeClient: BrazeClient,
-	config: AppConfig,
 ): Promise<void> {
-	try {
-		logger.log(`Processing message ${record.messageId}`);
+	logger.log(`Processing message ${record.messageId}`);
 
-		// Parse the message body
-		const body = DeletionRequestBodySchema.parse(JSON.parse(record.body));
+	// Parse the message body
+	const body = DeletionRequestBodySchema.parse(JSON.parse(record.body));
 
-		// Parse message attributes to track deletion status
-		const attributes = parseMessageAttributes(record.messageAttributes);
+	// Process the deletion - throws on retryable failure
+	await processUserDeletion(body.userId, mParticleClient, brazeClient);
 
-		logger.log(
-			`Deletion request for user ${body.userId}. Attributes:`,
-			attributes,
-		);
-
-		// Process the deletion
-		const result = await processUserDeletion(
-			body,
-			attributes,
-			mParticleClient,
-			brazeClient,
-			config.mmaUserDeletionDlqUrl,
-		);
-
-		if (result.allSucceeded) {
-			logger.log(
-				`Successfully processed deletion for user ${body.userId}. Message ${record.messageId} will be deleted from queue.`,
-			);
-		} else {
-			logger.log(
-				`Partial success for user ${body.userId}. Message sent to DLQ for retry. mParticle=${result.mParticleDeleted}, Braze=${result.brazeDeleted}`,
-			);
-		}
-	} catch (error) {
-		logger.error(
-			`Error processing message ${record.messageId}. Will be retried by SQS.`,
-			error,
-		);
-		// Re-throw to let SQS handle retry logic
-		throw error;
-	}
+	logger.log(
+		`Successfully processed deletion for user ${body.userId}. Message ${record.messageId} will be deleted from queue.`,
+	);
 }
 
 async function services() {
