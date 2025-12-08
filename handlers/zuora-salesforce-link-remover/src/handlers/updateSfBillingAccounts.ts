@@ -1,9 +1,6 @@
 import { sfApiVersion } from '@modules/salesforce/config';
 import { SfClient } from '@modules/salesforce/sfClient';
-import type {
-	SalesforceUpdateResponse,
-	SalesforceUpdateResponseArray,
-} from '@modules/salesforce/updateRecords';
+import type { SalesforceUpdateResponse, SalesforceUpdateResponseArray, } from '@modules/salesforce/updateRecords';
 import { doCompositeCallout } from '@modules/salesforce/updateRecords';
 import { stageFromEnvironment } from '@modules/stage';
 import type { Handler } from 'aws-lambda';
