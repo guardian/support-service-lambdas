@@ -1,15 +1,18 @@
 import type {
 	SfApiUserAuth,
 	SfConnectedAppAuth,
-} from '@modules/salesforce/src/auth';
-import { doSfAuth } from '@modules/salesforce/src/auth';
-import { executeSalesforceQuery } from '@modules/salesforce/src/query';
-import { RecordSchema } from '@modules/salesforce/src/recordSchema';
+} from '@modules/salesforce/auth';
+import { doSfAuth } from '@modules/salesforce/auth';
+import { executeSalesforceQuery } from '@modules/salesforce/query';
+import { RecordSchema } from '@modules/salesforce/recordSchema';
+import type {
+	ApiUserSecret,
+	ConnectedAppSecret,
+} from '@modules/salesforce/secrets';
+import { getSalesforceSecretNames } from '@modules/salesforce/secrets';
 import { getSecretValue } from '@modules/secrets-manager/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
 import { z } from 'zod';
-import { getSalesforceSecretNames } from '../secrets';
-import type { ApiUserSecret, ConnectedAppSecret } from '../secrets';
 
 export async function handler() {
 	try {
