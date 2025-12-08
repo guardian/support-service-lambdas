@@ -40,6 +40,7 @@ exports[`the buildCreateSubscriptionRequest function builds request with applied
   "subscriptions": [
     {
       "customFields": {
+        "CreatedRequestId__c": "request-123",
         "DeliveryAgent__c": "",
         "InitialPromotionCode__c": "PROMO10",
         "LastPlanAddedDate__c": "2025-09-01",
@@ -165,6 +166,7 @@ exports[`the buildCreateSubscriptionRequest function builds request with gift re
   "subscriptions": [
     {
       "customFields": {
+        "CreatedRequestId__c": "request-123",
         "DeliveryAgent__c": "",
         "InitialPromotionCode__c": undefined,
         "LastPlanAddedDate__c": "2025-09-01",
@@ -254,6 +256,7 @@ exports[`the buildCreateSubscriptionRequest function builds request without prom
   "subscriptions": [
     {
       "customFields": {
+        "CreatedRequestId__c": "request-123",
         "DeliveryAgent__c": "",
         "InitialPromotionCode__c": undefined,
         "LastPlanAddedDate__c": "2025-09-01",
