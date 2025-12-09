@@ -42,7 +42,7 @@ describe('Salesforce Create Helper', () => {
 			);
 
 			expect(result).toBe(
-				'https://test.salesforce.com/services/data/v58.0/sobjects/Payment_Dispute__c/Dispute_ID__c/du_test123',
+				'https://test.salesforce.com/services/data/v59.0/sobjects/Payment_Dispute__c/Dispute_ID__c/du_test123',
 			);
 		});
 	});

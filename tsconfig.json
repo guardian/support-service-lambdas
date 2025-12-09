@@ -30,21 +30,26 @@
     // "moduleResolution": "node10",                     /* Specify how TypeScript looks up a file from a given module specifier. */
     // "baseUrl": "./",                                  /* Specify the base directory to resolve non-relative module names. */
     "paths": {
-      "@modules/aws/*": ["./modules/aws/src/*"],
-      "@modules/zuora/*": ["./modules/zuora/src/*"],
-      "@modules/bigquery/*": ["./modules/bigquery/src/*"],
-      "@modules/zuora-catalog/*": ["./modules/zuora-catalog/src/*"],
-      "@modules/product-benefits/*": ["./modules/product-benefits/src/*"],
-      "@modules/product-catalog/*": ["./modules/product-catalog/src/*"],
-      "@modules/promotions/*": ["./modules/promotions/src/*"],
-      "@modules/email/*": ["./modules/email/src/*"],
-      "@modules/internationalisation/*": ["./modules/internationalisation/src/*"],
-      "@modules/supporter-product-data/*": ["./modules/supporter-product-data/src/*"],
-      "@modules/identity/*": ["./modules/identity/src/*"],
-      "@modules/routing/*": ["./modules/routing/src/*"],
-      "@modules/secrets-manager/*": ["./modules/secrets-manager/src/*"],
-      "@modules/*": ["./modules/*"]
-    },
+			"@modules/aws/*": ["./modules/aws/src/*"],
+			"@modules/zuora/*": ["./modules/zuora/src/*"],
+			"@modules/salesforce/*": ["./modules/salesforce/src/*"],
+			"@modules/bigquery/*": ["./modules/bigquery/src/*"],
+			"@modules/zuora-catalog/*": ["./modules/zuora-catalog/src/*"],
+			"@modules/product-benefits/*": ["./modules/product-benefits/src/*"],
+			"@modules/product-catalog/*": ["./modules/product-catalog/src/*"],
+			"@modules/promotions/*": ["./modules/promotions/src/*"],
+			"@modules/email/*": ["./modules/email/src/*"],
+			"@modules/internationalisation/*": [
+				"./modules/internationalisation/src/*"
+			],
+			"@modules/supporter-product-data/*": [
+				"./modules/supporter-product-data/src/*"
+			],
+			"@modules/identity/*": ["./modules/identity/src/*"],
+			"@modules/routing/*": ["./modules/routing/src/*"],
+			"@modules/secrets-manager/*": ["./modules/secrets-manager/src/*"],
+			"@modules/*": ["./modules/*"]
+		},
     // "rootDirs": [],                                   /* Allow multiple folders to be treated as one when resolving modules. */
     // "typeRoots": [],                                  /* Specify multiple folders that act like './node_modules/@types'. */
     "types": ["node", "jest"],                                   /* Specify type package names to be included without being referenced in a source file. */
