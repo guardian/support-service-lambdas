@@ -1,4 +1,4 @@
-import { getSalesforceSecretNames, getZuoraSecretName } from '../src/secrets';
+import { getSalesforceSecretNames } from '@modules/salesforce/secrets';
 
 describe('getSalesforceSecretNames', () => {
 	beforeEach(() => {
@@ -23,27 +23,6 @@ describe('getSalesforceSecretNames', () => {
 			connectedAppSecretName:
 				'PROD/Salesforce/ConnectedApp/BillingAccountRemover',
 		};
-
-		expect(actual).toEqual(expected);
-	});
-});
-
-describe('getZuoraSecretName', () => {
-	beforeEach(() => {
-		jest.resetAllMocks();
-		console.error = jest.fn();
-	});
-
-	test('should get CODE Zuora secret name', () => {
-		const actual = getZuoraSecretName('CODE');
-		const expected = 'CODE/Zuora-OAuth/SupportServiceLambdas';
-
-		expect(actual).toEqual(expected);
-	});
-
-	test('should get PROD Zuora secret name', () => {
-		const actual = getZuoraSecretName('PROD');
-		const expected = 'PROD/Zuora-OAuth/SupportServiceLambdas';
 
 		expect(actual).toEqual(expected);
 	});
