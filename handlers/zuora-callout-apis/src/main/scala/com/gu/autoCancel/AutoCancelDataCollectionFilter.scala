@@ -85,7 +85,7 @@ object AutoCancelDataCollectionFilter extends Logging {
     } else false
   }
 
-  // useful if one of subscriptions that is on invoice was cancelled manually before the trigger fired
+  // useful if one of subscriptions that is on invoice was cancelled manually before  the trigger fired
   def filterNotActiveSubscriptions(
       accountSubsOnAccount: List[SubscriptionNumberWithStatus],
       subsOnInvoice: List[SubscriptionNumber],
