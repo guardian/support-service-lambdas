@@ -87,6 +87,7 @@ export class MParticleApi extends SrStack {
 					timeout: Duration.seconds(300),
 					initialPolicy: [s3BatonReadAndWritePolicy],
 				},
+				batchSize: 1, // Process one deletion at a time for better failure isolation
 				maxReceiveCount: 3,
 				visibilityTimeout: Duration.seconds(300),
 				monitoring: {

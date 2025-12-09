@@ -427,6 +427,7 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
     },
     "MmaUserDeletionLambdaSqsEventSourcemparticleapiCODEQueue936999ED54883CA7": {
       "Properties": {
+        "BatchSize": 1,
         "EventSourceArn": {
           "Fn::GetAtt": [
             "Queue4A7E3555",
@@ -2159,6 +2160,7 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
     },
     "MmaUserDeletionLambdaSqsEventSourcemparticleapiPRODQueueC3FFAA06852150F8": {
       "Properties": {
+        "BatchSize": 1,
         "EventSourceArn": {
           "Fn::GetAtt": [
             "Queue4A7E3555",

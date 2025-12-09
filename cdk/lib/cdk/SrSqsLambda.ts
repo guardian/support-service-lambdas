@@ -32,6 +32,15 @@ type SrSqsLambdaProps = SrLambdaProps & {
 	 */
 	readonly visibilityTimeout?: Duration;
 	/**
+	 * The maximum number of messages to process in a single batch.
+	 *
+	 * Set to 1 for better failure isolation (one failed message won't affect others).
+	 * Higher values can be more efficient but entire batch is retried if any message fails.
+	 *
+	 * @default 10 (AWS default)
+	 */
+	readonly batchSize?: number;
+	/**
 	 * legacy IDs, to avoid having to drop and recreate an existing stack
 	 */
 	legacyQueueIds?: { queue: string; dlq: string };
@@ -74,7 +83,11 @@ export class SrSqsLambda extends SrLambda implements Construct {
 			visibilityTimeout: props.visibilityTimeout,
 		});
 
-		super.addEventSource(new SqsEventSource(this.inputQueue));
+		super.addEventSource(
+			new SqsEventSource(this.inputQueue, {
+				batchSize: props.batchSize,
+			}),
+		);
 
 		if (scope.stage === 'PROD' && !props.monitoring.noMonitoring) {
 			new SrLambdaAlarm(scope, 'Alarm', {

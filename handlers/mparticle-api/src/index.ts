@@ -68,29 +68,24 @@ export const handlerBaton: Handler<
 export const handlerDeletion: Handler<SQSEvent, void> = async (
 	event: SQSEvent,
 ): Promise<void> => {
-	try {
-		logger.log(`Processing ${event.Records.length} deletion messages`);
+	logger.log(`Processing ${event.Records.length} deletion messages`);
 
-		const config: AppConfig = await getAppConfig();
-		const mParticleClient = MParticleClient.createMParticleDataSubjectClient(
-			config.workspace,
-		);
-		const brazeClient = new BrazeClient(
-			config.braze.apiUrl,
-			config.braze.apiKey,
-		);
+	const config: AppConfig = await getAppConfig();
+	const mParticleClient = MParticleClient.createMParticleDataSubjectClient(
+		config.workspace,
+	);
+	const brazeClient = new BrazeClient(
+		config.braze.apiUrl,
+		config.braze.apiKey,
+	);
 
-		// Process each record independently
-		// SQS will retry failed messages automatically
-		for (const record of event.Records) {
-			await processSQSRecord(record, mParticleClient, brazeClient);
-		}
-
-		logger.log('Finished processing deletion messages');
-	} catch (error) {
-		logger.error('Deletion handler error:', error);
-		throw error;
+	// Process each record independently
+	// SQS will retry failed messages automatically
+	for (const record of event.Records) {
+		await processSQSRecord(record, mParticleClient, brazeClient);
 	}
+
+	logger.log('Finished processing deletion messages');
 };
 
 /**
