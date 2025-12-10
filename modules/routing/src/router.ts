@@ -1,7 +1,6 @@
-import { mapPartition, zipAll } from '@modules/arrayFunctions';
+import { mapPartition, mapValues, zipAll } from '@modules/arrayFunctions';
 import { ValidationError } from '@modules/errors';
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { z } from 'zod';
 import { logger } from '@modules/routing/logger';
 
 export type HttpMethod =
@@ -13,29 +12,54 @@ export type HttpMethod =
 	| 'OPTIONS'
 	| 'HEAD';
 
+export type Handler<E, TPath, TBody> = (
+	event: E,
+	path: TPath,
+	body: TBody,
+) => Promise<APIGatewayProxyResult>;
+
 export type Route<TPath, TBody> = {
 	httpMethod: HttpMethod;
 	path: string;
-	handler: (
-		event: APIGatewayProxyEvent,
-		parsed: { path: TPath; body: TBody },
-	) => Promise<APIGatewayProxyResult>;
-	parser?: {
-		path?: z.Schema<TPath>;
-		body?: z.Schema<TBody>;
-	};
+	handler: Handler<APIGatewayProxyEvent, TPath, TBody>;
 };
-
-export function createRoute<TPath, TBody>(
-	route: Route<TPath, TBody>,
-): Route<unknown, unknown> {
-	return route as Route<unknown, unknown>;
-}
 
 export const NotFoundResponse = {
 	body: 'Not Found',
 	statusCode: 404,
 };
+
+/**
+ * if routeParts ends with a greedy `+`, batch together the last eventsParts accordingly
+ */
+export function zipRouteWithEventPath(
+	routeParts: string[],
+	eventParts: string[],
+) {
+	const lastRoutePart: string | undefined = routeParts[routeParts.length - 1];
+	const routeIsGreedy = lastRoutePart?.endsWith('+}');
+	let adjustedEventParts;
+	let adjustedRouteParts;
+	if (lastRoutePart && routeIsGreedy && routeParts.length < eventParts.length) {
+		const excessParts = eventParts.slice(routeParts.length - 1);
+		const joinedGreedyValue = excessParts.join('/');
+		adjustedEventParts = [
+			...eventParts.slice(0, routeParts.length - 1),
+			joinedGreedyValue,
+		];
+		const adjustedLastRoutePart = lastRoutePart.replace(/\+}/, '}');
+		adjustedRouteParts = [
+			...routeParts.slice(0, routeParts.length - 1),
+			adjustedLastRoutePart,
+		];
+	} else if (routeParts.length === eventParts.length) {
+		adjustedEventParts = eventParts;
+		adjustedRouteParts = routeParts;
+	} else {
+		return undefined;
+	}
+	return zipAll(adjustedRouteParts, adjustedEventParts, '', '');
+}
 
 function matchPath(
 	routePath: string,
@@ -44,11 +68,11 @@ function matchPath(
 	const routeParts = routePath.split('/').filter(Boolean);
 	const eventParts = eventPath.split('/').filter(Boolean);
 
-	if (routeParts.length !== eventParts.length) {
+	const routeEventPairs = zipRouteWithEventPath(routeParts, eventParts);
+	if (routeEventPairs === undefined) {
 		return undefined;
 	}
 
-	const routeEventPairs = zipAll(routeParts, eventParts, '', '');
 	const [matchers, literals] = mapPartition(
 		routeEventPairs,
 		([routePart, eventPart]) => {
@@ -64,7 +88,9 @@ function matchPath(
 	return { params: Object.fromEntries(matchers) };
 }
 
-export function Router(routes: ReadonlyArray<Route<unknown, unknown>>) {
+export function Router(
+	routes: ReadonlyArray<Route<Record<string, string>, string | null>>,
+) {
 	const httpRouter = async (
 		event: APIGatewayProxyEvent,
 	): Promise<APIGatewayProxyResult> => {
@@ -78,38 +104,16 @@ export function Router(routes: ReadonlyArray<Route<unknown, unknown>>) {
 					const eventWithParams = {
 						...event,
 						pathParameters: {
-							...(event.pathParameters ?? {}),
+							...mapValues(event.pathParameters ?? {}, (v) => v ?? ''),
 							...matchResult.params,
 						},
 					};
 
-					let parsedPath, parsedBody;
-					try {
-						parsedPath = route.parser?.path?.parse(
-							eventWithParams.pathParameters,
-						);
-						parsedBody = route.parser?.body?.parse(
-							eventWithParams.body
-								? JSON.parse(eventWithParams.body)
-								: undefined,
-						);
-					} catch (error) {
-						if (error instanceof z.ZodError) {
-							return {
-								statusCode: 400,
-								body: JSON.stringify({
-									error: 'Invalid request',
-									details: error.errors,
-								}),
-							};
-						}
-						throw error;
-					}
-
-					return await route.handler(eventWithParams, {
-						path: parsedPath,
-						body: parsedBody,
-					});
+					return await route.handler(
+						eventWithParams,
+						eventWithParams.pathParameters,
+						eventWithParams.body,
+					);
 				}
 			}
 			return NotFoundResponse;

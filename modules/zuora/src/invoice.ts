@@ -1,19 +1,20 @@
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import { z } from 'zod';
-import { getInvoiceItemsSchema } from './types';
-import type { GetInvoiceItemsResponse } from './types';
-import {
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type {
+	GetInvoiceItemsResponse,
+	GetInvoiceResponse,
 	InvoiceItemAdjustmentResult,
-	invoiceItemAdjustmentResultSchema,
 	InvoiceItemAdjustmentSourceType,
 	InvoiceItemAdjustmentType,
 } from './types';
-import { getInvoiceSchema } from './types';
-import type { GetInvoiceResponse } from './types';
-import { zuoraResponseSchema } from './types';
+import {
+	getInvoiceItemsSchema,
+	getInvoiceSchema,
+	invoiceItemAdjustmentResultSchema,
+	voidSchema,
+} from './types';
 import { zuoraDateFormat } from './utils';
-import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 export const getInvoice = async (
 	zuoraClient: ZuoraClient,
@@ -62,14 +63,11 @@ export const creditInvoice = async (
 	);
 };
 
-export const writeOffInvoice = async <
-	T extends z.ZodType = typeof zuoraResponseSchema,
->(
+export const writeOffInvoice = async (
 	zuoraClient: ZuoraClient,
 	invoiceNumber: string,
 	comment: string,
-	schema?: T,
-): Promise<z.infer<T>> => {
+): Promise<void> => {
 	console.log(`Writing off invoice ${invoiceNumber} with comment: ${comment}`);
 	const path = `/v1/invoices/${invoiceNumber}/write-off`;
 	const body = JSON.stringify({
@@ -77,6 +75,5 @@ export const writeOffInvoice = async <
 		memoDate: dayjs().format('YYYY-MM-DD'),
 		reasonCode: 'Write-off',
 	});
-	const finalSchema = (schema ?? zuoraResponseSchema) as T;
-	return zuoraClient.put(path, body, finalSchema);
+	await zuoraClient.put(path, body, voidSchema);
 };

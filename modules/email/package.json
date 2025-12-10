@@ -1,12 +1,12 @@
 {
-  "name": "zuora",
+  "name": "email",
   "version": "1.0.0",
   "scripts": {
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
     "check-formatting": "prettier --check **.ts",
     "fix-formatting": "prettier --write **.ts",
-    "lint": "eslint src/**/*.ts test/**/*.ts",
+    "lint": "eslint 'src/**/*.ts' 'test/**/*.ts'",
     "build": "tsc --noEmit"
   },
   "dependencies": {

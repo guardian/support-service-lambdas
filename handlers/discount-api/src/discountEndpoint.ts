@@ -1,10 +1,7 @@
 import { sum } from '@modules/arrayFunctions';
-import { ValidationError } from '@modules/errors';
 import { Lazy } from '@modules/lazy';
-import { getIfDefined } from '@modules/nullAndUndefined';
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
-import { getAccount } from '@modules/zuora/account';
 import {
 	getBillingPreview,
 	getNextInvoice,
@@ -16,12 +13,10 @@ import {
 } from '@modules/zuora/billingPreview';
 import { addDiscount, previewDiscount } from '@modules/zuora/discount';
 import { isNotRemovedOrDiscount } from '@modules/zuora/rateplan';
-import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraAccount, ZuoraSubscription } from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils';
-import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import { getZuoraCatalog } from '@modules/zuora-catalog/S3';
-import type { APIGatewayProxyEventHeaders } from 'aws-lambda';
 import dayjs from 'dayjs';
 import { EligibilityChecker } from './eligibilityChecker';
 import { generateCancellationDiscountConfirmationEmail } from './generateCancellationDiscountConfirmationEmail';
@@ -29,18 +24,11 @@ import { getDiscountFromSubscription } from './productToDiscountMapping';
 
 export const previewDiscountEndpoint = async (
 	stage: Stage,
-	headers: APIGatewayProxyEventHeaders,
-	subscriptionNumber: string,
+	zuoraClient: ZuoraClient,
+	subscription: ZuoraSubscription,
+	account: ZuoraAccount,
 	today: dayjs.Dayjs,
 ) => {
-	const zuoraClient = await ZuoraClient.create(stage);
-
-	const { subscription, account } = await getSubscriptionIfBelongsToIdentityId(
-		headers,
-		zuoraClient,
-		subscriptionNumber,
-	);
-
 	const { discount, dateToApply, orderedInvoiceTotals } =
 		await getDiscountToApply(stage, subscription, account, zuoraClient, today);
 
@@ -48,7 +36,7 @@ export const previewDiscountEndpoint = async (
 	// note that this only returns the next payment - payments are not guaranteed to be identical
 	const previewResponse = await previewDiscount(
 		zuoraClient,
-		subscriptionNumber,
+		subscription.subscriptionNumber,
 		dayjs(dateToApply),
 		discount.productRatePlanId,
 	);
@@ -95,18 +83,12 @@ export const previewDiscountEndpoint = async (
 
 export const applyDiscountEndpoint = async (
 	stage: Stage,
-	headers: APIGatewayProxyEventHeaders,
+	zuoraClient: ZuoraClient,
+	subscription: ZuoraSubscription,
+	account: ZuoraAccount,
 	subscriptionNumber: string,
 	today: dayjs.Dayjs,
 ) => {
-	const zuoraClient = await ZuoraClient.create(stage);
-
-	const { subscription, account } = await getSubscriptionIfBelongsToIdentityId(
-		headers,
-		zuoraClient,
-		subscriptionNumber,
-	);
-
 	logger.mutableAddContext(
 		subscription.ratePlans
 			.filter(isNotRemovedOrDiscount)
@@ -122,7 +104,7 @@ export const applyDiscountEndpoint = async (
 		today,
 	);
 	logger.log('Apply a discount to the subscription');
-	const discounted = await addDiscount(
+	await addDiscount(
 		zuoraClient,
 		subscriptionNumber,
 		dayjs(subscription.termStartDate),
@@ -130,11 +112,6 @@ export const applyDiscountEndpoint = async (
 		dayjs(dateToApply),
 		discount.productRatePlanId,
 	);
-
-	if (!discounted.success) {
-		throw new Error('discount was not applied: ' + JSON.stringify(discounted));
-	}
-
 	logger.log('Discount applied successfully');
 
 	const billingPreviewAfter = await getBillingPreview(
@@ -170,31 +147,6 @@ export const applyDiscountEndpoint = async (
 		},
 	};
 };
-
-async function getSubscriptionIfBelongsToIdentityId(
-	headers: APIGatewayProxyEventHeaders,
-	zuoraClient: ZuoraClient,
-	subscriptionNumber: string,
-) {
-	const identityId = getIfDefined(
-		headers['x-identity-id'],
-		'Identity ID not found in request',
-	);
-
-	logger.log('Getting the subscription details from Zuora');
-	const subscription = await getSubscription(zuoraClient, subscriptionNumber);
-
-	logger.log('get account for the subscription');
-	const account = await getAccount(zuoraClient, subscription.accountNumber);
-	logger.log('assert that sub is owned by logged in user');
-	if (account.basicInfo.identityId !== identityId) {
-		throw new ValidationError(
-			`Subscription ${subscription.subscriptionNumber} does not belong to identity ID ${identityId}`,
-		);
-	}
-
-	return { subscription, account };
-}
 
 async function getDiscountToApply(
 	stage: Stage,

@@ -5,29 +5,27 @@
  */
 
 import { SupportRegionId } from '@modules/internationalisation/countryGroup';
-import { IsoCurrency } from '@modules/internationalisation/currency';
+import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
-import { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
+import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
 import { getPromotions } from '@modules/promotions/getPromotions';
-import { Promotion } from '@modules/promotions/schema';
-import {
-	createSubscription,
-	CreateSubscriptionInputFields,
-} from '@modules/zuora/createSubscription/createSubscription';
-import {
-	previewCreateSubscription,
-	PreviewCreateSubscriptionInputFields,
-} from '@modules/zuora/createSubscription/previewCreateSubscription';
+import type { Promotion } from '@modules/promotions/schema';
+import dayjs from 'dayjs';
+import { z } from 'zod';
+import type { CreateSubscriptionInputFields } from '@modules/zuora/createSubscription/createSubscription';
+import { createSubscription } from '@modules/zuora/createSubscription/createSubscription';
+import type { PreviewCreateSubscriptionInputFields } from '@modules/zuora/createSubscription/previewCreateSubscription';
+import { previewCreateSubscription } from '@modules/zuora/createSubscription/previewCreateSubscription';
 import { getInvoice } from '@modules/zuora/invoice';
-import {
+import type {
 	CreditCardReferenceTransaction,
 	DirectDebit,
 	PaymentGateway,
 } from '@modules/zuora/orders/paymentMethods';
 import { getSubscription } from '@modules/zuora/subscription';
+import { zuoraSubscriptionSchema } from '@modules/zuora/types/objects/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
-import dayjs from 'dayjs';
 import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
 
 describe('createSubscription integration', () => {
@@ -226,11 +224,20 @@ describe('createSubscription integration', () => {
 			inputFields,
 		);
 		expect(response.subscriptionNumbers.length).toEqual(1);
+		const subscriptionWithPromotionSchema = zuoraSubscriptionSchema.extend({
+			InitialPromotionCode__c: z.string().nullable(),
+			PromotionCode__c: z.string().nullable(),
+		});
 		const subscription = await getSubscription(
 			client,
 			getIfDefined(response.subscriptionNumbers[0], 'No subscription number'),
+			subscriptionWithPromotionSchema,
 		);
 		expect(subscription.ratePlans.length).toEqual(2); // There should be 2 rate plans one for the product and one for the promotion
+		expect(subscription.InitialPromotionCode__c).toEqual(
+			'E2E_TEST_SPLUS_MONTHLY',
+		);
+		expect(subscription.PromotionCode__c).toEqual('E2E_TEST_SPLUS_MONTHLY');
 	}, 10000);
 	test('We can preview a subscription with a discount promotion', async () => {
 		const inputFields: PreviewCreateSubscriptionInputFields = {

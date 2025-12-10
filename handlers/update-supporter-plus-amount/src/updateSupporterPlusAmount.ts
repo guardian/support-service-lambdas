@@ -10,9 +10,12 @@ import type {
 	ProductRatePlan,
 } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
-import { getAccount } from '@modules/zuora/account';
-import { getSubscription } from '@modules/zuora/subscription';
-import type { RatePlan, RatePlanCharge } from '@modules/zuora/types';
+import type {
+	RatePlan,
+	RatePlanCharge,
+	ZuoraAccount,
+	ZuoraSubscription,
+} from '@modules/zuora/types';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
@@ -157,18 +160,12 @@ const validateNewAmount = (
 
 export const updateSupporterPlusAmount = async (
 	zuoraClient: ZuoraClient,
+	subscription: ZuoraSubscription,
+	account: ZuoraAccount,
 	productCatalog: ProductCatalog,
-	identityIdFromRequest: string,
 	subscriptionNumber: string,
 	newPaymentAmount: number,
 ): Promise<EmailFields> => {
-	const subscription = await getSubscription(zuoraClient, subscriptionNumber);
-	const account = await getAccount(zuoraClient, subscription.accountNumber);
-	if (account.basicInfo.identityId !== identityIdFromRequest) {
-		throw new ValidationError(
-			`Subscription ${subscriptionNumber} does not belong to identity ID ${identityIdFromRequest}`,
-		);
-	}
 	const currency = account.billingAndPayment.currency;
 	if (!isSupportedCurrency(currency)) {
 		throw new Error(`Unsupported currency ${currency}`);

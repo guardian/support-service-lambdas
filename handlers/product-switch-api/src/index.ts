@@ -1,12 +1,14 @@
-import { createRoute, Router } from '@modules/routing/router';
+import { Router } from '@modules/routing/router';
+import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
+import { withParsers } from '@modules/routing/withParsers';
 import type { Stage } from '@modules/stage';
 import type { Handler } from 'aws-lambda';
 import dayjs from 'dayjs';
 import { z } from 'zod';
 import { contributionToSupporterPlusEndpoint } from './productSwitchEndpoint';
-import type { ProductSwitchRequestBody } from './schemas';
 import { productSwitchRequestSchema } from './schemas';
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo fix in next refactor
 const stage = process.env.STAGE as Stage;
 
 const pathParserSchema = z.object({
@@ -22,13 +24,17 @@ export type PathParser = z.infer<typeof pathParserSchema>;
 
 // entry point from AWS lambda
 export const handler: Handler = Router([
-	createRoute<PathParser, ProductSwitchRequestBody>({
+	{
 		httpMethod: 'POST',
 		path: '/product-move/recurring-contribution-to-supporter-plus/{subscriptionNumber}',
-		handler: contributionToSupporterPlusEndpoint(stage, dayjs()),
-		parser: {
-			path: pathParserSchema,
-			body: productSwitchRequestSchema,
-		},
-	}),
+		handler: withParsers(
+			pathParserSchema,
+			productSwitchRequestSchema,
+			withMMAIdentityCheck(
+				stage,
+				contributionToSupporterPlusEndpoint(stage, dayjs()),
+				(parsed) => parsed.path.subscriptionNumber,
+			),
+		),
+	},
 ]);

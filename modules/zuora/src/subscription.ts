@@ -1,10 +1,14 @@
 import type { Dayjs } from 'dayjs';
-import type { ZuoraSubscription } from './types';
-import { zuoraSubscriptionResponseSchema } from './types';
-import { zuoraResponseSchema } from './types';
-import type { ZuoraResponse } from './types';
-import { zuoraSubscriptionsFromAccountSchema } from './types';
-import type { ZuoraSubscriptionsFromAccountResponse } from './types';
+import type { z } from 'zod';
+import type {
+	ZuoraSubscription,
+	ZuoraSubscriptionsFromAccountResponse,
+} from './types';
+import {
+	voidSchema,
+	zuoraSubscriptionSchema,
+	zuoraSubscriptionsFromAccountSchema,
+} from './types';
 import { zuoraDateFormat } from './utils';
 import type { ZuoraClient } from './zuoraClient';
 
@@ -17,37 +21,43 @@ export const cancelSubscription = async (
 	cancellationPolicy:
 		| 'SpecificDate'
 		| 'EndOfLastInvoicePeriod' = 'SpecificDate',
-): Promise<ZuoraResponse> => {
+): Promise<void> => {
 	const path = `/v1/subscriptions/${subscriptionNumber}/cancel`;
-	const requestBody: any = {
-		cancellationPolicy,
-		runBilling,
-	};
 
 	// Only include cancellationEffectiveDate for SpecificDate policy
-	if (cancellationPolicy === 'SpecificDate') {
-		requestBody.cancellationEffectiveDate = zuoraDateFormat(
-			contractEffectiveDate,
-		);
-	}
+	const cancellationEffectiveDate =
+		cancellationPolicy === 'SpecificDate'
+			? {
+					cancellationEffectiveDate: zuoraDateFormat(contractEffectiveDate),
+				}
+			: undefined;
 
 	// Only include collect if it's not undefined
-	if (collect !== undefined) {
-		requestBody.collect = collect;
-	}
+	const collectField = collect !== undefined ? { collect: collect } : undefined;
+
+	const requestBody = {
+		cancellationPolicy,
+		runBilling,
+		...cancellationEffectiveDate,
+		...collectField,
+	};
 
 	const body = JSON.stringify(requestBody);
-	return zuoraClient.put(path, body, zuoraResponseSchema, {
+	await zuoraClient.put(path, body, voidSchema, {
 		'zuora-version': '211.0',
 	});
 };
 
-export const getSubscription = async (
+export const getSubscription = async <
+	T extends z.ZodType = typeof zuoraSubscriptionSchema,
+>(
 	zuoraClient: ZuoraClient,
 	subscriptionNumber: string,
-): Promise<ZuoraSubscription> => {
+	schema?: T,
+): Promise<z.infer<T>> => {
 	const path = `v1/subscriptions/${subscriptionNumber}`;
-	return zuoraClient.get(path, zuoraSubscriptionResponseSchema);
+	const finalSchema = schema ?? zuoraSubscriptionSchema;
+	return zuoraClient.get(path, finalSchema);
 };
 
 export const getSubscriptionsByAccountNumber = async (
@@ -65,9 +75,9 @@ export const getSubscriptionsByAccountNumber = async (
 export const updateSubscription = async (
 	zuoraClient: ZuoraClient,
 	subscriptionNumber: string,
-	fields: Record<string, any>,
-): Promise<ZuoraResponse> => {
+	fields: Record<string, string | number | boolean>,
+): Promise<void> => {
 	const path = `v1/subscriptions/${subscriptionNumber}`;
 	const body = JSON.stringify(fields);
-	return zuoraClient.put(path, body, zuoraResponseSchema);
+	await zuoraClient.put(path, body, voidSchema);
 };

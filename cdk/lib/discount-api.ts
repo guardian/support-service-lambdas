@@ -27,7 +27,7 @@ export class DiscountApi extends SrStack {
 		lambda.addPolicies(
 			new AllowS3CatalogReadPolicy(this),
 			new AllowZuoraOAuthSecretsPolicy(this),
-			new AllowSqsSendPolicy(this, `braze-emails`),
+			AllowSqsSendPolicy.create(this, `braze-emails`),
 		);
 	}
 }

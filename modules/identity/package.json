@@ -4,7 +4,7 @@
   "scripts": {
     "it-test": "jest --group=integration",
     "build": "tsc --noEmit",
-    "lint": "eslint src/**/*.ts test/**/*.ts"
+    "lint": "eslint 'src/**/*.ts' 'test/**/*.ts'"
   },
   "dependencies": {
     "@okta/jwt-verifier": "^4.0.1",

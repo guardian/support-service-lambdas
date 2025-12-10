@@ -2,20 +2,23 @@ import type {
 	SfApiUserAuth,
 	SfAuthResponse,
 	SfConnectedAppAuth,
-} from '@modules/salesforce/src/auth';
-import { doSfAuth } from '@modules/salesforce/src/auth';
-import { sfApiVersion } from '@modules/salesforce/src/config';
+} from '@modules/salesforce/auth';
+import { doSfAuth } from '@modules/salesforce/auth';
+import { sfApiVersion } from '@modules/salesforce/config';
+import type {
+	ApiUserSecret,
+	ConnectedAppSecret,
+} from '@modules/salesforce/secrets';
+import { getSalesforceSecretNames } from '@modules/salesforce/secrets';
 import type {
 	SalesforceUpdateResponse,
 	SalesforceUpdateResponseArray,
-} from '@modules/salesforce/src/updateRecords';
-import { doCompositeCallout } from '@modules/salesforce/src/updateRecords';
+} from '@modules/salesforce/updateRecords';
+import { doCompositeCallout } from '@modules/salesforce/updateRecords';
 import { getSecretValue } from '@modules/secrets-manager/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
 import type { Handler } from 'aws-lambda';
 import { z } from 'zod';
-import { getSalesforceSecretNames } from '../secrets';
-import type { ApiUserSecret, ConnectedAppSecret } from '../secrets';
 import type { BillingAccountRecord } from './getBillingAccounts';
 import { BillingAccountRecordSchema } from './getBillingAccounts';
 

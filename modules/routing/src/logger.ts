@@ -1,5 +1,5 @@
 import * as console from 'node:console';
-import { ZodObject } from 'zod';
+import { ZodType } from 'zod';
 
 function extractParamNames(fnString: string) {
 	const paramMatch = fnString.match(/\(([^)]*)\)/);
@@ -80,23 +80,33 @@ export class Logger {
 			return String(value);
 		}
 		if (value instanceof Error) {
-			return value.stack ?? '';
+			return (
+				(value.stack ?? '') +
+				'\n' +
+				this.objectToPrettyString(value) +
+				(value.cause ? '\nCaused by: ' + this.prettyPrint(value.cause) : '')
+			);
 		}
 		if (typeof value === 'object' || Array.isArray(value)) {
-			try {
-				const jsonString = JSON.stringify(value)
-					.replace(/"([^"]+)":/g, ' $1: ') // Remove quotes around keys
-					.replace(/}$/, ' }');
-				if (jsonString.length <= 80) {
-					return jsonString;
-				}
-				return JSON.stringify(value, null, 2).replace(/"([^"]+)":/g, '$1:');
-			} catch {
-				return String(value);
-			}
+			return this.objectToPrettyString(value);
 		}
 		return String(value);
 	};
+
+	private objectToPrettyString(object: unknown) {
+		try {
+			const jsonString = JSON.stringify(object)
+				.replace(/"([^"]+)":/g, ' $1: ') // Remove quotes around keys
+				.replace(/}$/, ' }');
+			if (jsonString.length <= 80) {
+				return jsonString;
+			}
+			return JSON.stringify(object, null, 2).replace(/"([^"]+)":/g, '$1:');
+		} catch (e) {
+			console.error('caught error when trying to serialise log line', e);
+			return String(object);
+		}
+	}
 
 	/* eslint-enable @typescript-eslint/no-explicit-any */
 	/* eslint-enable @typescript-eslint/no-unsafe-argument */
@@ -186,8 +196,8 @@ export class Logger {
 		return args.map((arg, index) => {
 			const paramName = paramNames[index] ?? `arg${index}`;
 			const value =
-				arg instanceof ZodObject
-					? '(ZodObject not expanded)'
+				arg instanceof ZodType
+					? '(ZodType not expanded)'
 					: this.prettyPrint(arg);
 			return `${paramName}: ${value}`;
 		});

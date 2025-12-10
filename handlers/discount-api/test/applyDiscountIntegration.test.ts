@@ -3,7 +3,11 @@
  */
 import type { EmailMessageWithUserId } from '@modules/email/email';
 import type { Stage } from '@modules/stage';
-import { cancelSubscription } from '@modules/zuora/subscription';
+import { getAccount } from '@modules/zuora/account';
+import {
+	cancelSubscription,
+	getSubscription,
+} from '@modules/zuora/subscription';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
@@ -15,7 +19,6 @@ import { applyDiscountEndpoint } from '../src/discountEndpoint';
 import type { ApplyDiscountResponseBody } from '../src/responseSchema';
 
 const stage: Stage = 'CODE';
-const validIdentityId = '200175946';
 
 test('Supporter Plus subscriptions can have a discount and get an email', async () => {
 	const zuoraClient = await ZuoraClient.create(stage);
@@ -26,9 +29,14 @@ test('Supporter Plus subscriptions can have a discount and get an email', async 
 	console.log('Creating a new S+ subscription');
 	const subscriptionNumber = await createSupporterPlusSubscription(zuoraClient);
 
+	const subscription = await getSubscription(zuoraClient, subscriptionNumber);
+	const account = await getAccount(zuoraClient, subscription.accountNumber);
+
 	const { response, emailPayload } = await applyDiscountEndpoint(
 		stage,
-		{ 'x-identity-id': validIdentityId },
+		zuoraClient,
+		subscription,
+		account,
 		subscriptionNumber,
 		paymentDate.add(2, 'months').add(1, 'day'),
 	);
@@ -58,13 +66,12 @@ test('Supporter Plus subscriptions can have a discount and get an email', async 
 	expect(emailPayload).toEqual(expectedEmail);
 
 	console.log('Cancelling the subscription');
-	const cancellationResult = await cancelSubscription(
+	await cancelSubscription(
 		zuoraClient,
 		subscriptionNumber,
 		dayjs().add(1, 'month'),
 		true,
 	);
-	expect(cancellationResult.success).toEqual(true);
 }, 30000);
 
 test('digi subs can have a discount but dont get an email', async () => {
@@ -77,9 +84,14 @@ test('digi subs can have a discount but dont get an email', async () => {
 		false,
 	);
 
+	const subscription = await getSubscription(zuoraClient, subscriptionNumber);
+	const account = await getAccount(zuoraClient, subscription.accountNumber);
+
 	const { response, emailPayload } = await applyDiscountEndpoint(
 		stage,
-		{ 'x-identity-id': validIdentityId },
+		zuoraClient,
+		subscription,
+		account,
 		subscriptionNumber,
 		today,
 	);
@@ -111,11 +123,10 @@ test('digi subs can have a discount but dont get an email', async () => {
 	expect(emailPayload).toEqual(expectedEmail);
 
 	console.log('Cancelling the subscription');
-	const cancellationResult = await cancelSubscription(
+	await cancelSubscription(
 		zuoraClient,
 		subscriptionNumber,
 		dayjs().add(1, 'month'),
 		true,
 	);
-	expect(cancellationResult.success).toEqual(true);
 }, 30000);

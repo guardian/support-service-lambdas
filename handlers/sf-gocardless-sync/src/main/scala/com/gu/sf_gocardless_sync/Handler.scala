@@ -173,7 +173,8 @@ object Handler extends Logging {
   ) = {
     sfMandate match {
       // if mandate already existed in SF then only patch the 'Last Event' if it's more recent
-      case MandateLookupDetail(_, _, _, Some(lastUpdated)) if lastUpdated.value < gcMandateEventDetail.event.created_at =>
+      case MandateLookupDetail(_, _, _, Some(lastUpdated))
+          if lastUpdated.value < gcMandateEventDetail.event.created_at =>
         patchMandateOp
       // if Status_Changed_At__c is missing then always patch the 'Last Event', old Mandate Events are deleted after one year so we can presume this is newer
       case MandateLookupDetail(_, _, _, None) =>

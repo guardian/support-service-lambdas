@@ -1,20 +1,18 @@
-import {
-	buildCreateSubscriptionRequest,
-	CreateSubscriptionInputFields,
-} from '../src/createSubscription/createSubscription';
-import { ReaderType } from '../src/createSubscription/readerType';
-import { AppliedPromotion, Promotion } from '@modules/promotions/schema';
+import { SupportRegionId } from '@modules/internationalisation/countryGroup';
+import type { IsoCurrency } from '@modules/internationalisation/currency';
+import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
+import type { AppliedPromotion, Promotion } from '@modules/promotions/schema';
+import type { Stage } from '@modules/stage';
 import dayjs from 'dayjs';
-import { IsoCurrency } from '@modules/internationalisation/currency';
-import { Stage } from '@modules/stage';
-import {
+import type { CreateSubscriptionOrderAction } from '@modules/zuora/orders/orderActions';
+import type {
 	CreditCardReferenceTransaction,
 	PaymentGateway,
 } from '@modules/zuora/orders/paymentMethods';
-import { CreateSubscriptionOrderAction } from '@modules/zuora/orders/orderActions';
 import code from '../../zuora-catalog/test/fixtures/catalog-code.json';
-import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
-import { SupportRegionId } from '@modules/internationalisation/countryGroup';
+import type { CreateSubscriptionInputFields } from '../src/createSubscription/createSubscription';
+import { buildCreateSubscriptionRequest } from '../src/createSubscription/createSubscription';
+import { ReaderType } from '../src/createSubscription/readerType';
 
 const contractEffectiveDate = dayjs('2025-09-01');
 const customerAcceptanceDate = dayjs('2025-09-05');

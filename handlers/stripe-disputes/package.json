@@ -1,15 +1,21 @@
 {
   "name": "stripe-disputes",
   "scripts": {
+    "cdk:test": "pnpm --filter cdk test stripe-disputes",
+    "cdk:test-update": "pnpm --filter cdk test-update stripe-disputes",
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
     "type-check": "tsc --noEmit",
     "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/producer.ts src/consumer.ts --sourcemap",
-    "lint": "eslint src/**/*.ts test/**/*.ts",
+    "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr stripe-disputes.zip ./*.js.map ./*.js",
-    "check-formatting": "prettier --check **.ts",
-    "fix-formatting": "prettier --write **.ts"
+    "check-formatting": "prettier --check \"**/*.ts\"",
+    "fix-formatting": "prettier --write \"**/*.ts\"",
+    "update-lambda": "../../update-lambda.sh \"stripe-disputes\"",
+    "update-stack": "../../update-stack.sh \"stripe-disputes\""
   },
+  "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
+  "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
     "aws-sdk": "^2.1692.0",
     "dayjs": "^1.11.13",

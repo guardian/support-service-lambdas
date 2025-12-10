@@ -63,7 +63,8 @@ object RaiseCase {
   )(
       reason: Reason,
       sfCase: CaseWithId,
-  ): ClientFailableOp[Unit] = sfUpdateOp(sfCase.id, JsObject(Map("Self_Serve_Cancel_Reason__c" -> JsString(reason.value))))
+  ): ClientFailableOp[Unit] =
+    sfUpdateOp(sfCase.id, JsObject(Map("Self_Serve_Cancel_Reason__c" -> JsString(reason.value))))
 
   type TNewOrResumeCase = (ContactIdContainer, SubscriptionName, Option[CaseWithId]) => ApiGatewayOp[CaseWithId]
 

@@ -1,6 +1,5 @@
 import type { Logger } from '@modules/routing/logger';
 import { rejectPayment } from '@modules/zuora/payment';
-import type { ZuoraResponse } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 
 export async function rejectPaymentService(
@@ -14,16 +13,9 @@ export async function rejectPaymentService(
 	}
 
 	logger.log(`Rejecting payment: ${paymentNumber}`);
-	const rejectPaymentResponse: ZuoraResponse = await rejectPayment(
-		zuoraClient,
-		paymentNumber,
-		'chargeback',
-	);
+	await rejectPayment(zuoraClient, paymentNumber, 'chargeback');
 
-	logger.log(
-		'Payment rejection response:',
-		JSON.stringify(rejectPaymentResponse),
-	);
+	logger.log('Payment rejection response succeeded');
 
 	return true;
 }

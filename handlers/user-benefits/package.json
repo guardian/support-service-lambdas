@@ -1,14 +1,21 @@
 {
   "name": "user-benefits",
   "scripts": {
+    "cdk:test": "pnpm --filter cdk test user-benefits",
+    "cdk:test-update": "pnpm --filter cdk test-update user-benefits",
     "test": "jest --group=-integration",
+    "it-test": "jest --group=integration",
     "type-check": "tsc --noEmit",
     "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/index.ts --sourcemap",
-    "lint": "eslint src/**/*.ts test/**/*.ts",
+    "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr user-benefits.zip ./*.js.map ./*.js",
-    "check-formatting": "prettier --check **.ts",
-    "fix-formatting": "prettier --write **.ts"
+    "check-formatting": "prettier --check \"**/*.ts\"",
+    "fix-formatting": "prettier --write \"**/*.ts\"",
+    "update-lambda": "../../update-lambda.sh \"user-benefits\"",
+    "update-stack": "../../update-stack.sh \"user-benefits\""
   },
+  "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
+  "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147"
   }

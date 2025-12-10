@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { zuoraResponseSchema } from '../httpResponse';
 
 // Common fields for all payment methods
 export const BasePaymentMethodSchema = z.object({
@@ -44,19 +43,19 @@ const AccountHolderInfoSchema = z.object({
 
 // Mandate info schema
 const MandateInfoSchema = z.object({
-	mitProfileAction: z.string().nullable(),
-	mitProfileType: z.string().nullable(),
-	mitConsentAgreementSrc: z.string().nullable(),
-	mitConsentAgreementRef: z.string().nullable(),
-	mitTransactionId: z.string().nullable(),
-	mitProfileAgreedOn: z.string().nullable(),
+	mitProfileAction: z.string().nullish(),
+	mitProfileType: z.string().nullish(),
+	mitConsentAgreementSrc: z.string().nullish(),
+	mitConsentAgreementRef: z.string().nullish(),
+	mitTransactionId: z.string().nullish(),
+	mitProfileAgreedOn: z.string().nullish(),
 	mandateStatus: z.string().nullable(),
 	mandateReason: z.string().nullable(),
 	mandateId: z.string().nullable(),
-	mandateReceivedStatus: z.string().nullable().optional(),
-	existingMandateStatus: z.string().nullable().optional(),
-	mandateCreationDate: z.string().nullable().optional(),
-	mandateUpdateDate: z.string().nullable().optional(),
+	mandateReceivedStatus: z.string().nullish(),
+	existingMandateStatus: z.string().nullish(),
+	mandateCreationDate: z.string().nullish(),
+	mandateUpdateDate: z.string().nullish(),
 });
 
 // Credit card payment method
@@ -103,7 +102,7 @@ const BankTransferPaymentMethodSchema = BasePaymentMethodSchema.extend({
 });
 
 // Main payment method response schema
-export const DefaultPaymentMethodResponseSchema = zuoraResponseSchema.extend({
+export const DefaultPaymentMethodResponseSchema = z.object({
 	defaultPaymentMethodId: z.string(),
 	paymentGateway: z.string(),
 	creditcard: z.array(CreditCardPaymentMethodSchema).optional(),

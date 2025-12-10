@@ -33,8 +33,7 @@ describe('rejectPaymentService', () => {
 		expect(result).toBe(true);
 		expect(mockLogger.log).toHaveBeenCalledWith('Rejecting payment: P-12345');
 		expect(mockLogger.log).toHaveBeenCalledWith(
-			'Payment rejection response:',
-			JSON.stringify(mockResponse),
+			'Payment rejection response succeeded',
 		);
 		expect(rejectPayment).toHaveBeenCalledWith(
 			mockZuoraClient,
