@@ -182,13 +182,6 @@ export async function selectCandidateSubscriptionCharge(
 	);
 
 	assertValidState(
-		subscriptionCharge.billingPeriod === 'Month' ||
-			subscriptionCharge.billingPeriod === 'Annual',
-		frequencySwitchValidationRequirements.hasEligibleCharges,
-		`billingPeriod is "${subscriptionCharge.billingPeriod}", not "Month" or "Annual"`,
-	);
-
-	assertValidState(
 		subscriptionCharge.price !== null,
 		frequencySwitchValidationRequirements.chargeHasValidPrice,
 		`price is ${subscriptionCharge.price}`,
