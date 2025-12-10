@@ -1,5 +1,5 @@
-import { validatePromotion } from '@modules/promotions/v1/validatePromotion';
-import { Promotion, AppliedPromotion } from '@modules/promotions/v1/schema';
+import { validatePromotion } from '../src/v1/validatePromotion';
+import { Promotion, AppliedPromotion } from '../src/v1/schema';
 import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 
 const promotionName = 'Test Promotion';
