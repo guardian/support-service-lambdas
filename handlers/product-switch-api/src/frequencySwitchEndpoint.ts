@@ -39,7 +39,7 @@ import type {
 	FrequencySwitchResponse,
 } from './frequencySwitchSchemas';
 import { frequencySwitchErrorResponseSchema } from './frequencySwitchSchemas';
-import type { ZuoraPreviewResponse, ZuoraSwitchResponse } from './schemas';
+import type { ZuoraPreviewResponse } from './schemas';
 import {
 	zuoraPreviewResponseSchema,
 	zuoraSwitchResponseSchema,
@@ -538,15 +538,13 @@ export async function executeFrequencySwitch(
 			],
 		};
 
-		const zuoraResponse: ZuoraSwitchResponse = await executeOrderRequest(
+		await executeOrderRequest(
 			zuoraClient,
 			orderRequest,
 			zuoraSwitchResponseSchema,
 		);
 
-		return {
-			invoiceIds: zuoraResponse.invoiceIds ?? [],
-		};
+		return {};
 	} catch (error) {
 		// Only return ValidationError messages to clients for security
 		if (error instanceof ValidationError) {

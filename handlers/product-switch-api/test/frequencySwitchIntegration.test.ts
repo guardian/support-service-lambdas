@@ -208,12 +208,8 @@ describe('frequency switch behaviour', () => {
 					dayjs(),
 				);
 
-				// Expect success response with invoice IDs
-				expect('invoiceIds' in result).toBe(true);
-				if ('invoiceIds' in result) {
-					expect(result.invoiceIds).toBeDefined();
-					expect(result.invoiceIds.length).toBeGreaterThan(0);
-				}
+				// Expect success response
+				expect('reason' in result).toBe(false);
 
 				// Verify subscription state after execution
 				const updatedSubscription = await getSubscription(
@@ -289,11 +285,7 @@ describe('frequency switch behaviour', () => {
 					dayjs(),
 				);
 
-				expect('invoiceIds' in eurResult).toBe(true);
-				if ('invoiceIds' in eurResult) {
-					expect(eurResult.invoiceIds).toBeDefined();
-					expect(eurResult.invoiceIds.length).toBeGreaterThan(0);
-				}
+				expect('reason' in eurResult).toBe(false);
 
 				const updatedEurSubscription = await getSubscription(
 					eurClient,
@@ -329,11 +321,7 @@ describe('frequency switch behaviour', () => {
 					dayjs(),
 				);
 
-				expect('invoiceIds' in usdResult).toBe(true);
-				if ('invoiceIds' in usdResult) {
-					expect(usdResult.invoiceIds).toBeDefined();
-					expect(usdResult.invoiceIds.length).toBeGreaterThan(0);
-				}
+				expect('reason' in usdResult).toBe(false);
 
 				const updatedUsdSubscription = await getSubscription(
 					usdClient,

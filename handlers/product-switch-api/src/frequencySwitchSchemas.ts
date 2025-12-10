@@ -40,9 +40,7 @@ export type FrequencySwitchPreviewSuccessResponse = z.infer<
 	typeof frequencySwitchPreviewSuccessResponseSchema
 >;
 
-export const frequencySwitchSuccessResponseSchema = z.object({
-	invoiceIds: z.array(z.string()),
-});
+export const frequencySwitchSuccessResponseSchema = z.object({});
 
 export type FrequencySwitchSuccessResponse = z.infer<
 	typeof frequencySwitchSuccessResponseSchema
