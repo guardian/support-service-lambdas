@@ -173,6 +173,7 @@ export async function selectCandidateSubscriptionCharge(
 		`effectiveEndDate ${subscriptionCharge.effectiveEndDate.toISOString()} is in the past`,
 	);
 
+	// this should always be the case if the bill runs are working, but checking for safety
 	assertValidState(
 		!subscriptionCharge.chargedThroughDate ||
 			subscriptionCharge.chargedThroughDate >= todayDate,
