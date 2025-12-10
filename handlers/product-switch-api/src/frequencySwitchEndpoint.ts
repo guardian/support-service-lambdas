@@ -637,20 +637,6 @@ export const frequencySwitchHandler =
 			throw error;
 		}
 
-		const { charge } = candidateCharge;
-
-		if (charge.billingPeriod === parsed.body.targetBillingPeriod) {
-			logger.log(
-				`Charge ${charge.id} already has billing period ${charge.billingPeriod}, no switch needed.`,
-			);
-			return {
-				statusCode: 400,
-				body: JSON.stringify({
-					message: 'Charge already matches target billing period.',
-				}),
-			};
-		}
-
 		const response = parsed.body.preview
 			? await previewFrequencySwitch(
 					zuoraClient,
