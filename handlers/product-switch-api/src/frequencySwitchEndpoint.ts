@@ -229,7 +229,6 @@ interface FrequencySwitchInfo {
 	targetRatePlanId: string;
 	targetPrice: number;
 	currency: IsoCurrency;
-	effectiveDate: dayjs.Dayjs;
 	orderActions: OrderAction[];
 }
 
@@ -325,7 +324,6 @@ function prepareFrequencySwitchInfo(
 		targetRatePlanId,
 		targetPrice,
 		currency,
-		effectiveDate,
 		orderActions,
 	};
 }
@@ -364,10 +362,10 @@ export async function previewFrequencySwitch(
 				previewThruType: 'SpecificDate',
 				previewTypes: ['BillingDocs'],
 				specificPreviewThruDate: zuoraDateFormat(
-					switchInfo.effectiveDate.add(1, 'month'),
+					effectiveDate.add(1, 'month'),
 				),
 			},
-			orderDate: zuoraDateFormat(switchInfo.effectiveDate),
+			orderDate: zuoraDateFormat(effectiveDate),
 			existingAccountNumber: subscription.accountNumber,
 			subscriptions: [
 				{
@@ -510,7 +508,7 @@ export async function executeFrequencySwitch(
 				runBilling: false,
 				collectPayment: false,
 			},
-			orderDate: zuoraDateFormat(switchInfo.effectiveDate),
+			orderDate: zuoraDateFormat(effectiveDate),
 			existingAccountNumber: subscription.accountNumber,
 			subscriptions: [
 				{
