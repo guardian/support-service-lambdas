@@ -484,7 +484,7 @@ export async function previewFrequencySwitch(
 		// Only return ValidationError messages to clients for security
 		if (error instanceof ValidationError) {
 			return {
-				reasons: [{ message: error.message }],
+				reason: error.message,
 			};
 		}
 
@@ -551,7 +551,7 @@ export async function executeFrequencySwitch(
 		// Only return ValidationError messages to clients for security
 		if (error instanceof ValidationError) {
 			return {
-				reasons: [{ message: error.message }],
+				reason: error.message,
 			};
 		}
 
@@ -616,11 +616,7 @@ export const frequencySwitchHandler =
 			return {
 				statusCode: 403,
 				body: JSON.stringify({
-					reasons: [
-						{
-							message: `Subscription ${parsed.path.subscriptionNumber} does not belong to the currently logged-in user`,
-						},
-					],
+					reason: `Subscription ${parsed.path.subscriptionNumber} does not belong to the currently logged-in user`,
 				}),
 			};
 		}
@@ -647,7 +643,7 @@ export const frequencySwitchHandler =
 				return {
 					statusCode: 400,
 					body: JSON.stringify({
-						reasons: [{ message: error.message }],
+						reason: error.message,
 					}),
 				};
 			}

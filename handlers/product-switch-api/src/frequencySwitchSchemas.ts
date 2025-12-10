@@ -16,7 +16,7 @@ export type FrequencySwitchRequestBody = z.infer<
 >;
 
 export const frequencySwitchErrorResponseSchema = z.object({
-	reasons: z.array(z.object({ message: z.string() })),
+	reason: z.string(),
 });
 
 export type FrequencySwitchErrorResponse = z.infer<
