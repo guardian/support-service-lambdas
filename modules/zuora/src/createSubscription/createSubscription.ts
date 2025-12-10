@@ -5,10 +5,10 @@ import type {
 	ProductKey,
 } from '@modules/product-catalog/productCatalog';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
-import { getDiscountRatePlanFromCatalog } from '@modules/promotions/getPromotions';
-import type { AppliedPromotion, Promotion } from '@modules/promotions/schema';
-import type { ValidatedPromotion } from '@modules/promotions/validatePromotion';
-import { validatePromotion } from '@modules/promotions/validatePromotion';
+import { getDiscountRatePlanFromCatalog } from '@modules/promotions/v1/getPromotions';
+import type { AppliedPromotion, Promotion } from '@modules/promotions/v1/schema';
+import type { ValidatedPromotion } from '@modules/promotions/v1/validatePromotion';
+import { validatePromotion } from '@modules/promotions/v1/validatePromotion';
 import dayjs from 'dayjs';
 import { z } from 'zod';
 import { getChargeOverride } from '@modules/zuora/createSubscription/chargeOverride';
