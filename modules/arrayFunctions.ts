@@ -150,33 +150,3 @@ export const intersection = <T>(a: T[], b: T[]) => {
 	const setB = new Set(b);
 	return [...new Set(a)].filter((x) => setB.has(x));
 };
-
-/**
- * Type guard that asserts a value is one of the allowed values.
- * Throws an error if the value is not in the allowed list.
- * This utility extracts the gap in type checking into a single well-tested location.
- *
- * @param value The value to check
- * @param allowedValues The list of allowed values
- * @param context Optional context for error messages (e.g., field name)
- * @returns The value, narrowed to the literal type of allowedValues
- * @throws Error if value is not in allowedValues
- *
- * @example
- * const period = assertValueIn(charge.billingPeriod, ['Month', 'Annual'], 'billingPeriod');
- * // period is now typed as 'Month' | 'Annual' instead of 'Month' | 'Quarter' | 'Annual' | null
- */
-export function assertValueIn<const T extends readonly unknown[]>(
-	value: unknown,
-	allowedValues: T,
-	context?: string,
-): T[number] {
-	if (!allowedValues.includes(value)) {
-		const contextStr = context ? ` for ${context}` : '';
-		const valuesStr: string = (allowedValues as readonly string[]).join(', ');
-		throw new Error(
-			`Value "${String(value)}" is not one of the allowed values${contextStr}: ${valuesStr}`,
-		);
-	}
-	return value as T[number];
-}
