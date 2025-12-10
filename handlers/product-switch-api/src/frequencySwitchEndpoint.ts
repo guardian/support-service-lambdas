@@ -164,7 +164,7 @@ export async function selectCandidateSubscriptionCharge(
 	assertValidState(
 		subscriptionCharge.effectiveStartDate < todayDate,
 		frequencySwitchValidationRequirements.hasEligibleCharges,
-		`effectiveStartDate ${subscriptionCharge.effectiveStartDate.toISOString()} is in the future`,
+		`effectiveStartDate ${subscriptionCharge.effectiveStartDate.toISOString()} is in the future (e.g. pending price rise)`,
 	);
 
 	assertValidState(
