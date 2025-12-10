@@ -160,13 +160,6 @@ export async function selectCandidateSubscriptionCharge(
 		`Subscription charge not found in SupporterPlus Monthly rate plan`,
 	);
 
-	// Validate the charge properties
-	assertValidState(
-		subscriptionCharge.type === 'Recurring',
-		frequencySwitchValidationRequirements.hasEligibleCharges,
-		`charge type is "${subscriptionCharge.type}", not "Recurring"`,
-	);
-
 	const todayDate = today.toDate();
 	assertValidState(
 		subscriptionCharge.effectiveStartDate < todayDate,

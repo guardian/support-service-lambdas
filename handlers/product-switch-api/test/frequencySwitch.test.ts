@@ -21,6 +21,7 @@ function makeMockZuoraClient(): ZuoraClient {
 					subscriptionNumber: 'A-SUB123',
 					serviceStartDate: '2024-12-01',
 					chargeAmount: 10,
+					taxAmount: 0,
 				},
 			],
 		}),
@@ -232,23 +233,6 @@ describe('selectCandidateSubscriptionCharge', () => {
 				zuoraClient,
 			),
 		).rejects.toThrow('SupporterPlus Monthly rate plan not found');
-	});
-
-	test('throws when charge type is not "Recurring"', async () => {
-		const subscription = makeSubscriptionWithSingleCharge('Month', 10, {
-			chargeType: 'OneTime',
-		});
-		const account = makeAccount();
-		const zuoraClient = makeMockZuoraClient();
-		await expect(
-			selectCandidateSubscriptionCharge(
-				subscription,
-				dayjs(),
-				account,
-				productCatalog,
-				zuoraClient,
-			),
-		).rejects.toThrow('charge type is "OneTime", not "Recurring"');
 	});
 
 	test('throws when rate plan lastChangeType is "Remove"', async () => {
