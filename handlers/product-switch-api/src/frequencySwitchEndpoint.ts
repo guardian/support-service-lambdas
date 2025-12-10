@@ -231,8 +231,6 @@ interface FrequencySwitchInfo {
 	currency: IsoCurrency;
 	effectiveDate: dayjs.Dayjs;
 	orderActions: OrderAction[];
-	currentRatePlan: RatePlan;
-	currentCharge: RatePlanCharge;
 }
 
 /**
@@ -329,8 +327,6 @@ function prepareFrequencySwitchInfo(
 		currency,
 		effectiveDate,
 		orderActions,
-		currentRatePlan,
-		currentCharge,
 	};
 }
 
@@ -397,7 +393,7 @@ export async function previewFrequencySwitch(
 
 		// Calculate savings and new price for monthly to annual switch
 		// currentCharge.price is guaranteed to be non-null by selectCandidateSubscriptionCharge validation
-		const currentPrice = switchInfo.currentCharge.price as number;
+		const currentPrice = charge.price as number;
 		const currentAnnualCost = currentPrice * 12;
 		const targetAnnualCost = switchInfo.targetPrice;
 		const savingsAmount = currentAnnualCost - targetAnnualCost;
@@ -407,10 +403,9 @@ export async function previewFrequencySwitch(
 		// Calculate current contribution using catalog ID to identify the charge
 		const contributionChargeId =
 			productCatalog.SupporterPlus.ratePlans.Monthly.charges.Contribution.id;
-		const contributionCharges =
-			switchInfo.currentRatePlan.ratePlanCharges.filter(
-				(c) => c.productRatePlanChargeId === contributionChargeId,
-			);
+		const contributionCharges = ratePlan.ratePlanCharges.filter(
+			(c) => c.productRatePlanChargeId === contributionChargeId,
+		);
 
 		assertValidState(
 			contributionCharges.length === 1,
