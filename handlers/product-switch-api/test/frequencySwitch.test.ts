@@ -356,6 +356,57 @@ describe('selectCandidateSubscriptionCharge', () => {
 		);
 		expect(charge.name).toBe('Subscription');
 	});
+
+	test('throws when subscription has active discount', async () => {
+		const now = dayjs();
+		const subscription = makeSubscriptionWithSingleCharge('Month', 12);
+		
+		// Add an active discount rate plan
+		subscription.ratePlans.push({
+			id: 'discount-rp-id',
+			lastChangeType: 'Add',
+			productId: 'discount-product-id',
+			productName: 'Discounts',
+			productRatePlanId: 'discount-rate-plan-id',
+			ratePlanName: '25% Off',
+			ratePlanCharges: [
+				{
+					id: 'discount-charge-id',
+					productRatePlanChargeId: 'discount-charge-product-id',
+					number: 'C-DISCOUNT-001',
+					name: 'Discount',
+					type: 'Recurring',
+					model: 'DiscountPercentage',
+					currency: 'GBP',
+					price: null,
+					billingPeriod: 'Month',
+					effectiveStartDate: now.subtract(1, 'day').toDate(),
+					effectiveEndDate: now.add(2, 'months').toDate(),
+					processedThroughDate: now.subtract(1, 'day').toDate(),
+					chargedThroughDate: null,
+					upToPeriodsType: null,
+					upToPeriods: null,
+					discountPercentage: 25,
+					billingPeriodAlignment: 'AlignToCharge' as const,
+				},
+			],
+		});
+
+		const account = makeAccount();
+		const zuoraClient = makeMockZuoraClient();
+
+		await expect(
+			selectCandidateSubscriptionCharge(
+				subscription,
+				now,
+				account,
+				productCatalog,
+				zuoraClient,
+			),
+		).rejects.toThrow(
+			'subscription has no active discounts (discounts must be removed before frequency switch)',
+		);
+	});
 });
 
 describe('getCatalogRatePlanName', () => {

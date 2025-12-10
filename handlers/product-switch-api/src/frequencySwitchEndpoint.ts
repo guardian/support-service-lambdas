@@ -58,6 +58,8 @@ export const frequencySwitchValidationRequirements = {
 	chargeHasValidPrice: 'eligible charge has a defined price',
 	zeroContributionAmount:
 		'contribution amount is zero (non-zero contributions cannot be preserved during frequency switch)',
+	noActiveDiscounts:
+		'subscription has no active discounts (discounts must be removed before frequency switch)',
 };
 
 /**
@@ -216,6 +218,25 @@ export async function selectCandidateSubscriptionCharge(
 		`contribution amount is ${contributionCharge.price}`,
 	);
 
+	// Check for active discounts - subscribers with discounts are not eligible
+	// This follows the same pattern as discount-api eligibility checker
+	const activeDiscountRatePlans = subscription.ratePlans.filter(
+		(rp) =>
+			rp.productName === 'Discounts' &&
+			rp.lastChangeType !== 'Remove' &&
+			rp.ratePlanCharges.some(
+				(charge) =>
+					charge.effectiveStartDate <= todayDate &&
+					charge.effectiveEndDate >= todayDate,
+			),
+	);
+
+	assertValidState(
+		activeDiscountRatePlans.length === 0,
+		frequencySwitchValidationRequirements.noActiveDiscounts,
+		`Found ${activeDiscountRatePlans.length} active discount(s): ${activeDiscountRatePlans.map((rp) => rp.ratePlanName).join(', ')}`,
+	);
+
 	return {
 		ratePlan: supporterPlusMonthlyRatePlan,
 		charge: subscriptionCharge,
@@ -235,14 +256,13 @@ interface FrequencySwitchInfo {
 /**
  * Prepare common information for a frequency switch.
  * Gets target rate plan, price, effective date, and builds order actions including
- * term renewal (if needed), discount removal, and plan change.
+ * term renewal (if needed) and plan change.
  *
  * @param currentRatePlan The current rate plan from the subscription
  * @param currentCharge The current charge eligible for switching
  * @param subscription The subscription being switched
  * @param productCatalog Product catalog for looking up rate plans and pricing
  * @param effectiveDate The date when the switch should take effect
- * @param today Today's date for filtering active discounts
  * @returns Common information needed for preview or execute
  */
 function prepareFrequencySwitchInfo(
@@ -251,7 +271,6 @@ function prepareFrequencySwitchInfo(
 	subscription: ZuoraSubscription,
 	productCatalog: ProductCatalog,
 	effectiveDate: dayjs.Dayjs,
-	today: dayjs.Dayjs,
 ): FrequencySwitchInfo {
 	const targetRatePlanId = getTargetRatePlanId(productCatalog, currentRatePlan);
 
@@ -268,19 +287,6 @@ function prepareFrequencySwitchInfo(
 	const termEndDate = dayjs(subscription.termEndDate);
 	const needsTermRenewal = effectiveDate.isAfter(termEndDate);
 
-	// Find active discount rate plans that need to be removed
-	// Discounts must be removed at the switch time to ensure customer ends up on full price
-	const activeDiscountRatePlans = subscription.ratePlans.filter(
-		(rp) =>
-			rp.productName === 'Discounts' &&
-			rp.lastChangeType !== 'Remove' &&
-			rp.ratePlanCharges.some(
-				(charge) =>
-					charge.effectiveStartDate <= today.toDate() &&
-					charge.effectiveEndDate >= today.toDate(),
-			),
-	);
-
 	const orderActions: OrderAction[] = [];
 
 	if (needsTermRenewal) {
@@ -290,21 +296,6 @@ function prepareFrequencySwitchInfo(
 		orderActions.push({
 			type: 'RenewSubscription',
 			triggerDates,
-		});
-	}
-
-	// Remove discount rate plans before changing the billing frequency
-	// This ensures discounts don't carry over to the new billing period
-	for (const discountRatePlan of activeDiscountRatePlans) {
-		logger.log(
-			`Removing discount rate plan ${discountRatePlan.ratePlanName} (${discountRatePlan.id})`,
-		);
-		orderActions.push({
-			type: 'RemoveProduct',
-			triggerDates,
-			removeProduct: {
-				ratePlanId: discountRatePlan.id,
-			},
 		});
 	}
 
@@ -352,7 +343,6 @@ export async function previewFrequencySwitch(
 			subscription,
 			productCatalog,
 			effectiveDate,
-			today,
 		);
 
 		// Preview with today's date to get Zuora to generate invoices
@@ -500,7 +490,6 @@ export async function executeFrequencySwitch(
 			subscription,
 			productCatalog,
 			effectiveDate,
-			today,
 		);
 
 		const orderRequest: CreateOrderRequest = {
