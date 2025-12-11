@@ -413,23 +413,15 @@ export async function previewFrequencySwitch(
 		// Use Zuora's billing preview to calculate the discount amount accurately
 		// This avoids replicating Zuora's complex logic for credits, discounts on specific rate plans,
 		// price rise engine, and other billing variations
-		// Find discount invoice items in the preview - these show the actual discount that would be applied
-		const discountInvoiceItems = invoice.invoiceItems.filter(
-			(item) => item.productName === 'Discounts',
-		);
-
-		// Calculate the current monthly cost with discounts applied
-		// This is what the customer currently pays per month
-		const currentMonthlyAmountWithDiscount = discountInvoiceItems.reduce(
+		// The preview invoice shows what would be charged for the first annual payment
+		// By comparing this to the undiscounted annual cost, we can calculate the discount savings
+		const expectedAnnualCostWithoutDiscount = currentPrice * 12;
+		const totalInvoiceAmount = invoice.invoiceItems.reduce(
 			(total, item) => total + item.amountWithoutTax,
-			currentPrice,
+			0,
 		);
-
-		// Calculate the annualized discount value
-		// If they currently pay less than the full price monthly, calculate how much they save per year
-		const monthlyDiscountAmount =
-			currentPrice - currentMonthlyAmountWithDiscount;
-		const currentDiscountAmount = monthlyDiscountAmount * 12;
+		const currentDiscountAmount =
+			expectedAnnualCostWithoutDiscount - totalInvoiceAmount;
 
 		return {
 			currency: switchInfo.currency,
