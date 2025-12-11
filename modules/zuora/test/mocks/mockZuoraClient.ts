@@ -11,7 +11,7 @@ class MockZuoraClient extends ZuoraClient {
 	put = jest.fn();
 	patch = jest.fn();
 	delete = jest.fn();
-	fetch = jest.fn();
+	fetchWithLogging = jest.fn();
 }
 
 export const mockZuoraClient = new MockZuoraClient();
