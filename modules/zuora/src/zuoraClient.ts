@@ -184,7 +184,14 @@ export class ZuoraClient {
 						`Received a 429 rate limit response with response headers ${JSON.stringify(e.responseHeaders)}`,
 					);
 				}
-				throw generateZuoraError(JSON.parse(e.responseBody), e);
+				let parsedBody: unknown;
+				try {
+					parsedBody = JSON.parse(e.responseBody);
+				} catch (parseError) {
+					// we're not going to be able to extract anything useful from non-json
+					throw e;
+				}
+				throw generateZuoraError(parsedBody, e);
 			}
 			throw new Error('unexpected error thrown during REST call', { cause: e });
 		}
