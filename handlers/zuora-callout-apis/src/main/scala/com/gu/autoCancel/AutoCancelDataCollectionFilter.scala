@@ -49,18 +49,24 @@ object AutoCancelDataCollectionFilter extends Logging {
       accountSummary: AccountSummary,
       dateToday: LocalDate,
   ): ApiGatewayOp[LocalDate] = {
-    accountSummary.invoices
-      .find(inv => {
-        logger.info(s"found callout invoice in accountSummary: $inv")
-        inv.id == invoiceId
-      })
-      .find(invoiceOverdue(_, dateToday)) match {
-      case None =>
-        logger.error(s"Failed on Validating Unpaid invoice that was overdue, invoiceId: $invoiceId")
-        ReturnWithResponse(noActionRequired("No unpaid and overdue invoices found!"))
-      case Some(inv) =>
-        logger.info(s"Found Valid Unpaid invoice for account: ${accountSummary.basicInfo.id}. Invoice: $inv")
-        ContinueProcessing(inv.dueDate)
+    // First verify the callout invoice is valid and overdue
+    val calloutInvoiceValid = accountSummary.invoices
+      .find(inv => inv.id == invoiceId)
+      .exists(invoiceOverdue(_, dateToday))
+
+    if (!calloutInvoiceValid) {
+      logger.error(s"Failed on Validating Unpaid invoice that was overdue, invoiceId: $invoiceId")
+      ReturnWithResponse(noActionRequired("No unpaid and overdue invoices found!"))
+    } else {
+      // Find ALL overdue invoices and use the earliest due date
+      // This ensures the cancellation generates enough credit to cover all unpaid invoices
+      val allOverdueInvoices = accountSummary.invoices.filter(invoiceOverdue(_, dateToday))
+      val earliestDueDate = allOverdueInvoices.map(_.dueDate).min
+      logger.info(
+        s"Found ${allOverdueInvoices.size} overdue invoice(s) for account: ${accountSummary.basicInfo.id}. " +
+          s"Using earliest dueDate: $earliestDueDate to ensure sufficient credit for all unpaid invoices.",
+      )
+      ContinueProcessing(earliestDueDate)
     }
   }
 
@@ -79,7 +85,7 @@ object AutoCancelDataCollectionFilter extends Logging {
     } else false
   }
 
-  // useful if one of subscriptions that is on invoice was cancelled manually before the trigger fired
+  // useful if one of subscriptions that is on invoice was cancelled manually before  the trigger fired
   def filterNotActiveSubscriptions(
       accountSubsOnAccount: List[SubscriptionNumberWithStatus],
       subsOnInvoice: List[SubscriptionNumber],

@@ -1,6 +1,6 @@
 import { objectEntries } from '@modules/objectFunctions';
 
-type Team = 'VALUE' | 'GROWTH' | 'PORTFOLIO' | 'PLATFORM' | 'SRE';
+type Team = 'VALUE' | 'GROWTH' | 'PORTFOLIO' | 'PLATFORM' | 'SRE' | 'ENGINE';
 
 const mobilePurchasesApps = [
 	'mobile-purchases-apple-pubsub',
@@ -29,7 +29,6 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'contributions-store-queue',
 		'dotcom-components',
 		...mobilePurchasesApps,
-		'price-migration-engine-state-machine',
 		'promotions-tool',
 		'super-mode',
 		'support-reminders',
@@ -134,6 +133,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'discount-expiry-notifier',
 		'observer-data-export',
 	],
+	ENGINE: ['price-migration-engine-state-machine'],
 };
 
 const buildAppToTeamMappings = (
