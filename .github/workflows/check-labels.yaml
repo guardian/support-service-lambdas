@@ -3,6 +3,8 @@ permissions:
   contents: read
 on:
   pull_request:
+    branches:
+      - main
     types: [opened, labeled, unlabeled, synchronize, reopened, edited]
 jobs:
   require-label:
