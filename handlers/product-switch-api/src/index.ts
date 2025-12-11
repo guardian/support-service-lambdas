@@ -6,7 +6,6 @@ import type { Handler } from 'aws-lambda';
 import dayjs from 'dayjs';
 import { z } from 'zod';
 import { frequencySwitchHandler } from './frequencySwitchEndpoint';
-import type { FrequencySwitchRequestBody } from './frequencySwitchSchemas';
 import { frequencySwitchRequestSchema } from './frequencySwitchSchemas';
 import { contributionToSupporterPlusEndpoint } from './productSwitchEndpoint';
 import { productSwitchRequestSchema } from './schemas';
@@ -52,5 +51,5 @@ export const handler: Handler = Router([
 				(parsed) => parsed.path.subscriptionNumber,
 			),
 		),
-	}
+	},
 ]);

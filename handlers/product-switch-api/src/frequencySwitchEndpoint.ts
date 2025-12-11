@@ -1,11 +1,13 @@
 import { ValidationError } from '@modules/errors';
-import type { IsoCurrency } from '@modules/internationalisation/currency';
+import {
+	CurrencyValues,
+	type IsoCurrency,
+} from '@modules/internationalisation/currency';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
-import { getAccount } from '@modules/zuora/account';
 import {
 	getBillingPreview,
 	getNextInvoiceItems,
@@ -22,7 +24,6 @@ import type {
 	CreateOrderRequest,
 	PreviewOrderRequest,
 } from '@modules/zuora/orders/orderRequests';
-import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraAccount } from '@modules/zuora/types';
 import type {
 	RatePlan,
@@ -30,7 +31,7 @@ import type {
 	ZuoraSubscription,
 } from '@modules/zuora/types/objects/subscription';
 import { zuoraDateFormat } from '@modules/zuora/utils/common';
-import { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { EligibilityChecker } from '../../discount-api/src/eligibilityChecker';
 import type {
@@ -275,7 +276,11 @@ function prepareFrequencySwitchInfo(
 	const targetRatePlanId = getTargetRatePlanId(productCatalog, currentRatePlan);
 
 	// Frequency switches are Supporter Plus specific, so directly access the Annual rate plan
-	const currency: IsoCurrency = currentCharge.currency as IsoCurrency;
+	// Validate currency is a supported IsoCurrency
+	const currency = getIfDefined(
+		CurrencyValues.find((c) => c === currentCharge.currency),
+		`Currency ${currentCharge.currency} is not a supported IsoCurrency`,
+	);
 	const targetPrice =
 		productCatalog.SupporterPlus.ratePlans.Annual.pricing[currency];
 
@@ -352,9 +357,7 @@ export async function previewFrequencySwitch(
 			previewOptions: {
 				previewThruType: 'SpecificDate',
 				previewTypes: ['BillingDocs'],
-				specificPreviewThruDate: zuoraDateFormat(
-					effectiveDate.add(1, 'month'),
-				),
+				specificPreviewThruDate: zuoraDateFormat(effectiveDate.add(1, 'month')),
 			},
 			orderDate: zuoraDateFormat(effectiveDate),
 			existingAccountNumber: subscription.accountNumber,
@@ -381,8 +384,8 @@ export async function previewFrequencySwitch(
 		);
 
 		// Calculate savings and new price for monthly to annual switch
-		// currentCharge.price is guaranteed to be non-null by selectCandidateSubscriptionCharge validation
-		const currentPrice = charge.price as number;
+		// charge.price is guaranteed to be non-null by selectCandidateSubscriptionCharge validation
+		const currentPrice = charge.price!;
 		const currentAnnualCost = currentPrice * 12;
 		const targetAnnualCost = switchInfo.targetPrice;
 		const savingsAmount = currentAnnualCost - targetAnnualCost;
@@ -549,21 +552,11 @@ function getTargetRatePlanId(
 export const frequencySwitchHandler =
 	(stage: Stage, today: dayjs.Dayjs) =>
 	async (
-		event: unknown,
-		parsed: {
-			path: { subscriptionNumber: string };
-			body: FrequencySwitchRequestBody;
-		},
+		body: FrequencySwitchRequestBody,
+		zuoraClient: ZuoraClient,
+		subscription: ZuoraSubscription,
+		account: ZuoraAccount,
 	): Promise<{ statusCode: number; body: string }> => {
-		logger.mutableAddContext(parsed.path.subscriptionNumber);
-
-		const zuoraClient = await ZuoraClient.create(stage);
-		const subscription = await getSubscription(
-			zuoraClient,
-			parsed.path.subscriptionNumber,
-		);
-
-		const account = await getAccount(zuoraClient, subscription.accountNumber);
 		const productCatalog = await getProductCatalogFromApi(stage);
 
 		// Use selectCandidateSubscriptionCharge to validate and find the eligible charge
@@ -595,7 +588,7 @@ export const frequencySwitchHandler =
 			throw error;
 		}
 
-		const response = parsed.body.preview
+		const response = body.preview
 			? await previewFrequencySwitch(
 					zuoraClient,
 					subscription,

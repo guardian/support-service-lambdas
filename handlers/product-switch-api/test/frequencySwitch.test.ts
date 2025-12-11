@@ -360,7 +360,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 	test('throws when subscription has active discount', async () => {
 		const now = dayjs();
 		const subscription = makeSubscriptionWithSingleCharge('Month', 12);
-		
+
 		// Add an active discount rate plan
 		subscription.ratePlans.push({
 			id: 'discount-rp-id',
