@@ -132,11 +132,11 @@ describe('ZuoraClient fetch method error handling', () => {
 			(fetch as jest.Mock).mockResolvedValue(mockResponse);
 
 			await expect(
-				zuoraClient.post('v1/action/query1', 'POST', testSchema),
+				zuoraClient.post('v1/action/query1', 'body', testSchema),
 			).rejects.toThrow(ZuoraError);
 
 			try {
-				await zuoraClient.post('v1/action/query1', 'POST', testSchema);
+				await zuoraClient.post('v1/action/query1', 'body', testSchema);
 			} catch (error) {
 				expect(error).toBeInstanceOf(ZuoraError);
 				expect((error as ZuoraError).message).toBe(errorMessage);
