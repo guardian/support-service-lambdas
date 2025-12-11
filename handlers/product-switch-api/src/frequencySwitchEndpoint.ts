@@ -563,24 +563,7 @@ export const frequencySwitchHandler =
 			parsed.path.subscriptionNumber,
 		);
 
-		// Extract identity ID from headers and validate ownership
-		const identityId = (
-			event as { headers?: Record<string, string | undefined> }
-		).headers?.['x-identity-id'];
 		const account = await getAccount(zuoraClient, subscription.accountNumber);
-
-		if (identityId && account.basicInfo.identityId !== identityId) {
-			logger.log(
-				`Subscription ${parsed.path.subscriptionNumber} does not belong to identity ID ${identityId}`,
-			);
-			return {
-				statusCode: 403,
-				body: JSON.stringify({
-					reason: `Subscription ${parsed.path.subscriptionNumber} does not belong to the currently logged-in user`,
-				}),
-			};
-		}
-
 		const productCatalog = await getProductCatalogFromApi(stage);
 
 		// Use selectCandidateSubscriptionCharge to validate and find the eligible charge
