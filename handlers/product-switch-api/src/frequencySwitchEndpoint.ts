@@ -334,8 +334,9 @@ export async function previewFrequencySwitch(
 	logger.log('Previewing frequency switch (Orders API) from Monthly to Annual');
 
 	try {
-		// Preview with today's date as effective date
-		const effectiveDate = today;
+		// Use chargedThroughDate as effective date to match execution behavior and provide accurate preview
+		// const effectiveDate = today; // Fallback if chargedThroughDate approach doesn't work
+		const effectiveDate = dayjs(charge.chargedThroughDate ?? today);
 
 		const switchInfo = prepareFrequencySwitchInfo(
 			ratePlan,
