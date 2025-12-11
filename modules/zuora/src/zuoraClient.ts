@@ -1,11 +1,42 @@
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
-import type { z } from 'zod';
+import type { ZodTypeDef } from 'zod';
+import { z } from 'zod';
 import { BearerTokenProvider } from './auth/bearerTokenProvider';
 import { getOAuthClientCredentials } from './auth/oAuthCredentials';
 import { generateZuoraError } from './errors/zuoraErrorHandler';
 import { zuoraErrorSchema, zuoraSuccessSchema } from './types/httpResponse';
 import { zuoraServerUrl } from './utils';
+
+export class RestClientError extends Error implements RestResult {
+	static create = (message: string, result: RestResult, e?: unknown) =>
+		new RestClientError(
+			message,
+			result.status,
+			result.responseBody,
+			result.responseHeaders,
+			e === undefined || e instanceof Error
+				? e
+				: new Error('value thrown that was not an Error', { cause: e }),
+		);
+
+	constructor(
+		message: string,
+		public status: number,
+		public responseBody: string,
+		public responseHeaders: Record<string, string>,
+		cause?: Error,
+	) {
+		super(message, { cause });
+		this.name = this.constructor.name;
+	}
+}
+
+export type RestResult = {
+	status: number;
+	responseBody: string;
+	responseHeaders: Record<string, string>;
+};
 
 export class ZuoraClient {
 	static async create(stage: Stage) {
@@ -25,7 +56,11 @@ export class ZuoraClient {
 		path: string,
 		schema: T,
 	): Promise<O> {
-		return await this.fetch(logger.getCallerInfo(1))(path, 'GET', schema);
+		return await this.fetchWithLogging(logger.getCallerInfo(1))(
+			path,
+			'GET',
+			schema,
+		);
 	}
 
 	public async post<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
@@ -34,7 +69,7 @@ export class ZuoraClient {
 		schema: T,
 		headers?: Record<string, string>,
 	): Promise<O> {
-		return await this.fetch(logger.getCallerInfo(1))(
+		return await this.fetchWithLogging(logger.getCallerInfo(1))(
 			path,
 			'POST',
 			schema,
@@ -49,7 +84,7 @@ export class ZuoraClient {
 		schema: T,
 		headers?: Record<string, string>,
 	): Promise<O> {
-		return await this.fetch(logger.getCallerInfo(1))(
+		return await this.fetchWithLogging(logger.getCallerInfo(1))(
 			path,
 			'PUT',
 			schema,
@@ -62,20 +97,24 @@ export class ZuoraClient {
 		path: string,
 		schema: T,
 	): Promise<O> {
-		return await this.fetch(logger.getCallerInfo(1))(path, 'DELETE', schema);
+		return await this.fetchWithLogging(logger.getCallerInfo(1))(
+			path,
+			'DELETE',
+			schema,
+		);
 	}
 
 	// has to be a function so that the callerInfo is refreshed on every call
-	fetch = (maybeCallerInfo?: string) =>
+	fetchWithLogging = (maybeCallerInfo?: string) =>
 		logger.wrapFn(
-			this.fetchWithoutLogging.bind(this),
+			this.fetchWithZuoraResponseHandling.bind(this),
 			() => 'HTTP ' + this.zuoraServerUrl,
-			this.fetchWithoutLogging.toString(),
+			this.fetchWithZuoraResponseHandling.toString(),
 			2,
 			maybeCallerInfo,
 		);
 
-	async fetchWithoutLogging<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
+	private async fetch<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
 		path: string,
 		method: string,
 		schema: T,
@@ -93,23 +132,61 @@ export class ZuoraClient {
 			},
 			body,
 		});
-		const json = await response.json();
+		const responseBody = await response.text();
 
-		// Check both HTTP status and logical success
-		// Some Zuora endpoints return HTTP 200 with success: false for logical errors
-		const isHttpSuccess = response.ok;
+		const responseHeaders: Record<string, string> = Object.fromEntries(
+			[...response.headers.entries()].map(([k, v]) => [k.toLowerCase(), v]),
+		);
+		const result: RestResult = {
+			status: response.status,
+			responseBody,
+			responseHeaders,
+		};
+		if (!response.ok) {
+			throw RestClientError.create('http call failed', result);
+		}
 
-		if (isHttpSuccess && isLogicalSuccess(json)) {
+		try {
+			const json: unknown = JSON.parse(result.responseBody);
 			return schema.parse(json);
-		} else {
-			// When Zuora returns a 429 status, the response headers typically contain important rate limiting information
-			if (response.status === 429) {
-				logger.log(
-					`Received a 429 rate limit response with response headers ${JSON.stringify(response.headers)}`,
-				);
-			}
+		} catch (e) {
+			throw RestClientError.create('parsing failure', result, e);
+		}
+	}
 
-			throw generateZuoraError(json, response);
+	/*
+	 * a normal RestClient throws non-2xx responses as Errors.  For Zuora, there are an extra layer of errors that
+	 * come back as 200 responses, and thus need their own special errors thrown.
+	 */
+	async fetchWithZuoraResponseHandling<
+		I,
+		O,
+		T extends z.ZodType<O, ZodTypeDef, I>,
+	>(
+		path: string,
+		method: string,
+		schema: T,
+		body?: string,
+		headers?: Record<string, string>,
+	): Promise<O> {
+		try {
+			/*
+			 * since zuora returns a wide variety of unsuccessful responses inside of 200 statuses, we need to check for
+			 * failure and fail parsing if we detect one.  Then handleZuoraFailure will throw a suitable detailed exception.
+			 */
+			const successSchema = z.any().refine(isLogicalSuccess).pipe(schema);
+			return await this.fetch(path, method, successSchema, body, headers);
+		} catch (e) {
+			if (e instanceof RestClientError) {
+				// When Zuora returns a 429 status, the response headers typically contain important rate limiting information
+				if (e.status === 429) {
+					logger.log(
+						`Received a 429 rate limit response with response headers ${JSON.stringify(e.responseHeaders)}`,
+					);
+				}
+				throw generateZuoraError(JSON.parse(e.responseBody), e);
+			}
+			throw new Error('unexpected error thrown during REST call', { cause: e });
 		}
 	}
 }
