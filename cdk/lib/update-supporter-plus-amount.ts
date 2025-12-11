@@ -28,7 +28,7 @@ export class UpdateSupporterPlusAmount extends SrStack {
 
 		lambda.addPolicies(
 			new AllowZuoraOAuthSecretsPolicy(this),
-			new AllowSqsSendPolicy(this, 'braze-emails', 'supporter-product-data'),
+			AllowSqsSendPolicy.create(this, 'braze-emails', 'supporter-product-data'),
 		);
 	}
 }

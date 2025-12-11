@@ -4,8 +4,9 @@ import {
 	GuGetS3ObjectsPolicy,
 } from '@guardian/cdk/lib/constructs/iam';
 import { Fn } from 'aws-cdk-lib';
+import type { Policy } from 'aws-cdk-lib/aws-iam';
 
-class AllowGetSecretValuePolicy extends GuAllowPolicy {
+export class AllowGetSecretValuePolicy extends GuAllowPolicy {
 	constructor(scope: GuStack, id: string, key: string) {
 		super(scope, id, {
 			actions: ['secretsmanager:GetSecretValue'],
@@ -22,8 +23,29 @@ export type SrQueueName =
 	| 'product-switch-salesforce-tracking';
 
 export class AllowSqsSendPolicy extends GuAllowPolicy {
-	constructor(
+	static createWithId = (
 		scope: GuStack,
+		id: string,
+		queuePrefix: SrQueueName,
+		...additionalQueuePrefixes: readonly SrQueueName[]
+	): Policy =>
+		new AllowSqsSendPolicy(scope, id, queuePrefix, ...additionalQueuePrefixes);
+
+	static create = (
+		scope: GuStack,
+		queuePrefix: SrQueueName,
+		...additionalQueuePrefixes: readonly SrQueueName[]
+	): Policy =>
+		new AllowSqsSendPolicy(
+			scope,
+			'SQS send policy',
+			queuePrefix,
+			...additionalQueuePrefixes,
+		);
+
+	private constructor(
+		scope: GuStack,
+		id: string,
 		queuePrefix: SrQueueName,
 		...additionalQueuePrefixes: readonly SrQueueName[]
 	) {
@@ -32,7 +54,7 @@ export class AllowSqsSendPolicy extends GuAllowPolicy {
 			(queuePrefix) =>
 				`arn:aws:sqs:${scope.region}:${scope.account}:${queuePrefix}-${scope.stage}`,
 		);
-		super(scope, 'SQS send policy', {
+		super(scope, id, {
 			actions: ['sqs:GetQueueUrl', 'sqs:SendMessage'],
 			resources,
 		});
@@ -49,10 +71,10 @@ export class AllowS3CatalogReadPolicy extends GuGetS3ObjectsPolicy {
 }
 
 export class AllowZuoraOAuthSecretsPolicy extends AllowGetSecretValuePolicy {
-	constructor(scope: GuStack) {
+	constructor(scope: GuStack, id?: string) {
 		super(
 			scope,
-			'Zuora OAuth Secrets Manager policy',
+			id ?? 'Zuora OAuth Secrets Manager policy',
 			'Zuora-OAuth/SupportServiceLambdas-*',
 		);
 	}

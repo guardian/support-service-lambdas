@@ -2,10 +2,13 @@ import { Lazy } from '@modules/lazy';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
 import type { OrderAction } from '@modules/zuora/orders/orderActions';
 import type { OrderRequest } from '@modules/zuora/orders/orderRequests';
-import type { GetInvoiceResponse, ZuoraResponse } from '@modules/zuora/types';
+import type {
+	GetInvoiceResponse,
+	ZuoraUpperCaseSuccess,
+} from '@modules/zuora/types';
 import {
 	zuoraAccountSchema,
-	zuoraSubscriptionResponseSchema,
+	zuoraSubscriptionSchema,
 } from '@modules/zuora/types';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
@@ -15,7 +18,7 @@ import {
 	switchToSupporterPlus,
 } from '../src/contributionToSupporterPlus';
 import type { ZuoraSwitchResponse } from '../src/schemas';
-import { getSwitchInformationWithOwnerCheck } from '../src/switchInformation';
+import { getSwitchInformation } from '../src/switchInformation';
 import accountJson from './fixtures/account.json';
 import pendingAmendmentsJson from './fixtures/pendingAmendments.json';
 
@@ -27,21 +30,18 @@ const mockZuoraClient = {
 
 const productCatalog = generateProductCatalog(zuoraCatalogFixture);
 
-const subscription = zuoraSubscriptionResponseSchema.parse(
-	pendingAmendmentsJson,
-);
+const subscription = zuoraSubscriptionSchema.parse(pendingAmendmentsJson);
 const account = zuoraAccountSchema.parse(accountJson);
 
 const today = dayjs('2024-12-05T22:42:06');
 
-const getSwitchInformation = async () =>
-	await getSwitchInformationWithOwnerCheck(
+const getTestSwitchInformation = async () =>
+	await getSwitchInformation(
 		'CODE',
 		{ preview: false },
 		subscription,
 		account,
 		productCatalog,
-		'999999999999',
 		new Lazy(() => Promise.resolve([]), 'test'),
 		today,
 	);
@@ -127,7 +127,7 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 			},
 		});
 
-		const switchInformation = await getSwitchInformation();
+		const switchInformation = await getTestSwitchInformation();
 
 		const result = await preview(
 			mockZuoraClient as unknown as ZuoraClient,
@@ -189,7 +189,7 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 		// createPayment
 		mockZuoraClient.post.mockResolvedValueOnce({
 			Success: true,
-		} as ZuoraResponse);
+		} as ZuoraUpperCaseSuccess);
 
 		const takePaymentOrAdjustInvoice = jest.fn().mockResolvedValue(75);
 		const sendThankYouEmail = jest.fn().mockResolvedValue(undefined);
@@ -209,7 +209,7 @@ describe('pendingAmendments, e.g. contribution amount changes, are dealt with co
 			sendToSupporterProductData,
 		}));
 
-		const switchInformation = await getSwitchInformation();
+		const switchInformation = await getTestSwitchInformation();
 
 		const result = await switchToSupporterPlus(
 			mockZuoraClient as unknown as ZuoraClient,

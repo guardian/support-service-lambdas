@@ -1,21 +1,22 @@
 import { sendEmail } from '@modules/email/email';
-import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
-import { logger } from '@modules/routing/logger';
-import { createRoute, Router } from '@modules/routing/router';
+import { Router } from '@modules/routing/router';
+import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
+import { withParsers } from '@modules/routing/withParsers';
 import type { Stage } from '@modules/stage';
-import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type {
-	APIGatewayProxyEvent,
-	APIGatewayProxyResult,
-	Handler,
-} from 'aws-lambda';
+	ZuoraAccount,
+	ZuoraSubscription,
+} from '@modules/zuora/types/objects';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { APIGatewayProxyResult, Handler } from 'aws-lambda';
 import { z } from 'zod';
 import type { RequestBody } from './schema';
 import { requestBodySchema } from './schema';
 import { createThankYouEmail } from './sendEmail';
 import { updateSupporterPlusAmount } from './updateSupporterPlusAmount';
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo fix in next refactor
 const stage = process.env.STAGE as Stage;
 
 const pathParserSchema = z.object({
@@ -31,34 +32,34 @@ export type PathParser = z.infer<typeof pathParserSchema>;
 
 // main entry from AWS
 export const handler: Handler = Router([
-	createRoute<PathParser, RequestBody>({
+	{
 		httpMethod: 'POST',
 		path: '/update-supporter-plus-amount/{subscriptionNumber}',
-		handler: handleUpdateAmount,
-		parser: {
-			path: pathParserSchema,
-			body: requestBodySchema,
-		},
-	}),
+		handler: withParsers(
+			pathParserSchema,
+			requestBodySchema,
+			withMMAIdentityCheck(
+				stage,
+				handleUpdateAmount,
+				({ path }) => path.subscriptionNumber,
+			),
+		),
+	},
 ]);
 
 async function handleUpdateAmount(
-	event: APIGatewayProxyEvent,
-	parsed: { path: PathParser; body: RequestBody },
+	requestBody: RequestBody,
+	zuoraClient: ZuoraClient,
+	subscription: ZuoraSubscription,
+	account: ZuoraAccount,
 ): Promise<APIGatewayProxyResult> {
-	const subscriptionNumber = parsed.path.subscriptionNumber;
-	logger.mutableAddContext(subscriptionNumber);
-	const requestBody = parsed.body;
-	const identityId = getIfDefined(
-		event.headers['x-identity-id'],
-		'Identity ID not found in request',
-	);
-	const zuoraClient = await ZuoraClient.create(stage);
+	const subscriptionNumber = subscription.subscriptionNumber;
 	const productCatalog = await getProductCatalogFromApi(stage);
 	const emailFields = await updateSupporterPlusAmount(
 		zuoraClient,
+		subscription,
+		account,
 		productCatalog,
-		identityId,
 		subscriptionNumber,
 		requestBody.newPaymentAmount,
 	);

@@ -46,6 +46,7 @@ export async function doSfAuth(
 		}
 		console.log('successfully authenticated with Salesforce');
 
+		// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo use zod
 		const sfAuthResponse = (await response.json()) as SfAuthResponse;
 
 		const parseResponse =

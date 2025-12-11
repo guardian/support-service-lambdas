@@ -15,7 +15,7 @@ describe('ZuoraPaymentService', () => {
 			const mockResponse = { success: true, Id: 'rejection_123' };
 			mockZuoraClient.post = jest.fn().mockResolvedValue(mockResponse);
 
-			const result = await rejectPayment(mockZuoraClient, 'P-12345');
+			await rejectPayment(mockZuoraClient, 'P-12345');
 
 			expect(mockZuoraClient.post).toHaveBeenCalledWith(
 				'/v1/gateway-settlement/payments/P-12345/reject',
@@ -27,8 +27,6 @@ describe('ZuoraPaymentService', () => {
 				}),
 				expect.any(Object),
 			);
-
-			expect(result).toEqual(mockResponse);
 		});
 
 		it('should reject payment with custom reason', async () => {

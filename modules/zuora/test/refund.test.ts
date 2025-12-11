@@ -1,7 +1,7 @@
-import { doRefund } from '@modules/zuora/refund';
-import { zuoraResponseSchema } from '@modules/zuora/types';
-import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 import { z } from 'zod';
+import { doRefund } from '@modules/zuora/refund';
+import { zuoraUpperCaseSuccessSchema } from '@modules/zuora/types';
+import { mockZuoraClient } from '../test/mocks/mockZuoraClient';
 
 jest.mock('@modules/zuora/zuoraClient');
 
@@ -16,7 +16,7 @@ describe('doRefund', () => {
 			Type: 'Refund',
 		});
 
-		const result = await doRefund(mockZuoraClient, body, zuoraResponseSchema);
+		const result = await doRefund(mockZuoraClient, body);
 		expect(result).toEqual(mockResponse);
 	});
 
@@ -51,7 +51,7 @@ describe('doRefund', () => {
 			expect(mockZuoraClient.post).toHaveBeenCalledWith(
 				'/v1/object/refund',
 				body,
-				zuoraResponseSchema,
+				zuoraUpperCaseSuccessSchema,
 			);
 			expect(result).toEqual(mockResponse);
 		});

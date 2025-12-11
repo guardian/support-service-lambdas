@@ -1,19 +1,22 @@
 import { sendEmail } from '@modules/email/email';
-import { getIfDefined } from '@modules/nullAndUndefined';
 import { logger } from '@modules/routing/logger';
 import { Router } from '@modules/routing/router';
+import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
+import { withBodyParser } from '@modules/routing/withParsers';
 import type { Stage } from '@modules/stage';
 import type {
-	APIGatewayProxyEvent,
-	APIGatewayProxyResult,
-	Handler,
-} from 'aws-lambda';
+	ZuoraAccount,
+	ZuoraSubscription,
+} from '@modules/zuora/types/objects';
+import type { ZuoraClient } from '@modules/zuora/zuoraClient';
+import type { APIGatewayProxyResult, Handler } from 'aws-lambda';
 import dayjs from 'dayjs';
 import type { ZodType } from 'zod';
 import {
 	applyDiscountEndpoint,
 	previewDiscountEndpoint,
 } from './discountEndpoint';
+import type { ApplyDiscountRequestBody } from './requestSchema';
 import { applyDiscountSchema } from './requestSchema';
 import type {
 	ApplyDiscountResponseBody,
@@ -24,6 +27,7 @@ import {
 	previewDiscountResponseSchema,
 } from './responseSchema';
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo fix in next refactor
 const stage = process.env.STAGE as Stage;
 
 // main entry point from AWS
@@ -31,58 +35,77 @@ export const handler: Handler = Router([
 	{
 		httpMethod: 'POST',
 		path: '/apply-discount',
-		handler: applyDiscountHandler,
+		handler: withBodyParser(
+			applyDiscountSchema,
+			withMMAIdentityCheck(
+				stage,
+				applyDiscountHandler(stage),
+				({ body }) => body.subscriptionNumber,
+			),
+		),
 	},
 	{
 		httpMethod: 'POST',
 		path: '/preview-discount',
-		handler: previewDiscountHandler,
+		handler: withBodyParser(
+			applyDiscountSchema,
+			withMMAIdentityCheck(
+				stage,
+				previewDiscountHandler(stage),
+				({ body }) => body.subscriptionNumber,
+			),
+		),
 	},
 ]);
 
-async function applyDiscountHandler(
-	event: APIGatewayProxyEvent,
-): Promise<APIGatewayProxyResult> {
-	const subscriptionNumber = applyDiscountSchema.parse(
-		JSON.parse(getIfDefined(event.body, 'No body was provided')),
-	).subscriptionNumber;
-	logger.mutableAddContext(subscriptionNumber);
-	const { response, emailPayload } = await applyDiscountEndpoint(
-		stage,
-		event.headers,
-		subscriptionNumber,
-		dayjs(),
-	);
-	await sendEmail(stage, emailPayload);
-	return {
-		body: stringify<ApplyDiscountResponseBody>(
-			response,
-			applyDiscountResponseSchema,
-		),
-		statusCode: 200,
+export function applyDiscountHandler(stage: Stage) {
+	return async (
+		requestBody: ApplyDiscountRequestBody,
+		zuoraClient: ZuoraClient,
+		subscription: ZuoraSubscription,
+		account: ZuoraAccount,
+	): Promise<APIGatewayProxyResult> => {
+		const { response, emailPayload } = await applyDiscountEndpoint(
+			stage,
+			zuoraClient,
+			subscription,
+			account,
+			subscription.subscriptionNumber,
+			dayjs(),
+		);
+		await sendEmail(stage, emailPayload);
+		return {
+			body: stringify<ApplyDiscountResponseBody>(
+				response,
+				applyDiscountResponseSchema,
+			),
+			statusCode: 200,
+		};
 	};
 }
 
-async function previewDiscountHandler(
-	event: APIGatewayProxyEvent,
-): Promise<APIGatewayProxyResult> {
-	const subscriptionNumber = applyDiscountSchema.parse(
-		JSON.parse(getIfDefined(event.body, 'No body was provided')),
-	).subscriptionNumber;
-	logger.mutableAddContext(subscriptionNumber);
-	logger.log('Previewing discount');
-	const result = await previewDiscountEndpoint(
-		stage,
-		event.headers,
-		subscriptionNumber,
-		dayjs(),
-	);
-	return {
-		body: stringify<EligibilityCheckResponseBody>(
-			result,
-			previewDiscountResponseSchema,
-		),
-		statusCode: 200,
+export function previewDiscountHandler(stage: Stage) {
+	return async (
+		requestBody: ApplyDiscountRequestBody,
+		zuoraClient: ZuoraClient,
+		subscription: ZuoraSubscription,
+		account: ZuoraAccount,
+	): Promise<APIGatewayProxyResult> => {
+		logger.log('Previewing discount');
+		const result = await previewDiscountEndpoint(
+			stage,
+			zuoraClient,
+			subscription,
+			account,
+			dayjs(),
+		);
+		return {
+			body: stringify<EligibilityCheckResponseBody>(
+				result,
+				previewDiscountResponseSchema,
+			),
+			statusCode: 200,
+		};
 	};
 }
 

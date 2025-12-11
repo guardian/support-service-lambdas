@@ -1,7 +1,7 @@
-import { zuoraResponseSchema } from '@modules/zuora/types';
 import { z } from 'zod';
+import { successOrFailureSchema } from './successOrFailureSchema';
 
-export const SubscriptionResponseSchema = zuoraResponseSchema;
+export const SubscriptionResponseSchema = successOrFailureSchema;
 export type SubscriptionResponse = z.infer<typeof SubscriptionResponseSchema>;
 
 export const ActiveSubscriptionResultSchema = z.object({

@@ -1,6 +1,8 @@
 import console from 'console';
 import { sendEmail } from '@modules/email/email';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
+import { getAccount } from '@modules/zuora/account';
+import { getSubscription } from '@modules/zuora/subscription';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { createThankYouEmail } from '../src/sendEmail';
@@ -25,15 +27,18 @@ const stage = 'CODE';
 
 test('We can carry out an amount change', async () => {
 	const subscriptionNumber = 'A-S00612865';
-	const identityId = '200110884';
 	const newPaymentAmount = 150;
 	const zuoraClient = await ZuoraClient.create(stage);
 	const productCatalog = await getProductCatalogFromApi(stage);
 
+	const subscription = await getSubscription(zuoraClient, subscriptionNumber);
+	const account = await getAccount(zuoraClient, subscription.accountNumber);
+
 	const result = await updateSupporterPlusAmount(
 		zuoraClient,
+		subscription,
+		account,
 		productCatalog,
-		identityId,
 		subscriptionNumber,
 		newPaymentAmount,
 	);

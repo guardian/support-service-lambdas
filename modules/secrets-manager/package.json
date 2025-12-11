@@ -5,7 +5,7 @@
     "check-formatting": "prettier --check **/*.ts",
     "test": "jest --group=-integration",
     "build": "tsc --noEmit",
-    "lint": "eslint src/**/*.ts test/**/*.ts"
+    "lint": "eslint 'src/**/*.ts' 'test/**/*.ts'"
   },
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.908.0",

@@ -1,11 +1,11 @@
-import type { z } from 'zod';
+import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
+import type { z } from 'zod';
 import { BearerTokenProvider } from './auth/bearerTokenProvider';
 import { getOAuthClientCredentials } from './auth/oAuthCredentials';
 import { generateZuoraError } from './errors/zuoraErrorHandler';
 import { zuoraErrorSchema, zuoraSuccessSchema } from './types/httpResponse';
 import { zuoraServerUrl } from './utils';
-import { logger } from '@modules/routing/logger';
 
 export class ZuoraClient {
 	static async create(stage: Stage) {
@@ -105,7 +105,7 @@ export class ZuoraClient {
 			// When Zuora returns a 429 status, the response headers typically contain important rate limiting information
 			if (response.status === 429) {
 				logger.log(
-					`Received a 429 rate limit response with response headers ${response.headers}`,
+					`Received a 429 rate limit response with response headers ${JSON.stringify(response.headers)}`,
 				);
 			}
 

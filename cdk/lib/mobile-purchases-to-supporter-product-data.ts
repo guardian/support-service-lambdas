@@ -23,7 +23,9 @@ export class MobilePurchasesToSupporterProductData extends SrStack {
 			// This must be >= the lambda timeout
 			visibilityTimeout: Duration.minutes(5),
 		});
-		lambda.addPolicies(new AllowSqsSendPolicy(this, 'supporter-product-data'));
+		lambda.addPolicies(
+			AllowSqsSendPolicy.create(this, 'supporter-product-data'),
+		);
 
 		const mobilePurchasesBus = EventBus.fromEventBusName(
 			this,

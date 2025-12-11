@@ -17,10 +17,10 @@ export default (pkg: HandlerDefinition) => {
 				'esbuild --bundle --platform=node --target=node20 --outdir=target/ ' +
 				entryPoints +
 				' --sourcemap',
-			lint: 'eslint --cache --cache-location /tmp/eslintcache/ src/**/*.ts test/**/*.ts',
+			lint: "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
 			package: `pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr ${pkg.name}.zip ./*.js.map ./*.js`,
-			'check-formatting': 'prettier --check \"**/*.ts\"',
-			'fix-formatting': 'prettier --write \"**/*.ts\"',
+			'check-formatting': 'prettier --check "**/*.ts"',
+			'fix-formatting': 'prettier --write "**/*.ts"',
 			'update-lambda': `../../update-lambda.sh "${pkg.name}"`,
 			'update-stack': `../../update-stack.sh "${pkg.name}"`,
 			...pkg.extraScripts,

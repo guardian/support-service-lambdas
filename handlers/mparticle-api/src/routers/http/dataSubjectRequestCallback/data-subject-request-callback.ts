@@ -1,11 +1,11 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { z } from 'zod';
-import { validateDataSubjectRequestCallback } from './validate-data-subject-request-callback';
-import {
+import type { BatonS3Writer } from '../../../services/batonS3Writer';
+import type {
 	DataSubjectAPI,
 	MParticleClient,
 } from '../../../services/mparticleClient';
-import type { BatonS3Writer } from '../../../services/batonS3Writer';
+import { validateDataSubjectRequestCallback } from './validate-data-subject-request-callback';
 
 export type DataSubjectRequestCallback = z.infer<
 	typeof dataSubjectRequestCallbackParser.body
@@ -47,7 +47,8 @@ export function dataSubjectRequestCallbackHandler(
 ) {
 	return async (
 		event: APIGatewayProxyEvent,
-		parsed: { path: { requestId: string }; body: DataSubjectRequestCallback },
+		path: { requestId: string },
+		body: DataSubjectRequestCallback,
 	): Promise<APIGatewayProxyResult> => {
 		const getHeader = (key: string): string | undefined =>
 			Object.entries(event.headers).find(
@@ -70,8 +71,8 @@ export function dataSubjectRequestCallbackHandler(
 			statusCode: 202,
 			body: JSON.stringify(
 				await processDataSubjectRequestCallback(
-					parsed.path.requestId,
-					parsed.body,
+					path.requestId,
+					body,
 					dataSubjectAPIMParticleClient,
 					batonS3Writer,
 				),
