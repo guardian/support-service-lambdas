@@ -1,0 +1,26 @@
+# MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/riff-raff.yaml.ts
+stacks:
+  - support
+regions:
+  - eu-west-1
+allowedStages:
+  - CODE
+  - PROD
+deployments:
+  promotions-lambdas-cloudformation:
+    type: cloud-formation
+    app: promotions-lambdas
+    parameters:
+      templateStagePaths:
+        CODE: promotions-lambdas-CODE.template.json
+        PROD: promotions-lambdas-PROD.template.json
+  promotions-lambdas:
+    type: aws-lambda
+    parameters:
+      fileName: promotions-lambdas.zip
+      bucketSsmLookup: true
+      prefixStack: false
+      functionNames:
+        - promo-campaign-sync
+    dependencies:
+      - promotions-lambdas-cloudformation
