@@ -5,12 +5,13 @@ module.exports = [
 	{
 		type: 'input',
 		name: 'lambdaName',
-		message: 'Enter new lambda name',
+		message: 'Enter new lambda name e.g. widgets-query-sync',
 	},
 	{
 		type: 'input',
 		name: 'includeApiKey',
-		message: 'Should I generate an API key for this lambda? (Y/n)',
+		message:
+			'Should this API be for internal use (as opposed to public)? (Y/n)',
 		default: 'Y',
 	},
 ];

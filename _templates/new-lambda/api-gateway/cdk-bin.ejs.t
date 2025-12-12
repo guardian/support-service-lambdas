@@ -6,5 +6,4 @@ after: "const stacks"
 append: true
 skip_if: ^<%= h.changeCase.pascal(lambdaName) %>
 ---
-<% PascalCase = h.changeCase.pascal(lambdaName) %>
-	<%= PascalCase %>,
+	<%= h.changeCase.pascal(lambdaName) %>,
