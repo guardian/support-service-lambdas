@@ -9,6 +9,9 @@ export class PromotionsLambdas extends SrStack {
 
 		new SrLambda(this, 'PromoCampaignSync', {
 			nameSuffix: 'promo-campaign-sync',
+			lambdaOverrides: {
+				handler: 'handlers/promoCampaignSync.handler',
+			},
 		});
 	}
 }
