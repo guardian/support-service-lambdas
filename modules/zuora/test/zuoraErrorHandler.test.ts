@@ -1,6 +1,6 @@
 import { ZuoraError } from '@modules/zuora/errors';
 import { generateZuoraError } from '@modules/zuora/errors/zuoraErrorHandler';
-import type { RestResult } from '@modules/zuora/zuoraClient';
+import type { RestResult } from '@modules/zuora/restClient';
 
 function mockResponse(status: number, body: unknown): RestResult {
 	return {

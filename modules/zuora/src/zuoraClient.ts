@@ -2,157 +2,27 @@ import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import type { ZodTypeDef } from 'zod';
 import { z } from 'zod';
-import { BearerTokenProvider } from './auth/bearerTokenProvider';
+import { RestClient, RestClientError } from '@modules/zuora/restClient';
+import { ZuoraBearerTokenProvider } from './auth/bearerTokenProvider';
 import { getOAuthClientCredentials } from './auth/oAuthCredentials';
 import { generateZuoraError } from './errors/zuoraErrorHandler';
 import { zuoraErrorSchema, zuoraSuccessSchema } from './types/httpResponse';
-import { zuoraServerUrl } from './utils';
 
-export class RestClientError extends Error implements RestResult {
-	public status: number;
-	public responseBody: string;
-	public responseHeaders: Record<string, string>;
-
-	constructor(message: string, restResult: RestResult, cause?: unknown) {
-		super(message, { cause });
-		this.name = this.constructor.name;
-		this.status = restResult.status;
-		this.responseBody = restResult.responseBody;
-		this.responseHeaders = restResult.responseHeaders;
-	}
-}
-
-export type RestResult = {
-	status: number;
-	responseBody: string;
-	responseHeaders: Record<string, string>;
-};
-
-export class ZuoraClient {
+export class ZuoraClient extends RestClient {
 	static async create(stage: Stage) {
 		const credentials = await getOAuthClientCredentials(stage);
-		const bearerTokenProvider = new BearerTokenProvider(stage, credentials);
-		return new ZuoraClient(stage, bearerTokenProvider);
-	}
-	protected zuoraServerUrl: string;
-	constructor(
-		stage: Stage,
-		private tokenProvider: BearerTokenProvider,
-	) {
-		this.zuoraServerUrl = zuoraServerUrl(stage).replace(/\/$/, ''); // remove trailing slash
-	}
-
-	public async get<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
-		path: string,
-		schema: T,
-	): Promise<O> {
-		return await this.fetchWithLogging(logger.getCallerInfo(1))(
-			path,
-			'GET',
-			schema,
+		const bearerTokenProvider = new ZuoraBearerTokenProvider(
+			stage,
+			credentials,
 		);
-	}
-
-	public async post<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
-		path: string,
-		body: string,
-		schema: T,
-		headers?: Record<string, string>,
-	): Promise<O> {
-		return await this.fetchWithLogging(logger.getCallerInfo(1))(
-			path,
-			'POST',
-			schema,
-			body,
-			headers,
-		);
-	}
-
-	public async put<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
-		path: string,
-		body: string,
-		schema: T,
-		headers?: Record<string, string>,
-	): Promise<O> {
-		return await this.fetchWithLogging(logger.getCallerInfo(1))(
-			path,
-			'PUT',
-			schema,
-			body,
-			headers,
-		);
-	}
-
-	public async delete<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
-		path: string,
-		schema: T,
-	): Promise<O> {
-		return await this.fetchWithLogging(logger.getCallerInfo(1))(
-			path,
-			'DELETE',
-			schema,
-		);
-	}
-
-	// has to be a function so that the callerInfo is refreshed on every call
-	fetchWithLogging = (maybeCallerInfo?: string) =>
-		logger.wrapFn(
-			this.fetchWithZuoraResponseHandling.bind(this),
-			() => 'HTTP ' + this.zuoraServerUrl,
-			this.fetchWithZuoraResponseHandling.toString(),
-			2,
-			maybeCallerInfo,
-		);
-
-	private async fetch<I, O, T extends z.ZodType<O, z.ZodTypeDef, I>>(
-		path: string,
-		method: string,
-		schema: T,
-		body?: string,
-		headers?: Record<string, string>,
-	): Promise<O> {
-		const bearerToken = await this.tokenProvider.getBearerToken();
-		const url = `${this.zuoraServerUrl}/${path.replace(/^\//, '')}`;
-		const response = await fetch(url, {
-			method,
-			headers: {
-				Authorization: `Bearer ${bearerToken.access_token}`,
-				'Content-Type': 'application/json',
-				...headers,
-			},
-			body,
-		});
-		const responseBody = await response.text();
-
-		const responseHeaders: Record<string, string> = Object.fromEntries(
-			[...response.headers.entries()].map(([k, v]) => [k.toLowerCase(), v]),
-		);
-		const result: RestResult = {
-			status: response.status,
-			responseBody,
-			responseHeaders,
-		};
-		if (!response.ok) {
-			throw new RestClientError('http call failed', result);
-		}
-
-		try {
-			const json: unknown = JSON.parse(result.responseBody);
-			return schema.parse(json);
-		} catch (e) {
-			throw new RestClientError('parsing failure', result, e);
-		}
+		return new ZuoraClient(bearerTokenProvider);
 	}
 
 	/*
 	 * a normal RestClient throws non-2xx responses as Errors.  For Zuora, there are an extra layer of errors that
 	 * come back as 200 responses, and thus need their own special errors thrown.
 	 */
-	async fetchWithZuoraResponseHandling<
-		I,
-		O,
-		T extends z.ZodType<O, ZodTypeDef, I>,
-	>(
+	override async fetch<I, O, T extends z.ZodType<O, ZodTypeDef, I>>(
 		path: string,
 		method: string,
 		schema: T,
@@ -165,7 +35,7 @@ export class ZuoraClient {
 			 * failure and fail parsing if we detect one.  Then handleZuoraFailure will throw a suitable detailed exception.
 			 */
 			const successSchema = z.any().refine(isLogicalSuccess).pipe(schema);
-			return await this.fetch(path, method, successSchema, body, headers);
+			return await super.fetch(path, method, successSchema, body, headers);
 		} catch (e) {
 			if (e instanceof RestClientError) {
 				// When Zuora returns a 429 status, the response headers typically contain important rate limiting information

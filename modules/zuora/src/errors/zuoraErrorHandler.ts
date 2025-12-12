@@ -1,4 +1,4 @@
-import type { RestResult } from '@modules/zuora/zuoraClient';
+import type { RestResult } from '@modules/zuora/restClient';
 import {
 	codeAndMessageSchema,
 	faultCodeAndMessageSchema,
