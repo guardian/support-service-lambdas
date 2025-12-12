@@ -74,10 +74,7 @@ export const handlerDeletion: Handler<SQSEvent, void> = async (
 	const mParticleClient = MParticleClient.createMParticleDataSubjectClient(
 		config.workspace,
 	);
-	const brazeClient = new BrazeClient(
-		config.braze.apiUrl,
-		config.braze.apiKey,
-	);
+	const brazeClient = new BrazeClient(config.braze.apiUrl, config.braze.apiKey);
 
 	// Process each record independently
 	// SQS will retry failed messages automatically
