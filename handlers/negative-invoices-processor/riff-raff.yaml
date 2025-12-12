@@ -1,3 +1,4 @@
+# MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/riff-raff.yaml.ts
 stacks:
   - support
 regions:
@@ -27,4 +28,5 @@ deployments:
         - negative-invoices-processor-do-credit-balance-refund-
         - negative-invoices-processor-save-results-
         - negative-invoices-processor-detect-failures-
-    dependencies: [negative-invoices-processor-cloudformation]
+    dependencies:
+      - negative-invoices-processor-cloudformation

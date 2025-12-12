@@ -84,7 +84,7 @@ class HolidayStopSubscriptionCancellationTest extends AnyFlatSpec with Matchers 
       ),
       processedExpectedRefundedAfterCancellationDate.copy(
         Actual_Price__c = Some(Price(estimatedPrice)),
-      )
+      ),
     )
   }
 

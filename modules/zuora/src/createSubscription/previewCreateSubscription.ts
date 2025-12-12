@@ -1,7 +1,10 @@
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
-import type { AppliedPromotion, Promotion } from '@modules/promotions/schema';
+import type {
+	AppliedPromotion,
+	Promotion,
+} from '@modules/promotions/v1/schema';
 import type { Stage } from '@modules/stage';
 import dayjs from 'dayjs';
 import { z } from 'zod';

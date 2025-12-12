@@ -746,7 +746,7 @@ val getSubscriptionResponseNeedingTermRenewal = GetSubscriptionResponse(
           effectiveEndDate = LocalDate.of(2022, 1, 15),
           chargedThroughDate = Some(LocalDate.of(2024, 11, 15)), // After termEndDate
           billingPeriod = Some(Monthly),
-        )
+        ),
       ),
       lastChangeType = None,
     ),

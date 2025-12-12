@@ -1,5 +1,5 @@
 {
-  "name": "zuora",
+  "name": "email",
   "version": "1.0.0",
   "scripts": {
     "test": "jest --group=-integration",

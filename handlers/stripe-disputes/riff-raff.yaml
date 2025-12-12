@@ -1,7 +1,8 @@
+# MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/riff-raff.yaml.ts
 stacks:
-- support
+  - support
 regions:
-- eu-west-1
+  - eu-west-1
 allowedStages:
   - CODE
   - PROD
@@ -13,7 +14,6 @@ deployments:
       templateStagePaths:
         CODE: stripe-disputes-CODE.template.json
         PROD: stripe-disputes-PROD.template.json
-
   stripe-disputes:
     type: aws-lambda
     parameters:
@@ -21,6 +21,7 @@ deployments:
       bucketSsmLookup: true
       prefixStack: false
       functionNames:
-      - stripe-disputes-producer-
-      - stripe-disputes-consumer-
-    dependencies: [stripe-disputes-cloudformation]
+        - stripe-disputes-producer-
+        - stripe-disputes-consumer-
+    dependencies:
+      - stripe-disputes-cloudformation

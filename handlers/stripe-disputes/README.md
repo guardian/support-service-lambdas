@@ -56,10 +56,16 @@ The email will not be sent if the customer email address is missing from Zuora.
 
 ## Testing
 
-Run tests from this directory:
-```bash
-npm test
-```
+### Automated
+`pnpm test`
+### Manual (in CODE)
+1. deploy to CODE
+1. take out a sub with one of the "dispute" test cards https://docs.stripe.com/testing#disputes
+1. go to stripe dashboard in test mode and accept the dispute
+1. check the logs for the consumer and make sure no errors https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1#logsV2:log-groups/log-group/$252Faws$252Flambda$252Fstripe-disputes-consumer-CODE
+1. log into dev1 salesforce, and check that the dispute is marked as "lost"
+1. check in sandbox zuora and make sure the sub is cancelled, the payment is marked as refunded, and the invoice balance is zero
+1. make sure you have had a dispute lost email from dev braze in your inbox.
 
 ## Monitoring
 
@@ -71,4 +77,4 @@ CloudWatch alarms monitor:
 
 ## Deployment
 
-The service is deployed via CDK as part of the support-service-lambdas stack. See the root README for deployment instructions.
+The service is deployed via riff-raff after the relevant build.

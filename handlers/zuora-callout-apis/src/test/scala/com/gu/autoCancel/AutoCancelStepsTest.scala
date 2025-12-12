@@ -68,10 +68,11 @@ class AutoCancelStepsTest extends AnyFlatSpec with Matchers {
 
     val actual: ApiGatewayOp[List[AutoCancelRequest]] = autoCancelReqestsProducer(autoCancelCallout)
 
+    // Should use the earliest overdue invoice date (minusDays(35)) to ensure sufficient credit for all unpaid invoices
     val expected = Right(
       List(
-        AutoCancelRequest("accId123", SubscriptionNumber("A-S123"), LocalDate.now.minusDays(14)),
-        AutoCancelRequest("accId123", SubscriptionNumber("A-S456"), LocalDate.now.minusDays(14)),
+        AutoCancelRequest("accId123", SubscriptionNumber("A-S123"), LocalDate.now.minusDays(35)),
+        AutoCancelRequest("accId123", SubscriptionNumber("A-S456"), LocalDate.now.minusDays(35)),
       ),
     )
 

@@ -63,11 +63,31 @@ class AutoCancelDataCollectionFilterTest extends AnyFlatSpec {
     assert(apiGatewayOp.toDisjunction == Right(LocalDate.now.minusDays(14)))
   }
 
-  "getCancellationDateFromInvoices" should "return the due date of invoice that triggered ZUORA Callout, if there is more than one overdue invoice on the account summary" in {
+  "getCancellationDateFromInvoices" should "return the earliest due date when there are multiple overdue invoices, to ensure sufficient credit is generated" in {
     val accountSummaryUnpaidInvs = AccountSummary(basicInfo, List(subscription), twoOverdueInvoices)
     val apiGatewayOp =
       getCancellationDateFromInvoice(twoOverdueInvoices.head.id, accountSummaryUnpaidInvs, LocalDate.now)
-    assert(apiGatewayOp.toDisjunction == Right(twoOverdueInvoices.head.dueDate))
+    // twoOverdueInvoices(1) has dueDate of now.minusDays(35), which is earlier than head's now.minusDays(21)
+    assert(apiGatewayOp.toDisjunction == Right(twoOverdueInvoices(1).dueDate))
+  }
+
+  "getCancellationDateFromInvoices" should "use earliest date even when callout is for a newer invoice (disputed payments scenario)" in {
+    // Simulates disputed payments scenario: multiple unpaid invoices from Stripe disputes
+    val olderDisputedInvoice = Invoice("inv_old", LocalDate.now.minusDays(60), 25.00, "Posted")
+    val middleDisputedInvoice = Invoice("inv_mid", LocalDate.now.minusDays(40), 25.00, "Posted")
+    val newerDisputedInvoice = Invoice("inv_new", LocalDate.now.minusDays(20), 25.00, "Posted")
+
+    val accountSummary = AccountSummary(
+      basicInfo,
+      List(subscription),
+      List(newerDisputedInvoice, middleDisputedInvoice, olderDisputedInvoice),
+    )
+
+    // Callout triggered for the newer invoice, but we should use the oldest date
+    val apiGatewayOp = getCancellationDateFromInvoice(newerDisputedInvoice.id, accountSummary, LocalDate.now)
+
+    // Should return the oldest invoice's due date to generate enough credit for all 3 invoices
+    assert(apiGatewayOp.toDisjunction == Right(olderDisputedInvoice.dueDate))
   }
 
   "filterNotActiveSubscriptions" should "return only active subscriptions from subscriptions on the invoice, " +

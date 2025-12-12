@@ -9,9 +9,6 @@ import {
 	membershipApisDomain,
 	membershipCertificateId,
 	membershipHostedZoneId,
-	supportApisDomain,
-	supportCertificateId,
-	supportHostedZoneId,
 } from '../lib/constants';
 import { DiscountApi } from '../lib/discount-api';
 import { DiscountExpiryNotifier } from '../lib/discount-expiry-notifier';
@@ -138,6 +135,7 @@ const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
 	GenerateProductCatalog,
 	TicketTailorWebhook,
 	MobilePurchasesToSupporterProductData,
+	StripeDisputes,
 ];
 
 // generate all stacks for all stages
@@ -145,21 +143,6 @@ stacks.forEach((Constructor) => {
 	stages.forEach((stage) => {
 		new Constructor(app, stage);
 	});
-});
-
-new StripeDisputes(app, 'stripe-disputes-CODE', {
-	stack: 'support',
-	stage: 'CODE',
-	domainName: `stripe-disputes-code.${supportApisDomain}`,
-	hostedZoneId: supportHostedZoneId,
-	certificateId: supportCertificateId,
-});
-new StripeDisputes(app, 'stripe-disputes-PROD', {
-	stack: 'support',
-	stage: 'PROD',
-	domainName: `stripe-disputes.${supportApisDomain}`,
-	hostedZoneId: supportHostedZoneId,
-	certificateId: supportCertificateId,
 });
 
 new SalesforceDisasterRecovery(app, 'salesforce-disaster-recovery-CODE', {

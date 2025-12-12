@@ -9,12 +9,6 @@ import type { SrStack } from './SrStack';
 type ApiGatewayToSqsProps = {
 	queue: Queue;
 	/**
-	 * header names to pull from the request into SQS attributes.
-	 *
-	 * FIXME if a header is missing, the requester still gets a 200 and the message is silently dropped!
-	 */
-	includeHeaderNames: string[];
-	/**
 	 * do we want to disable standard SrCDK 5xx alarm or override any properties?
 	 */
 	monitoring: SrMonitoring;

@@ -144,7 +144,7 @@ export const validateDataSubjectRequestCallback = async (
 		return false;
 	}
 
-	// 2. If the X-OpenDSR-Processor-Domain header value is in our whitelist, fetch the certificate. The
+	// 2. If the X-OpenDSR-Processor-Domain header value is in our allowlist, fetch the certificate. The
 	// certificate URL is available as the value of "processor_certificate" in the /discovery response body.
 	// The certificate can be cached for the lifetime of the certificate.
 	const processorCertificate: {

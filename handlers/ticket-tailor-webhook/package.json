@@ -1,18 +1,24 @@
 {
   "name": "ticket-tailor-webhook",
   "scripts": {
+    "cdk:test": "pnpm --filter cdk test ticket-tailor-webhook",
+    "cdk:test-update": "pnpm --filter cdk test-update ticket-tailor-webhook",
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
     "type-check": "tsc --noEmit",
     "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/index.ts --sourcemap",
-    "lint": "eslint 'src/**/*.ts' 'test/**/*.ts'",
+    "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr ticket-tailor-webhook.zip ./*.js.map ./*.js",
-    "check-formatting": "prettier --check **.ts",
-    "fix-formatting": "prettier --write **.ts"
+    "check-formatting": "prettier --check \"**/*.ts\"",
+    "fix-formatting": "prettier --write \"**/*.ts\"",
+    "update-lambda": "../../update-lambda.sh \"ticket-tailor-webhook\"",
+    "update-stack": "../../update-stack.sh \"ticket-tailor-webhook\""
   },
+  "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
+  "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
-    "@aws-sdk/client-cloudwatch": "^3.848.0",
-    "@aws-sdk/client-secrets-manager": "^3.908.0",
+    "@aws-sdk/client-cloudwatch": "^3.940.0",
+    "@aws-sdk/client-secrets-manager": "^3.940.0",
     "zod": "catalog:"
   },
   "devDependencies": {

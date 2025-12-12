@@ -144,10 +144,11 @@ object Handler {
   )(sfAccountId: SFAccountId): ApiGatewayOp[Option[SFContactId]] = {
     val result = for {
       fields <- GetSFContactSyncCheckFields(sfRequests).apply(sfAccountId)
-    } yield for {
-      standardRecordType <- standardRecordTypeForStage(stage)
-      syncable <- GetSFBillingContactIfSyncable(standardRecordType)(fields)
-    } yield syncable
+    } yield
+      for {
+        standardRecordType <- standardRecordTypeForStage(stage)
+        syncable <- GetSFBillingContactIfSyncable(standardRecordType)(fields)
+      } yield syncable
 
     result
       .toApiGatewayOp("load SF contact")

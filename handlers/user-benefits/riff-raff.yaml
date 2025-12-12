@@ -1,7 +1,8 @@
+# MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/riff-raff.yaml.ts
 stacks:
-- support
+  - support
 regions:
-- eu-west-1
+  - eu-west-1
 allowedStages:
   - CODE
   - PROD
@@ -13,7 +14,6 @@ deployments:
       templateStagePaths:
         CODE: user-benefits-CODE.template.json
         PROD: user-benefits-PROD.template.json
-
   user-benefits:
     type: aws-lambda
     parameters:
@@ -21,7 +21,8 @@ deployments:
       bucketSsmLookup: true
       prefixStack: false
       functionNames:
-      - user-benefits-me-
-      - user-benefits-identity-id-
-      - user-benefits-list-
-    dependencies: [user-benefits-cloudformation]
+        - user-benefits-me-
+        - user-benefits-identity-id-
+        - user-benefits-list-
+    dependencies:
+      - user-benefits-cloudformation

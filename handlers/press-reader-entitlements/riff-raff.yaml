@@ -1,7 +1,8 @@
+# MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/riff-raff.yaml.ts
 stacks:
-- support
+  - support
 regions:
-- eu-west-1
+  - eu-west-1
 allowedStages:
   - CODE
   - PROD
@@ -13,7 +14,6 @@ deployments:
       templateStagePaths:
         CODE: press-reader-entitlements-CODE.template.json
         PROD: press-reader-entitlements-PROD.template.json
-
   press-reader-entitlements:
     type: aws-lambda
     parameters:
@@ -21,5 +21,6 @@ deployments:
       bucketSsmLookup: true
       prefixStack: false
       functionNames:
-      - press-reader-entitlements-
-    dependencies: [press-reader-entitlements-cloudformation]
+        - press-reader-entitlements-
+    dependencies:
+      - press-reader-entitlements-cloudformation

@@ -837,6 +837,7 @@ exports[`The alarms-handler stack matches the snapshot 1`] = `
     },
     "TriggeredLambdaSqsEventSourcealarmshandlerCODEQueue0F21F3AE4C02DBC8": {
       "Properties": {
+        "BatchSize": 1,
         "EventSourceArn": {
           "Fn::GetAtt": [
             "Queue4A7E3555",
@@ -943,7 +944,37 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
             ],
           },
         ],
-        "AlarmDescription": "alarms-handler could not process a message and it ended up on the DLQ. Search the logs below for "error" for more information. Impact: could not send an alarm notification to a chat channel",
+        "AlarmDescription": {
+          "Fn::Join": [
+            "",
+            [
+              "alarms-handler could not process a message and it ended up on the DLQ. Search the logs below for "error" for more information. Impact: could not send an alarm notification to a chat channel
+DLQ: https://",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".console.aws.amazon.com/sqs/v2/home?region=",
+              {
+                "Ref": "AWS::Region",
+              },
+              "#/queues/https%3A%2F%2Fsqs.",
+              {
+                "Ref": "AWS::Region",
+              },
+              ".amazonaws.com%2F",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              "%2F",
+              {
+                "Fn::GetAtt": [
+                  "DLQ581697C4",
+                  "QueueName",
+                ],
+              },
+            ],
+          ],
+        },
         "AlarmName": {
           "Fn::Join": [
             "",
@@ -1915,6 +1946,7 @@ exports[`The alarms-handler stack matches the snapshot 2`] = `
     },
     "TriggeredLambdaSqsEventSourcealarmshandlerPRODQueueD916E65AD61FD1FA": {
       "Properties": {
+        "BatchSize": 1,
         "EventSourceArn": {
           "Fn::GetAtt": [
             "Queue4A7E3555",

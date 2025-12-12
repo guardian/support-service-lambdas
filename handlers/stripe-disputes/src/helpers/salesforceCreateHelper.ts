@@ -1,4 +1,4 @@
-import { sfApiVersion } from '@modules/salesforce/src/config';
+import { sfApiVersion } from '@modules/salesforce/config';
 import type { PaymentDisputeRecord } from '../interfaces';
 import type { SalesforceAuthResponse } from '../types';
 

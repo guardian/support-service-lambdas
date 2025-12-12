@@ -18,7 +18,6 @@
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
     "dayjs": "^1.11.13",
-    "source-map-support": "^0.5.21",
     "zod": "catalog:"
   },
   "devDependencies": {

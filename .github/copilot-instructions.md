@@ -7,6 +7,7 @@ Prefer pure functions to reduce the need for mocking in unit tests - load config
 When adding comments that explain generated code, prefix with "TODO:delete comment -"
 When generating documentation e.g. README.md, include a brief overview, how to test, and references to external documentation.
 Avoid adding new dependencies on external libraries.
+When accessing AWS, only use aws-sdk v3
 PR descriptions must include links to previous relevant PRs, and any chat discussions and google docs.  Information from other sources should not be duplicated.
 
 ### Config
@@ -34,11 +35,6 @@ All requests and responses should be logged
 
 the high level calls should be implemented in separate files as per modules/zuora/src/discount.ts together with their schemas
 
-### Dependencies
-Although new dependencies are to be avoided, these ones are acceptable:
-- aws-sdk v3
-- zod
-When accessing AWS, only use aws-sdk v3
-Use the pnpm workspace catalog for the following dependencies:
-- zod
-- aws-sdk v3
+### CDK
+
+Use SrCDK constructs from ./cdk/lib/cdk/ where possible.

@@ -28,7 +28,7 @@ export class ProductSwitchApi extends SrStack {
 
 		lambda.addPolicies(
 			new AllowZuoraOAuthSecretsPolicy(this),
-			new AllowSqsSendPolicy(
+			AllowSqsSendPolicy.create(
 				this,
 				`braze-emails`,
 				'supporter-product-data',

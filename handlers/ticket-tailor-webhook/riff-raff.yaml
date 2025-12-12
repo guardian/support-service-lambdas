@@ -1,7 +1,8 @@
+# MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/riff-raff.yaml.ts
 stacks:
-- support
+  - support
 regions:
-- eu-west-1
+  - eu-west-1
 allowedStages:
   - CODE
   - PROD
@@ -13,7 +14,6 @@ deployments:
       templateStagePaths:
         CODE: ticket-tailor-webhook-CODE.template.json
         PROD: ticket-tailor-webhook-PROD.template.json
-
   ticket-tailor-webhook:
     type: aws-lambda
     parameters:
@@ -21,5 +21,6 @@ deployments:
       bucketSsmLookup: true
       prefixStack: false
       functionNames:
-      - ticket-tailor-webhook-
-    dependencies: [ticket-tailor-webhook-cloudformation]
+        - ticket-tailor-webhook-
+    dependencies:
+      - ticket-tailor-webhook-cloudformation

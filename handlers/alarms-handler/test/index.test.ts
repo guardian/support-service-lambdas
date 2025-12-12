@@ -12,6 +12,7 @@ describe('Handler', () => {
 		SRE: 'sre-webhook-url',
 		PORTFOLIO: 'portfolio-webhook-url',
 		PLATFORM: 'platform-webhook-url',
+		ENGINE: 'engine-webhook-url',
 	};
 
 	const mockCloudWatchAlarmEvent = {

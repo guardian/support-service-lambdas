@@ -7,6 +7,7 @@ export const WebhookUrlsSchema = z.object({
 	SRE: z.string(),
 	PORTFOLIO: z.string(),
 	PLATFORM: z.string(),
+	ENGINE: z.string(),
 });
 export type WebhookUrls = z.infer<typeof WebhookUrlsSchema>;
 
