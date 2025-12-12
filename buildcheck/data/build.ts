@@ -191,7 +191,7 @@ const productSwitchApi: HandlerDefinition = {
 
 const promotionsLambdas: HandlerDefinition = {
 	name: 'promotions-lambdas',
-	functionNames: ['promo-campaign-sync'],
+	functionNames: ['promo-campaign-sync-'],
 	entryPoints: ['src/handlers/*.ts'],
 	dependencies: {},
 	devDependencies: {

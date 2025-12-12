@@ -21,6 +21,6 @@ deployments:
       bucketSsmLookup: true
       prefixStack: false
       functionNames:
-        - promo-campaign-sync
+        - promo-campaign-sync-
     dependencies:
       - promotions-lambdas-cloudformation
