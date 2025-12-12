@@ -20,6 +20,117 @@ Conditions:
   CreateProdMonitoring: !Equals [ !Ref Stage, PROD ]
 
 Resources:
+    # ============================================
+    # SQS Queue for rate-limited processing
+    # ============================================
+    AutoCancelQueue:
+        Type: AWS::SQS::Queue
+        Properties:
+            QueueName: !Sub zuora-auto-cancel-queue-${Stage}
+            VisibilityTimeout: 360  # Must be > Lambda timeout (300s)
+            MessageRetentionPeriod: 86400  # 1 day
+            RedrivePolicy:
+                deadLetterTargetArn: !GetAtt AutoCancelDLQ.Arn
+                maxReceiveCount: 3
+
+    AutoCancelDLQ:
+        Type: AWS::SQS::Queue
+        Properties:
+            QueueName: !Sub zuora-auto-cancel-dlq-${Stage}
+            MessageRetentionPeriod: 1209600  # 14 days
+
+    # ============================================
+    # Queue Writer Lambda (API Gateway -> SQS)
+    # ============================================
+    AutoCancelQueueWriterRole:
+        Type: AWS::IAM::Role
+        Properties:
+            RoleName: !Sub AutoCancelQueueWriter-${Stage}
+            AssumeRolePolicyDocument:
+                Statement:
+                    - Effect: Allow
+                      Principal:
+                          Service:
+                              - lambda.amazonaws.com
+                      Action:
+                          - sts:AssumeRole
+            Path: /
+            Policies:
+                - PolicyName: LambdaPolicy
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                                - logs:CreateLogGroup
+                                - logs:CreateLogStream
+                                - logs:PutLogEvents
+                            Resource: "*"
+                - PolicyName: SQSWriteToAutoCancelQueue
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                                - sqs:SendMessage
+                                - sqs:GetQueueUrl
+                            Resource: !GetAtt AutoCancelQueue.Arn
+                - PolicyName: ReadPrivateCredentials
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action: s3:GetObject
+                            Resource:
+                                - !Sub arn:aws:s3:::gu-reader-revenue-private/membership/support-service-lambdas/${Stage}/trustedApi-${Stage}.*.json
+
+    AutoCancelQueueWriterLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            Description: Receives auto-cancel callouts from Zuora and writes them to SQS queue
+            FunctionName: !Sub zuora-auto-cancel-queue-writer-${Stage}
+            Code:
+                S3Bucket: support-service-lambdas-dist
+                S3Key: !Sub membership/${Stage}/zuora-callout-apis/zuora-callout-apis.jar
+            Handler: com.gu.autoCancel.AutoCancelQueueWriter::handleRequest
+            Environment:
+                Variables:
+                    Stage: !Ref Stage
+                    AutoCancelQueueName: !GetAtt AutoCancelQueue.QueueName
+            Role: !GetAtt AutoCancelQueueWriterRole.Arn
+            MemorySize: 512
+            Runtime: java21
+            Timeout: 30  # Short timeout - just writes to SQS
+            Architectures:
+                - arm64
+        DependsOn:
+            - AutoCancelQueueWriterRole
+            - AutoCancelQueue
+
+    AutoCancelQueueWriterAPIPermission:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:invokeFunction
+            FunctionName: !Sub zuora-auto-cancel-queue-writer-${Stage}
+            Principal: apigateway.amazonaws.com
+        DependsOn: AutoCancelQueueWriterLambda
+
+    # ============================================
+    # SQS Event Source Mapping (Queue -> Processor)
+    # ============================================
+    AutoCancelSqsEventSourceMapping:
+        Type: AWS::Lambda::EventSourceMapping
+        Properties:
+            BatchSize: 1
+            Enabled: true
+            EventSourceArn: !GetAtt AutoCancelQueue.Arn
+            FunctionName: !Ref ZuoraAutoCancelLambda
+            ScalingConfig:
+                MaximumConcurrency: 5  # Limits concurrent Zuora API calls
+        DependsOn:
+            - AutoCancelQueue
+            - ZuoraAutoCancelLambda
+
+    # ============================================
+    # Original resources (modified)
+    # ============================================
     ZuoraAutoCancelRole:
         Type: AWS::IAM::Role
         Properties:
@@ -52,6 +163,15 @@ Resources:
                             Resource:
                               - Fn::ImportValue:
                                   !Sub "comms-${Stage}-EmailQueueArn"
+                - PolicyName: SQSReadFromAutoCancelQueue
+                  PolicyDocument:
+                      Statement:
+                          - Effect: Allow
+                            Action:
+                                - sqs:ReceiveMessage
+                                - sqs:DeleteMessage
+                                - sqs:GetQueueAttributes
+                            Resource: !GetAtt AutoCancelQueue.Arn
                 - PolicyName: ReadPrivateCredentials
                   PolicyDocument:
                       Statement:
@@ -65,13 +185,13 @@ Resources:
     ZuoraAutoCancelLambda:
         Type: AWS::Lambda::Function
         Properties:
-            Description: Handles auto-cancellations for membership and subscriptions
+            Description: Processes auto-cancellations from SQS queue (rate-limited)
             FunctionName:
                 !Sub zuora-auto-cancel-${Stage}
             Code:
                 S3Bucket: support-service-lambdas-dist
                 S3Key: !Sub membership/${Stage}/zuora-callout-apis/zuora-callout-apis.jar
-            Handler: com.gu.autoCancel.AutoCancelHandler::handleRequest
+            Handler: com.gu.autoCancel.AutoCancelSqsHandler::handleRequest
             Environment:
                 Variables:
                   Stage: !Ref Stage
@@ -119,10 +239,10 @@ Resources:
             Integration:
               Type: AWS_PROXY
               IntegrationHttpMethod: POST # this for the interaction between API Gateway and Lambda and MUST be POST
-              Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ZuoraAutoCancelLambda.Arn}/invocations
+              Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AutoCancelQueueWriterLambda.Arn}/invocations
         DependsOn:
         - ZuoraAutoCancelAPI
-        - ZuoraAutoCancelLambda
+        - AutoCancelQueueWriterLambda
         - ZuoraAutoCancelProxyResource
 
     ZuoraAutoCancelAPI:
@@ -187,5 +307,25 @@ Resources:
         Period: 3600
         Statistic: Sum
         Threshold: 5
+        TreatMissingData: notBreaching
+
+    AutoCancelDLQAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Condition: CreateProdMonitoring
+      Properties:
+        AlarmActions:
+        - !Sub arn:aws:sns:${AWS::Region}:${AWS::AccountId}:alarms-handler-topic-${Stage}
+        AlarmName: !Sub Messages in auto-cancel DLQ ${Stage}
+        AlarmDescription: Messages have failed processing and been sent to the dead letter queue
+        ComparisonOperator: GreaterThanThreshold
+        Dimensions:
+          - Name: QueueName
+            Value: !GetAtt AutoCancelDLQ.QueueName
+        EvaluationPeriods: 1
+        MetricName: ApproximateNumberOfMessagesVisible
+        Namespace: AWS/SQS
+        Period: 300
+        Statistic: Sum
+        Threshold: 0
         TreatMissingData: notBreaching
 
