@@ -191,16 +191,13 @@ const productSwitchApi: HandlerDefinition = {
 
 const promotionsLambdas: HandlerDefinition = {
 	name: 'promotions-lambdas',
-	functionNames: [
-		'promo-campaign-sync',
-	],
+	functionNames: ['promo-campaign-sync'],
 	entryPoints: ['src/handlers/*.ts'],
-	dependencies: {
-	},
+	dependencies: {},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
-}
+};
 
 const salesforceDisasterRecovery: HandlerDefinition = {
 	name: 'salesforce-disaster-recovery',
