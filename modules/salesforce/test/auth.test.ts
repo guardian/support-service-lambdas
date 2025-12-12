@@ -2,8 +2,8 @@ import type {
 	SfApiUserAuth,
 	SfAuthResponse,
 	SfConnectedAppAuth,
-} from '../src/auth';
-import { doSfAuth } from '../src/auth';
+} from '@modules/salesforce/auth/auth';
+import { doSfAuth } from '@modules/salesforce/auth/auth';
 
 // Mock the global fetch function
 global.fetch = jest.fn();

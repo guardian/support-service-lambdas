@@ -1,21 +1,10 @@
-import type {
-	SfApiUserAuth,
-	SfAuthResponse,
-	SfConnectedAppAuth,
-} from '@modules/salesforce/auth';
-import { doSfAuth } from '@modules/salesforce/auth';
 import { sfApiVersion } from '@modules/salesforce/config';
-import type {
-	ApiUserSecret,
-	ConnectedAppSecret,
-} from '@modules/salesforce/secrets';
-import { getSalesforceSecretNames } from '@modules/salesforce/secrets';
+import { SfClient } from '@modules/salesforce/sfClient';
 import type {
 	SalesforceUpdateResponse,
 	SalesforceUpdateResponseArray,
 } from '@modules/salesforce/updateRecords';
 import { doCompositeCallout } from '@modules/salesforce/updateRecords';
-import { getSecretValue } from '@modules/secrets-manager/getSecret';
 import { stageFromEnvironment } from '@modules/stage';
 import type { Handler } from 'aws-lambda';
 import { z } from 'zod';
@@ -38,30 +27,11 @@ export const handler: Handler<
 		}
 		const billingAccountsToUpdate: BillingAccountRecord[] = parseResponse.data;
 
-		const secretNames = getSalesforceSecretNames(stageFromEnvironment());
-
-		const { authUrl, clientId, clientSecret } =
-			await getSecretValue<ConnectedAppSecret>(
-				secretNames.connectedAppSecretName,
-			);
-
-		const { username, password, token } = await getSecretValue<ApiUserSecret>(
-			secretNames.apiUserSecretName,
-		);
-
-		const sfConnectedAppAuth: SfConnectedAppAuth = { clientId, clientSecret };
-		const sfApiUserAuth: SfApiUserAuth = {
-			url: authUrl,
-			grant_type: 'password',
-			username,
-			password,
-			token,
-		};
-
-		const sfAuthResponse = await doSfAuth(sfApiUserAuth, sfConnectedAppAuth);
+		const stage = stageFromEnvironment();
+		const sfClient = await SfClient.create(stage);
 
 		const sfUpdateResponse = await updateSfBillingAccounts(
-			sfAuthResponse,
+			sfClient,
 			billingAccountsToUpdate,
 		);
 
@@ -74,20 +44,17 @@ export const handler: Handler<
 };
 
 export async function updateSfBillingAccounts(
-	sfAuthResponse: SfAuthResponse,
+	sfClient: SfClient,
 	records: BillingAccountRecord[],
 ): Promise<SalesforceUpdateResponse[]> {
 	try {
-		const url = `${sfAuthResponse.instance_url}/services/data/${sfApiVersion()}/composite/sobjects`;
-
-		const body = JSON.stringify({
-			allOrNone: false,
-			records,
-		});
 		const sfUpdateResponse = await doCompositeCallout(
-			url,
-			sfAuthResponse.access_token,
-			body,
+			sfClient,
+			`/services/data/${sfApiVersion()}/composite/sobjects`,
+			{
+				allOrNone: false,
+				records,
+			},
 		);
 		return sfUpdateResponse;
 	} catch (error) {

@@ -11,7 +11,7 @@
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr user-benefits.zip ./*.js.map ./*.js",
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
-    "update-lambda": "../../update-lambda.sh \"user-benefits\"",
+    "update-lambda": "../../update-lambda.sh \"user-benefits\" user-benefits-me- user-benefits-identity-id- user-benefits-list-",
     "update-stack": "../../update-stack.sh \"user-benefits\""
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",

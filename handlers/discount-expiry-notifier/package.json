@@ -11,7 +11,7 @@
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr discount-expiry-notifier.zip ./*.js.map ./*.js",
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
-    "update-lambda": "../../update-lambda.sh \"discount-expiry-notifier\"",
+    "update-lambda": "../../update-lambda.sh \"discount-expiry-notifier\" discount-expiry-notifier-get-expiring-discounts- discount-expiry-notifier-filter-records- discount-expiry-notifier-get-sub-status- discount-expiry-notifier-get-old-payment-amount- discount-expiry-notifier-get-new-payment-amount- discount-expiry-notifier-send-email- discount-expiry-notifier-save-results- discount-expiry-notifier-alarm-on-failures-",
     "update-stack": "../../update-stack.sh \"discount-expiry-notifier\""
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
