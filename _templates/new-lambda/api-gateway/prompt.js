@@ -10,8 +10,7 @@ module.exports = [
 	{
 		type: 'input',
 		name: 'includeApiKey',
-		message:
-			'Should this API be for internal use (as opposed to public)? (Y/n)',
+		message: 'Should I generate an API key for this lambda? (Y/n)',
 		default: 'Y',
 	},
 ];
