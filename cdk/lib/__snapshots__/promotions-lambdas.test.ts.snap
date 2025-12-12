@@ -36,7 +36,7 @@ exports[`The Promotions lambdas stack matches the snapshot 1`] = `
             "STAGE": "CODE",
           },
         },
-        "FunctionName": "promotions-lambdas-CODE",
+        "FunctionName": "promotions-lambdas-promo-campaign-sync-CODE",
         "Handler": "index.handler",
         "LoggingConfig": {
           "LogFormat": "Text",
@@ -268,7 +268,7 @@ exports[`The Promotions lambdas stack matches the snapshot 2`] = `
             "STAGE": "PROD",
           },
         },
-        "FunctionName": "promotions-lambdas-PROD",
+        "FunctionName": "promotions-lambdas-promo-campaign-sync-PROD",
         "Handler": "index.handler",
         "LoggingConfig": {
           "LogFormat": "Text",

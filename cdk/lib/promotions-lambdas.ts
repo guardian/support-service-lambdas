@@ -7,6 +7,8 @@ export class PromotionsLambdas extends SrStack {
 	constructor(scope: App, stage: SrStageNames) {
 		super(scope, { stage, app: 'promotions-lambdas' });
 
-		new SrLambda(this, 'PromoCampaignSync', {});
+		new SrLambda(this, 'PromoCampaignSync', {
+			nameSuffix: 'promo-campaign-sync',
+		});
 	}
 }
