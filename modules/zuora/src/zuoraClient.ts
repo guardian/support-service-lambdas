@@ -9,26 +9,16 @@ import { zuoraErrorSchema, zuoraSuccessSchema } from './types/httpResponse';
 import { zuoraServerUrl } from './utils';
 
 export class RestClientError extends Error implements RestResult {
-	static create = (message: string, result: RestResult, e?: unknown) =>
-		new RestClientError(
-			message,
-			result.status,
-			result.responseBody,
-			result.responseHeaders,
-			e === undefined || e instanceof Error
-				? e
-				: new Error('value thrown that was not an Error', { cause: e }),
-		);
+	public status: number;
+	public responseBody: string;
+	public responseHeaders: Record<string, string>;
 
-	constructor(
-		message: string,
-		public status: number,
-		public responseBody: string,
-		public responseHeaders: Record<string, string>,
-		cause?: Error,
-	) {
+	constructor(message: string, restResult: RestResult, cause?: unknown) {
 		super(message, { cause });
 		this.name = this.constructor.name;
+		this.status = restResult.status;
+		this.responseBody = restResult.responseBody;
+		this.responseHeaders = restResult.responseHeaders;
 	}
 }
 
@@ -143,14 +133,14 @@ export class ZuoraClient {
 			responseHeaders,
 		};
 		if (!response.ok) {
-			throw RestClientError.create('http call failed', result);
+			throw new RestClientError('http call failed', result);
 		}
 
 		try {
 			const json: unknown = JSON.parse(result.responseBody);
 			return schema.parse(json);
 		} catch (e) {
-			throw RestClientError.create('parsing failure', result, e);
+			throw new RestClientError('parsing failure', result, e);
 		}
 	}
 
