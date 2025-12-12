@@ -9,8 +9,10 @@ import {
 	Role,
 	ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
+import { Topic } from 'aws-cdk-lib/aws-sns';
+import { SqsSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
-// import { SrAppConfigKey } from './cdk/SrAppConfigKey'; // Commented out for initial deployment - will be needed when SNS subscription is enabled
+import { SrAppConfigKey } from './cdk/SrAppConfigKey';
 import { SrLambda } from './cdk/SrLambda';
 import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
 import { SrRestDomain } from './cdk/SrRestDomain';
@@ -39,10 +41,10 @@ export class MParticleApi extends SrStack {
 			`/${this.stage}/${this.stack}/${app}/sarResultsBucket`,
 		).stringValue;
 
-		// const identityMmaSnsDeletionRequestTopicArn = new SrAppConfigKey(
-		// 	this,
-		// 	'IdentityMmaSnsDeletionRequestTopicArn',
-		// ).valueAsString;
+		const identityMmaSnsDeletionRequestTopicArn = new SrAppConfigKey(
+			this,
+			'IdentityMmaSnsDeletionRequestTopicArn',
+		).valueAsString;
 
 		const sarS3BaseKey = 'mparticle-results/'; // this must be the same as used in the code
 
@@ -104,11 +106,21 @@ export class MParticleApi extends SrStack {
 				resources: [mmaUserDeletionLambda.inputQueue.queueArn],
 				conditions: {
 					ArnEquals: {
-						//'aws:SourceArn': identityMmaSnsDeletionRequestTopicArn, --- This will be uncommented when testing is complete ---
-						'aws:SourceArn': 'AAAAAAAAAAAA',
+						'aws:SourceArn': identityMmaSnsDeletionRequestTopicArn,
+						// 'aws:SourceArn': 'AAAAAAAAAAAA', // Placeholder - use this to disable SNS subscription during testing
 					},
 				},
 			}),
+		);
+
+		// Subscribe the SQS queue to the Identity SNS topic for deletion requests
+		const identityMmaSnsTopic = Topic.fromTopicArn(
+			this,
+			'IdentityMmaSnsDeletionRequestTopic',
+			identityMmaSnsDeletionRequestTopicArn,
+		);
+		identityMmaSnsTopic.addSubscription(
+			new SqsSubscription(mmaUserDeletionLambda.inputQueue),
 		);
 
 		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {
