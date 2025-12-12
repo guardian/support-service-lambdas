@@ -4,7 +4,7 @@
 # `update-function-code` with the AWS Cli to update the lambda.
 # Usage: ./update-lambda.sh [project name] [--quick] [function names...]
 # eg. ./update-lambda.sh discount-api
-# eg. ./update-lambda.sh --quick mparticle-api "mparticle-api-http-" "mparticle-api-baton-"
+# eg. ./update-lambda.sh --quick mparticle-api mparticle-api-http- mparticle-api-baton-
 
 # Exit if any of these commands fail
 set -e
@@ -18,7 +18,7 @@ fi
 
 QUICK_MODE=""
 PROJECT_NAME=""
-function_names=""
+FUNCTION_NAMES=""
 
 while [ $# -gt 0 ]; do
   if [ "$1" = "--quick" ]; then
@@ -26,7 +26,7 @@ while [ $# -gt 0 ]; do
   elif [ -z "$PROJECT_NAME" ]; then
     PROJECT_NAME="$1"
   else
-    function_names="$function_names $1"
+    FUNCTION_NAMES="$FUNCTION_NAMES $1"
   fi
   shift
 done
@@ -36,8 +36,8 @@ if [ -z "$PROJECT_NAME" ]; then
   exit 2
 fi
 
-if [ -z "$function_names" ]; then
-  function_names="$PROJECT_NAME-"
+if [ -z "$FUNCTION_NAMES" ]; then
+  FUNCTION_NAMES="$PROJECT_NAME-"
 fi
 
 echo "Updating handler $PROJECT_NAME"
@@ -57,7 +57,7 @@ zipFile="./handlers/$PROJECT_NAME/target/$PROJECT_NAME.zip"
 
 aws s3 cp $zipFile s3://$s3Bucket/$s3Path --profile membership --region eu-west-1
 
-for fn in $function_names; do
+for fn in $FUNCTION_NAMES; do
   echo "Updating lambda $fn"
   aws lambda update-function-code \
     --function-name "${fn}CODE" \
