@@ -3,9 +3,8 @@ permissions:
   contents: read
 on:
   pull_request:
-    branches:
-      - main
     types: [opened, labeled, unlabeled, synchronize, reopened, edited]
 jobs:
   require-label:
+    if: github.event.pull_request.base.ref == github.event.repository.default_branch
     uses: guardian/.github/.github/workflows/require-label.yaml@4cb5024736632ffcc564b7f4b772c38b8e5ce739 #  v2.0.0
