@@ -11,7 +11,7 @@
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr negative-invoices-processor.zip ./*.js.map ./*.js",
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
-    "update-lambda": "../../update-lambda.sh \"negative-invoices-processor\"",
+    "update-lambda": "../../update-lambda.sh \"negative-invoices-processor\" negative-invoices-processor-get-invoices- negative-invoices-processor-check-for-active-sub- negative-invoices-processor-get-payment-methods- negative-invoices-processor-apply-credit-to-account-balance- negative-invoices-processor-do-credit-balance-refund- negative-invoices-processor-save-results- negative-invoices-processor-detect-failures-",
     "update-stack": "../../update-stack.sh \"negative-invoices-processor\""
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",

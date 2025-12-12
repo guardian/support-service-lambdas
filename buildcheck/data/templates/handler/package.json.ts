@@ -21,7 +21,7 @@ export default (pkg: HandlerDefinition) => {
 			package: `pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr ${pkg.name}.zip ./*.js.map ./*.js`,
 			'check-formatting': 'prettier --check "**/*.ts"',
 			'fix-formatting': 'prettier --write "**/*.ts"',
-			'update-lambda': `../../update-lambda.sh "${pkg.name}"`,
+			'update-lambda': `../../update-lambda.sh "${pkg.name}"${pkg.functionNames ? ` ${pkg.functionNames.join(' ')}` : ''}`,
 			'update-stack': `../../update-stack.sh "${pkg.name}"`,
 			...pkg.extraScripts,
 		},

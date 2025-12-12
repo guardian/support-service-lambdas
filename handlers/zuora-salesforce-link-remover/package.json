@@ -11,7 +11,7 @@
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr zuora-salesforce-link-remover.zip ./*.js.map ./*.js",
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
-    "update-lambda": "../../update-lambda.sh \"zuora-salesforce-link-remover\"",
+    "update-lambda": "../../update-lambda.sh \"zuora-salesforce-link-remover\" zuora-salesforce-link-remover-get-billing-accounts- zuora-salesforce-link-remover-update-zuora-billing-account- zuora-salesforce-link-remover-update-sf-billing-accounts-",
     "update-stack": "../../update-stack.sh \"zuora-salesforce-link-remover\""
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
