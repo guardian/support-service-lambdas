@@ -194,6 +194,16 @@ const productSwitchApi: HandlerDefinition = {
 	},
 };
 
+const promotionsLambdas: HandlerDefinition = {
+	name: 'promotions-lambdas',
+	functionNames: ['promotions-lambdas-promo-campaign-sync-'],
+	entryPoints: ['src/handlers/*.ts'],
+	dependencies: {},
+	devDependencies: {
+		...devDeps['@types/aws-lambda'],
+	},
+};
+
 const salesforceDisasterRecovery: HandlerDefinition = {
 	name: 'salesforce-disaster-recovery',
 	stack: 'membership',
@@ -323,6 +333,7 @@ export const build: HandlerDefinition[] = [
 	observerDataExport,
 	pressReaderEntitlements,
 	productSwitchApi,
+	promotionsLambdas,
 	salesforceDisasterRecovery,
 	salesforceDisasterRecoveryHealthCheck,
 	stripeDisputes,

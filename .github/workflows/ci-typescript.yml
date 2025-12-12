@@ -45,6 +45,7 @@ jobs:
       fail-fast: false
       matrix:
         subproject:
+          - promotions-lambdas
           - user-benefits
           - press-reader-entitlements
           - ticket-tailor-webhook

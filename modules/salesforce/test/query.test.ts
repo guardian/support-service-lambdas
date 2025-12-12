@@ -1,19 +1,11 @@
 import { z } from 'zod';
-import type { SfAuthResponse } from '../src/auth';
+import { mockZuoraClient } from '../../zuora/test/mocks/mockZuoraClient';
 import { executeSalesforceQuery } from '../src/query';
+import { SalesforceQueryResponseSchema } from '../src/recordSchema';
 
 global.fetch = jest.fn();
 
 describe('executeSalesforceQuery', () => {
-	const mockAuthResponse: SfAuthResponse = {
-		access_token: 'mock_access_token',
-		instance_url: 'https://login.salesforce.com/services/oauth2/token',
-		id: 'https://my.salesforce.com/id/mock_id',
-		token_type: 'Bearer',
-		issued_at: 'mock_issued_at',
-		signature: 'mock_signature',
-	};
-
 	const mockQuery = 'SELECT Id, Name FROM Account';
 	const mockSchema = z.object({
 		Id: z.string(),
@@ -38,13 +30,10 @@ describe('executeSalesforceQuery', () => {
 	});
 
 	it('should execute query successfully and return parsed response', async () => {
-		(fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce({
-			ok: true,
-			json: async () => await Promise.resolve(mockSuccessfulResponse),
-		} as Response);
+		mockZuoraClient.get.mockResolvedValueOnce(mockSuccessfulResponse);
 
 		const response = await executeSalesforceQuery(
-			mockAuthResponse,
+			mockZuoraClient,
 			mockQuery,
 			mockSchema,
 		);
@@ -52,25 +41,18 @@ describe('executeSalesforceQuery', () => {
 		expect(response).toEqual(mockSuccessfulResponse);
 	});
 
-	it('should throw an error if the query execution fails', async () => {
-		(fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce({
-			ok: false,
-			statusText: 'Bad Request',
-		} as Response);
-
-		await expect(
-			executeSalesforceQuery(mockAuthResponse, mockQuery, mockSchema),
-		).rejects.toThrow('Failed to execute query: Bad Request');
+	it('parser should succeed on an valid response', () => {
+		const actual = SalesforceQueryResponseSchema(mockSchema).safeParse(
+			mockSuccessfulResponse,
+		).success;
+		expect(actual).toBe(true);
 	});
 
-	it('should throw an error if the response parsing fails', async () => {
-		(fetch as jest.MockedFunction<typeof fetch>).mockResolvedValueOnce({
-			ok: true,
-			json: async () => await Promise.resolve(mockInvalidResponse),
-		} as Response);
-
-		await expect(
-			executeSalesforceQuery(mockAuthResponse, mockQuery, mockSchema),
-		).rejects.toThrow('Error parsing response from Salesforce:');
+	it('parser should fail on an invalid response', () => {
+		const actual =
+			SalesforceQueryResponseSchema(mockSchema).safeParse(
+				mockInvalidResponse,
+			).success;
+		expect(actual).toBe(false);
 	});
 });

@@ -145,7 +145,7 @@ const Discounts = (stage: Stage) => {
 			DataExtensionNames.digipackAnnualDiscountConfirmationEmail,
 		),
 		cancellationFree2MoSP: getCancellationFree2Mo(
-			'EligibleForFreePeriod',
+			'NoRepeats',
 			DataExtensionNames.cancellationDiscountConfirmation,
 		),
 		cancellationFree2MoRC: getCancellationFree2Mo(
