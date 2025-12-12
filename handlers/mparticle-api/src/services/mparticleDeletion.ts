@@ -59,7 +59,7 @@ export async function deleteMParticleUser(
 		const response = await client.post<
 			BulkDeletionRequest,
 			BulkDeletionResponse
-		>('/bulkdelete', requestBody, BulkDeletionResponseSchema);
+		>('/users/delete', requestBody, BulkDeletionResponseSchema);
 
 		if (response.success) {
 			logger.log(
