@@ -13,6 +13,10 @@ export const ConfigSchema = z.object({
 	}),
 	pod: z.string(),
 	sarResultsBucket: z.string(),
+	braze: z.object({
+		apiUrl: z.string(),
+		apiKey: z.string(),
+	}),
 });
 export type AppConfig = z.infer<typeof ConfigSchema>;
 
