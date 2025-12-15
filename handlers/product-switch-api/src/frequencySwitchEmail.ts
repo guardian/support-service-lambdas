@@ -45,8 +45,6 @@ export const buildFrequencySwitchEmailMessage = (
 				},
 			},
 		},
-		// TODO: Update this DataExtensionName once the Braze template is created
-		// This should match the data extension configured in Braze for frequency switch confirmations
 		DataExtensionName:
 			DataExtensionNames.supporterPlusFrequencySwitchConfirmation,
 		IdentityUserId: identityId,
