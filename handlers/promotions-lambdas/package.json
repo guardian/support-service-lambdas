@@ -1,23 +1,23 @@
 {
-  "name": "write-off-unpaid-invoices",
+  "name": "promotions-lambdas",
   "scripts": {
-    "cdk:test": "pnpm --filter cdk test write-off-unpaid-invoices",
-    "cdk:test-update": "pnpm --filter cdk test-update write-off-unpaid-invoices",
+    "cdk:test": "pnpm --filter cdk test promotions-lambdas",
+    "cdk:test-update": "pnpm --filter cdk test-update promotions-lambdas",
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
     "type-check": "tsc --noEmit",
     "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/handlers/*.ts --sourcemap",
     "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
-    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr write-off-unpaid-invoices.zip ./*.js.map ./*.js",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr promotions-lambdas.zip ./*.js.map ./*.js",
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
-    "update-lambda": "../../update-lambda.sh \"write-off-unpaid-invoices\" get-unpaid-invoices- write-off-invoices-",
-    "update-stack": "../../update-stack.sh \"write-off-unpaid-invoices\""
+    "update-lambda": "../../update-lambda.sh \"promotions-lambdas\" promotions-lambdas-promo-campaign-sync-",
+    "update-stack": "../../update-stack.sh \"promotions-lambdas\""
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
-  "dependencies": {
-    "@aws-sdk/client-secrets-manager": "^3.940.0",
-    "dayjs": "^1.11.13"
+  "dependencies": {},
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.147"
   }
 }
