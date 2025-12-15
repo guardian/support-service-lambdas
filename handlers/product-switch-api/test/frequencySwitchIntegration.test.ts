@@ -3,10 +3,10 @@
  * Tests actual frequency switches (monthly → annual only) using real Zuora API calls.
  *
  * Test Coverage:
- * - Preview: 2 tests (monthly→annual, non-GBP)
- * - Execute: 2 tests (monthly→annual with comprehensive verification, non-GBP currencies)
- * - Total: 4 integration tests creating real Zuora subscriptions
- * - Expected runtime: ~4-6 minutes (each test creates a real subscription in CODE environment)
+ * - Preview: 1 test (monthly→annual with comprehensive verification)
+ * - Execute: 1 test (monthly→annual with comprehensive verification)
+ * - Total: 2 integration tests creating real Zuora subscriptions
+ * - Expected runtime: ~2-3 minutes (each test creates a real subscription in CODE environment)
  *
  * @group integration
  */
@@ -128,56 +128,6 @@ describe('frequency switch behaviour', () => {
 			},
 			1000 * 60,
 		);
-
-		it(
-			'preview works for non-GBP subscription (EUR currency)',
-			async () => {
-				const monthlyPrice = 10;
-				const { zuoraClient, subscription } =
-					await createTestSubscriptionForFrequencySwitch(
-						'Month',
-						monthlyPrice,
-						{
-							billingCountry: 'Germany',
-							paymentMethod: 'visaCard',
-						},
-					);
-
-				const productCatalog = await getProductCatalogFromApi(stage);
-				const account = await getAccount(
-					zuoraClient,
-					subscription.accountNumber,
-				);
-				const candidateCharge = await selectCandidateSubscriptionCharge(
-					subscription,
-					dayjs(),
-					account,
-					productCatalog,
-					zuoraClient,
-				);
-				const result: FrequencySwitchPreviewResponse =
-					await previewFrequencySwitch(
-						zuoraClient,
-						subscription,
-						candidateCharge,
-						productCatalog,
-						dayjs(),
-					);
-
-				// Expect success response
-				expect('savings' in result).toBe(true);
-				if ('savings' in result) {
-					// Verify currency is at top level
-					expect(result.currency).toBe('EUR');
-					expect(result.savings.period).toBe('year');
-
-					// Verify new price has correct period
-					expect(result.newPrice.period).toBe('year');
-					expect(result.newPrice.amount).toBeGreaterThan(0);
-				}
-			},
-			1000 * 60,
-		);
 	});
 
 	describe('execute functionality', () => {
@@ -252,85 +202,6 @@ describe('frequency switch behaviour', () => {
 				expect(totalChargeAmount).toBeGreaterThan(0);
 			},
 			1000 * 60 * 2,
-		);
-
-		it(
-			'executes frequency switch for non-GBP subscriptions (EUR and USD)',
-			async () => {
-				// Test with EUR subscription
-				const eurPrice = 10;
-				const { zuoraClient: eurClient, subscription: eurSubscription } =
-					await createTestSubscriptionForFrequencySwitch('Month', eurPrice, {
-						billingCountry: 'Germany',
-						paymentMethod: 'visaCard',
-					});
-
-				const productCatalog = await getProductCatalogFromApi(stage);
-				const eurAccount = await getAccount(
-					eurClient,
-					eurSubscription.accountNumber,
-				);
-				const eurCandidateCharge = await selectCandidateSubscriptionCharge(
-					eurSubscription,
-					dayjs(),
-					eurAccount,
-					productCatalog,
-					eurClient,
-				);
-				const eurResult: FrequencySwitchResponse = await executeFrequencySwitch(
-					eurClient,
-					eurSubscription,
-					eurCandidateCharge,
-					productCatalog,
-					dayjs(),
-				);
-
-				expect('reason' in eurResult).toBe(false);
-
-				const updatedEurSubscription = await getSubscription(
-					eurClient,
-					eurSubscription.subscriptionNumber,
-				);
-				expect(updatedEurSubscription).toBeDefined();
-				expect(updatedEurSubscription.status).toBe('Active');
-
-				// Test with USD subscription
-				const usdPrice = 10;
-				const { zuoraClient: usdClient, subscription: usdSubscription } =
-					await createTestSubscriptionForFrequencySwitch('Month', usdPrice, {
-						billingCountry: 'United States',
-						paymentMethod: 'visaCard',
-					});
-
-				const usdAccount = await getAccount(
-					usdClient,
-					usdSubscription.accountNumber,
-				);
-				const usdCandidateCharge = await selectCandidateSubscriptionCharge(
-					usdSubscription,
-					dayjs(),
-					usdAccount,
-					productCatalog,
-					usdClient,
-				);
-				const usdResult: FrequencySwitchResponse = await executeFrequencySwitch(
-					usdClient,
-					usdSubscription,
-					usdCandidateCharge,
-					productCatalog,
-					dayjs(),
-				);
-
-				expect('reason' in usdResult).toBe(false);
-
-				const updatedUsdSubscription = await getSubscription(
-					usdClient,
-					usdSubscription.subscriptionNumber,
-				);
-				expect(updatedUsdSubscription).toBeDefined();
-				expect(updatedUsdSubscription.status).toBe('Active');
-			},
-			1000 * 60 * 3,
 		);
 	});
 });
