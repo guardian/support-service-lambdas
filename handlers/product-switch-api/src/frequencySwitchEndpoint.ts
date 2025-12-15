@@ -330,8 +330,7 @@ export async function previewFrequencySwitch(
 			effectiveDate,
 		);
 
-		// Preview with today's date to get Zuora to generate invoices
-		// Then filter to show only the new billing period charges (exclude credits/prorations)
+		// Preview the order to get Zuora to generate billing documents
 		const orderRequest: PreviewOrderRequest = {
 			previewOptions: {
 				previewThruType: 'SpecificDate',
