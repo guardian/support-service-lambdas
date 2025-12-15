@@ -36,12 +36,13 @@ describe('buildFrequencySwitchEmailMessage', () => {
 						payment_frequency: 'Annually',
 						subscription_id: 'A-S00123456',
 					},
+				},
 			},
-		},
-		DataExtensionName: 'SV_MonthlyToAnnualSwitchConfirmation',
-		IdentityUserId: '123456789',
+			DataExtensionName: 'SV_MonthlyToAnnualSwitchConfirmation',
+			IdentityUserId: '123456789',
+		});
 	});
-});	it('should format USD currency correctly', () => {
+	it('should format USD currency correctly', () => {
 		const result = buildFrequencySwitchEmailMessage(
 			'test@example.com',
 			'John',
