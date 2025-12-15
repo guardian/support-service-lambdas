@@ -3,6 +3,7 @@ import {
 	CurrencyValues,
 	type IsoCurrency,
 } from '@modules/internationalisation/currency';
+import { isoCurrencySchema } from '@modules/internationalisation/schemas';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
@@ -258,11 +259,7 @@ function prepareFrequencySwitchInfo(
 	const targetRatePlanId = getTargetRatePlanId(productCatalog, currentRatePlan);
 
 	// Frequency switches are Supporter Plus specific, so directly access the Annual rate plan
-	// Validate currency is a supported IsoCurrency
-	const currency = getIfDefined(
-		CurrencyValues.find((c) => c === currentCharge.currency),
-		`Currency ${currentCharge.currency} is not a supported IsoCurrency`,
-	);
+	const currency = isoCurrencySchema.parse(currentCharge.currency);
 	const targetPrice =
 		productCatalog.SupporterPlus.ratePlans.Annual.pricing[currency];
 
