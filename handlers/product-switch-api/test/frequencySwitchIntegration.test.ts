@@ -11,7 +11,6 @@
  * @group integration
  */
 import console from 'console';
-import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { getAccount } from '@modules/zuora/account';
 import {
 	getBillingPreview,
@@ -21,17 +20,10 @@ import { getSubscription } from '@modules/zuora/subscription';
 import type { ZuoraSubscription } from '@modules/zuora/types';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
-import { createContribution } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
 import type { ContributionTestAdditionalOptions } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
-import {
-	executeFrequencySwitch,
-	previewFrequencySwitch,
-	selectCandidateSubscriptionCharge,
-} from '../src/frequencySwitchEndpoint';
-import type {
-	FrequencySwitchPreviewResponse,
-	FrequencySwitchResponse,
-} from '../src/frequencySwitchSchemas';
+import { createContribution } from '../../../modules/zuora/test/it-helpers/createGuardianSubscription';
+import { getSwitchResult } from '../src/frequencySwitchEndpoint';
+import type { FrequencySwitchResponse } from '../src/frequencySwitchSchemas';
 
 interface FrequencySwitchTestSetup {
 	zuoraClient: ZuoraClient;
@@ -90,26 +82,18 @@ describe('frequency switch behaviour', () => {
 				const { zuoraClient, subscription } =
 					await createTestSubscriptionForFrequencySwitch('Month', monthlyPrice);
 
-				const productCatalog = await getProductCatalogFromApi(stage);
 				const account = await getAccount(
 					zuoraClient,
 					subscription.accountNumber,
 				);
-				const candidateCharge = await selectCandidateSubscriptionCharge(
-					subscription,
+				const result = await getSwitchResult(
+					stage,
 					dayjs(),
-					account,
-					productCatalog,
+					true,
 					zuoraClient,
+					subscription,
+					account,
 				);
-				const result: FrequencySwitchPreviewResponse =
-					await previewFrequencySwitch(
-						zuoraClient,
-						subscription,
-						candidateCharge,
-						productCatalog,
-						dayjs(),
-					);
 
 				// Expect success response
 				expect('savings' in result).toBe(true);
@@ -138,24 +122,17 @@ describe('frequency switch behaviour', () => {
 				const { zuoraClient, subscription } =
 					await createTestSubscriptionForFrequencySwitch('Month', monthlyPrice);
 
-				const productCatalog = await getProductCatalogFromApi(stage);
 				const account = await getAccount(
 					zuoraClient,
 					subscription.accountNumber,
 				);
-				const candidateCharge = await selectCandidateSubscriptionCharge(
-					subscription,
+				const result: FrequencySwitchResponse = await getSwitchResult(
+					stage,
 					dayjs(),
+					false,
+					zuoraClient,
+					subscription,
 					account,
-					productCatalog,
-					zuoraClient,
-				);
-				const result: FrequencySwitchResponse = await executeFrequencySwitch(
-					zuoraClient,
-					subscription,
-					candidateCharge,
-					productCatalog,
-					dayjs(),
 				);
 
 				// Expect success response

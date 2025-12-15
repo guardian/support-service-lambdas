@@ -12,15 +12,16 @@ import {
 	itemsForSubscription,
 	toSimpleInvoiceItems,
 } from '@modules/zuora/billingPreview';
-import { singleTriggerDate } from '@modules/zuora/orders/orderActions';
 import type { OrderAction } from '@modules/zuora/orders/orderActions';
+import { singleTriggerDate } from '@modules/zuora/orders/orderActions';
+import type {
+	CreateOrderRequest,
+	OrderRequest,
+	PreviewOrderRequest,
+} from '@modules/zuora/orders/orderRequests';
 import {
 	executeOrderRequest,
 	previewOrderRequest,
-} from '@modules/zuora/orders/orderRequests';
-import type {
-	CreateOrderRequest,
-	PreviewOrderRequest,
 } from '@modules/zuora/orders/orderRequests';
 import type { ZuoraAccount } from '@modules/zuora/types';
 import type {
@@ -32,13 +33,13 @@ import { zuoraDateFormat } from '@modules/zuora/utils/common';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import dayjs from 'dayjs';
 import { EligibilityChecker } from '../../discount-api/src/eligibilityChecker';
-import type {
-	FrequencySwitchPreviewResponse,
-	FrequencySwitchRequestBody,
-	FrequencySwitchResponse,
-} from './frequencySwitchSchemas';
-import { frequencySwitchErrorResponseSchema } from './frequencySwitchSchemas';
 import { sendFrequencySwitchConfirmationEmail } from './frequencySwitchEmail';
+import type {
+	FrequencySwitchErrorResponse,
+	FrequencySwitchPreviewSuccessResponse,
+	FrequencySwitchRequestBody,
+	FrequencySwitchSuccessResponse,
+} from './frequencySwitchSchemas';
 import type { ZuoraPreviewResponse } from './schemas';
 import {
 	zuoraPreviewResponseSchema,
@@ -306,134 +307,103 @@ function prepareFrequencySwitchInfo(
  * Prepares the switch info and runs a preview order request to calculate savings and new price.
  */
 export async function previewFrequencySwitch(
+	baseOrderRequest: OrderRequest,
 	zuoraClient: ZuoraClient,
-	subscription: ZuoraSubscription,
 	candidateCharge: { ratePlan: RatePlan; charge: RatePlanCharge },
 	productCatalog: ProductCatalog,
-	today: dayjs.Dayjs,
-): Promise<FrequencySwitchPreviewResponse> {
-	const { ratePlan, charge } = candidateCharge;
+	effectiveDate: dayjs.Dayjs,
+	switchInfo: FrequencySwitchInfo,
+): Promise<FrequencySwitchPreviewSuccessResponse> {
 	logger.log('Previewing frequency switch (Orders API) from Monthly to Annual');
 
-	try {
-		// Use chargedThroughDate as effective date to match execution behavior and provide accurate preview
-		// const effectiveDate = today; // Fallback if chargedThroughDate approach doesn't work
-		const effectiveDate = dayjs(charge.chargedThroughDate ?? today);
+	const orderRequest: PreviewOrderRequest = {
+		previewOptions: {
+			previewThruType: 'SpecificDate',
+			previewTypes: ['BillingDocs'],
+			specificPreviewThruDate: zuoraDateFormat(effectiveDate.add(1, 'month')),
+		},
+		...baseOrderRequest,
+	};
 
-		const switchInfo = prepareFrequencySwitchInfo(
-			ratePlan,
-			charge,
-			subscription,
-			productCatalog,
-			effectiveDate,
-		);
+	const zuoraPreview: ZuoraPreviewResponse = await previewOrderRequest(
+		zuoraClient,
+		orderRequest,
+		zuoraPreviewResponseSchema,
+	);
 
-		// Preview the order to get Zuora to generate billing documents
-		const orderRequest: PreviewOrderRequest = {
-			previewOptions: {
-				previewThruType: 'SpecificDate',
-				previewTypes: ['BillingDocs'],
-				specificPreviewThruDate: zuoraDateFormat(effectiveDate.add(1, 'month')),
-			},
-			orderDate: zuoraDateFormat(effectiveDate),
-			existingAccountNumber: subscription.accountNumber,
-			subscriptions: [
-				{
-					subscriptionNumber: subscription.subscriptionNumber,
-					orderActions: switchInfo.orderActions,
-				},
-			],
-		};
+	logger.log('Orders preview returned successful response', zuoraPreview);
 
-		const zuoraPreview: ZuoraPreviewResponse = await previewOrderRequest(
-			zuoraClient,
-			orderRequest,
-			zuoraPreviewResponseSchema,
-		);
+	// Extract the invoice from the preview response
+	const invoice = getIfDefined(
+		zuoraPreview.previewResult?.invoices[0],
+		'No invoice found in the preview response',
+	);
 
-		logger.log('Orders preview returned successful response', zuoraPreview);
+	const { ratePlan, charge } = candidateCharge;
 
-		// Extract the invoice from the preview response
-		const invoice = getIfDefined(
-			zuoraPreview.previewResult?.invoices[0],
-			'No invoice found in the preview response',
-		);
+	// Calculate savings and new price for monthly to annual switch
+	// charge.price is guaranteed to be non-null by selectCandidateSubscriptionCharge validation
+	const currentPrice = charge.price!;
+	const currentAnnualCost = currentPrice * 12;
+	const targetAnnualCost = switchInfo.targetPrice;
+	const savingsAmount = currentAnnualCost - targetAnnualCost;
+	const savingsPeriod = 'year' as const;
+	const newPricePeriod = 'year' as const;
 
-		// Calculate savings and new price for monthly to annual switch
-		// charge.price is guaranteed to be non-null by selectCandidateSubscriptionCharge validation
-		const currentPrice = charge.price!;
-		const currentAnnualCost = currentPrice * 12;
-		const targetAnnualCost = switchInfo.targetPrice;
-		const savingsAmount = currentAnnualCost - targetAnnualCost;
-		const savingsPeriod = 'year' as const;
-		const newPricePeriod = 'year' as const;
+	// Calculate current contribution using catalog ID to identify the charge
+	const contributionChargeId =
+		productCatalog.SupporterPlus.ratePlans.Monthly.charges.Contribution.id;
+	const contributionCharges = ratePlan.ratePlanCharges.filter(
+		(c) => c.productRatePlanChargeId === contributionChargeId,
+	);
 
-		// Calculate current contribution using catalog ID to identify the charge
-		const contributionChargeId =
-			productCatalog.SupporterPlus.ratePlans.Monthly.charges.Contribution.id;
-		const contributionCharges = ratePlan.ratePlanCharges.filter(
-			(c) => c.productRatePlanChargeId === contributionChargeId,
-		);
+	assertValidState(
+		contributionCharges.length === 1,
+		'Expected exactly one Contribution charge in the rate plan',
+		`Found ${contributionCharges.length} charges`,
+	);
 
-		assertValidState(
-			contributionCharges.length === 1,
-			'Expected exactly one Contribution charge in the rate plan',
-			`Found ${contributionCharges.length} charges`,
-		);
+	const contributionCharge = contributionCharges[0]!;
+	assertValidState(
+		contributionCharge.price !== null,
+		'Contribution charge price should be a number (0 or positive amount)',
+		`Found null price`,
+	);
 
-		const contributionCharge = contributionCharges[0]!;
-		assertValidState(
-			contributionCharge.price !== null,
-			'Contribution charge price should be a number (0 or positive amount)',
-			`Found null price`,
-		);
+	const currentContributionAmount = contributionCharge.price;
 
-		const currentContributionAmount = contributionCharge.price;
+	// Use Zuora's billing preview to calculate the discount amount accurately
+	// This avoids replicating Zuora's complex logic for credits, discounts on specific rate plans,
+	// price rise engine, and other billing variations
+	// The preview invoice shows what would be charged for the first annual payment
+	// By comparing this to the undiscounted annual cost, we can calculate the discount savings
+	const expectedAnnualCostWithoutDiscount = currentPrice * 12;
+	const totalInvoiceAmount = invoice.invoiceItems.reduce(
+		(total, item) => total + item.amountWithoutTax,
+		0,
+	);
+	const currentDiscountAmount =
+		expectedAnnualCostWithoutDiscount - totalInvoiceAmount;
 
-		// Use Zuora's billing preview to calculate the discount amount accurately
-		// This avoids replicating Zuora's complex logic for credits, discounts on specific rate plans,
-		// price rise engine, and other billing variations
-		// The preview invoice shows what would be charged for the first annual payment
-		// By comparing this to the undiscounted annual cost, we can calculate the discount savings
-		const expectedAnnualCostWithoutDiscount = currentPrice * 12;
-		const totalInvoiceAmount = invoice.invoiceItems.reduce(
-			(total, item) => total + item.amountWithoutTax,
-			0,
-		);
-		const currentDiscountAmount =
-			expectedAnnualCostWithoutDiscount - totalInvoiceAmount;
-
-		return {
-			currency: switchInfo.currency,
-			savings: {
-				amount: savingsAmount,
-				period: savingsPeriod,
-			},
-			newPrice: {
-				amount: switchInfo.targetPrice,
-				period: newPricePeriod,
-			},
-			currentContribution: {
-				amount: currentContributionAmount,
-				period: 'month',
-			},
-			currentDiscount: {
-				amount: Math.round(currentDiscountAmount * 100) / 100,
-				period: 'year',
-			},
-		};
-	} catch (error) {
-		// Only return ValidationError messages to clients for security
-		if (error instanceof ValidationError) {
-			return {
-				reason: error.message,
-			};
-		}
-
-		throw new Error('Unexpected error type in frequency switch preview', {
-			cause: error,
-		});
-	}
+	return {
+		currency: switchInfo.currency,
+		savings: {
+			amount: savingsAmount,
+			period: savingsPeriod,
+		},
+		newPrice: {
+			amount: switchInfo.targetPrice,
+			period: newPricePeriod,
+		},
+		currentContribution: {
+			amount: currentContributionAmount,
+			period: 'month',
+		},
+		currentDiscount: {
+			amount: Math.round(currentDiscountAmount * 100) / 100,
+			period: 'year',
+		},
+	};
 }
 
 /**
@@ -441,78 +411,26 @@ export async function previewFrequencySwitch(
  * Prepares the switch info and executes the order request to perform the actual switch.
  */
 export async function executeFrequencySwitch(
+	baseOrderRequest: OrderRequest,
 	zuoraClient: ZuoraClient,
-	subscription: ZuoraSubscription,
-	account: ZuoraAccount,
-	candidateCharge: { ratePlan: RatePlan; charge: RatePlanCharge },
-	productCatalog: ProductCatalog,
-	stage: Stage,
-	today: dayjs.Dayjs,
-): Promise<FrequencySwitchResponse> {
-	const { ratePlan, charge } = candidateCharge;
+): Promise<FrequencySwitchSuccessResponse> {
 	logger.log('Executing frequency switch (Orders API) from Monthly to Annual');
 
-	try {
-		// Use chargedThroughDate as the effective date - this is when the current billing period ends
-		// and the next payment will be due. Since SupporterPlus subscriptions don't have free periods
-		// (discounts reduce price but don't make invoices free), this avoids an extra billing preview API call.
-		const effectiveDate = dayjs(charge.chargedThroughDate ?? today);
+	const orderRequest: CreateOrderRequest = {
+		processingOptions: {
+			runBilling: false,
+			collectPayment: false,
+		},
+		...baseOrderRequest,
+	};
 
-		const switchInfo = prepareFrequencySwitchInfo(
-			ratePlan,
-			charge,
-			subscription,
-			productCatalog,
-			effectiveDate,
-		);
+	await executeOrderRequest(
+		zuoraClient,
+		orderRequest,
+		zuoraSwitchResponseSchema,
+	);
 
-		const orderRequest: CreateOrderRequest = {
-			processingOptions: {
-				runBilling: false,
-				collectPayment: false,
-			},
-			orderDate: zuoraDateFormat(effectiveDate),
-			existingAccountNumber: subscription.accountNumber,
-			subscriptions: [
-				{
-					subscriptionNumber: subscription.subscriptionNumber,
-					orderActions: switchInfo.orderActions,
-				},
-			],
-		};
-
-		await executeOrderRequest(
-			zuoraClient,
-			orderRequest,
-			zuoraSwitchResponseSchema,
-		);
-
-		// Send confirmation email after successful switch
-		// Use Promise.allSettled to prevent email failures from breaking the switch
-		await Promise.allSettled([
-			sendFrequencySwitchConfirmationEmail(
-				stage,
-				subscription,
-				account,
-				switchInfo.currency,
-				switchInfo.targetPrice,
-				effectiveDate,
-			),
-		]);
-
-		return {};
-	} catch (error) {
-		// Only return ValidationError messages to clients for security
-		if (error instanceof ValidationError) {
-			return {
-				reason: error.message,
-			};
-		}
-
-		throw new Error('Unexpected error type in frequency switch execution', {
-			cause: error,
-		});
-	}
+	return {};
 }
 
 /**
@@ -540,6 +458,79 @@ function getTargetRatePlanId(
 	);
 }
 
+export async function getSwitchResult(
+	stage: Stage,
+	today: dayjs.Dayjs,
+	isPreview: boolean,
+	zuoraClient: ZuoraClient,
+	subscription: ZuoraSubscription,
+	account: ZuoraAccount,
+): Promise<
+	FrequencySwitchPreviewSuccessResponse | FrequencySwitchSuccessResponse
+> {
+	const productCatalog = await getProductCatalogFromApi(stage);
+
+	// Use selectCandidateSubscriptionCharge to validate and find the eligible charge
+	const candidateCharge = await selectCandidateSubscriptionCharge(
+		subscription,
+		today,
+		account,
+		productCatalog,
+		zuoraClient,
+	);
+
+	const effectiveDate = dayjs(
+		candidateCharge.charge.chargedThroughDate ?? today,
+	);
+
+	const switchInfo = prepareFrequencySwitchInfo(
+		candidateCharge.ratePlan,
+		candidateCharge.charge,
+		subscription,
+		productCatalog,
+		effectiveDate,
+	);
+
+	const baseOrderRequest: OrderRequest = {
+		orderDate: zuoraDateFormat(effectiveDate),
+		existingAccountNumber: subscription.accountNumber,
+		subscriptions: [
+			{
+				subscriptionNumber: subscription.subscriptionNumber,
+				orderActions: switchInfo.orderActions,
+			},
+		],
+	};
+
+	if (isPreview) {
+		return await previewFrequencySwitch(
+			baseOrderRequest,
+			zuoraClient,
+			candidateCharge,
+			productCatalog,
+			effectiveDate,
+			switchInfo,
+		);
+	}
+
+	const result = await executeFrequencySwitch(baseOrderRequest, zuoraClient);
+
+	// Send confirmation email after successful switch
+	// Use Promise.allSettled to prevent email failures from breaking the switch
+	await Promise.allSettled([
+		sendFrequencySwitchConfirmationEmail(
+			stage,
+			subscription,
+			account,
+			switchInfo.currency,
+			switchInfo.targetPrice,
+			effectiveDate,
+		),
+	]);
+
+	return result;
+}
+
 export const frequencySwitchHandler =
 	(stage: Stage, today: dayjs.Dayjs) =>
 	async (
@@ -548,57 +539,33 @@ export const frequencySwitchHandler =
 		subscription: ZuoraSubscription,
 		account: ZuoraAccount,
 	): Promise<{ statusCode: number; body: string }> => {
-		const productCatalog = await getProductCatalogFromApi(stage);
-
-		// Use selectCandidateSubscriptionCharge to validate and find the eligible charge
-		let candidateCharge: { ratePlan: RatePlan; charge: RatePlanCharge };
 		try {
-			candidateCharge = await selectCandidateSubscriptionCharge(
-				subscription,
+			const response = await getSwitchResult(
+				stage,
 				today,
-				account,
-				productCatalog,
+				body.preview,
 				zuoraClient,
+				subscription,
+				account,
 			);
+
+			return { statusCode: 200, body: JSON.stringify(response) };
 		} catch (error) {
-			logger.log(
-				'Failed to select candidate charge for frequency switch.',
-				error,
-			);
 			// Only return ValidationError messages to clients for security
 			if (error instanceof ValidationError) {
 				return {
 					statusCode: 400,
 					body: JSON.stringify({
 						reason: error.message,
-					}),
+					} satisfies FrequencySwitchErrorResponse),
 				};
 			}
 
-			// The router will do log-and-500 for free
-			throw error;
+			throw new Error(
+				`Unexpected error type in frequency switch: preview=${body.preview}`,
+				{
+					cause: error,
+				},
+			);
 		}
-
-		const response = body.preview
-			? await previewFrequencySwitch(
-					zuoraClient,
-					subscription,
-					candidateCharge,
-					productCatalog,
-					today,
-				)
-			: await executeFrequencySwitch(
-					zuoraClient,
-					subscription,
-					account,
-					candidateCharge,
-					productCatalog,
-					stage,
-					today,
-				);
-
-		const isErrorResponse =
-			frequencySwitchErrorResponseSchema.safeParse(response).success;
-		const statusCode = isErrorResponse ? 400 : 200;
-		return { statusCode, body: JSON.stringify(response) };
 	};
