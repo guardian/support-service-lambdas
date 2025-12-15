@@ -59,8 +59,6 @@ export const frequencySwitchValidationRequirements = {
 	chargeHasValidPrice: 'eligible charge has a defined price',
 	zeroContributionAmount:
 		'contribution amount is zero (non-zero contributions cannot be preserved during frequency switch)',
-	noActiveDiscounts:
-		'subscription has no active discounts (discounts must be removed before frequency switch)',
 };
 
 /**
@@ -219,24 +217,8 @@ export async function selectCandidateSubscriptionCharge(
 		`contribution amount is ${contributionCharge.price}`,
 	);
 
-	// Check for active discounts - subscribers with discounts are not eligible
-	// This follows the same pattern as discount-api eligibility checker
-	const activeDiscountRatePlans = subscription.ratePlans.filter(
-		(rp) =>
-			rp.productName === 'Discounts' &&
-			rp.lastChangeType !== 'Remove' &&
-			rp.ratePlanCharges.some(
-				(charge) =>
-					charge.effectiveStartDate <= todayDate &&
-					charge.effectiveEndDate >= todayDate,
-			),
-	);
-
-	assertValidState(
-		activeDiscountRatePlans.length === 0,
-		frequencySwitchValidationRequirements.noActiveDiscounts,
-		`Found ${activeDiscountRatePlans.length} active discount(s): ${activeDiscountRatePlans.map((rp) => rp.ratePlanName).join(', ')}`,
-	);
+	// Note: discount eligibility is already checked by EligibilityChecker.assertGenerallyEligible()
+	// which validates that the next invoice has no negative items (discounts/refunds)
 
 	return {
 		ratePlan: supporterPlusMonthlyRatePlan,

@@ -393,7 +393,27 @@ describe('selectCandidateSubscriptionCharge', () => {
 		});
 
 		const account = makeAccount();
-		const zuoraClient = makeMockZuoraClient();
+		// Mock billing preview with a negative item (discount)
+		const zuoraClient = {
+			post: jest.fn().mockResolvedValue({
+				invoiceItems: [
+					{
+						subscriptionNumber: 'A-SUB123',
+						serviceStartDate: '2024-12-01',
+						chargeAmount: 10,
+						taxAmount: 0,
+					},
+					{
+						subscriptionNumber: 'A-SUB123',
+						serviceStartDate: '2024-12-01',
+						chargeAmount: -3, // Negative item representing discount
+						taxAmount: 0,
+					},
+				],
+			}),
+			get: jest.fn(),
+			delete: jest.fn(),
+		} as unknown as ZuoraClient;
 
 		await expect(
 			selectCandidateSubscriptionCharge(
@@ -403,9 +423,7 @@ describe('selectCandidateSubscriptionCharge', () => {
 				productCatalog,
 				zuoraClient,
 			),
-		).rejects.toThrow(
-			'subscription has no active discounts (discounts must be removed before frequency switch)',
-		);
+		).rejects.toThrow('next invoice has no negative items');
 	});
 });
 
