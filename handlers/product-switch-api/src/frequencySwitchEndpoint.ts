@@ -1,8 +1,5 @@
 import { ValidationError } from '@modules/errors';
-import {
-	CurrencyValues,
-	type IsoCurrency,
-} from '@modules/internationalisation/currency';
+import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { isoCurrencySchema } from '@modules/internationalisation/schemas';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
@@ -41,6 +38,7 @@ import type {
 	FrequencySwitchResponse,
 } from './frequencySwitchSchemas';
 import { frequencySwitchErrorResponseSchema } from './frequencySwitchSchemas';
+import { sendFrequencySwitchConfirmationEmail } from './frequencySwitchEmail';
 import type { ZuoraPreviewResponse } from './schemas';
 import {
 	zuoraPreviewResponseSchema,
@@ -445,8 +443,10 @@ export async function previewFrequencySwitch(
 export async function executeFrequencySwitch(
 	zuoraClient: ZuoraClient,
 	subscription: ZuoraSubscription,
+	account: ZuoraAccount,
 	candidateCharge: { ratePlan: RatePlan; charge: RatePlanCharge },
 	productCatalog: ProductCatalog,
+	stage: Stage,
 	today: dayjs.Dayjs,
 ): Promise<FrequencySwitchResponse> {
 	const { ratePlan, charge } = candidateCharge;
@@ -486,6 +486,19 @@ export async function executeFrequencySwitch(
 			orderRequest,
 			zuoraSwitchResponseSchema,
 		);
+
+		// Send confirmation email after successful switch
+		// Use Promise.allSettled to prevent email failures from breaking the switch
+		await Promise.allSettled([
+			sendFrequencySwitchConfirmationEmail(
+				stage,
+				subscription,
+				account,
+				switchInfo.currency,
+				switchInfo.targetPrice,
+				effectiveDate,
+			),
+		]);
 
 		return {};
 	} catch (error) {
@@ -577,8 +590,10 @@ export const frequencySwitchHandler =
 			: await executeFrequencySwitch(
 					zuoraClient,
 					subscription,
+					account,
 					candidateCharge,
 					productCatalog,
+					stage,
 					today,
 				);
 
