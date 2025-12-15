@@ -107,7 +107,6 @@ export class MParticleApi extends SrStack {
 				conditions: {
 					ArnEquals: {
 						'aws:SourceArn': identityMmaSnsDeletionRequestTopicArn,
-						// 'aws:SourceArn': 'AAAAAAAAAAAA', // Placeholder - use this to disable SNS subscription during testing
 					},
 				},
 			}),
