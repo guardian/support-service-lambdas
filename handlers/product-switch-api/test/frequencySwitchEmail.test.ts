@@ -78,8 +78,6 @@ describe('buildFrequencySwitchEmailMessage', () => {
 			dayjs('2026-03-15'),
 		);
 
-		expect(result.To.ContactAttributes.SubscriberAttributes.currency).toBe(
-			'€',
-		);
+		expect(result.To.ContactAttributes.SubscriberAttributes.currency).toBe('€');
 	});
 });
