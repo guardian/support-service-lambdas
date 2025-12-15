@@ -11,7 +11,7 @@
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr alarms-handler.zip ./*.js.map ./*.js",
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
-    "update-lambda": "../../update-lambda.sh \"alarms-handler\"",
+    "update-lambda": "../../update-lambda.sh \"alarms-handler\" alarms-handler- alarms-handler-scheduled-",
     "update-stack": "../../update-stack.sh \"alarms-handler\""
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",

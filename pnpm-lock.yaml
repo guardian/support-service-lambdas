@@ -312,6 +312,12 @@ importers:
         specifier: ^8.10.147
         version: 8.10.158
 
+  handlers/promotions-lambdas:
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.147
+        version: 8.10.158
+
   handlers/salesforce-disaster-recovery:
     dependencies:
       '@aws-sdk/client-s3':

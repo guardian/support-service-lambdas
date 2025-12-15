@@ -5,7 +5,7 @@ module.exports = [
 	{
 		type: 'input',
 		name: 'lambdaName',
-		message: 'Enter new lambda name',
+		message: 'Enter new lambda name e.g. widgets-query-sync',
 	},
 	{
 		type: 'input',

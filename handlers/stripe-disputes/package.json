@@ -11,7 +11,7 @@
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr stripe-disputes.zip ./*.js.map ./*.js",
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
-    "update-lambda": "../../update-lambda.sh \"stripe-disputes\"",
+    "update-lambda": "../../update-lambda.sh \"stripe-disputes\" stripe-disputes-producer- stripe-disputes-consumer-",
     "update-stack": "../../update-stack.sh \"stripe-disputes\""
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
