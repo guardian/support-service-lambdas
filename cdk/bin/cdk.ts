@@ -22,6 +22,7 @@ import { NewProductApi } from '../lib/new-product-api';
 import { ObserverDataExport } from '../lib/observer-data-export';
 import { PressReaderEntitlements } from '../lib/press-reader-entitlements';
 import { ProductSwitchApi } from '../lib/product-switch-api';
+import { PromotionsLambdas } from '../lib/promotions-lambdas';
 import { SalesforceDisasterRecovery } from '../lib/salesforce-disaster-recovery';
 import { SalesforceDisasterRecoveryHealthCheck } from '../lib/salesforce-disaster-recovery-health-check';
 import { SalesforceEventBus } from '../lib/salesforce-event-bus';
@@ -124,6 +125,7 @@ new SingleContributionSalesforceWrites(
 );
 
 const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
+	PromotionsLambdas,
 	DiscountApi,
 	ProductSwitchApi,
 	UpdateSupporterPlusAmount,
