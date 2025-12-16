@@ -41,10 +41,7 @@ describe('deleteMParticleUser', () => {
 			'Not Found',
 			'User not found',
 		);
-		mockPost.mockResolvedValue({
-			success: false,
-			error: error404,
-		});
+		mockPost.mockRejectedValue(error404);
 
 		const result = await deleteMParticleUser(mockClient, userId);
 
