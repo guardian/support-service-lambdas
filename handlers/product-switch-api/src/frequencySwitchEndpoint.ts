@@ -313,6 +313,7 @@ export async function previewFrequencySwitch(
 	productCatalog: ProductCatalog,
 	effectiveDate: dayjs.Dayjs,
 	switchInfo: FrequencySwitchInfo,
+	subscription: ZuoraSubscription,
 ): Promise<FrequencySwitchPreviewSuccessResponse> {
 	logger.log('Previewing frequency switch (Orders API) from Monthly to Annual');
 
@@ -332,12 +333,6 @@ export async function previewFrequencySwitch(
 	);
 
 	logger.log('Orders preview returned successful response', zuoraPreview);
-
-	// Extract the invoice from the preview response
-	const invoice = getIfDefined(
-		zuoraPreview.previewResult?.invoices[0],
-		'No invoice found in the preview response',
-	);
 
 	const { ratePlan, charge } = candidateCharge;
 
@@ -373,18 +368,31 @@ export async function previewFrequencySwitch(
 	const currentContributionAmount = contributionCharge.price;
 
 	// Use Zuora's billing preview to calculate the discount amount accurately
-	// This avoids replicating Zuora's complex logic for credits, discounts on specific rate plans,
-	// price rise engine, and other billing variations
-	// The preview invoice shows what would be charged for the first annual payment
-	// By comparing this to the undiscounted annual cost, we can calculate the discount savings
-	const expectedAnnualCostWithoutDiscount =
-		(currentPrice + currentContributionAmount) * 12;
-	const totalInvoiceAmount = invoice.invoiceItems.reduce(
-		(total, item) => total + item.amountWithoutTax,
+	// Get a billing preview for the next 12 months on the current monthly plan
+	// to understand what the user would actually pay (including any promotional discounts)
+	const currentBillingPreview = await getBillingPreview(
+		zuoraClient,
+		effectiveDate.add(12, 'months'),
+		subscription.accountNumber,
+	);
+	
+	const currentInvoiceItems = toSimpleInvoiceItems(
+		itemsForSubscription(subscription.subscriptionNumber)(currentBillingPreview),
+	);
+	
+	// Sum up what they would pay over the next 12 months on monthly billing
+	const totalCurrentAnnualCost = currentInvoiceItems.reduce(
+		(sum, item) => sum + item.amount,
 		0,
 	);
+	
+	// Calculate the expected cost without any discounts (base price × 12)
+	const expectedAnnualCostWithoutDiscount =
+		(currentPrice + currentContributionAmount) * 12;
+	
+	// Current discount is the difference between undiscounted cost and what they actually pay
 	const currentDiscountAmount =
-		expectedAnnualCostWithoutDiscount - totalInvoiceAmount;
+		expectedAnnualCostWithoutDiscount - totalCurrentAnnualCost;
 
 	return {
 		currency: switchInfo.currency,
@@ -511,6 +519,7 @@ export async function getSwitchResult(
 			productCatalog,
 			effectiveDate,
 			switchInfo,
+			subscription,
 		);
 	}
 
