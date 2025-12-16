@@ -375,21 +375,23 @@ export async function previewFrequencySwitch(
 		effectiveDate.add(12, 'months'),
 		subscription.accountNumber,
 	);
-	
+
 	const currentInvoiceItems = toSimpleInvoiceItems(
-		itemsForSubscription(subscription.subscriptionNumber)(currentBillingPreview),
+		itemsForSubscription(subscription.subscriptionNumber)(
+			currentBillingPreview,
+		),
 	);
-	
+
 	// Sum up what they would pay over the next 12 months on monthly billing
 	const totalCurrentAnnualCost = currentInvoiceItems.reduce(
 		(sum, item) => sum + item.amount,
 		0,
 	);
-	
+
 	// Calculate the expected cost without any discounts (base price × 12)
 	const expectedAnnualCostWithoutDiscount =
 		(currentPrice + currentContributionAmount) * 12;
-	
+
 	// Current discount is the difference between undiscounted cost and what they actually pay
 	const currentDiscountAmount =
 		expectedAnnualCostWithoutDiscount - totalCurrentAnnualCost;
