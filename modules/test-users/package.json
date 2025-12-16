@@ -1,20 +1,25 @@
 {
   "name": "test-users",
-  "version": "1.0.0",
   "scripts": {
+    "test": "jest --group=-integration",
+    "it-test": "jest --group=integration",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
+    "check-formatting": "prettier --check \"**/*.ts\"",
+    "fix-formatting": "prettier --write \"**/*.ts\"",
+    "build": "tsc --noEmit",
     "createDigitalSubscription": "ts-node ./src/createDigitalSubscription.ts",
     "createAnnualContribution": "ts-node ./src/createAnnualContribution.ts",
     "createMonthlyContribution": "ts-node ./src/createMonthlyContribution.ts",
     "updateMonthlyContributionAmount": "ts-node ./src/updateMonthlyContributionAmount.ts",
     "cancelSubscription": "ts-node ./src/cancel.ts",
-    "deleteAccount": "ts-node ./src/deleteAccount.ts",
-    "check-formatting": "prettier --check **.ts",
-    "fix-formatting": "prettier --write **.ts",
-    "lint": "eslint src/**/*.ts"
+    "deleteAccount": "ts-node ./src/deleteAccount.ts"
   },
+  "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/module/package.json.ts",
+  "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "devDependencies": {
     "dayjs": "^1.11.13",
-    "ts-node": "^10.9.2",
-    "tsconfig-paths": "^4.2.0"
+    "ts-node": "^10.9.1",
+    "tsconfig-paths": "catalog:"
   }
 }
