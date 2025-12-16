@@ -1,16 +1,16 @@
 {
   "name": "zuora-salesforce-link-remover",
   "scripts": {
-    "cdk:test": "pnpm --filter cdk test zuora-salesforce-link-remover",
-    "cdk:test-update": "pnpm --filter cdk test-update zuora-salesforce-link-remover",
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
     "type-check": "tsc --noEmit",
-    "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/handlers/*.ts --sourcemap",
     "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
-    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr zuora-salesforce-link-remover.zip ./*.js.map ./*.js",
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
+    "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/handlers/*.ts --sourcemap",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr zuora-salesforce-link-remover.zip ./*.js.map ./*.js",
+    "cdk:test": "pnpm --filter cdk test zuora-salesforce-link-remover",
+    "cdk:test-update": "pnpm --filter cdk test-update zuora-salesforce-link-remover",
     "update-lambda": "../../update-lambda.sh \"zuora-salesforce-link-remover\" zuora-salesforce-link-remover-get-billing-accounts- zuora-salesforce-link-remover-update-zuora-billing-account- zuora-salesforce-link-remover-update-sf-billing-accounts-",
     "update-stack": "../../update-stack.sh \"zuora-salesforce-link-remover\""
   },

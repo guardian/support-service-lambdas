@@ -15,7 +15,7 @@ object Dependencies {
   val catsEffectVersion = "2.5.5"
 
   val logging: Seq[ModuleID] = Seq(
-    "ch.qos.logback" % "logback-classic" % "1.5.18",
+    "ch.qos.logback" % "logback-classic" % "1.5.22",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.9.5",
   )
 
@@ -41,7 +41,7 @@ object Dependencies {
   val scalaLambda = "io.github.mkotsur" %% "aws-lambda-scala" % "0.3.0"
 
   // GCP
-  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.55.3"
+  val googleBigQuery = "com.google.cloud" % "google-cloud-bigquery" % "2.57.0"
   val grpcNettyOverride = "io.grpc" % "grpc-netty-shaded" % "1.76.0"
 
   // Cats
@@ -99,7 +99,7 @@ object Dependencies {
   val scalatest = "org.scalatest" %% "scalatest" % "3.2.19" % Test
   val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.18.1" % Test
   val scalaMock = "org.scalamock" %% "scalamock" % "7.3.2" % Test
-  val mockito = "org.mockito" % "mockito-core" % "5.14.2" % Test
+  val mockito = "org.mockito" % "mockito-core" % "5.21.0" % Test
   // play-json still uses an old version of jackson-core which has a vulnerability - https://security.snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-7569538
   val jacksonVersion = "2.17.3"
 

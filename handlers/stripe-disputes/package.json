@@ -1,16 +1,16 @@
 {
   "name": "stripe-disputes",
   "scripts": {
-    "cdk:test": "pnpm --filter cdk test stripe-disputes",
-    "cdk:test-update": "pnpm --filter cdk test-update stripe-disputes",
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
     "type-check": "tsc --noEmit",
-    "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/producer.ts src/consumer.ts --sourcemap",
     "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
-    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr stripe-disputes.zip ./*.js.map ./*.js",
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
+    "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/producer.ts src/consumer.ts --sourcemap",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr stripe-disputes.zip ./*.js.map ./*.js",
+    "cdk:test": "pnpm --filter cdk test stripe-disputes",
+    "cdk:test-update": "pnpm --filter cdk test-update stripe-disputes",
     "update-lambda": "../../update-lambda.sh \"stripe-disputes\" stripe-disputes-producer- stripe-disputes-consumer-",
     "update-stack": "../../update-stack.sh \"stripe-disputes\""
   },

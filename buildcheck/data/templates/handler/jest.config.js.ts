@@ -1,4 +1,4 @@
-import { HandlerDefinition } from '../../build';
+import type { HandlerDefinition } from '../../build';
 
 export default (
 	pkg: HandlerDefinition,

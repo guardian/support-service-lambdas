@@ -1,16 +1,16 @@
 {
   "name": "promotions-lambdas",
   "scripts": {
-    "cdk:test": "pnpm --filter cdk test promotions-lambdas",
-    "cdk:test-update": "pnpm --filter cdk test-update promotions-lambdas",
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
     "type-check": "tsc --noEmit",
-    "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/handlers/*.ts --sourcemap",
     "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
-    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr promotions-lambdas.zip ./*.js.map ./*.js",
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
+    "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/handlers/*.ts --sourcemap",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr promotions-lambdas.zip ./*.js.map ./*.js",
+    "cdk:test": "pnpm --filter cdk test promotions-lambdas",
+    "cdk:test-update": "pnpm --filter cdk test-update promotions-lambdas",
     "update-lambda": "../../update-lambda.sh \"promotions-lambdas\" promotions-lambdas-promo-campaign-sync-",
     "update-stack": "../../update-stack.sh \"promotions-lambdas\""
   },

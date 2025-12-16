@@ -1,16 +1,16 @@
 {
   "name": "discount-expiry-notifier",
   "scripts": {
-    "cdk:test": "pnpm --filter cdk test discount-expiry-notifier",
-    "cdk:test-update": "pnpm --filter cdk test-update discount-expiry-notifier",
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
     "type-check": "tsc --noEmit",
-    "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/handlers/*.ts --sourcemap",
     "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
-    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr discount-expiry-notifier.zip ./*.js.map ./*.js",
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
+    "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/handlers/*.ts --sourcemap",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr discount-expiry-notifier.zip ./*.js.map ./*.js",
+    "cdk:test": "pnpm --filter cdk test discount-expiry-notifier",
+    "cdk:test-update": "pnpm --filter cdk test-update discount-expiry-notifier",
     "update-lambda": "../../update-lambda.sh \"discount-expiry-notifier\" discount-expiry-notifier-get-expiring-discounts- discount-expiry-notifier-filter-records- discount-expiry-notifier-get-sub-status- discount-expiry-notifier-get-old-payment-amount- discount-expiry-notifier-get-new-payment-amount- discount-expiry-notifier-send-email- discount-expiry-notifier-save-results- discount-expiry-notifier-alarm-on-failures-",
     "update-stack": "../../update-stack.sh \"discount-expiry-notifier\""
   },
