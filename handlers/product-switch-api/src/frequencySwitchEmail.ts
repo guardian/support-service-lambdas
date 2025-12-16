@@ -37,9 +37,9 @@ export const buildFrequencySwitchEmailMessage = (
 				SubscriberAttributes: {
 					first_name: firstName,
 					last_name: lastName,
+					first_discounted_payment_date: nextPaymentDate.format('DD MMMM YYYY'),
 					currency: getCurrencyInfo(currency).extendedGlyph,
 					new_price: newAnnualPrice.toFixed(2),
-					next_payment_date: nextPaymentDate.format('DD MMMM YYYY'),
 					payment_frequency: 'Annually',
 					subscription_id: subscriptionNumber,
 				},

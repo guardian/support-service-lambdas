@@ -30,9 +30,9 @@ describe('buildFrequencySwitchEmailMessage', () => {
 					SubscriberAttributes: {
 						first_name: 'Test',
 						last_name: 'User',
+						first_discounted_payment_date: '15 January 2026',
 						currency: '£',
 						new_price: '95.00',
-						next_payment_date: '15 January 2026',
 						payment_frequency: 'Annually',
 						subscription_id: 'A-S00123456',
 					},
@@ -61,7 +61,8 @@ describe('buildFrequencySwitchEmailMessage', () => {
 			'120.00',
 		);
 		expect(
-			result.To.ContactAttributes.SubscriberAttributes.next_payment_date,
+			result.To.ContactAttributes.SubscriberAttributes
+				.first_discounted_payment_date,
 		).toBe('01 February 2026');
 	});
 
