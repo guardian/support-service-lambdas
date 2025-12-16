@@ -382,8 +382,14 @@ export async function previewFrequencySwitch(
 		),
 	);
 
+	// Filter to only include items within the next 12 months from effectiveDate
+	const twelveMonthsFromNow = effectiveDate.add(12, 'months').toDate();
+	const filteredItems = currentInvoiceItems.filter(
+		(item) => item.date < twelveMonthsFromNow,
+	);
+
 	// Sum up what they would pay over the next 12 months on monthly billing
-	const totalCurrentAnnualCost = currentInvoiceItems.reduce(
+	const totalCurrentAnnualCost = filteredItems.reduce(
 		(sum, item) => sum + item.amount,
 		0,
 	);
