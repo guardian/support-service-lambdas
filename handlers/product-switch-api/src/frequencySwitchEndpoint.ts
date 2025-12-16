@@ -313,7 +313,6 @@ export async function previewFrequencySwitch(
 	productCatalog: ProductCatalog,
 	effectiveDate: dayjs.Dayjs,
 	switchInfo: FrequencySwitchInfo,
-	subscription: ZuoraSubscription,
 ): Promise<FrequencySwitchPreviewSuccessResponse> {
 	logger.log('Previewing frequency switch (Orders API) from Monthly to Annual');
 
@@ -488,7 +487,6 @@ export async function getSwitchResult(
 			productCatalog,
 			effectiveDate,
 			switchInfo,
-			subscription,
 		);
 	}
 
