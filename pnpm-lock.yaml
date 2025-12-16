@@ -634,11 +634,11 @@ importers:
   modules/zuora:
     dependencies:
       '@aws-sdk/client-s3':
-        specifier: ^3.873.0
-        version: 3.933.0
+        specifier: ^3.940.0
+        version: 3.940.0
       '@aws-sdk/client-secrets-manager':
-        specifier: ^3.908.0
-        version: 3.933.0
+        specifier: ^3.940.0
+        version: 3.940.0
       dayjs:
         specifier: ^1.11.13
         version: 1.11.19
