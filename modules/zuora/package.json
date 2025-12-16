@@ -1,17 +1,19 @@
 {
   "name": "zuora",
-  "version": "1.0.0",
   "scripts": {
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
-    "check-formatting": "prettier --check **.ts",
-    "fix-formatting": "prettier --write **.ts",
-    "build": "tsc --noEmit",
-    "lint": "eslint 'src/**/*.ts' 'test/**/*.ts'"
+    "type-check": "tsc --noEmit",
+    "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
+    "check-formatting": "prettier --check \"**/*.ts\"",
+    "fix-formatting": "prettier --write \"**/*.ts\"",
+    "build": "tsc --noEmit"
   },
+  "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/module/package.json.ts",
+  "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.873.0",
-    "@aws-sdk/client-secrets-manager": "^3.908.0",
+    "@aws-sdk/client-s3": "^3.940.0",
+    "@aws-sdk/client-secrets-manager": "^3.940.0",
     "dayjs": "^1.11.13",
     "zod": "catalog:"
   }

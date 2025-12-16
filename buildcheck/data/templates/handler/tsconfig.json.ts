@@ -1,6 +1,6 @@
-import { HandlerDefinition } from '../../build';
+import { ModuleDefinition } from '../../build';
 
-export default (pkg: HandlerDefinition) => {
+export default (pkg: ModuleDefinition) => {
 	return {
 		extends: '../../tsconfig.json',
 		...pkg.tsConfigExtra,

@@ -1,7 +1,7 @@
-import { HandlerDefinition } from '../../build';
+import { ModuleDefinition } from '../../build';
 
 export default (
-	pkg: HandlerDefinition,
+	pkg: ModuleDefinition,
 ) => `/** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
 	preset: 'ts-jest',
