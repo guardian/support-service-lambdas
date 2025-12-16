@@ -377,7 +377,8 @@ export async function previewFrequencySwitch(
 	// price rise engine, and other billing variations
 	// The preview invoice shows what would be charged for the first annual payment
 	// By comparing this to the undiscounted annual cost, we can calculate the discount savings
-	const expectedAnnualCostWithoutDiscount = (currentPrice + currentContributionAmount) * 12;
+	const expectedAnnualCostWithoutDiscount =
+		(currentPrice + currentContributionAmount) * 12;
 	const totalInvoiceAmount = invoice.invoiceItems.reduce(
 		(total, item) => total + item.amountWithoutTax,
 		0,
