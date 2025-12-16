@@ -7,12 +7,12 @@ import {
 	Policy,
 	PolicyStatement,
 	Role,
-	ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
-import { Topic } from 'aws-cdk-lib/aws-sns';
-import { SqsSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
+// import { ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+// import { Topic } from 'aws-cdk-lib/aws-sns';
+// import { SqsSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
-import { SrAppConfigKey } from './cdk/SrAppConfigKey';
+// import { SrAppConfigKey } from './cdk/SrAppConfigKey';
 import { SrLambda } from './cdk/SrLambda';
 import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
 import { SrRestDomain } from './cdk/SrRestDomain';
@@ -41,10 +41,10 @@ export class MParticleApi extends SrStack {
 			`/${this.stage}/${this.stack}/${app}/sarResultsBucket`,
 		).stringValue;
 
-		const identityMmaSnsDeletionRequestTopicArn = new SrAppConfigKey(
-			this,
-			'IdentityMmaSnsDeletionRequestTopicArn',
-		).valueAsString;
+		// const identityMmaSnsDeletionRequestTopicArn = new SrAppConfigKey(
+		// 	this,
+		// 	'IdentityMmaSnsDeletionRequestTopicArn',
+		// ).valueAsString;
 
 		const sarS3BaseKey = 'mparticle-results/'; // this must be the same as used in the code
 
@@ -79,6 +79,7 @@ export class MParticleApi extends SrStack {
 			},
 		});
 
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Lambda is deployed but SNS subscription temporarily disabled
 		const mmaUserDeletionLambda = new SrSqsLambda(
 			this,
 			'MmaUserDeletionLambda',
@@ -98,29 +99,29 @@ export class MParticleApi extends SrStack {
 			},
 		);
 
-		mmaUserDeletionLambda.inputQueue.addToResourcePolicy(
-			new PolicyStatement({
-				effect: Effect.ALLOW,
-				principals: [new ServicePrincipal('sns.amazonaws.com')],
-				actions: ['sqs:SendMessage'],
-				resources: [mmaUserDeletionLambda.inputQueue.queueArn],
-				conditions: {
-					ArnEquals: {
-						'aws:SourceArn': identityMmaSnsDeletionRequestTopicArn,
-					},
-				},
-			}),
-		);
+		// mmaUserDeletionLambda.inputQueue.addToResourcePolicy(
+		// 	new PolicyStatement({
+		// 		effect: Effect.ALLOW,
+		// 		principals: [new ServicePrincipal('sns.amazonaws.com')],
+		// 		actions: ['sqs:SendMessage'],
+		// 		resources: [mmaUserDeletionLambda.inputQueue.queueArn],
+		// 		conditions: {
+		// 			ArnEquals: {
+		// 				'aws:SourceArn': identityMmaSnsDeletionRequestTopicArn,
+		// 			},
+		// 		},
+		// 	}),
+		// );
 
 		// Subscribe the SQS queue to the Identity SNS topic for deletion requests
-		const identityMmaSnsTopic = Topic.fromTopicArn(
-			this,
-			'IdentityMmaSnsDeletionRequestTopic',
-			identityMmaSnsDeletionRequestTopicArn,
-		);
-		identityMmaSnsTopic.addSubscription(
-			new SqsSubscription(mmaUserDeletionLambda.inputQueue),
-		);
+		// const identityMmaSnsTopic = Topic.fromTopicArn(
+		// 	this,
+		// 	'IdentityMmaSnsDeletionRequestTopic',
+		// 	identityMmaSnsDeletionRequestTopicArn,
+		// );
+		// identityMmaSnsTopic.addSubscription(
+		// 	new SqsSubscription(mmaUserDeletionLambda.inputQueue),
+		// );
 
 		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {
 			app: app,
