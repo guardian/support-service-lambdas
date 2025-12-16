@@ -1,7 +1,7 @@
 {
   "name": "sync-supporter-product-data",
   "scripts": {
-    "test": "jest --group=-integration",
+    "test": "jest --group=-integration --passWithNoTests",
     "it-test": "jest --group=integration",
     "type-check": "tsc --noEmit",
     "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts'",

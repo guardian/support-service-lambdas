@@ -324,8 +324,10 @@ const zuoraSalesforceLinkRemover: HandlerDefinition = {
 	},
 };
 
-const lintSrcOnly =
-	"eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts'";
+const srcOnly = {
+	lint: "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts'",
+	test: 'jest --group=-integration --passWithNoTests',
+};
 
 const moduleAws: ModuleDefinition = {
 	name: 'aws',
@@ -383,10 +385,7 @@ const moduleInternationalisation: ModuleDefinition = {
 	dependencies: {
 		...dep['zod'],
 	},
-	extraScripts: {
-		test: 'jest --group=-integration --passWithNoTests',
-		lint: lintSrcOnly,
-	},
+	extraScripts: srcOnly,
 };
 
 const moduleProductBenefits: ModuleDefinition = {
@@ -492,7 +491,7 @@ const moduleSyncSupporterProductData: ModuleDefinition = {
 		...devDeps['ts-node'],
 	},
 	extraScripts: {
-		lint: lintSrcOnly,
+		...srcOnly,
 		'sync-user': 'ts-node ./src/syncUser.ts',
 	},
 };
@@ -505,7 +504,7 @@ const moduleTestUsers: ModuleDefinition = {
 		...devDeps['tsconfig-paths'],
 	},
 	extraScripts: {
-		lint: lintSrcOnly,
+		...srcOnly,
 		createDigitalSubscription: 'ts-node ./src/createDigitalSubscription.ts',
 		createAnnualContribution: 'ts-node ./src/createAnnualContribution.ts',
 		createMonthlyContribution: 'ts-node ./src/createMonthlyContribution.ts',
