@@ -2,7 +2,7 @@ import { HandlerDefinition, ModuleDefinition } from '../../build';
 import { notice } from '../../snippets/notices';
 
 export function buildPackageJson(
-	pkg: HandlerDefinition | ModuleDefinition,
+	pkg: ModuleDefinition,
 	extraScripts: Record<string, string>,
 	filename: string,
 ) {
