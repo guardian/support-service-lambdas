@@ -1,4 +1,4 @@
-import { ModuleDefinition } from '../../build';
+import type { ModuleDefinition } from '../../build';
 
 export default (
 	pkg: ModuleDefinition,

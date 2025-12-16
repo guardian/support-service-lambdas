@@ -1,4 +1,4 @@
-import { ModuleDefinition } from '../../build';
+import type { ModuleDefinition } from '../../build';
 import { buildPackageJson } from '../handler/package.json';
 
 export default (pkg: ModuleDefinition) => {

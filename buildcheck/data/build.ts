@@ -11,7 +11,7 @@ export interface HandlerDefinition extends ModuleDefinition {
 	stack?: 'support' | 'membership';
 	functionNames?: string[];
 	entryPoints?: string[];
-	extraStages?: 'CSBX'[];
+	extraStages?: Array<'CSBX'>;
 }
 
 export interface ModuleDefinition {
