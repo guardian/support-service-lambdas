@@ -256,11 +256,13 @@ Resources:
         Properties:
             Description: Stage for zuora-auto-cancel-api
             RestApiId: !Ref ZuoraAutoCancelAPI
-            DeploymentId: !Ref ZuoraAutoCancelAPIDeployment
+            DeploymentId: !Ref ZuoraAutoCancelAPIDeploymentV2
             StageName: !Sub ${Stage}
         DependsOn: ZuoraAutoCancelMethod
 
-    ZuoraAutoCancelAPIDeployment:
+    # Note: Rename this resource (change the suffix) to force a new API Gateway deployment
+    # when changing the Lambda integration. CloudFormation doesn't automatically redeploy.
+    ZuoraAutoCancelAPIDeploymentV2:
         Type: AWS::ApiGateway::Deployment
         Properties:
             Description: Deploys zuora-auto-cancel-api into an environment/stage
