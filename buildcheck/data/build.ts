@@ -12,7 +12,7 @@ export interface HandlerDefinition {
 	stack?: 'support' | 'membership';
 	functionNames?: string[];
 	entryPoints?: string[];
-	extraStages?: 'CSBX'[];
+	extraStages?: Array<'CSBX'>;
 	testTimeoutSeconds?: number;
 	jestClearMocks?: boolean;
 	extraScripts?: Record<string, string>;
