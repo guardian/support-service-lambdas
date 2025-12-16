@@ -1,16 +1,16 @@
 {
   "name": "alarms-handler",
   "scripts": {
-    "cdk:test": "pnpm --filter cdk test alarms-handler",
-    "cdk:test-update": "pnpm --filter cdk test-update alarms-handler",
     "test": "jest --group=-integration",
     "it-test": "jest --group=integration",
     "type-check": "tsc --noEmit",
-    "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/index.ts src/indexScheduled.ts --sourcemap",
     "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
-    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr alarms-handler.zip ./*.js.map ./*.js",
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
+    "build": "esbuild --bundle --platform=node --target=node20 --outdir=target/ src/index.ts src/indexScheduled.ts --sourcemap",
+    "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr alarms-handler.zip ./*.js.map ./*.js",
+    "cdk:test": "pnpm --filter cdk test alarms-handler",
+    "cdk:test-update": "pnpm --filter cdk test-update alarms-handler",
     "update-lambda": "../../update-lambda.sh \"alarms-handler\" alarms-handler- alarms-handler-scheduled-",
     "update-stack": "../../update-stack.sh \"alarms-handler\""
   },
