@@ -193,7 +193,10 @@ const promotionsLambdas: HandlerDefinition = {
 	name: 'promotions-lambdas',
 	functionNames: ['promotions-lambdas-promo-campaign-sync-'],
 	entryPoints: ['src/handlers/*.ts'],
-	dependencies: {},
+	dependencies: {
+		...dep['@aws-sdk/util-dynamodb'],
+		...dep['@aws-sdk/client-dynamodb'],
+	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},

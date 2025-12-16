@@ -313,6 +313,13 @@ importers:
         version: 8.10.158
 
   handlers/promotions-lambdas:
+    dependencies:
+      '@aws-sdk/client-dynamodb':
+        specifier: ^3.940.0
+        version: 3.940.0
+      '@aws-sdk/util-dynamodb':
+        specifier: ^3.940.0
+        version: 3.940.0(@aws-sdk/client-dynamodb@3.940.0)
     devDependencies:
       '@types/aws-lambda':
         specifier: ^8.10.147
