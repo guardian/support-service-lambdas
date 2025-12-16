@@ -1,4 +1,4 @@
-import { HandlerDefinition } from '../../build';
+import type { HandlerDefinition } from '../../build';
 import { notice } from '../../snippets/notices';
 
 export function buildPackageJson(
@@ -27,7 +27,7 @@ export function buildPackageJson(
 
 export default (pkg: HandlerDefinition) => {
 	const entryPoints = pkg.entryPoints
-		? pkg.entryPoints?.join(' ')
+		? pkg.entryPoints.join(' ')
 		: 'src/index.ts';
 	const handlerScripts = {
 		build:

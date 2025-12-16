@@ -1,5 +1,5 @@
+import type { GeneratedFile } from '../../src/steps/generatedFile';
 import { notice, relativePath } from './notices';
-import { GeneratedFile } from '../../src/steps/generatedFile';
 
 export const warningFileName = 'BUILDCHECK.md';
 
@@ -28,7 +28,7 @@ ${fileList.map((name) => '- [' + name + '](' + name + ')').join('\n')}
 		targetPath: warningFileName,
 		content,
 		templateFilename: relativePath(__filename),
-	} as GeneratedFile;
+	} satisfies GeneratedFile;
 }
 
 export function extractGeneratedFilenames(fileLines: string[]): string[] {

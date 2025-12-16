@@ -1,5 +1,5 @@
-import { HandlerDefinition } from '../../build';
 import { recordFromEntries } from '../../../src/util/dependencyMapper';
+import type { HandlerDefinition } from '../../build';
 
 const stage =
 	(pkg: HandlerDefinition) =>
