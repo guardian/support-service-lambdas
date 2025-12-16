@@ -367,41 +367,6 @@ export async function previewFrequencySwitch(
 
 	const currentContributionAmount = contributionCharge.price;
 
-	// Use Zuora's billing preview to calculate the discount amount accurately
-	// Get a billing preview for the next 12 months on the current monthly plan
-	// to understand what the user would actually pay (including any promotional discounts)
-	const currentBillingPreview = await getBillingPreview(
-		zuoraClient,
-		effectiveDate.add(12, 'months'),
-		subscription.accountNumber,
-	);
-
-	const currentInvoiceItems = toSimpleInvoiceItems(
-		itemsForSubscription(subscription.subscriptionNumber)(
-			currentBillingPreview,
-		),
-	);
-
-	// Filter to only include items within the next 12 months from effectiveDate
-	const twelveMonthsFromNow = effectiveDate.add(12, 'months').toDate();
-	const filteredItems = currentInvoiceItems.filter(
-		(item) => item.date < twelveMonthsFromNow,
-	);
-
-	// Sum up what they would pay over the next 12 months on monthly billing
-	const totalCurrentAnnualCost = filteredItems.reduce(
-		(sum, item) => sum + item.amount,
-		0,
-	);
-
-	// Calculate the expected cost without any discounts (base price × 12)
-	const expectedAnnualCostWithoutDiscount =
-		(currentPrice + currentContributionAmount) * 12;
-
-	// Current discount is the difference between undiscounted cost and what they actually pay
-	const currentDiscountAmount =
-		expectedAnnualCostWithoutDiscount - totalCurrentAnnualCost;
-
 	return {
 		currency: switchInfo.currency,
 		savings: {
@@ -415,10 +380,6 @@ export async function previewFrequencySwitch(
 		currentContribution: {
 			amount: currentContributionAmount,
 			period: 'month',
-		},
-		currentDiscount: {
-			amount: Math.round(currentDiscountAmount * 100) / 100,
-			period: 'year',
 		},
 	};
 }

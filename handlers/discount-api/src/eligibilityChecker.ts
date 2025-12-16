@@ -32,11 +32,11 @@ export class EligibilityChecker {
 			'ensuring there are no refunds/discounts expected on the affected invoices',
 		);
 		const nextInvoiceItems = await getNextInvoiceItems();
-		// this.assertValidState(
-		// 	nextInvoiceItems.every((item) => item.amount >= 0),
-		// 	validationRequirements.noNegativePreviewItems,
-		// 	JSON.stringify(nextInvoiceItems),
-		// );
+		this.assertValidState(
+			nextInvoiceItems.every((item) => item.amount >= 0),
+			validationRequirements.noNegativePreviewItems,
+			JSON.stringify(nextInvoiceItems),
+		);
 
 		logger.log(
 			"making sure there's a payment due - avoid zero contribution amounts",

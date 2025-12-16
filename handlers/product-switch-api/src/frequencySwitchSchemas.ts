@@ -33,7 +33,6 @@ export const frequencySwitchPreviewSuccessResponseSchema = z.object({
 	savings: priceObjectSchema,
 	newPrice: priceObjectSchema,
 	currentContribution: priceObjectSchema,
-	currentDiscount: priceObjectSchema,
 });
 
 export type FrequencySwitchPreviewSuccessResponse = z.infer<
