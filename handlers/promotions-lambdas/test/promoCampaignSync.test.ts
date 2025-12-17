@@ -32,7 +32,7 @@ describe('handleRecord', () => {
 		expect(mockedWriteToDynamoDb).toHaveBeenCalledWith(
 			expect.objectContaining({
 				campaignCode: 'TEST_CODE',
-				product: 'DigitalPack',
+				product: 'DigitalSubscription',
 				name: 'Test Campaign',
 			}),
 			'support-admin-console-promo-campaigns-CODE',
@@ -53,7 +53,7 @@ describe('handleRecord', () => {
 		expect(mockedWriteToDynamoDb).toHaveBeenCalledWith(
 			expect.objectContaining({
 				campaignCode: 'TEST_CODE',
-				product: 'DigitalPack',
+				product: 'DigitalSubscription',
 				name: 'Test Campaign',
 			}),
 			'support-admin-console-promo-campaigns-PROD',
