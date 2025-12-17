@@ -124,8 +124,14 @@ new SingleContributionSalesforceWrites(
 	{ stack: 'membership', stage: 'PROD' },
 );
 
+new PromotionsLambdas(app, 'CODE', {
+	oldPromoCampaignStreamLabel: '2025-12-17T11:57:50.933',
+});
+new PromotionsLambdas(app, 'PROD', {
+	oldPromoCampaignStreamLabel: '2025-12-17T11:57:59.560',
+});
+
 const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [
-	PromotionsLambdas,
 	DiscountApi,
 	ProductSwitchApi,
 	UpdateSupporterPlusAmount,

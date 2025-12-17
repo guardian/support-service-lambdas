@@ -75,6 +75,61 @@ exports[`The Promotions lambdas stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
+    "PromoCampaignSyncDynamoDBEventSourcepromotionslambdasCODEOldPromoCampaignTableA46613279A81F52B": {
+      "Properties": {
+        "BatchSize": 5,
+        "BisectBatchOnFunctionError": true,
+        "EventSourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:dynamodb:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":table/MembershipSub-Campaigns-CODE/stream/2025-12-17T11:57:50.933",
+            ],
+          ],
+        },
+        "FunctionName": {
+          "Ref": "PromoCampaignSync84E481C1",
+        },
+        "FunctionResponseTypes": [
+          "ReportBatchItemFailures",
+        ],
+        "MaximumBatchingWindowInSeconds": 10,
+        "MaximumRetryAttempts": 3,
+        "ParallelizationFactor": 1,
+        "StartingPosition": "TRIM_HORIZON",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "promotions-lambdas",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
+    },
     "PromoCampaignSyncServiceRoleB0D678D2": {
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -216,6 +271,70 @@ exports[`The Promotions lambdas stack matches the snapshot 1`] = `
                 ],
               },
             },
+            {
+              "Action": "dynamodb:ListStreams",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "dynamodb:DescribeStream",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:dynamodb:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":table/MembershipSub-Campaigns-CODE/stream/2025-12-17T11:57:50.933",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":dynamodb:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":table/support-admin-console-promo-campaigns-CODE",
+                    ],
+                  ],
+                },
+                {
+                  "Ref": "AWS::NoValue",
+                },
+              ],
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -306,6 +425,61 @@ exports[`The Promotions lambdas stack matches the snapshot 2`] = `
         "Timeout": 15,
       },
       "Type": "AWS::Lambda::Function",
+    },
+    "PromoCampaignSyncDynamoDBEventSourcepromotionslambdasPRODOldPromoCampaignTable8A522C0CC24D3BCF": {
+      "Properties": {
+        "BatchSize": 5,
+        "BisectBatchOnFunctionError": true,
+        "EventSourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:aws:dynamodb:",
+              {
+                "Ref": "AWS::Region",
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId",
+              },
+              ":table/MembershipSub-Campaigns-PROD/stream/2025-12-17T11:57:59.560",
+            ],
+          ],
+        },
+        "FunctionName": {
+          "Ref": "PromoCampaignSync84E481C1",
+        },
+        "FunctionResponseTypes": [
+          "ReportBatchItemFailures",
+        ],
+        "MaximumBatchingWindowInSeconds": 10,
+        "MaximumRetryAttempts": 3,
+        "ParallelizationFactor": 1,
+        "StartingPosition": "TRIM_HORIZON",
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "promotions-lambdas",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::Lambda::EventSourceMapping",
     },
     "PromoCampaignSyncServiceRoleB0D678D2": {
       "Properties": {
@@ -447,6 +621,70 @@ exports[`The Promotions lambdas stack matches the snapshot 2`] = `
                   ],
                 ],
               },
+            },
+            {
+              "Action": "dynamodb:ListStreams",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": [
+                "dynamodb:DescribeStream",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:aws:dynamodb:",
+                    {
+                      "Ref": "AWS::Region",
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId",
+                    },
+                    ":table/MembershipSub-Campaigns-PROD/stream/2025-12-17T11:57:59.560",
+                  ],
+                ],
+              },
+            },
+            {
+              "Action": [
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":dynamodb:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":table/support-admin-console-promo-campaigns-PROD",
+                    ],
+                  ],
+                },
+                {
+                  "Ref": "AWS::NoValue",
+                },
+              ],
             },
           ],
           "Version": "2012-10-17",
