@@ -30,6 +30,7 @@ const teamToAppMappings: Record<Team, string[]> = {
 		'dotcom-components',
 		...mobilePurchasesApps,
 		'promotions-tool',
+		'promotions-lambdas',
 		'super-mode',
 		'support-reminders',
 		'ticker-calculator',
