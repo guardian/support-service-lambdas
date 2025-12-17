@@ -16,6 +16,54 @@ exports[`The Promotions lambdas stack matches the snapshot 1`] = `
     },
   },
   "Resources": {
+    "MockTable956D49B1": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "id",
+            "AttributeType": "S",
+          },
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "id",
+            "KeyType": "HASH",
+          },
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 5,
+          "WriteCapacityUnits": 5,
+        },
+        "StreamSpecification": {
+          "StreamViewType": "NEW_AND_OLD_IMAGES",
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "promotions-lambdas",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "CODE",
+          },
+        ],
+      },
+      "Type": "AWS::DynamoDB::Table",
+      "UpdateReplacePolicy": "Retain",
+    },
     "PromoCampaignSync84E481C1": {
       "DependsOn": [
         "PromoCampaignSyncServiceRoleDefaultPolicyABBBC0A6",
@@ -75,24 +123,14 @@ exports[`The Promotions lambdas stack matches the snapshot 1`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "PromoCampaignSyncDynamoDBEventSourcepromotionslambdasCODEOldPromoCampaignTableA46613279A81F52B": {
+    "PromoCampaignSyncDynamoDBEventSourcepromotionslambdasCODEMockTable0290FF1B402E87B8": {
       "Properties": {
         "BatchSize": 5,
         "BisectBatchOnFunctionError": true,
         "EventSourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:aws:dynamodb:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":table/MembershipSub-Campaigns-CODE/stream/*",
-            ],
+          "Fn::GetAtt": [
+            "MockTable956D49B1",
+            "StreamArn",
           ],
         },
         "FunctionName": {
@@ -284,19 +322,9 @@ exports[`The Promotions lambdas stack matches the snapshot 1`] = `
               ],
               "Effect": "Allow",
               "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:dynamodb:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":table/MembershipSub-Campaigns-CODE/stream/*",
-                  ],
+                "Fn::GetAtt": [
+                  "MockTable956D49B1",
+                  "StreamArn",
                 ],
               },
             },
@@ -332,6 +360,54 @@ exports[`The Promotions lambdas stack matches the snapshot 2`] = `
     },
   },
   "Resources": {
+    "MockTable956D49B1": {
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "id",
+            "AttributeType": "S",
+          },
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "id",
+            "KeyType": "HASH",
+          },
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 5,
+          "WriteCapacityUnits": 5,
+        },
+        "StreamSpecification": {
+          "StreamViewType": "NEW_AND_OLD_IMAGES",
+        },
+        "Tags": [
+          {
+            "Key": "App",
+            "Value": "promotions-lambdas",
+          },
+          {
+            "Key": "gu:cdk:version",
+            "Value": "TEST",
+          },
+          {
+            "Key": "gu:repo",
+            "Value": "guardian/support-service-lambdas",
+          },
+          {
+            "Key": "Stack",
+            "Value": "support",
+          },
+          {
+            "Key": "Stage",
+            "Value": "PROD",
+          },
+        ],
+      },
+      "Type": "AWS::DynamoDB::Table",
+      "UpdateReplacePolicy": "Retain",
+    },
     "PromoCampaignSync84E481C1": {
       "DependsOn": [
         "PromoCampaignSyncServiceRoleDefaultPolicyABBBC0A6",
@@ -391,24 +467,14 @@ exports[`The Promotions lambdas stack matches the snapshot 2`] = `
       },
       "Type": "AWS::Lambda::Function",
     },
-    "PromoCampaignSyncDynamoDBEventSourcepromotionslambdasPRODOldPromoCampaignTable8A522C0CC24D3BCF": {
+    "PromoCampaignSyncDynamoDBEventSourcepromotionslambdasPRODMockTableE3A6996386739BFF": {
       "Properties": {
         "BatchSize": 5,
         "BisectBatchOnFunctionError": true,
         "EventSourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:aws:dynamodb:",
-              {
-                "Ref": "AWS::Region",
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId",
-              },
-              ":table/MembershipSub-Campaigns-PROD/stream/*",
-            ],
+          "Fn::GetAtt": [
+            "MockTable956D49B1",
+            "StreamArn",
           ],
         },
         "FunctionName": {
@@ -600,19 +666,9 @@ exports[`The Promotions lambdas stack matches the snapshot 2`] = `
               ],
               "Effect": "Allow",
               "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    "arn:aws:dynamodb:",
-                    {
-                      "Ref": "AWS::Region",
-                    },
-                    ":",
-                    {
-                      "Ref": "AWS::AccountId",
-                    },
-                    ":table/MembershipSub-Campaigns-PROD/stream/*",
-                  ],
+                "Fn::GetAtt": [
+                  "MockTable956D49B1",
+                  "StreamArn",
                 ],
               },
             },

@@ -21,14 +21,18 @@ export class PromotionsLambdas extends SrStack {
 			},
 		});
 
-		const oldPromoCampaignTable = dynamodb.Table.fromTableAttributes(
-			this,
-			'OldPromoCampaignTable',
-			{
-				tableArn: `arn:aws:dynamodb:${this.region}:${this.account}:table/MembershipSub-Campaigns-${stage}`,
-				tableStreamArn: `arn:aws:dynamodb:${this.region}:${this.account}:table/MembershipSub-Campaigns-${stage}/stream/*`,
-			},
-		);
+		// We have to mock the table for the test run, otherwise we get the error "DynamoDB Streams must be enabled on the table promotions-lambdas-CODE/OldPromoCampaignTable"
+		const oldPromoCampaignTable =
+			process.env.NODE_ENV === 'test'
+				? new dynamodb.Table(this, 'MockTable', {
+						partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
+						stream: dynamodb.StreamViewType.NEW_AND_OLD_IMAGES,
+					})
+				: dynamodb.Table.fromTableName(
+						this,
+						'OldPromoCampaignTable',
+						`MembershipSub-Campaigns-${stage}`,
+					);
 
 		promoCampaignSyncLambda.addEventSource(
 			new DynamoEventSource(oldPromoCampaignTable, {
