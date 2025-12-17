@@ -300,6 +300,41 @@ exports[`The Promotions lambdas stack matches the snapshot 1`] = `
                 ],
               },
             },
+            {
+              "Action": [
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":dynamodb:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":table/support-admin-console-promo-campaigns-CODE",
+                    ],
+                  ],
+                },
+                {
+                  "Ref": "AWS::NoValue",
+                },
+              ],
+            },
           ],
           "Version": "2012-10-17",
         },
@@ -615,6 +650,41 @@ exports[`The Promotions lambdas stack matches the snapshot 2`] = `
                   ],
                 ],
               },
+            },
+            {
+              "Action": [
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable",
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition",
+                      },
+                      ":dynamodb:",
+                      {
+                        "Ref": "AWS::Region",
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId",
+                      },
+                      ":table/support-admin-console-promo-campaigns-PROD",
+                    ],
+                  ],
+                },
+                {
+                  "Ref": "AWS::NoValue",
+                },
+              ],
             },
           ],
           "Version": "2012-10-17",

@@ -34,6 +34,12 @@ export class PromotionsLambdas extends SrStack {
 			},
 		);
 
+		const newPromoCampaignTable = dynamodb.Table.fromTableName(
+			this,
+			'NewPromoCampaignTable',
+			`support-admin-console-promo-campaigns-${this.stage}`,
+		);
+
 		promoCampaignSyncLambda.addEventSource(
 			new DynamoEventSource(oldPromoCampaignTable, {
 				startingPosition: StartingPosition.TRIM_HORIZON,
@@ -47,5 +53,6 @@ export class PromotionsLambdas extends SrStack {
 		);
 
 		oldPromoCampaignTable.grantStreamRead(promoCampaignSyncLambda);
+		newPromoCampaignTable.grantWriteData(promoCampaignSyncLambda);
 	}
 }
