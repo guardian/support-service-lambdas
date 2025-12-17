@@ -17,6 +17,7 @@ const app = 'promotions-lambdas';
 
 interface Props {
 	oldPromoCampaignStreamLabel: string;
+	oldPromoStreamLabel: string;
 }
 
 export class PromotionsLambdas extends SrStack {
@@ -33,6 +34,16 @@ export class PromotionsLambdas extends SrStack {
 			},
 		});
 
+		const promoSyncLambda = new SrLambda(this, 'PromoSync', {
+			nameSuffix: 'promo-sync',
+			lambdaOverrides: {
+				handler: 'handlers/promoSync.handler',
+				environment: {
+					STAGE: stage,
+				},
+			},
+		});
+
 		const oldPromoCampaignTable = dynamodb.Table.fromTableAttributes(
 			this,
 			'OldPromoCampaignTable',
@@ -42,10 +53,25 @@ export class PromotionsLambdas extends SrStack {
 			},
 		);
 
+		const oldPromoTable = dynamodb.Table.fromTableAttributes(
+			this,
+			'OldPromoTable',
+			{
+				tableName: `MembershipSub-Promotions-${stage}`,
+				tableStreamArn: `arn:aws:dynamodb:${this.region}:${this.account}:table/MembershipSub-Promotions-${stage}/stream/${props.oldPromoStreamLabel}`,
+			},
+		);
+
 		const newPromoCampaignTable = dynamodb.Table.fromTableName(
 			this,
 			'NewPromoCampaignTable',
 			`support-admin-console-promo-campaigns-${this.stage}`,
+		);
+
+		const newPromoTable = dynamodb.Table.fromTableName(
+			this,
+			'NewPromoTable',
+			`support-admin-console-promos-${this.stage}`,
 		);
 
 		promoCampaignSyncLambda.addEventSource(
@@ -60,8 +86,23 @@ export class PromotionsLambdas extends SrStack {
 			}),
 		);
 
+		promoSyncLambda.addEventSource(
+			new DynamoEventSource(oldPromoTable, {
+				startingPosition: StartingPosition.TRIM_HORIZON,
+				batchSize: 5,
+				maxBatchingWindow: Duration.seconds(10),
+				bisectBatchOnError: true,
+				retryAttempts: 3,
+				reportBatchItemFailures: true,
+				parallelizationFactor: 1,
+			}),
+		);
+
 		oldPromoCampaignTable.grantStreamRead(promoCampaignSyncLambda);
 		newPromoCampaignTable.grantWriteData(promoCampaignSyncLambda);
+
+		oldPromoTable.grantStreamRead(promoSyncLambda);
+		newPromoTable.grantWriteData(promoSyncLambda);
 
 		new SrLambdaAlarm(this, 'PromoCampaignSyncLambdaErrorAlarm', {
 			app: app,
@@ -76,6 +117,26 @@ export class PromotionsLambdas extends SrStack {
 				period: Duration.minutes(5),
 				dimensionsMap: {
 					FunctionName: promoCampaignSyncLambda.functionName,
+				},
+			}),
+			threshold: 1,
+			evaluationPeriods: 1,
+			comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+			treatMissingData: TreatMissingData.NOT_BREACHING,
+		});
+
+		new SrLambdaAlarm(this, 'PromoSyncLambdaErrorAlarm', {
+			app: app,
+			alarmName: `${this.stage} ${app} - promo-sync lambda error`,
+			alarmDescription: 'The promo-sync lambda failed to process an event.',
+			lambdaFunctionNames: promoSyncLambda.functionName,
+			metric: new Metric({
+				metricName: 'Errors',
+				namespace: 'AWS/Lambda',
+				statistic: 'Sum',
+				period: Duration.minutes(5),
+				dimensionsMap: {
+					FunctionName: promoSyncLambda.functionName,
 				},
 			}),
 			threshold: 1,
