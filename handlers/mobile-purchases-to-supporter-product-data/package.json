@@ -13,7 +13,7 @@
     "cdk:test-update": "pnpm --filter cdk test-update mobile-purchases-to-supporter-product-data",
     "update-lambda": "../../update-lambda.sh \"mobile-purchases-to-supporter-product-data\"",
     "update-stack": "../../update-stack.sh \"mobile-purchases-to-supporter-product-data\"",
-    "runFullSync": "ts-node  -r tsconfig-paths/register --project ../../tsconfig.json src/fullSyncCommand.ts"
+    "runFullSync": "tsx src/fullSyncCommand.ts"
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
@@ -25,7 +25,7 @@
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147",
     "csv-parse": "^5.6.0",
-    "ts-node": "^10.9.1",
+    "tsx": "^4.21.0",
     "tsconfig-paths": "catalog:"
   }
 }
