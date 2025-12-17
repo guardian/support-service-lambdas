@@ -8,18 +8,18 @@
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "tsc --noEmit",
-    "createDigitalSubscription": "ts-node ./src/createDigitalSubscription.ts",
-    "createAnnualContribution": "ts-node ./src/createAnnualContribution.ts",
-    "createMonthlyContribution": "ts-node ./src/createMonthlyContribution.ts",
-    "updateMonthlyContributionAmount": "ts-node ./src/updateMonthlyContributionAmount.ts",
-    "cancelSubscription": "ts-node ./src/cancel.ts",
-    "deleteAccount": "ts-node ./src/deleteAccount.ts"
+    "createDigitalSubscription": "tsx ./src/createDigitalSubscription.ts",
+    "createAnnualContribution": "tsx ./src/createAnnualContribution.ts",
+    "createMonthlyContribution": "tsx ./src/createMonthlyContribution.ts",
+    "updateMonthlyContributionAmount": "tsx ./src/updateMonthlyContributionAmount.ts",
+    "cancelSubscription": "tsx ./src/cancel.ts",
+    "deleteAccount": "tsx ./src/deleteAccount.ts"
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/module/package.json.ts",
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "devDependencies": {
     "dayjs": "^1.11.13",
-    "ts-node": "^10.9.1",
+    "tsx": "^4.21.0",
     "tsconfig-paths": "catalog:"
   }
 }

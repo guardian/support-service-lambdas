@@ -8,7 +8,7 @@
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "tsc --noEmit",
-    "generateFiles": "ts-node -r tsconfig-paths/register --project ../../tsconfig.json src/generateSchemaCommand.ts",
+    "generateFiles": "tsx -r tsconfig-paths/register --project ../../tsconfig.json src/generateSchemaCommand.ts",
     "validateSchema": "prettier --write src/productCatalogSchema.ts && pnpm run sortSchemaKeys",
     "sortSchemaKeys": "for i in {1..3}; do eslint --fix src/productCatalogSchema.ts; done",
     "validateBillingPeriods": "prettier --write src/productBillingPeriods.ts && pnpm run sortBillingPeriodKeys",
@@ -23,7 +23,7 @@
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/module/package.json.ts",
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
   "devDependencies": {
-    "ts-node": "^10.9.1",
+    "tsx": "^4.21.0",
     "tsconfig-paths": "catalog:",
     "zod": "catalog:",
     "eslint-plugin-sort-keys-fix": "^1.1.2",

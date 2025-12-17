@@ -8,7 +8,7 @@
     "check-formatting": "prettier --check \"**/*.ts\"",
     "fix-formatting": "prettier --write \"**/*.ts\"",
     "build": "tsc --noEmit",
-    "sync-user": "ts-node ./src/syncUser.ts"
+    "sync-user": "tsx ./src/syncUser.ts"
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/module/package.json.ts",
   "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
@@ -18,6 +18,6 @@
   "devDependencies": {
     "@aws-sdk/client-sqs": "^3.940.0",
     "dayjs": "^1.11.13",
-    "ts-node": "^10.9.1"
+    "tsx": "^4.21.0"
   }
 }

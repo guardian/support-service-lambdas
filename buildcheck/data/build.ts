@@ -402,7 +402,7 @@ const moduleProductBenefits: ModuleDefinition = {
 const moduleProductCatalog: ModuleDefinition = {
 	name: 'product-catalog',
 	devDependencies: {
-		...devDeps['ts-node'],
+		...devDeps['tsx'],
 		...devDeps['tsconfig-paths'],
 		...dep['zod'],
 		...devDeps['eslint-plugin-sort-keys-fix'],
@@ -410,7 +410,7 @@ const moduleProductCatalog: ModuleDefinition = {
 	},
 	extraScripts: {
 		generateFiles:
-			'ts-node -r tsconfig-paths/register --project ../../tsconfig.json src/generateSchemaCommand.ts',
+			'tsx -r tsconfig-paths/register --project ../../tsconfig.json src/generateSchemaCommand.ts',
 		validateSchema:
 			'prettier --write src/productCatalogSchema.ts && pnpm run sortSchemaKeys',
 		sortSchemaKeys:
@@ -491,11 +491,11 @@ const moduleSyncSupporterProductData: ModuleDefinition = {
 	devDependencies: {
 		...dep['@aws-sdk/client-sqs'],
 		...dep['dayjs'],
-		...devDeps['ts-node'],
+		...devDeps['tsx'],
 	},
 	extraScripts: {
 		...srcOnly,
-		'sync-user': 'ts-node ./src/syncUser.ts',
+		'sync-user': 'tsx ./src/syncUser.ts',
 	},
 };
 
@@ -503,18 +503,18 @@ const moduleTestUsers: ModuleDefinition = {
 	name: 'test-users',
 	devDependencies: {
 		...dep['dayjs'],
-		...devDeps['ts-node'],
+		...devDeps['tsx'],
 		...devDeps['tsconfig-paths'],
 	},
 	extraScripts: {
 		...srcOnly,
-		createDigitalSubscription: 'ts-node ./src/createDigitalSubscription.ts',
-		createAnnualContribution: 'ts-node ./src/createAnnualContribution.ts',
-		createMonthlyContribution: 'ts-node ./src/createMonthlyContribution.ts',
+		createDigitalSubscription: 'tsx ./src/createDigitalSubscription.ts',
+		createAnnualContribution: 'tsx ./src/createAnnualContribution.ts',
+		createMonthlyContribution: 'tsx ./src/createMonthlyContribution.ts',
 		updateMonthlyContributionAmount:
-			'ts-node ./src/updateMonthlyContributionAmount.ts',
-		cancelSubscription: 'ts-node ./src/cancel.ts',
-		deleteAccount: 'ts-node ./src/deleteAccount.ts',
+			'tsx ./src/updateMonthlyContributionAmount.ts',
+		cancelSubscription: 'tsx ./src/cancel.ts',
+		deleteAccount: 'tsx ./src/deleteAccount.ts',
 	},
 };
 
