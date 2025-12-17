@@ -1,12 +1,7 @@
 import { SSMClient } from '@aws-sdk/client-ssm';
-import { describe } from 'node:test';
 import { z } from 'zod';
-import {
-	SSMKeyValuePairs,
-	parseSSMConfigToObject,
-	getTreeFromPaths,
-	PathArrayWithValue,
-} from '../src/appConfig';
+import type { PathArrayWithValue, SSMKeyValuePairs } from '../src/appConfig';
+import { getTreeFromPaths, parseSSMConfigToObject } from '../src/appConfig';
 
 jest.mock('@aws-sdk/client-ssm');
 
@@ -20,7 +15,7 @@ describe('parseSSMConfigToObject', () => {
 	it('should handle a single string config value', () => {
 		const key = '';
 		const testValue = 'hi';
-		const testData: Record<string, string>[] = [
+		const testData: Array<Record<string, string>> = [
 			{ [dummyConfigRoot + key]: testValue },
 		];
 		const testSchema = z.string();

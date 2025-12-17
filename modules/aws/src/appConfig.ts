@@ -1,4 +1,5 @@
 import { GetParametersByPathCommand, SSMClient } from '@aws-sdk/client-ssm';
+import { objectEntries } from '@modules/objectFunctions';
 import type { z } from 'zod';
 import { groupMap, mapValues, partitionByType } from '../../arrayFunctions';
 import { awsConfig } from '../src/config';
@@ -13,11 +14,11 @@ import { fetchAllPages } from './fetchAllPages';
  * @param app
  * @param schema this schema will validate that all your config is present
  */
-export const loadConfig = async <O>(
+export const loadConfig = async <O, I>(
 	stage: string,
 	stack: string,
 	app: string,
-	schema: z.ZodType<O, z.ZodTypeDef, any>,
+	schema: z.ZodType<O, z.ZodTypeDef, I>,
 ): Promise<O> => {
 	const configRoot = '/' + [stage, stack, app].join('/');
 	console.log('getting app config from SSM', configRoot);
@@ -57,13 +58,13 @@ async function readAllRecursive(configRoot: string): Promise<SSMKeyValuePairs> {
 
 // exported for test access
 // converts a flat key/value structure into a proper type
-export function parseSSMConfigToObject<O>(
+export function parseSSMConfigToObject<O, I>(
 	ssmKeyValuePairs: SSMKeyValuePairs,
 	configRoot: string,
-	schema: z.ZodType<O, z.ZodTypeDef, any>,
+	schema: z.ZodType<O, z.ZodTypeDef, I>,
 ): O {
 	const configValuesByPath = ssmKeyValuePairs
-		.flatMap(Object.entries)
+		.flatMap(objectEntries)
 		.map<PathArrayWithValue>(([name, value]) => ({
 			path: name
 				.replace(configRoot, '')
@@ -77,7 +78,8 @@ export function parseSSMConfigToObject<O>(
 	if (!parseResult.success) {
 		const configAsString = JSON.stringify(configTree, null, 2);
 		throw new Error(
-			`could not parse config:\n${configAsString}\nDue to error: ${parseResult.error}`,
+			`could not parse config:\n${configAsString}\nDue to error`,
+			{ cause: parseResult.error },
 		);
 	} else {
 		return parseResult.data;
@@ -117,7 +119,7 @@ function merge(singleItemTreesOrStringItem: ConfigTree[]): ConfigTree {
 	const thisNode = stringValues[0];
 	const subTree = mapValues(
 		groupMap(
-			singleItemTrees.flatMap(Object.entries),
+			singleItemTrees.flatMap(objectEntries),
 			(tree) => tree[0],
 			(tree) => tree[1],
 		),
