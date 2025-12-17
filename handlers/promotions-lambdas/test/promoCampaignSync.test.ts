@@ -31,20 +31,17 @@ describe('transformDynamoDbEvent', () => {
 
 		const result = transformDynamoDbEvent(dynamoDbEvent);
 
-		if (result instanceof Error) {
-			throw new Error(
-				`Error calling transformDynamoDbEvent: ${result.message}`,
-			);
-		}
+		expect(result).not.toBeInstanceOf(Error);
+		const campaign = result as Exclude<typeof result, Error>;
 
-		expect(result).toEqual({
+		expect(campaign).toEqual({
 			campaignCode: 'TEST_DIGITAL_PACK',
 			product: 'DigitalPack',
 			name: 'Digital Pack',
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- jest any
 			created: expect.any(String),
 		});
-		expect(new Date(result.created).toISOString()).toBe(result.created);
+		expect(new Date(campaign.created).toISOString()).toBe(campaign.created);
 	});
 
 	it('should handle supporterPlus product group', () => {
@@ -56,20 +53,17 @@ describe('transformDynamoDbEvent', () => {
 
 		const result = transformDynamoDbEvent(dynamoDbEvent);
 
-		if (result instanceof Error) {
-			throw new Error(
-				`Error calling transformDynamoDbEvent: ${result.message}`,
-			);
-		}
+		expect(result).not.toBeInstanceOf(Error);
+		const campaign = result as Exclude<typeof result, Error>;
 
-		expect(result).toEqual({
+		expect(campaign).toEqual({
 			campaignCode: 'TEST_SUPPORTER_PLUS',
 			product: 'SupporterPlus',
 			name: 'Test Campaign',
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- jest any
 			created: expect.any(String),
 		});
-		expect(new Date(result.created).toISOString()).toBe(result.created);
+		expect(new Date(campaign.created).toISOString()).toBe(campaign.created);
 	});
 
 	it('should return Error for invalid product group', () => {
