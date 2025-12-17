@@ -109,12 +109,11 @@ const mobilePurchasesToSupporterProductData: HandlerDefinition = {
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 		...dep['csv-parse'],
-		...devDeps['ts-node'],
+		...devDeps['tsx'],
 		...devDeps['tsconfig-paths'],
 	},
 	extraScripts: {
-		runFullSync:
-			'ts-node  -r tsconfig-paths/register --project ../../tsconfig.json src/fullSyncCommand.ts',
+		runFullSync: 'tsx src/fullSyncCommand.ts',
 	},
 };
 
@@ -123,7 +122,7 @@ const mparticleApi: HandlerDefinition = {
 	functionNames: ['mparticle-api-http-', 'mparticle-api-baton-'],
 	testTimeoutSeconds: 15,
 	extraScripts: {
-		'check-config': 'ts-node runManual/runLoadConfig.ts',
+		'check-config': 'tsx runManual/runLoadConfig.ts',
 	},
 	dependencies: {
 		...dep['@peculiar/x509'],
@@ -133,6 +132,7 @@ const mparticleApi: HandlerDefinition = {
 		...devDeps['@faker-js/faker'],
 		...devDeps['@types/aws-lambda'],
 		...dep['@aws-sdk/client-s3'],
+		...devDeps['tsx'],
 	},
 };
 
@@ -201,7 +201,10 @@ const promotionsLambdas: HandlerDefinition = {
 	name: 'promotions-lambdas',
 	functionNames: ['promotions-lambdas-promo-campaign-sync-'],
 	entryPoints: ['src/handlers/*.ts'],
-	dependencies: {},
+	dependencies: {
+		...dep['@aws-sdk/util-dynamodb'],
+		...dep['@aws-sdk/client-dynamodb'],
+	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},

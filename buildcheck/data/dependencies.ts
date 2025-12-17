@@ -44,7 +44,7 @@ export const devDeps = separateDepRecords({
 	'@types/aws-lambda': '^8.10.147',
 	'@types/jest': '^29.5.14',
 	// dev - for running locally
-	'ts-node': '^10.9.1',
+	tsx: '^4.21.0',
 	'tsconfig-paths': 'catalog:',
 	// for testing/mocking
 	'@faker-js/faker': '^9.8.0',
@@ -66,3 +66,9 @@ function awsClients<T extends string>(ids: T[]) {
 	const awsClientVersion = '^3.940.0';
 	return withVersion(awsClientVersion, withPrefix('@aws-sdk/', ids));
 }
+
+// buildcheck will refuse to accept libraries from this list
+// this is useful if copilot favours problematic libraries
+export const disallowedLibs: Record<string, string> = {
+	'ts-node': 'it is unmaintained, consider tsx instead',
+};
