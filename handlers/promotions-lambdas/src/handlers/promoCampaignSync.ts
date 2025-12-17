@@ -4,6 +4,7 @@ import type {
 	PromoCampaign,
 	promoProductSchema,
 } from '@modules/promotions/v2/schema';
+import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
 import type {
 	DynamoDBBatchResponse,
@@ -97,10 +98,10 @@ export const handler = async (
 	await Promise.allSettled(
 		event.Records.map(async (record) => {
 			try {
-				console.log('Processing record:', JSON.stringify(record.dynamodb));
+				logger.log('Processing record:', JSON.stringify(record.dynamodb));
 				await handleRecord(record, stage);
 			} catch (error) {
-				console.error(`Failed to process record:`, error);
+				logger.error(`Failed to process record:`, error);
 				if (record.dynamodb?.SequenceNumber) {
 					batchItemFailures.push({
 						itemIdentifier: record.dynamodb.SequenceNumber,
