@@ -1,5 +1,4 @@
-import { getIfDefined } from '@modules/nullAndUndefined';
-import { type Stage } from '@modules/stage';
+import { stageFromEnvironment } from '@modules/stage';
 import { ZuoraClient } from '@modules/zuora/zuoraClient';
 import {
 	type AccountRow,
@@ -13,11 +12,7 @@ export const handler = async (event: {
 }): Promise<AccountRowWithResult[]> => {
 	const { Items } = event;
 
-	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo fix in next refactor
-	const stage = getIfDefined<string>(
-		process.env.STAGE,
-		'STAGE environment variable not set',
-	) as Stage;
+	const stage = stageFromEnvironment();
 
 	const zuoraClient = await ZuoraClient.create(stage);
 

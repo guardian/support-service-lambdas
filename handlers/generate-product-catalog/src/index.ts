@@ -29,7 +29,7 @@ export const writeProductCatalogToS3 = async (stage: Stage) => {
 			'The generated product catalog did not pass validation in the current Zod schema: ',
 			parseResult.error,
 		);
-		await putMetric(failedSchemaValidationMetricName);
+		await putMetric(failedSchemaValidationMetricName, stage);
 	} else {
 		console.log(
 			'The generated product catalog passed validation, writing to S3',

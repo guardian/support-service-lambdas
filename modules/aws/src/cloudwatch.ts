@@ -11,22 +11,10 @@ import {
 export type Stage = 'CODE' | 'DEV' | 'PROD';
 export const metricNamespace = 'support-service-lambdas';
 
-const getStage = (): Stage | undefined => {
-	const stage = process.env.STAGE;
-	if (stage === undefined) {
-		throw new Error('Stage is not defined as an environment variable');
-	}
-	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- fix on next refactor
-	return stage as Stage;
-};
-
-export async function putMetric(metricName: string): Promise<void> {
-	const stage = getStage();
-	if (stage == 'DEV') {
-		console.log('No metrics sent as running local test');
-		return;
-	}
-
+export async function putMetric(
+	metricName: string,
+	stage: string,
+): Promise<void> {
 	const cloudwatch = new CloudWatchClient({
 		region: process.env.AWS_REGION ?? 'eu-west-1',
 	});

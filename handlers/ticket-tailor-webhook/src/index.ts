@@ -1,5 +1,6 @@
 import { putMetric } from '@modules/aws/cloudwatch';
 import { logger } from '@modules/routing/logger';
+import { stageFromEnvironment } from '@modules/stage';
 import type { SQSEvent } from 'aws-lambda';
 import type { ApiGatewayToSqsEvent } from './apiGatewayToSqsEvent';
 import { apiGatewayToSqsEventSchema } from './apiGatewayToSqsEvent';
@@ -35,6 +36,8 @@ async function processValidSqsRecord(sqsRecord: ApiGatewayToSqsEvent) {
 }
 
 export const handler = async (event: SQSEvent): Promise<void> => {
+	const stage = stageFromEnvironment();
+
 	const eventualEnsuredIdentityAccount = event.Records.flatMap(
 		async (sqsRecord) => {
 			logger.resetContext();
@@ -50,7 +53,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				await processValidSqsRecord(parsedEvent);
 			} else {
 				logger.error('Request failed validation. Processing terminated.');
-				await putMetric('ticket-tailor-webhook-validation-failure');
+				await putMetric('ticket-tailor-webhook-validation-failure', stage);
 				return;
 			}
 		},

@@ -1,9 +1,14 @@
-export type Stage = 'CODE' | 'PROD';
+import { z } from 'zod';
+
+export type Stage = z.infer<typeof stageSchema>;
+
+const stageSchema = z.enum(['CODE', 'PROD']);
 
 export const stageFromEnvironment = (): Stage => {
 	const stage = process.env.STAGE;
-	if (stage === undefined) {
-		throw new Error('Stage is not defined as an environment variable');
-	}
-	return stage as Stage;
+	return stageSchema.parse(stage, {
+		errorMap: (message) => ({
+			message: `Stage environment variable ${stage} is invalid: ` + message,
+		}),
+	});
 };
