@@ -441,7 +441,7 @@ exports[`The Promotions lambdas stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":table/MembershipSub-Promotions-CODE/stream/2025-12-17T11:57:50.933",
+              ":table/MembershipSub-Promotions-CODE/stream/2023-04-28T14:57:20.201",
             ],
           ],
         },
@@ -782,7 +782,7 @@ exports[`The Promotions lambdas stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":table/MembershipSub-Promotions-CODE/stream/2025-12-17T11:57:50.933",
+                    ":table/MembershipSub-Promotions-CODE/stream/2023-04-28T14:57:20.201",
                   ],
                 ],
               },
