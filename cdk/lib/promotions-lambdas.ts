@@ -41,5 +41,7 @@ export class PromotionsLambdas extends SrStack {
 				parallelizationFactor: 1,
 			}),
 		);
+
+		oldPromoCampaignTable.grantStreamRead(promoCampaignSyncLambda);
 	}
 }
