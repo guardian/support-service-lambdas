@@ -1,15 +1,20 @@
 {
   "name": "routing",
-  "version": "1.0.0",
   "scripts": {
-    "build": "tsc --noEmit",
     "test": "jest --group=-integration",
-    "lint": "eslint 'src/**/*.ts' 'test/**/*.ts'"
+    "it-test": "jest --group=integration",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
+    "check-formatting": "prettier --check \"**/*.ts\"",
+    "fix-formatting": "prettier --write \"**/*.ts\"",
+    "build": "tsc --noEmit"
+  },
+  "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/module/package.json.ts",
+  "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
+  "dependencies": {
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147"
-  },
-  "dependencies": {
-    "zod": "catalog:"
   }
 }

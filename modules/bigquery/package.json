@@ -1,24 +1,26 @@
 {
-	"name": "bigquery",
-	"version": "1.0.0",
-	"scripts": {
-		"test": "jest --group=-integration",
-		"it-test": "jest --group=integration",
-		"check-formatting": "prettier --check **.ts",
-		"fix-formatting": "prettier --write **.ts",
-		"lint": "eslint 'src/**/*.ts' 'test/**/*.ts'",
-		"build": "tsc --noEmit"
-	},
-	"dependencies": {
-		"@aws-sdk/client-s3": "^3.873.0",
-		"@google-cloud/bigquery": "^7.9.3",
-		"aws-sdk": "^2.1692.0",
-		"google-auth-library": "^9.15.0",
-		"zod": "catalog:"
-	},
-	"devDependencies": {
-		"@types/jest": "^29.5.14",
-		"jest": "^29.7.0",
-		"ts-jest": "^29.3.2"
-	}
+  "name": "bigquery",
+  "scripts": {
+    "test": "jest --group=-integration",
+    "it-test": "jest --group=integration",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint --cache --cache-location /tmp/eslintcache/ 'src/**/*.ts' 'test/**/*.ts'",
+    "check-formatting": "prettier --check \"**/*.ts\"",
+    "fix-formatting": "prettier --write \"**/*.ts\"",
+    "build": "tsc --noEmit"
+  },
+  "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/module/package.json.ts",
+  "NOTICE2": "all dependencies are defined in buildcheck/data/build.ts",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.940.0",
+    "@google-cloud/bigquery": "^7.9.3",
+    "aws-sdk": "^2.1692.0",
+    "google-auth-library": "^9.15.0",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.3.2"
+  }
 }
