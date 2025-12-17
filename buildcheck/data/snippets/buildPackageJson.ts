@@ -1,11 +1,30 @@
 import type { ModuleDefinition } from '../build';
+import { disallowedLibs } from '../dependencies';
 import { notice } from './notices';
+
+function assertNoDisallowedLibs(
+	name: string,
+	dependencies: Record<string, string> | undefined,
+) {
+	const dependencyErrors = Object.keys(dependencies ?? {}).flatMap((depName) =>
+		disallowedLibs[depName]
+			? [`do not use ${depName}: ${disallowedLibs[depName]}`]
+			: [],
+	);
+	if (dependencyErrors.length !== 0) {
+		throw new Error(
+			`${name}: disallowed dependencies: ` + dependencyErrors.join('\n'),
+		);
+	}
+}
 
 export function buildPackageJson(
 	pkg: ModuleDefinition,
 	extraScripts: Record<string, string>,
 	filename: string,
 ) {
+	assertNoDisallowedLibs(pkg.name, pkg.dependencies);
+	assertNoDisallowedLibs(pkg.name, pkg.devDependencies);
 	return {
 		name: `${pkg.name}`,
 		scripts: {
