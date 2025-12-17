@@ -3,7 +3,6 @@ import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { Router } from '@modules/routing/router';
 import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
 import { withParsers } from '@modules/routing/withParsers';
-import type { Stage } from '@modules/stage';
 import type {
 	ZuoraAccount,
 	ZuoraSubscription,
@@ -15,9 +14,9 @@ import type { RequestBody } from './schema';
 import { requestBodySchema } from './schema';
 import { createThankYouEmail } from './sendEmail';
 import { updateSupporterPlusAmount } from './updateSupporterPlusAmount';
+import { stageFromEnvironment } from '@modules/stage';
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo fix in next refactor
-const stage = process.env.STAGE as Stage;
+const stage = stageFromEnvironment();
 
 const pathParserSchema = z.object({
 	subscriptionNumber: z

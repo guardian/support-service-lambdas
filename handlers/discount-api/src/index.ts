@@ -3,7 +3,7 @@ import { logger } from '@modules/routing/logger';
 import { Router } from '@modules/routing/router';
 import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
 import { withBodyParser } from '@modules/routing/withParsers';
-import type { Stage } from '@modules/stage';
+import { Stage, stageFromEnvironment } from '@modules/stage';
 import type {
 	ZuoraAccount,
 	ZuoraSubscription,
@@ -27,8 +27,7 @@ import {
 	previewDiscountResponseSchema,
 } from './responseSchema';
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- todo fix in next refactor
-const stage = process.env.STAGE as Stage;
+const stage = stageFromEnvironment();
 
 // main entry point from AWS
 export const handler: Handler = Router([

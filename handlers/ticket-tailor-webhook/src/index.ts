@@ -5,6 +5,7 @@ import type { ApiGatewayToSqsEvent } from './apiGatewayToSqsEvent';
 import { apiGatewayToSqsEventSchema } from './apiGatewayToSqsEvent';
 import { createGuestAccount, fetchUserType } from './idapiService';
 import { validateRequest } from './validateRequest';
+import { stageFromEnvironment } from '@modules/stage';
 
 /*
 The payload of a webhook request contains an order object:
@@ -35,6 +36,8 @@ async function processValidSqsRecord(sqsRecord: ApiGatewayToSqsEvent) {
 }
 
 export const handler = async (event: SQSEvent): Promise<void> => {
+	const stage = stageFromEnvironment();
+
 	const eventualEnsuredIdentityAccount = event.Records.flatMap(
 		async (sqsRecord) => {
 			logger.resetContext();
@@ -50,7 +53,7 @@ export const handler = async (event: SQSEvent): Promise<void> => {
 				await processValidSqsRecord(parsedEvent);
 			} else {
 				logger.error('Request failed validation. Processing terminated.');
-				await putMetric('ticket-tailor-webhook-validation-failure');
+				await putMetric('ticket-tailor-webhook-validation-failure', stage);
 				return;
 			}
 		},

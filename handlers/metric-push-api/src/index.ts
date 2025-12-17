@@ -1,6 +1,9 @@
 import { putMetric } from '@modules/aws/cloudwatch';
 import { Router } from '@modules/routing/router';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
+import { stageFromEnvironment } from '@modules/stage';
+
+const stage = stageFromEnvironment();
 
 const validReferers = [
 	'https://support.thegulocal.com/',
@@ -22,7 +25,7 @@ export const handler = Router([
 			const referer = event.headers.referer ?? event.headers.Referer;
 
 			if (referer && validReferers.includes(referer)) {
-				await putMetric('metric-push-api-client-side-error');
+				await putMetric('metric-push-api-client-side-error', stage);
 				return Promise.resolve(buildResponse(201));
 			} else {
 				return Promise.resolve(buildResponse(204));
