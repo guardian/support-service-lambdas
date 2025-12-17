@@ -35,7 +35,7 @@ describe('handleRecord', () => {
 				product: 'DigitalPack',
 				name: 'Test Campaign',
 			}),
-			'CODE',
+			'support-admin-console-promo-campaigns-CODE',
 		);
 		expect(mockedDeleteFromDynamoDb).not.toHaveBeenCalled();
 	});
@@ -56,7 +56,7 @@ describe('handleRecord', () => {
 				product: 'DigitalPack',
 				name: 'Test Campaign',
 			}),
-			'PROD',
+			'support-admin-console-promo-campaigns-PROD',
 		);
 	});
 
@@ -73,10 +73,8 @@ describe('handleRecord', () => {
 		expect(mockedDeleteFromDynamoDb).toHaveBeenCalledWith(
 			expect.objectContaining({
 				campaignCode: 'TEST_CODE',
-				product: 'DigitalPack',
-				name: 'Test Campaign',
 			}),
-			'CODE',
+			'support-admin-console-promo-campaigns-CODE',
 		);
 		expect(mockedWriteToDynamoDb).not.toHaveBeenCalled();
 	});

@@ -66,16 +66,17 @@ export const handleRecord = (
 	record: DynamoDBRecord,
 	stage: Stage,
 ): Promise<void> => {
+	const tableName = `support-admin-console-promo-campaigns-${stage}`;
 	if (
 		(record.eventName === 'INSERT' || record.eventName === 'MODIFY') &&
 		record.dynamodb?.NewImage
 	) {
 		return transformDynamoDbEvent(record.dynamodb.NewImage).then((campaign) =>
-			writeToDynamoDb(campaign, stage),
+			writeToDynamoDb(campaign, tableName),
 		);
 	} else if (record.eventName === 'REMOVE' && record.dynamodb?.OldImage) {
 		return transformDynamoDbEvent(record.dynamodb.OldImage).then((campaign) =>
-			deleteFromDynamoDb(campaign, stage),
+			deleteFromDynamoDb({ campaignCode: campaign.campaignCode }, tableName),
 		);
 	}
 
