@@ -1,11 +1,11 @@
 import { putMetric } from '@modules/aws/cloudwatch';
 import { logger } from '@modules/routing/logger';
+import { stageFromEnvironment } from '@modules/stage';
 import type { SQSEvent } from 'aws-lambda';
 import type { ApiGatewayToSqsEvent } from './apiGatewayToSqsEvent';
 import { apiGatewayToSqsEventSchema } from './apiGatewayToSqsEvent';
 import { createGuestAccount, fetchUserType } from './idapiService';
 import { validateRequest } from './validateRequest';
-import { stageFromEnvironment } from '@modules/stage';
 
 /*
 The payload of a webhook request contains an order object:

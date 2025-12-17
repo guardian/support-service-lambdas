@@ -1,7 +1,7 @@
 import { putMetric } from '@modules/aws/cloudwatch';
 import { Router } from '@modules/routing/router';
-import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { stageFromEnvironment } from '@modules/stage';
+import type { APIGatewayProxyEvent } from 'aws-lambda';
 
 const stage = stageFromEnvironment();
 

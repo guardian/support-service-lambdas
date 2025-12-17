@@ -1,7 +1,7 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
+import { stageFromEnvironment } from '@modules/stage';
 import { publishSnsMessage } from '../services/sns';
 import { describeExecution, startExecution } from '../services/step-functions';
-import { stageFromEnvironment } from '@modules/stage';
 
 export const handler = async (): Promise<
 	'HEALTH CHECK PASSED' | 'HEALTH CHECK FAILED'

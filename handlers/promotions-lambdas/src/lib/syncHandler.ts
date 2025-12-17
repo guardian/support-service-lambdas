@@ -1,7 +1,8 @@
 import type { AttributeValue as SDKAttributeValue } from '@aws-sdk/client-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { logger } from '@modules/routing/logger';
-import { Stage, stageFromEnvironment } from '@modules/stage';
+import type { Stage } from '@modules/stage';
+import { stageFromEnvironment } from '@modules/stage';
 import type {
 	DynamoDBBatchResponse,
 	DynamoDBRecord,

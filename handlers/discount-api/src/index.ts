@@ -3,7 +3,8 @@ import { logger } from '@modules/routing/logger';
 import { Router } from '@modules/routing/router';
 import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
 import { withBodyParser } from '@modules/routing/withParsers';
-import { Stage, stageFromEnvironment } from '@modules/stage';
+import type { Stage } from '@modules/stage';
+import { stageFromEnvironment } from '@modules/stage';
 import type {
 	ZuoraAccount,
 	ZuoraSubscription,

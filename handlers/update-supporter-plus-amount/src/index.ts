@@ -3,6 +3,7 @@ import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { Router } from '@modules/routing/router';
 import { withMMAIdentityCheck } from '@modules/routing/withMMAIdentityCheck';
 import { withParsers } from '@modules/routing/withParsers';
+import { stageFromEnvironment } from '@modules/stage';
 import type {
 	ZuoraAccount,
 	ZuoraSubscription,
@@ -14,7 +15,6 @@ import type { RequestBody } from './schema';
 import { requestBodySchema } from './schema';
 import { createThankYouEmail } from './sendEmail';
 import { updateSupporterPlusAmount } from './updateSupporterPlusAmount';
-import { stageFromEnvironment } from '@modules/stage';
 
 const stage = stageFromEnvironment();
 
