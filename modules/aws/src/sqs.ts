@@ -8,33 +8,39 @@ import {
 	SendMessageCommand,
 	SQSClient,
 } from '@aws-sdk/client-sqs';
-import { awsConfig } from '@modules/aws/config';
 import { logger } from '@modules/routing/logger';
+import { awsConfig } from '@modules/aws/config';
 
-const client = new SQSClient(awsConfig);
+const defaultClient = new SQSClient(awsConfig);
 
 export const sendMessageToQueue = async ({
 	queueName,
 	messageBody,
+	send,
 }: {
 	queueName: string;
 	messageBody: SendMessageCommandInput['MessageBody'];
+	send?: typeof SQSClient.prototype.send;
 }) => {
 	try {
-		const { QueueUrl } = await client.send(
+		const { QueueUrl } = await (send ?? defaultClient.send.bind(defaultClient))(
 			new GetQueueUrlCommand({ QueueName: queueName }),
 		);
 
-		if (!QueueUrl) throw new Error('Queue URL not found');
+		if (!QueueUrl) {
+			throw new Error('Queue URL not found');
+		}
 
 		const command = new SendMessageCommand({
 			QueueUrl,
 			MessageBody: messageBody,
 		});
-		const response = await client.send(command);
+		const response = await (send ?? defaultClient.send.bind(defaultClient))(
+			command,
+		);
 		return response;
 	} catch (error) {
-		console.error(error);
+		logger.log('Error sending message to SQS: ' + queueName, error);
 		throw error;
 	}
 };
@@ -42,15 +48,19 @@ export const sendMessageToQueue = async ({
 export const sendBatchMessagesToQueue = async ({
 	queueName,
 	messages,
+	send,
 }: {
 	queueName: string;
 	messages: Array<{ id: string; body: string }>;
+	send?: typeof SQSClient.prototype.send;
 }) => {
 	try {
-		const { QueueUrl } = await client.send(
+		const { QueueUrl } = await (send ?? defaultClient.send.bind(defaultClient))(
 			new GetQueueUrlCommand({ QueueName: queueName }),
 		);
-		if (!QueueUrl) throw new Error('Queue URL not found');
+		if (!QueueUrl) {
+			throw new Error('Queue URL not found');
+		}
 
 		const entries: SendMessageBatchRequestEntry[] = messages.map((msg) => ({
 			Id: msg.id,
@@ -61,7 +71,7 @@ export const sendBatchMessagesToQueue = async ({
 			QueueUrl,
 			Entries: entries,
 		});
-		return await client.send(command);
+		return await (send ?? defaultClient.send.bind(defaultClient))(command);
 	} catch (error) {
 		logger.log('Error sending batch to SQS', { queueName, error });
 		throw error;
