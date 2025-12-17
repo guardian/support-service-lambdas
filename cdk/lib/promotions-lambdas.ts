@@ -28,9 +28,6 @@ export class PromotionsLambdas extends SrStack {
 			nameSuffix: 'promo-campaign-sync',
 			lambdaOverrides: {
 				handler: 'handlers/promoCampaignSync.handler',
-				environment: {
-					STAGE: stage,
-				},
 			},
 		});
 
@@ -38,9 +35,6 @@ export class PromotionsLambdas extends SrStack {
 			nameSuffix: 'promo-sync',
 			lambdaOverrides: {
 				handler: 'handlers/promoSync.handler',
-				environment: {
-					STAGE: stage,
-				},
 			},
 		});
 
