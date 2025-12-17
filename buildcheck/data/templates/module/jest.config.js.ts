@@ -1,3 +1,3 @@
-import handler_jest_config_js from '../handler/jest.config.js';
+import { buildJestConfigJs } from '../../snippets/buildJestConfigJs';
 
-export default handler_jest_config_js;
+export default buildJestConfigJs;

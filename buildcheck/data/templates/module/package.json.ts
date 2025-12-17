@@ -1,5 +1,5 @@
 import type { ModuleDefinition } from '../../build';
-import { buildPackageJson } from '../handler/package.json';
+import { buildPackageJson } from '../../snippets/buildPackageJson';
 
 export default (pkg: ModuleDefinition) => {
 	const moduleScripts = { build: 'tsc --noEmit' };

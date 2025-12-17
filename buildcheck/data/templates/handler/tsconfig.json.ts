@@ -1,8 +1,3 @@
-import type { ModuleDefinition } from '../../build';
+import { buildTsConfigJson } from '../../snippets/buildTsConfigJson';
 
-export default (pkg: ModuleDefinition) => {
-	return {
-		extends: '../../tsconfig.json',
-		...pkg.tsConfigExtra,
-	};
-};
+export default buildTsConfigJson;

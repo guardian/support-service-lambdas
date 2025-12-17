@@ -1,3 +1,3 @@
-import handler_tsconfig_json from '../handler/tsconfig.json';
+import { buildTsConfigJson } from '../../snippets/buildTsConfigJson';
 
-export default handler_tsconfig_json;
+export default buildTsConfigJson;
