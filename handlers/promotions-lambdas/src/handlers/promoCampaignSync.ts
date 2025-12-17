@@ -35,7 +35,7 @@ const productGroupMapping: Record<
 > = {
 	supporterPlus: 'SupporterPlus',
 	tierThree: 'TierThree',
-	digitalpack: 'DigitalPack',
+	digitalpack: 'DigitalSubscription',
 	newspaper: 'Newspaper',
 	weekly: 'Weekly',
 };
