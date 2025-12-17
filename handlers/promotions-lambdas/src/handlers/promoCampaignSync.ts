@@ -4,9 +4,15 @@ import type {
 	PromoCampaign,
 	promoProductSchema,
 } from '@modules/promotions/v2/schema';
-import type { DynamoDBRecord, DynamoDBStreamEvent } from 'aws-lambda';
+import type { Stage } from '@modules/stage';
+import type {
+	DynamoDBBatchResponse,
+	DynamoDBRecord,
+	DynamoDBStreamEvent,
+} from 'aws-lambda';
 import type { AttributeValue } from 'aws-lambda/trigger/dynamodb-stream';
 import { z } from 'zod';
+import { deleteFromDynamoDb, writeToDynamoDb } from '../lib/dynamodb';
 
 const oldPromoCampaignSchema = z.object({
 	code: z.string(),
@@ -42,40 +48,66 @@ const transformCampaign = (
 	created: new Date().toISOString(),
 });
 
-export const transformDynamoDbEvent = (
+const transformDynamoDbEvent = (
 	event: Record<string, AttributeValue>,
-): PromoCampaign | Error => {
+): Promise<PromoCampaign> => {
 	// Cast here because the type of AttributeValue differs between the dynamodb-stream and client-dynamodb libraries!
 	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- necessary
 	const item = unmarshall(event as Record<string, SDKAttributeValue>);
 	const oldCampaign = oldPromoCampaignSchema.safeParse(item);
 	if (oldCampaign.success) {
-		return transformCampaign(oldCampaign.data);
+		return Promise.resolve(transformCampaign(oldCampaign.data));
 	} else {
-		return oldCampaign.error;
+		return Promise.reject(oldCampaign.error);
 	}
 };
 
-export const handleRecord = (record: DynamoDBRecord): void => {
-	if (record.eventName === 'INSERT' || record.eventName === 'MODIFY') {
-		if (record.dynamodb?.NewImage) {
-			const campaign = transformDynamoDbEvent(record.dynamodb.NewImage);
-			console.log(`${record.eventName} campaign:`, JSON.stringify(campaign));
-			// TODO - write to dynamodb
-		}
-	} else if (record.eventName === 'REMOVE') {
-		if (record.dynamodb?.OldImage) {
-			const campaign = transformDynamoDbEvent(record.dynamodb.OldImage);
-			console.log(`${record.eventName} campaign:`, JSON.stringify(campaign));
-			// TODO - delete from dynamodb
-		}
+export const handleRecord = (
+	record: DynamoDBRecord,
+	stage: Stage,
+): Promise<void> => {
+	if (
+		(record.eventName === 'INSERT' || record.eventName === 'MODIFY') &&
+		record.dynamodb?.NewImage
+	) {
+		return transformDynamoDbEvent(record.dynamodb.NewImage).then((campaign) =>
+			writeToDynamoDb(campaign, stage),
+		);
+	} else if (record.eventName === 'REMOVE' && record.dynamodb?.OldImage) {
+		return transformDynamoDbEvent(record.dynamodb.OldImage).then((campaign) =>
+			deleteFromDynamoDb(campaign, stage),
+		);
 	}
+
+	return Promise.reject(Error(`Invalid event for: ${record.eventName}`));
 };
 
-export const handler = (event: DynamoDBStreamEvent): Promise<void> => {
-	event.Records.map((record) => {
-		console.log('Processing record:', JSON.stringify(record.dynamodb));
-		handleRecord(record);
-	});
-	return Promise.resolve();
+export const handler = async (
+	event: DynamoDBStreamEvent,
+): Promise<DynamoDBBatchResponse> => {
+	const stage = process.env.STAGE;
+	if (!(stage === 'CODE' || stage === 'PROD')) {
+		throw new Error('Invalid STAGE');
+	}
+
+	// We're processing a batch of updates here, so record any failures and have the Lambda return their identifiers
+	const batchItemFailures: DynamoDBBatchResponse['batchItemFailures'] = [];
+
+	await Promise.allSettled(
+		event.Records.map(async (record) => {
+			try {
+				console.log('Processing record:', JSON.stringify(record.dynamodb));
+				await handleRecord(record, stage);
+			} catch (error) {
+				console.error(`Failed to process record:`, error);
+				if (record.dynamodb?.SequenceNumber) {
+					batchItemFailures.push({
+						itemIdentifier: record.dynamodb.SequenceNumber,
+					});
+				}
+			}
+		}),
+	);
+
+	return { batchItemFailures };
 };

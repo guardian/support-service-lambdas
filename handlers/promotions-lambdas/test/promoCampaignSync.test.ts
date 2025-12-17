@@ -1,90 +1,117 @@
-import type { DynamoDBStreamEvent } from 'aws-lambda';
+import type { DynamoDBRecord } from 'aws-lambda';
 import type { AttributeValue } from 'aws-lambda/trigger/dynamodb-stream';
-import {
-	handler,
-	transformDynamoDbEvent,
-} from '../src/handlers/promoCampaignSync';
+import { handleRecord } from '../src/handlers/promoCampaignSync';
+import { deleteFromDynamoDb, writeToDynamoDb } from '../src/lib/dynamodb';
 
-describe('promoCampaignSync handler', () => {
+jest.mock('../src/lib/dynamodb');
+
+const mockedWriteToDynamoDb = jest.mocked(writeToDynamoDb);
+const mockedDeleteFromDynamoDb = jest.mocked(deleteFromDynamoDb);
+
+describe('handleRecord', () => {
+	const validNewImage: Record<string, AttributeValue> = {
+		code: { S: 'TEST_CODE' },
+		group: { S: 'digitalpack' },
+		name: { S: 'Test Campaign' },
+	};
+
 	beforeEach(() => {
 		jest.clearAllMocks();
 	});
 
-	it('should process INSERT event', async () => {
-		const event: DynamoDBStreamEvent = {
-			Records: [],
-		};
+	it('should write to DynamoDB on INSERT event', async () => {
+		const record: DynamoDBRecord = {
+			eventName: 'INSERT',
+			dynamodb: {
+				NewImage: validNewImage,
+			},
+		} as DynamoDBRecord;
 
-		const result = await handler(event);
+		await handleRecord(record, 'CODE');
 
-		expect(result).toBeUndefined();
-	});
-});
-
-describe('transformDynamoDbEvent', () => {
-	it('should transform valid DynamoDB event to new campaign model', () => {
-		const dynamoDbEvent: Record<string, AttributeValue> = {
-			code: { S: 'TEST_DIGITAL_PACK' },
-			group: { S: 'digitalpack' },
-			name: { S: 'Digital Pack' },
-		};
-
-		const result = transformDynamoDbEvent(dynamoDbEvent);
-
-		expect(result).not.toBeInstanceOf(Error);
-		const campaign = result as Exclude<typeof result, Error>;
-
-		expect(campaign).toEqual({
-			campaignCode: 'TEST_DIGITAL_PACK',
-			product: 'DigitalPack',
-			name: 'Digital Pack',
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- jest any
-			created: expect.any(String),
-		});
-		expect(new Date(campaign.created).toISOString()).toBe(campaign.created);
+		expect(mockedWriteToDynamoDb).toHaveBeenCalledWith(
+			expect.objectContaining({
+				campaignCode: 'TEST_CODE',
+				product: 'DigitalPack',
+				name: 'Test Campaign',
+			}),
+			'CODE',
+		);
+		expect(mockedDeleteFromDynamoDb).not.toHaveBeenCalled();
 	});
 
-	it('should handle supporterPlus product group', () => {
-		const dynamoDbEvent: Record<string, AttributeValue> = {
-			code: { S: 'TEST_SUPPORTER_PLUS' },
-			group: { S: 'supporterPlus' },
-			name: { S: 'Test Campaign' },
-		};
+	it('should write to DynamoDB on MODIFY event', async () => {
+		const record: DynamoDBRecord = {
+			eventName: 'MODIFY',
+			dynamodb: {
+				NewImage: validNewImage,
+			},
+		} as DynamoDBRecord;
 
-		const result = transformDynamoDbEvent(dynamoDbEvent);
+		await handleRecord(record, 'PROD');
 
-		expect(result).not.toBeInstanceOf(Error);
-		const campaign = result as Exclude<typeof result, Error>;
-
-		expect(campaign).toEqual({
-			campaignCode: 'TEST_SUPPORTER_PLUS',
-			product: 'SupporterPlus',
-			name: 'Test Campaign',
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- jest any
-			created: expect.any(String),
-		});
-		expect(new Date(campaign.created).toISOString()).toBe(campaign.created);
+		expect(mockedWriteToDynamoDb).toHaveBeenCalledWith(
+			expect.objectContaining({
+				campaignCode: 'TEST_CODE',
+				product: 'DigitalPack',
+				name: 'Test Campaign',
+			}),
+			'PROD',
+		);
 	});
 
-	it('should return Error for invalid product group', () => {
-		const dynamoDbEvent: Record<string, AttributeValue> = {
+	it('should delete from DynamoDB on REMOVE event', async () => {
+		const record: DynamoDBRecord = {
+			eventName: 'REMOVE',
+			dynamodb: {
+				OldImage: validNewImage,
+			},
+		} as DynamoDBRecord;
+
+		await handleRecord(record, 'CODE');
+
+		expect(mockedDeleteFromDynamoDb).toHaveBeenCalledWith(
+			expect.objectContaining({
+				campaignCode: 'TEST_CODE',
+				product: 'DigitalPack',
+				name: 'Test Campaign',
+			}),
+			'CODE',
+		);
+		expect(mockedWriteToDynamoDb).not.toHaveBeenCalled();
+	});
+
+	it('should reject when NewImage is missing for INSERT', async () => {
+		const record: DynamoDBRecord = {
+			eventName: 'INSERT',
+			dynamodb: {},
+		} as DynamoDBRecord;
+
+		await expect(handleRecord(record, 'CODE')).rejects.toThrow();
+	});
+
+	it('should reject when OldImage is missing for REMOVE', async () => {
+		const record: DynamoDBRecord = {
+			eventName: 'REMOVE',
+			dynamodb: {},
+		} as DynamoDBRecord;
+
+		await expect(handleRecord(record, 'CODE')).rejects.toThrow();
+	});
+
+	it('should reject when campaign transformation fails', async () => {
+		const invalidImage: Record<string, AttributeValue> = {
 			code: { S: 'TEST_CODE' },
-			group: { S: 'invalid' },
-			name: { S: 'Test Campaign' },
+			group: { S: 'invalid_group' },
 		};
 
-		const result = transformDynamoDbEvent(dynamoDbEvent);
+		const record: DynamoDBRecord = {
+			eventName: 'INSERT',
+			dynamodb: {
+				NewImage: invalidImage,
+			},
+		} as DynamoDBRecord;
 
-		expect(result).toBeInstanceOf(Error);
-	});
-
-	it('should return Error for missing required fields', () => {
-		const dynamoDbEvent: Record<string, AttributeValue> = {
-			code: { S: 'TEST_CODE' },
-		};
-
-		const result = transformDynamoDbEvent(dynamoDbEvent);
-
-		expect(result).toBeInstanceOf(Error);
+		await expect(handleRecord(record, 'CODE')).rejects.toThrow();
 	});
 });
