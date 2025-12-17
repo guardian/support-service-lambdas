@@ -7,18 +7,26 @@ Each record defines one handler and contains anything unique compared with the
 assumed build structure.
  */
 
-export interface HandlerDefinition {
-	name: string;
+export interface HandlerDefinition extends ModuleDefinition {
 	stack?: 'support' | 'membership';
 	functionNames?: string[];
 	entryPoints?: string[];
 	extraStages?: Array<'CSBX'>;
-	testTimeoutSeconds?: number;
-	jestClearMocks?: boolean;
+}
+
+export interface ModuleDefinition {
+	name: string;
 	extraScripts?: Record<string, string>;
 	dependencies?: Record<string, string>;
 	devDependencies?: Record<string, string>;
 	tsConfigExtra?: Record<string, unknown>;
+	testTimeoutSeconds?: number;
+	jestClearMocks?: boolean;
+}
+
+export interface BuildDefinition {
+	handlers: HandlerDefinition[];
+	modules: ModuleDefinition[];
 }
 
 const alarmsHandler: HandlerDefinition = {
@@ -316,25 +324,38 @@ const zuoraSalesforceLinkRemover: HandlerDefinition = {
 	},
 };
 
-export const build: HandlerDefinition[] = [
-	alarmsHandler,
-	discountApi,
-	discountExpiryNotifier,
-	generateProductCatalog,
-	metricPushApi,
-	mobilePurchasesToSupporterProductData,
-	mparticleApi,
-	negativeInvoicesProcessor,
-	observerDataExport,
-	pressReaderEntitlements,
-	productSwitchApi,
-	promotionsLambdas,
-	salesforceDisasterRecovery,
-	salesforceDisasterRecoveryHealthCheck,
-	stripeDisputes,
-	ticketTailorWebhook,
-	updateSupporterPlusAmount,
-	userBenefits,
-	writeOffUnpaidInvoices,
-	zuoraSalesforceLinkRemover,
-];
+const moduleZuora: ModuleDefinition = {
+	name: 'zuora',
+	dependencies: {
+		...dep['@aws-sdk/client-s3'],
+		...dep['@aws-sdk/client-secrets-manager'],
+		...dep.dayjs,
+		...dep.zod,
+	},
+};
+
+export const build: BuildDefinition = {
+	handlers: [
+		alarmsHandler,
+		discountApi,
+		discountExpiryNotifier,
+		generateProductCatalog,
+		metricPushApi,
+		mobilePurchasesToSupporterProductData,
+		mparticleApi,
+		negativeInvoicesProcessor,
+		observerDataExport,
+		pressReaderEntitlements,
+		productSwitchApi,
+		promotionsLambdas,
+		salesforceDisasterRecovery,
+		salesforceDisasterRecoveryHealthCheck,
+		stripeDisputes,
+		ticketTailorWebhook,
+		updateSupporterPlusAmount,
+		userBenefits,
+		writeOffUnpaidInvoices,
+		zuoraSalesforceLinkRemover,
+	],
+	modules: [moduleZuora],
+};
