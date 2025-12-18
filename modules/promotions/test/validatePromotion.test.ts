@@ -7,6 +7,7 @@ const productRatePlanId = '12345';
 const promoCode = 'TEST123';
 const testPromotion: Promotion = {
 	name: promotionName,
+	campaignCode: 'campaign',
 	promotionType: { name: 'percent_discount', amount: 25, durationMonths: 3 },
 	appliesTo: {
 		productRatePlanIds: new Set([productRatePlanId]),
