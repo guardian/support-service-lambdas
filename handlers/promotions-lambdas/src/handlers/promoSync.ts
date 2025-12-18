@@ -45,11 +45,11 @@ const transformPromo = (oldPromo: OldPromo): Promo[] => {
 				countryGroups: oldPromo.appliesTo
 					.countries as Promo['appliesTo']['countryGroups'],
 			},
-			startTimestamp: oldPromo.starts,
+			startTimestamp: oldPromo.starts.toISOString(),
 		};
 
 		if (oldPromo.expires) {
-			promo.endTimestamp = oldPromo.expires;
+			promo.endTimestamp = oldPromo.expires.toISOString();
 		}
 
 		if (isDiscountPromotion(oldPromo.promotionType)) {
