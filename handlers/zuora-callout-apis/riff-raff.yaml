@@ -22,5 +22,6 @@ deployments:
       prefixStack: false
       functionNames:
       - zuora-auto-cancel-
+      - zuora-auto-cancel-queue-writer-
     dependencies: [cfn]
     

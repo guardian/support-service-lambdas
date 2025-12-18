@@ -378,6 +378,7 @@ lazy val `zuora-callout-apis` = lambdaProject(
   "Handles auto-cancellations for membership and subscriptions",
   Seq(
     awsLambda,
+    awsEvents,
     okhttp3,
     scalatest,
     stripe,
