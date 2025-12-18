@@ -17,7 +17,7 @@ import { deleteFromDynamoDb, writeToDynamoDb } from './dynamodb';
 
 export interface SyncConfig<TSource, TTarget extends object> {
 	sourceSchema: z.ZodSchema<TSource>; // to validate the data from the source table
-	transform: (source: TSource) => TTarget;
+	transform: (source: TSource) => TTarget[];
 	getTableName: (stage: Stage) => string;
 	getPrimaryKey: (target: TTarget) => Record<string, unknown>;
 }
@@ -27,7 +27,7 @@ export const createSyncHandler = <TSource, TTarget extends object>(
 ) => {
 	const transformDynamoDbEvent = (
 		event: Record<string, AttributeValue>,
-	): Promise<TTarget> => {
+	): Promise<TTarget[]> => {
 		// Cast here because the type of AttributeValue differs between the dynamodb-stream and client-dynamodb libraries!
 		// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- necessary
 		const item = unmarshall(event as Record<string, SDKAttributeValue>);
@@ -43,7 +43,7 @@ export const createSyncHandler = <TSource, TTarget extends object>(
 	const handleRecord = (
 		record: DynamoDBRecord,
 		stage: Stage,
-	): Promise<void> => {
+	): Promise<void[]> => {
 		const tableName = config.getTableName(stage);
 
 		if (
@@ -51,12 +51,19 @@ export const createSyncHandler = <TSource, TTarget extends object>(
 			record.dynamodb?.NewImage
 		) {
 			return transformDynamoDbEvent(record.dynamodb.NewImage).then(
-				(transformed) => writeToDynamoDb(transformed, tableName),
+				(transformedItems) =>
+					Promise.all(
+						transformedItems.map((item) => writeToDynamoDb(item, tableName)),
+					),
 			);
 		} else if (record.eventName === 'REMOVE' && record.dynamodb?.OldImage) {
 			return transformDynamoDbEvent(record.dynamodb.OldImage).then(
-				(transformed) =>
-					deleteFromDynamoDb(config.getPrimaryKey(transformed), tableName),
+				(transformedItems) =>
+					Promise.all(
+						transformedItems.map((item) =>
+							deleteFromDynamoDb(config.getPrimaryKey(item), tableName),
+						),
+					),
 			);
 		}
 
