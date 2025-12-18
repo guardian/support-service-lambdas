@@ -52,7 +52,7 @@ describe('promoSync handler', () => {
 	const expectedNewData = (promoCode: string) => ({
 		promoCode,
 		campaignCode: 'C_ME8DW87P',
-		name: 'My promo',
+		name: `My promo - ${promoCode}`,
 		appliesTo: {
 			productRatePlanIds: [
 				'2c92c0f965f2122101660fb33ed24a45',

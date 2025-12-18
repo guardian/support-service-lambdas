@@ -37,7 +37,7 @@ const transformPromo = (oldPromo: OldPromo): Promo[] => {
 	return promoCodes.map((promoCode) => {
 		const promo: Promo = {
 			promoCode: promoCode,
-			name: oldPromo.name,
+			name: `${oldPromo.name} - ${promoCode}`,
 			campaignCode: oldPromo.campaignCode,
 			appliesTo: {
 				productRatePlanIds: oldPromo.appliesTo.productRatePlanIds,
