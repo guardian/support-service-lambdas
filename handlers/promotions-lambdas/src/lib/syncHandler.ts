@@ -53,16 +53,22 @@ export const createSyncHandler = <TSource, TTarget extends object>(
 			return transformDynamoDbEvent(record.dynamodb.NewImage).then(
 				(transformedItems) =>
 					Promise.all(
-						transformedItems.map((item) => writeToDynamoDb(item, tableName)),
+						transformedItems.map((item) => {
+							logger.log(`Writing item to DynamoDb: ${JSON.stringify(item)}`);
+							return writeToDynamoDb(item, tableName);
+						}),
 					),
 			);
 		} else if (record.eventName === 'REMOVE' && record.dynamodb?.OldImage) {
 			return transformDynamoDbEvent(record.dynamodb.OldImage).then(
 				(transformedItems) =>
 					Promise.all(
-						transformedItems.map((item) =>
-							deleteFromDynamoDb(config.getPrimaryKey(item), tableName),
-						),
+						transformedItems.map((item) => {
+							logger.log(
+								`Deleting item from DynamoDb: ${JSON.stringify(item)}`,
+							);
+							return deleteFromDynamoDb(config.getPrimaryKey(item), tableName);
+						}),
 					),
 			);
 		}
