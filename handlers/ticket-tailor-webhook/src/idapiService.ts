@@ -1,6 +1,6 @@
 import { logger } from '@modules/routing/logger';
 import { getSecretValue } from '@modules/secrets-manager/getSecret';
-import { stageFromEnvironment } from '@modules/stage';
+import { Stage } from '@modules/stage';
 import { z } from 'zod';
 
 export type IdApiToken = {
@@ -16,9 +16,7 @@ type UserTypeResponse = z.infer<typeof UserTypeResponseSchema>;
 const userTypeEndpoint = `/user/type/`;
 const guestEndpoint = '/guest?accountVerificationEmail=true';
 
-const getIdapiUrl = () => {
-	const stage = stageFromEnvironment();
-
+const getIdapiUrl = (stage: Stage) => {
 	const idapiUrl =
 		stage === 'PROD'
 			? 'https://idapi.theguardian.com'
@@ -29,16 +27,17 @@ const getIdapiUrl = () => {
 
 export const fetchUserType = async (
 	email: string,
+	stage: Stage,
 ): Promise<UserTypeResponse> => {
 	const idapiSecret = await getSecretValue<IdApiToken>(
-		`${stageFromEnvironment()}/TicketTailor/IdApi-token`,
+		`${stage}/TicketTailor/IdApi-token`,
 	);
 
 	logger.log(`Fetching user type for provided email.`);
 	const bearerToken = `Bearer ${idapiSecret.token}`;
 
 	const userTypeResponse = await fetch(
-		getIdapiUrl().concat(userTypeEndpoint).concat(email),
+		getIdapiUrl(stage).concat(userTypeEndpoint).concat(email),
 		{
 			method: 'GET',
 			headers: {
@@ -63,12 +62,15 @@ export const fetchUserType = async (
 	return validationResult.data;
 };
 
-export const createGuestAccount = async (email: string): Promise<void> => {
+export const createGuestAccount = async (
+	email: string,
+	stage: Stage,
+): Promise<void> => {
 	const idapiSecret = await getSecretValue<IdApiToken>(
-		`${stageFromEnvironment()}/TicketTailor/IdApi-token`,
+		`${stage}/TicketTailor/IdApi-token`,
 	);
 	const bearerToken = `Bearer ${idapiSecret.token}`;
-	const response = await fetch(getIdapiUrl().concat(guestEndpoint), {
+	const response = await fetch(getIdapiUrl(stage).concat(guestEndpoint), {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',

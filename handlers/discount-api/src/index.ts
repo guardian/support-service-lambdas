@@ -12,7 +12,6 @@ import type {
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyResult, Handler } from 'aws-lambda';
 import dayjs from 'dayjs';
-import type { ZodType } from 'zod';
 import {
 	applyDiscountEndpoint,
 	previewDiscountEndpoint,
@@ -27,6 +26,7 @@ import {
 	applyDiscountResponseSchema,
 	previewDiscountResponseSchema,
 } from './responseSchema';
+import { stringify } from './stringify';
 
 const stage = stageFromEnvironment();
 
@@ -108,7 +108,3 @@ export function previewDiscountHandler(stage: Stage) {
 		};
 	};
 }
-
-// this is a type safe version of stringify
-export const stringify = <T>(t: T, type: ZodType<T>): string =>
-	JSON.stringify(type.parse(t));

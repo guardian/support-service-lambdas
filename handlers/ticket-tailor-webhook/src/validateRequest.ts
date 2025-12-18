@@ -1,7 +1,7 @@
 import { createHmac, timingSafeEqual } from 'crypto';
 import { logger } from '@modules/routing/logger';
 import { getSecretValue } from '@modules/secrets-manager/getSecret';
-import { stageFromEnvironment } from '@modules/stage';
+import { Stage } from '@modules/stage';
 import type { ApiGatewayToSqsEvent } from './apiGatewayToSqsEvent';
 
 export type HmacKey = {
@@ -82,9 +82,10 @@ export const maxValidTimeWindowSeconds = 300;
 
 export const validateRequest = async (
 	record: ApiGatewayToSqsEvent,
+	stage: Stage,
 ): Promise<boolean> => {
 	const validationSecret = await getSecretValue<HmacKey>(
-		`${stageFromEnvironment()}/TicketTailor/Webhook-validation`,
+		`${stage}/TicketTailor/Webhook-validation`,
 	);
 
 	const currentDateTime = new Date();
