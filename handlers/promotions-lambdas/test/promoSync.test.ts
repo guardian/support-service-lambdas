@@ -1,12 +1,11 @@
 import type { DynamoDBRecord, DynamoDBStreamEvent } from 'aws-lambda';
 import type { AttributeValue } from 'aws-lambda/trigger/dynamodb-stream';
 import { handler } from '../src/handlers/promoSync';
-import { deleteFromDynamoDb, writeToDynamoDb } from '../src/lib/dynamodb';
+import { writeToDynamoDb } from '../src/lib/dynamodb';
 
 jest.mock('../src/lib/dynamodb');
 
 const mockedWriteToDynamoDb = jest.mocked(writeToDynamoDb);
-const mockedDeleteFromDynamoDb = jest.mocked(deleteFromDynamoDb);
 
 describe('promoSync handler', () => {
 	const validNewImage: Record<string, AttributeValue> = {
@@ -111,8 +110,6 @@ describe('promoSync handler', () => {
 			expect(item).toEqual(expectedNewData(promoCode));
 			expect(tableName).toBe('support-admin-console-promos-CODE');
 		});
-
-		expect(mockedDeleteFromDynamoDb).not.toHaveBeenCalled();
 	});
 
 	it('should write multiple items to DynamoDB on MODIFY event', async () => {
@@ -144,55 +141,9 @@ describe('promoSync handler', () => {
 		});
 	});
 
-	it('should delete multiple items from DynamoDB on REMOVE event', async () => {
-		const record: DynamoDBRecord = {
-			eventName: 'REMOVE',
-			dynamodb: {
-				OldImage: validNewImage,
-				SequenceNumber: '123',
-			},
-		} as DynamoDBRecord;
-
-		await handler(createEvent([record]));
-
-		expect(mockedDeleteFromDynamoDb).toHaveBeenCalledTimes(2);
-
-		const calls = mockedDeleteFromDynamoDb.mock.calls as Array<
-			[object, string]
-		>;
-		const deletedPromoCodes = calls.map(
-			([key]) => (key as { promoCode: string }).promoCode,
-		);
-
-		expect(deletedPromoCodes).toEqual(
-			expect.arrayContaining(['PROMO_CODE_1', 'PROMO_CODE_2']),
-		);
-
-		calls.forEach(([key, tableName]) => {
-			const promoCode = (key as { promoCode: string }).promoCode;
-			expect(key).toEqual({ promoCode });
-			expect(tableName).toBe('support-admin-console-promos-CODE');
-		});
-
-		expect(mockedWriteToDynamoDb).not.toHaveBeenCalled();
-	});
-
 	it('should return batch item failure when NewImage is missing for INSERT', async () => {
 		const record: DynamoDBRecord = {
 			eventName: 'INSERT',
-			dynamodb: {
-				SequenceNumber: '123',
-			},
-		} as DynamoDBRecord;
-
-		const result = await handler(createEvent([record]));
-
-		expect(result.batchItemFailures).toEqual([{ itemIdentifier: '123' }]);
-	});
-
-	it('should return batch item failure when OldImage is missing for REMOVE', async () => {
-		const record: DynamoDBRecord = {
-			eventName: 'REMOVE',
 			dynamodb: {
 				SequenceNumber: '123',
 			},
@@ -263,6 +214,5 @@ describe('promoSync handler', () => {
 		await handler(createEvent([record]));
 
 		expect(mockedWriteToDynamoDb).not.toHaveBeenCalled();
-		expect(mockedDeleteFromDynamoDb).not.toHaveBeenCalled();
 	});
 });

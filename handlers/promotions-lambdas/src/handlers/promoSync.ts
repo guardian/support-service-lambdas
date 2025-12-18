@@ -79,7 +79,4 @@ export const handler = createSyncHandler({
 	sourceSchema: oldDynamoPromoSchema,
 	transform: transformPromo,
 	getTableName: (stage: Stage) => `support-admin-console-promos-${stage}`,
-	getPrimaryKey: (promo: Promo) => ({
-		promoCode: promo.promoCode,
-	}),
 });

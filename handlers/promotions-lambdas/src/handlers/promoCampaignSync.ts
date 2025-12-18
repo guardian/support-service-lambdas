@@ -47,7 +47,4 @@ export const handler = createSyncHandler({
 	transform: transformCampaign,
 	getTableName: (stage: Stage) =>
 		`support-admin-console-promo-campaigns-${stage}`,
-	getPrimaryKey: (campaign: PromoCampaign) => ({
-		campaignCode: campaign.campaignCode,
-	}),
 });

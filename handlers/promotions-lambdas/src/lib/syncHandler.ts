@@ -9,7 +9,7 @@ import type {
 } from 'aws-lambda';
 import type { AttributeValue } from 'aws-lambda/trigger/dynamodb-stream';
 import type { z } from 'zod';
-import { deleteFromDynamoDb, writeToDynamoDb } from './dynamodb';
+import { writeToDynamoDb } from './dynamodb';
 
 /**
  * Generic handler for sync'ing a source dynamodb table to a target table, with data transformation
@@ -19,7 +19,6 @@ export interface SyncConfig<TSource, TTarget extends object> {
 	sourceSchema: z.ZodSchema<TSource>; // to validate the data from the source table
 	transform: (source: TSource) => TTarget[];
 	getTableName: (stage: Stage) => string;
-	getPrimaryKey: (target: TTarget) => Record<string, unknown>;
 }
 
 export const createSyncHandler = <TSource, TTarget extends object>(
@@ -56,18 +55,6 @@ export const createSyncHandler = <TSource, TTarget extends object>(
 						transformedItems.map((item) => {
 							logger.log(`Writing item to DynamoDb: ${JSON.stringify(item)}`);
 							return writeToDynamoDb(item, tableName);
-						}),
-					),
-			);
-		} else if (record.eventName === 'REMOVE' && record.dynamodb?.OldImage) {
-			return transformDynamoDbEvent(record.dynamodb.OldImage).then(
-				(transformedItems) =>
-					Promise.all(
-						transformedItems.map((item) => {
-							logger.log(
-								`Deleting item from DynamoDb: ${JSON.stringify(item)}`,
-							);
-							return deleteFromDynamoDb(config.getPrimaryKey(item), tableName);
 						}),
 					),
 			);
