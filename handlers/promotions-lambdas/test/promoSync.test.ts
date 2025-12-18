@@ -61,8 +61,8 @@ describe('promoSync handler', () => {
 			],
 			countryGroups: ['GB'],
 		},
-		startTimestamp: new Date('2025-11-17T00:00:00.000Z'),
-		endTimestamp: new Date('2026-11-17T00:00:00.000Z'),
+		startTimestamp: '2025-11-17T00:00:00.000Z',
+		endTimestamp: '2026-11-17T00:00:00.000Z',
 		discount: {
 			amount: 50,
 			durationMonths: 12,
