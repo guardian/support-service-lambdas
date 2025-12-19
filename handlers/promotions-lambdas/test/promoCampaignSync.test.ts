@@ -1,12 +1,11 @@
 import type { DynamoDBRecord, DynamoDBStreamEvent } from 'aws-lambda';
 import type { AttributeValue } from 'aws-lambda/trigger/dynamodb-stream';
 import { handler } from '../src/handlers/promoCampaignSync';
-import { deleteFromDynamoDb, writeToDynamoDb } from '../src/lib/dynamodb';
+import { writeToDynamoDb } from '../src/lib/dynamodb';
 
 jest.mock('../src/lib/dynamodb');
 
 const mockedWriteToDynamoDb = jest.mocked(writeToDynamoDb);
-const mockedDeleteFromDynamoDb = jest.mocked(deleteFromDynamoDb);
 
 describe('promoCampaignSync handler', () => {
 	const validNewImage: Record<string, AttributeValue> = {
@@ -43,7 +42,6 @@ describe('promoCampaignSync handler', () => {
 			}),
 			'support-admin-console-promo-campaigns-CODE',
 		);
-		expect(mockedDeleteFromDynamoDb).not.toHaveBeenCalled();
 	});
 
 	it('should write to DynamoDB on MODIFY event', async () => {
@@ -68,42 +66,9 @@ describe('promoCampaignSync handler', () => {
 		);
 	});
 
-	it('should delete from DynamoDB on REMOVE event', async () => {
-		const record: DynamoDBRecord = {
-			eventName: 'REMOVE',
-			dynamodb: {
-				OldImage: validNewImage,
-				SequenceNumber: '123',
-			},
-		} as DynamoDBRecord;
-
-		await handler(createEvent([record]));
-
-		expect(mockedDeleteFromDynamoDb).toHaveBeenCalledWith(
-			expect.objectContaining({
-				campaignCode: 'TEST_CODE',
-			}),
-			'support-admin-console-promo-campaigns-CODE',
-		);
-		expect(mockedWriteToDynamoDb).not.toHaveBeenCalled();
-	});
-
 	it('should return batch item failure when NewImage is missing for INSERT', async () => {
 		const record: DynamoDBRecord = {
 			eventName: 'INSERT',
-			dynamodb: {
-				SequenceNumber: '123',
-			},
-		} as DynamoDBRecord;
-
-		const result = await handler(createEvent([record]));
-
-		expect(result.batchItemFailures).toEqual([{ itemIdentifier: '123' }]);
-	});
-
-	it('should return batch item failure when OldImage is missing for REMOVE', async () => {
-		const record: DynamoDBRecord = {
-			eventName: 'REMOVE',
 			dynamodb: {
 				SequenceNumber: '123',
 			},

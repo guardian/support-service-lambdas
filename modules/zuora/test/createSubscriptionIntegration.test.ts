@@ -76,6 +76,7 @@ describe('createSubscription integration', () => {
 	const mockPromotions: Promotion[] = [
 		{
 			name: 'Test Promotion',
+			campaignCode: 'campaign',
 			promotionType: {
 				name: 'percent_discount',
 				durationMonths: 3,
