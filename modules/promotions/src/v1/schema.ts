@@ -38,6 +38,7 @@ export const appliesToSchema = z.object({
 });
 
 export const promotionSchema = z.object({
+	uuid: z.string(),
 	name: z.string(),
 	promotionType: promotionTypeSchema,
 	campaignCode: z.string(),

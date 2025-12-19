@@ -6,11 +6,15 @@
     "test": "jest --group=-integration",
     "check-formatting": "prettier --check **.ts",
     "fix-formatting": "prettier --write **.ts",
-    "lint": "eslint src/**/*.ts"
+    "lint": "eslint src/**/*.ts",
+    "get-active-promos": "tsx ./src/scripts/getActivePromos.ts PROD"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.879.0",
     "@aws-sdk/util-dynamodb": "^3.879.0",
     "zod": "catalog:"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0"
   }
 }
