@@ -122,7 +122,7 @@ describe('deleteMParticleUser', () => {
 		expect(callArgs[1]).toEqual({
 			user_identities: [
 				{
-					identity_type: 'mpid',
+					identity_type: 'customer_id',
 					identity: userId,
 				},
 			],

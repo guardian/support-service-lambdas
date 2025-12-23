@@ -50,7 +50,7 @@ export async function deleteMParticleUser(
 		const requestBody: BulkDeletionRequest = {
 			user_identities: [
 				{
-					identity_type: 'mpid',
+					identity_type: 'customer_id',
 					identity: userId,
 				},
 			],
