@@ -12,7 +12,7 @@ import type { MParticleClient } from './mparticleClient';
 const BulkDeletionRequestSchema = z.object({
 	user_identities: z.array(
 		z.object({
-			identity_type: z.enum(['customer_id', 'email', 'other']),
+			identity_type: z.enum(['customer_id', 'email', 'other', 'mpid']),
 			identity: z.string(),
 		}),
 	),
