@@ -16,7 +16,10 @@ export interface BulkDeletionAPI {
 }
 
 export interface MParticleClient<
-	T extends DataSubjectAPI | EventsAPI | BulkDeletionAPI = DataSubjectAPI | EventsAPI | BulkDeletionAPI,
+	T extends DataSubjectAPI | EventsAPI | BulkDeletionAPI =
+		| DataSubjectAPI
+		| EventsAPI
+		| BulkDeletionAPI,
 > {
 	readonly clientType: T['clientType'];
 	readonly baseURL: string;
@@ -70,7 +73,10 @@ export const MParticleClient = {
 };
 
 export class MParticleClientImpl<
-	T extends DataSubjectAPI | EventsAPI | BulkDeletionAPI = DataSubjectAPI | EventsAPI | BulkDeletionAPI,
+	T extends DataSubjectAPI | EventsAPI | BulkDeletionAPI =
+		| DataSubjectAPI
+		| EventsAPI
+		| BulkDeletionAPI,
 > implements MParticleClient<T>
 {
 	readonly clientType: T['clientType'];
