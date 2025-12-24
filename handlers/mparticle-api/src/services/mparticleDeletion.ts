@@ -22,10 +22,11 @@ type BulkDeletionRequest = BulkDeletionRequestItem[];
 /**
  * mParticle Bulk Profile Deletion API Response Schema
  * The API returns 202 Accepted with no body on success
+ * Use a function schema to handle empty responses
  */
-const BulkDeletionResponseSchema = z.any();
+const BulkDeletionResponseSchema = (): void => undefined;
 
-type BulkDeletionResponse = unknown;
+type BulkDeletionResponse = void;
 
 /**
  * Delete a user from mParticle using the Bulk Profile Deletion API
