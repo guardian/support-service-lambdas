@@ -9,26 +9,23 @@ import type { MParticleClient } from './mparticleClient';
  * API Documentation: https://docs.mparticle.com/developers/apis/bulk-profile-deletion-api/
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Used for type inference
-const BulkDeletionRequestSchema = z.object({
-	user_identities: z.array(
-		z.object({
-			identity_type: z.enum(['customer_id', 'email', 'other', 'mpid']),
-			identity: z.string(),
-		}),
-	),
+const BulkDeletionRequestItemSchema = z.object({
+	environment_type: z.enum(['production', 'development']),
+	action: z.literal('delete'),
+	mpid: z.string().optional(),
+	identities: z.record(z.string()).optional(),
 });
 
-type BulkDeletionRequest = z.infer<typeof BulkDeletionRequestSchema>;
+type BulkDeletionRequestItem = z.infer<typeof BulkDeletionRequestItemSchema>;
+type BulkDeletionRequest = BulkDeletionRequestItem[];
 
 /**
- * mParticle API Response Schema
+ * mParticle Bulk Profile Deletion API Response Schema
+ * The API returns 202 Accepted with no body on success
  */
-const BulkDeletionResponseSchema = z.object({
-	request_id: z.string().optional(),
-	status: z.string().optional(),
-});
+const BulkDeletionResponseSchema = z.any();
 
-type BulkDeletionResponse = z.infer<typeof BulkDeletionResponseSchema>;
+type BulkDeletionResponse = unknown;
 
 /**
  * Delete a user from mParticle using the Bulk Profile Deletion API
@@ -43,27 +40,29 @@ type BulkDeletionResponse = z.infer<typeof BulkDeletionResponseSchema>;
 export async function deleteMParticleUser(
 	client: MParticleClient,
 	userId: string,
+	environment: 'production' | 'development' = 'production',
 ): Promise<DeletionResult> {
 	try {
 		logger.log(`Attempting to delete user ${userId} from mParticle`);
 
-		const requestBody: BulkDeletionRequest = {
-			user_identities: [
-				{
-					identity_type: 'customer_id',
-					identity: userId,
+		const requestBody: BulkDeletionRequest = [
+			{
+				environment_type: environment,
+				action: 'delete',
+				identities: {
+					customerid: userId,
 				},
-			],
-		};
+			},
+		];
 
 		const response = await client.post<
 			BulkDeletionRequest,
 			BulkDeletionResponse
-		>('/users/delete', requestBody, BulkDeletionResponseSchema);
+		>('/userprofile/bulkdelete', requestBody, BulkDeletionResponseSchema);
 
 		if (response.success) {
 			logger.log(
-				`Successfully deleted user ${userId} from mParticle. Request ID: ${response.data.request_id}`,
+				`Successfully deleted user ${userId} from mParticle (202 Accepted)`,
 			);
 			return { success: true };
 		} else {

@@ -119,13 +119,16 @@ describe('deleteMParticleUser', () => {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Test mock calls
 		const callArgs = mockPost.mock.calls[0];
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- Test mock args
-		expect(callArgs[1]).toEqual({
-			user_identities: [
-				{
-					identity_type: 'customer_id',
-					identity: userId,
+		expect(callArgs[0]).toBe('/userprofile/bulkdelete');
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access -- Test mock args
+		expect(callArgs[1]).toEqual([
+			{
+				environment_type: 'production',
+				action: 'delete',
+				identities: {
+					customerid: userId,
 				},
-			],
-		});
+			},
+		]);
 	});
 });

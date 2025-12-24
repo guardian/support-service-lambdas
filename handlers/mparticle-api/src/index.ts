@@ -71,8 +71,9 @@ export const handlerDeletion: Handler<SQSEvent, void> = async (
 	logger.log(`Processing ${event.Records.length} deletion messages`);
 
 	const config: AppConfig = await getAppConfig();
-	const mParticleClient = MParticleClient.createMParticleDataSubjectClient(
+	const mParticleClient = MParticleClient.createBulkDeletionClient(
 		config.workspace,
+		config.pod,
 	);
 	const brazeClient = new BrazeClient(config.braze.apiUrl, config.braze.apiKey);
 
@@ -113,6 +114,10 @@ async function services() {
 	return {
 		mParticleDataSubjectClient:
 			MParticleClient.createMParticleDataSubjectClient(config.workspace),
+		mParticleBulkDeletionClient: MParticleClient.createBulkDeletionClient(
+			config.workspace,
+			config.pod,
+		),
 		mParticleEventsAPIClient: MParticleClient.createEventsApiClient(
 			config.inputPlatform,
 			config.pod,
