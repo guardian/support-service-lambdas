@@ -17,16 +17,22 @@ import { deleteMParticleUser } from '../../services/mparticleDeletion';
  * @param userId - The user ID to delete
  * @param mParticleClient - Client for mParticle API
  * @param brazeClient - Client for Braze API
+ * @param mParticleEnvironment - The mParticle environment (production or development)
  */
 export async function processUserDeletion(
 	userId: string,
 	mParticleClient: MParticleClient,
 	brazeClient: BrazeClient,
+	mParticleEnvironment: 'production' | 'development' = 'production',
 ): Promise<void> {
 	logger.log(`Processing deletion for user ${userId}`);
 
 	// Call both APIs - they're idempotent (404 = success)
-	const mParticleResult = await deleteMParticleUser(mParticleClient, userId);
+	const mParticleResult = await deleteMParticleUser(
+		mParticleClient,
+		userId,
+		mParticleEnvironment,
+	);
 	const brazeResult = await deleteBrazeUser(brazeClient, userId);
 
 	// If mParticle failed with retryable error, throw to trigger SQS retry

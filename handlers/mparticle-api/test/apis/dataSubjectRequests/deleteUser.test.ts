@@ -27,11 +27,17 @@ describe('processUserDeletion', () => {
 			mockDeleteMParticleUser.mockResolvedValue({ success: true });
 			mockDeleteBrazeUser.mockResolvedValue({ success: true });
 
-			await processUserDeletion(userId, mockMParticleClient, mockBrazeClient);
+			await processUserDeletion(
+				userId,
+				mockMParticleClient,
+				mockBrazeClient,
+				'production',
+			);
 
 			expect(mockDeleteMParticleUser).toHaveBeenCalledWith(
 				mockMParticleClient,
 				userId,
+				'production',
 			);
 			expect(mockDeleteBrazeUser).toHaveBeenCalledWith(mockBrazeClient, userId);
 		});
@@ -48,7 +54,12 @@ describe('processUserDeletion', () => {
 			mockDeleteBrazeUser.mockResolvedValue({ success: true });
 
 			await expect(
-				processUserDeletion(userId, mockMParticleClient, mockBrazeClient),
+				processUserDeletion(
+					userId,
+					mockMParticleClient,
+					mockBrazeClient,
+					'production',
+				),
 			).rejects.toThrow('Network timeout');
 
 			expect(mockDeleteMParticleUser).toHaveBeenCalled();
@@ -67,7 +78,12 @@ describe('processUserDeletion', () => {
 			});
 
 			await expect(
-				processUserDeletion(userId, mockMParticleClient, mockBrazeClient),
+				processUserDeletion(
+					userId,
+					mockMParticleClient,
+					mockBrazeClient,
+					'production',
+				),
 			).rejects.toThrow('Server error');
 		});
 	});
@@ -89,7 +105,12 @@ describe('processUserDeletion', () => {
 			});
 
 			await expect(
-				processUserDeletion(userId, mockMParticleClient, mockBrazeClient),
+				processUserDeletion(
+					userId,
+					mockMParticleClient,
+					mockBrazeClient,
+					'production',
+				),
 			).rejects.toThrow('mParticle error');
 		});
 	});
@@ -104,7 +125,12 @@ describe('processUserDeletion', () => {
 			mockDeleteBrazeUser.mockResolvedValue({ success: true });
 
 			// Should not throw - message will be removed from queue
-			await processUserDeletion(userId, mockMParticleClient, mockBrazeClient);
+			await processUserDeletion(
+				userId,
+				mockMParticleClient,
+				mockBrazeClient,
+				'production',
+			);
 
 			expect(mockDeleteMParticleUser).toHaveBeenCalled();
 			expect(mockDeleteBrazeUser).toHaveBeenCalled();
@@ -119,7 +145,12 @@ describe('processUserDeletion', () => {
 			});
 
 			// Should not throw - message will be removed from queue
-			await processUserDeletion(userId, mockMParticleClient, mockBrazeClient);
+			await processUserDeletion(
+				userId,
+				mockMParticleClient,
+				mockBrazeClient,
+				'production',
+			);
 		});
 	});
 
@@ -129,7 +160,12 @@ describe('processUserDeletion', () => {
 			mockDeleteMParticleUser.mockResolvedValue({ success: true }); // 404 treated as success
 			mockDeleteBrazeUser.mockResolvedValue({ success: true });
 
-			await processUserDeletion(userId, mockMParticleClient, mockBrazeClient);
+			await processUserDeletion(
+				userId,
+				mockMParticleClient,
+				mockBrazeClient,
+				'production',
+			);
 
 			expect(mockDeleteMParticleUser).toHaveBeenCalled();
 			expect(mockDeleteBrazeUser).toHaveBeenCalled();

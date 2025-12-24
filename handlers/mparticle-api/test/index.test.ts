@@ -75,6 +75,7 @@ describe('handlerDeletion', () => {
 			'user-123',
 			expect.anything(),
 			expect.anything(),
+			'development',
 		);
 	});
 
@@ -203,6 +204,7 @@ describe('handlerDeletion', () => {
 			'json-user',
 			expect.anything(),
 			expect.anything(),
+			'development',
 		);
 	});
 });

@@ -70,6 +70,7 @@ export const handlerDeletion: Handler<SQSEvent, void> = async (
 ): Promise<void> => {
 	logger.log(`Processing ${event.Records.length} deletion messages`);
 
+	const stage = getEnv('STAGE');
 	const config: AppConfig = await getAppConfig();
 	const mParticleClient = MParticleClient.createBulkDeletionClient(
 		config.workspace,
@@ -77,10 +78,20 @@ export const handlerDeletion: Handler<SQSEvent, void> = async (
 	);
 	const brazeClient = new BrazeClient(config.braze.apiUrl, config.braze.apiKey);
 
+	// Determine mParticle environment based on AWS stage
+	// CODE uses development environment, PROD uses production environment
+	const mParticleEnvironment: 'production' | 'development' =
+		stage === 'PROD' ? 'production' : 'development';
+
 	// Process each record independently
 	// SQS will retry failed messages automatically
 	for (const record of event.Records) {
-		await processSQSRecord(record, mParticleClient, brazeClient);
+		await processSQSRecord(
+			record,
+			mParticleClient,
+			brazeClient,
+			mParticleEnvironment,
+		);
 	}
 
 	logger.log('Finished processing deletion messages');
@@ -93,6 +104,7 @@ async function processSQSRecord(
 	record: SQSRecord,
 	mParticleClient: MParticleClient,
 	brazeClient: BrazeClient,
+	mParticleEnvironment: 'production' | 'development',
 ): Promise<void> {
 	logger.log(`Processing message ${record.messageId}`);
 
@@ -100,7 +112,12 @@ async function processSQSRecord(
 	const body = DeletionRequestBodySchema.parse(JSON.parse(record.body));
 
 	// Process the deletion - throws on retryable failure
-	await processUserDeletion(body.userId, mParticleClient, brazeClient);
+	await processUserDeletion(
+		body.userId,
+		mParticleClient,
+		brazeClient,
+		mParticleEnvironment,
+	);
 
 	logger.log(
 		`Successfully processed deletion for user ${body.userId}. Message ${record.messageId} will be deleted from queue.`,
