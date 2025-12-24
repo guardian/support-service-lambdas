@@ -11,8 +11,15 @@ export interface EventsAPI {
 	readonly clientType: 'eventsApi';
 }
 
+export interface BulkDeletionAPI {
+	readonly clientType: 'bulkDeletion';
+}
+
 export interface MParticleClient<
-	T extends DataSubjectAPI | EventsAPI = DataSubjectAPI | EventsAPI,
+	T extends DataSubjectAPI | EventsAPI | BulkDeletionAPI =
+		| DataSubjectAPI
+		| EventsAPI
+		| BulkDeletionAPI,
 > {
 	readonly clientType: T['clientType'];
 	readonly baseURL: string;
@@ -40,6 +47,18 @@ export const MParticleClient = {
 		);
 	},
 
+	createBulkDeletionClient(
+		config: AppConfig['workspace'],
+		pod: string,
+	): MParticleClient<BulkDeletionAPI> {
+		return new MParticleClientImpl<BulkDeletionAPI>(
+			`https://s2s.${pod}.mparticle.com`,
+			config.key,
+			config.secret,
+			'bulkDeletion',
+		);
+	},
+
 	createEventsApiClient(
 		config: AppConfig['inputPlatform'],
 		pod: string,
@@ -54,7 +73,10 @@ export const MParticleClient = {
 };
 
 export class MParticleClientImpl<
-	T extends DataSubjectAPI | EventsAPI = DataSubjectAPI | EventsAPI,
+	T extends DataSubjectAPI | EventsAPI | BulkDeletionAPI =
+		| DataSubjectAPI
+		| EventsAPI
+		| BulkDeletionAPI,
 > implements MParticleClient<T>
 {
 	readonly clientType: T['clientType'];

@@ -7,10 +7,12 @@ import {
 	Policy,
 	PolicyStatement,
 	Role,
-	ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
+// import { ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+// import { Topic } from 'aws-cdk-lib/aws-sns';
+// import { SqsSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
-// import { SrAppConfigKey } from './cdk/SrAppConfigKey'; // Commented out for initial deployment - will be needed when SNS subscription is enabled
+// import { SrAppConfigKey } from './cdk/SrAppConfigKey';
 import { SrLambda } from './cdk/SrLambda';
 import { SrLambdaAlarm } from './cdk/SrLambdaAlarm';
 import { SrRestDomain } from './cdk/SrRestDomain';
@@ -77,6 +79,7 @@ export class MParticleApi extends SrStack {
 			},
 		});
 
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Lambda is deployed but SNS subscription temporarily disabled
 		const mmaUserDeletionLambda = new SrSqsLambda(
 			this,
 			'MmaUserDeletionLambda',
@@ -96,20 +99,29 @@ export class MParticleApi extends SrStack {
 			},
 		);
 
-		mmaUserDeletionLambda.inputQueue.addToResourcePolicy(
-			new PolicyStatement({
-				effect: Effect.ALLOW,
-				principals: [new ServicePrincipal('sns.amazonaws.com')],
-				actions: ['sqs:SendMessage'],
-				resources: [mmaUserDeletionLambda.inputQueue.queueArn],
-				conditions: {
-					ArnEquals: {
-						//'aws:SourceArn': identityMmaSnsDeletionRequestTopicArn, --- This will be uncommented when testing is complete ---
-						'aws:SourceArn': 'AAAAAAAAAAAA',
-					},
-				},
-			}),
-		);
+		// mmaUserDeletionLambda.inputQueue.addToResourcePolicy(
+		// 	new PolicyStatement({
+		// 		effect: Effect.ALLOW,
+		// 		principals: [new ServicePrincipal('sns.amazonaws.com')],
+		// 		actions: ['sqs:SendMessage'],
+		// 		resources: [mmaUserDeletionLambda.inputQueue.queueArn],
+		// 		conditions: {
+		// 			ArnEquals: {
+		// 				'aws:SourceArn': identityMmaSnsDeletionRequestTopicArn,
+		// 			},
+		// 		},
+		// 	}),
+		// );
+
+		// Subscribe the SQS queue to the Identity SNS topic for deletion requests
+		// const identityMmaSnsTopic = Topic.fromTopicArn(
+		// 	this,
+		// 	'IdentityMmaSnsDeletionRequestTopic',
+		// 	identityMmaSnsDeletionRequestTopicArn,
+		// );
+		// identityMmaSnsTopic.addSubscription(
+		// 	new SqsSubscription(mmaUserDeletionLambda.inputQueue),
+		// );
 
 		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {
 			app: app,

@@ -578,39 +578,6 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
     },
-    "QueuePolicy25439813": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sqs:SendMessage",
-              "Condition": {
-                "ArnEquals": {
-                  "aws:SourceArn": "AAAAAAAAAAAA",
-                },
-              },
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "sns.amazonaws.com",
-              },
-              "Resource": {
-                "Fn::GetAtt": [
-                  "Queue4A7E3555",
-                  "Arn",
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "Queues": [
-          {
-            "Ref": "Queue4A7E3555",
-          },
-        ],
-      },
-      "Type": "AWS::SQS::QueuePolicy",
-    },
     "RestApi0C43BF4B": {
       "Properties": {
         "Name": "support-CODE-mparticle-api",
@@ -2340,39 +2307,6 @@ DLQ: https://",
       },
       "Type": "AWS::SQS::Queue",
       "UpdateReplacePolicy": "Delete",
-    },
-    "QueuePolicy25439813": {
-      "Properties": {
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sqs:SendMessage",
-              "Condition": {
-                "ArnEquals": {
-                  "aws:SourceArn": "AAAAAAAAAAAA",
-                },
-              },
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "sns.amazonaws.com",
-              },
-              "Resource": {
-                "Fn::GetAtt": [
-                  "Queue4A7E3555",
-                  "Arn",
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-        "Queues": [
-          {
-            "Ref": "Queue4A7E3555",
-          },
-        ],
-      },
-      "Type": "AWS::SQS::QueuePolicy",
     },
     "RestApi0C43BF4B": {
       "Properties": {
