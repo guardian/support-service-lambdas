@@ -13,6 +13,7 @@ describe('Handler', () => {
 		PORTFOLIO: 'portfolio-webhook-url',
 		PLATFORM: 'platform-webhook-url',
 		ENGINE: 'engine-webhook-url',
+		PUZZLES: 'puzzles-webhook-url',
 	};
 
 	const mockCloudWatchAlarmEvent = {
