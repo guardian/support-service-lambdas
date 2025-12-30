@@ -127,10 +127,12 @@ new SingleContributionSalesforceWrites(
 new PromotionsLambdas(app, 'CODE', {
 	oldPromoCampaignStreamLabel: '2025-12-17T11:57:50.933',
 	oldPromoStreamLabel: '2023-04-28T14:57:20.201',
+	newPromoStreamLabel: '2025-12-29T00:00:00.000',
 });
 new PromotionsLambdas(app, 'PROD', {
 	oldPromoCampaignStreamLabel: '2025-12-17T11:57:59.560',
 	oldPromoStreamLabel: '2016-06-01T13:26:09.654',
+	newPromoStreamLabel: '2025-12-29T00:00:00.000',
 });
 
 const stacks: Array<new (app: App, stage: SrStageNames) => unknown> = [

@@ -202,6 +202,7 @@ const promotionsLambdas: HandlerDefinition = {
 	functionNames: [
 		'promotions-lambdas-promo-campaign-sync-',
 		'promotions-lambdas-promo-sync-',
+		'promotions-lambdas-promo-code-view-'
 	],
 	entryPoints: ['src/handlers/*.ts'],
 	dependencies: {
