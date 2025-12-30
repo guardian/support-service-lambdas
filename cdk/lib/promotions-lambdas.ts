@@ -167,7 +167,8 @@ export class PromotionsLambdas extends SrStack {
 		new SrLambdaAlarm(this, 'PromoCodeViewLambdaErrorAlarm', {
 			app: app,
 			alarmName: `${this.stage} ${app} - promo-code-view lambda error`,
-			alarmDescription: 'The promo-code-view lambda failed to process an event.',
+			alarmDescription:
+				'The promo-code-view lambda failed to process an event.',
 			lambdaFunctionNames: promoCodeViewLambda.functionName,
 			metric: new Metric({
 				metricName: 'Errors',
