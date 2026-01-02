@@ -67,6 +67,9 @@ export const previewCreateSubscription = async (
 	});
 
 	const numberOfMonthsToPreview = 13; // 13 allows for annual subs to have a second invoice
+	createSubscriptionOrderAction.createSubscription.terms.initialTerm.period =
+		numberOfMonthsToPreview + 1; // This is to work round an issue where Zuora cuts off the preview at the term end date
+
 	const orderRequest: PreviewOrderRequest = {
 		existingAccountNumber: accountNumber,
 		orderDate: zuoraDateFormat(dayjs()),
@@ -79,8 +82,7 @@ export const previewCreateSubscription = async (
 			previewThruType: 'SpecificDate',
 			previewTypes: ['BillingDocs'],
 			specificPreviewThruDate: zuoraDateFormat(
-				// Preview from the first payment date which is the customer acceptance date
-				customerAcceptanceDate.add(numberOfMonthsToPreview, 'month'),
+				dayjs().add(numberOfMonthsToPreview, 'month'),
 			),
 		},
 	};
