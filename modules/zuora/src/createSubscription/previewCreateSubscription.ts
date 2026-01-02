@@ -79,7 +79,8 @@ export const previewCreateSubscription = async (
 			previewThruType: 'SpecificDate',
 			previewTypes: ['BillingDocs'],
 			specificPreviewThruDate: zuoraDateFormat(
-				dayjs().add(numberOfMonthsToPreview, 'month'),
+				// Preview from the first payment date which is the customer acceptance date
+				customerAcceptanceDate.add(numberOfMonthsToPreview, 'month'),
 			),
 		},
 	};
