@@ -9,7 +9,7 @@ import {
 	handleEventRecords,
 	handler,
 } from '../src/handlers/promoCodeView';
-// Mock the DynamoDB client
+
 const mockSend = jest.fn();
 jest.mock('@aws-sdk/client-dynamodb', () => {
 	const actual = jest.requireActual<typeof DynamoDBClientModule>(
@@ -24,10 +24,25 @@ jest.mock('@aws-sdk/client-dynamodb', () => {
 	};
 });
 
+const mockLoggerLog = jest.fn();
+const mockLoggerError = jest.fn();
+jest.mock('@modules/routing/logger', () => ({
+	logger: {
+		log: (...args: unknown[]): void => {
+			mockLoggerLog(...args);
+		},
+		error: (...args: unknown[]): void => {
+			mockLoggerError(...args);
+		},
+	},
+}));
+
 describe('promoCodeView handler', () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		mockSend.mockReset();
+		mockLoggerLog.mockClear();
+		mockLoggerError.mockClear();
 		process.env.STAGE = 'CODE';
 	});
 
@@ -43,7 +58,7 @@ describe('promoCodeView handler', () => {
 			const newImage: Record<string, AttributeValue> = {
 				promoCode: { S: 'PROMO123' },
 				campaignCode: { S: 'CAMPAIGN1' },
-				name: { S: 'Summer Sale' },
+				name: { S: 'promotion name' },
 				discount: {
 					M: {
 						amount: { N: '20' },
@@ -54,7 +69,7 @@ describe('promoCodeView handler', () => {
 				expires: { S: '2024-12-31' },
 				landingPage: {
 					M: {
-						title: { S: 'Special Offer' },
+						title: { S: 'Landing page title' },
 					},
 				},
 			};
@@ -75,7 +90,7 @@ describe('promoCodeView handler', () => {
 				'Subscription',
 			);
 			expect(result?.request.PutRequest.Item.promotion_name).toBe(
-				'Summer Sale',
+				'promotion name',
 			);
 			expect(result?.request.PutRequest.Item.discount_percent).toBe(20);
 			expect(result?.request.PutRequest.Item.discount_months).toBe(3);
@@ -92,6 +107,10 @@ describe('promoCodeView handler', () => {
 			);
 
 			expect(result).toBeNull();
+			expect(mockLoggerLog).toHaveBeenCalledWith(
+				'WARNING: Missing required promo fields, skipping record.',
+				newImage,
+			);
 		});
 
 		it('should return null when campaign is not found', () => {
@@ -107,6 +126,9 @@ describe('promoCodeView handler', () => {
 			);
 
 			expect(result).toBeNull();
+			expect(mockLoggerLog).toHaveBeenCalledWith(
+				'WARNING: Campaign UNKNOWN_CAMPAIGN not found for promo PROMO123',
+			);
 		});
 
 		it('should handle missing discount fields with defaults', () => {
@@ -170,12 +192,18 @@ describe('promoCodeView handler', () => {
 			expect(Object.keys(result)).toHaveLength(2);
 			expect(result['PROMO1']).toBeDefined();
 			expect(result['PROMO2']).toBeDefined();
+			expect(mockLoggerLog).toHaveBeenCalledWith(
+				'Successfully processed 2 records.',
+			);
 		});
 
 		it('should return empty object for empty records array', () => {
 			const result = handleEventRecords([], campaignDetails);
 
 			expect(result).toEqual({});
+			expect(mockLoggerLog).toHaveBeenCalledWith(
+				'Successfully processed 0 records.',
+			);
 		});
 	});
 
@@ -213,6 +241,9 @@ describe('promoCodeView handler', () => {
 			});
 
 			expect(mockSend).toHaveBeenCalledTimes(1);
+			expect(mockLoggerLog).toHaveBeenCalledWith(
+				'Retrieved 1 of 1 campaigns for stage CODE',
+			);
 		});
 
 		it('should return empty object when no campaign codes in records', async () => {
@@ -230,6 +261,9 @@ describe('promoCodeView handler', () => {
 
 			expect(result).toEqual({});
 			expect(mockSend).not.toHaveBeenCalled();
+			expect(mockLoggerLog).toHaveBeenCalledWith(
+				'No campaign codes found in records',
+			);
 		});
 	});
 
@@ -263,6 +297,9 @@ describe('promoCodeView handler', () => {
 
 			expect(result).toEqual([]);
 			expect(mockSend).toHaveBeenCalledTimes(1);
+			expect(mockLoggerLog).toHaveBeenCalledWith(
+				'Successfully updated 1 promo code views.',
+			);
 		});
 
 		it('should return failed promo codes when batch write fails', async () => {
@@ -275,6 +312,10 @@ describe('promoCodeView handler', () => {
 			);
 
 			expect(result).toEqual(['PROMO1']);
+			expect(mockLoggerError).toHaveBeenCalledWith(
+				'Error writing batch to DynamoDB',
+				expect.any(Error),
+			);
 		});
 	});
 
@@ -372,6 +413,9 @@ describe('promoCodeView handler', () => {
 			const result = await handler(event);
 
 			expect(result.batchItemFailures).toEqual([]);
+			expect(mockLoggerLog).toHaveBeenCalledWith(
+				'Successfully updated 1 of 1 promo code views.',
+			);
 		});
 
 		it('should handle missing stage in environment', async () => {

@@ -6,6 +6,7 @@ import {
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { awsConfig } from '@modules/aws/config';
+import { logger } from '@modules/routing/logger';
 import type {
 	AttributeValue,
 	DynamoDBBatchResponse,
@@ -20,19 +21,56 @@ const campaignSchema = z.object({
 	product: z.string(),
 });
 
+const getString = (attr: AttributeValue | undefined): string | undefined =>
+	attr?.S;
+
+const getNumber = (attr: AttributeValue | undefined): number =>
+	attr?.N ? parseInt(attr.N, 10) : 0;
+
+const parseDiscount = (
+	discount: AttributeValue | undefined,
+): { percent: number; months: number } => {
+	if (!discount?.M) {
+		return { percent: 0, months: 0 };
+	}
+	return {
+		percent: getNumber(discount.M.amount),
+		months: getNumber(discount.M.durationMonths),
+	};
+};
+
+const getViewTableName = (stage: string): string =>
+	`MembershipSub-PromoCode-View-${stage}`;
+
+const getCampaignTableName = (stage: string): string =>
+	`support-admin-console-promo-campaigns-${stage}`;
+
+const extractCampaignCodes = (records: DynamoDBRecord[]): Set<string> => {
+	const campaignCodes = new Set<string>();
+	records.forEach((record) => {
+		const campaignCode = getString(record.dynamodb?.NewImage?.campaignCode);
+		if (campaignCode) {
+			campaignCodes.add(campaignCode);
+		}
+	});
+	return campaignCodes;
+};
+
+interface PromoViewItem {
+	promo_code: string;
+	campaign_code: string;
+	promotion_name: string;
+	campaign_name: string;
+	product_family: string;
+	promotion_type: string;
+	discount_percent: number;
+	discount_months: number;
+	channel_name: string;
+}
+
 type PutRequest = {
 	PutRequest: {
-		Item: {
-			promo_code: string;
-			campaign_code: string;
-			promotion_name: string;
-			campaign_name: string;
-			product_family: string;
-			promotion_type: string;
-			discount_percent: number;
-			discount_months: number;
-			channel_name: string;
-		};
+		Item: PromoViewItem;
 	};
 };
 
@@ -61,7 +99,7 @@ export function handleEventRecords(
 		return acc;
 	}, {});
 
-	console.log(`Successfully processed ${eventRecords.length} records.`);
+	logger.log(`Successfully processed ${eventRecords.length} records.`);
 	return putRequestsByPromoCode;
 }
 
@@ -72,52 +110,43 @@ export function generatePutRequestFromNewPromoSchema(
 		{ campaign_name: string; product_family: string }
 	>,
 ): { promoCode: string; request: PutRequest } | null {
-	if (
-		!newImage.promoCode?.S ||
-		!newImage.campaignCode?.S ||
-		!newImage.name?.S
-	) {
-		console.warn('Missing required promo fields, skipping record.', newImage);
+	const promoCode = getString(newImage.promoCode);
+	const campaignCode = getString(newImage.campaignCode);
+	const promotionName = getString(newImage.name);
+
+	if (!promoCode || !campaignCode || !promotionName) {
+		logger.log(
+			'WARNING: Missing required promo fields, skipping record.',
+			newImage,
+		);
 		return null;
 	}
-
-	const promoCode = newImage.promoCode.S;
-	const campaignCode = newImage.campaignCode.S;
-	const promotionName = newImage.name.S;
 
 	const campaignData = campaignDetailsByCampaignCode[campaignCode];
 	if (!campaignData) {
-		console.warn(`Campaign ${campaignCode} not found for promo ${promoCode}`);
+		logger.log(
+			`WARNING: Campaign ${campaignCode} not found for promo ${promoCode}`,
+		);
 		return null;
 	}
-	let discountPercent = 0;
-	let discountDurationMonths = 0;
-	if (newImage.discount?.M) {
-		discountPercent = newImage.discount.M.amount?.N
-			? parseInt(newImage.discount.M.amount.N, 10)
-			: 0;
-		discountDurationMonths = newImage.discount.M.durationMonths?.N
-			? parseInt(newImage.discount.M.durationMonths.N, 10)
-			: 0;
-	}
+
+	const discount = parseDiscount(newImage.discount);
+
+	const item = {
+		promo_code: promoCode,
+		campaign_code: campaignCode,
+		promotion_name: promotionName,
+		campaign_name: campaignData.campaign_name,
+		product_family: campaignData.product_family,
+		promotion_type: discount.percent > 0 ? 'percent_discount' : 'other',
+		discount_percent: discount.percent,
+		discount_months: discount.months,
+		channel_name: '', //What needs to go here?
+	};
 
 	return {
 		promoCode,
-		request: {
-			PutRequest: {
-				Item: {
-					promo_code: promoCode,
-					campaign_code: campaignCode,
-					promotion_name: promotionName,
-					campaign_name: campaignData.campaign_name,
-					product_family: campaignData.product_family,
-					promotion_type: discountPercent > 0 ? 'percent_discount' : 'other',
-					discount_percent: discountPercent,
-					discount_months: discountDurationMonths,
-					channel_name: 'What needs to go here?',
-				},
-			},
-		},
+		request: { PutRequest: { Item: item } },
 	};
 }
 
@@ -156,8 +185,8 @@ export async function batchWriteRequestsForCodes(
 		}
 	});
 
-	console.log(
-		`Putting records into table: MembershipSub-PromoCode-View-${stage} = `,
+	logger.log(
+		`Putting records into table: ${getViewTableName(stage)}`,
 		JSON.stringify(putRequestsAsArray),
 	);
 
@@ -165,12 +194,11 @@ export async function batchWriteRequestsForCodes(
 		string,
 		Array<{ PutRequest: { Item: Record<string, DynamoDBAttributeValue> } }>
 	> = {};
-	RequestItemsObj['MembershipSub-PromoCode-View-' + stage] =
-		putRequestsAsArray.map((req) => ({
-			PutRequest: {
-				Item: marshall(req.PutRequest.Item),
-			},
-		}));
+	RequestItemsObj[getViewTableName(stage)] = putRequestsAsArray.map((req) => ({
+		PutRequest: {
+			Item: marshall(req.PutRequest.Item),
+		},
+	}));
 
 	try {
 		await dynamoClient.send(
@@ -178,12 +206,12 @@ export async function batchWriteRequestsForCodes(
 				RequestItems: RequestItemsObj,
 			}),
 		);
-		console.log(
+		logger.log(
 			`Successfully updated ${putRequestsAsArray.length} promo code views.`,
 		);
 		return [];
 	} catch (err) {
-		console.error('Error writing batch to DynamoDB', err);
+		logger.error('Error writing batch to DynamoDB', err);
 		return promoCodes;
 	}
 }
@@ -192,13 +220,7 @@ export async function fetchCampaigns(
 	records: DynamoDBRecord[],
 	stage: 'CODE' | 'PROD',
 ): Promise<Record<string, { campaign_name: string; product_family: string }>> {
-	const campaignCodes = new Set<string>();
-	records.forEach((record) => {
-		const campaignCode = record.dynamodb?.NewImage?.campaignCode?.S;
-		if (campaignCode) {
-			campaignCodes.add(campaignCode);
-		}
-	});
+	const campaignCodes = extractCampaignCodes(records);
 
 	const campaignDetailsByCampaignCode: Record<
 		string,
@@ -206,11 +228,11 @@ export async function fetchCampaigns(
 	> = {};
 
 	if (campaignCodes.size === 0) {
-		console.log('No campaign codes found in records');
+		logger.log('No campaign codes found in records');
 		return campaignDetailsByCampaignCode;
 	}
 
-	const tableName = `support-admin-console-promo-campaigns-${stage}`;
+	const tableName = getCampaignTableName(stage);
 	const keys = Array.from(campaignCodes).map((code) => ({
 		campaignCode: { S: code },
 	}));
@@ -228,7 +250,7 @@ export async function fetchCampaigns(
 	const items = (data.Responses?.[tableName] ?? []).map((item) =>
 		campaignSchema.parse(unmarshall(item)),
 	);
-	console.log(
+	logger.log(
 		`Retrieved ${items.length} of ${campaignCodes.size} campaigns for stage ${stage}`,
 	);
 
@@ -241,6 +263,26 @@ export async function fetchCampaigns(
 
 	return campaignDetailsByCampaignCode;
 }
+
+const createBatchItemFailures = (
+	records: DynamoDBRecord[],
+	failedPromoCodes?: string[],
+): Array<{ itemIdentifier: string }> => {
+	let filteredRecords = records;
+
+	if (failedPromoCodes) {
+		filteredRecords = records.filter((record) => {
+			const promoCode = getString(record.dynamodb?.NewImage?.promoCode);
+			return promoCode && failedPromoCodes.includes(promoCode);
+		});
+	}
+
+	return filteredRecords
+		.map((record) => ({
+			itemIdentifier: record.dynamodb?.SequenceNumber ?? '',
+		}))
+		.filter((item) => item.itemIdentifier !== '');
+};
 
 export const handler = async (
 	event: DynamoDBStreamEvent,
@@ -267,25 +309,19 @@ export const handler = async (
 		const totalToUpdate = Object.keys(putRequestsByPromoCode).length;
 
 		const totalUpdated = totalToUpdate - failedPromoCodes.length;
-		console.log(
+		logger.log(
 			`Successfully updated ${totalUpdated} of ${totalToUpdate} promo code views.`,
 		);
-		const batchItemFailures = event.Records.filter((record) => {
-			const promoCode = record.dynamodb?.NewImage?.promoCode?.S;
-			return promoCode && failedPromoCodes.includes(promoCode);
-		})
-			.map((record) => ({
-				itemIdentifier: record.dynamodb?.SequenceNumber ?? '',
-			}))
-			.filter((item) => item.itemIdentifier !== '');
+		const batchItemFailures = createBatchItemFailures(
+			event.Records,
+			failedPromoCodes,
+		);
 
 		return { batchItemFailures };
 	} catch (err) {
-		console.error('Error processing records', err);
+		logger.error('Error processing records', err);
 		return {
-			batchItemFailures: event.Records.map((record) => ({
-				itemIdentifier: record.dynamodb?.SequenceNumber ?? '',
-			})).filter((item) => item.itemIdentifier !== ''),
+			batchItemFailures: createBatchItemFailures(event.Records),
 		};
 	}
 };
