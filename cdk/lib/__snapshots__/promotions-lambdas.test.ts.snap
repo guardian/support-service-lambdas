@@ -441,7 +441,7 @@ exports[`The Promotions lambdas stack matches the snapshot 1`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":table/support-admin-console-promos-CODE/stream/2025-12-29T00:00:00.000",
+              ":table/support-admin-console-promos-CODE/stream/2026-01-05T11:33:36.603",
             ],
           ],
         },
@@ -729,7 +729,7 @@ exports[`The Promotions lambdas stack matches the snapshot 1`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":table/support-admin-console-promos-CODE/stream/2025-12-29T00:00:00.000",
+                    ":table/support-admin-console-promos-CODE/stream/2026-01-05T11:33:36.603",
                   ],
                 ],
               },
@@ -1726,7 +1726,7 @@ exports[`The Promotions lambdas stack matches the snapshot 2`] = `
               {
                 "Ref": "AWS::AccountId",
               },
-              ":table/support-admin-console-promos-PROD/stream/2025-12-29T00:00:00.000",
+              ":table/support-admin-console-promos-PROD/stream/2026-01-05T11:50:46.239",
             ],
           ],
         },
@@ -2014,7 +2014,7 @@ exports[`The Promotions lambdas stack matches the snapshot 2`] = `
                     {
                       "Ref": "AWS::AccountId",
                     },
-                    ":table/support-admin-console-promos-PROD/stream/2025-12-29T00:00:00.000",
+                    ":table/support-admin-console-promos-PROD/stream/2026-01-05T11:50:46.239",
                   ],
                 ],
               },
