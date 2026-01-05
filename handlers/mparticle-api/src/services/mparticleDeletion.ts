@@ -2,7 +2,7 @@ import { logger } from '@modules/routing/logger';
 import { z } from 'zod';
 import type { DeletionResult } from '../types/deletionMessage';
 import { HttpError } from './make-http-request';
-import type { MParticleClient } from './mparticleClient';
+import type { BulkDeletionAPI, MParticleClient } from './mparticleClient';
 
 /**
  * mParticle Bulk Profile Deletion API Request Schema
@@ -39,7 +39,7 @@ type BulkDeletionResponse = void;
  * @returns DeletionResult indicating success or failure with retry information
  */
 export async function deleteMParticleUser(
-	client: MParticleClient,
+	client: MParticleClient<BulkDeletionAPI>,
 	userId: string,
 	environment: 'production' | 'development' = 'production',
 ): Promise<DeletionResult> {

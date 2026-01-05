@@ -6,15 +6,22 @@ jest.mock('../src/apis/dataSubjectRequests/deleteUser');
 jest.mock('../src/services/config', () => ({
 	getAppConfig: jest.fn().mockResolvedValue({
 		workspace: {
-			id: 'test-workspace',
-			environment: 'test',
-			accountId: '12345',
-			mpApiKey: 'test-key',
-			mpApiSecret: 'test-secret',
+			key: 'test-key',
+			secret: 'test-secret',
 		},
+		inputPlatform: {
+			key: 'input-key',
+			secret: 'input-secret',
+		},
+		pod: 'EU1',
+		sarResultsBucket: 'test-bucket',
 		braze: {
 			apiUrl: 'https://api.braze.com',
 			apiKey: 'test-braze-key',
+		},
+		identityApi: {
+			baseUrl: 'https://idapi.example.com',
+			accessToken: 'test-token',
 		},
 	}),
 	getEnv: jest.fn().mockReturnValue('test'),
@@ -73,6 +80,7 @@ describe('handlerDeletion', () => {
 		expect(mockProcessUserDeletion).toHaveBeenCalledTimes(1);
 		expect(mockProcessUserDeletion).toHaveBeenCalledWith(
 			'user-123',
+			expect.anything(),
 			expect.anything(),
 			expect.anything(),
 			'development',
@@ -202,6 +210,7 @@ describe('handlerDeletion', () => {
 
 		expect(mockProcessUserDeletion).toHaveBeenCalledWith(
 			'json-user',
+			expect.anything(),
 			expect.anything(),
 			expect.anything(),
 			'development',

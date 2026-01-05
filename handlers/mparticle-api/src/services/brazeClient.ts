@@ -133,14 +133,6 @@ export async function deleteBrazeUser(
 			};
 		}
 	} catch (error) {
-		// Handle 404 as success - user already deleted (idempotent)
-		if (error instanceof HttpError && error.statusCode === 404) {
-			logger.log(
-				`User ${userId} not found in Braze (404) - treating as successful deletion`,
-			);
-			return { success: true };
-		}
-
 		logger.error(`Unexpected error deleting user ${userId} from Braze`, error);
 		return {
 			success: false,

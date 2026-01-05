@@ -1,7 +1,8 @@
 import { processUserDeletion } from '../../../src/apis/dataSubjectRequests/deleteUser';
 import type { BrazeClient } from '../../../src/services/brazeClient';
 import { deleteBrazeUser } from '../../../src/services/brazeClient';
-import type { MParticleClient } from '../../../src/services/mparticleClient';
+import type { IdentityApiClient } from '../../../src/services/identityApiClient';
+import type { BulkDeletionAPI, MParticleClient } from '../../../src/services/mparticleClient';
 import { deleteMParticleUser } from '../../../src/services/mparticleDeletion';
 
 // Mock the modules
@@ -12,14 +13,24 @@ describe('processUserDeletion', () => {
 	const mockDeleteMParticleUser = deleteMParticleUser as jest.Mock;
 	const mockDeleteBrazeUser = deleteBrazeUser as jest.Mock;
 
-	const mockMParticleClient = {} as MParticleClient;
+	const mockMParticleClient = {} as MParticleClient<BulkDeletionAPI>;
 	const mockBrazeClient = {} as BrazeClient;
+	const mockIdentityApi = {
+		getUser: jest.fn(),
+	};
+	const mockIdentityApiClient = mockIdentityApi as unknown as IdentityApiClient;
+	const mockGetUser = mockIdentityApi.getUser;
 	const userId = 'test-user-123';
 
 	beforeEach(() => {
 		jest.clearAllMocks();
 		console.log = jest.fn();
 		console.error = jest.fn();
+		mockGetUser.mockReset();
+		mockGetUser.mockResolvedValue({
+			identityId: userId,
+			brazeUuid: 'braze-uuid-123',
+		});
 	});
 
 	describe('Both deletions succeed', () => {
@@ -31,6 +42,7 @@ describe('processUserDeletion', () => {
 				userId,
 				mockMParticleClient,
 				mockBrazeClient,
+				mockIdentityApiClient,
 				'production',
 			);
 
@@ -39,7 +51,10 @@ describe('processUserDeletion', () => {
 				userId,
 				'production',
 			);
-			expect(mockDeleteBrazeUser).toHaveBeenCalledWith(mockBrazeClient, userId);
+			expect(mockDeleteBrazeUser).toHaveBeenCalledWith(
+				mockBrazeClient,
+				'braze-uuid-123',
+			);
 		});
 	});
 
@@ -58,6 +73,7 @@ describe('processUserDeletion', () => {
 					userId,
 					mockMParticleClient,
 					mockBrazeClient,
+					mockIdentityApiClient,
 					'production',
 				),
 			).rejects.toThrow('Network timeout');
@@ -82,6 +98,7 @@ describe('processUserDeletion', () => {
 					userId,
 					mockMParticleClient,
 					mockBrazeClient,
+					mockIdentityApiClient,
 					'production',
 				),
 			).rejects.toThrow('Server error');
@@ -109,6 +126,7 @@ describe('processUserDeletion', () => {
 					userId,
 					mockMParticleClient,
 					mockBrazeClient,
+					mockIdentityApiClient,
 					'production',
 				),
 			).rejects.toThrow('mParticle error');
@@ -129,6 +147,7 @@ describe('processUserDeletion', () => {
 				userId,
 				mockMParticleClient,
 				mockBrazeClient,
+				mockIdentityApiClient,
 				'production',
 			);
 
@@ -149,6 +168,7 @@ describe('processUserDeletion', () => {
 				userId,
 				mockMParticleClient,
 				mockBrazeClient,
+				mockIdentityApiClient,
 				'production',
 			);
 		});
@@ -164,11 +184,48 @@ describe('processUserDeletion', () => {
 				userId,
 				mockMParticleClient,
 				mockBrazeClient,
+				mockIdentityApiClient,
 				'production',
 			);
 
 			expect(mockDeleteMParticleUser).toHaveBeenCalled();
 			expect(mockDeleteBrazeUser).toHaveBeenCalled();
+		});
+	});
+	
+	describe('Identity API integration', () => {
+		it('should skip Braze deletion when brazeUuid is missing', async () => {
+			mockGetUser.mockResolvedValue({ identityId: userId });
+			mockDeleteMParticleUser.mockResolvedValue({ success: true });
+			mockDeleteBrazeUser.mockResolvedValue({ success: true });
+
+			await processUserDeletion(
+				userId,
+				mockMParticleClient,
+				mockBrazeClient,
+				mockIdentityApiClient,
+				'production',
+			);
+
+			expect(mockDeleteMParticleUser).toHaveBeenCalled();
+			expect(mockDeleteBrazeUser).not.toHaveBeenCalled();
+		});
+
+		it('should throw when Identity API returns no user', async () => {
+			mockGetUser.mockResolvedValue(null);
+
+			await expect(
+				processUserDeletion(
+					userId,
+					mockMParticleClient,
+					mockBrazeClient,
+					mockIdentityApiClient,
+					'production',
+				),
+			).rejects.toThrow('Unable to fetch Identity API data');
+
+			expect(mockDeleteMParticleUser).not.toHaveBeenCalled();
+			expect(mockDeleteBrazeUser).not.toHaveBeenCalled();
 		});
 	});
 });

@@ -1,5 +1,5 @@
 import { HttpError } from '../../src/services/make-http-request';
-import type { MParticleClient } from '../../src/services/mparticleClient';
+import type { BulkDeletionAPI, MParticleClient } from '../../src/services/mparticleClient';
 import { deleteMParticleUser } from '../../src/services/mparticleDeletion';
 
 jest.mock('@modules/routing/logger', () => ({
@@ -15,19 +15,19 @@ jest.mock('@modules/routing/logger', () => ({
 describe('deleteMParticleUser', () => {
 	const userId = 'test-user-789';
 	const mockPost = jest.fn();
-	const mockClient = {} as MParticleClient;
+	let mockClient: MParticleClient<BulkDeletionAPI>;
 
 	beforeEach(() => {
 		jest.clearAllMocks();
 		console.log = jest.fn();
 		console.error = jest.fn();
-		mockClient.post = mockPost;
+		mockPost.mockReset();
+		mockClient = { post: mockPost } as unknown as MParticleClient<BulkDeletionAPI>;
 	});
 
 	it('should have a basic test', async () => {
 		mockPost.mockResolvedValue({
 			success: true,
-			data: { request_id: 'test-request-123' },
 		});
 
 		const result = await deleteMParticleUser(mockClient, userId);
@@ -111,7 +111,6 @@ describe('deleteMParticleUser', () => {
 	it('should send correct request body format', async () => {
 		mockPost.mockResolvedValue({
 			success: true,
-			data: {},
 		});
 
 		await deleteMParticleUser(mockClient, userId);

@@ -14,7 +14,12 @@ import { BatonS3WriterImpl } from './services/batonS3Writer';
 import { BrazeClient } from './services/brazeClient';
 import type { AppConfig } from './services/config';
 import { getAppConfig, getEnv } from './services/config';
+import { IdentityApiClient } from './services/identityApiClient';
 import { MParticleClient } from './services/mparticleClient';
+import type {
+	BulkDeletionAPI,
+	MParticleClient as MParticleClientType,
+} from './services/mparticleClient';
 import { DeletionRequestBodySchema } from './types/deletionMessage';
 
 export const handlerHttp: Handler<
@@ -77,6 +82,10 @@ export const handlerDeletion: Handler<SQSEvent, void> = async (
 		config.pod,
 	);
 	const brazeClient = new BrazeClient(config.braze.apiUrl, config.braze.apiKey);
+	const identityApiClient = new IdentityApiClient(
+		config.identityApi.baseUrl,
+		config.identityApi.accessToken,
+	);
 
 	// Determine mParticle environment based on AWS stage
 	// CODE uses development environment, PROD uses production environment
@@ -90,6 +99,7 @@ export const handlerDeletion: Handler<SQSEvent, void> = async (
 			record,
 			mParticleClient,
 			brazeClient,
+			identityApiClient,
 			mParticleEnvironment,
 		);
 	}
@@ -102,8 +112,9 @@ export const handlerDeletion: Handler<SQSEvent, void> = async (
  */
 async function processSQSRecord(
 	record: SQSRecord,
-	mParticleClient: MParticleClient,
+	mParticleClient: MParticleClientType<BulkDeletionAPI>,
 	brazeClient: BrazeClient,
+	identityApiClient: IdentityApiClient,
 	mParticleEnvironment: 'production' | 'development',
 ): Promise<void> {
 	logger.log(`Processing message ${record.messageId}`);
@@ -116,6 +127,7 @@ async function processSQSRecord(
 		body.userId,
 		mParticleClient,
 		brazeClient,
+		identityApiClient,
 		mParticleEnvironment,
 	);
 

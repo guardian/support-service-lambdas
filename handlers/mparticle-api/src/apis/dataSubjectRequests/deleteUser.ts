@@ -1,8 +1,10 @@
 import { logger } from '@modules/routing/logger';
 import type { BrazeClient } from '../../services/brazeClient';
 import { deleteBrazeUser } from '../../services/brazeClient';
-import type { MParticleClient } from '../../services/mparticleClient';
+import type { IdentityApiClient } from '../../services/identityApiClient';
+import type { BulkDeletionAPI, MParticleClient } from '../../services/mparticleClient';
 import { deleteMParticleUser } from '../../services/mparticleDeletion';
+import type { DeletionResult } from '../../types/deletionMessage';
 
 /**
  * Process a user deletion request
@@ -14,38 +16,58 @@ import { deleteMParticleUser } from '../../services/mparticleDeletion';
  * 4. If either fails with retryable error: throws to trigger SQS retry
  * 5. SQS automatically retries up to maxReceiveCount, then moves to DLQ
  *
- * @param userId - The user ID to delete
+ * @param identityId - The identity ID (customerId) to delete
  * @param mParticleClient - Client for mParticle API
  * @param brazeClient - Client for Braze API
  * @param mParticleEnvironment - The mParticle environment (production or development)
  */
 export async function processUserDeletion(
-	userId: string,
-	mParticleClient: MParticleClient,
+	identityId: string,
+	mParticleClient: MParticleClient<BulkDeletionAPI>,
 	brazeClient: BrazeClient,
+	identityApiClient: IdentityApiClient,
 	mParticleEnvironment: 'production' | 'development' = 'production',
 ): Promise<void> {
-	logger.log(`Processing deletion for user ${userId}`);
+	logger.log(`Processing deletion for user ${identityId}`);
 
-	// Call both APIs - they're idempotent (404 = success)
+	const identityUser = await identityApiClient.getUser(identityId);
+	if (!identityUser) {
+		const error = new Error(
+			`Unable to fetch Identity API data for user ${identityId}`,
+		);
+		logger.error(error.message, error);
+		throw error;
+	}
+
+	const { identityId: resolvedIdentityId, brazeUuid } = identityUser;
+
+	// Delete from mParticle using the identity ID (customer_id)
 	const mParticleResult = await deleteMParticleUser(
 		mParticleClient,
-		userId,
+		resolvedIdentityId,
 		mParticleEnvironment,
 	);
-	const brazeResult = await deleteBrazeUser(brazeClient, userId);
+
+	let brazeResult: DeletionResult | null = null;
+	if (brazeUuid) {
+		brazeResult = await deleteBrazeUser(brazeClient, brazeUuid);
+	} else {
+		logger.log(
+			`Identity API did not return a brazeUuid for user ${resolvedIdentityId} - skipping Braze deletion`,
+		);
+	}
 
 	// If mParticle failed with retryable error, throw to trigger SQS retry
 	if (!mParticleResult.success) {
 		if (mParticleResult.retryable) {
 			logger.error(
-				`mParticle deletion failed for user ${userId} - will retry`,
+				`mParticle deletion failed for user ${resolvedIdentityId} - will retry`,
 				mParticleResult.error,
 			);
 			throw mParticleResult.error;
 		} else {
 			logger.error(
-				`Non-retryable mParticle error for user ${userId} - giving up`,
+				`Non-retryable mParticle error for user ${resolvedIdentityId} - giving up`,
 				mParticleResult.error,
 			);
 			// Don't throw - message will be removed from queue
@@ -53,21 +75,25 @@ export async function processUserDeletion(
 	}
 
 	// If Braze failed with retryable error, throw to trigger SQS retry
-	if (!brazeResult.success) {
+	if (brazeResult && !brazeResult.success) {
 		if (brazeResult.retryable) {
 			logger.error(
-				`Braze deletion failed for user ${userId} - will retry`,
+				`Braze deletion failed for user ${resolvedIdentityId} - will retry`,
 				brazeResult.error,
 			);
 			throw brazeResult.error;
 		} else {
 			logger.error(
-				`Non-retryable Braze error for user ${userId} - giving up`,
+				`Non-retryable Braze error for user ${resolvedIdentityId} - giving up`,
 				brazeResult.error,
 			);
 			// Don't throw - message will be removed from queue
 		}
 	}
 
-	logger.log(`Successfully deleted user ${userId} from all services`);
+	logger.log(
+		`Successfully processed deletion for user ${resolvedIdentityId} (Braze ${
+			brazeUuid ? 'processed' : 'skipped - no brazeUuid'
+		})`,
+	);
 }
