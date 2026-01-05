@@ -1,16 +1,30 @@
 import * as path from 'path';
 import { build } from '../../data/build';
 import { generateWarningFile } from '../../data/snippets/BUILDCHECK.md';
+import {
+	handlerTemplates,
+	moduleTemplates,
+} from '../dynamic/generated/generatedMappings';
 import { applyTemplates } from '../dynamic/templater';
 import type { GeneratedFile } from './generatedFile';
 
 // generates files across the whole repository
 export function generate(): GeneratedFile[] {
-	const handlersFiles = build.flatMap((pkg) => {
-		const handlerFiles = withWarningFile(applyTemplates(pkg), '../..');
+	const handlersFiles = build.handlers.flatMap((pkg) => {
+		const handlerFiles = withWarningFile(
+			applyTemplates(pkg, handlerTemplates),
+			'../..',
+		);
 		return prependToTargetPath(handlerFiles, ['handlers', pkg.name]);
 	});
-	return withWarningFile(handlersFiles, '.');
+	const modulesFiles = build.modules.flatMap((pkg) => {
+		const moduleFiles = withWarningFile(
+			applyTemplates(pkg, moduleTemplates),
+			'../..',
+		);
+		return prependToTargetPath(moduleFiles, ['modules', pkg.name]);
+	});
+	return withWarningFile([...handlersFiles, ...modulesFiles], '.');
 }
 
 function prependToTargetPath(

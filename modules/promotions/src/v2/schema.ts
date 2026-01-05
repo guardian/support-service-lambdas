@@ -4,7 +4,7 @@ import { z } from 'zod';
 export const promoProductSchema = z.enum([
 	'SupporterPlus',
 	'TierThree',
-	'DigitalPack',
+	'DigitalSubscription',
 	'Newspaper',
 	'Weekly',
 ]);

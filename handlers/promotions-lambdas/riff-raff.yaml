@@ -22,5 +22,6 @@ deployments:
       prefixStack: false
       functionNames:
         - promotions-lambdas-promo-campaign-sync-
+        - promotions-lambdas-promo-sync-
     dependencies:
       - promotions-lambdas-cloudformation

@@ -1,7 +1,13 @@
-import { HeadObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+	HeadObjectCommand,
+	NoSuchKey,
+	NotFound,
+	S3Client,
+	S3ServiceException,
+} from '@aws-sdk/client-s3';
 import { awsConfig } from './config';
 
-const s3Client = new S3Client(awsConfig);
+const defaultClient: S3Client = new S3Client(awsConfig);
 
 /**
  * Check if a file exists in S3 without downloading it.
@@ -10,22 +16,25 @@ const s3Client = new S3Client(awsConfig);
 export const checkFileExistsInS3 = async ({
 	bucketName,
 	filePath,
+	send,
 }: {
 	bucketName: string;
 	filePath: string;
+	send?: typeof S3Client.prototype.send;
 }): Promise<boolean> => {
 	try {
 		const command = new HeadObjectCommand({
 			Bucket: bucketName,
 			Key: filePath,
 		});
-		await s3Client.send(command);
+		await (send ?? defaultClient.send.bind(defaultClient))(command);
 		return true;
-	} catch (error: any) {
+	} catch (error) {
 		if (
-			error.name === 'NoSuchKey' ||
-			error.name === 'NotFound' ||
-			error.$metadata?.httpStatusCode === 404
+			error instanceof NoSuchKey ||
+			error instanceof NotFound ||
+			(error instanceof S3ServiceException &&
+				error.$metadata.httpStatusCode === 404)
 		) {
 			return false;
 		}

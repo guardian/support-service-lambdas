@@ -1,40 +1,10 @@
-// Mock the SQS client before importing the module
-const mockSend = jest.fn();
-
-// Create mock constructors that return proper instances
-const MockGetQueueUrlCommand = jest.fn().mockImplementation(function (
-	this: any,
-	input: any,
-) {
-	this.input = input;
-	return this;
-});
-
-const MockSendMessageCommand = jest.fn().mockImplementation(function (
-	this: any,
-	input: any,
-) {
-	this.input = input;
-	return this;
-});
-
-jest.mock('@aws-sdk/client-sqs', () => ({
-	SQSClient: jest.fn().mockImplementation(() => ({
-		send: mockSend,
-	})),
-	GetQueueUrlCommand: MockGetQueueUrlCommand,
-	SendMessageCommand: MockSendMessageCommand,
-}));
-
+import { GetQueueUrlCommand, SendMessageCommand } from '@aws-sdk/client-sqs';
 import { sendMessageToQueue } from '../src/sqs';
 
 describe('sqsModule', () => {
-	beforeEach(() => {
-		jest.clearAllMocks();
-	});
-
 	describe('sendMessageToQueue', () => {
 		it('should successfully send a message to the queue', async () => {
+			const mockSend = jest.fn();
 			const queueName = 'test-queue';
 			const mockQueueUrl = `https://sqs.us-east-1.amazonaws.com/123456789012/${queueName}`;
 			const messageBody = JSON.stringify({ key: 'value' });
@@ -43,46 +13,52 @@ describe('sqsModule', () => {
 				MD5OfBody: 'test-md5',
 			};
 
-			// Mock the GetQueueUrlCommand response
 			mockSend
 				.mockResolvedValueOnce({ QueueUrl: mockQueueUrl })
 				.mockResolvedValueOnce(mockResponse);
 
-			const result = await sendMessageToQueue({ queueName, messageBody });
+			const result = await sendMessageToQueue({
+				send: mockSend,
+				queueName,
+				messageBody,
+			});
 
 			expect(mockSend).toHaveBeenCalledTimes(2);
 			expect(mockSend).toHaveBeenNthCalledWith(
 				1,
-				expect.any(MockGetQueueUrlCommand),
+				expect.any(GetQueueUrlCommand),
 			);
 			expect(mockSend).toHaveBeenNthCalledWith(
 				2,
-				expect.any(MockSendMessageCommand),
+				expect.any(SendMessageCommand),
 			);
 			expect(result.MessageId).toBe(mockResponse.MessageId);
 		});
 
 		it('should throw an error when queue URL is not found', async () => {
-			// Mock GetQueueUrlCommand to return undefined QueueUrl
+			const mockSend = jest.fn();
 			mockSend.mockResolvedValueOnce({ QueueUrl: undefined });
 
 			await expect(
 				sendMessageToQueue({
+					send: mockSend,
 					queueName: 'non-existent-queue',
 					messageBody: 'test message',
 				}),
 			).rejects.toThrow('Queue URL not found');
 
 			expect(mockSend).toHaveBeenCalledTimes(1);
-			expect(mockSend).toHaveBeenCalledWith(expect.any(MockGetQueueUrlCommand));
+			expect(mockSend).toHaveBeenCalledWith(expect.any(GetQueueUrlCommand));
 		});
 
 		it('should throw an error when GetQueueUrlCommand fails', async () => {
+			const mockSend = jest.fn();
 			const mockError = new Error('Queue not found');
 			mockSend.mockRejectedValueOnce(mockError);
 
 			await expect(
 				sendMessageToQueue({
+					send: mockSend,
 					queueName: 'non-existent-queue',
 					messageBody: 'test message',
 				}),
@@ -92,6 +68,7 @@ describe('sqsModule', () => {
 		});
 
 		it('should throw an error when SendMessageCommand fails', async () => {
+			const mockSend = jest.fn();
 			const mockQueueUrl =
 				'https://sqs.us-east-1.amazonaws.com/123456789012/test-queue';
 			const mockError = new Error('Send message failed');
@@ -102,6 +79,7 @@ describe('sqsModule', () => {
 
 			await expect(
 				sendMessageToQueue({
+					send: mockSend,
 					queueName: 'test-queue',
 					messageBody: 'test message',
 				}),
@@ -111,6 +89,7 @@ describe('sqsModule', () => {
 		});
 
 		it('should pass correct parameters to GetQueueUrlCommand', async () => {
+			const mockSend = jest.fn();
 			const mockQueueUrl =
 				'https://sqs.us-east-1.amazonaws.com/123456789012/test-queue';
 
@@ -119,16 +98,20 @@ describe('sqsModule', () => {
 				.mockResolvedValueOnce({ MessageId: 'test-id' });
 
 			await sendMessageToQueue({
+				send: mockSend,
 				queueName: 'my-test-queue',
 				messageBody: 'test message',
 			});
 
-			const getQueueUrlCall = mockSend.mock.calls[0][0];
-			expect(getQueueUrlCall).toBeInstanceOf(MockGetQueueUrlCommand);
+			const getQueueUrlCall = (
+				mockSend.mock.calls[0] as unknown[]
+			)[0] as GetQueueUrlCommand;
+			expect(getQueueUrlCall).toBeInstanceOf(GetQueueUrlCommand);
 			expect(getQueueUrlCall.input).toEqual({ QueueName: 'my-test-queue' });
 		});
 
 		it('should pass correct parameters to SendMessageCommand', async () => {
+			const mockSend = jest.fn();
 			const mockQueueUrl =
 				'https://sqs.us-east-1.amazonaws.com/123456789012/test-queue';
 			const testMessage = 'Hello from SQS test';
@@ -138,12 +121,15 @@ describe('sqsModule', () => {
 				.mockResolvedValueOnce({ MessageId: 'test-id' });
 
 			await sendMessageToQueue({
+				send: mockSend,
 				queueName: 'test-queue',
 				messageBody: testMessage,
 			});
 
-			const sendMessageCall = mockSend.mock.calls[1][0];
-			expect(sendMessageCall).toBeInstanceOf(MockSendMessageCommand);
+			const sendMessageCall = (
+				mockSend.mock.calls[1] as unknown[]
+			)[0] as SendMessageCommand;
+			expect(sendMessageCall).toBeInstanceOf(SendMessageCommand);
 			expect(sendMessageCall.input).toEqual({
 				QueueUrl: mockQueueUrl,
 				MessageBody: testMessage,

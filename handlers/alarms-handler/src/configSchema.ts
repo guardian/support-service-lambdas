@@ -8,6 +8,7 @@ export const WebhookUrlsSchema = z.object({
 	PORTFOLIO: z.string(),
 	PLATFORM: z.string(),
 	ENGINE: z.string(),
+	PUZZLES: z.string(),
 });
 export type WebhookUrls = z.infer<typeof WebhookUrlsSchema>;
 

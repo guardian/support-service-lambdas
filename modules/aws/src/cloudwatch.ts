@@ -16,6 +16,7 @@ const getStage = (): Stage | undefined => {
 	if (stage === undefined) {
 		throw new Error('Stage is not defined as an environment variable');
 	}
+	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- fix on next refactor
 	return stage as Stage;
 };
 

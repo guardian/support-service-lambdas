@@ -7,18 +7,26 @@ Each record defines one handler and contains anything unique compared with the
 assumed build structure.
  */
 
-export interface HandlerDefinition {
-	name: string;
+export interface HandlerDefinition extends ModuleDefinition {
 	stack?: 'support' | 'membership';
 	functionNames?: string[];
 	entryPoints?: string[];
 	extraStages?: Array<'CSBX'>;
-	testTimeoutSeconds?: number;
-	jestClearMocks?: boolean;
+}
+
+export interface ModuleDefinition {
+	name: string;
 	extraScripts?: Record<string, string>;
 	dependencies?: Record<string, string>;
 	devDependencies?: Record<string, string>;
 	tsConfigExtra?: Record<string, unknown>;
+	testTimeoutSeconds?: number;
+	jestClearMocks?: boolean;
+}
+
+export interface BuildDefinition {
+	handlers: HandlerDefinition[];
+	modules: ModuleDefinition[];
 }
 
 const alarmsHandler: HandlerDefinition = {
@@ -101,12 +109,11 @@ const mobilePurchasesToSupporterProductData: HandlerDefinition = {
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 		...dep['csv-parse'],
-		...devDeps['ts-node'],
+		...devDeps['tsx'],
 		...devDeps['tsconfig-paths'],
 	},
 	extraScripts: {
-		runFullSync:
-			'ts-node  -r tsconfig-paths/register --project ../../tsconfig.json src/fullSyncCommand.ts',
+		runFullSync: 'tsx src/fullSyncCommand.ts',
 	},
 };
 
@@ -119,7 +126,7 @@ const mparticleApi: HandlerDefinition = {
 	],
 	testTimeoutSeconds: 15,
 	extraScripts: {
-		'check-config': 'ts-node runManual/runLoadConfig.ts',
+		'check-config': 'tsx runManual/runLoadConfig.ts',
 	},
 	dependencies: {
 		...dep['@peculiar/x509'],
@@ -130,6 +137,7 @@ const mparticleApi: HandlerDefinition = {
 		...devDeps['@faker-js/faker'],
 		...devDeps['@types/aws-lambda'],
 		...dep['@aws-sdk/client-s3'],
+		...devDeps['tsx'],
 	},
 };
 
@@ -196,9 +204,15 @@ const productSwitchApi: HandlerDefinition = {
 
 const promotionsLambdas: HandlerDefinition = {
 	name: 'promotions-lambdas',
-	functionNames: ['promotions-lambdas-promo-campaign-sync-'],
+	functionNames: [
+		'promotions-lambdas-promo-campaign-sync-',
+		'promotions-lambdas-promo-sync-',
+	],
 	entryPoints: ['src/handlers/*.ts'],
-	dependencies: {},
+	dependencies: {
+		...dep['@aws-sdk/util-dynamodb'],
+		...dep['@aws-sdk/client-dynamodb'],
+	},
 	devDependencies: {
 		...devDeps['@types/aws-lambda'],
 	},
@@ -321,25 +335,38 @@ const zuoraSalesforceLinkRemover: HandlerDefinition = {
 	},
 };
 
-export const build: HandlerDefinition[] = [
-	alarmsHandler,
-	discountApi,
-	discountExpiryNotifier,
-	generateProductCatalog,
-	metricPushApi,
-	mobilePurchasesToSupporterProductData,
-	mparticleApi,
-	negativeInvoicesProcessor,
-	observerDataExport,
-	pressReaderEntitlements,
-	productSwitchApi,
-	promotionsLambdas,
-	salesforceDisasterRecovery,
-	salesforceDisasterRecoveryHealthCheck,
-	stripeDisputes,
-	ticketTailorWebhook,
-	updateSupporterPlusAmount,
-	userBenefits,
-	writeOffUnpaidInvoices,
-	zuoraSalesforceLinkRemover,
-];
+const moduleZuora: ModuleDefinition = {
+	name: 'zuora',
+	dependencies: {
+		...dep['@aws-sdk/client-s3'],
+		...dep['@aws-sdk/client-secrets-manager'],
+		...dep.dayjs,
+		...dep.zod,
+	},
+};
+
+export const build: BuildDefinition = {
+	handlers: [
+		alarmsHandler,
+		discountApi,
+		discountExpiryNotifier,
+		generateProductCatalog,
+		metricPushApi,
+		mobilePurchasesToSupporterProductData,
+		mparticleApi,
+		negativeInvoicesProcessor,
+		observerDataExport,
+		pressReaderEntitlements,
+		productSwitchApi,
+		promotionsLambdas,
+		salesforceDisasterRecovery,
+		salesforceDisasterRecoveryHealthCheck,
+		stripeDisputes,
+		ticketTailorWebhook,
+		updateSupporterPlusAmount,
+		userBenefits,
+		writeOffUnpaidInvoices,
+		zuoraSalesforceLinkRemover,
+	],
+	modules: [moduleZuora],
+};
