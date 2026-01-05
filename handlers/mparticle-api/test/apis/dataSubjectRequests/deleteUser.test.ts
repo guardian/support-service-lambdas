@@ -2,7 +2,10 @@ import { processUserDeletion } from '../../../src/apis/dataSubjectRequests/delet
 import type { BrazeClient } from '../../../src/services/brazeClient';
 import { deleteBrazeUser } from '../../../src/services/brazeClient';
 import type { IdentityApiClient } from '../../../src/services/identityApiClient';
-import type { BulkDeletionAPI, MParticleClient } from '../../../src/services/mparticleClient';
+import type {
+	BulkDeletionAPI,
+	MParticleClient,
+} from '../../../src/services/mparticleClient';
 import { deleteMParticleUser } from '../../../src/services/mparticleDeletion';
 
 // Mock the modules
@@ -192,7 +195,7 @@ describe('processUserDeletion', () => {
 			expect(mockDeleteBrazeUser).toHaveBeenCalled();
 		});
 	});
-	
+
 	describe('Identity API integration', () => {
 		it('should skip Braze deletion when brazeUuid is missing', async () => {
 			mockGetUser.mockResolvedValue({ identityId: userId });

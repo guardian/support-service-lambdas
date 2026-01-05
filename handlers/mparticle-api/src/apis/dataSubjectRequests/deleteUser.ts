@@ -2,7 +2,10 @@ import { logger } from '@modules/routing/logger';
 import type { BrazeClient } from '../../services/brazeClient';
 import { deleteBrazeUser } from '../../services/brazeClient';
 import type { IdentityApiClient } from '../../services/identityApiClient';
-import type { BulkDeletionAPI, MParticleClient } from '../../services/mparticleClient';
+import type {
+	BulkDeletionAPI,
+	MParticleClient,
+} from '../../services/mparticleClient';
 import { deleteMParticleUser } from '../../services/mparticleDeletion';
 import type { DeletionResult } from '../../types/deletionMessage';
 

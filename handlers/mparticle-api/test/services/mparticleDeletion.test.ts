@@ -1,5 +1,8 @@
 import { HttpError } from '../../src/services/make-http-request';
-import type { BulkDeletionAPI, MParticleClient } from '../../src/services/mparticleClient';
+import type {
+	BulkDeletionAPI,
+	MParticleClient,
+} from '../../src/services/mparticleClient';
 import { deleteMParticleUser } from '../../src/services/mparticleDeletion';
 
 jest.mock('@modules/routing/logger', () => ({
@@ -22,7 +25,9 @@ describe('deleteMParticleUser', () => {
 		console.log = jest.fn();
 		console.error = jest.fn();
 		mockPost.mockReset();
-		mockClient = { post: mockPost } as unknown as MParticleClient<BulkDeletionAPI>;
+		mockClient = {
+			post: mockPost,
+		} as unknown as MParticleClient<BulkDeletionAPI>;
 	});
 
 	it('should have a basic test', async () => {

@@ -3,22 +3,22 @@ import { getIfDefined } from '@modules/nullAndUndefined';
 import { z } from 'zod';
 
 export const ConfigSchema = z.object({
-workspace: z.object({
-key: z.string(),
+	workspace: z.object({
+		key: z.string(),
 		secret: z.string(),
 	}),
 	inputPlatform: z.object({
-key: z.string(),
+		key: z.string(),
 		secret: z.string(),
 	}),
 	pod: z.string(),
 	sarResultsBucket: z.string(),
 	braze: z.object({
-apiUrl: z.string(),
+		apiUrl: z.string(),
 		apiKey: z.string(),
 	}),
 	identityApi: z.object({
-baseUrl: z.string(),
+		baseUrl: z.string(),
 		accessToken: z.string(),
 	}),
 });
