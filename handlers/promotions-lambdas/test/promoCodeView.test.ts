@@ -2,12 +2,11 @@ import type * as DynamoDBClientModule from '@aws-sdk/client-dynamodb';
 import type { DynamoDBRecord, DynamoDBStreamEvent } from 'aws-lambda';
 import type { AttributeValue } from 'aws-lambda/trigger/dynamodb-stream';
 import {
-	batchWriteRequestsForCodes,
-	chunkedUpdateOfPromoCodes,
 	fetchCampaigns,
 	generatePutRequestFromNewPromoSchema,
 	handleEventRecords,
 	handler,
+	writePromoCodeViews,
 } from '../src/handlers/promoCodeView';
 
 const mockSend = jest.fn();
@@ -267,7 +266,7 @@ describe('promoCodeView handler', () => {
 		});
 	});
 
-	describe('batchWriteRequestsForCodes', () => {
+	describe('writePromoCodeViews', () => {
 		const putRequestsByPromoCode = {
 			PROMO1: {
 				PutRequest: {
@@ -286,90 +285,36 @@ describe('promoCodeView handler', () => {
 			},
 		};
 
-		it('should write batch successfully and return empty array', async () => {
+		it('should write records successfully and return empty array', async () => {
 			mockSend.mockResolvedValueOnce({});
 
-			const result = await batchWriteRequestsForCodes(
-				['PROMO1'],
-				'CODE',
-				putRequestsByPromoCode,
-			);
+			const result = await writePromoCodeViews('CODE', putRequestsByPromoCode);
 
 			expect(result).toEqual([]);
 			expect(mockSend).toHaveBeenCalledTimes(1);
 			expect(mockLoggerLog).toHaveBeenCalledWith(
-				'Successfully updated 1 promo code views.',
+				'Successfully wrote 1 promo code views.',
 			);
 		});
 
-		it('should return failed promo codes when batch write fails', async () => {
+		it('should return all promo codes when write fails', async () => {
 			mockSend.mockRejectedValueOnce(new Error('DynamoDB error'));
 
-			const result = await batchWriteRequestsForCodes(
-				['PROMO1'],
-				'CODE',
-				putRequestsByPromoCode,
-			);
+			const result = await writePromoCodeViews('CODE', putRequestsByPromoCode);
 
 			expect(result).toEqual(['PROMO1']);
 			expect(mockLoggerError).toHaveBeenCalledWith(
-				'Error writing batch to DynamoDB',
+				'Error writing to DynamoDB',
 				expect.any(Error),
 			);
 		});
-	});
-
-	describe('chunkedUpdateOfPromoCodes', () => {
-		it('should split large updates into chunks of 25', async () => {
-			const putRequests: Record<
-				string,
-				{
-					PutRequest: {
-						Item: {
-							promo_code: string;
-							campaign_code: string;
-							promotion_name: string;
-							campaign_name: string;
-							product_family: string;
-							promotion_type: string;
-							discount_percent: number;
-							discount_months: number;
-							channel_name: string;
-						};
-					};
-				}
-			> = {};
-			for (let i = 0; i < 60; i++) {
-				putRequests[`PROMO${i}`] = {
-					PutRequest: {
-						Item: {
-							promo_code: `PROMO${i}`,
-							campaign_code: 'TEST',
-							promotion_name: 'Test',
-							campaign_name: 'Test Campaign',
-							product_family: 'Subscription',
-							promotion_type: 'percent_discount',
-							discount_percent: 10,
-							discount_months: 3,
-							channel_name: 'test',
-						},
-					},
-				};
-			}
-
-			mockSend.mockResolvedValue({});
-
-			const result = await chunkedUpdateOfPromoCodes('CODE', putRequests);
-
-			expect(result).toEqual([]);
-			expect(mockSend).toHaveBeenCalledTimes(3);
-		});
 
 		it('should handle empty putRequests', async () => {
-			const result = await chunkedUpdateOfPromoCodes('CODE', {});
+			const result = await writePromoCodeViews('CODE', {});
 
 			expect(result).toEqual([]);
 			expect(mockSend).not.toHaveBeenCalled();
+			expect(mockLoggerLog).toHaveBeenCalledWith('No records to write');
 		});
 	});
 
@@ -413,9 +358,6 @@ describe('promoCodeView handler', () => {
 			const result = await handler(event);
 
 			expect(result.batchItemFailures).toEqual([]);
-			expect(mockLoggerLog).toHaveBeenCalledWith(
-				'Successfully updated 1 of 1 promo code views.',
-			);
 		});
 
 		it('should handle missing stage in environment', async () => {

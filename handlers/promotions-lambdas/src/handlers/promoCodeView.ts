@@ -1,7 +1,6 @@
 import {
 	BatchGetItemCommand,
 	BatchWriteItemCommand,
-	type AttributeValue as DynamoDBAttributeValue,
 	DynamoDBClient,
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
@@ -150,51 +149,23 @@ export function generatePutRequestFromNewPromoSchema(
 	};
 }
 
-export async function chunkedUpdateOfPromoCodes(
+export async function writePromoCodeViews(
 	stage: 'CODE' | 'PROD',
 	putRequestsByPromoCode: Record<string, PutRequest>,
 ): Promise<string[]> {
-	const chunk = 25;
-	const promoCodesToUpdate = Object.keys(putRequestsByPromoCode);
+	const putRequests = Object.values(putRequestsByPromoCode);
 
-	const promises: Array<Promise<string[]>> = [];
-	for (let i = 0; i < promoCodesToUpdate.length; i += chunk) {
-		const temparray = promoCodesToUpdate.slice(i, i + chunk);
-		if (temparray.length === 0) {
-			continue;
-		}
-		promises.push(
-			batchWriteRequestsForCodes(temparray, stage, putRequestsByPromoCode),
-		);
+	if (putRequests.length === 0) {
+		logger.log('No records to write');
+		return [];
 	}
 
-	return Promise.all(promises).then((results) => results.flat());
-}
-
-export async function batchWriteRequestsForCodes(
-	promoCodes: string[],
-	stage: 'CODE' | 'PROD',
-	putRequestsByPromoCode: Record<string, PutRequest>,
-): Promise<string[]> {
-	const putRequestsAsArray: PutRequest[] = [];
-
-	promoCodes.forEach((key) => {
-		const putRequest = putRequestsByPromoCode[key];
-		if (putRequest) {
-			putRequestsAsArray.push(putRequest);
-		}
-	});
-
 	logger.log(
-		`Putting records into table: ${getViewTableName(stage)}`,
-		JSON.stringify(putRequestsAsArray),
+		`Writing ${putRequests.length} records to table: ${getViewTableName(stage)}`,
 	);
 
-	const RequestItemsObj: Record<
-		string,
-		Array<{ PutRequest: { Item: Record<string, DynamoDBAttributeValue> } }>
-	> = {};
-	RequestItemsObj[getViewTableName(stage)] = putRequestsAsArray.map((req) => ({
+	const tableName = getViewTableName(stage);
+	const requestItems = putRequests.map((req) => ({
 		PutRequest: {
 			Item: marshall(req.PutRequest.Item),
 		},
@@ -203,16 +174,18 @@ export async function batchWriteRequestsForCodes(
 	try {
 		await dynamoClient.send(
 			new BatchWriteItemCommand({
-				RequestItems: RequestItemsObj,
+				RequestItems: {
+					[tableName]: requestItems,
+				},
 			}),
 		);
 		logger.log(
-			`Successfully updated ${putRequestsAsArray.length} promo code views.`,
+			`Successfully wrote ${putRequests.length} promo code views.`,
 		);
 		return [];
 	} catch (err) {
-		logger.error('Error writing batch to DynamoDB', err);
-		return promoCodes;
+		logger.error('Error writing to DynamoDB', err);
+		return Object.keys(putRequestsByPromoCode);
 	}
 }
 
@@ -301,17 +274,11 @@ export const handler = async (
 			event.Records,
 			campaignDetailsByCampaignCode,
 		);
-		const failedPromoCodes = await chunkedUpdateOfPromoCodes(
+		const failedPromoCodes = await writePromoCodeViews(
 			stage,
 			putRequestsByPromoCode,
 		);
 
-		const totalToUpdate = Object.keys(putRequestsByPromoCode).length;
-
-		const totalUpdated = totalToUpdate - failedPromoCodes.length;
-		logger.log(
-			`Successfully updated ${totalUpdated} of ${totalToUpdate} promo code views.`,
-		);
 		const batchItemFailures = createBatchItemFailures(
 			event.Records,
 			failedPromoCodes,
