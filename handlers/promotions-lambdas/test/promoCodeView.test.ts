@@ -293,7 +293,7 @@ describe('promoCodeView handler', () => {
 			expect(result).toEqual([]);
 			expect(mockSend).toHaveBeenCalledTimes(1);
 			expect(mockLoggerLog).toHaveBeenCalledWith(
-				'Successfully wrote 1 promo code views.',
+				'Successfully wrote 1 promo code views with codes: PROMO1',
 			);
 		});
 
