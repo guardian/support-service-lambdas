@@ -79,6 +79,12 @@ export class PromotionsLambdas extends SrStack {
 			},
 		);
 
+		const promoCodeViewTable = dynamodb.Table.fromTableName(
+			this,
+			'PromoCodeViewTable',
+			`MembershipSub-PromoCode-View-${this.stage}`,
+		);
+
 		promoCampaignSyncLambda.addEventSource(
 			new DynamoEventSource(oldPromoCampaignTable, {
 				startingPosition: StartingPosition.TRIM_HORIZON,
@@ -122,6 +128,8 @@ export class PromotionsLambdas extends SrStack {
 		newPromoTable.grantWriteData(promoSyncLambda);
 
 		newPromoTable.grantStreamRead(promoCodeViewLambda);
+		newPromoCampaignTable.grantReadData(promoCodeViewLambda);
+		promoCodeViewTable.grantWriteData(promoCodeViewLambda);
 
 		new SrLambdaAlarm(this, 'PromoCampaignSyncLambdaErrorAlarm', {
 			app: app,
