@@ -179,7 +179,9 @@ export async function writePromoCodeViews(
 				},
 			}),
 		);
-		logger.log(`Successfully wrote ${putRequests.length} promo code views.`);
+		logger.log(
+			`Successfully wrote ${putRequests.length} promo code views with codes: ${Object.keys(putRequestsByPromoCode).join(', ')}`,
+		);
 		return [];
 	} catch (err) {
 		logger.error('Error writing to DynamoDB', err);
