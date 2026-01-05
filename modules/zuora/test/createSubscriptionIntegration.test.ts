@@ -44,7 +44,7 @@ describe('createSubscription integration', () => {
 	const productPurchase: ProductPurchase = {
 		product: 'NationalDelivery',
 		ratePlan: 'EverydayPlus',
-		firstDeliveryDate: dayjs().add(1, 'month').toDate(),
+		firstDeliveryDate: dayjs().add(1, 'week').toDate(),
 		deliveryContact: contact,
 		deliveryInstructions: 'Leave at front door',
 		deliveryAgent: 123,
@@ -264,5 +264,37 @@ describe('createSubscription integration', () => {
 				(item) => item.productName === 'Discounts',
 			)?.unitPrice,
 		).toEqual(discountAmount);
+	});
+	test('Payment schedule is not truncated by the subscription term', async () => {
+		const inputFields: PreviewCreateSubscriptionInputFields = {
+			stage: 'CODE',
+			accountNumber: 'A01036826',
+			currency: currency,
+			productPurchase: productPurchase,
+		};
+		const client = await ZuoraClient.create('CODE');
+		const response = await previewCreateSubscription(
+			client,
+			productCatalog,
+			mockPromotions,
+			inputFields,
+		);
+
+		// Check that all Digital Pack items have the same amount.
+		// Previously we had a bug where the last item in the payment schedule was only covering the period
+		// up until the end of the subscription term, causing it to be a different amount from all the other items.
+		const digitalPackInvoiceItems =
+			response.previewResult.invoices[0]?.invoiceItems.filter(
+				(item) => item.chargeName === 'Digital Pack',
+			) ?? [];
+
+		const [firstDigitalPackItem] = digitalPackInvoiceItems;
+		expect(
+			digitalPackInvoiceItems.every(
+				(item) =>
+					firstDigitalPackItem !== undefined &&
+					item.amountWithoutTax === firstDigitalPackItem.amountWithoutTax,
+			),
+		).toBe(true);
 	});
 });
