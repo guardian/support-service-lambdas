@@ -193,6 +193,25 @@ importers:
         specifier: ^8.10.147
         version: 8.10.158
 
+  handlers/identity-sync:
+    dependencies:
+      dayjs:
+        specifier: ^1.11.13
+        version: 1.11.19
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@types/aws-lambda':
+        specifier: ^8.10.147
+        version: 8.10.158
+      tsconfig-paths:
+        specifier: 'catalog:'
+        version: 4.2.0
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+
   handlers/metric-push-api:
     devDependencies:
       '@types/aws-lambda':
