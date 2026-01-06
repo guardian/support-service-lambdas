@@ -265,7 +265,7 @@ describe('createSubscription integration', () => {
 			)?.unitPrice,
 		).toEqual(discountAmount);
 	});
-	test('Payment schedule is not truncated by the subscription term', async () => {
+	test('Recurring payment schedule is not truncated by the subscription term', async () => {
 		const inputFields: PreviewCreateSubscriptionInputFields = {
 			stage: 'CODE',
 			accountNumber: 'A01036826',
@@ -296,5 +296,28 @@ describe('createSubscription integration', () => {
 					item.amountWithoutTax === firstDigitalPackItem.amountWithoutTax,
 			),
 		).toBe(true);
+	});
+
+	test('Gift payment schedule is not truncated by the subscription term', async () => {
+		const giftProductPurchase: ProductPurchase = {
+			product: 'GuardianWeeklyDomestic',
+			ratePlan: 'ThreeMonthGift',
+			firstDeliveryDate: dayjs().add(1, 'month').toDate(),
+			deliveryContact: contact,
+		};
+		const inputFields: PreviewCreateSubscriptionInputFields = {
+			stage: 'CODE',
+			accountNumber: 'A01036826',
+			currency: currency,
+			productPurchase: giftProductPurchase,
+		};
+		const client = await ZuoraClient.create('CODE');
+		const response = await previewCreateSubscription(
+			client,
+			productCatalog,
+			mockPromotions,
+			inputFields,
+		);
+		expect(response.previewResult.invoices.length).toBe(1); // Gift subs are fixed term so should only have one invoice
 	});
 });
