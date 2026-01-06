@@ -56,6 +56,9 @@ export const previewCreateSubscription = async (
 		productPurchase.product,
 	);
 
+	const numberOfMonthsToPreview = 13; // 13 allows for annual subs to have a second invoice
+	const initialTermLengthInMonths = 14; // This is to work round an issue where Zuora cuts off the preview at the term end date
+
 	const createSubscriptionOrderAction = buildCreateSubscriptionOrderAction({
 		productRatePlanId: productRatePlan.id,
 		contractEffectiveDate: contractEffectiveDate,
@@ -63,12 +66,8 @@ export const previewCreateSubscription = async (
 		chargeOverride: chargeOverride,
 		promotionInputFields: promotionInputFields,
 		termType: productRatePlan.termType,
-		termLengthInMonths: productRatePlan.termLengthInMonths,
+		termLengthInMonths: initialTermLengthInMonths,
 	});
-
-	const numberOfMonthsToPreview = 13; // 13 allows for annual subs to have a second invoice
-	createSubscriptionOrderAction.createSubscription.terms.initialTerm.period =
-		numberOfMonthsToPreview + 1; // This is to work round an issue where Zuora cuts off the preview at the term end date
 
 	const orderRequest: PreviewOrderRequest = {
 		existingAccountNumber: accountNumber,
