@@ -242,7 +242,7 @@ export function buildCreateSubscriptionOrderAction({
 
 	const [initialPeriodLength, initialPeriodType, autoRenew] =
 		termType === 'Recurring'
-			? ([12, 'Month', true] as const)
+			? ([termLengthInMonths, 'Month', true] as const)
 			: ([
 					initialTermInDays(
 						contractEffectiveDate,
