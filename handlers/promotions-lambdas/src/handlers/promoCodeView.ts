@@ -5,6 +5,7 @@ import {
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { awsConfig } from '@modules/aws/config';
+import { promoCampaignSchema } from '@modules/promotions/v2/schema';
 import { logger } from '@modules/routing/logger';
 import type {
 	AttributeValue,
@@ -12,13 +13,6 @@ import type {
 	DynamoDBRecord,
 	DynamoDBStreamEvent,
 } from 'aws-lambda';
-import { z } from 'zod';
-
-const campaignSchema = z.object({
-	campaignCode: z.string(),
-	name: z.string(),
-	product: z.string(),
-});
 
 const getString = (attr: AttributeValue | undefined): string | undefined =>
 	attr?.S;
@@ -137,10 +131,10 @@ export function generatePutRequestFromNewPromoSchema(
 		promotion_name: promotionName,
 		campaign_name: campaignData.campaign_name,
 		product_family: campaignData.product_family,
-		promotion_type: discount.percent > 0 ? 'percent_discount' : 'other',
+		promotion_type: 'percent_discount',
 		discount_percent: discount.percent,
 		discount_months: discount.months,
-		channel_name: '', //What needs to go here?
+		channel_name: '',
 	};
 
 	return {
@@ -221,7 +215,7 @@ export async function fetchCampaigns(
 	);
 
 	const items = (data.Responses?.[tableName] ?? []).map((item) =>
-		campaignSchema.parse(unmarshall(item)),
+		promoCampaignSchema.parse(unmarshall(item)),
 	);
 	logger.log(
 		`Retrieved ${items.length} of ${campaignCodes.size} campaigns for stage ${stage}`,

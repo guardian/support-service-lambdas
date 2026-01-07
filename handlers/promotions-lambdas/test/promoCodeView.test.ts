@@ -224,7 +224,8 @@ describe('promoCodeView handler', () => {
 						{
 							campaignCode: { S: 'CAMPAIGN1' },
 							name: { S: 'Test Campaign 1' },
-							product: { S: 'Subscription' },
+							product: { S: 'SupporterPlus' },
+							created: { S: '2024-01-01' },
 						},
 					],
 				},
@@ -235,7 +236,7 @@ describe('promoCodeView handler', () => {
 			expect(result).toEqual({
 				CAMPAIGN1: {
 					campaign_name: 'Test Campaign 1',
-					product_family: 'Subscription',
+					product_family: 'SupporterPlus',
 				},
 			});
 
@@ -348,7 +349,8 @@ describe('promoCodeView handler', () => {
 							{
 								campaignCode: { S: 'CAMPAIGN1' },
 								name: { S: 'Test Campaign' },
-								product: { S: 'Subscription' },
+								product: { S: 'SupporterPlus' },
+								created: { S: '2024-01-01' },
 							},
 						],
 					},
