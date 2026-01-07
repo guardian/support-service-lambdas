@@ -20,9 +20,9 @@ import {
 } from '../src/contributionToSupporterPlus';
 import { buildEmailMessage } from '../src/productSwitchEmail';
 import {
-	getFirstContributionRatePlan,
+	getRatePlanToRemove,
 	getSwitchInformation,
-	subscriptionHasAlreadySwitchedToSupporterPlus,
+	subscriptionHasAlreadySwitched,
 } from '../src/switchInformation';
 import accountJson from './fixtures/account.json';
 import alreadySwitchedJson from './fixtures/already-switched-subscription.json';
@@ -138,13 +138,13 @@ test('preview amounts are correct', () => {
 		previewResponseFromZuoraResponse(
 			apiResponse,
 			{
-				supporterPlus: {
-					price: 95,
+				targetProduct: {
+					catalogBasePrice: 95,
 					productRatePlanId: 'not_used',
 					subscriptionChargeId: '8ad08e1a858672180185880566606fad',
 					contributionChargeId: '8ad096ca858682bb0185881568385d73',
 				},
-				contribution: {
+				sourceProduct: {
 					productRatePlanId: 'not_used',
 					chargeId: '2c92c0f85e2d19af015e3896e84d092e',
 				},
@@ -267,7 +267,18 @@ test('We can tell when a subscription has already been switched to Supporter Plu
 	const productCatalog = getProductCatalogFromFixture();
 	const subscription = zuoraSubscriptionSchema.parse(alreadySwitchedJson);
 	expect(
-		subscriptionHasAlreadySwitchedToSupporterPlus(productCatalog, subscription),
+		subscriptionHasAlreadySwitched(
+			productCatalog,
+			subscription,
+			[
+				productCatalog.Contribution.ratePlans.Annual.id,
+				productCatalog.Contribution.ratePlans.Monthly.id,
+			],
+			[
+				productCatalog.SupporterPlus.ratePlans.Monthly.id,
+				productCatalog.SupporterPlus.ratePlans.Annual.id,
+			],
+		),
 	).toEqual(true);
 });
 
@@ -275,7 +286,18 @@ test('We throw a validation error (converts to 400) when trying to switch an alr
 	const productCatalog = getProductCatalogFromFixture();
 	const subscription = zuoraSubscriptionSchema.parse(alreadySwitchedJson);
 	expect(() =>
-		getFirstContributionRatePlan(productCatalog, subscription),
+		getRatePlanToRemove(
+			productCatalog,
+			subscription,
+			[
+				productCatalog.Contribution.ratePlans.Annual.id,
+				productCatalog.Contribution.ratePlans.Monthly.id,
+			],
+			[
+				productCatalog.SupporterPlus.ratePlans.Monthly.id,
+				productCatalog.SupporterPlus.ratePlans.Annual.id,
+			],
+		),
 	).toThrow(ValidationError);
 });
 
@@ -283,7 +305,18 @@ test('We throw a reference error (converts to 500) if a subscription has no cont
 	const productCatalog = getProductCatalogFromFixture();
 	const subscription = zuoraSubscriptionSchema.parse(jsonWithNoContribution);
 	expect(() =>
-		getFirstContributionRatePlan(productCatalog, subscription),
+		getRatePlanToRemove(
+			productCatalog,
+			subscription,
+			[
+				productCatalog.Contribution.ratePlans.Annual.id,
+				productCatalog.Contribution.ratePlans.Monthly.id,
+			],
+			[
+				productCatalog.SupporterPlus.ratePlans.Monthly.id,
+				productCatalog.SupporterPlus.ratePlans.Annual.id,
+			],
+		),
 	).toThrow(ReferenceError);
 });
 
@@ -291,7 +324,18 @@ test('We can successfully find the contribution charge on a valid subscription',
 	const productCatalog = getProductCatalogFromFixture();
 	const subscription = zuoraSubscriptionSchema.parse(subscriptionJson);
 	expect(() =>
-		getFirstContributionRatePlan(productCatalog, subscription),
+		getRatePlanToRemove(
+			productCatalog,
+			subscription,
+			[
+				productCatalog.Contribution.ratePlans.Annual.id,
+				productCatalog.Contribution.ratePlans.Monthly.id,
+			],
+			[
+				productCatalog.SupporterPlus.ratePlans.Monthly.id,
+				productCatalog.SupporterPlus.ratePlans.Annual.id,
+			],
+		),
 	).toBeDefined();
 });
 

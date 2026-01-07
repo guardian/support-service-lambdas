@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { validTargetProducts } from './validSwitches';
+
 export const productSwitchRequestSchema = z.object({
 	preview: z.boolean(),
 	newAmount: z.optional(z.number().positive()),
@@ -8,8 +10,18 @@ export const productSwitchRequestSchema = z.object({
 	applyDiscountIfAvailable: z.optional(z.boolean()),
 });
 
+export const productSwitchGenericRequestSchema = z
+	.object({
+		targetProduct: z.enum(validTargetProducts),
+	})
+	.extend(productSwitchRequestSchema.shape);
+
 export type ProductSwitchRequestBody = z.infer<
 	typeof productSwitchRequestSchema
+>;
+
+export type ProductSwitchGenericRequestBody = z.infer<
+	typeof productSwitchGenericRequestSchema
 >;
 
 export const zuoraPreviewResponseInvoiceItemSchema = z.object({

@@ -33,13 +33,13 @@ test('supporter product data', async () => {
 			currency: 'GBP',
 		},
 		catalog: {
-			supporterPlus: {
+			targetProduct: {
 				productRatePlanId: '8a128ed885fc6ded018602296ace3eb8',
-				price: 10,
+				catalogBasePrice: 10,
 				subscriptionChargeId: 'subscriptionChargeId',
 				contributionChargeId: 'contributionChargeId',
 			},
-			contribution: {
+			sourceProduct: {
 				productRatePlanId: 'contributionProductRatePlanId',
 				chargeId: 'chargeId',
 			},

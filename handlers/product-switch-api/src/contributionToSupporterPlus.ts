@@ -38,6 +38,7 @@ import {
 } from './schemas';
 import { supporterRatePlanItemFromSwitchInformation } from './supporterProductData';
 import type { SwitchInformation } from './switchInformation';
+import { distinct, getSingleOrThrow } from '@modules/arrayFunctions';
 
 export interface SwitchDiscountResponse {
 	discountedPrice: number;
@@ -70,7 +71,7 @@ export const switchToSupporterPlus = async (
 	const paidAmount = await takePaymentOrAdjustInvoice(
 		zuoraClient,
 		switchResponse,
-		productSwitchInformation.catalog.supporterPlus.subscriptionChargeId,
+		productSwitchInformation.catalog.targetProduct.subscriptionChargeId,
 		productSwitchInformation.account.id,
 		productSwitchInformation.account.defaultPaymentMethodId,
 	);
@@ -97,21 +98,31 @@ export const refundExpected = (
 		subscription.ratePlans.find(
 			(ratePlan: RatePlan) =>
 				ratePlan.productRatePlanId ===
-				catalogInformation.contribution.productRatePlanId,
+				catalogInformation.sourceProduct.productRatePlanId,
 		),
 		'No matching RatePlan found in Subscription,',
 	);
 
-	const chargedThroughDate: Date = getIfDefined(
-		ratePlan.ratePlanCharges.find(
-			(ratePlanCharge: RatePlanCharge) =>
-				ratePlanCharge.productRatePlanChargeId ===
-				catalogInformation.contribution.chargeId,
-		)?.chargedThroughDate,
-		'No matching chargedThroughDate found in Subscription',
+	const sourceCharges = ratePlan.ratePlanCharges.filter((ratePlanCharge) =>
+		catalogInformation.sourceProduct.chargeIds.includes(
+			ratePlanCharge.productRatePlanChargeId,
+		),
+	);
+	const chargedThroughDates = sourceCharges.flatMap(
+		(ratePlanCharge: RatePlanCharge) =>
+			ratePlanCharge.chargedThroughDate !== null
+				? [ratePlanCharge.chargedThroughDate]
+				: [],
+	);
+	const chargedThroughDate: Date = getSingleOrThrow(
+		distinct(chargedThroughDates),
+		(msg) =>
+			new Error(
+				"couldn't extract a chargedThroughDate from the charges: " + msg,
+			),
 	);
 
-	return !(currentDate.toDateString() == chargedThroughDate.toDateString());
+	return currentDate.toDateString() !== chargedThroughDate.toDateString();
 };
 
 export const getContributionRefundAmount = (
@@ -119,11 +130,17 @@ export const getContributionRefundAmount = (
 	catalogInformation: CatalogInformation,
 	subscription: ZuoraSubscription,
 ): number => {
-	const contributionRefundAmount = zuoraPreviewInvoice.invoiceItems.find(
-		(invoiceItem: ZuoraPreviewResponseInvoiceItem) =>
-			invoiceItem.productRatePlanChargeId ===
-			catalogInformation.contribution.chargeId,
-	)?.amountWithoutTax;
+	const contributionRefundAmount = zuoraPreviewInvoice.invoiceItems
+		.filter((invoiceItem: ZuoraPreviewResponseInvoiceItem) =>
+			catalogInformation.sourceProduct.chargeIds.includes(
+				invoiceItem.productRatePlanChargeId,
+			),
+		)
+		.reduceRight(
+			(accu, invoiceItem) =>
+				accu + invoiceItem.amountWithoutTax + invoiceItem.taxAmount,
+			0,
+		);
 	if (
 		contributionRefundAmount == undefined &&
 		refundExpected(catalogInformation, subscription, new Date())
@@ -155,20 +172,20 @@ export const previewResponseFromZuoraResponse = (
 		invoice.invoiceItems.find(
 			(invoiceItem: ZuoraPreviewResponseInvoiceItem) =>
 				invoiceItem.productRatePlanChargeId ===
-				catalogInformation.supporterPlus.subscriptionChargeId,
+				catalogInformation.targetProduct.subscriptionChargeId,
 		),
 		'No supporter plus invoice item found in the preview response: id: ' +
-			catalogInformation.supporterPlus.subscriptionChargeId,
+			catalogInformation.targetProduct.subscriptionChargeId,
 	);
 
 	const supporterPlusContributionItem = getIfDefined(
 		invoice.invoiceItems.find(
 			(invoiceItem) =>
 				invoiceItem.productRatePlanChargeId ===
-				catalogInformation.supporterPlus.contributionChargeId,
+				catalogInformation.targetProduct.contributionChargeId,
 		),
 		'No supporter plus invoice item found in the preview response: id: ' +
-			catalogInformation.supporterPlus.contributionChargeId,
+			catalogInformation.targetProduct.contributionChargeId,
 	);
 
 	const response: PreviewResponse = {
@@ -279,13 +296,13 @@ const buildChangePlanOrderAction = (
 		type: 'ChangePlan',
 		triggerDates: singleTriggerDate(orderDate),
 		changePlan: {
-			productRatePlanId: catalog.contribution.productRatePlanId,
+			productRatePlanId: catalog.sourceProduct.productRatePlanId,
 			subType: 'Upgrade',
 			newProductRatePlan: {
-				productRatePlanId: catalog.supporterPlus.productRatePlanId,
+				productRatePlanId: catalog.targetProduct.productRatePlanId,
 				chargeOverrides: [
 					{
-						productRatePlanChargeId: catalog.supporterPlus.contributionChargeId,
+						productRatePlanChargeId: catalog.targetProduct.contributionChargeId,
 						pricing: {
 							recurringFlatFee: {
 								listPrice: contributionAmount,

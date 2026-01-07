@@ -30,13 +30,13 @@ test('salesforce tracking data is serialised to the queue correctly', () => {
 			billingPeriod: 'Month',
 		},
 		catalog: {
-			supporterPlus: {
-				price: 0,
+			targetProduct: {
+				catalogBasePrice: 0,
 				productRatePlanId: '',
 				subscriptionChargeId: '',
 				contributionChargeId: '',
 			},
-			contribution: {
+			sourceProduct: {
 				productRatePlanId: '',
 				chargeId: '',
 			},
