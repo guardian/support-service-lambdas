@@ -31,6 +31,7 @@ const productCatalog = generateProductCatalog(code);
 const promotions: Promotion[] = [
 	{
 		name: 'Test Promo',
+		campaignCode: 'campaign',
 		promotionType: { name: 'percent_discount', amount: 10, durationMonths: 3 },
 		appliesTo: {
 			countries: new Set(['GB']),
@@ -42,6 +43,7 @@ const promotions: Promotion[] = [
 	},
 	{
 		name: 'Patron Promo',
+		campaignCode: 'campaign',
 		promotionType: { name: 'percent_discount', amount: 10, durationMonths: 3 },
 		appliesTo: {
 			countries: new Set(['GB']),
