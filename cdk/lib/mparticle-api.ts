@@ -9,8 +9,6 @@ import {
 	Role,
 	ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam';
-import { Topic } from 'aws-cdk-lib/aws-sns';
-import { SqsSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import { SrAppConfigKey } from './cdk/SrAppConfigKey';
 import { SrLambda } from './cdk/SrLambda';
@@ -112,15 +110,21 @@ export class MParticleApi extends SrStack {
 			}),
 		);
 
-		// Subscribe the SQS queue to the Identity SNS topic for deletion requests
-		const identityMmaSnsTopic = Topic.fromTopicArn(
-			this,
-			'IdentityMmaSnsDeletionRequestTopic',
-			identityMmaSnsDeletionRequestTopicArn,
-		);
-		identityMmaSnsTopic.addSubscription(
-			new SqsSubscription(mmaUserDeletionLambda.inputQueue),
-		);
+		// NOTE: The SNS subscription must be created manually by the Identity team
+		// because cross-account subscription creation requires permissions in the Identity account.
+		// The queue policy above allows Identity's SNS topic to send messages to our SQS queue.
+		// Identity team should subscribe this queue ARN to their SNS topic:
+		// Queue ARN: mmaUserDeletionLambda.inputQueue.queueArn
+		//
+		// Alternatively, this could be automated if Identity adds a topic policy allowing our account to subscribe:
+		// const identityMmaSnsTopic = Topic.fromTopicArn(
+		// 	this,
+		// 	'IdentityMmaSnsDeletionRequestTopic',
+		// 	identityMmaSnsDeletionRequestTopicArn,
+		// );
+		// identityMmaSnsTopic.addSubscription(
+		// 	new SqsSubscription(mmaUserDeletionLambda.inputQueue),
+		// );
 
 		const apiGateway = new GuApiGatewayWithLambdaByPath(this, {
 			app: app,
