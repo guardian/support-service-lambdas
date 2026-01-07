@@ -36,7 +36,6 @@ class HomeDeliveryPlans(getStartDateFromFulfilmentFiles: (ProductType, List[DayO
     (HomeDeliveryEveryDayPlus, PlanDescription("Everyday+"), everyDayRules, Monthly),
     (HomeDeliverySixDayPlus, PlanDescription("Sixday+"), sixDayRules, Monthly),
     (HomeDeliveryWeekendPlus, PlanDescription("Weekend+"), weekendRules, Monthly),
-    (HomeDeliverySundayPlus, PlanDescription("Sunday+"), sundayDateRules, Monthly),
     (HomeDeliverySaturdayPlus, PlanDescription("Saturday+"), saturdayDateRules, Monthly),
   )
 

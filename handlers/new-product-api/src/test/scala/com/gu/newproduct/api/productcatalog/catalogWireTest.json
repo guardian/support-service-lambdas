@@ -167,23 +167,6 @@
       } ],
       "paymentPlan" : "GBP 6.78 every month"
     }, {
-      "id" : "home_delivery_sunday_plus",
-      "label" : "Sunday+",
-      "startDateRules" : {
-        "daysOfWeek" : [ "Sunday" ],
-        "selectableWindow" : {
-          "startDate" : "2020-02-04",
-          "sizeInDays" : 28
-        }
-      },
-      "paymentPlans" : [ {
-        "currencyCode" : "GBP",
-        "amount" : 10.1,
-        "billingPeriod" : "Monthly",
-        "description" : "GBP 10.10 every month"
-      } ],
-      "paymentPlan" : "GBP 10.10 every month"
-    }, {
       "id" : "home_delivery_everyday",
       "label" : "Everyday",
       "startDateRules" : {
@@ -446,23 +429,6 @@
       } ],
       "paymentPlan" : "GBP 70.08 every month"
     }, {
-      "id" : "digital_voucher_sunday_plus",
-      "label" : "Sunday+",
-      "startDateRules" : {
-        "daysOfWeek" : [ "Sunday" ],
-        "selectableWindow" : {
-          "startDate" : "2020-04-05",
-          "sizeInDays" : 1
-        }
-      },
-      "paymentPlans" : [ {
-        "currencyCode" : "GBP",
-        "amount" : 70.1,
-        "billingPeriod" : "Monthly",
-        "description" : "GBP 70.10 every month"
-      } ],
-      "paymentPlan" : "GBP 70.10 every month"
-    }, {
       "id" : "digital_voucher_everyday",
       "label" : "Everyday",
       "startDateRules" : {
@@ -619,23 +585,6 @@
         "description" : "GBP 21.62 every month"
       } ],
       "paymentPlan" : "GBP 21.62 every month"
-    }, {
-      "id" : "voucher_sunday_plus",
-      "label" : "Sunday+",
-      "startDateRules" : {
-        "daysOfWeek" : [ "Sunday" ],
-        "selectableWindow" : {
-          "startDate" : "2020-03-03",
-          "sizeInDays" : 35
-        }
-      },
-      "paymentPlans" : [ {
-        "currencyCode" : "GBP",
-        "amount" : 22.06,
-        "billingPeriod" : "Monthly",
-        "description" : "GBP 22.06 every month"
-      } ],
-      "paymentPlan" : "GBP 22.06 every month"
     }, {
       "id" : "voucher_everyday",
       "label" : "Everyday",
