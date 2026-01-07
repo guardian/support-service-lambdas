@@ -1,5 +1,4 @@
 import { z } from 'zod';
-
 import { stringify } from '../src/stringify';
 
 test('stringify should not serialise any stray values in the object, for security reasons', () => {

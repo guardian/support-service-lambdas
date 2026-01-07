@@ -1,6 +1,6 @@
 import { logger } from '@modules/routing/logger';
 import { getSecretValue } from '@modules/secrets-manager/getSecret';
-import { Stage } from '@modules/stage';
+import type { Stage } from '@modules/stage';
 import { z } from 'zod';
 
 export type IdApiToken = {
