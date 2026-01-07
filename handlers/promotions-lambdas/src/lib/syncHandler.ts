@@ -2,6 +2,7 @@ import type { AttributeValue as SDKAttributeValue } from '@aws-sdk/client-dynamo
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
+import { stageFromEnvironment } from '@modules/stage';
 import type {
 	DynamoDBBatchResponse,
 	DynamoDBRecord,
@@ -65,10 +66,7 @@ export const createSyncHandler = <TSource, TTarget extends object>(
 
 	// build the handler
 	return async (event: DynamoDBStreamEvent): Promise<DynamoDBBatchResponse> => {
-		const stage = process.env.STAGE;
-		if (!(stage === 'CODE' || stage === 'PROD')) {
-			throw new Error('Invalid STAGE');
-		}
+		const stage = stageFromEnvironment();
 
 		const batchItemFailures: DynamoDBBatchResponse['batchItemFailures'] = [];
 
