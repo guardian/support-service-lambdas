@@ -6,6 +6,8 @@ import com.gu.effects.sqs.AwsSQSSend.{EmailQueueName, Payload, QueueName}
 import com.gu.effects.sqs.SqsSync
 import com.gu.effects.{GetFromS3, RawEffects}
 import com.gu.util.Logging
+import com.gu.util.apigateway.{ApiGatewayResponse, Auth}
+import com.gu.util.apigateway.Auth.TrustedApiConfig
 import com.gu.util.config.LoadConfigModule
 import com.gu.util.config.LoadConfigModule.StringFromS3
 import com.gu.util.config.Stage
@@ -13,7 +15,7 @@ import com.gu.util.email.EmailSendSteps
 import com.gu.util.reader.Types._
 import com.gu.util.zuora._
 import okhttp3.{Request, Response}
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Reads}
 
 import java.time.LocalDateTime
 import scala.jdk.CollectionConverters._
@@ -21,8 +23,23 @@ import scala.util.Try
 
 /** This handler processes auto-cancel requests from an SQS queue. It is triggered by an EventSourceMapping with limited
   * concurrency to avoid hitting Zuora rate limits. Each invocation processes one message at a time.
+  *
+  * Messages come from ApiGatewayToSqs which wraps the original HTTP request in a JSON envelope containing:
+  * - queryStringParameters (including apiToken for authentication)
+  * - headers
+  * - body (the actual AutoCancelCallout JSON)
   */
 class AutoCancelSqsHandler extends RequestHandler[SQSEvent, Unit] with Logging {
+
+  /** Represents the message format from ApiGatewayToSqs */
+  case class ApiGatewayToSqsMessage(
+      queryStringParameters: Map[String, String],
+      body: String,
+  )
+
+  object ApiGatewayToSqsMessage {
+    implicit val reads: Reads[ApiGatewayToSqsMessage] = Json.reads[ApiGatewayToSqsMessage]
+  }
 
   override def handleRequest(event: SQSEvent, context: Context): Unit = {
     val records = event.getRecords.asScala.toList
@@ -47,11 +64,27 @@ class AutoCancelSqsHandler extends RequestHandler[SQSEvent, Unit] with Logging {
     logger.info(s"Processing SQS message: $messageId")
 
     try {
-      val body = record.getBody
-      logger.info(s"Message body: $body")
+      val rawBody = record.getBody
+      logger.info(s"Message body: $rawBody")
 
-      // Parse the callout from the message body
-      val calloutResult = Json.parse(body).validate[AutoCancelCallout]
+      // Parse the ApiGatewayToSqs wrapper
+      val parsedMessage = Json.parse(rawBody)
+
+      // Check if this is an ApiGatewayToSqs message (has mappingSource: "SrCDK")
+      val isApiGatewayToSqsMessage = (parsedMessage \ "mappingSource").asOpt[String].contains("SrCDK")
+
+      val (calloutBody, maybeApiToken) = if (isApiGatewayToSqsMessage) {
+        // Extract from ApiGatewayToSqs envelope
+        val envelope = parsedMessage.as[ApiGatewayToSqsMessage]
+        val apiToken = envelope.queryStringParameters.get("apiToken")
+        (envelope.body, apiToken)
+      } else {
+        // Legacy format: direct callout JSON (no auth possible)
+        (rawBody, None)
+      }
+
+      // Parse the actual callout
+      val calloutResult = Json.parse(calloutBody).validate[AutoCancelCallout]
 
       calloutResult.fold(
         errors => {
@@ -61,7 +94,7 @@ class AutoCancelSqsHandler extends RequestHandler[SQSEvent, Unit] with Logging {
         },
         callout => {
           logger.info(s"Processing auto-cancel for account: ${callout.accountId}, invoice: ${callout.invoiceId}")
-          processCallout(callout, context) match {
+          processCallout(callout, maybeApiToken, context) match {
             case Right(_) =>
               logger.info(s"Successfully processed message $messageId")
               Right(())
@@ -79,14 +112,18 @@ class AutoCancelSqsHandler extends RequestHandler[SQSEvent, Unit] with Logging {
     }
   }
 
-  private def processCallout(callout: AutoCancelCallout, context: Context): Either[String, Unit] = {
+  private def processCallout(
+      callout: AutoCancelCallout,
+      maybeApiToken: Option[String],
+      context: Context,
+  ): Either[String, Unit] = {
     val stage = RawEffects.stage
     val fetchString = GetFromS3.fetchString _
     val response = RawEffects.response
     val now = RawEffects.now
     val sqsSend = SqsSync.send(SqsSync.buildClient) _
 
-    processCalloutWithEffects(stage, fetchString, response, now, sqsSend)(callout) match {
+    processCalloutWithEffects(stage, fetchString, response, now, sqsSend)(callout, maybeApiToken) match {
       case ApiGatewayOp.ContinueProcessing(_) => Right(())
       case ApiGatewayOp.ReturnWithResponse(resp) =>
         if (resp.statusCode.startsWith("2")) Right(())
@@ -100,10 +137,14 @@ class AutoCancelSqsHandler extends RequestHandler[SQSEvent, Unit] with Logging {
       response: Request => Response,
       now: () => LocalDateTime,
       awsSQSSend: QueueName => Payload => Try[Unit],
-  )(callout: AutoCancelCallout): ApiGatewayOp[Unit] = {
+  )(callout: AutoCancelCallout, maybeApiToken: Option[String]): ApiGatewayOp[Unit] = {
     val loadConfigModule = LoadConfigModule(stage, fetchString)
 
     for {
+      // Load and validate authentication
+      trustedApiConfig <- loadConfigModule.load[TrustedApiConfig].toApiGatewayOp("load trusted Api config")
+      _ <- validateAuth(trustedApiConfig, maybeApiToken)
+
       zuoraRestConfig <- loadConfigModule.load[ZuoraRestConfig].toApiGatewayOp("load zuora config")
       _ = logger.info(s"Loaded Zuora config for stage: $stage")
 
@@ -136,6 +177,17 @@ class AutoCancelSqsHandler extends RequestHandler[SQSEvent, Unit] with Logging {
       _ = sendEmailNotification(callout, response, zuoraRestConfig, awsSQSSend)
 
     } yield ()
+  }
+
+  private def validateAuth(trustedApiConfig: TrustedApiConfig, maybeApiToken: Option[String]): ApiGatewayOp[Unit] = {
+    val requestAuth = Auth.RequestAuth(maybeApiToken)
+    if (Auth.credentialsAreValid(trustedApiConfig, requestAuth)) {
+      logger.info("Authentication successful")
+      ApiGatewayOp.ContinueProcessing(())
+    } else {
+      logger.warn("Authentication failed: invalid or missing apiToken")
+      ApiGatewayOp.ReturnWithResponse(ApiGatewayResponse.unauthorized)
+    }
   }
 
   private def sendEmailNotification(
