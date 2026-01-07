@@ -51,6 +51,11 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
       "Default": "/CODE/support/mparticle-api/sarResultsBucket",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
+    "appConfigIdentityMmaSnsDeletionRequestTopicArn": {
+      "Default": "/CODE/support/mparticle-api/IdentityMmaSnsDeletionRequestTopicArn",
+      "Description": "parameter to look up IdentityMmaSnsDeletionRequestTopicArn from SSM",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
   },
   "Resources": {
     "BatonInvokeRoleF250FA62": {
@@ -586,7 +591,9 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
               "Action": "sqs:SendMessage",
               "Condition": {
                 "ArnEquals": {
-                  "aws:SourceArn": "AAAAAAAAAAAA",
+                  "aws:SourceArn": {
+                    "Ref": "appConfigIdentityMmaSnsDeletionRequestTopicArn",
+                  },
                 },
               },
               "Effect": "Allow",
@@ -610,6 +617,37 @@ exports[`The mParticle API stack matches the snapshot 1`] = `
         ],
       },
       "Type": "AWS::SQS::QueuePolicy",
+    },
+    "QueuemparticleapiCODEIdentityMmaSnsDeletionRequestTopicAC94882E4BD497AA": {
+      "DependsOn": [
+        "QueuePolicy25439813",
+      ],
+      "Properties": {
+        "Endpoint": {
+          "Fn::GetAtt": [
+            "Queue4A7E3555",
+            "Arn",
+          ],
+        },
+        "Protocol": "sqs",
+        "Region": {
+          "Fn::Select": [
+            3,
+            {
+              "Fn::Split": [
+                ":",
+                {
+                  "Ref": "appConfigIdentityMmaSnsDeletionRequestTopicArn",
+                },
+              ],
+            },
+          ],
+        },
+        "TopicArn": {
+          "Ref": "appConfigIdentityMmaSnsDeletionRequestTopicArn",
+        },
+      },
+      "Type": "AWS::SNS::Subscription",
     },
     "RestApi0C43BF4B": {
       "Properties": {
@@ -1460,6 +1498,11 @@ exports[`The mParticle API stack matches the snapshot 2`] = `
     },
     "SarResultsBucketParameter": {
       "Default": "/PROD/support/mparticle-api/sarResultsBucket",
+      "Type": "AWS::SSM::Parameter::Value<String>",
+    },
+    "appConfigIdentityMmaSnsDeletionRequestTopicArn": {
+      "Default": "/PROD/support/mparticle-api/IdentityMmaSnsDeletionRequestTopicArn",
+      "Description": "parameter to look up IdentityMmaSnsDeletionRequestTopicArn from SSM",
       "Type": "AWS::SSM::Parameter::Value<String>",
     },
   },
@@ -2349,7 +2392,9 @@ DLQ: https://",
               "Action": "sqs:SendMessage",
               "Condition": {
                 "ArnEquals": {
-                  "aws:SourceArn": "AAAAAAAAAAAA",
+                  "aws:SourceArn": {
+                    "Ref": "appConfigIdentityMmaSnsDeletionRequestTopicArn",
+                  },
                 },
               },
               "Effect": "Allow",
@@ -2373,6 +2418,37 @@ DLQ: https://",
         ],
       },
       "Type": "AWS::SQS::QueuePolicy",
+    },
+    "QueuemparticleapiPRODIdentityMmaSnsDeletionRequestTopic18F98BE2EB9C7838": {
+      "DependsOn": [
+        "QueuePolicy25439813",
+      ],
+      "Properties": {
+        "Endpoint": {
+          "Fn::GetAtt": [
+            "Queue4A7E3555",
+            "Arn",
+          ],
+        },
+        "Protocol": "sqs",
+        "Region": {
+          "Fn::Select": [
+            3,
+            {
+              "Fn::Split": [
+                ":",
+                {
+                  "Ref": "appConfigIdentityMmaSnsDeletionRequestTopicArn",
+                },
+              ],
+            },
+          ],
+        },
+        "TopicArn": {
+          "Ref": "appConfigIdentityMmaSnsDeletionRequestTopicArn",
+        },
+      },
+      "Type": "AWS::SNS::Subscription",
     },
     "RestApi0C43BF4B": {
       "Properties": {
