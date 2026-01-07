@@ -525,7 +525,7 @@ Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Tags": [
           {
             "Key": "App",
@@ -1304,7 +1304,7 @@ Check the logs at https://eu-west-1.console.aws.amazon.com/cloudwatch/home?regio
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Tags": [
           {
             "Key": "App",

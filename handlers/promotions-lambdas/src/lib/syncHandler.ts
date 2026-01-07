@@ -2,6 +2,7 @@ import type { AttributeValue as SDKAttributeValue } from '@aws-sdk/client-dynamo
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
+import { stageFromEnvironment } from '@modules/stage';
 import type {
 	DynamoDBBatchResponse,
 	DynamoDBRecord,
@@ -9,7 +10,7 @@ import type {
 } from 'aws-lambda';
 import type { AttributeValue } from 'aws-lambda/trigger/dynamodb-stream';
 import type { z } from 'zod';
-import { deleteFromDynamoDb, writeToDynamoDb } from './dynamodb';
+import { writeToDynamoDb } from './dynamodb';
 
 /**
  * Generic handler for sync'ing a source dynamodb table to a target table, with data transformation
@@ -17,9 +18,8 @@ import { deleteFromDynamoDb, writeToDynamoDb } from './dynamodb';
 
 export interface SyncConfig<TSource, TTarget extends object> {
 	sourceSchema: z.ZodSchema<TSource>; // to validate the data from the source table
-	transform: (source: TSource) => TTarget;
+	transform: (source: TSource) => TTarget[];
 	getTableName: (stage: Stage) => string;
-	getPrimaryKey: (target: TTarget) => Record<string, unknown>;
 }
 
 export const createSyncHandler = <TSource, TTarget extends object>(
@@ -27,7 +27,7 @@ export const createSyncHandler = <TSource, TTarget extends object>(
 ) => {
 	const transformDynamoDbEvent = (
 		event: Record<string, AttributeValue>,
-	): Promise<TTarget> => {
+	): Promise<TTarget[]> => {
 		// Cast here because the type of AttributeValue differs between the dynamodb-stream and client-dynamodb libraries!
 		// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- necessary
 		const item = unmarshall(event as Record<string, SDKAttributeValue>);
@@ -43,7 +43,7 @@ export const createSyncHandler = <TSource, TTarget extends object>(
 	const handleRecord = (
 		record: DynamoDBRecord,
 		stage: Stage,
-	): Promise<void> => {
+	): Promise<void[]> => {
 		const tableName = config.getTableName(stage);
 
 		if (
@@ -51,12 +51,13 @@ export const createSyncHandler = <TSource, TTarget extends object>(
 			record.dynamodb?.NewImage
 		) {
 			return transformDynamoDbEvent(record.dynamodb.NewImage).then(
-				(transformed) => writeToDynamoDb(transformed, tableName),
-			);
-		} else if (record.eventName === 'REMOVE' && record.dynamodb?.OldImage) {
-			return transformDynamoDbEvent(record.dynamodb.OldImage).then(
-				(transformed) =>
-					deleteFromDynamoDb(config.getPrimaryKey(transformed), tableName),
+				(transformedItems) =>
+					Promise.all(
+						transformedItems.map((item) => {
+							logger.log(`Writing item to DynamoDb: ${JSON.stringify(item)}`);
+							return writeToDynamoDb(item, tableName);
+						}),
+					),
 			);
 		}
 
@@ -65,10 +66,7 @@ export const createSyncHandler = <TSource, TTarget extends object>(
 
 	// build the handler
 	return async (event: DynamoDBStreamEvent): Promise<DynamoDBBatchResponse> => {
-		const stage = process.env.STAGE;
-		if (!(stage === 'CODE' || stage === 'PROD')) {
-			throw new Error('Invalid STAGE');
-		}
+		const stage = stageFromEnvironment();
 
 		const batchItemFailures: DynamoDBBatchResponse['batchItemFailures'] = [];
 
