@@ -58,7 +58,7 @@ describe('promoSync handler', () => {
 				'2c92c0f965f2122101660fb33ed24a45',
 				'2c92c0f965d280590165f16b1b9946c2',
 			],
-			countryGroups: ['GB'],
+			countries: ['GB'],
 		},
 		startTimestamp: '2025-11-17T00:00:00.000Z',
 		endTimestamp: '2026-11-17T00:00:00.000Z',
