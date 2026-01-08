@@ -186,6 +186,8 @@ jobs:
           configPath: ./handlers/zuora-callout-apis/riff-raff.yaml
           commentingEnabled: 'false'
           contentDirectories: |
+            zuora-auto-cancel-upload:
+              - ./handlers/zuora-callout-apis/target/scala-2.13/zuora-callout-apis.jar
             zuora-auto-cancel-cloudformation:
               - ./cdk/cdk.out/zuora-auto-cancel-CODE.template.json
               - ./cdk/cdk.out/zuora-auto-cancel-PROD.template.json
