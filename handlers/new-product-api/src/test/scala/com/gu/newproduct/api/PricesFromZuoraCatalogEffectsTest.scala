@@ -43,7 +43,6 @@ object ProductsData {
 
   val voucher = Set(
     VoucherSaturdayPlus,
-    VoucherSundayPlus,
     VoucherWeekendPlus,
     VoucherSixDayPlus,
     VoucherEveryDayPlus,
@@ -59,7 +58,6 @@ object ProductsData {
     HomeDeliveryEveryDay,
     HomeDeliverySixDay,
     HomeDeliveryWeekendPlus,
-    HomeDeliverySundayPlus,
     HomeDeliveryEveryDayPlus,
     HomeDeliverySixDayPlus,
     HomeDeliverySaturday,
@@ -71,7 +69,6 @@ object ProductsData {
     DigitalVoucherSaturdayPlus,
     DigitalVoucherSixdayPlus,
     DigitalVoucherWeekend,
-    DigitalVoucherSundayPlus,
     DigitalVoucherEverydayPlus,
     DigitalVoucherSixday,
     DigitalVoucherEveryday,

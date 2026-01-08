@@ -15,7 +15,7 @@ object PaperEmailDataSerialiser {
 object PaperEmailFields {
 
   private val digipackPlans =
-    List(VoucherWeekendPlus, VoucherEveryDayPlus, VoucherSixDayPlus, VoucherSundayPlus, VoucherSaturdayPlus)
+    List(VoucherWeekendPlus, VoucherEveryDayPlus, VoucherSixDayPlus, VoucherSaturdayPlus)
   private val dateformat = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
   def serialise(data: PaperEmailData): Map[String, String] =
