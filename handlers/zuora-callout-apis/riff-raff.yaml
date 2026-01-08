@@ -13,6 +13,8 @@ deployments:
       templateStagePaths:
         CODE: zuora-auto-cancel-CODE.template.json
         PROD: zuora-auto-cancel-PROD.template.json
+      cloudFormationStackByTags: false
+      createStackIfAbsent: true
 
   zuora-callout-apis:
     type: aws-lambda
