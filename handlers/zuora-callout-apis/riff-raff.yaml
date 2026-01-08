@@ -6,6 +6,16 @@ allowedStages:
   - CODE
   - PROD
 deployments:
+  # Upload JAR to S3 first (needed before CloudFormation can create the Lambda)
+  zuora-auto-cancel-upload:
+    type: aws-s3
+    app: zuora-auto-cancel
+    parameters:
+      bucketSsmLookup: true
+      prefixStack: true
+      prefixApp: true
+      prefixStage: true
+
   zuora-auto-cancel-cloudformation:
     type: cloud-formation
     app: zuora-auto-cancel
@@ -15,6 +25,8 @@ deployments:
         PROD: zuora-auto-cancel-PROD.template.json
       cloudFormationStackByTags: false
       createStackIfAbsent: true
+    dependencies:
+      - zuora-auto-cancel-upload
 
   zuora-callout-apis:
     type: aws-lambda
