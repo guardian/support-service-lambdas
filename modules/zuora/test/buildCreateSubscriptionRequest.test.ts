@@ -1,8 +1,7 @@
 import { SupportRegionId } from '@modules/internationalisation/countryGroup';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { generateProductCatalog } from '@modules/product-catalog/generateProductCatalog';
-import type { AppliedPromotion } from '@modules/promotions/v1/schema';
-import type { Promo } from '@modules/promotions/v2/schema';
+import type { AppliedPromotion, Promo } from '@modules/promotions/v2/schema';
 import type { Stage } from '@modules/stage';
 import dayjs from 'dayjs';
 import type { CreateSubscriptionOrderAction } from '@modules/zuora/orders/orderActions';

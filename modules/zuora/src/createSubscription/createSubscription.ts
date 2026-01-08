@@ -5,9 +5,8 @@ import type {
 	ProductKey,
 } from '@modules/product-catalog/productCatalog';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
-import type { AppliedPromotion } from '@modules/promotions/v1/schema';
 import { getDiscountRatePlanFromCatalog } from '@modules/promotions/v2/getPromotion';
-import type { Promo } from '@modules/promotions/v2/schema';
+import type { AppliedPromotion, Promo } from '@modules/promotions/v2/schema';
 import type { ValidatedPromotion } from '@modules/promotions/v2/validatePromotion';
 import { validatePromotion } from '@modules/promotions/v2/validatePromotion';
 import dayjs from 'dayjs';
