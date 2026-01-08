@@ -36,20 +36,6 @@ class PricesFromZuoraCatalogTest extends AnyFlatSpec with Matchers {
         |              "pricing": [ { "currency": "GBP", "price": 11.26 }, { "currency": "USD", "price": 11.46 }, { "currency": "EUR", "price": 11.26 } ]
         |            }
         |          ]
-        |        },
-        |        {
-        |          "id": "VoucherSundayPlusId",
-        |          "productRatePlanCharges": [
-        |            {
-        |              "name": "Digital Pack",
-        |              "pricing": [ { "currency": "GBP", "price": 11.27 }
-        |              ]
-        |            },
-        |            {
-        |              "name": "Sunday",
-        |              "pricing": [ {"currency": "GBP", "price": 10.79 } ]
-        |            }
-        |          ]
         |        }
         |      ]
         |    }
@@ -62,7 +48,6 @@ class PricesFromZuoraCatalogTest extends AnyFlatSpec with Matchers {
   it should "load catalog" in {
 
     val rateplanToPlanId = Map(
-      ProductRatePlanId("VoucherSundayPlusId") -> VoucherSundayPlus,
       ProductRatePlanId("VoucherSaturdayPlusId") -> VoucherSaturdayPlus,
     )
 
@@ -77,9 +62,6 @@ class PricesFromZuoraCatalogTest extends AnyFlatSpec with Matchers {
           GBP -> AmountMinorUnits(2162),
           USD -> AmountMinorUnits(2192),
           EUR -> AmountMinorUnits(2152),
-        ),
-        VoucherSundayPlus -> Map(
-          GBP -> AmountMinorUnits(2206),
         ),
       ),
     )

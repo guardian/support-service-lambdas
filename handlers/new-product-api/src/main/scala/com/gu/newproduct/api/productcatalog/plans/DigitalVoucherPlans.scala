@@ -61,12 +61,6 @@ class DigitalVoucherPlans(getStartDateFromFulfilmentFiles: (ProductType, List[Da
       Monthly,
     ),
     (
-      DigitalVoucherSundayPlus,
-      PlanDescription("Sunday+"),
-      startDateRule(sundayDays),
-      Monthly,
-    ),
-    (
       DigitalVoucherSixday,
       PlanDescription("Sixday"),
       startDateRule(sixDayDays),
