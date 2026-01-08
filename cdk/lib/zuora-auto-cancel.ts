@@ -18,7 +18,6 @@ export class ZuoraAutoCancel extends SrStack {
 		const errorImpact =
 			'Zuora auto-cancellations are not being processed. Subscriptions with failed payments may not be cancelled.';
 
-		// SQS-triggered Lambda using SrCDK with Java overrides
 		const lambda = new SrSqsLambda(this, 'Lambda', {
 			monitoring: { errorImpact },
 			maxReceiveCount: 3,
@@ -38,8 +37,7 @@ export class ZuoraAutoCancel extends SrStack {
 			},
 		});
 
-		// Add maxConcurrency to the event source mapping to limit concurrent Zuora API calls
-		// SrSqsLambda creates an event source with batchSize: 1, we need to add ScalingConfig
+		// Rate-limit concurrent Zuora API calls to avoid 429 errors (escape hatch - SrSqsLambda doesn't expose maxConcurrency)
 		lambda.node.findAll().forEach((child) => {
 			const cfnResource = child.node.defaultChild;
 			if (cfnResource instanceof CfnEventSourceMapping) {
