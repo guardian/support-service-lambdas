@@ -21,13 +21,11 @@ import java.time.LocalDateTime
 import scala.jdk.CollectionConverters._
 import scala.util.Try
 
-/** This handler processes auto-cancel requests from an SQS queue. It is triggered by an EventSourceMapping with limited
-  * concurrency to avoid hitting Zuora rate limits. Each invocation processes one message at a time.
+/** Processes auto-cancel requests from SQS. Triggered by an EventSourceMapping with maxConcurrency: 5 to avoid Zuora
+  * rate limits.
   *
-  * Messages come from ApiGatewayToSqs which wraps the original HTTP request in a JSON envelope containing:
-  * - queryStringParameters (including apiToken for authentication)
-  * - headers
-  * - body (the actual AutoCancelCallout JSON)
+  * Messages come from ApiGatewayToSqs which wraps the HTTP request in a JSON envelope with queryStringParameters
+  * (including apiToken) and body (the AutoCancelCallout JSON).
   */
 class AutoCancelSqsHandler extends RequestHandler[SQSEvent, Unit] with Logging {
 
@@ -67,21 +65,10 @@ class AutoCancelSqsHandler extends RequestHandler[SQSEvent, Unit] with Logging {
       val rawBody = record.getBody
       logger.info(s"Message body: $rawBody")
 
-      // Parse the ApiGatewayToSqs wrapper
-      val parsedMessage = Json.parse(rawBody)
-
-      // Check if this is an ApiGatewayToSqs message (has mappingSource: "SrCDK")
-      val isApiGatewayToSqsMessage = (parsedMessage \ "mappingSource").asOpt[String].contains("SrCDK")
-
-      val (calloutBody, maybeApiToken) = if (isApiGatewayToSqsMessage) {
-        // Extract from ApiGatewayToSqs envelope
-        val envelope = parsedMessage.as[ApiGatewayToSqsMessage]
-        val apiToken = envelope.queryStringParameters.get("apiToken")
-        (envelope.body, apiToken)
-      } else {
-        // Legacy format: direct callout JSON (no auth possible)
-        (rawBody, None)
-      }
+      // Parse the ApiGatewayToSqs envelope
+      val envelope = Json.parse(rawBody).as[ApiGatewayToSqsMessage]
+      val maybeApiToken = envelope.queryStringParameters.get("apiToken")
+      val calloutBody = envelope.body
 
       // Parse the actual callout
       val calloutResult = Json.parse(calloutBody).validate[AutoCancelCallout]
