@@ -42,8 +42,8 @@ const transformPromo = (oldPromo: OldPromo): Promo[] => {
 			appliesTo: {
 				productRatePlanIds: oldPromo.appliesTo.productRatePlanIds,
 				// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- the old schema only uses string
-				countryGroups: oldPromo.appliesTo
-					.countries as Promo['appliesTo']['countryGroups'],
+				countries: oldPromo.appliesTo
+					.countries as Promo['appliesTo']['countries'],
 			},
 			startTimestamp: oldPromo.starts.toISOString(),
 		};
