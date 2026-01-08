@@ -116,7 +116,7 @@ class PaperEmailDataTest extends AnyFlatSpec with Matchers {
         |  "IncludesDigipack" : "true",
         |  "date_of_first_paper" : "1 November 2018",
         |  "date_of_first_payment" : "1 December 2018",
-        |  "package" : "Everyday+",
+        |  "package" : "EverydayPlus",
         |  "subscription_rate" : "GBP 12.25 every month",
         |  "bank_account_no" : "*****mask",
         |  "bank_sort_code" : "12-34-56",
@@ -160,7 +160,7 @@ class PaperEmailDataTest extends AnyFlatSpec with Matchers {
         |  "IncludesDigipack" : "true",
         |  "date_of_first_paper" : "1 November 2018",
         |  "date_of_first_payment" : "1 December 2018",
-        |  "package" : "Everyday+",
+        |  "package" : "EverydayPlus",
         |  "subscription_rate" : "GBP 10.00 for first 2 months , then GBP 12.25 every 12 months",
         |  "bank_account_no" : "*****mask",
         |  "bank_sort_code" : "12-34-56",
@@ -221,7 +221,7 @@ class PaperEmailDataTest extends AnyFlatSpec with Matchers {
   it should "IncludesDigipack should be true for plus plans " in {
 
     val digipackPlans =
-      List(VoucherEveryDayPlus, VoucherWeekendPlus, VoucherSixDayPlus, VoucherSaturdayPlus, VoucherSundayPlus)
+      List(VoucherEveryDayPlus, VoucherWeekendPlus, VoucherSixDayPlus, VoucherSaturdayPlus)
 
     val allDigipackPlanFields: List[Map[String, String]] = fieldsForPlanIds(digipackPlans)
 
