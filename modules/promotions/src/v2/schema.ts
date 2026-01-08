@@ -20,7 +20,7 @@ export type PromoCampaign = z.infer<typeof promoCampaignSchema>;
 
 export const appliesToSchema = z.object({
 	productRatePlanIds: z.array(z.string()),
-	countryGroups: z.array(isoCountrySchema),
+	countries: z.array(isoCountrySchema),
 });
 
 export const discountDetailsSchema = z.object({
