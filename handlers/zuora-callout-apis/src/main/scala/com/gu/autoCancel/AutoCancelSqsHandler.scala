@@ -1,7 +1,7 @@
 package com.gu.autoCancel
 
-import com.amazonaws.services.lambda.runtime.events.SQSEvent
 import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
+import com.amazonaws.services.lambda.runtime.events.SQSEvent
 import com.gu.effects.sqs.AwsSQSSend.{EmailQueueName, Payload, QueueName}
 import com.gu.effects.sqs.SqsSync
 import com.gu.effects.{GetFromS3, RawEffects}
@@ -43,9 +43,7 @@ class AutoCancelSqsHandler extends RequestHandler[SQSEvent, Unit] with Logging {
     val records = event.getRecords.asScala.toList
     logger.info(s"Processing ${records.size} SQS message(s)")
 
-    val results = records.map { record =>
-      processRecord(record, context)
-    }
+    val results = records.map(processRecord)
 
     val failures = results.collect { case Left(error) => error }
     if (failures.nonEmpty) {
@@ -57,11 +55,11 @@ class AutoCancelSqsHandler extends RequestHandler[SQSEvent, Unit] with Logging {
     logger.info(s"Successfully processed ${records.size} message(s)")
   }
 
-  private def processRecord(record: SQSEvent.SQSMessage, context: Context): Either[String, Unit] = {
+  private def processRecord(record: SQSEvent.SQSMessage): Either[String, Unit] = {
     val messageId = record.getMessageId
     logger.info(s"Processing SQS message: $messageId")
 
-    try {
+    Try {
       val rawBody = record.getBody
       logger.info(s"Message body: $rawBody")
 
@@ -81,7 +79,7 @@ class AutoCancelSqsHandler extends RequestHandler[SQSEvent, Unit] with Logging {
         },
         callout => {
           logger.info(s"Processing auto-cancel for account: ${callout.accountId}, invoice: ${callout.invoiceId}")
-          processCallout(callout, maybeApiToken, context) match {
+          processCallout(callout, maybeApiToken) match {
             case Right(_) =>
               logger.info(s"Successfully processed message $messageId")
               Right(())
@@ -91,18 +89,16 @@ class AutoCancelSqsHandler extends RequestHandler[SQSEvent, Unit] with Logging {
           }
         },
       )
-    } catch {
-      case e: Exception =>
-        val errorMsg = s"Exception processing message $messageId: ${e.getMessage}"
-        logger.error(errorMsg, e)
-        Left(errorMsg)
-    }
+    }.toEither.left.map { e =>
+      val errorMsg = s"Exception processing message $messageId: ${e.getMessage}"
+      logger.error(errorMsg, e)
+      errorMsg
+    }.flatten
   }
 
   private def processCallout(
       callout: AutoCancelCallout,
       maybeApiToken: Option[String],
-      context: Context,
   ): Either[String, Unit] = {
     val stage = RawEffects.stage
     val fetchString = GetFromS3.fetchString _
