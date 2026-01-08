@@ -33,19 +33,18 @@ const productGroupMapping: Record<
 
 const transformCampaign = (
 	oldCampaign: OldPromoCampaignModel,
-): PromoCampaign => ({
-	campaignCode: oldCampaign.code,
-	product: productGroupMapping[oldCampaign.group],
-	name: oldCampaign.name,
-	created: new Date().toISOString(),
-});
+): PromoCampaign[] => [
+	{
+		campaignCode: oldCampaign.code,
+		product: productGroupMapping[oldCampaign.group],
+		name: oldCampaign.name,
+		created: new Date().toISOString(),
+	},
+];
 
 export const handler = createSyncHandler({
 	sourceSchema: oldPromoCampaignSchema,
 	transform: transformCampaign,
 	getTableName: (stage: Stage) =>
 		`support-admin-console-promo-campaigns-${stage}`,
-	getPrimaryKey: (campaign: PromoCampaign) => ({
-		campaignCode: campaign.campaignCode,
-	}),
 });

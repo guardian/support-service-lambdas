@@ -1,6 +1,5 @@
-import type { SQSEvent } from 'aws-lambda';
 import fetchMock from 'fetch-mock';
-import { handler } from '../src';
+import { handleSingleRecord } from '../src';
 import type { HmacKey } from '../src/validateRequest';
 import { maxValidTimeWindowSeconds } from '../src/validateRequest';
 import {
@@ -8,8 +7,6 @@ import {
 	validSQSRecord,
 	validSQSRecordTimestamp,
 } from './testFixtures';
-
-const sqsEvent: SQSEvent = { Records: [validSQSRecord] };
 
 const mockKey: HmacKey = {
 	secret: '9dn189d53me1ania7d73a45d5de4674d',
@@ -43,7 +40,7 @@ test('calls create guest account for new email addresses', async () => {
 		200,
 	);
 
-	await handler(sqsEvent);
+	await handleSingleRecord(validSQSRecord, 'CODE');
 	expect(
 		fetchMock.called(
 			`https://idapi.code.dev-theguardian.com/user/type/${emailAddress}`,
@@ -63,7 +60,7 @@ test('no call to create guest account for an existing email addresses', async ()
 		new Response(JSON.stringify({ userType: 'current' })),
 	);
 
-	await handler(sqsEvent);
+	await handleSingleRecord(validSQSRecord, 'CODE');
 	expect(
 		fetchMock.called(
 			`https://idapi.code.dev-theguardian.com/user/type/${emailAddress}`,

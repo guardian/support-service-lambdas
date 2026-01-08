@@ -1,8 +1,4 @@
-import {
-	DeleteItemCommand,
-	DynamoDBClient,
-	PutItemCommand,
-} from '@aws-sdk/client-dynamodb';
+import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { marshall } from '@aws-sdk/util-dynamodb';
 import { awsConfig } from '@modules/aws/config';
 
@@ -17,19 +13,6 @@ export const writeToDynamoDb = <T extends object>(
 			new PutItemCommand({
 				TableName: tableName,
 				Item: marshall(item),
-			}),
-		)
-		.then(() => undefined);
-
-export const deleteFromDynamoDb = <T extends object>(
-	key: T,
-	tableName: string,
-): Promise<void> =>
-	dynamoClient
-		.send(
-			new DeleteItemCommand({
-				TableName: tableName,
-				Key: marshall(key),
 			}),
 		)
 		.then(() => undefined);
