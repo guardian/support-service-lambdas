@@ -1,3 +1,5 @@
+import { difference } from '@modules/arrayFunctions';
+
 export function objectKeys<O extends object>(libs: O): (keyof O)[] {
 	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- allowed in utility function - get back type lost by Object.keys
 	return Object.keys(libs) as (keyof O)[];
@@ -27,8 +29,27 @@ export function objectFromEntries<K extends string, V>(
 	return Object.fromEntries(libs) as Record<K, V>;
 }
 
-export function objectEntries<K extends string, V>(
-	theMappings: Record<K, V> | Partial<Record<K, V>>,
-) {
-	return Object.entries(theMappings) as Array<[K, V]>;
+export function objectEntries<T extends Record<string, unknown>>(
+	theMappings: T,
+): Array<{ [K in keyof T]: [K, T[K]] }[keyof T]> {
+	// eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- allowed in utility function - get back type lost by Object.entries
+	return Object.entries(theMappings) as Array<
+		{ [K in keyof T]: [K, T[K]] }[keyof T]
+	>;
+}
+
+export function objectJoin<K extends string, VA, VB>(
+	l: Record<K, VA>,
+	r: Record<K, VB>,
+): [VA, VB][] {
+	const lKeys = objectKeys(l);
+	const [onlyInL, onlyInR] = difference(lKeys, objectKeys(r));
+
+	if (onlyInL.length + onlyInR.length !== 0) {
+		throw new Error(
+			`Keys do not match between records: onlyInL: ${onlyInL} onlyInR: ${onlyInR}`,
+		);
+	}
+
+	return lKeys.map((key) => [l[key], r[key]] as const);
 }

@@ -1,6 +1,13 @@
 import { BillingPeriodValues } from '@modules/billingPeriod';
 import { z } from 'zod';
 
+const billingPeriodAlignmentValues = [
+	'AlignToCharge',
+	'AlignToSubscriptionStart',
+	'AlignToTermStart',
+] as const;
+export type BillingPeriodAlignment =
+	(typeof billingPeriodAlignmentValues)[number];
 export const zuoraSubscriptionSchema = z.object({
 	id: z.string(),
 	accountNumber: z.string(),
@@ -40,11 +47,7 @@ export const zuoraSubscriptionSchema = z.object({
 					upToPeriods: z.nullable(z.number()),
 					price: z.nullable(z.number()),
 					discountPercentage: z.nullable(z.number()),
-					billingPeriodAlignment: z.enum([
-						'AlignToCharge',
-						'AlignToSubscriptionStart',
-						'AlignToTermStart',
-					]),
+					billingPeriodAlignment: z.enum(billingPeriodAlignmentValues),
 				}),
 			),
 		}),

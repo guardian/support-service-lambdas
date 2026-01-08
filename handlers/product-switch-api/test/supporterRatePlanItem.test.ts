@@ -31,13 +31,13 @@ const getSwitchInformation = (
 		currency: 'GBP',
 	},
 	catalog: {
-		supporterPlus: {
+		targetProduct: {
 			productRatePlanId: 'supporterPlusProductRatePlanId',
-			price: 1,
+			catalogBasePrice: 1,
 			subscriptionChargeId: 'subscriptionChargeId',
 			contributionChargeId: 'contributionChargeId',
 		},
-		contribution: {
+		sourceProduct: {
 			productRatePlanId: 'contributionProductRatePlanId',
 			chargeId: 'chargeId',
 		},

@@ -17,7 +17,7 @@ export const supporterRatePlanItemFromSwitchInformation = (
 		subscriptionName: switchInformation.subscription.subscriptionNumber,
 		identityId: switchInformation.account.identityId,
 		productRatePlanId:
-			switchInformation.catalog.supporterPlus.productRatePlanId,
+			switchInformation.catalog.targetProduct.productRatePlanId,
 		productRatePlanName,
 		termEndDate: zuoraDateFormat(dayjs().add(1, 'year')),
 		contractEffectiveDate: zuoraDateFormat(dayjs()),

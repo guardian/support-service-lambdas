@@ -2,17 +2,18 @@ import type { BillingPeriod } from '@modules/billingPeriod';
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
+import { validSwitches, ValidTargetProduct } from './validSwitches';
 
 export type CatalogInformation = {
-	supporterPlus: {
-		price: number;
+	targetProduct: {
+		catalogBasePrice: number;
 		productRatePlanId: string;
-		subscriptionChargeId: string;
-		contributionChargeId: string;
+		subscriptionChargeId: string; // used to find the price and service end date (next payment date) from the preview invoice, also to find and adjust out any charge less than 0.50
+		contributionChargeId?: string; // used to find the price from the preview invoice as above, also to do the chargeOverrides in the order to set the additional amount to take
 	};
-	contribution: {
+	sourceProduct: {
 		productRatePlanId: string;
-		chargeId: string;
+		chargeIds: [string, ...string[]]; // needed to find the refund amount in the invoice (todo total it) and the charged through date (todo toSet it and check it's unique)
 	};
 };
 
@@ -27,34 +28,30 @@ const getCatalogBillingPeriod = (billingPeriod: BillingPeriod) => {
 
 export const getCatalogInformation = (
 	productCatalog: ProductCatalog,
+	s: (typeof validSwitches)[ValidTargetProduct],
 	billingPeriod: BillingPeriod,
 	currency: IsoCurrency,
 ): CatalogInformation => {
 	const catalogBillingPeriod = getCatalogBillingPeriod(billingPeriod);
+	const sourceProductRatePlan =
+		productCatalog[s.sourceProduct].ratePlans[catalogBillingPeriod];
+	const targetProductRatePlan =
+		productCatalog[s.targetProduct].ratePlans[catalogBillingPeriod];
+
 	const price = getIfDefined(
-		productCatalog.SupporterPlus.ratePlans[catalogBillingPeriod].pricing[
-			currency
-		],
+		targetProductRatePlan.pricing[currency],
 		'No Supporter Plus price defined for currency',
 	);
 	return {
-		supporterPlus: {
-			price,
-			productRatePlanId:
-				productCatalog.SupporterPlus.ratePlans[catalogBillingPeriod].id,
-			subscriptionChargeId:
-				productCatalog.SupporterPlus.ratePlans[catalogBillingPeriod].charges
-					.Subscription.id,
-			contributionChargeId:
-				productCatalog.SupporterPlus.ratePlans[catalogBillingPeriod].charges
-					.Contribution.id,
+		targetProduct: {
+			catalogBasePrice: price,
+			productRatePlanId: targetProductRatePlan.id,
+			subscriptionChargeId: targetProductRatePlan.charges.Subscription.id,
+			contributionChargeId: targetProductRatePlan.charges.Contribution.id,
 		},
-		contribution: {
-			productRatePlanId:
-				productCatalog.Contribution.ratePlans[catalogBillingPeriod].id,
-			chargeId:
-				productCatalog.Contribution.ratePlans[catalogBillingPeriod].charges
-					.Contribution.id,
+		sourceProduct: {
+			productRatePlanId: sourceProductRatePlan.id,
+			chargeIds: [sourceProductRatePlan.charges.Contribution.id],
 		},
 	};
 };

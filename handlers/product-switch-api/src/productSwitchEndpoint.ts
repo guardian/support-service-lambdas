@@ -1,5 +1,4 @@
 import { Lazy } from '@modules/lazy';
-import { prettyPrint } from '@modules/prettyPrint';
 import { getProductCatalogFromApi } from '@modules/product-catalog/api';
 import { logger } from '@modules/routing/logger';
 import type { Stage } from '@modules/stage';
@@ -16,7 +15,10 @@ import type { ZuoraClient } from '@modules/zuora/zuoraClient';
 import type { APIGatewayProxyResult } from 'aws-lambda';
 import dayjs from 'dayjs';
 import { preview, switchToSupporterPlus } from './contributionToSupporterPlus';
-import type { ProductSwitchRequestBody } from './schemas';
+import type {
+	ProductSwitchGenericRequestBody,
+	ProductSwitchRequestBody,
+} from './schemas';
 import { getSwitchInformation } from './switchInformation';
 
 export function contributionToSupporterPlusEndpoint(
@@ -28,10 +30,24 @@ export function contributionToSupporterPlusEndpoint(
 		zuoraClient: ZuoraClient,
 		subscription: ZuoraSubscription,
 		account: ZuoraAccount,
+	): Promise<APIGatewayProxyResult> =>
+		await productSwitchEndpoint(stage, today)(
+			{ ...body, targetProduct: 'SupporterPlus' },
+			zuoraClient,
+			subscription,
+			account,
+		);
+}
+
+export function productSwitchEndpoint(stage: Stage, today: dayjs.Dayjs) {
+	return async (
+		body: ProductSwitchGenericRequestBody,
+		zuoraClient: ZuoraClient,
+		subscription: ZuoraSubscription,
+		account: ZuoraAccount,
 	): Promise<APIGatewayProxyResult> => {
 		logger.log('Loading the product catalog');
 		const productCatalog = await getProductCatalogFromApi(stage);
-		logger.log(`Request body is ${prettyPrint(body)}`);
 
 		// don't get the billing preview until we know the subscription is not cancelled
 		const lazyBillingPreview = new Lazy(

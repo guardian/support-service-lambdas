@@ -49,18 +49,35 @@ export const chunkArray = <T>(array: T[], chunkSize: number): T[][] => {
 	return result;
 };
 
-export const mapValues = <
-	T extends object,
-	RES extends { [K in keyof T]: any },
->(
+export const mapValues = <T extends object, RES>(
 	obj: T,
-	fn: <K extends keyof T>(v: T[K], k: K) => RES[K],
-): RES => {
-	const res = {} as RES;
+	fn: <K extends keyof T>(v: T[K], k: K) => RES | undefined,
+): Record<keyof T, RES> => {
+	const res = {} as Record<keyof T, RES>;
 	for (const key in obj) {
-		res[key] = fn(obj[key], key);
+		const maybeNewValue = fn(obj[key], key);
+		if (maybeNewValue !== undefined) {
+			res[key] = maybeNewValue;
+		}
 	}
 	return res;
+};
+
+export const partitionByValueType = <T extends object, U extends T[keyof T]>(
+	obj: T,
+	fn: (v: T[keyof T], k: keyof T) => v is U,
+): [Record<string, U>, Record<string, Exclude<T[keyof T], U>>] => {
+	const pass: Record<string, U> = {};
+	const fail: Record<string, Exclude<T[keyof T], U>> = {};
+	for (const key in obj) {
+		const value = obj[key];
+		if (fn(value, key)) {
+			pass[key] = value;
+		} else {
+			fail[key] = value as Exclude<T[keyof T], U>;
+		}
+	}
+	return [pass, fail];
 };
 
 export const partition = <T>(
@@ -163,4 +180,12 @@ export const mapPartition = <U, T>(array: T[], fn: (t: T) => U | undefined) =>
 export const intersection = <T>(a: T[], b: T[]) => {
 	const setB = new Set(b);
 	return [...new Set(a)].filter((x) => setB.has(x));
+};
+
+export const difference = <T>(a: T[], b: T[]) => {
+	const setA = new Set(a);
+	const setB = new Set(b);
+	const onlyInA = [...setA].filter((x) => !setB.has(x));
+	const onlyInB = [...setB].filter((x) => !setA.has(x));
+	return [onlyInA, onlyInB] as const;
 };
