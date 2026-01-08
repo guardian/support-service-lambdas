@@ -5,10 +5,9 @@ import type {
 	ProductKey,
 } from '@modules/product-catalog/productCatalog';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
+import type { AppliedPromotion } from '@modules/promotions/v1/schema';
 import { getDiscountRatePlanFromCatalog } from '@modules/promotions/v2/getPromotion';
-import type {
-	AppliedPromotion,
-} from '@modules/promotions/v1/schema';
+import type { Promo } from '@modules/promotions/v2/schema';
 import type { ValidatedPromotion } from '@modules/promotions/v2/validatePromotion';
 import { validatePromotion } from '@modules/promotions/v2/validatePromotion';
 import dayjs from 'dayjs';
@@ -29,7 +28,6 @@ import type {
 } from '@modules/zuora/orders/paymentMethods';
 import { zuoraDateFormat } from '@modules/zuora/utils';
 import type { ZuoraClient } from '@modules/zuora/zuoraClient';
-import {Promo} from "@modules/promotions/v2/schema";
 
 const createSubscriptionResponseSchema = z.object({
 	orderNumber: z.string(),
@@ -74,9 +72,14 @@ export function getPromotionInputFields(
 	productCatalog: ProductCatalog,
 	productKey: ProductKey,
 ): PromotionInputFields | undefined {
-	const validatedPromotion = appliedPromotion && promotion
-		? validatePromotion(promotion, appliedPromotion.supportRegionId, productRatePlanId)
-		: undefined;
+	const validatedPromotion =
+		appliedPromotion && promotion
+			? validatePromotion(
+					promotion,
+					appliedPromotion.supportRegionId,
+					productRatePlanId,
+				)
+			: undefined;
 
 	if (!validatedPromotion) {
 		console.log('No promotion applied');
