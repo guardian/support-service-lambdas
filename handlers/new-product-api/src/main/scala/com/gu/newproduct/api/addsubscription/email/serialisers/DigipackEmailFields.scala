@@ -23,7 +23,7 @@ object DigipackEmailDataSerialiser {
 object DigipackEmailFields {
 
   val digipackPlans =
-    List(VoucherWeekendPlus, VoucherEveryDayPlus, VoucherSixDayPlus, VoucherSundayPlus, VoucherSaturdayPlus)
+    List(VoucherWeekendPlus, VoucherEveryDayPlus, VoucherSixDayPlus, VoucherSaturdayPlus)
   val dateformat = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
   def nounFor(billingPeriod: BillingPeriod) = billingPeriod match {
