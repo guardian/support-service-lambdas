@@ -2,7 +2,7 @@
  * @group integration
  */
 
-import { getPromotions } from '../src/v1/getPromotions';
+import { getPromotions } from '@modules/promotions/v1/getPromotions';
 import { getIfDefined } from '@modules/nullAndUndefined';
 import * as util from 'node:util';
 
