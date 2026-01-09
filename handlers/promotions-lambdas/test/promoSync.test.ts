@@ -215,4 +215,32 @@ describe('promoSync handler', () => {
 
 		expect(mockedWriteToDynamoDb).not.toHaveBeenCalled();
 	});
+
+	it('should not include landingPage when title is undefined', async () => {
+		const imageWithoutLandingPageTitle: Record<string, AttributeValue> = {
+			...validNewImage,
+			landingPage: {
+				M: {
+					type: { S: 'supporterPlus' },
+				},
+			},
+		};
+
+		const record: DynamoDBRecord = {
+			eventName: 'INSERT',
+			dynamodb: {
+				NewImage: imageWithoutLandingPageTitle,
+				SequenceNumber: '123',
+			},
+		} as DynamoDBRecord;
+
+		await handler(createEvent([record]));
+
+		expect(mockedWriteToDynamoDb).toHaveBeenCalledTimes(2);
+
+		const calls = mockedWriteToDynamoDb.mock.calls as Array<[object, string]>;
+		calls.forEach(([item]) => {
+			expect(item).not.toHaveProperty('landingPage');
+		});
+	});
 });

@@ -63,7 +63,7 @@ const transformPromo = (oldPromo: OldPromo): Promo[] => {
 			promo.description = oldPromo.description;
 		}
 
-		if (oldPromo.landingPage) {
+		if (oldPromo.landingPage?.title) {
 			promo.landingPage = {
 				title: oldPromo.landingPage.title,
 				description: oldPromo.landingPage.description,
