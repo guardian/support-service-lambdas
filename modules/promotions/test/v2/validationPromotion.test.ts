@@ -29,9 +29,11 @@ const appliedPromotion: AppliedPromotion = {
 
 describe('validatePromotion v2', () => {
 	it('throws an error if the promotion is undefined', () => {
-	  expect(() =>
-	    validatePromotion(undefined, appliedPromotion, productRatePlanId),
-	  ).toThrow(`No Promotion found for promo code ${appliedPromotion.promoCode}`);
+		expect(() =>
+			validatePromotion(undefined, appliedPromotion, productRatePlanId),
+		).toThrow(
+			`No Promotion found for promo code ${appliedPromotion.promoCode}`,
+		);
 	});
 
 	it('returns a ValidatedPromotion for valid promotion and country', () => {
