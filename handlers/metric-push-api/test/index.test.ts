@@ -2,6 +2,9 @@ import { putMetric } from '@modules/aws/cloudwatch';
 import type { APIGatewayProxyEvent } from 'aws-lambda';
 import { handler } from '../src/index';
 
+jest.mock('@modules/stage', () => ({
+	stageFromEnvironment: jest.fn(() => 'CODE'),
+}));
 jest.mock('@modules/aws/cloudwatch', () => ({
 	putMetric: jest.fn(),
 }));
@@ -60,6 +63,7 @@ describe('handler', () => {
 
 				expect(putMetric).toHaveBeenCalledWith(
 					'metric-push-api-client-side-error',
+					'CODE',
 				);
 			});
 
