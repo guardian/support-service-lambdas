@@ -5,13 +5,10 @@ import type {
 	ProductKey,
 } from '@modules/product-catalog/productCatalog';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
-import { getDiscountRatePlanFromCatalog } from '@modules/promotions/v1/getPromotions';
-import type {
-	AppliedPromotion,
-	Promotion,
-} from '@modules/promotions/v1/schema';
-import type { ValidatedPromotion } from '@modules/promotions/v1/validatePromotion';
-import { validatePromotion } from '@modules/promotions/v1/validatePromotion';
+import { getDiscountRatePlanFromCatalog } from '@modules/promotions/v2/getPromotion';
+import type { AppliedPromotion, Promo } from '@modules/promotions/v2/schema';
+import type { ValidatedPromotion } from '@modules/promotions/v2/validatePromotion';
+import { validatePromotion } from '@modules/promotions/v2/validatePromotion';
 import dayjs from 'dayjs';
 import { z } from 'zod';
 import { getChargeOverride } from '@modules/zuora/createSubscription/chargeOverride';
@@ -69,13 +66,13 @@ export type PromotionInputFields = {
 
 export function getPromotionInputFields(
 	appliedPromotion: AppliedPromotion | undefined,
-	promotions: Promotion[],
+	promotion: Promo | undefined,
 	productRatePlanId: string,
 	productCatalog: ProductCatalog,
 	productKey: ProductKey,
 ): PromotionInputFields | undefined {
 	const validatedPromotion = appliedPromotion
-		? validatePromotion(promotions, appliedPromotion, productRatePlanId)
+		? validatePromotion(promotion, appliedPromotion, productRatePlanId)
 		: undefined;
 
 	if (!validatedPromotion) {
@@ -98,7 +95,6 @@ export function getPromotionInputFields(
 
 export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 	productCatalog: ProductCatalog,
-	promotions: Promotion[],
 	{
 		accountName,
 		createdRequestId,
@@ -115,6 +111,7 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 		runBilling,
 		collectPayment,
 	}: CreateSubscriptionInputFields<T>,
+	promotion: Promo | undefined,
 ): CreateOrderRequest {
 	const { deliveryContact, deliveryAgent, deliveryInstructions } = {
 		deliveryContact: undefined,
@@ -153,7 +150,7 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 	const productRatePlan = getProductRatePlan(productCatalog, productPurchase);
 	const promotionInputFields = getPromotionInputFields(
 		appliedPromotion,
-		promotions,
+		promotion,
 		productRatePlan.id,
 		productCatalog,
 		productPurchase.product,
@@ -196,12 +193,12 @@ export function buildCreateSubscriptionRequest<T extends PaymentMethod>(
 export const createSubscription = async <T extends PaymentMethod>(
 	zuoraClient: ZuoraClient,
 	productCatalog: ProductCatalog,
-	promotions: Promotion[],
 	inputFields: CreateSubscriptionInputFields<T>,
+	promotion: Promo | undefined,
 ): Promise<CreateSubscriptionResponse> => {
 	return executeOrderRequest(
 		zuoraClient,
-		buildCreateSubscriptionRequest(productCatalog, promotions, inputFields),
+		buildCreateSubscriptionRequest(productCatalog, inputFields, promotion),
 		createSubscriptionResponseSchema,
 		inputFields.createdRequestId,
 	);

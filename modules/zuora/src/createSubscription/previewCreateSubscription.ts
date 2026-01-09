@@ -1,10 +1,7 @@
 import type { IsoCurrency } from '@modules/internationalisation/currency';
 import type { ProductCatalog } from '@modules/product-catalog/productCatalog';
 import type { ProductPurchase } from '@modules/product-catalog/productPurchaseSchema';
-import type {
-	AppliedPromotion,
-	Promotion,
-} from '@modules/promotions/v1/schema';
+import type { AppliedPromotion, Promo } from '@modules/promotions/v2/schema';
 import type { Stage } from '@modules/stage';
 import dayjs from 'dayjs';
 import { z } from 'zod';
@@ -30,13 +27,13 @@ export type PreviewCreateSubscriptionInputFields = {
 export const previewCreateSubscription = async (
 	zuoraClient: ZuoraClient,
 	productCatalog: ProductCatalog,
-	promotions: Promotion[],
 	{
 		accountNumber,
 		currency,
 		productPurchase,
 		appliedPromotion,
 	}: PreviewCreateSubscriptionInputFields,
+	promotion: Promo | undefined,
 ): Promise<PreviewCreateSubscriptionResponse> => {
 	const { contractEffectiveDate, customerAcceptanceDate } =
 		getSubscriptionDates(dayjs(), productPurchase);
@@ -50,7 +47,7 @@ export const previewCreateSubscription = async (
 	const productRatePlan = getProductRatePlan(productCatalog, productPurchase);
 	const promotionInputFields = getPromotionInputFields(
 		appliedPromotion,
-		promotions,
+		promotion,
 		productRatePlan.id,
 		productCatalog,
 		productPurchase.product,

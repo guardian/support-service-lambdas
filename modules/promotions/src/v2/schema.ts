@@ -1,4 +1,7 @@
-import { isoCountrySchema } from '@modules/internationalisation/schemas';
+import {
+	isoCountrySchema,
+	supportRegionSchema,
+} from '@modules/internationalisation/schemas';
 import { z } from 'zod';
 
 export const promoProductSchema = z.enum([
@@ -47,3 +50,9 @@ export const promoSchema = z.object({
 });
 
 export type Promo = z.infer<typeof promoSchema>;
+
+export const appliedPromotionSchema = z.object({
+	promoCode: z.string(),
+	supportRegionId: supportRegionSchema,
+});
+export type AppliedPromotion = z.infer<typeof appliedPromotionSchema>;

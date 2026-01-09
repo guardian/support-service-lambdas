@@ -1,6 +1,9 @@
 import { SupportRegionId } from '@modules/internationalisation/countryGroup';
-import type { AppliedPromotion, Promotion } from '../src/v1/schema';
-import { validatePromotion } from '../src/v1/validatePromotion';
+import type {
+	AppliedPromotion,
+	Promotion,
+} from '@modules/promotions/v1/schema';
+import { validatePromotion } from '@modules/promotions/v1/validatePromotion';
 
 const promotionName = 'Test Promotion';
 const productRatePlanId = '12345';
