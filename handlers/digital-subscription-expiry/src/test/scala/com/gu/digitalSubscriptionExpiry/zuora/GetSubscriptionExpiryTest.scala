@@ -137,6 +137,29 @@ class GetSubscriptionExpiryTest extends AnyFlatSpec {
     val actualResponse = GetSubscriptionExpiry(today)("123-sold", digiPackSub, accountSummary)
     actualResponse shouldEqual expectedResponse
   }
+
+  it should "recognise digital charges with name set to supporter plus" in {
+
+    val charges = List(
+      RatePlanCharge("Supporter Plus Annual Charge", lastWeek, nextWeek),
+      RatePlanCharge("Contribution", lastWeek, nextWeek),
+    )
+
+    val supporterPlusSub = SubscriptionResult(
+      id = SubscriptionId("subId"),
+      name = SubscriptionName("subName"),
+      accountId = AccountId("accountId"),
+      casActivationDate = None,
+      customerAcceptanceDate = lastWeek,
+      startDate = lastWeek,
+      endDate = subEndDate,
+      ratePlans = List(RatePlan("Supporter Plus Annual", charges)),
+    )
+
+    val actualResponse = GetSubscriptionExpiry(today)("123-sold", supporterPlusSub, accountSummary)
+    actualResponse shouldEqual expectedResponse
+  }
+
   it should "return not found for invalid password" in {
     val actualResponse = GetSubscriptionExpiry(today)("invalid password", digitalPack, accountSummary)
     actualResponse shouldEqual notFoundResponse
