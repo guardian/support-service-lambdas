@@ -15,10 +15,17 @@ object Types extends Logging {
     case class ContinueProcessing[A](a: A) extends ApiGatewayOp[A] {
       override def toDisjunction: Either[ApiResponse, A] = Right(a)
 
+      override def toTry[B](a: B): Try[B] = Success(a)
+
       override def isComplete: Boolean = false
     }
     case class ReturnWithResponse(resp: ApiResponse) extends ApiGatewayOp[Nothing] {
       override def toDisjunction: Either[ApiResponse, Nothing] = Left(resp)
+
+      override def toTry[B](a: B): Try[B] =
+        if (resp.statusCode.startsWith("2")) Success(a)
+        else
+          Failure(new RuntimeException(s"Processing returned non-success response: ${resp.statusCode} - ${resp.body}"))
 
       override def isComplete: Boolean = true
     }
@@ -28,6 +35,7 @@ object Types extends Logging {
     def isComplete: Boolean
 
     def toDisjunction: Either[ApiResponse, A]
+    def toTry[B](a: B): Try[B]
 
     def flatMap[B](f: A => ApiGatewayOp[B]): ApiGatewayOp[B] =
       toDisjunction.flatMap(f.andThen(_.toDisjunction)).toApiGatewayOp

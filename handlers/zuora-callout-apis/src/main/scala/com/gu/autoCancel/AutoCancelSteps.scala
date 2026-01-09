@@ -38,10 +38,7 @@ object AutoCancelSteps extends Logging {
   def apply(
       callZuoraAutoCancel: (List[AutoCancelRequest], AutoCancelUrlParams) => ApiGatewayOp[Unit],
       autoCancelReqProducer: AutoCancelCallout => ApiGatewayOp[List[AutoCancelRequest]],
-      sendEmailRegardingAccount: (
-          String,
-          PaymentFailureInformation => Either[String, EmailMessage],
-      ) => ClientFailableOp[Unit],
+      zuoraEmailSteps: ZuoraEmailSteps,
   ): Operation = Operation.noHealthcheck({ apiGatewayRequest: ApiGatewayRequest =>
     (for {
       autoCancelCallout <- apiGatewayRequest.bodyAsCaseClass[AutoCancelCallout]()
@@ -54,7 +51,7 @@ object AutoCancelSteps extends Logging {
         s"auto-cancellation for ${autoCancelCallout.accountId}",
       )
       request = makeRequest(autoCancelCallout) _
-      _ <- handleSendPaymentFailureEmail(autoCancelCallout.accountId, request, sendEmailRegardingAccount, urlParams)
+      _ <- handleSendPaymentFailureEmail(autoCancelCallout.accountId, request, zuoraEmailSteps, urlParams)
     } yield ApiGatewayResponse.successfulExecution).apiResponse
   })
 
@@ -66,17 +63,14 @@ object AutoCancelSteps extends Logging {
   private def handleSendPaymentFailureEmail(
       accountId: String,
       request: PaymentFailureInformation => Either[String, EmailMessage],
-      sendEmailRegardingAccount: (
-          String,
-          PaymentFailureInformation => Either[String, EmailMessage],
-      ) => ClientFailableOp[Unit],
+      zuoraEmailSteps: ZuoraEmailSteps,
       urlParams: AutoCancelUrlParams,
   ) = {
     if (urlParams.dryRun) {
       val msg = "DryRun of SendPaymentFailureEmail"
       logger.info(msg)
       ContinueProcessing(())
-    } else logErrorsAndContinueProcessing(sendEmailRegardingAccount(accountId, request))
+    } else logErrorsAndContinueProcessing(zuoraEmailSteps.sendEmailRegardingAccount(accountId, request))
   }
 
   private def logErrorsAndContinueProcessing(clientFailableOp: ClientFailableOp[Unit]): ContinueProcessing[Unit] =
@@ -88,12 +82,15 @@ object AutoCancelSteps extends Logging {
     }
 }
 
-object ZuoraEmailSteps {
+class ZuoraEmailSteps(
+    sendEmail: EmailMessage => ClientFailableOp[Unit],
+    getInvoiceTransactions: String => ClientFailableOp[InvoiceTransactionSummary],
+) {
 
   def sendEmailRegardingAccount(
-      sendEmail: EmailMessage => ClientFailableOp[Unit],
-      getInvoiceTransactions: String => ClientFailableOp[InvoiceTransactionSummary],
-  )(accountId: String, toMessage: PaymentFailureInformation => Either[String, EmailMessage]): ClientFailableOp[Unit] = {
+      accountId: String,
+      toMessage: PaymentFailureInformation => Either[String, EmailMessage],
+  ): ClientFailableOp[Unit] = {
     for {
       invoiceTransactionSummary <- getInvoiceTransactions(accountId)
       paymentInformation <- GetPaymentData(accountId)(invoiceTransactionSummary).left
