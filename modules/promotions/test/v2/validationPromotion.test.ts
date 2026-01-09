@@ -1,5 +1,5 @@
 import { SupportRegionId } from '@modules/internationalisation/countryGroup';
-import type { Promo } from '@modules/promotions/v2/schema';
+import type { AppliedPromotion, Promo } from '@modules/promotions/v2/schema';
 import { validatePromotion } from '@modules/promotions/v2/validatePromotion';
 
 const promotionName = 'Test Promotion';
@@ -22,10 +22,21 @@ const testPromotion: Promo = {
 	},
 };
 
+const appliedPromotion: AppliedPromotion = {
+	promoCode,
+	supportRegionId: SupportRegionId.UK,
+};
+
 describe('validatePromotion v2', () => {
+	it('throws an error if the promotion is undefined', () => {
+	  expect(() =>
+	    validatePromotion(undefined, appliedPromotion, productRatePlanId),
+	  ).toThrow(`No Promotion found for promo code ${appliedPromotion.promoCode}`);
+	});
+
 	it('returns a ValidatedPromotion for valid promotion and country', () => {
 		expect(
-			validatePromotion(testPromotion, SupportRegionId.UK, productRatePlanId),
+			validatePromotion(testPromotion, appliedPromotion, productRatePlanId),
 		).toStrictEqual({
 			discountPercentage: 25,
 			durationInMonths: 3,
@@ -37,7 +48,7 @@ describe('validatePromotion v2', () => {
 		expect(() =>
 			validatePromotion(
 				testPromotion,
-				SupportRegionId.UK,
+				appliedPromotion,
 				'invalidProductRatePlanId',
 			),
 		).toThrow(
@@ -47,7 +58,11 @@ describe('validatePromotion v2', () => {
 
 	it('throws an error for invalid countryGroupId', () => {
 		expect(() =>
-			validatePromotion(testPromotion, SupportRegionId.EU, productRatePlanId),
+			validatePromotion(
+				testPromotion,
+				{ promoCode, supportRegionId: SupportRegionId.EU },
+				productRatePlanId,
+			),
 		).toThrow(
 			`Promotion ${promotionName} is not valid for country group Europe`,
 		);
@@ -61,7 +76,7 @@ describe('validatePromotion v2', () => {
 		expect(() =>
 			validatePromotion(
 				noDiscountPromotion,
-				SupportRegionId.UK,
+				appliedPromotion,
 				productRatePlanId,
 			),
 		).toThrow(`Promotion ${promoCode} is missing discount`);
@@ -74,7 +89,7 @@ describe('validatePromotion v2', () => {
 			startTimestamp: futureDate,
 		};
 		expect(() =>
-			validatePromotion(futurePromotion, SupportRegionId.UK, productRatePlanId),
+			validatePromotion(futurePromotion, appliedPromotion, productRatePlanId),
 		).toThrow(
 			`Promotion ${promotionName} is not yet active, starts on ${futureDate}`,
 		);
@@ -87,11 +102,7 @@ describe('validatePromotion v2', () => {
 			endTimestamp: pastDate,
 		};
 		expect(() =>
-			validatePromotion(
-				expiredPromotion,
-				SupportRegionId.UK,
-				productRatePlanId,
-			),
+			validatePromotion(expiredPromotion, appliedPromotion, productRatePlanId),
 		).toThrow(`Promotion ${promotionName} expired on ${pastDate}`);
 	});
 
@@ -101,7 +112,7 @@ describe('validatePromotion v2', () => {
 			endTimestamp: undefined,
 		};
 		expect(() =>
-			validatePromotion(noEndPromotion, SupportRegionId.UK, productRatePlanId),
+			validatePromotion(noEndPromotion, appliedPromotion, productRatePlanId),
 		).not.toThrow();
 	});
 });

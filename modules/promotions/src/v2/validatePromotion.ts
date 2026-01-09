@@ -3,7 +3,7 @@ import { ValidationError } from '@modules/errors';
 import type { SupportRegionId } from '@modules/internationalisation/countryGroup';
 import { countryGroupBySupportRegionId } from '@modules/internationalisation/countryGroup';
 import { logger } from '@modules/routing/logger';
-import type { Promo } from './schema';
+import type { AppliedPromotion, Promo } from './schema';
 
 export type ValidatedPromotion = {
 	discountPercentage: number;
@@ -12,10 +12,15 @@ export type ValidatedPromotion = {
 };
 
 export const validatePromotion = (
-	promotion: Promo,
-	supportRegionId: SupportRegionId,
+	promotion: Promo | undefined,
+	appliedPromotion: AppliedPromotion,
 	productRatePlanId: string,
 ): ValidatedPromotion => {
+	if (!promotion) {
+		throw new ValidationError(
+			`No Promotion found for promo code ${appliedPromotion.promoCode}`,
+		);
+	}
 	logger.log(`Validating promotion ${promotion.promoCode}: `, promotion.name);
 
 	checkPromotionIsActive(promotion);
@@ -26,9 +31,9 @@ export const validatePromotion = (
 		`${promotion.promoCode} has a duration of ${promotion.discount.durationMonths}`,
 	);
 
-	validateForCountryGroup(promotion, supportRegionId);
+	validateForCountryGroup(promotion, appliedPromotion.supportRegionId);
 	console.log(
-		`Promotion ${promotion.promoCode} is valid for country group ${supportRegionId}`,
+		`Promotion ${promotion.promoCode} is valid for country group ${appliedPromotion.supportRegionId}`,
 	);
 
 	validateProductRatePlan(promotion, productRatePlanId);

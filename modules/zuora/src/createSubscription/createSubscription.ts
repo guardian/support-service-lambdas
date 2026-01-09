@@ -71,14 +71,9 @@ export function getPromotionInputFields(
 	productCatalog: ProductCatalog,
 	productKey: ProductKey,
 ): PromotionInputFields | undefined {
-	const validatedPromotion =
-		appliedPromotion && promotion
-			? validatePromotion(
-					promotion,
-					appliedPromotion.supportRegionId,
-					productRatePlanId,
-				)
-			: undefined;
+	const validatedPromotion = appliedPromotion
+		? validatePromotion(promotion, appliedPromotion, productRatePlanId)
+		: undefined;
 
 	if (!validatedPromotion) {
 		console.log('No promotion applied');
