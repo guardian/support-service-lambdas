@@ -1,4 +1,5 @@
 import { getIfDefined } from '@modules/nullAndUndefined';
+import { stageFromEnvironment } from '@modules/stage';
 import { publishSnsMessage } from '../services/sns';
 import { describeExecution, startExecution } from '../services/step-functions';
 
@@ -10,10 +11,7 @@ export const handler = async (): Promise<
 		'APP environment variable not set',
 	);
 
-	const stage = getIfDefined<string>(
-		process.env.STAGE,
-		'STAGE environment variable not set',
-	);
+	const stage = stageFromEnvironment();
 
 	const region = getIfDefined<string>(
 		process.env.REGION,

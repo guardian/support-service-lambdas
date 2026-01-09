@@ -514,7 +514,7 @@ Action=SendMessage&MessageBody=$util.urlEncode($json)",
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Tags": [
           {
             "Key": "App",
@@ -1490,7 +1490,7 @@ Action=SendMessage&MessageBody=$util.urlEncode($json)",
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Tags": [
           {
             "Key": "App",

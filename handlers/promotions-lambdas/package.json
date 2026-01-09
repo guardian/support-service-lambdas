@@ -11,7 +11,7 @@
     "package": "pnpm type-check && pnpm lint && pnpm check-formatting && pnpm test && pnpm build && cd target && zip -qr promotions-lambdas.zip ./*.js.map ./*.js",
     "cdk:test": "pnpm --filter cdk test promotions-lambdas",
     "cdk:test-update": "pnpm --filter cdk test-update promotions-lambdas",
-    "update-lambda": "../../update-lambda.sh \"promotions-lambdas\" promotions-lambdas-promo-campaign-sync- promotions-lambdas-promo-sync-",
+    "update-lambda": "../../update-lambda.sh \"promotions-lambdas\" promotions-lambdas-promo-campaign-sync- promotions-lambdas-promo-sync- promotions-lambdas-promo-code-view-",
     "update-stack": "../../update-stack.sh \"promotions-lambdas\""
   },
   "NOTICE1": "MANAGED FILE: to push changes see buildcheck/README.md - template: buildcheck/data/templates/handler/package.json.ts",

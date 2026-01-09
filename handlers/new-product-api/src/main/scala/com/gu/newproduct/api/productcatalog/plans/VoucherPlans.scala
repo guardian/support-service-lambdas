@@ -34,7 +34,6 @@ class VoucherPlans(getStartDateFromFulfilmentFiles: (ProductType, List[DayOfWeek
     (VoucherSixDay, PlanDescription("Sixday"), mondayRules, Monthly),
     (VoucherWeekendPlus, PlanDescription("Weekend+"), saturdayDateRules, Monthly),
     (VoucherSaturdayPlus, PlanDescription("Saturday+"), saturdayDateRules, Monthly),
-    (VoucherSundayPlus, PlanDescription("Sunday+"), sundayDateRules, Monthly),
     (VoucherEveryDayPlus, PlanDescription("Everyday+"), mondayRules, Monthly),
     (VoucherSixDayPlus, PlanDescription("Sixday+"), mondayRules, Monthly),
   )
