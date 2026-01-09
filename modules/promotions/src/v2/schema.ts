@@ -4,7 +4,7 @@ import { z } from 'zod';
 export const promoProductSchema = z.enum([
 	'SupporterPlus',
 	'TierThree',
-	'DigitalPack',
+	'DigitalSubscription',
 	'Newspaper',
 	'Weekly',
 ]);
@@ -20,7 +20,7 @@ export type PromoCampaign = z.infer<typeof promoCampaignSchema>;
 
 export const appliesToSchema = z.object({
 	productRatePlanIds: z.array(z.string()),
-	countryGroups: z.array(isoCountrySchema),
+	countries: z.array(isoCountrySchema),
 });
 
 export const discountDetailsSchema = z.object({

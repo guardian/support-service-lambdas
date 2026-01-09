@@ -87,7 +87,7 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Tags": [
           {
             "Key": "App",
@@ -455,7 +455,7 @@ exports[`The Salesforce disaster recovery health check stack matches the snapsho
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Tags": [
           {
             "Key": "App",

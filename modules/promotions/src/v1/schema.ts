@@ -40,11 +40,13 @@ export const appliesToSchema = z.object({
 export const promotionSchema = z.object({
 	name: z.string(),
 	promotionType: promotionTypeSchema,
+	campaignCode: z.string(),
 	appliesTo: appliesToSchema,
 	codes: z.record(z.string(), z.array(z.string())),
 	starts: z.coerce.date(),
 	expires: z.coerce.date().optional(),
 	landingPage: promotionCopySchema.optional(),
+	description: z.string().optional(),
 });
 export type Promotion = z.infer<typeof promotionSchema>;
 

@@ -10,16 +10,18 @@ import {
 import { Upload } from '@aws-sdk/lib-storage';
 import { awsConfig } from './config';
 
-const s3Client = new S3Client(awsConfig);
+const defaultClient = new S3Client(awsConfig);
 
 export const uploadFileToS3 = async ({
 	bucketName,
 	filePath,
 	content,
+	send,
 }: {
 	bucketName: PutObjectCommandInput['Bucket'];
 	filePath: PutObjectCommandInput['Key'];
 	content: PutObjectCommandInput['Body'];
+	send?: typeof S3Client.prototype.send;
 }) => {
 	try {
 		const command = new PutObjectCommand({
@@ -27,7 +29,9 @@ export const uploadFileToS3 = async ({
 			Key: filePath,
 			Body: content,
 		});
-		const response = await s3Client.send(command);
+		const response = await (send ?? defaultClient.send.bind(defaultClient))(
+			command,
+		);
 		return response;
 	} catch (error) {
 		console.error(error);
@@ -38,9 +42,11 @@ export const uploadFileToS3 = async ({
 export const getFileFromS3 = async ({
 	bucketName,
 	filePath,
+	send,
 }: {
 	bucketName: GetObjectCommandInput['Bucket'];
 	filePath: GetObjectCommandInput['Key'];
+	send?: typeof S3Client.prototype.send;
 }) => {
 	try {
 		const command = new GetObjectCommand({
@@ -48,7 +54,9 @@ export const getFileFromS3 = async ({
 			Key: filePath,
 		});
 
-		const response = await s3Client.send(command);
+		const response = await (send ?? defaultClient.send.bind(defaultClient))(
+			command,
+		);
 		const fileContent = response.Body?.transformToString();
 
 		if (!fileContent) {
@@ -71,7 +79,7 @@ export const streamToS3 = async (
 	console.log(`streaming data to ${s3Bucket} ${s3Key}`);
 
 	const upload = new Upload({
-		client: s3Client,
+		client: defaultClient,
 		params: {
 			Bucket: s3Bucket,
 			Key: s3Key,

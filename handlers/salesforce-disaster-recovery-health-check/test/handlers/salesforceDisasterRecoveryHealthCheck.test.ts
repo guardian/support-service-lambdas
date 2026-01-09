@@ -66,7 +66,7 @@ describe('Handler', () => {
 		delete process.env.STAGE;
 
 		await expect(handler()).rejects.toThrow(
-			'STAGE environment variable not set',
+			'Stage environment variable is invalid',
 		);
 	});
 });

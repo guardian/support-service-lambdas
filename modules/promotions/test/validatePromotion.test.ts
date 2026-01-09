@@ -1,12 +1,13 @@
-import { validatePromotion } from '../src/v1/validatePromotion';
-import { Promotion, AppliedPromotion } from '../src/v1/schema';
 import { SupportRegionId } from '@modules/internationalisation/countryGroup';
+import type { AppliedPromotion, Promotion } from '../src/v1/schema';
+import { validatePromotion } from '../src/v1/validatePromotion';
 
 const promotionName = 'Test Promotion';
 const productRatePlanId = '12345';
 const promoCode = 'TEST123';
 const testPromotion: Promotion = {
 	name: promotionName,
+	campaignCode: 'campaign',
 	promotionType: { name: 'percent_discount', amount: 25, durationMonths: 3 },
 	appliesTo: {
 		productRatePlanIds: new Set([productRatePlanId]),

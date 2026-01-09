@@ -33,7 +33,6 @@ class CatalogWireTest extends AnyFlatSpec with Matchers with ResourceLoader {
     case VoucherWeekendPlus => gbpPrice(2942)
     case VoucherWeekend => gbpPrice(2076)
     case VoucherSunday => gbpPrice(1079)
-    case VoucherSundayPlus => gbpPrice(2206)
     case VoucherSaturday => gbpPrice(1036)
     case VoucherSaturdayPlus => gbpPrice(2162)
     case VoucherEveryDay => gbpPrice(4762)
@@ -51,7 +50,6 @@ class CatalogWireTest extends AnyFlatSpec with Matchers with ResourceLoader {
     case HomeDeliveryWeekend => gbpPrice(888)
     case HomeDeliveryEveryDayPlus => gbpPrice(999)
     case HomeDeliverySaturdayPlus => gbpPrice(678)
-    case HomeDeliverySundayPlus => gbpPrice(1010)
     case HomeDeliverySixDayPlus => gbpPrice(1111)
     case HomeDeliveryWeekendPlus => gbpPrice(2222)
     case DigipackMonthly =>
@@ -103,7 +101,6 @@ class CatalogWireTest extends AnyFlatSpec with Matchers with ResourceLoader {
     case DigitalVoucherSaturday => gbpPrice(7007)
     case DigitalVoucherSaturdayPlus => gbpPrice(7008)
     case DigitalVoucherSunday => gbpPrice(7009)
-    case DigitalVoucherSundayPlus => gbpPrice(7010)
     case NationalDeliveryEveryday => gbpPrice(7100)
     case NationalDeliverySixday => gbpPrice(7101)
     case NationalDeliveryWeekend => gbpPrice(7102)
