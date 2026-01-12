@@ -11,7 +11,7 @@ import { ZuoraError } from './zuoraError';
 export function generateZuoraError(
 	json: unknown,
 	response: RestResult,
-): ZuoraError {
+): ZuoraError | undefined {
 	// Format 1: reasons array (authentication, account errors)
 	const lowerCaseParseResult = lowerCaseZuoraErrorSchema.safeParse(json);
 	if (lowerCaseParseResult.success) {
@@ -21,7 +21,7 @@ export function generateZuoraError(
 		}));
 		return new ZuoraError(
 			`${messageFromErrorDetails(reasons)}`,
-			response.status,
+			response,
 			reasons,
 		);
 	}
@@ -35,7 +35,7 @@ export function generateZuoraError(
 		}));
 		return new ZuoraError(
 			`${messageFromErrorDetails(reasons)}`,
-			response.status,
+			response,
 			reasons,
 		);
 	}
@@ -45,7 +45,7 @@ export function generateZuoraError(
 	if (faultCodeParseResult.success) {
 		return new ZuoraError(
 			`${faultCodeParseResult.data.FaultMessage}`,
-			response.status,
+			response,
 			[
 				{
 					code: faultCodeParseResult.data.FaultCode,
@@ -60,7 +60,7 @@ export function generateZuoraError(
 	if (codeAndMessageParseResult.success) {
 		return new ZuoraError(
 			`${codeAndMessageParseResult.data.message}`,
-			response.status,
+			response,
 			[
 				{
 					code: codeAndMessageParseResult.data.code,
@@ -69,8 +69,8 @@ export function generateZuoraError(
 			],
 		);
 	}
-	// Fallback: unknown error format
-	return new ZuoraError('Zuora API Error', response.status, []);
+	// unknown error format - let the caller fall back to the standard rest client error
+	return undefined;
 }
 
 function messageFromErrorDetails(errorDetails: ZuoraErrorDetail[]): string {

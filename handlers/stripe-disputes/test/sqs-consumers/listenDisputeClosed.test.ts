@@ -246,13 +246,17 @@ describe('handleListenDisputeClosed', () => {
 			);
 
 			// Simulate Zuora error 66000030 (payment already processed/refunded)
-			const zuoraError = new ZuoraError('Transaction already processed', 200, [
-				{
-					code: '66000030',
-					message:
-						'Another transaction has already been entered for this transaction',
-				},
-			]);
+			const zuoraError = new ZuoraError(
+				'Transaction already processed',
+				{ status: 200, responseBody: '', responseHeaders: {} },
+				[
+					{
+						code: '66000030',
+						message:
+							'Another transaction has already been entered for this transaction',
+					},
+				],
+			);
 
 			mockRejectPayment.mockRejectedValueOnce(zuoraError);
 

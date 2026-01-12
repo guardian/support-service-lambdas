@@ -208,7 +208,7 @@ describe('product-switching behaviour', () => {
 	it(
 		'can switch a recurring contribution',
 		async () => {
-			const contributionPrice = 10;
+			const contributionPrice = 120;
 			const { zuoraClient, switchInformation } = await createTestContribution(
 				contributionPrice,
 				contributionPrice,
@@ -251,12 +251,13 @@ describe('product-switching behaviour', () => {
 	it(
 		'can adjust an invoice to zero',
 		async () => {
-			const contributionPrice = 2;
+			const contributionPrice = 11.9;
 			const { zuoraClient, switchInformation } = await createTestContribution(
 				contributionPrice,
-				2.1,
+				12,
 				false,
 				false,
+				{ billingPeriod: 'Month' },
 			);
 
 			const switchResponse = await doSwitch(
@@ -274,7 +275,7 @@ describe('product-switching behaviour', () => {
 				zuoraClient,
 				invoiceId,
 				0.1,
-				'8ad08e1a858672180185880566606fad',
+				'8ad08cbd8586721c01858804e3715378',
 			);
 
 			expect(response.Id).toBeDefined();
