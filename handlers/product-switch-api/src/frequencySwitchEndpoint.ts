@@ -516,6 +516,13 @@ export const frequencySwitchHandler =
 		subscription: ZuoraSubscription,
 		account: ZuoraAccount,
 	): Promise<{ statusCode: number; body: string }> => {
+		return {
+			statusCode: 500,
+			body: JSON.stringify({
+				reason: 'Testing failure response',
+			} satisfies FrequencySwitchErrorResponse),
+		};
+
 		try {
 			const response = await getSwitchResult(
 				stage,
