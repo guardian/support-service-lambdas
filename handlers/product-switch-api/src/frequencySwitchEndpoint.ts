@@ -540,7 +540,7 @@ export const frequencySwitchHandler =
 				return {
 					statusCode: 400,
 					body: JSON.stringify({
-						reason: "error.message",
+						reason: 'error.message',
 					} satisfies FrequencySwitchErrorResponse),
 				};
 			}
