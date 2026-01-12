@@ -73,6 +73,8 @@ export const handlerBaton: Handler<
 export const handlerDeletion: Handler<SQSEvent, void> = async (
 	event: SQSEvent,
 ): Promise<void> => {
+	// TODO:delete comment - Temporary logging to capture SNS subscription confirmation
+	logger.log('Raw SQS event:', JSON.stringify(event, null, 2));
 	logger.log(`Processing ${event.Records.length} deletion messages`);
 
 	const stage = getEnv('STAGE');
