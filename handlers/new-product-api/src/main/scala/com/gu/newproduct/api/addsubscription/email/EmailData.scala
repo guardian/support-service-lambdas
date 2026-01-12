@@ -20,7 +20,6 @@ sealed trait EmailData {
 case class PaperEmailData(
     plan: Plan,
     firstPaymentDate: LocalDate,
-    firstPaperDate: LocalDate,
     subscriptionName: SubscriptionName,
     contacts: Contacts,
     paymentMethod: PaymentMethod,

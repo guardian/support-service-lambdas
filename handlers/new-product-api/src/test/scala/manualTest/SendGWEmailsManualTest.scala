@@ -4,26 +4,14 @@ import com.gu.effects.sqs.AwsSQSSend.EmailQueueName
 import com.gu.effects.sqs.SqsAsync
 import com.gu.i18n.Country
 import com.gu.i18n.Currency.GBP
-import com.gu.newproduct.api.addsubscription.DiscountMessage
-import com.gu.newproduct.api.addsubscription.email.serialisers.PaperEmailDataSerialiser._
-import com.gu.newproduct.api.addsubscription.email.{
-  DeliveryAgentDetails,
-  EtSqsSend,
-  PaperEmailData,
-  SendConfirmationEmail,
-}
+import com.gu.newproduct.api.addsubscription.email.serialisers.GuardianWeeklyEmailDataSerialiser._
+import com.gu.newproduct.api.addsubscription.email.{DeliveryAgentDetails, EtSqsSend, GuardianWeeklyEmailData, PaperEmailData, SendConfirmationEmail}
 import com.gu.newproduct.api.addsubscription.zuora.CreateSubscription.SubscriptionName
 import com.gu.newproduct.api.addsubscription.zuora.GetAccount.SfContactId
 import com.gu.newproduct.api.addsubscription.zuora.GetContacts._
-import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{
-  BankAccountName,
-  BankAccountNumberMask,
-  DirectDebit,
-  MandateId,
-  SortCode,
-}
+import com.gu.newproduct.api.addsubscription.zuora.GetPaymentMethod.{BankAccountName, BankAccountNumberMask, DirectDebit, MandateId, SortCode}
 import com.gu.newproduct.api.addsubscription.zuora.PaymentMethodStatus.ActivePaymentMethod
-import com.gu.newproduct.api.productcatalog.PlanId.NationalDeliveryWeekend
+import com.gu.newproduct.api.productcatalog.PlanId.{GuardianWeeklyROWMonthly, NationalDeliveryWeekend}
 import com.gu.newproduct.api.productcatalog.RuleFixtures.testStartDateRules
 import com.gu.newproduct.api.productcatalog._
 
@@ -32,9 +20,9 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import scala.util.Random
 
-object SendVoucherEmailsManualTest {
+object SendGWEmailsManualTest {
 
-  def fakeVoucherEmailData(email: Email) = {
+  def fakeEmailData(email: Email) = {
 
     val contacts = Contacts(
       billTo = BillToContact(
@@ -80,10 +68,10 @@ object SendVoucherEmailsManualTest {
       "my postcode",
     )
 
-    PaperEmailData(
+    GuardianWeeklyEmailData(
       plan = Plan(
-        NationalDeliveryWeekend,
-        PlanDescription("Weekend"),
+        GuardianWeeklyROWMonthly,
+        PlanDescription("Monthly"),
         testStartDateRules,
         Map(GBP -> PaymentPlan(GBP, AmountMinorUnits(3112), Monthly, "GBP 32.12 every month")),
       ),
@@ -98,8 +86,7 @@ object SendVoucherEmailsManualTest {
         MandateId("MandateId"),
       ),
       currency = GBP,
-      Some(deliveryAgentDetails),
-      None,
+      discountMessage= None,
     )
   }
 
@@ -109,9 +96,9 @@ object SendVoucherEmailsManualTest {
         println("please input a parameter which is your email address for SES emails to be sent")
       case Some(rawEmail) =>
         val sqsSend = SqsAsync.send(SqsAsync.buildClient)(EmailQueueName) _
-        val voucherSqsSend = EtSqsSend[PaperEmailData](sqsSend) _
+        val voucherSqsSend = EtSqsSend[GuardianWeeklyEmailData](sqsSend) _
         val sendConfirmationEmail = SendConfirmationEmail(voucherSqsSend) _
-        val data = fakeVoucherEmailData(Email(rawEmail))
+        val data = fakeEmailData(Email(rawEmail))
         val devContactId = SfContactId("0039E00001pSvOHQA0")
         val sendResult = sendConfirmationEmail(Some(devContactId), data)
         val opresult = Await.result(sendResult.underlying, Duration.Inf)

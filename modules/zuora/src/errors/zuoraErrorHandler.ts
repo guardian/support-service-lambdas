@@ -69,7 +69,7 @@ export function generateZuoraError(
 			],
 		);
 	}
-	// unknown error format
+	// unknown error format - let the caller fall back to the standard rest client error
 	return undefined;
 }
 
