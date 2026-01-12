@@ -121,13 +121,13 @@ describe('chunkArray', () => {
 
 	test('throws error if size is zero', () => {
 		expect(() => chunkArray([1, 2, 3], 0)).toThrow(
-			'Size must be greater than 0',
+			'Chunk size must be greater than 0',
 		);
 	});
 
 	test('throws error if size is negative', () => {
 		expect(() => chunkArray([1, 2, 3], -1)).toThrow(
-			'Size must be greater than 0',
+			'Chunk size must be greater than 0',
 		);
 	});
 

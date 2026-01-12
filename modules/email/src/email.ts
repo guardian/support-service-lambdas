@@ -40,6 +40,8 @@ export const DataExtensionNames = {
 		'supporter-plus-annual-discount-confirmation-email',
 	discountExpiryNotificationEmail: 'discount-expiry-email',
 	stripeDisputeCancellation: 'stripe-dispute-cancellation',
+	supporterPlusFrequencySwitchConfirmation:
+		'SV_MonthlyToAnnualSwitchConfirmation',
 	// Day 0 thank you emails, sent by support-workers
 	supporterPlusDay0Email: 'supporter-plus', // SV_SP_WelcomeDay0
 	recurringContributionDay0Email: 'regular-contribution-thank-you', // SV_RC_WelcomeDay0

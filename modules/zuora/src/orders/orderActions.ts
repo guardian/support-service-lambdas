@@ -24,7 +24,8 @@ export type OrderActionType =
 	| 'RenewSubscription'
 	| 'UpdateProduct'
 	| 'CreateSubscription'
-	| 'AddProduct';
+	| 'AddProduct'
+	| 'RemoveProduct';
 
 type BaseOrderAction = {
 	type: OrderActionType;
@@ -38,16 +39,14 @@ export type ChangePlanOrderAction = BaseOrderAction & {
 		subType: 'Upgrade';
 		newProductRatePlan: {
 			productRatePlanId: string;
-			chargeOverrides: [
-				{
-					productRatePlanChargeId: string;
-					pricing: {
-						recurringFlatFee: {
-							listPrice: number;
-						};
+			chargeOverrides?: Array<{
+				productRatePlanChargeId: string;
+				pricing: {
+					recurringFlatFee: {
+						listPrice: number;
 					};
-				},
-			];
+				};
+			}>;
 		};
 	};
 };
@@ -55,6 +54,12 @@ export type DiscountOrderAction = BaseOrderAction & {
 	type: 'AddProduct';
 	addProduct: {
 		productRatePlanId: string;
+	};
+};
+export type RemoveProductOrderAction = BaseOrderAction & {
+	type: 'RemoveProduct';
+	removeProduct: {
+		ratePlanId: string;
 	};
 };
 export type UpdateProductOrderAction = BaseOrderAction & {
@@ -144,6 +149,7 @@ export type OrderAction =
 	| TermsAndConditionsOrderAction
 	| UpdateProductOrderAction
 	| DiscountOrderAction
+	| RemoveProductOrderAction
 	| CreateSubscriptionOrderAction;
 
 export function singleTriggerDate(applyFromDate: Dayjs): TriggerDates {
